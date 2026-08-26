@@ -18,6 +18,8 @@ model Tenant {
   events    WebhookEvent[]
   conversations Conversation[]
   messages      Message[]
+  settings      TenantSettings?
+  orders        Order[]
 
   @@map("tenants")
 }
@@ -51,6 +53,7 @@ model Conversation {
   updatedAt              DateTime  @updatedAt @map("updated_at")
   tenant                 Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   messages               Message[]
+  orders                 Order[]
 
   @@unique([tenantId, channel, externalConversationId])
   @@index([tenantId, lastMessageAt])
@@ -73,10 +76,69 @@ model Message {
   conversation      Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   rawEvent          WebhookEvent @relation(fields: [rawEventId], references: [id], onDelete: Restrict)
   attachments       Attachment[]
+  triggeredOrders   Order[]      @relation("OrderTriggerMessage")
 
   @@unique([tenantId, channel, externalMessageId])
   @@index([conversationId, sourceTimestamp])
   @@map("messages")
+}
+
+model TenantSettings {
+  id                    String   @id @default(uuid()) @db.Uuid
+  tenantId              String   @unique @map("tenant_id") @db.Uuid
+  approvalMode          String   @default("ALWAYS") @map("approval_mode")
+  autoApprovalThreshold Float    @default(0.9) @map("auto_approval_threshold")
+  promptVersion         String   @default("instagram-order-v1") @map("prompt_version")
+  triggerPhrases        Json     @map("trigger_phrases")
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+  tenant                Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@map("tenant_settings")
+}
+
+model Order {
+  id                String      @id @default(uuid()) @db.Uuid
+  tenantId          String      @map("tenant_id") @db.Uuid
+  conversationId    String      @map("conversation_id") @db.Uuid
+  triggerMessageId  String      @unique @map("trigger_message_id") @db.Uuid
+  status            String      @default("AI_PROCESSING")
+  extraction        Json?
+  validationIssues  Json?       @map("validation_issues")
+  overallConfidence Float?      @map("overall_confidence")
+  aiResponseId      String?     @map("ai_response_id")
+  aiModel           String?     @map("ai_model")
+  promptVersion     String      @map("prompt_version")
+  inputTokens       Int?        @map("input_tokens")
+  outputTokens      Int?        @map("output_tokens")
+  approvedAt        DateTime?   @map("approved_at")
+  approvedBy        String?     @map("approved_by")
+  createdAt         DateTime    @default(now()) @map("created_at")
+  updatedAt         DateTime    @updatedAt @map("updated_at")
+  tenant            Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  conversation      Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  triggerMessage    Message     @relation("OrderTriggerMessage", fields: [triggerMessageId], references: [id], onDelete: Restrict)
+  items             OrderItem[]
+
+  @@index([tenantId, status, createdAt])
+  @@index([conversationId, createdAt])
+  @@map("orders")
+}
+
+model OrderItem {
+  id           String   @id @default(uuid()) @db.Uuid
+  orderId      String   @map("order_id") @db.Uuid
+  catalogId    String?  @map("catalog_id")
+  originalText String   @map("original_text")
+  quantity     Int
+  color        String?
+  size         String?
+  confidence   Float
+  createdAt    DateTime @default(now()) @map("created_at")
+  order        Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@map("order_items")
 }
 
 model Attachment {

@@ -37,7 +37,8 @@ The schema and integration interfaces will carry `tenant_id` from the beginning,
 - **Primary storage:** PostgreSQL through Prisma migrations. Google Sheets is a projection, never the source of truth.
 - **Background processing:** Redis and BullMQ for media download, AI extraction, product matching, and Sheets synchronization.
 - **Object storage:** S3-compatible interface; MinIO in local/self-hosted deployments.
-- **AI boundary:** provider adapter returning a versioned JSON schema. AI proposes extracted facts and candidates; it cannot invent or directly persist a SKU.
+- **AI boundary:** OpenAI Responses API adapter returning a strict, versioned JSON schema. The model extracts facts from prompts, conversation context, images, and supplied catalogue candidates; local validation rejects unknown SKUs and incomplete output.
+- **Approval policy:** each tenant selects `ALWAYS`, `NEVER`, or `ON_LOW_CONFIDENCE`. Automatic approval is permitted only after schema, catalogue, completeness, and duplicate validation.
 - **Instagram boundary:** official Meta APIs only. Raw webhook payloads are retained for replay and audit.
 - **Google Sheets boundary:** a dedicated adapter using the Google Sheets API. The MVP authenticates with a service account and grants it access only to the selected spreadsheet. OAuth can replace this adapter credential strategy later.
 - **Idempotency:** unique external message IDs, unique order trigger IDs, and a unique `(tenant_id, order_id, destination)` export key prevent duplicate orders and rows.
@@ -70,8 +71,9 @@ Caddy (HTTPS)
 5. Conversation context is evaluated for an explicit order trigger.
 6. AI extracts customer, products, quantity, and delivery fields into a strict schema.
 7. Deterministic catalogue search produces SKU candidates; AI may rank only those candidates.
-8. High-confidence, complete data becomes `READY`; ambiguity becomes `NEEDS_REVIEW`.
-9. A manager approves or corrects the order in the web interface.
+8. Local validation checks required fields, catalogue IDs, and duplicates after AI extraction.
+9. The tenant approval policy routes the order to `NEEDS_REVIEW` or `AUTO_APPROVED`; unsafe results always require review.
+10. When review is required, a manager approves or corrects the order in the web interface.
 10. An idempotent job appends or updates the Google Sheets row by `order_id`.
 
 ## Google Sheets Contract
@@ -131,9 +133,9 @@ The exact client spreadsheet can add mapped columns through configuration withou
 
 - [ ] Task 7: Import and search the product catalogue.
 - [ ] Task 8: Detect the confirmed-order trigger.
-- [ ] Task 9: Extract a validated order draft with AI.
+- [ ] Task 9: Extract a strict, validated order draft through the OpenAI Responses API.
 - [ ] Task 10: Match product candidates and calculate confidence.
-- [ ] Task 11: Review, correct, and approve an order in the UI.
+- [ ] Task 11: Configure approval policy and review only orders routed to `NEEDS_REVIEW`.
 
 ### Checkpoint: Reviewed order
 
@@ -206,7 +208,7 @@ v
 |---|---|---|
 | Meta App Review or permissions are delayed | High | Make Task 1 a blocking spike; use a client-owned test account before estimating production launch. |
 | Message media URL expires | High | Queue immediate download and retain checksum plus original metadata. |
-| Trigger phrase produces false positives | High | Require conversation context, completeness checks, and manual approval in MVP. |
+| Trigger phrase produces false positives | High | Require conversation context and completeness checks; unsafe results override the tenant's auto-approval preference and require review. |
 | AI selects the wrong SKU | High | Retrieve deterministic candidates, enforce confidence thresholds, and require review for ambiguity. |
 | Google Sheets rows are duplicated | High | Persist export state and row identity; use an order-level idempotency key and reconciliation job. |
 | User manually changes headers/columns | Medium | Validate configured headers before export and stop with an actionable error. |
@@ -227,4 +229,3 @@ v
 ## Definition of Done
 
 The MVP is complete only when a real Instagram test conversation can be ingested, reviewed, approved, and reflected exactly once in Google Sheets; all state remains recoverable after container restart; external outages produce visible retryable failures; and the documented backup can restore the system on another Docker host.
-

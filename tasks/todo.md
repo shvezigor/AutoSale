@@ -192,7 +192,7 @@
 
 **Estimated scope:** Medium
 
-## Task 9: Extract a validated order draft with AI
+## Task 9: Extract a validated order draft with OpenAI
 
 **Description:** Send the bounded conversation context and relevant images to an AI provider and validate its response against a versioned order schema.
 
@@ -236,9 +236,9 @@
 
 **Estimated scope:** Medium
 
-## Task 11: Review, correct, and approve an order in the UI
+## Task 11: Configure approval policy and review routed orders
 
-**Description:** Let the manager inspect evidence, correct customer/product data, choose a candidate SKU, and approve an order with an audit trail.
+**Description:** Support `ALWAYS`, `NEVER`, and `ON_LOW_CONFIDENCE` per tenant. Let the manager inspect evidence, correct customer/product data, choose a candidate SKU, and approve orders routed to review. Incomplete or invalid AI output must require review regardless of configuration.
 
 **Acceptance criteria:**
 - [ ] Missing and low-confidence fields are visibly highlighted.
@@ -411,4 +411,3 @@
 - [ ] Clean-host restore test passes.
 - [ ] Secrets scan is clean.
 - [ ] Client accepts the end-to-end workflow.
-

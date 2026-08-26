@@ -234,6 +234,7 @@ export type MessageWhereInput = {
   conversation?: Prisma.XOR<Prisma.ConversationScalarRelationFilter, Prisma.ConversationWhereInput>
   rawEvent?: Prisma.XOR<Prisma.WebhookEventScalarRelationFilter, Prisma.WebhookEventWhereInput>
   attachments?: Prisma.AttachmentListRelationFilter
+  triggeredOrders?: Prisma.OrderListRelationFilter
 }
 
 export type MessageOrderByWithRelationInput = {
@@ -252,6 +253,7 @@ export type MessageOrderByWithRelationInput = {
   conversation?: Prisma.ConversationOrderByWithRelationInput
   rawEvent?: Prisma.WebhookEventOrderByWithRelationInput
   attachments?: Prisma.AttachmentOrderByRelationAggregateInput
+  triggeredOrders?: Prisma.OrderOrderByRelationAggregateInput
 }
 
 export type MessageWhereUniqueInput = Prisma.AtLeast<{
@@ -274,6 +276,7 @@ export type MessageWhereUniqueInput = Prisma.AtLeast<{
   conversation?: Prisma.XOR<Prisma.ConversationScalarRelationFilter, Prisma.ConversationWhereInput>
   rawEvent?: Prisma.XOR<Prisma.WebhookEventScalarRelationFilter, Prisma.WebhookEventWhereInput>
   attachments?: Prisma.AttachmentListRelationFilter
+  triggeredOrders?: Prisma.OrderListRelationFilter
 }, "id" | "tenantId_channel_externalMessageId">
 
 export type MessageOrderByWithAggregationInput = {
@@ -323,6 +326,7 @@ export type MessageCreateInput = {
   conversation: Prisma.ConversationCreateNestedOneWithoutMessagesInput
   rawEvent: Prisma.WebhookEventCreateNestedOneWithoutMessagesInput
   attachments?: Prisma.AttachmentCreateNestedManyWithoutMessageInput
+  triggeredOrders?: Prisma.OrderCreateNestedManyWithoutTriggerMessageInput
 }
 
 export type MessageUncheckedCreateInput = {
@@ -338,6 +342,7 @@ export type MessageUncheckedCreateInput = {
   sourceTimestamp: Date | string
   createdAt?: Date | string
   attachments?: Prisma.AttachmentUncheckedCreateNestedManyWithoutMessageInput
+  triggeredOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutTriggerMessageInput
 }
 
 export type MessageUpdateInput = {
@@ -353,6 +358,7 @@ export type MessageUpdateInput = {
   conversation?: Prisma.ConversationUpdateOneRequiredWithoutMessagesNestedInput
   rawEvent?: Prisma.WebhookEventUpdateOneRequiredWithoutMessagesNestedInput
   attachments?: Prisma.AttachmentUpdateManyWithoutMessageNestedInput
+  triggeredOrders?: Prisma.OrderUpdateManyWithoutTriggerMessageNestedInput
 }
 
 export type MessageUncheckedUpdateInput = {
@@ -368,6 +374,7 @@ export type MessageUncheckedUpdateInput = {
   sourceTimestamp?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   attachments?: Prisma.AttachmentUncheckedUpdateManyWithoutMessageNestedInput
+  triggeredOrders?: Prisma.OrderUncheckedUpdateManyWithoutTriggerMessageNestedInput
 }
 
 export type MessageCreateManyInput = {
@@ -598,6 +605,20 @@ export type MessageUncheckedUpdateManyWithoutConversationNestedInput = {
   deleteMany?: Prisma.MessageScalarWhereInput | Prisma.MessageScalarWhereInput[]
 }
 
+export type MessageCreateNestedOneWithoutTriggeredOrdersInput = {
+  create?: Prisma.XOR<Prisma.MessageCreateWithoutTriggeredOrdersInput, Prisma.MessageUncheckedCreateWithoutTriggeredOrdersInput>
+  connectOrCreate?: Prisma.MessageCreateOrConnectWithoutTriggeredOrdersInput
+  connect?: Prisma.MessageWhereUniqueInput
+}
+
+export type MessageUpdateOneRequiredWithoutTriggeredOrdersNestedInput = {
+  create?: Prisma.XOR<Prisma.MessageCreateWithoutTriggeredOrdersInput, Prisma.MessageUncheckedCreateWithoutTriggeredOrdersInput>
+  connectOrCreate?: Prisma.MessageCreateOrConnectWithoutTriggeredOrdersInput
+  upsert?: Prisma.MessageUpsertWithoutTriggeredOrdersInput
+  connect?: Prisma.MessageWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MessageUpdateToOneWithWhereWithoutTriggeredOrdersInput, Prisma.MessageUpdateWithoutTriggeredOrdersInput>, Prisma.MessageUncheckedUpdateWithoutTriggeredOrdersInput>
+}
+
 export type MessageCreateNestedOneWithoutAttachmentsInput = {
   create?: Prisma.XOR<Prisma.MessageCreateWithoutAttachmentsInput, Prisma.MessageUncheckedCreateWithoutAttachmentsInput>
   connectOrCreate?: Prisma.MessageCreateOrConnectWithoutAttachmentsInput
@@ -624,6 +645,7 @@ export type MessageCreateWithoutTenantInput = {
   conversation: Prisma.ConversationCreateNestedOneWithoutMessagesInput
   rawEvent: Prisma.WebhookEventCreateNestedOneWithoutMessagesInput
   attachments?: Prisma.AttachmentCreateNestedManyWithoutMessageInput
+  triggeredOrders?: Prisma.OrderCreateNestedManyWithoutTriggerMessageInput
 }
 
 export type MessageUncheckedCreateWithoutTenantInput = {
@@ -638,6 +660,7 @@ export type MessageUncheckedCreateWithoutTenantInput = {
   sourceTimestamp: Date | string
   createdAt?: Date | string
   attachments?: Prisma.AttachmentUncheckedCreateNestedManyWithoutMessageInput
+  triggeredOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutTriggerMessageInput
 }
 
 export type MessageCreateOrConnectWithoutTenantInput = {
@@ -695,6 +718,7 @@ export type MessageCreateWithoutRawEventInput = {
   tenant: Prisma.TenantCreateNestedOneWithoutMessagesInput
   conversation: Prisma.ConversationCreateNestedOneWithoutMessagesInput
   attachments?: Prisma.AttachmentCreateNestedManyWithoutMessageInput
+  triggeredOrders?: Prisma.OrderCreateNestedManyWithoutTriggerMessageInput
 }
 
 export type MessageUncheckedCreateWithoutRawEventInput = {
@@ -709,6 +733,7 @@ export type MessageUncheckedCreateWithoutRawEventInput = {
   sourceTimestamp: Date | string
   createdAt?: Date | string
   attachments?: Prisma.AttachmentUncheckedCreateNestedManyWithoutMessageInput
+  triggeredOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutTriggerMessageInput
 }
 
 export type MessageCreateOrConnectWithoutRawEventInput = {
@@ -749,6 +774,7 @@ export type MessageCreateWithoutConversationInput = {
   tenant: Prisma.TenantCreateNestedOneWithoutMessagesInput
   rawEvent: Prisma.WebhookEventCreateNestedOneWithoutMessagesInput
   attachments?: Prisma.AttachmentCreateNestedManyWithoutMessageInput
+  triggeredOrders?: Prisma.OrderCreateNestedManyWithoutTriggerMessageInput
 }
 
 export type MessageUncheckedCreateWithoutConversationInput = {
@@ -763,6 +789,7 @@ export type MessageUncheckedCreateWithoutConversationInput = {
   sourceTimestamp: Date | string
   createdAt?: Date | string
   attachments?: Prisma.AttachmentUncheckedCreateNestedManyWithoutMessageInput
+  triggeredOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutTriggerMessageInput
 }
 
 export type MessageCreateOrConnectWithoutConversationInput = {
@@ -791,6 +818,82 @@ export type MessageUpdateManyWithWhereWithoutConversationInput = {
   data: Prisma.XOR<Prisma.MessageUpdateManyMutationInput, Prisma.MessageUncheckedUpdateManyWithoutConversationInput>
 }
 
+export type MessageCreateWithoutTriggeredOrdersInput = {
+  id?: string
+  channel: string
+  externalMessageId: string
+  direction: string
+  senderId: string
+  text?: string | null
+  sourceTimestamp: Date | string
+  createdAt?: Date | string
+  tenant: Prisma.TenantCreateNestedOneWithoutMessagesInput
+  conversation: Prisma.ConversationCreateNestedOneWithoutMessagesInput
+  rawEvent: Prisma.WebhookEventCreateNestedOneWithoutMessagesInput
+  attachments?: Prisma.AttachmentCreateNestedManyWithoutMessageInput
+}
+
+export type MessageUncheckedCreateWithoutTriggeredOrdersInput = {
+  id?: string
+  tenantId: string
+  conversationId: string
+  rawEventId: string
+  channel: string
+  externalMessageId: string
+  direction: string
+  senderId: string
+  text?: string | null
+  sourceTimestamp: Date | string
+  createdAt?: Date | string
+  attachments?: Prisma.AttachmentUncheckedCreateNestedManyWithoutMessageInput
+}
+
+export type MessageCreateOrConnectWithoutTriggeredOrdersInput = {
+  where: Prisma.MessageWhereUniqueInput
+  create: Prisma.XOR<Prisma.MessageCreateWithoutTriggeredOrdersInput, Prisma.MessageUncheckedCreateWithoutTriggeredOrdersInput>
+}
+
+export type MessageUpsertWithoutTriggeredOrdersInput = {
+  update: Prisma.XOR<Prisma.MessageUpdateWithoutTriggeredOrdersInput, Prisma.MessageUncheckedUpdateWithoutTriggeredOrdersInput>
+  create: Prisma.XOR<Prisma.MessageCreateWithoutTriggeredOrdersInput, Prisma.MessageUncheckedCreateWithoutTriggeredOrdersInput>
+  where?: Prisma.MessageWhereInput
+}
+
+export type MessageUpdateToOneWithWhereWithoutTriggeredOrdersInput = {
+  where?: Prisma.MessageWhereInput
+  data: Prisma.XOR<Prisma.MessageUpdateWithoutTriggeredOrdersInput, Prisma.MessageUncheckedUpdateWithoutTriggeredOrdersInput>
+}
+
+export type MessageUpdateWithoutTriggeredOrdersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  channel?: Prisma.StringFieldUpdateOperationsInput | string
+  externalMessageId?: Prisma.StringFieldUpdateOperationsInput | string
+  direction?: Prisma.StringFieldUpdateOperationsInput | string
+  senderId?: Prisma.StringFieldUpdateOperationsInput | string
+  text?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceTimestamp?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutMessagesNestedInput
+  conversation?: Prisma.ConversationUpdateOneRequiredWithoutMessagesNestedInput
+  rawEvent?: Prisma.WebhookEventUpdateOneRequiredWithoutMessagesNestedInput
+  attachments?: Prisma.AttachmentUpdateManyWithoutMessageNestedInput
+}
+
+export type MessageUncheckedUpdateWithoutTriggeredOrdersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  conversationId?: Prisma.StringFieldUpdateOperationsInput | string
+  rawEventId?: Prisma.StringFieldUpdateOperationsInput | string
+  channel?: Prisma.StringFieldUpdateOperationsInput | string
+  externalMessageId?: Prisma.StringFieldUpdateOperationsInput | string
+  direction?: Prisma.StringFieldUpdateOperationsInput | string
+  senderId?: Prisma.StringFieldUpdateOperationsInput | string
+  text?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceTimestamp?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  attachments?: Prisma.AttachmentUncheckedUpdateManyWithoutMessageNestedInput
+}
+
 export type MessageCreateWithoutAttachmentsInput = {
   id?: string
   channel: string
@@ -803,6 +906,7 @@ export type MessageCreateWithoutAttachmentsInput = {
   tenant: Prisma.TenantCreateNestedOneWithoutMessagesInput
   conversation: Prisma.ConversationCreateNestedOneWithoutMessagesInput
   rawEvent: Prisma.WebhookEventCreateNestedOneWithoutMessagesInput
+  triggeredOrders?: Prisma.OrderCreateNestedManyWithoutTriggerMessageInput
 }
 
 export type MessageUncheckedCreateWithoutAttachmentsInput = {
@@ -817,6 +921,7 @@ export type MessageUncheckedCreateWithoutAttachmentsInput = {
   text?: string | null
   sourceTimestamp: Date | string
   createdAt?: Date | string
+  triggeredOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutTriggerMessageInput
 }
 
 export type MessageCreateOrConnectWithoutAttachmentsInput = {
@@ -847,6 +952,7 @@ export type MessageUpdateWithoutAttachmentsInput = {
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMessagesNestedInput
   conversation?: Prisma.ConversationUpdateOneRequiredWithoutMessagesNestedInput
   rawEvent?: Prisma.WebhookEventUpdateOneRequiredWithoutMessagesNestedInput
+  triggeredOrders?: Prisma.OrderUpdateManyWithoutTriggerMessageNestedInput
 }
 
 export type MessageUncheckedUpdateWithoutAttachmentsInput = {
@@ -861,6 +967,7 @@ export type MessageUncheckedUpdateWithoutAttachmentsInput = {
   text?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceTimestamp?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  triggeredOrders?: Prisma.OrderUncheckedUpdateManyWithoutTriggerMessageNestedInput
 }
 
 export type MessageCreateManyTenantInput = {
@@ -888,6 +995,7 @@ export type MessageUpdateWithoutTenantInput = {
   conversation?: Prisma.ConversationUpdateOneRequiredWithoutMessagesNestedInput
   rawEvent?: Prisma.WebhookEventUpdateOneRequiredWithoutMessagesNestedInput
   attachments?: Prisma.AttachmentUpdateManyWithoutMessageNestedInput
+  triggeredOrders?: Prisma.OrderUpdateManyWithoutTriggerMessageNestedInput
 }
 
 export type MessageUncheckedUpdateWithoutTenantInput = {
@@ -902,6 +1010,7 @@ export type MessageUncheckedUpdateWithoutTenantInput = {
   sourceTimestamp?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   attachments?: Prisma.AttachmentUncheckedUpdateManyWithoutMessageNestedInput
+  triggeredOrders?: Prisma.OrderUncheckedUpdateManyWithoutTriggerMessageNestedInput
 }
 
 export type MessageUncheckedUpdateManyWithoutTenantInput = {
@@ -942,6 +1051,7 @@ export type MessageUpdateWithoutRawEventInput = {
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMessagesNestedInput
   conversation?: Prisma.ConversationUpdateOneRequiredWithoutMessagesNestedInput
   attachments?: Prisma.AttachmentUpdateManyWithoutMessageNestedInput
+  triggeredOrders?: Prisma.OrderUpdateManyWithoutTriggerMessageNestedInput
 }
 
 export type MessageUncheckedUpdateWithoutRawEventInput = {
@@ -956,6 +1066,7 @@ export type MessageUncheckedUpdateWithoutRawEventInput = {
   sourceTimestamp?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   attachments?: Prisma.AttachmentUncheckedUpdateManyWithoutMessageNestedInput
+  triggeredOrders?: Prisma.OrderUncheckedUpdateManyWithoutTriggerMessageNestedInput
 }
 
 export type MessageUncheckedUpdateManyWithoutRawEventInput = {
@@ -996,6 +1107,7 @@ export type MessageUpdateWithoutConversationInput = {
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMessagesNestedInput
   rawEvent?: Prisma.WebhookEventUpdateOneRequiredWithoutMessagesNestedInput
   attachments?: Prisma.AttachmentUpdateManyWithoutMessageNestedInput
+  triggeredOrders?: Prisma.OrderUpdateManyWithoutTriggerMessageNestedInput
 }
 
 export type MessageUncheckedUpdateWithoutConversationInput = {
@@ -1010,6 +1122,7 @@ export type MessageUncheckedUpdateWithoutConversationInput = {
   sourceTimestamp?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   attachments?: Prisma.AttachmentUncheckedUpdateManyWithoutMessageNestedInput
+  triggeredOrders?: Prisma.OrderUncheckedUpdateManyWithoutTriggerMessageNestedInput
 }
 
 export type MessageUncheckedUpdateManyWithoutConversationInput = {
@@ -1032,10 +1145,12 @@ export type MessageUncheckedUpdateManyWithoutConversationInput = {
 
 export type MessageCountOutputType = {
   attachments: number
+  triggeredOrders: number
 }
 
 export type MessageCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   attachments?: boolean | MessageCountOutputTypeCountAttachmentsArgs
+  triggeredOrders?: boolean | MessageCountOutputTypeCountTriggeredOrdersArgs
 }
 
 /**
@@ -1055,6 +1170,13 @@ export type MessageCountOutputTypeCountAttachmentsArgs<ExtArgs extends runtime.T
   where?: Prisma.AttachmentWhereInput
 }
 
+/**
+ * MessageCountOutputType without action
+ */
+export type MessageCountOutputTypeCountTriggeredOrdersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.OrderWhereInput
+}
+
 
 export type MessageSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1072,6 +1194,7 @@ export type MessageSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
   rawEvent?: boolean | Prisma.WebhookEventDefaultArgs<ExtArgs>
   attachments?: boolean | Prisma.Message$attachmentsArgs<ExtArgs>
+  triggeredOrders?: boolean | Prisma.Message$triggeredOrdersArgs<ExtArgs>
   _count?: boolean | Prisma.MessageCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["message"]>
 
@@ -1129,6 +1252,7 @@ export type MessageInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
   rawEvent?: boolean | Prisma.WebhookEventDefaultArgs<ExtArgs>
   attachments?: boolean | Prisma.Message$attachmentsArgs<ExtArgs>
+  triggeredOrders?: boolean | Prisma.Message$triggeredOrdersArgs<ExtArgs>
   _count?: boolean | Prisma.MessageCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type MessageIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1149,6 +1273,7 @@ export type $MessagePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     conversation: Prisma.$ConversationPayload<ExtArgs>
     rawEvent: Prisma.$WebhookEventPayload<ExtArgs>
     attachments: Prisma.$AttachmentPayload<ExtArgs>[]
+    triggeredOrders: Prisma.$OrderPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1560,6 +1685,7 @@ export interface Prisma__MessageClient<T, Null = never, ExtArgs extends runtime.
   conversation<T extends Prisma.ConversationDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ConversationDefaultArgs<ExtArgs>>): Prisma.Prisma__ConversationClient<runtime.Types.Result.GetResult<Prisma.$ConversationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   rawEvent<T extends Prisma.WebhookEventDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.WebhookEventDefaultArgs<ExtArgs>>): Prisma.Prisma__WebhookEventClient<runtime.Types.Result.GetResult<Prisma.$WebhookEventPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   attachments<T extends Prisma.Message$attachmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Message$attachmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AttachmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  triggeredOrders<T extends Prisma.Message$triggeredOrdersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Message$triggeredOrdersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2022,6 +2148,30 @@ export type Message$attachmentsArgs<ExtArgs extends runtime.Types.Extensions.Int
   take?: number
   skip?: number
   distinct?: Prisma.AttachmentScalarFieldEnum | Prisma.AttachmentScalarFieldEnum[]
+}
+
+/**
+ * Message.triggeredOrders
+ */
+export type Message$triggeredOrdersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Order
+   */
+  select?: Prisma.OrderSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Order
+   */
+  omit?: Prisma.OrderOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OrderInclude<ExtArgs> | null
+  where?: Prisma.OrderWhereInput
+  orderBy?: Prisma.OrderOrderByWithRelationInput | Prisma.OrderOrderByWithRelationInput[]
+  cursor?: Prisma.OrderWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.OrderScalarFieldEnum | Prisma.OrderScalarFieldEnum[]
 }
 
 /**
