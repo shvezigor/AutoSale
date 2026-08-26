@@ -10,6 +10,7 @@ onlyBuiltDependencies:
   - prisma
   - protobufjs
 allowBuilds:
+  '@scarf/scarf': false
   '@prisma/engines': true
   cpu-features: true
   esbuild: true
