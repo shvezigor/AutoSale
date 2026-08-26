@@ -48,7 +48,7 @@ describe('normalizeInstagramEvent', () => {
         attachments: [
           {
             type: 'IMAGE',
-            sourceUrl: 'https://lookaside.example.test/instagram/image-001.jpg',
+            sourceUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
           },
         ],
       }),

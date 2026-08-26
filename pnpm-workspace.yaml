@@ -4,6 +4,10 @@ packages:
 
 injectWorkspacePackages: true
 
+overrides:
+  deepmerge-ts: 8.0.0
+  uuid: 11.1.1
+
 onlyBuiltDependencies:
   - '@prisma/engines'
   - esbuild
@@ -12,7 +16,7 @@ onlyBuiltDependencies:
 allowBuilds:
   '@scarf/scarf': false
   '@prisma/engines': true
-  cpu-features: true
+  cpu-features: false
   esbuild: true
   msgpackr-extract: false
   prisma: true
@@ -39,3 +43,4 @@ minimumReleaseAgeExclude:
   - '@prisma/fetch-engine@7.10.0'
   - '@prisma/get-platform@7.10.0'
   - prisma@7.10.0
+  - '@aws-sdk/client-s3@3.1118.0'

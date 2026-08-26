@@ -1,4 +1,4 @@
-import { CreateBucketCommand, HeadBucketCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { CreateBucketCommand, GetObjectCommand, HeadBucketCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 
 import type { ObjectStorage } from './object-storage.js';
 
@@ -58,5 +58,18 @@ export class S3ObjectStorage implements ObjectStorage {
     }
 
     return { key: input.key, etag: response.ETag.replaceAll('"', '') };
+  }
+
+  async get(key: string): Promise<{ body: Uint8Array; contentType: string }> {
+    const response = await this.client.send(
+      new GetObjectCommand({ Bucket: this.config.bucket, Key: key }),
+    );
+    if (!response.Body || !response.ContentType) {
+      throw new Error('Stored object is missing its body or content type');
+    }
+    return {
+      body: await response.Body.transformToByteArray(),
+      contentType: response.ContentType,
+    };
   }
 }

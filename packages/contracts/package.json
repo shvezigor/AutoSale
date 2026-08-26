@@ -5,12 +5,16 @@
   "type": "module",
   "exports": {
     ".": {
+      "react-server": "./src/index.ts",
+      "browser": "./src/index.ts",
       "types": "./src/index.ts",
       "development": "./src/index.ts",
       "import": "./dist/index.js",
       "default": "./dist/index.js"
     },
     "./conversations": {
+      "react-server": "./src/conversations.ts",
+      "browser": "./src/conversations.ts",
       "types": "./src/conversations.ts",
       "development": "./src/conversations.ts",
       "import": "./dist/conversations.js",

@@ -11,6 +11,11 @@ const validEnv = {
   DEFAULT_TENANT_KEY: 'default',
   META_VERIFY_TOKEN: 'verify-token-with-24-characters',
   META_APP_SECRET: 'meta-app-secret-value',
+  S3_ENDPOINT: 'http://minio:9000',
+  S3_REGION: 'us-east-1',
+  S3_BUCKET: 'autosale-media',
+  S3_ACCESS_KEY_ID: 'minio-access-key',
+  S3_SECRET_ACCESS_KEY: 'minio-secret-key',
 };
 
 describe('parseApiEnv', () => {

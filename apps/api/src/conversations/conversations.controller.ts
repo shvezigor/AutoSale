@@ -13,10 +13,19 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
-import type { SchemaObject } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface.js';
 import { ZodError } from 'zod';
 
 import { ConversationsService } from './conversations.service.js';
+
+type OpenApiSchema = {
+  type: 'array' | 'object' | 'string';
+  format?: string;
+  nullable?: boolean;
+  enum?: string[];
+  required?: string[];
+  properties?: Record<string, OpenApiSchema>;
+  items?: OpenApiSchema;
+};
 
 @ApiTags('conversations')
 @Controller('api/conversations')
@@ -51,7 +60,7 @@ export class ConversationsController {
   }
 }
 
-function conversationListOpenApiSchema(): SchemaObject {
+function conversationListOpenApiSchema(): OpenApiSchema {
   return {
   type: 'object',
   required: ['items', 'nextCursor'],
@@ -75,7 +84,7 @@ function conversationListOpenApiSchema(): SchemaObject {
   };
 }
 
-function conversationDetailOpenApiSchema(): SchemaObject {
+function conversationDetailOpenApiSchema(): OpenApiSchema {
   return {
   type: 'object',
   required: ['id', 'channel', 'participantName', 'messages'],
