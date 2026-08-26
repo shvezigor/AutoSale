@@ -24,6 +24,9 @@ RUN pnpm --filter @autosale/api deploy --prod /prod/api
 FROM build AS worker-deploy
 RUN pnpm --filter @autosale/worker deploy --prod /prod/worker
 
+FROM build AS migrate
+CMD ["pnpm", "--filter", "@autosale/database", "exec", "prisma", "migrate", "deploy"]
+
 FROM node:24-alpine AS api
 ENV NODE_ENV=production
 WORKDIR /app

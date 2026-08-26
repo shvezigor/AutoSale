@@ -7,6 +7,8 @@ const validEnv = {
   PORT: '3001',
   DATABASE_URL: 'postgresql://autosale:secret@postgres:5432/autosale',
   REDIS_URL: 'redis://redis:6379',
+  DEFAULT_TENANT_ID: '11111111-1111-4111-8111-111111111111',
+  DEFAULT_TENANT_KEY: 'default',
   META_VERIFY_TOKEN: 'verify-token-with-24-characters',
   META_APP_SECRET: 'meta-app-secret-value',
 };

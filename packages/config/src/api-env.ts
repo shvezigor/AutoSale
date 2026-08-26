@@ -5,6 +5,8 @@ export const apiEnvSchema = z.object({
   PORT: z.coerce.number().int().positive().default(3001),
   DATABASE_URL: z.string().url(),
   REDIS_URL: z.string().url(),
+  DEFAULT_TENANT_ID: z.string().uuid(),
+  DEFAULT_TENANT_KEY: z.string().min(1).default('default'),
   META_VERIFY_TOKEN: z.string().min(24),
   META_APP_SECRET: z.string().min(16),
 });
