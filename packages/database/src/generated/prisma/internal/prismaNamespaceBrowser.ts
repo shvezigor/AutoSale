@@ -57,6 +57,7 @@ export const ModelName = {
   Message: 'Message',
   TenantSettings: 'TenantSettings',
   Order: 'Order',
+  AuditLog: 'AuditLog',
   OrderItem: 'OrderItem',
   Product: 'Product',
   Attachment: 'Attachment'
@@ -169,6 +170,19 @@ export const OrderScalarFieldEnum = {
 } as const
 
 export type OrderScalarFieldEnum = (typeof OrderScalarFieldEnum)[keyof typeof OrderScalarFieldEnum]
+
+
+export const AuditLogScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  orderId: 'orderId',
+  actor: 'actor',
+  action: 'action',
+  changes: 'changes',
+  createdAt: 'createdAt'
+} as const
+
+export type AuditLogScalarFieldEnum = (typeof AuditLogScalarFieldEnum)[keyof typeof AuditLogScalarFieldEnum]
 
 
 export const OrderItemScalarFieldEnum = {

@@ -25,6 +25,14 @@
       "development": "./src/meta.ts",
       "import": "./dist/meta.js",
       "default": "./dist/meta.js"
+    },
+    "./orders": {
+      "react-server": "./src/orders.ts",
+      "browser": "./src/orders.ts",
+      "types": "./src/orders.ts",
+      "development": "./src/orders.ts",
+      "import": "./dist/orders.js",
+      "default": "./dist/orders.js"
     }
   },
   "scripts": {

@@ -21,6 +21,7 @@ model Tenant {
   settings      TenantSettings?
   orders        Order[]
   products      Product[]
+  auditLogs     AuditLog[]
 
   @@map("tenants")
 }
@@ -120,10 +121,26 @@ model Order {
   conversation      Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   triggerMessage    Message     @relation("OrderTriggerMessage", fields: [triggerMessageId], references: [id], onDelete: Restrict)
   items             OrderItem[]
+  auditLogs         AuditLog[]
 
   @@index([tenantId, status, createdAt])
   @@index([conversationId, createdAt])
   @@map("orders")
+}
+
+model AuditLog {
+  id        String   @id @default(uuid()) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  orderId   String   @map("order_id") @db.Uuid
+  actor     String
+  action    String
+  changes   Json
+  createdAt DateTime @default(now()) @map("created_at")
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId, createdAt])
+  @@map("audit_logs")
 }
 
 model OrderItem {

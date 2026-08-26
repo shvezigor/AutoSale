@@ -24,7 +24,7 @@ export * as $Enums from './enums.js'
 export * from "./enums.js"
 /**
  * ## Prisma Client
- *
+ * 
  * Type-safe database client for TypeScript
  * @example
  * ```
@@ -34,7 +34,7 @@ export * from "./enums.js"
  * // Fetch zero or more Tenants
  * const tenants = await prisma.tenant.findMany()
  * ```
- *
+ * 
  * Read more in our [docs](https://pris.ly/d/client).
  */
 export const PrismaClient = $Class.getPrismaClientClass()
@@ -43,46 +43,51 @@ export { Prisma }
 
 /**
  * Model Tenant
- *
+ * 
  */
 export type Tenant = Prisma.TenantModel
 /**
  * Model WebhookEvent
- *
+ * 
  */
 export type WebhookEvent = Prisma.WebhookEventModel
 /**
  * Model Conversation
- *
+ * 
  */
 export type Conversation = Prisma.ConversationModel
 /**
  * Model Message
- *
+ * 
  */
 export type Message = Prisma.MessageModel
 /**
  * Model TenantSettings
- *
+ * 
  */
 export type TenantSettings = Prisma.TenantSettingsModel
 /**
  * Model Order
- *
+ * 
  */
 export type Order = Prisma.OrderModel
 /**
+ * Model AuditLog
+ * 
+ */
+export type AuditLog = Prisma.AuditLogModel
+/**
  * Model OrderItem
- *
+ * 
  */
 export type OrderItem = Prisma.OrderItemModel
 /**
  * Model Product
- *
+ * 
  */
 export type Product = Prisma.ProductModel
 /**
  * Model Attachment
- *
+ * 
  */
 export type Attachment = Prisma.AttachmentModel

@@ -6,7 +6,7 @@
 /*
  * This file should be your main import to use Prisma-related types and utilities in a browser. 
  * Use it to get access to models, enums, and input types.
- *
+ * 
  * This file does not contain a `PrismaClient` class, nor several other helpers that are intended as server-side only.
  * See `client.ts` for the standard, server-side entry point.
  *
@@ -19,42 +19,47 @@ export * as $Enums from './enums.js'
 export * from './enums.js';
 /**
  * Model Tenant
- *
+ * 
  */
 export type Tenant = Prisma.TenantModel
 /**
  * Model WebhookEvent
- *
+ * 
  */
 export type WebhookEvent = Prisma.WebhookEventModel
 /**
  * Model Conversation
- *
+ * 
  */
 export type Conversation = Prisma.ConversationModel
 /**
  * Model Message
- *
+ * 
  */
 export type Message = Prisma.MessageModel
 /**
  * Model TenantSettings
- *
+ * 
  */
 export type TenantSettings = Prisma.TenantSettingsModel
 /**
  * Model Order
- *
+ * 
  */
 export type Order = Prisma.OrderModel
 /**
+ * Model AuditLog
+ * 
+ */
+export type AuditLog = Prisma.AuditLogModel
+/**
  * Model OrderItem
- *
+ * 
  */
 export type OrderItem = Prisma.OrderItemModel
 /**
  * Model Product
- *
+ * 
  */
 export type Product = Prisma.ProductModel
 /**

@@ -19,6 +19,7 @@ export default async function SettingsPage() {
         <Link className="brand" href="/conversations">AutoSale</Link>
         <nav aria-label="Головна навігація">
           <Link className="nav-item" href="/conversations">Діалоги</Link>
+          <Link className="nav-item" href="/orders">Замовлення</Link>
           <Link className="nav-item active" href="/settings">Налаштування</Link>
         </nav>
       </aside>

@@ -6,6 +6,7 @@ import { ConversationsModule } from './conversations/conversations.module.js';
 import { MetaModule } from './meta/meta.module.js';
 import { MediaModule } from './media/media.module.js';
 import { OrderSettingsModule } from './settings/order-settings.module.js';
+import { OrdersModule } from './orders/orders.module.js';
 
 @Module({
   controllers: [HealthController],
@@ -19,6 +20,7 @@ export class AppModule {
         MediaModule.register(env),
         MetaModule.register(env),
         OrderSettingsModule.register(env),
+        OrdersModule.register(env),
       ],
     };
   }

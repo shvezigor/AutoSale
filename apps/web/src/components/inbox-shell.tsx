@@ -22,6 +22,7 @@ export function InboxShell({
             <ChatIcon />
             <span>Діалоги</span>
           </Link>
+          <Link className="nav-item" href="/orders"><span>Замовлення</span></Link>
           <Link className="nav-item" href="/settings"><span>Налаштування</span></Link>
         </nav>
         <div className="manager"><span className="manager-avatar">A</span><span>Андрій<small>Менеджер</small></span></div>
