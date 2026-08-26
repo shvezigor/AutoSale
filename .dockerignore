@@ -1,0 +1,8 @@
+.git
+.worktrees
+**/.next
+**/dist
+**/node_modules
+.env
+coverage
+test-results

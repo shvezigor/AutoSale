@@ -1,0 +1,31 @@
+{
+  "name": "@autosale/config",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./api-env": {
+      "types": "./src/api-env.ts",
+      "import": "./dist/api-env.js",
+      "require": "./dist/api-env.js",
+      "default": "./dist/api-env.js"
+    },
+    "./worker-env": {
+      "types": "./src/worker-env.ts",
+      "import": "./dist/worker-env.js",
+      "require": "./dist/worker-env.js",
+      "default": "./dist/worker-env.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "zod": "^4.1.5"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0"
+  }
+}
