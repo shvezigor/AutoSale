@@ -16,6 +16,8 @@ model Tenant {
   name      String
   createdAt DateTime       @default(now()) @map("created_at")
   events    WebhookEvent[]
+  conversations Conversation[]
+  messages      Message[]
 
   @@map("tenants")
 }
@@ -30,8 +32,67 @@ model WebhookEvent {
   receivedAt      DateTime  @default(now()) @map("received_at")
   processedAt     DateTime? @map("processed_at")
   tenant          Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  messages        Message[]
 
   @@unique([tenantId, provider, externalEventId])
   @@index([status, receivedAt])
   @@map("webhook_events")
+}
+
+model Conversation {
+  id                     String    @id @default(uuid()) @db.Uuid
+  tenantId               String    @map("tenant_id") @db.Uuid
+  channel                String
+  externalConversationId String    @map("external_conversation_id")
+  participantId          String    @map("participant_id")
+  displayName            String?   @map("display_name")
+  lastMessageAt          DateTime  @map("last_message_at")
+  createdAt              DateTime  @default(now()) @map("created_at")
+  updatedAt              DateTime  @updatedAt @map("updated_at")
+  tenant                 Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  messages               Message[]
+
+  @@unique([tenantId, channel, externalConversationId])
+  @@index([tenantId, lastMessageAt])
+  @@map("conversations")
+}
+
+model Message {
+  id                String       @id @default(uuid()) @db.Uuid
+  tenantId          String       @map("tenant_id") @db.Uuid
+  conversationId    String       @map("conversation_id") @db.Uuid
+  rawEventId        String       @map("raw_event_id") @db.Uuid
+  channel           String
+  externalMessageId String       @map("external_message_id")
+  direction         String
+  senderId          String       @map("sender_id")
+  text              String?
+  sourceTimestamp   DateTime     @map("source_timestamp")
+  createdAt         DateTime     @default(now()) @map("created_at")
+  tenant            Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  conversation      Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  rawEvent          WebhookEvent @relation(fields: [rawEventId], references: [id], onDelete: Restrict)
+  attachments       Attachment[]
+
+  @@unique([tenantId, channel, externalMessageId])
+  @@index([conversationId, sourceTimestamp])
+  @@map("messages")
+}
+
+model Attachment {
+  id             String   @id @default(uuid()) @db.Uuid
+  messageId      String   @map("message_id") @db.Uuid
+  type           String
+  originalUrl    String   @map("original_url")
+  storageKey     String?  @map("storage_key")
+  checksum       String?
+  copyStatus     String   @default("PENDING") @map("copy_status")
+  failureSummary String?  @map("failure_summary")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+  message        Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@index([copyStatus, createdAt])
+  @@index([checksum])
+  @@map("attachments")
 }

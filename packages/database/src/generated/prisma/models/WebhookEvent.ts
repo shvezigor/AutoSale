@@ -203,6 +203,7 @@ export type WebhookEventWhereInput = {
   receivedAt?: Prisma.DateTimeFilter<"WebhookEvent"> | Date | string
   processedAt?: Prisma.DateTimeNullableFilter<"WebhookEvent"> | Date | string | null
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
+  messages?: Prisma.MessageListRelationFilter
 }
 
 export type WebhookEventOrderByWithRelationInput = {
@@ -215,6 +216,7 @@ export type WebhookEventOrderByWithRelationInput = {
   receivedAt?: Prisma.SortOrder
   processedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   tenant?: Prisma.TenantOrderByWithRelationInput
+  messages?: Prisma.MessageOrderByRelationAggregateInput
 }
 
 export type WebhookEventWhereUniqueInput = Prisma.AtLeast<{
@@ -231,6 +233,7 @@ export type WebhookEventWhereUniqueInput = Prisma.AtLeast<{
   receivedAt?: Prisma.DateTimeFilter<"WebhookEvent"> | Date | string
   processedAt?: Prisma.DateTimeNullableFilter<"WebhookEvent"> | Date | string | null
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
+  messages?: Prisma.MessageListRelationFilter
 }, "id" | "tenantId_provider_externalEventId">
 
 export type WebhookEventOrderByWithAggregationInput = {
@@ -270,6 +273,7 @@ export type WebhookEventCreateInput = {
   receivedAt?: Date | string
   processedAt?: Date | string | null
   tenant: Prisma.TenantCreateNestedOneWithoutEventsInput
+  messages?: Prisma.MessageCreateNestedManyWithoutRawEventInput
 }
 
 export type WebhookEventUncheckedCreateInput = {
@@ -281,6 +285,7 @@ export type WebhookEventUncheckedCreateInput = {
   status?: string
   receivedAt?: Date | string
   processedAt?: Date | string | null
+  messages?: Prisma.MessageUncheckedCreateNestedManyWithoutRawEventInput
 }
 
 export type WebhookEventUpdateInput = {
@@ -292,6 +297,7 @@ export type WebhookEventUpdateInput = {
   receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   processedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tenant?: Prisma.TenantUpdateOneRequiredWithoutEventsNestedInput
+  messages?: Prisma.MessageUpdateManyWithoutRawEventNestedInput
 }
 
 export type WebhookEventUncheckedUpdateInput = {
@@ -303,6 +309,7 @@ export type WebhookEventUncheckedUpdateInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   processedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  messages?: Prisma.MessageUncheckedUpdateManyWithoutRawEventNestedInput
 }
 
 export type WebhookEventCreateManyInput = {
@@ -384,6 +391,11 @@ export type WebhookEventMinOrderByAggregateInput = {
   processedAt?: Prisma.SortOrder
 }
 
+export type WebhookEventScalarRelationFilter = {
+  is?: Prisma.WebhookEventWhereInput
+  isNot?: Prisma.WebhookEventWhereInput
+}
+
 export type WebhookEventCreateNestedManyWithoutTenantInput = {
   create?: Prisma.XOR<Prisma.WebhookEventCreateWithoutTenantInput, Prisma.WebhookEventUncheckedCreateWithoutTenantInput> | Prisma.WebhookEventCreateWithoutTenantInput[] | Prisma.WebhookEventUncheckedCreateWithoutTenantInput[]
   connectOrCreate?: Prisma.WebhookEventCreateOrConnectWithoutTenantInput | Prisma.WebhookEventCreateOrConnectWithoutTenantInput[]
@@ -430,6 +442,20 @@ export type NullableDateTimeFieldUpdateOperationsInput = {
   set?: Date | string | null
 }
 
+export type WebhookEventCreateNestedOneWithoutMessagesInput = {
+  create?: Prisma.XOR<Prisma.WebhookEventCreateWithoutMessagesInput, Prisma.WebhookEventUncheckedCreateWithoutMessagesInput>
+  connectOrCreate?: Prisma.WebhookEventCreateOrConnectWithoutMessagesInput
+  connect?: Prisma.WebhookEventWhereUniqueInput
+}
+
+export type WebhookEventUpdateOneRequiredWithoutMessagesNestedInput = {
+  create?: Prisma.XOR<Prisma.WebhookEventCreateWithoutMessagesInput, Prisma.WebhookEventUncheckedCreateWithoutMessagesInput>
+  connectOrCreate?: Prisma.WebhookEventCreateOrConnectWithoutMessagesInput
+  upsert?: Prisma.WebhookEventUpsertWithoutMessagesInput
+  connect?: Prisma.WebhookEventWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.WebhookEventUpdateToOneWithWhereWithoutMessagesInput, Prisma.WebhookEventUpdateWithoutMessagesInput>, Prisma.WebhookEventUncheckedUpdateWithoutMessagesInput>
+}
+
 export type WebhookEventCreateWithoutTenantInput = {
   id?: string
   provider: string
@@ -438,6 +464,7 @@ export type WebhookEventCreateWithoutTenantInput = {
   status?: string
   receivedAt?: Date | string
   processedAt?: Date | string | null
+  messages?: Prisma.MessageCreateNestedManyWithoutRawEventInput
 }
 
 export type WebhookEventUncheckedCreateWithoutTenantInput = {
@@ -448,6 +475,7 @@ export type WebhookEventUncheckedCreateWithoutTenantInput = {
   status?: string
   receivedAt?: Date | string
   processedAt?: Date | string | null
+  messages?: Prisma.MessageUncheckedCreateNestedManyWithoutRawEventInput
 }
 
 export type WebhookEventCreateOrConnectWithoutTenantInput = {
@@ -490,6 +518,66 @@ export type WebhookEventScalarWhereInput = {
   processedAt?: Prisma.DateTimeNullableFilter<"WebhookEvent"> | Date | string | null
 }
 
+export type WebhookEventCreateWithoutMessagesInput = {
+  id?: string
+  provider: string
+  externalEventId: string
+  payload: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  status?: string
+  receivedAt?: Date | string
+  processedAt?: Date | string | null
+  tenant: Prisma.TenantCreateNestedOneWithoutEventsInput
+}
+
+export type WebhookEventUncheckedCreateWithoutMessagesInput = {
+  id?: string
+  tenantId: string
+  provider: string
+  externalEventId: string
+  payload: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  status?: string
+  receivedAt?: Date | string
+  processedAt?: Date | string | null
+}
+
+export type WebhookEventCreateOrConnectWithoutMessagesInput = {
+  where: Prisma.WebhookEventWhereUniqueInput
+  create: Prisma.XOR<Prisma.WebhookEventCreateWithoutMessagesInput, Prisma.WebhookEventUncheckedCreateWithoutMessagesInput>
+}
+
+export type WebhookEventUpsertWithoutMessagesInput = {
+  update: Prisma.XOR<Prisma.WebhookEventUpdateWithoutMessagesInput, Prisma.WebhookEventUncheckedUpdateWithoutMessagesInput>
+  create: Prisma.XOR<Prisma.WebhookEventCreateWithoutMessagesInput, Prisma.WebhookEventUncheckedCreateWithoutMessagesInput>
+  where?: Prisma.WebhookEventWhereInput
+}
+
+export type WebhookEventUpdateToOneWithWhereWithoutMessagesInput = {
+  where?: Prisma.WebhookEventWhereInput
+  data: Prisma.XOR<Prisma.WebhookEventUpdateWithoutMessagesInput, Prisma.WebhookEventUncheckedUpdateWithoutMessagesInput>
+}
+
+export type WebhookEventUpdateWithoutMessagesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  provider?: Prisma.StringFieldUpdateOperationsInput | string
+  externalEventId?: Prisma.StringFieldUpdateOperationsInput | string
+  payload?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  processedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutEventsNestedInput
+}
+
+export type WebhookEventUncheckedUpdateWithoutMessagesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  provider?: Prisma.StringFieldUpdateOperationsInput | string
+  externalEventId?: Prisma.StringFieldUpdateOperationsInput | string
+  payload?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  processedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
 export type WebhookEventCreateManyTenantInput = {
   id?: string
   provider: string
@@ -508,6 +596,7 @@ export type WebhookEventUpdateWithoutTenantInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   processedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  messages?: Prisma.MessageUpdateManyWithoutRawEventNestedInput
 }
 
 export type WebhookEventUncheckedUpdateWithoutTenantInput = {
@@ -518,6 +607,7 @@ export type WebhookEventUncheckedUpdateWithoutTenantInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   processedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  messages?: Prisma.MessageUncheckedUpdateManyWithoutRawEventNestedInput
 }
 
 export type WebhookEventUncheckedUpdateManyWithoutTenantInput = {
@@ -531,6 +621,35 @@ export type WebhookEventUncheckedUpdateManyWithoutTenantInput = {
 }
 
 
+/**
+ * Count Type WebhookEventCountOutputType
+ */
+
+export type WebhookEventCountOutputType = {
+  messages: number
+}
+
+export type WebhookEventCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  messages?: boolean | WebhookEventCountOutputTypeCountMessagesArgs
+}
+
+/**
+ * WebhookEventCountOutputType without action
+ */
+export type WebhookEventCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the WebhookEventCountOutputType
+   */
+  select?: Prisma.WebhookEventCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * WebhookEventCountOutputType without action
+ */
+export type WebhookEventCountOutputTypeCountMessagesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MessageWhereInput
+}
+
 
 export type WebhookEventSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -542,6 +661,8 @@ export type WebhookEventSelect<ExtArgs extends runtime.Types.Extensions.Internal
   receivedAt?: boolean
   processedAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
+  messages?: boolean | Prisma.WebhookEvent$messagesArgs<ExtArgs>
+  _count?: boolean | Prisma.WebhookEventCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["webhookEvent"]>
 
 export type WebhookEventSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -582,6 +703,8 @@ export type WebhookEventSelectScalar = {
 export type WebhookEventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "provider" | "externalEventId" | "payload" | "status" | "receivedAt" | "processedAt", ExtArgs["result"]["webhookEvent"]>
 export type WebhookEventInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
+  messages?: boolean | Prisma.WebhookEvent$messagesArgs<ExtArgs>
+  _count?: boolean | Prisma.WebhookEventCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type WebhookEventIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
@@ -594,6 +717,7 @@ export type $WebhookEventPayload<ExtArgs extends runtime.Types.Extensions.Intern
   name: "WebhookEvent"
   objects: {
     tenant: Prisma.$TenantPayload<ExtArgs>
+    messages: Prisma.$MessagePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -999,6 +1123,7 @@ readonly fields: WebhookEventFieldRefs;
 export interface Prisma__WebhookEventClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   tenant<T extends Prisma.TenantDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TenantDefaultArgs<ExtArgs>>): Prisma.Prisma__TenantClient<runtime.Types.Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  messages<T extends Prisma.WebhookEvent$messagesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.WebhookEvent$messagesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1434,6 +1559,30 @@ export type WebhookEventDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.
    * Limit how many WebhookEvents to delete.
    */
   limit?: number
+}
+
+/**
+ * WebhookEvent.messages
+ */
+export type WebhookEvent$messagesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Message
+   */
+  select?: Prisma.MessageSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Message
+   */
+  omit?: Prisma.MessageOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MessageInclude<ExtArgs> | null
+  where?: Prisma.MessageWhereInput
+  orderBy?: Prisma.MessageOrderByWithRelationInput | Prisma.MessageOrderByWithRelationInput[]
+  cursor?: Prisma.MessageWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MessageScalarFieldEnum | Prisma.MessageScalarFieldEnum[]
 }
 
 /**

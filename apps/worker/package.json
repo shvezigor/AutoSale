@@ -9,9 +9,15 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@autosale/config": "workspace:*"
+    "@autosale/config": "workspace:*",
+    "@autosale/database": "workspace:*",
+    "@autosale/integrations": "workspace:*",
+    "bullmq": "5.58.5"
   },
   "devDependencies": {
-    "@types/node": "^24.3.0"
+    "@testcontainers/postgresql": "12.1.0",
+    "@types/node": "^24.3.0",
+    "@types/pg": "8.15.5",
+    "pg": "8.16.3"
   }
 }

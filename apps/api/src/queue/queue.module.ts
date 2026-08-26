@@ -22,6 +22,12 @@ export class QueueModule {
                 password: url.password || undefined,
                 tls: url.protocol === 'rediss:' ? {} : undefined,
               },
+              defaultJobOptions: {
+                attempts: 5,
+                backoff: { type: 'exponential', delay: 1_000 },
+                removeOnComplete: 1_000,
+                removeOnFail: 5_000,
+              },
             }),
         },
       ],

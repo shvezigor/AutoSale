@@ -51,3 +51,18 @@ export type Tenant = Prisma.TenantModel
  * 
  */
 export type WebhookEvent = Prisma.WebhookEventModel
+/**
+ * Model Conversation
+ * 
+ */
+export type Conversation = Prisma.ConversationModel
+/**
+ * Model Message
+ * 
+ */
+export type Message = Prisma.MessageModel
+/**
+ * Model Attachment
+ * 
+ */
+export type Attachment = Prisma.AttachmentModel

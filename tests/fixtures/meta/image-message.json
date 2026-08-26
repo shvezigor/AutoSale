@@ -1,0 +1,27 @@
+{
+  "object": "instagram",
+  "entry": [
+    {
+      "id": "17841400000000000",
+      "time": 1787731201000,
+      "messaging": [
+        {
+          "sender": { "id": "ig-user-100" },
+          "recipient": { "id": "17841400000000000" },
+          "timestamp": 1787731201123,
+          "message": {
+            "mid": "m_image_001",
+            "attachments": [
+              {
+                "type": "image",
+                "payload": {
+                  "url": "https://lookaside.example.test/instagram/image-001.jpg"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -10,4 +10,7 @@
  */
 export type * from './models/Tenant.js'
 export type * from './models/WebhookEvent.js'
+export type * from './models/Conversation.js'
+export type * from './models/Message.js'
+export type * from './models/Attachment.js'
 export type * from './commonInputTypes.js'
