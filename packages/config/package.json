@@ -6,12 +6,14 @@
   "exports": {
     "./api-env": {
       "types": "./src/api-env.ts",
+      "development": "./src/api-env.ts",
       "import": "./dist/api-env.js",
       "require": "./dist/api-env.js",
       "default": "./dist/api-env.js"
     },
     "./worker-env": {
       "types": "./src/worker-env.ts",
+      "development": "./src/worker-env.ts",
       "import": "./dist/worker-env.js",
       "require": "./dist/worker-env.js",
       "default": "./dist/worker-env.js"

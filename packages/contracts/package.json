@@ -1,0 +1,25 @@
+{
+  "name": "@autosale/contracts",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./meta": {
+      "types": "./src/meta.ts",
+      "development": "./src/meta.ts",
+      "import": "./dist/meta.js",
+      "default": "./dist/meta.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "zod": "^4.1.5"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0"
+  }
+}
