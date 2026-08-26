@@ -48,17 +48,17 @@ export { Prisma }
 export type Tenant = Prisma.TenantModel
 /**
  * Model WebhookEvent
- * 
+ *
  */
 export type WebhookEvent = Prisma.WebhookEventModel
 /**
  * Model Conversation
- * 
+ *
  */
 export type Conversation = Prisma.ConversationModel
 /**
  * Model Message
- * 
+ *
  */
 export type Message = Prisma.MessageModel
 /**
@@ -77,7 +77,12 @@ export type Order = Prisma.OrderModel
  */
 export type OrderItem = Prisma.OrderItemModel
 /**
+ * Model Product
+ *
+ */
+export type Product = Prisma.ProductModel
+/**
  * Model Attachment
- * 
+ *
  */
 export type Attachment = Prisma.AttachmentModel

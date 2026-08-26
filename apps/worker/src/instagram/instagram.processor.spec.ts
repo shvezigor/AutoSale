@@ -13,6 +13,7 @@ describe('InstagramProcessor', () => {
   let prisma: PrismaClient;
   let tenantId: string;
   const copy = vi.fn();
+  const processIfTriggered = vi.fn();
 
   beforeAll(async () => {
     container = await new PostgreSqlContainer('postgres:17.6-alpine').start();
@@ -95,6 +96,51 @@ describe('InstagramProcessor', () => {
       checksum: 'checksum',
       storageKey: 'tenants/test/instagram/sha256/checksum.jpg',
     });
+  });
+
+  it('checks a durable outbound message for an order trigger', async () => {
+    const payload = {
+      object: 'instagram',
+      entry: [
+        {
+          id: 'page',
+          messaging: [
+            {
+              sender: { id: 'page' },
+              recipient: { id: 'ig-customer-trigger' },
+              timestamp: 1787731300123,
+              message: {
+                mid: 'm_manager_confirmation',
+                is_echo: true,
+                text: 'Дякуємо, беремо замовлення в роботу',
+              },
+            },
+          ],
+        },
+      ],
+    };
+    const event = await prisma.webhookEvent.create({
+      data: {
+        tenantId,
+        provider: 'META',
+        externalEventId: 'm_manager_confirmation',
+        payload,
+      },
+    });
+    const processor = new InstagramProcessor(prisma, { copy }, { processIfTriggered });
+
+    await processor.process(event.id);
+
+    const message = await prisma.message.findUniqueOrThrow({
+      where: {
+        tenantId_channel_externalMessageId: {
+          tenantId,
+          channel: 'INSTAGRAM',
+          externalMessageId: 'm_manager_confirmation',
+        },
+      },
+    });
+    expect(processIfTriggered).toHaveBeenCalledWith(message.id);
   });
 });
 

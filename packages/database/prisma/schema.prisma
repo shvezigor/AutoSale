@@ -20,6 +20,7 @@ model Tenant {
   messages      Message[]
   settings      TenantSettings?
   orders        Order[]
+  products      Product[]
 
   @@map("tenants")
 }
@@ -139,6 +140,23 @@ model OrderItem {
 
   @@index([orderId])
   @@map("order_items")
+}
+
+model Product {
+  id        String   @id @default(uuid()) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  sku       String
+  name      String
+  aliases   Json
+  imageUrl  String?  @map("image_url")
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, sku])
+  @@index([tenantId, active, name])
+  @@map("products")
 }
 
 model Attachment {

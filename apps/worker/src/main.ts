@@ -6,6 +6,9 @@ import { Worker } from 'bullmq';
 import { createWorkerHealthServer } from './health-server.js';
 import { InstagramProcessor } from './instagram/instagram.processor.js';
 import { MediaCopyService } from './instagram/media-copy.service.js';
+import { createOpenAiOrderRecognizer } from './orders/openai-order-recognizer.js';
+import { OrderRecognitionService } from './orders/order-recognition.service.js';
+import { TriggeredOrderProcessor } from './orders/triggered-order.processor.js';
 
 async function bootstrap(): Promise<void> {
   const env = parseWorkerEnv(process.env);
@@ -20,7 +23,16 @@ async function bootstrap(): Promise<void> {
     forcePathStyle: true,
   });
   await storage.ensureBucket();
-  const processor = new InstagramProcessor(prisma, new MediaCopyService(storage));
+  const orderRecognizer = createOpenAiOrderRecognizer(env.OPENAI_API_KEY, env.OPENAI_MODEL);
+  const orderProcessor = new TriggeredOrderProcessor(
+    prisma,
+    new OrderRecognitionService(orderRecognizer),
+  );
+  const processor = new InstagramProcessor(
+    prisma,
+    new MediaCopyService(storage),
+    orderProcessor,
+  );
   const redis = new URL(env.REDIS_URL);
   const worker = new Worker(
     'instagram',

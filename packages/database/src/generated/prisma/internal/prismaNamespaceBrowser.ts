@@ -58,6 +58,7 @@ export const ModelName = {
   TenantSettings: 'TenantSettings',
   Order: 'Order',
   OrderItem: 'OrderItem',
+  Product: 'Product',
   Attachment: 'Attachment'
 } as const
 
@@ -183,6 +184,21 @@ export const OrderItemScalarFieldEnum = {
 } as const
 
 export type OrderItemScalarFieldEnum = (typeof OrderItemScalarFieldEnum)[keyof typeof OrderItemScalarFieldEnum]
+
+
+export const ProductScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  sku: 'sku',
+  name: 'name',
+  aliases: 'aliases',
+  imageUrl: 'imageUrl',
+  active: 'active',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProductScalarFieldEnum = (typeof ProductScalarFieldEnum)[keyof typeof ProductScalarFieldEnum]
 
 
 export const AttachmentScalarFieldEnum = {

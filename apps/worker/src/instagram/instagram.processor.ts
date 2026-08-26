@@ -12,10 +12,15 @@ interface MediaCopier {
   }>;
 }
 
+interface OrderTriggerProcessor {
+  processIfTriggered(messageId: string): Promise<unknown>;
+}
+
 export class InstagramProcessor {
   constructor(
     private readonly prisma: PrismaClient,
     private readonly media: MediaCopier,
+    private readonly orders?: OrderTriggerProcessor,
   ) {}
 
   async process(eventId: string): Promise<void> {
@@ -23,7 +28,7 @@ export class InstagramProcessor {
     const messages = normalizeInstagramEvent(event.payload);
 
     for (const normalized of messages) {
-      const attachments = await this.prisma.$transaction(async (transaction) => {
+      const persisted = await this.prisma.$transaction(async (transaction) => {
         const conversation = await transaction.conversation.upsert({
           where: {
             tenantId_channel_externalConversationId: {
@@ -84,12 +89,16 @@ export class InstagramProcessor {
           });
         }
 
-        return transaction.attachment.findMany({
-          where: { messageId: message.id, copyStatus: { in: ['PENDING', 'RETRYABLE_FAILURE'] } },
-        });
+        return {
+          messageId: message.id,
+          wasCreated: created.count === 1,
+          attachments: await transaction.attachment.findMany({
+            where: { messageId: message.id, copyStatus: { in: ['PENDING', 'RETRYABLE_FAILURE'] } },
+          }),
+        };
       });
 
-      for (const attachment of attachments) {
+      for (const attachment of persisted.attachments) {
         try {
           const copied = await this.media.copy({
             tenantId: event.tenantId,
@@ -115,6 +124,10 @@ export class InstagramProcessor {
           });
           if (retryable) throw error;
         }
+      }
+
+      if (persisted.wasCreated) {
+        await this.orders?.processIfTriggered(persisted.messageId);
       }
     }
 
