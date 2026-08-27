@@ -17,6 +17,7 @@ import {
 } from '@nestjs/common';
 
 import { INSTAGRAM_NORMALIZE_QUEUE } from '../queue/queue.module.js';
+import { Public } from '../auth/auth.decorators.js';
 import { MetaEventService } from './meta-event.service.js';
 import { MetaSignatureService } from './meta-signature.service.js';
 
@@ -32,6 +33,7 @@ interface NormalizeQueue {
 }
 
 @Controller('webhooks/meta')
+@Public()
 export class MetaController {
   constructor(
     @Inject(META_WEBHOOK_CONFIG) private readonly config: MetaWebhookConfig,

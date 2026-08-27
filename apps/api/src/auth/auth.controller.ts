@@ -1,9 +1,12 @@
-import { loginRequestSchema, registerRequestSchema, type PublicSession } from '@autosale/contracts/auth';
+import { loginRequestSchema, registerRequestSchema, type AuthPrincipal, type PublicSession } from '@autosale/contracts/auth';
 import { BadRequestException, Body, Controller, Get, Inject, Post, Req, Res, UnauthorizedException } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { z } from 'zod';
 
 import { AuthService } from './auth.service.js';
+import { CurrentPrincipal, Public, SkipCsrf } from './auth.decorators.js';
+import { CsrfService } from './csrf.service.js';
+import { RateLimitService } from './rate-limit.service.js';
 import { SessionService } from './session.service.js';
 
 export const AUTH_HTTP_CONFIG = Symbol('AUTH_HTTP_CONFIG');
@@ -19,21 +22,36 @@ export class AuthController {
     @Inject(AuthService) private readonly auth: AuthService,
     @Inject(SessionService) private readonly sessions: SessionService,
     @Inject(AUTH_HTTP_CONFIG) private readonly config: AuthHttpConfig,
+    @Inject(CsrfService) private readonly csrfService: CsrfService,
+    @Inject(RateLimitService) private readonly rateLimit: RateLimitService,
   ) {}
 
+  @Post('csrf')
+  @SkipCsrf()
+  csrf(@CurrentPrincipal() principal: AuthPrincipal): { token: string } {
+    return { token: this.csrfService.issue(principal.sessionId) };
+  }
+
   @Post('register')
-  register(@Body() body: unknown, @Req() request: Request) {
-    return this.auth.register(parse(registerRequestSchema, body), requestMetadata(request));
+  @Public()
+  async register(@Body() body: unknown, @Req() request: Request) {
+    const input = parse(registerRequestSchema, body);
+    await this.rateLimit.consume('register', requestMetadata(request).ipPrefix ?? 'unknown', input.email, 3, 3600);
+    return this.auth.register(input, requestMetadata(request));
   }
 
   @Post('verify-email')
+  @Public()
   verifyEmail(@Body() body: unknown) {
     return this.auth.verifyEmail(parse(tokenSchema, body).token);
   }
 
   @Post('login')
+  @Public()
   async login(@Body() body: unknown, @Req() request: Request, @Res({ passthrough: true }) response: Response): Promise<PublicSession> {
-    const result = await this.auth.login(parse(loginRequestSchema, body), requestMetadata(request));
+    const input = parse(loginRequestSchema, body);
+    await this.rateLimit.consume('login', requestMetadata(request).ipPrefix ?? 'unknown', input.email.trim().toLowerCase(), 5, 60);
+    const result = await this.auth.login(input, requestMetadata(request));
     response.cookie(this.config.cookieName, result.rawToken, {
       httpOnly: true, secure: this.config.production, sameSite: 'lax', path: '/', expires: result.expiresAt,
     });
@@ -64,13 +82,18 @@ export class AuthController {
   }
 
   @Post('forgot-password')
-  forgotPassword(@Body() body: unknown) {
-    return this.auth.requestPasswordReset(parse(forgotSchema, body).email);
+  @Public()
+  async forgotPassword(@Body() body: unknown, @Req() request: Request) {
+    const input = parse(forgotSchema, body);
+    await this.rateLimit.consume('forgot-password', requestMetadata(request).ipPrefix ?? 'unknown', input.email.trim().toLowerCase(), 5, 3600);
+    return this.auth.requestPasswordReset(input.email);
   }
 
   @Post('reset-password')
-  resetPassword(@Body() body: unknown) {
+  @Public()
+  async resetPassword(@Body() body: unknown, @Req() request: Request) {
     const input = parse(resetSchema, body);
+    await this.rateLimit.consume('reset-password', requestMetadata(request).ipPrefix ?? 'unknown', input.token, 5, 3600);
     return this.auth.resetPassword(input.token, input.password);
   }
 }
