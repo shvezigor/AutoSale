@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { mutatingFetch } from '../auth/csrf-fetch';
 
 export interface OrderSettings {
   approvalMode: 'ALWAYS' | 'NEVER' | 'ON_LOW_CONFIDENCE';
@@ -37,7 +38,7 @@ export function OrderSettingsForm({ initial }: { initial: OrderSettings }) {
 
   async function save() {
     setState('saving');
-    const response = await fetch('/api/settings/orders', {
+    const response = await mutatingFetch('/api/settings/orders', {
       method: 'PATCH',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ approvalMode: mode }),

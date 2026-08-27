@@ -14,7 +14,7 @@ describe('SessionService', () => {
       lastSeenAt: new Date('2026-08-27T00:00:00Z'), revokedAt: null,
       tenant: { status: 'ACTIVE' },
       user: {
-        email: 'owner@example.com', platformRole: 'USER', status: 'ACTIVE',
+        email: 'owner@example.com', name: 'Олена', platformRole: 'USER', status: 'ACTIVE',
         memberships: [{ tenantId: '10000000-0000-4000-8000-000000000003', role: 'OWNER', status: 'ACTIVE' }],
       },
     };
@@ -31,7 +31,7 @@ describe('SessionService', () => {
     const issued = await sessions.create(record.userId, record.tenantId, { ipPrefix: '127.0.0.0/24', userAgent: 'test' });
     record.tokenHash = issued.tokenHash;
     await expect(sessions.resolve(issued.rawToken)).resolves.toMatchObject({
-      userId: record.userId, tenantId: record.tenantId, membershipRole: 'OWNER',
+      userId: record.userId, name: 'Олена', tenantId: record.tenantId, membershipRole: 'OWNER',
     });
     await sessions.revoke(record.id);
     expect(prisma.session.update).toHaveBeenCalled();
@@ -41,7 +41,7 @@ describe('SessionService', () => {
     const prisma = { session: { findUnique: vi.fn(async () => ({
       id: 'session', userId: 'user', tenantId: null, revokedAt: null,
       expiresAt: new Date('2026-08-01T00:00:00Z'), lastSeenAt: new Date(),
-      user: { email: 'x@example.com', platformRole: 'USER', status: 'ACTIVE', memberships: [] },
+      user: { email: 'x@example.com', name: 'X', platformRole: 'USER', status: 'ACTIVE', memberships: [] },
     })) } } as unknown as PrismaClient;
     const sessions = new SessionService(prisma, new CryptoService(), 'p'.repeat(32), () => new Date('2026-08-27T12:00:00Z'));
     await expect(sessions.resolve('expired')).resolves.toBeNull();
@@ -51,7 +51,7 @@ describe('SessionService', () => {
     const prisma = { session: { findUnique: vi.fn(async () => ({
       id: 'session', userId: 'user', tenantId: 'tenant', revokedAt: null,
       expiresAt: new Date('2026-09-01T00:00:00Z'), lastSeenAt: new Date(), tenant: { status: 'BLOCKED' },
-      user: { email: 'x@example.com', platformRole: 'USER', status: 'ACTIVE', memberships: [{ tenantId: 'tenant', role: 'OWNER', status: 'ACTIVE' }] },
+      user: { email: 'x@example.com', name: 'X', platformRole: 'USER', status: 'ACTIVE', memberships: [{ tenantId: 'tenant', role: 'OWNER', status: 'ACTIVE' }] },
     })) } } as unknown as PrismaClient;
     const sessions = new SessionService(prisma, new CryptoService(), 'p'.repeat(32), () => new Date('2026-08-27T12:00:00Z'));
 

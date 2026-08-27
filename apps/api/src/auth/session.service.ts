@@ -57,6 +57,7 @@ export class SessionService {
     return {
       userId: session.userId,
       email: session.user.email,
+      name: session.user.name,
       platformRole: session.user.platformRole,
       tenantId: session.tenantId,
       membershipRole: membership?.role ?? null,

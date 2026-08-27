@@ -45,6 +45,7 @@ export const publicSessionSchema = z.object({
 export interface AuthPrincipal {
   userId: string;
   email: string;
+  name: string;
   platformRole: 'USER' | 'PLATFORM_ADMIN';
   tenantId: string | null;
   membershipRole: 'OWNER' | 'MANAGER' | null;

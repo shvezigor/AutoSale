@@ -23,7 +23,9 @@ afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
 describe('OrderReviewPanel', () => {
   it('approves a complete order and shows the new status', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({ ...order, status: 'APPROVED' }) }));
+    vi.stubGlobal('fetch', vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ token: 'csrf-token' }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ ...order, status: 'APPROVED' }) }));
     render(<OrderReviewPanel initialOrder={order} />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Підтвердити' }));
@@ -39,7 +41,9 @@ describe('OrderReviewPanel', () => {
   });
 
   it('saves manager corrections before approval', async () => {
-    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ ...order, customer: { ...order.customer, phone: '+380501112233' } }) });
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ token: 'csrf-token' }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ ...order, customer: { ...order.customer, phone: '+380501112233' } }) });
     vi.stubGlobal('fetch', fetchMock);
     render(<OrderReviewPanel initialOrder={order} />);
     fireEvent.change(screen.getByLabelText('Телефон'), { target: { value: '+380501112233' } });
@@ -55,7 +59,9 @@ describe('OrderReviewPanel', () => {
   });
 
   it('retries a failed recoverable export and changes its visible state to pending', async () => {
-    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ status: 'PENDING', attempts: 2, rowNumber: null, lastAttemptAt: '2026-08-27T08:00:00.000Z', lastSyncedAt: null, errorSummary: null, retryAllowed: false }) });
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ token: 'csrf-token' }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ status: 'PENDING', attempts: 2, rowNumber: null, lastAttemptAt: '2026-08-27T08:00:00.000Z', lastSyncedAt: null, errorSummary: null, retryAllowed: false }) });
     vi.stubGlobal('fetch', fetchMock);
     render(<OrderReviewPanel initialOrder={{ ...order, status: 'APPROVED', sheetsExport: { status: 'FAILED', attempts: 1, rowNumber: null, lastAttemptAt: '2026-08-27T08:00:00.000Z', lastSyncedAt: null, errorSummary: 'Google Sheets API returned HTTP 503', retryAllowed: true } }} />);
 

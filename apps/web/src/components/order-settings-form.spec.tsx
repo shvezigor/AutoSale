@@ -7,7 +7,9 @@ describe('OrderSettingsForm', () => {
   afterEach(() => vi.unstubAllGlobals());
 
   it('saves the selected approval mode', async () => {
-    const fetchMock = vi.fn().mockResolvedValue({ ok: true });
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ token: 'csrf-token' }) })
+      .mockResolvedValueOnce({ ok: true });
     vi.stubGlobal('fetch', fetchMock);
     render(
       <OrderSettingsForm
@@ -29,6 +31,7 @@ describe('OrderSettingsForm', () => {
         expect.objectContaining({
           method: 'PATCH',
           body: JSON.stringify({ approvalMode: 'NEVER' }),
+          headers: expect.objectContaining({ 'x-csrf-token': 'csrf-token' }),
         }),
       ),
     );

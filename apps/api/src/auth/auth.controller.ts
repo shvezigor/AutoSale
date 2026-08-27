@@ -70,13 +70,13 @@ export class AuthController {
   }
 
   @Get('session')
-  async session(@Req() request: Request): Promise<Omit<PublicSession, 'name'>> {
+  async session(@Req() request: Request): Promise<PublicSession> {
     const rawToken = readCookie(request.headers.cookie, this.config.cookieName);
     if (!rawToken) throw new UnauthorizedException('Authentication required');
     const principal = await this.sessions.resolve(rawToken);
     if (!principal) throw new UnauthorizedException('Authentication required');
     return {
-      userId: principal.userId, email: principal.email, platformRole: principal.platformRole,
+      userId: principal.userId, email: principal.email, name: principal.name, platformRole: principal.platformRole,
       tenantId: principal.tenantId, membershipRole: principal.membershipRole,
     };
   }

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { mutatingFetch } from '../auth/csrf-fetch';
 
 export interface GoogleSheetsSettings {
   spreadsheetId: string | null;
@@ -22,7 +23,7 @@ export function GoogleSheetsSettingsForm({ initial }: { initial: GoogleSheetsSet
   async function save() {
     setPending(true); setMessage(null); setError(null);
     try {
-      const response = await fetch('/api/settings/google-sheets', { method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ spreadsheetId, sheetName }) });
+      const response = await mutatingFetch('/api/settings/google-sheets', { method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ spreadsheetId, sheetName }) });
       if (!response.ok) throw new Error('Не вдалося зберегти конфігурацію');
       setSettings(await response.json() as GoogleSheetsSettings); setMessage('Конфігурацію збережено');
     } catch (reason) { setError(reason instanceof Error ? reason.message : 'Сталася помилка'); }
@@ -32,7 +33,7 @@ export function GoogleSheetsSettingsForm({ initial }: { initial: GoogleSheetsSet
   async function validate() {
     setPending(true); setMessage(null); setError(null);
     try {
-      const response = await fetch('/api/settings/google-sheets/validate', { method: 'POST' });
+      const response = await mutatingFetch('/api/settings/google-sheets/validate', { method: 'POST' });
       const body = await response.json() as { valid?: boolean; missingHeaders?: string[]; message?: string };
       if (!response.ok) throw new Error(body.message ?? 'Не вдалося перевірити доступ');
       if (!body.valid) throw new Error(`Відсутні колонки: ${body.missingHeaders?.join(', ')}`);

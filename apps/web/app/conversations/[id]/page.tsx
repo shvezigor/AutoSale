@@ -1,14 +1,16 @@
 import { getConversation, getConversations } from '../../../src/api/conversations';
 import { InboxShell } from '../../../src/components/inbox-shell';
 import { MessageThread } from '../../../src/components/message-thread';
+import { getServerSession } from '../../../src/auth/session';
 
 export default async function ConversationDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [list, conversation] = await Promise.all([getConversations(), getConversation(id)]);
+  const [list, conversation, session] = await Promise.all([getConversations(), getConversation(id), getServerSession()]);
+  if (!session) return null;
   const name = conversation.participantName ?? 'Клієнт Instagram';
 
   return (
-    <InboxShell conversations={list.items} selectedId={id}>
+    <InboxShell conversations={list.items} selectedId={id} session={session}>
       <section className="conversation-panel">
         <header className="conversation-header">
           <span className="avatar large" aria-hidden="true">{name[0]}</span>

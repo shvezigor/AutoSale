@@ -4,6 +4,7 @@ import {
   type ConversationDetailResponse,
   type ConversationListResponse,
 } from '../../../../packages/contracts/src/conversations';
+import { authenticatedApiFetch } from '../auth/session';
 
 export class ConversationApiError extends Error {
   constructor(
@@ -28,8 +29,7 @@ export async function getConversation(id: string): Promise<ConversationDetailRes
 }
 
 async function request<T>(path: string, parse: (value: unknown) => T): Promise<T> {
-  const baseUrl = process.env.API_INTERNAL_URL ?? 'http://localhost:3001';
-  const response = await fetch(`${baseUrl}${path}`, { cache: 'no-store' });
+  const response = await authenticatedApiFetch(path);
   if (!response.ok) {
     throw new ConversationApiError(`Conversation API returned HTTP ${response.status}`, response.status);
   }

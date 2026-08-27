@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 import { AuthGuard, decideAccess } from './auth.guard.js';
 
-const owner: AuthPrincipal = { userId: 'u', email: 'o@example.com', platformRole: 'USER', tenantId: 't', membershipRole: 'OWNER', sessionId: 's' };
+const owner: AuthPrincipal = { userId: 'u', email: 'o@example.com', name: 'Owner', platformRole: 'USER', tenantId: 't', membershipRole: 'OWNER', sessionId: 's' };
 const manager: AuthPrincipal = { ...owner, membershipRole: 'MANAGER' };
 const admin: AuthPrincipal = { ...owner, platformRole: 'PLATFORM_ADMIN', tenantId: null, membershipRole: null };
 
