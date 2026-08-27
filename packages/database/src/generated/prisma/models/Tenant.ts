@@ -181,6 +181,7 @@ export type TenantWhereInput = {
   orders?: Prisma.OrderListRelationFilter
   products?: Prisma.ProductListRelationFilter
   auditLogs?: Prisma.AuditLogListRelationFilter
+  sheetsDestination?: Prisma.XOR<Prisma.GoogleSheetsDestinationNullableScalarRelationFilter, Prisma.GoogleSheetsDestinationWhereInput> | null
 }
 
 export type TenantOrderByWithRelationInput = {
@@ -195,6 +196,7 @@ export type TenantOrderByWithRelationInput = {
   orders?: Prisma.OrderOrderByRelationAggregateInput
   products?: Prisma.ProductOrderByRelationAggregateInput
   auditLogs?: Prisma.AuditLogOrderByRelationAggregateInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationOrderByWithRelationInput
 }
 
 export type TenantWhereUniqueInput = Prisma.AtLeast<{
@@ -212,6 +214,7 @@ export type TenantWhereUniqueInput = Prisma.AtLeast<{
   orders?: Prisma.OrderListRelationFilter
   products?: Prisma.ProductListRelationFilter
   auditLogs?: Prisma.AuditLogListRelationFilter
+  sheetsDestination?: Prisma.XOR<Prisma.GoogleSheetsDestinationNullableScalarRelationFilter, Prisma.GoogleSheetsDestinationWhereInput> | null
 }, "id" | "key">
 
 export type TenantOrderByWithAggregationInput = {
@@ -246,6 +249,7 @@ export type TenantCreateInput = {
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationCreateNestedOneWithoutTenantInput
 }
 
 export type TenantUncheckedCreateInput = {
@@ -260,6 +264,7 @@ export type TenantUncheckedCreateInput = {
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedCreateNestedOneWithoutTenantInput
 }
 
 export type TenantUpdateInput = {
@@ -274,6 +279,7 @@ export type TenantUpdateInput = {
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateInput = {
@@ -288,6 +294,7 @@ export type TenantUncheckedUpdateInput = {
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantCreateManyInput = {
@@ -387,6 +394,20 @@ export type TenantUpdateOneRequiredWithoutMessagesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.TenantUpdateToOneWithWhereWithoutMessagesInput, Prisma.TenantUpdateWithoutMessagesInput>, Prisma.TenantUncheckedUpdateWithoutMessagesInput>
 }
 
+export type TenantCreateNestedOneWithoutSheetsDestinationInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutSheetsDestinationInput, Prisma.TenantUncheckedCreateWithoutSheetsDestinationInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutSheetsDestinationInput
+  connect?: Prisma.TenantWhereUniqueInput
+}
+
+export type TenantUpdateOneRequiredWithoutSheetsDestinationNestedInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutSheetsDestinationInput, Prisma.TenantUncheckedCreateWithoutSheetsDestinationInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutSheetsDestinationInput
+  upsert?: Prisma.TenantUpsertWithoutSheetsDestinationInput
+  connect?: Prisma.TenantWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TenantUpdateToOneWithWhereWithoutSheetsDestinationInput, Prisma.TenantUpdateWithoutSheetsDestinationInput>, Prisma.TenantUncheckedUpdateWithoutSheetsDestinationInput>
+}
+
 export type TenantCreateNestedOneWithoutSettingsInput = {
   create?: Prisma.XOR<Prisma.TenantCreateWithoutSettingsInput, Prisma.TenantUncheckedCreateWithoutSettingsInput>
   connectOrCreate?: Prisma.TenantCreateOrConnectWithoutSettingsInput
@@ -454,6 +475,7 @@ export type TenantCreateWithoutEventsInput = {
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationCreateNestedOneWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutEventsInput = {
@@ -467,6 +489,7 @@ export type TenantUncheckedCreateWithoutEventsInput = {
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedCreateNestedOneWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutEventsInput = {
@@ -496,6 +519,7 @@ export type TenantUpdateWithoutEventsInput = {
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutEventsInput = {
@@ -509,6 +533,7 @@ export type TenantUncheckedUpdateWithoutEventsInput = {
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutConversationsInput = {
@@ -522,6 +547,7 @@ export type TenantCreateWithoutConversationsInput = {
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationCreateNestedOneWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutConversationsInput = {
@@ -535,6 +561,7 @@ export type TenantUncheckedCreateWithoutConversationsInput = {
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedCreateNestedOneWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutConversationsInput = {
@@ -564,6 +591,7 @@ export type TenantUpdateWithoutConversationsInput = {
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutConversationsInput = {
@@ -577,6 +605,7 @@ export type TenantUncheckedUpdateWithoutConversationsInput = {
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutMessagesInput = {
@@ -590,6 +619,7 @@ export type TenantCreateWithoutMessagesInput = {
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationCreateNestedOneWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutMessagesInput = {
@@ -603,6 +633,7 @@ export type TenantUncheckedCreateWithoutMessagesInput = {
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedCreateNestedOneWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutMessagesInput = {
@@ -632,6 +663,7 @@ export type TenantUpdateWithoutMessagesInput = {
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutMessagesInput = {
@@ -641,6 +673,79 @@ export type TenantUncheckedUpdateWithoutMessagesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
+  settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedUpdateOneWithoutTenantNestedInput
+}
+
+export type TenantCreateWithoutSheetsDestinationInput = {
+  id?: string
+  key: string
+  name: string
+  createdAt?: Date | string
+  events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
+  conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
+  messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
+  settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
+  products?: Prisma.ProductCreateNestedManyWithoutTenantInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutTenantInput
+}
+
+export type TenantUncheckedCreateWithoutSheetsDestinationInput = {
+  id?: string
+  key: string
+  name: string
+  createdAt?: Date | string
+  events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
+  conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
+  messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
+  settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutTenantInput
+}
+
+export type TenantCreateOrConnectWithoutSheetsDestinationInput = {
+  where: Prisma.TenantWhereUniqueInput
+  create: Prisma.XOR<Prisma.TenantCreateWithoutSheetsDestinationInput, Prisma.TenantUncheckedCreateWithoutSheetsDestinationInput>
+}
+
+export type TenantUpsertWithoutSheetsDestinationInput = {
+  update: Prisma.XOR<Prisma.TenantUpdateWithoutSheetsDestinationInput, Prisma.TenantUncheckedUpdateWithoutSheetsDestinationInput>
+  create: Prisma.XOR<Prisma.TenantCreateWithoutSheetsDestinationInput, Prisma.TenantUncheckedCreateWithoutSheetsDestinationInput>
+  where?: Prisma.TenantWhereInput
+}
+
+export type TenantUpdateToOneWithWhereWithoutSheetsDestinationInput = {
+  where?: Prisma.TenantWhereInput
+  data: Prisma.XOR<Prisma.TenantUpdateWithoutSheetsDestinationInput, Prisma.TenantUncheckedUpdateWithoutSheetsDestinationInput>
+}
+
+export type TenantUpdateWithoutSheetsDestinationInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
+  conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
+  messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
+  settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
+  products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutTenantNestedInput
+}
+
+export type TenantUncheckedUpdateWithoutSheetsDestinationInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
+  conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
+  messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
@@ -658,6 +763,7 @@ export type TenantCreateWithoutSettingsInput = {
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationCreateNestedOneWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutSettingsInput = {
@@ -671,6 +777,7 @@ export type TenantUncheckedCreateWithoutSettingsInput = {
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedCreateNestedOneWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutSettingsInput = {
@@ -700,6 +807,7 @@ export type TenantUpdateWithoutSettingsInput = {
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutSettingsInput = {
@@ -713,6 +821,7 @@ export type TenantUncheckedUpdateWithoutSettingsInput = {
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutOrdersInput = {
@@ -726,6 +835,7 @@ export type TenantCreateWithoutOrdersInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationCreateNestedOneWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutOrdersInput = {
@@ -739,6 +849,7 @@ export type TenantUncheckedCreateWithoutOrdersInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedCreateNestedOneWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutOrdersInput = {
@@ -768,6 +879,7 @@ export type TenantUpdateWithoutOrdersInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutOrdersInput = {
@@ -781,6 +893,7 @@ export type TenantUncheckedUpdateWithoutOrdersInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutAuditLogsInput = {
@@ -794,6 +907,7 @@ export type TenantCreateWithoutAuditLogsInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationCreateNestedOneWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutAuditLogsInput = {
@@ -807,6 +921,7 @@ export type TenantUncheckedCreateWithoutAuditLogsInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedCreateNestedOneWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutAuditLogsInput = {
@@ -836,6 +951,7 @@ export type TenantUpdateWithoutAuditLogsInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutAuditLogsInput = {
@@ -849,6 +965,7 @@ export type TenantUncheckedUpdateWithoutAuditLogsInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutProductsInput = {
@@ -862,6 +979,7 @@ export type TenantCreateWithoutProductsInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationCreateNestedOneWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutProductsInput = {
@@ -875,6 +993,7 @@ export type TenantUncheckedCreateWithoutProductsInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedCreateNestedOneWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutProductsInput = {
@@ -904,6 +1023,7 @@ export type TenantUpdateWithoutProductsInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutProductsInput = {
@@ -917,6 +1037,7 @@ export type TenantUncheckedUpdateWithoutProductsInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedUpdateOneWithoutTenantNestedInput
 }
 
 
@@ -1007,6 +1128,7 @@ export type TenantSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   orders?: boolean | Prisma.Tenant$ordersArgs<ExtArgs>
   products?: boolean | Prisma.Tenant$productsArgs<ExtArgs>
   auditLogs?: boolean | Prisma.Tenant$auditLogsArgs<ExtArgs>
+  sheetsDestination?: boolean | Prisma.Tenant$sheetsDestinationArgs<ExtArgs>
   _count?: boolean | Prisma.TenantCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["tenant"]>
 
@@ -1040,6 +1162,7 @@ export type TenantInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   orders?: boolean | Prisma.Tenant$ordersArgs<ExtArgs>
   products?: boolean | Prisma.Tenant$productsArgs<ExtArgs>
   auditLogs?: boolean | Prisma.Tenant$auditLogsArgs<ExtArgs>
+  sheetsDestination?: boolean | Prisma.Tenant$sheetsDestinationArgs<ExtArgs>
   _count?: boolean | Prisma.TenantCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type TenantIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1055,6 +1178,7 @@ export type $TenantPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     orders: Prisma.$OrderPayload<ExtArgs>[]
     products: Prisma.$ProductPayload<ExtArgs>[]
     auditLogs: Prisma.$AuditLogPayload<ExtArgs>[]
+    sheetsDestination: Prisma.$GoogleSheetsDestinationPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1462,6 +1586,7 @@ export interface Prisma__TenantClient<T, Null = never, ExtArgs extends runtime.T
   orders<T extends Prisma.Tenant$ordersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$ordersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   products<T extends Prisma.Tenant$productsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$productsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   auditLogs<T extends Prisma.Tenant$auditLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$auditLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  sheetsDestination<T extends Prisma.Tenant$sheetsDestinationArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$sheetsDestinationArgs<ExtArgs>>): Prisma.Prisma__GoogleSheetsDestinationClient<runtime.Types.Result.GetResult<Prisma.$GoogleSheetsDestinationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2048,6 +2173,25 @@ export type Tenant$auditLogsArgs<ExtArgs extends runtime.Types.Extensions.Intern
   take?: number
   skip?: number
   distinct?: Prisma.AuditLogScalarFieldEnum | Prisma.AuditLogScalarFieldEnum[]
+}
+
+/**
+ * Tenant.sheetsDestination
+ */
+export type Tenant$sheetsDestinationArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the GoogleSheetsDestination
+   */
+  select?: Prisma.GoogleSheetsDestinationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the GoogleSheetsDestination
+   */
+  omit?: Prisma.GoogleSheetsDestinationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GoogleSheetsDestinationInclude<ExtArgs> | null
+  where?: Prisma.GoogleSheetsDestinationWhereInput
 }
 
 /**

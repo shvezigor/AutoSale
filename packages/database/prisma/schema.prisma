@@ -22,6 +22,7 @@ model Tenant {
   orders        Order[]
   products      Product[]
   auditLogs     AuditLog[]
+  sheetsDestination GoogleSheetsDestination?
 
   @@map("tenants")
 }
@@ -83,6 +84,22 @@ model Message {
   @@unique([tenantId, channel, externalMessageId])
   @@index([conversationId, sourceTimestamp])
   @@map("messages")
+}
+
+model GoogleSheetsDestination {
+  id              String    @id @default(uuid()) @db.Uuid
+  tenantId        String    @unique @map("tenant_id") @db.Uuid
+  spreadsheetId   String    @map("spreadsheet_id")
+  sheetName       String    @map("sheet_name")
+  requiredHeaders Json      @map("required_headers")
+  status          String    @default("PENDING")
+  lastValidatedAt DateTime? @map("last_validated_at")
+  errorSummary    String?   @map("error_summary")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  tenant          Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@map("google_sheets_destinations")
 }
 
 model TenantSettings {

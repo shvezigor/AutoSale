@@ -28,4 +28,8 @@ describe('parseApiEnv', () => {
 
     expect(() => parseApiEnv(incompleteEnv)).toThrow();
   });
+
+  it('treats an empty optional Google credential path as unconfigured', () => {
+    expect(parseApiEnv({ ...validEnv, GOOGLE_SERVICE_ACCOUNT_FILE: '' }).GOOGLE_SERVICE_ACCOUNT_FILE).toBeUndefined();
+  });
 });

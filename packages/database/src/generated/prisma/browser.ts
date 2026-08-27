@@ -38,6 +38,11 @@ export type Conversation = Prisma.ConversationModel
  */
 export type Message = Prisma.MessageModel
 /**
+ * Model GoogleSheetsDestination
+ * 
+ */
+export type GoogleSheetsDestination = Prisma.GoogleSheetsDestinationModel
+/**
  * Model TenantSettings
  * 
  */

@@ -55,6 +55,7 @@ export const ModelName = {
   WebhookEvent: 'WebhookEvent',
   Conversation: 'Conversation',
   Message: 'Message',
+  GoogleSheetsDestination: 'GoogleSheetsDestination',
   TenantSettings: 'TenantSettings',
   Order: 'Order',
   AuditLog: 'AuditLog',
@@ -133,6 +134,22 @@ export const MessageScalarFieldEnum = {
 } as const
 
 export type MessageScalarFieldEnum = (typeof MessageScalarFieldEnum)[keyof typeof MessageScalarFieldEnum]
+
+
+export const GoogleSheetsDestinationScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  spreadsheetId: 'spreadsheetId',
+  sheetName: 'sheetName',
+  requiredHeaders: 'requiredHeaders',
+  status: 'status',
+  lastValidatedAt: 'lastValidatedAt',
+  errorSummary: 'errorSummary',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type GoogleSheetsDestinationScalarFieldEnum = (typeof GoogleSheetsDestinationScalarFieldEnum)[keyof typeof GoogleSheetsDestinationScalarFieldEnum]
 
 
 export const TenantSettingsScalarFieldEnum = {

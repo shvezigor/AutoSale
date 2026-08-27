@@ -401,6 +401,7 @@ export const ModelName = {
   WebhookEvent: 'WebhookEvent',
   Conversation: 'Conversation',
   Message: 'Message',
+  GoogleSheetsDestination: 'GoogleSheetsDestination',
   TenantSettings: 'TenantSettings',
   Order: 'Order',
   AuditLog: 'AuditLog',
@@ -422,7 +423,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "tenant" | "webhookEvent" | "conversation" | "message" | "tenantSettings" | "order" | "auditLog" | "orderItem" | "product" | "attachment"
+    modelProps: "tenant" | "webhookEvent" | "conversation" | "message" | "googleSheetsDestination" | "tenantSettings" | "order" | "auditLog" | "orderItem" | "product" | "attachment"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -719,6 +720,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.MessageCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.MessageCountAggregateOutputType> | number
+        }
+      }
+    }
+    GoogleSheetsDestination: {
+      payload: Prisma.$GoogleSheetsDestinationPayload<ExtArgs>
+      fields: Prisma.GoogleSheetsDestinationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.GoogleSheetsDestinationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoogleSheetsDestinationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.GoogleSheetsDestinationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoogleSheetsDestinationPayload>
+        }
+        findFirst: {
+          args: Prisma.GoogleSheetsDestinationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoogleSheetsDestinationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.GoogleSheetsDestinationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoogleSheetsDestinationPayload>
+        }
+        findMany: {
+          args: Prisma.GoogleSheetsDestinationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoogleSheetsDestinationPayload>[]
+        }
+        create: {
+          args: Prisma.GoogleSheetsDestinationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoogleSheetsDestinationPayload>
+        }
+        createMany: {
+          args: Prisma.GoogleSheetsDestinationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.GoogleSheetsDestinationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoogleSheetsDestinationPayload>[]
+        }
+        delete: {
+          args: Prisma.GoogleSheetsDestinationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoogleSheetsDestinationPayload>
+        }
+        update: {
+          args: Prisma.GoogleSheetsDestinationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoogleSheetsDestinationPayload>
+        }
+        deleteMany: {
+          args: Prisma.GoogleSheetsDestinationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.GoogleSheetsDestinationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.GoogleSheetsDestinationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoogleSheetsDestinationPayload>[]
+        }
+        upsert: {
+          args: Prisma.GoogleSheetsDestinationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoogleSheetsDestinationPayload>
+        }
+        aggregate: {
+          args: Prisma.GoogleSheetsDestinationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateGoogleSheetsDestination>
+        }
+        groupBy: {
+          args: Prisma.GoogleSheetsDestinationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.GoogleSheetsDestinationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.GoogleSheetsDestinationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.GoogleSheetsDestinationCountAggregateOutputType> | number
         }
       }
     }
@@ -1261,6 +1336,22 @@ export const MessageScalarFieldEnum = {
 export type MessageScalarFieldEnum = (typeof MessageScalarFieldEnum)[keyof typeof MessageScalarFieldEnum]
 
 
+export const GoogleSheetsDestinationScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  spreadsheetId: 'spreadsheetId',
+  sheetName: 'sheetName',
+  requiredHeaders: 'requiredHeaders',
+  status: 'status',
+  lastValidatedAt: 'lastValidatedAt',
+  errorSummary: 'errorSummary',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type GoogleSheetsDestinationScalarFieldEnum = (typeof GoogleSheetsDestinationScalarFieldEnum)[keyof typeof GoogleSheetsDestinationScalarFieldEnum]
+
+
 export const TenantSettingsScalarFieldEnum = {
   id: 'id',
   tenantId: 'tenantId',
@@ -1642,6 +1733,7 @@ export type GlobalOmitConfig = {
   webhookEvent?: Prisma.WebhookEventOmit
   conversation?: Prisma.ConversationOmit
   message?: Prisma.MessageOmit
+  googleSheetsDestination?: Prisma.GoogleSheetsDestinationOmit
   tenantSettings?: Prisma.TenantSettingsOmit
   order?: Prisma.OrderOmit
   auditLog?: Prisma.AuditLogOmit
