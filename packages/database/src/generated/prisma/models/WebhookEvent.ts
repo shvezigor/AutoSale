@@ -438,10 +438,6 @@ export type WebhookEventUncheckedUpdateManyWithoutTenantNestedInput = {
   deleteMany?: Prisma.WebhookEventScalarWhereInput | Prisma.WebhookEventScalarWhereInput[]
 }
 
-export type NullableDateTimeFieldUpdateOperationsInput = {
-  set?: Date | string | null
-}
-
 export type WebhookEventCreateNestedOneWithoutMessagesInput = {
   create?: Prisma.XOR<Prisma.WebhookEventCreateWithoutMessagesInput, Prisma.WebhookEventUncheckedCreateWithoutMessagesInput>
   connectOrCreate?: Prisma.WebhookEventCreateOrConnectWithoutMessagesInput

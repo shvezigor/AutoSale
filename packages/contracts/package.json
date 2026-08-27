@@ -33,6 +33,14 @@
       "development": "./src/orders.ts",
       "import": "./dist/orders.js",
       "default": "./dist/orders.js"
+    },
+    "./auth": {
+      "react-server": "./src/auth.ts",
+      "browser": "./src/auth.ts",
+      "types": "./src/auth.ts",
+      "development": "./src/auth.ts",
+      "import": "./dist/auth.js",
+      "default": "./dist/auth.js"
     }
   },
   "scripts": {

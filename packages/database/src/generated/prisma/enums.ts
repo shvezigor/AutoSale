@@ -9,7 +9,26 @@
 * 🟢 You can import this file directly.
 */
 
+export const PlatformRole = {
+  USER: 'USER',
+  PLATFORM_ADMIN: 'PLATFORM_ADMIN'
+} as const
+
+export type PlatformRole = (typeof PlatformRole)[keyof typeof PlatformRole]
 
 
-// This file is empty because there are no enums in the schema.
-export {}
+export const MembershipRole = {
+  OWNER: 'OWNER',
+  MANAGER: 'MANAGER'
+} as const
+
+export type MembershipRole = (typeof MembershipRole)[keyof typeof MembershipRole]
+
+
+export const AccessStatus = {
+  PENDING: 'PENDING',
+  ACTIVE: 'ACTIVE',
+  BLOCKED: 'BLOCKED'
+} as const
+
+export type AccessStatus = (typeof AccessStatus)[keyof typeof AccessStatus]
