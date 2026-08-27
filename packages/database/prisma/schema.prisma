@@ -30,6 +30,7 @@ model Tenant {
   id        String         @id @default(uuid()) @db.Uuid
   key       String         @unique
   name      String
+  status    AccessStatus   @default(ACTIVE)
   createdAt DateTime       @default(now()) @map("created_at")
   events    WebhookEvent[]
   conversations Conversation[]
@@ -45,6 +46,7 @@ model Tenant {
   invitations       TenantInvitation[]
   securityAuditLogs SecurityAuditLog[]
 
+  @@index([status])
   @@map("tenants")
 }
 

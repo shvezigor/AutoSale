@@ -1884,6 +1884,7 @@ export const TenantScalarFieldEnum = {
   id: 'id',
   key: 'key',
   name: 'name',
+  status: 'status',
   createdAt: 'createdAt'
 } as const
 
@@ -2233,6 +2234,20 @@ export type ListStringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaMod
 
 
 /**
+ * Reference to a field of type 'AccessStatus'
+ */
+export type EnumAccessStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AccessStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'AccessStatus[]'
+ */
+export type ListEnumAccessStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AccessStatus[]'>
+    
+
+
+/**
  * Reference to a field of type 'DateTime'
  */
 export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
@@ -2257,20 +2272,6 @@ export type EnumPlatformRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$Pri
  * Reference to a field of type 'PlatformRole[]'
  */
 export type ListEnumPlatformRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PlatformRole[]'>
-    
-
-
-/**
- * Reference to a field of type 'AccessStatus'
- */
-export type EnumAccessStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AccessStatus'>
-    
-
-
-/**
- * Reference to a field of type 'AccessStatus[]'
- */
-export type ListEnumAccessStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AccessStatus[]'>
     
 
 

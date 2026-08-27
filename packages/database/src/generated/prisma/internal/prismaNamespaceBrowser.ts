@@ -92,6 +92,7 @@ export const TenantScalarFieldEnum = {
   id: 'id',
   key: 'key',
   name: 'name',
+  status: 'status',
   createdAt: 'createdAt'
 } as const
 

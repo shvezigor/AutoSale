@@ -21,6 +21,8 @@ describe('TriggeredOrderProcessor', () => {
       '20260826123000_conversations_messages',
       '20260826203000_ai_order_recognition',
       '20260826210000_product_catalog',
+      '20260827160000_self_hosted_auth',
+      '20260827170000_tenant_access_status',
     ];
     const pool = new pg.Pool({ connectionString });
     for (const migration of migrations) {

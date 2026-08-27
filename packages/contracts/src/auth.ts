@@ -15,6 +15,24 @@ export const loginRequestSchema = z.object({
   password: passwordSchema,
 }).strict();
 
+export const inviteMemberRequestSchema = z.object({ email: normalizedEmailSchema }).strict();
+
+export const acceptInvitationRequestSchema = z.object({
+  token: z.string().min(20),
+  name: z.string().trim().min(1).max(120),
+  password: passwordSchema,
+}).strict();
+
+export const adminTenantSummarySchema = z.object({
+  tenantId: z.string().uuid(),
+  tenantName: z.string(),
+  status: z.enum(['ACTIVE', 'BLOCKED']),
+  ownerEmail: normalizedEmailSchema.nullable(),
+  userCount: z.number().int().nonnegative(),
+  orderCount: z.number().int().nonnegative(),
+  createdAt: z.string().datetime(),
+}).strict();
+
 export const publicSessionSchema = z.object({
   userId: z.string().uuid(),
   email: normalizedEmailSchema,
@@ -35,4 +53,7 @@ export interface AuthPrincipal {
 
 export type RegisterRequest = z.infer<typeof registerRequestSchema>;
 export type LoginRequest = z.infer<typeof loginRequestSchema>;
+export type InviteMemberRequest = z.infer<typeof inviteMemberRequestSchema>;
+export type AcceptInvitationRequest = z.infer<typeof acceptInvitationRequestSchema>;
+export type AdminTenantSummary = z.infer<typeof adminTenantSummarySchema>;
 export type PublicSession = z.infer<typeof publicSessionSchema>;

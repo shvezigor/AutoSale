@@ -453,10 +453,6 @@ export type EnumPlatformRoleFieldUpdateOperationsInput = {
   set?: $Enums.PlatformRole
 }
 
-export type EnumAccessStatusFieldUpdateOperationsInput = {
-  set?: $Enums.AccessStatus
-}
-
 export type UserCreateNestedOneWithoutMembershipsInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutMembershipsInput, Prisma.UserUncheckedCreateWithoutMembershipsInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutMembershipsInput

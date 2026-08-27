@@ -28,6 +28,7 @@ export type TenantMinAggregateOutputType = {
   id: string | null
   key: string | null
   name: string | null
+  status: $Enums.AccessStatus | null
   createdAt: Date | null
 }
 
@@ -35,6 +36,7 @@ export type TenantMaxAggregateOutputType = {
   id: string | null
   key: string | null
   name: string | null
+  status: $Enums.AccessStatus | null
   createdAt: Date | null
 }
 
@@ -42,6 +44,7 @@ export type TenantCountAggregateOutputType = {
   id: number
   key: number
   name: number
+  status: number
   createdAt: number
   _all: number
 }
@@ -51,6 +54,7 @@ export type TenantMinAggregateInputType = {
   id?: true
   key?: true
   name?: true
+  status?: true
   createdAt?: true
 }
 
@@ -58,6 +62,7 @@ export type TenantMaxAggregateInputType = {
   id?: true
   key?: true
   name?: true
+  status?: true
   createdAt?: true
 }
 
@@ -65,6 +70,7 @@ export type TenantCountAggregateInputType = {
   id?: true
   key?: true
   name?: true
+  status?: true
   createdAt?: true
   _all?: true
 }
@@ -145,6 +151,7 @@ export type TenantGroupByOutputType = {
   id: string
   key: string
   name: string
+  status: $Enums.AccessStatus
   createdAt: Date
   _count: TenantCountAggregateOutputType | null
   _min: TenantMinAggregateOutputType | null
@@ -173,6 +180,7 @@ export type TenantWhereInput = {
   id?: Prisma.UuidFilter<"Tenant"> | string
   key?: Prisma.StringFilter<"Tenant"> | string
   name?: Prisma.StringFilter<"Tenant"> | string
+  status?: Prisma.EnumAccessStatusFilter<"Tenant"> | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFilter<"Tenant"> | Date | string
   events?: Prisma.WebhookEventListRelationFilter
   conversations?: Prisma.ConversationListRelationFilter
@@ -193,6 +201,7 @@ export type TenantOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   key?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   events?: Prisma.WebhookEventOrderByRelationAggregateInput
   conversations?: Prisma.ConversationOrderByRelationAggregateInput
@@ -216,6 +225,7 @@ export type TenantWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.TenantWhereInput[]
   NOT?: Prisma.TenantWhereInput | Prisma.TenantWhereInput[]
   name?: Prisma.StringFilter<"Tenant"> | string
+  status?: Prisma.EnumAccessStatusFilter<"Tenant"> | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFilter<"Tenant"> | Date | string
   events?: Prisma.WebhookEventListRelationFilter
   conversations?: Prisma.ConversationListRelationFilter
@@ -236,6 +246,7 @@ export type TenantOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   key?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.TenantCountOrderByAggregateInput
   _max?: Prisma.TenantMaxOrderByAggregateInput
@@ -249,6 +260,7 @@ export type TenantScalarWhereWithAggregatesInput = {
   id?: Prisma.UuidWithAggregatesFilter<"Tenant"> | string
   key?: Prisma.StringWithAggregatesFilter<"Tenant"> | string
   name?: Prisma.StringWithAggregatesFilter<"Tenant"> | string
+  status?: Prisma.EnumAccessStatusWithAggregatesFilter<"Tenant"> | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Tenant"> | Date | string
 }
 
@@ -256,6 +268,7 @@ export type TenantCreateInput = {
   id?: string
   key: string
   name: string
+  status?: $Enums.AccessStatus
   createdAt?: Date | string
   events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
@@ -276,6 +289,7 @@ export type TenantUncheckedCreateInput = {
   id?: string
   key: string
   name: string
+  status?: $Enums.AccessStatus
   createdAt?: Date | string
   events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
@@ -296,6 +310,7 @@ export type TenantUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   key?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
@@ -316,6 +331,7 @@ export type TenantUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   key?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
@@ -336,6 +352,7 @@ export type TenantCreateManyInput = {
   id?: string
   key: string
   name: string
+  status?: $Enums.AccessStatus
   createdAt?: Date | string
 }
 
@@ -343,6 +360,7 @@ export type TenantUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   key?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -350,6 +368,7 @@ export type TenantUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   key?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -357,6 +376,7 @@ export type TenantCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   key?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -364,6 +384,7 @@ export type TenantMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   key?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -371,6 +392,7 @@ export type TenantMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   key?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -386,6 +408,10 @@ export type TenantNullableScalarRelationFilter = {
 
 export type StringFieldUpdateOperationsInput = {
   set?: string
+}
+
+export type EnumAccessStatusFieldUpdateOperationsInput = {
+  set?: $Enums.AccessStatus
 }
 
 export type DateTimeFieldUpdateOperationsInput = {
@@ -582,6 +608,7 @@ export type TenantCreateWithoutMembershipsInput = {
   id?: string
   key: string
   name: string
+  status?: $Enums.AccessStatus
   createdAt?: Date | string
   events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
@@ -601,6 +628,7 @@ export type TenantUncheckedCreateWithoutMembershipsInput = {
   id?: string
   key: string
   name: string
+  status?: $Enums.AccessStatus
   createdAt?: Date | string
   events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
@@ -636,6 +664,7 @@ export type TenantUpdateWithoutMembershipsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   key?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
@@ -655,6 +684,7 @@ export type TenantUncheckedUpdateWithoutMembershipsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   key?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
@@ -674,6 +704,7 @@ export type TenantCreateWithoutSessionsInput = {
   id?: string
   key: string
   name: string
+  status?: $Enums.AccessStatus
   createdAt?: Date | string
   events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
@@ -693,6 +724,7 @@ export type TenantUncheckedCreateWithoutSessionsInput = {
   id?: string
   key: string
   name: string
+  status?: $Enums.AccessStatus
   createdAt?: Date | string
   events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
@@ -728,6 +760,7 @@ export type TenantUpdateWithoutSessionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   key?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
@@ -747,6 +780,7 @@ export type TenantUncheckedUpdateWithoutSessionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   key?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
@@ -766,6 +800,7 @@ export type TenantCreateWithoutInvitationsInput = {
   id?: string
   key: string
   name: string
+  status?: $Enums.AccessStatus
   createdAt?: Date | string
   events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
@@ -785,6 +820,7 @@ export type TenantUncheckedCreateWithoutInvitationsInput = {
   id?: string
   key: string
   name: string
+  status?: $Enums.AccessStatus
   createdAt?: Date | string
   events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
@@ -820,6 +856,7 @@ export type TenantUpdateWithoutInvitationsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   key?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
@@ -839,6 +876,7 @@ export type TenantUncheckedUpdateWithoutInvitationsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   key?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
@@ -858,6 +896,7 @@ export type TenantCreateWithoutSecurityAuditLogsInput = {
   id?: string
   key: string
   name: string
+  status?: $Enums.AccessStatus
   createdAt?: Date | string
   events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
@@ -877,6 +916,7 @@ export type TenantUncheckedCreateWithoutSecurityAuditLogsInput = {
   id?: string
   key: string
   name: string
+  status?: $Enums.AccessStatus
   createdAt?: Date | string
   events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
@@ -912,6 +952,7 @@ export type TenantUpdateWithoutSecurityAuditLogsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   key?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
@@ -931,6 +972,7 @@ export type TenantUncheckedUpdateWithoutSecurityAuditLogsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   key?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
@@ -950,6 +992,7 @@ export type TenantCreateWithoutEventsInput = {
   id?: string
   key: string
   name: string
+  status?: $Enums.AccessStatus
   createdAt?: Date | string
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
@@ -969,6 +1012,7 @@ export type TenantUncheckedCreateWithoutEventsInput = {
   id?: string
   key: string
   name: string
+  status?: $Enums.AccessStatus
   createdAt?: Date | string
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
@@ -1004,6 +1048,7 @@ export type TenantUpdateWithoutEventsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   key?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
@@ -1023,6 +1068,7 @@ export type TenantUncheckedUpdateWithoutEventsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   key?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
@@ -1042,6 +1088,7 @@ export type TenantCreateWithoutConversationsInput = {
   id?: string
   key: string
   name: string
+  status?: $Enums.AccessStatus
   createdAt?: Date | string
   events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
@@ -1061,6 +1108,7 @@ export type TenantUncheckedCreateWithoutConversationsInput = {
   id?: string
   key: string
   name: string
+  status?: $Enums.AccessStatus
   createdAt?: Date | string
   events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
@@ -1096,6 +1144,7 @@ export type TenantUpdateWithoutConversationsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   key?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
@@ -1115,6 +1164,7 @@ export type TenantUncheckedUpdateWithoutConversationsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   key?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
@@ -1134,6 +1184,7 @@ export type TenantCreateWithoutMessagesInput = {
   id?: string
   key: string
   name: string
+  status?: $Enums.AccessStatus
   createdAt?: Date | string
   events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
@@ -1153,6 +1204,7 @@ export type TenantUncheckedCreateWithoutMessagesInput = {
   id?: string
   key: string
   name: string
+  status?: $Enums.AccessStatus
   createdAt?: Date | string
   events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
@@ -1188,6 +1240,7 @@ export type TenantUpdateWithoutMessagesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   key?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
@@ -1207,6 +1260,7 @@ export type TenantUncheckedUpdateWithoutMessagesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   key?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
@@ -1226,6 +1280,7 @@ export type TenantCreateWithoutSheetsDestinationInput = {
   id?: string
   key: string
   name: string
+  status?: $Enums.AccessStatus
   createdAt?: Date | string
   events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
@@ -1245,6 +1300,7 @@ export type TenantUncheckedCreateWithoutSheetsDestinationInput = {
   id?: string
   key: string
   name: string
+  status?: $Enums.AccessStatus
   createdAt?: Date | string
   events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
@@ -1280,6 +1336,7 @@ export type TenantUpdateWithoutSheetsDestinationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   key?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
@@ -1299,6 +1356,7 @@ export type TenantUncheckedUpdateWithoutSheetsDestinationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   key?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
@@ -1318,6 +1376,7 @@ export type TenantCreateWithoutSettingsInput = {
   id?: string
   key: string
   name: string
+  status?: $Enums.AccessStatus
   createdAt?: Date | string
   events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
@@ -1337,6 +1396,7 @@ export type TenantUncheckedCreateWithoutSettingsInput = {
   id?: string
   key: string
   name: string
+  status?: $Enums.AccessStatus
   createdAt?: Date | string
   events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
@@ -1372,6 +1432,7 @@ export type TenantUpdateWithoutSettingsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   key?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
@@ -1391,6 +1452,7 @@ export type TenantUncheckedUpdateWithoutSettingsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   key?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
@@ -1410,6 +1472,7 @@ export type TenantCreateWithoutOrdersInput = {
   id?: string
   key: string
   name: string
+  status?: $Enums.AccessStatus
   createdAt?: Date | string
   events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
@@ -1429,6 +1492,7 @@ export type TenantUncheckedCreateWithoutOrdersInput = {
   id?: string
   key: string
   name: string
+  status?: $Enums.AccessStatus
   createdAt?: Date | string
   events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
@@ -1464,6 +1528,7 @@ export type TenantUpdateWithoutOrdersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   key?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
@@ -1483,6 +1548,7 @@ export type TenantUncheckedUpdateWithoutOrdersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   key?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
@@ -1502,6 +1568,7 @@ export type TenantCreateWithoutOrderExportsInput = {
   id?: string
   key: string
   name: string
+  status?: $Enums.AccessStatus
   createdAt?: Date | string
   events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
@@ -1521,6 +1588,7 @@ export type TenantUncheckedCreateWithoutOrderExportsInput = {
   id?: string
   key: string
   name: string
+  status?: $Enums.AccessStatus
   createdAt?: Date | string
   events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
@@ -1556,6 +1624,7 @@ export type TenantUpdateWithoutOrderExportsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   key?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
@@ -1575,6 +1644,7 @@ export type TenantUncheckedUpdateWithoutOrderExportsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   key?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
@@ -1594,6 +1664,7 @@ export type TenantCreateWithoutAuditLogsInput = {
   id?: string
   key: string
   name: string
+  status?: $Enums.AccessStatus
   createdAt?: Date | string
   events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
@@ -1613,6 +1684,7 @@ export type TenantUncheckedCreateWithoutAuditLogsInput = {
   id?: string
   key: string
   name: string
+  status?: $Enums.AccessStatus
   createdAt?: Date | string
   events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
@@ -1648,6 +1720,7 @@ export type TenantUpdateWithoutAuditLogsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   key?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
@@ -1667,6 +1740,7 @@ export type TenantUncheckedUpdateWithoutAuditLogsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   key?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
@@ -1686,6 +1760,7 @@ export type TenantCreateWithoutProductsInput = {
   id?: string
   key: string
   name: string
+  status?: $Enums.AccessStatus
   createdAt?: Date | string
   events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
@@ -1705,6 +1780,7 @@ export type TenantUncheckedCreateWithoutProductsInput = {
   id?: string
   key: string
   name: string
+  status?: $Enums.AccessStatus
   createdAt?: Date | string
   events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
@@ -1740,6 +1816,7 @@ export type TenantUpdateWithoutProductsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   key?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
@@ -1759,6 +1836,7 @@ export type TenantUncheckedUpdateWithoutProductsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   key?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
@@ -1899,6 +1977,7 @@ export type TenantSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   id?: boolean
   key?: boolean
   name?: boolean
+  status?: boolean
   createdAt?: boolean
   events?: boolean | Prisma.Tenant$eventsArgs<ExtArgs>
   conversations?: boolean | Prisma.Tenant$conversationsArgs<ExtArgs>
@@ -1920,6 +1999,7 @@ export type TenantSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   id?: boolean
   key?: boolean
   name?: boolean
+  status?: boolean
   createdAt?: boolean
 }, ExtArgs["result"]["tenant"]>
 
@@ -1927,6 +2007,7 @@ export type TenantSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   id?: boolean
   key?: boolean
   name?: boolean
+  status?: boolean
   createdAt?: boolean
 }, ExtArgs["result"]["tenant"]>
 
@@ -1934,10 +2015,11 @@ export type TenantSelectScalar = {
   id?: boolean
   key?: boolean
   name?: boolean
+  status?: boolean
   createdAt?: boolean
 }
 
-export type TenantOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "key" | "name" | "createdAt", ExtArgs["result"]["tenant"]>
+export type TenantOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "key" | "name" | "status" | "createdAt", ExtArgs["result"]["tenant"]>
 export type TenantInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   events?: boolean | Prisma.Tenant$eventsArgs<ExtArgs>
   conversations?: boolean | Prisma.Tenant$conversationsArgs<ExtArgs>
@@ -1978,6 +2060,7 @@ export type $TenantPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     id: string
     key: string
     name: string
+    status: $Enums.AccessStatus
     createdAt: Date
   }, ExtArgs["result"]["tenant"]>
   composites: {}
@@ -2418,6 +2501,7 @@ export interface TenantFieldRefs {
   readonly id: Prisma.FieldRef<"Tenant", 'String'>
   readonly key: Prisma.FieldRef<"Tenant", 'String'>
   readonly name: Prisma.FieldRef<"Tenant", 'String'>
+  readonly status: Prisma.FieldRef<"Tenant", 'AccessStatus'>
   readonly createdAt: Prisma.FieldRef<"Tenant", 'DateTime'>
 }
     

@@ -35,12 +35,13 @@ export class SessionService {
     const tokenHash = this.crypto.hashOpaqueToken(rawToken, this.pepper);
     const session = await this.prisma.session.findUnique({
       where: { tokenHash },
-      include: { user: { include: { memberships: true } } },
+      include: { tenant: { select: { status: true } }, user: { include: { memberships: true } } },
     });
     const now = this.now();
     if (!session || session.revokedAt || session.expiresAt <= now || session.user.status !== 'ACTIVE') {
       return null;
     }
+    if (session.tenantId && session.tenant?.status !== 'ACTIVE') return null;
 
     const membership = session.tenantId
       ? session.user.memberships.find((item) => item.tenantId === session.tenantId)

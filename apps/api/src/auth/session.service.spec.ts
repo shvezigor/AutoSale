@@ -12,6 +12,7 @@ describe('SessionService', () => {
       tenantId: '10000000-0000-4000-8000-000000000003',
       tokenHash: '', expiresAt: new Date('2026-09-01T00:00:00Z'),
       lastSeenAt: new Date('2026-08-27T00:00:00Z'), revokedAt: null,
+      tenant: { status: 'ACTIVE' },
       user: {
         email: 'owner@example.com', platformRole: 'USER', status: 'ACTIVE',
         memberships: [{ tenantId: '10000000-0000-4000-8000-000000000003', role: 'OWNER', status: 'ACTIVE' }],
@@ -44,5 +45,16 @@ describe('SessionService', () => {
     })) } } as unknown as PrismaClient;
     const sessions = new SessionService(prisma, new CryptoService(), 'p'.repeat(32), () => new Date('2026-08-27T12:00:00Z'));
     await expect(sessions.resolve('expired')).resolves.toBeNull();
+  });
+
+  it('rejects sessions for a blocked tenant', async () => {
+    const prisma = { session: { findUnique: vi.fn(async () => ({
+      id: 'session', userId: 'user', tenantId: 'tenant', revokedAt: null,
+      expiresAt: new Date('2026-09-01T00:00:00Z'), lastSeenAt: new Date(), tenant: { status: 'BLOCKED' },
+      user: { email: 'x@example.com', platformRole: 'USER', status: 'ACTIVE', memberships: [{ tenantId: 'tenant', role: 'OWNER', status: 'ACTIVE' }] },
+    })) } } as unknown as PrismaClient;
+    const sessions = new SessionService(prisma, new CryptoService(), 'p'.repeat(32), () => new Date('2026-08-27T12:00:00Z'));
+
+    await expect(sessions.resolve('blocked-tenant')).resolves.toBeNull();
   });
 });
