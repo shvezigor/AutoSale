@@ -28,7 +28,7 @@ export interface MetaWebhookConfig {
 }
 
 interface NormalizeQueue {
-  add(name: 'instagram.normalize', data: { eventId: string }): Promise<unknown>;
+  add(name: 'instagram.normalize', data: { eventId: string; correlationId: string }): Promise<unknown>;
 }
 
 @Controller('webhooks/meta')
@@ -72,7 +72,7 @@ export class MetaController {
     });
 
     if (!registered.duplicate) {
-      await this.queue.add('instagram.normalize', { eventId: registered.eventId });
+      await this.queue.add('instagram.normalize', { eventId: registered.eventId, correlationId: registered.eventId });
     }
 
     return { received: true };

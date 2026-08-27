@@ -34,4 +34,17 @@ describe('createWorkerHealthServer', () => {
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ status: 'ok' });
   });
+
+  it('exposes Prometheus-compatible worker metrics', async () => {
+    const server = createWorkerHealthServer();
+    servers.push(server);
+    server.listen(0, '127.0.0.1');
+    await once(server, 'listening');
+    const address = server.address();
+    if (!address || typeof address === 'string') throw new Error('Expected a TCP address');
+    const response = await fetch(`http://127.0.0.1:${address.port}/metrics`);
+    expect(response.status).toBe(200);
+    expect(response.headers.get('content-type')).toContain('text/plain');
+    expect(await response.text()).toContain('autosale_worker_info');
+  });
 });

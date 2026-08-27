@@ -92,7 +92,7 @@ describe('MetaController', () => {
       externalEventId: 'm_text_001',
       payload: fixture,
     });
-    expect(add).toHaveBeenCalledWith('instagram.normalize', { eventId: 'event-1' });
+    expect(add).toHaveBeenCalledWith('instagram.normalize', { eventId: 'event-1', correlationId: 'event-1' });
   });
 
   it('rejects an invalid signature without writing or enqueueing', async () => {
