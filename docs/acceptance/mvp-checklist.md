@@ -2,6 +2,10 @@
 
 ## Автоматизовано локально
 
+- [x] Реєстрація, login/reset, session cookie, CSRF і role guards покриті тестами.
+- [x] Власник керує запрошеннями; менеджер не бачить Team/Settings.
+- [x] Платформний адміністратор отримує лише privacy-safe агрегати.
+- [x] Bootstrap адміністратора й власника читає пароль тільки зі stdin.
 - [x] Підписаний Meta fixture приймається webhook endpoint.
 - [x] Текст і фото з’являються в одному Instagram-діалозі.
 - [x] Повторна доставка того самого Meta event створює рівно одне повідомлення.
@@ -28,3 +32,4 @@ docker compose build
 ```
 
 E2E запускається проти `E2E_BASE_URL` (типово `http://localhost`) і підписує fixtures значенням `META_APP_SECRET`. Не використовуйте production Instagram account або production Google Sheet для acceptance.
+Для захищених сценаріїв також задайте тестові `E2E_OWNER_EMAIL`, `E2E_OWNER_PASSWORD`, `E2E_ADMIN_EMAIL` та `E2E_ADMIN_PASSWORD`; деталі наведені в `docs/operations/authentication.md`.

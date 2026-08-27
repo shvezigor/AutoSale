@@ -6,13 +6,24 @@ import { expect, test, type APIRequestContext } from '@playwright/test';
 
 const appSecret = process.env.META_APP_SECRET ?? 'replace-with-meta-app-secret';
 
-test('manager opens an Instagram conversation with a photo', async ({ page, request }) => {
-  await deliverFixture(request, 'text-message.json');
-  await deliverFixture(request, 'image-message.json');
+test.beforeEach(async ({ page }) => {
+  const email = process.env.E2E_OWNER_EMAIL;
+  const password = process.env.E2E_OWNER_PASSWORD;
+  test.skip(!email || !password, 'E2E owner credentials are not configured');
+  await page.goto('/login');
+  await page.getByLabel('Email').fill(email!);
+  await page.getByLabel('Пароль').fill(password!);
+  await page.getByRole('button', { name: 'Увійти' }).click();
+  await expect(page).not.toHaveURL(/\/login/);
+});
+
+test('manager opens an Instagram conversation with a photo', async ({ page }) => {
+  await deliverFixture(page.request, 'text-message.json');
+  await deliverFixture(page.request, 'image-message.json');
 
   await expect
     .poll(async () => {
-      const response = await request.get('/api/conversations?limit=20');
+      const response = await page.request.get('/api/conversations?limit=20');
       const body = (await response.json()) as { items?: unknown[] };
       return body.items?.length ?? 0;
     })
@@ -24,7 +35,7 @@ test('manager opens an Instagram conversation with a photo', async ({ page, requ
   await expect(page.getByRole('img', { name: /вкладення з Instagram/i })).toBeVisible();
 });
 
-test('replayed Meta webhook creates one normalized message', async ({ request }) => {
+test('replayed Meta webhook creates one normalized message', async ({ page }) => {
   const uniqueId = `m_replay_${Date.now()}`;
   const marker = `Replay acceptance ${uniqueId}`;
   const payload = Buffer.from(JSON.stringify({
@@ -41,10 +52,10 @@ test('replayed Meta webhook creates one normalized message', async ({ request })
     }],
   }));
 
-  await deliverBody(request, payload);
-  await deliverBody(request, payload);
+  await deliverBody(page.request, payload);
+  await deliverBody(page.request, payload);
 
-  await expect.poll(async () => countMessagesContaining(request, marker)).toBe(1);
+  await expect.poll(async () => countMessagesContaining(page.request, marker)).toBe(1);
 });
 
 test('manager opens an AI-created order and sees its Sheets state', async ({ page }) => {
