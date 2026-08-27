@@ -11,6 +11,7 @@ export function OrderReviewPanel({ initialOrder }: { initialOrder: ManagerOrder 
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [sheetsExport, setSheetsExport] = useState(initialOrder.sheetsExport);
   const unresolved = order.validationIssues.length > 0 || draft.items.length === 0 || draft.items.some((item) => !item.catalogId || item.quantity < 1);
   const final = ['APPROVED', 'AUTO_APPROVED', 'CANCELLED'].includes(order.status);
 
@@ -34,6 +35,16 @@ export function OrderReviewPanel({ initialOrder }: { initialOrder: ManagerOrder 
     finally { setPending(false); }
   }
 
+  async function retrySheetsExport() {
+    setPending(true); setError(null);
+    try {
+      const response = await fetch(`/api/orders/${order.id}/sheets-export/retry`, { method: 'POST' });
+      if (!response.ok) throw new Error('Не вдалося повторити синхронізацію');
+      setSheetsExport(await response.json() as NonNullable<ManagerOrder['sheetsExport']>);
+    } catch (reason) { setError(reason instanceof Error ? reason.message : 'Сталася помилка'); }
+    finally { setPending(false); }
+  }
+
   const changeItem = (id: string, values: Partial<ManagerOrder['items'][number]>) => setDraft({ ...draft, items: draft.items.map((item) => item.id === id ? { ...item, ...values } : item) });
 
   return <section className="review-panel" aria-labelledby="order-heading">
@@ -42,8 +53,14 @@ export function OrderReviewPanel({ initialOrder }: { initialOrder: ManagerOrder 
     <EditableFields title="Клієнт" rows={[['Ім’я', draft.customer.name, (value) => setDraft({ ...draft, customer: { ...draft.customer, name: value } })], ['Телефон', draft.customer.phone, (value) => setDraft({ ...draft, customer: { ...draft.customer, phone: value } })]]} />
     <EditableFields title="Доставка" rows={[['Місто', draft.delivery.city, (value) => setDraft({ ...draft, delivery: { ...draft.delivery, city: value } })], ['Відділення', draft.delivery.novaPoshtaBranch, (value) => setDraft({ ...draft, delivery: { ...draft.delivery, novaPoshtaBranch: value } })]]} />
     <section className="review-section"><h2>Товари</h2>{draft.items.map((item, index) => <article className="review-item" data-low-confidence={item.confidence < 0.9} key={item.id}><div className="review-item-head"><label><span className="sr-only">Товар {index + 1}</span><select value={item.catalogId ?? ''} onChange={(event) => changeItem(item.id, { catalogId: event.target.value || null, productName: draft.catalogueCandidates.find((candidate) => candidate.sku === event.target.value)?.name ?? null })}><option value="">Оберіть товар</option>{draft.catalogueCandidates.map((candidate) => <option key={candidate.sku} value={candidate.sku}>{candidate.sku} — {candidate.name}</option>)}</select></label><b>{Math.round(item.confidence * 100)}%</b></div><div className="item-edit-grid"><label>Розмір<input value={item.size ?? ''} onChange={(event) => changeItem(item.id, { size: event.target.value || null })} /></label><label>Колір<input value={item.color ?? ''} onChange={(event) => changeItem(item.id, { color: event.target.value || null })} /></label><label>Кількість<input min="1" type="number" value={item.quantity} onChange={(event) => changeItem(item.id, { quantity: Number(event.target.value) })} /></label></div></article>)}</section>
+    {sheetsExport && <SheetsExportState value={sheetsExport} pending={pending} retry={() => void retrySheetsExport()} />}
     <div className="review-actions"><button className="secondary" disabled={pending || final} onClick={() => void save()} type="button">Зберегти зміни</button>{saved && <p className="save-success">Зміни збережено</p>}<button disabled={pending || unresolved || final} onClick={() => void transition('approve')} type="button">Підтвердити</button><button className="secondary" disabled={pending || final} onClick={() => void transition('cancel')} type="button">Відхилити</button>{error && <p role="alert">{error}</p>}</div>
   </section>;
+}
+
+function SheetsExportState({ value, pending, retry }: { value: NonNullable<ManagerOrder['sheetsExport']>; pending: boolean; retry: () => void }) {
+  const title = value.status === 'SUCCEEDED' ? 'Синхронізовано з Google Sheets' : value.status === 'FAILED' ? 'Помилка синхронізації' : value.status === 'PROCESSING' ? 'Синхронізація виконується' : 'Очікує синхронізації';
+  return <section className={`sheets-export-state export-${value.status.toLowerCase()}`} aria-live="polite"><div><h2>{title}</h2>{value.rowNumber && <span>Рядок {value.rowNumber}</span>}{value.errorSummary && <p>{value.errorSummary}</p>}</div>{value.retryAllowed && <button className="secondary" disabled={pending} onClick={retry} type="button">Повторити синхронізацію</button>}</section>;
 }
 
 function EditableFields({ title, rows }: { title: string; rows: Array<[string, string | null, (value: string | null) => void]> }) {

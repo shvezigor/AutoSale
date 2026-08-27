@@ -16,6 +16,7 @@ const order: ManagerOrder = {
   items: [{ id: 'item-1', catalogId: 'UB-038-BLK', productName: 'Кросівки Urban Black', originalText: 'чорна модель 38', quantity: 1, color: 'Чорний', size: '38', confidence: 0.82 }],
   catalogueCandidates: [{ sku: 'UB-038-BLK', name: 'Кросівки Urban Black' }],
   createdAt: '2026-08-26T12:00:00.000Z',
+  sheetsExport: null,
 };
 
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
@@ -45,5 +46,22 @@ describe('OrderReviewPanel', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Зберегти зміни' }));
     await waitFor(() => expect(screen.getByText('Зміни збережено')).toBeInTheDocument());
     expect(fetchMock).toHaveBeenCalledWith(`/api/orders/${order.id}`, expect.objectContaining({ method: 'PATCH' }));
+  });
+
+  it('shows a successful Google Sheets synchronization with its row number', () => {
+    render(<OrderReviewPanel initialOrder={{ ...order, status: 'APPROVED', sheetsExport: { status: 'SUCCEEDED', attempts: 1, rowNumber: 8, lastAttemptAt: '2026-08-27T08:00:00.000Z', lastSyncedAt: '2026-08-27T08:00:01.000Z', errorSummary: null, retryAllowed: false } }} />);
+    expect(screen.getByText('Синхронізовано з Google Sheets')).toBeInTheDocument();
+    expect(screen.getByText('Рядок 8')).toBeInTheDocument();
+  });
+
+  it('retries a failed recoverable export and changes its visible state to pending', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ status: 'PENDING', attempts: 2, rowNumber: null, lastAttemptAt: '2026-08-27T08:00:00.000Z', lastSyncedAt: null, errorSummary: null, retryAllowed: false }) });
+    vi.stubGlobal('fetch', fetchMock);
+    render(<OrderReviewPanel initialOrder={{ ...order, status: 'APPROVED', sheetsExport: { status: 'FAILED', attempts: 1, rowNumber: null, lastAttemptAt: '2026-08-27T08:00:00.000Z', lastSyncedAt: null, errorSummary: 'Google Sheets API returned HTTP 503', retryAllowed: true } }} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Повторити синхронізацію' }));
+
+    await waitFor(() => expect(screen.getByText('Очікує синхронізації')).toBeInTheDocument());
+    expect(fetchMock).toHaveBeenCalledWith(`/api/orders/${order.id}/sheets-export/retry`, expect.objectContaining({ method: 'POST' }));
   });
 });

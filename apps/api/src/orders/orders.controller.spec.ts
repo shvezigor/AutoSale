@@ -29,6 +29,7 @@ describe('OrdersController', () => {
   const approve = vi.fn();
   const cancel = vi.fn();
   const update = vi.fn();
+  const retrySheetsExport = vi.fn();
 
   beforeEach(async () => {
     list.mockReset().mockResolvedValue({ items: [order] });
@@ -36,9 +37,10 @@ describe('OrdersController', () => {
     approve.mockReset().mockResolvedValue({ ...order, status: 'APPROVED' });
     cancel.mockReset().mockResolvedValue({ ...order, status: 'CANCELLED' });
     update.mockReset().mockResolvedValue({ ...order, customer: { ...order.customer, phone: '+380501112233' } });
+    retrySheetsExport.mockReset().mockResolvedValue({ status: 'PENDING' });
     const moduleRef = await Test.createTestingModule({
       controllers: [OrdersController],
-      providers: [{ provide: OrdersService, useValue: { list, detail, approve, cancel, update } }],
+      providers: [{ provide: OrdersService, useValue: { list, detail, approve, cancel, update, retrySheetsExport } }],
     }).compile();
     app = moduleRef.createNestApplication();
     await app.init();
@@ -76,5 +78,10 @@ describe('OrdersController', () => {
   it('updates corrected fields with the manager actor', async () => {
     await request(app.getHttpServer()).patch(`/api/orders/${orderId}`).send({ actor: 'Андрій', customer: { phone: '+380501112233' } }).expect(200);
     expect(update).toHaveBeenCalledWith(orderId, 'Андрій', { customer: { phone: '+380501112233' } });
+  });
+
+  it('requests a safe retry for the order export', async () => {
+    await request(app.getHttpServer()).post(`/api/orders/${orderId}/sheets-export/retry`).expect(201, { status: 'PENDING' });
+    expect(retrySheetsExport).toHaveBeenCalledWith(orderId);
   });
 });
