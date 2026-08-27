@@ -23,6 +23,7 @@ export const apiEnvSchema = z.object({
   SMTP_PORT: z.coerce.number().int().positive().default(587),
   SMTP_USER: z.preprocess((value) => value === '' ? undefined : value, z.string().min(1).optional()),
   SMTP_PASSWORD: z.preprocess((value) => value === '' ? undefined : value, z.string().min(1).optional()),
+  SMTP_FROM: z.preprocess((value) => value === '' ? undefined : value, z.string().min(3).optional()),
 });
 
 export type ApiEnv = z.infer<typeof apiEnvSchema>;

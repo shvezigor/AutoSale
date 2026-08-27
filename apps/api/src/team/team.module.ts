@@ -3,14 +3,14 @@ import { createPrismaClient } from '@autosale/database';
 import { DynamicModule, Module } from '@nestjs/common';
 
 import { CryptoService } from '../auth/crypto.service.js';
-import { DevelopmentEmailDelivery, UnavailableEmailDelivery } from '../auth/email-delivery.js';
+import { createEmailDelivery } from '../auth/email-delivery.js';
 import { TeamController } from './team.controller.js';
 import { TeamService } from './team.service.js';
 
 @Module({})
 export class TeamModule {
   static register(env: ApiEnv): DynamicModule {
-    const email = env.NODE_ENV === 'production' ? new UnavailableEmailDelivery() : new DevelopmentEmailDelivery();
+    const email = createEmailDelivery(env);
     return {
       module: TeamModule,
       controllers: [TeamController],
