@@ -43,6 +43,16 @@ export class OrdersService {
     return this.transition(id, actor, 'CANCELLED', 'ORDER_CANCELLED');
   }
 
+  async retrySheetsExport(id: string): Promise<NonNullable<ManagerOrder['sheetsExport']>> {
+    await this.find(id);
+    const record = await this.prisma.orderExport.findFirst({ where: { orderId: id, tenantId: this.tenantId }, include: { destination: { select: { status: true } } } });
+    if (!record) throw new NotFoundException('Google Sheets export not found');
+    if (record.destination.status !== 'ACTIVE') throw new BadRequestException('Google Sheets destination must be active before retry');
+    if (record.status !== 'FAILED') throw new BadRequestException('Only failed exports can be retried');
+    const updated = await this.prisma.orderExport.update({ where: { id: record.id }, data: { status: 'PENDING', errorSummary: null } });
+    return this.mapExport(updated, true);
+  }
+
   async update(id: string, actor: string, input: ManagerOrderUpdate): Promise<ManagerOrder> {
     const current = await this.find(id);
     const products = await this.productNames();
@@ -96,6 +106,7 @@ export class OrdersService {
   private readonly include = {
     conversation: { select: { displayName: true, channel: true } },
     items: { orderBy: { createdAt: 'asc' as const } },
+    exports: { orderBy: { createdAt: 'desc' as const }, take: 1, include: { destination: { select: { status: true } } } },
   };
 
   private async productNames(): Promise<Map<string, string>> {
@@ -117,6 +128,15 @@ export class OrdersService {
       items: row.items.map((item) => ({ ...item, productName: item.catalogId ? products.get(item.catalogId) ?? null : null })),
       catalogueCandidates: [...products].map(([sku, name]) => ({ sku, name })),
       createdAt: row.createdAt.toISOString(),
+      sheetsExport: row.exports[0] ? this.mapExport(row.exports[0], row.exports[0].destination.status === 'ACTIVE') : null,
+    };
+  }
+
+  private mapExport(row: { status: string; attempts: number; rowNumber: number | null; lastAttemptAt: Date | null; lastSyncedAt: Date | null; errorSummary: string | null }, destinationActive: boolean): NonNullable<ManagerOrder['sheetsExport']> {
+    return {
+      status: row.status as NonNullable<ManagerOrder['sheetsExport']>['status'], attempts: row.attempts, rowNumber: row.rowNumber,
+      lastAttemptAt: row.lastAttemptAt?.toISOString() ?? null, lastSyncedAt: row.lastSyncedAt?.toISOString() ?? null,
+      errorSummary: row.errorSummary, retryAllowed: row.status === 'FAILED' && destinationActive,
     };
   }
 }

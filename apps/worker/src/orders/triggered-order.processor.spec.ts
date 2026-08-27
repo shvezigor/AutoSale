@@ -125,9 +125,12 @@ describe('TriggeredOrderProcessor', () => {
         outputTokens: 90,
       },
     });
+    const telemetry = vi.fn();
     const processor = new TriggeredOrderProcessor(
       prisma,
       new OrderRecognitionService({ recognize }),
+      undefined,
+      telemetry,
     );
 
     const first = await processor.processIfTriggered(trigger.id);
@@ -145,5 +148,6 @@ describe('TriggeredOrderProcessor', () => {
       items: [{ catalogId: 'SKU-1', quantity: 1, size: 'M' }],
     });
     expect(recognize).toHaveBeenCalledTimes(1);
+    expect(telemetry).toHaveBeenCalledWith('ai_order_recognition_completed', expect.objectContaining({ orderId: first!.id, result: 'AUTO_APPROVED' }));
   });
 });

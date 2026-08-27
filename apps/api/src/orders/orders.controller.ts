@@ -30,6 +30,10 @@ export class OrdersController {
     return this.orders.cancel(id, this.actor(body));
   }
 
+  @Post(':id/sheets-export/retry') retrySheetsExport(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
+    return this.orders.retrySheetsExport(id);
+  }
+
   @Patch(':id') update(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string, @Body() body: unknown) {
     const parsed = updateSchema.safeParse(body);
     if (!parsed.success) throw new BadRequestException('Invalid order correction');

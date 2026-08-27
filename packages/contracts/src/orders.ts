@@ -21,6 +21,15 @@ export interface ManagerOrder {
   }>;
   catalogueCandidates: Array<{ sku: string; name: string }>;
   createdAt: string;
+  sheetsExport: {
+    status: 'PENDING' | 'PROCESSING' | 'SUCCEEDED' | 'FAILED';
+    attempts: number;
+    rowNumber: number | null;
+    lastAttemptAt: string | null;
+    lastSyncedAt: string | null;
+    errorSummary: string | null;
+    retryAllowed: boolean;
+  } | null;
 }
 
 export interface ManagerOrderUpdate {

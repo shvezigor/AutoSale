@@ -2,6 +2,7 @@ import { parseWorkerEnv } from '@autosale/config/worker-env';
 import { createPrismaClient } from '@autosale/database';
 import { createGoogleSheetsAdapter, S3ObjectStorage } from '@autosale/integrations';
 import { Worker } from 'bullmq';
+import { metrics, StructuredLogger } from '@autosale/observability';
 
 import { createWorkerHealthServer } from './health-server.js';
 import { InstagramProcessor } from './instagram/instagram.processor.js';
@@ -13,6 +14,7 @@ import { GoogleSheetsSyncProcessor } from './google-sheets/google-sheets-sync.pr
 
 async function bootstrap(): Promise<void> {
   const env = parseWorkerEnv(process.env);
+  const logger = new StructuredLogger('worker');
   const server = createWorkerHealthServer();
   const prisma = createPrismaClient(env.DATABASE_URL);
   const storage = new S3ObjectStorage({
@@ -37,6 +39,11 @@ async function bootstrap(): Promise<void> {
         update: { status: 'PENDING', errorSummary: null },
       });
     },
+    (event, fields) => {
+      const result = fields.result === 'failure' ? 'failure' : 'success';
+      metrics.increment('autosale_operations_total', { operation: 'ai_order_recognition', result });
+      if (result === 'failure') logger.warn(event, fields); else logger.info(event, fields);
+    },
   );
   const processor = new InstagramProcessor(
     prisma,
@@ -48,7 +55,19 @@ async function bootstrap(): Promise<void> {
     'instagram',
     async (job) => {
       if (job.name !== 'instagram.normalize' || typeof job.data?.eventId !== 'string') return;
-      await processor.process(job.data.eventId);
+      const correlationId = typeof job.data.correlationId === 'string' ? job.data.correlationId : job.data.eventId;
+      const started = performance.now();
+      try {
+        await processor.process(job.data.eventId);
+        metrics.increment('autosale_operations_total', { operation: 'instagram_normalize', result: 'success' });
+        logger.info('instagram_normalize_completed', { correlationId, eventId: job.data.eventId, jobId: job.id });
+      } catch (error) {
+        metrics.increment('autosale_operations_total', { operation: 'instagram_normalize', result: 'failure' });
+        logger.error('instagram_normalize_failed', { correlationId, eventId: job.data.eventId, jobId: job.id, errorCode: error instanceof Error ? error.name : 'UNKNOWN' });
+        throw error;
+      } finally {
+        metrics.observe('autosale_operation_duration_seconds', (performance.now() - started) / 1000, { operation: 'instagram_normalize' });
+      }
     },
     {
       connection: {
@@ -66,13 +85,28 @@ async function bootstrap(): Promise<void> {
     : undefined;
   let polling = false;
   const pollExports = async (): Promise<void> => {
-    if (!sheetsProcessor || polling) return;
+    if (polling) return;
     polling = true;
     try {
-      const pending = await prisma.orderExport.findMany({ where: { status: 'PENDING' }, orderBy: { createdAt: 'asc' }, take: 10 });
+      const pending = await prisma.orderExport.findMany({ where: { status: 'PENDING' }, orderBy: { createdAt: 'asc' }, take: 10, include: { order: { select: { triggerMessage: { select: { rawEventId: true } } } } } });
+      metrics.set('autosale_queue_backlog', pending.length, { queue: 'google_sheets' });
+      if (!sheetsProcessor) return;
       for (const record of pending) {
         const claimed = await prisma.orderExport.updateMany({ where: { id: record.id, status: 'PENDING' }, data: { status: 'PROCESSING' } });
-        if (claimed.count === 1) await sheetsProcessor.process(record.id).catch(() => undefined);
+        if (claimed.count === 1) {
+          const correlationId = record.order.triggerMessage.rawEventId;
+          const started = performance.now();
+          try {
+            await sheetsProcessor.process(record.id);
+            metrics.increment('autosale_operations_total', { operation: 'sheets_export', result: 'success' });
+            logger.info('sheets_export_completed', { correlationId, orderId: record.orderId, exportId: record.id });
+          } catch (error) {
+            metrics.increment('autosale_operations_total', { operation: 'sheets_export', result: 'failure' });
+            logger.warn('sheets_export_failed', { correlationId, orderId: record.orderId, exportId: record.id, errorCode: error instanceof Error ? error.name : 'UNKNOWN' });
+          } finally {
+            metrics.observe('autosale_operation_duration_seconds', (performance.now() - started) / 1000, { operation: 'sheets_export' });
+          }
+        }
       }
     } finally {
       polling = false;
@@ -80,6 +114,7 @@ async function bootstrap(): Promise<void> {
   };
   const sheetsTimer = setInterval(() => void pollExports(), 5_000);
   void pollExports();
+  logger.info('service_started', { correlationId: 'system:startup', healthPort: env.HEALTH_PORT });
 
   server.listen(env.HEALTH_PORT, '0.0.0.0');
 

@@ -9,6 +9,7 @@ export class TriggeredOrderProcessor {
     private readonly prisma: PrismaClient,
     private readonly recognition: OrderRecognitionService,
     private readonly scheduleExport?: (orderId: string, tenantId: string) => Promise<void>,
+    private readonly telemetry?: (event: string, fields: { correlationId: string; orderId: string; result: string }) => void,
   ) {}
 
   async processIfTriggered(
@@ -104,9 +105,11 @@ export class TriggeredOrderProcessor {
       if (autoApproved) {
         await this.scheduleExport?.(order.id, trigger.tenantId);
       }
+      this.telemetry?.('ai_order_recognition_completed', { correlationId: trigger.rawEventId, orderId: order.id, result: result.status });
       return updated;
     } catch (error) {
       await this.prisma.order.update({ where: { id: order.id }, data: { status: 'AI_FAILED' } });
+      this.telemetry?.('ai_order_recognition_failed', { correlationId: trigger.rawEventId, orderId: order.id, result: 'failure' });
       throw error;
     }
   }
