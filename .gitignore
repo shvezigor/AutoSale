@@ -4,6 +4,7 @@ node_modules/
 **/dist/
 **/.next/
 .env
+secrets/
 coverage/
 test-results/
 playwright-report/

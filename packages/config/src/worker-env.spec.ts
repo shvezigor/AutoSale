@@ -11,6 +11,8 @@ const validEnv = {
   S3_BUCKET: 'autosale-media',
   S3_ACCESS_KEY_ID: 'minio-access-key',
   S3_SECRET_ACCESS_KEY: 'minio-secret-key',
+  OPENAI_API_KEY: 'sk-test-not-a-real-key-value',
+  OPENAI_MODEL: 'gpt-5.4-mini',
 };
 
 describe('parseWorkerEnv', () => {
@@ -20,6 +22,12 @@ describe('parseWorkerEnv', () => {
 
   it('rejects a missing object-storage bucket', () => {
     const { S3_BUCKET: _omitted, ...incompleteEnv } = validEnv;
+
+    expect(() => parseWorkerEnv(incompleteEnv)).toThrow();
+  });
+
+  it('rejects a missing OpenAI API key', () => {
+    const { OPENAI_API_KEY: _omitted, ...incompleteEnv } = validEnv;
 
     expect(() => parseWorkerEnv(incompleteEnv)).toThrow();
   });

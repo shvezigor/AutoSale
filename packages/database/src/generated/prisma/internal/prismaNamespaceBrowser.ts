@@ -55,6 +55,13 @@ export const ModelName = {
   WebhookEvent: 'WebhookEvent',
   Conversation: 'Conversation',
   Message: 'Message',
+  GoogleSheetsDestination: 'GoogleSheetsDestination',
+  TenantSettings: 'TenantSettings',
+  Order: 'Order',
+  OrderExport: 'OrderExport',
+  AuditLog: 'AuditLog',
+  OrderItem: 'OrderItem',
+  Product: 'Product',
   Attachment: 'Attachment'
 } as const
 
@@ -130,6 +137,120 @@ export const MessageScalarFieldEnum = {
 export type MessageScalarFieldEnum = (typeof MessageScalarFieldEnum)[keyof typeof MessageScalarFieldEnum]
 
 
+export const GoogleSheetsDestinationScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  spreadsheetId: 'spreadsheetId',
+  sheetName: 'sheetName',
+  requiredHeaders: 'requiredHeaders',
+  status: 'status',
+  lastValidatedAt: 'lastValidatedAt',
+  errorSummary: 'errorSummary',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type GoogleSheetsDestinationScalarFieldEnum = (typeof GoogleSheetsDestinationScalarFieldEnum)[keyof typeof GoogleSheetsDestinationScalarFieldEnum]
+
+
+export const TenantSettingsScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  approvalMode: 'approvalMode',
+  autoApprovalThreshold: 'autoApprovalThreshold',
+  promptVersion: 'promptVersion',
+  triggerPhrases: 'triggerPhrases',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TenantSettingsScalarFieldEnum = (typeof TenantSettingsScalarFieldEnum)[keyof typeof TenantSettingsScalarFieldEnum]
+
+
+export const OrderScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  conversationId: 'conversationId',
+  triggerMessageId: 'triggerMessageId',
+  status: 'status',
+  extraction: 'extraction',
+  validationIssues: 'validationIssues',
+  overallConfidence: 'overallConfidence',
+  aiResponseId: 'aiResponseId',
+  aiModel: 'aiModel',
+  promptVersion: 'promptVersion',
+  inputTokens: 'inputTokens',
+  outputTokens: 'outputTokens',
+  approvedAt: 'approvedAt',
+  approvedBy: 'approvedBy',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type OrderScalarFieldEnum = (typeof OrderScalarFieldEnum)[keyof typeof OrderScalarFieldEnum]
+
+
+export const OrderExportScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  orderId: 'orderId',
+  destinationId: 'destinationId',
+  status: 'status',
+  attempts: 'attempts',
+  rowNumber: 'rowNumber',
+  lastAttemptAt: 'lastAttemptAt',
+  lastSyncedAt: 'lastSyncedAt',
+  errorSummary: 'errorSummary',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type OrderExportScalarFieldEnum = (typeof OrderExportScalarFieldEnum)[keyof typeof OrderExportScalarFieldEnum]
+
+
+export const AuditLogScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  orderId: 'orderId',
+  actor: 'actor',
+  action: 'action',
+  changes: 'changes',
+  createdAt: 'createdAt'
+} as const
+
+export type AuditLogScalarFieldEnum = (typeof AuditLogScalarFieldEnum)[keyof typeof AuditLogScalarFieldEnum]
+
+
+export const OrderItemScalarFieldEnum = {
+  id: 'id',
+  orderId: 'orderId',
+  catalogId: 'catalogId',
+  originalText: 'originalText',
+  quantity: 'quantity',
+  color: 'color',
+  size: 'size',
+  confidence: 'confidence',
+  createdAt: 'createdAt'
+} as const
+
+export type OrderItemScalarFieldEnum = (typeof OrderItemScalarFieldEnum)[keyof typeof OrderItemScalarFieldEnum]
+
+
+export const ProductScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  sku: 'sku',
+  name: 'name',
+  aliases: 'aliases',
+  imageUrl: 'imageUrl',
+  active: 'active',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProductScalarFieldEnum = (typeof ProductScalarFieldEnum)[keyof typeof ProductScalarFieldEnum]
+
+
 export const AttachmentScalarFieldEnum = {
   id: 'id',
   messageId: 'messageId',
@@ -159,6 +280,14 @@ export const JsonNullValueInput = {
 } as const
 
 export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
+
+
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
 
 
 export const QueryMode = {

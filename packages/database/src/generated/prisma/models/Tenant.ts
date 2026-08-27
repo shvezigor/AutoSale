@@ -177,6 +177,12 @@ export type TenantWhereInput = {
   events?: Prisma.WebhookEventListRelationFilter
   conversations?: Prisma.ConversationListRelationFilter
   messages?: Prisma.MessageListRelationFilter
+  settings?: Prisma.XOR<Prisma.TenantSettingsNullableScalarRelationFilter, Prisma.TenantSettingsWhereInput> | null
+  orders?: Prisma.OrderListRelationFilter
+  products?: Prisma.ProductListRelationFilter
+  auditLogs?: Prisma.AuditLogListRelationFilter
+  sheetsDestination?: Prisma.XOR<Prisma.GoogleSheetsDestinationNullableScalarRelationFilter, Prisma.GoogleSheetsDestinationWhereInput> | null
+  orderExports?: Prisma.OrderExportListRelationFilter
 }
 
 export type TenantOrderByWithRelationInput = {
@@ -187,6 +193,12 @@ export type TenantOrderByWithRelationInput = {
   events?: Prisma.WebhookEventOrderByRelationAggregateInput
   conversations?: Prisma.ConversationOrderByRelationAggregateInput
   messages?: Prisma.MessageOrderByRelationAggregateInput
+  settings?: Prisma.TenantSettingsOrderByWithRelationInput
+  orders?: Prisma.OrderOrderByRelationAggregateInput
+  products?: Prisma.ProductOrderByRelationAggregateInput
+  auditLogs?: Prisma.AuditLogOrderByRelationAggregateInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationOrderByWithRelationInput
+  orderExports?: Prisma.OrderExportOrderByRelationAggregateInput
 }
 
 export type TenantWhereUniqueInput = Prisma.AtLeast<{
@@ -200,6 +212,12 @@ export type TenantWhereUniqueInput = Prisma.AtLeast<{
   events?: Prisma.WebhookEventListRelationFilter
   conversations?: Prisma.ConversationListRelationFilter
   messages?: Prisma.MessageListRelationFilter
+  settings?: Prisma.XOR<Prisma.TenantSettingsNullableScalarRelationFilter, Prisma.TenantSettingsWhereInput> | null
+  orders?: Prisma.OrderListRelationFilter
+  products?: Prisma.ProductListRelationFilter
+  auditLogs?: Prisma.AuditLogListRelationFilter
+  sheetsDestination?: Prisma.XOR<Prisma.GoogleSheetsDestinationNullableScalarRelationFilter, Prisma.GoogleSheetsDestinationWhereInput> | null
+  orderExports?: Prisma.OrderExportListRelationFilter
 }, "id" | "key">
 
 export type TenantOrderByWithAggregationInput = {
@@ -230,6 +248,12 @@ export type TenantCreateInput = {
   events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
+  settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
+  products?: Prisma.ProductCreateNestedManyWithoutTenantInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationCreateNestedOneWithoutTenantInput
+  orderExports?: Prisma.OrderExportCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateInput = {
@@ -240,6 +264,12 @@ export type TenantUncheckedCreateInput = {
   events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
+  settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedCreateNestedOneWithoutTenantInput
+  orderExports?: Prisma.OrderExportUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUpdateInput = {
@@ -250,6 +280,12 @@ export type TenantUpdateInput = {
   events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
+  settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
+  products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUpdateOneWithoutTenantNestedInput
+  orderExports?: Prisma.OrderExportUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateInput = {
@@ -260,6 +296,12 @@ export type TenantUncheckedUpdateInput = {
   events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
+  settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedUpdateOneWithoutTenantNestedInput
+  orderExports?: Prisma.OrderExportUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateManyInput = {
@@ -359,6 +401,90 @@ export type TenantUpdateOneRequiredWithoutMessagesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.TenantUpdateToOneWithWhereWithoutMessagesInput, Prisma.TenantUpdateWithoutMessagesInput>, Prisma.TenantUncheckedUpdateWithoutMessagesInput>
 }
 
+export type TenantCreateNestedOneWithoutSheetsDestinationInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutSheetsDestinationInput, Prisma.TenantUncheckedCreateWithoutSheetsDestinationInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutSheetsDestinationInput
+  connect?: Prisma.TenantWhereUniqueInput
+}
+
+export type TenantUpdateOneRequiredWithoutSheetsDestinationNestedInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutSheetsDestinationInput, Prisma.TenantUncheckedCreateWithoutSheetsDestinationInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutSheetsDestinationInput
+  upsert?: Prisma.TenantUpsertWithoutSheetsDestinationInput
+  connect?: Prisma.TenantWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TenantUpdateToOneWithWhereWithoutSheetsDestinationInput, Prisma.TenantUpdateWithoutSheetsDestinationInput>, Prisma.TenantUncheckedUpdateWithoutSheetsDestinationInput>
+}
+
+export type TenantCreateNestedOneWithoutSettingsInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutSettingsInput, Prisma.TenantUncheckedCreateWithoutSettingsInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutSettingsInput
+  connect?: Prisma.TenantWhereUniqueInput
+}
+
+export type TenantUpdateOneRequiredWithoutSettingsNestedInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutSettingsInput, Prisma.TenantUncheckedCreateWithoutSettingsInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutSettingsInput
+  upsert?: Prisma.TenantUpsertWithoutSettingsInput
+  connect?: Prisma.TenantWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TenantUpdateToOneWithWhereWithoutSettingsInput, Prisma.TenantUpdateWithoutSettingsInput>, Prisma.TenantUncheckedUpdateWithoutSettingsInput>
+}
+
+export type TenantCreateNestedOneWithoutOrdersInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutOrdersInput, Prisma.TenantUncheckedCreateWithoutOrdersInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutOrdersInput
+  connect?: Prisma.TenantWhereUniqueInput
+}
+
+export type TenantUpdateOneRequiredWithoutOrdersNestedInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutOrdersInput, Prisma.TenantUncheckedCreateWithoutOrdersInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutOrdersInput
+  upsert?: Prisma.TenantUpsertWithoutOrdersInput
+  connect?: Prisma.TenantWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TenantUpdateToOneWithWhereWithoutOrdersInput, Prisma.TenantUpdateWithoutOrdersInput>, Prisma.TenantUncheckedUpdateWithoutOrdersInput>
+}
+
+export type TenantCreateNestedOneWithoutOrderExportsInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutOrderExportsInput, Prisma.TenantUncheckedCreateWithoutOrderExportsInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutOrderExportsInput
+  connect?: Prisma.TenantWhereUniqueInput
+}
+
+export type TenantUpdateOneRequiredWithoutOrderExportsNestedInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutOrderExportsInput, Prisma.TenantUncheckedCreateWithoutOrderExportsInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutOrderExportsInput
+  upsert?: Prisma.TenantUpsertWithoutOrderExportsInput
+  connect?: Prisma.TenantWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TenantUpdateToOneWithWhereWithoutOrderExportsInput, Prisma.TenantUpdateWithoutOrderExportsInput>, Prisma.TenantUncheckedUpdateWithoutOrderExportsInput>
+}
+
+export type TenantCreateNestedOneWithoutAuditLogsInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutAuditLogsInput, Prisma.TenantUncheckedCreateWithoutAuditLogsInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutAuditLogsInput
+  connect?: Prisma.TenantWhereUniqueInput
+}
+
+export type TenantUpdateOneRequiredWithoutAuditLogsNestedInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutAuditLogsInput, Prisma.TenantUncheckedCreateWithoutAuditLogsInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutAuditLogsInput
+  upsert?: Prisma.TenantUpsertWithoutAuditLogsInput
+  connect?: Prisma.TenantWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TenantUpdateToOneWithWhereWithoutAuditLogsInput, Prisma.TenantUpdateWithoutAuditLogsInput>, Prisma.TenantUncheckedUpdateWithoutAuditLogsInput>
+}
+
+export type TenantCreateNestedOneWithoutProductsInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutProductsInput, Prisma.TenantUncheckedCreateWithoutProductsInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutProductsInput
+  connect?: Prisma.TenantWhereUniqueInput
+}
+
+export type TenantUpdateOneRequiredWithoutProductsNestedInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutProductsInput, Prisma.TenantUncheckedCreateWithoutProductsInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutProductsInput
+  upsert?: Prisma.TenantUpsertWithoutProductsInput
+  connect?: Prisma.TenantWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TenantUpdateToOneWithWhereWithoutProductsInput, Prisma.TenantUpdateWithoutProductsInput>, Prisma.TenantUncheckedUpdateWithoutProductsInput>
+}
+
 export type TenantCreateWithoutEventsInput = {
   id?: string
   key: string
@@ -366,6 +492,12 @@ export type TenantCreateWithoutEventsInput = {
   createdAt?: Date | string
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
+  settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
+  products?: Prisma.ProductCreateNestedManyWithoutTenantInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationCreateNestedOneWithoutTenantInput
+  orderExports?: Prisma.OrderExportCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutEventsInput = {
@@ -375,6 +507,12 @@ export type TenantUncheckedCreateWithoutEventsInput = {
   createdAt?: Date | string
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
+  settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedCreateNestedOneWithoutTenantInput
+  orderExports?: Prisma.OrderExportUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutEventsInput = {
@@ -400,6 +538,12 @@ export type TenantUpdateWithoutEventsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
+  settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
+  products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUpdateOneWithoutTenantNestedInput
+  orderExports?: Prisma.OrderExportUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutEventsInput = {
@@ -409,6 +553,12 @@ export type TenantUncheckedUpdateWithoutEventsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
+  settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedUpdateOneWithoutTenantNestedInput
+  orderExports?: Prisma.OrderExportUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutConversationsInput = {
@@ -418,6 +568,12 @@ export type TenantCreateWithoutConversationsInput = {
   createdAt?: Date | string
   events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
+  settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
+  products?: Prisma.ProductCreateNestedManyWithoutTenantInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationCreateNestedOneWithoutTenantInput
+  orderExports?: Prisma.OrderExportCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutConversationsInput = {
@@ -427,6 +583,12 @@ export type TenantUncheckedCreateWithoutConversationsInput = {
   createdAt?: Date | string
   events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
+  settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedCreateNestedOneWithoutTenantInput
+  orderExports?: Prisma.OrderExportUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutConversationsInput = {
@@ -452,6 +614,12 @@ export type TenantUpdateWithoutConversationsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
+  settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
+  products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUpdateOneWithoutTenantNestedInput
+  orderExports?: Prisma.OrderExportUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutConversationsInput = {
@@ -461,6 +629,12 @@ export type TenantUncheckedUpdateWithoutConversationsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
+  settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedUpdateOneWithoutTenantNestedInput
+  orderExports?: Prisma.OrderExportUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutMessagesInput = {
@@ -470,6 +644,12 @@ export type TenantCreateWithoutMessagesInput = {
   createdAt?: Date | string
   events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
+  settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
+  products?: Prisma.ProductCreateNestedManyWithoutTenantInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationCreateNestedOneWithoutTenantInput
+  orderExports?: Prisma.OrderExportCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutMessagesInput = {
@@ -479,6 +659,12 @@ export type TenantUncheckedCreateWithoutMessagesInput = {
   createdAt?: Date | string
   events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
+  settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedCreateNestedOneWithoutTenantInput
+  orderExports?: Prisma.OrderExportUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutMessagesInput = {
@@ -504,6 +690,12 @@ export type TenantUpdateWithoutMessagesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
+  settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
+  products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUpdateOneWithoutTenantNestedInput
+  orderExports?: Prisma.OrderExportUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutMessagesInput = {
@@ -513,6 +705,468 @@ export type TenantUncheckedUpdateWithoutMessagesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
+  settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedUpdateOneWithoutTenantNestedInput
+  orderExports?: Prisma.OrderExportUncheckedUpdateManyWithoutTenantNestedInput
+}
+
+export type TenantCreateWithoutSheetsDestinationInput = {
+  id?: string
+  key: string
+  name: string
+  createdAt?: Date | string
+  events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
+  conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
+  messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
+  settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
+  products?: Prisma.ProductCreateNestedManyWithoutTenantInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutTenantInput
+  orderExports?: Prisma.OrderExportCreateNestedManyWithoutTenantInput
+}
+
+export type TenantUncheckedCreateWithoutSheetsDestinationInput = {
+  id?: string
+  key: string
+  name: string
+  createdAt?: Date | string
+  events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
+  conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
+  messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
+  settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutTenantInput
+  orderExports?: Prisma.OrderExportUncheckedCreateNestedManyWithoutTenantInput
+}
+
+export type TenantCreateOrConnectWithoutSheetsDestinationInput = {
+  where: Prisma.TenantWhereUniqueInput
+  create: Prisma.XOR<Prisma.TenantCreateWithoutSheetsDestinationInput, Prisma.TenantUncheckedCreateWithoutSheetsDestinationInput>
+}
+
+export type TenantUpsertWithoutSheetsDestinationInput = {
+  update: Prisma.XOR<Prisma.TenantUpdateWithoutSheetsDestinationInput, Prisma.TenantUncheckedUpdateWithoutSheetsDestinationInput>
+  create: Prisma.XOR<Prisma.TenantCreateWithoutSheetsDestinationInput, Prisma.TenantUncheckedCreateWithoutSheetsDestinationInput>
+  where?: Prisma.TenantWhereInput
+}
+
+export type TenantUpdateToOneWithWhereWithoutSheetsDestinationInput = {
+  where?: Prisma.TenantWhereInput
+  data: Prisma.XOR<Prisma.TenantUpdateWithoutSheetsDestinationInput, Prisma.TenantUncheckedUpdateWithoutSheetsDestinationInput>
+}
+
+export type TenantUpdateWithoutSheetsDestinationInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
+  conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
+  messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
+  settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
+  products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutTenantNestedInput
+  orderExports?: Prisma.OrderExportUpdateManyWithoutTenantNestedInput
+}
+
+export type TenantUncheckedUpdateWithoutSheetsDestinationInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
+  conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
+  messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
+  settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutTenantNestedInput
+  orderExports?: Prisma.OrderExportUncheckedUpdateManyWithoutTenantNestedInput
+}
+
+export type TenantCreateWithoutSettingsInput = {
+  id?: string
+  key: string
+  name: string
+  createdAt?: Date | string
+  events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
+  conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
+  messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
+  orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
+  products?: Prisma.ProductCreateNestedManyWithoutTenantInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationCreateNestedOneWithoutTenantInput
+  orderExports?: Prisma.OrderExportCreateNestedManyWithoutTenantInput
+}
+
+export type TenantUncheckedCreateWithoutSettingsInput = {
+  id?: string
+  key: string
+  name: string
+  createdAt?: Date | string
+  events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
+  conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
+  messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedCreateNestedOneWithoutTenantInput
+  orderExports?: Prisma.OrderExportUncheckedCreateNestedManyWithoutTenantInput
+}
+
+export type TenantCreateOrConnectWithoutSettingsInput = {
+  where: Prisma.TenantWhereUniqueInput
+  create: Prisma.XOR<Prisma.TenantCreateWithoutSettingsInput, Prisma.TenantUncheckedCreateWithoutSettingsInput>
+}
+
+export type TenantUpsertWithoutSettingsInput = {
+  update: Prisma.XOR<Prisma.TenantUpdateWithoutSettingsInput, Prisma.TenantUncheckedUpdateWithoutSettingsInput>
+  create: Prisma.XOR<Prisma.TenantCreateWithoutSettingsInput, Prisma.TenantUncheckedCreateWithoutSettingsInput>
+  where?: Prisma.TenantWhereInput
+}
+
+export type TenantUpdateToOneWithWhereWithoutSettingsInput = {
+  where?: Prisma.TenantWhereInput
+  data: Prisma.XOR<Prisma.TenantUpdateWithoutSettingsInput, Prisma.TenantUncheckedUpdateWithoutSettingsInput>
+}
+
+export type TenantUpdateWithoutSettingsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
+  conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
+  messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
+  orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
+  products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUpdateOneWithoutTenantNestedInput
+  orderExports?: Prisma.OrderExportUpdateManyWithoutTenantNestedInput
+}
+
+export type TenantUncheckedUpdateWithoutSettingsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
+  conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
+  messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedUpdateOneWithoutTenantNestedInput
+  orderExports?: Prisma.OrderExportUncheckedUpdateManyWithoutTenantNestedInput
+}
+
+export type TenantCreateWithoutOrdersInput = {
+  id?: string
+  key: string
+  name: string
+  createdAt?: Date | string
+  events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
+  conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
+  messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
+  settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  products?: Prisma.ProductCreateNestedManyWithoutTenantInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationCreateNestedOneWithoutTenantInput
+  orderExports?: Prisma.OrderExportCreateNestedManyWithoutTenantInput
+}
+
+export type TenantUncheckedCreateWithoutOrdersInput = {
+  id?: string
+  key: string
+  name: string
+  createdAt?: Date | string
+  events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
+  conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
+  messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
+  settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedCreateNestedOneWithoutTenantInput
+  orderExports?: Prisma.OrderExportUncheckedCreateNestedManyWithoutTenantInput
+}
+
+export type TenantCreateOrConnectWithoutOrdersInput = {
+  where: Prisma.TenantWhereUniqueInput
+  create: Prisma.XOR<Prisma.TenantCreateWithoutOrdersInput, Prisma.TenantUncheckedCreateWithoutOrdersInput>
+}
+
+export type TenantUpsertWithoutOrdersInput = {
+  update: Prisma.XOR<Prisma.TenantUpdateWithoutOrdersInput, Prisma.TenantUncheckedUpdateWithoutOrdersInput>
+  create: Prisma.XOR<Prisma.TenantCreateWithoutOrdersInput, Prisma.TenantUncheckedCreateWithoutOrdersInput>
+  where?: Prisma.TenantWhereInput
+}
+
+export type TenantUpdateToOneWithWhereWithoutOrdersInput = {
+  where?: Prisma.TenantWhereInput
+  data: Prisma.XOR<Prisma.TenantUpdateWithoutOrdersInput, Prisma.TenantUncheckedUpdateWithoutOrdersInput>
+}
+
+export type TenantUpdateWithoutOrdersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
+  conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
+  messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
+  settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUpdateOneWithoutTenantNestedInput
+  orderExports?: Prisma.OrderExportUpdateManyWithoutTenantNestedInput
+}
+
+export type TenantUncheckedUpdateWithoutOrdersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
+  conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
+  messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
+  settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedUpdateOneWithoutTenantNestedInput
+  orderExports?: Prisma.OrderExportUncheckedUpdateManyWithoutTenantNestedInput
+}
+
+export type TenantCreateWithoutOrderExportsInput = {
+  id?: string
+  key: string
+  name: string
+  createdAt?: Date | string
+  events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
+  conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
+  messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
+  settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
+  products?: Prisma.ProductCreateNestedManyWithoutTenantInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationCreateNestedOneWithoutTenantInput
+}
+
+export type TenantUncheckedCreateWithoutOrderExportsInput = {
+  id?: string
+  key: string
+  name: string
+  createdAt?: Date | string
+  events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
+  conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
+  messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
+  settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedCreateNestedOneWithoutTenantInput
+}
+
+export type TenantCreateOrConnectWithoutOrderExportsInput = {
+  where: Prisma.TenantWhereUniqueInput
+  create: Prisma.XOR<Prisma.TenantCreateWithoutOrderExportsInput, Prisma.TenantUncheckedCreateWithoutOrderExportsInput>
+}
+
+export type TenantUpsertWithoutOrderExportsInput = {
+  update: Prisma.XOR<Prisma.TenantUpdateWithoutOrderExportsInput, Prisma.TenantUncheckedUpdateWithoutOrderExportsInput>
+  create: Prisma.XOR<Prisma.TenantCreateWithoutOrderExportsInput, Prisma.TenantUncheckedCreateWithoutOrderExportsInput>
+  where?: Prisma.TenantWhereInput
+}
+
+export type TenantUpdateToOneWithWhereWithoutOrderExportsInput = {
+  where?: Prisma.TenantWhereInput
+  data: Prisma.XOR<Prisma.TenantUpdateWithoutOrderExportsInput, Prisma.TenantUncheckedUpdateWithoutOrderExportsInput>
+}
+
+export type TenantUpdateWithoutOrderExportsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
+  conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
+  messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
+  settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
+  products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUpdateOneWithoutTenantNestedInput
+}
+
+export type TenantUncheckedUpdateWithoutOrderExportsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
+  conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
+  messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
+  settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedUpdateOneWithoutTenantNestedInput
+}
+
+export type TenantCreateWithoutAuditLogsInput = {
+  id?: string
+  key: string
+  name: string
+  createdAt?: Date | string
+  events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
+  conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
+  messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
+  settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
+  products?: Prisma.ProductCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationCreateNestedOneWithoutTenantInput
+  orderExports?: Prisma.OrderExportCreateNestedManyWithoutTenantInput
+}
+
+export type TenantUncheckedCreateWithoutAuditLogsInput = {
+  id?: string
+  key: string
+  name: string
+  createdAt?: Date | string
+  events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
+  conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
+  messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
+  settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedCreateNestedOneWithoutTenantInput
+  orderExports?: Prisma.OrderExportUncheckedCreateNestedManyWithoutTenantInput
+}
+
+export type TenantCreateOrConnectWithoutAuditLogsInput = {
+  where: Prisma.TenantWhereUniqueInput
+  create: Prisma.XOR<Prisma.TenantCreateWithoutAuditLogsInput, Prisma.TenantUncheckedCreateWithoutAuditLogsInput>
+}
+
+export type TenantUpsertWithoutAuditLogsInput = {
+  update: Prisma.XOR<Prisma.TenantUpdateWithoutAuditLogsInput, Prisma.TenantUncheckedUpdateWithoutAuditLogsInput>
+  create: Prisma.XOR<Prisma.TenantCreateWithoutAuditLogsInput, Prisma.TenantUncheckedCreateWithoutAuditLogsInput>
+  where?: Prisma.TenantWhereInput
+}
+
+export type TenantUpdateToOneWithWhereWithoutAuditLogsInput = {
+  where?: Prisma.TenantWhereInput
+  data: Prisma.XOR<Prisma.TenantUpdateWithoutAuditLogsInput, Prisma.TenantUncheckedUpdateWithoutAuditLogsInput>
+}
+
+export type TenantUpdateWithoutAuditLogsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
+  conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
+  messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
+  settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
+  products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUpdateOneWithoutTenantNestedInput
+  orderExports?: Prisma.OrderExportUpdateManyWithoutTenantNestedInput
+}
+
+export type TenantUncheckedUpdateWithoutAuditLogsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
+  conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
+  messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
+  settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedUpdateOneWithoutTenantNestedInput
+  orderExports?: Prisma.OrderExportUncheckedUpdateManyWithoutTenantNestedInput
+}
+
+export type TenantCreateWithoutProductsInput = {
+  id?: string
+  key: string
+  name: string
+  createdAt?: Date | string
+  events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
+  conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
+  messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
+  settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationCreateNestedOneWithoutTenantInput
+  orderExports?: Prisma.OrderExportCreateNestedManyWithoutTenantInput
+}
+
+export type TenantUncheckedCreateWithoutProductsInput = {
+  id?: string
+  key: string
+  name: string
+  createdAt?: Date | string
+  events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
+  conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
+  messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
+  settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedCreateNestedOneWithoutTenantInput
+  orderExports?: Prisma.OrderExportUncheckedCreateNestedManyWithoutTenantInput
+}
+
+export type TenantCreateOrConnectWithoutProductsInput = {
+  where: Prisma.TenantWhereUniqueInput
+  create: Prisma.XOR<Prisma.TenantCreateWithoutProductsInput, Prisma.TenantUncheckedCreateWithoutProductsInput>
+}
+
+export type TenantUpsertWithoutProductsInput = {
+  update: Prisma.XOR<Prisma.TenantUpdateWithoutProductsInput, Prisma.TenantUncheckedUpdateWithoutProductsInput>
+  create: Prisma.XOR<Prisma.TenantCreateWithoutProductsInput, Prisma.TenantUncheckedCreateWithoutProductsInput>
+  where?: Prisma.TenantWhereInput
+}
+
+export type TenantUpdateToOneWithWhereWithoutProductsInput = {
+  where?: Prisma.TenantWhereInput
+  data: Prisma.XOR<Prisma.TenantUpdateWithoutProductsInput, Prisma.TenantUncheckedUpdateWithoutProductsInput>
+}
+
+export type TenantUpdateWithoutProductsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
+  conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
+  messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
+  settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUpdateOneWithoutTenantNestedInput
+  orderExports?: Prisma.OrderExportUpdateManyWithoutTenantNestedInput
+}
+
+export type TenantUncheckedUpdateWithoutProductsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
+  conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
+  messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
+  settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedUpdateOneWithoutTenantNestedInput
+  orderExports?: Prisma.OrderExportUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 
@@ -524,12 +1178,20 @@ export type TenantCountOutputType = {
   events: number
   conversations: number
   messages: number
+  orders: number
+  products: number
+  auditLogs: number
+  orderExports: number
 }
 
 export type TenantCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   events?: boolean | TenantCountOutputTypeCountEventsArgs
   conversations?: boolean | TenantCountOutputTypeCountConversationsArgs
   messages?: boolean | TenantCountOutputTypeCountMessagesArgs
+  orders?: boolean | TenantCountOutputTypeCountOrdersArgs
+  products?: boolean | TenantCountOutputTypeCountProductsArgs
+  auditLogs?: boolean | TenantCountOutputTypeCountAuditLogsArgs
+  orderExports?: boolean | TenantCountOutputTypeCountOrderExportsArgs
 }
 
 /**
@@ -563,6 +1225,34 @@ export type TenantCountOutputTypeCountMessagesArgs<ExtArgs extends runtime.Types
   where?: Prisma.MessageWhereInput
 }
 
+/**
+ * TenantCountOutputType without action
+ */
+export type TenantCountOutputTypeCountOrdersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.OrderWhereInput
+}
+
+/**
+ * TenantCountOutputType without action
+ */
+export type TenantCountOutputTypeCountProductsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ProductWhereInput
+}
+
+/**
+ * TenantCountOutputType without action
+ */
+export type TenantCountOutputTypeCountAuditLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AuditLogWhereInput
+}
+
+/**
+ * TenantCountOutputType without action
+ */
+export type TenantCountOutputTypeCountOrderExportsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.OrderExportWhereInput
+}
+
 
 export type TenantSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -572,6 +1262,12 @@ export type TenantSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   events?: boolean | Prisma.Tenant$eventsArgs<ExtArgs>
   conversations?: boolean | Prisma.Tenant$conversationsArgs<ExtArgs>
   messages?: boolean | Prisma.Tenant$messagesArgs<ExtArgs>
+  settings?: boolean | Prisma.Tenant$settingsArgs<ExtArgs>
+  orders?: boolean | Prisma.Tenant$ordersArgs<ExtArgs>
+  products?: boolean | Prisma.Tenant$productsArgs<ExtArgs>
+  auditLogs?: boolean | Prisma.Tenant$auditLogsArgs<ExtArgs>
+  sheetsDestination?: boolean | Prisma.Tenant$sheetsDestinationArgs<ExtArgs>
+  orderExports?: boolean | Prisma.Tenant$orderExportsArgs<ExtArgs>
   _count?: boolean | Prisma.TenantCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["tenant"]>
 
@@ -601,6 +1297,12 @@ export type TenantInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   events?: boolean | Prisma.Tenant$eventsArgs<ExtArgs>
   conversations?: boolean | Prisma.Tenant$conversationsArgs<ExtArgs>
   messages?: boolean | Prisma.Tenant$messagesArgs<ExtArgs>
+  settings?: boolean | Prisma.Tenant$settingsArgs<ExtArgs>
+  orders?: boolean | Prisma.Tenant$ordersArgs<ExtArgs>
+  products?: boolean | Prisma.Tenant$productsArgs<ExtArgs>
+  auditLogs?: boolean | Prisma.Tenant$auditLogsArgs<ExtArgs>
+  sheetsDestination?: boolean | Prisma.Tenant$sheetsDestinationArgs<ExtArgs>
+  orderExports?: boolean | Prisma.Tenant$orderExportsArgs<ExtArgs>
   _count?: boolean | Prisma.TenantCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type TenantIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -612,6 +1314,12 @@ export type $TenantPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     events: Prisma.$WebhookEventPayload<ExtArgs>[]
     conversations: Prisma.$ConversationPayload<ExtArgs>[]
     messages: Prisma.$MessagePayload<ExtArgs>[]
+    settings: Prisma.$TenantSettingsPayload<ExtArgs> | null
+    orders: Prisma.$OrderPayload<ExtArgs>[]
+    products: Prisma.$ProductPayload<ExtArgs>[]
+    auditLogs: Prisma.$AuditLogPayload<ExtArgs>[]
+    sheetsDestination: Prisma.$GoogleSheetsDestinationPayload<ExtArgs> | null
+    orderExports: Prisma.$OrderExportPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1015,6 +1723,12 @@ export interface Prisma__TenantClient<T, Null = never, ExtArgs extends runtime.T
   events<T extends Prisma.Tenant$eventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$eventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WebhookEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   conversations<T extends Prisma.Tenant$conversationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$conversationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConversationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   messages<T extends Prisma.Tenant$messagesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$messagesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  settings<T extends Prisma.Tenant$settingsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$settingsArgs<ExtArgs>>): Prisma.Prisma__TenantSettingsClient<runtime.Types.Result.GetResult<Prisma.$TenantSettingsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  orders<T extends Prisma.Tenant$ordersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$ordersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  products<T extends Prisma.Tenant$productsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$productsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  auditLogs<T extends Prisma.Tenant$auditLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$auditLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  sheetsDestination<T extends Prisma.Tenant$sheetsDestinationArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$sheetsDestinationArgs<ExtArgs>>): Prisma.Prisma__GoogleSheetsDestinationClient<runtime.Types.Result.GetResult<Prisma.$GoogleSheetsDestinationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  orderExports<T extends Prisma.Tenant$orderExportsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$orderExportsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderExportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1510,6 +2224,140 @@ export type Tenant$messagesArgs<ExtArgs extends runtime.Types.Extensions.Interna
   take?: number
   skip?: number
   distinct?: Prisma.MessageScalarFieldEnum | Prisma.MessageScalarFieldEnum[]
+}
+
+/**
+ * Tenant.settings
+ */
+export type Tenant$settingsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TenantSettings
+   */
+  select?: Prisma.TenantSettingsSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the TenantSettings
+   */
+  omit?: Prisma.TenantSettingsOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TenantSettingsInclude<ExtArgs> | null
+  where?: Prisma.TenantSettingsWhereInput
+}
+
+/**
+ * Tenant.orders
+ */
+export type Tenant$ordersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Order
+   */
+  select?: Prisma.OrderSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Order
+   */
+  omit?: Prisma.OrderOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OrderInclude<ExtArgs> | null
+  where?: Prisma.OrderWhereInput
+  orderBy?: Prisma.OrderOrderByWithRelationInput | Prisma.OrderOrderByWithRelationInput[]
+  cursor?: Prisma.OrderWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.OrderScalarFieldEnum | Prisma.OrderScalarFieldEnum[]
+}
+
+/**
+ * Tenant.products
+ */
+export type Tenant$productsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Product
+   */
+  select?: Prisma.ProductSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Product
+   */
+  omit?: Prisma.ProductOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ProductInclude<ExtArgs> | null
+  where?: Prisma.ProductWhereInput
+  orderBy?: Prisma.ProductOrderByWithRelationInput | Prisma.ProductOrderByWithRelationInput[]
+  cursor?: Prisma.ProductWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ProductScalarFieldEnum | Prisma.ProductScalarFieldEnum[]
+}
+
+/**
+ * Tenant.auditLogs
+ */
+export type Tenant$auditLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AuditLog
+   */
+  select?: Prisma.AuditLogSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AuditLog
+   */
+  omit?: Prisma.AuditLogOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AuditLogInclude<ExtArgs> | null
+  where?: Prisma.AuditLogWhereInput
+  orderBy?: Prisma.AuditLogOrderByWithRelationInput | Prisma.AuditLogOrderByWithRelationInput[]
+  cursor?: Prisma.AuditLogWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AuditLogScalarFieldEnum | Prisma.AuditLogScalarFieldEnum[]
+}
+
+/**
+ * Tenant.sheetsDestination
+ */
+export type Tenant$sheetsDestinationArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the GoogleSheetsDestination
+   */
+  select?: Prisma.GoogleSheetsDestinationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the GoogleSheetsDestination
+   */
+  omit?: Prisma.GoogleSheetsDestinationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GoogleSheetsDestinationInclude<ExtArgs> | null
+  where?: Prisma.GoogleSheetsDestinationWhereInput
+}
+
+/**
+ * Tenant.orderExports
+ */
+export type Tenant$orderExportsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the OrderExport
+   */
+  select?: Prisma.OrderExportSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the OrderExport
+   */
+  omit?: Prisma.OrderExportOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OrderExportInclude<ExtArgs> | null
+  where?: Prisma.OrderExportWhereInput
+  orderBy?: Prisma.OrderExportOrderByWithRelationInput | Prisma.OrderExportOrderByWithRelationInput[]
+  cursor?: Prisma.OrderExportWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.OrderExportScalarFieldEnum | Prisma.OrderExportScalarFieldEnum[]
 }
 
 /**

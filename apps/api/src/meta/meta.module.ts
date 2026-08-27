@@ -36,6 +36,20 @@ export class MetaModule {
                 name: env.DEFAULT_TENANT_KEY,
               },
             });
+            await prisma.tenantSettings.upsert({
+              where: { tenantId: env.DEFAULT_TENANT_ID },
+              update: {},
+              create: {
+                tenantId: env.DEFAULT_TENANT_ID,
+                approvalMode: 'ALWAYS',
+                autoApprovalThreshold: 0.9,
+                promptVersion: 'instagram-order-v1',
+                triggerPhrases: [
+                  'беремо замовлення в роботу',
+                  'замовлення прийнято',
+                ],
+              },
+            });
             return new MetaEventService(prisma);
           },
         },

@@ -18,6 +18,12 @@ model Tenant {
   events    WebhookEvent[]
   conversations Conversation[]
   messages      Message[]
+  settings      TenantSettings?
+  orders        Order[]
+  products      Product[]
+  auditLogs     AuditLog[]
+  sheetsDestination GoogleSheetsDestination?
+  orderExports      OrderExport[]
 
   @@map("tenants")
 }
@@ -51,6 +57,7 @@ model Conversation {
   updatedAt              DateTime  @updatedAt @map("updated_at")
   tenant                 Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   messages               Message[]
+  orders                 Order[]
 
   @@unique([tenantId, channel, externalConversationId])
   @@index([tenantId, lastMessageAt])
@@ -73,10 +80,142 @@ model Message {
   conversation      Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   rawEvent          WebhookEvent @relation(fields: [rawEventId], references: [id], onDelete: Restrict)
   attachments       Attachment[]
+  triggeredOrders   Order[]      @relation("OrderTriggerMessage")
 
   @@unique([tenantId, channel, externalMessageId])
   @@index([conversationId, sourceTimestamp])
   @@map("messages")
+}
+
+model GoogleSheetsDestination {
+  id              String    @id @default(uuid()) @db.Uuid
+  tenantId        String    @unique @map("tenant_id") @db.Uuid
+  spreadsheetId   String    @map("spreadsheet_id")
+  sheetName       String    @map("sheet_name")
+  requiredHeaders Json      @map("required_headers")
+  status          String    @default("PENDING")
+  lastValidatedAt DateTime? @map("last_validated_at")
+  errorSummary    String?   @map("error_summary")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  tenant          Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  exports         OrderExport[]
+
+  @@map("google_sheets_destinations")
+}
+
+model TenantSettings {
+  id                    String   @id @default(uuid()) @db.Uuid
+  tenantId              String   @unique @map("tenant_id") @db.Uuid
+  approvalMode          String   @default("ALWAYS") @map("approval_mode")
+  autoApprovalThreshold Float    @default(0.9) @map("auto_approval_threshold")
+  promptVersion         String   @default("instagram-order-v1") @map("prompt_version")
+  triggerPhrases        Json     @map("trigger_phrases")
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+  tenant                Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@map("tenant_settings")
+}
+
+model Order {
+  id                String      @id @default(uuid()) @db.Uuid
+  tenantId          String      @map("tenant_id") @db.Uuid
+  conversationId    String      @map("conversation_id") @db.Uuid
+  triggerMessageId  String      @unique @map("trigger_message_id") @db.Uuid
+  status            String      @default("AI_PROCESSING")
+  extraction        Json?
+  validationIssues  Json?       @map("validation_issues")
+  overallConfidence Float?      @map("overall_confidence")
+  aiResponseId      String?     @map("ai_response_id")
+  aiModel           String?     @map("ai_model")
+  promptVersion     String      @map("prompt_version")
+  inputTokens       Int?        @map("input_tokens")
+  outputTokens      Int?        @map("output_tokens")
+  approvedAt        DateTime?   @map("approved_at")
+  approvedBy        String?     @map("approved_by")
+  createdAt         DateTime    @default(now()) @map("created_at")
+  updatedAt         DateTime    @updatedAt @map("updated_at")
+  tenant            Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  conversation      Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  triggerMessage    Message     @relation("OrderTriggerMessage", fields: [triggerMessageId], references: [id], onDelete: Restrict)
+  items             OrderItem[]
+  auditLogs         AuditLog[]
+  exports           OrderExport[]
+
+  @@index([tenantId, status, createdAt])
+  @@index([conversationId, createdAt])
+  @@map("orders")
+}
+
+model OrderExport {
+  id            String    @id @default(uuid()) @db.Uuid
+  tenantId      String    @map("tenant_id") @db.Uuid
+  orderId       String    @map("order_id") @db.Uuid
+  destinationId String    @map("destination_id") @db.Uuid
+  status        String    @default("PENDING")
+  attempts      Int       @default(0)
+  rowNumber     Int?      @map("row_number")
+  lastAttemptAt DateTime? @map("last_attempt_at")
+  lastSyncedAt  DateTime? @map("last_synced_at")
+  errorSummary  String?   @map("error_summary")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  tenant        Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  order         Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  destination   GoogleSheetsDestination @relation(fields: [destinationId], references: [id], onDelete: Cascade)
+
+  @@unique([orderId, destinationId])
+  @@index([status, updatedAt])
+  @@map("order_exports")
+}
+
+model AuditLog {
+  id        String   @id @default(uuid()) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  orderId   String   @map("order_id") @db.Uuid
+  actor     String
+  action    String
+  changes   Json
+  createdAt DateTime @default(now()) @map("created_at")
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId, createdAt])
+  @@map("audit_logs")
+}
+
+model OrderItem {
+  id           String   @id @default(uuid()) @db.Uuid
+  orderId      String   @map("order_id") @db.Uuid
+  catalogId    String?  @map("catalog_id")
+  originalText String   @map("original_text")
+  quantity     Int
+  color        String?
+  size         String?
+  confidence   Float
+  createdAt    DateTime @default(now()) @map("created_at")
+  order        Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@map("order_items")
+}
+
+model Product {
+  id        String   @id @default(uuid()) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  sku       String
+  name      String
+  aliases   Json
+  imageUrl  String?  @map("image_url")
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, sku])
+  @@index([tenantId, active, name])
+  @@map("products")
 }
 
 model Attachment {
