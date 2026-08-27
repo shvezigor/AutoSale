@@ -27,13 +27,15 @@ export function LoginForm({ submit }: { submit: (input: { email: string; passwor
 
 export function RegisterForm({ submit }: { submit: (input: { name: string; tenantName: string; email: string; password: string }) => Promise<SubmitResult> }) {
   const [state, setState] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+  const [previewUrl, setPreviewUrl] = useState<string | undefined>();
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setState('submitting');
     const data = new FormData(event.currentTarget);
     const result = await submit({ name: String(data.get('name')), tenantName: String(data.get('tenantName')), email: String(data.get('email')), password: String(data.get('password')) });
+    setPreviewUrl(result.previewUrl);
     setState(result.ok ? 'success' : 'error');
   }
-  if (state === 'success') return <AuthFrame title="Перевірте вашу електронну пошту" description="Ми надіслали посилання для активації акаунта."><Link className="primary-button button-link" href="/login">Перейти до входу</Link></AuthFrame>;
+  if (state === 'success') return <AuthFrame title="Перевірте вашу електронну пошту" description="Ми надіслали посилання для активації акаунта.">{previewUrl && <Link className="primary-button button-link" data-testid="dev-verification-link" href={previewUrl}>Активувати тестовий акаунт</Link>}<Link className="auth-link" href="/login">Перейти до входу</Link></AuthFrame>;
   return <AuthFrame title="Створіть робочий простір" description="Зареєструйте власника та організацію AutoSale.">
     <form className="auth-form" onSubmit={(event) => void onSubmit(event)}>
       <Field label="Ім’я" name="name" autoComplete="name" />
