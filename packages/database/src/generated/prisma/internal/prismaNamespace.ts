@@ -398,6 +398,7 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 export const ModelName = {
   Tenant: 'Tenant',
+  InstagramConnection: 'InstagramConnection',
   User: 'User',
   TenantMembership: 'TenantMembership',
   Session: 'Session',
@@ -431,7 +432,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "tenant" | "user" | "tenantMembership" | "session" | "emailVerificationToken" | "passwordResetToken" | "tenantInvitation" | "securityAuditLog" | "webhookEvent" | "conversation" | "message" | "googleSheetsDestination" | "tenantSettings" | "order" | "orderExport" | "auditLog" | "orderItem" | "product" | "attachment"
+    modelProps: "tenant" | "instagramConnection" | "user" | "tenantMembership" | "session" | "emailVerificationToken" | "passwordResetToken" | "tenantInvitation" | "securityAuditLog" | "webhookEvent" | "conversation" | "message" | "googleSheetsDestination" | "tenantSettings" | "order" | "orderExport" | "auditLog" | "orderItem" | "product" | "attachment"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -506,6 +507,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.TenantCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.TenantCountAggregateOutputType> | number
+        }
+      }
+    }
+    InstagramConnection: {
+      payload: Prisma.$InstagramConnectionPayload<ExtArgs>
+      fields: Prisma.InstagramConnectionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.InstagramConnectionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InstagramConnectionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.InstagramConnectionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InstagramConnectionPayload>
+        }
+        findFirst: {
+          args: Prisma.InstagramConnectionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InstagramConnectionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.InstagramConnectionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InstagramConnectionPayload>
+        }
+        findMany: {
+          args: Prisma.InstagramConnectionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InstagramConnectionPayload>[]
+        }
+        create: {
+          args: Prisma.InstagramConnectionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InstagramConnectionPayload>
+        }
+        createMany: {
+          args: Prisma.InstagramConnectionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.InstagramConnectionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InstagramConnectionPayload>[]
+        }
+        delete: {
+          args: Prisma.InstagramConnectionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InstagramConnectionPayload>
+        }
+        update: {
+          args: Prisma.InstagramConnectionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InstagramConnectionPayload>
+        }
+        deleteMany: {
+          args: Prisma.InstagramConnectionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.InstagramConnectionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.InstagramConnectionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InstagramConnectionPayload>[]
+        }
+        upsert: {
+          args: Prisma.InstagramConnectionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InstagramConnectionPayload>
+        }
+        aggregate: {
+          args: Prisma.InstagramConnectionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateInstagramConnection>
+        }
+        groupBy: {
+          args: Prisma.InstagramConnectionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.InstagramConnectionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.InstagramConnectionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.InstagramConnectionCountAggregateOutputType> | number
         }
       }
     }
@@ -1891,6 +1966,19 @@ export const TenantScalarFieldEnum = {
 export type TenantScalarFieldEnum = (typeof TenantScalarFieldEnum)[keyof typeof TenantScalarFieldEnum]
 
 
+export const InstagramConnectionScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  externalAccountId: 'externalAccountId',
+  displayName: 'displayName',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type InstagramConnectionScalarFieldEnum = (typeof InstagramConnectionScalarFieldEnum)[keyof typeof InstagramConnectionScalarFieldEnum]
+
+
 export const UserScalarFieldEnum = {
   id: 'id',
   email: 'email',
@@ -2489,6 +2577,7 @@ export interface PrismaClientOptionsWithAdapter extends PrismaClientBaseOptions 
 export type PrismaClientOptions = PrismaClientOptionsWithAccelerateUrl | PrismaClientOptionsWithAdapter
 export type GlobalOmitConfig = {
   tenant?: Prisma.TenantOmit
+  instagramConnection?: Prisma.InstagramConnectionOmit
   user?: Prisma.UserOmit
   tenantMembership?: Prisma.TenantMembershipOmit
   session?: Prisma.SessionOmit

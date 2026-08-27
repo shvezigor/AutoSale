@@ -4,6 +4,11 @@ import { Prisma, type PrismaClient } from '@autosale/database';
 export class MetaEventService {
   constructor(private readonly prisma: PrismaClient) {}
 
+  async resolveTenant(externalAccountId: string): Promise<string | null> {
+    const connection = await this.prisma.instagramConnection.findUnique({ where: { externalAccountId }, select: { tenantId: true, status: true } });
+    return connection?.status === 'ACTIVE' ? connection.tenantId : null;
+  }
+
   async register(
     input: RegisterMetaEventInput,
   ): Promise<{ eventId: string; duplicate: boolean }> {

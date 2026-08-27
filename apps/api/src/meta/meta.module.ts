@@ -17,7 +17,7 @@ export class MetaModule {
       providers: [
         {
           provide: META_WEBHOOK_CONFIG,
-          useValue: { tenantId: env.DEFAULT_TENANT_ID, verifyToken: env.META_VERIFY_TOKEN },
+          useValue: { verifyToken: env.META_VERIFY_TOKEN },
         },
         {
           provide: MetaSignatureService,

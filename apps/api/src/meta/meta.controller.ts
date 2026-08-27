@@ -24,7 +24,6 @@ import { MetaSignatureService } from './meta-signature.service.js';
 export const META_WEBHOOK_CONFIG = Symbol('META_WEBHOOK_CONFIG');
 
 export interface MetaWebhookConfig {
-  tenantId: string;
   verifyToken: string;
 }
 
@@ -66,9 +65,13 @@ export class MetaController {
       throw new UnauthorizedException();
     }
 
-    const externalEventId = deriveExternalEventId(payload, this.config.tenantId);
+    const externalAccountId = extractAccountId(payload);
+    if (!externalAccountId) return { received: true };
+    const tenantId = await this.events.resolveTenant(externalAccountId);
+    if (!tenantId) return { received: true };
+    const externalEventId = deriveExternalEventId(payload, tenantId);
     const registered = await this.events.register({
-      tenantId: this.config.tenantId,
+      tenantId,
       externalEventId,
       payload,
     });
@@ -79,6 +82,12 @@ export class MetaController {
 
     return { received: true };
   }
+}
+
+function extractAccountId(payload: Record<string, unknown>): string | null {
+  const entries = Array.isArray(payload.entry) ? payload.entry : [];
+  const first = entries[0];
+  return isRecord(first) && typeof first.id === 'string' ? first.id : null;
 }
 
 function deriveExternalEventId(payload: Record<string, unknown>, tenantId: string): string {

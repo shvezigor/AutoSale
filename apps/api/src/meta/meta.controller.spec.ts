@@ -25,6 +25,7 @@ describe('MetaController', () => {
   let rawBody: Buffer;
   let fixture: Record<string, unknown>;
   const register = vi.fn();
+  const resolveTenant = vi.fn();
   const add = vi.fn();
 
   beforeEach(async () => {
@@ -33,15 +34,16 @@ describe('MetaController', () => {
     );
     fixture = JSON.parse(rawBody.toString('utf8')) as Record<string, unknown>;
     register.mockReset().mockResolvedValue({ eventId: 'event-1', duplicate: false });
+    resolveTenant.mockReset().mockResolvedValue(tenantId);
     add.mockReset().mockResolvedValue(undefined);
 
-    const config: MetaWebhookConfig = { tenantId, verifyToken };
+    const config: MetaWebhookConfig = { verifyToken };
     const moduleRef = await Test.createTestingModule({
       controllers: [MetaController],
       providers: [
         { provide: META_WEBHOOK_CONFIG, useValue: config },
         { provide: MetaSignatureService, useValue: new MetaSignatureService(appSecret) },
-        { provide: MetaEventService, useValue: { register } },
+        { provide: MetaEventService, useValue: { register, resolveTenant } },
         { provide: INSTAGRAM_NORMALIZE_QUEUE, useValue: { add } },
       ],
     }).compile();
@@ -93,6 +95,16 @@ describe('MetaController', () => {
       payload: fixture,
     });
     expect(add).toHaveBeenCalledWith('instagram.normalize', { eventId: 'event-1', correlationId: 'event-1' });
+    expect(resolveTenant).toHaveBeenCalledWith('17841400000000000');
+  });
+
+  it('acknowledges an unknown account without assigning it to another tenant', async () => {
+    resolveTenant.mockResolvedValue(null);
+    const sentBody = Buffer.from(JSON.stringify(fixture));
+    const signature = `sha256=${createHmac('sha256', appSecret).update(sentBody).digest('hex')}`;
+    await request(app!.getHttpServer()).post('/webhooks/meta').set('Content-Type', 'application/json').set('X-Hub-Signature-256', signature).send(fixture).expect(200, { received: true });
+    expect(register).not.toHaveBeenCalled();
+    expect(add).not.toHaveBeenCalled();
   });
 
   it('rejects an invalid signature without writing or enqueueing', async () => {

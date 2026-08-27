@@ -23,6 +23,11 @@ export const acceptInvitationRequestSchema = z.object({
   password: passwordSchema,
 }).strict();
 
+export const instagramConnectionRequestSchema = z.object({
+  externalAccountId: z.string().trim().regex(/^\d{5,64}$/),
+  displayName: z.string().trim().min(1).max(160).nullable().optional(),
+}).strict();
+
 export const adminTenantSummarySchema = z.object({
   tenantId: z.string().uuid(),
   tenantName: z.string(),
