@@ -8,44 +8,44 @@ type Extraction = {
 };
 
 export class OrdersService {
-  constructor(private readonly prisma: PrismaClient, private readonly tenantId: string) {}
+  constructor(private readonly prisma: PrismaClient) {}
 
-  async list(): Promise<OrderListResponse> {
+  async list(tenantId: string): Promise<OrderListResponse> {
     const [rows, products] = await Promise.all([
-      this.prisma.order.findMany({ where: { tenantId: this.tenantId }, orderBy: { createdAt: 'desc' }, include: this.include }),
-      this.productNames(),
+      this.prisma.order.findMany({ where: { tenantId }, orderBy: { createdAt: 'desc' }, include: this.include }),
+      this.productNames(tenantId),
     ]);
     return { items: rows.map((row) => this.map(row, products)) };
   }
 
-  async detail(id: string): Promise<ManagerOrder> {
-    const row = await this.find(id);
-    return this.map(row, await this.productNames());
+  async detail(tenantId: string, id: string): Promise<ManagerOrder> {
+    const row = await this.find(tenantId, id);
+    return this.map(row, await this.productNames(tenantId));
   }
 
-  async approve(id: string, actor: string): Promise<ManagerOrder> {
-    const order = await this.transition(id, actor, 'APPROVED', 'ORDER_APPROVED');
-    await this.ensurePendingExport(id);
+  async approve(tenantId: string, id: string, actor: string): Promise<ManagerOrder> {
+    const order = await this.transition(tenantId, id, actor, 'APPROVED', 'ORDER_APPROVED');
+    await this.ensurePendingExport(tenantId, id);
     return order;
   }
 
-  private async ensurePendingExport(orderId: string): Promise<void> {
-    const destination = await this.prisma.googleSheetsDestination.findUnique({ where: { tenantId: this.tenantId } });
+  private async ensurePendingExport(tenantId: string, orderId: string): Promise<void> {
+    const destination = await this.prisma.googleSheetsDestination.findUnique({ where: { tenantId } });
     if (!destination || destination.status !== 'ACTIVE') return;
     await this.prisma.orderExport.upsert({
       where: { orderId_destinationId: { orderId, destinationId: destination.id } },
-      create: { tenantId: this.tenantId, orderId, destinationId: destination.id },
+      create: { tenantId, orderId, destinationId: destination.id },
       update: { status: 'PENDING', errorSummary: null },
     });
   }
 
-  cancel(id: string, actor: string): Promise<ManagerOrder> {
-    return this.transition(id, actor, 'CANCELLED', 'ORDER_CANCELLED');
+  cancel(tenantId: string, id: string, actor: string): Promise<ManagerOrder> {
+    return this.transition(tenantId, id, actor, 'CANCELLED', 'ORDER_CANCELLED');
   }
 
-  async retrySheetsExport(id: string): Promise<NonNullable<ManagerOrder['sheetsExport']>> {
-    await this.find(id);
-    const record = await this.prisma.orderExport.findFirst({ where: { orderId: id, tenantId: this.tenantId }, include: { destination: { select: { status: true } } } });
+  async retrySheetsExport(tenantId: string, id: string): Promise<NonNullable<ManagerOrder['sheetsExport']>> {
+    await this.find(tenantId, id);
+    const record = await this.prisma.orderExport.findFirst({ where: { orderId: id, tenantId }, include: { destination: { select: { status: true } } } });
     if (!record) throw new NotFoundException('Google Sheets export not found');
     if (record.destination.status !== 'ACTIVE') throw new BadRequestException('Google Sheets destination must be active before retry');
     if (record.status !== 'FAILED') throw new BadRequestException('Only failed exports can be retried');
@@ -53,9 +53,9 @@ export class OrdersService {
     return this.mapExport(updated, true);
   }
 
-  async update(id: string, actor: string, input: ManagerOrderUpdate): Promise<ManagerOrder> {
-    const current = await this.find(id);
-    const products = await this.productNames();
+  async update(tenantId: string, id: string, actor: string, input: ManagerOrderUpdate): Promise<ManagerOrder> {
+    const current = await this.find(tenantId, id);
+    const products = await this.productNames(tenantId);
     for (const item of input.items ?? []) {
       if (item.catalogId !== null && !products.has(item.catalogId)) throw new BadRequestException('Unknown catalogue SKU');
       if (!current.items.some((existing) => existing.id === item.id)) throw new BadRequestException('Unknown order item');
@@ -72,32 +72,32 @@ export class OrdersService {
       }
       const rows = input.items ?? current.items;
       const issues = validationIssues(nextExtraction, rows);
-      const order = await tx.order.update({ where: { id }, data: { extraction: nextExtraction as Prisma.InputJsonObject, validationIssues: issues, status: 'NEEDS_REVIEW' }, include: this.include });
-      await tx.auditLog.create({ data: { tenantId: this.tenantId, orderId: id, actor, action: 'ORDER_CORRECTED', changes: JSON.parse(JSON.stringify(input)) as Prisma.InputJsonValue } });
+      const order = await tx.order.update({ where: { id, tenantId }, data: { extraction: nextExtraction as Prisma.InputJsonObject, validationIssues: issues, status: 'NEEDS_REVIEW' }, include: this.include });
+      await tx.auditLog.create({ data: { tenantId, orderId: id, actor, action: 'ORDER_CORRECTED', changes: JSON.parse(JSON.stringify(input)) as Prisma.InputJsonValue } });
       return order;
     });
     return this.map(updated, products);
   }
 
-  private async transition(id: string, actor: string, status: OrderStatus, action: string): Promise<ManagerOrder> {
-    const current = await this.find(id);
+  private async transition(tenantId: string, id: string, actor: string, status: OrderStatus, action: string): Promise<ManagerOrder> {
+    const current = await this.find(tenantId, id);
     if (status === 'APPROVED' && (jsonStrings(current.validationIssues).length > 0 || current.items.length === 0 || current.items.some((item) => !item.catalogId || item.quantity < 1))) {
       throw new BadRequestException('Order has unresolved validation issues');
     }
     const updated = await this.prisma.$transaction(async (tx) => {
       const order = await tx.order.update({
-        where: { id },
+        where: { id, tenantId },
         data: { status, approvedAt: status === 'APPROVED' ? new Date() : null, approvedBy: status === 'APPROVED' ? actor : null },
         include: this.include,
       });
-      await tx.auditLog.create({ data: { tenantId: this.tenantId, orderId: id, actor, action, changes: { status: { from: current.status, to: status } } } });
+      await tx.auditLog.create({ data: { tenantId, orderId: id, actor, action, changes: { status: { from: current.status, to: status } } } });
       return order;
     });
-    return this.map(updated, await this.productNames());
+    return this.map(updated, await this.productNames(tenantId));
   }
 
-  private find(id: string) {
-    return this.prisma.order.findFirst({ where: { id, tenantId: this.tenantId }, include: this.include }).then((row) => {
+  private find(tenantId: string, id: string) {
+    return this.prisma.order.findFirst({ where: { id, tenantId }, include: this.include }).then((row) => {
       if (!row) throw new NotFoundException('Order not found');
       return row;
     });
@@ -109,8 +109,8 @@ export class OrdersService {
     exports: { orderBy: { createdAt: 'desc' as const }, take: 1, include: { destination: { select: { status: true } } } },
   };
 
-  private async productNames(): Promise<Map<string, string>> {
-    const products = await this.prisma.product.findMany({ where: { tenantId: this.tenantId }, select: { sku: true, name: true } });
+  private async productNames(tenantId: string): Promise<Map<string, string>> {
+    const products = await this.prisma.product.findMany({ where: { tenantId }, select: { sku: true, name: true } });
     return new Map(products.map((product) => [product.sku, product.name]));
   }
 

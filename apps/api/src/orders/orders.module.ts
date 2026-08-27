@@ -8,6 +8,6 @@ import { OrdersService } from './orders.service.js';
 @Module({})
 export class OrdersModule {
   static register(env: ApiEnv): DynamicModule {
-    return { module: OrdersModule, controllers: [OrdersController], providers: [{ provide: OrdersService, useFactory: () => new OrdersService(createPrismaClient(env.DATABASE_URL), env.DEFAULT_TENANT_ID) }] };
+    return { module: OrdersModule, controllers: [OrdersController], providers: [{ provide: OrdersService, useFactory: () => new OrdersService(createPrismaClient(env.DATABASE_URL)) }] };
   }
 }

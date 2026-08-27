@@ -14,21 +14,18 @@ export interface UpdateOrderSettingsInput {
 }
 
 export class OrderSettingsService {
-  constructor(
-    private readonly prisma: PrismaClient,
-    private readonly tenantId: string,
-  ) {}
+  constructor(private readonly prisma: PrismaClient) {}
 
-  async get(): Promise<OrderSettingsResponse> {
+  async get(tenantId: string): Promise<OrderSettingsResponse> {
     return toResponse(
-      await this.prisma.tenantSettings.findUniqueOrThrow({ where: { tenantId: this.tenantId } }),
+      await this.prisma.tenantSettings.findUniqueOrThrow({ where: { tenantId } }),
     );
   }
 
-  async update(input: UpdateOrderSettingsInput): Promise<OrderSettingsResponse> {
+  async update(tenantId: string, input: UpdateOrderSettingsInput): Promise<OrderSettingsResponse> {
     return toResponse(
       await this.prisma.tenantSettings.update({
-        where: { tenantId: this.tenantId },
+        where: { tenantId },
         data: input,
       }),
     );

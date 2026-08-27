@@ -7,6 +7,7 @@ import { OrdersController } from './orders.controller.js';
 import { OrdersService } from './orders.service.js';
 
 const orderId = '11111111-1111-4111-8111-111111111111';
+const tenantId = '22222222-2222-4222-8222-222222222222';
 
 const order = {
   id: orderId,
@@ -43,6 +44,10 @@ describe('OrdersController', () => {
       providers: [{ provide: OrdersService, useValue: { list, detail, approve, cancel, update, retrySheetsExport } }],
     }).compile();
     app = moduleRef.createNestApplication();
+    app.use((request: { principal?: unknown }, _response: unknown, next: () => void) => {
+      request.principal = { userId: 'user', email: 'manager@example.com', platformRole: 'USER', tenantId, membershipRole: 'MANAGER', sessionId: 'session' };
+      next();
+    });
     await app.init();
   });
 
@@ -52,6 +57,8 @@ describe('OrdersController', () => {
     const response = await request(app.getHttpServer()).get('/api/orders').expect(200);
     expect(response.body).toEqual({ items: [order] });
     await request(app.getHttpServer()).get(`/api/orders/${orderId}`).expect(200, order);
+    expect(list).toHaveBeenCalledWith(tenantId);
+    expect(detail).toHaveBeenCalledWith(tenantId, orderId);
   });
 
   it('approves a valid order with the manager actor', async () => {
@@ -59,7 +66,7 @@ describe('OrdersController', () => {
       .post(`/api/orders/${orderId}/approve`)
       .send({ actor: 'Андрій' })
       .expect(201);
-    expect(approve).toHaveBeenCalledWith(orderId, 'Андрій');
+    expect(approve).toHaveBeenCalledWith(tenantId, orderId, 'Андрій');
   });
 
   it('cancels an order with the manager actor', async () => {
@@ -67,7 +74,7 @@ describe('OrdersController', () => {
       .post(`/api/orders/${orderId}/cancel`)
       .send({ actor: 'Андрій' })
       .expect(201);
-    expect(cancel).toHaveBeenCalledWith(orderId, 'Андрій');
+    expect(cancel).toHaveBeenCalledWith(tenantId, orderId, 'Андрій');
   });
 
   it('rejects an empty actor', async () => {
@@ -77,11 +84,11 @@ describe('OrdersController', () => {
 
   it('updates corrected fields with the manager actor', async () => {
     await request(app.getHttpServer()).patch(`/api/orders/${orderId}`).send({ actor: 'Андрій', customer: { phone: '+380501112233' } }).expect(200);
-    expect(update).toHaveBeenCalledWith(orderId, 'Андрій', { customer: { phone: '+380501112233' } });
+    expect(update).toHaveBeenCalledWith(tenantId, orderId, 'Андрій', { customer: { phone: '+380501112233' } });
   });
 
   it('requests a safe retry for the order export', async () => {
     await request(app.getHttpServer()).post(`/api/orders/${orderId}/sheets-export/retry`).expect(201, { status: 'PENDING' });
-    expect(retrySheetsExport).toHaveBeenCalledWith(orderId);
+    expect(retrySheetsExport).toHaveBeenCalledWith(tenantId, orderId);
   });
 });

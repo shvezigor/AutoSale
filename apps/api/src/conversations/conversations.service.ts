@@ -12,17 +12,14 @@ interface ConversationCursor {
 }
 
 export class ConversationsService {
-  constructor(
-    private readonly prisma: PrismaClient,
-    private readonly tenantId: string,
-  ) {}
+  constructor(private readonly prisma: PrismaClient) {}
 
-  async list(query: ConversationQuery): Promise<ConversationListResponse> {
+  async list(tenantId: string, query: ConversationQuery): Promise<ConversationListResponse> {
     const limit = Math.min(query.limit, 50);
     const cursor = query.cursor ? decodeCursor(query.cursor) : undefined;
     const rows = await this.prisma.conversation.findMany({
       where: {
-        tenantId: this.tenantId,
+        tenantId,
         ...(cursor
           ? {
               OR: [
@@ -62,9 +59,9 @@ export class ConversationsService {
     };
   }
 
-  async detail(id: string): Promise<ConversationDetailResponse> {
+  async detail(tenantId: string, id: string): Promise<ConversationDetailResponse> {
     const conversation = await this.prisma.conversation.findFirst({
-      where: { id, tenantId: this.tenantId },
+      where: { id, tenantId },
       include: {
         messages: {
           orderBy: [{ sourceTimestamp: 'asc' }, { id: 'asc' }],

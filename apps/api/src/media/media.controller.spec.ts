@@ -7,6 +7,7 @@ import { MediaController } from './media.controller.js';
 import { MediaService } from './media.service.js';
 
 const attachmentId = '11111111-1111-4111-8111-111111111111';
+const tenantId = '22222222-2222-4222-8222-222222222222';
 
 describe('MediaController', () => {
   let app: INestApplication | undefined;
@@ -22,6 +23,10 @@ describe('MediaController', () => {
       providers: [{ provide: MediaService, useValue: { load } }],
     }).compile();
     app = moduleRef.createNestApplication();
+    app.use((request: { principal?: unknown }, _response: unknown, next: () => void) => {
+      request.principal = { userId: 'user', email: 'manager@example.com', platformRole: 'USER', tenantId, membershipRole: 'MANAGER', sessionId: 'session' };
+      next();
+    });
     await app.init();
   });
 
@@ -34,6 +39,6 @@ describe('MediaController', () => {
       .expect('Content-Type', /image\/png/);
 
     expect(Buffer.from(response.body as Uint8Array)).toEqual(Buffer.from([137, 80, 78, 71]));
-    expect(load).toHaveBeenCalledWith(attachmentId);
+    expect(load).toHaveBeenCalledWith(tenantId, attachmentId);
   });
 });

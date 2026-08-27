@@ -18,11 +18,11 @@ export class OrderSettingsModule {
         {
           provide: OrderSettingsService,
           useFactory: () =>
-            new OrderSettingsService(createPrismaClient(env.DATABASE_URL), env.DEFAULT_TENANT_ID),
+            new OrderSettingsService(createPrismaClient(env.DATABASE_URL)),
         },
         {
           provide: GoogleSheetsSettingsService,
-          useFactory: () => new GoogleSheetsSettingsService(createPrismaClient(env.DATABASE_URL), env.DEFAULT_TENANT_ID, env.GOOGLE_SERVICE_ACCOUNT_FILE ? createGoogleSheetsAdapter(env.GOOGLE_SERVICE_ACCOUNT_FILE) : undefined),
+          useFactory: () => new GoogleSheetsSettingsService(createPrismaClient(env.DATABASE_URL), env.GOOGLE_SERVICE_ACCOUNT_FILE ? createGoogleSheetsAdapter(env.GOOGLE_SERVICE_ACCOUNT_FILE) : undefined),
         },
       ],
     };

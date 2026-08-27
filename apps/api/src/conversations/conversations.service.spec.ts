@@ -38,7 +38,7 @@ describe('ConversationsService', () => {
     const tenant = await prisma.tenant.create({ data: { key: 'a', name: 'A' } });
     const otherTenant = await prisma.tenant.create({ data: { key: 'b', name: 'B' } });
     tenantId = tenant.id;
-    service = new ConversationsService(prisma, tenantId);
+    service = new ConversationsService(prisma);
 
     const event = await prisma.webhookEvent.create({
       data: { tenantId, provider: 'META', externalEventId: 'seed-a', payload: {} },
@@ -91,8 +91,8 @@ describe('ConversationsService', () => {
   });
 
   it('orders newest first, isolates the tenant, and paginates by cursor', async () => {
-    const first = await service.list({ limit: 2 });
-    const second = await service.list({ limit: 2, cursor: first.nextCursor! });
+    const first = await service.list(tenantId, { limit: 2 });
+    const second = await service.list(tenantId, { limit: 2, cursor: first.nextCursor! });
 
     expect(first.items.map((item) => item.lastMessagePreview)).toEqual([
       'Повідомлення 2',
@@ -104,7 +104,7 @@ describe('ConversationsService', () => {
   });
 
   it('returns an ordered conversation detail without source object URLs', async () => {
-    const detail = await service.detail(newestId);
+    const detail = await service.detail(tenantId, newestId);
 
     expect(detail).toMatchObject({
       id: newestId,
@@ -118,8 +118,8 @@ describe('ConversationsService', () => {
       where: { tenantId: { not: tenantId } },
     });
 
-    await expect(service.detail(foreign.id)).rejects.toBeInstanceOf(NotFoundException);
-    await expect(service.detail('11111111-1111-4111-8111-111111111111')).rejects.toBeInstanceOf(
+    await expect(service.detail(tenantId, foreign.id)).rejects.toBeInstanceOf(NotFoundException);
+    await expect(service.detail(tenantId, '11111111-1111-4111-8111-111111111111')).rejects.toBeInstanceOf(
       NotFoundException,
     );
   });
