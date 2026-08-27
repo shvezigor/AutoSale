@@ -38,3 +38,9 @@ Restore навмисно вимагає абсолютний шлях і точ�
 - Pending/failed Google export збережені й безпечно повторюються після повернення інтеграції.
 
 Раз на квартал виконуйте test restore на окремому host/VM і записуйте дату, backup ID, Git commit, кількість перевірених записів та відповідального. Backup без успішного тесту відновлення не вважається перевіреним.
+
+## Журнал перевірок
+
+| Дата (UTC) | Середовище | Результат | Перевірені дані |
+| --- | --- | --- | --- |
+| 2026-08-27 | Ізольований Docker Compose project `autosale_restorecheck` | Успішно | SHA-256, 1 conversation, 1 order, 1 attachment, MinIO object, API/web HTTP 200, healthy API/worker |

@@ -21,10 +21,10 @@ if [ ! -f "$BACKUP_DIR/postgres.dump" ] || [ ! -f "$BACKUP_DIR/minio.tar.gz" ]; 
   exit 2
 fi
 
-(cd "$BACKUP_DIR" && sha256sum --check SHA256SUMS)
+(cd "$BACKUP_DIR" && sha256sum -c SHA256SUMS)
 
 docker compose stop proxy web api worker redis 2>/dev/null || true
-docker compose up -d postgres minio
+docker compose up -d --wait postgres minio
 
 docker compose exec -T postgres sh -c \
   'dropdb --if-exists --force --username="$POSTGRES_USER" "$POSTGRES_DB" && createdb --username="$POSTGRES_USER" "$POSTGRES_DB"'
@@ -40,12 +40,17 @@ if [ -z "$MINIO_VOLUME" ]; then
 fi
 
 docker compose stop minio
-docker run --rm --volume "$MINIO_VOLUME:/target" --volume "$BACKUP_DIR:/backup:ro" alpine:3.22 \
-  sh -c 'find /target -mindepth 1 -maxdepth 1 -exec rm -rf -- {} + && tar -C /target -xzf /backup/minio.tar.gz'
+docker run --rm --interactive --volume "$MINIO_VOLUME:/target" alpine:3.22 \
+  sh -c 'find /target -mindepth 1 -maxdepth 1 -exec rm -rf -- {} + && tar -C /target -xzf -' \
+  < "$BACKUP_DIR/minio.tar.gz"
 docker compose up -d minio
 
-REDIS_VOLUME=$(docker inspect "$(docker compose ps -a -q redis)" \
-  --format '{{range .Mounts}}{{if eq .Destination "/data"}}{{.Name}}{{end}}{{end}}')
+REDIS_CONTAINER=$(docker compose ps -a -q redis)
+REDIS_VOLUME=""
+if [ -n "$REDIS_CONTAINER" ]; then
+  REDIS_VOLUME=$(docker inspect "$REDIS_CONTAINER" \
+    --format '{{range .Mounts}}{{if eq .Destination "/data"}}{{.Name}}{{end}}{{end}}')
+fi
 if [ -n "$REDIS_VOLUME" ]; then
   docker run --rm --volume "$REDIS_VOLUME:/target" alpine:3.22 \
     sh -c 'find /target -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +'

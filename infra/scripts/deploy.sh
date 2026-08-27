@@ -12,7 +12,7 @@ docker compose $COMPOSE_FILES config --quiet
 docker compose $COMPOSE_FILES build
 # Start only stateful dependencies before running the one-shot migration.
 # shellcheck disable=SC2086
-docker compose $COMPOSE_FILES up -d postgres redis minio
+docker compose $COMPOSE_FILES up -d --wait postgres redis minio
 # A non-zero migration exit stops this script before application rollout.
 # shellcheck disable=SC2086
 docker compose $COMPOSE_FILES run --rm migrate
@@ -20,4 +20,3 @@ docker compose $COMPOSE_FILES run --rm migrate
 docker compose $COMPOSE_FILES up -d --remove-orphans
 # shellcheck disable=SC2086
 docker compose $COMPOSE_FILES ps
-
