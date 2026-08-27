@@ -317,6 +317,7 @@ export type OrderWhereInput = {
   triggerMessage?: Prisma.XOR<Prisma.MessageScalarRelationFilter, Prisma.MessageWhereInput>
   items?: Prisma.OrderItemListRelationFilter
   auditLogs?: Prisma.AuditLogListRelationFilter
+  exports?: Prisma.OrderExportListRelationFilter
 }
 
 export type OrderOrderByWithRelationInput = {
@@ -342,6 +343,7 @@ export type OrderOrderByWithRelationInput = {
   triggerMessage?: Prisma.MessageOrderByWithRelationInput
   items?: Prisma.OrderItemOrderByRelationAggregateInput
   auditLogs?: Prisma.AuditLogOrderByRelationAggregateInput
+  exports?: Prisma.OrderExportOrderByRelationAggregateInput
 }
 
 export type OrderWhereUniqueInput = Prisma.AtLeast<{
@@ -370,6 +372,7 @@ export type OrderWhereUniqueInput = Prisma.AtLeast<{
   triggerMessage?: Prisma.XOR<Prisma.MessageScalarRelationFilter, Prisma.MessageWhereInput>
   items?: Prisma.OrderItemListRelationFilter
   auditLogs?: Prisma.AuditLogListRelationFilter
+  exports?: Prisma.OrderExportListRelationFilter
 }, "id" | "triggerMessageId">
 
 export type OrderOrderByWithAggregationInput = {
@@ -440,6 +443,7 @@ export type OrderCreateInput = {
   triggerMessage: Prisma.MessageCreateNestedOneWithoutTriggeredOrdersInput
   items?: Prisma.OrderItemCreateNestedManyWithoutOrderInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrderInput
+  exports?: Prisma.OrderExportCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateInput = {
@@ -462,6 +466,7 @@ export type OrderUncheckedCreateInput = {
   updatedAt?: Date | string
   items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrderInput
+  exports?: Prisma.OrderExportUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUpdateInput = {
@@ -484,6 +489,7 @@ export type OrderUpdateInput = {
   triggerMessage?: Prisma.MessageUpdateOneRequiredWithoutTriggeredOrdersNestedInput
   items?: Prisma.OrderItemUpdateManyWithoutOrderNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutOrderNestedInput
+  exports?: Prisma.OrderExportUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateInput = {
@@ -506,6 +512,7 @@ export type OrderUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrderNestedInput
+  exports?: Prisma.OrderExportUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderCreateManyInput = {
@@ -790,6 +797,20 @@ export type NullableIntFieldUpdateOperationsInput = {
   divide?: number
 }
 
+export type OrderCreateNestedOneWithoutExportsInput = {
+  create?: Prisma.XOR<Prisma.OrderCreateWithoutExportsInput, Prisma.OrderUncheckedCreateWithoutExportsInput>
+  connectOrCreate?: Prisma.OrderCreateOrConnectWithoutExportsInput
+  connect?: Prisma.OrderWhereUniqueInput
+}
+
+export type OrderUpdateOneRequiredWithoutExportsNestedInput = {
+  create?: Prisma.XOR<Prisma.OrderCreateWithoutExportsInput, Prisma.OrderUncheckedCreateWithoutExportsInput>
+  connectOrCreate?: Prisma.OrderCreateOrConnectWithoutExportsInput
+  upsert?: Prisma.OrderUpsertWithoutExportsInput
+  connect?: Prisma.OrderWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrderUpdateToOneWithWhereWithoutExportsInput, Prisma.OrderUpdateWithoutExportsInput>, Prisma.OrderUncheckedUpdateWithoutExportsInput>
+}
+
 export type OrderCreateNestedOneWithoutAuditLogsInput = {
   create?: Prisma.XOR<Prisma.OrderCreateWithoutAuditLogsInput, Prisma.OrderUncheckedCreateWithoutAuditLogsInput>
   connectOrCreate?: Prisma.OrderCreateOrConnectWithoutAuditLogsInput
@@ -837,6 +858,7 @@ export type OrderCreateWithoutTenantInput = {
   triggerMessage: Prisma.MessageCreateNestedOneWithoutTriggeredOrdersInput
   items?: Prisma.OrderItemCreateNestedManyWithoutOrderInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrderInput
+  exports?: Prisma.OrderExportCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutTenantInput = {
@@ -858,6 +880,7 @@ export type OrderUncheckedCreateWithoutTenantInput = {
   updatedAt?: Date | string
   items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrderInput
+  exports?: Prisma.OrderExportUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutTenantInput = {
@@ -928,6 +951,7 @@ export type OrderCreateWithoutConversationInput = {
   triggerMessage: Prisma.MessageCreateNestedOneWithoutTriggeredOrdersInput
   items?: Prisma.OrderItemCreateNestedManyWithoutOrderInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrderInput
+  exports?: Prisma.OrderExportCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutConversationInput = {
@@ -949,6 +973,7 @@ export type OrderUncheckedCreateWithoutConversationInput = {
   updatedAt?: Date | string
   items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrderInput
+  exports?: Prisma.OrderExportUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutConversationInput = {
@@ -996,6 +1021,7 @@ export type OrderCreateWithoutTriggerMessageInput = {
   conversation: Prisma.ConversationCreateNestedOneWithoutOrdersInput
   items?: Prisma.OrderItemCreateNestedManyWithoutOrderInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrderInput
+  exports?: Prisma.OrderExportCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutTriggerMessageInput = {
@@ -1017,6 +1043,7 @@ export type OrderUncheckedCreateWithoutTriggerMessageInput = {
   updatedAt?: Date | string
   items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrderInput
+  exports?: Prisma.OrderExportUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutTriggerMessageInput = {
@@ -1045,6 +1072,110 @@ export type OrderUpdateManyWithWhereWithoutTriggerMessageInput = {
   data: Prisma.XOR<Prisma.OrderUpdateManyMutationInput, Prisma.OrderUncheckedUpdateManyWithoutTriggerMessageInput>
 }
 
+export type OrderCreateWithoutExportsInput = {
+  id?: string
+  status?: string
+  extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  overallConfidence?: number | null
+  aiResponseId?: string | null
+  aiModel?: string | null
+  promptVersion: string
+  inputTokens?: number | null
+  outputTokens?: number | null
+  approvedAt?: Date | string | null
+  approvedBy?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tenant: Prisma.TenantCreateNestedOneWithoutOrdersInput
+  conversation: Prisma.ConversationCreateNestedOneWithoutOrdersInput
+  triggerMessage: Prisma.MessageCreateNestedOneWithoutTriggeredOrdersInput
+  items?: Prisma.OrderItemCreateNestedManyWithoutOrderInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrderInput
+}
+
+export type OrderUncheckedCreateWithoutExportsInput = {
+  id?: string
+  tenantId: string
+  conversationId: string
+  triggerMessageId: string
+  status?: string
+  extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  overallConfidence?: number | null
+  aiResponseId?: string | null
+  aiModel?: string | null
+  promptVersion: string
+  inputTokens?: number | null
+  outputTokens?: number | null
+  approvedAt?: Date | string | null
+  approvedBy?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrderInput
+}
+
+export type OrderCreateOrConnectWithoutExportsInput = {
+  where: Prisma.OrderWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrderCreateWithoutExportsInput, Prisma.OrderUncheckedCreateWithoutExportsInput>
+}
+
+export type OrderUpsertWithoutExportsInput = {
+  update: Prisma.XOR<Prisma.OrderUpdateWithoutExportsInput, Prisma.OrderUncheckedUpdateWithoutExportsInput>
+  create: Prisma.XOR<Prisma.OrderCreateWithoutExportsInput, Prisma.OrderUncheckedCreateWithoutExportsInput>
+  where?: Prisma.OrderWhereInput
+}
+
+export type OrderUpdateToOneWithWhereWithoutExportsInput = {
+  where?: Prisma.OrderWhereInput
+  data: Prisma.XOR<Prisma.OrderUpdateWithoutExportsInput, Prisma.OrderUncheckedUpdateWithoutExportsInput>
+}
+
+export type OrderUpdateWithoutExportsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  overallConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  aiResponseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aiModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  promptVersion?: Prisma.StringFieldUpdateOperationsInput | string
+  inputTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  outputTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  approvedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutOrdersNestedInput
+  conversation?: Prisma.ConversationUpdateOneRequiredWithoutOrdersNestedInput
+  triggerMessage?: Prisma.MessageUpdateOneRequiredWithoutTriggeredOrdersNestedInput
+  items?: Prisma.OrderItemUpdateManyWithoutOrderNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutOrderNestedInput
+}
+
+export type OrderUncheckedUpdateWithoutExportsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  conversationId?: Prisma.StringFieldUpdateOperationsInput | string
+  triggerMessageId?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  overallConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  aiResponseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aiModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  promptVersion?: Prisma.StringFieldUpdateOperationsInput | string
+  inputTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  outputTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  approvedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrderNestedInput
+}
+
 export type OrderCreateWithoutAuditLogsInput = {
   id?: string
   status?: string
@@ -1064,6 +1195,7 @@ export type OrderCreateWithoutAuditLogsInput = {
   conversation: Prisma.ConversationCreateNestedOneWithoutOrdersInput
   triggerMessage: Prisma.MessageCreateNestedOneWithoutTriggeredOrdersInput
   items?: Prisma.OrderItemCreateNestedManyWithoutOrderInput
+  exports?: Prisma.OrderExportCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutAuditLogsInput = {
@@ -1085,6 +1217,7 @@ export type OrderUncheckedCreateWithoutAuditLogsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
+  exports?: Prisma.OrderExportUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutAuditLogsInput = {
@@ -1122,6 +1255,7 @@ export type OrderUpdateWithoutAuditLogsInput = {
   conversation?: Prisma.ConversationUpdateOneRequiredWithoutOrdersNestedInput
   triggerMessage?: Prisma.MessageUpdateOneRequiredWithoutTriggeredOrdersNestedInput
   items?: Prisma.OrderItemUpdateManyWithoutOrderNestedInput
+  exports?: Prisma.OrderExportUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutAuditLogsInput = {
@@ -1143,6 +1277,7 @@ export type OrderUncheckedUpdateWithoutAuditLogsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
+  exports?: Prisma.OrderExportUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderCreateWithoutItemsInput = {
@@ -1164,6 +1299,7 @@ export type OrderCreateWithoutItemsInput = {
   conversation: Prisma.ConversationCreateNestedOneWithoutOrdersInput
   triggerMessage: Prisma.MessageCreateNestedOneWithoutTriggeredOrdersInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrderInput
+  exports?: Prisma.OrderExportCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutItemsInput = {
@@ -1185,6 +1321,7 @@ export type OrderUncheckedCreateWithoutItemsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrderInput
+  exports?: Prisma.OrderExportUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutItemsInput = {
@@ -1222,6 +1359,7 @@ export type OrderUpdateWithoutItemsInput = {
   conversation?: Prisma.ConversationUpdateOneRequiredWithoutOrdersNestedInput
   triggerMessage?: Prisma.MessageUpdateOneRequiredWithoutTriggeredOrdersNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutOrderNestedInput
+  exports?: Prisma.OrderExportUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutItemsInput = {
@@ -1243,6 +1381,7 @@ export type OrderUncheckedUpdateWithoutItemsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrderNestedInput
+  exports?: Prisma.OrderExportUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderCreateManyTenantInput = {
@@ -1283,6 +1422,7 @@ export type OrderUpdateWithoutTenantInput = {
   triggerMessage?: Prisma.MessageUpdateOneRequiredWithoutTriggeredOrdersNestedInput
   items?: Prisma.OrderItemUpdateManyWithoutOrderNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutOrderNestedInput
+  exports?: Prisma.OrderExportUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutTenantInput = {
@@ -1304,6 +1444,7 @@ export type OrderUncheckedUpdateWithoutTenantInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrderNestedInput
+  exports?: Prisma.OrderExportUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateManyWithoutTenantInput = {
@@ -1363,6 +1504,7 @@ export type OrderUpdateWithoutConversationInput = {
   triggerMessage?: Prisma.MessageUpdateOneRequiredWithoutTriggeredOrdersNestedInput
   items?: Prisma.OrderItemUpdateManyWithoutOrderNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutOrderNestedInput
+  exports?: Prisma.OrderExportUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutConversationInput = {
@@ -1384,6 +1526,7 @@ export type OrderUncheckedUpdateWithoutConversationInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrderNestedInput
+  exports?: Prisma.OrderExportUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateManyWithoutConversationInput = {
@@ -1443,6 +1586,7 @@ export type OrderUpdateWithoutTriggerMessageInput = {
   conversation?: Prisma.ConversationUpdateOneRequiredWithoutOrdersNestedInput
   items?: Prisma.OrderItemUpdateManyWithoutOrderNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutOrderNestedInput
+  exports?: Prisma.OrderExportUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutTriggerMessageInput = {
@@ -1464,6 +1608,7 @@ export type OrderUncheckedUpdateWithoutTriggerMessageInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrderNestedInput
+  exports?: Prisma.OrderExportUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateManyWithoutTriggerMessageInput = {
@@ -1493,11 +1638,13 @@ export type OrderUncheckedUpdateManyWithoutTriggerMessageInput = {
 export type OrderCountOutputType = {
   items: number
   auditLogs: number
+  exports: number
 }
 
 export type OrderCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   items?: boolean | OrderCountOutputTypeCountItemsArgs
   auditLogs?: boolean | OrderCountOutputTypeCountAuditLogsArgs
+  exports?: boolean | OrderCountOutputTypeCountExportsArgs
 }
 
 /**
@@ -1524,6 +1671,13 @@ export type OrderCountOutputTypeCountAuditLogsArgs<ExtArgs extends runtime.Types
   where?: Prisma.AuditLogWhereInput
 }
 
+/**
+ * OrderCountOutputType without action
+ */
+export type OrderCountOutputTypeCountExportsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.OrderExportWhereInput
+}
+
 
 export type OrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1548,6 +1702,7 @@ export type OrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   triggerMessage?: boolean | Prisma.MessageDefaultArgs<ExtArgs>
   items?: boolean | Prisma.Order$itemsArgs<ExtArgs>
   auditLogs?: boolean | Prisma.Order$auditLogsArgs<ExtArgs>
+  exports?: boolean | Prisma.Order$exportsArgs<ExtArgs>
   _count?: boolean | Prisma.OrderCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["order"]>
 
@@ -1624,6 +1779,7 @@ export type OrderInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   triggerMessage?: boolean | Prisma.MessageDefaultArgs<ExtArgs>
   items?: boolean | Prisma.Order$itemsArgs<ExtArgs>
   auditLogs?: boolean | Prisma.Order$auditLogsArgs<ExtArgs>
+  exports?: boolean | Prisma.Order$exportsArgs<ExtArgs>
   _count?: boolean | Prisma.OrderCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type OrderIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1645,6 +1801,7 @@ export type $OrderPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     triggerMessage: Prisma.$MessagePayload<ExtArgs>
     items: Prisma.$OrderItemPayload<ExtArgs>[]
     auditLogs: Prisma.$AuditLogPayload<ExtArgs>[]
+    exports: Prisma.$OrderExportPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2063,6 +2220,7 @@ export interface Prisma__OrderClient<T, Null = never, ExtArgs extends runtime.Ty
   triggerMessage<T extends Prisma.MessageDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MessageDefaultArgs<ExtArgs>>): Prisma.Prisma__MessageClient<runtime.Types.Result.GetResult<Prisma.$MessagePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   items<T extends Prisma.Order$itemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$itemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   auditLogs<T extends Prisma.Order$auditLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$auditLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  exports<T extends Prisma.Order$exportsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$exportsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderExportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2555,6 +2713,30 @@ export type Order$auditLogsArgs<ExtArgs extends runtime.Types.Extensions.Interna
   take?: number
   skip?: number
   distinct?: Prisma.AuditLogScalarFieldEnum | Prisma.AuditLogScalarFieldEnum[]
+}
+
+/**
+ * Order.exports
+ */
+export type Order$exportsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the OrderExport
+   */
+  select?: Prisma.OrderExportSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the OrderExport
+   */
+  omit?: Prisma.OrderExportOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OrderExportInclude<ExtArgs> | null
+  where?: Prisma.OrderExportWhereInput
+  orderBy?: Prisma.OrderExportOrderByWithRelationInput | Prisma.OrderExportOrderByWithRelationInput[]
+  cursor?: Prisma.OrderExportWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.OrderExportScalarFieldEnum | Prisma.OrderExportScalarFieldEnum[]
 }
 
 /**

@@ -8,6 +8,7 @@ export class TriggeredOrderProcessor {
   constructor(
     private readonly prisma: PrismaClient,
     private readonly recognition: OrderRecognitionService,
+    private readonly scheduleExport?: (orderId: string, tenantId: string) => Promise<void>,
   ) {}
 
   async processIfTriggered(
@@ -75,7 +76,7 @@ export class TriggeredOrderProcessor {
       );
       const autoApproved = result.status === 'AUTO_APPROVED';
 
-      return await this.prisma.order.update({
+      const updated = await this.prisma.order.update({
         where: { id: order.id },
         data: {
           status: result.status,
@@ -100,6 +101,10 @@ export class TriggeredOrderProcessor {
           },
         },
       });
+      if (autoApproved) {
+        await this.scheduleExport?.(order.id, trigger.tenantId);
+      }
+      return updated;
     } catch (error) {
       await this.prisma.order.update({ where: { id: order.id }, data: { status: 'AI_FAILED' } });
       throw error;

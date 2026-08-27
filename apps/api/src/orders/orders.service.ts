@@ -23,8 +23,20 @@ export class OrdersService {
     return this.map(row, await this.productNames());
   }
 
-  approve(id: string, actor: string): Promise<ManagerOrder> {
-    return this.transition(id, actor, 'APPROVED', 'ORDER_APPROVED');
+  async approve(id: string, actor: string): Promise<ManagerOrder> {
+    const order = await this.transition(id, actor, 'APPROVED', 'ORDER_APPROVED');
+    await this.ensurePendingExport(id);
+    return order;
+  }
+
+  private async ensurePendingExport(orderId: string): Promise<void> {
+    const destination = await this.prisma.googleSheetsDestination.findUnique({ where: { tenantId: this.tenantId } });
+    if (!destination || destination.status !== 'ACTIVE') return;
+    await this.prisma.orderExport.upsert({
+      where: { orderId_destinationId: { orderId, destinationId: destination.id } },
+      create: { tenantId: this.tenantId, orderId, destinationId: destination.id },
+      update: { status: 'PENDING', errorSummary: null },
+    });
   }
 
   cancel(id: string, actor: string): Promise<ManagerOrder> {

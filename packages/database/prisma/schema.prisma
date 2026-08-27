@@ -23,6 +23,7 @@ model Tenant {
   products      Product[]
   auditLogs     AuditLog[]
   sheetsDestination GoogleSheetsDestination?
+  orderExports      OrderExport[]
 
   @@map("tenants")
 }
@@ -98,6 +99,7 @@ model GoogleSheetsDestination {
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @updatedAt @map("updated_at")
   tenant          Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  exports         OrderExport[]
 
   @@map("google_sheets_destinations")
 }
@@ -139,10 +141,33 @@ model Order {
   triggerMessage    Message     @relation("OrderTriggerMessage", fields: [triggerMessageId], references: [id], onDelete: Restrict)
   items             OrderItem[]
   auditLogs         AuditLog[]
+  exports           OrderExport[]
 
   @@index([tenantId, status, createdAt])
   @@index([conversationId, createdAt])
   @@map("orders")
+}
+
+model OrderExport {
+  id            String    @id @default(uuid()) @db.Uuid
+  tenantId      String    @map("tenant_id") @db.Uuid
+  orderId       String    @map("order_id") @db.Uuid
+  destinationId String    @map("destination_id") @db.Uuid
+  status        String    @default("PENDING")
+  attempts      Int       @default(0)
+  rowNumber     Int?      @map("row_number")
+  lastAttemptAt DateTime? @map("last_attempt_at")
+  lastSyncedAt  DateTime? @map("last_synced_at")
+  errorSummary  String?   @map("error_summary")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  tenant        Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  order         Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  destination   GoogleSheetsDestination @relation(fields: [destinationId], references: [id], onDelete: Cascade)
+
+  @@unique([orderId, destinationId])
+  @@index([status, updatedAt])
+  @@map("order_exports")
 }
 
 model AuditLog {

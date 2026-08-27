@@ -58,6 +58,7 @@ export const ModelName = {
   GoogleSheetsDestination: 'GoogleSheetsDestination',
   TenantSettings: 'TenantSettings',
   Order: 'Order',
+  OrderExport: 'OrderExport',
   AuditLog: 'AuditLog',
   OrderItem: 'OrderItem',
   Product: 'Product',
@@ -187,6 +188,24 @@ export const OrderScalarFieldEnum = {
 } as const
 
 export type OrderScalarFieldEnum = (typeof OrderScalarFieldEnum)[keyof typeof OrderScalarFieldEnum]
+
+
+export const OrderExportScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  orderId: 'orderId',
+  destinationId: 'destinationId',
+  status: 'status',
+  attempts: 'attempts',
+  rowNumber: 'rowNumber',
+  lastAttemptAt: 'lastAttemptAt',
+  lastSyncedAt: 'lastSyncedAt',
+  errorSummary: 'errorSummary',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type OrderExportScalarFieldEnum = (typeof OrderExportScalarFieldEnum)[keyof typeof OrderExportScalarFieldEnum]
 
 
 export const AuditLogScalarFieldEnum = {

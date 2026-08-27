@@ -219,6 +219,7 @@ export type GoogleSheetsDestinationWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"GoogleSheetsDestination"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"GoogleSheetsDestination"> | Date | string
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
+  exports?: Prisma.OrderExportListRelationFilter
 }
 
 export type GoogleSheetsDestinationOrderByWithRelationInput = {
@@ -233,6 +234,7 @@ export type GoogleSheetsDestinationOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   tenant?: Prisma.TenantOrderByWithRelationInput
+  exports?: Prisma.OrderExportOrderByRelationAggregateInput
 }
 
 export type GoogleSheetsDestinationWhereUniqueInput = Prisma.AtLeast<{
@@ -250,6 +252,7 @@ export type GoogleSheetsDestinationWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"GoogleSheetsDestination"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"GoogleSheetsDestination"> | Date | string
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
+  exports?: Prisma.OrderExportListRelationFilter
 }, "id" | "tenantId">
 
 export type GoogleSheetsDestinationOrderByWithAggregationInput = {
@@ -295,6 +298,7 @@ export type GoogleSheetsDestinationCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutSheetsDestinationInput
+  exports?: Prisma.OrderExportCreateNestedManyWithoutDestinationInput
 }
 
 export type GoogleSheetsDestinationUncheckedCreateInput = {
@@ -308,6 +312,7 @@ export type GoogleSheetsDestinationUncheckedCreateInput = {
   errorSummary?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  exports?: Prisma.OrderExportUncheckedCreateNestedManyWithoutDestinationInput
 }
 
 export type GoogleSheetsDestinationUpdateInput = {
@@ -321,6 +326,7 @@ export type GoogleSheetsDestinationUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutSheetsDestinationNestedInput
+  exports?: Prisma.OrderExportUpdateManyWithoutDestinationNestedInput
 }
 
 export type GoogleSheetsDestinationUncheckedUpdateInput = {
@@ -334,6 +340,7 @@ export type GoogleSheetsDestinationUncheckedUpdateInput = {
   errorSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  exports?: Prisma.OrderExportUncheckedUpdateManyWithoutDestinationNestedInput
 }
 
 export type GoogleSheetsDestinationCreateManyInput = {
@@ -416,6 +423,11 @@ export type GoogleSheetsDestinationMinOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
 }
 
+export type GoogleSheetsDestinationScalarRelationFilter = {
+  is?: Prisma.GoogleSheetsDestinationWhereInput
+  isNot?: Prisma.GoogleSheetsDestinationWhereInput
+}
+
 export type GoogleSheetsDestinationCreateNestedOneWithoutTenantInput = {
   create?: Prisma.XOR<Prisma.GoogleSheetsDestinationCreateWithoutTenantInput, Prisma.GoogleSheetsDestinationUncheckedCreateWithoutTenantInput>
   connectOrCreate?: Prisma.GoogleSheetsDestinationCreateOrConnectWithoutTenantInput
@@ -448,6 +460,20 @@ export type GoogleSheetsDestinationUncheckedUpdateOneWithoutTenantNestedInput = 
   update?: Prisma.XOR<Prisma.XOR<Prisma.GoogleSheetsDestinationUpdateToOneWithWhereWithoutTenantInput, Prisma.GoogleSheetsDestinationUpdateWithoutTenantInput>, Prisma.GoogleSheetsDestinationUncheckedUpdateWithoutTenantInput>
 }
 
+export type GoogleSheetsDestinationCreateNestedOneWithoutExportsInput = {
+  create?: Prisma.XOR<Prisma.GoogleSheetsDestinationCreateWithoutExportsInput, Prisma.GoogleSheetsDestinationUncheckedCreateWithoutExportsInput>
+  connectOrCreate?: Prisma.GoogleSheetsDestinationCreateOrConnectWithoutExportsInput
+  connect?: Prisma.GoogleSheetsDestinationWhereUniqueInput
+}
+
+export type GoogleSheetsDestinationUpdateOneRequiredWithoutExportsNestedInput = {
+  create?: Prisma.XOR<Prisma.GoogleSheetsDestinationCreateWithoutExportsInput, Prisma.GoogleSheetsDestinationUncheckedCreateWithoutExportsInput>
+  connectOrCreate?: Prisma.GoogleSheetsDestinationCreateOrConnectWithoutExportsInput
+  upsert?: Prisma.GoogleSheetsDestinationUpsertWithoutExportsInput
+  connect?: Prisma.GoogleSheetsDestinationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.GoogleSheetsDestinationUpdateToOneWithWhereWithoutExportsInput, Prisma.GoogleSheetsDestinationUpdateWithoutExportsInput>, Prisma.GoogleSheetsDestinationUncheckedUpdateWithoutExportsInput>
+}
+
 export type GoogleSheetsDestinationCreateWithoutTenantInput = {
   id?: string
   spreadsheetId: string
@@ -458,6 +484,7 @@ export type GoogleSheetsDestinationCreateWithoutTenantInput = {
   errorSummary?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  exports?: Prisma.OrderExportCreateNestedManyWithoutDestinationInput
 }
 
 export type GoogleSheetsDestinationUncheckedCreateWithoutTenantInput = {
@@ -470,6 +497,7 @@ export type GoogleSheetsDestinationUncheckedCreateWithoutTenantInput = {
   errorSummary?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  exports?: Prisma.OrderExportUncheckedCreateNestedManyWithoutDestinationInput
 }
 
 export type GoogleSheetsDestinationCreateOrConnectWithoutTenantInput = {
@@ -498,6 +526,7 @@ export type GoogleSheetsDestinationUpdateWithoutTenantInput = {
   errorSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  exports?: Prisma.OrderExportUpdateManyWithoutDestinationNestedInput
 }
 
 export type GoogleSheetsDestinationUncheckedUpdateWithoutTenantInput = {
@@ -510,8 +539,106 @@ export type GoogleSheetsDestinationUncheckedUpdateWithoutTenantInput = {
   errorSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  exports?: Prisma.OrderExportUncheckedUpdateManyWithoutDestinationNestedInput
 }
 
+export type GoogleSheetsDestinationCreateWithoutExportsInput = {
+  id?: string
+  spreadsheetId: string
+  sheetName: string
+  requiredHeaders: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  status?: string
+  lastValidatedAt?: Date | string | null
+  errorSummary?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tenant: Prisma.TenantCreateNestedOneWithoutSheetsDestinationInput
+}
+
+export type GoogleSheetsDestinationUncheckedCreateWithoutExportsInput = {
+  id?: string
+  tenantId: string
+  spreadsheetId: string
+  sheetName: string
+  requiredHeaders: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  status?: string
+  lastValidatedAt?: Date | string | null
+  errorSummary?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type GoogleSheetsDestinationCreateOrConnectWithoutExportsInput = {
+  where: Prisma.GoogleSheetsDestinationWhereUniqueInput
+  create: Prisma.XOR<Prisma.GoogleSheetsDestinationCreateWithoutExportsInput, Prisma.GoogleSheetsDestinationUncheckedCreateWithoutExportsInput>
+}
+
+export type GoogleSheetsDestinationUpsertWithoutExportsInput = {
+  update: Prisma.XOR<Prisma.GoogleSheetsDestinationUpdateWithoutExportsInput, Prisma.GoogleSheetsDestinationUncheckedUpdateWithoutExportsInput>
+  create: Prisma.XOR<Prisma.GoogleSheetsDestinationCreateWithoutExportsInput, Prisma.GoogleSheetsDestinationUncheckedCreateWithoutExportsInput>
+  where?: Prisma.GoogleSheetsDestinationWhereInput
+}
+
+export type GoogleSheetsDestinationUpdateToOneWithWhereWithoutExportsInput = {
+  where?: Prisma.GoogleSheetsDestinationWhereInput
+  data: Prisma.XOR<Prisma.GoogleSheetsDestinationUpdateWithoutExportsInput, Prisma.GoogleSheetsDestinationUncheckedUpdateWithoutExportsInput>
+}
+
+export type GoogleSheetsDestinationUpdateWithoutExportsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  spreadsheetId?: Prisma.StringFieldUpdateOperationsInput | string
+  sheetName?: Prisma.StringFieldUpdateOperationsInput | string
+  requiredHeaders?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  lastValidatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  errorSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutSheetsDestinationNestedInput
+}
+
+export type GoogleSheetsDestinationUncheckedUpdateWithoutExportsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  spreadsheetId?: Prisma.StringFieldUpdateOperationsInput | string
+  sheetName?: Prisma.StringFieldUpdateOperationsInput | string
+  requiredHeaders?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  lastValidatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  errorSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+
+/**
+ * Count Type GoogleSheetsDestinationCountOutputType
+ */
+
+export type GoogleSheetsDestinationCountOutputType = {
+  exports: number
+}
+
+export type GoogleSheetsDestinationCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  exports?: boolean | GoogleSheetsDestinationCountOutputTypeCountExportsArgs
+}
+
+/**
+ * GoogleSheetsDestinationCountOutputType without action
+ */
+export type GoogleSheetsDestinationCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the GoogleSheetsDestinationCountOutputType
+   */
+  select?: Prisma.GoogleSheetsDestinationCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * GoogleSheetsDestinationCountOutputType without action
+ */
+export type GoogleSheetsDestinationCountOutputTypeCountExportsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.OrderExportWhereInput
+}
 
 
 export type GoogleSheetsDestinationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -526,6 +653,8 @@ export type GoogleSheetsDestinationSelect<ExtArgs extends runtime.Types.Extensio
   createdAt?: boolean
   updatedAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
+  exports?: boolean | Prisma.GoogleSheetsDestination$exportsArgs<ExtArgs>
+  _count?: boolean | Prisma.GoogleSheetsDestinationCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["googleSheetsDestination"]>
 
 export type GoogleSheetsDestinationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -572,6 +701,8 @@ export type GoogleSheetsDestinationSelectScalar = {
 export type GoogleSheetsDestinationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "spreadsheetId" | "sheetName" | "requiredHeaders" | "status" | "lastValidatedAt" | "errorSummary" | "createdAt" | "updatedAt", ExtArgs["result"]["googleSheetsDestination"]>
 export type GoogleSheetsDestinationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
+  exports?: boolean | Prisma.GoogleSheetsDestination$exportsArgs<ExtArgs>
+  _count?: boolean | Prisma.GoogleSheetsDestinationCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type GoogleSheetsDestinationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
@@ -584,6 +715,7 @@ export type $GoogleSheetsDestinationPayload<ExtArgs extends runtime.Types.Extens
   name: "GoogleSheetsDestination"
   objects: {
     tenant: Prisma.$TenantPayload<ExtArgs>
+    exports: Prisma.$OrderExportPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -991,6 +1123,7 @@ readonly fields: GoogleSheetsDestinationFieldRefs;
 export interface Prisma__GoogleSheetsDestinationClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   tenant<T extends Prisma.TenantDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TenantDefaultArgs<ExtArgs>>): Prisma.Prisma__TenantClient<runtime.Types.Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  exports<T extends Prisma.GoogleSheetsDestination$exportsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.GoogleSheetsDestination$exportsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderExportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1428,6 +1561,30 @@ export type GoogleSheetsDestinationDeleteManyArgs<ExtArgs extends runtime.Types.
    * Limit how many GoogleSheetsDestinations to delete.
    */
   limit?: number
+}
+
+/**
+ * GoogleSheetsDestination.exports
+ */
+export type GoogleSheetsDestination$exportsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the OrderExport
+   */
+  select?: Prisma.OrderExportSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the OrderExport
+   */
+  omit?: Prisma.OrderExportOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OrderExportInclude<ExtArgs> | null
+  where?: Prisma.OrderExportWhereInput
+  orderBy?: Prisma.OrderExportOrderByWithRelationInput | Prisma.OrderExportOrderByWithRelationInput[]
+  cursor?: Prisma.OrderExportWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.OrderExportScalarFieldEnum | Prisma.OrderExportScalarFieldEnum[]
 }
 
 /**

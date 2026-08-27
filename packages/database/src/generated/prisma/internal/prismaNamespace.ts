@@ -404,6 +404,7 @@ export const ModelName = {
   GoogleSheetsDestination: 'GoogleSheetsDestination',
   TenantSettings: 'TenantSettings',
   Order: 'Order',
+  OrderExport: 'OrderExport',
   AuditLog: 'AuditLog',
   OrderItem: 'OrderItem',
   Product: 'Product',
@@ -423,7 +424,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "tenant" | "webhookEvent" | "conversation" | "message" | "googleSheetsDestination" | "tenantSettings" | "order" | "auditLog" | "orderItem" | "product" | "attachment"
+    modelProps: "tenant" | "webhookEvent" | "conversation" | "message" | "googleSheetsDestination" | "tenantSettings" | "order" | "orderExport" | "auditLog" | "orderItem" | "product" | "attachment"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -945,6 +946,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    OrderExport: {
+      payload: Prisma.$OrderExportPayload<ExtArgs>
+      fields: Prisma.OrderExportFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.OrderExportFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderExportPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.OrderExportFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderExportPayload>
+        }
+        findFirst: {
+          args: Prisma.OrderExportFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderExportPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.OrderExportFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderExportPayload>
+        }
+        findMany: {
+          args: Prisma.OrderExportFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderExportPayload>[]
+        }
+        create: {
+          args: Prisma.OrderExportCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderExportPayload>
+        }
+        createMany: {
+          args: Prisma.OrderExportCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.OrderExportCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderExportPayload>[]
+        }
+        delete: {
+          args: Prisma.OrderExportDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderExportPayload>
+        }
+        update: {
+          args: Prisma.OrderExportUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderExportPayload>
+        }
+        deleteMany: {
+          args: Prisma.OrderExportDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.OrderExportUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.OrderExportUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderExportPayload>[]
+        }
+        upsert: {
+          args: Prisma.OrderExportUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderExportPayload>
+        }
+        aggregate: {
+          args: Prisma.OrderExportAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateOrderExport>
+        }
+        groupBy: {
+          args: Prisma.OrderExportGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.OrderExportGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.OrderExportCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.OrderExportCountAggregateOutputType> | number
+        }
+      }
+    }
     AuditLog: {
       payload: Prisma.$AuditLogPayload<ExtArgs>
       fields: Prisma.AuditLogFieldRefs
@@ -1389,6 +1464,24 @@ export const OrderScalarFieldEnum = {
 export type OrderScalarFieldEnum = (typeof OrderScalarFieldEnum)[keyof typeof OrderScalarFieldEnum]
 
 
+export const OrderExportScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  orderId: 'orderId',
+  destinationId: 'destinationId',
+  status: 'status',
+  attempts: 'attempts',
+  rowNumber: 'rowNumber',
+  lastAttemptAt: 'lastAttemptAt',
+  lastSyncedAt: 'lastSyncedAt',
+  errorSummary: 'errorSummary',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type OrderExportScalarFieldEnum = (typeof OrderExportScalarFieldEnum)[keyof typeof OrderExportScalarFieldEnum]
+
+
 export const AuditLogScalarFieldEnum = {
   id: 'id',
   tenantId: 'tenantId',
@@ -1736,6 +1829,7 @@ export type GlobalOmitConfig = {
   googleSheetsDestination?: Prisma.GoogleSheetsDestinationOmit
   tenantSettings?: Prisma.TenantSettingsOmit
   order?: Prisma.OrderOmit
+  orderExport?: Prisma.OrderExportOmit
   auditLog?: Prisma.AuditLogOmit
   orderItem?: Prisma.OrderItemOmit
   product?: Prisma.ProductOmit
