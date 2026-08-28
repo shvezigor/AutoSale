@@ -90,12 +90,10 @@ describe('MetaInstagramClient', () => {
     expect(init).toMatchObject({ headers: { authorization: 'Bearer access-token-that-must-not-leak' } });
   });
 
-  it('returns the actual granted permission set without placing the token in the URL', async () => {
+  it('normalizes the documented Instagram Login permission string without placing the token in the URL', async () => {
     const fetchFn = vi.fn<typeof fetch>().mockResolvedValue(response({
       data: [
-        { permission: 'instagram_business_basic', status: 'granted' },
-        { permission: 'instagram_business_manage_messages', status: 'granted' },
-        { permission: 'pages_show_list', status: 'declined' },
+        { permissions: ' instagram_business_manage_messages, instagram_business_basic, instagram_business_basic ' },
       ],
     }));
     const client = new MetaInstagramClient({ ...config, fetch: fetchFn });
@@ -109,6 +107,11 @@ describe('MetaInstagramClient', () => {
     expect(String(requestUrl)).toBe('https://graph.instagram.com/v24.0/me/permissions');
     expect(String(requestUrl)).not.toContain('access-token-that-must-not-leak');
     expect(init).toMatchObject({ headers: { authorization: 'Bearer access-token-that-must-not-leak' } });
+  });
+
+  it.each([{ data: [] }, { data: [{}] }, { data: [{ permissions: ['instagram_business_basic'] }] }, { data: [{ permission: 'instagram_business_basic', status: 'granted' }] }])('rejects malformed or Facebook-style permission payloads', async (payload) => {
+    const client = new MetaInstagramClient({ ...config, fetch: vi.fn<typeof fetch>().mockResolvedValue(response(payload)) });
+    await expect(client.getGrantedScopes('access-token-that-must-not-leak')).rejects.toEqual(expect.objectContaining({ name: 'MetaInstagramError', status: 200, providerCode: null }));
   });
 
   it('subscribes the current account to message webhooks', async () => {

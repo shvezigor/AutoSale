@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { InstagramOAuthStateService } from './instagram-oauth-state.service.js';
 
 type OAuthStateRow = {
+  id: string;
   tokenHash: string;
   tenantId: string;
   userId: string;
@@ -57,13 +58,15 @@ class OAuthStateStore {
           row.usedAt = data.usedAt;
         }
 
-        return rows.map(({ tenantId, userId, returnPath }) => ({
+        return rows.map(({ id, tenantId, userId, returnPath }) => ({
+          id,
           tenantId,
           userId,
           returnPath,
         }));
       },
     },
+    tenant: { update: async () => ({}) },
     $transaction: async <T>(callback: (transaction: OAuthStateStore['prisma']) => Promise<T>) => callback(this.prisma),
   };
 }
@@ -123,6 +126,7 @@ describe('InstagramOAuthStateService', () => {
     });
 
     await expect(service.consume(rawState)).resolves.toEqual({
+      id: expect.any(String),
       tenantId: 'tenant-a',
       userId: 'user-a',
       returnPath: '/settings?tab=instagram',

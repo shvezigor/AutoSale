@@ -101,15 +101,9 @@ export class MetaInstagramClient {
 
   async getGrantedScopes(accessToken: string): Promise<string[]> {
     const payload = await this.requestJson(this.graphUrl('me/permissions'), this.authorized(accessToken));
-    if (!isRecord(payload) || !Array.isArray(payload.data)) throw new MetaInstagramError(200, null);
-
-    const granted = new Set<string>();
-    for (const permission of payload.data) {
-      if (!isRecord(permission)) continue;
-      if (permission.status === 'granted' && typeof permission.permission === 'string') {
-        granted.add(permission.permission);
-      }
-    }
+    const entry = isRecord(payload) && Array.isArray(payload.data) ? payload.data[0] : undefined;
+    if (!isRecord(entry) || typeof entry.permissions !== 'string') throw new MetaInstagramError(200, null);
+    const granted = new Set(entry.permissions.split(',').map((scope) => scope.trim()).filter(Boolean));
     return [...granted].sort();
   }
 

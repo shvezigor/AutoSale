@@ -1,4 +1,4 @@
-import type { PrismaClient } from '@autosale/database';
+import { type Prisma, type PrismaClient } from '@autosale/database';
 import {
   MetaInstagramError,
   type MetaInstagramClient,
@@ -93,7 +93,7 @@ export class InstagramOAuthService {
     code: string | undefined,
     rawState: string,
   ): Promise<{ returnPath: string; summary: InstagramConnectionSummary }> {
-    let binding: { tenantId: string; userId: string; returnPath: string };
+    let binding: { id: string; tenantId: string; userId: string; returnPath: string };
     try {
       binding = await this.states.consume(rawState);
     } catch {
@@ -134,15 +134,12 @@ export class InstagramOAuthService {
       throw safeFailure();
     }
 
-    const owner = await this.prisma.instagramConnection.findUnique({
-      where: { externalAccountId: identity.accountId },
-      select: { tenantId: true },
-    });
-    if (owner && owner.tenantId !== binding.tenantId) {
+    const connectedAt = this.now();
+    if (expiresIn !== null && connectedAt.getTime() + expiresIn * 1000 <= connectedAt.getTime()) {
+      await this.markFailure(binding.tenantId, 'REAUTH_REQUIRED', 'META_TOKEN_EXPIRED');
       throw safeFailure();
     }
 
-    const connectedAt = this.now();
     const pendingData = {
       externalAccountId: identity.accountId,
       displayName: identity.username,
@@ -157,10 +154,14 @@ export class InstagramOAuthService {
     };
 
     try {
-      await this.prisma.instagramConnection.upsert({
+      await this.withCurrentAttempt(binding, async (transaction) => {
+        const owner = await transaction.instagramConnection.findUnique({ where: { externalAccountId: identity.accountId }, select: { tenantId: true } });
+        if (owner && owner.tenantId !== binding.tenantId) throw safeFailure();
+        await transaction.instagramConnection.upsert({
         where: { tenantId: binding.tenantId },
         create: { tenantId: binding.tenantId, ...pendingData },
         update: pendingData,
+      });
       });
     } catch {
       // A concurrent unique-account claim must never overwrite the owning tenant.
@@ -179,7 +180,7 @@ export class InstagramOAuthService {
 
     let active: SafeConnectionRow;
     try {
-      active = await this.prisma.instagramConnection.update({
+      active = await this.withCurrentAttempt(binding, (transaction) => transaction.instagramConnection.update({
         where: { tenantId: binding.tenantId },
         data: {
           status: 'ACTIVE',
@@ -188,7 +189,7 @@ export class InstagramOAuthService {
           disconnectedAt: null,
         },
         select: SAFE_CONNECTION_SELECT,
-      });
+      }));
     } catch {
       throw safeFailure();
     }
@@ -299,6 +300,36 @@ export class InstagramOAuthService {
       return false;
     }
   }
+
+  private async withCurrentAttempt<T>(
+    binding: { id: string; tenantId: string; userId: string },
+    operation: (transaction: Prisma.TransactionClient) => Promise<T>,
+  ): Promise<T> {
+    return this.withSerializableRetry(() => this.prisma.$transaction(async (transaction) => {
+      const locked = await transaction.tenant.updateMany({
+        where: { id: binding.tenantId, instagramOAuthCurrentAttemptId: binding.id },
+        data: { instagramOAuthCurrentAttemptId: binding.id },
+      });
+      if (locked.count !== 1) throw safeFailure();
+      const [tenant, membership] = await Promise.all([
+        transaction.tenant.findUnique({ where: { id: binding.tenantId }, select: { status: true } }),
+        transaction.tenantMembership.findUnique({ where: { userId_tenantId: { userId: binding.userId, tenantId: binding.tenantId } }, select: { role: true, status: true, user: { select: { status: true } } } }),
+      ]);
+      if (tenant?.status !== 'ACTIVE' || membership?.status !== 'ACTIVE' || membership.role !== 'OWNER' || membership.user.status !== 'ACTIVE') throw safeFailure();
+      return operation(transaction);
+    }, { isolationLevel: 'Serializable' }));
+  }
+
+  private async withSerializableRetry<T>(operation: () => Promise<T>): Promise<T> {
+    let lastError: unknown;
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      try { return await operation(); } catch (error) {
+        lastError = error;
+        if (!isSerializableConflict(error) || attempt === 2) throw error;
+      }
+    }
+    throw lastError;
+  }
 }
 
 function toSummary(connection: SafeConnectionRow, expired = false): InstagramConnectionSummary {
@@ -337,6 +368,10 @@ function emptySummary(): InstagramConnectionSummary {
 function isAuthorizationFailure(error: unknown): boolean {
   return error instanceof MetaInstagramError &&
     (error.status === 400 || error.status === 401 || error.status === 403 || error.providerCode === 190);
+}
+
+function isSerializableConflict(error: unknown): boolean {
+  return typeof error === 'object' && error !== null && 'code' in error && error.code === 'P2034';
 }
 
 function safeFailure(): Error {

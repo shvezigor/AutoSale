@@ -23,6 +23,7 @@ describe('InstagramOAuthController', () => {
     sessionId: 'session-owner',
   };
   const manager: AuthPrincipal = { ...owner, userId: 'manager-a', membershipRole: 'MANAGER', sessionId: 'session-manager' };
+  const platformAdmin: AuthPrincipal = { ...owner, userId: 'admin-a', platformRole: 'PLATFORM_ADMIN', tenantId: null, membershipRole: null, sessionId: 'session-admin' };
   let app: INestApplication | undefined;
   const getSummary = vi.fn();
   const connect = vi.fn();
@@ -52,6 +53,7 @@ describe('InstagramOAuthController', () => {
     resolve.mockReset().mockImplementation(async (token: string) => {
       if (token === 'owner-token') return owner;
       if (token === 'manager-token') return manager;
+      if (token === 'admin-token') return platformAdmin;
       return null;
     });
 
@@ -86,6 +88,7 @@ describe('InstagramOAuthController', () => {
       .get('/api/integrations/instagram')
       .set('Cookie', cookie('manager-token'))
       .expect(200);
+    await request(app!.getHttpServer()).get('/api/integrations/instagram').set('Cookie', cookie('admin-token')).expect(403);
 
     expect(getSummary).toHaveBeenCalledWith('tenant-a');
   });
@@ -97,6 +100,13 @@ describe('InstagramOAuthController', () => {
       .set(csrfHeader(manager))
       .send({ returnPath: '/settings?tab=instagram' })
       .expect(403);
+    await request(app!.getHttpServer())
+      .post('/api/integrations/instagram/connect')
+      .set('Cookie', cookie('admin-token'))
+      .set(csrfHeader(platformAdmin))
+      .send({ returnPath: '/settings?tab=instagram' })
+      .expect(403);
+    await request(app!.getHttpServer()).post('/api/integrations/instagram/disconnect').set('Cookie', cookie('invalid-session')).expect(401);
     await request(app!.getHttpServer())
       .post('/api/integrations/instagram/connect')
       .set('Cookie', cookie('owner-token'))

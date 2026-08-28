@@ -554,10 +554,6 @@ export type InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.InstagramConnectionUpdateToOneWithWhereWithoutTenantInput, Prisma.InstagramConnectionUpdateWithoutTenantInput>, Prisma.InstagramConnectionUncheckedUpdateWithoutTenantInput>
 }
 
-export type NullableStringFieldUpdateOperationsInput = {
-  set?: string | null
-}
-
 export type EnumInstagramConnectionStatusFieldUpdateOperationsInput = {
   set?: $Enums.InstagramConnectionStatus
 }

@@ -30,6 +30,7 @@ export type TenantMinAggregateOutputType = {
   name: string | null
   status: $Enums.AccessStatus | null
   createdAt: Date | null
+  instagramOAuthCurrentAttemptId: string | null
 }
 
 export type TenantMaxAggregateOutputType = {
@@ -38,6 +39,7 @@ export type TenantMaxAggregateOutputType = {
   name: string | null
   status: $Enums.AccessStatus | null
   createdAt: Date | null
+  instagramOAuthCurrentAttemptId: string | null
 }
 
 export type TenantCountAggregateOutputType = {
@@ -46,6 +48,7 @@ export type TenantCountAggregateOutputType = {
   name: number
   status: number
   createdAt: number
+  instagramOAuthCurrentAttemptId: number
   _all: number
 }
 
@@ -56,6 +59,7 @@ export type TenantMinAggregateInputType = {
   name?: true
   status?: true
   createdAt?: true
+  instagramOAuthCurrentAttemptId?: true
 }
 
 export type TenantMaxAggregateInputType = {
@@ -64,6 +68,7 @@ export type TenantMaxAggregateInputType = {
   name?: true
   status?: true
   createdAt?: true
+  instagramOAuthCurrentAttemptId?: true
 }
 
 export type TenantCountAggregateInputType = {
@@ -72,6 +77,7 @@ export type TenantCountAggregateInputType = {
   name?: true
   status?: true
   createdAt?: true
+  instagramOAuthCurrentAttemptId?: true
   _all?: true
 }
 
@@ -153,6 +159,7 @@ export type TenantGroupByOutputType = {
   name: string
   status: $Enums.AccessStatus
   createdAt: Date
+  instagramOAuthCurrentAttemptId: string | null
   _count: TenantCountAggregateOutputType | null
   _min: TenantMinAggregateOutputType | null
   _max: TenantMaxAggregateOutputType | null
@@ -182,6 +189,7 @@ export type TenantWhereInput = {
   name?: Prisma.StringFilter<"Tenant"> | string
   status?: Prisma.EnumAccessStatusFilter<"Tenant"> | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFilter<"Tenant"> | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.UuidNullableFilter<"Tenant"> | string | null
   events?: Prisma.WebhookEventListRelationFilter
   conversations?: Prisma.ConversationListRelationFilter
   messages?: Prisma.MessageListRelationFilter
@@ -205,6 +213,7 @@ export type TenantOrderByWithRelationInput = {
   name?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  instagramOAuthCurrentAttemptId?: Prisma.SortOrderInput | Prisma.SortOrder
   events?: Prisma.WebhookEventOrderByRelationAggregateInput
   conversations?: Prisma.ConversationOrderByRelationAggregateInput
   messages?: Prisma.MessageOrderByRelationAggregateInput
@@ -231,6 +240,7 @@ export type TenantWhereUniqueInput = Prisma.AtLeast<{
   name?: Prisma.StringFilter<"Tenant"> | string
   status?: Prisma.EnumAccessStatusFilter<"Tenant"> | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFilter<"Tenant"> | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.UuidNullableFilter<"Tenant"> | string | null
   events?: Prisma.WebhookEventListRelationFilter
   conversations?: Prisma.ConversationListRelationFilter
   messages?: Prisma.MessageListRelationFilter
@@ -254,6 +264,7 @@ export type TenantOrderByWithAggregationInput = {
   name?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  instagramOAuthCurrentAttemptId?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.TenantCountOrderByAggregateInput
   _max?: Prisma.TenantMaxOrderByAggregateInput
   _min?: Prisma.TenantMinOrderByAggregateInput
@@ -268,6 +279,7 @@ export type TenantScalarWhereWithAggregatesInput = {
   name?: Prisma.StringWithAggregatesFilter<"Tenant"> | string
   status?: Prisma.EnumAccessStatusWithAggregatesFilter<"Tenant"> | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Tenant"> | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.UuidNullableWithAggregatesFilter<"Tenant"> | string | null
 }
 
 export type TenantCreateInput = {
@@ -276,6 +288,7 @@ export type TenantCreateInput = {
   name: string
   status?: $Enums.AccessStatus
   createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
   events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
@@ -299,6 +312,7 @@ export type TenantUncheckedCreateInput = {
   name: string
   status?: $Enums.AccessStatus
   createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
   events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
@@ -322,6 +336,7 @@ export type TenantUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
@@ -345,6 +360,7 @@ export type TenantUncheckedUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
@@ -368,6 +384,7 @@ export type TenantCreateManyInput = {
   name: string
   status?: $Enums.AccessStatus
   createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
 }
 
 export type TenantUpdateManyMutationInput = {
@@ -376,6 +393,7 @@ export type TenantUpdateManyMutationInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type TenantUncheckedUpdateManyInput = {
@@ -384,6 +402,7 @@ export type TenantUncheckedUpdateManyInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type TenantCountOrderByAggregateInput = {
@@ -392,6 +411,7 @@ export type TenantCountOrderByAggregateInput = {
   name?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  instagramOAuthCurrentAttemptId?: Prisma.SortOrder
 }
 
 export type TenantMaxOrderByAggregateInput = {
@@ -400,6 +420,7 @@ export type TenantMaxOrderByAggregateInput = {
   name?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  instagramOAuthCurrentAttemptId?: Prisma.SortOrder
 }
 
 export type TenantMinOrderByAggregateInput = {
@@ -408,6 +429,7 @@ export type TenantMinOrderByAggregateInput = {
   name?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  instagramOAuthCurrentAttemptId?: Prisma.SortOrder
 }
 
 export type TenantScalarRelationFilter = {
@@ -430,6 +452,10 @@ export type EnumAccessStatusFieldUpdateOperationsInput = {
 
 export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
+}
+
+export type NullableStringFieldUpdateOperationsInput = {
+  set?: string | null
 }
 
 export type TenantCreateNestedOneWithoutInstagramConnectionInput = {
@@ -652,6 +678,7 @@ export type TenantCreateWithoutInstagramConnectionInput = {
   name: string
   status?: $Enums.AccessStatus
   createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
   events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
@@ -674,6 +701,7 @@ export type TenantUncheckedCreateWithoutInstagramConnectionInput = {
   name: string
   status?: $Enums.AccessStatus
   createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
   events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
@@ -712,6 +740,7 @@ export type TenantUpdateWithoutInstagramConnectionInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
@@ -734,6 +763,7 @@ export type TenantUncheckedUpdateWithoutInstagramConnectionInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
@@ -756,6 +786,7 @@ export type TenantCreateWithoutInstagramOAuthStatesInput = {
   name: string
   status?: $Enums.AccessStatus
   createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
   events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
@@ -778,6 +809,7 @@ export type TenantUncheckedCreateWithoutInstagramOAuthStatesInput = {
   name: string
   status?: $Enums.AccessStatus
   createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
   events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
@@ -816,6 +848,7 @@ export type TenantUpdateWithoutInstagramOAuthStatesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
@@ -838,6 +871,7 @@ export type TenantUncheckedUpdateWithoutInstagramOAuthStatesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
@@ -860,6 +894,7 @@ export type TenantCreateWithoutMembershipsInput = {
   name: string
   status?: $Enums.AccessStatus
   createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
   events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
@@ -882,6 +917,7 @@ export type TenantUncheckedCreateWithoutMembershipsInput = {
   name: string
   status?: $Enums.AccessStatus
   createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
   events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
@@ -920,6 +956,7 @@ export type TenantUpdateWithoutMembershipsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
@@ -942,6 +979,7 @@ export type TenantUncheckedUpdateWithoutMembershipsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
@@ -964,6 +1002,7 @@ export type TenantCreateWithoutSessionsInput = {
   name: string
   status?: $Enums.AccessStatus
   createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
   events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
@@ -986,6 +1025,7 @@ export type TenantUncheckedCreateWithoutSessionsInput = {
   name: string
   status?: $Enums.AccessStatus
   createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
   events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
@@ -1024,6 +1064,7 @@ export type TenantUpdateWithoutSessionsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
@@ -1046,6 +1087,7 @@ export type TenantUncheckedUpdateWithoutSessionsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
@@ -1068,6 +1110,7 @@ export type TenantCreateWithoutInvitationsInput = {
   name: string
   status?: $Enums.AccessStatus
   createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
   events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
@@ -1090,6 +1133,7 @@ export type TenantUncheckedCreateWithoutInvitationsInput = {
   name: string
   status?: $Enums.AccessStatus
   createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
   events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
@@ -1128,6 +1172,7 @@ export type TenantUpdateWithoutInvitationsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
@@ -1150,6 +1195,7 @@ export type TenantUncheckedUpdateWithoutInvitationsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
@@ -1172,6 +1218,7 @@ export type TenantCreateWithoutSecurityAuditLogsInput = {
   name: string
   status?: $Enums.AccessStatus
   createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
   events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
@@ -1194,6 +1241,7 @@ export type TenantUncheckedCreateWithoutSecurityAuditLogsInput = {
   name: string
   status?: $Enums.AccessStatus
   createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
   events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
@@ -1232,6 +1280,7 @@ export type TenantUpdateWithoutSecurityAuditLogsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
@@ -1254,6 +1303,7 @@ export type TenantUncheckedUpdateWithoutSecurityAuditLogsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
@@ -1276,6 +1326,7 @@ export type TenantCreateWithoutEventsInput = {
   name: string
   status?: $Enums.AccessStatus
   createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
@@ -1298,6 +1349,7 @@ export type TenantUncheckedCreateWithoutEventsInput = {
   name: string
   status?: $Enums.AccessStatus
   createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
@@ -1336,6 +1388,7 @@ export type TenantUpdateWithoutEventsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
@@ -1358,6 +1411,7 @@ export type TenantUncheckedUpdateWithoutEventsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
@@ -1380,6 +1434,7 @@ export type TenantCreateWithoutConversationsInput = {
   name: string
   status?: $Enums.AccessStatus
   createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
   events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
@@ -1402,6 +1457,7 @@ export type TenantUncheckedCreateWithoutConversationsInput = {
   name: string
   status?: $Enums.AccessStatus
   createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
   events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
@@ -1440,6 +1496,7 @@ export type TenantUpdateWithoutConversationsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
@@ -1462,6 +1519,7 @@ export type TenantUncheckedUpdateWithoutConversationsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
@@ -1484,6 +1542,7 @@ export type TenantCreateWithoutMessagesInput = {
   name: string
   status?: $Enums.AccessStatus
   createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
   events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
@@ -1506,6 +1565,7 @@ export type TenantUncheckedCreateWithoutMessagesInput = {
   name: string
   status?: $Enums.AccessStatus
   createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
   events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
@@ -1544,6 +1604,7 @@ export type TenantUpdateWithoutMessagesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
@@ -1566,6 +1627,7 @@ export type TenantUncheckedUpdateWithoutMessagesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
@@ -1588,6 +1650,7 @@ export type TenantCreateWithoutSheetsDestinationInput = {
   name: string
   status?: $Enums.AccessStatus
   createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
   events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
@@ -1610,6 +1673,7 @@ export type TenantUncheckedCreateWithoutSheetsDestinationInput = {
   name: string
   status?: $Enums.AccessStatus
   createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
   events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
@@ -1648,6 +1712,7 @@ export type TenantUpdateWithoutSheetsDestinationInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
@@ -1670,6 +1735,7 @@ export type TenantUncheckedUpdateWithoutSheetsDestinationInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
@@ -1692,6 +1758,7 @@ export type TenantCreateWithoutSettingsInput = {
   name: string
   status?: $Enums.AccessStatus
   createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
   events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
@@ -1714,6 +1781,7 @@ export type TenantUncheckedCreateWithoutSettingsInput = {
   name: string
   status?: $Enums.AccessStatus
   createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
   events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
@@ -1752,6 +1820,7 @@ export type TenantUpdateWithoutSettingsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
@@ -1774,6 +1843,7 @@ export type TenantUncheckedUpdateWithoutSettingsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
@@ -1796,6 +1866,7 @@ export type TenantCreateWithoutOrdersInput = {
   name: string
   status?: $Enums.AccessStatus
   createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
   events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
@@ -1818,6 +1889,7 @@ export type TenantUncheckedCreateWithoutOrdersInput = {
   name: string
   status?: $Enums.AccessStatus
   createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
   events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
@@ -1856,6 +1928,7 @@ export type TenantUpdateWithoutOrdersInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
@@ -1878,6 +1951,7 @@ export type TenantUncheckedUpdateWithoutOrdersInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
@@ -1900,6 +1974,7 @@ export type TenantCreateWithoutOrderExportsInput = {
   name: string
   status?: $Enums.AccessStatus
   createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
   events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
@@ -1922,6 +1997,7 @@ export type TenantUncheckedCreateWithoutOrderExportsInput = {
   name: string
   status?: $Enums.AccessStatus
   createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
   events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
@@ -1960,6 +2036,7 @@ export type TenantUpdateWithoutOrderExportsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
@@ -1982,6 +2059,7 @@ export type TenantUncheckedUpdateWithoutOrderExportsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
@@ -2004,6 +2082,7 @@ export type TenantCreateWithoutAuditLogsInput = {
   name: string
   status?: $Enums.AccessStatus
   createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
   events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
@@ -2026,6 +2105,7 @@ export type TenantUncheckedCreateWithoutAuditLogsInput = {
   name: string
   status?: $Enums.AccessStatus
   createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
   events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
@@ -2064,6 +2144,7 @@ export type TenantUpdateWithoutAuditLogsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
@@ -2086,6 +2167,7 @@ export type TenantUncheckedUpdateWithoutAuditLogsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
@@ -2108,6 +2190,7 @@ export type TenantCreateWithoutProductsInput = {
   name: string
   status?: $Enums.AccessStatus
   createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
   events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
@@ -2130,6 +2213,7 @@ export type TenantUncheckedCreateWithoutProductsInput = {
   name: string
   status?: $Enums.AccessStatus
   createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
   events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
@@ -2168,6 +2252,7 @@ export type TenantUpdateWithoutProductsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
@@ -2190,6 +2275,7 @@ export type TenantUncheckedUpdateWithoutProductsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
@@ -2342,6 +2428,7 @@ export type TenantSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   name?: boolean
   status?: boolean
   createdAt?: boolean
+  instagramOAuthCurrentAttemptId?: boolean
   events?: boolean | Prisma.Tenant$eventsArgs<ExtArgs>
   conversations?: boolean | Prisma.Tenant$conversationsArgs<ExtArgs>
   messages?: boolean | Prisma.Tenant$messagesArgs<ExtArgs>
@@ -2366,6 +2453,7 @@ export type TenantSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   name?: boolean
   status?: boolean
   createdAt?: boolean
+  instagramOAuthCurrentAttemptId?: boolean
 }, ExtArgs["result"]["tenant"]>
 
 export type TenantSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -2374,6 +2462,7 @@ export type TenantSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   name?: boolean
   status?: boolean
   createdAt?: boolean
+  instagramOAuthCurrentAttemptId?: boolean
 }, ExtArgs["result"]["tenant"]>
 
 export type TenantSelectScalar = {
@@ -2382,9 +2471,10 @@ export type TenantSelectScalar = {
   name?: boolean
   status?: boolean
   createdAt?: boolean
+  instagramOAuthCurrentAttemptId?: boolean
 }
 
-export type TenantOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "key" | "name" | "status" | "createdAt", ExtArgs["result"]["tenant"]>
+export type TenantOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "key" | "name" | "status" | "createdAt" | "instagramOAuthCurrentAttemptId", ExtArgs["result"]["tenant"]>
 export type TenantInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   events?: boolean | Prisma.Tenant$eventsArgs<ExtArgs>
   conversations?: boolean | Prisma.Tenant$conversationsArgs<ExtArgs>
@@ -2431,6 +2521,7 @@ export type $TenantPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     name: string
     status: $Enums.AccessStatus
     createdAt: Date
+    instagramOAuthCurrentAttemptId: string | null
   }, ExtArgs["result"]["tenant"]>
   composites: {}
 }
@@ -2874,6 +2965,7 @@ export interface TenantFieldRefs {
   readonly name: Prisma.FieldRef<"Tenant", 'String'>
   readonly status: Prisma.FieldRef<"Tenant", 'AccessStatus'>
   readonly createdAt: Prisma.FieldRef<"Tenant", 'DateTime'>
+  readonly instagramOAuthCurrentAttemptId: Prisma.FieldRef<"Tenant", 'String'>
 }
     
 

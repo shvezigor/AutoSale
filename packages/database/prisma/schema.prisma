@@ -55,6 +55,7 @@ model Tenant {
   securityAuditLogs SecurityAuditLog[]
   instagramConnection InstagramConnection?
   instagramOAuthStates InstagramOAuthState[]
+  instagramOAuthCurrentAttemptId String? @db.Uuid @map("instagram_oauth_current_attempt_id")
 
   @@index([status])
   @@map("tenants")

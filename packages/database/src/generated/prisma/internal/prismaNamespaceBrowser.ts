@@ -95,7 +95,8 @@ export const TenantScalarFieldEnum = {
   key: 'key',
   name: 'name',
   status: 'status',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  instagramOAuthCurrentAttemptId: 'instagramOAuthCurrentAttemptId'
 } as const
 
 export type TenantScalarFieldEnum = (typeof TenantScalarFieldEnum)[keyof typeof TenantScalarFieldEnum]

@@ -29,6 +29,7 @@ function setup() {
   const update = vi.fn();
   const updateMany = vi.fn().mockResolvedValue({ count: 1 });
   const tenantFindUnique = vi.fn().mockResolvedValue({ status: 'ACTIVE' });
+  const tenantUpdateMany = vi.fn().mockResolvedValue({ count: 1 });
   const membershipFindUnique = vi.fn().mockResolvedValue({
     role: 'OWNER',
     status: 'ACTIVE',
@@ -36,13 +37,14 @@ function setup() {
   });
   const prisma = {
     instagramConnection: { findUnique, upsert, update, updateMany },
-    tenant: { findUnique: tenantFindUnique },
+    tenant: { findUnique: tenantFindUnique, updateMany: tenantUpdateMany },
     tenantMembership: { findUnique: membershipFindUnique },
   };
+  (prisma as { $transaction?: unknown }).$transaction = async <T>(callback: (transaction: typeof prisma) => Promise<T>) => callback(prisma);
   const state = {
     create: vi.fn().mockResolvedValue('state-token'),
     consume: vi.fn().mockResolvedValue({
-      tenantId: 'tenant-a',
+      id: 'attempt-a', tenantId: 'tenant-a',
       userId: 'user-a',
       returnPath: '/settings?tab=instagram',
     }),
@@ -73,7 +75,7 @@ function setup() {
 
   return {
     service, prisma, state, meta, findUnique, upsert, update, updateMany,
-    tenantFindUnique, membershipFindUnique,
+    tenantFindUnique, tenantUpdateMany, membershipFindUnique,
   };
 }
 
@@ -173,6 +175,31 @@ describe('InstagramOAuthService', () => {
       where: { tenantId: 'tenant-a' },
       data: { status: 'ERROR', lastErrorCode: 'META_REQUIRED_SCOPES_MISSING' },
     });
+  });
+
+  it('rechecks tenant authorization in the serialized final write after provider I/O', async () => {
+    const { service, tenantFindUnique, upsert } = setup();
+    tenantFindUnique.mockResolvedValueOnce({ status: 'ACTIVE' }).mockResolvedValueOnce({ status: 'BLOCKED' });
+
+    await expect(service.completeCallback('authorization-code', 'raw-state')).rejects.toThrow('Instagram connection failed');
+    expect(upsert).not.toHaveBeenCalled();
+  });
+
+  it('rejects an older consumed attempt after a newer state becomes current', async () => {
+    const { service, state, tenantUpdateMany, upsert } = setup();
+    state.consume.mockResolvedValue({ id: 'older-attempt', tenantId: 'tenant-a', userId: 'user-a', returnPath: '/settings' });
+    tenantUpdateMany.mockResolvedValue({ count: 0 });
+
+    await expect(service.completeCallback('authorization-code', 'raw-state')).rejects.toThrow('Instagram connection failed');
+    expect(upsert).not.toHaveBeenCalled();
+  });
+
+  it('never activates an already expired exchanged credential', async () => {
+    const { service, meta, upsert } = setup();
+    meta.exchangeCode.mockResolvedValue({ accessToken: 'long-lived-token', expiresIn: -1 });
+    await expect(service.completeCallback('authorization-code', 'raw-state')).rejects.toThrow('Instagram connection failed');
+    expect(upsert).not.toHaveBeenCalled();
+    expect(meta.subscribe).not.toHaveBeenCalled();
   });
 
   it('fails closed when the Instagram account belongs to another tenant', async () => {
