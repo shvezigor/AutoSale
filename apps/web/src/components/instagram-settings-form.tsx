@@ -1,18 +1,166 @@
 'use client';
 
-import { FormEvent, useState } from 'react';
+import type { InstagramConnectionSummary as ContractInstagramConnectionSummary } from '../../../../packages/contracts/src/instagram';
+import { useState } from 'react';
+
 import { mutatingFetch } from '../auth/csrf-fetch';
 
-export interface InstagramSettings { externalAccountId: string | null; displayName: string | null; status: 'NOT_CONFIGURED' | 'ACTIVE' | 'BLOCKED'; updatedAt: string | null }
+export type InstagramConnectionSummary = ContractInstagramConnectionSummary;
 
-export function InstagramSettingsForm({ initial }: { initial: InstagramSettings }) {
-  const [accountId, setAccountId] = useState(initial.externalAccountId ?? '');
-  const [displayName, setDisplayName] = useState(initial.displayName ?? '');
-  const [state, setState] = useState<'idle' | 'saved' | 'error'>('idle');
-  async function submit(event: FormEvent) {
-    event.preventDefault(); setState('idle');
-    const response = await mutatingFetch('/api/settings/instagram', { method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ externalAccountId: accountId, displayName: displayName || null }) });
-    setState(response.ok ? 'saved' : 'error');
+type MembershipRole = 'OWNER' | 'MANAGER' | null;
+type Message = { kind: 'success' | 'error'; text: string } | null;
+
+const META_AUTHORIZATION_ORIGIN = 'https://www.instagram.com';
+const CONNECTION_STATUSES = new Set<InstagramConnectionSummary['status']>([
+  'NOT_CONNECTED',
+  'LEGACY',
+  'ACTIVE',
+  'REAUTH_REQUIRED',
+  'ERROR',
+  'DISCONNECTED',
+]);
+
+export function InstagramSettingsForm({
+  initial,
+  membershipRole,
+}: {
+  initial: InstagramConnectionSummary;
+  membershipRole: MembershipRole;
+}) {
+  const [connection, setConnection] = useState(initial);
+  const [message, setMessage] = useState<Message>(null);
+  const [pending, setPending] = useState(false);
+  const [confirmingDisconnect, setConfirmingDisconnect] = useState(false);
+  const isOwner = membershipRole === 'OWNER';
+  const actionLabel = connectionActionLabel(connection.status);
+
+  async function connect() {
+    setPending(true);
+    setMessage(null);
+    try {
+      const response = await mutatingFetch('/api/integrations/instagram/connect', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ returnPath: '/settings' }),
+      });
+      const payload = await jsonOrNull(response);
+      const authorizationUrl = isRecord(payload) ? payload.authorizationUrl : null;
+      if (!response.ok || typeof authorizationUrl !== 'string' || !isTrustedMetaAuthorizationUrl(authorizationUrl)) {
+        throw new Error('connect failed');
+      }
+      window.location.href = authorizationUrl;
+    } catch {
+      setMessage({ kind: 'error', text: 'Не вдалося розпочати підключення Instagram' });
+    } finally {
+      setPending(false);
+    }
   }
-  return <form className="settings-card sheets-card" onSubmit={submit}><div className="settings-card-heading"><div><h2>Instagram</h2><p>Вкажіть ID професійного Instagram-акаунта, події якого належать цій організації.</p></div><span className={`connection-status status-${initial.status.toLowerCase()}`}>{initial.status === 'ACTIVE' ? 'Активне' : 'Не налаштовано'}</span></div><div className="sheets-fields"><label>Instagram Account ID<input inputMode="numeric" pattern="[0-9]{5,64}" required value={accountId} onChange={(event) => setAccountId(event.target.value)} /></label><label>Назва акаунта<input value={displayName} onChange={(event) => setDisplayName(event.target.value)} /></label></div><p className="sheets-hint">Це числовий ID Professional Account, не username.</p><div className="settings-actions"><button type="submit">Зберегти Instagram</button>{state === 'saved' && <span className="save-success">Instagram підключено</span>}{state === 'error' && <span className="save-error">Не вдалося зберегти</span>}</div></form>;
+
+  async function disconnect() {
+    setPending(true);
+    setMessage(null);
+    try {
+      const response = await mutatingFetch('/api/integrations/instagram/disconnect', { method: 'POST' });
+      const payload = await jsonOrNull(response);
+      if (!response.ok || !isInstagramConnectionSummary(payload)) throw new Error('disconnect failed');
+      setConnection(payload);
+      setConfirmingDisconnect(false);
+      setMessage({ kind: 'success', text: 'Instagram відключено' });
+    } catch {
+      setMessage({ kind: 'error', text: 'Не вдалося відключити Instagram' });
+    } finally {
+      setPending(false);
+    }
+  }
+
+  return <section className="settings-card instagram-connection-card" aria-labelledby="instagram-connection-title">
+    <div className="settings-card-heading">
+      <div>
+        <h2 id="instagram-connection-title">Instagram</h2>
+        <p>Підключіть професійний Instagram-акаунт через Meta, щоб отримувати повідомлення та замовлення.</p>
+      </div>
+      <span className={`connection-status status-${connection.status.toLowerCase()}`} aria-label={`Статус підключення: ${statusLabel(connection.status)}`}>
+        {statusLabel(connection.status)}
+      </span>
+    </div>
+
+    <dl className="instagram-connection-details">
+      <div><dt>Акаунт</dt><dd>{connection.username ? `@${connection.username}` : 'Ще не підключено'}</dd></div>
+      <div><dt>Остання перевірка</dt><dd>{formatVerificationDate(connection.lastVerifiedAt)}</dd></div>
+      {connection.lastErrorCode && <div><dt>Стан</dt><dd>{safeErrorCode(connection.lastErrorCode)}</dd></div>}
+    </dl>
+
+    {membershipRole === 'MANAGER' && <p className="sheets-hint">Перегляд доступний. Змінювати підключення може власник організації.</p>}
+
+    {isOwner && <div className="settings-actions instagram-connection-actions">
+      {actionLabel && <button disabled={pending} onClick={() => void connect()} type="button">{actionLabel}</button>}
+      {canDisconnect(connection.status) && !confirmingDisconnect && <button className="danger-button" disabled={pending} onClick={() => setConfirmingDisconnect(true)} type="button">Відключити Instagram</button>}
+      {confirmingDisconnect && <div className="instagram-disconnect-confirmation" role="alert">
+        <span>Відключити Instagram? Повторне підключення знадобиться для нових повідомлень.</span>
+        <div>
+          <button className="secondary-button" disabled={pending} onClick={() => setConfirmingDisconnect(false)} type="button">Скасувати</button>
+          <button className="danger-button" disabled={pending} onClick={() => void disconnect()} type="button">Так, відключити</button>
+        </div>
+      </div>}
+      {message && <span className={message.kind === 'error' ? 'save-error' : 'save-success'} role={message.kind === 'error' ? 'alert' : 'status'}>{message.text}</span>}
+    </div>}
+  </section>;
+}
+
+export function isTrustedMetaAuthorizationUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return url.origin === META_AUTHORIZATION_ORIGIN && url.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
+function connectionActionLabel(status: InstagramConnectionSummary['status']): string | null {
+  if (status === 'NOT_CONNECTED' || status === 'DISCONNECTED') return 'Підключити Instagram';
+  if (status === 'LEGACY' || status === 'REAUTH_REQUIRED' || status === 'ERROR') return 'Перепідключити Instagram';
+  return null;
+}
+
+function canDisconnect(status: InstagramConnectionSummary['status']): boolean {
+  return status === 'ACTIVE' || status === 'LEGACY' || status === 'REAUTH_REQUIRED' || status === 'ERROR';
+}
+
+function statusLabel(status: InstagramConnectionSummary['status']): string {
+  return {
+    NOT_CONNECTED: 'Не підключено',
+    LEGACY: 'Потрібне перепідключення',
+    ACTIVE: 'Активне',
+    REAUTH_REQUIRED: 'Потрібне перепідключення',
+    ERROR: 'Помилка підключення',
+    DISCONNECTED: 'Відключено',
+  }[status];
+}
+
+function formatVerificationDate(value: string | null): string {
+  if (!value) return 'Ще не перевірялося';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'Ще не перевірялося';
+  return new Intl.DateTimeFormat('uk-UA', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'UTC' }).format(date);
+}
+
+function safeErrorCode(value: string): string {
+  return /^[A-Z][A-Z0-9_]{0,63}$/.test(value) ? `Код помилки: ${value}` : 'Потрібна перевірка підключення';
+}
+
+async function jsonOrNull(response: Response): Promise<unknown> {
+  try {
+    return await response.json();
+  } catch {
+    return null;
+  }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function isInstagramConnectionSummary(value: unknown): value is InstagramConnectionSummary {
+  if (!isRecord(value) || typeof value.status !== 'string' || !CONNECTION_STATUSES.has(value.status as InstagramConnectionSummary['status'])) return false;
+  return ['accountId', 'username', 'tokenExpiresAt', 'lastVerifiedAt', 'lastErrorCode'].every((key) => value[key] === null || typeof value[key] === 'string');
 }
