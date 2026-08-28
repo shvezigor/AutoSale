@@ -184,6 +184,63 @@ describe('MetaInstagramClient', () => {
     await expect(failure).rejects.not.toThrow('app-secret-that-must-not-leak');
   });
 
+  it('sanitizes an aborted initial token exchange without leaking credentials', async () => {
+    const fetchFn = vi.fn<typeof fetch>().mockImplementation(async (_input, init) => {
+      expect(init?.signal).toBeInstanceOf(AbortSignal);
+      throw new DOMException('Abort access-token-that-must-not-leak authorization-code-that-must-not-leak app-secret-that-must-not-leak', 'AbortError');
+    });
+    const client = new MetaInstagramClient({ ...config, fetch: fetchFn });
+    const failure = client.exchangeCode({
+      code: 'authorization-code-that-must-not-leak',
+      redirectUri: 'https://demo.ngrok-free.app/api/integrations/instagram/callback',
+    });
+
+    await expect(failure).rejects.toEqual(expect.objectContaining({
+      name: 'MetaInstagramError', status: null, providerCode: null,
+    }));
+    await expect(failure).rejects.not.toThrow('access-token-that-must-not-leak');
+    await expect(failure).rejects.not.toThrow('authorization-code-that-must-not-leak');
+    await expect(failure).rejects.not.toThrow('app-secret-that-must-not-leak');
+  });
+
+  it('sanitizes malformed successful JSON during the initial token exchange', async () => {
+    const client = new MetaInstagramClient({
+      ...config,
+      fetch: vi.fn<typeof fetch>().mockResolvedValue(new Response('access-token-that-must-not-leak authorization-code-that-must-not-leak app-secret-that-must-not-leak', { status: 200 })),
+    });
+    const failure = client.exchangeCode({
+      code: 'authorization-code-that-must-not-leak',
+      redirectUri: 'https://demo.ngrok-free.app/api/integrations/instagram/callback',
+    });
+
+    await expect(failure).rejects.toEqual(expect.objectContaining({
+      name: 'MetaInstagramError', status: 200, providerCode: null,
+    }));
+    await expect(failure).rejects.not.toThrow('access-token-that-must-not-leak');
+    await expect(failure).rejects.not.toThrow('authorization-code-that-must-not-leak');
+    await expect(failure).rejects.not.toThrow('app-secret-that-must-not-leak');
+  });
+
+  it('sanitizes a malformed successful payload during the long-lived token exchange', async () => {
+    const client = new MetaInstagramClient({
+      ...config,
+      fetch: vi.fn<typeof fetch>()
+        .mockResolvedValueOnce(response({ access_token: 'short-lived-token' }))
+        .mockResolvedValueOnce(response({ access_token: ['access-token-that-must-not-leak'], expires_in: 'app-secret-that-must-not-leak', code: 'authorization-code-that-must-not-leak' })),
+    });
+    const failure = client.exchangeCode({
+      code: 'authorization-code-that-must-not-leak',
+      redirectUri: 'https://demo.ngrok-free.app/api/integrations/instagram/callback',
+    });
+
+    await expect(failure).rejects.toEqual(expect.objectContaining({
+      name: 'MetaInstagramError', status: 200, providerCode: null,
+    }));
+    await expect(failure).rejects.not.toThrow('access-token-that-must-not-leak');
+    await expect(failure).rejects.not.toThrow('authorization-code-that-must-not-leak');
+    await expect(failure).rejects.not.toThrow('app-secret-that-must-not-leak');
+  });
+
   it('sanitizes a malformed successful JSON response', async () => {
     const client = new MetaInstagramClient({
       ...config,
