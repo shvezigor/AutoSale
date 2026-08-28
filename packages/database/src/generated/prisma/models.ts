@@ -10,6 +10,7 @@
  */
 export type * from './models/Tenant.js'
 export type * from './models/InstagramConnection.js'
+export type * from './models/InstagramOAuthState.js'
 export type * from './models/User.js'
 export type * from './models/TenantMembership.js'
 export type * from './models/Session.js'

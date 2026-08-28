@@ -53,6 +53,7 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   Tenant: 'Tenant',
   InstagramConnection: 'InstagramConnection',
+  InstagramOAuthState: 'InstagramOAuthState',
   User: 'User',
   TenantMembership: 'TenantMembership',
   Session: 'Session',
@@ -106,11 +107,32 @@ export const InstagramConnectionScalarFieldEnum = {
   externalAccountId: 'externalAccountId',
   displayName: 'displayName',
   status: 'status',
+  encryptedAccessToken: 'encryptedAccessToken',
+  tokenExpiresAt: 'tokenExpiresAt',
+  grantedScopes: 'grantedScopes',
+  lastVerifiedAt: 'lastVerifiedAt',
+  lastErrorCode: 'lastErrorCode',
+  connectedByUserId: 'connectedByUserId',
+  disconnectedAt: 'disconnectedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type InstagramConnectionScalarFieldEnum = (typeof InstagramConnectionScalarFieldEnum)[keyof typeof InstagramConnectionScalarFieldEnum]
+
+
+export const InstagramOAuthStateScalarFieldEnum = {
+  id: 'id',
+  tokenHash: 'tokenHash',
+  tenantId: 'tenantId',
+  userId: 'userId',
+  returnPath: 'returnPath',
+  expiresAt: 'expiresAt',
+  usedAt: 'usedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type InstagramOAuthStateScalarFieldEnum = (typeof InstagramOAuthStateScalarFieldEnum)[keyof typeof InstagramOAuthStateScalarFieldEnum]
 
 
 export const UserScalarFieldEnum = {

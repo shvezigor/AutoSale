@@ -6,7 +6,7 @@
 /*
  * This file should be your main import to use Prisma-related types and utilities in a browser. 
  * Use it to get access to models, enums, and input types.
- *
+ * 
  * This file does not contain a `PrismaClient` class, nor several other helpers that are intended as server-side only.
  * See `client.ts` for the standard, server-side entry point.
  *
@@ -27,6 +27,11 @@ export type Tenant = Prisma.TenantModel
  * 
  */
 export type InstagramConnection = Prisma.InstagramConnectionModel
+/**
+ * Model InstagramOAuthState
+ * 
+ */
+export type InstagramOAuthState = Prisma.InstagramOAuthStateModel
 /**
  * Model User
  * 

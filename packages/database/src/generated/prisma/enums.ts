@@ -32,3 +32,14 @@ export const AccessStatus = {
 } as const
 
 export type AccessStatus = (typeof AccessStatus)[keyof typeof AccessStatus]
+
+
+export const InstagramConnectionStatus = {
+  LEGACY: 'LEGACY',
+  ACTIVE: 'ACTIVE',
+  REAUTH_REQUIRED: 'REAUTH_REQUIRED',
+  ERROR: 'ERROR',
+  DISCONNECTED: 'DISCONNECTED'
+} as const
+
+export type InstagramConnectionStatus = (typeof InstagramConnectionStatus)[keyof typeof InstagramConnectionStatus]

@@ -399,6 +399,7 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 export const ModelName = {
   Tenant: 'Tenant',
   InstagramConnection: 'InstagramConnection',
+  InstagramOAuthState: 'InstagramOAuthState',
   User: 'User',
   TenantMembership: 'TenantMembership',
   Session: 'Session',
@@ -432,7 +433,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "tenant" | "instagramConnection" | "user" | "tenantMembership" | "session" | "emailVerificationToken" | "passwordResetToken" | "tenantInvitation" | "securityAuditLog" | "webhookEvent" | "conversation" | "message" | "googleSheetsDestination" | "tenantSettings" | "order" | "orderExport" | "auditLog" | "orderItem" | "product" | "attachment"
+    modelProps: "tenant" | "instagramConnection" | "instagramOAuthState" | "user" | "tenantMembership" | "session" | "emailVerificationToken" | "passwordResetToken" | "tenantInvitation" | "securityAuditLog" | "webhookEvent" | "conversation" | "message" | "googleSheetsDestination" | "tenantSettings" | "order" | "orderExport" | "auditLog" | "orderItem" | "product" | "attachment"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -581,6 +582,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.InstagramConnectionCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.InstagramConnectionCountAggregateOutputType> | number
+        }
+      }
+    }
+    InstagramOAuthState: {
+      payload: Prisma.$InstagramOAuthStatePayload<ExtArgs>
+      fields: Prisma.InstagramOAuthStateFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.InstagramOAuthStateFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InstagramOAuthStatePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.InstagramOAuthStateFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InstagramOAuthStatePayload>
+        }
+        findFirst: {
+          args: Prisma.InstagramOAuthStateFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InstagramOAuthStatePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.InstagramOAuthStateFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InstagramOAuthStatePayload>
+        }
+        findMany: {
+          args: Prisma.InstagramOAuthStateFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InstagramOAuthStatePayload>[]
+        }
+        create: {
+          args: Prisma.InstagramOAuthStateCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InstagramOAuthStatePayload>
+        }
+        createMany: {
+          args: Prisma.InstagramOAuthStateCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.InstagramOAuthStateCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InstagramOAuthStatePayload>[]
+        }
+        delete: {
+          args: Prisma.InstagramOAuthStateDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InstagramOAuthStatePayload>
+        }
+        update: {
+          args: Prisma.InstagramOAuthStateUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InstagramOAuthStatePayload>
+        }
+        deleteMany: {
+          args: Prisma.InstagramOAuthStateDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.InstagramOAuthStateUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.InstagramOAuthStateUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InstagramOAuthStatePayload>[]
+        }
+        upsert: {
+          args: Prisma.InstagramOAuthStateUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InstagramOAuthStatePayload>
+        }
+        aggregate: {
+          args: Prisma.InstagramOAuthStateAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateInstagramOAuthState>
+        }
+        groupBy: {
+          args: Prisma.InstagramOAuthStateGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.InstagramOAuthStateGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.InstagramOAuthStateCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.InstagramOAuthStateCountAggregateOutputType> | number
         }
       }
     }
@@ -1972,11 +2047,32 @@ export const InstagramConnectionScalarFieldEnum = {
   externalAccountId: 'externalAccountId',
   displayName: 'displayName',
   status: 'status',
+  encryptedAccessToken: 'encryptedAccessToken',
+  tokenExpiresAt: 'tokenExpiresAt',
+  grantedScopes: 'grantedScopes',
+  lastVerifiedAt: 'lastVerifiedAt',
+  lastErrorCode: 'lastErrorCode',
+  connectedByUserId: 'connectedByUserId',
+  disconnectedAt: 'disconnectedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type InstagramConnectionScalarFieldEnum = (typeof InstagramConnectionScalarFieldEnum)[keyof typeof InstagramConnectionScalarFieldEnum]
+
+
+export const InstagramOAuthStateScalarFieldEnum = {
+  id: 'id',
+  tokenHash: 'tokenHash',
+  tenantId: 'tenantId',
+  userId: 'userId',
+  returnPath: 'returnPath',
+  expiresAt: 'expiresAt',
+  usedAt: 'usedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type InstagramOAuthStateScalarFieldEnum = (typeof InstagramOAuthStateScalarFieldEnum)[keyof typeof InstagramOAuthStateScalarFieldEnum]
 
 
 export const UserScalarFieldEnum = {
@@ -2350,6 +2446,20 @@ export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaM
 
 
 /**
+ * Reference to a field of type 'InstagramConnectionStatus'
+ */
+export type EnumInstagramConnectionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'InstagramConnectionStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'InstagramConnectionStatus[]'
+ */
+export type ListEnumInstagramConnectionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'InstagramConnectionStatus[]'>
+    
+
+
+/**
  * Reference to a field of type 'PlatformRole'
  */
 export type EnumPlatformRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PlatformRole'>
@@ -2578,6 +2688,7 @@ export type PrismaClientOptions = PrismaClientOptionsWithAccelerateUrl | PrismaC
 export type GlobalOmitConfig = {
   tenant?: Prisma.TenantOmit
   instagramConnection?: Prisma.InstagramConnectionOmit
+  instagramOAuthState?: Prisma.InstagramOAuthStateOmit
   user?: Prisma.UserOmit
   tenantMembership?: Prisma.TenantMembershipOmit
   session?: Prisma.SessionOmit

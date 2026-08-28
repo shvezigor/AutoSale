@@ -29,7 +29,14 @@ export type InstagramConnectionMinAggregateOutputType = {
   tenantId: string | null
   externalAccountId: string | null
   displayName: string | null
-  status: $Enums.AccessStatus | null
+  status: $Enums.InstagramConnectionStatus | null
+  encryptedAccessToken: string | null
+  tokenExpiresAt: Date | null
+  grantedScopes: string | null
+  lastVerifiedAt: Date | null
+  lastErrorCode: string | null
+  connectedByUserId: string | null
+  disconnectedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -39,7 +46,14 @@ export type InstagramConnectionMaxAggregateOutputType = {
   tenantId: string | null
   externalAccountId: string | null
   displayName: string | null
-  status: $Enums.AccessStatus | null
+  status: $Enums.InstagramConnectionStatus | null
+  encryptedAccessToken: string | null
+  tokenExpiresAt: Date | null
+  grantedScopes: string | null
+  lastVerifiedAt: Date | null
+  lastErrorCode: string | null
+  connectedByUserId: string | null
+  disconnectedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -50,6 +64,13 @@ export type InstagramConnectionCountAggregateOutputType = {
   externalAccountId: number
   displayName: number
   status: number
+  encryptedAccessToken: number
+  tokenExpiresAt: number
+  grantedScopes: number
+  lastVerifiedAt: number
+  lastErrorCode: number
+  connectedByUserId: number
+  disconnectedAt: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -62,6 +83,13 @@ export type InstagramConnectionMinAggregateInputType = {
   externalAccountId?: true
   displayName?: true
   status?: true
+  encryptedAccessToken?: true
+  tokenExpiresAt?: true
+  grantedScopes?: true
+  lastVerifiedAt?: true
+  lastErrorCode?: true
+  connectedByUserId?: true
+  disconnectedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -72,6 +100,13 @@ export type InstagramConnectionMaxAggregateInputType = {
   externalAccountId?: true
   displayName?: true
   status?: true
+  encryptedAccessToken?: true
+  tokenExpiresAt?: true
+  grantedScopes?: true
+  lastVerifiedAt?: true
+  lastErrorCode?: true
+  connectedByUserId?: true
+  disconnectedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -82,6 +117,13 @@ export type InstagramConnectionCountAggregateInputType = {
   externalAccountId?: true
   displayName?: true
   status?: true
+  encryptedAccessToken?: true
+  tokenExpiresAt?: true
+  grantedScopes?: true
+  lastVerifiedAt?: true
+  lastErrorCode?: true
+  connectedByUserId?: true
+  disconnectedAt?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -164,7 +206,14 @@ export type InstagramConnectionGroupByOutputType = {
   tenantId: string
   externalAccountId: string
   displayName: string | null
-  status: $Enums.AccessStatus
+  status: $Enums.InstagramConnectionStatus
+  encryptedAccessToken: string | null
+  tokenExpiresAt: Date | null
+  grantedScopes: string | null
+  lastVerifiedAt: Date | null
+  lastErrorCode: string | null
+  connectedByUserId: string | null
+  disconnectedAt: Date | null
   createdAt: Date
   updatedAt: Date
   _count: InstagramConnectionCountAggregateOutputType | null
@@ -195,10 +244,18 @@ export type InstagramConnectionWhereInput = {
   tenantId?: Prisma.UuidFilter<"InstagramConnection"> | string
   externalAccountId?: Prisma.StringFilter<"InstagramConnection"> | string
   displayName?: Prisma.StringNullableFilter<"InstagramConnection"> | string | null
-  status?: Prisma.EnumAccessStatusFilter<"InstagramConnection"> | $Enums.AccessStatus
+  status?: Prisma.EnumInstagramConnectionStatusFilter<"InstagramConnection"> | $Enums.InstagramConnectionStatus
+  encryptedAccessToken?: Prisma.StringNullableFilter<"InstagramConnection"> | string | null
+  tokenExpiresAt?: Prisma.DateTimeNullableFilter<"InstagramConnection"> | Date | string | null
+  grantedScopes?: Prisma.StringNullableFilter<"InstagramConnection"> | string | null
+  lastVerifiedAt?: Prisma.DateTimeNullableFilter<"InstagramConnection"> | Date | string | null
+  lastErrorCode?: Prisma.StringNullableFilter<"InstagramConnection"> | string | null
+  connectedByUserId?: Prisma.UuidNullableFilter<"InstagramConnection"> | string | null
+  disconnectedAt?: Prisma.DateTimeNullableFilter<"InstagramConnection"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"InstagramConnection"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"InstagramConnection"> | Date | string
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
+  connectedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
 }
 
 export type InstagramConnectionOrderByWithRelationInput = {
@@ -207,9 +264,17 @@ export type InstagramConnectionOrderByWithRelationInput = {
   externalAccountId?: Prisma.SortOrder
   displayName?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
+  encryptedAccessToken?: Prisma.SortOrderInput | Prisma.SortOrder
+  tokenExpiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  grantedScopes?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastVerifiedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastErrorCode?: Prisma.SortOrderInput | Prisma.SortOrder
+  connectedByUserId?: Prisma.SortOrderInput | Prisma.SortOrder
+  disconnectedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   tenant?: Prisma.TenantOrderByWithRelationInput
+  connectedBy?: Prisma.UserOrderByWithRelationInput
 }
 
 export type InstagramConnectionWhereUniqueInput = Prisma.AtLeast<{
@@ -220,10 +285,18 @@ export type InstagramConnectionWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.InstagramConnectionWhereInput[]
   NOT?: Prisma.InstagramConnectionWhereInput | Prisma.InstagramConnectionWhereInput[]
   displayName?: Prisma.StringNullableFilter<"InstagramConnection"> | string | null
-  status?: Prisma.EnumAccessStatusFilter<"InstagramConnection"> | $Enums.AccessStatus
+  status?: Prisma.EnumInstagramConnectionStatusFilter<"InstagramConnection"> | $Enums.InstagramConnectionStatus
+  encryptedAccessToken?: Prisma.StringNullableFilter<"InstagramConnection"> | string | null
+  tokenExpiresAt?: Prisma.DateTimeNullableFilter<"InstagramConnection"> | Date | string | null
+  grantedScopes?: Prisma.StringNullableFilter<"InstagramConnection"> | string | null
+  lastVerifiedAt?: Prisma.DateTimeNullableFilter<"InstagramConnection"> | Date | string | null
+  lastErrorCode?: Prisma.StringNullableFilter<"InstagramConnection"> | string | null
+  connectedByUserId?: Prisma.UuidNullableFilter<"InstagramConnection"> | string | null
+  disconnectedAt?: Prisma.DateTimeNullableFilter<"InstagramConnection"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"InstagramConnection"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"InstagramConnection"> | Date | string
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
+  connectedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
 }, "id" | "tenantId" | "externalAccountId">
 
 export type InstagramConnectionOrderByWithAggregationInput = {
@@ -232,6 +305,13 @@ export type InstagramConnectionOrderByWithAggregationInput = {
   externalAccountId?: Prisma.SortOrder
   displayName?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
+  encryptedAccessToken?: Prisma.SortOrderInput | Prisma.SortOrder
+  tokenExpiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  grantedScopes?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastVerifiedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastErrorCode?: Prisma.SortOrderInput | Prisma.SortOrder
+  connectedByUserId?: Prisma.SortOrderInput | Prisma.SortOrder
+  disconnectedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.InstagramConnectionCountOrderByAggregateInput
@@ -247,7 +327,14 @@ export type InstagramConnectionScalarWhereWithAggregatesInput = {
   tenantId?: Prisma.UuidWithAggregatesFilter<"InstagramConnection"> | string
   externalAccountId?: Prisma.StringWithAggregatesFilter<"InstagramConnection"> | string
   displayName?: Prisma.StringNullableWithAggregatesFilter<"InstagramConnection"> | string | null
-  status?: Prisma.EnumAccessStatusWithAggregatesFilter<"InstagramConnection"> | $Enums.AccessStatus
+  status?: Prisma.EnumInstagramConnectionStatusWithAggregatesFilter<"InstagramConnection"> | $Enums.InstagramConnectionStatus
+  encryptedAccessToken?: Prisma.StringNullableWithAggregatesFilter<"InstagramConnection"> | string | null
+  tokenExpiresAt?: Prisma.DateTimeNullableWithAggregatesFilter<"InstagramConnection"> | Date | string | null
+  grantedScopes?: Prisma.StringNullableWithAggregatesFilter<"InstagramConnection"> | string | null
+  lastVerifiedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"InstagramConnection"> | Date | string | null
+  lastErrorCode?: Prisma.StringNullableWithAggregatesFilter<"InstagramConnection"> | string | null
+  connectedByUserId?: Prisma.UuidNullableWithAggregatesFilter<"InstagramConnection"> | string | null
+  disconnectedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"InstagramConnection"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"InstagramConnection"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"InstagramConnection"> | Date | string
 }
@@ -256,10 +343,17 @@ export type InstagramConnectionCreateInput = {
   id?: string
   externalAccountId: string
   displayName?: string | null
-  status?: $Enums.AccessStatus
+  status?: $Enums.InstagramConnectionStatus
+  encryptedAccessToken?: string | null
+  tokenExpiresAt?: Date | string | null
+  grantedScopes?: string | null
+  lastVerifiedAt?: Date | string | null
+  lastErrorCode?: string | null
+  disconnectedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutInstagramConnectionInput
+  connectedBy?: Prisma.UserCreateNestedOneWithoutInstagramConnectionsInput
 }
 
 export type InstagramConnectionUncheckedCreateInput = {
@@ -267,7 +361,14 @@ export type InstagramConnectionUncheckedCreateInput = {
   tenantId: string
   externalAccountId: string
   displayName?: string | null
-  status?: $Enums.AccessStatus
+  status?: $Enums.InstagramConnectionStatus
+  encryptedAccessToken?: string | null
+  tokenExpiresAt?: Date | string | null
+  grantedScopes?: string | null
+  lastVerifiedAt?: Date | string | null
+  lastErrorCode?: string | null
+  connectedByUserId?: string | null
+  disconnectedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -276,10 +377,17 @@ export type InstagramConnectionUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   externalAccountId?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  status?: Prisma.EnumInstagramConnectionStatusFieldUpdateOperationsInput | $Enums.InstagramConnectionStatus
+  encryptedAccessToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  grantedScopes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastErrorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  disconnectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutInstagramConnectionNestedInput
+  connectedBy?: Prisma.UserUpdateOneWithoutInstagramConnectionsNestedInput
 }
 
 export type InstagramConnectionUncheckedUpdateInput = {
@@ -287,7 +395,14 @@ export type InstagramConnectionUncheckedUpdateInput = {
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   externalAccountId?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  status?: Prisma.EnumInstagramConnectionStatusFieldUpdateOperationsInput | $Enums.InstagramConnectionStatus
+  encryptedAccessToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  grantedScopes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastErrorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  disconnectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -297,7 +412,14 @@ export type InstagramConnectionCreateManyInput = {
   tenantId: string
   externalAccountId: string
   displayName?: string | null
-  status?: $Enums.AccessStatus
+  status?: $Enums.InstagramConnectionStatus
+  encryptedAccessToken?: string | null
+  tokenExpiresAt?: Date | string | null
+  grantedScopes?: string | null
+  lastVerifiedAt?: Date | string | null
+  lastErrorCode?: string | null
+  connectedByUserId?: string | null
+  disconnectedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -306,7 +428,13 @@ export type InstagramConnectionUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   externalAccountId?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  status?: Prisma.EnumInstagramConnectionStatusFieldUpdateOperationsInput | $Enums.InstagramConnectionStatus
+  encryptedAccessToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  grantedScopes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastErrorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  disconnectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -316,7 +444,14 @@ export type InstagramConnectionUncheckedUpdateManyInput = {
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   externalAccountId?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  status?: Prisma.EnumInstagramConnectionStatusFieldUpdateOperationsInput | $Enums.InstagramConnectionStatus
+  encryptedAccessToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  grantedScopes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastErrorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  disconnectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -332,6 +467,13 @@ export type InstagramConnectionCountOrderByAggregateInput = {
   externalAccountId?: Prisma.SortOrder
   displayName?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  encryptedAccessToken?: Prisma.SortOrder
+  tokenExpiresAt?: Prisma.SortOrder
+  grantedScopes?: Prisma.SortOrder
+  lastVerifiedAt?: Prisma.SortOrder
+  lastErrorCode?: Prisma.SortOrder
+  connectedByUserId?: Prisma.SortOrder
+  disconnectedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -342,6 +484,13 @@ export type InstagramConnectionMaxOrderByAggregateInput = {
   externalAccountId?: Prisma.SortOrder
   displayName?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  encryptedAccessToken?: Prisma.SortOrder
+  tokenExpiresAt?: Prisma.SortOrder
+  grantedScopes?: Prisma.SortOrder
+  lastVerifiedAt?: Prisma.SortOrder
+  lastErrorCode?: Prisma.SortOrder
+  connectedByUserId?: Prisma.SortOrder
+  disconnectedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -352,8 +501,25 @@ export type InstagramConnectionMinOrderByAggregateInput = {
   externalAccountId?: Prisma.SortOrder
   displayName?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  encryptedAccessToken?: Prisma.SortOrder
+  tokenExpiresAt?: Prisma.SortOrder
+  grantedScopes?: Prisma.SortOrder
+  lastVerifiedAt?: Prisma.SortOrder
+  lastErrorCode?: Prisma.SortOrder
+  connectedByUserId?: Prisma.SortOrder
+  disconnectedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type InstagramConnectionListRelationFilter = {
+  every?: Prisma.InstagramConnectionWhereInput
+  some?: Prisma.InstagramConnectionWhereInput
+  none?: Prisma.InstagramConnectionWhereInput
+}
+
+export type InstagramConnectionOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type InstagramConnectionCreateNestedOneWithoutTenantInput = {
@@ -392,20 +558,84 @@ export type NullableStringFieldUpdateOperationsInput = {
   set?: string | null
 }
 
+export type EnumInstagramConnectionStatusFieldUpdateOperationsInput = {
+  set?: $Enums.InstagramConnectionStatus
+}
+
+export type NullableDateTimeFieldUpdateOperationsInput = {
+  set?: Date | string | null
+}
+
+export type InstagramConnectionCreateNestedManyWithoutConnectedByInput = {
+  create?: Prisma.XOR<Prisma.InstagramConnectionCreateWithoutConnectedByInput, Prisma.InstagramConnectionUncheckedCreateWithoutConnectedByInput> | Prisma.InstagramConnectionCreateWithoutConnectedByInput[] | Prisma.InstagramConnectionUncheckedCreateWithoutConnectedByInput[]
+  connectOrCreate?: Prisma.InstagramConnectionCreateOrConnectWithoutConnectedByInput | Prisma.InstagramConnectionCreateOrConnectWithoutConnectedByInput[]
+  createMany?: Prisma.InstagramConnectionCreateManyConnectedByInputEnvelope
+  connect?: Prisma.InstagramConnectionWhereUniqueInput | Prisma.InstagramConnectionWhereUniqueInput[]
+}
+
+export type InstagramConnectionUncheckedCreateNestedManyWithoutConnectedByInput = {
+  create?: Prisma.XOR<Prisma.InstagramConnectionCreateWithoutConnectedByInput, Prisma.InstagramConnectionUncheckedCreateWithoutConnectedByInput> | Prisma.InstagramConnectionCreateWithoutConnectedByInput[] | Prisma.InstagramConnectionUncheckedCreateWithoutConnectedByInput[]
+  connectOrCreate?: Prisma.InstagramConnectionCreateOrConnectWithoutConnectedByInput | Prisma.InstagramConnectionCreateOrConnectWithoutConnectedByInput[]
+  createMany?: Prisma.InstagramConnectionCreateManyConnectedByInputEnvelope
+  connect?: Prisma.InstagramConnectionWhereUniqueInput | Prisma.InstagramConnectionWhereUniqueInput[]
+}
+
+export type InstagramConnectionUpdateManyWithoutConnectedByNestedInput = {
+  create?: Prisma.XOR<Prisma.InstagramConnectionCreateWithoutConnectedByInput, Prisma.InstagramConnectionUncheckedCreateWithoutConnectedByInput> | Prisma.InstagramConnectionCreateWithoutConnectedByInput[] | Prisma.InstagramConnectionUncheckedCreateWithoutConnectedByInput[]
+  connectOrCreate?: Prisma.InstagramConnectionCreateOrConnectWithoutConnectedByInput | Prisma.InstagramConnectionCreateOrConnectWithoutConnectedByInput[]
+  upsert?: Prisma.InstagramConnectionUpsertWithWhereUniqueWithoutConnectedByInput | Prisma.InstagramConnectionUpsertWithWhereUniqueWithoutConnectedByInput[]
+  createMany?: Prisma.InstagramConnectionCreateManyConnectedByInputEnvelope
+  set?: Prisma.InstagramConnectionWhereUniqueInput | Prisma.InstagramConnectionWhereUniqueInput[]
+  disconnect?: Prisma.InstagramConnectionWhereUniqueInput | Prisma.InstagramConnectionWhereUniqueInput[]
+  delete?: Prisma.InstagramConnectionWhereUniqueInput | Prisma.InstagramConnectionWhereUniqueInput[]
+  connect?: Prisma.InstagramConnectionWhereUniqueInput | Prisma.InstagramConnectionWhereUniqueInput[]
+  update?: Prisma.InstagramConnectionUpdateWithWhereUniqueWithoutConnectedByInput | Prisma.InstagramConnectionUpdateWithWhereUniqueWithoutConnectedByInput[]
+  updateMany?: Prisma.InstagramConnectionUpdateManyWithWhereWithoutConnectedByInput | Prisma.InstagramConnectionUpdateManyWithWhereWithoutConnectedByInput[]
+  deleteMany?: Prisma.InstagramConnectionScalarWhereInput | Prisma.InstagramConnectionScalarWhereInput[]
+}
+
+export type InstagramConnectionUncheckedUpdateManyWithoutConnectedByNestedInput = {
+  create?: Prisma.XOR<Prisma.InstagramConnectionCreateWithoutConnectedByInput, Prisma.InstagramConnectionUncheckedCreateWithoutConnectedByInput> | Prisma.InstagramConnectionCreateWithoutConnectedByInput[] | Prisma.InstagramConnectionUncheckedCreateWithoutConnectedByInput[]
+  connectOrCreate?: Prisma.InstagramConnectionCreateOrConnectWithoutConnectedByInput | Prisma.InstagramConnectionCreateOrConnectWithoutConnectedByInput[]
+  upsert?: Prisma.InstagramConnectionUpsertWithWhereUniqueWithoutConnectedByInput | Prisma.InstagramConnectionUpsertWithWhereUniqueWithoutConnectedByInput[]
+  createMany?: Prisma.InstagramConnectionCreateManyConnectedByInputEnvelope
+  set?: Prisma.InstagramConnectionWhereUniqueInput | Prisma.InstagramConnectionWhereUniqueInput[]
+  disconnect?: Prisma.InstagramConnectionWhereUniqueInput | Prisma.InstagramConnectionWhereUniqueInput[]
+  delete?: Prisma.InstagramConnectionWhereUniqueInput | Prisma.InstagramConnectionWhereUniqueInput[]
+  connect?: Prisma.InstagramConnectionWhereUniqueInput | Prisma.InstagramConnectionWhereUniqueInput[]
+  update?: Prisma.InstagramConnectionUpdateWithWhereUniqueWithoutConnectedByInput | Prisma.InstagramConnectionUpdateWithWhereUniqueWithoutConnectedByInput[]
+  updateMany?: Prisma.InstagramConnectionUpdateManyWithWhereWithoutConnectedByInput | Prisma.InstagramConnectionUpdateManyWithWhereWithoutConnectedByInput[]
+  deleteMany?: Prisma.InstagramConnectionScalarWhereInput | Prisma.InstagramConnectionScalarWhereInput[]
+}
+
 export type InstagramConnectionCreateWithoutTenantInput = {
   id?: string
   externalAccountId: string
   displayName?: string | null
-  status?: $Enums.AccessStatus
+  status?: $Enums.InstagramConnectionStatus
+  encryptedAccessToken?: string | null
+  tokenExpiresAt?: Date | string | null
+  grantedScopes?: string | null
+  lastVerifiedAt?: Date | string | null
+  lastErrorCode?: string | null
+  disconnectedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  connectedBy?: Prisma.UserCreateNestedOneWithoutInstagramConnectionsInput
 }
 
 export type InstagramConnectionUncheckedCreateWithoutTenantInput = {
   id?: string
   externalAccountId: string
   displayName?: string | null
-  status?: $Enums.AccessStatus
+  status?: $Enums.InstagramConnectionStatus
+  encryptedAccessToken?: string | null
+  tokenExpiresAt?: Date | string | null
+  grantedScopes?: string | null
+  lastVerifiedAt?: Date | string | null
+  lastErrorCode?: string | null
+  connectedByUserId?: string | null
+  disconnectedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -430,16 +660,172 @@ export type InstagramConnectionUpdateWithoutTenantInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   externalAccountId?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  status?: Prisma.EnumInstagramConnectionStatusFieldUpdateOperationsInput | $Enums.InstagramConnectionStatus
+  encryptedAccessToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  grantedScopes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastErrorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  disconnectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  connectedBy?: Prisma.UserUpdateOneWithoutInstagramConnectionsNestedInput
 }
 
 export type InstagramConnectionUncheckedUpdateWithoutTenantInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   externalAccountId?: Prisma.StringFieldUpdateOperationsInput | string
   displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  status?: Prisma.EnumInstagramConnectionStatusFieldUpdateOperationsInput | $Enums.InstagramConnectionStatus
+  encryptedAccessToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  grantedScopes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastErrorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  connectedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  disconnectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type InstagramConnectionCreateWithoutConnectedByInput = {
+  id?: string
+  externalAccountId: string
+  displayName?: string | null
+  status?: $Enums.InstagramConnectionStatus
+  encryptedAccessToken?: string | null
+  tokenExpiresAt?: Date | string | null
+  grantedScopes?: string | null
+  lastVerifiedAt?: Date | string | null
+  lastErrorCode?: string | null
+  disconnectedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tenant: Prisma.TenantCreateNestedOneWithoutInstagramConnectionInput
+}
+
+export type InstagramConnectionUncheckedCreateWithoutConnectedByInput = {
+  id?: string
+  tenantId: string
+  externalAccountId: string
+  displayName?: string | null
+  status?: $Enums.InstagramConnectionStatus
+  encryptedAccessToken?: string | null
+  tokenExpiresAt?: Date | string | null
+  grantedScopes?: string | null
+  lastVerifiedAt?: Date | string | null
+  lastErrorCode?: string | null
+  disconnectedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type InstagramConnectionCreateOrConnectWithoutConnectedByInput = {
+  where: Prisma.InstagramConnectionWhereUniqueInput
+  create: Prisma.XOR<Prisma.InstagramConnectionCreateWithoutConnectedByInput, Prisma.InstagramConnectionUncheckedCreateWithoutConnectedByInput>
+}
+
+export type InstagramConnectionCreateManyConnectedByInputEnvelope = {
+  data: Prisma.InstagramConnectionCreateManyConnectedByInput | Prisma.InstagramConnectionCreateManyConnectedByInput[]
+  skipDuplicates?: boolean
+}
+
+export type InstagramConnectionUpsertWithWhereUniqueWithoutConnectedByInput = {
+  where: Prisma.InstagramConnectionWhereUniqueInput
+  update: Prisma.XOR<Prisma.InstagramConnectionUpdateWithoutConnectedByInput, Prisma.InstagramConnectionUncheckedUpdateWithoutConnectedByInput>
+  create: Prisma.XOR<Prisma.InstagramConnectionCreateWithoutConnectedByInput, Prisma.InstagramConnectionUncheckedCreateWithoutConnectedByInput>
+}
+
+export type InstagramConnectionUpdateWithWhereUniqueWithoutConnectedByInput = {
+  where: Prisma.InstagramConnectionWhereUniqueInput
+  data: Prisma.XOR<Prisma.InstagramConnectionUpdateWithoutConnectedByInput, Prisma.InstagramConnectionUncheckedUpdateWithoutConnectedByInput>
+}
+
+export type InstagramConnectionUpdateManyWithWhereWithoutConnectedByInput = {
+  where: Prisma.InstagramConnectionScalarWhereInput
+  data: Prisma.XOR<Prisma.InstagramConnectionUpdateManyMutationInput, Prisma.InstagramConnectionUncheckedUpdateManyWithoutConnectedByInput>
+}
+
+export type InstagramConnectionScalarWhereInput = {
+  AND?: Prisma.InstagramConnectionScalarWhereInput | Prisma.InstagramConnectionScalarWhereInput[]
+  OR?: Prisma.InstagramConnectionScalarWhereInput[]
+  NOT?: Prisma.InstagramConnectionScalarWhereInput | Prisma.InstagramConnectionScalarWhereInput[]
+  id?: Prisma.UuidFilter<"InstagramConnection"> | string
+  tenantId?: Prisma.UuidFilter<"InstagramConnection"> | string
+  externalAccountId?: Prisma.StringFilter<"InstagramConnection"> | string
+  displayName?: Prisma.StringNullableFilter<"InstagramConnection"> | string | null
+  status?: Prisma.EnumInstagramConnectionStatusFilter<"InstagramConnection"> | $Enums.InstagramConnectionStatus
+  encryptedAccessToken?: Prisma.StringNullableFilter<"InstagramConnection"> | string | null
+  tokenExpiresAt?: Prisma.DateTimeNullableFilter<"InstagramConnection"> | Date | string | null
+  grantedScopes?: Prisma.StringNullableFilter<"InstagramConnection"> | string | null
+  lastVerifiedAt?: Prisma.DateTimeNullableFilter<"InstagramConnection"> | Date | string | null
+  lastErrorCode?: Prisma.StringNullableFilter<"InstagramConnection"> | string | null
+  connectedByUserId?: Prisma.UuidNullableFilter<"InstagramConnection"> | string | null
+  disconnectedAt?: Prisma.DateTimeNullableFilter<"InstagramConnection"> | Date | string | null
+  createdAt?: Prisma.DateTimeFilter<"InstagramConnection"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"InstagramConnection"> | Date | string
+}
+
+export type InstagramConnectionCreateManyConnectedByInput = {
+  id?: string
+  tenantId: string
+  externalAccountId: string
+  displayName?: string | null
+  status?: $Enums.InstagramConnectionStatus
+  encryptedAccessToken?: string | null
+  tokenExpiresAt?: Date | string | null
+  grantedScopes?: string | null
+  lastVerifiedAt?: Date | string | null
+  lastErrorCode?: string | null
+  disconnectedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type InstagramConnectionUpdateWithoutConnectedByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  externalAccountId?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumInstagramConnectionStatusFieldUpdateOperationsInput | $Enums.InstagramConnectionStatus
+  encryptedAccessToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  grantedScopes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastErrorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  disconnectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutInstagramConnectionNestedInput
+}
+
+export type InstagramConnectionUncheckedUpdateWithoutConnectedByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  externalAccountId?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumInstagramConnectionStatusFieldUpdateOperationsInput | $Enums.InstagramConnectionStatus
+  encryptedAccessToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  grantedScopes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastErrorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  disconnectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type InstagramConnectionUncheckedUpdateManyWithoutConnectedByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  externalAccountId?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumInstagramConnectionStatusFieldUpdateOperationsInput | $Enums.InstagramConnectionStatus
+  encryptedAccessToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tokenExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  grantedScopes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastErrorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  disconnectedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -452,9 +838,17 @@ export type InstagramConnectionSelect<ExtArgs extends runtime.Types.Extensions.I
   externalAccountId?: boolean
   displayName?: boolean
   status?: boolean
+  encryptedAccessToken?: boolean
+  tokenExpiresAt?: boolean
+  grantedScopes?: boolean
+  lastVerifiedAt?: boolean
+  lastErrorCode?: boolean
+  connectedByUserId?: boolean
+  disconnectedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
+  connectedBy?: boolean | Prisma.InstagramConnection$connectedByArgs<ExtArgs>
 }, ExtArgs["result"]["instagramConnection"]>
 
 export type InstagramConnectionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -463,9 +857,17 @@ export type InstagramConnectionSelectCreateManyAndReturn<ExtArgs extends runtime
   externalAccountId?: boolean
   displayName?: boolean
   status?: boolean
+  encryptedAccessToken?: boolean
+  tokenExpiresAt?: boolean
+  grantedScopes?: boolean
+  lastVerifiedAt?: boolean
+  lastErrorCode?: boolean
+  connectedByUserId?: boolean
+  disconnectedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
+  connectedBy?: boolean | Prisma.InstagramConnection$connectedByArgs<ExtArgs>
 }, ExtArgs["result"]["instagramConnection"]>
 
 export type InstagramConnectionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -474,9 +876,17 @@ export type InstagramConnectionSelectUpdateManyAndReturn<ExtArgs extends runtime
   externalAccountId?: boolean
   displayName?: boolean
   status?: boolean
+  encryptedAccessToken?: boolean
+  tokenExpiresAt?: boolean
+  grantedScopes?: boolean
+  lastVerifiedAt?: boolean
+  lastErrorCode?: boolean
+  connectedByUserId?: boolean
+  disconnectedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
+  connectedBy?: boolean | Prisma.InstagramConnection$connectedByArgs<ExtArgs>
 }, ExtArgs["result"]["instagramConnection"]>
 
 export type InstagramConnectionSelectScalar = {
@@ -485,32 +895,50 @@ export type InstagramConnectionSelectScalar = {
   externalAccountId?: boolean
   displayName?: boolean
   status?: boolean
+  encryptedAccessToken?: boolean
+  tokenExpiresAt?: boolean
+  grantedScopes?: boolean
+  lastVerifiedAt?: boolean
+  lastErrorCode?: boolean
+  connectedByUserId?: boolean
+  disconnectedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type InstagramConnectionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "externalAccountId" | "displayName" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["instagramConnection"]>
+export type InstagramConnectionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "externalAccountId" | "displayName" | "status" | "encryptedAccessToken" | "tokenExpiresAt" | "grantedScopes" | "lastVerifiedAt" | "lastErrorCode" | "connectedByUserId" | "disconnectedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["instagramConnection"]>
 export type InstagramConnectionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
+  connectedBy?: boolean | Prisma.InstagramConnection$connectedByArgs<ExtArgs>
 }
 export type InstagramConnectionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
+  connectedBy?: boolean | Prisma.InstagramConnection$connectedByArgs<ExtArgs>
 }
 export type InstagramConnectionIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
+  connectedBy?: boolean | Prisma.InstagramConnection$connectedByArgs<ExtArgs>
 }
 
 export type $InstagramConnectionPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "InstagramConnection"
   objects: {
     tenant: Prisma.$TenantPayload<ExtArgs>
+    connectedBy: Prisma.$UserPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenantId: string
     externalAccountId: string
     displayName: string | null
-    status: $Enums.AccessStatus
+    status: $Enums.InstagramConnectionStatus
+    encryptedAccessToken: string | null
+    tokenExpiresAt: Date | null
+    grantedScopes: string | null
+    lastVerifiedAt: Date | null
+    lastErrorCode: string | null
+    connectedByUserId: string | null
+    disconnectedAt: Date | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["instagramConnection"]>
@@ -908,6 +1336,7 @@ readonly fields: InstagramConnectionFieldRefs;
 export interface Prisma__InstagramConnectionClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   tenant<T extends Prisma.TenantDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TenantDefaultArgs<ExtArgs>>): Prisma.Prisma__TenantClient<runtime.Types.Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  connectedBy<T extends Prisma.InstagramConnection$connectedByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.InstagramConnection$connectedByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -941,7 +1370,14 @@ export interface InstagramConnectionFieldRefs {
   readonly tenantId: Prisma.FieldRef<"InstagramConnection", 'String'>
   readonly externalAccountId: Prisma.FieldRef<"InstagramConnection", 'String'>
   readonly displayName: Prisma.FieldRef<"InstagramConnection", 'String'>
-  readonly status: Prisma.FieldRef<"InstagramConnection", 'AccessStatus'>
+  readonly status: Prisma.FieldRef<"InstagramConnection", 'InstagramConnectionStatus'>
+  readonly encryptedAccessToken: Prisma.FieldRef<"InstagramConnection", 'String'>
+  readonly tokenExpiresAt: Prisma.FieldRef<"InstagramConnection", 'DateTime'>
+  readonly grantedScopes: Prisma.FieldRef<"InstagramConnection", 'String'>
+  readonly lastVerifiedAt: Prisma.FieldRef<"InstagramConnection", 'DateTime'>
+  readonly lastErrorCode: Prisma.FieldRef<"InstagramConnection", 'String'>
+  readonly connectedByUserId: Prisma.FieldRef<"InstagramConnection", 'String'>
+  readonly disconnectedAt: Prisma.FieldRef<"InstagramConnection", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"InstagramConnection", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"InstagramConnection", 'DateTime'>
 }
@@ -1342,6 +1778,25 @@ export type InstagramConnectionDeleteManyArgs<ExtArgs extends runtime.Types.Exte
    * Limit how many InstagramConnections to delete.
    */
   limit?: number
+}
+
+/**
+ * InstagramConnection.connectedBy
+ */
+export type InstagramConnection$connectedByArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
 }
 
 /**

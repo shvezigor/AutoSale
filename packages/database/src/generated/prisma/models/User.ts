@@ -220,6 +220,8 @@ export type UserWhereInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenListRelationFilter
   invitationsCreated?: Prisma.TenantInvitationListRelationFilter
   securityAuditLogs?: Prisma.SecurityAuditLogListRelationFilter
+  instagramOAuthStates?: Prisma.InstagramOAuthStateListRelationFilter
+  instagramConnections?: Prisma.InstagramConnectionListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -238,6 +240,8 @@ export type UserOrderByWithRelationInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenOrderByRelationAggregateInput
   invitationsCreated?: Prisma.TenantInvitationOrderByRelationAggregateInput
   securityAuditLogs?: Prisma.SecurityAuditLogOrderByRelationAggregateInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateOrderByRelationAggregateInput
+  instagramConnections?: Prisma.InstagramConnectionOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -259,6 +263,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   passwordResetTokens?: Prisma.PasswordResetTokenListRelationFilter
   invitationsCreated?: Prisma.TenantInvitationListRelationFilter
   securityAuditLogs?: Prisma.SecurityAuditLogListRelationFilter
+  instagramOAuthStates?: Prisma.InstagramOAuthStateListRelationFilter
+  instagramConnections?: Prisma.InstagramConnectionListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -307,6 +313,8 @@ export type UserCreateInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationCreateNestedManyWithoutInvitedByInput
   securityAuditLogs?: Prisma.SecurityAuditLogCreateNestedManyWithoutUserInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutUserInput
+  instagramConnections?: Prisma.InstagramConnectionCreateNestedManyWithoutConnectedByInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -325,6 +333,8 @@ export type UserUncheckedCreateInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutInvitedByInput
   securityAuditLogs?: Prisma.SecurityAuditLogUncheckedCreateNestedManyWithoutUserInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutUserInput
+  instagramConnections?: Prisma.InstagramConnectionUncheckedCreateNestedManyWithoutConnectedByInput
 }
 
 export type UserUpdateInput = {
@@ -343,6 +353,8 @@ export type UserUpdateInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUpdateManyWithoutInvitedByNestedInput
   securityAuditLogs?: Prisma.SecurityAuditLogUpdateManyWithoutUserNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutUserNestedInput
+  instagramConnections?: Prisma.InstagramConnectionUpdateManyWithoutConnectedByNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -361,6 +373,8 @@ export type UserUncheckedUpdateInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   securityAuditLogs?: Prisma.SecurityAuditLogUncheckedUpdateManyWithoutUserNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutUserNestedInput
+  instagramConnections?: Prisma.InstagramConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -399,6 +413,16 @@ export type UserUncheckedUpdateManyInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
+export type UserNullableScalarRelationFilter = {
+  is?: Prisma.UserWhereInput | null
+  isNot?: Prisma.UserWhereInput | null
+}
+
+export type UserScalarRelationFilter = {
+  is?: Prisma.UserWhereInput
+  isNot?: Prisma.UserWhereInput
+}
+
 export type UserCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   email?: Prisma.SortOrder
@@ -435,18 +459,34 @@ export type UserMinOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
 }
 
-export type UserScalarRelationFilter = {
-  is?: Prisma.UserWhereInput
-  isNot?: Prisma.UserWhereInput
+export type UserCreateNestedOneWithoutInstagramConnectionsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutInstagramConnectionsInput, Prisma.UserUncheckedCreateWithoutInstagramConnectionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutInstagramConnectionsInput
+  connect?: Prisma.UserWhereUniqueInput
 }
 
-export type UserNullableScalarRelationFilter = {
-  is?: Prisma.UserWhereInput | null
-  isNot?: Prisma.UserWhereInput | null
+export type UserUpdateOneWithoutInstagramConnectionsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutInstagramConnectionsInput, Prisma.UserUncheckedCreateWithoutInstagramConnectionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutInstagramConnectionsInput
+  upsert?: Prisma.UserUpsertWithoutInstagramConnectionsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutInstagramConnectionsInput, Prisma.UserUpdateWithoutInstagramConnectionsInput>, Prisma.UserUncheckedUpdateWithoutInstagramConnectionsInput>
 }
 
-export type NullableDateTimeFieldUpdateOperationsInput = {
-  set?: Date | string | null
+export type UserCreateNestedOneWithoutInstagramOAuthStatesInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutInstagramOAuthStatesInput, Prisma.UserUncheckedCreateWithoutInstagramOAuthStatesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutInstagramOAuthStatesInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutInstagramOAuthStatesNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutInstagramOAuthStatesInput, Prisma.UserUncheckedCreateWithoutInstagramOAuthStatesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutInstagramOAuthStatesInput
+  upsert?: Prisma.UserUpsertWithoutInstagramOAuthStatesInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutInstagramOAuthStatesInput, Prisma.UserUpdateWithoutInstagramOAuthStatesInput>, Prisma.UserUncheckedUpdateWithoutInstagramOAuthStatesInput>
 }
 
 export type EnumPlatformRoleFieldUpdateOperationsInput = {
@@ -539,6 +579,190 @@ export type UserUpdateOneWithoutSecurityAuditLogsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSecurityAuditLogsInput, Prisma.UserUpdateWithoutSecurityAuditLogsInput>, Prisma.UserUncheckedUpdateWithoutSecurityAuditLogsInput>
 }
 
+export type UserCreateWithoutInstagramConnectionsInput = {
+  id?: string
+  email: string
+  name: string
+  passwordHash: string
+  emailVerifiedAt?: Date | string | null
+  platformRole?: $Enums.PlatformRole
+  status?: $Enums.AccessStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+  invitationsCreated?: Prisma.TenantInvitationCreateNestedManyWithoutInvitedByInput
+  securityAuditLogs?: Prisma.SecurityAuditLogCreateNestedManyWithoutUserInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutInstagramConnectionsInput = {
+  id?: string
+  email: string
+  name: string
+  passwordHash: string
+  emailVerifiedAt?: Date | string | null
+  platformRole?: $Enums.PlatformRole
+  status?: $Enums.AccessStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  invitationsCreated?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUncheckedCreateNestedManyWithoutUserInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutInstagramConnectionsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutInstagramConnectionsInput, Prisma.UserUncheckedCreateWithoutInstagramConnectionsInput>
+}
+
+export type UserUpsertWithoutInstagramConnectionsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutInstagramConnectionsInput, Prisma.UserUncheckedUpdateWithoutInstagramConnectionsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutInstagramConnectionsInput, Prisma.UserUncheckedCreateWithoutInstagramConnectionsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutInstagramConnectionsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutInstagramConnectionsInput, Prisma.UserUncheckedUpdateWithoutInstagramConnectionsInput>
+}
+
+export type UserUpdateWithoutInstagramConnectionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+  invitationsCreated?: Prisma.TenantInvitationUpdateManyWithoutInvitedByNestedInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUpdateManyWithoutUserNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutInstagramConnectionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+  invitationsCreated?: Prisma.TenantInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUncheckedUpdateManyWithoutUserNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutInstagramOAuthStatesInput = {
+  id?: string
+  email: string
+  name: string
+  passwordHash: string
+  emailVerifiedAt?: Date | string | null
+  platformRole?: $Enums.PlatformRole
+  status?: $Enums.AccessStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+  invitationsCreated?: Prisma.TenantInvitationCreateNestedManyWithoutInvitedByInput
+  securityAuditLogs?: Prisma.SecurityAuditLogCreateNestedManyWithoutUserInput
+  instagramConnections?: Prisma.InstagramConnectionCreateNestedManyWithoutConnectedByInput
+}
+
+export type UserUncheckedCreateWithoutInstagramOAuthStatesInput = {
+  id?: string
+  email: string
+  name: string
+  passwordHash: string
+  emailVerifiedAt?: Date | string | null
+  platformRole?: $Enums.PlatformRole
+  status?: $Enums.AccessStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  invitationsCreated?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUncheckedCreateNestedManyWithoutUserInput
+  instagramConnections?: Prisma.InstagramConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+}
+
+export type UserCreateOrConnectWithoutInstagramOAuthStatesInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutInstagramOAuthStatesInput, Prisma.UserUncheckedCreateWithoutInstagramOAuthStatesInput>
+}
+
+export type UserUpsertWithoutInstagramOAuthStatesInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutInstagramOAuthStatesInput, Prisma.UserUncheckedUpdateWithoutInstagramOAuthStatesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutInstagramOAuthStatesInput, Prisma.UserUncheckedCreateWithoutInstagramOAuthStatesInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutInstagramOAuthStatesInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutInstagramOAuthStatesInput, Prisma.UserUncheckedUpdateWithoutInstagramOAuthStatesInput>
+}
+
+export type UserUpdateWithoutInstagramOAuthStatesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+  invitationsCreated?: Prisma.TenantInvitationUpdateManyWithoutInvitedByNestedInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUpdateManyWithoutUserNestedInput
+  instagramConnections?: Prisma.InstagramConnectionUpdateManyWithoutConnectedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutInstagramOAuthStatesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+  invitationsCreated?: Prisma.TenantInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUncheckedUpdateManyWithoutUserNestedInput
+  instagramConnections?: Prisma.InstagramConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+}
+
 export type UserCreateWithoutMembershipsInput = {
   id?: string
   email: string
@@ -554,6 +778,8 @@ export type UserCreateWithoutMembershipsInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationCreateNestedManyWithoutInvitedByInput
   securityAuditLogs?: Prisma.SecurityAuditLogCreateNestedManyWithoutUserInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutUserInput
+  instagramConnections?: Prisma.InstagramConnectionCreateNestedManyWithoutConnectedByInput
 }
 
 export type UserUncheckedCreateWithoutMembershipsInput = {
@@ -571,6 +797,8 @@ export type UserUncheckedCreateWithoutMembershipsInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutInvitedByInput
   securityAuditLogs?: Prisma.SecurityAuditLogUncheckedCreateNestedManyWithoutUserInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutUserInput
+  instagramConnections?: Prisma.InstagramConnectionUncheckedCreateNestedManyWithoutConnectedByInput
 }
 
 export type UserCreateOrConnectWithoutMembershipsInput = {
@@ -604,6 +832,8 @@ export type UserUpdateWithoutMembershipsInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUpdateManyWithoutInvitedByNestedInput
   securityAuditLogs?: Prisma.SecurityAuditLogUpdateManyWithoutUserNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutUserNestedInput
+  instagramConnections?: Prisma.InstagramConnectionUpdateManyWithoutConnectedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMembershipsInput = {
@@ -621,6 +851,8 @@ export type UserUncheckedUpdateWithoutMembershipsInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   securityAuditLogs?: Prisma.SecurityAuditLogUncheckedUpdateManyWithoutUserNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutUserNestedInput
+  instagramConnections?: Prisma.InstagramConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
 }
 
 export type UserCreateWithoutSessionsInput = {
@@ -638,6 +870,8 @@ export type UserCreateWithoutSessionsInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationCreateNestedManyWithoutInvitedByInput
   securityAuditLogs?: Prisma.SecurityAuditLogCreateNestedManyWithoutUserInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutUserInput
+  instagramConnections?: Prisma.InstagramConnectionCreateNestedManyWithoutConnectedByInput
 }
 
 export type UserUncheckedCreateWithoutSessionsInput = {
@@ -655,6 +889,8 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutInvitedByInput
   securityAuditLogs?: Prisma.SecurityAuditLogUncheckedCreateNestedManyWithoutUserInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutUserInput
+  instagramConnections?: Prisma.InstagramConnectionUncheckedCreateNestedManyWithoutConnectedByInput
 }
 
 export type UserCreateOrConnectWithoutSessionsInput = {
@@ -688,6 +924,8 @@ export type UserUpdateWithoutSessionsInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUpdateManyWithoutInvitedByNestedInput
   securityAuditLogs?: Prisma.SecurityAuditLogUpdateManyWithoutUserNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutUserNestedInput
+  instagramConnections?: Prisma.InstagramConnectionUpdateManyWithoutConnectedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -705,6 +943,8 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   securityAuditLogs?: Prisma.SecurityAuditLogUncheckedUpdateManyWithoutUserNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutUserNestedInput
+  instagramConnections?: Prisma.InstagramConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
 }
 
 export type UserCreateWithoutEmailVerificationTokensInput = {
@@ -722,6 +962,8 @@ export type UserCreateWithoutEmailVerificationTokensInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationCreateNestedManyWithoutInvitedByInput
   securityAuditLogs?: Prisma.SecurityAuditLogCreateNestedManyWithoutUserInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutUserInput
+  instagramConnections?: Prisma.InstagramConnectionCreateNestedManyWithoutConnectedByInput
 }
 
 export type UserUncheckedCreateWithoutEmailVerificationTokensInput = {
@@ -739,6 +981,8 @@ export type UserUncheckedCreateWithoutEmailVerificationTokensInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutInvitedByInput
   securityAuditLogs?: Prisma.SecurityAuditLogUncheckedCreateNestedManyWithoutUserInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutUserInput
+  instagramConnections?: Prisma.InstagramConnectionUncheckedCreateNestedManyWithoutConnectedByInput
 }
 
 export type UserCreateOrConnectWithoutEmailVerificationTokensInput = {
@@ -772,6 +1016,8 @@ export type UserUpdateWithoutEmailVerificationTokensInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUpdateManyWithoutInvitedByNestedInput
   securityAuditLogs?: Prisma.SecurityAuditLogUpdateManyWithoutUserNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutUserNestedInput
+  instagramConnections?: Prisma.InstagramConnectionUpdateManyWithoutConnectedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutEmailVerificationTokensInput = {
@@ -789,6 +1035,8 @@ export type UserUncheckedUpdateWithoutEmailVerificationTokensInput = {
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   securityAuditLogs?: Prisma.SecurityAuditLogUncheckedUpdateManyWithoutUserNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutUserNestedInput
+  instagramConnections?: Prisma.InstagramConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
 }
 
 export type UserCreateWithoutPasswordResetTokensInput = {
@@ -806,6 +1054,8 @@ export type UserCreateWithoutPasswordResetTokensInput = {
   emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationCreateNestedManyWithoutInvitedByInput
   securityAuditLogs?: Prisma.SecurityAuditLogCreateNestedManyWithoutUserInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutUserInput
+  instagramConnections?: Prisma.InstagramConnectionCreateNestedManyWithoutConnectedByInput
 }
 
 export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
@@ -823,6 +1073,8 @@ export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutInvitedByInput
   securityAuditLogs?: Prisma.SecurityAuditLogUncheckedCreateNestedManyWithoutUserInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutUserInput
+  instagramConnections?: Prisma.InstagramConnectionUncheckedCreateNestedManyWithoutConnectedByInput
 }
 
 export type UserCreateOrConnectWithoutPasswordResetTokensInput = {
@@ -856,6 +1108,8 @@ export type UserUpdateWithoutPasswordResetTokensInput = {
   emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUpdateManyWithoutInvitedByNestedInput
   securityAuditLogs?: Prisma.SecurityAuditLogUpdateManyWithoutUserNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutUserNestedInput
+  instagramConnections?: Prisma.InstagramConnectionUpdateManyWithoutConnectedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
@@ -873,6 +1127,8 @@ export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   securityAuditLogs?: Prisma.SecurityAuditLogUncheckedUpdateManyWithoutUserNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutUserNestedInput
+  instagramConnections?: Prisma.InstagramConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
 }
 
 export type UserCreateWithoutInvitationsCreatedInput = {
@@ -890,6 +1146,8 @@ export type UserCreateWithoutInvitationsCreatedInput = {
   emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   securityAuditLogs?: Prisma.SecurityAuditLogCreateNestedManyWithoutUserInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutUserInput
+  instagramConnections?: Prisma.InstagramConnectionCreateNestedManyWithoutConnectedByInput
 }
 
 export type UserUncheckedCreateWithoutInvitationsCreatedInput = {
@@ -907,6 +1165,8 @@ export type UserUncheckedCreateWithoutInvitationsCreatedInput = {
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   securityAuditLogs?: Prisma.SecurityAuditLogUncheckedCreateNestedManyWithoutUserInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutUserInput
+  instagramConnections?: Prisma.InstagramConnectionUncheckedCreateNestedManyWithoutConnectedByInput
 }
 
 export type UserCreateOrConnectWithoutInvitationsCreatedInput = {
@@ -940,6 +1200,8 @@ export type UserUpdateWithoutInvitationsCreatedInput = {
   emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   securityAuditLogs?: Prisma.SecurityAuditLogUpdateManyWithoutUserNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutUserNestedInput
+  instagramConnections?: Prisma.InstagramConnectionUpdateManyWithoutConnectedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutInvitationsCreatedInput = {
@@ -957,6 +1219,8 @@ export type UserUncheckedUpdateWithoutInvitationsCreatedInput = {
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   securityAuditLogs?: Prisma.SecurityAuditLogUncheckedUpdateManyWithoutUserNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutUserNestedInput
+  instagramConnections?: Prisma.InstagramConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
 }
 
 export type UserCreateWithoutSecurityAuditLogsInput = {
@@ -974,6 +1238,8 @@ export type UserCreateWithoutSecurityAuditLogsInput = {
   emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationCreateNestedManyWithoutInvitedByInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutUserInput
+  instagramConnections?: Prisma.InstagramConnectionCreateNestedManyWithoutConnectedByInput
 }
 
 export type UserUncheckedCreateWithoutSecurityAuditLogsInput = {
@@ -991,6 +1257,8 @@ export type UserUncheckedCreateWithoutSecurityAuditLogsInput = {
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutUserInput
+  instagramConnections?: Prisma.InstagramConnectionUncheckedCreateNestedManyWithoutConnectedByInput
 }
 
 export type UserCreateOrConnectWithoutSecurityAuditLogsInput = {
@@ -1024,6 +1292,8 @@ export type UserUpdateWithoutSecurityAuditLogsInput = {
   emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUpdateManyWithoutInvitedByNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutUserNestedInput
+  instagramConnections?: Prisma.InstagramConnectionUpdateManyWithoutConnectedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSecurityAuditLogsInput = {
@@ -1041,6 +1311,8 @@ export type UserUncheckedUpdateWithoutSecurityAuditLogsInput = {
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutUserNestedInput
+  instagramConnections?: Prisma.InstagramConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
 }
 
 
@@ -1055,6 +1327,8 @@ export type UserCountOutputType = {
   passwordResetTokens: number
   invitationsCreated: number
   securityAuditLogs: number
+  instagramOAuthStates: number
+  instagramConnections: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1064,6 +1338,8 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   passwordResetTokens?: boolean | UserCountOutputTypeCountPasswordResetTokensArgs
   invitationsCreated?: boolean | UserCountOutputTypeCountInvitationsCreatedArgs
   securityAuditLogs?: boolean | UserCountOutputTypeCountSecurityAuditLogsArgs
+  instagramOAuthStates?: boolean | UserCountOutputTypeCountInstagramOAuthStatesArgs
+  instagramConnections?: boolean | UserCountOutputTypeCountInstagramConnectionsArgs
 }
 
 /**
@@ -1118,6 +1394,20 @@ export type UserCountOutputTypeCountSecurityAuditLogsArgs<ExtArgs extends runtim
   where?: Prisma.SecurityAuditLogWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountInstagramOAuthStatesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.InstagramOAuthStateWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountInstagramConnectionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.InstagramConnectionWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1135,6 +1425,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   passwordResetTokens?: boolean | Prisma.User$passwordResetTokensArgs<ExtArgs>
   invitationsCreated?: boolean | Prisma.User$invitationsCreatedArgs<ExtArgs>
   securityAuditLogs?: boolean | Prisma.User$securityAuditLogsArgs<ExtArgs>
+  instagramOAuthStates?: boolean | Prisma.User$instagramOAuthStatesArgs<ExtArgs>
+  instagramConnections?: boolean | Prisma.User$instagramConnectionsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1182,6 +1474,8 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   passwordResetTokens?: boolean | Prisma.User$passwordResetTokensArgs<ExtArgs>
   invitationsCreated?: boolean | Prisma.User$invitationsCreatedArgs<ExtArgs>
   securityAuditLogs?: boolean | Prisma.User$securityAuditLogsArgs<ExtArgs>
+  instagramOAuthStates?: boolean | Prisma.User$instagramOAuthStatesArgs<ExtArgs>
+  instagramConnections?: boolean | Prisma.User$instagramConnectionsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1196,6 +1490,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     passwordResetTokens: Prisma.$PasswordResetTokenPayload<ExtArgs>[]
     invitationsCreated: Prisma.$TenantInvitationPayload<ExtArgs>[]
     securityAuditLogs: Prisma.$SecurityAuditLogPayload<ExtArgs>[]
+    instagramOAuthStates: Prisma.$InstagramOAuthStatePayload<ExtArgs>[]
+    instagramConnections: Prisma.$InstagramConnectionPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1607,6 +1903,8 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   passwordResetTokens<T extends Prisma.User$passwordResetTokensArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$passwordResetTokensArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PasswordResetTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   invitationsCreated<T extends Prisma.User$invitationsCreatedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$invitationsCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TenantInvitationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   securityAuditLogs<T extends Prisma.User$securityAuditLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$securityAuditLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SecurityAuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  instagramOAuthStates<T extends Prisma.User$instagramOAuthStatesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$instagramOAuthStatesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InstagramOAuthStatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  instagramConnections<T extends Prisma.User$instagramConnectionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$instagramConnectionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InstagramConnectionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2179,6 +2477,54 @@ export type User$securityAuditLogsArgs<ExtArgs extends runtime.Types.Extensions.
   take?: number
   skip?: number
   distinct?: Prisma.SecurityAuditLogScalarFieldEnum | Prisma.SecurityAuditLogScalarFieldEnum[]
+}
+
+/**
+ * User.instagramOAuthStates
+ */
+export type User$instagramOAuthStatesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the InstagramOAuthState
+   */
+  select?: Prisma.InstagramOAuthStateSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the InstagramOAuthState
+   */
+  omit?: Prisma.InstagramOAuthStateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.InstagramOAuthStateInclude<ExtArgs> | null
+  where?: Prisma.InstagramOAuthStateWhereInput
+  orderBy?: Prisma.InstagramOAuthStateOrderByWithRelationInput | Prisma.InstagramOAuthStateOrderByWithRelationInput[]
+  cursor?: Prisma.InstagramOAuthStateWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.InstagramOAuthStateScalarFieldEnum | Prisma.InstagramOAuthStateScalarFieldEnum[]
+}
+
+/**
+ * User.instagramConnections
+ */
+export type User$instagramConnectionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the InstagramConnection
+   */
+  select?: Prisma.InstagramConnectionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the InstagramConnection
+   */
+  omit?: Prisma.InstagramConnectionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.InstagramConnectionInclude<ExtArgs> | null
+  where?: Prisma.InstagramConnectionWhereInput
+  orderBy?: Prisma.InstagramConnectionOrderByWithRelationInput | Prisma.InstagramConnectionOrderByWithRelationInput[]
+  cursor?: Prisma.InstagramConnectionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.InstagramConnectionScalarFieldEnum | Prisma.InstagramConnectionScalarFieldEnum[]
 }
 
 /**
