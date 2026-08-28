@@ -90,6 +90,27 @@ describe('MetaInstagramClient', () => {
     expect(init).toMatchObject({ headers: { authorization: 'Bearer access-token-that-must-not-leak' } });
   });
 
+  it('returns the actual granted permission set without placing the token in the URL', async () => {
+    const fetchFn = vi.fn<typeof fetch>().mockResolvedValue(response({
+      data: [
+        { permission: 'instagram_business_basic', status: 'granted' },
+        { permission: 'instagram_business_manage_messages', status: 'granted' },
+        { permission: 'pages_show_list', status: 'declined' },
+      ],
+    }));
+    const client = new MetaInstagramClient({ ...config, fetch: fetchFn });
+
+    await expect(client.getGrantedScopes('access-token-that-must-not-leak')).resolves.toEqual([
+      'instagram_business_basic',
+      'instagram_business_manage_messages',
+    ]);
+
+    const [requestUrl, init] = fetchFn.mock.calls[0] ?? [];
+    expect(String(requestUrl)).toBe('https://graph.instagram.com/v24.0/me/permissions');
+    expect(String(requestUrl)).not.toContain('access-token-that-must-not-leak');
+    expect(init).toMatchObject({ headers: { authorization: 'Bearer access-token-that-must-not-leak' } });
+  });
+
   it('subscribes the current account to message webhooks', async () => {
     const fetchFn = vi.fn<typeof fetch>().mockResolvedValue(response({ success: true }));
     const client = new MetaInstagramClient({ ...config, fetch: fetchFn });

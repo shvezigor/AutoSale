@@ -99,6 +99,20 @@ export class MetaInstagramClient {
     return { accountId: payload.id, username: typeof payload.username === 'string' ? payload.username : null };
   }
 
+  async getGrantedScopes(accessToken: string): Promise<string[]> {
+    const payload = await this.requestJson(this.graphUrl('me/permissions'), this.authorized(accessToken));
+    if (!isRecord(payload) || !Array.isArray(payload.data)) throw new MetaInstagramError(200, null);
+
+    const granted = new Set<string>();
+    for (const permission of payload.data) {
+      if (!isRecord(permission)) continue;
+      if (permission.status === 'granted' && typeof permission.permission === 'string') {
+        granted.add(permission.permission);
+      }
+    }
+    return [...granted].sort();
+  }
+
   async subscribe(accessToken: string): Promise<void> {
     await this.requestVoid(this.graphUrl('me/subscribed_apps'), {
       ...this.authorized(accessToken),

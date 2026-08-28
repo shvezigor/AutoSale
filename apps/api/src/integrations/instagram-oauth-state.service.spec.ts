@@ -23,6 +23,17 @@ class OAuthStateStore {
         this.rows.push(row);
         return row;
       },
+      updateMany: async ({ where, data }: {
+        where: { tenantId?: string; usedAt?: null };
+        data: { usedAt: Date };
+      }) => {
+        const rows = this.rows.filter((row) =>
+          (where.tenantId === undefined || row.tenantId === where.tenantId) &&
+          (where.usedAt === undefined || row.usedAt === where.usedAt),
+        );
+        for (const row of rows) row.usedAt = data.usedAt;
+        return { count: rows.length };
+      },
       updateManyAndReturn: async ({
         where,
         data,
@@ -53,6 +64,7 @@ class OAuthStateStore {
         }));
       },
     },
+    $transaction: async <T>(callback: (transaction: OAuthStateStore['prisma']) => Promise<T>) => callback(this.prisma),
   };
 }
 
@@ -60,7 +72,7 @@ function createService(store = new OAuthStateStore()): {
   service: InstagramOAuthStateService;
   store: OAuthStateStore;
 } {
-  return { service: new InstagramOAuthStateService(store.prisma), store };
+  return { service: new InstagramOAuthStateService(store.prisma as never), store };
 }
 
 describe('InstagramOAuthStateService', () => {
@@ -141,5 +153,14 @@ describe('InstagramOAuthStateService', () => {
     expect(results.filter((result) => result.status === 'rejected')).toHaveLength(1);
     const rejected = results.find((result) => result.status === 'rejected');
     expect(rejected?.status === 'rejected' && rejected.reason.message).toBe('Invalid or expired OAuth state');
+  });
+
+  it('invalidates every older unused state for the tenant before issuing the next state', async () => {
+    const { service } = createService();
+    const older = await service.create({ tenantId: 'tenant-a', userId: 'user-a' });
+    const current = await service.create({ tenantId: 'tenant-a', userId: 'user-a' });
+
+    await expect(service.consume(older)).rejects.toThrow('Invalid or expired OAuth state');
+    await expect(service.consume(current)).resolves.toMatchObject({ tenantId: 'tenant-a', userId: 'user-a' });
   });
 });

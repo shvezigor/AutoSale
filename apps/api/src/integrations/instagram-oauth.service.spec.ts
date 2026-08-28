@@ -28,8 +28,16 @@ function setup() {
   const upsert = vi.fn();
   const update = vi.fn();
   const updateMany = vi.fn().mockResolvedValue({ count: 1 });
+  const tenantFindUnique = vi.fn().mockResolvedValue({ status: 'ACTIVE' });
+  const membershipFindUnique = vi.fn().mockResolvedValue({
+    role: 'OWNER',
+    status: 'ACTIVE',
+    user: { status: 'ACTIVE' },
+  });
   const prisma = {
     instagramConnection: { findUnique, upsert, update, updateMany },
+    tenant: { findUnique: tenantFindUnique },
+    tenantMembership: { findUnique: membershipFindUnique },
   };
   const state = {
     create: vi.fn().mockResolvedValue('state-token'),
@@ -45,6 +53,10 @@ function setup() {
     ),
     exchangeCode: vi.fn().mockResolvedValue({ accessToken: 'long-lived-token', expiresIn: 60 * 24 * 60 * 60 }),
     getIdentity: vi.fn().mockResolvedValue({ accountId: '17841400000000000', username: 'autosale_store' }),
+    getGrantedScopes: vi.fn().mockResolvedValue([
+      'instagram_business_basic',
+      'instagram_business_manage_messages',
+    ]),
     subscribe: vi.fn().mockResolvedValue(undefined),
     unsubscribe: vi.fn().mockResolvedValue(undefined),
     revoke: vi.fn().mockResolvedValue(undefined),
@@ -59,7 +71,10 @@ function setup() {
     () => now,
   );
 
-  return { service, prisma, state, meta, findUnique, upsert, update, updateMany };
+  return {
+    service, prisma, state, meta, findUnique, upsert, update, updateMany,
+    tenantFindUnique, membershipFindUnique,
+  };
 }
 
 describe('InstagramOAuthService', () => {
@@ -89,6 +104,10 @@ describe('InstagramOAuthService', () => {
     meta.subscribe.mockImplementation(async () => {
       order.push('subscribe');
     });
+    meta.getGrantedScopes.mockImplementation(async () => {
+      order.push('permissions');
+      return ['instagram_business_basic', 'instagram_business_manage_messages'];
+    });
     findUnique.mockResolvedValue(null);
     upsert.mockResolvedValue(connection({ status: 'ERROR' }));
     update.mockResolvedValue(connection());
@@ -105,7 +124,7 @@ describe('InstagramOAuthService', () => {
       },
     });
 
-    expect(order).toEqual(['consume', 'exchange', 'subscribe']);
+    expect(order).toEqual(['consume', 'exchange', 'permissions', 'subscribe']);
     expect(meta.exchangeCode).toHaveBeenCalledWith({ code: 'authorization-code', redirectUri: callbackUri });
     expect(meta.getIdentity).toHaveBeenCalledWith('long-lived-token');
     const write = upsert.mock.calls[0]![0];
@@ -118,10 +137,42 @@ describe('InstagramOAuthService', () => {
       connectedByUserId: 'user-a',
     });
     expect(write.create.encryptedAccessToken).not.toBe('long-lived-token');
+    expect(write.create.grantedScopes).toBe('instagram_business_basic,instagram_business_manage_messages');
     expect(update).toHaveBeenCalledWith(expect.objectContaining({
       where: { tenantId: 'tenant-a' },
       data: expect.objectContaining({ status: 'ACTIVE', lastVerifiedAt: now, lastErrorCode: null }),
     }));
+  });
+
+  it.each([
+    ['blocked tenant', 'tenantFindUnique', { status: 'BLOCKED' }],
+    ['removed owner membership', 'membershipFindUnique', null],
+    ['blocked owner membership', 'membershipFindUnique', { role: 'OWNER', status: 'BLOCKED', user: { status: 'ACTIVE' } }],
+    ['demoted owner membership', 'membershipFindUnique', { role: 'MANAGER', status: 'ACTIVE', user: { status: 'ACTIVE' } }],
+    ['blocked owner user', 'membershipFindUnique', { role: 'OWNER', status: 'ACTIVE', user: { status: 'BLOCKED' } }],
+  ])('fails closed before Meta exchange for a %s', async (_name, stub, value) => {
+    const { service, meta, tenantFindUnique, membershipFindUnique } = setup();
+    if (stub === 'tenantFindUnique') tenantFindUnique.mockResolvedValue(value);
+    else membershipFindUnique.mockResolvedValue(value);
+
+    await expect(service.completeCallback('authorization-code', 'raw-state')).rejects.toThrow('Instagram connection failed');
+
+    expect(meta.exchangeCode).not.toHaveBeenCalled();
+  });
+
+  it('fails safely before persistence when Meta did not grant every required scope', async () => {
+    const { service, findUnique, upsert, meta, updateMany } = setup();
+    findUnique.mockResolvedValue(null);
+    meta.getGrantedScopes.mockResolvedValue(['instagram_business_basic']);
+
+    await expect(service.completeCallback('authorization-code', 'raw-state')).rejects.toThrow('Instagram connection failed');
+
+    expect(upsert).not.toHaveBeenCalled();
+    expect(meta.subscribe).not.toHaveBeenCalled();
+    expect(updateMany).toHaveBeenCalledWith({
+      where: { tenantId: 'tenant-a' },
+      data: { status: 'ERROR', lastErrorCode: 'META_REQUIRED_SCOPES_MISSING' },
+    });
   });
 
   it('fails closed when the Instagram account belongs to another tenant', async () => {
@@ -182,6 +233,28 @@ describe('InstagramOAuthService', () => {
     expect(summary).not.toHaveProperty('encryptedAccessToken');
   });
 
+  it('treats an expired ACTIVE credential as reauthorization-required without exposing it', async () => {
+    const { service, findUnique, updateMany } = setup();
+    findUnique.mockResolvedValue(connection({ tokenExpiresAt: new Date('2026-08-28T11:59:59.999Z') }));
+
+    await expect(service.getSummary('tenant-a')).resolves.toEqual({
+      status: 'REAUTH_REQUIRED',
+      accountId: '17841400000000000',
+      username: 'autosale_store',
+      tokenExpiresAt: '2026-08-28T11:59:59.999Z',
+      lastVerifiedAt: '2026-08-28T12:00:00.000Z',
+      lastErrorCode: 'META_TOKEN_EXPIRED',
+    });
+    expect(updateMany).toHaveBeenCalledWith({
+      where: {
+        tenantId: 'tenant-a',
+        status: 'ACTIVE',
+        tokenExpiresAt: { lte: now },
+      },
+      data: { status: 'REAUTH_REQUIRED', lastErrorCode: 'META_TOKEN_EXPIRED' },
+    });
+  });
+
   it('returns NOT_CONNECTED when the tenant has no Instagram record', async () => {
     const { service, findUnique } = setup();
     findUnique.mockResolvedValue(null);
@@ -196,19 +269,27 @@ describe('InstagramOAuthService', () => {
     });
   });
 
-  it('attempts unsubscribe and revoke independently, then always clears the local credential', async () => {
+  it('disables locally before remote cleanup, retains a failed cleanup credential, and clears it on retry', async () => {
     const { service, findUnique, update, meta } = setup();
     const cipher = new CredentialCipher(Buffer.alloc(32, 7));
     findUnique.mockResolvedValue(connection({ encryptedAccessToken: cipher.encrypt('remote-token') }));
+    const order: string[] = [];
+    update
+      .mockImplementationOnce(async (input: { data: { status: string } }) => {
+        order.push(`local:${input.data.status}`);
+        return connection({ status: 'DISCONNECTED', lastErrorCode: null });
+      })
+      .mockImplementationOnce(async () => connection({
+        status: 'DISCONNECTED',
+        encryptedAccessToken: cipher.encrypt('remote-token'),
+        lastErrorCode: 'META_DISCONNECT_CLEANUP_FAILED',
+      }))
+      .mockImplementationOnce(async () => connection({ status: 'DISCONNECTED', lastErrorCode: null }))
+      .mockImplementationOnce(async () => connection({ status: 'DISCONNECTED', encryptedAccessToken: null, tokenExpiresAt: null }));
     meta.unsubscribe.mockRejectedValue(new Error('provider unavailable'));
     meta.revoke.mockRejectedValue(new Error('provider unavailable'));
-    update.mockResolvedValue(connection({
-      status: 'DISCONNECTED',
-      encryptedAccessToken: null,
-      tokenExpiresAt: null,
-      lastVerifiedAt: now,
-      lastErrorCode: 'META_DISCONNECT_CLEANUP_FAILED',
-    }));
+    meta.unsubscribe.mockImplementation(async () => { order.push('unsubscribe'); throw new Error('provider unavailable'); });
+    meta.revoke.mockImplementation(async () => { order.push('revoke'); throw new Error('provider unavailable'); });
 
     await expect(service.disconnect('tenant-a')).resolves.toMatchObject({
       status: 'DISCONNECTED',
@@ -217,14 +298,21 @@ describe('InstagramOAuthService', () => {
 
     expect(meta.unsubscribe).toHaveBeenCalledWith('remote-token');
     expect(meta.revoke).toHaveBeenCalledWith('remote-token');
-    expect(update).toHaveBeenCalledWith(expect.objectContaining({
+    expect(order.slice(0, 3)).toEqual(['local:DISCONNECTED', 'unsubscribe', 'revoke']);
+    expect(update).toHaveBeenNthCalledWith(2, expect.objectContaining({
+      where: { tenantId: 'tenant-a' },
+      data: { status: 'DISCONNECTED', lastErrorCode: 'META_DISCONNECT_CLEANUP_FAILED' },
+    }));
+
+    meta.unsubscribe.mockResolvedValue(undefined);
+    meta.revoke.mockResolvedValue(undefined);
+    await expect(service.disconnect('tenant-a')).resolves.toMatchObject({ status: 'DISCONNECTED', lastErrorCode: null });
+    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({
       where: { tenantId: 'tenant-a' },
       data: expect.objectContaining({
-        status: 'DISCONNECTED',
         encryptedAccessToken: null,
         tokenExpiresAt: null,
         grantedScopes: null,
-        disconnectedAt: now,
       }),
     }));
   });
@@ -239,5 +327,13 @@ describe('InstagramOAuthService', () => {
     expect(meta.unsubscribe).not.toHaveBeenCalled();
     expect(meta.revoke).not.toHaveBeenCalled();
     expect(update).toHaveBeenCalledOnce();
+    expect(update).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({
+        status: 'DISCONNECTED',
+        encryptedAccessToken: null,
+        tokenExpiresAt: null,
+        grantedScopes: null,
+      }),
+    }));
   });
 });

@@ -1,27 +1,38 @@
+import type { AuthPrincipal } from '@autosale/contracts/auth';
 import type { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
+import { APP_GUARD, Reflector } from '@nestjs/core';
 import request from 'supertest';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { AUTH_ACCESS_KEY, SKIP_CSRF_KEY } from '../auth/auth.decorators.js';
+import { AUTH_HTTP_CONFIG } from '../auth/auth.controller.js';
+import { AuthGuard } from '../auth/auth.guard.js';
+import { CsrfService } from '../auth/csrf.service.js';
+import { SessionService } from '../auth/session.service.js';
 import { InstagramOAuthController } from './instagram-oauth.controller.js';
 import { InstagramOAuthService } from './instagram-oauth.service.js';
 
 describe('InstagramOAuthController', () => {
-  const principal = {
+  const owner: AuthPrincipal = {
     userId: 'owner-a',
     email: 'owner@example.com',
     name: 'Owner',
     platformRole: 'USER',
     tenantId: 'tenant-a',
     membershipRole: 'OWNER',
-    sessionId: 'session-a',
-  } as const;
+    sessionId: 'session-owner',
+  };
+  const manager: AuthPrincipal = { ...owner, userId: 'manager-a', membershipRole: 'MANAGER', sessionId: 'session-manager' };
   let app: INestApplication | undefined;
   const getSummary = vi.fn();
   const connect = vi.fn();
   const completeCallback = vi.fn();
   const disconnect = vi.fn();
+  const resolve = vi.fn();
+  const csrf = new CsrfService('p'.repeat(32));
+
+  const cookie = (token: string) => `autosale_session=${token}`;
+  const csrfHeader = (principal: AuthPrincipal) => ({ 'x-csrf-token': csrf.issue(principal.sessionId) });
 
   beforeEach(async () => {
     getSummary.mockReset().mockResolvedValue({
@@ -38,51 +49,76 @@ describe('InstagramOAuthController', () => {
       summary: { status: 'ACTIVE' },
     });
     disconnect.mockReset().mockResolvedValue({ status: 'DISCONNECTED' });
+    resolve.mockReset().mockImplementation(async (token: string) => {
+      if (token === 'owner-token') return owner;
+      if (token === 'manager-token') return manager;
+      return null;
+    });
 
     const moduleRef = await Test.createTestingModule({
       controllers: [InstagramOAuthController],
-      providers: [{
-        provide: InstagramOAuthService,
-        useValue: { getSummary, connect, completeCallback, disconnect },
-      }],
+      providers: [
+        { provide: InstagramOAuthService, useValue: { getSummary, connect, completeCallback, disconnect } },
+        { provide: SessionService, useValue: { resolve } },
+        { provide: CsrfService, useValue: csrf },
+        { provide: AUTH_HTTP_CONFIG, useValue: { cookieName: 'autosale_session', production: false } },
+        {
+          provide: AuthGuard,
+          useFactory: () => new AuthGuard(
+            new Reflector(),
+            { resolve } as never,
+            { cookieName: 'autosale_session', production: false },
+            csrf,
+          ),
+        },
+        { provide: APP_GUARD, useExisting: AuthGuard },
+      ],
     }).compile();
     app = moduleRef.createNestApplication();
-    app.use((req: { principal?: unknown }, _res: unknown, next: () => void) => {
-      req.principal = principal;
-      next();
-    });
     await app.init();
   });
 
   afterEach(async () => app?.close());
 
-  it('requires manager membership for summary and owner membership for mutations', () => {
-    expect(Reflect.getMetadata(AUTH_ACCESS_KEY, InstagramOAuthController.prototype.getSummary)).toBe('TENANT_MANAGER');
-    expect(Reflect.getMetadata(AUTH_ACCESS_KEY, InstagramOAuthController.prototype.connect)).toBe('TENANT_OWNER');
-    expect(Reflect.getMetadata(AUTH_ACCESS_KEY, InstagramOAuthController.prototype.disconnect)).toBe('TENANT_OWNER');
-  });
-
-  it('makes only the callback public and CSRF-exempt', () => {
-    expect(Reflect.getMetadata(AUTH_ACCESS_KEY, InstagramOAuthController.prototype.callback)).toBe('PUBLIC');
-    expect(Reflect.getMetadata(SKIP_CSRF_KEY, InstagramOAuthController.prototype.callback)).toBe(true);
-    expect(Reflect.getMetadata(SKIP_CSRF_KEY, InstagramOAuthController.prototype.connect)).toBeUndefined();
-    expect(Reflect.getMetadata(SKIP_CSRF_KEY, InstagramOAuthController.prototype.disconnect)).toBeUndefined();
-  });
-
-  it('uses only the authenticated tenant for summary, connect, and disconnect', async () => {
-    await request(app!.getHttpServer()).get('/api/integrations/instagram').expect(200);
+  it('rejects an unauthenticated summary request while allowing a tenant manager to read it', async () => {
+    await request(app!.getHttpServer()).get('/api/integrations/instagram').expect(401);
     await request(app!.getHttpServer())
-      .post('/api/integrations/instagram/connect')
-      .send({ returnPath: '/settings?tab=instagram' })
-      .expect(201);
-    await request(app!.getHttpServer()).post('/api/integrations/instagram/disconnect').expect(201);
+      .get('/api/integrations/instagram')
+      .set('Cookie', cookie('manager-token'))
+      .expect(200);
 
     expect(getSummary).toHaveBeenCalledWith('tenant-a');
+  });
+
+  it('allows only an owner with a valid CSRF token to mutate the connection', async () => {
+    await request(app!.getHttpServer())
+      .post('/api/integrations/instagram/connect')
+      .set('Cookie', cookie('manager-token'))
+      .set(csrfHeader(manager))
+      .send({ returnPath: '/settings?tab=instagram' })
+      .expect(403);
+    await request(app!.getHttpServer())
+      .post('/api/integrations/instagram/connect')
+      .set('Cookie', cookie('owner-token'))
+      .send({ returnPath: '/settings?tab=instagram' })
+      .expect(403);
+    await request(app!.getHttpServer())
+      .post('/api/integrations/instagram/connect')
+      .set('Cookie', cookie('owner-token'))
+      .set(csrfHeader(owner))
+      .send({ returnPath: '/settings?tab=instagram' })
+      .expect(201);
+    await request(app!.getHttpServer())
+      .post('/api/integrations/instagram/disconnect')
+      .set('Cookie', cookie('owner-token'))
+      .set(csrfHeader(owner))
+      .expect(201);
+
     expect(connect).toHaveBeenCalledWith('tenant-a', 'owner-a', '/settings?tab=instagram');
     expect(disconnect).toHaveBeenCalledWith('tenant-a');
   });
 
-  it('uses state-bound callback data without consulting a session and preserves an existing query', async () => {
+  it('allows the callback without a session or CSRF token and redirects from state-bound data', async () => {
     await request(app!.getHttpServer())
       .get('/api/integrations/instagram/callback')
       .query({ code: 'authorization-code', state: 'raw-state' })

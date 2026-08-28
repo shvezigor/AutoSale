@@ -8,7 +8,10 @@ import { CredentialCipher } from './credential-cipher.js';
 import { InstagramOAuthStateService } from './instagram-oauth-state.service.js';
 
 const CALLBACK_PATH = '/api/integrations/instagram/callback';
-const GRANTED_SCOPES = 'instagram_business_basic,instagram_business_manage_messages';
+const REQUIRED_SCOPES = [
+  'instagram_business_basic',
+  'instagram_business_manage_messages',
+] as const;
 const SAFE_FAILURE_MESSAGE = 'Instagram connection failed';
 
 const SAFE_CONNECTION_SELECT = {
@@ -58,7 +61,14 @@ export class InstagramOAuthService {
       select: SAFE_CONNECTION_SELECT,
     });
 
-    return connection ? toSummary(connection) : emptySummary();
+    if (!connection) return emptySummary();
+
+    const checkedAt = this.now();
+    const expired = isExpiredActiveConnection(connection, checkedAt);
+    if (expired) {
+      await this.markExpired(tenantId, checkedAt);
+    }
+    return toSummary(connection, expired);
   }
 
   async connect(
@@ -90,6 +100,10 @@ export class InstagramOAuthService {
       throw safeFailure();
     }
 
+    if (!await this.hasActiveOwner(binding.tenantId, binding.userId)) {
+      throw safeFailure();
+    }
+
     if (!code) {
       await this.markFailure(binding.tenantId, 'ERROR', 'META_CALLBACK_INVALID');
       throw safeFailure();
@@ -98,11 +112,13 @@ export class InstagramOAuthService {
     let accessToken: string;
     let expiresIn: number | null;
     let identity: { accountId: string; username: string | null };
+    let grantedScopes: string[];
     try {
       const token = await this.meta.exchangeCode({ code, redirectUri: this.callbackUri });
       accessToken = token.accessToken;
       expiresIn = token.expiresIn;
       identity = await this.meta.getIdentity(accessToken);
+      grantedScopes = await this.meta.getGrantedScopes(accessToken);
     } catch (error) {
       const authorizationFailure = isAuthorizationFailure(error);
       await this.markFailure(
@@ -110,6 +126,11 @@ export class InstagramOAuthService {
         authorizationFailure ? 'REAUTH_REQUIRED' : 'ERROR',
         authorizationFailure ? 'META_AUTHORIZATION_FAILED' : 'META_PROVIDER_FAILED',
       );
+      throw safeFailure();
+    }
+
+    if (!hasRequiredScopes(grantedScopes)) {
+      await this.markFailure(binding.tenantId, 'ERROR', 'META_REQUIRED_SCOPES_MISSING');
       throw safeFailure();
     }
 
@@ -128,7 +149,7 @@ export class InstagramOAuthService {
       status: 'ERROR' as const,
       encryptedAccessToken: this.cipher.encrypt(accessToken),
       tokenExpiresAt: expiresIn === null ? null : new Date(connectedAt.getTime() + expiresIn * 1000),
-      grantedScopes: GRANTED_SCOPES,
+      grantedScopes: grantedScopes.join(','),
       lastVerifiedAt: null,
       lastErrorCode: null,
       connectedByUserId: binding.userId,
@@ -182,34 +203,54 @@ export class InstagramOAuthService {
     });
     if (!connection) return emptySummary();
 
-    let cleanupFailed = false;
-    if (connection.encryptedAccessToken) {
-      try {
-        const accessToken = this.cipher.decrypt(connection.encryptedAccessToken);
-        const cleanup = await Promise.allSettled([
-          this.meta.unsubscribe(accessToken),
-          this.meta.revoke(accessToken),
-        ]);
-        cleanupFailed = cleanup.some((result) => result.status === 'rejected');
-      } catch {
-        cleanupFailed = true;
-      }
-    }
-
-    const disconnected = await this.prisma.instagramConnection.update({
+    const disconnectedAt = this.now();
+    const disabled = await this.prisma.instagramConnection.update({
       where: { tenantId },
-      data: {
-        status: 'DISCONNECTED',
-        encryptedAccessToken: null,
-        tokenExpiresAt: null,
-        grantedScopes: null,
-        disconnectedAt: this.now(),
-        lastErrorCode: cleanupFailed ? 'META_DISCONNECT_CLEANUP_FAILED' : null,
-      },
+      data: connection.encryptedAccessToken
+        ? {
+            status: 'DISCONNECTED',
+            disconnectedAt,
+            lastErrorCode: null,
+          }
+        : {
+            status: 'DISCONNECTED',
+            encryptedAccessToken: null,
+            tokenExpiresAt: null,
+            grantedScopes: null,
+            disconnectedAt,
+            lastErrorCode: null,
+          },
       select: SAFE_CONNECTION_SELECT,
     });
 
-    return toSummary(disconnected);
+    if (!connection.encryptedAccessToken) return toSummary(disabled);
+
+    let cleanupSucceeded = false;
+    try {
+      const accessToken = this.cipher.decrypt(connection.encryptedAccessToken);
+      const cleanup = await Promise.allSettled([
+        this.meta.unsubscribe(accessToken),
+        this.meta.revoke(accessToken),
+      ]);
+      cleanupSucceeded = cleanup.every((result) => result.status === 'fulfilled');
+    } catch {
+      cleanupSucceeded = false;
+    }
+
+    const finalized = await this.prisma.instagramConnection.update({
+      where: { tenantId },
+      data: cleanupSucceeded
+        ? {
+            encryptedAccessToken: null,
+            tokenExpiresAt: null,
+            grantedScopes: null,
+            lastErrorCode: null,
+          }
+        : { status: 'DISCONNECTED', lastErrorCode: 'META_DISCONNECT_CLEANUP_FAILED' },
+      select: SAFE_CONNECTION_SELECT,
+    });
+
+    return toSummary(finalized);
   }
 
   private async markFailure(
@@ -226,17 +267,60 @@ export class InstagramOAuthService {
       // The public callback still returns only the normalized failure.
     }
   }
+
+  private async markExpired(tenantId: string, checkedAt: Date): Promise<void> {
+    try {
+      await this.prisma.instagramConnection.updateMany({
+        where: { tenantId, status: 'ACTIVE', tokenExpiresAt: { lte: checkedAt } },
+        data: { status: 'REAUTH_REQUIRED', lastErrorCode: 'META_TOKEN_EXPIRED' },
+      });
+    } catch {
+      // The safe summary still reports the expired credential as unusable.
+    }
+  }
+
+  private async hasActiveOwner(tenantId: string, userId: string): Promise<boolean> {
+    try {
+      const [tenant, membership] = await Promise.all([
+        this.prisma.tenant.findUnique({
+          where: { id: tenantId },
+          select: { status: true },
+        }),
+        this.prisma.tenantMembership.findUnique({
+          where: { userId_tenantId: { userId, tenantId } },
+          select: { role: true, status: true, user: { select: { status: true } } },
+        }),
+      ]);
+      return tenant?.status === 'ACTIVE' &&
+        membership?.status === 'ACTIVE' &&
+        membership.role === 'OWNER' &&
+        membership.user.status === 'ACTIVE';
+    } catch {
+      return false;
+    }
+  }
 }
 
-function toSummary(connection: SafeConnectionRow): InstagramConnectionSummary {
+function toSummary(connection: SafeConnectionRow, expired = false): InstagramConnectionSummary {
   return {
-    status: connection.status,
+    status: expired ? 'REAUTH_REQUIRED' : connection.status,
     accountId: connection.externalAccountId,
     username: connection.displayName,
     tokenExpiresAt: connection.tokenExpiresAt?.toISOString() ?? null,
     lastVerifiedAt: connection.lastVerifiedAt?.toISOString() ?? null,
-    lastErrorCode: connection.lastErrorCode,
+    lastErrorCode: expired ? 'META_TOKEN_EXPIRED' : connection.lastErrorCode,
   };
+}
+
+function hasRequiredScopes(grantedScopes: string[]): boolean {
+  const granted = new Set(grantedScopes);
+  return REQUIRED_SCOPES.every((scope) => granted.has(scope));
+}
+
+function isExpiredActiveConnection(connection: SafeConnectionRow, now: Date): boolean {
+  return connection.status === 'ACTIVE' &&
+    connection.tokenExpiresAt !== null &&
+    connection.tokenExpiresAt.getTime() <= now.getTime();
 }
 
 function emptySummary(): InstagramConnectionSummary {

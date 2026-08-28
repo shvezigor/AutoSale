@@ -1,4 +1,5 @@
 import { createHash, randomBytes } from 'node:crypto';
+import type { PrismaClient } from '@autosale/database';
 
 const STATE_TTL_MS = 10 * 60 * 1000;
 const DEFAULT_RETURN_PATH = '/settings';
@@ -15,29 +16,6 @@ type ConsumedInstagramOAuthState = {
   tenantId: string;
   userId: string;
   returnPath: string;
-};
-
-type InstagramOAuthStatePrisma = {
-  instagramOAuthState: {
-    create(input: {
-      data: {
-        tokenHash: string;
-        tenantId: string;
-        userId: string;
-        returnPath: string;
-        expiresAt: Date;
-      };
-    }): PromiseLike<unknown>;
-    updateManyAndReturn(input: {
-      where: {
-        tokenHash: string;
-        usedAt: null;
-        expiresAt: { gt: Date };
-      };
-      data: { usedAt: Date };
-      select: { tenantId: true; userId: true; returnPath: true };
-    }): PromiseLike<ConsumedInstagramOAuthState[]>;
-  };
 };
 
 function hashState(rawState: string): string {
@@ -59,20 +37,27 @@ function normalizeReturnPath(returnPath: string | undefined): string {
 }
 
 export class InstagramOAuthStateService {
-  constructor(private readonly prisma: InstagramOAuthStatePrisma) {}
+  constructor(private readonly prisma: PrismaClient) {}
 
   async create(input: CreateInstagramOAuthStateInput): Promise<string> {
     const rawState = randomBytes(32).toString('base64url');
+    const now = new Date();
 
-    await this.prisma.instagramOAuthState.create({
-      data: {
-        tokenHash: hashState(rawState),
-        tenantId: input.tenantId,
-        userId: input.userId,
-        returnPath: normalizeReturnPath(input.returnPath),
-        expiresAt: new Date(Date.now() + STATE_TTL_MS),
-      },
-    });
+    await this.prisma.$transaction(async (transaction) => {
+      await transaction.instagramOAuthState.updateMany({
+        where: { tenantId: input.tenantId, usedAt: null },
+        data: { usedAt: now },
+      });
+      await transaction.instagramOAuthState.create({
+        data: {
+          tokenHash: hashState(rawState),
+          tenantId: input.tenantId,
+          userId: input.userId,
+          returnPath: normalizeReturnPath(input.returnPath),
+          expiresAt: new Date(now.getTime() + STATE_TTL_MS),
+        },
+      });
+    }, { isolationLevel: 'Serializable' });
 
     return rawState;
   }
