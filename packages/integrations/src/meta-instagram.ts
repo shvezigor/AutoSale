@@ -1,0 +1,165 @@
+export interface MetaInstagramClientConfig {
+  appId: string;
+  appSecret: string;
+  graphVersion: string;
+  fetch?: typeof fetch;
+}
+
+export interface MetaInstagramAuthorizationInput {
+  state: string;
+  redirectUri: string;
+}
+
+export interface MetaInstagramCodeExchangeInput {
+  code: string;
+  redirectUri: string;
+}
+
+export interface MetaInstagramToken {
+  accessToken: string;
+  expiresIn: number | null;
+}
+
+export interface MetaInstagramIdentity {
+  accountId: string;
+  username: string | null;
+}
+
+export class MetaInstagramError extends Error {
+  constructor(
+    readonly status: number | null,
+    readonly providerCode: number | string | null,
+  ) {
+    super('Meta Instagram API request failed');
+    this.name = 'MetaInstagramError';
+  }
+}
+
+export class MetaInstagramClient {
+  private readonly fetchFn: typeof fetch;
+  private readonly graphBaseUrl: URL;
+
+  constructor(private readonly config: MetaInstagramClientConfig) {
+    this.fetchFn = config.fetch ?? fetch;
+    this.graphBaseUrl = new URL(`https://graph.instagram.com/${config.graphVersion.replace(/^\/+|\/+$/g, '')}/`);
+  }
+
+  getAuthorizationUrl(input: MetaInstagramAuthorizationInput): string {
+    const url = new URL('https://www.instagram.com/oauth/authorize');
+    url.search = new URLSearchParams({
+      enable_fb_login: '0',
+      force_authentication: '1',
+      client_id: this.config.appId,
+      redirect_uri: input.redirectUri,
+      response_type: 'code',
+      scope: 'instagram_business_basic,instagram_business_manage_messages',
+      state: input.state,
+    }).toString();
+    return url.toString();
+  }
+
+  async exchangeCode(input: MetaInstagramCodeExchangeInput): Promise<MetaInstagramToken> {
+    const body = new URLSearchParams({
+      client_id: this.config.appId,
+      client_secret: this.config.appSecret,
+      grant_type: 'authorization_code',
+      redirect_uri: input.redirectUri,
+      code: input.code,
+    });
+    const payload = await this.requestJson('https://api.instagram.com/oauth/access_token', {
+      method: 'POST',
+      headers: { 'content-type': 'application/x-www-form-urlencoded' },
+      body,
+    });
+
+    if (!isRecord(payload) || typeof payload.access_token !== 'string') throw new MetaInstagramError(200, null);
+    return {
+      accessToken: payload.access_token,
+      expiresIn: typeof payload.expires_in === 'number' && Number.isFinite(payload.expires_in) ? payload.expires_in : null,
+    };
+  }
+
+  async getIdentity(accessToken: string): Promise<MetaInstagramIdentity> {
+    const url = this.graphUrl('me');
+    url.searchParams.set('fields', 'id,username');
+    const payload = await this.requestJson(url, this.authorized(accessToken));
+
+    if (!isRecord(payload) || typeof payload.id !== 'string' || (payload.username !== undefined && payload.username !== null && typeof payload.username !== 'string')) {
+      throw new MetaInstagramError(200, null);
+    }
+    return { accountId: payload.id, username: typeof payload.username === 'string' ? payload.username : null };
+  }
+
+  async subscribe(accessToken: string): Promise<void> {
+    await this.requestVoid(this.graphUrl('me/subscribed_apps'), {
+      ...this.authorized(accessToken),
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${accessToken}`,
+        'content-type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({ subscribed_fields: 'messages' }),
+    });
+  }
+
+  async unsubscribe(accessToken: string): Promise<void> {
+    await this.requestVoid(this.graphUrl('me/subscribed_apps'), { ...this.authorized(accessToken), method: 'DELETE' });
+  }
+
+  async revoke(accessToken: string): Promise<void> {
+    await this.requestVoid(this.graphUrl('me/permissions'), { ...this.authorized(accessToken), method: 'DELETE' });
+  }
+
+  private graphUrl(path: string): URL {
+    return new URL(path, this.graphBaseUrl);
+  }
+
+  private authorized(accessToken: string): RequestInit {
+    return { headers: { authorization: `Bearer ${accessToken}` } };
+  }
+
+  private async requestJson(url: URL | string, init: RequestInit): Promise<unknown> {
+    const response = await this.request(url, init);
+    try {
+      return await response.json();
+    } catch {
+      throw new MetaInstagramError(response.status, null);
+    }
+  }
+
+  private async requestVoid(url: URL | string, init: RequestInit): Promise<void> {
+    await this.request(url, init);
+  }
+
+  private async request(url: URL | string, init: RequestInit): Promise<Response> {
+    let response: Response;
+    try {
+      response = await this.fetchFn(url, { ...init, signal: AbortSignal.timeout(10_000) });
+    } catch {
+      throw new MetaInstagramError(null, null);
+    }
+
+    if (response.ok) return response;
+    throw await this.providerError(response);
+  }
+
+  private async providerError(response: Response): Promise<MetaInstagramError> {
+    let payload: unknown;
+    try {
+      payload = await response.json();
+    } catch {
+      payload = undefined;
+    }
+    return new MetaInstagramError(response.status, providerCode(payload));
+  }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function providerCode(payload: unknown): number | string | null {
+  if (!isRecord(payload) || !isRecord(payload.error)) return null;
+  const { code } = payload.error;
+  return typeof code === 'number' || typeof code === 'string' ? code : null;
+}
