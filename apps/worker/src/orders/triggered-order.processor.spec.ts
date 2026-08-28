@@ -23,6 +23,9 @@ describe('TriggeredOrderProcessor', () => {
       '20260826210000_product_catalog',
       '20260827160000_self_hosted_auth',
       '20260827170000_tenant_access_status',
+      '20260827230000_instagram_connections',
+      '20260828_meta_instagram_oauth',
+      '20260828150000_instagram_oauth_attempt_guard',
     ];
     const pool = new pg.Pool({ connectionString });
     for (const migration of migrations) {

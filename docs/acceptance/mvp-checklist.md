@@ -12,6 +12,11 @@
 - [x] Менеджер відкриває AI-сформоване замовлення та бачить товар і Sheets status.
 - [x] Backup відновлює conversation, order, attachment і MinIO object у чистий Compose namespace.
 - [x] API, worker і web проходять health checks після restore.
+- [x] 2026-08-28: `pnpm test` завершився успішно (232 tests у 67 test files; database package не має test files).
+- [x] 2026-08-28: `pnpm typecheck`, `pnpm build` і `git diff --check` завершилися успішно.
+- [x] 2026-08-28: ізольований Compose namespace `autosale-oauth-verify` зібраний; `migrate` завершився успішно, а API, worker, web, PostgreSQL, Redis і MinIO стали healthy (proxy running).
+- [x] 2026-08-28: локальні HTTP межі в ізольованому namespace: `GET /health/live` → 200, неавторизований `GET /api/integrations/instagram` → 401. Для ізоляції від уже зайнятого host port 80 перевірка використала `http://localhost:18080`.
+- [x] 2026-08-28: переглянуто санітизовані API logs; секрети й access tokens не виводяться.
 
 ## Потребує зовнішніх тестових доступів
 
@@ -22,6 +27,7 @@
 - [ ] Додати та оновити рівно один рядок у тестовому Google Sheet.
 - [ ] Тимчасово відкликати Google access, перевірити failed state, повернути access і виконати retry.
 - [ ] Зафіксувати погодження власника щодо mapping полів і manager workflow.
+- [ ] 2026-08-28: реальний Meta/ngrok OAuth callback, Meta webhook verification/subscription і одне реальне вхідне повідомлення залишаються pending — тестові Meta credentials, ngrok domain і Professional test account не надані. Live readiness не заявляється.
 
 ## Команда
 
