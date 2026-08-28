@@ -1,12 +1,28 @@
 # Meta integration access
 
-## Local verification — 2026-08-26
+## Налаштування OAuth і локального тунелю
 
-- Docker migration container applied `20260826090000_init_webhook_events` successfully.
-- API and proxy health checks succeeded.
-- `GET /webhooks/meta` returned the supplied challenge for the configured local verification token.
-- Automated tests verify valid and invalid `X-Hub-Signature-256` callbacks, durable registration, and replay suppression.
+Повний український посібник із локального запуску Docker, стабільного
+ngrok-домену, Meta Instagram Login, тестерів, App Review, webhook і міграції
+на Cloudflare Tunnel: [meta-instagram-oauth.md](meta-instagram-oauth.md).
 
-## Staging verification pending
+Поточна інтеграція приймає лише Instagram Professional Business і Creator
+акаунти через Instagram API with Instagram Login. Її єдина public webhook
+адреса — `/webhooks/meta`, а OAuth callback —
+`/api/integrations/instagram/callback` від `APP_PUBLIC_URL`.
 
-The live Meta callback cannot be configured until the project owner supplies a test Instagram Professional account, Meta app ID, app secret, page access token, webhook verification token, and permission to configure a public HTTPS callback URL. No secrets or message content belong in this document.
+## Локальна перевірка — 2026-08-26
+
+- Контейнер міграції Docker успішно застосував `20260826090000_init_webhook_events`.
+- Перевірки стану API та proxy пройшли успішно.
+- `GET /webhooks/meta` повернув переданий challenge для налаштованого локального verify token.
+- Автоматичні тести перевіряють коректні й некоректні callbacks з
+  `X-Hub-Signature-256`, стійку реєстрацію та придушення повторів.
+
+## Перевірка staging / реального Meta — очікується
+
+Реальний callback не налаштовується, доки власник проєкту не надасть тестовий
+Instagram Professional Business або Creator акаунт, Meta app ID, app secret,
+webhook verify token і право налаштувати публічну HTTPS callback URL. OAuth
+потік не вимагає ручного page access token. Секрети й вміст повідомлень не
+належать до цього документа.

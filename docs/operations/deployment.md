@@ -20,6 +20,26 @@ infra/scripts/deploy.sh
 
 Після першого auth-релізу створіть платформного адміністратора або прив'яжіть наявну організацію за процедурою [`authentication.md`](authentication.md). Bootstrap ніколи не запускається автоматично під час старту контейнерів.
 
+## Публічний origin для Meta Instagram
+
+Для Instagram OAuth і Meta webhook API читає тільки `APP_PUBLIC_URL`. До
+запуску встановіть його у кореневому `.env` в точний публічний HTTPS origin та
+перезапустіть API/стек. Дозволений OAuth callback завжди має вигляд
+`<APP_PUBLIC_URL>/api/integrations/instagram/callback`, а webhook callback —
+`<APP_PUBLIC_URL>/webhooks/meta`.
+
+Для локального тестування використовуйте призначений ngrok development domain
+і тримайте Docker, комп'ютер та ngrok active. Для власного домену можна
+використати named Cloudflare Tunnel: `cloudflared` створює вихідне з'єднання,
+тому origin не потребує публічної IP-адреси або відкритого inbound port
+forwarding. Поточний Compose публікує Caddy на host port 80; для тунелю
+спрямуйте його на `http://localhost:80` і заблокуйте зовнішній TCP 80/443
+firewall-ом (або змініть binding на loopback).
+
+Після зміни домену оновіть **і** Meta redirect URI, **і** Meta webhook
+callback, потім повторіть webhook verification та приймальний OAuth-тест.
+Детальний runbook: [`../integrations/meta-instagram-oauth.md`](../integrations/meta-instagram-oauth.md).
+
 ## Відкат
 
 Перейдіть на попередній перевірений Git tag і повторно запустіть deploy. Міграції БД мають бути backward-compatible; автоматичного downgrade Prisma немає. Якщо реліз містить несумісну міграцію даних, відновіть backup у контрольоване вікно за процедурою `backup-restore.md`.
