@@ -1,0 +1,145 @@
+import { createHash } from 'node:crypto';
+
+import { describe, expect, it } from 'vitest';
+
+import { InstagramOAuthStateService } from './instagram-oauth-state.service.js';
+
+type OAuthStateRow = {
+  tokenHash: string;
+  tenantId: string;
+  userId: string;
+  returnPath: string;
+  expiresAt: Date;
+  usedAt: Date | null;
+};
+
+class OAuthStateStore {
+  readonly rows: OAuthStateRow[] = [];
+
+  readonly prisma = {
+    instagramOAuthState: {
+      create: async ({ data }: { data: Omit<OAuthStateRow, 'usedAt'> & { usedAt?: Date | null } }) => {
+        const row = { ...data, usedAt: data.usedAt ?? null };
+        this.rows.push(row);
+        return row;
+      },
+      updateManyAndReturn: async ({
+        where,
+        data,
+        select,
+      }: {
+        where: {
+          tokenHash?: string;
+          usedAt?: null;
+          expiresAt?: { gt?: Date };
+        };
+        data: { usedAt: Date };
+        select: { tenantId: true; userId: true; returnPath: true };
+      }) => {
+        const rows = this.rows.filter((row) =>
+          (where.tokenHash === undefined || row.tokenHash === where.tokenHash) &&
+          (where.usedAt === undefined || row.usedAt === where.usedAt) &&
+          (where.expiresAt?.gt === undefined || row.expiresAt > where.expiresAt.gt),
+        );
+
+        for (const row of rows) {
+          row.usedAt = data.usedAt;
+        }
+
+        return rows.map(({ tenantId, userId, returnPath }) => ({
+          tenantId,
+          userId,
+          returnPath,
+        }));
+      },
+    },
+  };
+}
+
+function createService(store = new OAuthStateStore()): {
+  service: InstagramOAuthStateService;
+  store: OAuthStateStore;
+} {
+  return { service: new InstagramOAuthStateService(store.prisma), store };
+}
+
+describe('InstagramOAuthStateService', () => {
+  it('stores only a SHA-256 hash when creating a tenant-bound state', async () => {
+    const { service, store } = createService();
+    const beforeCreation = Date.now();
+
+    const rawState = await service.create({
+      tenantId: 'tenant-a',
+      userId: 'user-a',
+      returnPath: '/settings?tab=instagram',
+    });
+
+    const stored = store.rows[0];
+    expect(stored).toMatchObject({
+      tokenHash: createHash('sha256').update(rawState).digest('hex'),
+      tenantId: 'tenant-a',
+      userId: 'user-a',
+      returnPath: '/settings?tab=instagram',
+      usedAt: null,
+    });
+    expect(stored?.tokenHash).not.toBe(rawState);
+    expect(stored?.expiresAt.getTime()).toBeGreaterThanOrEqual(beforeCreation + 10 * 60 * 1000);
+    expect(stored?.expiresAt.getTime()).toBeLessThanOrEqual(Date.now() + 10 * 60 * 1000);
+  });
+
+  it.each([
+    '//attacker.example',
+    '\\attacker.example',
+    '/settings\\attacker',
+    'https://attacker.example',
+    'http://attacker.example',
+    '/settings\nattacker',
+  ])('normalizes unsafe return path %j to settings', async (returnPath) => {
+    const { service, store } = createService();
+
+    await service.create({ tenantId: 'tenant-a', userId: 'user-a', returnPath });
+
+    expect(store.rows[0]?.returnPath).toBe('/settings');
+  });
+
+  it('consumes a valid state and returns its bound tenant, user, and return path', async () => {
+    const { service, store } = createService();
+    const rawState = await service.create({
+      tenantId: 'tenant-a',
+      userId: 'user-a',
+      returnPath: '/settings?tab=instagram',
+    });
+
+    await expect(service.consume(rawState)).resolves.toEqual({
+      tenantId: 'tenant-a',
+      userId: 'user-a',
+      returnPath: '/settings?tab=instagram',
+    });
+    expect(store.rows[0]?.usedAt).toBeInstanceOf(Date);
+  });
+
+  it('rejects missing, expired, and reused states with one safe error', async () => {
+    const { service, store } = createService();
+    const rawState = await service.create({ tenantId: 'tenant-a', userId: 'user-a' });
+    store.rows[0]!.expiresAt = new Date(Date.now() - 1);
+
+    await expect(service.consume('not-a-state')).rejects.toThrow('Invalid or expired OAuth state');
+    await expect(service.consume(rawState)).rejects.toThrow('Invalid or expired OAuth state');
+
+    store.rows[0]!.expiresAt = new Date(Date.now() + 60_000);
+    await service.consume(rawState);
+    await expect(service.consume(rawState)).rejects.toThrow('Invalid or expired OAuth state');
+  });
+
+  it('allows exactly one concurrent consumer by conditionally marking the state used', async () => {
+    const { service } = createService();
+    const rawState = await service.create({ tenantId: 'tenant-a', userId: 'user-a' });
+
+    const results = await Promise.allSettled([service.consume(rawState), service.consume(rawState)]);
+
+    expect(results.filter((result) => result.status === 'fulfilled')).toHaveLength(1);
+    expect(results.filter((result) => result.status === 'rejected')).toHaveLength(1);
+    const rejected = results.find((result) => result.status === 'rejected');
+    expect(rejected?.status === 'rejected' && rejected.reason.message).toBe('Invalid or expired OAuth state');
+  });
+});
