@@ -73,9 +73,18 @@ export class MetaInstagramClient {
     });
 
     if (!isRecord(payload) || typeof payload.access_token !== 'string') throw new MetaInstagramError(200, null);
+    const longLivedUrl = new URL('https://graph.instagram.com/access_token');
+    longLivedUrl.search = new URLSearchParams({
+      grant_type: 'ig_exchange_token',
+      client_secret: this.config.appSecret,
+      access_token: payload.access_token,
+    }).toString();
+    const longLivedPayload = await this.requestJson(longLivedUrl, { method: 'GET' });
+
+    if (!isRecord(longLivedPayload) || typeof longLivedPayload.access_token !== 'string') throw new MetaInstagramError(200, null);
     return {
-      accessToken: payload.access_token,
-      expiresIn: typeof payload.expires_in === 'number' && Number.isFinite(payload.expires_in) ? payload.expires_in : null,
+      accessToken: longLivedPayload.access_token,
+      expiresIn: typeof longLivedPayload.expires_in === 'number' && Number.isFinite(longLivedPayload.expires_in) ? longLivedPayload.expires_in : null,
     };
   }
 
