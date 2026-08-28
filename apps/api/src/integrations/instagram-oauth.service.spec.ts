@@ -23,7 +23,7 @@ function connection(overrides: Record<string, unknown> = {}) {
   };
 }
 
-function setup() {
+function setup(nowFn: () => Date = () => now) {
   const findUnique = vi.fn();
   const upsert = vi.fn();
   const update = vi.fn();
@@ -38,7 +38,8 @@ function setup() {
   const prisma = {
     instagramConnection: { findUnique, upsert, update, updateMany },
     tenant: { findUnique: tenantFindUnique, updateMany: tenantUpdateMany },
-    tenantMembership: { findUnique: membershipFindUnique },
+    tenantMembership: { findUnique: membershipFindUnique, updateMany: vi.fn().mockResolvedValue({ count: 1 }) },
+    user: { updateMany: vi.fn().mockResolvedValue({ count: 1 }) },
   };
   (prisma as { $transaction?: unknown }).$transaction = async <T>(callback: (transaction: typeof prisma) => Promise<T>) => callback(prisma);
   const state = {
@@ -53,12 +54,8 @@ function setup() {
     getAuthorizationUrl: vi.fn().mockReturnValue(
       `https://www.instagram.com/oauth/authorize?state=state-token&redirect_uri=${encodeURIComponent(callbackUri)}`,
     ),
-    exchangeCode: vi.fn().mockResolvedValue({ accessToken: 'long-lived-token', expiresIn: 60 * 24 * 60 * 60 }),
+    exchangeCode: vi.fn().mockResolvedValue({ accessToken: 'long-lived-token', expiresIn: 60 * 24 * 60 * 60, grantedScopes: ['instagram_business_basic', 'instagram_business_manage_messages'] }),
     getIdentity: vi.fn().mockResolvedValue({ accountId: '17841400000000000', username: 'autosale_store' }),
-    getGrantedScopes: vi.fn().mockResolvedValue([
-      'instagram_business_basic',
-      'instagram_business_manage_messages',
-    ]),
     subscribe: vi.fn().mockResolvedValue(undefined),
     unsubscribe: vi.fn().mockResolvedValue(undefined),
     revoke: vi.fn().mockResolvedValue(undefined),
@@ -70,7 +67,7 @@ function setup() {
     state as never,
     cipher,
     'https://demo.ngrok-free.app',
-    () => now,
+    nowFn,
   );
 
   return {
@@ -101,14 +98,14 @@ describe('InstagramOAuthService', () => {
     });
     meta.exchangeCode.mockImplementation(async () => {
       order.push('exchange');
-      return { accessToken: 'long-lived-token', expiresIn: 60 * 24 * 60 * 60 };
+      return {
+        accessToken: 'long-lived-token',
+        expiresIn: 60 * 24 * 60 * 60,
+        grantedScopes: ['instagram_business_basic', 'instagram_business_manage_messages'],
+      };
     });
     meta.subscribe.mockImplementation(async () => {
       order.push('subscribe');
-    });
-    meta.getGrantedScopes.mockImplementation(async () => {
-      order.push('permissions');
-      return ['instagram_business_basic', 'instagram_business_manage_messages'];
     });
     findUnique.mockResolvedValue(null);
     upsert.mockResolvedValue(connection({ status: 'ERROR' }));
@@ -126,7 +123,7 @@ describe('InstagramOAuthService', () => {
       },
     });
 
-    expect(order).toEqual(['consume', 'exchange', 'permissions', 'subscribe']);
+    expect(order).toEqual(['consume', 'exchange', 'subscribe']);
     expect(meta.exchangeCode).toHaveBeenCalledWith({ code: 'authorization-code', redirectUri: callbackUri });
     expect(meta.getIdentity).toHaveBeenCalledWith('long-lived-token');
     const write = upsert.mock.calls[0]![0];
@@ -165,7 +162,7 @@ describe('InstagramOAuthService', () => {
   it('fails safely before persistence when Meta did not grant every required scope', async () => {
     const { service, findUnique, upsert, meta, updateMany } = setup();
     findUnique.mockResolvedValue(null);
-    meta.getGrantedScopes.mockResolvedValue(['instagram_business_basic']);
+    meta.exchangeCode.mockResolvedValue({ accessToken: 'long-lived-token', expiresIn: 60, grantedScopes: ['instagram_business_basic'] });
 
     await expect(service.completeCallback('authorization-code', 'raw-state')).rejects.toThrow('Instagram connection failed');
 
@@ -178,8 +175,8 @@ describe('InstagramOAuthService', () => {
   });
 
   it('rechecks tenant authorization in the serialized final write after provider I/O', async () => {
-    const { service, tenantFindUnique, upsert } = setup();
-    tenantFindUnique.mockResolvedValueOnce({ status: 'ACTIVE' }).mockResolvedValueOnce({ status: 'BLOCKED' });
+    const { service, tenantUpdateMany, upsert } = setup();
+    tenantUpdateMany.mockResolvedValueOnce({ count: 0 });
 
     await expect(service.completeCallback('authorization-code', 'raw-state')).rejects.toThrow('Instagram connection failed');
     expect(upsert).not.toHaveBeenCalled();
@@ -196,7 +193,11 @@ describe('InstagramOAuthService', () => {
 
   it('never activates an already expired exchanged credential', async () => {
     const { service, meta, upsert } = setup();
-    meta.exchangeCode.mockResolvedValue({ accessToken: 'long-lived-token', expiresIn: -1 });
+    meta.exchangeCode.mockResolvedValue({
+      accessToken: 'long-lived-token',
+      expiresIn: -1,
+      grantedScopes: ['instagram_business_basic', 'instagram_business_manage_messages'],
+    });
     await expect(service.completeCallback('authorization-code', 'raw-state')).rejects.toThrow('Instagram connection failed');
     expect(upsert).not.toHaveBeenCalled();
     expect(meta.subscribe).not.toHaveBeenCalled();
@@ -213,7 +214,7 @@ describe('InstagramOAuthService', () => {
   });
 
   it('marks a stored credential ERROR when subscription fails instead of exposing it as ACTIVE', async () => {
-    const { service, findUnique, upsert, update, meta } = setup();
+    const { service, findUnique, upsert, update, updateMany, meta } = setup();
     findUnique.mockResolvedValue(null);
     upsert.mockResolvedValue(connection({ status: 'ERROR' }));
     meta.subscribe.mockRejectedValue(new MetaInstagramError(500, 2));
@@ -221,11 +222,54 @@ describe('InstagramOAuthService', () => {
 
     await expect(service.completeCallback('authorization-code', 'raw-state')).rejects.toThrow('Instagram connection failed');
 
-    expect(update).toHaveBeenCalledWith({
+    expect(updateMany).toHaveBeenCalledWith({
       where: { tenantId: 'tenant-a' },
       data: { status: 'ERROR', lastErrorCode: 'META_SUBSCRIPTION_FAILED' },
     });
     expect(update).not.toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ status: 'ACTIVE' }) }));
+  });
+
+  it('does not activate a token that expires while Meta subscription is in flight', async () => {
+    let clock = now;
+    const { service, findUnique, upsert, update, meta } = setup(() => clock);
+    findUnique.mockResolvedValue(null);
+    upsert.mockResolvedValue(connection({ status: 'ERROR' }));
+    meta.exchangeCode.mockResolvedValue({
+      accessToken: 'long-lived-token',
+      expiresIn: 1,
+      grantedScopes: ['instagram_business_basic', 'instagram_business_manage_messages'],
+    });
+    meta.subscribe.mockImplementation(async () => {
+      clock = new Date(now.getTime() + 1_000);
+    });
+
+    await expect(service.completeCallback('authorization-code', 'raw-state')).rejects.toThrow('Instagram connection failed');
+
+    expect(update).not.toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ status: 'ACTIVE' }) }));
+  });
+
+  it('does not let a provider failure from a superseded callback downgrade a newer connection', async () => {
+    const { service, meta, tenantUpdateMany, updateMany } = setup();
+    meta.exchangeCode.mockRejectedValue(new MetaInstagramError(500, 2));
+    tenantUpdateMany.mockResolvedValue({ count: 0 });
+
+    await expect(service.completeCallback('authorization-code', 'raw-state')).rejects.toThrow('Instagram connection failed');
+
+    expect(updateMany).not.toHaveBeenCalled();
+  });
+
+  it('refuses activation when an owner demotion completed after provider I/O but before the final lock', async () => {
+    const { service, meta, upsert, prisma } = setup();
+    meta.exchangeCode.mockImplementation(async () => ({
+      accessToken: 'long-lived-token',
+      expiresIn: 60,
+      grantedScopes: ['instagram_business_basic', 'instagram_business_manage_messages'],
+    }));
+    prisma.tenantMembership.updateMany.mockResolvedValueOnce({ count: 0 });
+
+    await expect(service.completeCallback('authorization-code', 'raw-state')).rejects.toThrow('Instagram connection failed');
+
+    expect(upsert).not.toHaveBeenCalled();
   });
 
   it('normalizes provider authorization failure and never exposes provider text', async () => {

@@ -25,6 +25,7 @@ describe('ConversationsService', () => {
       '20260826123000_conversations_messages',
       '20260827160000_self_hosted_auth',
       '20260827170000_tenant_access_status',
+      '20260828150000_instagram_oauth_attempt_guard',
     ]) {
       const sql = await readFile(
         resolve(

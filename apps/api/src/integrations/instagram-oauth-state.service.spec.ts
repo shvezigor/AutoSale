@@ -14,10 +14,31 @@ type OAuthStateRow = {
   usedAt: Date | null;
 };
 
+type OAuthStatePrisma = {
+  instagramOAuthState: {
+    create: (input: { data: Omit<OAuthStateRow, 'usedAt'> & { usedAt?: Date | null } }) => Promise<OAuthStateRow>;
+    updateMany: (input: {
+      where: { tenantId?: string; usedAt?: null };
+      data: { usedAt: Date };
+    }) => Promise<{ count: number }>;
+    updateManyAndReturn: (input: {
+      where: {
+        tokenHash?: string;
+        usedAt?: null;
+        expiresAt?: { gt?: Date };
+      };
+      data: { usedAt: Date };
+      select: { id: true; tenantId: true; userId: true; returnPath: true };
+    }) => Promise<Array<Pick<OAuthStateRow, 'id' | 'tenantId' | 'userId' | 'returnPath'>>>;
+  };
+  tenant: { update: () => Promise<Record<string, never>> };
+  $transaction: <T>(callback: (transaction: OAuthStatePrisma) => Promise<T>) => Promise<T>;
+};
+
 class OAuthStateStore {
   readonly rows: OAuthStateRow[] = [];
 
-  readonly prisma = {
+  readonly prisma: OAuthStatePrisma = {
     instagramOAuthState: {
       create: async ({ data }: { data: Omit<OAuthStateRow, 'usedAt'> & { usedAt?: Date | null } }) => {
         const row = { ...data, usedAt: data.usedAt ?? null };
@@ -46,7 +67,7 @@ class OAuthStateStore {
           expiresAt?: { gt?: Date };
         };
         data: { usedAt: Date };
-        select: { tenantId: true; userId: true; returnPath: true };
+        select: { id: true; tenantId: true; userId: true; returnPath: true };
       }) => {
         const rows = this.rows.filter((row) =>
           (where.tokenHash === undefined || row.tokenHash === where.tokenHash) &&
@@ -67,7 +88,7 @@ class OAuthStateStore {
       },
     },
     tenant: { update: async () => ({}) },
-    $transaction: async <T>(callback: (transaction: OAuthStateStore['prisma']) => Promise<T>) => callback(this.prisma),
+    $transaction: async <T>(callback: (transaction: OAuthStatePrisma) => Promise<T>) => callback(this.prisma),
   };
 }
 

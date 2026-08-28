@@ -105,12 +105,12 @@ export class InstagramOAuthService {
     }
 
     if (!code) {
-      await this.markFailure(binding.tenantId, 'ERROR', 'META_CALLBACK_INVALID');
+      await this.markCallbackFailure(binding, 'ERROR', 'META_CALLBACK_INVALID');
       throw safeFailure();
     }
 
     let accessToken: string;
-    let expiresIn: number | null;
+    let expiresIn: number;
     let identity: { accountId: string; username: string | null };
     let grantedScopes: string[];
     try {
@@ -118,11 +118,11 @@ export class InstagramOAuthService {
       accessToken = token.accessToken;
       expiresIn = token.expiresIn;
       identity = await this.meta.getIdentity(accessToken);
-      grantedScopes = await this.meta.getGrantedScopes(accessToken);
+      grantedScopes = token.grantedScopes;
     } catch (error) {
       const authorizationFailure = isAuthorizationFailure(error);
-      await this.markFailure(
-        binding.tenantId,
+      await this.markCallbackFailure(
+        binding,
         authorizationFailure ? 'REAUTH_REQUIRED' : 'ERROR',
         authorizationFailure ? 'META_AUTHORIZATION_FAILED' : 'META_PROVIDER_FAILED',
       );
@@ -130,13 +130,13 @@ export class InstagramOAuthService {
     }
 
     if (!hasRequiredScopes(grantedScopes)) {
-      await this.markFailure(binding.tenantId, 'ERROR', 'META_REQUIRED_SCOPES_MISSING');
+      await this.markCallbackFailure(binding, 'ERROR', 'META_REQUIRED_SCOPES_MISSING');
       throw safeFailure();
     }
 
     const connectedAt = this.now();
-    if (expiresIn !== null && connectedAt.getTime() + expiresIn * 1000 <= connectedAt.getTime()) {
-      await this.markFailure(binding.tenantId, 'REAUTH_REQUIRED', 'META_TOKEN_EXPIRED');
+    if (!Number.isFinite(expiresIn) || expiresIn <= 0) {
+      await this.markCallbackFailure(binding, 'REAUTH_REQUIRED', 'META_TOKEN_EXPIRED');
       throw safeFailure();
     }
 
@@ -145,7 +145,7 @@ export class InstagramOAuthService {
       displayName: identity.username,
       status: 'ERROR' as const,
       encryptedAccessToken: this.cipher.encrypt(accessToken),
-      tokenExpiresAt: expiresIn === null ? null : new Date(connectedAt.getTime() + expiresIn * 1000),
+      tokenExpiresAt: new Date(connectedAt.getTime() + expiresIn * 1000),
       grantedScopes: grantedScopes.join(','),
       lastVerifiedAt: null,
       lastErrorCode: null,
@@ -158,10 +158,10 @@ export class InstagramOAuthService {
         const owner = await transaction.instagramConnection.findUnique({ where: { externalAccountId: identity.accountId }, select: { tenantId: true } });
         if (owner && owner.tenantId !== binding.tenantId) throw safeFailure();
         await transaction.instagramConnection.upsert({
-        where: { tenantId: binding.tenantId },
-        create: { tenantId: binding.tenantId, ...pendingData },
-        update: pendingData,
-      });
+          where: { tenantId: binding.tenantId },
+          create: { tenantId: binding.tenantId, ...pendingData },
+          update: pendingData,
+        });
       });
     } catch {
       // A concurrent unique-account claim must never overwrite the owning tenant.
@@ -171,25 +171,25 @@ export class InstagramOAuthService {
     try {
       await this.meta.subscribe(accessToken);
     } catch {
-      await this.prisma.instagramConnection.update({
-        where: { tenantId: binding.tenantId },
-        data: { status: 'ERROR', lastErrorCode: 'META_SUBSCRIPTION_FAILED' },
-      });
+      await this.markCallbackFailure(binding, 'ERROR', 'META_SUBSCRIPTION_FAILED');
       throw safeFailure();
     }
 
     let active: SafeConnectionRow;
     try {
-      active = await this.withCurrentAttempt(binding, (transaction) => transaction.instagramConnection.update({
-        where: { tenantId: binding.tenantId },
-        data: {
-          status: 'ACTIVE',
-          lastVerifiedAt: connectedAt,
-          lastErrorCode: null,
-          disconnectedAt: null,
-        },
-        select: SAFE_CONNECTION_SELECT,
-      }));
+      active = await this.withCurrentAttempt(binding, (transaction) => {
+        if (pendingData.tokenExpiresAt <= this.now()) throw safeFailure();
+        return transaction.instagramConnection.update({
+          where: { tenantId: binding.tenantId },
+          data: {
+            status: 'ACTIVE',
+            lastVerifiedAt: connectedAt,
+            lastErrorCode: null,
+            disconnectedAt: null,
+          },
+          select: SAFE_CONNECTION_SELECT,
+        });
+      });
     } catch {
       throw safeFailure();
     }
@@ -254,18 +254,18 @@ export class InstagramOAuthService {
     return toSummary(finalized);
   }
 
-  private async markFailure(
-    tenantId: string,
+  private async markCallbackFailure(
+    binding: { id: string; tenantId: string; userId: string },
     status: 'REAUTH_REQUIRED' | 'ERROR',
     lastErrorCode: string,
   ): Promise<void> {
     try {
-      await this.prisma.instagramConnection.updateMany({
-        where: { tenantId },
+      await this.withCurrentAttempt(binding, (transaction) => transaction.instagramConnection.updateMany({
+        where: { tenantId: binding.tenantId },
         data: { status, lastErrorCode },
-      });
+      }));
     } catch {
-      // The public callback still returns only the normalized failure.
+      // A superseded attempt must not change the current connection.
     }
   }
 
@@ -307,15 +307,13 @@ export class InstagramOAuthService {
   ): Promise<T> {
     return this.withSerializableRetry(() => this.prisma.$transaction(async (transaction) => {
       const locked = await transaction.tenant.updateMany({
-        where: { id: binding.tenantId, instagramOAuthCurrentAttemptId: binding.id },
+        where: { id: binding.tenantId, instagramOAuthCurrentAttemptId: binding.id, status: 'ACTIVE' },
         data: { instagramOAuthCurrentAttemptId: binding.id },
       });
       if (locked.count !== 1) throw safeFailure();
-      const [tenant, membership] = await Promise.all([
-        transaction.tenant.findUnique({ where: { id: binding.tenantId }, select: { status: true } }),
-        transaction.tenantMembership.findUnique({ where: { userId_tenantId: { userId: binding.userId, tenantId: binding.tenantId } }, select: { role: true, status: true, user: { select: { status: true } } } }),
-      ]);
-      if (tenant?.status !== 'ACTIVE' || membership?.status !== 'ACTIVE' || membership.role !== 'OWNER' || membership.user.status !== 'ACTIVE') throw safeFailure();
+      const user = await transaction.user.updateMany({ where: { id: binding.userId, status: 'ACTIVE' }, data: { status: 'ACTIVE' } });
+      const membership = await transaction.tenantMembership.updateMany({ where: { userId: binding.userId, tenantId: binding.tenantId, status: 'ACTIVE', role: 'OWNER' }, data: { role: 'OWNER' } });
+      if (locked.count !== 1 || user.count !== 1 || membership.count !== 1) throw safeFailure();
       return operation(transaction);
     }, { isolationLevel: 'Serializable' }));
   }

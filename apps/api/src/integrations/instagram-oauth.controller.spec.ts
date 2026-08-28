@@ -107,6 +107,9 @@ describe('InstagramOAuthController', () => {
       .send({ returnPath: '/settings?tab=instagram' })
       .expect(403);
     await request(app!.getHttpServer()).post('/api/integrations/instagram/disconnect').set('Cookie', cookie('invalid-session')).expect(401);
+    await request(app!.getHttpServer()).post('/api/integrations/instagram/disconnect').set('Cookie', cookie('manager-token')).set(csrfHeader(manager)).expect(403);
+    await request(app!.getHttpServer()).post('/api/integrations/instagram/disconnect').set('Cookie', cookie('admin-token')).set(csrfHeader(platformAdmin)).expect(403);
+    await request(app!.getHttpServer()).post('/api/integrations/instagram/disconnect').set('Cookie', cookie('owner-token')).expect(403);
     await request(app!.getHttpServer())
       .post('/api/integrations/instagram/connect')
       .set('Cookie', cookie('owner-token'))

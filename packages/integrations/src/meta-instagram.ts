@@ -17,7 +17,8 @@ export interface MetaInstagramCodeExchangeInput {
 
 export interface MetaInstagramToken {
   accessToken: string;
-  expiresIn: number | null;
+  expiresIn: number;
+  grantedScopes: string[];
 }
 
 export interface MetaInstagramIdentity {
@@ -73,6 +74,7 @@ export class MetaInstagramClient {
     });
 
     if (!isRecord(payload) || typeof payload.access_token !== 'string') throw new MetaInstagramError(200, null);
+    const grantedScopes = parsePermissions(payload);
     const longLivedUrl = new URL('https://graph.instagram.com/access_token');
     longLivedUrl.search = new URLSearchParams({
       grant_type: 'ig_exchange_token',
@@ -81,10 +83,11 @@ export class MetaInstagramClient {
     }).toString();
     const longLivedPayload = await this.requestJson(longLivedUrl, { method: 'GET' });
 
-    if (!isRecord(longLivedPayload) || typeof longLivedPayload.access_token !== 'string') throw new MetaInstagramError(200, null);
+    if (!isRecord(longLivedPayload) || typeof longLivedPayload.access_token !== 'string' || typeof longLivedPayload.expires_in !== 'number' || !Number.isFinite(longLivedPayload.expires_in) || longLivedPayload.expires_in <= 0) throw new MetaInstagramError(200, null);
     return {
       accessToken: longLivedPayload.access_token,
-      expiresIn: typeof longLivedPayload.expires_in === 'number' && Number.isFinite(longLivedPayload.expires_in) ? longLivedPayload.expires_in : null,
+      expiresIn: longLivedPayload.expires_in,
+      grantedScopes,
     };
   }
 
@@ -99,13 +102,6 @@ export class MetaInstagramClient {
     return { accountId: payload.id, username: typeof payload.username === 'string' ? payload.username : null };
   }
 
-  async getGrantedScopes(accessToken: string): Promise<string[]> {
-    const payload = await this.requestJson(this.graphUrl('me/permissions'), this.authorized(accessToken));
-    const entry = isRecord(payload) && Array.isArray(payload.data) ? payload.data[0] : undefined;
-    if (!isRecord(entry) || typeof entry.permissions !== 'string') throw new MetaInstagramError(200, null);
-    const granted = new Set(entry.permissions.split(',').map((scope) => scope.trim()).filter(Boolean));
-    return [...granted].sort();
-  }
 
   async subscribe(accessToken: string): Promise<void> {
     await this.requestVoid(this.graphUrl('me/subscribed_apps'), {
@@ -179,4 +175,10 @@ function providerCode(payload: unknown): number | string | null {
   if (!isRecord(payload) || !isRecord(payload.error)) return null;
   const { code } = payload.error;
   return typeof code === 'number' || typeof code === 'string' ? code : null;
+}
+
+function parsePermissions(payload: Record<string, unknown>): string[] {
+  const entry = Array.isArray(payload.data) ? payload.data[0] : undefined;
+  if (!isRecord(entry) || typeof entry.permissions !== 'string') throw new MetaInstagramError(200, null);
+  return [...new Set(entry.permissions.split(',').map((scope) => scope.trim()).filter(Boolean))].sort();
 }

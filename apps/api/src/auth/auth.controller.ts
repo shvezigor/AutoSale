@@ -1,4 +1,4 @@
-import { loginRequestSchema, registerRequestSchema, type AuthPrincipal, type PublicSession } from '@autosale/contracts/auth';
+import { loginRequestSchema, registerRequestSchema, type AuthPrincipal, type LoginRequest, type PublicSession, type RegisterRequest } from '@autosale/contracts/auth';
 import { BadRequestException, Body, Controller, Get, Inject, Post, Req, Res, UnauthorizedException } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { z } from 'zod';
@@ -15,6 +15,12 @@ export interface AuthHttpConfig { cookieName: string; production: boolean }
 const tokenSchema = z.object({ token: z.string().min(20) }).strict();
 const forgotSchema = z.object({ email: z.string().trim().email() }).strict();
 const resetSchema = z.object({ token: z.string().min(20), password: z.string().min(12).max(128) }).strict();
+const registerSchema = registerRequestSchema as unknown as Parser<RegisterRequest>;
+const loginSchema = loginRequestSchema as unknown as Parser<LoginRequest>;
+
+type Parser<T> = {
+  safeParse: (value: unknown) => { success: true; data: T } | { success: false };
+};
 
 @Controller('api/auth')
 export class AuthController {
@@ -35,7 +41,7 @@ export class AuthController {
   @Post('register')
   @Public()
   async register(@Body() body: unknown, @Req() request: Request) {
-    const input = parse(registerRequestSchema, body);
+    const input = parse(registerSchema, body);
     await this.rateLimit.consume('register', requestMetadata(request).ipPrefix ?? 'unknown', input.email, 3, 3600);
     return this.auth.register(input, requestMetadata(request));
   }
@@ -49,7 +55,7 @@ export class AuthController {
   @Post('login')
   @Public()
   async login(@Body() body: unknown, @Req() request: Request, @Res({ passthrough: true }) response: Response): Promise<PublicSession> {
-    const input = parse(loginRequestSchema, body);
+    const input = parse(loginSchema, body);
     await this.rateLimit.consume('login', requestMetadata(request).ipPrefix ?? 'unknown', input.email.trim().toLowerCase(), 5, 60);
     const result = await this.auth.login(input, requestMetadata(request));
     response.cookie(this.config.cookieName, result.rawToken, {
@@ -98,7 +104,7 @@ export class AuthController {
   }
 }
 
-function parse<T>(schema: z.ZodType<T>, value: unknown): T {
+function parse<T>(schema: Parser<T>, value: unknown): T {
   const result = schema.safeParse(value);
   if (!result.success) throw new BadRequestException('Invalid authentication request');
   return result.data;
