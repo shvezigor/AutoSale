@@ -73,13 +73,12 @@ export class MetaInstagramClient {
       body,
     });
 
-    if (!isRecord(payload) || typeof payload.access_token !== 'string') throw new MetaInstagramError(200, null);
-    const grantedScopes = parsePermissions(payload);
+    const shortLived = parseShortLivedToken(payload);
     const longLivedUrl = new URL('https://graph.instagram.com/access_token');
     longLivedUrl.search = new URLSearchParams({
       grant_type: 'ig_exchange_token',
       client_secret: this.config.appSecret,
-      access_token: payload.access_token,
+      access_token: shortLived.accessToken,
     }).toString();
     const longLivedPayload = await this.requestJson(longLivedUrl, { method: 'GET' });
 
@@ -87,19 +86,20 @@ export class MetaInstagramClient {
     return {
       accessToken: longLivedPayload.access_token,
       expiresIn: longLivedPayload.expires_in,
-      grantedScopes,
+      grantedScopes: shortLived.grantedScopes,
     };
   }
 
   async getIdentity(accessToken: string): Promise<MetaInstagramIdentity> {
     const url = this.graphUrl('me');
-    url.searchParams.set('fields', 'id,username');
+    url.searchParams.set('fields', 'user_id,username');
     const payload = await this.requestJson(url, this.authorized(accessToken));
 
-    if (!isRecord(payload) || typeof payload.id !== 'string' || (payload.username !== undefined && payload.username !== null && typeof payload.username !== 'string')) {
+    const entry = isRecord(payload) && Array.isArray(payload.data) ? payload.data[0] : undefined;
+    if (!isRecord(entry) || typeof entry.user_id !== 'string' || (entry.username !== undefined && entry.username !== null && typeof entry.username !== 'string')) {
       throw new MetaInstagramError(200, null);
     }
-    return { accountId: payload.id, username: typeof payload.username === 'string' ? payload.username : null };
+    return { accountId: entry.user_id, username: typeof entry.username === 'string' ? entry.username : null };
   }
 
 
@@ -177,8 +177,18 @@ function providerCode(payload: unknown): number | string | null {
   return typeof code === 'number' || typeof code === 'string' ? code : null;
 }
 
-function parsePermissions(payload: Record<string, unknown>): string[] {
-  const entry = Array.isArray(payload.data) ? payload.data[0] : undefined;
-  if (!isRecord(entry) || typeof entry.permissions !== 'string') throw new MetaInstagramError(200, null);
-  return [...new Set(entry.permissions.split(',').map((scope) => scope.trim()).filter(Boolean))].sort();
+function parseShortLivedToken(payload: unknown): { accessToken: string; grantedScopes: string[] } {
+  const entry = isRecord(payload) && Array.isArray(payload.data) ? payload.data[0] : undefined;
+  if (
+    !isRecord(entry) ||
+    typeof entry.access_token !== 'string' ||
+    typeof entry.user_id !== 'string' ||
+    typeof entry.permissions !== 'string'
+  ) {
+    throw new MetaInstagramError(200, null);
+  }
+  return {
+    accessToken: entry.access_token,
+    grantedScopes: [...new Set(entry.permissions.split(',').map((scope) => scope.trim()).filter(Boolean))].sort(),
+  };
 }

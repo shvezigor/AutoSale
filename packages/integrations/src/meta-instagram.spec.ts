@@ -15,6 +15,21 @@ function response(body: unknown, status = 200): Response {
   });
 }
 
+const documentedShortLivedTokenEnvelope = {
+  data: [{
+    access_token: 'short-lived-token',
+    user_id: '10200000000000000',
+    permissions: 'instagram_business_basic,instagram_business_manage_messages',
+  }],
+};
+
+const documentedIdentityEnvelope = {
+  data: [{
+    user_id: '17841400000000000',
+    username: 'shop_account',
+  }],
+};
+
 describe('MetaInstagramClient', () => {
   it('builds an Instagram Login authorization URL with only the required scopes', () => {
     const client = new MetaInstagramClient(config);
@@ -34,7 +49,7 @@ describe('MetaInstagramClient', () => {
 
   it('exchanges the code and its short-lived token for a long-lived token', async () => {
     const fetchFn = vi.fn<typeof fetch>()
-      .mockResolvedValueOnce(response({ access_token: 'short-lived-token', data: [{ permissions: 'instagram_business_basic,instagram_business_manage_messages' }] }))
+      .mockResolvedValueOnce(response(documentedShortLivedTokenEnvelope))
       .mockResolvedValueOnce(response({ access_token: 'long-lived-token', expires_in: 5_184_000 }));
     const client = new MetaInstagramClient({ ...config, fetch: fetchFn });
 
@@ -67,7 +82,7 @@ describe('MetaInstagramClient', () => {
     const client = new MetaInstagramClient({
       ...config,
       fetch: vi.fn<typeof fetch>()
-        .mockResolvedValueOnce(response({ access_token: 'short-lived-token', data: [{ permissions: 'instagram_business_basic,instagram_business_manage_messages' }] }))
+        .mockResolvedValueOnce(response(documentedShortLivedTokenEnvelope))
         .mockResolvedValueOnce(response({ access_token: 'long-lived-token' })),
     });
 
@@ -75,7 +90,7 @@ describe('MetaInstagramClient', () => {
   });
 
   it('gets the professional account identity from graph.instagram.com without putting the token in the URL', async () => {
-    const fetchFn = vi.fn<typeof fetch>().mockResolvedValue(response({ id: '17841400000000000', username: 'shop_account' }));
+    const fetchFn = vi.fn<typeof fetch>().mockResolvedValue(response(documentedIdentityEnvelope));
     const client = new MetaInstagramClient({ ...config, fetch: fetchFn });
 
     await expect(client.getIdentity('access-token-that-must-not-leak')).resolves.toEqual({
@@ -84,17 +99,14 @@ describe('MetaInstagramClient', () => {
     });
 
     const [requestUrl, init] = fetchFn.mock.calls[0] ?? [];
-    expect(String(requestUrl)).toBe('https://graph.instagram.com/v24.0/me?fields=id%2Cusername');
+    expect(String(requestUrl)).toBe('https://graph.instagram.com/v24.0/me?fields=user_id%2Cusername');
     expect(String(requestUrl)).not.toContain('access-token-that-must-not-leak');
     expect(init).toMatchObject({ headers: { authorization: 'Bearer access-token-that-must-not-leak' } });
   });
 
   it('uses permissions from code exchange without a separate permissions request', async () => {
     const fetchFn = vi.fn<typeof fetch>()
-      .mockResolvedValueOnce(response({
-        access_token: 'short-lived-token',
-        data: [{ permissions: 'instagram_business_basic,instagram_business_manage_messages' }],
-      }))
+      .mockResolvedValueOnce(response(documentedShortLivedTokenEnvelope))
       .mockResolvedValueOnce(response({ access_token: 'long-lived-token', expires_in: 60 }));
     const client = new MetaInstagramClient({ ...config, fetch: fetchFn });
 
@@ -106,15 +118,49 @@ describe('MetaInstagramClient', () => {
     );
   });
 
-  it.each([{ data: [] }, { data: [{}] }, { data: [{ permissions: ['instagram_business_basic'] }] }, { data: [{ permission: 'instagram_business_basic', status: 'granted' }] }])('rejects malformed or Facebook-style permission payloads', async (payload) => {
+  it.each([
+    { data: [] },
+    { data: [{}] },
+    { data: [{ access_token: 'short-lived-token', user_id: '10200000000000000', permissions: ['instagram_business_basic'] }] },
+    { data: [{ access_token: 'short-lived-token', user_id: '10200000000000000', permission: 'instagram_business_basic', status: 'granted' }] },
+  ])('rejects malformed or Facebook-style permission payloads', async (payload) => {
     const client = new MetaInstagramClient({
       ...config,
-      fetch: vi.fn<typeof fetch>().mockResolvedValue(response({
-        access_token: 'short-lived-token',
-        ...payload,
-      })),
+      fetch: vi.fn<typeof fetch>().mockResolvedValue(response(payload)),
     });
     await expect(client.exchangeCode({ code: 'code', redirectUri: 'https://example.test/callback' })).rejects.toEqual(expect.objectContaining({ name: 'MetaInstagramError', status: 200, providerCode: null }));
+  });
+
+  it.each([
+    {
+      access_token: 'short-lived-token',
+      data: [{ user_id: '10200000000000000', permissions: 'instagram_business_basic,instagram_business_manage_messages' }],
+    },
+    {
+      data: [
+        { access_token: 'short-lived-token', user_id: '10200000000000000' },
+        { permissions: 'instagram_business_basic,instagram_business_manage_messages' },
+      ],
+    },
+    {
+      data: [{ access_token: 'short-lived-token', permissions: 'instagram_business_basic,instagram_business_manage_messages' }],
+    },
+  ])('rejects top-level, split-entry, or incomplete short-lived token alternatives', async (payload) => {
+    const client = new MetaInstagramClient({
+      ...config,
+      fetch: vi.fn<typeof fetch>().mockResolvedValue(response(payload)),
+    });
+
+    await expect(client.exchangeCode({ code: 'code', redirectUri: 'https://example.test/callback' })).rejects.toEqual(expect.objectContaining({ name: 'MetaInstagramError', status: 200, providerCode: null }));
+  });
+
+  it('rejects a top-level identity alternative', async () => {
+    const client = new MetaInstagramClient({
+      ...config,
+      fetch: vi.fn<typeof fetch>().mockResolvedValue(response({ user_id: '17841400000000000', username: 'shop_account' })),
+    });
+
+    await expect(client.getIdentity('access-token')).rejects.toEqual(expect.objectContaining({ name: 'MetaInstagramError', status: 200, providerCode: null }));
   });
 
   it('subscribes the current account to message webhooks', async () => {
@@ -195,10 +241,7 @@ describe('MetaInstagramClient', () => {
     const client = new MetaInstagramClient({
       ...config,
       fetch: vi.fn<typeof fetch>()
-        .mockResolvedValueOnce(response({
-          access_token: 'short-lived-token',
-          data: [{ permissions: 'instagram_business_basic,instagram_business_manage_messages' }],
-        }))
+        .mockResolvedValueOnce(response(documentedShortLivedTokenEnvelope))
         .mockRejectedValueOnce(new Error('https://graph.instagram.com/access_token?client_secret=app-secret-that-must-not-leak&access_token=short-lived-token&code=authorization-code-that-must-not-leak')),
     });
     const failure = client.exchangeCode({
@@ -255,10 +298,7 @@ describe('MetaInstagramClient', () => {
     const client = new MetaInstagramClient({
       ...config,
       fetch: vi.fn<typeof fetch>()
-        .mockResolvedValueOnce(response({
-          access_token: 'short-lived-token',
-          data: [{ permissions: 'instagram_business_basic,instagram_business_manage_messages' }],
-        }))
+        .mockResolvedValueOnce(response(documentedShortLivedTokenEnvelope))
         .mockResolvedValueOnce(response({ access_token: ['access-token-that-must-not-leak'], expires_in: 'app-secret-that-must-not-leak', code: 'authorization-code-that-must-not-leak' })),
     });
     const failure = client.exchangeCode({
@@ -290,7 +330,7 @@ describe('MetaInstagramClient', () => {
   it('sanitizes a malformed successful JSON payload', async () => {
     const client = new MetaInstagramClient({
       ...config,
-      fetch: vi.fn<typeof fetch>().mockResolvedValue(response({ id: 123, username: ['access-token-that-must-not-leak'] })),
+      fetch: vi.fn<typeof fetch>().mockResolvedValue(response({ data: [{ user_id: 123, username: ['access-token-that-must-not-leak'] }] })),
     });
     const failure = client.getIdentity('access-token-that-must-not-leak');
 

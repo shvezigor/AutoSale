@@ -53,6 +53,64 @@ describe('InstagramSettingsForm', () => {
     expect(screen.getByRole('button', { name: 'Перепідключити Instagram' })).toBeInTheDocument();
   });
 
+  it('shows and announces the connecting state while the owner request is in flight', async () => {
+    let resolveConnect!: (value: unknown) => void;
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ token: 'csrf-token' }) })
+      .mockImplementationOnce(() => new Promise((resolve) => { resolveConnect = resolve; }));
+    vi.stubGlobal('fetch', fetchMock);
+    render(<InstagramSettingsForm initial={initial()} membershipRole="OWNER" />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Підключити Instagram' }));
+
+    await waitFor(() => expect(screen.getByRole('region', { name: 'Instagram' })).toHaveAttribute('aria-busy', 'true'));
+    expect(screen.getByRole('status')).toHaveTextContent('Підключення…');
+    resolveConnect({ ok: false, json: async () => null });
+  });
+
+  it('offers a reachable cleanup retry instead of connect while a credential is retained', async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ token: 'csrf-token' }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => initial({ status: 'DISCONNECTED' }) });
+    vi.stubGlobal('fetch', fetchMock);
+    render(<InstagramSettingsForm initial={initial({
+      status: 'DISCONNECTED',
+      lastErrorCode: 'META_DISCONNECT_CLEANUP_FAILED',
+    })} membershipRole="OWNER" />);
+
+    expect(screen.queryByRole('button', { name: 'Підключити Instagram' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Повторити очищення' }));
+
+    await waitFor(() => expect(screen.getByText('Очищення Instagram завершено')).toBeInTheDocument());
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/integrations/instagram/cleanup',
+      expect.objectContaining({
+        method: 'POST',
+        headers: expect.objectContaining({ 'x-csrf-token': 'csrf-token' }),
+      }),
+    );
+  });
+
+  it('keeps cleanup retry reachable when the provider cleanup fails again', async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ token: 'csrf-token' }) })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => initial({ status: 'DISCONNECTED', lastErrorCode: 'META_DISCONNECT_CLEANUP_FAILED' }),
+      });
+    vi.stubGlobal('fetch', fetchMock);
+    render(<InstagramSettingsForm initial={initial({
+      status: 'DISCONNECTED',
+      lastErrorCode: 'META_DISCONNECT_CLEANUP_FAILED',
+    })} membershipRole="OWNER" />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Повторити очищення' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Не вдалося очистити підключення Instagram');
+    expect(screen.getByRole('button', { name: 'Повторити очищення' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Підключити Instagram' })).not.toBeInTheDocument();
+  });
+
   it('keeps connection metadata read-only for a manager', () => {
     render(<InstagramSettingsForm initial={initial({ status: 'ACTIVE', username: 'autosale_store' })} membershipRole="MANAGER" />);
 

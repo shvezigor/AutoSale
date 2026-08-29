@@ -15,6 +15,9 @@ type OAuthStateRow = {
 };
 
 type OAuthStatePrisma = {
+  instagramConnection: {
+    findUnique: (input: { where: { tenantId: string }; select: { status: true; encryptedAccessToken: true } }) => Promise<{ status: string; encryptedAccessToken: string | null } | null>;
+  };
   instagramOAuthState: {
     create: (input: { data: Omit<OAuthStateRow, 'usedAt'> & { usedAt?: Date | null } }) => Promise<OAuthStateRow>;
     updateMany: (input: {
@@ -31,14 +34,22 @@ type OAuthStatePrisma = {
       select: { id: true; tenantId: true; userId: true; returnPath: true };
     }) => Promise<Array<Pick<OAuthStateRow, 'id' | 'tenantId' | 'userId' | 'returnPath'>>>;
   };
+  securityAuditLog: {
+    create: (input: { data: { tenantId: string; userId: string; actor: string; action: string; result: string; metadata: Record<string, never> } }) => Promise<unknown>;
+  };
   tenant: { update: () => Promise<Record<string, never>> };
   $transaction: <T>(callback: (transaction: OAuthStatePrisma) => Promise<T>) => Promise<T>;
 };
 
 class OAuthStateStore {
   readonly rows: OAuthStateRow[] = [];
+  readonly auditRows: Array<{ tenantId: string; userId: string; actor: string; action: string; result: string; metadata: Record<string, never> }> = [];
+  connectionRow: { status: string; encryptedAccessToken: string | null } | null = null;
 
   readonly prisma: OAuthStatePrisma = {
+    instagramConnection: {
+      findUnique: async () => this.connectionRow,
+    },
     instagramOAuthState: {
       create: async ({ data }: { data: Omit<OAuthStateRow, 'usedAt'> & { usedAt?: Date | null } }) => {
         const row = { ...data, usedAt: data.usedAt ?? null };
@@ -87,6 +98,12 @@ class OAuthStateStore {
         }));
       },
     },
+    securityAuditLog: {
+      create: async ({ data }) => {
+        this.auditRows.push(data);
+        return data;
+      },
+    },
     tenant: { update: async () => ({}) },
     $transaction: async <T>(callback: (transaction: OAuthStatePrisma) => Promise<T>) => callback(this.prisma),
   };
@@ -121,6 +138,24 @@ describe('InstagramOAuthStateService', () => {
     expect(stored?.tokenHash).not.toBe(rawState);
     expect(stored?.expiresAt.getTime()).toBeGreaterThanOrEqual(beforeCreation + 10 * 60 * 1000);
     expect(stored?.expiresAt.getTime()).toBeLessThanOrEqual(Date.now() + 10 * 60 * 1000);
+    expect(store.auditRows).toEqual([{
+      tenantId: 'tenant-a',
+      userId: 'user-a',
+      actor: 'USER',
+      action: 'INSTAGRAM_CONNECT_STARTED',
+      result: 'SUCCESS',
+      metadata: {},
+    }]);
+  });
+
+  it('blocks reconnect while a disconnected credential still needs provider cleanup', async () => {
+    const { service, store } = createService();
+    store.connectionRow = { status: 'DISCONNECTED', encryptedAccessToken: 'encrypted-retained-credential' };
+
+    await expect(service.create({ tenantId: 'tenant-a', userId: 'user-a' })).rejects.toThrow('Instagram cleanup pending');
+
+    expect(store.rows).toHaveLength(0);
+    expect(store.auditRows).toHaveLength(0);
   });
 
   it.each([

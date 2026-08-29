@@ -36,7 +36,7 @@ describe('instagramConnectionSummarySchema', () => {
     expect(instagramConnectionSummarySchema.parse(summary)).toEqual(summary);
   });
 
-  it('rejects credential fields and malformed timestamps', () => {
+  it('rejects malformed timestamps', () => {
     expect(() =>
       instagramConnectionSummarySchema.parse({
         status: 'ACTIVE',
@@ -44,6 +44,19 @@ describe('instagramConnectionSummarySchema', () => {
         username: 'autosale_store',
         tokenExpiresAt: 'tomorrow',
         lastVerifiedAt: null,
+        lastErrorCode: null,
+      }),
+    ).toThrow();
+  });
+
+  it('rejects credential fields from an otherwise valid summary', () => {
+    expect(() =>
+      instagramConnectionSummarySchema.parse({
+        status: 'ACTIVE',
+        accountId: '17841400000000000',
+        username: 'autosale_store',
+        tokenExpiresAt: '2026-10-27T12:00:00.000Z',
+        lastVerifiedAt: '2026-08-28T12:00:00.000Z',
         lastErrorCode: null,
         encryptedAccessToken: 'v1.secret',
       }),

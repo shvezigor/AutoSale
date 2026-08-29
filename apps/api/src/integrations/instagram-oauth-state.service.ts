@@ -4,6 +4,7 @@ import type { PrismaClient } from '@autosale/database';
 const STATE_TTL_MS = 10 * 60 * 1000;
 const DEFAULT_RETURN_PATH = '/settings';
 const INVALID_STATE_ERROR = 'Invalid or expired OAuth state';
+const CLEANUP_PENDING_ERROR = 'Instagram cleanup pending';
 const CONTROL_CHARACTER_PATTERN = /[\u0000-\u001F\u007F]/;
 
 type CreateInstagramOAuthStateInput = {
@@ -50,6 +51,13 @@ export class InstagramOAuthStateService {
         where: { id: input.tenantId },
         data: { instagramOAuthCurrentAttemptId: stateId },
       });
+      const connection = await transaction.instagramConnection.findUnique({
+        where: { tenantId: input.tenantId },
+        select: { status: true, encryptedAccessToken: true },
+      });
+      if (connection?.status === 'DISCONNECTED' && connection.encryptedAccessToken !== null) {
+        throw new Error(CLEANUP_PENDING_ERROR);
+      }
       await transaction.instagramOAuthState.updateMany({
         where: { tenantId: input.tenantId, usedAt: null },
         data: { usedAt: now },
@@ -62,6 +70,16 @@ export class InstagramOAuthStateService {
           userId: input.userId,
           returnPath: normalizeReturnPath(input.returnPath),
           expiresAt: new Date(now.getTime() + STATE_TTL_MS),
+        },
+      });
+      await transaction.securityAuditLog.create({
+        data: {
+          tenantId: input.tenantId,
+          userId: input.userId,
+          actor: 'USER',
+          action: 'INSTAGRAM_CONNECT_STARTED',
+          result: 'SUCCESS',
+          metadata: {},
         },
       });
     }, { isolationLevel: 'Serializable' }));

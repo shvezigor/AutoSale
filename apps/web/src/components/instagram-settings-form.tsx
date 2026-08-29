@@ -9,6 +9,7 @@ export type InstagramConnectionSummary = ContractInstagramConnectionSummary;
 
 type MembershipRole = 'OWNER' | 'MANAGER' | null;
 type Message = { kind: 'success' | 'error'; text: string } | null;
+type PendingAction = 'connect' | 'disconnect' | 'cleanup' | null;
 
 const META_AUTHORIZATION_ORIGIN = 'https://www.instagram.com';
 const CONNECTION_STATUSES = new Set<InstagramConnectionSummary['status']>([
@@ -29,13 +30,15 @@ export function InstagramSettingsForm({
 }) {
   const [connection, setConnection] = useState(initial);
   const [message, setMessage] = useState<Message>(null);
-  const [pending, setPending] = useState(false);
+  const [pendingAction, setPendingAction] = useState<PendingAction>(null);
   const [confirmingDisconnect, setConfirmingDisconnect] = useState(false);
   const isOwner = membershipRole === 'OWNER';
+  const pending = pendingAction !== null;
+  const cleanupPending = isCleanupPending(connection);
   const actionLabel = connectionActionLabel(connection.status);
 
   async function connect() {
-    setPending(true);
+    setPendingAction('connect');
     setMessage(null);
     try {
       const response = await mutatingFetch('/api/integrations/instagram/connect', {
@@ -52,12 +55,12 @@ export function InstagramSettingsForm({
     } catch {
       setMessage({ kind: 'error', text: 'Не вдалося розпочати підключення Instagram' });
     } finally {
-      setPending(false);
+      setPendingAction(null);
     }
   }
 
   async function disconnect() {
-    setPending(true);
+    setPendingAction('disconnect');
     setMessage(null);
     try {
       const response = await mutatingFetch('/api/integrations/instagram/disconnect', { method: 'POST' });
@@ -69,18 +72,37 @@ export function InstagramSettingsForm({
     } catch {
       setMessage({ kind: 'error', text: 'Не вдалося відключити Instagram' });
     } finally {
-      setPending(false);
+      setPendingAction(null);
     }
   }
 
-  return <section className="settings-card instagram-connection-card" aria-labelledby="instagram-connection-title">
+  async function retryCleanup() {
+    setPendingAction('cleanup');
+    setMessage(null);
+    try {
+      const response = await mutatingFetch('/api/integrations/instagram/cleanup', { method: 'POST' });
+      const payload = await jsonOrNull(response);
+      if (!response.ok || !isInstagramConnectionSummary(payload)) throw new Error('cleanup failed');
+      setConnection(payload);
+      if (isCleanupPending(payload)) throw new Error('cleanup failed');
+      setMessage({ kind: 'success', text: 'Очищення Instagram завершено' });
+    } catch {
+      setMessage({ kind: 'error', text: 'Не вдалося очистити підключення Instagram' });
+    } finally {
+      setPendingAction(null);
+    }
+  }
+
+  const visibleStatus = pendingAction === 'connect' ? 'Підключення…' : statusLabel(connection.status);
+
+  return <section className="settings-card instagram-connection-card" aria-busy={pending || undefined} aria-labelledby="instagram-connection-title">
     <div className="settings-card-heading">
       <div>
         <h2 id="instagram-connection-title">Instagram</h2>
         <p>Підключіть професійний Instagram-акаунт через Meta, щоб отримувати повідомлення та замовлення.</p>
       </div>
-      <span className={`connection-status status-${connection.status.toLowerCase()}`} aria-label={`Статус підключення: ${statusLabel(connection.status)}`}>
-        {statusLabel(connection.status)}
+      <span className={`connection-status status-${connection.status.toLowerCase()}`} aria-label={`Статус підключення: ${visibleStatus}`} role={pendingAction === 'connect' ? 'status' : undefined}>
+        {visibleStatus}
       </span>
     </div>
 
@@ -93,7 +115,8 @@ export function InstagramSettingsForm({
     {membershipRole === 'MANAGER' && <p className="sheets-hint">Перегляд доступний. Змінювати підключення може власник організації.</p>}
 
     {isOwner && <div className="settings-actions instagram-connection-actions">
-      {actionLabel && <button disabled={pending} onClick={() => void connect()} type="button">{actionLabel}</button>}
+      {actionLabel && !cleanupPending && <button disabled={pending} onClick={() => void connect()} type="button">{actionLabel}</button>}
+      {cleanupPending && <button disabled={pending} onClick={() => void retryCleanup()} type="button">Повторити очищення</button>}
       {canDisconnect(connection.status) && !confirmingDisconnect && <button className="danger-button" disabled={pending} onClick={() => setConfirmingDisconnect(true)} type="button">Відключити Instagram</button>}
       {confirmingDisconnect && <div className="instagram-disconnect-confirmation" role="alert">
         <span>Відключити Instagram? Повторне підключення знадобиться для нових повідомлень.</span>
@@ -120,6 +143,11 @@ function connectionActionLabel(status: InstagramConnectionSummary['status']): st
   if (status === 'NOT_CONNECTED' || status === 'DISCONNECTED') return 'Підключити Instagram';
   if (status === 'LEGACY' || status === 'REAUTH_REQUIRED' || status === 'ERROR') return 'Перепідключити Instagram';
   return null;
+}
+
+function isCleanupPending(connection: InstagramConnectionSummary): boolean {
+  return connection.status === 'DISCONNECTED' &&
+    (connection.lastErrorCode === 'META_DISCONNECT_CLEANUP_PENDING' || connection.lastErrorCode === 'META_DISCONNECT_CLEANUP_FAILED');
 }
 
 function canDisconnect(status: InstagramConnectionSummary['status']): boolean {

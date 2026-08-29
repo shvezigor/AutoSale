@@ -1,9 +1,9 @@
 import { Buffer } from 'node:buffer';
 
 import type { ApiEnv } from '@autosale/config/api-env';
-import { createPrismaClient } from '@autosale/database';
+import { createPrismaClient, type PrismaClient } from '@autosale/database';
 import { MetaInstagramClient } from '@autosale/integrations';
-import { DynamicModule, Module } from '@nestjs/common';
+import { DynamicModule, Module, type OnApplicationShutdown } from '@nestjs/common';
 
 import { CredentialCipher } from './credential-cipher.js';
 import { InstagramOAuthController } from './instagram-oauth.controller.js';
@@ -14,6 +14,7 @@ import { InstagramOAuthStateService } from './instagram-oauth-state.service.js';
 export class InstagramOAuthModule {
   static register(env: ApiEnv): DynamicModule {
     const prisma = createPrismaClient(env.DATABASE_URL);
+    const prismaLifecycle = new InstagramOAuthPrismaLifecycle(prisma);
     const meta = new MetaInstagramClient({
       appId: env.META_APP_ID,
       appSecret: env.META_APP_SECRET,
@@ -30,8 +31,19 @@ export class InstagramOAuthModule {
     return {
       module: InstagramOAuthModule,
       controllers: [InstagramOAuthController],
-      providers: [{ provide: InstagramOAuthService, useValue: service }],
+      providers: [
+        { provide: InstagramOAuthService, useValue: service },
+        { provide: InstagramOAuthPrismaLifecycle, useValue: prismaLifecycle },
+      ],
       exports: [InstagramOAuthService],
     };
+  }
+}
+
+export class InstagramOAuthPrismaLifecycle implements OnApplicationShutdown {
+  constructor(private readonly prisma: PrismaClient) {}
+
+  async onApplicationShutdown(): Promise<void> {
+    await this.prisma.$disconnect();
   }
 }

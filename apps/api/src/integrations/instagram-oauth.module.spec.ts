@@ -5,7 +5,7 @@ import { Test } from '@nestjs/testing';
 import { describe, expect, it } from 'vitest';
 
 import { InstagramOAuthController } from './instagram-oauth.controller.js';
-import { InstagramOAuthModule } from './instagram-oauth.module.js';
+import { InstagramOAuthModule, InstagramOAuthPrismaLifecycle } from './instagram-oauth.module.js';
 import { InstagramOAuthService } from './instagram-oauth.service.js';
 
 const env = {
@@ -33,6 +33,17 @@ const env = {
 } satisfies ApiEnv;
 
 describe('InstagramOAuthModule', () => {
+  it('disconnects its module-owned Prisma client during application shutdown', async () => {
+    let disconnected = false;
+    const lifecycle = new InstagramOAuthPrismaLifecycle({
+      $disconnect: async () => { disconnected = true; },
+    } as never);
+
+    await lifecycle.onApplicationShutdown();
+
+    expect(disconnected).toBe(true);
+  });
+
   it('wires the OAuth service and controller from deployment configuration', async () => {
     const moduleRef = await Test.createTestingModule({
       imports: [InstagramOAuthModule.register(env)],

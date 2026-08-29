@@ -13,6 +13,8 @@ const REQUIRED_SCOPES = [
   'instagram_business_manage_messages',
 ] as const;
 const SAFE_FAILURE_MESSAGE = 'Instagram connection failed';
+const CLEANUP_PENDING_CODE = 'META_DISCONNECT_CLEANUP_PENDING';
+const CLEANUP_FAILED_CODE = 'META_DISCONNECT_CLEANUP_FAILED';
 
 const SAFE_CONNECTION_SELECT = {
   externalAccountId: true,
@@ -31,6 +33,24 @@ type SafeConnectionRow = {
   lastVerifiedAt: Date | null;
   lastErrorCode: string | null;
 };
+
+type OAuthBinding = { id: string; tenantId: string; userId: string; returnPath?: string };
+
+type CleanupSnapshot = {
+  id: string;
+  tenantId: string;
+  encryptedAccessToken: string;
+  disconnectedAt: Date;
+  lastErrorCode: typeof CLEANUP_PENDING_CODE | typeof CLEANUP_FAILED_CODE;
+};
+
+const CLEANUP_CONNECTION_SELECT = {
+  ...SAFE_CONNECTION_SELECT,
+  id: true,
+  tenantId: true,
+  encryptedAccessToken: true,
+  disconnectedAt: true,
+} as const;
 
 export type InstagramConnectionSummary = {
   status: 'NOT_CONNECTED' | SafeConnectionRow['status'];
@@ -92,6 +112,7 @@ export class InstagramOAuthService {
   async completeCallback(
     code: string | undefined,
     rawState: string,
+    authorizationDenied = false,
   ): Promise<{ returnPath: string; summary: InstagramConnectionSummary }> {
     let binding: { id: string; tenantId: string; userId: string; returnPath: string };
     try {
@@ -101,6 +122,12 @@ export class InstagramOAuthService {
     }
 
     if (!await this.hasActiveOwner(binding.tenantId, binding.userId)) {
+      await this.recordAuditBestEffort(binding, 'INSTAGRAM_CALLBACK_FAILED', 'FAILURE', 'META_OWNER_INVALID');
+      throw safeFailure();
+    }
+
+    if (authorizationDenied) {
+      await this.markCallbackFailure(binding, 'ERROR', 'META_AUTHORIZATION_DENIED');
       throw safeFailure();
     }
 
@@ -165,6 +192,7 @@ export class InstagramOAuthService {
       });
     } catch {
       // A concurrent unique-account claim must never overwrite the owning tenant.
+      await this.markCallbackFailure(binding, 'ERROR', 'META_CONNECTION_FAILED');
       throw safeFailure();
     }
 
@@ -188,32 +216,101 @@ export class InstagramOAuthService {
             disconnectedAt: null,
           },
           select: SAFE_CONNECTION_SELECT,
+        }).then(async (connection) => {
+          await this.recordAudit(transaction, binding, 'INSTAGRAM_CONNECTED', 'SUCCESS');
+          return connection;
         });
       });
     } catch {
+      await this.markCallbackFailure(binding, 'ERROR', 'META_ACTIVATION_FAILED');
       throw safeFailure();
     }
 
     return { returnPath: binding.returnPath, summary: toSummary(active) };
   }
 
-  async disconnect(tenantId: string): Promise<InstagramConnectionSummary> {
-    const connection = await this.prisma.instagramConnection.findUnique({
-      where: { tenantId },
-      select: { encryptedAccessToken: true },
-    });
-    if (!connection) return emptySummary();
+  async disconnect(tenantId: string, userId: string): Promise<InstagramConnectionSummary> {
+    const prepared = await this.prepareDisconnect(tenantId, userId);
+    if (!prepared.snapshot) return prepared.summary;
+    return this.cleanupCredential(prepared.snapshot, userId);
+  }
 
-    const disconnectedAt = this.now();
-    const disabled = await this.prisma.instagramConnection.update({
-      where: { tenantId },
-      data: connection.encryptedAccessToken
-        ? {
-            status: 'DISCONNECTED',
-            disconnectedAt,
-            lastErrorCode: null,
-          }
-        : {
+  async retryCleanup(tenantId: string, userId: string): Promise<InstagramConnectionSummary> {
+    const prepared = await this.withSerializableRetry(() => this.prisma.$transaction(async (transaction) => {
+      const locked = await transaction.tenant.updateMany({
+        where: { id: tenantId, instagramOAuthCurrentAttemptId: null },
+        data: { instagramOAuthCurrentAttemptId: null },
+      });
+      if (locked.count !== 1) throw safeFailure();
+      const connection = await transaction.instagramConnection.findUnique({
+        where: { tenantId },
+        select: CLEANUP_CONNECTION_SELECT,
+      });
+      if (!connection) return { summary: emptySummary(), snapshot: null };
+      const summary = toSummary(connection);
+      if (
+        connection.status !== 'DISCONNECTED' ||
+        connection.encryptedAccessToken === null ||
+        connection.disconnectedAt === null ||
+        (connection.lastErrorCode !== CLEANUP_PENDING_CODE && connection.lastErrorCode !== CLEANUP_FAILED_CODE)
+      ) {
+        return { summary, snapshot: null };
+      }
+      return {
+        summary,
+        snapshot: {
+          id: connection.id,
+          tenantId,
+          encryptedAccessToken: connection.encryptedAccessToken,
+          disconnectedAt: connection.disconnectedAt,
+          lastErrorCode: connection.lastErrorCode,
+        } satisfies CleanupSnapshot,
+      };
+    }, { isolationLevel: 'Serializable' }));
+    if (!prepared.snapshot) return prepared.summary;
+    return this.cleanupCredential(prepared.snapshot, userId);
+  }
+
+  private async prepareDisconnect(
+    tenantId: string,
+    userId: string,
+  ): Promise<{ summary: InstagramConnectionSummary; snapshot: CleanupSnapshot | null }> {
+    return this.withSerializableRetry(() => this.prisma.$transaction(async (transaction) => {
+      const locked = await transaction.tenant.updateMany({
+        where: { id: tenantId },
+        data: { instagramOAuthCurrentAttemptId: null },
+      });
+      if (locked.count !== 1) throw safeFailure();
+      const disconnectedAt = this.now();
+      await transaction.instagramOAuthState.updateMany({
+        where: { tenantId, usedAt: null },
+        data: { usedAt: disconnectedAt },
+      });
+      await this.recordAudit(
+        transaction,
+        { tenantId, userId },
+        'INSTAGRAM_DISCONNECT_REQUESTED',
+        'SUCCESS',
+      );
+
+      const connection = await transaction.instagramConnection.findUnique({
+        where: { tenantId },
+        select: CLEANUP_CONNECTION_SELECT,
+      });
+      if (!connection) {
+        await this.recordAudit(
+          transaction,
+          { tenantId, userId },
+          'INSTAGRAM_DISCONNECTED',
+          'SUCCESS',
+        );
+        return { summary: emptySummary(), snapshot: null };
+      }
+
+      if (connection.encryptedAccessToken === null) {
+        const disconnected = await transaction.instagramConnection.update({
+          where: { id: connection.id },
+          data: {
             status: 'DISCONNECTED',
             encryptedAccessToken: null,
             tokenExpiresAt: null,
@@ -221,14 +318,43 @@ export class InstagramOAuthService {
             disconnectedAt,
             lastErrorCode: null,
           },
-      select: SAFE_CONNECTION_SELECT,
-    });
+          select: SAFE_CONNECTION_SELECT,
+        });
+        await this.recordAudit(
+          transaction,
+          { tenantId, userId },
+          'INSTAGRAM_DISCONNECTED',
+          'SUCCESS',
+        );
+        return { summary: toSummary(disconnected), snapshot: null };
+      }
 
-    if (!connection.encryptedAccessToken) return toSummary(disabled);
+      const disabled = await transaction.instagramConnection.update({
+        where: { id: connection.id },
+        data: {
+          status: 'DISCONNECTED',
+          disconnectedAt,
+          lastErrorCode: CLEANUP_PENDING_CODE,
+        },
+        select: SAFE_CONNECTION_SELECT,
+      });
+      return {
+        summary: toSummary(disabled),
+        snapshot: {
+          id: connection.id,
+          tenantId,
+          encryptedAccessToken: connection.encryptedAccessToken,
+          disconnectedAt,
+          lastErrorCode: CLEANUP_PENDING_CODE,
+        },
+      };
+    }, { isolationLevel: 'Serializable' }));
+  }
 
+  private async cleanupCredential(snapshot: CleanupSnapshot, userId: string): Promise<InstagramConnectionSummary> {
     let cleanupSucceeded = false;
     try {
-      const accessToken = this.cipher.decrypt(connection.encryptedAccessToken);
+      const accessToken = this.cipher.decrypt(snapshot.encryptedAccessToken);
       const cleanup = await Promise.allSettled([
         this.meta.unsubscribe(accessToken),
         this.meta.revoke(accessToken),
@@ -238,34 +364,110 @@ export class InstagramOAuthService {
       cleanupSucceeded = false;
     }
 
-    const finalized = await this.prisma.instagramConnection.update({
-      where: { tenantId },
-      data: cleanupSucceeded
-        ? {
-            encryptedAccessToken: null,
-            tokenExpiresAt: null,
-            grantedScopes: null,
-            lastErrorCode: null,
-          }
-        : { status: 'DISCONNECTED', lastErrorCode: 'META_DISCONNECT_CLEANUP_FAILED' },
+    const finalized = await this.withSerializableRetry(() => this.prisma.$transaction(async (transaction) => {
+      const locked = await transaction.tenant.updateMany({
+        where: { id: snapshot.tenantId, instagramOAuthCurrentAttemptId: null },
+        data: { instagramOAuthCurrentAttemptId: null },
+      });
+      if (locked.count !== 1) return null;
+      const rows = await transaction.instagramConnection.updateManyAndReturn({
+        where: {
+          id: snapshot.id,
+          tenantId: snapshot.tenantId,
+          encryptedAccessToken: snapshot.encryptedAccessToken,
+          status: 'DISCONNECTED',
+          disconnectedAt: snapshot.disconnectedAt,
+          lastErrorCode: snapshot.lastErrorCode,
+        },
+        data: cleanupSucceeded
+          ? {
+              encryptedAccessToken: null,
+              tokenExpiresAt: null,
+              grantedScopes: null,
+              lastErrorCode: null,
+            }
+          : { lastErrorCode: CLEANUP_FAILED_CODE },
+        select: SAFE_CONNECTION_SELECT,
+      });
+      const connection = rows[0];
+      if (!connection) return null;
+      await this.recordAudit(
+        transaction,
+        { tenantId: snapshot.tenantId, userId },
+        cleanupSucceeded ? 'INSTAGRAM_DISCONNECTED' : 'INSTAGRAM_CLEANUP_FAILED',
+        cleanupSucceeded ? 'SUCCESS' : 'FAILURE',
+        cleanupSucceeded ? undefined : CLEANUP_FAILED_CODE,
+      );
+      return connection;
+    }, { isolationLevel: 'Serializable' }));
+    if (finalized) return toSummary(finalized);
+
+    const current = await this.prisma.instagramConnection.findUnique({
+      where: { tenantId: snapshot.tenantId },
       select: SAFE_CONNECTION_SELECT,
     });
-
-    return toSummary(finalized);
+    return current ? toSummary(current) : emptySummary();
   }
 
   private async markCallbackFailure(
-    binding: { id: string; tenantId: string; userId: string },
+    binding: OAuthBinding,
     status: 'REAUTH_REQUIRED' | 'ERROR',
     lastErrorCode: string,
   ): Promise<void> {
     try {
-      await this.withCurrentAttempt(binding, (transaction) => transaction.instagramConnection.updateMany({
-        where: { tenantId: binding.tenantId },
-        data: { status, lastErrorCode },
-      }));
+      await this.withCurrentAttempt(binding, async (transaction) => {
+        await transaction.instagramConnection.updateMany({
+          where: { tenantId: binding.tenantId },
+          data: { status, lastErrorCode },
+        });
+        await this.recordAudit(
+          transaction,
+          binding,
+          'INSTAGRAM_CALLBACK_FAILED',
+          'FAILURE',
+          lastErrorCode,
+        );
+      });
     } catch {
       // A superseded attempt must not change the current connection.
+      await this.recordAuditBestEffort(
+        binding,
+        'INSTAGRAM_CALLBACK_FAILED',
+        'FAILURE',
+        lastErrorCode,
+      );
+    }
+  }
+
+  private recordAudit(
+    client: Prisma.TransactionClient | PrismaClient,
+    binding: Pick<OAuthBinding, 'tenantId' | 'userId'>,
+    action: string,
+    result: 'SUCCESS' | 'FAILURE',
+    errorCode?: string,
+  ): Promise<unknown> {
+    return client.securityAuditLog.create({
+      data: {
+        tenantId: binding.tenantId,
+        userId: binding.userId,
+        actor: 'USER',
+        action,
+        result,
+        metadata: errorCode === undefined ? {} : { errorCode },
+      },
+    });
+  }
+
+  private async recordAuditBestEffort(
+    binding: Pick<OAuthBinding, 'tenantId' | 'userId'>,
+    action: string,
+    result: 'SUCCESS' | 'FAILURE',
+    errorCode?: string,
+  ): Promise<void> {
+    try {
+      await this.recordAudit(this.prisma, binding, action, result, errorCode);
+    } catch {
+      // Audit persistence failure must not expose callback or provider details.
     }
   }
 
@@ -302,7 +504,7 @@ export class InstagramOAuthService {
   }
 
   private async withCurrentAttempt<T>(
-    binding: { id: string; tenantId: string; userId: string },
+    binding: OAuthBinding,
     operation: (transaction: Prisma.TransactionClient) => Promise<T>,
   ): Promise<T> {
     return this.withSerializableRetry(() => this.prisma.$transaction(async (transaction) => {

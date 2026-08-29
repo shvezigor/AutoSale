@@ -58,10 +58,15 @@ export class InstagramOAuthController {
   async callback(
     @Query('code') code: string | undefined,
     @Query('state') state: string | undefined,
+    @Query('error') providerError: string | undefined,
     @Res() response: Response,
   ): Promise<void> {
     try {
-      const result = await this.instagram.completeCallback(code, state ?? '');
+      const result = await this.instagram.completeCallback(
+        code,
+        state ?? '',
+        providerError === 'access_denied',
+      );
       response.redirect(appendResult(result.returnPath, 'connected'));
     } catch {
       response.redirect('/settings?instagram=error');
@@ -71,7 +76,13 @@ export class InstagramOAuthController {
   @Post('disconnect')
   @RequireMembership('OWNER')
   disconnect(@CurrentPrincipal() principal: AuthPrincipal) {
-    return this.instagram.disconnect(principal.tenantId!);
+    return this.instagram.disconnect(principal.tenantId!, principal.userId);
+  }
+
+  @Post('cleanup')
+  @RequireMembership('OWNER')
+  retryCleanup(@CurrentPrincipal() principal: AuthPrincipal) {
+    return this.instagram.retryCleanup(principal.tenantId!, principal.userId);
   }
 }
 

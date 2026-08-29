@@ -29,6 +29,7 @@ describe('InstagramOAuthController', () => {
   const connect = vi.fn();
   const completeCallback = vi.fn();
   const disconnect = vi.fn();
+  const retryCleanup = vi.fn();
   const resolve = vi.fn();
   const csrf = new CsrfService('p'.repeat(32));
 
@@ -50,6 +51,7 @@ describe('InstagramOAuthController', () => {
       summary: { status: 'ACTIVE' },
     });
     disconnect.mockReset().mockResolvedValue({ status: 'DISCONNECTED' });
+    retryCleanup.mockReset().mockResolvedValue({ status: 'DISCONNECTED', lastErrorCode: null });
     resolve.mockReset().mockImplementation(async (token: string) => {
       if (token === 'owner-token') return owner;
       if (token === 'manager-token') return manager;
@@ -60,7 +62,7 @@ describe('InstagramOAuthController', () => {
     const moduleRef = await Test.createTestingModule({
       controllers: [InstagramOAuthController],
       providers: [
-        { provide: InstagramOAuthService, useValue: { getSummary, connect, completeCallback, disconnect } },
+        { provide: InstagramOAuthService, useValue: { getSummary, connect, completeCallback, disconnect, retryCleanup } },
         { provide: SessionService, useValue: { resolve } },
         { provide: CsrfService, useValue: csrf },
         { provide: AUTH_HTTP_CONFIG, useValue: { cookieName: 'autosale_session', production: false } },
@@ -126,9 +128,20 @@ describe('InstagramOAuthController', () => {
       .set('Cookie', cookie('owner-token'))
       .set(csrfHeader(owner))
       .expect(201);
+    await request(app!.getHttpServer())
+      .post('/api/integrations/instagram/cleanup')
+      .set('Cookie', cookie('manager-token'))
+      .set(csrfHeader(manager))
+      .expect(403);
+    await request(app!.getHttpServer())
+      .post('/api/integrations/instagram/cleanup')
+      .set('Cookie', cookie('owner-token'))
+      .set(csrfHeader(owner))
+      .expect(201);
 
     expect(connect).toHaveBeenCalledWith('tenant-a', 'owner-a', '/settings?tab=instagram');
-    expect(disconnect).toHaveBeenCalledWith('tenant-a');
+    expect(disconnect).toHaveBeenCalledWith('tenant-a', 'owner-a');
+    expect(retryCleanup).toHaveBeenCalledWith('tenant-a', 'owner-a');
   });
 
   it('allows the callback without a session or CSRF token and redirects from state-bound data', async () => {
@@ -138,7 +151,7 @@ describe('InstagramOAuthController', () => {
       .expect(302)
       .expect('Location', '/settings?tab=instagram&instagram=connected');
 
-    expect(completeCallback).toHaveBeenCalledWith('authorization-code', 'raw-state');
+    expect(completeCallback).toHaveBeenCalledWith('authorization-code', 'raw-state', false);
   });
 
   it('redirects every invalid or provider-failed callback to one safe local error URL', async () => {
@@ -151,6 +164,6 @@ describe('InstagramOAuthController', () => {
 
     expect(response.headers.location).toBe('/settings?instagram=error');
     expect(response.headers.location).not.toContain('secret-token');
-    expect(completeCallback).toHaveBeenCalledWith(undefined, 'raw-state');
+    expect(completeCallback).toHaveBeenCalledWith(undefined, 'raw-state', true);
   });
 });
