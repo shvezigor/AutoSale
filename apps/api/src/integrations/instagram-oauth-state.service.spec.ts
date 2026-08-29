@@ -18,6 +18,12 @@ type OAuthStatePrisma = {
   instagramConnection: {
     findUnique: (input: { where: { tenantId: string }; select: { status: true; encryptedAccessToken: true } }) => Promise<{ status: string; encryptedAccessToken: string | null } | null>;
   };
+  instagramCredentialCleanup: {
+    findFirst: (input: {
+      where: { tenantId: string; terminalAt: null };
+      select: { id: true };
+    }) => Promise<{ id: string } | null>;
+  };
   instagramOAuthState: {
     create: (input: { data: Omit<OAuthStateRow, 'usedAt'> & { usedAt?: Date | null } }) => Promise<OAuthStateRow>;
     updateMany: (input: {
@@ -45,10 +51,14 @@ class OAuthStateStore {
   readonly rows: OAuthStateRow[] = [];
   readonly auditRows: Array<{ tenantId: string; userId: string; actor: string; action: string; result: string; metadata: Record<string, never> }> = [];
   connectionRow: { status: string; encryptedAccessToken: string | null } | null = null;
+  cleanupRow: { id: string } | null = null;
 
   readonly prisma: OAuthStatePrisma = {
     instagramConnection: {
       findUnique: async () => this.connectionRow,
+    },
+    instagramCredentialCleanup: {
+      findFirst: async () => this.cleanupRow,
     },
     instagramOAuthState: {
       create: async ({ data }: { data: Omit<OAuthStateRow, 'usedAt'> & { usedAt?: Date | null } }) => {
@@ -148,14 +158,19 @@ describe('InstagramOAuthStateService', () => {
     }]);
   });
 
-  it('blocks reconnect while a disconnected credential still needs provider cleanup', async () => {
+  it('blocks reconnect only while a durable credential cleanup is incomplete', async () => {
     const { service, store } = createService();
-    store.connectionRow = { status: 'DISCONNECTED', encryptedAccessToken: 'encrypted-retained-credential' };
+    store.connectionRow = { status: 'DISCONNECTED', encryptedAccessToken: null };
+    store.cleanupRow = { id: 'cleanup-a' };
 
     await expect(service.create({ tenantId: 'tenant-a', userId: 'user-a' })).rejects.toThrow('Instagram cleanup pending');
 
     expect(store.rows).toHaveLength(0);
     expect(store.auditRows).toHaveLength(0);
+
+    store.cleanupRow = null;
+    await expect(service.create({ tenantId: 'tenant-a', userId: 'user-a' })).resolves.toEqual(expect.any(String));
+    expect(store.rows).toHaveLength(1);
   });
 
   it.each([

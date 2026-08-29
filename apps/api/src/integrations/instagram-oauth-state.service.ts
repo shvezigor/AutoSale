@@ -51,11 +51,11 @@ export class InstagramOAuthStateService {
         where: { id: input.tenantId },
         data: { instagramOAuthCurrentAttemptId: stateId },
       });
-      const connection = await transaction.instagramConnection.findUnique({
-        where: { tenantId: input.tenantId },
-        select: { status: true, encryptedAccessToken: true },
+      const cleanup = await transaction.instagramCredentialCleanup.findFirst({
+        where: { tenantId: input.tenantId, terminalAt: null },
+        select: { id: true },
       });
-      if (connection?.status === 'DISCONNECTED' && connection.encryptedAccessToken !== null) {
+      if (cleanup) {
         throw new Error(CLEANUP_PENDING_ERROR);
       }
       await transaction.instagramOAuthState.updateMany({

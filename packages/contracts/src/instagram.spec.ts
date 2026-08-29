@@ -18,6 +18,8 @@ describe('instagramConnectionSummarySchema', () => {
       tokenExpiresAt: '2026-10-27T12:00:00.000Z',
       lastVerifiedAt: '2026-08-28T12:00:00.000Z',
       lastErrorCode: null,
+      cleanupStatus: 'NONE',
+      cleanupErrorCode: null,
     };
 
     expect(instagramConnectionSummarySchema.parse(summary)).toEqual(summary);
@@ -31,6 +33,8 @@ describe('instagramConnectionSummarySchema', () => {
       tokenExpiresAt: null,
       lastVerifiedAt: null,
       lastErrorCode: null,
+      cleanupStatus: 'NONE',
+      cleanupErrorCode: null,
     };
 
     expect(instagramConnectionSummarySchema.parse(summary)).toEqual(summary);
@@ -45,8 +49,25 @@ describe('instagramConnectionSummarySchema', () => {
         tokenExpiresAt: 'tomorrow',
         lastVerifiedAt: null,
         lastErrorCode: null,
+        cleanupStatus: 'NONE',
+        cleanupErrorCode: null,
       }),
     ).toThrow();
+  });
+
+  it.each(['NONE', 'PENDING', 'FAILED'])('accepts safe cleanup status %s', (cleanupStatus) => {
+    const summary = {
+      status: 'ACTIVE',
+      accountId: '17841400000000000',
+      username: 'autosale_store',
+      tokenExpiresAt: null,
+      lastVerifiedAt: null,
+      lastErrorCode: null,
+      cleanupStatus,
+      cleanupErrorCode: cleanupStatus === 'FAILED' ? 'META_DISCONNECT_CLEANUP_FAILED' : null,
+    };
+
+    expect(instagramConnectionSummarySchema.parse(summary)).toEqual(summary);
   });
 
   it('rejects credential fields from an otherwise valid summary', () => {
@@ -58,6 +79,8 @@ describe('instagramConnectionSummarySchema', () => {
         tokenExpiresAt: '2026-10-27T12:00:00.000Z',
         lastVerifiedAt: '2026-08-28T12:00:00.000Z',
         lastErrorCode: null,
+        cleanupStatus: 'NONE',
+        cleanupErrorCode: null,
         encryptedAccessToken: 'v1.secret',
       }),
     ).toThrow();

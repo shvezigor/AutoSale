@@ -36,6 +36,7 @@ export function InstagramSettingsForm({
   const pending = pendingAction !== null;
   const cleanupPending = isCleanupPending(connection);
   const actionLabel = connectionActionLabel(connection.status);
+  const visibleErrorCode = connection.cleanupErrorCode ?? connection.lastErrorCode;
 
   async function connect() {
     setPendingAction('connect');
@@ -109,7 +110,7 @@ export function InstagramSettingsForm({
     <dl className="instagram-connection-details">
       <div><dt>Акаунт</dt><dd>{connection.username ? `@${connection.username}` : 'Ще не підключено'}</dd></div>
       <div><dt>Остання перевірка</dt><dd>{formatVerificationDate(connection.lastVerifiedAt)}</dd></div>
-      {connection.lastErrorCode && <div><dt>Стан</dt><dd>{safeErrorCode(connection.lastErrorCode)}</dd></div>}
+      {visibleErrorCode && <div><dt>Стан</dt><dd>{safeErrorCode(visibleErrorCode)}</dd></div>}
     </dl>
 
     {membershipRole === 'MANAGER' && <p className="sheets-hint">Перегляд доступний. Змінювати підключення може власник організації.</p>}
@@ -146,8 +147,7 @@ function connectionActionLabel(status: InstagramConnectionSummary['status']): st
 }
 
 function isCleanupPending(connection: InstagramConnectionSummary): boolean {
-  return connection.status === 'DISCONNECTED' &&
-    (connection.lastErrorCode === 'META_DISCONNECT_CLEANUP_PENDING' || connection.lastErrorCode === 'META_DISCONNECT_CLEANUP_FAILED');
+  return connection.cleanupStatus === 'PENDING' || connection.cleanupStatus === 'FAILED';
 }
 
 function canDisconnect(status: InstagramConnectionSummary['status']): boolean {
@@ -190,5 +190,6 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function isInstagramConnectionSummary(value: unknown): value is InstagramConnectionSummary {
   if (!isRecord(value) || typeof value.status !== 'string' || !CONNECTION_STATUSES.has(value.status as InstagramConnectionSummary['status'])) return false;
-  return ['accountId', 'username', 'tokenExpiresAt', 'lastVerifiedAt', 'lastErrorCode'].every((key) => value[key] === null || typeof value[key] === 'string');
+  return ['accountId', 'username', 'tokenExpiresAt', 'lastVerifiedAt', 'lastErrorCode', 'cleanupErrorCode'].every((key) => value[key] === null || typeof value[key] === 'string') &&
+    (value.cleanupStatus === 'NONE' || value.cleanupStatus === 'PENDING' || value.cleanupStatus === 'FAILED');
 }

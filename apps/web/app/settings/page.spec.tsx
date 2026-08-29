@@ -36,6 +36,8 @@ describe('SettingsPage', () => {
         tokenExpiresAt: null,
         lastVerifiedAt: '2026-08-28T12:00:00.000Z',
         lastErrorCode: null,
+        cleanupStatus: 'NONE',
+        cleanupErrorCode: null,
       }),
     });
 

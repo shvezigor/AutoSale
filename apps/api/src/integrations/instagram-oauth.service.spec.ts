@@ -9,6 +9,28 @@ import { InstagramOAuthService } from './instagram-oauth.service.js';
 const now = new Date('2026-08-28T12:00:00.000Z');
 const callbackUri = 'https://demo.ngrok-free.app/api/integrations/instagram/callback';
 
+type CleanupTestRow = Record<string, unknown> & {
+  id: string;
+  tenantId: string;
+  externalAccountId: string;
+  encryptedAccessToken: string;
+  source: string;
+  unsubscribeStatus: string;
+  unsubscribeAttemptedAt: Date | null;
+  unsubscribeSucceededAt: Date | null;
+  revokeStatus: string;
+  revokeAttemptedAt: Date | null;
+  revokeSucceededAt: Date | null;
+  attempts: number;
+  leaseId: string | null;
+  leaseExpiresAt: Date | null;
+  version: number;
+  lastErrorCode: string | null;
+  terminalAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
 function connection(overrides: Record<string, unknown> = {}) {
   return {
     id: 'connection-a',
@@ -25,12 +47,42 @@ function connection(overrides: Record<string, unknown> = {}) {
   };
 }
 
+function cleanupRow(overrides: Record<string, unknown> = {}): CleanupTestRow {
+  return {
+    id: 'cleanup-a',
+    tenantId: 'tenant-a',
+    externalAccountId: '17841400000000000',
+    encryptedAccessToken: 'encrypted-token',
+    source: 'DISCONNECT',
+    unsubscribeStatus: 'PENDING',
+    unsubscribeAttemptedAt: null,
+    unsubscribeSucceededAt: null,
+    revokeStatus: 'PENDING',
+    revokeAttemptedAt: null,
+    revokeSucceededAt: null,
+    attempts: 0,
+    leaseId: null,
+    leaseExpiresAt: null,
+    version: 0,
+    lastErrorCode: null,
+    terminalAt: null,
+    createdAt: now,
+    updatedAt: now,
+    ...overrides,
+  } as CleanupTestRow;
+}
+
 function setup(nowFn: () => Date = () => now) {
   const findUnique = vi.fn();
   const upsert = vi.fn();
   const update = vi.fn();
   const updateMany = vi.fn().mockResolvedValue({ count: 1 });
   const updateManyAndReturn = vi.fn();
+  const cleanupCreate = vi.fn().mockResolvedValue(cleanupRow());
+  const cleanupFindUnique = vi.fn().mockResolvedValue(null);
+  const cleanupFindFirst = vi.fn().mockResolvedValue(null);
+  const cleanupFindMany = vi.fn().mockResolvedValue([]);
+  const cleanupUpdateManyAndReturn = vi.fn();
   const oauthStateUpdateMany = vi.fn().mockResolvedValue({ count: 0 });
   const auditCreate = vi.fn().mockResolvedValue({ id: 'audit-a' });
   const tenantFindUnique = vi.fn().mockResolvedValue({ status: 'ACTIVE' });
@@ -42,6 +94,13 @@ function setup(nowFn: () => Date = () => now) {
   });
   const prisma = {
     instagramConnection: { findUnique, upsert, update, updateMany, updateManyAndReturn },
+    instagramCredentialCleanup: {
+      create: cleanupCreate,
+      findUnique: cleanupFindUnique,
+      findFirst: cleanupFindFirst,
+      findMany: cleanupFindMany,
+      updateManyAndReturn: cleanupUpdateManyAndReturn,
+    },
     instagramOAuthState: { updateMany: oauthStateUpdateMany },
     securityAuditLog: { create: auditCreate },
     tenant: { findUnique: tenantFindUnique, updateMany: tenantUpdateMany },
@@ -79,9 +138,69 @@ function setup(nowFn: () => Date = () => now) {
 
   return {
     service, prisma, state, meta, findUnique, upsert, update, updateMany, updateManyAndReturn,
+    cleanupCreate, cleanupFindUnique, cleanupFindFirst, cleanupFindMany, cleanupUpdateManyAndReturn,
     oauthStateUpdateMany, auditCreate,
     tenantFindUnique, tenantUpdateMany, membershipFindUnique,
   };
+}
+
+function installCleanupStore(
+  mocks: Pick<ReturnType<typeof setup>, 'cleanupCreate' | 'cleanupFindUnique' | 'cleanupFindFirst' | 'cleanupFindMany' | 'cleanupUpdateManyAndReturn'>,
+  initialRows: Array<Record<string, unknown>> = [],
+) {
+  const rows = initialRows.map((row, index) => cleanupRow({ id: `cleanup-${index + 1}`, ...row }));
+  mocks.cleanupCreate.mockImplementation(async ({ data }: { data: Record<string, unknown> }) => {
+    const row = cleanupRow({ id: `cleanup-${rows.length + 1}`, ...data });
+    rows.push(row);
+    return row;
+  });
+  mocks.cleanupFindUnique.mockImplementation(async ({ where }: { where: Record<string, unknown> }) =>
+    rows.find((row) => row.id === where.id) ?? null);
+  mocks.cleanupFindFirst.mockImplementation(async ({ where }: { where: Record<string, unknown> }) =>
+    rows.find((row) => cleanupMatches(row, where)) ?? null);
+  mocks.cleanupFindMany.mockImplementation(async ({ where }: { where: Record<string, unknown> }) =>
+    rows.filter((row) => cleanupMatches(row, where)));
+  mocks.cleanupUpdateManyAndReturn.mockImplementation(async ({ where, data }: {
+    where: Record<string, unknown>;
+    data: Record<string, unknown>;
+  }) => {
+    const row = rows.find((candidate) => cleanupMatches(candidate, where));
+    if (!row) return [];
+    applyCleanupData(row, data);
+    row.updatedAt = now;
+    return [row];
+  });
+  return rows;
+}
+
+function cleanupMatches(row: Record<string, unknown>, where: Record<string, unknown>): boolean {
+  for (const [key, expected] of Object.entries(where)) {
+    if (key === 'OR' && Array.isArray(expected)) {
+      if (!expected.some((branch) => cleanupMatches(row, branch as Record<string, unknown>))) return false;
+      continue;
+    }
+    if (key === 'id' && typeof expected === 'object' && expected !== null && 'notIn' in expected) {
+      if ((expected.notIn as unknown[]).includes(row.id)) return false;
+      continue;
+    }
+    if (key === 'leaseExpiresAt' && typeof expected === 'object' && expected !== null && 'lt' in expected) {
+      const value = row.leaseExpiresAt;
+      if (!(value instanceof Date) || value >= (expected.lt as Date)) return false;
+      continue;
+    }
+    if (expected !== row[key]) return false;
+  }
+  return true;
+}
+
+function applyCleanupData(row: Record<string, unknown>, data: Record<string, unknown>): void {
+  for (const [key, value] of Object.entries(data)) {
+    if (typeof value === 'object' && value !== null && 'increment' in value) {
+      row[key] = Number(row[key] ?? 0) + Number(value.increment);
+    } else {
+      row[key] = value;
+    }
+  }
 }
 
 describe('InstagramOAuthService', () => {
@@ -128,6 +247,8 @@ describe('InstagramOAuthService', () => {
         tokenExpiresAt: '2026-10-27T12:00:00.000Z',
         lastVerifiedAt: '2026-08-28T12:00:00.000Z',
         lastErrorCode: null,
+        cleanupStatus: 'NONE',
+        cleanupErrorCode: null,
       },
     });
 
@@ -346,6 +467,8 @@ describe('InstagramOAuthService', () => {
       tokenExpiresAt: '2026-10-27T12:00:00.000Z',
       lastVerifiedAt: '2026-08-28T12:00:00.000Z',
       lastErrorCode: null,
+      cleanupStatus: 'NONE',
+      cleanupErrorCode: null,
     });
     expect(summary).not.toHaveProperty('encryptedAccessToken');
   });
@@ -361,6 +484,8 @@ describe('InstagramOAuthService', () => {
       tokenExpiresAt: '2026-08-28T11:59:59.999Z',
       lastVerifiedAt: '2026-08-28T12:00:00.000Z',
       lastErrorCode: 'META_TOKEN_EXPIRED',
+      cleanupStatus: 'NONE',
+      cleanupErrorCode: null,
     });
     expect(updateMany).toHaveBeenCalledWith({
       where: {
@@ -383,6 +508,8 @@ describe('InstagramOAuthService', () => {
       tokenExpiresAt: null,
       lastVerifiedAt: null,
       lastErrorCode: null,
+      cleanupStatus: 'NONE',
+      cleanupErrorCode: null,
     });
   });
 
@@ -397,6 +524,8 @@ describe('InstagramOAuthService', () => {
       tokenExpiresAt: null,
       lastVerifiedAt: null,
       lastErrorCode: null,
+      cleanupStatus: 'NONE',
+      cleanupErrorCode: null,
     });
 
     expect(tenantUpdateMany).toHaveBeenCalledWith({
@@ -440,77 +569,186 @@ describe('InstagramOAuthService', () => {
     expect(upsert).not.toHaveBeenCalled();
   });
 
-  it('disables locally before remote cleanup, retains a failed cleanup credential, and clears it through the retry workflow', async () => {
-    const { service, findUnique, update, updateManyAndReturn, meta, auditCreate } = setup();
+  it('queues and completes compensation when disconnect wins locally while callback subscribe is in flight', async () => {
+    const mocks = setup();
+    const { service, meta, findUnique, tenantUpdateMany, upsert, update, updateManyAndReturn, auditCreate } = mocks;
+    const cleanupRows = installCleanupStore(mocks);
+    let currentAttempt: string | null = 'attempt-a';
+    let currentConnection: Record<string, unknown> | null = null;
+    tenantUpdateMany.mockImplementation(async (input: {
+      where: { id: string; instagramOAuthCurrentAttemptId?: string };
+      data: { instagramOAuthCurrentAttemptId?: string | null };
+    }) => {
+      if ('instagramOAuthCurrentAttemptId' in input.where && input.where.instagramOAuthCurrentAttemptId !== currentAttempt) return { count: 0 };
+      if ('instagramOAuthCurrentAttemptId' in input.data) currentAttempt = input.data.instagramOAuthCurrentAttemptId ?? null;
+      return { count: 1 };
+    });
+    findUnique.mockImplementation(async (input: { where: { tenantId?: string; externalAccountId?: string } }) => {
+      if (input.where.externalAccountId) return null;
+      return currentConnection;
+    });
+    upsert.mockImplementation(async (input: { create: Record<string, unknown> }) => {
+      currentConnection = connection(input.create);
+      return currentConnection;
+    });
+    update.mockImplementation(async (input: { data: Record<string, unknown> }) => {
+      currentConnection = connection({ ...currentConnection, ...input.data });
+      return currentConnection;
+    });
+    updateManyAndReturn.mockImplementation(async () => [connection({ ...currentConnection, status: 'DISCONNECTED', encryptedAccessToken: null })]);
+    let releaseSubscribe!: () => void;
+    let subscribeStarted!: () => void;
+    const started = new Promise<void>((resolve) => { subscribeStarted = resolve; });
+    meta.subscribe.mockImplementation(async () => {
+      subscribeStarted();
+      await new Promise<void>((resolve) => { releaseSubscribe = resolve; });
+    });
+
+    const callback = service.completeCallback('authorization-code', 'raw-state');
+    await started;
+    await service.disconnect('tenant-a', 'user-a');
+    releaseSubscribe();
+
+    await expect(callback).rejects.toThrow('Instagram connection failed');
+    expect(update.mock.calls.some(([input]) => input.data.status === 'ACTIVE')).toBe(false);
+    expect(cleanupRows).toHaveLength(2);
+    expect(cleanupRows.every((row) => row.encryptedAccessToken === cleanupRows[0]?.encryptedAccessToken)).toBe(true);
+    expect(cleanupRows.every((row) => row.terminalAt !== null && row.terminalAt instanceof Date)).toBe(true);
+    expect(meta.unsubscribe).toHaveBeenCalledTimes(2);
+    expect(meta.revoke).toHaveBeenCalledTimes(2);
+    expect(auditCreate.mock.calls.map(([input]) => input.data.action)).toEqual(expect.arrayContaining([
+      'INSTAGRAM_CREDENTIAL_CLEANUP_QUEUED',
+      'INSTAGRAM_CREDENTIAL_CLEANUP_COMPLETED',
+      'INSTAGRAM_CALLBACK_FAILED',
+    ]));
+    expect(JSON.stringify(auditCreate.mock.calls)).not.toMatch(/authorization-code|long-lived-token|encrypted-token/);
+  });
+
+  it('snapshots the exact token into durable cleanup and clears it from the connection before provider calls', async () => {
+    const mocks = setup();
+    const { service, findUnique, update, meta, auditCreate } = mocks;
     const cipher = new CredentialCipher(Buffer.alloc(32, 7));
     const encryptedAccessToken = cipher.encrypt('remote-token');
-    findUnique.mockResolvedValue(connection({ encryptedAccessToken, status: 'DISCONNECTED', lastErrorCode: 'META_DISCONNECT_CLEANUP_FAILED', disconnectedAt: now }));
+    const cleanupRows = installCleanupStore(mocks);
     const order: string[] = [];
+    let currentConnection = connection({ encryptedAccessToken });
+    findUnique.mockImplementation(async () => currentConnection);
     update
-      .mockImplementationOnce(async (input: { data: { status: string } }) => {
+      .mockImplementationOnce(async (input: { data: { status: string; encryptedAccessToken: string | null } }) => {
         order.push(`local:${input.data.status}`);
-        return connection({ status: 'DISCONNECTED', lastErrorCode: 'META_DISCONNECT_CLEANUP_PENDING', disconnectedAt: now });
+        currentConnection = connection({ ...currentConnection, ...input.data });
+        return currentConnection;
       });
-    updateManyAndReturn
-      .mockResolvedValueOnce([connection({ status: 'DISCONNECTED', lastErrorCode: 'META_DISCONNECT_CLEANUP_FAILED', disconnectedAt: now })])
-      .mockResolvedValueOnce([connection({ status: 'DISCONNECTED', lastErrorCode: null, tokenExpiresAt: null, disconnectedAt: now })]);
-    meta.unsubscribe.mockRejectedValue(new Error('provider unavailable'));
-    meta.revoke.mockRejectedValue(new Error('provider unavailable'));
     meta.unsubscribe.mockImplementation(async () => { order.push('unsubscribe'); throw new Error('provider unavailable'); });
-    meta.revoke.mockImplementation(async () => { order.push('revoke'); throw new Error('provider unavailable'); });
+    meta.revoke.mockImplementation(async () => { order.push('revoke'); });
 
     await expect(service.disconnect('tenant-a', 'user-a')).resolves.toMatchObject({
       status: 'DISCONNECTED',
-      lastErrorCode: 'META_DISCONNECT_CLEANUP_FAILED',
+      cleanupStatus: 'FAILED',
+      cleanupErrorCode: 'META_DISCONNECT_CLEANUP_FAILED',
     });
 
+    expect(cleanupRows).toHaveLength(1);
+    expect(cleanupRows[0]).toMatchObject({
+      tenantId: 'tenant-a',
+      externalAccountId: '17841400000000000',
+      encryptedAccessToken,
+      unsubscribeStatus: 'FAILED',
+      revokeStatus: 'PENDING',
+      terminalAt: null,
+      lastErrorCode: 'META_DISCONNECT_CLEANUP_FAILED',
+    });
     expect(meta.unsubscribe).toHaveBeenCalledWith('remote-token');
-    expect(meta.revoke).toHaveBeenCalledWith('remote-token');
-    expect(order.slice(0, 3)).toEqual(['local:DISCONNECTED', 'unsubscribe', 'revoke']);
-    expect(updateManyAndReturn).toHaveBeenNthCalledWith(1, expect.objectContaining({
-      where: expect.objectContaining({
-        id: 'connection-a',
-        tenantId: 'tenant-a',
-        encryptedAccessToken,
-        status: 'DISCONNECTED',
-        disconnectedAt: now,
-        lastErrorCode: 'META_DISCONNECT_CLEANUP_PENDING',
-      }),
-      data: { lastErrorCode: 'META_DISCONNECT_CLEANUP_FAILED' },
-    }));
-    expect(auditCreate.mock.calls.map(([input]) => input.data.action)).toContain('INSTAGRAM_CLEANUP_FAILED');
-
-    meta.unsubscribe.mockResolvedValue(undefined);
-    meta.revoke.mockResolvedValue(undefined);
-    await expect(service.retryCleanup('tenant-a', 'user-a')).resolves.toMatchObject({ status: 'DISCONNECTED', lastErrorCode: null });
-    expect(updateManyAndReturn).toHaveBeenLastCalledWith(expect.objectContaining({
+    expect(meta.revoke).not.toHaveBeenCalled();
+    expect(order).toEqual(['local:DISCONNECTED', 'unsubscribe']);
+    expect(update).toHaveBeenCalledWith(expect.objectContaining({
       data: expect.objectContaining({
+        status: 'DISCONNECTED',
         encryptedAccessToken: null,
         tokenExpiresAt: null,
         grantedScopes: null,
       }),
     }));
+    expect(auditCreate.mock.calls.map(([input]) => input.data.action)).toEqual(expect.arrayContaining([
+      'INSTAGRAM_CREDENTIAL_CLEANUP_QUEUED',
+      'INSTAGRAM_CREDENTIAL_CLEANUP_FAILED',
+    ]));
     expect(auditCreate).toHaveBeenCalledWith({
-      data: {
+      data: expect.objectContaining({
         tenantId: 'tenant-a',
         userId: 'user-a',
-        actor: 'USER',
-        action: 'INSTAGRAM_CLEANUP_FAILED',
+        action: 'INSTAGRAM_CREDENTIAL_CLEANUP_FAILED',
         result: 'FAILURE',
         metadata: { errorCode: 'META_DISCONNECT_CLEANUP_FAILED' },
-      },
-    });
-    expect(auditCreate).toHaveBeenCalledWith({
-      data: {
-        tenantId: 'tenant-a',
-        userId: 'user-a',
-        actor: 'USER',
-        action: 'INSTAGRAM_DISCONNECTED',
-        result: 'SUCCESS',
-        metadata: {},
-      },
+      }),
     });
     expect(JSON.stringify(auditCreate.mock.calls)).not.toMatch(/remote-token|encryptedAccessToken|app-secret|provider unavailable/);
+  });
+
+  it('persists partial cleanup progress and retries only the remaining revoke operation', async () => {
+    const mocks = setup();
+    const { service, findUnique, meta } = mocks;
+    const cipher = new CredentialCipher(Buffer.alloc(32, 7));
+    const encryptedAccessToken = cipher.encrypt('remote-token');
+    const cleanupRows = installCleanupStore(mocks, [{ encryptedAccessToken }]);
+    findUnique.mockResolvedValue(connection({ status: 'DISCONNECTED', encryptedAccessToken: null, disconnectedAt: now }));
+    meta.revoke
+      .mockRejectedValueOnce(new Error('provider unavailable'))
+      .mockResolvedValueOnce(undefined);
+
+    await expect(service.retryCleanup('tenant-a', 'user-a')).resolves.toMatchObject({
+      status: 'DISCONNECTED',
+      cleanupStatus: 'FAILED',
+      cleanupErrorCode: 'META_DISCONNECT_CLEANUP_FAILED',
+    });
+
+    expect(cleanupRows[0]).toMatchObject({
+      unsubscribeStatus: 'SUCCEEDED',
+      revokeStatus: 'FAILED',
+      terminalAt: null,
+    });
+    expect(meta.unsubscribe).toHaveBeenCalledTimes(1);
+    expect(meta.revoke).toHaveBeenCalledTimes(1);
+
+    await expect(service.retryCleanup('tenant-a', 'user-a')).resolves.toMatchObject({
+      status: 'DISCONNECTED',
+      cleanupStatus: 'NONE',
+      cleanupErrorCode: null,
+    });
+
+    expect(meta.unsubscribe).toHaveBeenCalledTimes(1);
+    expect(meta.revoke).toHaveBeenCalledTimes(2);
+    expect(cleanupRows[0]).toMatchObject({
+      unsubscribeStatus: 'SUCCEEDED',
+      revokeStatus: 'SUCCEEDED',
+      lastErrorCode: null,
+    });
+    expect(cleanupRows[0]?.terminalAt).toBeInstanceOf(Date);
+  });
+
+  it('leases cleanup rows so overlapping retries do not duplicate provider operations', async () => {
+    const mocks = setup();
+    const { service, findUnique, meta } = mocks;
+    const cipher = new CredentialCipher(Buffer.alloc(32, 7));
+    installCleanupStore(mocks, [{ encryptedAccessToken: cipher.encrypt('remote-token') }]);
+    findUnique.mockResolvedValue(connection({ status: 'DISCONNECTED', encryptedAccessToken: null, disconnectedAt: now }));
+    let cleanupStarted: (() => void) | undefined;
+    let releaseCleanup: (() => void) | undefined;
+    const started = new Promise<void>((resolve) => { cleanupStarted = resolve; });
+    meta.unsubscribe.mockImplementation(async () => {
+      cleanupStarted?.();
+      await new Promise<void>((resolve) => { releaseCleanup = resolve; });
+    });
+
+    const first = service.retryCleanup('tenant-a', 'user-a');
+    await Promise.race([started, new Promise<void>((resolve) => setTimeout(resolve, 50))]);
+    const second = service.retryCleanup('tenant-a', 'user-a');
+    await second;
+    releaseCleanup?.();
+    await first;
+
+    expect(meta.unsubscribe).toHaveBeenCalledTimes(1);
+    expect(meta.revoke).toHaveBeenCalledTimes(1);
   });
 
   it('does not decrypt or call Meta when a legacy row has no ciphertext', async () => {
@@ -533,26 +771,13 @@ describe('InstagramOAuthService', () => {
     }));
   });
 
-  it.each([
-    ['successful', undefined],
-    ['failed', new Error('provider unavailable')],
-  ])('compare-and-set finalization cannot clear or overwrite a concurrent reconnect after %s cleanup', async (_label, cleanupError) => {
-    const { service, findUnique, update, updateManyAndReturn, meta } = setup();
+  it('cleans an older pending credential without touching a newer active connection', async () => {
+    const mocks = setup();
+    const { service, findUnique, update, updateMany, meta } = mocks;
     const cipher = new CredentialCipher(Buffer.alloc(32, 7));
     const oldCiphertext = cipher.encrypt('old-remote-token');
-    findUnique.mockResolvedValueOnce(connection({ encryptedAccessToken: oldCiphertext }));
-    update.mockResolvedValue(connection({ status: 'DISCONNECTED', lastErrorCode: 'META_DISCONNECT_CLEANUP_PENDING', disconnectedAt: now }));
-    let releaseCleanup!: () => void;
-    let cleanupStarted!: () => void;
-    const started = new Promise<void>((resolve) => { cleanupStarted = resolve; });
-    meta.unsubscribe.mockImplementation(async () => {
-      cleanupStarted();
-      await new Promise<void>((resolve) => { releaseCleanup = resolve; });
-      if (cleanupError) throw cleanupError;
-    });
-    if (cleanupError) meta.revoke.mockRejectedValue(cleanupError);
-    updateManyAndReturn.mockResolvedValue([]);
-    findUnique.mockResolvedValueOnce(connection({
+    installCleanupStore(mocks, [{ encryptedAccessToken: oldCiphertext }]);
+    findUnique.mockResolvedValue(connection({
       externalAccountId: '17841499999999999',
       displayName: 'new_store',
       status: 'ACTIVE',
@@ -560,18 +785,19 @@ describe('InstagramOAuthService', () => {
       lastErrorCode: null,
     }));
 
-    const disconnect = service.disconnect('tenant-a', 'user-a');
-    await started;
-    releaseCleanup();
-
-    await expect(disconnect).resolves.toMatchObject({
+    await expect(service.retryCleanup('tenant-a', 'user-a')).resolves.toMatchObject({
       status: 'ACTIVE',
       accountId: '17841499999999999',
       username: 'new_store',
       lastErrorCode: null,
+      cleanupStatus: 'NONE',
     });
-    expect(updateManyAndReturn).toHaveBeenCalledWith(expect.objectContaining({
-      where: expect.objectContaining({ encryptedAccessToken: oldCiphertext }),
+
+    expect(meta.unsubscribe).toHaveBeenCalledWith('old-remote-token');
+    expect(meta.revoke).toHaveBeenCalledWith('old-remote-token');
+    expect(update).not.toHaveBeenCalled();
+    expect(updateMany).not.toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({ status: 'DISCONNECTED' }),
     }));
   });
 });

@@ -14,6 +14,8 @@ const initial = (overrides: Partial<InstagramConnectionSummary> = {}): Instagram
   tokenExpiresAt: null,
   lastVerifiedAt: null,
   lastErrorCode: null,
+  cleanupStatus: 'NONE',
+  cleanupErrorCode: null,
   ...overrides,
 });
 
@@ -75,7 +77,8 @@ describe('InstagramSettingsForm', () => {
     vi.stubGlobal('fetch', fetchMock);
     render(<InstagramSettingsForm initial={initial({
       status: 'DISCONNECTED',
-      lastErrorCode: 'META_DISCONNECT_CLEANUP_FAILED',
+      cleanupStatus: 'FAILED',
+      cleanupErrorCode: 'META_DISCONNECT_CLEANUP_FAILED',
     })} membershipRole="OWNER" />);
 
     expect(screen.queryByRole('button', { name: 'Підключити Instagram' })).not.toBeInTheDocument();
@@ -96,18 +99,37 @@ describe('InstagramSettingsForm', () => {
       .mockResolvedValueOnce({ ok: true, json: async () => ({ token: 'csrf-token' }) })
       .mockResolvedValueOnce({
         ok: true,
-        json: async () => initial({ status: 'DISCONNECTED', lastErrorCode: 'META_DISCONNECT_CLEANUP_FAILED' }),
+        json: async () => initial({
+          status: 'DISCONNECTED',
+          cleanupStatus: 'FAILED',
+          cleanupErrorCode: 'META_DISCONNECT_CLEANUP_FAILED',
+        }),
       });
     vi.stubGlobal('fetch', fetchMock);
     render(<InstagramSettingsForm initial={initial({
       status: 'DISCONNECTED',
-      lastErrorCode: 'META_DISCONNECT_CLEANUP_FAILED',
+      cleanupStatus: 'FAILED',
+      cleanupErrorCode: 'META_DISCONNECT_CLEANUP_FAILED',
     })} membershipRole="OWNER" />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Повторити очищення' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Не вдалося очистити підключення Instagram');
     expect(screen.getByRole('button', { name: 'Повторити очищення' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Підключити Instagram' })).not.toBeInTheDocument();
+  });
+
+  it('keeps cleanup retry reachable without downgrading a newer active connection', () => {
+    render(<InstagramSettingsForm initial={initial({
+      status: 'ACTIVE',
+      username: 'new_store',
+      cleanupStatus: 'FAILED',
+      cleanupErrorCode: 'META_DISCONNECT_CLEANUP_FAILED',
+    })} membershipRole="OWNER" />);
+
+    expect(screen.getByText('@new_store')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Повторити очищення' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Відключити Instagram' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Підключити Instagram' })).not.toBeInTheDocument();
   });
 

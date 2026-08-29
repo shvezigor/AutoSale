@@ -34,6 +34,12 @@ enum InstagramConnectionStatus {
   DISCONNECTED
 }
 
+enum InstagramCredentialCleanupOperationStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+}
+
 model Tenant {
   id        String         @id @default(uuid()) @db.Uuid
   key       String         @unique
@@ -55,6 +61,7 @@ model Tenant {
   securityAuditLogs SecurityAuditLog[]
   instagramConnection InstagramConnection?
   instagramOAuthStates InstagramOAuthState[]
+  instagramCredentialCleanups InstagramCredentialCleanup[]
   instagramOAuthCurrentAttemptId String? @db.Uuid @map("instagram_oauth_current_attempt_id")
 
   @@index([status])
@@ -97,6 +104,33 @@ model InstagramOAuthState {
 
   @@index([expiresAt, usedAt])
   @@map("instagram_oauth_states")
+}
+
+model InstagramCredentialCleanup {
+  id                       String                                    @id @default(uuid()) @db.Uuid
+  tenantId                 String                                    @map("tenant_id") @db.Uuid
+  externalAccountId        String                                    @map("external_account_id")
+  encryptedAccessToken     String                                    @map("encrypted_access_token")
+  source                   String                                    @default("DISCONNECT")
+  unsubscribeStatus        InstagramCredentialCleanupOperationStatus @default(PENDING) @map("unsubscribe_status")
+  unsubscribeAttemptedAt   DateTime?                                 @map("unsubscribe_attempted_at")
+  unsubscribeSucceededAt   DateTime?                                 @map("unsubscribe_succeeded_at")
+  revokeStatus             InstagramCredentialCleanupOperationStatus @default(PENDING) @map("revoke_status")
+  revokeAttemptedAt        DateTime?                                 @map("revoke_attempted_at")
+  revokeSucceededAt        DateTime?                                 @map("revoke_succeeded_at")
+  attempts                 Int                                       @default(0)
+  leaseId                  String?                                   @map("lease_id") @db.Uuid
+  leaseExpiresAt           DateTime?                                 @map("lease_expires_at")
+  version                  Int                                       @default(0)
+  lastErrorCode            String?                                   @map("last_error_code")
+  terminalAt               DateTime?                                 @map("terminal_at")
+  createdAt                DateTime                                  @default(now()) @map("created_at")
+  updatedAt                DateTime                                  @updatedAt @map("updated_at")
+  tenant                   Tenant                                    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, terminalAt])
+  @@index([leaseExpiresAt])
+  @@map("instagram_credential_cleanups")
 }
 
 model User {

@@ -13,7 +13,11 @@ describe('InstagramSettingsService', () => {
       lastVerifiedAt: new Date('2026-08-27T00:00:00Z'),
       lastErrorCode: null,
     }));
-    const service = new InstagramSettingsService({ instagramConnection: { findUnique } } as unknown as PrismaClient);
+    const findMany = vi.fn(async () => []);
+    const service = new InstagramSettingsService({
+      instagramConnection: { findUnique },
+      instagramCredentialCleanup: { findMany },
+    } as unknown as PrismaClient);
 
     const summary = await service.get('tenant-a');
 
@@ -24,8 +28,40 @@ describe('InstagramSettingsService', () => {
       tokenExpiresAt: '2026-10-27T00:00:00.000Z',
       lastVerifiedAt: '2026-08-27T00:00:00.000Z',
       lastErrorCode: null,
+      cleanupStatus: 'NONE',
+      cleanupErrorCode: null,
     });
     expect(summary).not.toHaveProperty('encryptedAccessToken');
     expect(findUnique).toHaveBeenCalledWith(expect.objectContaining({ where: { tenantId: 'tenant-a' } }));
+  });
+
+  it('returns cleanup state separately from current connection errors', async () => {
+    const service = new InstagramSettingsService({
+      instagramConnection: {
+        findUnique: vi.fn(async () => ({
+          externalAccountId: '17841499999999999',
+          displayName: 'New Store',
+          status: 'ACTIVE',
+          tokenExpiresAt: null,
+          lastVerifiedAt: null,
+          lastErrorCode: null,
+        })),
+      },
+      instagramCredentialCleanup: {
+        findMany: vi.fn(async () => [{
+          unsubscribeStatus: 'SUCCEEDED',
+          revokeStatus: 'FAILED',
+          lastErrorCode: 'META_DISCONNECT_CLEANUP_FAILED',
+        }]),
+      },
+    } as unknown as PrismaClient);
+
+    await expect(service.get('tenant-a')).resolves.toMatchObject({
+      status: 'ACTIVE',
+      accountId: '17841499999999999',
+      cleanupStatus: 'FAILED',
+      cleanupErrorCode: 'META_DISCONNECT_CLEANUP_FAILED',
+      lastErrorCode: null,
+    });
   });
 });

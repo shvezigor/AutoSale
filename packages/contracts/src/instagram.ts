@@ -9,6 +9,12 @@ export const instagramConnectionStatusSchema = z.enum([
   'DISCONNECTED',
 ]);
 
+export const instagramCleanupStatusSchema = z.enum([
+  'NONE',
+  'PENDING',
+  'FAILED',
+]);
+
 export const instagramConnectionSummarySchema = z
   .object({
     status: instagramConnectionStatusSchema,
@@ -17,8 +23,11 @@ export const instagramConnectionSummarySchema = z
     tokenExpiresAt: z.string().datetime().nullable(),
     lastVerifiedAt: z.string().datetime().nullable(),
     lastErrorCode: z.string().nullable(),
+    cleanupStatus: instagramCleanupStatusSchema,
+    cleanupErrorCode: z.string().nullable(),
   })
   .strict();
 
 export type InstagramConnectionStatus = z.infer<typeof instagramConnectionStatusSchema>;
+export type InstagramCleanupStatus = z.infer<typeof instagramCleanupStatusSchema>;
 export type InstagramConnectionSummary = z.infer<typeof instagramConnectionSummarySchema>;

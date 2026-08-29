@@ -26,6 +26,7 @@ describe('TriggeredOrderProcessor', () => {
       '20260827230000_instagram_connections',
       '20260828_meta_instagram_oauth',
       '20260828150000_instagram_oauth_attempt_guard',
+      '20260829120000_instagram_credential_cleanup_queue',
     ];
     const pool = new pg.Pool({ connectionString });
     for (const migration of migrations) {

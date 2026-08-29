@@ -145,7 +145,7 @@ expect(() => parseApiEnv({ ...validEnv, META_GRAPH_API_VERSION: 'latest' })).toT
 
 - [ ] **Step 2: Run the config test and verify failure**
 
-Run: `pnpm --filter @autosale/config test -- api-env.spec.ts`  
+Run: `pnpm --filter @autosale/config test -- api-env.spec.ts`
 Expected: FAIL because the three fields are not in `apiEnvSchema`.
 
 - [ ] **Step 3: Add strict environment schemas**
@@ -174,7 +174,7 @@ expect(() => cipher.decrypt(tamperedPayload)).toThrow('Invalid encrypted credent
 
 - [ ] **Step 5: Run the cipher test and verify failure**
 
-Run: `pnpm --filter @autosale/api test -- credential-cipher.spec.ts`  
+Run: `pnpm --filter @autosale/api test -- credential-cipher.spec.ts`
 Expected: FAIL because `CredentialCipher` does not exist.
 
 - [ ] **Step 6: Implement versioned AES-256-GCM encryption**
@@ -225,7 +225,7 @@ expect(url.searchParams.get('redirect_uri')).toBe('https://demo.ngrok-free.app/a
 
 - [ ] **Step 2: Run the tests and verify failure**
 
-Run: `pnpm --filter @autosale/integrations test -- meta-instagram.spec.ts`  
+Run: `pnpm --filter @autosale/integrations test -- meta-instagram.spec.ts`
 Expected: FAIL because the adapter is missing.
 
 - [ ] **Step 3: Implement the adapter**
@@ -285,7 +285,7 @@ await expect(service.consume(raw)).rejects.toThrow('Invalid or expired OAuth sta
 
 - [ ] **Step 2: Run and verify failure**
 
-Run: `pnpm --filter @autosale/api test -- instagram-oauth-state.service.spec.ts`  
+Run: `pnpm --filter @autosale/api test -- instagram-oauth-state.service.spec.ts`
 Expected: FAIL because the service is missing.
 
 - [ ] **Step 3: Implement state creation and atomic consumption**
@@ -294,7 +294,7 @@ Generate 32 random bytes as base64url, persist SHA-256 with a 10-minute expiry, 
 
 - [ ] **Step 4: Verify and commit**
 
-Run: `pnpm --filter @autosale/api test -- instagram-oauth-state.service.spec.ts`  
+Run: `pnpm --filter @autosale/api test -- instagram-oauth-state.service.spec.ts`
 Expected: PASS.
 
 ```powershell
@@ -318,7 +318,7 @@ git commit -m "feat: add single-use Instagram OAuth state"
 - Refactor: `apps/api/src/settings/instagram-settings.service.ts`
 
 **Interfaces:**
-- Produces safe summary `{ status, accountId, username, tokenExpiresAt, lastVerifiedAt, lastErrorCode }` with no credential field.
+- Produces safe summary `{ status, accountId, username, tokenExpiresAt, lastVerifiedAt, lastErrorCode, cleanupStatus, cleanupErrorCode }` with no credential field.
 - Produces owner endpoints from the spec and a public, CSRF-exempt GET callback.
 - Consumes Task 2 cipher, Task 3 Meta client, and Task 4 state service.
 
@@ -332,7 +332,7 @@ Test that connect returns a Meta URL tied to state; callback consumes state befo
 
 - [ ] **Step 3: Run and verify failure**
 
-Run: `pnpm --filter @autosale/api test -- instagram-oauth.service.spec.ts`  
+Run: `pnpm --filter @autosale/api test -- instagram-oauth.service.spec.ts`
 Expected: FAIL because the orchestration service is missing.
 
 - [ ] **Step 4: Implement the orchestration service**
@@ -389,7 +389,7 @@ expect(screen.queryByLabelText('Instagram Account ID')).not.toBeInTheDocument();
 
 - [ ] **Step 2: Run and verify failure**
 
-Run: `pnpm --filter @autosale/web test -- instagram-settings-form.spec.tsx`  
+Run: `pnpm --filter @autosale/web test -- instagram-settings-form.spec.tsx`
 Expected: FAIL because the current component renders manual fields.
 
 - [ ] **Step 3: Implement the connection-state card**
