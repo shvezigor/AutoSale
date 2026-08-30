@@ -24,7 +24,7 @@ export function PrimaryNavigation({ active, session }: { active: Destination; se
       <Link className={`nav-item${active === 'conversations' ? ' active' : ''}`} href="/conversations"><span>Діалоги</span></Link>
       <Link className={`nav-item${active === 'orders' ? ' active' : ''}`} href="/orders"><span>Замовлення</span></Link>
       {isOwner && <Link className={`nav-item${active === 'team' ? ' active' : ''}`} href="/team"><span>Команда</span></Link>}
-      {isOwner && <Link className={`nav-item${active === 'settings' ? ' active' : ''}`} href="/settings"><span>Налаштування</span></Link>}
+      {session.membershipRole && <Link className={`nav-item${active === 'settings' ? ' active' : ''}`} href="/settings"><span>Налаштування</span></Link>}
     </nav>
     <div className="manager"><span className="manager-avatar">{session.name.slice(0, 1).toUpperCase()}</span><span>{session.name}<small>{isOwner ? 'Власник' : 'Менеджер'}</small></span></div>
     <button className="logout-button" disabled={loggingOut} onClick={logout} type="button">{loggingOut ? 'Вихід…' : 'Вийти'}</button>

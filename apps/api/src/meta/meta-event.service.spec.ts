@@ -18,7 +18,7 @@ describe('MetaEventService', () => {
     container = await new PostgreSqlContainer('postgres:17.6-alpine').start();
     const connectionString = container.getConnectionUri();
     const pool = new pg.Pool({ connectionString });
-    for (const migrationName of ['20260826090000_init_webhook_events', '20260827160000_self_hosted_auth', '20260827170000_tenant_access_status']) {
+    for (const migrationName of ['20260826090000_init_webhook_events', '20260827160000_self_hosted_auth', '20260827170000_tenant_access_status', '20260827230000_instagram_connections', '20260828_meta_instagram_oauth', '20260828150000_instagram_oauth_attempt_guard', '20260829120000_instagram_credential_cleanup_queue']) {
       const migration = await readFile(resolve(process.cwd(), `../../packages/database/prisma/migrations/${migrationName}/migration.sql`), 'utf8');
       await pool.query(migration);
     }
@@ -34,6 +34,13 @@ describe('MetaEventService', () => {
   afterAll(async () => {
     await prisma?.$disconnect();
     await container?.stop();
+  });
+
+  it('rejects and transitions an expired active Instagram connection before webhook processing', async () => {
+    const connection = await prisma.instagramConnection.create({ data: { tenantId, externalAccountId: '17841400000000000', status: 'ACTIVE', tokenExpiresAt: new Date('2026-08-28T11:59:59.999Z') } });
+    const expiredService = new MetaEventService(prisma, () => new Date('2026-08-28T12:00:00.000Z'));
+    await expect(expiredService.resolveTenant(connection.externalAccountId)).resolves.toBeNull();
+    await expect(prisma.instagramConnection.findUniqueOrThrow({ where: { id: connection.id } })).resolves.toMatchObject({ status: 'REAUTH_REQUIRED', lastErrorCode: 'META_TOKEN_EXPIRED' });
   });
 
   it('returns the existing event when the same Meta event is replayed', async () => {

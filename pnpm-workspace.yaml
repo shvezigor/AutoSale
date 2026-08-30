@@ -16,6 +16,7 @@ onlyBuiltDependencies:
 allowBuilds:
   '@scarf/scarf': false
   '@prisma/engines': true
+  argon2: true
   cpu-features: false
   esbuild: true
   msgpackr-extract: false

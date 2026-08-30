@@ -9,10 +9,10 @@ vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh }) }));
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); refresh.mockClear(); });
 
 describe('PrimaryNavigation', () => {
-  it('hides owner-only destinations from managers', () => {
+  it('shows settings but hides team management from managers', () => {
     render(<PrimaryNavigation active="orders" session={{ name: 'Іван', email: 'manager@example.com', membershipRole: 'MANAGER' }} />);
     expect(screen.queryByRole('link', { name: 'Команда' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: 'Налаштування' })).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Налаштування' })).toHaveAttribute('href', '/settings');
   });
 
   it('logs out with csrf protection', async () => {

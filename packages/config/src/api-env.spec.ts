@@ -11,6 +11,9 @@ const validEnv = {
   DEFAULT_TENANT_KEY: 'default',
   META_VERIFY_TOKEN: 'verify-token-with-24-characters',
   META_APP_SECRET: 'meta-app-secret-value',
+  META_APP_ID: '123456789012345',
+  META_GRAPH_API_VERSION: 'v23.0',
+  INTEGRATION_ENCRYPTION_KEY: Buffer.alloc(32, 7).toString('base64'),
   S3_ENDPOINT: 'http://minio:9000',
   S3_REGION: 'us-east-1',
   S3_BUCKET: 'autosale-media',
@@ -39,5 +42,17 @@ describe('parseApiEnv', () => {
 
   it('rejects a short session pepper', () => {
     expect(() => parseApiEnv({ ...validEnv, SESSION_PEPPER: 'short' })).toThrow();
+  });
+
+  it('rejects an encryption key that does not decode to 32 bytes', () => {
+    expect(() => parseApiEnv({ ...validEnv, INTEGRATION_ENCRYPTION_KEY: 'short' })).toThrow();
+  });
+
+  it('rejects a non-canonical encryption key', () => {
+    expect(() => parseApiEnv({ ...validEnv, INTEGRATION_ENCRYPTION_KEY: `${validEnv.INTEGRATION_ENCRYPTION_KEY}=` })).toThrow();
+  });
+
+  it('rejects an invalid Meta Graph API version', () => {
+    expect(() => parseApiEnv({ ...validEnv, META_GRAPH_API_VERSION: 'latest' })).toThrow();
   });
 });

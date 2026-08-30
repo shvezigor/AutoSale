@@ -1,4 +1,12 @@
+import { Buffer } from 'node:buffer';
+
 import { z } from 'zod';
+
+const isCanonicalIntegrationEncryptionKey = (value: string): boolean => {
+  const decoded = Buffer.from(value, 'base64');
+
+  return decoded.length === 32 && decoded.toString('base64') === value;
+};
 
 export const apiEnvSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']),
@@ -9,6 +17,12 @@ export const apiEnvSchema = z.object({
   DEFAULT_TENANT_KEY: z.string().min(1).default('default'),
   META_VERIFY_TOKEN: z.string().min(24),
   META_APP_SECRET: z.string().min(16),
+  META_APP_ID: z.string().regex(/^\d{5,32}$/),
+  META_GRAPH_API_VERSION: z.string().regex(/^v\d+\.\d+$/),
+  INTEGRATION_ENCRYPTION_KEY: z.string().refine(
+    isCanonicalIntegrationEncryptionKey,
+    'must be canonical base64 encoding of 32 bytes',
+  ),
   S3_ENDPOINT: z.string().url(),
   S3_REGION: z.string().min(1),
   S3_BUCKET: z.string().min(3),
