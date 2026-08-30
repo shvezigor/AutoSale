@@ -12,6 +12,7 @@ import { ConversationsController } from './conversations.controller.js';
 import { ConversationsService } from './conversations.service.js';
 
 const conversationId = '11111111-1111-4111-8111-111111111111';
+const tenantId = '22222222-2222-4222-8222-222222222222';
 
 describe('ConversationsController', () => {
   let app: INestApplication | undefined;
@@ -42,6 +43,10 @@ describe('ConversationsController', () => {
       providers: [{ provide: ConversationsService, useValue: { list, detail } }],
     }).compile();
     app = moduleRef.createNestApplication();
+    app.use((request: { principal?: unknown }, _response: unknown, next: () => void) => {
+      request.principal = { userId: 'user', email: 'manager@example.com', platformRole: 'USER', tenantId, membershipRole: 'MANAGER', sessionId: 'session' };
+      next();
+    });
     await app.init();
   });
 
@@ -51,7 +56,7 @@ describe('ConversationsController', () => {
     const response = await request(app!.getHttpServer()).get('/api/conversations?limit=20').expect(200);
 
     expect(() => conversationListResponseSchema.parse(response.body)).not.toThrow();
-    expect(list).toHaveBeenCalledWith({ limit: 20 });
+    expect(list).toHaveBeenCalledWith(tenantId, { limit: 20 });
   });
 
   it('returns detail conforming to the shared response contract', async () => {
@@ -60,6 +65,7 @@ describe('ConversationsController', () => {
       .expect(200);
 
     expect(() => conversationDetailResponseSchema.parse(response.body)).not.toThrow();
+    expect(detail).toHaveBeenCalledWith(tenantId, conversationId);
   });
 
   it('rejects an excessive page limit', async () => {

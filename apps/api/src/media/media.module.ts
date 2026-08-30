@@ -26,7 +26,6 @@ export class MediaModule {
                 secretAccessKey: env.S3_SECRET_ACCESS_KEY,
                 forcePathStyle: true,
               }),
-              env.DEFAULT_TENANT_ID,
             ),
         },
       ],

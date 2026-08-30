@@ -15,7 +15,7 @@ export class ConversationsModule {
         {
           provide: ConversationsService,
           useFactory: () =>
-            new ConversationsService(createPrismaClient(env.DATABASE_URL), env.DEFAULT_TENANT_ID),
+            new ConversationsService(createPrismaClient(env.DATABASE_URL)),
         },
       ],
     };

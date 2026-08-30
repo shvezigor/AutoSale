@@ -1,8 +1,8 @@
 import type { ManagerOrder, OrderListResponse } from '../../../../packages/contracts/src/orders';
+import { authenticatedApiFetch } from '../auth/session';
 
 async function request<T>(path: string): Promise<T> {
-  const baseUrl = process.env.API_INTERNAL_URL ?? 'http://localhost:3001';
-  const response = await fetch(`${baseUrl}${path}`, { cache: 'no-store' });
+  const response = await authenticatedApiFetch(path);
   if (!response.ok) throw new Error(`Order API returned HTTP ${response.status}`);
   return response.json() as Promise<T>;
 }

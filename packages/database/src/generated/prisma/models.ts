@@ -9,6 +9,13 @@
  * 🟢 You can import this file directly.
  */
 export type * from './models/Tenant.js'
+export type * from './models/User.js'
+export type * from './models/TenantMembership.js'
+export type * from './models/Session.js'
+export type * from './models/EmailVerificationToken.js'
+export type * from './models/PasswordResetToken.js'
+export type * from './models/TenantInvitation.js'
+export type * from './models/SecurityAuditLog.js'
 export type * from './models/WebhookEvent.js'
 export type * from './models/Conversation.js'
 export type * from './models/Message.js'

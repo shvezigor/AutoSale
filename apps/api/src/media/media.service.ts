@@ -6,16 +6,15 @@ export class MediaService {
   constructor(
     private readonly prisma: PrismaClient,
     private readonly storage: ObjectStorage,
-    private readonly tenantId: string,
   ) {}
 
-  async load(id: string): Promise<{ body: Uint8Array; contentType: string }> {
+  async load(tenantId: string, id: string): Promise<{ body: Uint8Array; contentType: string }> {
     const attachment = await this.prisma.attachment.findFirst({
       where: {
         id,
         copyStatus: 'COPIED',
         storageKey: { not: null },
-        message: { tenantId: this.tenantId },
+        message: { tenantId },
       },
       select: { storageKey: true },
     });

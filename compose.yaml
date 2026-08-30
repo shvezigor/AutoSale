@@ -55,6 +55,14 @@ services:
       S3_BUCKET: ${S3_BUCKET}
       S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID}
       S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
+      SESSION_COOKIE_NAME: ${SESSION_COOKIE_NAME:-autosale_session}
+      SESSION_PEPPER: ${SESSION_PEPPER}
+      AUTH_TOKEN_PEPPER: ${AUTH_TOKEN_PEPPER}
+      APP_PUBLIC_URL: ${APP_PUBLIC_URL:-http://localhost}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
     depends_on:
       migrate:
         condition: service_completed_successfully

@@ -18,7 +18,10 @@ COPY packages/observability/package.json packages/observability/package.json
 RUN pnpm install --frozen-lockfile
 
 COPY . .
-RUN pnpm build
+# Refresh pnpm's injected workspace copies now that package sources are present.
+RUN pnpm install --offline --frozen-lockfile
+# Build workspace packages in dependency-safe order; a clean image has no stale dist artifacts.
+RUN pnpm -r --workspace-concurrency=1 build
 
 FROM build AS api-deploy
 RUN pnpm --filter @autosale/api deploy --prod /prod/api

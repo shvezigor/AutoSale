@@ -1,32 +1,24 @@
 import type { ConversationListResponse } from '../../../../packages/contracts/src/conversations';
-import Link from 'next/link';
 import type { ReactNode } from 'react';
+import type { PublicSession } from '../../../../packages/contracts/src/auth';
 
 import { ConversationList } from './conversation-list';
+import { PrimaryNavigation } from './primary-navigation';
 
 export function InboxShell({
   conversations,
   selectedId,
+  session,
   children,
 }: {
   conversations: ConversationListResponse['items'];
   selectedId?: string;
+  session: Pick<PublicSession, 'name' | 'email' | 'membershipRole'>;
   children: ReactNode;
 }) {
   return (
     <main className="app-shell">
-      <aside className="primary-nav">
-        <Link className="brand" href="/conversations">AutoSale</Link>
-        <nav aria-label="Головна навігація">
-          <Link className="nav-item active" href="/conversations">
-            <ChatIcon />
-            <span>Діалоги</span>
-          </Link>
-          <Link className="nav-item" href="/orders"><span>Замовлення</span></Link>
-          <Link className="nav-item" href="/settings"><span>Налаштування</span></Link>
-        </nav>
-        <div className="manager"><span className="manager-avatar">A</span><span>Андрій<small>Менеджер</small></span></div>
-      </aside>
+      <PrimaryNavigation active="conversations" session={session} />
       <section className="inbox-sidebar">
         <header className="inbox-heading">
           <h1>Діалоги</h1>
@@ -45,9 +37,6 @@ export function InboxShell({
   );
 }
 
-function ChatIcon() {
-  return <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 5h14v11H9l-4 3V5Z" /></svg>;
-}
 function SearchIcon() {
   return <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5" /><path d="m15.5 15.5 4 4" /></svg>;
 }

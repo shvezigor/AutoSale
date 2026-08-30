@@ -15,6 +15,14 @@ export const apiEnvSchema = z.object({
   S3_ACCESS_KEY_ID: z.string().min(8),
   S3_SECRET_ACCESS_KEY: z.string().min(8),
   GOOGLE_SERVICE_ACCOUNT_FILE: z.preprocess((value) => value === '' ? undefined : value, z.string().min(1).optional()),
+  SESSION_COOKIE_NAME: z.string().regex(/^[A-Za-z0-9_-]+$/).default('autosale_session'),
+  SESSION_PEPPER: z.string().min(32),
+  AUTH_TOKEN_PEPPER: z.string().min(32),
+  APP_PUBLIC_URL: z.string().url(),
+  SMTP_HOST: z.preprocess((value) => value === '' ? undefined : value, z.string().min(1).optional()),
+  SMTP_PORT: z.coerce.number().int().positive().default(587),
+  SMTP_USER: z.preprocess((value) => value === '' ? undefined : value, z.string().min(1).optional()),
+  SMTP_PASSWORD: z.preprocess((value) => value === '' ? undefined : value, z.string().min(1).optional()),
 });
 
 export type ApiEnv = z.infer<typeof apiEnvSchema>;

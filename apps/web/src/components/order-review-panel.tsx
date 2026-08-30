@@ -2,6 +2,7 @@
 
 import type { ManagerOrder } from '../../../../packages/contracts/src/orders';
 import { useState } from 'react';
+import { mutatingFetch } from '../auth/csrf-fetch';
 
 const statusLabels: Record<string, string> = { NEEDS_REVIEW: 'Потребує перевірки', APPROVED: 'Підтверджено', AUTO_APPROVED: 'Підтверджено автоматично', CANCELLED: 'Відхилено', AI_PROCESSING: 'AI обробляє', AI_FAILED: 'Помилка AI' };
 
@@ -18,7 +19,7 @@ export function OrderReviewPanel({ initialOrder }: { initialOrder: ManagerOrder 
   async function transition(action: 'approve' | 'cancel') {
     setPending(true); setError(null);
     try {
-      const response = await fetch(`/api/orders/${order.id}/${action}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ actor: 'Андрій' }) });
+      const response = await mutatingFetch(`/api/orders/${order.id}/${action}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ actor: 'Андрій' }) });
       if (!response.ok) throw new Error('Не вдалося змінити статус замовлення');
       const next = await response.json() as ManagerOrder; setOrder(next); setDraft(next);
     } catch (reason) { setError(reason instanceof Error ? reason.message : 'Сталася помилка'); }
@@ -28,7 +29,7 @@ export function OrderReviewPanel({ initialOrder }: { initialOrder: ManagerOrder 
   async function save() {
     setPending(true); setError(null); setSaved(false);
     try {
-      const response = await fetch(`/api/orders/${order.id}`, { method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ actor: 'Андрій', customer: draft.customer, delivery: draft.delivery, items: draft.items.map(({ id, catalogId, quantity, color, size }) => ({ id, catalogId, quantity, color, size })) }) });
+      const response = await mutatingFetch(`/api/orders/${order.id}`, { method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ actor: 'Андрій', customer: draft.customer, delivery: draft.delivery, items: draft.items.map(({ id, catalogId, quantity, color, size }) => ({ id, catalogId, quantity, color, size })) }) });
       if (!response.ok) throw new Error('Не вдалося зберегти зміни');
       const next = await response.json() as ManagerOrder; setOrder(next); setDraft(next); setSaved(true);
     } catch (reason) { setError(reason instanceof Error ? reason.message : 'Сталася помилка'); }
@@ -38,7 +39,7 @@ export function OrderReviewPanel({ initialOrder }: { initialOrder: ManagerOrder 
   async function retrySheetsExport() {
     setPending(true); setError(null);
     try {
-      const response = await fetch(`/api/orders/${order.id}/sheets-export/retry`, { method: 'POST' });
+      const response = await mutatingFetch(`/api/orders/${order.id}/sheets-export/retry`, { method: 'POST' });
       if (!response.ok) throw new Error('Не вдалося повторити синхронізацію');
       setSheetsExport(await response.json() as NonNullable<ManagerOrder['sheetsExport']>);
     } catch (reason) { setError(reason instanceof Error ? reason.message : 'Сталася помилка'); }

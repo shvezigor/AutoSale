@@ -1,7 +1,9 @@
 import { BadRequestException, Body, Controller, Get, Inject, Patch } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { z } from 'zod';
+import type { AuthPrincipal } from '@autosale/contracts/auth';
 
+import { CurrentPrincipal, RequireMembership } from '../auth/auth.decorators.js';
 import {
   OrderSettingsService,
   type OrderSettingsResponse,
@@ -18,20 +20,21 @@ const updateSchema = z
 
 @ApiTags('settings')
 @Controller('api/settings/orders')
+@RequireMembership('OWNER')
 export class OrderSettingsController {
   constructor(@Inject(OrderSettingsService) private readonly settings: OrderSettingsService) {}
 
   @Get()
   @ApiOperation({ summary: 'Get order processing settings' })
   @ApiOkResponse({ description: 'Current order processing settings' })
-  get(): Promise<OrderSettingsResponse> {
-    return this.settings.get();
+  get(@CurrentPrincipal() principal: AuthPrincipal): Promise<OrderSettingsResponse> {
+    return this.settings.get(principal.tenantId!);
   }
 
   @Patch()
   @ApiOperation({ summary: 'Update order processing settings' })
   @ApiOkResponse({ description: 'Updated order processing settings' })
-  update(@Body() body: unknown): Promise<OrderSettingsResponse> {
+  update(@CurrentPrincipal() principal: AuthPrincipal, @Body() body: unknown): Promise<OrderSettingsResponse> {
     const parsed = updateSchema.safeParse(body);
     if (!parsed.success) throw new BadRequestException('Invalid order settings');
     const input: UpdateOrderSettingsInput = {};
@@ -40,6 +43,6 @@ export class OrderSettingsController {
       input.autoApprovalThreshold = parsed.data.autoApprovalThreshold;
     }
     if (parsed.data.triggerPhrases !== undefined) input.triggerPhrases = parsed.data.triggerPhrases;
-    return this.settings.update(input);
+    return this.settings.update(principal.tenantId!, input);
   }
 }

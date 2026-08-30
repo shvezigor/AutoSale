@@ -21,6 +21,8 @@ describe('InstagramProcessor', () => {
     const migrationPaths = [
       '20260826090000_init_webhook_events',
       '20260826123000_conversations_messages',
+      '20260827160000_self_hosted_auth',
+      '20260827170000_tenant_access_status',
     ];
     const pool = new pg.Pool({ connectionString });
     for (const migrationPath of migrationPaths) {

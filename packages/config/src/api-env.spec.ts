@@ -16,11 +16,15 @@ const validEnv = {
   S3_BUCKET: 'autosale-media',
   S3_ACCESS_KEY_ID: 'minio-access-key',
   S3_SECRET_ACCESS_KEY: 'minio-secret-key',
+  SESSION_COOKIE_NAME: 'autosale_session',
+  SESSION_PEPPER: 'session-pepper-with-at-least-32-characters',
+  AUTH_TOKEN_PEPPER: 'auth-token-pepper-with-at-least-32-characters',
+  APP_PUBLIC_URL: 'https://autosale.example.com',
 };
 
 describe('parseApiEnv', () => {
   it('coerces a valid API environment', () => {
-    expect(parseApiEnv(validEnv)).toEqual({ ...validEnv, PORT: 3001 });
+    expect(parseApiEnv(validEnv)).toEqual({ ...validEnv, PORT: 3001, SMTP_PORT: 587 });
   });
 
   it('rejects an environment without the Meta app secret', () => {
@@ -31,5 +35,9 @@ describe('parseApiEnv', () => {
 
   it('treats an empty optional Google credential path as unconfigured', () => {
     expect(parseApiEnv({ ...validEnv, GOOGLE_SERVICE_ACCOUNT_FILE: '' }).GOOGLE_SERVICE_ACCOUNT_FILE).toBeUndefined();
+  });
+
+  it('rejects a short session pepper', () => {
+    expect(() => parseApiEnv({ ...validEnv, SESSION_PEPPER: 'short' })).toThrow();
   });
 });

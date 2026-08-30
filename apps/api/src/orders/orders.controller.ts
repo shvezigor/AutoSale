@@ -2,7 +2,9 @@ import { BadRequestException, Body, Controller, Get, Inject, Param, ParseUUIDPip
 import { ApiTags } from '@nestjs/swagger';
 import { z } from 'zod';
 import type { ManagerOrderUpdate } from '@autosale/contracts/orders';
+import type { AuthPrincipal } from '@autosale/contracts/auth';
 
+import { CurrentPrincipal, RequireMembership } from '../auth/auth.decorators.js';
 import { OrdersService } from './orders.service.js';
 
 const actorSchema = z.object({ actor: z.string().trim().min(1).max(120) }).strict();
@@ -15,26 +17,27 @@ const updateSchema = z.object({
 
 @ApiTags('orders')
 @Controller('api/orders')
+@RequireMembership('MANAGER')
 export class OrdersController {
   constructor(@Inject(OrdersService) private readonly orders: OrdersService) {}
 
-  @Get() list() { return this.orders.list(); }
+  @Get() list(@CurrentPrincipal() principal: AuthPrincipal) { return this.orders.list(principal.tenantId!); }
 
-  @Get(':id') detail(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) { return this.orders.detail(id); }
+  @Get(':id') detail(@CurrentPrincipal() principal: AuthPrincipal, @Param('id', new ParseUUIDPipe({ version: '4' })) id: string) { return this.orders.detail(principal.tenantId!, id); }
 
-  @Post(':id/approve') approve(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string, @Body() body: unknown) {
-    return this.orders.approve(id, this.actor(body));
+  @Post(':id/approve') approve(@CurrentPrincipal() principal: AuthPrincipal, @Param('id', new ParseUUIDPipe({ version: '4' })) id: string, @Body() body: unknown) {
+    return this.orders.approve(principal.tenantId!, id, this.actor(body));
   }
 
-  @Post(':id/cancel') cancel(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string, @Body() body: unknown) {
-    return this.orders.cancel(id, this.actor(body));
+  @Post(':id/cancel') cancel(@CurrentPrincipal() principal: AuthPrincipal, @Param('id', new ParseUUIDPipe({ version: '4' })) id: string, @Body() body: unknown) {
+    return this.orders.cancel(principal.tenantId!, id, this.actor(body));
   }
 
-  @Post(':id/sheets-export/retry') retrySheetsExport(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
-    return this.orders.retrySheetsExport(id);
+  @Post(':id/sheets-export/retry') retrySheetsExport(@CurrentPrincipal() principal: AuthPrincipal, @Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
+    return this.orders.retrySheetsExport(principal.tenantId!, id);
   }
 
-  @Patch(':id') update(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string, @Body() body: unknown) {
+  @Patch(':id') update(@CurrentPrincipal() principal: AuthPrincipal, @Param('id', new ParseUUIDPipe({ version: '4' })) id: string, @Body() body: unknown) {
     const parsed = updateSchema.safeParse(body);
     if (!parsed.success) throw new BadRequestException('Invalid order correction');
     const { actor } = parsed.data;
@@ -42,7 +45,7 @@ export class OrdersController {
     if (parsed.data.customer !== undefined) changes.customer = parsed.data.customer as NonNullable<ManagerOrderUpdate['customer']>;
     if (parsed.data.delivery !== undefined) changes.delivery = parsed.data.delivery as NonNullable<ManagerOrderUpdate['delivery']>;
     if (parsed.data.items !== undefined) changes.items = parsed.data.items;
-    return this.orders.update(id, actor, changes);
+    return this.orders.update(principal.tenantId!, id, actor, changes);
   }
 
   private actor(body: unknown): string {

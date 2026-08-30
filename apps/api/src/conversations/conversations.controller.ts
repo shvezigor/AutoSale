@@ -3,6 +3,7 @@ import {
   type ConversationDetailResponse,
   type ConversationListResponse,
 } from '@autosale/contracts/conversations';
+import type { AuthPrincipal } from '@autosale/contracts/auth';
 import {
   BadRequestException,
   Controller,
@@ -15,6 +16,7 @@ import {
 import { ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { ZodError } from 'zod';
 
+import { CurrentPrincipal, RequireMembership } from '../auth/auth.decorators.js';
 import { ConversationsService } from './conversations.service.js';
 
 type OpenApiSchema = {
@@ -29,6 +31,7 @@ type OpenApiSchema = {
 
 @ApiTags('conversations')
 @Controller('api/conversations')
+@RequireMembership('MANAGER')
 export class ConversationsController {
   constructor(
     @Inject(ConversationsService) private readonly conversations: ConversationsService,
@@ -39,9 +42,9 @@ export class ConversationsController {
   @ApiQuery({ name: 'cursor', required: false, type: String })
   @ApiQuery({ name: 'limit', required: false, type: Number, example: 20 })
   @ApiOkResponse({ schema: conversationListOpenApiSchema() })
-  async list(@Query() rawQuery: Record<string, unknown>): Promise<ConversationListResponse> {
+  async list(@CurrentPrincipal() principal: AuthPrincipal, @Query() rawQuery: Record<string, unknown>): Promise<ConversationListResponse> {
     try {
-      return await this.conversations.list(conversationQuerySchema.parse(rawQuery));
+      return await this.conversations.list(principal.tenantId!, conversationQuerySchema.parse(rawQuery));
     } catch (error) {
       if (error instanceof ZodError) {
         throw new BadRequestException('Invalid conversation query');
@@ -54,9 +57,10 @@ export class ConversationsController {
   @ApiOperation({ summary: 'Get a manager conversation with messages' })
   @ApiOkResponse({ schema: conversationDetailOpenApiSchema() })
   detail(
+    @CurrentPrincipal() principal: AuthPrincipal,
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
   ): Promise<ConversationDetailResponse> {
-    return this.conversations.detail(id);
+    return this.conversations.detail(principal.tenantId!, id);
   }
 }
 
