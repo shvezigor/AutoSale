@@ -1,6 +1,16 @@
 name: autosale
 
 services:
+  cloudflared:
+    image: cloudflare/cloudflared:2026.6.0
+    restart: unless-stopped
+    command: ["tunnel", "--no-autoupdate", "run", "--token", "${CLOUDFLARE_TUNNEL_TOKEN}"]
+    depends_on:
+      proxy:
+        condition: service_started
+    networks:
+      - edge
+
   proxy:
     image: caddy:2.10.2-alpine
     restart: unless-stopped

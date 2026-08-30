@@ -240,6 +240,16 @@ function applyCleanupData(row: Record<string, unknown>, data: Record<string, unk
 }
 
 describe('InstagramOAuthService', () => {
+  it('disconnects the tenant bound to a provider-initiated deauthorization', async () => {
+    const { service, findUnique } = setup();
+    findUnique.mockResolvedValue({ tenantId: 'tenant-a', connectedByUserId: 'user-a' });
+    const disconnect = vi.spyOn(service, 'disconnect').mockResolvedValue({} as never);
+
+    await service.disconnectByExternalAccountId('17841400000000000');
+
+    expect(disconnect).toHaveBeenCalledWith('tenant-a', 'user-a');
+  });
+
   beforeEach(() => vi.clearAllMocks());
 
   it('creates tenant and user bound state and returns its Meta authorization URL', async () => {
