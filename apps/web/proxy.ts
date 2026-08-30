@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 const authPaths = ['/login', '/register', '/verify-email', '/forgot-password', '/reset-password', '/invite'];
+const publicPaths = ['/privacy', '/terms'];
 
 export async function proxy(request: NextRequest) {
   const isAuthPath = authPaths.some((path) => request.nextUrl.pathname === path || request.nextUrl.pathname.startsWith(`${path}/`));
+  const isPublicPath = publicPaths.some((path) => request.nextUrl.pathname === path || request.nextUrl.pathname.startsWith(`${path}/`));
   const session = await resolveSession(request);
   
-  if (!session && !isAuthPath) {
+  if (!session && !isAuthPath && !isPublicPath) {
     const login = new URL('/login', request.url); login.searchParams.set('next', `${request.nextUrl.pathname}${request.nextUrl.search}`); return NextResponse.redirect(login);
   }
   if (session && isAuthPath) return NextResponse.redirect(new URL(session.platformRole === 'PLATFORM_ADMIN' ? '/admin' : '/conversations', request.url));
