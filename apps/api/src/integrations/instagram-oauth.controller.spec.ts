@@ -11,6 +11,8 @@ import { CsrfService } from '../auth/csrf.service.js';
 import { SessionService } from '../auth/session.service.js';
 import { InstagramOAuthController } from './instagram-oauth.controller.js';
 import { InstagramOAuthService } from './instagram-oauth.service.js';
+import { MetaDataDeletionReceipt } from './meta-data-deletion-receipt.js';
+import { MetaSignedRequest } from './meta-signed-request.js';
 
 describe('InstagramOAuthController', () => {
   const owner: AuthPrincipal = {
@@ -31,6 +33,9 @@ describe('InstagramOAuthController', () => {
   const disconnect = vi.fn();
   const retryCleanup = vi.fn();
   const deadLetterCleanup = vi.fn();
+  const disconnectByExternalAccountId = vi.fn();
+  const parseUserId = vi.fn();
+  const createDeletionReceipt = vi.fn();
   const resolve = vi.fn();
   const csrf = new CsrfService('p'.repeat(32));
 
@@ -54,6 +59,12 @@ describe('InstagramOAuthController', () => {
     disconnect.mockReset().mockResolvedValue({ status: 'DISCONNECTED' });
     retryCleanup.mockReset().mockResolvedValue({ status: 'DISCONNECTED', lastErrorCode: null });
     deadLetterCleanup.mockReset().mockResolvedValue({ status: 'DISCONNECTED', lastErrorCode: 'META_CLEANUP_DEAD_LETTERED' });
+    disconnectByExternalAccountId.mockReset().mockResolvedValue(undefined);
+    parseUserId.mockReset().mockReturnValue('17841400000000000');
+    createDeletionReceipt.mockReset().mockReturnValue({
+      url: 'https://autosale.example.com/privacy/data-deletion?code=confirmation',
+      confirmation_code: 'confirmation',
+    });
     resolve.mockReset().mockImplementation(async (token: string) => {
       if (token === 'owner-token') return owner;
       if (token === 'manager-token') return manager;
@@ -64,7 +75,9 @@ describe('InstagramOAuthController', () => {
     const moduleRef = await Test.createTestingModule({
       controllers: [InstagramOAuthController],
       providers: [
-        { provide: InstagramOAuthService, useValue: { getSummary, connect, completeCallback, disconnect, retryCleanup, deadLetterCleanup } },
+        { provide: InstagramOAuthService, useValue: { getSummary, connect, completeCallback, disconnect, retryCleanup, deadLetterCleanup, disconnectByExternalAccountId } },
+        { provide: MetaSignedRequest, useValue: { parseUserId } },
+        { provide: MetaDataDeletionReceipt, useValue: { create: createDeletionReceipt } },
         { provide: SessionService, useValue: { resolve } },
         { provide: CsrfService, useValue: csrf },
         { provide: AUTH_HTTP_CONFIG, useValue: { cookieName: 'autosale_session', production: false } },
@@ -189,5 +202,44 @@ describe('InstagramOAuthController', () => {
     expect(response.headers.location).toBe('/settings?instagram=error');
     expect(response.headers.location).not.toContain('secret-token');
     expect(completeCallback).toHaveBeenCalledWith(undefined, 'raw-state', true);
+  });
+
+  it('accepts a valid Meta deauthorization request without a user session', async () => {
+    await request(app!.getHttpServer())
+      .post('/api/integrations/instagram/deauthorize')
+      .type('form')
+      .send({ signed_request: 'signed-provider-payload' })
+      .expect(200)
+      .expect({ received: true });
+
+    expect(parseUserId).toHaveBeenCalledWith('signed-provider-payload');
+    expect(disconnectByExternalAccountId).toHaveBeenCalledWith('17841400000000000');
+  });
+
+  it('rejects an invalid Meta deauthorization request without changing a connection', async () => {
+    parseUserId.mockImplementation(() => { throw new Error('Invalid Meta signed request'); });
+
+    await request(app!.getHttpServer())
+      .post('/api/integrations/instagram/deauthorize')
+      .type('form')
+      .send({ signed_request: 'tampered' })
+      .expect(400);
+
+    expect(disconnectByExternalAccountId).not.toHaveBeenCalled();
+  });
+
+  it('returns a privacy-safe receipt after a valid Meta data deletion request', async () => {
+    await request(app!.getHttpServer())
+      .post('/api/integrations/instagram/data-deletion')
+      .type('form')
+      .send({ signed_request: 'signed-provider-payload' })
+      .expect(200)
+      .expect({
+        url: 'https://autosale.example.com/privacy/data-deletion?code=confirmation',
+        confirmation_code: 'confirmation',
+      });
+
+    expect(disconnectByExternalAccountId).toHaveBeenCalledWith('17841400000000000');
+    expect(createDeletionReceipt).toHaveBeenCalledWith('17841400000000000');
   });
 });

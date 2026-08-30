@@ -400,6 +400,15 @@ export class InstagramOAuthService {
     return this.getSummary(tenantId);
   }
 
+  async disconnectByExternalAccountId(externalAccountId: string): Promise<void> {
+    const connection = await this.prisma.instagramConnection.findUnique({
+      where: { externalAccountId },
+      select: { tenantId: true, connectedByUserId: true },
+    });
+    if (!connection?.connectedByUserId) return;
+    await this.disconnect(connection.tenantId, connection.connectedByUserId);
+  }
+
   async retryCleanup(tenantId: string, userId: string): Promise<InstagramConnectionSummary> {
     await this.recoverUnresolvedCleanups(tenantId);
     await this.cleanupAvailableCredentials(tenantId, userId);

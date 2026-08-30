@@ -9,6 +9,8 @@ import { CredentialCipher } from './credential-cipher.js';
 import { InstagramOAuthController } from './instagram-oauth.controller.js';
 import { InstagramOAuthService } from './instagram-oauth.service.js';
 import { InstagramOAuthStateService } from './instagram-oauth-state.service.js';
+import { MetaSignedRequest } from './meta-signed-request.js';
+import { MetaDataDeletionReceipt } from './meta-data-deletion-receipt.js';
 
 @Module({})
 export class InstagramOAuthModule {
@@ -33,6 +35,8 @@ export class InstagramOAuthModule {
       controllers: [InstagramOAuthController],
       providers: [
         { provide: InstagramOAuthService, useValue: service },
+        { provide: MetaSignedRequest, useValue: new MetaSignedRequest(env.META_APP_SECRET) },
+        { provide: MetaDataDeletionReceipt, useValue: new MetaDataDeletionReceipt(env.META_APP_SECRET, env.APP_PUBLIC_URL) },
         { provide: InstagramOAuthPrismaLifecycle, useValue: prismaLifecycle },
       ],
       exports: [InstagramOAuthService],

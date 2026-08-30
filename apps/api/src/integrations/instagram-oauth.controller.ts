@@ -4,6 +4,7 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
   Inject,
   Post,
   Query,
@@ -22,6 +23,8 @@ import {
   InstagramOAuthService,
   INSTAGRAM_CLEANUP_ABANDON_CONFIRMATION,
 } from './instagram-oauth.service.js';
+import { MetaSignedRequest } from './meta-signed-request.js';
+import { MetaDataDeletionReceipt } from './meta-data-deletion-receipt.js';
 
 const connectRequestSchema = z.object({
   returnPath: z.string().max(2_048).optional(),
@@ -36,6 +39,10 @@ export class InstagramOAuthController {
   constructor(
     @Inject(InstagramOAuthService)
     private readonly instagram: InstagramOAuthService,
+    @Inject(MetaSignedRequest)
+    private readonly signedRequest: MetaSignedRequest,
+    @Inject(MetaDataDeletionReceipt)
+    private readonly deletionReceipt: MetaDataDeletionReceipt,
   ) {}
 
   @Get()
@@ -84,6 +91,36 @@ export class InstagramOAuthController {
   @RequireMembership('OWNER')
   disconnect(@CurrentPrincipal() principal: AuthPrincipal) {
     return this.instagram.disconnect(principal.tenantId!, principal.userId);
+  }
+
+  @Post('deauthorize')
+  @HttpCode(200)
+  @Public()
+  @SkipCsrf()
+  async deauthorize(@Body('signed_request') value: unknown) {
+    if (typeof value !== 'string') throw new BadRequestException('Invalid Meta signed request');
+    try {
+      const externalAccountId = this.signedRequest.parseUserId(value);
+      await this.instagram.disconnectByExternalAccountId(externalAccountId);
+      return { received: true };
+    } catch {
+      throw new BadRequestException('Invalid Meta signed request');
+    }
+  }
+
+  @Post('data-deletion')
+  @HttpCode(200)
+  @Public()
+  @SkipCsrf()
+  async requestDataDeletion(@Body('signed_request') value: unknown) {
+    if (typeof value !== 'string') throw new BadRequestException('Invalid Meta signed request');
+    try {
+      const externalAccountId = this.signedRequest.parseUserId(value);
+      await this.instagram.disconnectByExternalAccountId(externalAccountId);
+      return this.deletionReceipt.create(externalAccountId);
+    } catch {
+      throw new BadRequestException('Invalid Meta signed request');
+    }
   }
 
   @Post('cleanup')
