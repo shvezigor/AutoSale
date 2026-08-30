@@ -20,17 +20,37 @@ const initial = (overrides: Partial<InstagramConnectionSummary> = {}): Instagram
   ...overrides,
 });
 
+function startMetaAuthorization() {
+  fireEvent.click(screen.getByRole('button', { name: 'Підключити Instagram' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Продовжити' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Підключити через Meta' }));
+}
+
 afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
 });
 
 describe('InstagramSettingsForm', () => {
-  it('offers an owner a connection button when Instagram is not connected', () => {
+  it('guides an owner through preparation before starting Meta authorization', () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
     render(<InstagramSettingsForm initial={initial()} membershipRole="OWNER" />);
 
     expect(screen.getByRole('button', { name: 'Підключити Instagram' })).toBeInTheDocument();
-    expect(screen.queryByLabelText('Instagram Account ID')).not.toBeInTheDocument();
+    expect(screen.queryByRole('dialog', { name: 'Підключення Instagram' })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Підключити Instagram' }));
+
+    expect(screen.getByRole('dialog', { name: 'Підключення Instagram' })).toBeInTheDocument();
+    expect(screen.getByText('Професійний акаунт')).toBeInTheDocument();
+    expect(screen.getByText('Безпечний вхід через Meta')).toBeInTheDocument();
+    expect(fetchMock).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Продовжити' }));
+
+    expect(screen.getByText('Дозволи та вибір акаунта')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Підключити через Meta' })).toBeInTheDocument();
   });
 
   it('shows the connected username and most recent verification for an active connection', () => {
@@ -64,7 +84,7 @@ describe('InstagramSettingsForm', () => {
     vi.stubGlobal('fetch', fetchMock);
     render(<InstagramSettingsForm initial={initial()} membershipRole="OWNER" />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Підключити Instagram' }));
+    startMetaAuthorization();
 
     await waitFor(() => expect(screen.getByRole('region', { name: 'Instagram' })).toHaveAttribute('aria-busy', 'true'));
     expect(screen.getByRole('status')).toHaveTextContent('Підключення…');
@@ -243,7 +263,7 @@ describe('InstagramSettingsForm', () => {
     vi.stubGlobal('fetch', fetchMock);
     render(<InstagramSettingsForm initial={initial()} membershipRole="OWNER" />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Підключити Instagram' }));
+    startMetaAuthorization();
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Не вдалося розпочати підключення Instagram');
     expect(fetchMock).toHaveBeenCalledWith(

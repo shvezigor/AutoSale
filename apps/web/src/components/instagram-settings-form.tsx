@@ -10,6 +10,7 @@ export type InstagramConnectionSummary = ContractInstagramConnectionSummary;
 type MembershipRole = 'OWNER' | 'MANAGER' | null;
 type Message = { kind: 'success' | 'error'; text: string } | null;
 type PendingAction = 'connect' | 'disconnect' | 'cleanup' | 'deadLetter' | null;
+type WizardStep = 'prepare' | 'authorize' | null;
 
 const META_AUTHORIZATION_ORIGIN = 'https://www.instagram.com';
 const CONNECTION_STATUSES = new Set<InstagramConnectionSummary['status']>([
@@ -33,6 +34,7 @@ export function InstagramSettingsForm({
   const [pendingAction, setPendingAction] = useState<PendingAction>(null);
   const [confirmingDisconnect, setConfirmingDisconnect] = useState(false);
   const [confirmingDeadLetter, setConfirmingDeadLetter] = useState(false);
+  const [wizardStep, setWizardStep] = useState<WizardStep>(null);
   const isOwner = membershipRole === 'OWNER';
   const pending = pendingAction !== null;
   const cleanupPending = isCleanupPending(connection);
@@ -141,10 +143,46 @@ export function InstagramSettingsForm({
     {membershipRole === 'MANAGER' && <p className="sheets-hint">Перегляд доступний. Змінювати підключення може власник організації.</p>}
 
     {isOwner && <div className="settings-actions instagram-connection-actions">
-      {actionLabel && !cleanupPending && <button disabled={pending} onClick={() => void connect()} type="button">{actionLabel}</button>}
+      {actionLabel && !cleanupPending && wizardStep === null && <button disabled={pending} onClick={() => setWizardStep('prepare')} type="button">{actionLabel}</button>}
       {cleanupPending && <button disabled={pending} onClick={() => void retryCleanup()} type="button">Повторити очищення</button>}
       {cleanupCanBeAbandoned && !confirmingDeadLetter && <button className="secondary-button" disabled={pending} onClick={() => { setConfirmingDisconnect(false); setConfirmingDeadLetter(true); }} type="button">Розблокувати підключення</button>}
       {canDisconnect(connection.status) && !confirmingDisconnect && <button className="danger-button" disabled={pending} onClick={() => setConfirmingDisconnect(true)} type="button">Відключити Instagram</button>}
+      {wizardStep && <div className="instagram-connect-wizard" role="dialog" aria-labelledby="instagram-wizard-title">
+        <div className="instagram-wizard-progress" aria-label="Прогрес підключення">
+          <span className={wizardStep === 'prepare' ? 'is-current' : 'is-complete'}>1</span>
+          <i />
+          <span className={wizardStep === 'authorize' ? 'is-current' : ''}>2</span>
+          <i />
+          <span>3</span>
+        </div>
+        {wizardStep === 'prepare' ? <>
+          <div className="instagram-wizard-copy">
+            <small>Крок 1 із 3</small>
+            <h3 id="instagram-wizard-title">Підключення Instagram</h3>
+            <p>Перед початком переконайтеся, що акаунт готовий. Жодні ключі або токени вводити вручну не потрібно.</p>
+          </div>
+          <ul className="instagram-wizard-checklist">
+            <li><strong>Професійний акаунт</strong><span>Instagram Business або Creator.</span></li>
+            <li><strong>Доступ власника</strong><span>Увійдіть у Meta під користувачем, який керує цим акаунтом.</span></li>
+            <li><strong>Безпечний вхід через Meta</strong><span>Пароль передається тільки Meta та не потрапляє в AutoSale.</span></li>
+          </ul>
+          <div className="instagram-wizard-actions">
+            <button className="secondary-button" onClick={() => setWizardStep(null)} type="button">Скасувати</button>
+            <button onClick={() => setWizardStep('authorize')} type="button">Продовжити</button>
+          </div>
+        </> : <>
+          <div className="instagram-wizard-copy">
+            <small>Крок 2 із 3</small>
+            <h3 id="instagram-wizard-title">Дозволи та вибір акаунта</h3>
+            <p>Meta відкриється в захищеному вікні. Виберіть потрібний Instagram-акаунт і дозвольте отримання повідомлень. Після повернення AutoSale автоматично перевірить та збереже підключення.</p>
+          </div>
+          <div className="instagram-wizard-note"><strong>Що буде збережено</strong><span>Ідентифікатор акаунта, дозволи та зашифрований токен доступу лише для вашої організації.</span></div>
+          <div className="instagram-wizard-actions">
+            <button className="secondary-button" disabled={pending} onClick={() => setWizardStep('prepare')} type="button">Назад</button>
+            <button disabled={pending} onClick={() => void connect()} type="button">Підключити через Meta</button>
+          </div>
+        </>}
+      </div>}
       {confirmingDisconnect && <div className="instagram-disconnect-confirmation" role="alert">
         <span>Відключити Instagram? Повторне підключення знадобиться для нових повідомлень.</span>
         <div>
