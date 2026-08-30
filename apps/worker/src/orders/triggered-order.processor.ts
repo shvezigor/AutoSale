@@ -77,9 +77,10 @@ export class TriggeredOrderProcessor {
       );
       const autoApproved = result.status === 'AUTO_APPROVED';
 
-      const updated = await this.prisma.order.update({
-        where: { id: order.id },
-        data: {
+      const updated = await this.prisma.$transaction(async (transaction) => {
+        const persisted = await transaction.order.update({
+          where: { id: order.id },
+          data: {
           status: result.status,
           extraction: result.order as Prisma.InputJsonObject,
           validationIssues: result.validationIssues,
@@ -90,17 +91,15 @@ export class TriggeredOrderProcessor {
           outputTokens: result.metadata.outputTokens,
           approvedAt: autoApproved ? new Date() : null,
           approvedBy: autoApproved ? 'SYSTEM' : null,
-          items: {
-            create: result.order.items.map((item) => ({
-              catalogId: item.catalogId,
-              originalText: item.originalText,
-              quantity: item.quantity,
-              color: item.color,
-              size: item.size,
-              confidence: item.confidence,
-            })),
           },
-        },
+        });
+        for (const item of result.order.items) {
+          await transaction.$executeRaw(Prisma.sql`
+            INSERT INTO "order_items" ("id", "order_id", "catalog_id", "original_text", "quantity", "color", "size", "confidence")
+            VALUES (gen_random_uuid(), ${order.id}::uuid, ${item.catalogId}, ${item.originalText}, ${item.quantity}, ${item.color}, ${item.size}, ${item.confidence})
+          `);
+        }
+        return persisted;
       });
       if (autoApproved) {
         await this.scheduleExport?.(order.id, trigger.tenantId);

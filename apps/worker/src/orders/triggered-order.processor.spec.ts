@@ -151,8 +151,12 @@ describe('TriggeredOrderProcessor', () => {
       status: 'AUTO_APPROVED',
       approvedBy: 'SYSTEM',
       aiResponseId: 'resp-order',
-      items: [{ catalogId: 'SKU-1', quantity: 1, size: 'M' }],
+      items: [{ catalogId: 'SKU-1', size: 'M' }],
     });
+    const persistedItems = await prisma.$queryRaw<Array<{ quantity: number }>>(
+      Prisma.sql`SELECT "quantity" FROM "order_items" WHERE "order_id" = ${first!.id}::uuid`,
+    );
+    expect(persistedItems).toEqual([{ quantity: 1 }]);
     expect(recognize).toHaveBeenCalledTimes(1);
     expect(telemetry).toHaveBeenCalledWith('ai_order_recognition_completed', expect.objectContaining({ orderId: first!.id, result: 'AUTO_APPROVED' }));
   });
