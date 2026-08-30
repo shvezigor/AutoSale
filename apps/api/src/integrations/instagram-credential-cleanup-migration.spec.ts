@@ -95,7 +95,7 @@ describe('Instagram credential cleanup migration', () => {
           '2026-10-27T12:00:00.000Z',
           'instagram_business_basic,instagram_business_manage_messages',
           NULL,
-          $3,
+          $4,
           NULL,
           CURRENT_TIMESTAMP
         ),
@@ -109,7 +109,7 @@ describe('Instagram credential cleanup migration', () => {
           '2026-10-27T12:00:00.000Z',
           'instagram_business_basic,instagram_business_manage_messages',
           'META_DISCONNECT_CLEANUP_FAILED',
-          $3,
+          $4,
           '2026-08-28T12:00:00.000Z',
           CURRENT_TIMESTAMP
         ),
