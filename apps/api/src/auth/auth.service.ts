@@ -20,12 +20,13 @@ export class AuthService {
     private readonly now: () => Date = () => new Date(),
   ) {}
 
-  async register(input: RegisterRequest, _metadata: SessionMetadata): Promise<{ accepted: true }> {
+  async register(input: RegisterRequest, _metadata: SessionMetadata): Promise<{ accepted: true; previewUrl?: string }> {
     const normalizedEmail = input.email.trim().toLowerCase();
     const passwordHash = await this.crypto.hashPassword(input.password);
     const token = this.crypto.issueOpaqueToken(this.tokenPepper);
     const expiresAt = new Date(this.now().getTime() + TOKEN_TTL_MS);
     try {
+      let previewUrl: string | undefined;
       await this.prisma.$transaction(async (tx) => {
         const tenant = await tx.tenant.create({
           data: { key: `${slug(input.tenantName)}-${token.raw.slice(0, 8).toLowerCase()}`, name: input.tenantName.trim() },
@@ -39,9 +40,9 @@ export class AuthService {
         await tx.emailVerificationToken.create({
           data: { userId: user.id, tokenHash: token.hash, expiresAt },
         });
-        await this.email.sendVerification(normalizedEmail, `${this.publicUrl}/verify-email?token=${encodeURIComponent(token.raw)}`);
+        previewUrl = await this.email.sendVerification(normalizedEmail, `${this.publicUrl}/verify-email?token=${encodeURIComponent(token.raw)}`);
       });
-      return { accepted: true };
+      return { accepted: true, ...(previewUrl ? { previewUrl } : {}) };
     } catch (error) {
       if (error instanceof Error && error.message === 'Email delivery is not configured') {
         throw new ServiceUnavailableException('Email delivery is not configured');

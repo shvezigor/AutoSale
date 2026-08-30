@@ -10,6 +10,7 @@ import { OrdersModule } from './orders/orders.module.js';
 import { AuthModule } from './auth/auth.module.js';
 import { TeamModule } from './team/team.module.js';
 import { AdminModule } from './admin/admin.module.js';
+import { InstagramOAuthModule } from './integrations/instagram-oauth.module.js';
 
 @Module({
   controllers: [HealthController],
@@ -27,6 +28,7 @@ export class AppModule {
         MetaModule.register(env),
         OrderSettingsModule.register(env),
         OrdersModule.register(env),
+        InstagramOAuthModule.register(env),
       ],
     };
   }

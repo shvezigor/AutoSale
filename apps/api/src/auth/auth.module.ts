@@ -9,7 +9,7 @@ import { AuthGuard } from './auth.guard.js';
 import { AuthService } from './auth.service.js';
 import { CryptoService } from './crypto.service.js';
 import { CsrfService } from './csrf.service.js';
-import { DevelopmentEmailDelivery, UnavailableEmailDelivery } from './email-delivery.js';
+import { createEmailDelivery } from './email-delivery.js';
 import { RateLimitService, RedisRateLimitStore } from './rate-limit.service.js';
 import { SessionService } from './session.service.js';
 
@@ -22,7 +22,7 @@ export class AuthModule {
     const csrf = new CsrfService(env.SESSION_PEPPER);
     const redis = new Redis(env.REDIS_URL, { lazyConnect: true, maxRetriesPerRequest: 1 });
     const rateLimit = new RateLimitService(new RedisRateLimitStore(redis), env.AUTH_TOKEN_PEPPER);
-    const email = env.NODE_ENV === 'production' ? new UnavailableEmailDelivery() : new DevelopmentEmailDelivery();
+    const email = createEmailDelivery(env);
     const auth = new AuthService(prisma, crypto, sessions, email, env.AUTH_TOKEN_PEPPER, env.APP_PUBLIC_URL);
     return {
       module: AuthModule,
