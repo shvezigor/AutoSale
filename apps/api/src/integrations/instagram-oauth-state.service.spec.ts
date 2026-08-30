@@ -51,14 +51,16 @@ class OAuthStateStore {
   readonly rows: OAuthStateRow[] = [];
   readonly auditRows: Array<{ tenantId: string; userId: string; actor: string; action: string; result: string; metadata: Record<string, never> }> = [];
   connectionRow: { status: string; encryptedAccessToken: string | null } | null = null;
-  cleanupRow: { id: string } | null = null;
+  cleanupRow: { id: string; terminalAt?: Date | null } | null = null;
 
   readonly prisma: OAuthStatePrisma = {
     instagramConnection: {
       findUnique: async () => this.connectionRow,
     },
     instagramCredentialCleanup: {
-      findFirst: async () => this.cleanupRow,
+        findFirst: async () => this.cleanupRow && this.cleanupRow.terminalAt !== undefined && this.cleanupRow.terminalAt !== null
+          ? null
+          : this.cleanupRow,
     },
     instagramOAuthState: {
       create: async ({ data }: { data: Omit<OAuthStateRow, 'usedAt'> & { usedAt?: Date | null } }) => {
@@ -171,6 +173,16 @@ describe('InstagramOAuthStateService', () => {
     store.cleanupRow = null;
     await expect(service.create({ tenantId: 'tenant-a', userId: 'user-a' })).resolves.toEqual(expect.any(String));
     expect(store.rows).toHaveLength(1);
+  });
+
+  it('allows reconnect after cleanup is terminally abandoned', async () => {
+    const { service, store } = createService();
+    store.connectionRow = { status: 'DISCONNECTED', encryptedAccessToken: null };
+    store.cleanupRow = { id: 'cleanup-a', terminalAt: new Date('2026-08-28T12:00:00.000Z') };
+
+    await expect(service.create({ tenantId: 'tenant-a', userId: 'user-a' })).resolves.toEqual(expect.any(String));
+    expect(store.rows).toHaveLength(1);
+    expect(store.auditRows[0]?.action).toBe('INSTAGRAM_CONNECT_STARTED');
   });
 
   it.each([

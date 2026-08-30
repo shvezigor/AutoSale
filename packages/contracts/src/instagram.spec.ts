@@ -20,6 +20,7 @@ describe('instagramConnectionSummarySchema', () => {
       lastErrorCode: null,
       cleanupStatus: 'NONE',
       cleanupErrorCode: null,
+      cleanupAbandonEligible: false,
     };
 
     expect(instagramConnectionSummarySchema.parse(summary)).toEqual(summary);
@@ -35,6 +36,7 @@ describe('instagramConnectionSummarySchema', () => {
       lastErrorCode: null,
       cleanupStatus: 'NONE',
       cleanupErrorCode: null,
+      cleanupAbandonEligible: false,
     };
 
     expect(instagramConnectionSummarySchema.parse(summary)).toEqual(summary);
@@ -51,6 +53,7 @@ describe('instagramConnectionSummarySchema', () => {
         lastErrorCode: null,
         cleanupStatus: 'NONE',
         cleanupErrorCode: null,
+        cleanupAbandonEligible: false,
       }),
     ).toThrow();
   });
@@ -65,6 +68,7 @@ describe('instagramConnectionSummarySchema', () => {
       lastErrorCode: null,
       cleanupStatus,
       cleanupErrorCode: cleanupStatus === 'FAILED' ? 'META_DISCONNECT_CLEANUP_FAILED' : null,
+      cleanupAbandonEligible: cleanupStatus === 'FAILED',
     };
 
     expect(instagramConnectionSummarySchema.parse(summary)).toEqual(summary);
@@ -81,6 +85,7 @@ describe('instagramConnectionSummarySchema', () => {
         lastErrorCode: null,
         cleanupStatus: 'NONE',
         cleanupErrorCode: null,
+        cleanupAbandonEligible: false,
         encryptedAccessToken: 'v1.secret',
       }),
     ).toThrow();

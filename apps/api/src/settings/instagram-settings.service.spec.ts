@@ -30,6 +30,7 @@ describe('InstagramSettingsService', () => {
       lastErrorCode: null,
       cleanupStatus: 'NONE',
       cleanupErrorCode: null,
+      cleanupAbandonEligible: false,
     });
     expect(summary).not.toHaveProperty('encryptedAccessToken');
     expect(findUnique).toHaveBeenCalledWith(expect.objectContaining({ where: { tenantId: 'tenant-a' } }));
@@ -52,6 +53,9 @@ describe('InstagramSettingsService', () => {
           unsubscribeStatus: 'SUCCEEDED',
           revokeStatus: 'FAILED',
           lastErrorCode: 'META_DISCONNECT_CLEANUP_FAILED',
+          attempts: 3,
+          leaseId: null,
+          leaseExpiresAt: null,
         }]),
       },
     } as unknown as PrismaClient);
@@ -61,6 +65,7 @@ describe('InstagramSettingsService', () => {
       accountId: '17841499999999999',
       cleanupStatus: 'FAILED',
       cleanupErrorCode: 'META_DISCONNECT_CLEANUP_FAILED',
+      cleanupAbandonEligible: true,
       lastErrorCode: null,
     });
   });

@@ -16,6 +16,15 @@ const REQUIRED_SCOPES = [
 ] as const;
 const SAFE_FAILURE_MESSAGE = 'Instagram connection failed';
 const CLEANUP_FAILED_CODE = 'META_DISCONNECT_CLEANUP_FAILED';
+const CLEANUP_PERMANENT_FAILURE_CODE = 'META_CLEANUP_PERMANENT_FAILURE';
+const CLEANUP_DEAD_LETTERED_CODE = 'META_CLEANUP_DEAD_LETTERED';
+export const INSTAGRAM_CLEANUP_ABANDON_CONFIRMATION = 'ABANDON_REMOTE_CLEANUP';
+export const INSTAGRAM_CLEANUP_ABANDON_AFTER_ATTEMPTS = 3;
+// Meta documents code 10 as a permission-denied Graph error. It is the only
+// cleanup failure we currently have enough provider evidence to abandon as
+// permanent; all other coded client errors stay retryable unless they are a
+// verified revoke of an unusable credential (code 190 below).
+const CLEANUP_PERMANENT_PROVIDER_CODES = new Set([10]);
 const CLEANUP_LEASE_MS = 5 * 60 * 1000;
 const CLEANUP_RETRY_BATCH_LIMIT = 25;
 
@@ -33,15 +42,19 @@ const CLEANUP_CONNECTION_SELECT = {
   id: true,
   tenantId: true,
   encryptedAccessToken: true,
+  credentialGenerationId: true,
   disconnectedAt: true,
 } as const;
 
 const CLEANUP_ROW_SELECT = {
   id: true,
+  credentialGenerationId: true,
   tenantId: true,
   externalAccountId: true,
   encryptedAccessToken: true,
   source: true,
+  state: true,
+  callbackResolvedAt: true,
   unsubscribeStatus: true,
   revokeStatus: true,
   attempts: true,
@@ -49,12 +62,19 @@ const CLEANUP_ROW_SELECT = {
   leaseExpiresAt: true,
   version: true,
   lastErrorCode: true,
+  permanentFailureAt: true,
+  deadLetteredAt: true,
+  deadLetteredByUserId: true,
   terminalAt: true,
+  createdAt: true,
 } as const;
 
 const CLEANUP_SUMMARY_SELECT = {
   unsubscribeStatus: true,
   revokeStatus: true,
+  attempts: true,
+  leaseId: true,
+  leaseExpiresAt: true,
   lastErrorCode: true,
 } as const;
 
@@ -70,27 +90,36 @@ type SafeConnectionRow = {
 type OAuthBinding = { id: string; tenantId: string; userId: string; returnPath?: string };
 
 type CleanupOperationStatus = 'PENDING' | 'SUCCEEDED' | 'FAILED';
+type CleanupState = 'ARMED' | 'REQUIRED' | 'COMPLETED' | 'CANCELLED' | 'DEAD_LETTER';
 type CleanupPublicStatus = 'NONE' | 'PENDING' | 'FAILED';
 type CleanupOperation = 'UNSUBSCRIBE' | 'REVOKE';
 type CleanupSource = 'DISCONNECT' | 'CALLBACK_COMPENSATION' | 'SUBSCRIPTION_FAILURE';
+type CleanupFailureResolution = 'SUCCEEDED' | 'RETRYABLE' | 'PERMANENT';
 
 type CleanupSummary = {
   status: CleanupPublicStatus;
   errorCode: string | null;
+  abandonEligible: boolean;
 };
 
 type CleanupSummaryRow = {
   unsubscribeStatus: CleanupOperationStatus;
   revokeStatus: CleanupOperationStatus;
+  attempts: number;
+  leaseId: string | null;
+  leaseExpiresAt: Date | null;
   lastErrorCode: string | null;
 };
 
 type CleanupRow = {
   id: string;
+  credentialGenerationId: string;
   tenantId: string;
   externalAccountId: string;
   encryptedAccessToken: string;
   source: string;
+  state: CleanupState;
+  callbackResolvedAt: Date | null;
   unsubscribeStatus: CleanupOperationStatus;
   revokeStatus: CleanupOperationStatus;
   attempts: number;
@@ -98,7 +127,11 @@ type CleanupRow = {
   leaseExpiresAt: Date | null;
   version: number;
   lastErrorCode: string | null;
+  permanentFailureAt: Date | null;
+  deadLetteredAt: Date | null;
+  deadLetteredByUserId: string | null;
   terminalAt: Date | null;
+  createdAt: Date;
 };
 
 type LeasedCleanupRow = CleanupRow & {
@@ -107,6 +140,7 @@ type LeasedCleanupRow = CleanupRow & {
 };
 
 type PendingCredential = {
+  credentialGenerationId: string;
   externalAccountId: string;
   encryptedAccessToken: string;
 };
@@ -120,6 +154,7 @@ export type InstagramConnectionSummary = {
   lastErrorCode: string | null;
   cleanupStatus: CleanupPublicStatus;
   cleanupErrorCode: string | null;
+  cleanupAbandonEligible: boolean;
 };
 
 export class InstagramOAuthService {
@@ -232,6 +267,7 @@ export class InstagramOAuthService {
     }
 
     const pendingCredential = {
+      credentialGenerationId: randomUUID(),
       externalAccountId: identity.accountId,
       encryptedAccessToken: this.cipher.encrypt(accessToken),
     };
@@ -240,6 +276,7 @@ export class InstagramOAuthService {
       displayName: identity.username,
       status: 'ERROR' as const,
       encryptedAccessToken: pendingCredential.encryptedAccessToken,
+      credentialGenerationId: pendingCredential.credentialGenerationId,
       tokenExpiresAt: new Date(connectedAt.getTime() + expiresIn * 1000),
       grantedScopes: grantedScopes.join(','),
       lastVerifiedAt: null,
@@ -257,6 +294,24 @@ export class InstagramOAuthService {
           create: { tenantId: binding.tenantId, ...pendingData },
           update: pendingData,
         });
+        await transaction.instagramCredentialCleanup.create({
+          data: {
+            credentialGenerationId: pendingCredential.credentialGenerationId,
+            tenantId: binding.tenantId,
+            externalAccountId: pendingCredential.externalAccountId,
+            encryptedAccessToken: pendingCredential.encryptedAccessToken,
+            source: 'CALLBACK_PREARM',
+            state: 'ARMED',
+            callbackResolvedAt: null,
+          },
+          select: CLEANUP_ROW_SELECT,
+        });
+        await this.recordAudit(
+          transaction,
+          binding,
+          'INSTAGRAM_CREDENTIAL_CLEANUP_QUEUED',
+          'SUCCESS',
+        );
       });
     } catch {
       // A concurrent unique-account claim must never overwrite the owning tenant.
@@ -267,22 +322,45 @@ export class InstagramOAuthService {
     try {
       await this.meta.subscribe(accessToken);
     } catch {
-      const cleanup = await this.enqueueCallbackCleanup(
-        binding,
-        pendingCredential,
-        'SUBSCRIPTION_FAILURE',
-        'META_SUBSCRIPTION_FAILED',
-      );
-      if (cleanup) await this.cleanupCredentialById(cleanup.id, binding.userId);
-      await this.markCallbackFailure(binding, 'ERROR', 'META_SUBSCRIPTION_FAILED');
+      try {
+        const cleanup = await this.requireCallbackCleanup(
+          binding,
+          pendingCredential,
+          'SUBSCRIPTION_FAILURE',
+          'META_SUBSCRIPTION_FAILED',
+        );
+        await this.cleanupCredentialById(cleanup.id, binding.userId);
+      } finally {
+        // Even if a transient cleanup persistence/read failure prevents the
+        // inline retry, keep the callback outcome safe and auditable. The
+        // pre-armed row remains the durable recovery record.
+        await this.markCallbackFailure(binding, 'ERROR', 'META_SUBSCRIPTION_FAILED');
+      }
       throw safeFailure();
     }
 
     let active: SafeConnectionRow;
     try {
-      active = await this.withCurrentAttempt(binding, (transaction) => {
+      active = await this.withCurrentAttempt(binding, async (transaction) => {
         if (pendingData.tokenExpiresAt <= this.now()) throw safeFailure();
-        return transaction.instagramConnection.update({
+        const resolvedCleanup = await transaction.instagramCredentialCleanup.updateMany({
+          where: {
+            credentialGenerationId: pendingCredential.credentialGenerationId,
+            state: 'ARMED',
+            terminalAt: null,
+          },
+          data: {
+            state: 'CANCELLED',
+            callbackResolvedAt: connectedAt,
+            terminalAt: connectedAt,
+            lastErrorCode: null,
+            leaseId: null,
+            leaseExpiresAt: null,
+            version: { increment: 1 },
+          },
+        });
+        if (resolvedCleanup.count !== 1) throw safeFailure();
+        const connection = await transaction.instagramConnection.update({
           where: { tenantId: binding.tenantId },
           data: {
             status: 'ACTIVE',
@@ -291,20 +369,22 @@ export class InstagramOAuthService {
             disconnectedAt: null,
           },
           select: SAFE_CONNECTION_SELECT,
-        }).then(async (connection) => {
-          await this.recordAudit(transaction, binding, 'INSTAGRAM_CONNECTED', 'SUCCESS');
-          return connection;
         });
+        await this.recordAudit(transaction, binding, 'INSTAGRAM_CONNECTED', 'SUCCESS');
+        return connection;
       });
     } catch {
-      const cleanup = await this.enqueueCallbackCleanup(
-        binding,
-        pendingCredential,
-        'CALLBACK_COMPENSATION',
-        'META_ACTIVATION_FAILED',
-      );
-      if (cleanup) await this.cleanupCredentialById(cleanup.id, binding.userId);
-      await this.recordAuditBestEffort(binding, 'INSTAGRAM_CALLBACK_FAILED', 'FAILURE', { errorCode: 'META_ACTIVATION_FAILED' });
+      try {
+        const cleanup = await this.requireCallbackCleanup(
+          binding,
+          pendingCredential,
+          'CALLBACK_COMPENSATION',
+          'META_ACTIVATION_FAILED',
+        );
+        await this.cleanupCredentialById(cleanup.id, binding.userId);
+      } finally {
+        await this.recordAuditBestEffort(binding, 'INSTAGRAM_CALLBACK_FAILED', 'FAILURE', { errorCode: 'META_ACTIVATION_FAILED' });
+      }
       throw safeFailure();
     }
 
@@ -321,7 +401,100 @@ export class InstagramOAuthService {
   }
 
   async retryCleanup(tenantId: string, userId: string): Promise<InstagramConnectionSummary> {
+    await this.recoverUnresolvedCleanups(tenantId);
     await this.cleanupAvailableCredentials(tenantId, userId);
+    return this.getSummary(tenantId);
+  }
+
+  async deadLetterCleanup(
+    tenantId: string,
+    userId: string,
+    confirmation: string,
+  ): Promise<InstagramConnectionSummary> {
+    if (confirmation !== INSTAGRAM_CLEANUP_ABANDON_CONFIRMATION) throw safeFailure();
+    await this.withSerializableRetry(() => this.prisma.$transaction(async (transaction) => {
+      const failed = await transaction.instagramCredentialCleanup.findMany({
+        where: { tenantId, terminalAt: null },
+        select: {
+          id: true,
+          credentialGenerationId: true,
+          permanentFailureAt: true,
+          unsubscribeStatus: true,
+          revokeStatus: true,
+          attempts: true,
+          leaseId: true,
+          leaseExpiresAt: true,
+        },
+      });
+      const eligible = failed.filter((cleanup) =>
+        cleanup.permanentFailureAt !== null || isCleanupAbandonEligible(cleanup));
+      if (eligible.length === 0) throw safeFailure();
+
+      const deadLetteredAt = this.now();
+      const generations: string[] = [];
+      let permanentDeadLettered = false;
+      let retryableDeadLettered = false;
+      for (const cleanup of eligible) {
+        const firstOperation = firstIncompleteOperation(cleanup);
+        const operationWhere = cleanup.permanentFailureAt !== null
+          ? { permanentFailureAt: { not: null } }
+          : firstOperation === 'UNSUBSCRIBE'
+            ? { unsubscribeStatus: 'FAILED' as const }
+            : { unsubscribeStatus: 'SUCCEEDED' as const, revokeStatus: 'FAILED' as const };
+        const attemptWhere = cleanup.permanentFailureAt === null
+          ? { attempts: { gte: INSTAGRAM_CLEANUP_ABANDON_AFTER_ATTEMPTS } }
+          : {};
+        const updated = await transaction.instagramCredentialCleanup.updateMany({
+          where: {
+            id: cleanup.id,
+            state: 'REQUIRED',
+            terminalAt: null,
+            leaseId: null,
+            leaseExpiresAt: null,
+            ...attemptWhere,
+            ...operationWhere,
+          },
+          data: {
+            state: 'DEAD_LETTER',
+            terminalAt: deadLetteredAt,
+            deadLetteredAt,
+            deadLetteredByUserId: userId,
+            lastErrorCode: CLEANUP_DEAD_LETTERED_CODE,
+            leaseId: null,
+            leaseExpiresAt: null,
+            version: { increment: 1 },
+          },
+        });
+        if (updated.count === 1) {
+          generations.push(cleanup.credentialGenerationId);
+          if (cleanup.permanentFailureAt !== null) permanentDeadLettered = true;
+          else retryableDeadLettered = true;
+        }
+      }
+      if (generations.length === 0) throw safeFailure();
+
+      await transaction.instagramConnection.updateMany({
+        where: {
+          tenantId,
+          status: 'DISCONNECTED',
+          credentialGenerationId: { in: generations },
+        },
+        data: { lastErrorCode: CLEANUP_DEAD_LETTERED_CODE },
+      });
+      await this.recordAudit(
+        transaction,
+        { tenantId, userId },
+        'INSTAGRAM_CREDENTIAL_CLEANUP_DEAD_LETTERED',
+        'SUCCESS',
+        {
+          errorCode: permanentDeadLettered && retryableDeadLettered
+            ? CLEANUP_DEAD_LETTERED_CODE
+            : permanentDeadLettered
+              ? CLEANUP_PERMANENT_FAILURE_CODE
+              : CLEANUP_FAILED_CODE,
+        },
+      );
+    }, { isolationLevel: 'Serializable' }));
     return this.getSummary(tenantId);
   }
 
@@ -362,6 +535,12 @@ export class InstagramOAuthService {
       }
 
       if (connection.encryptedAccessToken === null) {
+        const existingCleanup = connection.credentialGenerationId === null
+          ? null
+          : await transaction.instagramCredentialCleanup.findUnique({
+            where: { credentialGenerationId: connection.credentialGenerationId },
+            select: CLEANUP_ROW_SELECT,
+          });
         await transaction.instagramConnection.update({
           where: { id: connection.id },
           data: {
@@ -374,6 +553,7 @@ export class InstagramOAuthService {
           },
           select: SAFE_CONNECTION_SELECT,
         });
+        if (existingCleanup?.terminalAt === null) return existingCleanup.id;
         await this.recordAudit(
           transaction,
           { tenantId, userId },
@@ -383,11 +563,17 @@ export class InstagramOAuthService {
         return null;
       }
 
+      const credentialGenerationId = connection.credentialGenerationId ?? randomUUID();
+      const existingCleanup = await transaction.instagramCredentialCleanup.findUnique({
+        where: { credentialGenerationId },
+        select: CLEANUP_ROW_SELECT,
+      });
       await transaction.instagramConnection.update({
         where: { id: connection.id },
         data: {
           status: 'DISCONNECTED',
           encryptedAccessToken: null,
+          credentialGenerationId,
           tokenExpiresAt: null,
           grantedScopes: null,
           disconnectedAt,
@@ -395,15 +581,50 @@ export class InstagramOAuthService {
         },
         select: SAFE_CONNECTION_SELECT,
       });
-      const cleanup = await transaction.instagramCredentialCleanup.create({
-        data: {
-          tenantId,
-          externalAccountId: connection.externalAccountId,
-          encryptedAccessToken: connection.encryptedAccessToken,
-          source: 'DISCONNECT',
-        },
-        select: CLEANUP_ROW_SELECT,
-      });
+      const cleanup = existingCleanup === null
+        ? await transaction.instagramCredentialCleanup.create({
+          data: {
+            credentialGenerationId,
+            tenantId,
+            externalAccountId: connection.externalAccountId,
+            encryptedAccessToken: connection.encryptedAccessToken,
+            source: 'DISCONNECT',
+            state: 'REQUIRED',
+            callbackResolvedAt: disconnectedAt,
+          },
+          select: CLEANUP_ROW_SELECT,
+        })
+        : (await transaction.instagramCredentialCleanup.updateManyAndReturn({
+          where: { credentialGenerationId },
+          data: {
+            // A pre-armed row has to remain unresolved until the callback has
+            // finished its in-flight subscribe call. For an already-required
+            // row, retain operation progress and any active lease; disconnect
+            // must reuse the generation rather than reset or duplicate it.
+            source: existingCleanup.source === 'CALLBACK_PREARM' ? 'DISCONNECT' : existingCleanup.source,
+            state: 'REQUIRED',
+            terminalAt: null,
+            ...(existingCleanup.terminalAt !== null
+              ? {
+                unsubscribeStatus: 'PENDING' as const,
+                unsubscribeAttemptedAt: null,
+                unsubscribeSucceededAt: null,
+                revokeStatus: 'PENDING' as const,
+                revokeAttemptedAt: null,
+                revokeSucceededAt: null,
+                lastErrorCode: null,
+                permanentFailureAt: null,
+                deadLetteredAt: null,
+                deadLetteredByUserId: null,
+                leaseId: null,
+                leaseExpiresAt: null,
+              }
+              : {}),
+            version: { increment: 1 },
+          },
+          select: CLEANUP_ROW_SELECT,
+        }))[0];
+      if (!cleanup) throw safeFailure();
       await this.recordAudit(
         transaction,
         { tenantId, userId },
@@ -414,54 +635,119 @@ export class InstagramOAuthService {
     }, { isolationLevel: 'Serializable' }));
   }
 
-  private async enqueueCallbackCleanup(
+  private async requireCallbackCleanup(
     binding: OAuthBinding,
     credential: PendingCredential,
     source: Exclude<CleanupSource, 'DISCONNECT'>,
     lastErrorCode: string,
-  ): Promise<CleanupRow | null> {
-    try {
-      const cleanup = await this.withSerializableRetry(() => this.prisma.$transaction(async (transaction) => {
-        const row = await transaction.instagramCredentialCleanup.create({
-          data: {
-            tenantId: binding.tenantId,
-            externalAccountId: credential.externalAccountId,
-            encryptedAccessToken: credential.encryptedAccessToken,
-            source,
-          },
-          select: CLEANUP_ROW_SELECT,
-        });
-        await transaction.instagramConnection.updateMany({
-          where: {
-            tenantId: binding.tenantId,
-            encryptedAccessToken: credential.encryptedAccessToken,
-            status: { not: 'ACTIVE' },
-          },
-          data: {
-            encryptedAccessToken: null,
-            tokenExpiresAt: null,
-            grantedScopes: null,
-            lastErrorCode,
-          },
-        });
-        return row;
-      }, { isolationLevel: 'Serializable' }));
+  ): Promise<CleanupRow> {
+    const cleanup = await this.withSerializableRetry(() => this.prisma.$transaction(async (transaction) => {
+      const existing = await transaction.instagramCredentialCleanup.findUnique({
+        where: { credentialGenerationId: credential.credentialGenerationId },
+        select: CLEANUP_ROW_SELECT,
+      });
+      if (!existing) throw safeFailure();
+
+      // Cleanup may have recovered and completed while the callback was
+      // unwinding. Never resurrect a terminal generation or replay its remote
+      // effects merely because the losing callback noticed its stale attempt.
+      if (existing.terminalAt !== null) return existing;
+
+      const resolvedAt = existing.callbackResolvedAt ?? this.now();
+      const rows = await transaction.instagramCredentialCleanup.updateManyAndReturn({
+        where: {
+          credentialGenerationId: credential.credentialGenerationId,
+          tenantId: binding.tenantId,
+          terminalAt: null,
+          state: { in: ['ARMED', 'REQUIRED'] },
+        },
+        data: {
+          // Disconnect wins the callback/disconnect race and owns the reason
+          // for the single generation row. Preserve that source in the late
+          // callback path; otherwise record the callback's failure source.
+          source: existing.source === 'DISCONNECT' ? existing.source : source,
+          state: 'REQUIRED',
+          callbackResolvedAt: resolvedAt,
+          lastErrorCode,
+          version: { increment: 1 },
+        },
+        select: CLEANUP_ROW_SELECT,
+      });
+      const row = rows[0];
+      if (!row) throw safeFailure();
+      await transaction.instagramConnection.updateMany({
+        where: {
+          tenantId: binding.tenantId,
+          credentialGenerationId: credential.credentialGenerationId,
+          status: { not: 'ACTIVE' },
+        },
+        data: {
+          encryptedAccessToken: null,
+          tokenExpiresAt: null,
+          grantedScopes: null,
+          lastErrorCode,
+        },
+      });
+      return row ?? existing;
+    }, { isolationLevel: 'Serializable' }));
+    if (cleanup.terminalAt === null) {
       await this.recordAuditBestEffort(
         binding,
         'INSTAGRAM_CREDENTIAL_CLEANUP_QUEUED',
         'SUCCESS',
         { errorCode: lastErrorCode },
       );
-      return cleanup;
-    } catch {
-      await this.recordAuditBestEffort(
-        binding,
-        'INSTAGRAM_CALLBACK_FAILED',
-        'FAILURE',
-        { errorCode: lastErrorCode },
-      );
-      return null;
     }
+    return cleanup;
+  }
+
+  private async recoverUnresolvedCleanups(tenantId: string): Promise<void> {
+    const recoveredAt = this.now();
+    const staleBefore = new Date(recoveredAt.getTime() - CLEANUP_LEASE_MS);
+    await this.withSerializableRetry(() => this.prisma.$transaction(async (transaction) => {
+      const unresolved = await transaction.instagramCredentialCleanup.findMany({
+        where: {
+          tenantId,
+          terminalAt: null,
+          callbackResolvedAt: null,
+          createdAt: { lt: staleBefore },
+          state: { in: ['ARMED', 'REQUIRED'] },
+        },
+        select: { credentialGenerationId: true },
+      });
+      const generations = unresolved.map((row) => row.credentialGenerationId);
+      if (generations.length === 0) return;
+
+      await transaction.instagramCredentialCleanup.updateMany({
+        where: {
+          credentialGenerationId: { in: generations },
+          tenantId,
+          terminalAt: null,
+          callbackResolvedAt: null,
+          state: { in: ['ARMED', 'REQUIRED'] },
+        },
+        data: {
+          source: 'OPERATOR_RECOVERY',
+          state: 'REQUIRED',
+          callbackResolvedAt: recoveredAt,
+          lastErrorCode: null,
+          version: { increment: 1 },
+        },
+      });
+      await transaction.instagramConnection.updateMany({
+        where: {
+          tenantId,
+          credentialGenerationId: { in: generations },
+          status: { not: 'ACTIVE' },
+        },
+        data: {
+          encryptedAccessToken: null,
+          tokenExpiresAt: null,
+          grantedScopes: null,
+          lastErrorCode: 'META_ACTIVATION_FAILED',
+        },
+      });
+    }, { isolationLevel: 'Serializable' }));
   }
 
   private async cleanupAvailableCredentials(tenantId: string, userId: string): Promise<void> {
@@ -485,7 +771,7 @@ export class InstagramOAuthService {
       where: { id: cleanupId },
       select: CLEANUP_ROW_SELECT,
     });
-    if (!row || row.terminalAt !== null) return null;
+    if (!row || row.terminalAt !== null || row.state !== 'REQUIRED' || row.callbackResolvedAt === null) return null;
     return this.leaseCleanupRow(row);
   }
 
@@ -494,6 +780,8 @@ export class InstagramOAuthService {
     const row = await this.prisma.instagramCredentialCleanup.findFirst({
       where: {
         tenantId,
+        state: 'REQUIRED',
+        callbackResolvedAt: { not: null },
         terminalAt: null,
         ...(excludedIds.length > 0 ? { id: { notIn: excludedIds } } : {}),
         OR: [{ leaseExpiresAt: null }, { leaseExpiresAt: { lt: checkedAt } }],
@@ -512,6 +800,8 @@ export class InstagramOAuthService {
       where: {
         id: row.id,
         version: row.version,
+        state: 'REQUIRED',
+        callbackResolvedAt: { not: null },
         terminalAt: null,
         OR: [{ leaseExpiresAt: null }, { leaseExpiresAt: { lt: leasedAt } }],
       },
@@ -533,11 +823,17 @@ export class InstagramOAuthService {
       'SUCCESS',
     );
 
+    const operation = firstIncompleteOperation(cleanup);
+    if (operation === null) {
+      await this.markCleanupCompleted(cleanup, userId);
+      return;
+    }
+
     let accessToken: string;
     try {
       accessToken = this.cipher.decrypt(cleanup.encryptedAccessToken);
     } catch {
-      await this.markCleanupFailed(cleanup, 'UNSUBSCRIBE', userId);
+      await this.markCleanupFailed(cleanup, operation, userId, false);
       return;
     }
 
@@ -548,9 +844,12 @@ export class InstagramOAuthService {
       current = attempted;
       try {
         await this.meta.unsubscribe(accessToken);
-      } catch {
-        await this.markCleanupFailed(current, 'UNSUBSCRIBE', userId);
-        return;
+      } catch (error) {
+        const resolution = classifyCleanupFailure('UNSUBSCRIBE', error);
+        if (resolution !== 'SUCCEEDED') {
+          await this.markCleanupFailed(current, 'UNSUBSCRIBE', userId, resolution === 'PERMANENT');
+          return;
+        }
       }
       const succeeded = await this.markCleanupSucceeded(current, 'UNSUBSCRIBE');
       if (!succeeded) return;
@@ -569,9 +868,12 @@ export class InstagramOAuthService {
       current = attempted;
       try {
         await this.meta.revoke(accessToken);
-      } catch {
-        await this.markCleanupFailed(current, 'REVOKE', userId);
-        return;
+      } catch (error) {
+        const resolution = classifyCleanupFailure('REVOKE', error);
+        if (resolution !== 'SUCCEEDED') {
+          await this.markCleanupFailed(current, 'REVOKE', userId, resolution === 'PERMANENT');
+          return;
+        }
       }
       const succeeded = await this.markCleanupSucceeded(current, 'REVOKE');
       if (!succeeded) return;
@@ -593,8 +895,8 @@ export class InstagramOAuthService {
   ): Promise<LeasedCleanupRow | null> {
     const attemptedAt = this.now();
     const updated = await this.updateLeasedCleanup(cleanup, operation === 'UNSUBSCRIBE'
-      ? { unsubscribeStatus: 'PENDING', unsubscribeAttemptedAt: attemptedAt, lastErrorCode: null }
-      : { revokeStatus: 'PENDING', revokeAttemptedAt: attemptedAt, lastErrorCode: null });
+      ? { unsubscribeStatus: 'PENDING', unsubscribeAttemptedAt: attemptedAt, lastErrorCode: null, permanentFailureAt: null }
+      : { revokeStatus: 'PENDING', revokeAttemptedAt: attemptedAt, lastErrorCode: null, permanentFailureAt: null });
     return asLeasedCleanup(updated);
   }
 
@@ -613,13 +915,15 @@ export class InstagramOAuthService {
     cleanup: LeasedCleanupRow,
     operation: CleanupOperation,
     userId: string,
+    permanent: boolean,
   ): Promise<void> {
     const failedAt = this.now();
     const failed = await this.updateLeasedCleanup(cleanup, {
       ...(operation === 'UNSUBSCRIBE'
         ? { unsubscribeStatus: 'FAILED', unsubscribeAttemptedAt: failedAt }
         : { revokeStatus: 'FAILED', revokeAttemptedAt: failedAt }),
-      lastErrorCode: CLEANUP_FAILED_CODE,
+      lastErrorCode: permanent ? CLEANUP_PERMANENT_FAILURE_CODE : CLEANUP_FAILED_CODE,
+      permanentFailureAt: permanent ? failedAt : null,
       leaseId: null,
       leaseExpiresAt: null,
     });
@@ -628,24 +932,56 @@ export class InstagramOAuthService {
       { tenantId: cleanup.tenantId, userId },
       'INSTAGRAM_CREDENTIAL_CLEANUP_FAILED',
       'FAILURE',
-      { errorCode: CLEANUP_FAILED_CODE },
+      { errorCode: permanent ? CLEANUP_PERMANENT_FAILURE_CODE : CLEANUP_FAILED_CODE },
     );
   }
 
   private async markCleanupCompleted(cleanup: LeasedCleanupRow, userId: string): Promise<void> {
-    const completed = await this.updateLeasedCleanup(cleanup, {
-      terminalAt: this.now(),
-      lastErrorCode: null,
-      leaseId: null,
-      leaseExpiresAt: null,
+    if (cleanup.callbackResolvedAt === null) {
+      await this.updateLeasedCleanup(cleanup, { leaseId: null, leaseExpiresAt: null });
+      return;
+    }
+
+    const completedAt = this.now();
+    const completed = await this.prisma.$transaction(async (transaction) => {
+      const rows = await transaction.instagramCredentialCleanup.updateManyAndReturn({
+        where: {
+          id: cleanup.id,
+          leaseId: cleanup.leaseId,
+          version: cleanup.version,
+          state: 'REQUIRED',
+          terminalAt: null,
+        },
+        data: {
+          state: 'COMPLETED',
+          terminalAt: completedAt,
+          lastErrorCode: null,
+          permanentFailureAt: null,
+          leaseId: null,
+          leaseExpiresAt: null,
+          version: { increment: 1 },
+        },
+        select: CLEANUP_ROW_SELECT,
+      });
+      const row = rows[0];
+      if (!row) return { row: null, disconnected: false };
+      const connection = await transaction.instagramConnection.updateMany({
+        where: {
+          tenantId: cleanup.tenantId,
+          credentialGenerationId: cleanup.credentialGenerationId,
+          status: 'DISCONNECTED',
+        },
+        data: { lastErrorCode: null },
+      });
+      return { row, disconnected: connection.count === 1 };
     });
-    if (!completed) return;
+    if (!completed.row) return;
     await this.recordAuditBestEffort(
       { tenantId: cleanup.tenantId, userId },
       'INSTAGRAM_CREDENTIAL_CLEANUP_COMPLETED',
       'SUCCESS',
     );
-    if (cleanup.source === 'DISCONNECT') {
+    if (completed.disconnected) {
       await this.recordAuditBestEffort(
         { tenantId: cleanup.tenantId, userId },
         'INSTAGRAM_DISCONNECTED',
@@ -663,6 +999,7 @@ export class InstagramOAuthService {
         id: cleanup.id,
         leaseId: cleanup.leaseId,
         version: cleanup.version,
+        state: 'REQUIRED',
         terminalAt: null,
       },
       data: {
@@ -819,6 +1156,7 @@ function toSummary(
     lastErrorCode: expired ? 'META_TOKEN_EXPIRED' : connection.lastErrorCode,
     cleanupStatus: cleanup.status,
     cleanupErrorCode: cleanup.errorCode,
+    cleanupAbandonEligible: cleanup.abandonEligible,
   };
 }
 
@@ -832,6 +1170,7 @@ function emptySummary(cleanup = noCleanup()): InstagramConnectionSummary {
     lastErrorCode: null,
     cleanupStatus: cleanup.status,
     cleanupErrorCode: cleanup.errorCode,
+    cleanupAbandonEligible: cleanup.abandonEligible,
   };
 }
 
@@ -841,17 +1180,63 @@ function summarizeCleanup(rows: CleanupSummaryRow[]): CleanupSummary {
     row.lastErrorCode !== null ||
     row.unsubscribeStatus === 'FAILED' ||
     row.revokeStatus === 'FAILED');
-  if (failed) return { status: 'FAILED', errorCode: failed.lastErrorCode ?? CLEANUP_FAILED_CODE };
-  return { status: 'PENDING', errorCode: null };
+  const abandonEligible = rows.some((row) => isCleanupAbandonEligible(row));
+  if (failed) return { status: 'FAILED', errorCode: failed.lastErrorCode ?? CLEANUP_FAILED_CODE, abandonEligible };
+  return { status: 'PENDING', errorCode: null, abandonEligible };
 }
 
 function noCleanup(): CleanupSummary {
-  return { status: 'NONE', errorCode: null };
+  return { status: 'NONE', errorCode: null, abandonEligible: false };
 }
 
 function asLeasedCleanup(row: CleanupRow | undefined | null): LeasedCleanupRow | null {
   if (!row || row.leaseId === null || row.leaseExpiresAt === null) return null;
   return { ...row, leaseId: row.leaseId, leaseExpiresAt: row.leaseExpiresAt };
+}
+
+function firstIncompleteOperation(
+  cleanup: Pick<CleanupRow, 'unsubscribeStatus' | 'revokeStatus'>,
+): CleanupOperation | null {
+  if (cleanup.unsubscribeStatus !== 'SUCCEEDED') return 'UNSUBSCRIBE';
+  if (cleanup.revokeStatus !== 'SUCCEEDED') return 'REVOKE';
+  return null;
+}
+
+function isCleanupAbandonEligible(
+  cleanup: Pick<CleanupSummaryRow, 'unsubscribeStatus' | 'revokeStatus' | 'attempts' | 'leaseId' | 'leaseExpiresAt'>,
+): boolean {
+  const operation = firstIncompleteOperation(cleanup);
+  const operationFailed = operation === 'UNSUBSCRIBE'
+    ? cleanup.unsubscribeStatus === 'FAILED'
+    : operation === 'REVOKE'
+      ? cleanup.revokeStatus === 'FAILED'
+      : false;
+  return operationFailed &&
+    cleanup.attempts >= INSTAGRAM_CLEANUP_ABANDON_AFTER_ATTEMPTS &&
+    cleanup.leaseId === null &&
+    cleanup.leaseExpiresAt === null;
+}
+
+function classifyCleanupFailure(operation: CleanupOperation, error: unknown): CleanupFailureResolution {
+  if (!(error instanceof MetaInstagramError)) return 'RETRYABLE';
+  if (error.isTransient === true) return 'RETRYABLE';
+  if (operation === 'REVOKE' && isInvalidCredential(error)) return 'SUCCEEDED';
+  if (isEvidenceBackedPermanentFailure(error)) return 'PERMANENT';
+  return 'RETRYABLE';
+}
+
+function isEvidenceBackedPermanentFailure(error: MetaInstagramError): boolean {
+  if (error.status === null || error.status < 400 || error.status >= 500) return false;
+  const providerCode = typeof error.providerCode === 'number'
+    ? error.providerCode
+    : typeof error.providerCode === 'string' && /^\d+$/.test(error.providerCode)
+      ? Number(error.providerCode)
+      : null;
+  return providerCode !== null && CLEANUP_PERMANENT_PROVIDER_CODES.has(providerCode);
+}
+
+function isInvalidCredential(error: MetaInstagramError): boolean {
+  return (error.status === 400 || error.status === 401) && String(error.providerCode) === '190';
 }
 
 function hasRequiredScopes(grantedScopes: string[]): boolean {

@@ -40,6 +40,14 @@ enum InstagramCredentialCleanupOperationStatus {
   FAILED
 }
 
+enum InstagramCredentialCleanupState {
+  ARMED
+  REQUIRED
+  COMPLETED
+  CANCELLED
+  DEAD_LETTER
+}
+
 model Tenant {
   id        String         @id @default(uuid()) @db.Uuid
   key       String         @unique
@@ -75,6 +83,7 @@ model InstagramConnection {
   displayName          String?                   @map("display_name")
   status               InstagramConnectionStatus @default(LEGACY)
   encryptedAccessToken String?                   @map("encrypted_access_token")
+  credentialGenerationId String?                 @unique @map("credential_generation_id") @db.Uuid
   tokenExpiresAt       DateTime?                 @map("token_expires_at")
   grantedScopes        String?                   @map("granted_scopes")
   lastVerifiedAt       DateTime?                 @map("last_verified_at")
@@ -108,10 +117,13 @@ model InstagramOAuthState {
 
 model InstagramCredentialCleanup {
   id                       String                                    @id @default(uuid()) @db.Uuid
+  credentialGenerationId   String                                    @unique @map("credential_generation_id") @db.Uuid
   tenantId                 String                                    @map("tenant_id") @db.Uuid
   externalAccountId        String                                    @map("external_account_id")
   encryptedAccessToken     String                                    @map("encrypted_access_token")
   source                   String                                    @default("DISCONNECT")
+  state                    InstagramCredentialCleanupState           @default(ARMED)
+  callbackResolvedAt       DateTime?                                 @map("callback_resolved_at")
   unsubscribeStatus        InstagramCredentialCleanupOperationStatus @default(PENDING) @map("unsubscribe_status")
   unsubscribeAttemptedAt   DateTime?                                 @map("unsubscribe_attempted_at")
   unsubscribeSucceededAt   DateTime?                                 @map("unsubscribe_succeeded_at")
@@ -123,10 +135,14 @@ model InstagramCredentialCleanup {
   leaseExpiresAt           DateTime?                                 @map("lease_expires_at")
   version                  Int                                       @default(0)
   lastErrorCode            String?                                   @map("last_error_code")
+  permanentFailureAt       DateTime?                                 @map("permanent_failure_at")
+  deadLetteredAt           DateTime?                                 @map("dead_lettered_at")
+  deadLetteredByUserId     String?                                   @map("dead_lettered_by_user_id") @db.Uuid
   terminalAt               DateTime?                                 @map("terminal_at")
   createdAt                DateTime                                  @default(now()) @map("created_at")
   updatedAt                DateTime                                  @updatedAt @map("updated_at")
   tenant                   Tenant                                    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  deadLetteredBy           User?                                     @relation("InstagramCleanupDeadLetteredBy", fields: [deadLetteredByUserId], references: [id], onDelete: SetNull)
 
   @@index([tenantId, terminalAt])
   @@index([leaseExpiresAt])
@@ -151,6 +167,7 @@ model User {
   securityAuditLogs       SecurityAuditLog[]
   instagramOAuthStates    InstagramOAuthState[]
   instagramConnections    InstagramConnection[]    @relation("InstagramConnectionConnectedBy")
+  instagramCleanupsDeadLettered InstagramCredentialCleanup[] @relation("InstagramCleanupDeadLetteredBy")
 
   @@index([status])
   @@map("users")

@@ -9,7 +9,7 @@ export type InstagramConnectionSummary = ContractInstagramConnectionSummary;
 
 type MembershipRole = 'OWNER' | 'MANAGER' | null;
 type Message = { kind: 'success' | 'error'; text: string } | null;
-type PendingAction = 'connect' | 'disconnect' | 'cleanup' | null;
+type PendingAction = 'connect' | 'disconnect' | 'cleanup' | 'deadLetter' | null;
 
 const META_AUTHORIZATION_ORIGIN = 'https://www.instagram.com';
 const CONNECTION_STATUSES = new Set<InstagramConnectionSummary['status']>([
@@ -32,9 +32,12 @@ export function InstagramSettingsForm({
   const [message, setMessage] = useState<Message>(null);
   const [pendingAction, setPendingAction] = useState<PendingAction>(null);
   const [confirmingDisconnect, setConfirmingDisconnect] = useState(false);
+  const [confirmingDeadLetter, setConfirmingDeadLetter] = useState(false);
   const isOwner = membershipRole === 'OWNER';
   const pending = pendingAction !== null;
   const cleanupPending = isCleanupPending(connection);
+  const cleanupCanBeAbandoned = connection.cleanupStatus === 'FAILED' &&
+    (isPermanentCleanupFailure(connection) || connection.cleanupAbandonEligible);
   const actionLabel = connectionActionLabel(connection.status);
   const visibleErrorCode = connection.cleanupErrorCode ?? connection.lastErrorCode;
 
@@ -69,6 +72,7 @@ export function InstagramSettingsForm({
       if (!response.ok || !isInstagramConnectionSummary(payload)) throw new Error('disconnect failed');
       setConnection(payload);
       setConfirmingDisconnect(false);
+      setConfirmingDeadLetter(false);
       setMessage({ kind: 'success', text: 'Instagram відключено' });
     } catch {
       setMessage({ kind: 'error', text: 'Не вдалося відключити Instagram' });
@@ -89,6 +93,27 @@ export function InstagramSettingsForm({
       setMessage({ kind: 'success', text: 'Очищення Instagram завершено' });
     } catch {
       setMessage({ kind: 'error', text: 'Не вдалося очистити підключення Instagram' });
+    } finally {
+      setPendingAction(null);
+    }
+  }
+
+  async function deadLetterCleanup() {
+    setPendingAction('deadLetter');
+    setMessage(null);
+    try {
+      const response = await mutatingFetch('/api/integrations/instagram/cleanup/dead-letter', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ confirmation: 'ABANDON_REMOTE_CLEANUP' }),
+      });
+      const payload = await jsonOrNull(response);
+      if (!response.ok || !isInstagramConnectionSummary(payload) || isCleanupPending(payload)) throw new Error('dead letter failed');
+      setConnection(payload);
+      setConfirmingDeadLetter(false);
+      setMessage({ kind: 'success', text: 'Підключення Instagram розблоковано' });
+    } catch {
+      setMessage({ kind: 'error', text: 'Не вдалося розблокувати підключення Instagram' });
     } finally {
       setPendingAction(null);
     }
@@ -118,12 +143,20 @@ export function InstagramSettingsForm({
     {isOwner && <div className="settings-actions instagram-connection-actions">
       {actionLabel && !cleanupPending && <button disabled={pending} onClick={() => void connect()} type="button">{actionLabel}</button>}
       {cleanupPending && <button disabled={pending} onClick={() => void retryCleanup()} type="button">Повторити очищення</button>}
+      {cleanupCanBeAbandoned && !confirmingDeadLetter && <button className="secondary-button" disabled={pending} onClick={() => { setConfirmingDisconnect(false); setConfirmingDeadLetter(true); }} type="button">Розблокувати підключення</button>}
       {canDisconnect(connection.status) && !confirmingDisconnect && <button className="danger-button" disabled={pending} onClick={() => setConfirmingDisconnect(true)} type="button">Відключити Instagram</button>}
       {confirmingDisconnect && <div className="instagram-disconnect-confirmation" role="alert">
         <span>Відключити Instagram? Повторне підключення знадобиться для нових повідомлень.</span>
         <div>
           <button className="secondary-button" disabled={pending} onClick={() => setConfirmingDisconnect(false)} type="button">Скасувати</button>
           <button className="danger-button" disabled={pending} onClick={() => void disconnect()} type="button">Так, відключити</button>
+        </div>
+      </div>}
+      {confirmingDeadLetter && <div className="instagram-disconnect-confirmation" role="alert">
+        <span>Розблокувати Instagram? Віддалене очищення не підтверджене. Автоматичні повтори для цього облікового запису буде припинено, і залишковий стан у Meta може зберегтися. Після цього можна підключити акаунт повторно.</span>
+        <div>
+          <button className="secondary-button" disabled={pending} onClick={() => setConfirmingDeadLetter(false)} type="button">Скасувати</button>
+          <button className="danger-button" disabled={pending} onClick={() => void deadLetterCleanup()} type="button">Так, розблокувати</button>
         </div>
       </div>}
       {message && <span className={message.kind === 'error' ? 'save-error' : 'save-success'} role={message.kind === 'error' ? 'alert' : 'status'}>{message.text}</span>}
@@ -148,6 +181,10 @@ function connectionActionLabel(status: InstagramConnectionSummary['status']): st
 
 function isCleanupPending(connection: InstagramConnectionSummary): boolean {
   return connection.cleanupStatus === 'PENDING' || connection.cleanupStatus === 'FAILED';
+}
+
+function isPermanentCleanupFailure(connection: InstagramConnectionSummary): boolean {
+  return connection.cleanupStatus === 'FAILED' && connection.cleanupErrorCode === 'META_CLEANUP_PERMANENT_FAILURE';
 }
 
 function canDisconnect(status: InstagramConnectionSummary['status']): boolean {
@@ -191,5 +228,6 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 function isInstagramConnectionSummary(value: unknown): value is InstagramConnectionSummary {
   if (!isRecord(value) || typeof value.status !== 'string' || !CONNECTION_STATUSES.has(value.status as InstagramConnectionSummary['status'])) return false;
   return ['accountId', 'username', 'tokenExpiresAt', 'lastVerifiedAt', 'lastErrorCode', 'cleanupErrorCode'].every((key) => value[key] === null || typeof value[key] === 'string') &&
+    typeof value.cleanupAbandonEligible === 'boolean' &&
     (value.cleanupStatus === 'NONE' || value.cleanupStatus === 'PENDING' || value.cleanupStatus === 'FAILED');
 }

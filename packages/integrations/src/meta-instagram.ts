@@ -30,6 +30,8 @@ export class MetaInstagramError extends Error {
   constructor(
     readonly status: number | null,
     readonly providerCode: number | string | null,
+    readonly isTransient: boolean | null = null,
+    readonly errorSubcode: number | null = null,
   ) {
     super('Meta Instagram API request failed');
     this.name = 'MetaInstagramError';
@@ -141,7 +143,16 @@ export class MetaInstagramClient {
   }
 
   private async requestVoid(url: URL | string, init: RequestInit): Promise<void> {
-    await this.request(url, init);
+    const response = await this.request(url, init);
+    let payload: unknown;
+    try {
+      payload = await response.json();
+    } catch {
+      throw new MetaInstagramError(response.status, null);
+    }
+    if (!isRecord(payload) || payload.success !== true) {
+      throw new MetaInstagramError(response.status, null);
+    }
   }
 
   private async request(url: URL | string, init: RequestInit): Promise<Response> {
@@ -163,7 +174,12 @@ export class MetaInstagramClient {
     } catch {
       payload = undefined;
     }
-    return new MetaInstagramError(response.status, providerCode(payload));
+    return new MetaInstagramError(
+      response.status,
+      providerCode(payload),
+      providerIsTransient(payload),
+      providerErrorSubcode(payload),
+    );
   }
 }
 
@@ -175,6 +191,17 @@ function providerCode(payload: unknown): number | string | null {
   if (!isRecord(payload) || !isRecord(payload.error)) return null;
   const { code } = payload.error;
   return typeof code === 'number' || typeof code === 'string' ? code : null;
+}
+
+function providerIsTransient(payload: unknown): boolean | null {
+  if (!isRecord(payload) || !isRecord(payload.error)) return null;
+  return typeof payload.error.is_transient === 'boolean' ? payload.error.is_transient : null;
+}
+
+function providerErrorSubcode(payload: unknown): number | null {
+  if (!isRecord(payload) || !isRecord(payload.error)) return null;
+  const { error_subcode: errorSubcode } = payload.error;
+  return typeof errorSubcode === 'number' && Number.isInteger(errorSubcode) ? errorSubcode : null;
 }
 
 function parseShortLivedToken(payload: unknown): { accessToken: string; grantedScopes: string[] } {

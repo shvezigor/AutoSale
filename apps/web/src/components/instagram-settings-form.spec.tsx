@@ -16,6 +16,7 @@ const initial = (overrides: Partial<InstagramConnectionSummary> = {}): Instagram
   lastErrorCode: null,
   cleanupStatus: 'NONE',
   cleanupErrorCode: null,
+  cleanupAbandonEligible: false,
   ...overrides,
 });
 
@@ -117,6 +118,79 @@ describe('InstagramSettingsForm', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('Не вдалося очистити підключення Instagram');
     expect(screen.getByRole('button', { name: 'Повторити очищення' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Підключити Instagram' })).not.toBeInTheDocument();
+  });
+
+  it('requires an explicit owner confirmation before dead-lettering permanent cleanup failure', async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ token: 'csrf-token' }) })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => initial({
+          status: 'DISCONNECTED',
+          cleanupStatus: 'NONE',
+          cleanupErrorCode: null,
+          lastErrorCode: 'META_CLEANUP_DEAD_LETTERED',
+        }),
+      });
+    vi.stubGlobal('fetch', fetchMock);
+    render(<InstagramSettingsForm initial={initial({
+      status: 'DISCONNECTED',
+      cleanupStatus: 'FAILED',
+      cleanupErrorCode: 'META_CLEANUP_PERMANENT_FAILURE',
+    })} membershipRole="OWNER" />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Розблокувати підключення' }));
+    expect(screen.getByRole('alert')).toHaveTextContent('Розблокувати Instagram?');
+    expect(screen.getByRole('alert')).toHaveTextContent('Віддалене очищення не підтверджене');
+    expect(screen.getByRole('alert')).toHaveTextContent('Автоматичні повтори для цього облікового запису буде припинено');
+    expect(screen.getByRole('alert')).toHaveTextContent('залишковий стан у Meta може зберегтися');
+    expect(fetchMock).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Так, розблокувати' }));
+
+    await waitFor(() => expect(screen.getByText('Підключення Instagram розблоковано')).toBeInTheDocument());
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/integrations/instagram/cleanup/dead-letter',
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({ confirmation: 'ABANDON_REMOTE_CLEANUP' }),
+        headers: expect.objectContaining({ 'x-csrf-token': 'csrf-token' }),
+      }),
+    );
+    expect(screen.getByRole('button', { name: 'Підключити Instagram' })).toBeInTheDocument();
+  });
+
+  it('offers the same confirmed abandon flow after a retryable cleanup reaches the safe threshold', async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ token: 'csrf-token' }) })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => initial({
+          status: 'DISCONNECTED',
+          cleanupStatus: 'NONE',
+          cleanupErrorCode: null,
+          cleanupAbandonEligible: false,
+          lastErrorCode: 'META_CLEANUP_DEAD_LETTERED',
+        }),
+      });
+    vi.stubGlobal('fetch', fetchMock);
+    render(<InstagramSettingsForm initial={initial({
+      status: 'DISCONNECTED',
+      cleanupStatus: 'FAILED',
+      cleanupErrorCode: 'META_DISCONNECT_CLEANUP_FAILED',
+      cleanupAbandonEligible: true,
+    })} membershipRole="OWNER" />);
+
+    expect(screen.getByRole('button', { name: 'Розблокувати підключення' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Розблокувати підключення' }));
+    expect(screen.getByRole('alert')).toHaveTextContent('Віддалене очищення не підтверджене');
+    fireEvent.click(screen.getByRole('button', { name: 'Так, розблокувати' }));
+
+    await waitFor(() => expect(screen.getByText('Підключення Instagram розблоковано')).toBeInTheDocument());
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/integrations/instagram/cleanup/dead-letter',
+      expect.objectContaining({ body: JSON.stringify({ confirmation: 'ABANDON_REMOTE_CLEANUP' }) }),
+    );
   });
 
   it('keeps cleanup retry reachable without downgrading a newer active connection', () => {

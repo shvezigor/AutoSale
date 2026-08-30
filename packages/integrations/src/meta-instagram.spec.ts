@@ -30,6 +30,28 @@ const documentedIdentityEnvelope = {
   }],
 };
 
+const documentedTransientMetaErrorEnvelope = {
+  error: {
+    message: 'Temporary provider failure that must not be retained',
+    type: 'OAuthException',
+    code: 2,
+    error_subcode: 2207051,
+    is_transient: true,
+    fbtrace_id: 'trace-transient',
+  },
+};
+
+const documentedNonTransientMetaErrorEnvelope = {
+  error: {
+    message: 'Invalid OAuth access token that must not be retained',
+    type: 'OAuthException',
+    code: 190,
+    error_subcode: 463,
+    is_transient: false,
+    fbtrace_id: 'trace-invalid-token',
+  },
+};
+
 describe('MetaInstagramClient', () => {
   it('builds an Instagram Login authorization URL with only the required scopes', () => {
     const client = new MetaInstagramClient(config);
@@ -188,6 +210,17 @@ describe('MetaInstagramClient', () => {
     expect(init?.headers).toEqual({ authorization: 'Bearer access-token' });
   });
 
+  it('accepts a repeated documented success response for unsubscribe replay', async () => {
+    const fetchFn = vi.fn<typeof fetch>().mockImplementation(async () => response({ success: true }));
+    const client = new MetaInstagramClient({ ...config, fetch: fetchFn });
+
+    await client.unsubscribe('access-token');
+    await expect(client.unsubscribe('access-token')).resolves.toBeUndefined();
+
+    expect(fetchFn).toHaveBeenCalledTimes(2);
+    expect(fetchFn.mock.calls.every(([, init]) => init?.method === 'DELETE')).toBe(true);
+  });
+
   it('revokes the current account token', async () => {
     const fetchFn = vi.fn<typeof fetch>().mockResolvedValue(response({ success: true }));
     const client = new MetaInstagramClient({ ...config, fetch: fetchFn });
@@ -198,6 +231,48 @@ describe('MetaInstagramClient', () => {
     expect(String(requestUrl)).toBe('https://graph.instagram.com/v24.0/me/permissions');
     expect(init?.method).toBe('DELETE');
     expect(init?.headers).toEqual({ authorization: 'Bearer access-token' });
+  });
+
+  it.each(['subscribe', 'unsubscribe', 'revoke'] as const)('requires Meta success=true for %s side effects', async (operation) => {
+    const client = new MetaInstagramClient({
+      ...config,
+      fetch: vi.fn<typeof fetch>().mockResolvedValue(response({ success: false })),
+    });
+
+    await expect(client[operation]('access-token')).rejects.toEqual(expect.objectContaining({
+      name: 'MetaInstagramError', status: 200, providerCode: null,
+    }));
+  });
+
+  it('preserves the documented invalid-token code for cleanup replay normalization', async () => {
+    const client = new MetaInstagramClient({
+      ...config,
+      fetch: vi.fn<typeof fetch>().mockResolvedValue(response({
+        error: { code: 190, message: 'Invalid OAuth access token' },
+      }, 400)),
+    });
+
+    await expect(client.revoke('revoked-token')).rejects.toEqual(expect.objectContaining({
+      name: 'MetaInstagramError', status: 400, providerCode: 190, isTransient: null, errorSubcode: null,
+    }));
+  });
+
+  it.each([
+    ['transient', documentedTransientMetaErrorEnvelope, 503, 2, true, 2207051],
+    ['non-transient invalid token', documentedNonTransientMetaErrorEnvelope, 400, 190, false, 463],
+  ])('parses the documented Meta %s error envelope into sanitized retry metadata', async (_name, envelope, status, providerCode, isTransient, errorSubcode) => {
+    const client = new MetaInstagramClient({
+      ...config,
+      fetch: vi.fn<typeof fetch>().mockResolvedValue(response(envelope, status)),
+    });
+
+    const failure = client.getIdentity('access-token-that-must-not-leak');
+
+    await expect(failure).rejects.toEqual(expect.objectContaining({
+      name: 'MetaInstagramError', status, providerCode, isTransient, errorSubcode,
+    }));
+    await expect(failure).rejects.not.toThrow('Temporary provider failure that must not be retained');
+    await expect(failure).rejects.not.toThrow('Invalid OAuth access token that must not be retained');
   });
 
   it('sanitizes provider errors to status and provider code', async () => {

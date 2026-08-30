@@ -30,6 +30,7 @@ describe('InstagramOAuthController', () => {
   const completeCallback = vi.fn();
   const disconnect = vi.fn();
   const retryCleanup = vi.fn();
+  const deadLetterCleanup = vi.fn();
   const resolve = vi.fn();
   const csrf = new CsrfService('p'.repeat(32));
 
@@ -52,6 +53,7 @@ describe('InstagramOAuthController', () => {
     });
     disconnect.mockReset().mockResolvedValue({ status: 'DISCONNECTED' });
     retryCleanup.mockReset().mockResolvedValue({ status: 'DISCONNECTED', lastErrorCode: null });
+    deadLetterCleanup.mockReset().mockResolvedValue({ status: 'DISCONNECTED', lastErrorCode: 'META_CLEANUP_DEAD_LETTERED' });
     resolve.mockReset().mockImplementation(async (token: string) => {
       if (token === 'owner-token') return owner;
       if (token === 'manager-token') return manager;
@@ -62,7 +64,7 @@ describe('InstagramOAuthController', () => {
     const moduleRef = await Test.createTestingModule({
       controllers: [InstagramOAuthController],
       providers: [
-        { provide: InstagramOAuthService, useValue: { getSummary, connect, completeCallback, disconnect, retryCleanup } },
+        { provide: InstagramOAuthService, useValue: { getSummary, connect, completeCallback, disconnect, retryCleanup, deadLetterCleanup } },
         { provide: SessionService, useValue: { resolve } },
         { provide: CsrfService, useValue: csrf },
         { provide: AUTH_HTTP_CONFIG, useValue: { cookieName: 'autosale_session', production: false } },
@@ -138,10 +140,32 @@ describe('InstagramOAuthController', () => {
       .set('Cookie', cookie('owner-token'))
       .set(csrfHeader(owner))
       .expect(201);
+    await request(app!.getHttpServer())
+      .post('/api/integrations/instagram/cleanup/dead-letter')
+      .set('Cookie', cookie('manager-token'))
+      .set(csrfHeader(manager))
+      .expect(403);
+    await request(app!.getHttpServer())
+      .post('/api/integrations/instagram/cleanup/dead-letter')
+      .set('Cookie', cookie('owner-token'))
+      .expect(403);
+    await request(app!.getHttpServer())
+      .post('/api/integrations/instagram/cleanup/dead-letter')
+      .set('Cookie', cookie('owner-token'))
+      .set(csrfHeader(owner))
+      .send({ confirmation: 'not-the-confirmation' })
+      .expect(400);
+    await request(app!.getHttpServer())
+      .post('/api/integrations/instagram/cleanup/dead-letter')
+      .set('Cookie', cookie('owner-token'))
+      .set(csrfHeader(owner))
+      .send({ confirmation: 'ABANDON_REMOTE_CLEANUP' })
+      .expect(201);
 
     expect(connect).toHaveBeenCalledWith('tenant-a', 'owner-a', '/settings?tab=instagram');
     expect(disconnect).toHaveBeenCalledWith('tenant-a', 'owner-a');
     expect(retryCleanup).toHaveBeenCalledWith('tenant-a', 'owner-a');
+    expect(deadLetterCleanup).toHaveBeenCalledWith('tenant-a', 'owner-a', 'ABANDON_REMOTE_CLEANUP');
   });
 
   it('allows the callback without a session or CSRF token and redirects from state-bound data', async () => {

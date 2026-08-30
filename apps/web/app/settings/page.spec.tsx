@@ -38,6 +38,7 @@ describe('SettingsPage', () => {
         lastErrorCode: null,
         cleanupStatus: 'NONE',
         cleanupErrorCode: null,
+        cleanupAbandonEligible: false,
       }),
     });
 

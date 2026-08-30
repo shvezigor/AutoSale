@@ -18,10 +18,17 @@ import {
   RequireMembership,
   SkipCsrf,
 } from '../auth/auth.decorators.js';
-import { InstagramOAuthService } from './instagram-oauth.service.js';
+import {
+  InstagramOAuthService,
+  INSTAGRAM_CLEANUP_ABANDON_CONFIRMATION,
+} from './instagram-oauth.service.js';
 
 const connectRequestSchema = z.object({
   returnPath: z.string().max(2_048).optional(),
+}).strict();
+
+const cleanupAbandonRequestSchema = z.object({
+  confirmation: z.literal(INSTAGRAM_CLEANUP_ABANDON_CONFIRMATION),
 }).strict();
 
 @Controller('api/integrations/instagram')
@@ -83,6 +90,17 @@ export class InstagramOAuthController {
   @RequireMembership('OWNER')
   retryCleanup(@CurrentPrincipal() principal: AuthPrincipal) {
     return this.instagram.retryCleanup(principal.tenantId!, principal.userId);
+  }
+
+  @Post('cleanup/dead-letter')
+  @RequireMembership('OWNER')
+  deadLetterCleanup(
+    @CurrentPrincipal() principal: AuthPrincipal,
+    @Body() body: unknown,
+  ) {
+    const parsed = cleanupAbandonRequestSchema.safeParse(body);
+    if (!parsed.success) throw new BadRequestException('Invalid Instagram cleanup confirmation');
+    return this.instagram.deadLetterCleanup(principal.tenantId!, principal.userId, parsed.data.confirmation);
   }
 }
 

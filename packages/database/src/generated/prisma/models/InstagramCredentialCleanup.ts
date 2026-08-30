@@ -38,10 +38,13 @@ export type InstagramCredentialCleanupSumAggregateOutputType = {
 
 export type InstagramCredentialCleanupMinAggregateOutputType = {
   id: string | null
+  credentialGenerationId: string | null
   tenantId: string | null
   externalAccountId: string | null
   encryptedAccessToken: string | null
   source: string | null
+  state: $Enums.InstagramCredentialCleanupState | null
+  callbackResolvedAt: Date | null
   unsubscribeStatus: $Enums.InstagramCredentialCleanupOperationStatus | null
   unsubscribeAttemptedAt: Date | null
   unsubscribeSucceededAt: Date | null
@@ -53,6 +56,9 @@ export type InstagramCredentialCleanupMinAggregateOutputType = {
   leaseExpiresAt: Date | null
   version: number | null
   lastErrorCode: string | null
+  permanentFailureAt: Date | null
+  deadLetteredAt: Date | null
+  deadLetteredByUserId: string | null
   terminalAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -60,10 +66,13 @@ export type InstagramCredentialCleanupMinAggregateOutputType = {
 
 export type InstagramCredentialCleanupMaxAggregateOutputType = {
   id: string | null
+  credentialGenerationId: string | null
   tenantId: string | null
   externalAccountId: string | null
   encryptedAccessToken: string | null
   source: string | null
+  state: $Enums.InstagramCredentialCleanupState | null
+  callbackResolvedAt: Date | null
   unsubscribeStatus: $Enums.InstagramCredentialCleanupOperationStatus | null
   unsubscribeAttemptedAt: Date | null
   unsubscribeSucceededAt: Date | null
@@ -75,6 +84,9 @@ export type InstagramCredentialCleanupMaxAggregateOutputType = {
   leaseExpiresAt: Date | null
   version: number | null
   lastErrorCode: string | null
+  permanentFailureAt: Date | null
+  deadLetteredAt: Date | null
+  deadLetteredByUserId: string | null
   terminalAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -82,10 +94,13 @@ export type InstagramCredentialCleanupMaxAggregateOutputType = {
 
 export type InstagramCredentialCleanupCountAggregateOutputType = {
   id: number
+  credentialGenerationId: number
   tenantId: number
   externalAccountId: number
   encryptedAccessToken: number
   source: number
+  state: number
+  callbackResolvedAt: number
   unsubscribeStatus: number
   unsubscribeAttemptedAt: number
   unsubscribeSucceededAt: number
@@ -97,6 +112,9 @@ export type InstagramCredentialCleanupCountAggregateOutputType = {
   leaseExpiresAt: number
   version: number
   lastErrorCode: number
+  permanentFailureAt: number
+  deadLetteredAt: number
+  deadLetteredByUserId: number
   terminalAt: number
   createdAt: number
   updatedAt: number
@@ -116,10 +134,13 @@ export type InstagramCredentialCleanupSumAggregateInputType = {
 
 export type InstagramCredentialCleanupMinAggregateInputType = {
   id?: true
+  credentialGenerationId?: true
   tenantId?: true
   externalAccountId?: true
   encryptedAccessToken?: true
   source?: true
+  state?: true
+  callbackResolvedAt?: true
   unsubscribeStatus?: true
   unsubscribeAttemptedAt?: true
   unsubscribeSucceededAt?: true
@@ -131,6 +152,9 @@ export type InstagramCredentialCleanupMinAggregateInputType = {
   leaseExpiresAt?: true
   version?: true
   lastErrorCode?: true
+  permanentFailureAt?: true
+  deadLetteredAt?: true
+  deadLetteredByUserId?: true
   terminalAt?: true
   createdAt?: true
   updatedAt?: true
@@ -138,10 +162,13 @@ export type InstagramCredentialCleanupMinAggregateInputType = {
 
 export type InstagramCredentialCleanupMaxAggregateInputType = {
   id?: true
+  credentialGenerationId?: true
   tenantId?: true
   externalAccountId?: true
   encryptedAccessToken?: true
   source?: true
+  state?: true
+  callbackResolvedAt?: true
   unsubscribeStatus?: true
   unsubscribeAttemptedAt?: true
   unsubscribeSucceededAt?: true
@@ -153,6 +180,9 @@ export type InstagramCredentialCleanupMaxAggregateInputType = {
   leaseExpiresAt?: true
   version?: true
   lastErrorCode?: true
+  permanentFailureAt?: true
+  deadLetteredAt?: true
+  deadLetteredByUserId?: true
   terminalAt?: true
   createdAt?: true
   updatedAt?: true
@@ -160,10 +190,13 @@ export type InstagramCredentialCleanupMaxAggregateInputType = {
 
 export type InstagramCredentialCleanupCountAggregateInputType = {
   id?: true
+  credentialGenerationId?: true
   tenantId?: true
   externalAccountId?: true
   encryptedAccessToken?: true
   source?: true
+  state?: true
+  callbackResolvedAt?: true
   unsubscribeStatus?: true
   unsubscribeAttemptedAt?: true
   unsubscribeSucceededAt?: true
@@ -175,6 +208,9 @@ export type InstagramCredentialCleanupCountAggregateInputType = {
   leaseExpiresAt?: true
   version?: true
   lastErrorCode?: true
+  permanentFailureAt?: true
+  deadLetteredAt?: true
+  deadLetteredByUserId?: true
   terminalAt?: true
   createdAt?: true
   updatedAt?: true
@@ -269,10 +305,13 @@ export type InstagramCredentialCleanupGroupByArgs<ExtArgs extends runtime.Types.
 
 export type InstagramCredentialCleanupGroupByOutputType = {
   id: string
+  credentialGenerationId: string
   tenantId: string
   externalAccountId: string
   encryptedAccessToken: string
   source: string
+  state: $Enums.InstagramCredentialCleanupState
+  callbackResolvedAt: Date | null
   unsubscribeStatus: $Enums.InstagramCredentialCleanupOperationStatus
   unsubscribeAttemptedAt: Date | null
   unsubscribeSucceededAt: Date | null
@@ -284,6 +323,9 @@ export type InstagramCredentialCleanupGroupByOutputType = {
   leaseExpiresAt: Date | null
   version: number
   lastErrorCode: string | null
+  permanentFailureAt: Date | null
+  deadLetteredAt: Date | null
+  deadLetteredByUserId: string | null
   terminalAt: Date | null
   createdAt: Date
   updatedAt: Date
@@ -314,10 +356,13 @@ export type InstagramCredentialCleanupWhereInput = {
   OR?: Prisma.InstagramCredentialCleanupWhereInput[]
   NOT?: Prisma.InstagramCredentialCleanupWhereInput | Prisma.InstagramCredentialCleanupWhereInput[]
   id?: Prisma.UuidFilter<"InstagramCredentialCleanup"> | string
+  credentialGenerationId?: Prisma.UuidFilter<"InstagramCredentialCleanup"> | string
   tenantId?: Prisma.UuidFilter<"InstagramCredentialCleanup"> | string
   externalAccountId?: Prisma.StringFilter<"InstagramCredentialCleanup"> | string
   encryptedAccessToken?: Prisma.StringFilter<"InstagramCredentialCleanup"> | string
   source?: Prisma.StringFilter<"InstagramCredentialCleanup"> | string
+  state?: Prisma.EnumInstagramCredentialCleanupStateFilter<"InstagramCredentialCleanup"> | $Enums.InstagramCredentialCleanupState
+  callbackResolvedAt?: Prisma.DateTimeNullableFilter<"InstagramCredentialCleanup"> | Date | string | null
   unsubscribeStatus?: Prisma.EnumInstagramCredentialCleanupOperationStatusFilter<"InstagramCredentialCleanup"> | $Enums.InstagramCredentialCleanupOperationStatus
   unsubscribeAttemptedAt?: Prisma.DateTimeNullableFilter<"InstagramCredentialCleanup"> | Date | string | null
   unsubscribeSucceededAt?: Prisma.DateTimeNullableFilter<"InstagramCredentialCleanup"> | Date | string | null
@@ -329,18 +374,25 @@ export type InstagramCredentialCleanupWhereInput = {
   leaseExpiresAt?: Prisma.DateTimeNullableFilter<"InstagramCredentialCleanup"> | Date | string | null
   version?: Prisma.IntFilter<"InstagramCredentialCleanup"> | number
   lastErrorCode?: Prisma.StringNullableFilter<"InstagramCredentialCleanup"> | string | null
+  permanentFailureAt?: Prisma.DateTimeNullableFilter<"InstagramCredentialCleanup"> | Date | string | null
+  deadLetteredAt?: Prisma.DateTimeNullableFilter<"InstagramCredentialCleanup"> | Date | string | null
+  deadLetteredByUserId?: Prisma.UuidNullableFilter<"InstagramCredentialCleanup"> | string | null
   terminalAt?: Prisma.DateTimeNullableFilter<"InstagramCredentialCleanup"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"InstagramCredentialCleanup"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"InstagramCredentialCleanup"> | Date | string
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
+  deadLetteredBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
 }
 
 export type InstagramCredentialCleanupOrderByWithRelationInput = {
   id?: Prisma.SortOrder
+  credentialGenerationId?: Prisma.SortOrder
   tenantId?: Prisma.SortOrder
   externalAccountId?: Prisma.SortOrder
   encryptedAccessToken?: Prisma.SortOrder
   source?: Prisma.SortOrder
+  state?: Prisma.SortOrder
+  callbackResolvedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   unsubscribeStatus?: Prisma.SortOrder
   unsubscribeAttemptedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   unsubscribeSucceededAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -352,14 +404,19 @@ export type InstagramCredentialCleanupOrderByWithRelationInput = {
   leaseExpiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
   version?: Prisma.SortOrder
   lastErrorCode?: Prisma.SortOrderInput | Prisma.SortOrder
+  permanentFailureAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  deadLetteredAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  deadLetteredByUserId?: Prisma.SortOrderInput | Prisma.SortOrder
   terminalAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   tenant?: Prisma.TenantOrderByWithRelationInput
+  deadLetteredBy?: Prisma.UserOrderByWithRelationInput
 }
 
 export type InstagramCredentialCleanupWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  credentialGenerationId?: string
   AND?: Prisma.InstagramCredentialCleanupWhereInput | Prisma.InstagramCredentialCleanupWhereInput[]
   OR?: Prisma.InstagramCredentialCleanupWhereInput[]
   NOT?: Prisma.InstagramCredentialCleanupWhereInput | Prisma.InstagramCredentialCleanupWhereInput[]
@@ -367,6 +424,8 @@ export type InstagramCredentialCleanupWhereUniqueInput = Prisma.AtLeast<{
   externalAccountId?: Prisma.StringFilter<"InstagramCredentialCleanup"> | string
   encryptedAccessToken?: Prisma.StringFilter<"InstagramCredentialCleanup"> | string
   source?: Prisma.StringFilter<"InstagramCredentialCleanup"> | string
+  state?: Prisma.EnumInstagramCredentialCleanupStateFilter<"InstagramCredentialCleanup"> | $Enums.InstagramCredentialCleanupState
+  callbackResolvedAt?: Prisma.DateTimeNullableFilter<"InstagramCredentialCleanup"> | Date | string | null
   unsubscribeStatus?: Prisma.EnumInstagramCredentialCleanupOperationStatusFilter<"InstagramCredentialCleanup"> | $Enums.InstagramCredentialCleanupOperationStatus
   unsubscribeAttemptedAt?: Prisma.DateTimeNullableFilter<"InstagramCredentialCleanup"> | Date | string | null
   unsubscribeSucceededAt?: Prisma.DateTimeNullableFilter<"InstagramCredentialCleanup"> | Date | string | null
@@ -378,18 +437,25 @@ export type InstagramCredentialCleanupWhereUniqueInput = Prisma.AtLeast<{
   leaseExpiresAt?: Prisma.DateTimeNullableFilter<"InstagramCredentialCleanup"> | Date | string | null
   version?: Prisma.IntFilter<"InstagramCredentialCleanup"> | number
   lastErrorCode?: Prisma.StringNullableFilter<"InstagramCredentialCleanup"> | string | null
+  permanentFailureAt?: Prisma.DateTimeNullableFilter<"InstagramCredentialCleanup"> | Date | string | null
+  deadLetteredAt?: Prisma.DateTimeNullableFilter<"InstagramCredentialCleanup"> | Date | string | null
+  deadLetteredByUserId?: Prisma.UuidNullableFilter<"InstagramCredentialCleanup"> | string | null
   terminalAt?: Prisma.DateTimeNullableFilter<"InstagramCredentialCleanup"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"InstagramCredentialCleanup"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"InstagramCredentialCleanup"> | Date | string
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
-}, "id">
+  deadLetteredBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+}, "id" | "credentialGenerationId">
 
 export type InstagramCredentialCleanupOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
+  credentialGenerationId?: Prisma.SortOrder
   tenantId?: Prisma.SortOrder
   externalAccountId?: Prisma.SortOrder
   encryptedAccessToken?: Prisma.SortOrder
   source?: Prisma.SortOrder
+  state?: Prisma.SortOrder
+  callbackResolvedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   unsubscribeStatus?: Prisma.SortOrder
   unsubscribeAttemptedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   unsubscribeSucceededAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -401,6 +467,9 @@ export type InstagramCredentialCleanupOrderByWithAggregationInput = {
   leaseExpiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
   version?: Prisma.SortOrder
   lastErrorCode?: Prisma.SortOrderInput | Prisma.SortOrder
+  permanentFailureAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  deadLetteredAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  deadLetteredByUserId?: Prisma.SortOrderInput | Prisma.SortOrder
   terminalAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -416,10 +485,13 @@ export type InstagramCredentialCleanupScalarWhereWithAggregatesInput = {
   OR?: Prisma.InstagramCredentialCleanupScalarWhereWithAggregatesInput[]
   NOT?: Prisma.InstagramCredentialCleanupScalarWhereWithAggregatesInput | Prisma.InstagramCredentialCleanupScalarWhereWithAggregatesInput[]
   id?: Prisma.UuidWithAggregatesFilter<"InstagramCredentialCleanup"> | string
+  credentialGenerationId?: Prisma.UuidWithAggregatesFilter<"InstagramCredentialCleanup"> | string
   tenantId?: Prisma.UuidWithAggregatesFilter<"InstagramCredentialCleanup"> | string
   externalAccountId?: Prisma.StringWithAggregatesFilter<"InstagramCredentialCleanup"> | string
   encryptedAccessToken?: Prisma.StringWithAggregatesFilter<"InstagramCredentialCleanup"> | string
   source?: Prisma.StringWithAggregatesFilter<"InstagramCredentialCleanup"> | string
+  state?: Prisma.EnumInstagramCredentialCleanupStateWithAggregatesFilter<"InstagramCredentialCleanup"> | $Enums.InstagramCredentialCleanupState
+  callbackResolvedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"InstagramCredentialCleanup"> | Date | string | null
   unsubscribeStatus?: Prisma.EnumInstagramCredentialCleanupOperationStatusWithAggregatesFilter<"InstagramCredentialCleanup"> | $Enums.InstagramCredentialCleanupOperationStatus
   unsubscribeAttemptedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"InstagramCredentialCleanup"> | Date | string | null
   unsubscribeSucceededAt?: Prisma.DateTimeNullableWithAggregatesFilter<"InstagramCredentialCleanup"> | Date | string | null
@@ -431,6 +503,9 @@ export type InstagramCredentialCleanupScalarWhereWithAggregatesInput = {
   leaseExpiresAt?: Prisma.DateTimeNullableWithAggregatesFilter<"InstagramCredentialCleanup"> | Date | string | null
   version?: Prisma.IntWithAggregatesFilter<"InstagramCredentialCleanup"> | number
   lastErrorCode?: Prisma.StringNullableWithAggregatesFilter<"InstagramCredentialCleanup"> | string | null
+  permanentFailureAt?: Prisma.DateTimeNullableWithAggregatesFilter<"InstagramCredentialCleanup"> | Date | string | null
+  deadLetteredAt?: Prisma.DateTimeNullableWithAggregatesFilter<"InstagramCredentialCleanup"> | Date | string | null
+  deadLetteredByUserId?: Prisma.UuidNullableWithAggregatesFilter<"InstagramCredentialCleanup"> | string | null
   terminalAt?: Prisma.DateTimeNullableWithAggregatesFilter<"InstagramCredentialCleanup"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"InstagramCredentialCleanup"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"InstagramCredentialCleanup"> | Date | string
@@ -438,9 +513,12 @@ export type InstagramCredentialCleanupScalarWhereWithAggregatesInput = {
 
 export type InstagramCredentialCleanupCreateInput = {
   id?: string
+  credentialGenerationId: string
   externalAccountId: string
   encryptedAccessToken: string
   source?: string
+  state?: $Enums.InstagramCredentialCleanupState
+  callbackResolvedAt?: Date | string | null
   unsubscribeStatus?: $Enums.InstagramCredentialCleanupOperationStatus
   unsubscribeAttemptedAt?: Date | string | null
   unsubscribeSucceededAt?: Date | string | null
@@ -452,18 +530,24 @@ export type InstagramCredentialCleanupCreateInput = {
   leaseExpiresAt?: Date | string | null
   version?: number
   lastErrorCode?: string | null
+  permanentFailureAt?: Date | string | null
+  deadLetteredAt?: Date | string | null
   terminalAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutInstagramCredentialCleanupsInput
+  deadLetteredBy?: Prisma.UserCreateNestedOneWithoutInstagramCleanupsDeadLetteredInput
 }
 
 export type InstagramCredentialCleanupUncheckedCreateInput = {
   id?: string
+  credentialGenerationId: string
   tenantId: string
   externalAccountId: string
   encryptedAccessToken: string
   source?: string
+  state?: $Enums.InstagramCredentialCleanupState
+  callbackResolvedAt?: Date | string | null
   unsubscribeStatus?: $Enums.InstagramCredentialCleanupOperationStatus
   unsubscribeAttemptedAt?: Date | string | null
   unsubscribeSucceededAt?: Date | string | null
@@ -475,6 +559,9 @@ export type InstagramCredentialCleanupUncheckedCreateInput = {
   leaseExpiresAt?: Date | string | null
   version?: number
   lastErrorCode?: string | null
+  permanentFailureAt?: Date | string | null
+  deadLetteredAt?: Date | string | null
+  deadLetteredByUserId?: string | null
   terminalAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -482,9 +569,12 @@ export type InstagramCredentialCleanupUncheckedCreateInput = {
 
 export type InstagramCredentialCleanupUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  credentialGenerationId?: Prisma.StringFieldUpdateOperationsInput | string
   externalAccountId?: Prisma.StringFieldUpdateOperationsInput | string
   encryptedAccessToken?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.StringFieldUpdateOperationsInput | string
+  state?: Prisma.EnumInstagramCredentialCleanupStateFieldUpdateOperationsInput | $Enums.InstagramCredentialCleanupState
+  callbackResolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   unsubscribeStatus?: Prisma.EnumInstagramCredentialCleanupOperationStatusFieldUpdateOperationsInput | $Enums.InstagramCredentialCleanupOperationStatus
   unsubscribeAttemptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   unsubscribeSucceededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -496,18 +586,24 @@ export type InstagramCredentialCleanupUpdateInput = {
   leaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   version?: Prisma.IntFieldUpdateOperationsInput | number
   lastErrorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permanentFailureAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deadLetteredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   terminalAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutInstagramCredentialCleanupsNestedInput
+  deadLetteredBy?: Prisma.UserUpdateOneWithoutInstagramCleanupsDeadLetteredNestedInput
 }
 
 export type InstagramCredentialCleanupUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  credentialGenerationId?: Prisma.StringFieldUpdateOperationsInput | string
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   externalAccountId?: Prisma.StringFieldUpdateOperationsInput | string
   encryptedAccessToken?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.StringFieldUpdateOperationsInput | string
+  state?: Prisma.EnumInstagramCredentialCleanupStateFieldUpdateOperationsInput | $Enums.InstagramCredentialCleanupState
+  callbackResolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   unsubscribeStatus?: Prisma.EnumInstagramCredentialCleanupOperationStatusFieldUpdateOperationsInput | $Enums.InstagramCredentialCleanupOperationStatus
   unsubscribeAttemptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   unsubscribeSucceededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -519,6 +615,9 @@ export type InstagramCredentialCleanupUncheckedUpdateInput = {
   leaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   version?: Prisma.IntFieldUpdateOperationsInput | number
   lastErrorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permanentFailureAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deadLetteredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deadLetteredByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   terminalAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -526,10 +625,13 @@ export type InstagramCredentialCleanupUncheckedUpdateInput = {
 
 export type InstagramCredentialCleanupCreateManyInput = {
   id?: string
+  credentialGenerationId: string
   tenantId: string
   externalAccountId: string
   encryptedAccessToken: string
   source?: string
+  state?: $Enums.InstagramCredentialCleanupState
+  callbackResolvedAt?: Date | string | null
   unsubscribeStatus?: $Enums.InstagramCredentialCleanupOperationStatus
   unsubscribeAttemptedAt?: Date | string | null
   unsubscribeSucceededAt?: Date | string | null
@@ -541,6 +643,9 @@ export type InstagramCredentialCleanupCreateManyInput = {
   leaseExpiresAt?: Date | string | null
   version?: number
   lastErrorCode?: string | null
+  permanentFailureAt?: Date | string | null
+  deadLetteredAt?: Date | string | null
+  deadLetteredByUserId?: string | null
   terminalAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -548,9 +653,12 @@ export type InstagramCredentialCleanupCreateManyInput = {
 
 export type InstagramCredentialCleanupUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  credentialGenerationId?: Prisma.StringFieldUpdateOperationsInput | string
   externalAccountId?: Prisma.StringFieldUpdateOperationsInput | string
   encryptedAccessToken?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.StringFieldUpdateOperationsInput | string
+  state?: Prisma.EnumInstagramCredentialCleanupStateFieldUpdateOperationsInput | $Enums.InstagramCredentialCleanupState
+  callbackResolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   unsubscribeStatus?: Prisma.EnumInstagramCredentialCleanupOperationStatusFieldUpdateOperationsInput | $Enums.InstagramCredentialCleanupOperationStatus
   unsubscribeAttemptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   unsubscribeSucceededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -562,6 +670,8 @@ export type InstagramCredentialCleanupUpdateManyMutationInput = {
   leaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   version?: Prisma.IntFieldUpdateOperationsInput | number
   lastErrorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permanentFailureAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deadLetteredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   terminalAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -569,10 +679,13 @@ export type InstagramCredentialCleanupUpdateManyMutationInput = {
 
 export type InstagramCredentialCleanupUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  credentialGenerationId?: Prisma.StringFieldUpdateOperationsInput | string
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   externalAccountId?: Prisma.StringFieldUpdateOperationsInput | string
   encryptedAccessToken?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.StringFieldUpdateOperationsInput | string
+  state?: Prisma.EnumInstagramCredentialCleanupStateFieldUpdateOperationsInput | $Enums.InstagramCredentialCleanupState
+  callbackResolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   unsubscribeStatus?: Prisma.EnumInstagramCredentialCleanupOperationStatusFieldUpdateOperationsInput | $Enums.InstagramCredentialCleanupOperationStatus
   unsubscribeAttemptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   unsubscribeSucceededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -584,6 +697,9 @@ export type InstagramCredentialCleanupUncheckedUpdateManyInput = {
   leaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   version?: Prisma.IntFieldUpdateOperationsInput | number
   lastErrorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permanentFailureAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deadLetteredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deadLetteredByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   terminalAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -601,10 +717,13 @@ export type InstagramCredentialCleanupOrderByRelationAggregateInput = {
 
 export type InstagramCredentialCleanupCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  credentialGenerationId?: Prisma.SortOrder
   tenantId?: Prisma.SortOrder
   externalAccountId?: Prisma.SortOrder
   encryptedAccessToken?: Prisma.SortOrder
   source?: Prisma.SortOrder
+  state?: Prisma.SortOrder
+  callbackResolvedAt?: Prisma.SortOrder
   unsubscribeStatus?: Prisma.SortOrder
   unsubscribeAttemptedAt?: Prisma.SortOrder
   unsubscribeSucceededAt?: Prisma.SortOrder
@@ -616,6 +735,9 @@ export type InstagramCredentialCleanupCountOrderByAggregateInput = {
   leaseExpiresAt?: Prisma.SortOrder
   version?: Prisma.SortOrder
   lastErrorCode?: Prisma.SortOrder
+  permanentFailureAt?: Prisma.SortOrder
+  deadLetteredAt?: Prisma.SortOrder
+  deadLetteredByUserId?: Prisma.SortOrder
   terminalAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -628,10 +750,13 @@ export type InstagramCredentialCleanupAvgOrderByAggregateInput = {
 
 export type InstagramCredentialCleanupMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  credentialGenerationId?: Prisma.SortOrder
   tenantId?: Prisma.SortOrder
   externalAccountId?: Prisma.SortOrder
   encryptedAccessToken?: Prisma.SortOrder
   source?: Prisma.SortOrder
+  state?: Prisma.SortOrder
+  callbackResolvedAt?: Prisma.SortOrder
   unsubscribeStatus?: Prisma.SortOrder
   unsubscribeAttemptedAt?: Prisma.SortOrder
   unsubscribeSucceededAt?: Prisma.SortOrder
@@ -643,6 +768,9 @@ export type InstagramCredentialCleanupMaxOrderByAggregateInput = {
   leaseExpiresAt?: Prisma.SortOrder
   version?: Prisma.SortOrder
   lastErrorCode?: Prisma.SortOrder
+  permanentFailureAt?: Prisma.SortOrder
+  deadLetteredAt?: Prisma.SortOrder
+  deadLetteredByUserId?: Prisma.SortOrder
   terminalAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -650,10 +778,13 @@ export type InstagramCredentialCleanupMaxOrderByAggregateInput = {
 
 export type InstagramCredentialCleanupMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  credentialGenerationId?: Prisma.SortOrder
   tenantId?: Prisma.SortOrder
   externalAccountId?: Prisma.SortOrder
   encryptedAccessToken?: Prisma.SortOrder
   source?: Prisma.SortOrder
+  state?: Prisma.SortOrder
+  callbackResolvedAt?: Prisma.SortOrder
   unsubscribeStatus?: Prisma.SortOrder
   unsubscribeAttemptedAt?: Prisma.SortOrder
   unsubscribeSucceededAt?: Prisma.SortOrder
@@ -665,6 +796,9 @@ export type InstagramCredentialCleanupMinOrderByAggregateInput = {
   leaseExpiresAt?: Prisma.SortOrder
   version?: Prisma.SortOrder
   lastErrorCode?: Prisma.SortOrder
+  permanentFailureAt?: Prisma.SortOrder
+  deadLetteredAt?: Prisma.SortOrder
+  deadLetteredByUserId?: Prisma.SortOrder
   terminalAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -717,6 +851,10 @@ export type InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInpu
   deleteMany?: Prisma.InstagramCredentialCleanupScalarWhereInput | Prisma.InstagramCredentialCleanupScalarWhereInput[]
 }
 
+export type EnumInstagramCredentialCleanupStateFieldUpdateOperationsInput = {
+  set?: $Enums.InstagramCredentialCleanupState
+}
+
 export type EnumInstagramCredentialCleanupOperationStatusFieldUpdateOperationsInput = {
   set?: $Enums.InstagramCredentialCleanupOperationStatus
 }
@@ -729,11 +867,56 @@ export type IntFieldUpdateOperationsInput = {
   divide?: number
 }
 
+export type InstagramCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput = {
+  create?: Prisma.XOR<Prisma.InstagramCredentialCleanupCreateWithoutDeadLetteredByInput, Prisma.InstagramCredentialCleanupUncheckedCreateWithoutDeadLetteredByInput> | Prisma.InstagramCredentialCleanupCreateWithoutDeadLetteredByInput[] | Prisma.InstagramCredentialCleanupUncheckedCreateWithoutDeadLetteredByInput[]
+  connectOrCreate?: Prisma.InstagramCredentialCleanupCreateOrConnectWithoutDeadLetteredByInput | Prisma.InstagramCredentialCleanupCreateOrConnectWithoutDeadLetteredByInput[]
+  createMany?: Prisma.InstagramCredentialCleanupCreateManyDeadLetteredByInputEnvelope
+  connect?: Prisma.InstagramCredentialCleanupWhereUniqueInput | Prisma.InstagramCredentialCleanupWhereUniqueInput[]
+}
+
+export type InstagramCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput = {
+  create?: Prisma.XOR<Prisma.InstagramCredentialCleanupCreateWithoutDeadLetteredByInput, Prisma.InstagramCredentialCleanupUncheckedCreateWithoutDeadLetteredByInput> | Prisma.InstagramCredentialCleanupCreateWithoutDeadLetteredByInput[] | Prisma.InstagramCredentialCleanupUncheckedCreateWithoutDeadLetteredByInput[]
+  connectOrCreate?: Prisma.InstagramCredentialCleanupCreateOrConnectWithoutDeadLetteredByInput | Prisma.InstagramCredentialCleanupCreateOrConnectWithoutDeadLetteredByInput[]
+  createMany?: Prisma.InstagramCredentialCleanupCreateManyDeadLetteredByInputEnvelope
+  connect?: Prisma.InstagramCredentialCleanupWhereUniqueInput | Prisma.InstagramCredentialCleanupWhereUniqueInput[]
+}
+
+export type InstagramCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput = {
+  create?: Prisma.XOR<Prisma.InstagramCredentialCleanupCreateWithoutDeadLetteredByInput, Prisma.InstagramCredentialCleanupUncheckedCreateWithoutDeadLetteredByInput> | Prisma.InstagramCredentialCleanupCreateWithoutDeadLetteredByInput[] | Prisma.InstagramCredentialCleanupUncheckedCreateWithoutDeadLetteredByInput[]
+  connectOrCreate?: Prisma.InstagramCredentialCleanupCreateOrConnectWithoutDeadLetteredByInput | Prisma.InstagramCredentialCleanupCreateOrConnectWithoutDeadLetteredByInput[]
+  upsert?: Prisma.InstagramCredentialCleanupUpsertWithWhereUniqueWithoutDeadLetteredByInput | Prisma.InstagramCredentialCleanupUpsertWithWhereUniqueWithoutDeadLetteredByInput[]
+  createMany?: Prisma.InstagramCredentialCleanupCreateManyDeadLetteredByInputEnvelope
+  set?: Prisma.InstagramCredentialCleanupWhereUniqueInput | Prisma.InstagramCredentialCleanupWhereUniqueInput[]
+  disconnect?: Prisma.InstagramCredentialCleanupWhereUniqueInput | Prisma.InstagramCredentialCleanupWhereUniqueInput[]
+  delete?: Prisma.InstagramCredentialCleanupWhereUniqueInput | Prisma.InstagramCredentialCleanupWhereUniqueInput[]
+  connect?: Prisma.InstagramCredentialCleanupWhereUniqueInput | Prisma.InstagramCredentialCleanupWhereUniqueInput[]
+  update?: Prisma.InstagramCredentialCleanupUpdateWithWhereUniqueWithoutDeadLetteredByInput | Prisma.InstagramCredentialCleanupUpdateWithWhereUniqueWithoutDeadLetteredByInput[]
+  updateMany?: Prisma.InstagramCredentialCleanupUpdateManyWithWhereWithoutDeadLetteredByInput | Prisma.InstagramCredentialCleanupUpdateManyWithWhereWithoutDeadLetteredByInput[]
+  deleteMany?: Prisma.InstagramCredentialCleanupScalarWhereInput | Prisma.InstagramCredentialCleanupScalarWhereInput[]
+}
+
+export type InstagramCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput = {
+  create?: Prisma.XOR<Prisma.InstagramCredentialCleanupCreateWithoutDeadLetteredByInput, Prisma.InstagramCredentialCleanupUncheckedCreateWithoutDeadLetteredByInput> | Prisma.InstagramCredentialCleanupCreateWithoutDeadLetteredByInput[] | Prisma.InstagramCredentialCleanupUncheckedCreateWithoutDeadLetteredByInput[]
+  connectOrCreate?: Prisma.InstagramCredentialCleanupCreateOrConnectWithoutDeadLetteredByInput | Prisma.InstagramCredentialCleanupCreateOrConnectWithoutDeadLetteredByInput[]
+  upsert?: Prisma.InstagramCredentialCleanupUpsertWithWhereUniqueWithoutDeadLetteredByInput | Prisma.InstagramCredentialCleanupUpsertWithWhereUniqueWithoutDeadLetteredByInput[]
+  createMany?: Prisma.InstagramCredentialCleanupCreateManyDeadLetteredByInputEnvelope
+  set?: Prisma.InstagramCredentialCleanupWhereUniqueInput | Prisma.InstagramCredentialCleanupWhereUniqueInput[]
+  disconnect?: Prisma.InstagramCredentialCleanupWhereUniqueInput | Prisma.InstagramCredentialCleanupWhereUniqueInput[]
+  delete?: Prisma.InstagramCredentialCleanupWhereUniqueInput | Prisma.InstagramCredentialCleanupWhereUniqueInput[]
+  connect?: Prisma.InstagramCredentialCleanupWhereUniqueInput | Prisma.InstagramCredentialCleanupWhereUniqueInput[]
+  update?: Prisma.InstagramCredentialCleanupUpdateWithWhereUniqueWithoutDeadLetteredByInput | Prisma.InstagramCredentialCleanupUpdateWithWhereUniqueWithoutDeadLetteredByInput[]
+  updateMany?: Prisma.InstagramCredentialCleanupUpdateManyWithWhereWithoutDeadLetteredByInput | Prisma.InstagramCredentialCleanupUpdateManyWithWhereWithoutDeadLetteredByInput[]
+  deleteMany?: Prisma.InstagramCredentialCleanupScalarWhereInput | Prisma.InstagramCredentialCleanupScalarWhereInput[]
+}
+
 export type InstagramCredentialCleanupCreateWithoutTenantInput = {
   id?: string
+  credentialGenerationId: string
   externalAccountId: string
   encryptedAccessToken: string
   source?: string
+  state?: $Enums.InstagramCredentialCleanupState
+  callbackResolvedAt?: Date | string | null
   unsubscribeStatus?: $Enums.InstagramCredentialCleanupOperationStatus
   unsubscribeAttemptedAt?: Date | string | null
   unsubscribeSucceededAt?: Date | string | null
@@ -745,16 +928,22 @@ export type InstagramCredentialCleanupCreateWithoutTenantInput = {
   leaseExpiresAt?: Date | string | null
   version?: number
   lastErrorCode?: string | null
+  permanentFailureAt?: Date | string | null
+  deadLetteredAt?: Date | string | null
   terminalAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  deadLetteredBy?: Prisma.UserCreateNestedOneWithoutInstagramCleanupsDeadLetteredInput
 }
 
 export type InstagramCredentialCleanupUncheckedCreateWithoutTenantInput = {
   id?: string
+  credentialGenerationId: string
   externalAccountId: string
   encryptedAccessToken: string
   source?: string
+  state?: $Enums.InstagramCredentialCleanupState
+  callbackResolvedAt?: Date | string | null
   unsubscribeStatus?: $Enums.InstagramCredentialCleanupOperationStatus
   unsubscribeAttemptedAt?: Date | string | null
   unsubscribeSucceededAt?: Date | string | null
@@ -766,6 +955,9 @@ export type InstagramCredentialCleanupUncheckedCreateWithoutTenantInput = {
   leaseExpiresAt?: Date | string | null
   version?: number
   lastErrorCode?: string | null
+  permanentFailureAt?: Date | string | null
+  deadLetteredAt?: Date | string | null
+  deadLetteredByUserId?: string | null
   terminalAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -802,10 +994,13 @@ export type InstagramCredentialCleanupScalarWhereInput = {
   OR?: Prisma.InstagramCredentialCleanupScalarWhereInput[]
   NOT?: Prisma.InstagramCredentialCleanupScalarWhereInput | Prisma.InstagramCredentialCleanupScalarWhereInput[]
   id?: Prisma.UuidFilter<"InstagramCredentialCleanup"> | string
+  credentialGenerationId?: Prisma.UuidFilter<"InstagramCredentialCleanup"> | string
   tenantId?: Prisma.UuidFilter<"InstagramCredentialCleanup"> | string
   externalAccountId?: Prisma.StringFilter<"InstagramCredentialCleanup"> | string
   encryptedAccessToken?: Prisma.StringFilter<"InstagramCredentialCleanup"> | string
   source?: Prisma.StringFilter<"InstagramCredentialCleanup"> | string
+  state?: Prisma.EnumInstagramCredentialCleanupStateFilter<"InstagramCredentialCleanup"> | $Enums.InstagramCredentialCleanupState
+  callbackResolvedAt?: Prisma.DateTimeNullableFilter<"InstagramCredentialCleanup"> | Date | string | null
   unsubscribeStatus?: Prisma.EnumInstagramCredentialCleanupOperationStatusFilter<"InstagramCredentialCleanup"> | $Enums.InstagramCredentialCleanupOperationStatus
   unsubscribeAttemptedAt?: Prisma.DateTimeNullableFilter<"InstagramCredentialCleanup"> | Date | string | null
   unsubscribeSucceededAt?: Prisma.DateTimeNullableFilter<"InstagramCredentialCleanup"> | Date | string | null
@@ -817,16 +1012,22 @@ export type InstagramCredentialCleanupScalarWhereInput = {
   leaseExpiresAt?: Prisma.DateTimeNullableFilter<"InstagramCredentialCleanup"> | Date | string | null
   version?: Prisma.IntFilter<"InstagramCredentialCleanup"> | number
   lastErrorCode?: Prisma.StringNullableFilter<"InstagramCredentialCleanup"> | string | null
+  permanentFailureAt?: Prisma.DateTimeNullableFilter<"InstagramCredentialCleanup"> | Date | string | null
+  deadLetteredAt?: Prisma.DateTimeNullableFilter<"InstagramCredentialCleanup"> | Date | string | null
+  deadLetteredByUserId?: Prisma.UuidNullableFilter<"InstagramCredentialCleanup"> | string | null
   terminalAt?: Prisma.DateTimeNullableFilter<"InstagramCredentialCleanup"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"InstagramCredentialCleanup"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"InstagramCredentialCleanup"> | Date | string
 }
 
-export type InstagramCredentialCleanupCreateManyTenantInput = {
+export type InstagramCredentialCleanupCreateWithoutDeadLetteredByInput = {
   id?: string
+  credentialGenerationId: string
   externalAccountId: string
   encryptedAccessToken: string
   source?: string
+  state?: $Enums.InstagramCredentialCleanupState
+  callbackResolvedAt?: Date | string | null
   unsubscribeStatus?: $Enums.InstagramCredentialCleanupOperationStatus
   unsubscribeAttemptedAt?: Date | string | null
   unsubscribeSucceededAt?: Date | string | null
@@ -838,6 +1039,89 @@ export type InstagramCredentialCleanupCreateManyTenantInput = {
   leaseExpiresAt?: Date | string | null
   version?: number
   lastErrorCode?: string | null
+  permanentFailureAt?: Date | string | null
+  deadLetteredAt?: Date | string | null
+  terminalAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tenant: Prisma.TenantCreateNestedOneWithoutInstagramCredentialCleanupsInput
+}
+
+export type InstagramCredentialCleanupUncheckedCreateWithoutDeadLetteredByInput = {
+  id?: string
+  credentialGenerationId: string
+  tenantId: string
+  externalAccountId: string
+  encryptedAccessToken: string
+  source?: string
+  state?: $Enums.InstagramCredentialCleanupState
+  callbackResolvedAt?: Date | string | null
+  unsubscribeStatus?: $Enums.InstagramCredentialCleanupOperationStatus
+  unsubscribeAttemptedAt?: Date | string | null
+  unsubscribeSucceededAt?: Date | string | null
+  revokeStatus?: $Enums.InstagramCredentialCleanupOperationStatus
+  revokeAttemptedAt?: Date | string | null
+  revokeSucceededAt?: Date | string | null
+  attempts?: number
+  leaseId?: string | null
+  leaseExpiresAt?: Date | string | null
+  version?: number
+  lastErrorCode?: string | null
+  permanentFailureAt?: Date | string | null
+  deadLetteredAt?: Date | string | null
+  terminalAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type InstagramCredentialCleanupCreateOrConnectWithoutDeadLetteredByInput = {
+  where: Prisma.InstagramCredentialCleanupWhereUniqueInput
+  create: Prisma.XOR<Prisma.InstagramCredentialCleanupCreateWithoutDeadLetteredByInput, Prisma.InstagramCredentialCleanupUncheckedCreateWithoutDeadLetteredByInput>
+}
+
+export type InstagramCredentialCleanupCreateManyDeadLetteredByInputEnvelope = {
+  data: Prisma.InstagramCredentialCleanupCreateManyDeadLetteredByInput | Prisma.InstagramCredentialCleanupCreateManyDeadLetteredByInput[]
+  skipDuplicates?: boolean
+}
+
+export type InstagramCredentialCleanupUpsertWithWhereUniqueWithoutDeadLetteredByInput = {
+  where: Prisma.InstagramCredentialCleanupWhereUniqueInput
+  update: Prisma.XOR<Prisma.InstagramCredentialCleanupUpdateWithoutDeadLetteredByInput, Prisma.InstagramCredentialCleanupUncheckedUpdateWithoutDeadLetteredByInput>
+  create: Prisma.XOR<Prisma.InstagramCredentialCleanupCreateWithoutDeadLetteredByInput, Prisma.InstagramCredentialCleanupUncheckedCreateWithoutDeadLetteredByInput>
+}
+
+export type InstagramCredentialCleanupUpdateWithWhereUniqueWithoutDeadLetteredByInput = {
+  where: Prisma.InstagramCredentialCleanupWhereUniqueInput
+  data: Prisma.XOR<Prisma.InstagramCredentialCleanupUpdateWithoutDeadLetteredByInput, Prisma.InstagramCredentialCleanupUncheckedUpdateWithoutDeadLetteredByInput>
+}
+
+export type InstagramCredentialCleanupUpdateManyWithWhereWithoutDeadLetteredByInput = {
+  where: Prisma.InstagramCredentialCleanupScalarWhereInput
+  data: Prisma.XOR<Prisma.InstagramCredentialCleanupUpdateManyMutationInput, Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByInput>
+}
+
+export type InstagramCredentialCleanupCreateManyTenantInput = {
+  id?: string
+  credentialGenerationId: string
+  externalAccountId: string
+  encryptedAccessToken: string
+  source?: string
+  state?: $Enums.InstagramCredentialCleanupState
+  callbackResolvedAt?: Date | string | null
+  unsubscribeStatus?: $Enums.InstagramCredentialCleanupOperationStatus
+  unsubscribeAttemptedAt?: Date | string | null
+  unsubscribeSucceededAt?: Date | string | null
+  revokeStatus?: $Enums.InstagramCredentialCleanupOperationStatus
+  revokeAttemptedAt?: Date | string | null
+  revokeSucceededAt?: Date | string | null
+  attempts?: number
+  leaseId?: string | null
+  leaseExpiresAt?: Date | string | null
+  version?: number
+  lastErrorCode?: string | null
+  permanentFailureAt?: Date | string | null
+  deadLetteredAt?: Date | string | null
+  deadLetteredByUserId?: string | null
   terminalAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -845,9 +1129,12 @@ export type InstagramCredentialCleanupCreateManyTenantInput = {
 
 export type InstagramCredentialCleanupUpdateWithoutTenantInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  credentialGenerationId?: Prisma.StringFieldUpdateOperationsInput | string
   externalAccountId?: Prisma.StringFieldUpdateOperationsInput | string
   encryptedAccessToken?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.StringFieldUpdateOperationsInput | string
+  state?: Prisma.EnumInstagramCredentialCleanupStateFieldUpdateOperationsInput | $Enums.InstagramCredentialCleanupState
+  callbackResolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   unsubscribeStatus?: Prisma.EnumInstagramCredentialCleanupOperationStatusFieldUpdateOperationsInput | $Enums.InstagramCredentialCleanupOperationStatus
   unsubscribeAttemptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   unsubscribeSucceededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -859,16 +1146,22 @@ export type InstagramCredentialCleanupUpdateWithoutTenantInput = {
   leaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   version?: Prisma.IntFieldUpdateOperationsInput | number
   lastErrorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permanentFailureAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deadLetteredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   terminalAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deadLetteredBy?: Prisma.UserUpdateOneWithoutInstagramCleanupsDeadLetteredNestedInput
 }
 
 export type InstagramCredentialCleanupUncheckedUpdateWithoutTenantInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  credentialGenerationId?: Prisma.StringFieldUpdateOperationsInput | string
   externalAccountId?: Prisma.StringFieldUpdateOperationsInput | string
   encryptedAccessToken?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.StringFieldUpdateOperationsInput | string
+  state?: Prisma.EnumInstagramCredentialCleanupStateFieldUpdateOperationsInput | $Enums.InstagramCredentialCleanupState
+  callbackResolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   unsubscribeStatus?: Prisma.EnumInstagramCredentialCleanupOperationStatusFieldUpdateOperationsInput | $Enums.InstagramCredentialCleanupOperationStatus
   unsubscribeAttemptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   unsubscribeSucceededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -880,6 +1173,9 @@ export type InstagramCredentialCleanupUncheckedUpdateWithoutTenantInput = {
   leaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   version?: Prisma.IntFieldUpdateOperationsInput | number
   lastErrorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permanentFailureAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deadLetteredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deadLetteredByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   terminalAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -887,9 +1183,12 @@ export type InstagramCredentialCleanupUncheckedUpdateWithoutTenantInput = {
 
 export type InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  credentialGenerationId?: Prisma.StringFieldUpdateOperationsInput | string
   externalAccountId?: Prisma.StringFieldUpdateOperationsInput | string
   encryptedAccessToken?: Prisma.StringFieldUpdateOperationsInput | string
   source?: Prisma.StringFieldUpdateOperationsInput | string
+  state?: Prisma.EnumInstagramCredentialCleanupStateFieldUpdateOperationsInput | $Enums.InstagramCredentialCleanupState
+  callbackResolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   unsubscribeStatus?: Prisma.EnumInstagramCredentialCleanupOperationStatusFieldUpdateOperationsInput | $Enums.InstagramCredentialCleanupOperationStatus
   unsubscribeAttemptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   unsubscribeSucceededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -901,6 +1200,117 @@ export type InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantInput = {
   leaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   version?: Prisma.IntFieldUpdateOperationsInput | number
   lastErrorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permanentFailureAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deadLetteredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deadLetteredByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  terminalAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type InstagramCredentialCleanupCreateManyDeadLetteredByInput = {
+  id?: string
+  credentialGenerationId: string
+  tenantId: string
+  externalAccountId: string
+  encryptedAccessToken: string
+  source?: string
+  state?: $Enums.InstagramCredentialCleanupState
+  callbackResolvedAt?: Date | string | null
+  unsubscribeStatus?: $Enums.InstagramCredentialCleanupOperationStatus
+  unsubscribeAttemptedAt?: Date | string | null
+  unsubscribeSucceededAt?: Date | string | null
+  revokeStatus?: $Enums.InstagramCredentialCleanupOperationStatus
+  revokeAttemptedAt?: Date | string | null
+  revokeSucceededAt?: Date | string | null
+  attempts?: number
+  leaseId?: string | null
+  leaseExpiresAt?: Date | string | null
+  version?: number
+  lastErrorCode?: string | null
+  permanentFailureAt?: Date | string | null
+  deadLetteredAt?: Date | string | null
+  terminalAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type InstagramCredentialCleanupUpdateWithoutDeadLetteredByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  credentialGenerationId?: Prisma.StringFieldUpdateOperationsInput | string
+  externalAccountId?: Prisma.StringFieldUpdateOperationsInput | string
+  encryptedAccessToken?: Prisma.StringFieldUpdateOperationsInput | string
+  source?: Prisma.StringFieldUpdateOperationsInput | string
+  state?: Prisma.EnumInstagramCredentialCleanupStateFieldUpdateOperationsInput | $Enums.InstagramCredentialCleanupState
+  callbackResolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  unsubscribeStatus?: Prisma.EnumInstagramCredentialCleanupOperationStatusFieldUpdateOperationsInput | $Enums.InstagramCredentialCleanupOperationStatus
+  unsubscribeAttemptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  unsubscribeSucceededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  revokeStatus?: Prisma.EnumInstagramCredentialCleanupOperationStatusFieldUpdateOperationsInput | $Enums.InstagramCredentialCleanupOperationStatus
+  revokeAttemptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  revokeSucceededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  attempts?: Prisma.IntFieldUpdateOperationsInput | number
+  leaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  lastErrorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permanentFailureAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deadLetteredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  terminalAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutInstagramCredentialCleanupsNestedInput
+}
+
+export type InstagramCredentialCleanupUncheckedUpdateWithoutDeadLetteredByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  credentialGenerationId?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  externalAccountId?: Prisma.StringFieldUpdateOperationsInput | string
+  encryptedAccessToken?: Prisma.StringFieldUpdateOperationsInput | string
+  source?: Prisma.StringFieldUpdateOperationsInput | string
+  state?: Prisma.EnumInstagramCredentialCleanupStateFieldUpdateOperationsInput | $Enums.InstagramCredentialCleanupState
+  callbackResolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  unsubscribeStatus?: Prisma.EnumInstagramCredentialCleanupOperationStatusFieldUpdateOperationsInput | $Enums.InstagramCredentialCleanupOperationStatus
+  unsubscribeAttemptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  unsubscribeSucceededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  revokeStatus?: Prisma.EnumInstagramCredentialCleanupOperationStatusFieldUpdateOperationsInput | $Enums.InstagramCredentialCleanupOperationStatus
+  revokeAttemptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  revokeSucceededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  attempts?: Prisma.IntFieldUpdateOperationsInput | number
+  leaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  lastErrorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permanentFailureAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deadLetteredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  terminalAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type InstagramCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  credentialGenerationId?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  externalAccountId?: Prisma.StringFieldUpdateOperationsInput | string
+  encryptedAccessToken?: Prisma.StringFieldUpdateOperationsInput | string
+  source?: Prisma.StringFieldUpdateOperationsInput | string
+  state?: Prisma.EnumInstagramCredentialCleanupStateFieldUpdateOperationsInput | $Enums.InstagramCredentialCleanupState
+  callbackResolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  unsubscribeStatus?: Prisma.EnumInstagramCredentialCleanupOperationStatusFieldUpdateOperationsInput | $Enums.InstagramCredentialCleanupOperationStatus
+  unsubscribeAttemptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  unsubscribeSucceededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  revokeStatus?: Prisma.EnumInstagramCredentialCleanupOperationStatusFieldUpdateOperationsInput | $Enums.InstagramCredentialCleanupOperationStatus
+  revokeAttemptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  revokeSucceededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  attempts?: Prisma.IntFieldUpdateOperationsInput | number
+  leaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  lastErrorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permanentFailureAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deadLetteredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   terminalAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -910,10 +1320,13 @@ export type InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantInput = {
 
 export type InstagramCredentialCleanupSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  credentialGenerationId?: boolean
   tenantId?: boolean
   externalAccountId?: boolean
   encryptedAccessToken?: boolean
   source?: boolean
+  state?: boolean
+  callbackResolvedAt?: boolean
   unsubscribeStatus?: boolean
   unsubscribeAttemptedAt?: boolean
   unsubscribeSucceededAt?: boolean
@@ -925,18 +1338,25 @@ export type InstagramCredentialCleanupSelect<ExtArgs extends runtime.Types.Exten
   leaseExpiresAt?: boolean
   version?: boolean
   lastErrorCode?: boolean
+  permanentFailureAt?: boolean
+  deadLetteredAt?: boolean
+  deadLetteredByUserId?: boolean
   terminalAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
+  deadLetteredBy?: boolean | Prisma.InstagramCredentialCleanup$deadLetteredByArgs<ExtArgs>
 }, ExtArgs["result"]["instagramCredentialCleanup"]>
 
 export type InstagramCredentialCleanupSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  credentialGenerationId?: boolean
   tenantId?: boolean
   externalAccountId?: boolean
   encryptedAccessToken?: boolean
   source?: boolean
+  state?: boolean
+  callbackResolvedAt?: boolean
   unsubscribeStatus?: boolean
   unsubscribeAttemptedAt?: boolean
   unsubscribeSucceededAt?: boolean
@@ -948,18 +1368,25 @@ export type InstagramCredentialCleanupSelectCreateManyAndReturn<ExtArgs extends 
   leaseExpiresAt?: boolean
   version?: boolean
   lastErrorCode?: boolean
+  permanentFailureAt?: boolean
+  deadLetteredAt?: boolean
+  deadLetteredByUserId?: boolean
   terminalAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
+  deadLetteredBy?: boolean | Prisma.InstagramCredentialCleanup$deadLetteredByArgs<ExtArgs>
 }, ExtArgs["result"]["instagramCredentialCleanup"]>
 
 export type InstagramCredentialCleanupSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  credentialGenerationId?: boolean
   tenantId?: boolean
   externalAccountId?: boolean
   encryptedAccessToken?: boolean
   source?: boolean
+  state?: boolean
+  callbackResolvedAt?: boolean
   unsubscribeStatus?: boolean
   unsubscribeAttemptedAt?: boolean
   unsubscribeSucceededAt?: boolean
@@ -971,18 +1398,25 @@ export type InstagramCredentialCleanupSelectUpdateManyAndReturn<ExtArgs extends 
   leaseExpiresAt?: boolean
   version?: boolean
   lastErrorCode?: boolean
+  permanentFailureAt?: boolean
+  deadLetteredAt?: boolean
+  deadLetteredByUserId?: boolean
   terminalAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
+  deadLetteredBy?: boolean | Prisma.InstagramCredentialCleanup$deadLetteredByArgs<ExtArgs>
 }, ExtArgs["result"]["instagramCredentialCleanup"]>
 
 export type InstagramCredentialCleanupSelectScalar = {
   id?: boolean
+  credentialGenerationId?: boolean
   tenantId?: boolean
   externalAccountId?: boolean
   encryptedAccessToken?: boolean
   source?: boolean
+  state?: boolean
+  callbackResolvedAt?: boolean
   unsubscribeStatus?: boolean
   unsubscribeAttemptedAt?: boolean
   unsubscribeSucceededAt?: boolean
@@ -994,33 +1428,43 @@ export type InstagramCredentialCleanupSelectScalar = {
   leaseExpiresAt?: boolean
   version?: boolean
   lastErrorCode?: boolean
+  permanentFailureAt?: boolean
+  deadLetteredAt?: boolean
+  deadLetteredByUserId?: boolean
   terminalAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type InstagramCredentialCleanupOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "externalAccountId" | "encryptedAccessToken" | "source" | "unsubscribeStatus" | "unsubscribeAttemptedAt" | "unsubscribeSucceededAt" | "revokeStatus" | "revokeAttemptedAt" | "revokeSucceededAt" | "attempts" | "leaseId" | "leaseExpiresAt" | "version" | "lastErrorCode" | "terminalAt" | "createdAt" | "updatedAt", ExtArgs["result"]["instagramCredentialCleanup"]>
+export type InstagramCredentialCleanupOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "credentialGenerationId" | "tenantId" | "externalAccountId" | "encryptedAccessToken" | "source" | "state" | "callbackResolvedAt" | "unsubscribeStatus" | "unsubscribeAttemptedAt" | "unsubscribeSucceededAt" | "revokeStatus" | "revokeAttemptedAt" | "revokeSucceededAt" | "attempts" | "leaseId" | "leaseExpiresAt" | "version" | "lastErrorCode" | "permanentFailureAt" | "deadLetteredAt" | "deadLetteredByUserId" | "terminalAt" | "createdAt" | "updatedAt", ExtArgs["result"]["instagramCredentialCleanup"]>
 export type InstagramCredentialCleanupInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
+  deadLetteredBy?: boolean | Prisma.InstagramCredentialCleanup$deadLetteredByArgs<ExtArgs>
 }
 export type InstagramCredentialCleanupIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
+  deadLetteredBy?: boolean | Prisma.InstagramCredentialCleanup$deadLetteredByArgs<ExtArgs>
 }
 export type InstagramCredentialCleanupIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
+  deadLetteredBy?: boolean | Prisma.InstagramCredentialCleanup$deadLetteredByArgs<ExtArgs>
 }
 
 export type $InstagramCredentialCleanupPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "InstagramCredentialCleanup"
   objects: {
     tenant: Prisma.$TenantPayload<ExtArgs>
+    deadLetteredBy: Prisma.$UserPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
+    credentialGenerationId: string
     tenantId: string
     externalAccountId: string
     encryptedAccessToken: string
     source: string
+    state: $Enums.InstagramCredentialCleanupState
+    callbackResolvedAt: Date | null
     unsubscribeStatus: $Enums.InstagramCredentialCleanupOperationStatus
     unsubscribeAttemptedAt: Date | null
     unsubscribeSucceededAt: Date | null
@@ -1032,6 +1476,9 @@ export type $InstagramCredentialCleanupPayload<ExtArgs extends runtime.Types.Ext
     leaseExpiresAt: Date | null
     version: number
     lastErrorCode: string | null
+    permanentFailureAt: Date | null
+    deadLetteredAt: Date | null
+    deadLetteredByUserId: string | null
     terminalAt: Date | null
     createdAt: Date
     updatedAt: Date
@@ -1430,6 +1877,7 @@ readonly fields: InstagramCredentialCleanupFieldRefs;
 export interface Prisma__InstagramCredentialCleanupClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   tenant<T extends Prisma.TenantDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TenantDefaultArgs<ExtArgs>>): Prisma.Prisma__TenantClient<runtime.Types.Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  deadLetteredBy<T extends Prisma.InstagramCredentialCleanup$deadLetteredByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.InstagramCredentialCleanup$deadLetteredByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1460,10 +1908,13 @@ export interface Prisma__InstagramCredentialCleanupClient<T, Null = never, ExtAr
  */
 export interface InstagramCredentialCleanupFieldRefs {
   readonly id: Prisma.FieldRef<"InstagramCredentialCleanup", 'String'>
+  readonly credentialGenerationId: Prisma.FieldRef<"InstagramCredentialCleanup", 'String'>
   readonly tenantId: Prisma.FieldRef<"InstagramCredentialCleanup", 'String'>
   readonly externalAccountId: Prisma.FieldRef<"InstagramCredentialCleanup", 'String'>
   readonly encryptedAccessToken: Prisma.FieldRef<"InstagramCredentialCleanup", 'String'>
   readonly source: Prisma.FieldRef<"InstagramCredentialCleanup", 'String'>
+  readonly state: Prisma.FieldRef<"InstagramCredentialCleanup", 'InstagramCredentialCleanupState'>
+  readonly callbackResolvedAt: Prisma.FieldRef<"InstagramCredentialCleanup", 'DateTime'>
   readonly unsubscribeStatus: Prisma.FieldRef<"InstagramCredentialCleanup", 'InstagramCredentialCleanupOperationStatus'>
   readonly unsubscribeAttemptedAt: Prisma.FieldRef<"InstagramCredentialCleanup", 'DateTime'>
   readonly unsubscribeSucceededAt: Prisma.FieldRef<"InstagramCredentialCleanup", 'DateTime'>
@@ -1475,6 +1926,9 @@ export interface InstagramCredentialCleanupFieldRefs {
   readonly leaseExpiresAt: Prisma.FieldRef<"InstagramCredentialCleanup", 'DateTime'>
   readonly version: Prisma.FieldRef<"InstagramCredentialCleanup", 'Int'>
   readonly lastErrorCode: Prisma.FieldRef<"InstagramCredentialCleanup", 'String'>
+  readonly permanentFailureAt: Prisma.FieldRef<"InstagramCredentialCleanup", 'DateTime'>
+  readonly deadLetteredAt: Prisma.FieldRef<"InstagramCredentialCleanup", 'DateTime'>
+  readonly deadLetteredByUserId: Prisma.FieldRef<"InstagramCredentialCleanup", 'String'>
   readonly terminalAt: Prisma.FieldRef<"InstagramCredentialCleanup", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"InstagramCredentialCleanup", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"InstagramCredentialCleanup", 'DateTime'>
@@ -1876,6 +2330,25 @@ export type InstagramCredentialCleanupDeleteManyArgs<ExtArgs extends runtime.Typ
    * Limit how many InstagramCredentialCleanups to delete.
    */
   limit?: number
+}
+
+/**
+ * InstagramCredentialCleanup.deadLetteredBy
+ */
+export type InstagramCredentialCleanup$deadLetteredByArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
 }
 
 /**

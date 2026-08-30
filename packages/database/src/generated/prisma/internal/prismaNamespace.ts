@@ -2124,6 +2124,7 @@ export const InstagramConnectionScalarFieldEnum = {
   displayName: 'displayName',
   status: 'status',
   encryptedAccessToken: 'encryptedAccessToken',
+  credentialGenerationId: 'credentialGenerationId',
   tokenExpiresAt: 'tokenExpiresAt',
   grantedScopes: 'grantedScopes',
   lastVerifiedAt: 'lastVerifiedAt',
@@ -2153,10 +2154,13 @@ export type InstagramOAuthStateScalarFieldEnum = (typeof InstagramOAuthStateScal
 
 export const InstagramCredentialCleanupScalarFieldEnum = {
   id: 'id',
+  credentialGenerationId: 'credentialGenerationId',
   tenantId: 'tenantId',
   externalAccountId: 'externalAccountId',
   encryptedAccessToken: 'encryptedAccessToken',
   source: 'source',
+  state: 'state',
+  callbackResolvedAt: 'callbackResolvedAt',
   unsubscribeStatus: 'unsubscribeStatus',
   unsubscribeAttemptedAt: 'unsubscribeAttemptedAt',
   unsubscribeSucceededAt: 'unsubscribeSucceededAt',
@@ -2168,6 +2172,9 @@ export const InstagramCredentialCleanupScalarFieldEnum = {
   leaseExpiresAt: 'leaseExpiresAt',
   version: 'version',
   lastErrorCode: 'lastErrorCode',
+  permanentFailureAt: 'permanentFailureAt',
+  deadLetteredAt: 'deadLetteredAt',
+  deadLetteredByUserId: 'deadLetteredByUserId',
   terminalAt: 'terminalAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -2557,6 +2564,20 @@ export type EnumInstagramConnectionStatusFieldRefInput<$PrismaModel> = FieldRefI
  * Reference to a field of type 'InstagramConnectionStatus[]'
  */
 export type ListEnumInstagramConnectionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'InstagramConnectionStatus[]'>
+
+
+
+/**
+ * Reference to a field of type 'InstagramCredentialCleanupState'
+ */
+export type EnumInstagramCredentialCleanupStateFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'InstagramCredentialCleanupState'>
+
+
+
+/**
+ * Reference to a field of type 'InstagramCredentialCleanupState[]'
+ */
+export type ListEnumInstagramCredentialCleanupStateFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'InstagramCredentialCleanupState[]'>
 
 
 

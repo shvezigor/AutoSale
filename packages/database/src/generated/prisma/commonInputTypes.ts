@@ -223,6 +223,13 @@ export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedDateTimeNullableFilter<$PrismaModel>
 }
 
+export type EnumInstagramCredentialCleanupStateFilter<$PrismaModel = never> = {
+  equals?: $Enums.InstagramCredentialCleanupState | Prisma.EnumInstagramCredentialCleanupStateFieldRefInput<$PrismaModel>
+  in?: $Enums.InstagramCredentialCleanupState[] | Prisma.ListEnumInstagramCredentialCleanupStateFieldRefInput<$PrismaModel>
+  notIn?: $Enums.InstagramCredentialCleanupState[] | Prisma.ListEnumInstagramCredentialCleanupStateFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumInstagramCredentialCleanupStateFilter<$PrismaModel> | $Enums.InstagramCredentialCleanupState
+}
+
 export type EnumInstagramCredentialCleanupOperationStatusFilter<$PrismaModel = never> = {
   equals?: $Enums.InstagramCredentialCleanupOperationStatus | Prisma.EnumInstagramCredentialCleanupOperationStatusFieldRefInput<$PrismaModel>
   in?: $Enums.InstagramCredentialCleanupOperationStatus[] | Prisma.ListEnumInstagramCredentialCleanupOperationStatusFieldRefInput<$PrismaModel>
@@ -239,6 +246,16 @@ export type IntFilter<$PrismaModel = never> = {
   gt?: number | Prisma.IntFieldRefInput<$PrismaModel>
   gte?: number | Prisma.IntFieldRefInput<$PrismaModel>
   not?: Prisma.NestedIntFilter<$PrismaModel> | number
+}
+
+export type EnumInstagramCredentialCleanupStateWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.InstagramCredentialCleanupState | Prisma.EnumInstagramCredentialCleanupStateFieldRefInput<$PrismaModel>
+  in?: $Enums.InstagramCredentialCleanupState[] | Prisma.ListEnumInstagramCredentialCleanupStateFieldRefInput<$PrismaModel>
+  notIn?: $Enums.InstagramCredentialCleanupState[] | Prisma.ListEnumInstagramCredentialCleanupStateFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumInstagramCredentialCleanupStateWithAggregatesFilter<$PrismaModel> | $Enums.InstagramCredentialCleanupState
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumInstagramCredentialCleanupStateFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumInstagramCredentialCleanupStateFilter<$PrismaModel>
 }
 
 export type EnumInstagramCredentialCleanupOperationStatusWithAggregatesFilter<$PrismaModel = never> = {
@@ -715,11 +732,28 @@ export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedDateTimeNullableFilter<$PrismaModel>
 }
 
+export type NestedEnumInstagramCredentialCleanupStateFilter<$PrismaModel = never> = {
+  equals?: $Enums.InstagramCredentialCleanupState | Prisma.EnumInstagramCredentialCleanupStateFieldRefInput<$PrismaModel>
+  in?: $Enums.InstagramCredentialCleanupState[] | Prisma.ListEnumInstagramCredentialCleanupStateFieldRefInput<$PrismaModel>
+  notIn?: $Enums.InstagramCredentialCleanupState[] | Prisma.ListEnumInstagramCredentialCleanupStateFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumInstagramCredentialCleanupStateFilter<$PrismaModel> | $Enums.InstagramCredentialCleanupState
+}
+
 export type NestedEnumInstagramCredentialCleanupOperationStatusFilter<$PrismaModel = never> = {
   equals?: $Enums.InstagramCredentialCleanupOperationStatus | Prisma.EnumInstagramCredentialCleanupOperationStatusFieldRefInput<$PrismaModel>
   in?: $Enums.InstagramCredentialCleanupOperationStatus[] | Prisma.ListEnumInstagramCredentialCleanupOperationStatusFieldRefInput<$PrismaModel>
   notIn?: $Enums.InstagramCredentialCleanupOperationStatus[] | Prisma.ListEnumInstagramCredentialCleanupOperationStatusFieldRefInput<$PrismaModel>
   not?: Prisma.NestedEnumInstagramCredentialCleanupOperationStatusFilter<$PrismaModel> | $Enums.InstagramCredentialCleanupOperationStatus
+}
+
+export type NestedEnumInstagramCredentialCleanupStateWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.InstagramCredentialCleanupState | Prisma.EnumInstagramCredentialCleanupStateFieldRefInput<$PrismaModel>
+  in?: $Enums.InstagramCredentialCleanupState[] | Prisma.ListEnumInstagramCredentialCleanupStateFieldRefInput<$PrismaModel>
+  notIn?: $Enums.InstagramCredentialCleanupState[] | Prisma.ListEnumInstagramCredentialCleanupStateFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumInstagramCredentialCleanupStateWithAggregatesFilter<$PrismaModel> | $Enums.InstagramCredentialCleanupState
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumInstagramCredentialCleanupStateFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumInstagramCredentialCleanupStateFilter<$PrismaModel>
 }
 
 export type NestedEnumInstagramCredentialCleanupOperationStatusWithAggregatesFilter<$PrismaModel = never> = {

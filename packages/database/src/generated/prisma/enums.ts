@@ -52,3 +52,14 @@ export const InstagramCredentialCleanupOperationStatus = {
 } as const
 
 export type InstagramCredentialCleanupOperationStatus = (typeof InstagramCredentialCleanupOperationStatus)[keyof typeof InstagramCredentialCleanupOperationStatus]
+
+
+export const InstagramCredentialCleanupState = {
+  ARMED: 'ARMED',
+  REQUIRED: 'REQUIRED',
+  COMPLETED: 'COMPLETED',
+  CANCELLED: 'CANCELLED',
+  DEAD_LETTER: 'DEAD_LETTER'
+} as const
+
+export type InstagramCredentialCleanupState = (typeof InstagramCredentialCleanupState)[keyof typeof InstagramCredentialCleanupState]

@@ -25,6 +25,7 @@ export const instagramConnectionSummarySchema = z
     lastErrorCode: z.string().nullable(),
     cleanupStatus: instagramCleanupStatusSchema,
     cleanupErrorCode: z.string().nullable(),
+    cleanupAbandonEligible: z.boolean(),
   })
   .strict();
 
