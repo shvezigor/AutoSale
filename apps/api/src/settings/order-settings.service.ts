@@ -18,7 +18,20 @@ export class OrderSettingsService {
 
   async get(tenantId: string): Promise<OrderSettingsResponse> {
     return toResponse(
-      await this.prisma.tenantSettings.findUniqueOrThrow({ where: { tenantId } }),
+      await this.prisma.tenantSettings.upsert({
+        where: { tenantId },
+        update: {},
+        create: {
+          tenantId,
+          approvalMode: 'ALWAYS',
+          autoApprovalThreshold: 0.9,
+          promptVersion: 'instagram-order-v1',
+          triggerPhrases: [
+            'беремо замовлення в роботу',
+            'замовлення прийнято',
+          ],
+        },
+      }),
     );
   }
 
