@@ -5,6 +5,7 @@ import { BadRequestException, NotFoundException } from '@nestjs/common';
 type Extraction = {
   customer?: ManagerOrder['customer'];
   delivery?: ManagerOrder['delivery'];
+  items?: Array<{ quantity?: number; confidence?: number }>;
 };
 
 export class OrdersService {
@@ -125,7 +126,12 @@ export class OrdersService {
       validationIssues: jsonStrings(row.validationIssues),
       customer: extraction.customer ?? { name: null, phone: null, instagramUsername: null },
       delivery: extraction.delivery ?? { city: null, address: null, novaPoshtaBranch: null },
-      items: row.items.map((item) => ({ ...item, productName: item.catalogId ? products.get(item.catalogId) ?? null : null })),
+      items: row.items.map((item, index) => ({
+        ...item,
+        quantity: item.quantity ?? extraction.items?.[index]?.quantity ?? 1,
+        confidence: item.confidence ?? extraction.items?.[index]?.confidence ?? 0,
+        productName: item.catalogId ? products.get(item.catalogId) ?? null : null,
+      })),
       catalogueCandidates: [...products].map(([sku, name]) => ({ sku, name })),
       createdAt: row.createdAt.toISOString(),
       sheetsExport: row.exports[0] ? this.mapExport(row.exports[0], row.exports[0].destination.status === 'ACTIVE') : null,

@@ -4,6 +4,7 @@ import { GoogleSheetsSettingsForm, type GoogleSheetsSettings } from '../../src/c
 import { OrderSettingsForm, type OrderSettings } from '../../src/components/order-settings-form';
 import { PrimaryNavigation } from '../../src/components/primary-navigation';
 import { InstagramSettingsForm, type InstagramConnectionSummary } from '../../src/components/instagram-settings-form';
+import { DemoScenarioCard } from '../../src/components/demo-scenario-card';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,5 +38,5 @@ function SettingsLayout({
   sheets?: GoogleSheetsSettings;
 }) {
   const isManager = session.membershipRole === 'MANAGER';
-  return <main className="settings-layout"><PrimaryNavigation active="settings" session={session} /><section className="settings-content"><header className="settings-header"><h1>Налаштування</h1><p>{isManager ? 'Переглядайте стан підключення Instagram.' : 'Керуйте автоматичною обробкою Instagram-замовлень.'}</p></header><InstagramSettingsForm initial={instagram} membershipRole={session.membershipRole} />{settings && <OrderSettingsForm initial={settings} />}{sheets && <GoogleSheetsSettingsForm initial={sheets} />}</section></main>;
+  return <main className="settings-layout"><PrimaryNavigation active="settings" session={session} /><section className="settings-content"><header className="settings-header"><h1>Налаштування</h1><p>{isManager ? 'Переглядайте стан підключення Instagram.' : 'Керуйте автоматичною обробкою Instagram-замовлень.'}</p></header><InstagramSettingsForm initial={instagram} membershipRole={session.membershipRole} />{settings && <OrderSettingsForm initial={settings} />}{sheets && <GoogleSheetsSettingsForm initial={sheets} />}{settings && <DemoScenarioCard />}</section></main>;
 }
