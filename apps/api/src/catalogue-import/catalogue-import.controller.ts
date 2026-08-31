@@ -54,6 +54,11 @@ export class CatalogueImportController {
     return this.imports.updateMapping(principal.tenantId!, principal.userId, id, parsed.data);
   }
 
+  @Get(':id')
+  status(@CurrentPrincipal() principal: AuthPrincipal, @Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
+    return this.imports.status(principal.tenantId!, id);
+  }
+
   @Get(':id/preview')
   preview(@CurrentPrincipal() principal: AuthPrincipal, @Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
     return this.imports.preview(principal.tenantId!, id);

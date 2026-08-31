@@ -6,7 +6,7 @@ import type { ObjectStorage } from '@autosale/integrations';
 import { ConflictException, ServiceUnavailableException, UnprocessableEntityException } from '@nestjs/common';
 import { PostgreSqlContainer, type StartedPostgreSqlContainer } from '@testcontainers/postgresql';
 import pg from 'pg';
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { CatalogueImportService } from './catalogue-import.service.js';
 
@@ -332,6 +332,20 @@ describe('CatalogueImportService', () => {
     expect(storage.objects.size).toBe(1);
     expect(await prisma.catalogueSource.count()).toBe(1);
     expect(await prisma.catalogueImportRun.count()).toBe(1);
+  });
+
+  it('enqueues a mapping job only after a new upload run is durable', async () => {
+    const add = vi.fn().mockResolvedValue(undefined);
+    const queuedService = new CatalogueImportService(prisma, storage, { add });
+    const file = { originalName: 'products.csv', mediaType: 'text/csv', buffer: Buffer.from('SKU,Name\nLUNA-01,Luna') };
+
+    const first = await queuedService.upload(tenantId, ownerUserId, file);
+    const second = await queuedService.upload(tenantId, ownerUserId, file);
+
+    expect(second.id).toBe(first.id);
+    expect(add).toHaveBeenCalledTimes(1);
+    expect(add).toHaveBeenCalledWith('catalogue.mapping', { tenantId, runId: first.id }, expect.objectContaining({ jobId: `catalogue.mapping:${first.id}` }));
+    expect(await prisma.catalogueImportRun.findUniqueOrThrow({ where: { id: first.id } })).toMatchObject({ tenantId, status: 'UPLOADED' });
   });
 
   async function uploadAndMap(csv: string) {

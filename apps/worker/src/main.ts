@@ -11,6 +11,8 @@ import { createOpenAiOrderRecognizer } from './orders/openai-order-recognizer.js
 import { OrderRecognitionService } from './orders/order-recognition.service.js';
 import { TriggeredOrderProcessor } from './orders/triggered-order.processor.js';
 import { GoogleSheetsSyncProcessor } from './google-sheets/google-sheets-sync.processor.js';
+import { CatalogueMappingProcessor } from './catalogue/catalogue-mapping.processor.js';
+import { createOpenAiColumnMapper } from './catalogue/openai-column-mapper.js';
 
 async function bootstrap(): Promise<void> {
   const env = parseWorkerEnv(process.env);
@@ -27,6 +29,8 @@ async function bootstrap(): Promise<void> {
   });
   await storage.ensureBucket();
   const orderRecognizer = createOpenAiOrderRecognizer(env.OPENAI_API_KEY, env.OPENAI_MODEL);
+  const catalogueMapper = createOpenAiColumnMapper(env.OPENAI_API_KEY, env.OPENAI_MODEL);
+  const catalogueMappingProcessor = new CatalogueMappingProcessor(prisma, storage, catalogueMapper);
   const orderProcessor = new TriggeredOrderProcessor(
     prisma,
     new OrderRecognitionService(orderRecognizer),
@@ -80,6 +84,34 @@ async function bootstrap(): Promise<void> {
       concurrency: 5,
     },
   );
+  const catalogueWorker = new Worker(
+    'catalogue',
+    async (job) => {
+      if (job.name !== 'catalogue.mapping' || typeof job.data?.tenantId !== 'string' || typeof job.data?.runId !== 'string') return;
+      const started = performance.now();
+      try {
+        await catalogueMappingProcessor.process({ tenantId: job.data.tenantId, runId: job.data.runId });
+        metrics.increment('autosale_operations_total', { operation: 'catalogue_mapping', result: 'success' });
+        logger.info('catalogue_mapping_completed', { correlationId: job.data.runId, runId: job.data.runId });
+      } catch (error) {
+        metrics.increment('autosale_operations_total', { operation: 'catalogue_mapping', result: 'failure' });
+        logger.warn('catalogue_mapping_failed', { correlationId: job.data.runId, runId: job.data.runId, errorCode: error instanceof Error ? error.name : 'UNKNOWN' });
+        throw error;
+      } finally {
+        metrics.observe('autosale_operation_duration_seconds', (performance.now() - started) / 1000, { operation: 'catalogue_mapping' });
+      }
+    },
+    {
+      connection: {
+        host: redis.hostname,
+        port: Number(redis.port || 6379),
+        username: redis.username || undefined,
+        password: redis.password || undefined,
+        tls: redis.protocol === 'rediss:' ? {} : undefined,
+      },
+      concurrency: 2,
+    },
+  );
   const sheetsProcessor = env.GOOGLE_SERVICE_ACCOUNT_FILE
     ? new GoogleSheetsSyncProcessor(prisma, createGoogleSheetsAdapter(env.GOOGLE_SERVICE_ACCOUNT_FILE))
     : undefined;
@@ -121,6 +153,7 @@ async function bootstrap(): Promise<void> {
   const shutdown = async (): Promise<void> => {
     clearInterval(sheetsTimer);
     await worker.close();
+    await catalogueWorker.close();
     await prisma.$disconnect();
     server.close();
   };

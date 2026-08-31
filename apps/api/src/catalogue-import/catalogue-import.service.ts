@@ -1,7 +1,7 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { basename, extname } from 'node:path';
 
-import type { CatalogueImportSummary, CataloguePreview, CatalogueTargetField } from '@autosale/contracts';
+import { catalogueTargetFieldSchema, type CatalogueImportSummary, type CataloguePreview, type CatalogueTargetField } from '@autosale/contracts';
 import { Prisma, type PrismaClient } from '@autosale/database';
 import type { ObjectStorage } from '@autosale/integrations';
 import { BadRequestException, ConflictException, NotFoundException, ServiceUnavailableException, UnprocessableEntityException } from '@nestjs/common';
@@ -39,6 +39,13 @@ export type CatalogueUploadResult = CatalogueImportSummary & {
   fingerprint: string;
 };
 
+export type CatalogueMappingQueue = { add(name: string, data: { tenantId: string; runId: string }, options?: Record<string, unknown>): Promise<unknown> };
+
+export type CatalogueImportStatusResult = CatalogueImportSummary & {
+  mapping: { columns: CatalogueColumnMapping[]; aiModel: string | null; promptVersion: string | null; schemaVersion: string | null } | null;
+  mappingFailure: 'MAPPING_UNAVAILABLE' | null;
+};
+
 type PreviewProduct = NonNullable<CataloguePreview['rows'][number]['product']>;
 type InternalPreviewRow = CataloguePreview['rows'][number] & {
   codes: string[];
@@ -49,6 +56,7 @@ export class CatalogueImportService {
   constructor(
     private readonly prisma: PrismaClient,
     private readonly storage: ObjectStorage,
+    private readonly mappingQueue?: CatalogueMappingQueue,
   ) {}
 
   async upload(tenantId: string, userId: string, file: CatalogueUploadFile): Promise<CatalogueUploadResult> {
@@ -101,7 +109,16 @@ export class CatalogueImportService {
           },
         });
       });
-      return { ...mapSummary(run), headers: table.headers, fingerprint: table.fingerprint };
+      const result = { ...mapSummary(run), headers: table.headers, fingerprint: table.fingerprint };
+      try {
+        await this.mappingQueue?.add('catalogue.mapping', { tenantId, runId: run.id }, { jobId: `catalogue.mapping:${run.id}`, removeOnComplete: 1_000, removeOnFail: 5_000 });
+      } catch {
+        await this.prisma.catalogueImportRun.updateMany({
+          where: { id: run.id, tenantId, status: 'UPLOADED' },
+          data: { status: 'MAPPING_REVIEW', rowErrors: [{ errors: ['MAPPING_UNAVAILABLE'] }] },
+        });
+      }
+      return result;
     } catch (error) {
       await this.deleteStoredObject(storedObjectKey);
       if (isUniqueConstraintError(error)) {
@@ -175,6 +192,21 @@ export class CatalogueImportService {
     const mapping = readMapping(run.mapping.columns);
     const preview = await this.buildPreview(tenantId, table, mapping, readClearFields(run.mapping.transformSettings));
     return publicPreview(preview);
+  }
+
+  async status(tenantId: string, runId: string): Promise<CatalogueImportStatusResult> {
+    const run = await this.prisma.catalogueImportRun.findFirst({
+      where: { id: runId, tenantId },
+      include: { mapping: { select: { columns: true, aiModel: true, promptVersion: true, schemaVersion: true } } },
+    });
+    if (!run) throw new NotFoundException('Catalogue import not found');
+    return {
+      ...mapSummary(run),
+      mapping: run.mapping ? {
+        columns: readProposalColumns(run.mapping.columns), aiModel: run.mapping.aiModel, promptVersion: run.mapping.promptVersion, schemaVersion: run.mapping.schemaVersion,
+      } : null,
+      mappingFailure: hasMappingFailure(run.rowErrors) ? 'MAPPING_UNAVAILABLE' : null,
+    };
   }
 
   async confirm(tenantId: string, userId: string, runId: string): Promise<CatalogueImportSummary> {
@@ -351,6 +383,25 @@ function readMapping(value: Prisma.JsonValue): CatalogueColumnMapping[] {
       throw new ConflictException('Catalogue mapping is invalid');
     }
     return { source: item.source, target: item.target as CatalogueTargetField };
+  });
+}
+
+function readProposalColumns(value: Prisma.JsonValue): CatalogueColumnMapping[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((item) => {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) return [];
+    const column = item as Record<string, unknown>;
+    const target = catalogueTargetFieldSchema.safeParse(column.target);
+    if (typeof column.source !== 'string' || !target.success || (typeof column.confidence !== 'number' && column.confidence !== undefined)) return [];
+    return [{ source: column.source, target: target.data, ...(typeof column.confidence === 'number' ? { confidence: column.confidence } : {}) }];
+  });
+}
+
+function hasMappingFailure(value: Prisma.JsonValue | null): boolean {
+  return Array.isArray(value) && value.some((item) => {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) return false;
+    const errors = (item as Record<string, unknown>).errors;
+    return Array.isArray(errors) && errors.includes('MAPPING_UNAVAILABLE');
   });
 }
 

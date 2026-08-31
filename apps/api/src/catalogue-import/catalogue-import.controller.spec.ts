@@ -23,6 +23,7 @@ class RecordingImportService {
   mappingCalls: unknown[][] = [];
   previewCalls: unknown[][] = [];
   confirmCalls: unknown[][] = [];
+  statusCalls: unknown[][] = [];
 
   async upload(tenant: string, user: string, file: { originalName: string; mediaType: string; buffer: Buffer }) {
     this.uploads.push({ tenantId: tenant, userId: user, originalName: file.originalName, mediaType: file.mediaType, body: file.buffer.toString('utf8') });
@@ -32,6 +33,7 @@ class RecordingImportService {
   async updateMapping(...args: unknown[]) { this.mappingCalls.push(args); return preview; }
   async preview(...args: unknown[]) { this.previewCalls.push(args); return preview; }
   async confirm(...args: unknown[]) { this.confirmCalls.push(args); return { ...summary, status: 'COMPLETED' }; }
+  async status(...args: unknown[]) { this.statusCalls.push(args); return { ...summary, status: 'MAPPING_REVIEW', mapping: { columns: [{ source: 'sku', target: 'sku', confidence: 0.98 }], aiModel: 'gpt-5.4-mini', promptVersion: 'catalogue-column-mapping-v1' } }; }
 }
 
 describe('CatalogueImportController', () => {
@@ -95,5 +97,13 @@ describe('CatalogueImportController', () => {
     await request(app.getHttpServer()).get(`/api/catalogue/imports/${runId}/preview`).set('Cookie', 'session=manager').expect(403);
     await request(app.getHttpServer()).post(`/api/catalogue/imports/${runId}/confirm`).set('Cookie', 'session=owner').expect(403);
     expect(imports.confirmCalls).toHaveLength(1);
+  });
+
+  it('returns only the owner-visible import status and draft mapping, never source data', async () => {
+    const response = await request(app.getHttpServer()).get(`/api/catalogue/imports/${runId}`).set('Cookie', 'session=owner').expect(200);
+
+    expect(response.body).toMatchObject({ id: runId, status: 'MAPPING_REVIEW', mapping: { columns: [{ source: 'sku', target: 'sku', confidence: 0.98 }] } });
+    expect(imports.statusCalls).toEqual([[tenantId, runId]]);
+    await request(app.getHttpServer()).get(`/api/catalogue/imports/${runId}`).set('Cookie', 'session=manager').expect(403);
   });
 });

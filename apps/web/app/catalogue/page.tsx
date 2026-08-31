@@ -2,6 +2,7 @@ import type { CatalogueProduct } from '../../../../packages/contracts/src/catalo
 
 import { authenticatedApiFetch, getServerSession } from '../../src/auth/session';
 import { CatalogueTable } from '../../src/components/catalogue-table';
+import { CatalogueImportWizard } from '../../src/components/catalogue-import-wizard';
 import { PrimaryNavigation } from '../../src/components/primary-navigation';
 
 export const dynamic = 'force-dynamic';
@@ -23,7 +24,7 @@ export default async function CataloguePage({ searchParams }: CataloguePageProps
   if (!response.ok) throw new Error('Не вдалося завантажити каталог');
   const catalogue = await response.json() as CatalogueResponse;
 
-  return <main className="catalogue-layout"><PrimaryNavigation active="catalogue" session={session} /><section className="catalogue-content"><header className="catalogue-header"><h1>Каталог товарів</h1><p>{session.membershipRole === 'OWNER' ? 'Додавайте та оновлюйте товари, які AI використовує для розпізнавання замовлень.' : 'Переглядайте товари, які AI використовує для розпізнавання замовлень.'}</p></header><CatalogueTable page={catalogue.page} pageSize={catalogue.pageSize} products={catalogue.items} search={search} session={session} total={catalogue.total} /></section></main>;
+  return <main className="catalogue-layout"><PrimaryNavigation active="catalogue" session={session} /><section className="catalogue-content"><header className="catalogue-header"><h1>Каталог товарів</h1><p>{session.membershipRole === 'OWNER' ? 'Додавайте та оновлюйте товари, які AI використовує для розпізнавання замовлень.' : 'Переглядайте товари, які AI використовує для розпізнавання замовлень.'}</p></header><CatalogueImportWizard session={session} /><CatalogueTable page={catalogue.page} pageSize={catalogue.pageSize} products={catalogue.items} search={search} session={session} total={catalogue.total} /></section></main>;
 }
 
 function positiveInteger(value: string | string[] | undefined) { const parsed = Number(Array.isArray(value) ? value[0] : value); return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : null; }

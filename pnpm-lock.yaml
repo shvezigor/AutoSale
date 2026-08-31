@@ -144,6 +144,9 @@ importers:
       '@autosale/config':
         specifier: workspace:*
         version: file:packages/config
+      '@autosale/contracts':
+        specifier: workspace:*
+        version: file:packages/contracts
       '@autosale/database':
         specifier: workspace:*
         version: file:packages/database(prisma@7.10.0(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(typescript@5.9.3))(typescript@5.9.3)
@@ -156,6 +159,12 @@ importers:
       bullmq:
         specifier: 5.58.5
         version: 5.58.5
+      csv-parse:
+        specifier: 6.1.0
+        version: 6.1.0
+      exceljs:
+        specifier: 4.4.0
+        version: 4.4.0
       openai:
         specifier: 6.22.0
         version: 6.22.0(ws@8.21.3)(zod@4.1.5)
