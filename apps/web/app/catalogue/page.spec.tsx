@@ -19,4 +19,11 @@ describe('CataloguePage', () => {
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/catalogue?page=2&pageSize=25&search=Luna');
     expect(screen.getByText('Товарів за цим запитом не знайдено.')).toBeInTheDocument();
   });
+
+  it('throws when the initial catalogue fetch fails so the route error boundary can render recovery UI', async () => {
+    getServerSession.mockResolvedValue({ name: 'Іван', email: 'manager@example.com', membershipRole: 'MANAGER' });
+    authenticatedApiFetch.mockResolvedValue({ ok: false });
+
+    await expect(CataloguePage({ searchParams: Promise.resolve({}) })).rejects.toThrow('Не вдалося завантажити каталог');
+  });
 });
