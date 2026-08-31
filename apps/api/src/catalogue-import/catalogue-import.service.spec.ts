@@ -1,8 +1,9 @@
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
-import { createPrismaClient, type PrismaClient } from '@autosale/database';
+import { createPrismaClient, Prisma, type PrismaClient } from '@autosale/database';
 import type { ObjectStorage } from '@autosale/integrations';
+import { ConflictException, ServiceUnavailableException, UnprocessableEntityException } from '@nestjs/common';
 import { PostgreSqlContainer, type StartedPostgreSqlContainer } from '@testcontainers/postgresql';
 import pg from 'pg';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
@@ -34,6 +35,8 @@ const migrationNames = [
 
 class MemoryStorage implements ObjectStorage {
   readonly objects = new Map<string, { body: Uint8Array; contentType: string }>();
+  readonly deleted: string[] = [];
+  getFailure: Error | null = null;
 
   async put(input: { key: string; body: Uint8Array; contentType: string }): Promise<{ key: string; etag: string }> {
     this.objects.set(input.key, { body: input.body, contentType: input.contentType });
@@ -41,9 +44,15 @@ class MemoryStorage implements ObjectStorage {
   }
 
   async get(key: string): Promise<{ body: Uint8Array; contentType: string }> {
+    if (this.getFailure) throw this.getFailure;
     const object = this.objects.get(key);
     if (!object) throw new Error('Fixture object not found');
     return object;
+  }
+
+  async delete(key: string): Promise<void> {
+    this.deleted.push(key);
+    this.objects.delete(key);
   }
 }
 
@@ -200,6 +209,99 @@ describe('CatalogueImportService', () => {
     expect(product).toEqual({ description: null, aliases: [] });
   });
 
+  it('rejects remapping a processing run with a safe 409 and does not create an orphan mapping', async () => {
+    const uploaded = await service.upload(tenantId, ownerUserId, {
+      originalName: 'products.csv',
+      mediaType: 'text/csv',
+      buffer: Buffer.from('SKU,Name\nLUNA-01,Luna'),
+    });
+    await prisma.catalogueImportRun.update({
+      where: { id: uploaded.id },
+      data: { status: 'PROCESSING' },
+    });
+
+    await expect(service.updateMapping(tenantId, ownerUserId, uploaded.id, {
+      columns: [
+        { source: 'sku', target: 'sku' },
+        { source: 'name', target: 'name' },
+      ],
+    })).rejects.toMatchObject({
+      constructor: ConflictException,
+      message: 'Catalogue import cannot be remapped',
+    });
+
+    expect(await prisma.catalogueMapping.count()).toBe(0);
+  });
+
+  it('rejects a concurrent remap lock loss with a safe 409 and leaves no orphan mapping', async () => {
+    const uploaded = await service.upload(tenantId, ownerUserId, {
+      originalName: 'products.csv',
+      mediaType: 'text/csv',
+      buffer: Buffer.from('SKU,Name\nLUNA-01,Luna'),
+    });
+    const prismaWithLostLock = createPrismaWithLostRemapLock(prisma);
+    const lockedService = new CatalogueImportService(prismaWithLostLock, storage);
+
+    await expect(lockedService.updateMapping(tenantId, ownerUserId, uploaded.id, {
+      columns: [
+        { source: 'sku', target: 'sku' },
+        { source: 'name', target: 'name' },
+      ],
+    })).rejects.toMatchObject({
+      constructor: ConflictException,
+      message: 'Catalogue import cannot be remapped',
+    });
+
+    expect(await prisma.catalogueMapping.count()).toBe(0);
+    expect(await prisma.catalogueImportRun.findUniqueOrThrow({
+      where: { id: uploaded.id },
+      select: { status: true, mappingId: true },
+    })).toEqual({ status: 'UPLOADED', mappingId: null });
+  });
+
+  it('deletes the stored object when upload persistence fails after storage put', async () => {
+    const failingPrisma = createPrismaWithFailingUploadTransaction(prisma);
+    const failingService = new CatalogueImportService(failingPrisma, storage);
+
+    await expect(failingService.upload(tenantId, ownerUserId, {
+      originalName: 'products.csv',
+      mediaType: 'text/csv',
+      buffer: Buffer.from('SKU,Name\nLUNA-01,Luna'),
+    })).rejects.toThrow('Catalogue import is temporarily unavailable');
+
+    expect(storage.deleted).toHaveLength(1);
+    expect(storage.objects.size).toBe(0);
+    expect(await prisma.catalogueSource.count()).toBe(0);
+    expect(await prisma.catalogueImportRun.count()).toBe(0);
+  });
+
+  it('returns a safe 503 when stored source retrieval fails', async () => {
+    const uploaded = await uploadAndMap('SKU,Name,Description,Price,Aliases\nLUNA-01,Luna,,,');
+    storage.getFailure = new Error('socket timeout secret-key-123');
+
+    await expect(service.preview(tenantId, uploaded.id)).rejects.toMatchObject({
+      constructor: ServiceUnavailableException,
+      message: 'Catalogue source file is temporarily unavailable',
+    });
+  });
+
+  it('returns a safe 422 when a stored source body can no longer be parsed', async () => {
+    const uploaded = await uploadAndMap('SKU,Name,Description,Price,Aliases\nLUNA-01,Luna,,,');
+    const source = await prisma.catalogueSource.findUniqueOrThrow({
+      where: { id: uploaded.sourceId },
+      select: { objectKey: true },
+    });
+    storage.objects.set(source.objectKey!, {
+      body: Buffer.from('not-a-catalogue-source'),
+      contentType: 'application/json',
+    });
+
+    await expect(service.preview(tenantId, uploaded.id)).rejects.toMatchObject({
+      constructor: UnprocessableEntityException,
+      message: 'Stored catalogue source is unreadable',
+    });
+  });
+
   async function uploadAndMap(csv: string) {
     const uploaded = await service.upload(tenantId, ownerUserId, {
       originalName: 'products.csv',
@@ -218,3 +320,59 @@ describe('CatalogueImportService', () => {
     return uploaded;
   }
 });
+
+function createPrismaWithLostRemapLock(prisma: PrismaClient): PrismaClient {
+  return new Proxy(prisma, {
+    get(target, property, receiver) {
+      if (property === '$transaction') {
+        return async (arg: unknown) => {
+          if (typeof arg === 'function') {
+            return prisma.$transaction((tx) => arg(createTxWithLostRemapLock(tx)));
+          }
+          return prisma.$transaction(arg as Parameters<PrismaClient['$transaction']>[0]);
+        };
+      }
+      return Reflect.get(target, property, receiver);
+    },
+  }) as PrismaClient;
+}
+
+function createPrismaWithFailingUploadTransaction(prisma: PrismaClient): PrismaClient {
+  return new Proxy(prisma, {
+    get(target, property, receiver) {
+      if (property === '$transaction') {
+        return async (arg: unknown) => {
+          if (typeof arg === 'function') {
+            return prisma.$transaction(async (tx) => {
+              await arg(tx);
+              throw new Error('simulated upload transaction failure');
+            });
+          }
+          return prisma.$transaction(arg as Parameters<PrismaClient['$transaction']>[0]);
+        };
+      }
+      return Reflect.get(target, property, receiver);
+    },
+  }) as PrismaClient;
+}
+
+function createTxWithLostRemapLock(tx: Prisma.TransactionClient): Prisma.TransactionClient {
+  const runDelegate = new Proxy(tx.catalogueImportRun, {
+    get(target, property, receiver) {
+      if (property === 'updateMany') {
+        return async (args: { data?: { mappingId?: string } }) => {
+          if (args?.data && 'mappingId' in args.data) return { count: 0 };
+          return tx.catalogueImportRun.updateMany(args as never);
+        };
+      }
+      return Reflect.get(target, property, receiver);
+    },
+  });
+
+  return new Proxy(tx, {
+    get(target, property, receiver) {
+      if (property === 'catalogueImportRun') return runDelegate;
+      return Reflect.get(target, property, receiver);
+    },
+  }) as Prisma.TransactionClient;
+}

@@ -4,12 +4,13 @@ import { basename, extname } from 'node:path';
 import type { CatalogueImportSummary, CataloguePreview, CatalogueTargetField } from '@autosale/contracts';
 import { Prisma, type PrismaClient } from '@autosale/database';
 import type { ObjectStorage } from '@autosale/integrations';
-import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, NotFoundException, ServiceUnavailableException, UnprocessableEntityException } from '@nestjs/common';
 
 import { parseCatalogueSource, type ParsedCell, type ParsedTable } from './source-parser.js';
 
 export const MAX_CATALOGUE_UPLOAD_BYTES = 5 * 1024 * 1024;
 const IMPORT_BATCH_SIZE = 100;
+const REMAPPABLE_STATUSES = ['UPLOADED', 'MAPPING', 'MAPPING_REVIEW', 'PREVIEW_READY'] as const;
 const XLSX_MEDIA_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 const supportedFiles = new Map([
   ['.csv', { mediaTypes: new Set(['text/csv', 'application/csv']), sourceType: 'CSV_UPLOAD' as const }],
@@ -67,70 +68,90 @@ export class CatalogueImportService {
     }
     const sourceRevision = createHash('sha256').update(file.buffer).digest('hex');
     const objectKey = `catalogue/${tenantId}/${sourceRevision}${extension}`;
-    await this.storage.put({ key: objectKey, body: file.buffer, contentType: file.mediaType });
+    try {
+      await this.storage.put({ key: objectKey, body: file.buffer, contentType: file.mediaType });
 
-    const existing = await this.prisma.catalogueImportRun.findUnique({
-      where: { tenantId_idempotencyKey: { tenantId, idempotencyKey: `upload:${sourceRevision}` } },
-      include: { source: { select: { headerFingerprint: true, objectKey: true } } },
-    });
-    if (existing) {
-      return { ...mapSummary(existing), headers: table.headers, fingerprint: existing.source.headerFingerprint ?? table.fingerprint };
+      const existing = await this.prisma.catalogueImportRun.findUnique({
+        where: { tenantId_idempotencyKey: { tenantId, idempotencyKey: `upload:${sourceRevision}` } },
+        include: { source: { select: { headerFingerprint: true, objectKey: true } } },
+      });
+      if (existing) {
+        return { ...mapSummary(existing), headers: table.headers, fingerprint: existing.source.headerFingerprint ?? table.fingerprint };
+      }
+
+      const run = await this.prisma.$transaction(async (tx) => {
+        const source = await tx.catalogueSource.create({
+          data: {
+            tenantId,
+            type: fileType.sourceType,
+            displayName: fileName,
+            status: 'PENDING',
+            createdByUserId: userId,
+            objectKey,
+            headerFingerprint: table.fingerprint,
+          },
+        });
+        return tx.catalogueImportRun.create({
+          data: {
+            tenantId,
+            sourceId: source.id,
+            requestedByUserId: userId,
+            status: 'UPLOADED',
+            idempotencyKey: `upload:${sourceRevision}`,
+            sourceRevision,
+            totalRows: table.rows.length,
+          },
+        });
+      });
+      return { ...mapSummary(run), headers: table.headers, fingerprint: table.fingerprint };
+    } catch {
+      await this.deleteStoredObject(objectKey);
+      throw new ServiceUnavailableException('Catalogue import is temporarily unavailable');
     }
-
-    const run = await this.prisma.$transaction(async (tx) => {
-      const source = await tx.catalogueSource.create({
-        data: {
-          tenantId,
-          type: fileType.sourceType,
-          displayName: fileName,
-          status: 'PENDING',
-          createdByUserId: userId,
-          objectKey,
-          headerFingerprint: table.fingerprint,
-        },
-      });
-      return tx.catalogueImportRun.create({
-        data: {
-          tenantId,
-          sourceId: source.id,
-          requestedByUserId: userId,
-          status: 'UPLOADED',
-          idempotencyKey: `upload:${sourceRevision}`,
-          sourceRevision,
-          totalRows: table.rows.length,
-        },
-      });
-    });
-    return { ...mapSummary(run), headers: table.headers, fingerprint: table.fingerprint };
   }
 
   async updateMapping(tenantId: string, userId: string, runId: string, input: CatalogueMappingInput): Promise<CataloguePreview> {
-    const run = await this.loadRun(tenantId, runId);
-    const table = await this.loadTable(run.source.objectKey, run.source.type);
-    const columns = validateMapping(input.columns, table.headers);
-    const clearEmptyFields = validateClearFields(input.clearEmptyFields ?? [], columns);
-    const latest = await this.prisma.catalogueMapping.findFirst({
-      where: { tenantId, sourceId: run.sourceId },
-      orderBy: { version: 'desc' },
-      select: { version: true },
+    await this.prisma.$transaction(async (tx) => {
+      const lock = await tx.catalogueImportRun.updateMany({
+        where: { id: runId, tenantId, status: { in: [...REMAPPABLE_STATUSES] } },
+        data: { status: 'MAPPING' },
+      });
+      if (lock.count !== 1) await throwRemapConflict(tx, tenantId, runId);
+
+      const run = await tx.catalogueImportRun.findFirst({
+        where: { id: runId, tenantId },
+        include: { source: { select: { type: true, objectKey: true } } },
+      });
+      if (!run) throw new NotFoundException('Catalogue import not found');
+
+      const table = await this.loadTable(run.source.objectKey, run.source.type);
+      const columns = validateMapping(input.columns, table.headers);
+      const clearEmptyFields = validateClearFields(input.clearEmptyFields ?? [], columns);
+      const latest = await tx.catalogueMapping.findFirst({
+        where: { tenantId, sourceId: run.sourceId },
+        orderBy: { version: 'desc' },
+        select: { version: true },
+      });
+      const mapping = await tx.catalogueMapping.create({
+        data: {
+          tenantId,
+          sourceId: run.sourceId,
+          version: (latest?.version ?? 0) + 1,
+          sourceFingerprint: table.fingerprint,
+          columns: columns as unknown as Prisma.InputJsonValue,
+          transformSettings: { clearEmptyFields },
+          ownerModified: true,
+          confirmedAt: new Date(),
+          confirmedByUserId: userId,
+        },
+      });
+      const assign = await tx.catalogueImportRun.updateMany({
+        where: { id: runId, tenantId, status: 'MAPPING' },
+        data: { mappingId: mapping.id, status: 'PREVIEW_READY' },
+      });
+      if (assign.count !== 1) throw new ConflictException('Catalogue import cannot be remapped');
     });
-    const mapping = await this.prisma.catalogueMapping.create({
-      data: {
-        tenantId,
-        sourceId: run.sourceId,
-        version: (latest?.version ?? 0) + 1,
-        sourceFingerprint: table.fingerprint,
-        columns: columns as unknown as Prisma.InputJsonValue,
-        transformSettings: { clearEmptyFields },
-        ownerModified: true,
-        confirmedAt: new Date(),
-        confirmedByUserId: userId,
-      },
-    });
-    await this.prisma.catalogueImportRun.updateMany({
-      where: { id: runId, tenantId, status: { in: ['UPLOADED', 'MAPPING', 'MAPPING_REVIEW', 'PREVIEW_READY'] } },
-      data: { mappingId: mapping.id, status: 'PREVIEW_READY' },
-    });
+
     const preview = await this.preview(tenantId, runId);
     await this.prisma.catalogueImportRun.updateMany({
       where: { id: runId, tenantId },
@@ -258,9 +279,32 @@ export class CatalogueImportService {
 
   private async loadTable(objectKey: string | null, sourceType: 'CSV_UPLOAD' | 'XLSX_UPLOAD' | 'GOOGLE_SHEETS'): Promise<ParsedTable> {
     if (!objectKey || sourceType === 'GOOGLE_SHEETS') throw new ConflictException('Catalogue source file is unavailable');
-    const object = await this.storage.get(objectKey);
-    return parseCatalogueSource(Buffer.from(object.body), object.contentType);
+    let object: { body: Uint8Array; contentType: string };
+    try {
+      object = await this.storage.get(objectKey);
+    } catch {
+      throw new ServiceUnavailableException('Catalogue source file is temporarily unavailable');
+    }
+    try {
+      return await parseCatalogueSource(Buffer.from(object.body), object.contentType);
+    } catch {
+      throw new UnprocessableEntityException('Stored catalogue source is unreadable');
+    }
   }
+
+  private async deleteStoredObject(objectKey: string): Promise<void> {
+    try {
+      await this.storage.delete(objectKey);
+    } catch {
+      // Best-effort compensation; storage failures remain intentionally opaque.
+    }
+  }
+}
+
+async function throwRemapConflict(prisma: Prisma.TransactionClient, tenantId: string, runId: string): Promise<never> {
+  const existing = await prisma.catalogueImportRun.findFirst({ where: { id: runId, tenantId }, select: { id: true } });
+  if (!existing) throw new NotFoundException('Catalogue import not found');
+  throw new ConflictException('Catalogue import cannot be remapped');
 }
 
 function validateMapping(columns: CatalogueColumnMapping[], headers: string[]): CatalogueColumnMapping[] {

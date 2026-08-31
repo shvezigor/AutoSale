@@ -1,4 +1,4 @@
-import { CreateBucketCommand, GetObjectCommand, HeadBucketCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { CreateBucketCommand, DeleteObjectCommand, GetObjectCommand, HeadBucketCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 
 import type { ObjectStorage } from './object-storage.js';
 
@@ -71,5 +71,11 @@ export class S3ObjectStorage implements ObjectStorage {
       body: await response.Body.transformToByteArray(),
       contentType: response.ContentType,
     };
+  }
+
+  async delete(key: string): Promise<void> {
+    await this.client.send(
+      new DeleteObjectCommand({ Bucket: this.config.bucket, Key: key }),
+    );
   }
 }
