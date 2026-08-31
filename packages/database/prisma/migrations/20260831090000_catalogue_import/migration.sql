@@ -35,7 +35,6 @@ CREATE TABLE "catalogue_sources" (
   "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
   CONSTRAINT "catalogue_sources_pkey" PRIMARY KEY ("id"),
-  CONSTRAINT "catalogue_sources_tenant_id_id_key" UNIQUE ("tenant_id", "id"),
   CONSTRAINT "catalogue_sources_tenant_id_fkey"
     FOREIGN KEY ("tenant_id") REFERENCES "tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
@@ -60,11 +59,10 @@ CREATE TABLE "catalogue_mappings" (
   "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
   CONSTRAINT "catalogue_mappings_pkey" PRIMARY KEY ("id"),
-  CONSTRAINT "catalogue_mappings_tenant_id_id_key" UNIQUE ("tenant_id", "id"),
   CONSTRAINT "catalogue_mappings_tenant_id_fkey"
     FOREIGN KEY ("tenant_id") REFERENCES "tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT "catalogue_mappings_tenant_id_source_id_fkey"
-    FOREIGN KEY ("tenant_id", "source_id") REFERENCES "catalogue_sources"("tenant_id", "id") ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT "catalogue_mappings_source_id_fkey"
+    FOREIGN KEY ("source_id") REFERENCES "catalogue_sources"("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE "catalogue_import_runs" (
@@ -91,15 +89,15 @@ CREATE TABLE "catalogue_import_runs" (
   CONSTRAINT "catalogue_import_runs_pkey" PRIMARY KEY ("id"),
   CONSTRAINT "catalogue_import_runs_tenant_id_fkey"
     FOREIGN KEY ("tenant_id") REFERENCES "tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT "catalogue_import_runs_tenant_id_source_id_fkey"
-    FOREIGN KEY ("tenant_id", "source_id") REFERENCES "catalogue_sources"("tenant_id", "id") ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT "catalogue_import_runs_tenant_id_mapping_id_fkey"
-    FOREIGN KEY ("tenant_id", "mapping_id") REFERENCES "catalogue_mappings"("tenant_id", "id") ON DELETE RESTRICT ON UPDATE CASCADE
+  CONSTRAINT "catalogue_import_runs_source_id_fkey"
+    FOREIGN KEY ("source_id") REFERENCES "catalogue_sources"("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT "catalogue_import_runs_mapping_id_fkey"
+    FOREIGN KEY ("mapping_id") REFERENCES "catalogue_mappings"("id") ON DELETE SET NULL ON UPDATE CASCADE
 );
 
 ALTER TABLE "products"
-  ADD CONSTRAINT "products_tenant_id_source_id_fkey"
-  FOREIGN KEY ("tenant_id", "source_id") REFERENCES "catalogue_sources"("tenant_id", "id") ON DELETE RESTRICT ON UPDATE CASCADE;
+  ADD CONSTRAINT "products_source_id_fkey"
+  FOREIGN KEY ("source_id") REFERENCES "catalogue_sources"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 CREATE INDEX "catalogue_sources_tenant_id_status_idx" ON "catalogue_sources"("tenant_id", "status");
 CREATE UNIQUE INDEX "catalogue_mappings_source_id_version_key" ON "catalogue_mappings"("source_id", "version");
