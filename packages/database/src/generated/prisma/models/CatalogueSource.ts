@@ -34,6 +34,7 @@ export type CatalogueSourceMinAggregateOutputType = {
   spreadsheetId: string | null
   sheetName: string | null
   credentialRef: string | null
+  objectKey: string | null
   syncSchedule: string | null
   headerFingerprint: string | null
   lastSyncedAt: Date | null
@@ -52,6 +53,7 @@ export type CatalogueSourceMaxAggregateOutputType = {
   spreadsheetId: string | null
   sheetName: string | null
   credentialRef: string | null
+  objectKey: string | null
   syncSchedule: string | null
   headerFingerprint: string | null
   lastSyncedAt: Date | null
@@ -70,6 +72,7 @@ export type CatalogueSourceCountAggregateOutputType = {
   spreadsheetId: number
   sheetName: number
   credentialRef: number
+  objectKey: number
   syncSchedule: number
   headerFingerprint: number
   lastSyncedAt: number
@@ -90,6 +93,7 @@ export type CatalogueSourceMinAggregateInputType = {
   spreadsheetId?: true
   sheetName?: true
   credentialRef?: true
+  objectKey?: true
   syncSchedule?: true
   headerFingerprint?: true
   lastSyncedAt?: true
@@ -108,6 +112,7 @@ export type CatalogueSourceMaxAggregateInputType = {
   spreadsheetId?: true
   sheetName?: true
   credentialRef?: true
+  objectKey?: true
   syncSchedule?: true
   headerFingerprint?: true
   lastSyncedAt?: true
@@ -126,6 +131,7 @@ export type CatalogueSourceCountAggregateInputType = {
   spreadsheetId?: true
   sheetName?: true
   credentialRef?: true
+  objectKey?: true
   syncSchedule?: true
   headerFingerprint?: true
   lastSyncedAt?: true
@@ -217,6 +223,7 @@ export type CatalogueSourceGroupByOutputType = {
   spreadsheetId: string | null
   sheetName: string | null
   credentialRef: string | null
+  objectKey: string | null
   syncSchedule: string | null
   headerFingerprint: string | null
   lastSyncedAt: Date | null
@@ -256,6 +263,7 @@ export type CatalogueSourceWhereInput = {
   spreadsheetId?: Prisma.StringNullableFilter<"CatalogueSource"> | string | null
   sheetName?: Prisma.StringNullableFilter<"CatalogueSource"> | string | null
   credentialRef?: Prisma.StringNullableFilter<"CatalogueSource"> | string | null
+  objectKey?: Prisma.StringNullableFilter<"CatalogueSource"> | string | null
   syncSchedule?: Prisma.StringNullableFilter<"CatalogueSource"> | string | null
   headerFingerprint?: Prisma.StringNullableFilter<"CatalogueSource"> | string | null
   lastSyncedAt?: Prisma.DateTimeNullableFilter<"CatalogueSource"> | Date | string | null
@@ -278,6 +286,7 @@ export type CatalogueSourceOrderByWithRelationInput = {
   spreadsheetId?: Prisma.SortOrderInput | Prisma.SortOrder
   sheetName?: Prisma.SortOrderInput | Prisma.SortOrder
   credentialRef?: Prisma.SortOrderInput | Prisma.SortOrder
+  objectKey?: Prisma.SortOrderInput | Prisma.SortOrder
   syncSchedule?: Prisma.SortOrderInput | Prisma.SortOrder
   headerFingerprint?: Prisma.SortOrderInput | Prisma.SortOrder
   lastSyncedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -304,6 +313,7 @@ export type CatalogueSourceWhereUniqueInput = Prisma.AtLeast<{
   spreadsheetId?: Prisma.StringNullableFilter<"CatalogueSource"> | string | null
   sheetName?: Prisma.StringNullableFilter<"CatalogueSource"> | string | null
   credentialRef?: Prisma.StringNullableFilter<"CatalogueSource"> | string | null
+  objectKey?: Prisma.StringNullableFilter<"CatalogueSource"> | string | null
   syncSchedule?: Prisma.StringNullableFilter<"CatalogueSource"> | string | null
   headerFingerprint?: Prisma.StringNullableFilter<"CatalogueSource"> | string | null
   lastSyncedAt?: Prisma.DateTimeNullableFilter<"CatalogueSource"> | Date | string | null
@@ -326,6 +336,7 @@ export type CatalogueSourceOrderByWithAggregationInput = {
   spreadsheetId?: Prisma.SortOrderInput | Prisma.SortOrder
   sheetName?: Prisma.SortOrderInput | Prisma.SortOrder
   credentialRef?: Prisma.SortOrderInput | Prisma.SortOrder
+  objectKey?: Prisma.SortOrderInput | Prisma.SortOrder
   syncSchedule?: Prisma.SortOrderInput | Prisma.SortOrder
   headerFingerprint?: Prisma.SortOrderInput | Prisma.SortOrder
   lastSyncedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -350,6 +361,7 @@ export type CatalogueSourceScalarWhereWithAggregatesInput = {
   spreadsheetId?: Prisma.StringNullableWithAggregatesFilter<"CatalogueSource"> | string | null
   sheetName?: Prisma.StringNullableWithAggregatesFilter<"CatalogueSource"> | string | null
   credentialRef?: Prisma.StringNullableWithAggregatesFilter<"CatalogueSource"> | string | null
+  objectKey?: Prisma.StringNullableWithAggregatesFilter<"CatalogueSource"> | string | null
   syncSchedule?: Prisma.StringNullableWithAggregatesFilter<"CatalogueSource"> | string | null
   headerFingerprint?: Prisma.StringNullableWithAggregatesFilter<"CatalogueSource"> | string | null
   lastSyncedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"CatalogueSource"> | Date | string | null
@@ -367,6 +379,7 @@ export type CatalogueSourceCreateInput = {
   spreadsheetId?: string | null
   sheetName?: string | null
   credentialRef?: string | null
+  objectKey?: string | null
   syncSchedule?: string | null
   headerFingerprint?: string | null
   lastSyncedAt?: Date | string | null
@@ -389,6 +402,7 @@ export type CatalogueSourceUncheckedCreateInput = {
   spreadsheetId?: string | null
   sheetName?: string | null
   credentialRef?: string | null
+  objectKey?: string | null
   syncSchedule?: string | null
   headerFingerprint?: string | null
   lastSyncedAt?: Date | string | null
@@ -409,6 +423,7 @@ export type CatalogueSourceUpdateInput = {
   spreadsheetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sheetName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   credentialRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  objectKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   syncSchedule?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headerFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -431,6 +446,7 @@ export type CatalogueSourceUncheckedUpdateInput = {
   spreadsheetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sheetName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   credentialRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  objectKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   syncSchedule?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headerFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -452,6 +468,7 @@ export type CatalogueSourceCreateManyInput = {
   spreadsheetId?: string | null
   sheetName?: string | null
   credentialRef?: string | null
+  objectKey?: string | null
   syncSchedule?: string | null
   headerFingerprint?: string | null
   lastSyncedAt?: Date | string | null
@@ -469,6 +486,7 @@ export type CatalogueSourceUpdateManyMutationInput = {
   spreadsheetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sheetName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   credentialRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  objectKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   syncSchedule?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headerFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -487,6 +505,7 @@ export type CatalogueSourceUncheckedUpdateManyInput = {
   spreadsheetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sheetName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   credentialRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  objectKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   syncSchedule?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headerFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -525,6 +544,7 @@ export type CatalogueSourceCountOrderByAggregateInput = {
   spreadsheetId?: Prisma.SortOrder
   sheetName?: Prisma.SortOrder
   credentialRef?: Prisma.SortOrder
+  objectKey?: Prisma.SortOrder
   syncSchedule?: Prisma.SortOrder
   headerFingerprint?: Prisma.SortOrder
   lastSyncedAt?: Prisma.SortOrder
@@ -543,6 +563,7 @@ export type CatalogueSourceMaxOrderByAggregateInput = {
   spreadsheetId?: Prisma.SortOrder
   sheetName?: Prisma.SortOrder
   credentialRef?: Prisma.SortOrder
+  objectKey?: Prisma.SortOrder
   syncSchedule?: Prisma.SortOrder
   headerFingerprint?: Prisma.SortOrder
   lastSyncedAt?: Prisma.SortOrder
@@ -561,6 +582,7 @@ export type CatalogueSourceMinOrderByAggregateInput = {
   spreadsheetId?: Prisma.SortOrder
   sheetName?: Prisma.SortOrder
   credentialRef?: Prisma.SortOrder
+  objectKey?: Prisma.SortOrder
   syncSchedule?: Prisma.SortOrder
   headerFingerprint?: Prisma.SortOrder
   lastSyncedAt?: Prisma.SortOrder
@@ -677,6 +699,7 @@ export type CatalogueSourceCreateWithoutTenantInput = {
   spreadsheetId?: string | null
   sheetName?: string | null
   credentialRef?: string | null
+  objectKey?: string | null
   syncSchedule?: string | null
   headerFingerprint?: string | null
   lastSyncedAt?: Date | string | null
@@ -697,6 +720,7 @@ export type CatalogueSourceUncheckedCreateWithoutTenantInput = {
   spreadsheetId?: string | null
   sheetName?: string | null
   credentialRef?: string | null
+  objectKey?: string | null
   syncSchedule?: string | null
   headerFingerprint?: string | null
   lastSyncedAt?: Date | string | null
@@ -747,6 +771,7 @@ export type CatalogueSourceScalarWhereInput = {
   spreadsheetId?: Prisma.StringNullableFilter<"CatalogueSource"> | string | null
   sheetName?: Prisma.StringNullableFilter<"CatalogueSource"> | string | null
   credentialRef?: Prisma.StringNullableFilter<"CatalogueSource"> | string | null
+  objectKey?: Prisma.StringNullableFilter<"CatalogueSource"> | string | null
   syncSchedule?: Prisma.StringNullableFilter<"CatalogueSource"> | string | null
   headerFingerprint?: Prisma.StringNullableFilter<"CatalogueSource"> | string | null
   lastSyncedAt?: Prisma.DateTimeNullableFilter<"CatalogueSource"> | Date | string | null
@@ -764,6 +789,7 @@ export type CatalogueSourceCreateWithoutProductsInput = {
   spreadsheetId?: string | null
   sheetName?: string | null
   credentialRef?: string | null
+  objectKey?: string | null
   syncSchedule?: string | null
   headerFingerprint?: string | null
   lastSyncedAt?: Date | string | null
@@ -785,6 +811,7 @@ export type CatalogueSourceUncheckedCreateWithoutProductsInput = {
   spreadsheetId?: string | null
   sheetName?: string | null
   credentialRef?: string | null
+  objectKey?: string | null
   syncSchedule?: string | null
   headerFingerprint?: string | null
   lastSyncedAt?: Date | string | null
@@ -820,6 +847,7 @@ export type CatalogueSourceUpdateWithoutProductsInput = {
   spreadsheetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sheetName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   credentialRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  objectKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   syncSchedule?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headerFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -841,6 +869,7 @@ export type CatalogueSourceUncheckedUpdateWithoutProductsInput = {
   spreadsheetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sheetName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   credentialRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  objectKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   syncSchedule?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headerFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -860,6 +889,7 @@ export type CatalogueSourceCreateWithoutMappingsInput = {
   spreadsheetId?: string | null
   sheetName?: string | null
   credentialRef?: string | null
+  objectKey?: string | null
   syncSchedule?: string | null
   headerFingerprint?: string | null
   lastSyncedAt?: Date | string | null
@@ -881,6 +911,7 @@ export type CatalogueSourceUncheckedCreateWithoutMappingsInput = {
   spreadsheetId?: string | null
   sheetName?: string | null
   credentialRef?: string | null
+  objectKey?: string | null
   syncSchedule?: string | null
   headerFingerprint?: string | null
   lastSyncedAt?: Date | string | null
@@ -916,6 +947,7 @@ export type CatalogueSourceUpdateWithoutMappingsInput = {
   spreadsheetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sheetName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   credentialRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  objectKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   syncSchedule?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headerFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -937,6 +969,7 @@ export type CatalogueSourceUncheckedUpdateWithoutMappingsInput = {
   spreadsheetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sheetName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   credentialRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  objectKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   syncSchedule?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headerFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -956,6 +989,7 @@ export type CatalogueSourceCreateWithoutImportRunsInput = {
   spreadsheetId?: string | null
   sheetName?: string | null
   credentialRef?: string | null
+  objectKey?: string | null
   syncSchedule?: string | null
   headerFingerprint?: string | null
   lastSyncedAt?: Date | string | null
@@ -977,6 +1011,7 @@ export type CatalogueSourceUncheckedCreateWithoutImportRunsInput = {
   spreadsheetId?: string | null
   sheetName?: string | null
   credentialRef?: string | null
+  objectKey?: string | null
   syncSchedule?: string | null
   headerFingerprint?: string | null
   lastSyncedAt?: Date | string | null
@@ -1012,6 +1047,7 @@ export type CatalogueSourceUpdateWithoutImportRunsInput = {
   spreadsheetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sheetName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   credentialRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  objectKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   syncSchedule?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headerFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1033,6 +1069,7 @@ export type CatalogueSourceUncheckedUpdateWithoutImportRunsInput = {
   spreadsheetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sheetName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   credentialRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  objectKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   syncSchedule?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headerFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1052,6 +1089,7 @@ export type CatalogueSourceCreateManyTenantInput = {
   spreadsheetId?: string | null
   sheetName?: string | null
   credentialRef?: string | null
+  objectKey?: string | null
   syncSchedule?: string | null
   headerFingerprint?: string | null
   lastSyncedAt?: Date | string | null
@@ -1069,6 +1107,7 @@ export type CatalogueSourceUpdateWithoutTenantInput = {
   spreadsheetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sheetName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   credentialRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  objectKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   syncSchedule?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headerFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1089,6 +1128,7 @@ export type CatalogueSourceUncheckedUpdateWithoutTenantInput = {
   spreadsheetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sheetName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   credentialRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  objectKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   syncSchedule?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headerFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1109,6 +1149,7 @@ export type CatalogueSourceUncheckedUpdateManyWithoutTenantInput = {
   spreadsheetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sheetName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   credentialRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  objectKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   syncSchedule?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headerFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1176,6 +1217,7 @@ export type CatalogueSourceSelect<ExtArgs extends runtime.Types.Extensions.Inter
   spreadsheetId?: boolean
   sheetName?: boolean
   credentialRef?: boolean
+  objectKey?: boolean
   syncSchedule?: boolean
   headerFingerprint?: boolean
   lastSyncedAt?: boolean
@@ -1199,6 +1241,7 @@ export type CatalogueSourceSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   spreadsheetId?: boolean
   sheetName?: boolean
   credentialRef?: boolean
+  objectKey?: boolean
   syncSchedule?: boolean
   headerFingerprint?: boolean
   lastSyncedAt?: boolean
@@ -1218,6 +1261,7 @@ export type CatalogueSourceSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   spreadsheetId?: boolean
   sheetName?: boolean
   credentialRef?: boolean
+  objectKey?: boolean
   syncSchedule?: boolean
   headerFingerprint?: boolean
   lastSyncedAt?: boolean
@@ -1237,6 +1281,7 @@ export type CatalogueSourceSelectScalar = {
   spreadsheetId?: boolean
   sheetName?: boolean
   credentialRef?: boolean
+  objectKey?: boolean
   syncSchedule?: boolean
   headerFingerprint?: boolean
   lastSyncedAt?: boolean
@@ -1245,7 +1290,7 @@ export type CatalogueSourceSelectScalar = {
   updatedAt?: boolean
 }
 
-export type CatalogueSourceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "type" | "displayName" | "status" | "createdByUserId" | "spreadsheetId" | "sheetName" | "credentialRef" | "syncSchedule" | "headerFingerprint" | "lastSyncedAt" | "lastErrorSummary" | "createdAt" | "updatedAt", ExtArgs["result"]["catalogueSource"]>
+export type CatalogueSourceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "type" | "displayName" | "status" | "createdByUserId" | "spreadsheetId" | "sheetName" | "credentialRef" | "objectKey" | "syncSchedule" | "headerFingerprint" | "lastSyncedAt" | "lastErrorSummary" | "createdAt" | "updatedAt", ExtArgs["result"]["catalogueSource"]>
 export type CatalogueSourceInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   products?: boolean | Prisma.CatalogueSource$productsArgs<ExtArgs>
@@ -1278,6 +1323,7 @@ export type $CatalogueSourcePayload<ExtArgs extends runtime.Types.Extensions.Int
     spreadsheetId: string | null
     sheetName: string | null
     credentialRef: string | null
+    objectKey: string | null
     syncSchedule: string | null
     headerFingerprint: string | null
     lastSyncedAt: Date | null
@@ -1720,6 +1766,7 @@ export interface CatalogueSourceFieldRefs {
   readonly spreadsheetId: Prisma.FieldRef<"CatalogueSource", 'String'>
   readonly sheetName: Prisma.FieldRef<"CatalogueSource", 'String'>
   readonly credentialRef: Prisma.FieldRef<"CatalogueSource", 'String'>
+  readonly objectKey: Prisma.FieldRef<"CatalogueSource", 'String'>
   readonly syncSchedule: Prisma.FieldRef<"CatalogueSource", 'String'>
   readonly headerFingerprint: Prisma.FieldRef<"CatalogueSource", 'String'>
   readonly lastSyncedAt: Prisma.FieldRef<"CatalogueSource", 'DateTime'>

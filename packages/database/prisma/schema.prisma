@@ -512,6 +512,7 @@ model CatalogueSource {
   spreadsheetId    String?                @map("spreadsheet_id")
   sheetName        String?                @map("sheet_name")
   credentialRef    String?                @map("credential_ref")
+  objectKey        String?                @map("object_key")
   syncSchedule     String?                @map("sync_schedule")
   headerFingerprint String?               @map("header_fingerprint")
   lastSyncedAt     DateTime?              @map("last_synced_at")

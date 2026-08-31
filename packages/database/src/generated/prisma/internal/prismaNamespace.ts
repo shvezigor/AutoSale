@@ -2689,6 +2689,7 @@ export const CatalogueSourceScalarFieldEnum = {
   spreadsheetId: 'spreadsheetId',
   sheetName: 'sheetName',
   credentialRef: 'credentialRef',
+  objectKey: 'objectKey',
   syncSchedule: 'syncSchedule',
   headerFingerprint: 'headerFingerprint',
   lastSyncedAt: 'lastSyncedAt',
