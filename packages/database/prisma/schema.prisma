@@ -495,7 +495,7 @@ model Product {
   createdAt       DateTime         @default(now()) @map("created_at")
   updatedAt       DateTime         @updatedAt @map("updated_at")
   tenant          Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  source          CatalogueSource? @relation(fields: [sourceId], references: [id], onDelete: SetNull)
+  source          CatalogueSource? @relation("ProductSource", fields: [tenantId, sourceId], references: [tenantId, id], onDelete: Restrict)
 
   @@unique([tenantId, sku])
   @@index([tenantId, active, name])
@@ -519,11 +519,12 @@ model CatalogueSource {
   createdAt        DateTime               @default(now()) @map("created_at")
   updatedAt        DateTime               @updatedAt @map("updated_at")
   tenant           Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  products         Product[]
+  products         Product[]               @relation("ProductSource")
   mappings         CatalogueMapping[]
   importRuns       CatalogueImportRun[]
 
   @@index([tenantId, status])
+  @@unique([tenantId, id])
   @@map("catalogue_sources")
 }
 
@@ -546,10 +547,11 @@ model CatalogueMapping {
   confirmedByUserId String?           @map("confirmed_by_user_id") @db.Uuid
   createdAt         DateTime          @default(now()) @map("created_at")
   tenant            Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  source            CatalogueSource   @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  source            CatalogueSource   @relation(fields: [tenantId, sourceId], references: [tenantId, id], onDelete: Cascade)
   importRuns        CatalogueImportRun[]
 
   @@unique([sourceId, version])
+  @@unique([tenantId, id])
   @@index([tenantId, sourceId])
   @@map("catalogue_mappings")
 }
@@ -575,8 +577,8 @@ model CatalogueImportRun {
   createdAt       DateTime               @default(now()) @map("created_at")
   updatedAt       DateTime               @updatedAt @map("updated_at")
   tenant          Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  source          CatalogueSource        @relation(fields: [sourceId], references: [id], onDelete: Cascade)
-  mapping         CatalogueMapping?      @relation(fields: [mappingId], references: [id], onDelete: SetNull)
+  source          CatalogueSource        @relation(fields: [tenantId, sourceId], references: [tenantId, id], onDelete: Cascade)
+  mapping         CatalogueMapping?      @relation(fields: [tenantId, mappingId], references: [tenantId, id], onDelete: Restrict)
 
   @@unique([tenantId, idempotencyKey])
   @@index([sourceId, createdAt])

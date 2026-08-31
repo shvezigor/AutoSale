@@ -347,6 +347,7 @@ export type CatalogueMappingOrderByWithRelationInput = {
 export type CatalogueMappingWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   sourceId_version?: Prisma.CatalogueMappingSourceIdVersionCompoundUniqueInput
+  tenantId_id?: Prisma.CatalogueMappingTenantIdIdCompoundUniqueInput
   AND?: Prisma.CatalogueMappingWhereInput | Prisma.CatalogueMappingWhereInput[]
   OR?: Prisma.CatalogueMappingWhereInput[]
   NOT?: Prisma.CatalogueMappingWhereInput | Prisma.CatalogueMappingWhereInput[]
@@ -369,7 +370,7 @@ export type CatalogueMappingWhereUniqueInput = Prisma.AtLeast<{
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
   source?: Prisma.XOR<Prisma.CatalogueSourceScalarRelationFilter, Prisma.CatalogueSourceWhereInput>
   importRuns?: Prisma.CatalogueImportRunListRelationFilter
-}, "id" | "sourceId_version">
+}, "id" | "sourceId_version" | "tenantId_id">
 
 export type CatalogueMappingOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -574,6 +575,11 @@ export type CatalogueMappingOrderByRelationAggregateInput = {
 export type CatalogueMappingSourceIdVersionCompoundUniqueInput = {
   sourceId: string
   version: number
+}
+
+export type CatalogueMappingTenantIdIdCompoundUniqueInput = {
+  tenantId: string
+  id: string
 }
 
 export type CatalogueMappingCountOrderByAggregateInput = {
@@ -862,7 +868,6 @@ export type CatalogueMappingCreateWithoutSourceInput = {
 
 export type CatalogueMappingUncheckedCreateWithoutSourceInput = {
   id?: string
-  tenantId: string
   version: number
   sourceFingerprint: string
   columns: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -1082,7 +1087,6 @@ export type CatalogueMappingUncheckedUpdateManyWithoutTenantInput = {
 
 export type CatalogueMappingCreateManySourceInput = {
   id?: string
-  tenantId: string
   version: number
   sourceFingerprint: string
   columns: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -1121,7 +1125,6 @@ export type CatalogueMappingUpdateWithoutSourceInput = {
 
 export type CatalogueMappingUncheckedUpdateWithoutSourceInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
   sourceFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
   columns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -1141,7 +1144,6 @@ export type CatalogueMappingUncheckedUpdateWithoutSourceInput = {
 
 export type CatalogueMappingUncheckedUpdateManyWithoutSourceInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
   sourceFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
   columns?: Prisma.JsonNullValueInput | runtime.InputJsonValue

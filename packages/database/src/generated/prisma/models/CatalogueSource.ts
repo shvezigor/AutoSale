@@ -292,6 +292,7 @@ export type CatalogueSourceOrderByWithRelationInput = {
 
 export type CatalogueSourceWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  tenantId_id?: Prisma.CatalogueSourceTenantIdIdCompoundUniqueInput
   AND?: Prisma.CatalogueSourceWhereInput | Prisma.CatalogueSourceWhereInput[]
   OR?: Prisma.CatalogueSourceWhereInput[]
   NOT?: Prisma.CatalogueSourceWhereInput | Prisma.CatalogueSourceWhereInput[]
@@ -313,7 +314,7 @@ export type CatalogueSourceWhereUniqueInput = Prisma.AtLeast<{
   products?: Prisma.ProductListRelationFilter
   mappings?: Prisma.CatalogueMappingListRelationFilter
   importRuns?: Prisma.CatalogueImportRunListRelationFilter
-}, "id">
+}, "id" | "tenantId_id">
 
 export type CatalogueSourceOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -507,6 +508,11 @@ export type CatalogueSourceOrderByRelationAggregateInput = {
 export type CatalogueSourceNullableScalarRelationFilter = {
   is?: Prisma.CatalogueSourceWhereInput | null
   isNot?: Prisma.CatalogueSourceWhereInput | null
+}
+
+export type CatalogueSourceTenantIdIdCompoundUniqueInput = {
+  tenantId: string
+  id: string
 }
 
 export type CatalogueSourceCountOrderByAggregateInput = {

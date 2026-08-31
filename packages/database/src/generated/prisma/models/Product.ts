@@ -955,7 +955,6 @@ export type ProductCreateWithoutSourceInput = {
 
 export type ProductUncheckedCreateWithoutSourceInput = {
   id?: string
-  tenantId: string
   sku: string
   name: string
   description?: string | null
@@ -1101,7 +1100,6 @@ export type ProductUncheckedUpdateManyWithoutTenantInput = {
 
 export type ProductCreateManySourceInput = {
   id?: string
-  tenantId: string
   sku: string
   name: string
   description?: string | null
@@ -1149,7 +1147,6 @@ export type ProductUpdateWithoutSourceInput = {
 
 export type ProductUncheckedUpdateWithoutSourceInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   sku?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1173,7 +1170,6 @@ export type ProductUncheckedUpdateWithoutSourceInput = {
 
 export type ProductUncheckedUpdateManyWithoutSourceInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   sku?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null

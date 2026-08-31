@@ -949,7 +949,6 @@ export type CatalogueImportRunCreateWithoutSourceInput = {
 
 export type CatalogueImportRunUncheckedCreateWithoutSourceInput = {
   id?: string
-  tenantId: string
   mappingId?: string | null
   requestedByUserId?: string | null
   status?: $Enums.CatalogueImportStatus
@@ -1017,7 +1016,6 @@ export type CatalogueImportRunCreateWithoutMappingInput = {
 
 export type CatalogueImportRunUncheckedCreateWithoutMappingInput = {
   id?: string
-  tenantId: string
   sourceId: string
   requestedByUserId?: string | null
   status?: $Enums.CatalogueImportStatus
@@ -1148,7 +1146,6 @@ export type CatalogueImportRunUncheckedUpdateManyWithoutTenantInput = {
 
 export type CatalogueImportRunCreateManySourceInput = {
   id?: string
-  tenantId: string
   mappingId?: string | null
   requestedByUserId?: string | null
   status?: $Enums.CatalogueImportStatus
@@ -1190,7 +1187,6 @@ export type CatalogueImportRunUpdateWithoutSourceInput = {
 
 export type CatalogueImportRunUncheckedUpdateWithoutSourceInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   mappingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requestedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCatalogueImportStatusFieldUpdateOperationsInput | $Enums.CatalogueImportStatus
@@ -1211,7 +1207,6 @@ export type CatalogueImportRunUncheckedUpdateWithoutSourceInput = {
 
 export type CatalogueImportRunUncheckedUpdateManyWithoutSourceInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   mappingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requestedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCatalogueImportStatusFieldUpdateOperationsInput | $Enums.CatalogueImportStatus
@@ -1232,7 +1227,6 @@ export type CatalogueImportRunUncheckedUpdateManyWithoutSourceInput = {
 
 export type CatalogueImportRunCreateManyMappingInput = {
   id?: string
-  tenantId: string
   sourceId: string
   requestedByUserId?: string | null
   status?: $Enums.CatalogueImportStatus
@@ -1274,7 +1268,6 @@ export type CatalogueImportRunUpdateWithoutMappingInput = {
 
 export type CatalogueImportRunUncheckedUpdateWithoutMappingInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   sourceId?: Prisma.StringFieldUpdateOperationsInput | string
   requestedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCatalogueImportStatusFieldUpdateOperationsInput | $Enums.CatalogueImportStatus
@@ -1295,7 +1288,6 @@ export type CatalogueImportRunUncheckedUpdateWithoutMappingInput = {
 
 export type CatalogueImportRunUncheckedUpdateManyWithoutMappingInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   sourceId?: Prisma.StringFieldUpdateOperationsInput | string
   requestedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCatalogueImportStatusFieldUpdateOperationsInput | $Enums.CatalogueImportStatus
