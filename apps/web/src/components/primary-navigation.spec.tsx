@@ -13,6 +13,7 @@ describe('PrimaryNavigation', () => {
     render(<PrimaryNavigation active="orders" session={{ name: 'Іван', email: 'manager@example.com', membershipRole: 'MANAGER' }} />);
     expect(screen.queryByRole('link', { name: 'Команда' })).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Налаштування' })).toHaveAttribute('href', '/settings');
+    expect(screen.getByRole('link', { name: 'Каталог' })).toHaveAttribute('href', '/catalogue');
   });
 
   it('logs out with csrf protection', async () => {
