@@ -108,7 +108,7 @@ describe('CatalogueImportService', () => {
       where: { id: run.sourceId },
       select: { objectKey: true, credentialRef: true },
     });
-    expect(sourceStorage.objectKey).toMatch(new RegExp(`^catalogue/${tenantId}/[0-9a-f]{64}\\.csv$`));
+    expect(sourceStorage.objectKey).toMatch(new RegExp(`^catalogue/${tenantId}/[0-9a-f]{64}/[0-9a-f-]{36}\\.csv$`));
     expect(sourceStorage.credentialRef).toBeNull();
 
     const preview = await service.preview(tenantId, run.id);
@@ -302,6 +302,38 @@ describe('CatalogueImportService', () => {
     });
   });
 
+  it('returns the durable run and preserves the winner object when a duplicate upload loses the idempotency race', async () => {
+    const file = {
+      originalName: 'products.csv',
+      mediaType: 'text/csv',
+      buffer: Buffer.from('SKU,Name\nLUNA-01,Luna'),
+    };
+    const racingPrisma = createPrismaWithDuplicateUploadRace(prisma);
+    const firstService = new CatalogueImportService(racingPrisma, storage);
+    const secondService = new CatalogueImportService(racingPrisma, storage);
+
+    const [first, second] = await Promise.all([
+      firstService.upload(tenantId, ownerUserId, file),
+      secondService.upload(tenantId, ownerUserId, file),
+    ]);
+    const winner = first.id === second.id ? first : second;
+    const loser = first.id === winner.id ? second : first;
+    const winnerSource = await prisma.catalogueSource.findUniqueOrThrow({
+      where: { id: winner.sourceId },
+      select: { objectKey: true },
+    });
+
+    expect(loser).toEqual(winner);
+    expect(storage.deleted).toHaveLength(1);
+    expect(storage.deleted[0]).not.toBe(winnerSource.objectKey);
+    expect(storage.deleted[0]).toMatch(new RegExp(`^catalogue/${tenantId}/[0-9a-f]{64}/[0-9a-f-]{36}\\.csv$`));
+    expect(storage.objects.has(winnerSource.objectKey!)).toBe(true);
+    expect(storage.deleted).not.toContain(winnerSource.objectKey!);
+    expect(storage.objects.size).toBe(1);
+    expect(await prisma.catalogueSource.count()).toBe(1);
+    expect(await prisma.catalogueImportRun.count()).toBe(1);
+  });
+
   async function uploadAndMap(csv: string) {
     const uploaded = await service.upload(tenantId, ownerUserId, {
       originalName: 'products.csv',
@@ -351,6 +383,38 @@ function createPrismaWithFailingUploadTransaction(prisma: PrismaClient): PrismaC
           return prisma.$transaction(arg as Parameters<PrismaClient['$transaction']>[0]);
         };
       }
+      return Reflect.get(target, property, receiver);
+    },
+  }) as PrismaClient;
+}
+
+function createPrismaWithDuplicateUploadRace(prisma: PrismaClient): PrismaClient {
+  let precheckCount = 0;
+  let releasePrechecks!: () => void;
+  const prechecksReleased = new Promise<void>((resolve) => {
+    releasePrechecks = resolve;
+  });
+
+  const runDelegate = new Proxy(prisma.catalogueImportRun, {
+    get(target, property, receiver) {
+      if (property === 'findUnique') {
+        return async (args: { where?: { tenantId_idempotencyKey?: { tenantId: string; idempotencyKey: string } } }) => {
+          if (args.where?.tenantId_idempotencyKey && precheckCount < 2) {
+            precheckCount += 1;
+            if (precheckCount === 2) releasePrechecks();
+            await prechecksReleased;
+            return null;
+          }
+          return prisma.catalogueImportRun.findUnique(args as never);
+        };
+      }
+      return Reflect.get(target, property, receiver);
+    },
+  });
+
+  return new Proxy(prisma, {
+    get(target, property, receiver) {
+      if (property === 'catalogueImportRun') return runDelegate;
       return Reflect.get(target, property, receiver);
     },
   }) as PrismaClient;

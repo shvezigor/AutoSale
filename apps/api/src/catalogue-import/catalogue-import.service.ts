@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { basename, extname } from 'node:path';
 
 import type { CatalogueImportSummary, CataloguePreview, CatalogueTargetField } from '@autosale/contracts';
@@ -67,17 +67,15 @@ export class CatalogueImportService {
       throw new BadRequestException('Invalid catalogue source');
     }
     const sourceRevision = createHash('sha256').update(file.buffer).digest('hex');
-    const objectKey = `catalogue/${tenantId}/${sourceRevision}${extension}`;
+    const idempotencyKey = `upload:${sourceRevision}`;
+    const existing = await this.findUploadRunByRevision(tenantId, idempotencyKey);
+    if (existing) return { ...mapSummary(existing), headers: table.headers, fingerprint: existing.source.headerFingerprint ?? table.fingerprint };
+
+    const objectKey = `catalogue/${tenantId}/${sourceRevision}/${randomUUID()}${extension}`;
+    let storedObjectKey: string | null = null;
     try {
       await this.storage.put({ key: objectKey, body: file.buffer, contentType: file.mediaType });
-
-      const existing = await this.prisma.catalogueImportRun.findUnique({
-        where: { tenantId_idempotencyKey: { tenantId, idempotencyKey: `upload:${sourceRevision}` } },
-        include: { source: { select: { headerFingerprint: true, objectKey: true } } },
-      });
-      if (existing) {
-        return { ...mapSummary(existing), headers: table.headers, fingerprint: existing.source.headerFingerprint ?? table.fingerprint };
-      }
+      storedObjectKey = objectKey;
 
       const run = await this.prisma.$transaction(async (tx) => {
         const source = await tx.catalogueSource.create({
@@ -97,15 +95,19 @@ export class CatalogueImportService {
             sourceId: source.id,
             requestedByUserId: userId,
             status: 'UPLOADED',
-            idempotencyKey: `upload:${sourceRevision}`,
+            idempotencyKey,
             sourceRevision,
             totalRows: table.rows.length,
           },
         });
       });
       return { ...mapSummary(run), headers: table.headers, fingerprint: table.fingerprint };
-    } catch {
-      await this.deleteStoredObject(objectKey);
+    } catch (error) {
+      await this.deleteStoredObject(storedObjectKey);
+      if (isUniqueConstraintError(error)) {
+        const persisted = await this.findUploadRunByRevision(tenantId, idempotencyKey);
+        if (persisted) return { ...mapSummary(persisted), headers: table.headers, fingerprint: persisted.source.headerFingerprint ?? table.fingerprint };
+      }
       throw new ServiceUnavailableException('Catalogue import is temporarily unavailable');
     }
   }
@@ -277,6 +279,13 @@ export class CatalogueImportService {
     return run;
   }
 
+  private findUploadRunByRevision(tenantId: string, idempotencyKey: string) {
+    return this.prisma.catalogueImportRun.findUnique({
+      where: { tenantId_idempotencyKey: { tenantId, idempotencyKey } },
+      include: { source: { select: { headerFingerprint: true, objectKey: true } } },
+    });
+  }
+
   private async loadTable(objectKey: string | null, sourceType: 'CSV_UPLOAD' | 'XLSX_UPLOAD' | 'GOOGLE_SHEETS'): Promise<ParsedTable> {
     if (!objectKey || sourceType === 'GOOGLE_SHEETS') throw new ConflictException('Catalogue source file is unavailable');
     let object: { body: Uint8Array; contentType: string };
@@ -292,13 +301,18 @@ export class CatalogueImportService {
     }
   }
 
-  private async deleteStoredObject(objectKey: string): Promise<void> {
+  private async deleteStoredObject(objectKey: string | null): Promise<void> {
+    if (!objectKey) return;
     try {
       await this.storage.delete(objectKey);
     } catch {
       // Best-effort compensation; storage failures remain intentionally opaque.
     }
   }
+}
+
+function isUniqueConstraintError(error: unknown): error is Prisma.PrismaClientKnownRequestError {
+  return error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002';
 }
 
 async function throwRemapConflict(prisma: Prisma.TransactionClient, tenantId: string, runId: string): Promise<never> {

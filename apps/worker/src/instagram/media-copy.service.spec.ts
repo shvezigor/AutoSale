@@ -6,7 +6,7 @@ import { MediaCopyError, MediaCopyService } from './media-copy.service.js';
 describe('MediaCopyService', () => {
   const put = vi.fn();
   const fetchMedia = vi.fn();
-  const storage: ObjectStorage = { put, get: vi.fn() };
+  const storage: ObjectStorage = { put, get: vi.fn(), delete: vi.fn() };
 
   beforeEach(() => {
     put.mockReset().mockResolvedValue({ key: 'stored-key', etag: 'etag-1' });
