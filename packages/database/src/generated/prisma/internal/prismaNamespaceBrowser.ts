@@ -72,6 +72,9 @@ export const ModelName = {
   AuditLog: 'AuditLog',
   OrderItem: 'OrderItem',
   Product: 'Product',
+  CatalogueSource: 'CatalogueSource',
+  CatalogueMapping: 'CatalogueMapping',
+  CatalogueImportRun: 'CatalogueImportRun',
   Attachment: 'Attachment'
 } as const
 
@@ -417,14 +420,96 @@ export const ProductScalarFieldEnum = {
   tenantId: 'tenantId',
   sku: 'sku',
   name: 'name',
+  description: 'description',
+  price: 'price',
+  currency: 'currency',
+  stockQuantity: 'stockQuantity',
+  category: 'category',
+  brand: 'brand',
   aliases: 'aliases',
+  color: 'color',
+  size: 'size',
+  imageUrls: 'imageUrls',
+  attributes: 'attributes',
   imageUrl: 'imageUrl',
   active: 'active',
+  sourceId: 'sourceId',
+  sourceRowKey: 'sourceRowKey',
+  sourceUpdatedAt: 'sourceUpdatedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type ProductScalarFieldEnum = (typeof ProductScalarFieldEnum)[keyof typeof ProductScalarFieldEnum]
+
+
+export const CatalogueSourceScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  type: 'type',
+  displayName: 'displayName',
+  status: 'status',
+  createdByUserId: 'createdByUserId',
+  spreadsheetId: 'spreadsheetId',
+  sheetName: 'sheetName',
+  credentialRef: 'credentialRef',
+  syncSchedule: 'syncSchedule',
+  headerFingerprint: 'headerFingerprint',
+  lastSyncedAt: 'lastSyncedAt',
+  lastErrorSummary: 'lastErrorSummary',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CatalogueSourceScalarFieldEnum = (typeof CatalogueSourceScalarFieldEnum)[keyof typeof CatalogueSourceScalarFieldEnum]
+
+
+export const CatalogueMappingScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  sourceId: 'sourceId',
+  version: 'version',
+  sourceFingerprint: 'sourceFingerprint',
+  columns: 'columns',
+  transformSettings: 'transformSettings',
+  aiModel: 'aiModel',
+  promptVersion: 'promptVersion',
+  schemaVersion: 'schemaVersion',
+  aiLatencyMs: 'aiLatencyMs',
+  aiInputTokens: 'aiInputTokens',
+  aiOutputTokens: 'aiOutputTokens',
+  ownerModified: 'ownerModified',
+  confirmedAt: 'confirmedAt',
+  confirmedByUserId: 'confirmedByUserId',
+  createdAt: 'createdAt'
+} as const
+
+export type CatalogueMappingScalarFieldEnum = (typeof CatalogueMappingScalarFieldEnum)[keyof typeof CatalogueMappingScalarFieldEnum]
+
+
+export const CatalogueImportRunScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  sourceId: 'sourceId',
+  mappingId: 'mappingId',
+  requestedByUserId: 'requestedByUserId',
+  status: 'status',
+  idempotencyKey: 'idempotencyKey',
+  sourceRevision: 'sourceRevision',
+  totalRows: 'totalRows',
+  validRows: 'validRows',
+  createdRows: 'createdRows',
+  updatedRows: 'updatedRows',
+  skippedRows: 'skippedRows',
+  failedRows: 'failedRows',
+  rowErrors: 'rowErrors',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CatalogueImportRunScalarFieldEnum = (typeof CatalogueImportRunScalarFieldEnum)[keyof typeof CatalogueImportRunScalarFieldEnum]
 
 
 export const AttachmentScalarFieldEnum = {

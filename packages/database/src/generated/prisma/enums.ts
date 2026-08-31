@@ -63,3 +63,38 @@ export const InstagramCredentialCleanupState = {
 } as const
 
 export type InstagramCredentialCleanupState = (typeof InstagramCredentialCleanupState)[keyof typeof InstagramCredentialCleanupState]
+
+
+export const CatalogueSourceType = {
+  XLSX_UPLOAD: 'XLSX_UPLOAD',
+  CSV_UPLOAD: 'CSV_UPLOAD',
+  GOOGLE_SHEETS: 'GOOGLE_SHEETS'
+} as const
+
+export type CatalogueSourceType = (typeof CatalogueSourceType)[keyof typeof CatalogueSourceType]
+
+
+export const CatalogueSourceStatus = {
+  PENDING: 'PENDING',
+  ACTIVE: 'ACTIVE',
+  PAUSED: 'PAUSED',
+  ERROR: 'ERROR',
+  DISCONNECTED: 'DISCONNECTED'
+} as const
+
+export type CatalogueSourceStatus = (typeof CatalogueSourceStatus)[keyof typeof CatalogueSourceStatus]
+
+
+export const CatalogueImportStatus = {
+  UPLOADED: 'UPLOADED',
+  MAPPING: 'MAPPING',
+  MAPPING_REVIEW: 'MAPPING_REVIEW',
+  PREVIEW_READY: 'PREVIEW_READY',
+  CONFIRMED: 'CONFIRMED',
+  PROCESSING: 'PROCESSING',
+  COMPLETED: 'COMPLETED',
+  FAILED: 'FAILED',
+  CANCELLED: 'CANCELLED'
+} as const
+
+export type CatalogueImportStatus = (typeof CatalogueImportStatus)[keyof typeof CatalogueImportStatus]

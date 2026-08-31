@@ -48,6 +48,32 @@ enum InstagramCredentialCleanupState {
   DEAD_LETTER
 }
 
+enum CatalogueSourceType {
+  XLSX_UPLOAD
+  CSV_UPLOAD
+  GOOGLE_SHEETS
+}
+
+enum CatalogueSourceStatus {
+  PENDING
+  ACTIVE
+  PAUSED
+  ERROR
+  DISCONNECTED
+}
+
+enum CatalogueImportStatus {
+  UPLOADED
+  MAPPING
+  MAPPING_REVIEW
+  PREVIEW_READY
+  CONFIRMED
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
 model Tenant {
   id        String         @id @default(uuid()) @db.Uuid
   key       String         @unique
@@ -60,6 +86,9 @@ model Tenant {
   settings      TenantSettings?
   orders        Order[]
   products      Product[]
+  catalogueSources CatalogueSource[]
+  catalogueMappings CatalogueMapping[]
+  catalogueImportRuns CatalogueImportRun[]
   auditLogs     AuditLog[]
   sheetsDestination GoogleSheetsDestination?
   orderExports      OrderExport[]
@@ -443,20 +472,115 @@ model OrderItem {
 }
 
 model Product {
-  id        String   @id @default(uuid()) @db.Uuid
-  tenantId  String   @map("tenant_id") @db.Uuid
-  sku       String
-  name      String
-  aliases   Json
-  imageUrl  String?  @map("image_url")
-  active    Boolean  @default(true)
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id              String           @id @default(uuid()) @db.Uuid
+  tenantId        String           @map("tenant_id") @db.Uuid
+  sku             String
+  name            String
+  description     String?
+  price           Decimal?         @db.Decimal(12, 2)
+  currency        String?          @db.VarChar(3)
+  stockQuantity   Int?             @map("stock_quantity")
+  category        String?
+  brand           String?
+  aliases         Json
+  color           String?
+  size            String?
+  imageUrls       Json?            @map("image_urls")
+  attributes      Json?
+  imageUrl        String?          @map("image_url")
+  active          Boolean          @default(true)
+  sourceId        String?          @map("source_id") @db.Uuid
+  sourceRowKey    String?          @map("source_row_key")
+  sourceUpdatedAt DateTime?        @map("source_updated_at")
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+  tenant          Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  source          CatalogueSource? @relation(fields: [sourceId], references: [id], onDelete: SetNull)
 
   @@unique([tenantId, sku])
   @@index([tenantId, active, name])
   @@map("products")
+}
+
+model CatalogueSource {
+  id               String                 @id @default(uuid()) @db.Uuid
+  tenantId         String                 @map("tenant_id") @db.Uuid
+  type             CatalogueSourceType
+  displayName      String                 @map("display_name")
+  status           CatalogueSourceStatus  @default(PENDING)
+  createdByUserId  String?                @map("created_by_user_id") @db.Uuid
+  spreadsheetId    String?                @map("spreadsheet_id")
+  sheetName        String?                @map("sheet_name")
+  credentialRef    String?                @map("credential_ref")
+  syncSchedule     String?                @map("sync_schedule")
+  headerFingerprint String?               @map("header_fingerprint")
+  lastSyncedAt     DateTime?              @map("last_synced_at")
+  lastErrorSummary String?                @map("last_error_summary")
+  createdAt        DateTime               @default(now()) @map("created_at")
+  updatedAt        DateTime               @updatedAt @map("updated_at")
+  tenant           Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  products         Product[]
+  mappings         CatalogueMapping[]
+  importRuns       CatalogueImportRun[]
+
+  @@index([tenantId, status])
+  @@map("catalogue_sources")
+}
+
+model CatalogueMapping {
+  id                String            @id @default(uuid()) @db.Uuid
+  tenantId          String            @map("tenant_id") @db.Uuid
+  sourceId          String            @map("source_id") @db.Uuid
+  version           Int
+  sourceFingerprint String            @map("source_fingerprint")
+  columns           Json
+  transformSettings Json?             @map("transform_settings")
+  aiModel           String?           @map("ai_model")
+  promptVersion     String?           @map("prompt_version")
+  schemaVersion     String?           @map("schema_version")
+  aiLatencyMs       Int?              @map("ai_latency_ms")
+  aiInputTokens     Int?              @map("ai_input_tokens")
+  aiOutputTokens    Int?              @map("ai_output_tokens")
+  ownerModified     Boolean           @default(false) @map("owner_modified")
+  confirmedAt       DateTime?         @map("confirmed_at")
+  confirmedByUserId String?           @map("confirmed_by_user_id") @db.Uuid
+  createdAt         DateTime          @default(now()) @map("created_at")
+  tenant            Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  source            CatalogueSource   @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  importRuns        CatalogueImportRun[]
+
+  @@unique([sourceId, version])
+  @@index([tenantId, sourceId])
+  @@map("catalogue_mappings")
+}
+
+model CatalogueImportRun {
+  id              String                 @id @default(uuid()) @db.Uuid
+  tenantId        String                 @map("tenant_id") @db.Uuid
+  sourceId        String                 @map("source_id") @db.Uuid
+  mappingId       String?                @map("mapping_id") @db.Uuid
+  requestedByUserId String?              @map("requested_by_user_id") @db.Uuid
+  status          CatalogueImportStatus  @default(UPLOADED)
+  idempotencyKey  String                 @map("idempotency_key")
+  sourceRevision  String?                @map("source_revision")
+  totalRows       Int                    @default(0) @map("total_rows")
+  validRows       Int                    @default(0) @map("valid_rows")
+  createdRows     Int                    @default(0) @map("created_rows")
+  updatedRows     Int                    @default(0) @map("updated_rows")
+  skippedRows     Int                    @default(0) @map("skipped_rows")
+  failedRows      Int                    @default(0) @map("failed_rows")
+  rowErrors       Json?                  @map("row_errors")
+  startedAt       DateTime?              @map("started_at")
+  completedAt     DateTime?              @map("completed_at")
+  createdAt       DateTime               @default(now()) @map("created_at")
+  updatedAt       DateTime               @updatedAt @map("updated_at")
+  tenant          Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  source          CatalogueSource        @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  mapping         CatalogueMapping?      @relation(fields: [mappingId], references: [id], onDelete: SetNull)
+
+  @@unique([tenantId, idempotencyKey])
+  @@index([sourceId, createdAt])
+  @@map("catalogue_import_runs")
 }
 
 model Attachment {
