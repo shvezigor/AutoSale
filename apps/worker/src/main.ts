@@ -1,7 +1,7 @@
 import { parseWorkerEnv } from '@autosale/config/worker-env';
 import { createPrismaClient } from '@autosale/database';
 import { createGoogleSheetsAdapter, S3ObjectStorage } from '@autosale/integrations';
-import { Worker } from 'bullmq';
+import { Queue, Worker } from 'bullmq';
 import { metrics, StructuredLogger } from '@autosale/observability';
 
 import { createWorkerHealthServer } from './health-server.js';
@@ -13,6 +13,7 @@ import { TriggeredOrderProcessor } from './orders/triggered-order.processor.js';
 import { GoogleSheetsSyncProcessor } from './google-sheets/google-sheets-sync.processor.js';
 import { CatalogueMappingProcessor } from './catalogue/catalogue-mapping.processor.js';
 import { createOpenAiColumnMapper } from './catalogue/openai-column-mapper.js';
+import { CatalogueMappingReconciler } from './catalogue/catalogue-mapping-reconciler.js';
 
 async function bootstrap(): Promise<void> {
   const env = parseWorkerEnv(process.env);
@@ -112,6 +113,16 @@ async function bootstrap(): Promise<void> {
       concurrency: 2,
     },
   );
+  const catalogueQueue = new Queue('catalogue', {
+    connection: {
+      host: redis.hostname,
+      port: Number(redis.port || 6379),
+      username: redis.username || undefined,
+      password: redis.password || undefined,
+      tls: redis.protocol === 'rediss:' ? {} : undefined,
+    },
+  });
+  const catalogueReconciler = new CatalogueMappingReconciler(prisma, catalogueQueue);
   const sheetsProcessor = env.GOOGLE_SERVICE_ACCOUNT_FILE
     ? new GoogleSheetsSyncProcessor(prisma, createGoogleSheetsAdapter(env.GOOGLE_SERVICE_ACCOUNT_FILE))
     : undefined;
@@ -145,15 +156,33 @@ async function bootstrap(): Promise<void> {
     }
   };
   const sheetsTimer = setInterval(() => void pollExports(), 5_000);
+  let reconcilingCatalogueMappings = false;
+  const reconcileCatalogueMappings = async (): Promise<void> => {
+    if (reconcilingCatalogueMappings) return;
+    reconcilingCatalogueMappings = true;
+    try {
+      const result = await catalogueReconciler.reconcile();
+      metrics.set('autosale_queue_backlog', result.attempted, { queue: 'catalogue' });
+    } catch (error) {
+      metrics.increment('autosale_operations_total', { operation: 'catalogue_mapping_reconcile', result: 'failure' });
+      logger.warn('catalogue_mapping_reconcile_failed', { correlationId: 'system:catalogue-mapping', errorCode: error instanceof Error ? error.name : 'UNKNOWN' });
+    } finally {
+      reconcilingCatalogueMappings = false;
+    }
+  };
+  const catalogueReconcileTimer = setInterval(() => void reconcileCatalogueMappings(), 5_000);
   void pollExports();
+  void reconcileCatalogueMappings();
   logger.info('service_started', { correlationId: 'system:startup', healthPort: env.HEALTH_PORT });
 
   server.listen(env.HEALTH_PORT, '0.0.0.0');
 
   const shutdown = async (): Promise<void> => {
     clearInterval(sheetsTimer);
+    clearInterval(catalogueReconcileTimer);
     await worker.close();
     await catalogueWorker.close();
+    await catalogueQueue.close();
     await prisma.$disconnect();
     server.close();
   };

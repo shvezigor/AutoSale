@@ -6,6 +6,7 @@ import ExcelJS from 'exceljs';
 import type { CatalogueColumnMappingInput, CatalogueMappingSuggestion } from './openai-column-mapper.js';
 
 const MAX_SOURCE_BYTES = 5 * 1024 * 1024;
+export const CATALOGUE_MAPPING_LEASE_MS = 5 * 60 * 1_000;
 
 export type CatalogueMappingJob = { tenantId: string; runId: string };
 
@@ -18,12 +19,16 @@ export class CatalogueMappingProcessor {
     private readonly mapper: Mapper,
   ) {}
 
-  async process(job: CatalogueMappingJob): Promise<{ status: 'MAPPING_REVIEW'; proposal: CatalogueMappingSuggestion['proposal'] | null }> {
+  async process(job: CatalogueMappingJob): Promise<{ status: 'MAPPING_REVIEW' | 'SKIPPED'; proposal: CatalogueMappingSuggestion['proposal'] | null }> {
+    const staleBefore = new Date(Date.now() - CATALOGUE_MAPPING_LEASE_MS);
     const claimed = await this.prisma.catalogueImportRun.updateMany({
-      where: { id: job.runId, tenantId: job.tenantId, status: 'UPLOADED' },
+      where: {
+        id: job.runId, tenantId: job.tenantId,
+        OR: [{ status: 'UPLOADED' }, { status: 'MAPPING', updatedAt: { lt: staleBefore } }],
+      },
       data: { status: 'MAPPING' },
     });
-    if (claimed.count !== 1) return { status: 'MAPPING_REVIEW', proposal: null };
+    if (claimed.count !== 1) return { status: 'SKIPPED', proposal: null };
 
     try {
       const run = await this.prisma.catalogueImportRun.findFirst({

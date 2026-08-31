@@ -8,7 +8,7 @@ type Target = 'sku' | 'name' | 'description' | 'price' | 'currency' | 'stockQuan
 type Column = { source: string; target: Target; confidence?: number };
 type Session = { membershipRole: 'OWNER' | 'MANAGER' | null };
 type UploadResult = { id: string; headers: string[] };
-type Status = { status: string; mapping: { columns: Column[] } | null; mappingFailure: 'MAPPING_UNAVAILABLE' | null };
+type Status = { status: string; mapping: { columns: Column[] } | null; mappingFailure: 'MAPPING_UNAVAILABLE' | null; createdRows?: number; updatedRows?: number; skippedRows?: number; failedRows?: number };
 type Preview = { totals: { created: number; updated: number; skipped: number; failed: number } };
 
 const targets: Target[] = ['ignore', 'sku', 'name', 'description', 'price', 'currency', 'stockQuantity', 'category', 'brand', 'aliases', 'color', 'size', 'imageUrls', 'active', 'attributes'];
@@ -24,6 +24,8 @@ export function CatalogueImportWizard({ session }: { session: Session }) {
   const [preview, setPreview] = useState<Preview | null>(null);
   const [confirmed, setConfirmed] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [importStatus, setImportStatus] = useState<Status | null>(null);
+  const [statusRetry, setStatusRetry] = useState(0);
 
   const pollStatus = useCallback(async (id: string, fallbackHeaders: string[]) => {
     try {
@@ -49,6 +51,28 @@ export function CatalogueImportWizard({ session }: { session: Session }) {
     if (!runId || step !== 3) return;
     void pollStatus(runId, headers);
   }, [headers, pollStatus, runId, step]);
+
+  useEffect(() => {
+    if (!runId || step !== 7) return;
+    let active = true;
+    let timer: number | undefined;
+    const poll = async () => {
+      try {
+        const response = await fetch(`/api/catalogue/imports/${runId}`, { cache: 'no-store' });
+        if (!response.ok) throw new Error('status unavailable');
+        const status = await response.json() as Status;
+        if (!active) return;
+        setImportStatus(status);
+        setError(null);
+        if (status.status !== 'COMPLETED' && status.status !== 'FAILED') timer = window.setTimeout(() => void poll(), 1_500);
+      } catch {
+        if (!active) return;
+        setError('Не вдалося оновити стан імпорту.');
+      }
+    };
+    void poll();
+    return () => { active = false; if (timer !== undefined) window.clearTimeout(timer); };
+  }, [runId, statusRetry, step]);
 
   if (session.membershipRole !== 'OWNER') return null;
 
@@ -85,6 +109,8 @@ export function CatalogueImportWizard({ session }: { session: Session }) {
     if (!runId || !confirmed) return;
     const response = await mutatingFetch(`/api/catalogue/imports/${runId}/confirm`, { method: 'POST' });
     if (!response.ok) { setError('Не вдалося підтвердити імпорт.'); return; }
+    setImportStatus(await response.json() as Status);
+    setError(null);
     setStep(7);
   }
 
@@ -99,6 +125,6 @@ export function CatalogueImportWizard({ session }: { session: Session }) {
     {step === 4 ? <div className="catalogue-import-panel"><h2>{manualFallback ? 'AI недоступний — зіставте колонки вручну' : 'AI запропонував зіставлення'}</h2><p>Перевірте кожну колонку перед імпортом. AI не змінює значення товарів.</p><div className="catalogue-mapping-grid">{columns.map((column) => <label key={column.source}>{column.source}<small>{column.confidence === undefined ? 'ручне зіставлення' : `${Math.round(column.confidence * 100)}%`}</small><select aria-label={column.source} value={column.target} onChange={updateColumn(column.source)}>{targets.map((target) => <option key={target} value={target}>{target}</option>)}</select></label>)}</div><button type="button" className="primary-button" onClick={checkMapping}>Перевірити зіставлення</button></div> : null}
     {step === 5 ? <div className="catalogue-import-panel"><h2>Обов’язкові поля зіставлено</h2><p>SKU та назва готові до перевірки без зміни товарів.</p><button type="button" className="primary-button" onClick={() => void createPreview()}>Створити попередній перегляд</button></div> : null}
     {step === 6 && preview ? <div className="catalogue-import-panel"><h2>Попередній перегляд</h2><dl className="catalogue-import-totals"><div><dt>Нових</dt><dd>Нових: {preview.totals.created}</dd></div><div><dt>Оновлень</dt><dd>Оновлень: {preview.totals.updated}</dd></div><div><dt>Пропущено</dt><dd>{preview.totals.skipped}</dd></div><div><dt>Помилок</dt><dd>{preview.totals.failed}</dd></div></dl><label className="catalogue-confirmation"><input type="checkbox" checked={confirmed} onChange={(event) => setConfirmed(event.target.checked)} />Я підтверджую зіставлення та підсумки попереднього перегляду</label><button type="button" className="primary-button" disabled={!confirmed} onClick={() => void confirmImport()}>Підтвердити імпорт</button></div> : null}
-    {step === 7 ? <div className="catalogue-import-panel" aria-live="polite"><h2>Імпорт обробляється</h2><p>Каталог оновиться після завершення без видалення наявних товарів.</p></div> : null}
+    {step === 7 ? <div className="catalogue-import-panel" aria-live="polite">{importStatus?.status === 'COMPLETED' ? <><h2>Імпорт завершено</h2><p>Створено: {importStatus.createdRows ?? 0}</p><p>Оновлено: {importStatus.updatedRows ?? 0}</p></> : importStatus?.status === 'FAILED' ? <><h2>Імпорт не завершено</h2><p>Помилок: {importStatus.failedRows ?? 0}</p></> : <><h2>Імпорт обробляється</h2><p>Каталог оновиться після завершення без видалення наявних товарів.</p></>}{error ? <button type="button" className="secondary-button" onClick={() => setStatusRetry((value) => value + 1)}>Оновити стан</button> : null}</div> : null}
   </section>;
 }

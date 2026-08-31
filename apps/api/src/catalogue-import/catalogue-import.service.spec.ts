@@ -348,6 +348,17 @@ describe('CatalogueImportService', () => {
     expect(await prisma.catalogueImportRun.findUniqueOrThrow({ where: { id: first.id } })).toMatchObject({ tenantId, status: 'UPLOADED' });
   });
 
+  it('keeps a durable uploaded dispatch record when the immediate queue enqueue fails', async () => {
+    const queuedService = new CatalogueImportService(prisma, storage, { add: vi.fn().mockRejectedValue(new Error('redis unavailable')) });
+
+    const uploaded = await queuedService.upload(tenantId, ownerUserId, {
+      originalName: 'products.csv', mediaType: 'text/csv', buffer: Buffer.from('SKU,Name\nLUNA-01,Luna'),
+    });
+
+    expect(await prisma.catalogueImportRun.findUniqueOrThrow({ where: { id: uploaded.id }, select: { status: true, mappingId: true } }))
+      .toEqual({ status: 'UPLOADED', mappingId: null });
+  });
+
   async function uploadAndMap(csv: string) {
     const uploaded = await service.upload(tenantId, ownerUserId, {
       originalName: 'products.csv',

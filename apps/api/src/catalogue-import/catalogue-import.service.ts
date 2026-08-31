@@ -113,10 +113,7 @@ export class CatalogueImportService {
       try {
         await this.mappingQueue?.add('catalogue.mapping', { tenantId, runId: run.id }, { jobId: `catalogue.mapping:${run.id}`, removeOnComplete: 1_000, removeOnFail: 5_000 });
       } catch {
-        await this.prisma.catalogueImportRun.updateMany({
-          where: { id: run.id, tenantId, status: 'UPLOADED' },
-          data: { status: 'MAPPING_REVIEW', rowErrors: [{ errors: ['MAPPING_UNAVAILABLE'] }] },
-        });
+        // The worker reconciler reads this durable UPLOADED run and retries dispatch.
       }
       return result;
     } catch (error) {

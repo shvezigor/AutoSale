@@ -11,7 +11,7 @@ const upload = { id: runId, sourceId: '22222222-2222-4222-8222-222222222222', st
 const proposal = { ...upload, status: 'MAPPING_REVIEW', mapping: { columns: [{ source: 'sku', target: 'sku', confidence: 0.99 }, { source: 'name', target: 'name', confidence: 0.98 }, { source: 'note', target: 'ignore', confidence: 0.7 }], aiModel: 'gpt-5.4-mini', promptVersion: 'catalogue-column-mapping-v1', schemaVersion: 'catalogue-mapping-proposal-v1' }, mappingFailure: null };
 const preview = { rows: [], totals: { created: 1, updated: 1, skipped: 0, failed: 0 } };
 
-afterEach(() => { cleanup(); mutatingFetch.mockReset(); vi.unstubAllGlobals(); });
+afterEach(() => { cleanup(); mutatingFetch.mockReset(); vi.unstubAllGlobals(); vi.useRealTimers(); });
 
 describe('CatalogueImportWizard', () => {
   it('moves an owner through source upload, reviewed mapping, preview, confirmation, and progress without persisting source rows', async () => {
@@ -60,6 +60,47 @@ describe('CatalogueImportWizard', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Перевірити зіставлення' }));
     expect(screen.getByText('Зіставте обов’язкові поля SKU та назву.')).toBeInTheDocument();
   });
+
+  it('keeps polling confirmed work until a terminal completed status reports progress totals', async () => {
+    mutatingFetch.mockResolvedValueOnce(response(upload)).mockResolvedValueOnce(response(preview)).mockResolvedValueOnce(response({ ...upload, status: 'PROCESSING' }));
+    vi.stubGlobal('fetch', vi.fn()
+      .mockResolvedValueOnce(response(proposal))
+      .mockResolvedValueOnce(response({ ...proposal, status: 'PROCESSING' }))
+      .mockResolvedValueOnce(response({ ...proposal, status: 'COMPLETED', createdRows: 2, updatedRows: 1, skippedRows: 0, failedRows: 0 })));
+    render(<CatalogueImportWizard session={{ membershipRole: 'OWNER' }} />);
+
+    await reachConfirmation();
+    await waitFor(() => expect(screen.getByText('Імпорт обробляється')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Імпорт завершено')).toBeInTheDocument(), { timeout: 2_500 });
+    expect(screen.getByText('Створено: 2')).toBeInTheDocument();
+  });
+
+  it('shows a safe status error and lets the owner retry a terminal failure check', async () => {
+    mutatingFetch.mockResolvedValueOnce(response(upload)).mockResolvedValueOnce(response(preview)).mockResolvedValueOnce(response({ ...upload, status: 'PROCESSING' }));
+    vi.stubGlobal('fetch', vi.fn()
+      .mockResolvedValueOnce(response(proposal))
+      .mockResolvedValueOnce({ ok: false } as Response)
+      .mockResolvedValueOnce(response({ ...proposal, status: 'FAILED', failedRows: 2 })));
+    render(<CatalogueImportWizard session={{ membershipRole: 'OWNER' }} />);
+
+    await reachConfirmation();
+    await waitFor(() => expect(screen.getByText('Не вдалося оновити стан імпорту.')).toBeInTheDocument(), { timeout: 2_500 });
+    fireEvent.click(screen.getByRole('button', { name: 'Оновити стан' }));
+    await waitFor(() => expect(screen.getByText('Імпорт не завершено')).toBeInTheDocument());
+    expect(screen.getByText('Помилок: 2')).toBeInTheDocument();
+  });
 });
+
+async function reachConfirmation() {
+  fireEvent.click(screen.getByRole('button', { name: 'Обрати файл' }));
+  fireEvent.change(screen.getByLabelText('Файл каталогу'), { target: { files: [new File(['sku,name\nA,Alpha'], 'catalogue.csv', { type: 'text/csv' })] } });
+  fireEvent.click(screen.getByRole('button', { name: 'Завантажити каталог' }));
+  await screen.findByText('AI запропонував зіставлення');
+  fireEvent.click(screen.getByRole('button', { name: 'Перевірити зіставлення' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Створити попередній перегляд' }));
+  await screen.findByText('Нових: 1');
+  fireEvent.click(screen.getByLabelText('Я підтверджую зіставлення та підсумки попереднього перегляду'));
+  fireEvent.click(screen.getByRole('button', { name: 'Підтвердити імпорт' }));
+}
 
 function response(body: unknown) { return { ok: true, json: async () => body } as Response; }
