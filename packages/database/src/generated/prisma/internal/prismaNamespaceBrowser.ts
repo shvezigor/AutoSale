@@ -493,6 +493,8 @@ export const CatalogueImportRunScalarFieldEnum = {
   tenantId: 'tenantId',
   sourceId: 'sourceId',
   mappingId: 'mappingId',
+  mappingLeaseId: 'mappingLeaseId',
+  mappingLeaseExpiresAt: 'mappingLeaseExpiresAt',
   requestedByUserId: 'requestedByUserId',
   status: 'status',
   idempotencyKey: 'idempotencyKey',

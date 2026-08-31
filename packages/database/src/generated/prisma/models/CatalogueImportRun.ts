@@ -49,6 +49,8 @@ export type CatalogueImportRunMinAggregateOutputType = {
   tenantId: string | null
   sourceId: string | null
   mappingId: string | null
+  mappingLeaseId: string | null
+  mappingLeaseExpiresAt: Date | null
   requestedByUserId: string | null
   status: $Enums.CatalogueImportStatus | null
   idempotencyKey: string | null
@@ -70,6 +72,8 @@ export type CatalogueImportRunMaxAggregateOutputType = {
   tenantId: string | null
   sourceId: string | null
   mappingId: string | null
+  mappingLeaseId: string | null
+  mappingLeaseExpiresAt: Date | null
   requestedByUserId: string | null
   status: $Enums.CatalogueImportStatus | null
   idempotencyKey: string | null
@@ -91,6 +95,8 @@ export type CatalogueImportRunCountAggregateOutputType = {
   tenantId: number
   sourceId: number
   mappingId: number
+  mappingLeaseId: number
+  mappingLeaseExpiresAt: number
   requestedByUserId: number
   status: number
   idempotencyKey: number
@@ -133,6 +139,8 @@ export type CatalogueImportRunMinAggregateInputType = {
   tenantId?: true
   sourceId?: true
   mappingId?: true
+  mappingLeaseId?: true
+  mappingLeaseExpiresAt?: true
   requestedByUserId?: true
   status?: true
   idempotencyKey?: true
@@ -154,6 +162,8 @@ export type CatalogueImportRunMaxAggregateInputType = {
   tenantId?: true
   sourceId?: true
   mappingId?: true
+  mappingLeaseId?: true
+  mappingLeaseExpiresAt?: true
   requestedByUserId?: true
   status?: true
   idempotencyKey?: true
@@ -175,6 +185,8 @@ export type CatalogueImportRunCountAggregateInputType = {
   tenantId?: true
   sourceId?: true
   mappingId?: true
+  mappingLeaseId?: true
+  mappingLeaseExpiresAt?: true
   requestedByUserId?: true
   status?: true
   idempotencyKey?: true
@@ -284,6 +296,8 @@ export type CatalogueImportRunGroupByOutputType = {
   tenantId: string
   sourceId: string
   mappingId: string | null
+  mappingLeaseId: string | null
+  mappingLeaseExpiresAt: Date | null
   requestedByUserId: string | null
   status: $Enums.CatalogueImportStatus
   idempotencyKey: string
@@ -329,6 +343,8 @@ export type CatalogueImportRunWhereInput = {
   tenantId?: Prisma.UuidFilter<"CatalogueImportRun"> | string
   sourceId?: Prisma.UuidFilter<"CatalogueImportRun"> | string
   mappingId?: Prisma.UuidNullableFilter<"CatalogueImportRun"> | string | null
+  mappingLeaseId?: Prisma.UuidNullableFilter<"CatalogueImportRun"> | string | null
+  mappingLeaseExpiresAt?: Prisma.DateTimeNullableFilter<"CatalogueImportRun"> | Date | string | null
   requestedByUserId?: Prisma.UuidNullableFilter<"CatalogueImportRun"> | string | null
   status?: Prisma.EnumCatalogueImportStatusFilter<"CatalogueImportRun"> | $Enums.CatalogueImportStatus
   idempotencyKey?: Prisma.StringFilter<"CatalogueImportRun"> | string
@@ -354,6 +370,8 @@ export type CatalogueImportRunOrderByWithRelationInput = {
   tenantId?: Prisma.SortOrder
   sourceId?: Prisma.SortOrder
   mappingId?: Prisma.SortOrderInput | Prisma.SortOrder
+  mappingLeaseId?: Prisma.SortOrderInput | Prisma.SortOrder
+  mappingLeaseExpiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
   requestedByUserId?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   idempotencyKey?: Prisma.SortOrder
@@ -383,6 +401,8 @@ export type CatalogueImportRunWhereUniqueInput = Prisma.AtLeast<{
   tenantId?: Prisma.UuidFilter<"CatalogueImportRun"> | string
   sourceId?: Prisma.UuidFilter<"CatalogueImportRun"> | string
   mappingId?: Prisma.UuidNullableFilter<"CatalogueImportRun"> | string | null
+  mappingLeaseId?: Prisma.UuidNullableFilter<"CatalogueImportRun"> | string | null
+  mappingLeaseExpiresAt?: Prisma.DateTimeNullableFilter<"CatalogueImportRun"> | Date | string | null
   requestedByUserId?: Prisma.UuidNullableFilter<"CatalogueImportRun"> | string | null
   status?: Prisma.EnumCatalogueImportStatusFilter<"CatalogueImportRun"> | $Enums.CatalogueImportStatus
   idempotencyKey?: Prisma.StringFilter<"CatalogueImportRun"> | string
@@ -408,6 +428,8 @@ export type CatalogueImportRunOrderByWithAggregationInput = {
   tenantId?: Prisma.SortOrder
   sourceId?: Prisma.SortOrder
   mappingId?: Prisma.SortOrderInput | Prisma.SortOrder
+  mappingLeaseId?: Prisma.SortOrderInput | Prisma.SortOrder
+  mappingLeaseExpiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
   requestedByUserId?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   idempotencyKey?: Prisma.SortOrder
@@ -438,6 +460,8 @@ export type CatalogueImportRunScalarWhereWithAggregatesInput = {
   tenantId?: Prisma.UuidWithAggregatesFilter<"CatalogueImportRun"> | string
   sourceId?: Prisma.UuidWithAggregatesFilter<"CatalogueImportRun"> | string
   mappingId?: Prisma.UuidNullableWithAggregatesFilter<"CatalogueImportRun"> | string | null
+  mappingLeaseId?: Prisma.UuidNullableWithAggregatesFilter<"CatalogueImportRun"> | string | null
+  mappingLeaseExpiresAt?: Prisma.DateTimeNullableWithAggregatesFilter<"CatalogueImportRun"> | Date | string | null
   requestedByUserId?: Prisma.UuidNullableWithAggregatesFilter<"CatalogueImportRun"> | string | null
   status?: Prisma.EnumCatalogueImportStatusWithAggregatesFilter<"CatalogueImportRun"> | $Enums.CatalogueImportStatus
   idempotencyKey?: Prisma.StringWithAggregatesFilter<"CatalogueImportRun"> | string
@@ -457,6 +481,8 @@ export type CatalogueImportRunScalarWhereWithAggregatesInput = {
 
 export type CatalogueImportRunCreateInput = {
   id?: string
+  mappingLeaseId?: string | null
+  mappingLeaseExpiresAt?: Date | string | null
   requestedByUserId?: string | null
   status?: $Enums.CatalogueImportStatus
   idempotencyKey: string
@@ -482,6 +508,8 @@ export type CatalogueImportRunUncheckedCreateInput = {
   tenantId: string
   sourceId: string
   mappingId?: string | null
+  mappingLeaseId?: string | null
+  mappingLeaseExpiresAt?: Date | string | null
   requestedByUserId?: string | null
   status?: $Enums.CatalogueImportStatus
   idempotencyKey: string
@@ -501,6 +529,8 @@ export type CatalogueImportRunUncheckedCreateInput = {
 
 export type CatalogueImportRunUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  mappingLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mappingLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   requestedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCatalogueImportStatusFieldUpdateOperationsInput | $Enums.CatalogueImportStatus
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
@@ -526,6 +556,8 @@ export type CatalogueImportRunUncheckedUpdateInput = {
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   sourceId?: Prisma.StringFieldUpdateOperationsInput | string
   mappingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mappingLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mappingLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   requestedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCatalogueImportStatusFieldUpdateOperationsInput | $Enums.CatalogueImportStatus
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
@@ -548,6 +580,8 @@ export type CatalogueImportRunCreateManyInput = {
   tenantId: string
   sourceId: string
   mappingId?: string | null
+  mappingLeaseId?: string | null
+  mappingLeaseExpiresAt?: Date | string | null
   requestedByUserId?: string | null
   status?: $Enums.CatalogueImportStatus
   idempotencyKey: string
@@ -567,6 +601,8 @@ export type CatalogueImportRunCreateManyInput = {
 
 export type CatalogueImportRunUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  mappingLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mappingLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   requestedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCatalogueImportStatusFieldUpdateOperationsInput | $Enums.CatalogueImportStatus
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
@@ -589,6 +625,8 @@ export type CatalogueImportRunUncheckedUpdateManyInput = {
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   sourceId?: Prisma.StringFieldUpdateOperationsInput | string
   mappingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mappingLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mappingLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   requestedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCatalogueImportStatusFieldUpdateOperationsInput | $Enums.CatalogueImportStatus
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
@@ -626,6 +664,8 @@ export type CatalogueImportRunCountOrderByAggregateInput = {
   tenantId?: Prisma.SortOrder
   sourceId?: Prisma.SortOrder
   mappingId?: Prisma.SortOrder
+  mappingLeaseId?: Prisma.SortOrder
+  mappingLeaseExpiresAt?: Prisma.SortOrder
   requestedByUserId?: Prisma.SortOrder
   status?: Prisma.SortOrder
   idempotencyKey?: Prisma.SortOrder
@@ -657,6 +697,8 @@ export type CatalogueImportRunMaxOrderByAggregateInput = {
   tenantId?: Prisma.SortOrder
   sourceId?: Prisma.SortOrder
   mappingId?: Prisma.SortOrder
+  mappingLeaseId?: Prisma.SortOrder
+  mappingLeaseExpiresAt?: Prisma.SortOrder
   requestedByUserId?: Prisma.SortOrder
   status?: Prisma.SortOrder
   idempotencyKey?: Prisma.SortOrder
@@ -678,6 +720,8 @@ export type CatalogueImportRunMinOrderByAggregateInput = {
   tenantId?: Prisma.SortOrder
   sourceId?: Prisma.SortOrder
   mappingId?: Prisma.SortOrder
+  mappingLeaseId?: Prisma.SortOrder
+  mappingLeaseExpiresAt?: Prisma.SortOrder
   requestedByUserId?: Prisma.SortOrder
   status?: Prisma.SortOrder
   idempotencyKey?: Prisma.SortOrder
@@ -835,6 +879,8 @@ export type EnumCatalogueImportStatusFieldUpdateOperationsInput = {
 
 export type CatalogueImportRunCreateWithoutTenantInput = {
   id?: string
+  mappingLeaseId?: string | null
+  mappingLeaseExpiresAt?: Date | string | null
   requestedByUserId?: string | null
   status?: $Enums.CatalogueImportStatus
   idempotencyKey: string
@@ -858,6 +904,8 @@ export type CatalogueImportRunUncheckedCreateWithoutTenantInput = {
   id?: string
   sourceId: string
   mappingId?: string | null
+  mappingLeaseId?: string | null
+  mappingLeaseExpiresAt?: Date | string | null
   requestedByUserId?: string | null
   status?: $Enums.CatalogueImportStatus
   idempotencyKey: string
@@ -909,6 +957,8 @@ export type CatalogueImportRunScalarWhereInput = {
   tenantId?: Prisma.UuidFilter<"CatalogueImportRun"> | string
   sourceId?: Prisma.UuidFilter<"CatalogueImportRun"> | string
   mappingId?: Prisma.UuidNullableFilter<"CatalogueImportRun"> | string | null
+  mappingLeaseId?: Prisma.UuidNullableFilter<"CatalogueImportRun"> | string | null
+  mappingLeaseExpiresAt?: Prisma.DateTimeNullableFilter<"CatalogueImportRun"> | Date | string | null
   requestedByUserId?: Prisma.UuidNullableFilter<"CatalogueImportRun"> | string | null
   status?: Prisma.EnumCatalogueImportStatusFilter<"CatalogueImportRun"> | $Enums.CatalogueImportStatus
   idempotencyKey?: Prisma.StringFilter<"CatalogueImportRun"> | string
@@ -928,6 +978,8 @@ export type CatalogueImportRunScalarWhereInput = {
 
 export type CatalogueImportRunCreateWithoutSourceInput = {
   id?: string
+  mappingLeaseId?: string | null
+  mappingLeaseExpiresAt?: Date | string | null
   requestedByUserId?: string | null
   status?: $Enums.CatalogueImportStatus
   idempotencyKey: string
@@ -950,6 +1002,8 @@ export type CatalogueImportRunCreateWithoutSourceInput = {
 export type CatalogueImportRunUncheckedCreateWithoutSourceInput = {
   id?: string
   mappingId?: string | null
+  mappingLeaseId?: string | null
+  mappingLeaseExpiresAt?: Date | string | null
   requestedByUserId?: string | null
   status?: $Enums.CatalogueImportStatus
   idempotencyKey: string
@@ -995,6 +1049,8 @@ export type CatalogueImportRunUpdateManyWithWhereWithoutSourceInput = {
 
 export type CatalogueImportRunCreateWithoutMappingInput = {
   id?: string
+  mappingLeaseId?: string | null
+  mappingLeaseExpiresAt?: Date | string | null
   requestedByUserId?: string | null
   status?: $Enums.CatalogueImportStatus
   idempotencyKey: string
@@ -1017,6 +1073,8 @@ export type CatalogueImportRunCreateWithoutMappingInput = {
 export type CatalogueImportRunUncheckedCreateWithoutMappingInput = {
   id?: string
   sourceId: string
+  mappingLeaseId?: string | null
+  mappingLeaseExpiresAt?: Date | string | null
   requestedByUserId?: string | null
   status?: $Enums.CatalogueImportStatus
   idempotencyKey: string
@@ -1064,6 +1122,8 @@ export type CatalogueImportRunCreateManyTenantInput = {
   id?: string
   sourceId: string
   mappingId?: string | null
+  mappingLeaseId?: string | null
+  mappingLeaseExpiresAt?: Date | string | null
   requestedByUserId?: string | null
   status?: $Enums.CatalogueImportStatus
   idempotencyKey: string
@@ -1083,6 +1143,8 @@ export type CatalogueImportRunCreateManyTenantInput = {
 
 export type CatalogueImportRunUpdateWithoutTenantInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  mappingLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mappingLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   requestedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCatalogueImportStatusFieldUpdateOperationsInput | $Enums.CatalogueImportStatus
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1106,6 +1168,8 @@ export type CatalogueImportRunUncheckedUpdateWithoutTenantInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   sourceId?: Prisma.StringFieldUpdateOperationsInput | string
   mappingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mappingLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mappingLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   requestedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCatalogueImportStatusFieldUpdateOperationsInput | $Enums.CatalogueImportStatus
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1127,6 +1191,8 @@ export type CatalogueImportRunUncheckedUpdateManyWithoutTenantInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   sourceId?: Prisma.StringFieldUpdateOperationsInput | string
   mappingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mappingLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mappingLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   requestedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCatalogueImportStatusFieldUpdateOperationsInput | $Enums.CatalogueImportStatus
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1147,6 +1213,8 @@ export type CatalogueImportRunUncheckedUpdateManyWithoutTenantInput = {
 export type CatalogueImportRunCreateManySourceInput = {
   id?: string
   mappingId?: string | null
+  mappingLeaseId?: string | null
+  mappingLeaseExpiresAt?: Date | string | null
   requestedByUserId?: string | null
   status?: $Enums.CatalogueImportStatus
   idempotencyKey: string
@@ -1166,6 +1234,8 @@ export type CatalogueImportRunCreateManySourceInput = {
 
 export type CatalogueImportRunUpdateWithoutSourceInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  mappingLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mappingLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   requestedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCatalogueImportStatusFieldUpdateOperationsInput | $Enums.CatalogueImportStatus
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1188,6 +1258,8 @@ export type CatalogueImportRunUpdateWithoutSourceInput = {
 export type CatalogueImportRunUncheckedUpdateWithoutSourceInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   mappingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mappingLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mappingLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   requestedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCatalogueImportStatusFieldUpdateOperationsInput | $Enums.CatalogueImportStatus
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1208,6 +1280,8 @@ export type CatalogueImportRunUncheckedUpdateWithoutSourceInput = {
 export type CatalogueImportRunUncheckedUpdateManyWithoutSourceInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   mappingId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mappingLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mappingLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   requestedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCatalogueImportStatusFieldUpdateOperationsInput | $Enums.CatalogueImportStatus
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1228,6 +1302,8 @@ export type CatalogueImportRunUncheckedUpdateManyWithoutSourceInput = {
 export type CatalogueImportRunCreateManyMappingInput = {
   id?: string
   sourceId: string
+  mappingLeaseId?: string | null
+  mappingLeaseExpiresAt?: Date | string | null
   requestedByUserId?: string | null
   status?: $Enums.CatalogueImportStatus
   idempotencyKey: string
@@ -1247,6 +1323,8 @@ export type CatalogueImportRunCreateManyMappingInput = {
 
 export type CatalogueImportRunUpdateWithoutMappingInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  mappingLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mappingLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   requestedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCatalogueImportStatusFieldUpdateOperationsInput | $Enums.CatalogueImportStatus
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1269,6 +1347,8 @@ export type CatalogueImportRunUpdateWithoutMappingInput = {
 export type CatalogueImportRunUncheckedUpdateWithoutMappingInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   sourceId?: Prisma.StringFieldUpdateOperationsInput | string
+  mappingLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mappingLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   requestedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCatalogueImportStatusFieldUpdateOperationsInput | $Enums.CatalogueImportStatus
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1289,6 +1369,8 @@ export type CatalogueImportRunUncheckedUpdateWithoutMappingInput = {
 export type CatalogueImportRunUncheckedUpdateManyWithoutMappingInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   sourceId?: Prisma.StringFieldUpdateOperationsInput | string
+  mappingLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mappingLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   requestedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCatalogueImportStatusFieldUpdateOperationsInput | $Enums.CatalogueImportStatus
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1313,6 +1395,8 @@ export type CatalogueImportRunSelect<ExtArgs extends runtime.Types.Extensions.In
   tenantId?: boolean
   sourceId?: boolean
   mappingId?: boolean
+  mappingLeaseId?: boolean
+  mappingLeaseExpiresAt?: boolean
   requestedByUserId?: boolean
   status?: boolean
   idempotencyKey?: boolean
@@ -1338,6 +1422,8 @@ export type CatalogueImportRunSelectCreateManyAndReturn<ExtArgs extends runtime.
   tenantId?: boolean
   sourceId?: boolean
   mappingId?: boolean
+  mappingLeaseId?: boolean
+  mappingLeaseExpiresAt?: boolean
   requestedByUserId?: boolean
   status?: boolean
   idempotencyKey?: boolean
@@ -1363,6 +1449,8 @@ export type CatalogueImportRunSelectUpdateManyAndReturn<ExtArgs extends runtime.
   tenantId?: boolean
   sourceId?: boolean
   mappingId?: boolean
+  mappingLeaseId?: boolean
+  mappingLeaseExpiresAt?: boolean
   requestedByUserId?: boolean
   status?: boolean
   idempotencyKey?: boolean
@@ -1388,6 +1476,8 @@ export type CatalogueImportRunSelectScalar = {
   tenantId?: boolean
   sourceId?: boolean
   mappingId?: boolean
+  mappingLeaseId?: boolean
+  mappingLeaseExpiresAt?: boolean
   requestedByUserId?: boolean
   status?: boolean
   idempotencyKey?: boolean
@@ -1405,7 +1495,7 @@ export type CatalogueImportRunSelectScalar = {
   updatedAt?: boolean
 }
 
-export type CatalogueImportRunOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "sourceId" | "mappingId" | "requestedByUserId" | "status" | "idempotencyKey" | "sourceRevision" | "totalRows" | "validRows" | "createdRows" | "updatedRows" | "skippedRows" | "failedRows" | "rowErrors" | "startedAt" | "completedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["catalogueImportRun"]>
+export type CatalogueImportRunOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "sourceId" | "mappingId" | "mappingLeaseId" | "mappingLeaseExpiresAt" | "requestedByUserId" | "status" | "idempotencyKey" | "sourceRevision" | "totalRows" | "validRows" | "createdRows" | "updatedRows" | "skippedRows" | "failedRows" | "rowErrors" | "startedAt" | "completedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["catalogueImportRun"]>
 export type CatalogueImportRunInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   source?: boolean | Prisma.CatalogueSourceDefaultArgs<ExtArgs>
@@ -1434,6 +1524,8 @@ export type $CatalogueImportRunPayload<ExtArgs extends runtime.Types.Extensions.
     tenantId: string
     sourceId: string
     mappingId: string | null
+    mappingLeaseId: string | null
+    mappingLeaseExpiresAt: Date | null
     requestedByUserId: string | null
     status: $Enums.CatalogueImportStatus
     idempotencyKey: string
@@ -1879,6 +1971,8 @@ export interface CatalogueImportRunFieldRefs {
   readonly tenantId: Prisma.FieldRef<"CatalogueImportRun", 'String'>
   readonly sourceId: Prisma.FieldRef<"CatalogueImportRun", 'String'>
   readonly mappingId: Prisma.FieldRef<"CatalogueImportRun", 'String'>
+  readonly mappingLeaseId: Prisma.FieldRef<"CatalogueImportRun", 'String'>
+  readonly mappingLeaseExpiresAt: Prisma.FieldRef<"CatalogueImportRun", 'DateTime'>
   readonly requestedByUserId: Prisma.FieldRef<"CatalogueImportRun", 'String'>
   readonly status: Prisma.FieldRef<"CatalogueImportRun", 'CatalogueImportStatus'>
   readonly idempotencyKey: Prisma.FieldRef<"CatalogueImportRun", 'String'>

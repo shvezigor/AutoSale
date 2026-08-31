@@ -562,6 +562,8 @@ model CatalogueImportRun {
   tenantId        String                 @map("tenant_id") @db.Uuid
   sourceId        String                 @map("source_id") @db.Uuid
   mappingId       String?                @map("mapping_id") @db.Uuid
+  mappingLeaseId  String?                @map("mapping_lease_id") @db.Uuid
+  mappingLeaseExpiresAt DateTime?        @map("mapping_lease_expires_at")
   requestedByUserId String?              @map("requested_by_user_id") @db.Uuid
   status          CatalogueImportStatus  @default(UPLOADED)
   idempotencyKey  String                 @map("idempotency_key")
@@ -583,6 +585,7 @@ model CatalogueImportRun {
 
   @@unique([tenantId, idempotencyKey])
   @@index([sourceId, createdAt])
+  @@index([status, mappingLeaseExpiresAt])
   @@map("catalogue_import_runs")
 }
 
