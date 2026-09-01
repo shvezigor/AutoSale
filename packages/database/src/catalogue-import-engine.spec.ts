@@ -79,7 +79,7 @@ describe('catalogue table import engine', () => {
   });
 
   it('rolls back product mutation when the source lease fence is lost before commit', async () => {
-    const prisma = prismaDouble([], { leaseCounts: [1, 0], transactionalWrites: true });
+    const prisma = prismaDouble([], { leaseCounts: [0], transactionalWrites: true });
 
     await expect(importCatalogueTable(prisma as never, {
       tenantId: 'tenant-1', sourceId: 'google-source', ownershipPolicy: 'FENCE_CROSS_SOURCE', mapping: mapping.slice(0, 2), transformSettings: null,
@@ -88,11 +88,22 @@ describe('catalogue table import engine', () => {
     })).rejects.toBeInstanceOf(CatalogueImportLeaseLostError);
     expect(prisma.committedWrites).toEqual([]);
   });
+
+  it('rejects an already-lost source lease before attempting a product write', async () => {
+    const prisma = prismaDouble([], { leaseOwned: false, transactionalWrites: true });
+
+    await expect(importCatalogueTable(prisma as never, {
+      tenantId: 'tenant-1', sourceId: 'google-source', ownershipPolicy: 'FENCE_CROSS_SOURCE', mapping: mapping.slice(0, 2), transformSettings: null,
+      headers: ['SKU', 'Name'], rows: [['LUNA-1', 'Luna']],
+      lease: { id: 'expired-lease', syncVersion: 7, ttlMs: 300_000 },
+    })).rejects.toBeInstanceOf(CatalogueImportLeaseLostError);
+    expect(prisma.product.upsert).not.toHaveBeenCalled();
+  });
 });
 
 function prismaDouble(
   existing: Array<{ sku: string; sourceId: string | null }>,
-  options: { leaseCounts?: number[]; transactionalWrites?: boolean } = {},
+  options: { leaseCounts?: number[]; leaseOwned?: boolean; transactionalWrites?: boolean } = {},
 ) {
   const committedWrites: unknown[] = [];
   let pendingWrites: unknown[] = [];
@@ -103,16 +114,20 @@ function prismaDouble(
       return {};
     }),
   };
-  const catalogueSource = { updateMany: vi.fn().mockImplementation(async () => ({ count: options.leaseCounts?.shift() ?? 1 })) };
+  const catalogueSource = {
+    findFirst: vi.fn().mockResolvedValue(options.leaseOwned === false ? null : { id: 'google-source' }),
+    updateMany: vi.fn().mockImplementation(async () => ({ count: options.leaseCounts?.shift() ?? 1 })),
+  };
   return {
     committedWrites,
     product,
     catalogueSource,
+    $queryRaw: vi.fn().mockResolvedValue([{ pg_advisory_xact_lock: null }]),
     $transaction: vi.fn().mockImplementation(async (work) => {
       if (typeof work !== 'function') return Promise.all(work);
       pendingWrites = [];
       try {
-        const result = await work({ product, catalogueSource });
+        const result = await work({ product, catalogueSource, $queryRaw: vi.fn().mockResolvedValue([{ pg_advisory_xact_lock: null }]) });
         committedWrites.push(...pendingWrites);
         return result;
       } finally {

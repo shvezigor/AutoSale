@@ -104,7 +104,7 @@ An import run records:
 7. The owner reviews the mapping. Low-confidence, conflicting, or missing required mappings are highlighted.
 8. The system parses and validates the complete source using the confirmed mapping and displays a preview plus created/updated/skipped/error counts.
 9. The owner confirms the import.
-10. The importer validates all rows and tenant SKU collisions before mutation, then performs every product upsert in one serializable transaction and saves an import report. A late collision or lost source fence rolls back the whole product mutation.
+10. The importer validates all rows and tenant SKU collisions before mutation, then performs every product upsert in one atomic `READ COMMITTED` transaction protected by a tenant-scoped PostgreSQL transaction advisory lock. A late collision or lost source fence rolls back the whole product mutation.
 11. The internal catalogue becomes available to deterministic candidate search and order recognition.
 
 If OpenAI is unavailable or returns invalid output, the owner can configure mappings manually. AI assistance is not a hard dependency for importing a known structure.
@@ -156,7 +156,7 @@ When the structure changes, synchronization pauses before product mutation and c
 
 Google reads request complete rows so columns beyond the 100-column cap remain detectable. Reads accept at most 5,000 product rows and scan a finite additional 5,000-row window for sparse overflow; structural limit failures are owner-fixable validation errors, never provider retries.
 
-Every Google synchronization or snapshot confirmation atomically claims the source version with a renewable five-minute token lease. A one-minute heartbeat renews the lease during long reads/imports. The product transaction checks the token, version, and unexpired lease before and after mutation, and completion atomically fences the run/source state, so an expired or replaced claimant cannot commit or mark the source active. A preview stores its source version and cannot be confirmed after configuration changes; a refreshed identical preview is reassigned to the current fenced version and remains visible to the owner.
+Every Google synchronization or snapshot confirmation atomically claims the source version with a renewable five-minute token lease. A one-minute heartbeat renews the lease during long reads/imports. The product transaction does not touch the source row while product work is in progress, so the heartbeat remains independently renewable. Immediately before commit it conditionally updates the unchanged lease token while checking the token, version, and unexpired deadline; this takes the source-row lock only for the short commit window, preventing a claimant from replacing the lease between the fence and commit. Tenant-scoped advisory locking serializes catalogue product writers while `READ COMMITTED` lets the final fence observe heartbeat renewals committed after the transaction began. Completion atomically fences the run/source state, so an expired or replaced claimant cannot mark the source active. A preview stores its source version and cannot be confirmed after configuration changes; a refreshed identical preview is reassigned to the current fenced version and remains visible to the owner.
 
 Order export continues through its existing destination and idempotent `orderId` mapping. Catalogue synchronization never writes order rows, and order export never mutates catalogue source data.
 

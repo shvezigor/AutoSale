@@ -9,7 +9,7 @@ export type CatalogueTableInput = {
   sourceId: string;
   /** File snapshots may replace tenant-wide SKUs; live Google sources may only update their own SKUs. */
   ownershipPolicy?: 'REASSIGN' | 'FENCE_CROSS_SOURCE';
-  /** A renewable Google source lease, checked inside the product commit transaction. */
+  /** A renewable Google source lease, fenced immediately before the product transaction commits. */
   lease?: { id: string; syncVersion: number; ttlMs: number };
   headers: string[];
   rows: CatalogueCell[][];
@@ -113,8 +113,9 @@ export async function upsertCatalogueProducts(
     batchSize?: number;
   },
 ): Promise<void> {
-  await serializableRetry(prisma, async (tx) => {
-    if (input.lease) await renewImportLease(tx, input, input.lease);
+  await catalogueWriteRetry(prisma, async (tx) => {
+    await lockTenantCatalogueWrites(tx, input.tenantId);
+    if (input.lease) await assertImportLeaseOwned(tx, input, input.lease);
     const owned = await tx.product.findMany({
       where: { tenantId: input.tenantId, sku: { in: input.rows.map((row) => row.product.sku) } },
       select: { sku: true, sourceId: true },
@@ -130,31 +131,56 @@ export async function upsertCatalogueProducts(
         update: productUpdate(input.sourceId, row),
       });
     }
-    if (input.lease) await renewImportLease(tx, input, input.lease);
+    if (input.lease) await fenceImportLease(tx, input, input.lease);
   });
 }
 
-async function renewImportLease(
+async function lockTenantCatalogueWrites(tx: Prisma.TransactionClient, tenantId: string): Promise<void> {
+  await tx.$queryRaw(Prisma.sql`SELECT pg_advisory_xact_lock(hashtextextended(${tenantId}, 0))::text`);
+}
+
+async function assertImportLeaseOwned(
   tx: Prisma.TransactionClient,
   input: { tenantId: string; sourceId: string },
-  lease: { id: string; syncVersion: number; ttlMs: number },
+  lease: { id: string; syncVersion: number },
+): Promise<void> {
+  const owned = await tx.catalogueSource.findFirst({
+    where: {
+      id: input.sourceId, tenantId: input.tenantId, type: 'GOOGLE_SHEETS', syncLeaseId: lease.id,
+      syncVersion: lease.syncVersion, syncLeaseExpiresAt: { gt: new Date() },
+    },
+    select: { id: true },
+  });
+  if (!owned) throw new CatalogueImportLeaseLostError();
+}
+
+async function fenceImportLease(
+  tx: Prisma.TransactionClient,
+  input: { tenantId: string; sourceId: string },
+  lease: { id: string; syncVersion: number },
 ): Promise<void> {
   const now = new Date();
-  const renewed = await tx.catalogueSource.updateMany({
+  const fenced = await tx.catalogueSource.updateMany({
     where: {
       id: input.sourceId, tenantId: input.tenantId, type: 'GOOGLE_SHEETS', syncLeaseId: lease.id,
       syncVersion: lease.syncVersion, syncLeaseExpiresAt: { gt: now },
     },
-    data: { syncLeaseExpiresAt: new Date(now.getTime() + lease.ttlMs) },
+    // This no-op token update takes the source row lock only for the final,
+    // short commit window. Heartbeats remain free to renew throughout the
+    // product work, while a claimant cannot replace the lease after this fence.
+    data: { syncLeaseId: lease.id },
   });
-  if (renewed.count !== 1) throw new CatalogueImportLeaseLostError();
+  if (fenced.count !== 1) throw new CatalogueImportLeaseLostError();
 }
 
-async function serializableRetry(prisma: PrismaClient, operation: (tx: Prisma.TransactionClient) => Promise<void>): Promise<void> {
+async function catalogueWriteRetry(prisma: PrismaClient, operation: (tx: Prisma.TransactionClient) => Promise<void>): Promise<void> {
   for (let attempt = 0; attempt < 3; attempt += 1) {
     try {
       await prisma.$transaction(operation, {
-        isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+        // The final source fence must observe heartbeat renewals committed
+        // after this long transaction began. Tenant advisory locking provides
+        // the catalogue-writer serialization previously supplied by SSI.
+        isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted,
         maxWait: 10_000,
         timeout: 10 * 60_000,
       });
