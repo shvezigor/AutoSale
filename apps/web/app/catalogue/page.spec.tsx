@@ -12,11 +12,15 @@ afterEach(() => { cleanup(); authenticatedApiFetch.mockReset(); getServerSession
 describe('CataloguePage', () => {
   it('loads the requested server page for the authenticated membership', async () => {
     getServerSession.mockResolvedValue({ name: 'Іван', email: 'manager@example.com', membershipRole: 'MANAGER' });
-    authenticatedApiFetch.mockResolvedValue({ ok: true, json: async () => ({ items: [], page: 2, pageSize: 25, total: 0 }) });
+    authenticatedApiFetch
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ items: [], page: 2, pageSize: 25, total: 0 }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ([{ id: '44444444-4444-4444-8444-444444444444', type: 'GOOGLE_SHEETS', displayName: 'Каталог', status: 'ACTIVE', lastSyncedAt: null, lastErrorSummary: null, updatedAt: '2026-09-01T08:00:00.000Z' }]) });
 
     render(await CataloguePage({ searchParams: Promise.resolve({ page: '2', search: 'Luna' }) }));
 
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/catalogue?page=2&pageSize=25&search=Luna');
+    expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/catalogue/sources');
+    expect(screen.getByText('Стан джерела каталогу')).toBeInTheDocument();
     expect(screen.getByText('Товарів за цим запитом не знайдено.')).toBeInTheDocument();
   });
 

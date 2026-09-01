@@ -2,14 +2,13 @@ import { createHash, randomUUID } from 'node:crypto';
 import { basename, extname } from 'node:path';
 
 import { catalogueTargetFieldSchema, type CatalogueImportSummary, type CataloguePreview, type CatalogueTargetField } from '@autosale/contracts';
-import { Prisma, type PrismaClient } from '@autosale/database';
+import { Prisma, upsertCatalogueProducts, type PrismaClient } from '@autosale/database';
 import type { ObjectStorage } from '@autosale/integrations';
 import { BadRequestException, ConflictException, NotFoundException, ServiceUnavailableException, UnprocessableEntityException } from '@nestjs/common';
 
 import { parseCatalogueSource, type ParsedCell, type ParsedTable } from './source-parser.js';
 
 export const MAX_CATALOGUE_UPLOAD_BYTES = 5 * 1024 * 1024;
-const IMPORT_BATCH_SIZE = 100;
 const REMAPPABLE_STATUSES = ['UPLOADED', 'MAPPING', 'MAPPING_REVIEW', 'PREVIEW_READY'] as const;
 const XLSX_MEDIA_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 const supportedFiles = new Map([
@@ -226,14 +225,7 @@ export class CatalogueImportService {
       const internal = await this.buildPreview(tenantId, table, readMapping(run.mapping.columns), readClearFields(run.mapping.transformSettings));
       const validRows = internal.rows.filter((row): row is InternalPreviewRow & { product: PreviewProduct } => Boolean(row.product) && row.errors.length === 0);
 
-      for (let offset = 0; offset < validRows.length; offset += IMPORT_BATCH_SIZE) {
-        const batch = validRows.slice(offset, offset + IMPORT_BATCH_SIZE);
-        await this.prisma.$transaction(batch.map((row) => this.prisma.product.upsert({
-          where: { tenantId_sku: { tenantId, sku: row.product.sku } },
-          create: productCreate(tenantId, run.sourceId, row),
-          update: productUpdate(run.sourceId, row),
-        })));
-      }
+      await upsertCatalogueProducts(this.prisma, { tenantId, sourceId: run.sourceId, rows: validRows });
 
       const completed = await this.prisma.catalogueImportRun.update({
         where: { id: runId },
@@ -553,46 +545,6 @@ function publicPreview(preview: { rows: InternalPreviewRow[]; totals: CatalogueP
       : { rowNumber: row.rowNumber, errors: row.errors }),
     totals: preview.totals,
   };
-}
-
-function productCreate(tenantId: string, sourceId: string, row: InternalPreviewRow & { product: PreviewProduct }): Prisma.ProductUncheckedCreateInput {
-  const create: Prisma.ProductUncheckedCreateInput = {
-    tenantId,
-    sourceId,
-    sourceRowKey: String(row.rowNumber),
-    sku: row.product.sku,
-    name: row.product.name,
-    aliases: row.product.aliases,
-    imageUrls: row.product.imageUrls,
-    attributes: row.product.attributes as Prisma.InputJsonValue,
-    active: row.product.active,
-    sourceUpdatedAt: new Date(),
-  };
-  if (row.product.description !== undefined) create.description = row.product.description;
-  if (row.product.price !== undefined) create.price = row.product.price;
-  if (row.product.currency !== undefined) create.currency = row.product.currency;
-  if (row.product.stockQuantity !== undefined) create.stockQuantity = row.product.stockQuantity;
-  if (row.product.category !== undefined) create.category = row.product.category;
-  if (row.product.brand !== undefined) create.brand = row.product.brand;
-  if (row.product.color !== undefined) create.color = row.product.color;
-  if (row.product.size !== undefined) create.size = row.product.size;
-  return create;
-}
-
-function productUpdate(sourceId: string, row: InternalPreviewRow & { product: PreviewProduct }): Prisma.ProductUncheckedUpdateInput {
-  const update: Prisma.ProductUncheckedUpdateInput = {
-    sourceId,
-    sourceRowKey: String(row.rowNumber),
-    sku: row.product.sku,
-    name: row.product.name,
-    sourceUpdatedAt: new Date(),
-  };
-  for (const target of row.presentTargets) {
-    if (target === 'sku' || target === 'name' || target === 'ignore') continue;
-    if (target === 'attributes') update.attributes = row.product.attributes as Prisma.InputJsonValue;
-    else update[target] = row.product[target] as never;
-  }
-  return update;
 }
 
 function mapSummary(run: {

@@ -10,6 +10,14 @@ export const catalogueSourceStatusSchema = z.enum(['PENDING', 'ACTIVE', 'PAUSED'
 export const catalogueImportStatusSchema = z.enum([
   'UPLOADED', 'MAPPING', 'MAPPING_REVIEW', 'PREVIEW_READY', 'CONFIRMED', 'PROCESSING', 'COMPLETED', 'FAILED', 'CANCELLED',
 ]);
+export const catalogueSyncScheduleSchema = z.enum(['MANUAL', 'HOURLY', 'DAILY']);
+
+export const googleCatalogueSourceInputSchema = z.object({
+  displayName: z.string().trim().min(1).max(200),
+  spreadsheet: z.string().trim().min(5).max(500),
+  sheetName: z.string().trim().min(1).max(200),
+  syncSchedule: catalogueSyncScheduleSchema,
+}).strict();
 
 const nullableString = z.string().nullable().optional();
 
@@ -86,6 +94,8 @@ export type CatalogueTargetField = z.infer<typeof catalogueTargetFieldSchema>;
 export type CatalogueSourceType = z.infer<typeof catalogueSourceTypeSchema>;
 export type CatalogueSourceStatus = z.infer<typeof catalogueSourceStatusSchema>;
 export type CatalogueImportStatus = z.infer<typeof catalogueImportStatusSchema>;
+export type CatalogueSyncSchedule = z.infer<typeof catalogueSyncScheduleSchema>;
+export type GoogleCatalogueSourceInput = z.infer<typeof googleCatalogueSourceInputSchema>;
 export type CatalogueProduct = z.infer<typeof catalogueProductSchema>;
 export type CatalogueSourceSummary = z.infer<typeof catalogueSourceSummarySchema>;
 export type CatalogueMappingProposal = z.infer<typeof catalogueMappingProposalSchema>;

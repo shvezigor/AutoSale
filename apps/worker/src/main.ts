@@ -14,6 +14,7 @@ import { GoogleSheetsSyncProcessor } from './google-sheets/google-sheets-sync.pr
 import { CatalogueMappingProcessor } from './catalogue/catalogue-mapping.processor.js';
 import { createOpenAiColumnMapper } from './catalogue/openai-column-mapper.js';
 import { CatalogueMappingReconciler } from './catalogue/catalogue-mapping-reconciler.js';
+import { GoogleCatalogueSyncProcessor } from './catalogue/google-catalogue-sync.processor.js';
 
 async function bootstrap(): Promise<void> {
   const env = parseWorkerEnv(process.env);
@@ -32,6 +33,8 @@ async function bootstrap(): Promise<void> {
   const orderRecognizer = createOpenAiOrderRecognizer(env.OPENAI_API_KEY, env.OPENAI_MODEL);
   const catalogueMapper = createOpenAiColumnMapper(env.OPENAI_API_KEY, env.OPENAI_MODEL);
   const catalogueMappingProcessor = new CatalogueMappingProcessor(prisma, storage, catalogueMapper);
+  const googleSheets = env.GOOGLE_SERVICE_ACCOUNT_FILE ? createGoogleSheetsAdapter(env.GOOGLE_SERVICE_ACCOUNT_FILE) : undefined;
+  const catalogueSyncProcessor = googleSheets ? new GoogleCatalogueSyncProcessor(prisma, googleSheets) : undefined;
   const orderProcessor = new TriggeredOrderProcessor(
     prisma,
     new OrderRecognitionService(orderRecognizer),
@@ -88,6 +91,22 @@ async function bootstrap(): Promise<void> {
   const catalogueWorker = new Worker(
     'catalogue',
     async (job) => {
+      if (job.name === 'catalogue.sync' && typeof job.data?.tenantId === 'string' && typeof job.data?.sourceId === 'string') {
+        if (!catalogueSyncProcessor) throw new Error('Google catalogue synchronization is unavailable');
+        const started = performance.now();
+        try {
+          await catalogueSyncProcessor.process({ tenantId: job.data.tenantId, sourceId: job.data.sourceId });
+          metrics.increment('autosale_operations_total', { operation: 'catalogue_sync', result: 'success' });
+          logger.info('catalogue_sync_completed', { correlationId: job.data.sourceId, sourceId: job.data.sourceId });
+        } catch (error) {
+          metrics.increment('autosale_operations_total', { operation: 'catalogue_sync', result: 'failure' });
+          logger.warn('catalogue_sync_failed', { correlationId: job.data.sourceId, sourceId: job.data.sourceId, errorCode: error instanceof Error ? error.name : 'UNKNOWN' });
+          throw error;
+        } finally {
+          metrics.observe('autosale_operation_duration_seconds', (performance.now() - started) / 1000, { operation: 'catalogue_sync' });
+        }
+        return;
+      }
       if (job.name !== 'catalogue.mapping' || typeof job.data?.tenantId !== 'string' || typeof job.data?.runId !== 'string') return;
       const started = performance.now();
       try {
@@ -123,9 +142,7 @@ async function bootstrap(): Promise<void> {
     },
   });
   const catalogueReconciler = new CatalogueMappingReconciler(prisma, catalogueQueue);
-  const sheetsProcessor = env.GOOGLE_SERVICE_ACCOUNT_FILE
-    ? new GoogleSheetsSyncProcessor(prisma, createGoogleSheetsAdapter(env.GOOGLE_SERVICE_ACCOUNT_FILE))
-    : undefined;
+  const sheetsProcessor = googleSheets ? new GoogleSheetsSyncProcessor(prisma, googleSheets) : undefined;
   let polling = false;
   const pollExports = async (): Promise<void> => {
     if (polling) return;
@@ -171,8 +188,36 @@ async function bootstrap(): Promise<void> {
     }
   };
   const catalogueReconcileTimer = setInterval(() => void reconcileCatalogueMappings(), 5_000);
+  let schedulingCatalogueSources = false;
+  const scheduleCatalogueSources = async (): Promise<void> => {
+    if (schedulingCatalogueSources) return;
+    schedulingCatalogueSources = true;
+    try {
+      const now = new Date();
+      const candidates = await prisma.catalogueSource.findMany({
+        where: { type: 'GOOGLE_SHEETS', status: 'ACTIVE', syncSchedule: { in: ['HOURLY', 'DAILY'] } },
+        select: { id: true, tenantId: true, syncSchedule: true, lastSyncedAt: true },
+        take: 100,
+      });
+      for (const source of candidates) {
+        const interval = source.syncSchedule === 'HOURLY' ? 60 * 60_000 : 24 * 60 * 60_000;
+        if (source.lastSyncedAt && now.getTime() - source.lastSyncedAt.getTime() < interval) continue;
+        const bucket = Math.floor(now.getTime() / interval);
+        await catalogueQueue.add('catalogue.sync', { tenantId: source.tenantId, sourceId: source.id }, {
+          jobId: `catalogue.sync:${source.id}:${bucket}`, attempts: 5, backoff: { type: 'exponential', delay: 30_000 }, removeOnComplete: true, removeOnFail: 5_000,
+        });
+      }
+    } catch (error) {
+      metrics.increment('autosale_operations_total', { operation: 'catalogue_sync_schedule', result: 'failure' });
+      logger.warn('catalogue_sync_schedule_failed', { correlationId: 'system:catalogue-sync', errorCode: error instanceof Error ? error.name : 'UNKNOWN' });
+    } finally {
+      schedulingCatalogueSources = false;
+    }
+  };
+  const catalogueScheduleTimer = setInterval(() => void scheduleCatalogueSources(), 60_000);
   void pollExports();
   void reconcileCatalogueMappings();
+  void scheduleCatalogueSources();
   logger.info('service_started', { correlationId: 'system:startup', healthPort: env.HEALTH_PORT });
 
   server.listen(env.HEALTH_PORT, '0.0.0.0');
@@ -180,6 +225,7 @@ async function bootstrap(): Promise<void> {
   const shutdown = async (): Promise<void> => {
     clearInterval(sheetsTimer);
     clearInterval(catalogueReconcileTimer);
+    clearInterval(catalogueScheduleTimer);
     await worker.close();
     await catalogueWorker.close();
     await catalogueQueue.close();
