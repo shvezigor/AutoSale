@@ -32,6 +32,8 @@ export class MetaInstagramError extends Error {
     readonly providerCode: number | string | null,
     readonly isTransient: boolean | null = null,
     readonly errorSubcode: number | null = null,
+    readonly responseStage: 'SHORT_LIVED_TOKEN' | 'LONG_LIVED_TOKEN' | 'IDENTITY' | null = null,
+    readonly responseShape: string | null = null,
   ) {
     super('Meta Instagram API request failed');
     this.name = 'MetaInstagramError';
@@ -84,7 +86,7 @@ export class MetaInstagramClient {
     }).toString();
     const longLivedPayload = await this.requestJson(longLivedUrl, { method: 'GET' });
 
-    if (!isRecord(longLivedPayload) || typeof longLivedPayload.access_token !== 'string' || typeof longLivedPayload.expires_in !== 'number' || !Number.isFinite(longLivedPayload.expires_in) || longLivedPayload.expires_in <= 0) throw new MetaInstagramError(200, null);
+    if (!isRecord(longLivedPayload) || typeof longLivedPayload.access_token !== 'string' || typeof longLivedPayload.expires_in !== 'number' || !Number.isFinite(longLivedPayload.expires_in) || longLivedPayload.expires_in <= 0) throw new MetaInstagramError(200, null, null, null, 'LONG_LIVED_TOKEN');
     return {
       accessToken: longLivedPayload.access_token,
       expiresIn: longLivedPayload.expires_in,
@@ -97,9 +99,9 @@ export class MetaInstagramClient {
     url.searchParams.set('fields', 'user_id,username');
     const payload = await this.requestJson(url, this.authorized(accessToken));
 
-    const entry = isRecord(payload) && Array.isArray(payload.data) ? payload.data[0] : undefined;
+    const entry = isRecord(payload) && Array.isArray(payload.data) ? payload.data[0] : payload;
     if (!isRecord(entry) || typeof entry.user_id !== 'string' || (entry.username !== undefined && entry.username !== null && typeof entry.username !== 'string')) {
-      throw new MetaInstagramError(200, null);
+      throw new MetaInstagramError(200, null, null, null, 'IDENTITY');
     }
     return { accountId: entry.user_id, username: typeof entry.username === 'string' ? entry.username : null };
   }
@@ -205,17 +207,38 @@ function providerErrorSubcode(payload: unknown): number | null {
 }
 
 function parseShortLivedToken(payload: unknown): { accessToken: string; grantedScopes: string[] } {
-  const entry = isRecord(payload) && Array.isArray(payload.data) ? payload.data[0] : undefined;
+  const entry = isRecord(payload) && Array.isArray(payload.data) ? payload.data[0] : payload;
+  const permissions = isRecord(entry) && typeof entry.permissions === 'string'
+    ? entry.permissions.split(',')
+    : isRecord(entry) && Array.isArray(entry.permissions) && entry.permissions.every((scope) => typeof scope === 'string')
+      ? entry.permissions
+      : null;
   if (
     !isRecord(entry) ||
     typeof entry.access_token !== 'string' ||
-    typeof entry.user_id !== 'string' ||
-    typeof entry.permissions !== 'string'
+    (typeof entry.user_id !== 'string' && typeof entry.user_id !== 'number') ||
+    permissions === null
   ) {
-    throw new MetaInstagramError(200, null);
+    throw new MetaInstagramError(200, null, null, null, 'SHORT_LIVED_TOKEN', safeResponseShape(payload));
   }
   return {
     accessToken: entry.access_token,
-    grantedScopes: [...new Set(entry.permissions.split(',').map((scope) => scope.trim()).filter(Boolean))].sort(),
+    grantedScopes: [...new Set(permissions.map((scope) => scope.trim()).filter(Boolean))].sort(),
   };
+}
+
+function safeResponseShape(payload: unknown): string {
+  const topKeys = isRecord(payload) ? Object.keys(payload).sort().join(',') : '-';
+  const data = isRecord(payload) ? payload.data : undefined;
+  const entry = Array.isArray(data) ? data[0] : undefined;
+  const entryKeys = isRecord(entry) ? Object.keys(entry).sort().join(',') : '-';
+  const kind = (value: unknown): string => Array.isArray(value) ? 'array' : value === null ? 'null' : typeof value;
+  return [
+    `topKeys:${topKeys}`,
+    `data:${kind(data)}`,
+    `entryKeys:${entryKeys}`,
+    `access_token:${kind(isRecord(entry) ? entry.access_token : undefined)}`,
+    `user_id:${kind(isRecord(entry) ? entry.user_id : undefined)}`,
+    `permissions:${kind(isRecord(entry) ? entry.permissions : undefined)}`,
+  ].join(';');
 }
