@@ -11,8 +11,7 @@ export class CatalogueMappingReconciler {
       where: {
         OR: [
           { status: 'UPLOADED' },
-          { status: 'MAPPING', mappingLeaseExpiresAt: { lt: now } },
-          { status: 'MAPPING', mappingLeaseExpiresAt: null },
+          { status: 'MAPPING', mappingLeaseId: { not: null }, mappingLeaseExpiresAt: { lt: now } },
         ],
       },
       select: { id: true, tenantId: true }, orderBy: { updatedAt: 'asc' }, take: 100,

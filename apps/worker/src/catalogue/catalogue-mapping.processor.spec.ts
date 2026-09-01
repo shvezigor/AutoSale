@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import { CatalogueMappingProcessor } from './catalogue-mapping.processor.js';
+import { CatalogueMappingReconciler } from './catalogue-mapping-reconciler.js';
 
 const tenantId = '11111111-1111-4111-8111-111111111111';
 const runId = '22222222-2222-4222-8222-222222222222';
@@ -26,7 +27,7 @@ describe('CatalogueMappingProcessor', () => {
     await new CatalogueMappingProcessor(prisma as never, storage as never, mapper).process({ tenantId, runId });
 
     expect(updateMany.mock.calls[0]?.[0]).toEqual(expect.objectContaining({
-      where: expect.objectContaining({ OR: expect.arrayContaining([expect.objectContaining({ status: 'UPLOADED' }), expect.objectContaining({ status: 'MAPPING', mappingLeaseExpiresAt: { lt: expect.any(Date) } })]) }),
+      where: expect.objectContaining({ OR: expect.arrayContaining([expect.objectContaining({ status: 'UPLOADED' }), expect.objectContaining({ status: 'MAPPING', mappingLeaseId: { not: null }, mappingLeaseExpiresAt: { lt: expect.any(Date) } })]) }),
       data: expect.objectContaining({ status: 'MAPPING', mappingLeaseId: expect.any(String), mappingLeaseExpiresAt: expect.any(Date) }),
     }));
     expect(mapper.suggest).toHaveBeenCalledWith({
@@ -99,7 +100,7 @@ describe('CatalogueMappingProcessor', () => {
 
     await expect(new CatalogueMappingProcessor(prisma as never, storage as never, mapper).process({ tenantId, runId })).resolves.toMatchObject({ proposal: expect.any(Object) });
     expect(updateMany.mock.calls[0]?.[0]).toEqual(expect.objectContaining({
-      where: expect.objectContaining({ id: runId, tenantId, OR: expect.arrayContaining([expect.objectContaining({ status: 'UPLOADED' }), expect.objectContaining({ status: 'MAPPING', mappingLeaseExpiresAt: { lt: expect.any(Date) } })]) }),
+      where: expect.objectContaining({ id: runId, tenantId, OR: expect.arrayContaining([expect.objectContaining({ status: 'UPLOADED' }), expect.objectContaining({ status: 'MAPPING', mappingLeaseId: { not: null }, mappingLeaseExpiresAt: { lt: expect.any(Date) } })]) }),
     }));
   });
 
@@ -152,5 +153,58 @@ describe('CatalogueMappingProcessor', () => {
       .resolves.toEqual({ status: 'MAPPING_REVIEW', proposal: null });
     expect(clearIntervalSpy).toHaveBeenCalled();
     clearIntervalSpy.mockRestore();
+  });
+
+  it('keeps a mapper active beyond its lease duration so reconcilers and another claimant cannot reclaim it', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-09-01T00:00:00.000Z'));
+    const run = { status: 'UPLOADED', leaseId: null as string | null, expiresAt: null as Date | null };
+    const updateMany = vi.fn().mockImplementation(async (args: { where: { OR?: Array<{ status: string; mappingLeaseExpiresAt?: { lt: Date } }>; status?: string; mappingLeaseId?: string; mappingLeaseExpiresAt?: { gt: Date } }; data: { status?: string; mappingLeaseId?: string | null; mappingLeaseExpiresAt?: Date | null; mappingId?: string | null } }) => {
+      if (args.where.OR) {
+        const now = new Date();
+        const claimable = run.status === 'UPLOADED' || (run.status === 'MAPPING' && run.expiresAt !== null && run.expiresAt < now);
+        if (!claimable) return { count: 0 };
+        run.status = 'MAPPING';
+        run.leaseId = args.data.mappingLeaseId ?? null;
+        run.expiresAt = args.data.mappingLeaseExpiresAt ?? null;
+        return { count: 1 };
+      }
+      const owned = run.status === 'MAPPING'
+        && run.leaseId === args.where.mappingLeaseId
+        && run.expiresAt !== null
+        && run.expiresAt > (args.where.mappingLeaseExpiresAt?.gt ?? new Date(0));
+      if (!owned) return { count: 0 };
+      if (args.data.status) run.status = args.data.status;
+      run.leaseId = args.data.mappingLeaseId ?? run.leaseId;
+      run.expiresAt = args.data.mappingLeaseExpiresAt ?? run.expiresAt;
+      return { count: 1 };
+    });
+    const source = { objectKey: 'catalogue/object.csv', type: 'CSV_UPLOAD' as const, headerFingerprint: 'fingerprint-1' };
+    const prisma = {
+      catalogueImportRun: {
+        updateMany,
+        findFirst: vi.fn().mockImplementation(async (args: { where: { status: string; mappingLeaseId: string } }) => run.status === args.where.status && run.leaseId === args.where.mappingLeaseId ? { id: runId, tenantId, sourceId: 'source-1', source } : null),
+        findMany: vi.fn().mockImplementation(async () => run.status === 'UPLOADED' || (run.status === 'MAPPING' && run.expiresAt !== null && run.expiresAt < new Date()) ? [{ id: runId, tenantId }] : []),
+      },
+      catalogueMapping: { findFirst: vi.fn().mockResolvedValue(null), create: vi.fn().mockResolvedValue({ id: 'mapping-heartbeat-long' }) },
+      $transaction: async (work: (tx: unknown) => Promise<unknown>) => work(prisma),
+    };
+    let resolveSuggestion!: (value: { proposal: { columns: Array<{ source: string; target: 'sku'; confidence: number }> }; metadata: { responseId: string; model: string; promptVersion: string; schemaVersion: string; latencyMs: number; inputTokens: number; outputTokens: number } }) => void;
+    const mapper = { suggest: vi.fn().mockImplementation(() => new Promise((resolve) => { resolveSuggestion = resolve; })) };
+    const storage = { get: vi.fn().mockResolvedValue({ body: Buffer.from('Артикул\nSKU-1\n'), contentType: 'text/csv' }) };
+    const processor = new CatalogueMappingProcessor(prisma as never, storage as never, mapper);
+    const processing = processor.process({ tenantId, runId });
+    await vi.waitFor(() => expect(mapper.suggest).toHaveBeenCalledOnce());
+
+    await vi.advanceTimersByTimeAsync(6 * 60 * 1_000);
+    const queue = { add: vi.fn() };
+    await expect(new CatalogueMappingReconciler(prisma as never, queue).reconcile()).resolves.toEqual({ attempted: 0, enqueued: 0 });
+    await expect(new CatalogueMappingProcessor(prisma as never, storage as never, mapper).process({ tenantId, runId }))
+      .resolves.toEqual({ status: 'SKIPPED', proposal: null });
+    expect(mapper.suggest).toHaveBeenCalledOnce();
+
+    resolveSuggestion({ proposal: { columns: [{ source: 'артикул', target: 'sku', confidence: 0.9 }] }, metadata: { responseId: 'resp', model: 'model', promptVersion: 'v1', schemaVersion: 'schema', latencyMs: 1, inputTokens: 1, outputTokens: 1 } });
+    await expect(processing).resolves.toMatchObject({ status: 'MAPPING_REVIEW' });
+    vi.useRealTimers();
   });
 });

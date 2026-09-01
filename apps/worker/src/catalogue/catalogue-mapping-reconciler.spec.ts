@@ -11,7 +11,7 @@ describe('CatalogueMappingReconciler', () => {
       .resolves.toEqual({ attempted: 1, enqueued: 1 });
 
     expect(add).toHaveBeenCalledWith('catalogue.mapping', { tenantId: 'tenant-1', runId: 'run-1' }, expect.objectContaining({ jobId: 'catalogue.mapping:run-1' }));
-    expect(findMany).toHaveBeenCalledWith(expect.objectContaining({ where: expect.objectContaining({ OR: expect.arrayContaining([expect.objectContaining({ status: 'UPLOADED' }), expect.objectContaining({ status: 'MAPPING', mappingLeaseExpiresAt: { lt: expect.any(Date) } })]) }) }));
+    expect(findMany).toHaveBeenCalledWith(expect.objectContaining({ where: expect.objectContaining({ OR: expect.arrayContaining([expect.objectContaining({ status: 'UPLOADED' }), expect.objectContaining({ status: 'MAPPING', mappingLeaseId: { not: null }, mappingLeaseExpiresAt: { lt: expect.any(Date) } })]) }) }));
   });
 
   it('leaves durable candidates for a later retry when queueing fails', async () => {

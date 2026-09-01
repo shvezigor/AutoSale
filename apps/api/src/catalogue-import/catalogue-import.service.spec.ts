@@ -31,6 +31,7 @@ const migrationNames = [
   '20260831090000_catalogue_import',
   '20260831091500_catalogue_tenant_relations',
   '20260831100000_catalogue_source_object_key',
+  '20260901090000_catalogue_mapping_leases',
 ];
 
 class MemoryStorage implements ObjectStorage {

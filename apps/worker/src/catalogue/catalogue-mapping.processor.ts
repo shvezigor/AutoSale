@@ -29,8 +29,7 @@ export class CatalogueMappingProcessor {
         id: job.runId, tenantId: job.tenantId,
         OR: [
           { status: 'UPLOADED' },
-          { status: 'MAPPING', mappingLeaseExpiresAt: { lt: claimedAt } },
-          { status: 'MAPPING', mappingLeaseExpiresAt: null },
+          { status: 'MAPPING', mappingLeaseId: { not: null }, mappingLeaseExpiresAt: { lt: claimedAt } },
         ],
       },
       data: { status: 'MAPPING', mappingLeaseId: leaseId, mappingLeaseExpiresAt: leaseExpiry(claimedAt) },
