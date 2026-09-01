@@ -457,7 +457,11 @@ export const CatalogueSourceScalarFieldEnum = {
   syncSchedule: 'syncSchedule',
   headerFingerprint: 'headerFingerprint',
   lastSyncedAt: 'lastSyncedAt',
+  nextSyncAt: 'nextSyncAt',
   lastErrorSummary: 'lastErrorSummary',
+  syncLeaseId: 'syncLeaseId',
+  syncLeaseExpiresAt: 'syncLeaseExpiresAt',
+  syncVersion: 'syncVersion',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -499,6 +503,9 @@ export const CatalogueImportRunScalarFieldEnum = {
   status: 'status',
   idempotencyKey: 'idempotencyKey',
   sourceRevision: 'sourceRevision',
+  sourceHeaders: 'sourceHeaders',
+  snapshotObjectKey: 'snapshotObjectKey',
+  sourceSyncVersion: 'sourceSyncVersion',
   totalRows: 'totalRows',
   validRows: 'validRows',
   createdRows: 'createdRows',

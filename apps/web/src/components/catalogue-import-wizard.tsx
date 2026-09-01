@@ -8,13 +8,13 @@ type Target = 'sku' | 'name' | 'description' | 'price' | 'currency' | 'stockQuan
 type Column = { source: string; target: Target; confidence?: number };
 type Session = { membershipRole: 'OWNER' | 'MANAGER' | null };
 type UploadResult = { id: string; headers: string[] };
-type Status = { status: string; mapping: { columns: Column[] } | null; mappingFailure: 'MAPPING_UNAVAILABLE' | null; createdRows?: number; updatedRows?: number; skippedRows?: number; failedRows?: number };
+type Status = { status: string; headers?: string[]; mapping: { columns: Column[] } | null; mappingFailure: 'MAPPING_UNAVAILABLE' | null; createdRows?: number; updatedRows?: number; skippedRows?: number; failedRows?: number };
 type Preview = { totals: { created: number; updated: number; skipped: number; failed: number } };
 
 const targets: Target[] = ['ignore', 'sku', 'name', 'description', 'price', 'currency', 'stockQuantity', 'category', 'brand', 'aliases', 'color', 'size', 'imageUrls', 'active', 'attributes'];
 const stepLabels = ['Джерело', 'Завантаження', 'Аналіз колонок', 'Зіставлення', 'Перевірка', 'Попередній перегляд', 'Підтвердження та прогрес'];
 
-export function CatalogueImportWizard({ session }: { session: Session }) {
+export function CatalogueImportWizard({ session, reviewRuns = [] }: { session: Session; reviewRuns?: Array<{ id: string; sourceName: string; headers: string[] }> }) {
   const [file, setFile] = useState<File | null>(null);
   const [runId, setRunId] = useState<string | null>(null);
   const [headers, setHeaders] = useState<string[]>([]);
@@ -33,7 +33,8 @@ export function CatalogueImportWizard({ session }: { session: Session }) {
       if (!response.ok) throw new Error('status unavailable');
       const status = await response.json() as Status;
       if (status.status === 'MAPPING_REVIEW') {
-        const proposed = status.mapping?.columns ?? fallbackHeaders.map((source) => ({ source, target: 'ignore' as const }));
+        const availableHeaders = status.headers?.length ? status.headers : fallbackHeaders;
+        const proposed = status.mapping?.columns ?? availableHeaders.map((source) => ({ source, target: 'ignore' as const }));
         setColumns(proposed);
         setManualFallback(Boolean(status.mappingFailure) || !status.mapping);
         setStep(4);
@@ -89,6 +90,10 @@ export function CatalogueImportWizard({ session }: { session: Session }) {
     setStep(3);
   }
 
+  function openReview(run: { id: string; headers: string[] }) {
+    setRunId(run.id); setHeaders(run.headers); setColumns([]); setError(null); setStep(3);
+  }
+
   function checkMapping() {
     const values = columns.map((column) => column.target);
     if (!values.includes('sku') || !values.includes('name')) { setError('Зіставте обов’язкові поля SKU та назву.'); return; }
@@ -119,7 +124,7 @@ export function CatalogueImportWizard({ session }: { session: Session }) {
   return <section className="catalogue-import-wizard" aria-label="Імпорт каталогу">
     <ol className="catalogue-import-steps">{stepLabels.map((label, index) => <li key={label} className={step === index + 1 ? 'is-current' : step > index + 1 ? 'is-complete' : ''}><span>Крок {index + 1} з 7</span>{label}</li>)}</ol>
     {error ? <p className="catalogue-import-error" role="alert">{error}</p> : null}
-    {step === 1 ? <div className="catalogue-import-panel"><h2>Оберіть джерело</h2><p>Завантажте CSV або XLSX. Дані рядків залишаються на сервері.</p><button type="button" className="secondary-button" onClick={() => setStep(2)}>Обрати файл</button></div> : null}
+    {step === 1 ? <div className="catalogue-import-panel"><h2>Оберіть джерело</h2><p>Завантажте CSV або XLSX або продовжте перевірку Google Sheets. Дані рядків залишаються на сервері.</p>{reviewRuns.map((run) => <button key={run.id} type="button" className="secondary-button" onClick={() => openReview(run)}>Переглянути {run.sourceName}</button>)}<button type="button" className="secondary-button" onClick={() => setStep(2)}>Обрати файл</button></div> : null}
     {step === 2 ? <div className="catalogue-import-panel"><h2>Завантажте каталог</h2><label>Файл каталогу<input aria-label="Файл каталогу" type="file" accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onChange={(event) => setFile(event.target.files?.[0] ?? null)} /></label><button type="button" className="primary-button" onClick={() => void upload()}>Завантажити каталог</button></div> : null}
     {step === 3 ? <div className="catalogue-import-panel" aria-live="polite"><h2>Аналіз колонок</h2><p>AI аналізує лише назви колонок, типи та до п’яти обмежених прикладів.</p><p>Готуємо пропозицію зіставлення…</p></div> : null}
     {step === 4 ? <div className="catalogue-import-panel"><h2>{manualFallback ? 'AI недоступний — зіставте колонки вручну' : 'AI запропонував зіставлення'}</h2><p>Перевірте кожну колонку перед імпортом. AI не змінює значення товарів.</p><div className="catalogue-mapping-grid">{columns.map((column) => <label key={column.source}>{column.source}<small>{column.confidence === undefined ? 'ручне зіставлення' : `${Math.round(column.confidence * 100)}%`}</small><select aria-label={column.source} value={column.target} onChange={updateColumn(column.source)}>{targets.map((target) => <option key={target} value={target}>{target}</option>)}</select></label>)}</div><button type="button" className="primary-button" onClick={checkMapping}>Перевірити зіставлення</button></div> : null}

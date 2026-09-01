@@ -45,26 +45,34 @@ export class CatalogueSourcesService {
         spreadsheetId,
         sheetName: input.sheetName,
         syncSchedule: input.syncSchedule,
+        nextSyncAt: initialNextSyncAt(input.syncSchedule),
         status: 'PENDING',
       },
     });
-    return this.ownerView(source);
+    return this.ownerView(source, null);
   }
 
   async update(tenantId: string, sourceId: string, input: CatalogueSourceInput) {
     const spreadsheetId = parseGoogleSpreadsheetId(input.spreadsheet);
+    const now = new Date();
     const updated = await this.prisma.catalogueSource.updateMany({
-      where: { id: sourceId, tenantId, type: 'GOOGLE_SHEETS' },
+      where: { id: sourceId, tenantId, type: 'GOOGLE_SHEETS', OR: [{ syncLeaseId: null }, { syncLeaseExpiresAt: { lte: now } }] },
       data: {
         displayName: input.displayName,
         spreadsheetId,
         sheetName: input.sheetName,
         syncSchedule: input.syncSchedule,
+        nextSyncAt: initialNextSyncAt(input.syncSchedule),
+        syncVersion: { increment: 1 },
         status: 'PENDING',
         lastErrorSummary: null,
       },
     });
-    if (updated.count !== 1) throw new NotFoundException('Catalogue source not found');
+    if (updated.count !== 1) {
+      const exists = await this.prisma.catalogueSource.findFirst({ where: { id: sourceId, tenantId, type: 'GOOGLE_SHEETS' }, select: { id: true } });
+      if (exists) throw new ConflictException('Catalogue source is synchronizing');
+      throw new NotFoundException('Catalogue source not found');
+    }
     return this.getConfiguration(tenantId, sourceId);
   }
 
@@ -96,7 +104,11 @@ export class CatalogueSourcesService {
       where: { id: sourceId, tenantId, type: 'GOOGLE_SHEETS' },
     });
     if (!source) throw new NotFoundException('Catalogue source not found');
-    return this.ownerView(source);
+    const pending = await this.prisma.catalogueImportRun.findFirst({
+      where: { tenantId, sourceId, status: 'MAPPING_REVIEW' }, orderBy: { createdAt: 'desc' },
+      select: { id: true, sourceHeaders: true },
+    });
+    return this.ownerView(source, pending ? { runId: pending.id, headers: safeHeaders(pending.sourceHeaders) } : null);
   }
 
   async checkConnectivity(tenantId: string, sourceId: string) {
@@ -149,7 +161,7 @@ export class CatalogueSourcesService {
     }
   }
 
-  private ownerView(source: SourceRow) {
+  private ownerView(source: SourceRow, pendingReview: { runId: string; headers: string[] } | null) {
     return {
       id: source.id,
       type: source.type,
@@ -163,8 +175,17 @@ export class CatalogueSourcesService {
       updatedAt: source.updatedAt.toISOString(),
       serviceAccountEmail: this.config.serviceAccountEmail ?? null,
       authorizationAction: this.config.serviceAccountEmail ? 'SHARE_WITH_SERVICE_ACCOUNT' : 'CONFIGURE_SERVICE_ACCOUNT',
+      pendingReview,
     };
   }
+}
+
+function safeHeaders(value: unknown): string[] {
+  return Array.isArray(value) ? value.filter((header): header is string => typeof header === 'string').slice(0, 100) : [];
+}
+
+function initialNextSyncAt(schedule: CatalogueSyncSchedule): Date | null {
+  return schedule === 'MANUAL' ? null : new Date();
 }
 
 function mapHealth(source: {

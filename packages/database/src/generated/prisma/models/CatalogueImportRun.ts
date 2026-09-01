@@ -27,6 +27,7 @@ export type AggregateCatalogueImportRun = {
 }
 
 export type CatalogueImportRunAvgAggregateOutputType = {
+  sourceSyncVersion: number | null
   totalRows: number | null
   validRows: number | null
   createdRows: number | null
@@ -36,6 +37,7 @@ export type CatalogueImportRunAvgAggregateOutputType = {
 }
 
 export type CatalogueImportRunSumAggregateOutputType = {
+  sourceSyncVersion: number | null
   totalRows: number | null
   validRows: number | null
   createdRows: number | null
@@ -55,6 +57,8 @@ export type CatalogueImportRunMinAggregateOutputType = {
   status: $Enums.CatalogueImportStatus | null
   idempotencyKey: string | null
   sourceRevision: string | null
+  snapshotObjectKey: string | null
+  sourceSyncVersion: number | null
   totalRows: number | null
   validRows: number | null
   createdRows: number | null
@@ -78,6 +82,8 @@ export type CatalogueImportRunMaxAggregateOutputType = {
   status: $Enums.CatalogueImportStatus | null
   idempotencyKey: string | null
   sourceRevision: string | null
+  snapshotObjectKey: string | null
+  sourceSyncVersion: number | null
   totalRows: number | null
   validRows: number | null
   createdRows: number | null
@@ -101,6 +107,9 @@ export type CatalogueImportRunCountAggregateOutputType = {
   status: number
   idempotencyKey: number
   sourceRevision: number
+  sourceHeaders: number
+  snapshotObjectKey: number
+  sourceSyncVersion: number
   totalRows: number
   validRows: number
   createdRows: number
@@ -117,6 +126,7 @@ export type CatalogueImportRunCountAggregateOutputType = {
 
 
 export type CatalogueImportRunAvgAggregateInputType = {
+  sourceSyncVersion?: true
   totalRows?: true
   validRows?: true
   createdRows?: true
@@ -126,6 +136,7 @@ export type CatalogueImportRunAvgAggregateInputType = {
 }
 
 export type CatalogueImportRunSumAggregateInputType = {
+  sourceSyncVersion?: true
   totalRows?: true
   validRows?: true
   createdRows?: true
@@ -145,6 +156,8 @@ export type CatalogueImportRunMinAggregateInputType = {
   status?: true
   idempotencyKey?: true
   sourceRevision?: true
+  snapshotObjectKey?: true
+  sourceSyncVersion?: true
   totalRows?: true
   validRows?: true
   createdRows?: true
@@ -168,6 +181,8 @@ export type CatalogueImportRunMaxAggregateInputType = {
   status?: true
   idempotencyKey?: true
   sourceRevision?: true
+  snapshotObjectKey?: true
+  sourceSyncVersion?: true
   totalRows?: true
   validRows?: true
   createdRows?: true
@@ -191,6 +206,9 @@ export type CatalogueImportRunCountAggregateInputType = {
   status?: true
   idempotencyKey?: true
   sourceRevision?: true
+  sourceHeaders?: true
+  snapshotObjectKey?: true
+  sourceSyncVersion?: true
   totalRows?: true
   validRows?: true
   createdRows?: true
@@ -302,6 +320,9 @@ export type CatalogueImportRunGroupByOutputType = {
   status: $Enums.CatalogueImportStatus
   idempotencyKey: string
   sourceRevision: string | null
+  sourceHeaders: runtime.JsonValue | null
+  snapshotObjectKey: string | null
+  sourceSyncVersion: number | null
   totalRows: number
   validRows: number
   createdRows: number
@@ -349,6 +370,9 @@ export type CatalogueImportRunWhereInput = {
   status?: Prisma.EnumCatalogueImportStatusFilter<"CatalogueImportRun"> | $Enums.CatalogueImportStatus
   idempotencyKey?: Prisma.StringFilter<"CatalogueImportRun"> | string
   sourceRevision?: Prisma.StringNullableFilter<"CatalogueImportRun"> | string | null
+  sourceHeaders?: Prisma.JsonNullableFilter<"CatalogueImportRun">
+  snapshotObjectKey?: Prisma.StringNullableFilter<"CatalogueImportRun"> | string | null
+  sourceSyncVersion?: Prisma.IntNullableFilter<"CatalogueImportRun"> | number | null
   totalRows?: Prisma.IntFilter<"CatalogueImportRun"> | number
   validRows?: Prisma.IntFilter<"CatalogueImportRun"> | number
   createdRows?: Prisma.IntFilter<"CatalogueImportRun"> | number
@@ -376,6 +400,9 @@ export type CatalogueImportRunOrderByWithRelationInput = {
   status?: Prisma.SortOrder
   idempotencyKey?: Prisma.SortOrder
   sourceRevision?: Prisma.SortOrderInput | Prisma.SortOrder
+  sourceHeaders?: Prisma.SortOrderInput | Prisma.SortOrder
+  snapshotObjectKey?: Prisma.SortOrderInput | Prisma.SortOrder
+  sourceSyncVersion?: Prisma.SortOrderInput | Prisma.SortOrder
   totalRows?: Prisma.SortOrder
   validRows?: Prisma.SortOrder
   createdRows?: Prisma.SortOrder
@@ -407,6 +434,9 @@ export type CatalogueImportRunWhereUniqueInput = Prisma.AtLeast<{
   status?: Prisma.EnumCatalogueImportStatusFilter<"CatalogueImportRun"> | $Enums.CatalogueImportStatus
   idempotencyKey?: Prisma.StringFilter<"CatalogueImportRun"> | string
   sourceRevision?: Prisma.StringNullableFilter<"CatalogueImportRun"> | string | null
+  sourceHeaders?: Prisma.JsonNullableFilter<"CatalogueImportRun">
+  snapshotObjectKey?: Prisma.StringNullableFilter<"CatalogueImportRun"> | string | null
+  sourceSyncVersion?: Prisma.IntNullableFilter<"CatalogueImportRun"> | number | null
   totalRows?: Prisma.IntFilter<"CatalogueImportRun"> | number
   validRows?: Prisma.IntFilter<"CatalogueImportRun"> | number
   createdRows?: Prisma.IntFilter<"CatalogueImportRun"> | number
@@ -434,6 +464,9 @@ export type CatalogueImportRunOrderByWithAggregationInput = {
   status?: Prisma.SortOrder
   idempotencyKey?: Prisma.SortOrder
   sourceRevision?: Prisma.SortOrderInput | Prisma.SortOrder
+  sourceHeaders?: Prisma.SortOrderInput | Prisma.SortOrder
+  snapshotObjectKey?: Prisma.SortOrderInput | Prisma.SortOrder
+  sourceSyncVersion?: Prisma.SortOrderInput | Prisma.SortOrder
   totalRows?: Prisma.SortOrder
   validRows?: Prisma.SortOrder
   createdRows?: Prisma.SortOrder
@@ -466,6 +499,9 @@ export type CatalogueImportRunScalarWhereWithAggregatesInput = {
   status?: Prisma.EnumCatalogueImportStatusWithAggregatesFilter<"CatalogueImportRun"> | $Enums.CatalogueImportStatus
   idempotencyKey?: Prisma.StringWithAggregatesFilter<"CatalogueImportRun"> | string
   sourceRevision?: Prisma.StringNullableWithAggregatesFilter<"CatalogueImportRun"> | string | null
+  sourceHeaders?: Prisma.JsonNullableWithAggregatesFilter<"CatalogueImportRun">
+  snapshotObjectKey?: Prisma.StringNullableWithAggregatesFilter<"CatalogueImportRun"> | string | null
+  sourceSyncVersion?: Prisma.IntNullableWithAggregatesFilter<"CatalogueImportRun"> | number | null
   totalRows?: Prisma.IntWithAggregatesFilter<"CatalogueImportRun"> | number
   validRows?: Prisma.IntWithAggregatesFilter<"CatalogueImportRun"> | number
   createdRows?: Prisma.IntWithAggregatesFilter<"CatalogueImportRun"> | number
@@ -487,6 +523,9 @@ export type CatalogueImportRunCreateInput = {
   status?: $Enums.CatalogueImportStatus
   idempotencyKey: string
   sourceRevision?: string | null
+  sourceHeaders?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  snapshotObjectKey?: string | null
+  sourceSyncVersion?: number | null
   totalRows?: number
   validRows?: number
   createdRows?: number
@@ -514,6 +553,9 @@ export type CatalogueImportRunUncheckedCreateInput = {
   status?: $Enums.CatalogueImportStatus
   idempotencyKey: string
   sourceRevision?: string | null
+  sourceHeaders?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  snapshotObjectKey?: string | null
+  sourceSyncVersion?: number | null
   totalRows?: number
   validRows?: number
   createdRows?: number
@@ -535,6 +577,9 @@ export type CatalogueImportRunUpdateInput = {
   status?: Prisma.EnumCatalogueImportStatusFieldUpdateOperationsInput | $Enums.CatalogueImportStatus
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceHeaders?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  snapshotObjectKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceSyncVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   totalRows?: Prisma.IntFieldUpdateOperationsInput | number
   validRows?: Prisma.IntFieldUpdateOperationsInput | number
   createdRows?: Prisma.IntFieldUpdateOperationsInput | number
@@ -562,6 +607,9 @@ export type CatalogueImportRunUncheckedUpdateInput = {
   status?: Prisma.EnumCatalogueImportStatusFieldUpdateOperationsInput | $Enums.CatalogueImportStatus
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceHeaders?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  snapshotObjectKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceSyncVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   totalRows?: Prisma.IntFieldUpdateOperationsInput | number
   validRows?: Prisma.IntFieldUpdateOperationsInput | number
   createdRows?: Prisma.IntFieldUpdateOperationsInput | number
@@ -586,6 +634,9 @@ export type CatalogueImportRunCreateManyInput = {
   status?: $Enums.CatalogueImportStatus
   idempotencyKey: string
   sourceRevision?: string | null
+  sourceHeaders?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  snapshotObjectKey?: string | null
+  sourceSyncVersion?: number | null
   totalRows?: number
   validRows?: number
   createdRows?: number
@@ -607,6 +658,9 @@ export type CatalogueImportRunUpdateManyMutationInput = {
   status?: Prisma.EnumCatalogueImportStatusFieldUpdateOperationsInput | $Enums.CatalogueImportStatus
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceHeaders?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  snapshotObjectKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceSyncVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   totalRows?: Prisma.IntFieldUpdateOperationsInput | number
   validRows?: Prisma.IntFieldUpdateOperationsInput | number
   createdRows?: Prisma.IntFieldUpdateOperationsInput | number
@@ -631,6 +685,9 @@ export type CatalogueImportRunUncheckedUpdateManyInput = {
   status?: Prisma.EnumCatalogueImportStatusFieldUpdateOperationsInput | $Enums.CatalogueImportStatus
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceHeaders?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  snapshotObjectKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceSyncVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   totalRows?: Prisma.IntFieldUpdateOperationsInput | number
   validRows?: Prisma.IntFieldUpdateOperationsInput | number
   createdRows?: Prisma.IntFieldUpdateOperationsInput | number
@@ -670,6 +727,9 @@ export type CatalogueImportRunCountOrderByAggregateInput = {
   status?: Prisma.SortOrder
   idempotencyKey?: Prisma.SortOrder
   sourceRevision?: Prisma.SortOrder
+  sourceHeaders?: Prisma.SortOrder
+  snapshotObjectKey?: Prisma.SortOrder
+  sourceSyncVersion?: Prisma.SortOrder
   totalRows?: Prisma.SortOrder
   validRows?: Prisma.SortOrder
   createdRows?: Prisma.SortOrder
@@ -684,6 +744,7 @@ export type CatalogueImportRunCountOrderByAggregateInput = {
 }
 
 export type CatalogueImportRunAvgOrderByAggregateInput = {
+  sourceSyncVersion?: Prisma.SortOrder
   totalRows?: Prisma.SortOrder
   validRows?: Prisma.SortOrder
   createdRows?: Prisma.SortOrder
@@ -703,6 +764,8 @@ export type CatalogueImportRunMaxOrderByAggregateInput = {
   status?: Prisma.SortOrder
   idempotencyKey?: Prisma.SortOrder
   sourceRevision?: Prisma.SortOrder
+  snapshotObjectKey?: Prisma.SortOrder
+  sourceSyncVersion?: Prisma.SortOrder
   totalRows?: Prisma.SortOrder
   validRows?: Prisma.SortOrder
   createdRows?: Prisma.SortOrder
@@ -726,6 +789,8 @@ export type CatalogueImportRunMinOrderByAggregateInput = {
   status?: Prisma.SortOrder
   idempotencyKey?: Prisma.SortOrder
   sourceRevision?: Prisma.SortOrder
+  snapshotObjectKey?: Prisma.SortOrder
+  sourceSyncVersion?: Prisma.SortOrder
   totalRows?: Prisma.SortOrder
   validRows?: Prisma.SortOrder
   createdRows?: Prisma.SortOrder
@@ -739,6 +804,7 @@ export type CatalogueImportRunMinOrderByAggregateInput = {
 }
 
 export type CatalogueImportRunSumOrderByAggregateInput = {
+  sourceSyncVersion?: Prisma.SortOrder
   totalRows?: Prisma.SortOrder
   validRows?: Prisma.SortOrder
   createdRows?: Prisma.SortOrder
@@ -885,6 +951,9 @@ export type CatalogueImportRunCreateWithoutTenantInput = {
   status?: $Enums.CatalogueImportStatus
   idempotencyKey: string
   sourceRevision?: string | null
+  sourceHeaders?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  snapshotObjectKey?: string | null
+  sourceSyncVersion?: number | null
   totalRows?: number
   validRows?: number
   createdRows?: number
@@ -910,6 +979,9 @@ export type CatalogueImportRunUncheckedCreateWithoutTenantInput = {
   status?: $Enums.CatalogueImportStatus
   idempotencyKey: string
   sourceRevision?: string | null
+  sourceHeaders?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  snapshotObjectKey?: string | null
+  sourceSyncVersion?: number | null
   totalRows?: number
   validRows?: number
   createdRows?: number
@@ -963,6 +1035,9 @@ export type CatalogueImportRunScalarWhereInput = {
   status?: Prisma.EnumCatalogueImportStatusFilter<"CatalogueImportRun"> | $Enums.CatalogueImportStatus
   idempotencyKey?: Prisma.StringFilter<"CatalogueImportRun"> | string
   sourceRevision?: Prisma.StringNullableFilter<"CatalogueImportRun"> | string | null
+  sourceHeaders?: Prisma.JsonNullableFilter<"CatalogueImportRun">
+  snapshotObjectKey?: Prisma.StringNullableFilter<"CatalogueImportRun"> | string | null
+  sourceSyncVersion?: Prisma.IntNullableFilter<"CatalogueImportRun"> | number | null
   totalRows?: Prisma.IntFilter<"CatalogueImportRun"> | number
   validRows?: Prisma.IntFilter<"CatalogueImportRun"> | number
   createdRows?: Prisma.IntFilter<"CatalogueImportRun"> | number
@@ -984,6 +1059,9 @@ export type CatalogueImportRunCreateWithoutSourceInput = {
   status?: $Enums.CatalogueImportStatus
   idempotencyKey: string
   sourceRevision?: string | null
+  sourceHeaders?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  snapshotObjectKey?: string | null
+  sourceSyncVersion?: number | null
   totalRows?: number
   validRows?: number
   createdRows?: number
@@ -1008,6 +1086,9 @@ export type CatalogueImportRunUncheckedCreateWithoutSourceInput = {
   status?: $Enums.CatalogueImportStatus
   idempotencyKey: string
   sourceRevision?: string | null
+  sourceHeaders?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  snapshotObjectKey?: string | null
+  sourceSyncVersion?: number | null
   totalRows?: number
   validRows?: number
   createdRows?: number
@@ -1055,6 +1136,9 @@ export type CatalogueImportRunCreateWithoutMappingInput = {
   status?: $Enums.CatalogueImportStatus
   idempotencyKey: string
   sourceRevision?: string | null
+  sourceHeaders?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  snapshotObjectKey?: string | null
+  sourceSyncVersion?: number | null
   totalRows?: number
   validRows?: number
   createdRows?: number
@@ -1079,6 +1163,9 @@ export type CatalogueImportRunUncheckedCreateWithoutMappingInput = {
   status?: $Enums.CatalogueImportStatus
   idempotencyKey: string
   sourceRevision?: string | null
+  sourceHeaders?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  snapshotObjectKey?: string | null
+  sourceSyncVersion?: number | null
   totalRows?: number
   validRows?: number
   createdRows?: number
@@ -1128,6 +1215,9 @@ export type CatalogueImportRunCreateManyTenantInput = {
   status?: $Enums.CatalogueImportStatus
   idempotencyKey: string
   sourceRevision?: string | null
+  sourceHeaders?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  snapshotObjectKey?: string | null
+  sourceSyncVersion?: number | null
   totalRows?: number
   validRows?: number
   createdRows?: number
@@ -1149,6 +1239,9 @@ export type CatalogueImportRunUpdateWithoutTenantInput = {
   status?: Prisma.EnumCatalogueImportStatusFieldUpdateOperationsInput | $Enums.CatalogueImportStatus
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceHeaders?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  snapshotObjectKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceSyncVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   totalRows?: Prisma.IntFieldUpdateOperationsInput | number
   validRows?: Prisma.IntFieldUpdateOperationsInput | number
   createdRows?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1174,6 +1267,9 @@ export type CatalogueImportRunUncheckedUpdateWithoutTenantInput = {
   status?: Prisma.EnumCatalogueImportStatusFieldUpdateOperationsInput | $Enums.CatalogueImportStatus
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceHeaders?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  snapshotObjectKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceSyncVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   totalRows?: Prisma.IntFieldUpdateOperationsInput | number
   validRows?: Prisma.IntFieldUpdateOperationsInput | number
   createdRows?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1197,6 +1293,9 @@ export type CatalogueImportRunUncheckedUpdateManyWithoutTenantInput = {
   status?: Prisma.EnumCatalogueImportStatusFieldUpdateOperationsInput | $Enums.CatalogueImportStatus
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceHeaders?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  snapshotObjectKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceSyncVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   totalRows?: Prisma.IntFieldUpdateOperationsInput | number
   validRows?: Prisma.IntFieldUpdateOperationsInput | number
   createdRows?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1219,6 +1318,9 @@ export type CatalogueImportRunCreateManySourceInput = {
   status?: $Enums.CatalogueImportStatus
   idempotencyKey: string
   sourceRevision?: string | null
+  sourceHeaders?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  snapshotObjectKey?: string | null
+  sourceSyncVersion?: number | null
   totalRows?: number
   validRows?: number
   createdRows?: number
@@ -1240,6 +1342,9 @@ export type CatalogueImportRunUpdateWithoutSourceInput = {
   status?: Prisma.EnumCatalogueImportStatusFieldUpdateOperationsInput | $Enums.CatalogueImportStatus
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceHeaders?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  snapshotObjectKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceSyncVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   totalRows?: Prisma.IntFieldUpdateOperationsInput | number
   validRows?: Prisma.IntFieldUpdateOperationsInput | number
   createdRows?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1264,6 +1369,9 @@ export type CatalogueImportRunUncheckedUpdateWithoutSourceInput = {
   status?: Prisma.EnumCatalogueImportStatusFieldUpdateOperationsInput | $Enums.CatalogueImportStatus
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceHeaders?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  snapshotObjectKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceSyncVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   totalRows?: Prisma.IntFieldUpdateOperationsInput | number
   validRows?: Prisma.IntFieldUpdateOperationsInput | number
   createdRows?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1286,6 +1394,9 @@ export type CatalogueImportRunUncheckedUpdateManyWithoutSourceInput = {
   status?: Prisma.EnumCatalogueImportStatusFieldUpdateOperationsInput | $Enums.CatalogueImportStatus
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceHeaders?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  snapshotObjectKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceSyncVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   totalRows?: Prisma.IntFieldUpdateOperationsInput | number
   validRows?: Prisma.IntFieldUpdateOperationsInput | number
   createdRows?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1308,6 +1419,9 @@ export type CatalogueImportRunCreateManyMappingInput = {
   status?: $Enums.CatalogueImportStatus
   idempotencyKey: string
   sourceRevision?: string | null
+  sourceHeaders?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  snapshotObjectKey?: string | null
+  sourceSyncVersion?: number | null
   totalRows?: number
   validRows?: number
   createdRows?: number
@@ -1329,6 +1443,9 @@ export type CatalogueImportRunUpdateWithoutMappingInput = {
   status?: Prisma.EnumCatalogueImportStatusFieldUpdateOperationsInput | $Enums.CatalogueImportStatus
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceHeaders?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  snapshotObjectKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceSyncVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   totalRows?: Prisma.IntFieldUpdateOperationsInput | number
   validRows?: Prisma.IntFieldUpdateOperationsInput | number
   createdRows?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1353,6 +1470,9 @@ export type CatalogueImportRunUncheckedUpdateWithoutMappingInput = {
   status?: Prisma.EnumCatalogueImportStatusFieldUpdateOperationsInput | $Enums.CatalogueImportStatus
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceHeaders?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  snapshotObjectKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceSyncVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   totalRows?: Prisma.IntFieldUpdateOperationsInput | number
   validRows?: Prisma.IntFieldUpdateOperationsInput | number
   createdRows?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1375,6 +1495,9 @@ export type CatalogueImportRunUncheckedUpdateManyWithoutMappingInput = {
   status?: Prisma.EnumCatalogueImportStatusFieldUpdateOperationsInput | $Enums.CatalogueImportStatus
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceHeaders?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  snapshotObjectKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceSyncVersion?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   totalRows?: Prisma.IntFieldUpdateOperationsInput | number
   validRows?: Prisma.IntFieldUpdateOperationsInput | number
   createdRows?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1401,6 +1524,9 @@ export type CatalogueImportRunSelect<ExtArgs extends runtime.Types.Extensions.In
   status?: boolean
   idempotencyKey?: boolean
   sourceRevision?: boolean
+  sourceHeaders?: boolean
+  snapshotObjectKey?: boolean
+  sourceSyncVersion?: boolean
   totalRows?: boolean
   validRows?: boolean
   createdRows?: boolean
@@ -1428,6 +1554,9 @@ export type CatalogueImportRunSelectCreateManyAndReturn<ExtArgs extends runtime.
   status?: boolean
   idempotencyKey?: boolean
   sourceRevision?: boolean
+  sourceHeaders?: boolean
+  snapshotObjectKey?: boolean
+  sourceSyncVersion?: boolean
   totalRows?: boolean
   validRows?: boolean
   createdRows?: boolean
@@ -1455,6 +1584,9 @@ export type CatalogueImportRunSelectUpdateManyAndReturn<ExtArgs extends runtime.
   status?: boolean
   idempotencyKey?: boolean
   sourceRevision?: boolean
+  sourceHeaders?: boolean
+  snapshotObjectKey?: boolean
+  sourceSyncVersion?: boolean
   totalRows?: boolean
   validRows?: boolean
   createdRows?: boolean
@@ -1482,6 +1614,9 @@ export type CatalogueImportRunSelectScalar = {
   status?: boolean
   idempotencyKey?: boolean
   sourceRevision?: boolean
+  sourceHeaders?: boolean
+  snapshotObjectKey?: boolean
+  sourceSyncVersion?: boolean
   totalRows?: boolean
   validRows?: boolean
   createdRows?: boolean
@@ -1495,7 +1630,7 @@ export type CatalogueImportRunSelectScalar = {
   updatedAt?: boolean
 }
 
-export type CatalogueImportRunOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "sourceId" | "mappingId" | "mappingLeaseId" | "mappingLeaseExpiresAt" | "requestedByUserId" | "status" | "idempotencyKey" | "sourceRevision" | "totalRows" | "validRows" | "createdRows" | "updatedRows" | "skippedRows" | "failedRows" | "rowErrors" | "startedAt" | "completedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["catalogueImportRun"]>
+export type CatalogueImportRunOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "sourceId" | "mappingId" | "mappingLeaseId" | "mappingLeaseExpiresAt" | "requestedByUserId" | "status" | "idempotencyKey" | "sourceRevision" | "sourceHeaders" | "snapshotObjectKey" | "sourceSyncVersion" | "totalRows" | "validRows" | "createdRows" | "updatedRows" | "skippedRows" | "failedRows" | "rowErrors" | "startedAt" | "completedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["catalogueImportRun"]>
 export type CatalogueImportRunInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   source?: boolean | Prisma.CatalogueSourceDefaultArgs<ExtArgs>
@@ -1530,6 +1665,9 @@ export type $CatalogueImportRunPayload<ExtArgs extends runtime.Types.Extensions.
     status: $Enums.CatalogueImportStatus
     idempotencyKey: string
     sourceRevision: string | null
+    sourceHeaders: runtime.JsonValue | null
+    snapshotObjectKey: string | null
+    sourceSyncVersion: number | null
     totalRows: number
     validRows: number
     createdRows: number
@@ -1977,6 +2115,9 @@ export interface CatalogueImportRunFieldRefs {
   readonly status: Prisma.FieldRef<"CatalogueImportRun", 'CatalogueImportStatus'>
   readonly idempotencyKey: Prisma.FieldRef<"CatalogueImportRun", 'String'>
   readonly sourceRevision: Prisma.FieldRef<"CatalogueImportRun", 'String'>
+  readonly sourceHeaders: Prisma.FieldRef<"CatalogueImportRun", 'Json'>
+  readonly snapshotObjectKey: Prisma.FieldRef<"CatalogueImportRun", 'String'>
+  readonly sourceSyncVersion: Prisma.FieldRef<"CatalogueImportRun", 'Int'>
   readonly totalRows: Prisma.FieldRef<"CatalogueImportRun", 'Int'>
   readonly validRows: Prisma.FieldRef<"CatalogueImportRun", 'Int'>
   readonly createdRows: Prisma.FieldRef<"CatalogueImportRun", 'Int'>

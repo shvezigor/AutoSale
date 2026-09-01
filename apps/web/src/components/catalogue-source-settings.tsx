@@ -10,27 +10,37 @@ export type CatalogueSourceHealth = {
 export type CatalogueSourceConfiguration = CatalogueSourceHealth & {
   spreadsheetId: string | null; sheetName: string | null; syncSchedule: 'MANUAL' | 'HOURLY' | 'DAILY';
   serviceAccountEmail: string | null; authorizationAction: string;
+  pendingReview?: { runId: string; headers: string[] } | null;
 };
 
 export function CatalogueSourceSettings({
   role,
   sources,
-  configuration,
+  configurations,
 }: {
   role: 'OWNER' | 'MANAGER';
   sources: CatalogueSourceHealth[];
-  configuration: CatalogueSourceConfiguration | null;
+  configurations: CatalogueSourceConfiguration[];
 }) {
-  const [current, setCurrent] = useState(configuration);
-  const [displayName, setDisplayName] = useState(configuration?.displayName ?? 'Каталог Google Sheets');
-  const [spreadsheet, setSpreadsheet] = useState(configuration?.spreadsheetId ?? '');
-  const [sheetName, setSheetName] = useState(configuration?.sheetName ?? 'Товари');
-  const [schedule, setSchedule] = useState<'MANUAL' | 'HOURLY' | 'DAILY'>(configuration?.syncSchedule ?? 'MANUAL');
+  const [current, setCurrent] = useState(configurations[0] ?? null);
+  const [displayName, setDisplayName] = useState(current?.displayName ?? 'Каталог Google Sheets');
+  const [spreadsheet, setSpreadsheet] = useState(current?.spreadsheetId ?? '');
+  const [sheetName, setSheetName] = useState(current?.sheetName ?? 'Товари');
+  const [schedule, setSchedule] = useState<'MANUAL' | 'HOURLY' | 'DAILY'>(current?.syncSchedule ?? 'MANUAL');
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   if (role === 'MANAGER') return <HealthList sources={sources} />;
+
+  function select(configuration: CatalogueSourceConfiguration | null) {
+    setCurrent(configuration);
+    setDisplayName(configuration?.displayName ?? 'Каталог Google Sheets');
+    setSpreadsheet(configuration?.spreadsheetId ?? '');
+    setSheetName(configuration?.sheetName ?? 'Товари');
+    setSchedule(configuration?.syncSchedule ?? 'MANUAL');
+    setMessage(null); setError(null);
+  }
 
   async function mutate(path: string, init: RequestInit, success: string) {
     setPending(true); setMessage(null); setError(null);
@@ -59,11 +69,15 @@ export function CatalogueSourceSettings({
   async function remove() {
     if (!current) return;
     const result = await mutate(`/api/catalogue/sources/${current.id}`, { method: 'DELETE' }, 'Джерело видалено');
-    if (result) setCurrent(null);
+    if (result) select(null);
   }
 
   return <section className="catalogue-source-settings" aria-labelledby="catalogue-source-title">
     <div className="catalogue-source-heading"><div><h2 id="catalogue-source-title">Google Sheets джерело</h2><p>Синхронізуйте товари з окремої таблиці, не змінюючи експорт замовлень.</p></div>{current && <span className={`catalogue-status ${current.status === 'ACTIVE' ? 'is-active' : ''}`}>{statusLabel(current.status)}</span>}</div>
+    <div className="catalogue-source-actions">
+      <label><span>Оберіть джерело</span><select aria-label="Оберіть джерело" value={current?.id ?? ''} onChange={(event) => select(configurations.find((item) => item.id === event.target.value) ?? null)}><option value="">Нове джерело</option>{configurations.map((item) => <option key={item.id} value={item.id}>{item.displayName}</option>)}</select></label>
+      <button className="secondary-button" type="button" onClick={() => select(null)}>Додати джерело</button>
+    </div>
     <div className="catalogue-source-grid">
       <label><span>Назва джерела</span><input aria-label="Назва джерела" value={displayName} onChange={(event) => setDisplayName(event.target.value)} /></label>
       <label><span>Google таблиця: URL або ID</span><input aria-label="Google таблиця" value={spreadsheet} onChange={(event) => setSpreadsheet(event.target.value)} /></label>

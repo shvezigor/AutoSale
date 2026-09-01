@@ -15,6 +15,7 @@ import { CatalogueMappingProcessor } from './catalogue/catalogue-mapping.process
 import { createOpenAiColumnMapper } from './catalogue/openai-column-mapper.js';
 import { CatalogueMappingReconciler } from './catalogue/catalogue-mapping-reconciler.js';
 import { GoogleCatalogueSyncProcessor } from './catalogue/google-catalogue-sync.processor.js';
+import { CatalogueSyncScheduler } from './catalogue/catalogue-sync-scheduler.js';
 
 async function bootstrap(): Promise<void> {
   const env = parseWorkerEnv(process.env);
@@ -34,7 +35,7 @@ async function bootstrap(): Promise<void> {
   const catalogueMapper = createOpenAiColumnMapper(env.OPENAI_API_KEY, env.OPENAI_MODEL);
   const catalogueMappingProcessor = new CatalogueMappingProcessor(prisma, storage, catalogueMapper);
   const googleSheets = env.GOOGLE_SERVICE_ACCOUNT_FILE ? createGoogleSheetsAdapter(env.GOOGLE_SERVICE_ACCOUNT_FILE) : undefined;
-  const catalogueSyncProcessor = googleSheets ? new GoogleCatalogueSyncProcessor(prisma, googleSheets) : undefined;
+  const catalogueSyncProcessor = googleSheets ? new GoogleCatalogueSyncProcessor(prisma, googleSheets, storage) : undefined;
   const orderProcessor = new TriggeredOrderProcessor(
     prisma,
     new OrderRecognitionService(orderRecognizer),
@@ -142,6 +143,7 @@ async function bootstrap(): Promise<void> {
     },
   });
   const catalogueReconciler = new CatalogueMappingReconciler(prisma, catalogueQueue);
+  const catalogueScheduler = new CatalogueSyncScheduler(prisma, catalogueQueue);
   const sheetsProcessor = googleSheets ? new GoogleSheetsSyncProcessor(prisma, googleSheets) : undefined;
   let polling = false;
   const pollExports = async (): Promise<void> => {
@@ -193,20 +195,7 @@ async function bootstrap(): Promise<void> {
     if (schedulingCatalogueSources) return;
     schedulingCatalogueSources = true;
     try {
-      const now = new Date();
-      const candidates = await prisma.catalogueSource.findMany({
-        where: { type: 'GOOGLE_SHEETS', status: 'ACTIVE', syncSchedule: { in: ['HOURLY', 'DAILY'] } },
-        select: { id: true, tenantId: true, syncSchedule: true, lastSyncedAt: true },
-        take: 100,
-      });
-      for (const source of candidates) {
-        const interval = source.syncSchedule === 'HOURLY' ? 60 * 60_000 : 24 * 60 * 60_000;
-        if (source.lastSyncedAt && now.getTime() - source.lastSyncedAt.getTime() < interval) continue;
-        const bucket = Math.floor(now.getTime() / interval);
-        await catalogueQueue.add('catalogue.sync', { tenantId: source.tenantId, sourceId: source.id }, {
-          jobId: `catalogue.sync:${source.id}:${bucket}`, attempts: 5, backoff: { type: 'exponential', delay: 30_000 }, removeOnComplete: true, removeOnFail: 5_000,
-        });
-      }
+      await catalogueScheduler.scheduleDue();
     } catch (error) {
       metrics.increment('autosale_operations_total', { operation: 'catalogue_sync_schedule', result: 'failure' });
       logger.warn('catalogue_sync_schedule_failed', { correlationId: 'system:catalogue-sync', errorCode: error instanceof Error ? error.name : 'UNKNOWN' });

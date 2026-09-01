@@ -19,12 +19,28 @@ const configuration = {
 afterEach(() => { cleanup(); mutatingFetch.mockReset(); });
 
 describe('CatalogueSourceSettings', () => {
+  it('supports adding, selecting, and editing multiple independent sources', async () => {
+    const second = { ...source, id: '55555555-5555-4555-8555-555555555555', displayName: 'Wholesale' };
+    const secondConfiguration = { ...configuration, ...second, spreadsheetId: 'wholesale-sheet' };
+    mutatingFetch.mockResolvedValueOnce(response(secondConfiguration));
+    render(<CatalogueSourceSettings role="OWNER" sources={[source, second]} configurations={[configuration, secondConfiguration]} />);
+
+    fireEvent.change(screen.getByLabelText('Оберіть джерело'), { target: { value: second.id } });
+    expect(screen.getByLabelText('Google таблиця')).toHaveValue('wholesale-sheet');
+    fireEvent.click(screen.getByRole('button', { name: 'Додати джерело' }));
+    expect(screen.getByLabelText('Google таблиця')).toHaveValue('');
+    fireEvent.change(screen.getByLabelText('Назва джерела'), { target: { value: 'Retail' } });
+    fireEvent.change(screen.getByLabelText('Google таблиця'), { target: { value: 'retail-sheet' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Зберегти джерело' }));
+    await waitFor(() => expect(mutatingFetch).toHaveBeenCalledWith('/api/catalogue/sources', expect.objectContaining({ method: 'POST' })));
+  });
+
   it('lets an owner save a tab and schedule, test access, and synchronize now without collecting credentials', async () => {
     mutatingFetch
       .mockResolvedValueOnce(response({ ...configuration, syncSchedule: 'HOURLY' }))
       .mockResolvedValueOnce(response({ connected: true, headers: ['SKU', 'Name'], fingerprint: 'fingerprint' }))
       .mockResolvedValueOnce(response({ queued: true, sourceId: source.id }));
-    render(<CatalogueSourceSettings role="OWNER" sources={[source]} configuration={configuration} />);
+    render(<CatalogueSourceSettings role="OWNER" sources={[source]} configurations={[configuration]} />);
 
     fireEvent.change(screen.getByLabelText('Розклад синхронізації'), { target: { value: 'HOURLY' } });
     fireEvent.click(screen.getByRole('button', { name: 'Зберегти джерело' }));
@@ -42,7 +58,7 @@ describe('CatalogueSourceSettings', () => {
   });
 
   it('shows a manager only health and last synchronization time', () => {
-    render(<CatalogueSourceSettings role="MANAGER" sources={[source]} configuration={null} />);
+    render(<CatalogueSourceSettings role="MANAGER" sources={[source]} configurations={[]} />);
 
     expect(screen.getByText('Активне')).toBeInTheDocument();
     expect(screen.getByText(/01\.09\.2026/)).toBeInTheDocument();

@@ -9,6 +9,8 @@ export type GoogleSheetsUpsertResult = { action: 'appended' | 'updated'; rowNumb
 export type GoogleSheetsCell = string | number | boolean | null;
 export type GoogleSheetsTable = { headers: string[]; rows: GoogleSheetsCell[][]; revision: string };
 export type GoogleSheetsReadErrorCode = 'AUTHORIZATION' | 'NOT_FOUND' | 'RATE_LIMIT' | 'RETRYABLE';
+const MAX_TABLE_COLUMNS = 100;
+const MAX_TABLE_CELL_CHARACTERS = 10_000;
 
 export function googleSheetsStructureFingerprint(headers: string[]): string {
   const normalized = headers.map((header) => header.normalize('NFKC').trim().replace(/\s+/g, ' ').toLocaleLowerCase('en-US'));
@@ -39,7 +41,7 @@ export class GoogleSheetsAdapter {
     try {
       const token = await this.auth.getAccessToken();
       const quotedSheet = `'${input.sheetName.replaceAll("'", "''")}'`;
-      const range = encodeURIComponent(`${quotedSheet}!1:${input.maxRows + 2}`);
+      const range = encodeURIComponent(`${quotedSheet}!A1:${columnName(MAX_TABLE_COLUMNS)}${input.maxRows + 2}`);
       const url = `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(input.spreadsheetId)}/values/${range}?majorDimension=ROWS&valueRenderOption=UNFORMATTED_VALUE`;
       response = await this.fetchFn(url, { headers: { authorization: `Bearer ${token}` } });
     } catch {
@@ -53,9 +55,18 @@ export class GoogleSheetsAdapter {
       throw new GoogleSheetsReadError('RETRYABLE', true);
     }
     const values = Array.isArray(body.values) ? body.values.map((row) => Array.isArray(row) ? row.map(normalizeCell) : []) : [];
+    if (values.some((row) => row.length > MAX_TABLE_COLUMNS)) throw new RangeError(`Google Sheets table exceeds ${MAX_TABLE_COLUMNS} columns`);
+    if (values.some((row) => row.some((cell) => typeof cell === 'string' && cell.length > MAX_TABLE_CELL_CHARACTERS))) {
+      throw new RangeError('Google Sheets cell exceeds the character limit');
+    }
     const headers = (values[0] ?? []).map((value) => String(value ?? ''));
     const rows = values.slice(1);
     if (rows.length > input.maxRows) throw new RangeError(`Google Sheets table exceeds ${input.maxRows} rows`);
+    if (headers.length > 0) {
+      const normalizedHeaders = headers.map(normalizeHeader);
+      if (normalizedHeaders.some((header) => header.length === 0)) throw new RangeError('Google Sheets table contains an empty header');
+      if (new Set(normalizedHeaders).size !== normalizedHeaders.length) throw new RangeError('Google Sheets table contains a duplicate header');
+    }
     return {
       headers,
       rows,
@@ -96,6 +107,10 @@ export class GoogleSheetsAdapter {
     const result = await response.json() as { updates?: { updatedRange?: string } };
     return { action: 'appended', rowNumber: rowNumberFromRange(result.updates?.updatedRange) ?? (idsBody.values?.length ?? 1) + 1 };
   }
+}
+
+function normalizeHeader(value: string): string {
+  return value.normalize('NFKC').trim().replace(/\s+/g, ' ').toLocaleLowerCase('en-US');
 }
 
 function classifyReadFailure(status: number): GoogleSheetsReadError {

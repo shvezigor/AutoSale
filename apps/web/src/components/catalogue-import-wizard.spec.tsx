@@ -14,6 +14,16 @@ const preview = { rows: [], totals: { created: 1, updated: 1, skipped: 0, failed
 afterEach(() => { cleanup(); mutatingFetch.mockReset(); vi.unstubAllGlobals(); vi.useRealTimers(); });
 
 describe('CatalogueImportWizard', () => {
+  it('opens a pending Google run in the same owner review and confirmation workflow', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(response({ ...proposal, headers: ['sku', 'name', 'note'] })));
+    render(<CatalogueImportWizard session={{ membershipRole: 'OWNER' }} reviewRuns={[{ id: runId, sourceName: 'Google catalogue', headers: ['sku', 'name', 'note'] }]} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Переглянути Google catalogue' }));
+    await screen.findByText('AI запропонував зіставлення');
+    expect(screen.queryByLabelText('Файл каталогу')).not.toBeInTheDocument();
+    expect(fetch).toHaveBeenCalledWith(`/api/catalogue/imports/${runId}`, { cache: 'no-store' });
+  });
+
   it('moves an owner through source upload, reviewed mapping, preview, confirmation, and progress without persisting source rows', async () => {
     mutatingFetch
       .mockResolvedValueOnce(response(upload))

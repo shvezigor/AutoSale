@@ -2,8 +2,8 @@ import { createHash, randomUUID } from 'node:crypto';
 import { basename, extname } from 'node:path';
 
 import { catalogueTargetFieldSchema, type CatalogueImportSummary, type CataloguePreview, type CatalogueTargetField } from '@autosale/contracts';
-import { Prisma, upsertCatalogueProducts, type PrismaClient } from '@autosale/database';
-import type { ObjectStorage } from '@autosale/integrations';
+import { buildCatalogueImportPlan, importCatalogueTable, Prisma, type PrismaClient } from '@autosale/database';
+import { googleSheetsStructureFingerprint, type ObjectStorage } from '@autosale/integrations';
 import { BadRequestException, ConflictException, NotFoundException, ServiceUnavailableException, UnprocessableEntityException } from '@nestjs/common';
 
 import { parseCatalogueSource, type ParsedCell, type ParsedTable } from './source-parser.js';
@@ -41,6 +41,7 @@ export type CatalogueUploadResult = CatalogueImportSummary & {
 export type CatalogueMappingQueue = { add(name: string, data: { tenantId: string; runId: string }, options?: Record<string, unknown>): Promise<unknown> };
 
 export type CatalogueImportStatusResult = CatalogueImportSummary & {
+  headers: string[];
   mapping: { columns: CatalogueColumnMapping[]; aiModel: string | null; promptVersion: string | null; schemaVersion: string | null } | null;
   mappingFailure: 'MAPPING_UNAVAILABLE' | null;
 };
@@ -104,6 +105,7 @@ export class CatalogueImportService {
             status: 'UPLOADED',
             idempotencyKey,
             sourceRevision,
+            sourceHeaders: table.headers,
             totalRows: table.rows.length,
           },
         });
@@ -139,7 +141,7 @@ export class CatalogueImportService {
       });
       if (!run) throw new NotFoundException('Catalogue import not found');
 
-      const table = await this.loadTable(run.source.objectKey, run.source.type);
+      const table = await this.loadTable(run.source.objectKey, run.source.type, run.snapshotObjectKey);
       const columns = validateMapping(input.columns, table.headers);
       const clearEmptyFields = validateClearFields(input.clearEmptyFields ?? [], columns);
       const latest = await tx.catalogueMapping.findFirst({
@@ -162,7 +164,11 @@ export class CatalogueImportService {
       });
       const assign = await tx.catalogueImportRun.updateMany({
         where: { id: runId, tenantId, status: 'MAPPING' },
-        data: { mappingId: mapping.id, status: 'PREVIEW_READY' },
+        data: {
+          mappingId: mapping.id,
+          status: 'PREVIEW_READY',
+          idempotencyKey: run.sourceRevision ? `google:${run.sourceId}:${run.sourceRevision}:mapping:${mapping.version}` : run.idempotencyKey,
+        },
       });
       if (assign.count !== 1) throw new ConflictException('Catalogue import cannot be remapped');
     });
@@ -183,7 +189,7 @@ export class CatalogueImportService {
   async preview(tenantId: string, runId: string): Promise<CataloguePreview> {
     const run = await this.loadRun(tenantId, runId);
     if (!run.mapping) throw new ConflictException('Catalogue mapping is not confirmed');
-    const table = await this.loadTable(run.source.objectKey, run.source.type);
+    const table = await this.loadTable(run.source.objectKey, run.source.type, run.snapshotObjectKey);
     if (table.fingerprint !== run.mapping.sourceFingerprint) throw new ConflictException('Catalogue headers changed');
     const mapping = readMapping(run.mapping.columns);
     const preview = await this.buildPreview(tenantId, table, mapping, readClearFields(run.mapping.transformSettings));
@@ -198,6 +204,7 @@ export class CatalogueImportService {
     if (!run) throw new NotFoundException('Catalogue import not found');
     return {
       ...mapSummary(run),
+      headers: readHeaders(run.sourceHeaders),
       mapping: run.mapping ? {
         columns: readProposalColumns(run.mapping.columns), aiModel: run.mapping.aiModel, promptVersion: run.mapping.promptVersion, schemaVersion: run.mapping.schemaVersion,
       } : null,
@@ -220,30 +227,34 @@ export class CatalogueImportService {
     try {
       const run = await this.loadRun(tenantId, runId);
       if (!run.mapping) throw new ConflictException('Catalogue mapping is not confirmed');
-      const table = await this.loadTable(run.source.objectKey, run.source.type);
+      const table = await this.loadTable(run.source.objectKey, run.source.type, run.snapshotObjectKey);
       if (table.fingerprint !== run.mapping.sourceFingerprint) throw new ConflictException('Catalogue headers changed');
-      const internal = await this.buildPreview(tenantId, table, readMapping(run.mapping.columns), readClearFields(run.mapping.transformSettings));
-      const validRows = internal.rows.filter((row): row is InternalPreviewRow & { product: PreviewProduct } => Boolean(row.product) && row.errors.length === 0);
-
-      await upsertCatalogueProducts(this.prisma, { tenantId, sourceId: run.sourceId, rows: validRows });
+      const result = await importCatalogueTable(this.prisma, {
+        tenantId,
+        sourceId: run.sourceId,
+        headers: table.headers,
+        rows: table.rows.map((row) => table.headers.map((header) => row[header] ?? null)),
+        mapping: readMapping(run.mapping.columns),
+        transformSettings: run.mapping.transformSettings,
+      });
 
       const completed = await this.prisma.catalogueImportRun.update({
         where: { id: runId },
         data: {
           status: 'COMPLETED',
-          totalRows: internal.rows.length,
-          validRows: validRows.length,
-          createdRows: internal.totals.created,
-          updatedRows: internal.totals.updated,
-          skippedRows: internal.totals.skipped,
-          failedRows: internal.totals.failed,
-          rowErrors: internal.rows
-            .filter((row) => row.codes.length > 0)
-            .slice(0, 100)
-            .map((row) => ({ rowNumber: row.rowNumber, errors: row.codes })) as Prisma.InputJsonValue,
+          ...result,
+          rowErrors: result.rowErrors as Prisma.InputJsonValue,
           completedAt: new Date(),
         },
       });
+      if (run.source.type === 'GOOGLE_SHEETS') {
+        await this.prisma.catalogueSource.updateMany({
+          where: { id: run.sourceId, tenantId, type: 'GOOGLE_SHEETS' },
+          data: {
+            status: 'ACTIVE', lastSyncedAt: new Date(), nextSyncAt: nextSyncAt(run.source.syncSchedule), lastErrorSummary: null,
+          },
+        });
+      }
       return mapSummary(completed);
     } catch (error) {
       await this.prisma.catalogueImportRun.updateMany({
@@ -255,36 +266,17 @@ export class CatalogueImportService {
   }
 
   private async buildPreview(tenantId: string, table: ParsedTable, mapping: CatalogueColumnMapping[], clearEmptyFields: Set<CatalogueTargetField>): Promise<{ rows: InternalPreviewRow[]; totals: CataloguePreview['totals'] }> {
-    const rows = table.rows.map((sourceRow, index) => mapRow(sourceRow, mapping, clearEmptyFields, index + 2));
-    const skuRows = new Map<string, number[]>();
-    for (const row of rows) {
-      if (!row.product?.sku) continue;
-      const numbers = skuRows.get(row.product.sku) ?? [];
-      numbers.push(row.rowNumber);
-      skuRows.set(row.product.sku, numbers);
-    }
-    for (const row of rows) {
-      const duplicates = row.product ? skuRows.get(row.product.sku) : undefined;
-      if (!duplicates || duplicates.length < 2) continue;
-      const other = duplicates.find((number) => number !== row.rowNumber)!;
-      row.errors.push(`Duplicate SKU also appears on row ${other}`);
-      row.codes.push('SKU_DUPLICATE');
-      delete row.product;
-    }
-    const validSkus = rows.flatMap((row) => row.product && row.errors.length === 0 ? [row.product.sku] : []);
-    const existing = validSkus.length === 0 ? [] : await this.prisma.product.findMany({
-      where: { tenantId, sku: { in: validSkus } },
-      select: { sku: true },
+    const plan = await buildCatalogueImportPlan(this.prisma, {
+      tenantId,
+      sourceId: '',
+      headers: table.headers,
+      rows: table.rows.map((row) => table.headers.map((header) => row[header] ?? null)),
+      mapping,
+      transformSettings: { clearEmptyFields: [...clearEmptyFields] },
     });
-    const existingSkus = new Set(existing.map((product) => product.sku));
     return {
-      rows,
-      totals: {
-        created: rows.filter((row) => row.product && row.errors.length === 0 && !existingSkus.has(row.product.sku)).length,
-        updated: rows.filter((row) => row.product && row.errors.length === 0 && existingSkus.has(row.product.sku)).length,
-        skipped: rows.filter((row) => row.codes.includes('EMPTY_ROW')).length,
-        failed: rows.filter((row) => row.errors.length > 0).length,
-      },
+      rows: plan.rows as InternalPreviewRow[],
+      totals: plan.totals,
     };
   }
 
@@ -292,7 +284,7 @@ export class CatalogueImportService {
     const run = await this.prisma.catalogueImportRun.findFirst({
       where: { id: runId, tenantId },
       include: {
-        source: { select: { type: true, objectKey: true } },
+        source: { select: { type: true, objectKey: true, syncSchedule: true } },
         mapping: { select: { sourceFingerprint: true, columns: true, transformSettings: true } },
       },
     });
@@ -307,15 +299,18 @@ export class CatalogueImportService {
     });
   }
 
-  private async loadTable(objectKey: string | null, sourceType: 'CSV_UPLOAD' | 'XLSX_UPLOAD' | 'GOOGLE_SHEETS'): Promise<ParsedTable> {
-    if (!objectKey || sourceType === 'GOOGLE_SHEETS') throw new ConflictException('Catalogue source file is unavailable');
+  private async loadTable(objectKey: string | null, sourceType: 'CSV_UPLOAD' | 'XLSX_UPLOAD' | 'GOOGLE_SHEETS', snapshotObjectKey?: string | null): Promise<ParsedTable> {
+    const resolvedKey = snapshotObjectKey ?? objectKey;
+    if (!resolvedKey) throw new ConflictException('Catalogue source file is unavailable');
     let object: { body: Uint8Array; contentType: string };
     try {
-      object = await this.storage.get(objectKey);
+      object = await this.storage.get(resolvedKey);
     } catch {
       throw new ServiceUnavailableException('Catalogue source file is temporarily unavailable');
     }
     try {
+      if (snapshotObjectKey) return parseTableSnapshot(Buffer.from(object.body), object.contentType);
+      if (sourceType === 'GOOGLE_SHEETS') throw new Error('Google snapshot is missing');
       return await parseCatalogueSource(Buffer.from(object.body), object.contentType);
     } catch {
       throw new UnprocessableEntityException('Stored catalogue source is unreadable');
@@ -536,6 +531,38 @@ function isHttpUrl(value: string): boolean {
   } catch {
     return false;
   }
+}
+
+function parseTableSnapshot(buffer: Buffer, contentType: string): ParsedTable {
+  if (contentType !== 'application/vnd.autosale.catalogue-table+json' || buffer.length > MAX_CATALOGUE_UPLOAD_BYTES * 4) {
+    throw new Error('Invalid catalogue table snapshot');
+  }
+  const parsed = JSON.parse(buffer.toString('utf8')) as unknown;
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) throw new Error('Invalid catalogue table snapshot');
+  const candidate = parsed as { headers?: unknown; rows?: unknown };
+  if (!Array.isArray(candidate.headers) || candidate.headers.length === 0 || candidate.headers.length > 100
+    || candidate.headers.some((header) => typeof header !== 'string') || !Array.isArray(candidate.rows) || candidate.rows.length > 5_000) {
+    throw new Error('Invalid catalogue table snapshot');
+  }
+  const headers = candidate.headers as string[];
+  const normalizedHeaders = headers.map((header) => header.normalize('NFKC').trim().replace(/\s+/g, ' ').toLocaleLowerCase('en-US'));
+  if (normalizedHeaders.some((header) => !header) || new Set(normalizedHeaders).size !== normalizedHeaders.length) throw new Error('Invalid catalogue table snapshot');
+  const rows = candidate.rows.map((row) => {
+    if (!Array.isArray(row) || row.length > headers.length || row.some((cell) => cell !== null && !['string', 'number', 'boolean'].includes(typeof cell))) {
+      throw new Error('Invalid catalogue table snapshot');
+    }
+    return Object.fromEntries(normalizedHeaders.map((header, index) => [header, (row[index] ?? null) as ParsedCell]));
+  });
+  return { headers: normalizedHeaders, rows, fingerprint: googleSheetsStructureFingerprint(headers) };
+}
+
+function readHeaders(value: Prisma.JsonValue | null): string[] {
+  return Array.isArray(value) ? value.filter((header): header is string => typeof header === 'string').slice(0, 100) : [];
+}
+
+function nextSyncAt(schedule: string | null): Date | null {
+  const interval = schedule === 'HOURLY' ? 60 * 60_000 : schedule === 'DAILY' ? 24 * 60 * 60_000 : null;
+  return interval === null ? null : new Date(Date.now() + interval);
 }
 
 function publicPreview(preview: { rows: InternalPreviewRow[]; totals: CataloguePreview['totals'] }): CataloguePreview {

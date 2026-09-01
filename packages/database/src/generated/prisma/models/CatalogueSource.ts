@@ -20,8 +20,18 @@ export type CatalogueSourceModel = runtime.Types.Result.DefaultSelection<Prisma.
 
 export type AggregateCatalogueSource = {
   _count: CatalogueSourceCountAggregateOutputType | null
+  _avg: CatalogueSourceAvgAggregateOutputType | null
+  _sum: CatalogueSourceSumAggregateOutputType | null
   _min: CatalogueSourceMinAggregateOutputType | null
   _max: CatalogueSourceMaxAggregateOutputType | null
+}
+
+export type CatalogueSourceAvgAggregateOutputType = {
+  syncVersion: number | null
+}
+
+export type CatalogueSourceSumAggregateOutputType = {
+  syncVersion: number | null
 }
 
 export type CatalogueSourceMinAggregateOutputType = {
@@ -38,7 +48,11 @@ export type CatalogueSourceMinAggregateOutputType = {
   syncSchedule: string | null
   headerFingerprint: string | null
   lastSyncedAt: Date | null
+  nextSyncAt: Date | null
   lastErrorSummary: string | null
+  syncLeaseId: string | null
+  syncLeaseExpiresAt: Date | null
+  syncVersion: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -57,7 +71,11 @@ export type CatalogueSourceMaxAggregateOutputType = {
   syncSchedule: string | null
   headerFingerprint: string | null
   lastSyncedAt: Date | null
+  nextSyncAt: Date | null
   lastErrorSummary: string | null
+  syncLeaseId: string | null
+  syncLeaseExpiresAt: Date | null
+  syncVersion: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -76,12 +94,24 @@ export type CatalogueSourceCountAggregateOutputType = {
   syncSchedule: number
   headerFingerprint: number
   lastSyncedAt: number
+  nextSyncAt: number
   lastErrorSummary: number
+  syncLeaseId: number
+  syncLeaseExpiresAt: number
+  syncVersion: number
   createdAt: number
   updatedAt: number
   _all: number
 }
 
+
+export type CatalogueSourceAvgAggregateInputType = {
+  syncVersion?: true
+}
+
+export type CatalogueSourceSumAggregateInputType = {
+  syncVersion?: true
+}
 
 export type CatalogueSourceMinAggregateInputType = {
   id?: true
@@ -97,7 +127,11 @@ export type CatalogueSourceMinAggregateInputType = {
   syncSchedule?: true
   headerFingerprint?: true
   lastSyncedAt?: true
+  nextSyncAt?: true
   lastErrorSummary?: true
+  syncLeaseId?: true
+  syncLeaseExpiresAt?: true
+  syncVersion?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -116,7 +150,11 @@ export type CatalogueSourceMaxAggregateInputType = {
   syncSchedule?: true
   headerFingerprint?: true
   lastSyncedAt?: true
+  nextSyncAt?: true
   lastErrorSummary?: true
+  syncLeaseId?: true
+  syncLeaseExpiresAt?: true
+  syncVersion?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -135,7 +173,11 @@ export type CatalogueSourceCountAggregateInputType = {
   syncSchedule?: true
   headerFingerprint?: true
   lastSyncedAt?: true
+  nextSyncAt?: true
   lastErrorSummary?: true
+  syncLeaseId?: true
+  syncLeaseExpiresAt?: true
+  syncVersion?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -179,6 +221,18 @@ export type CatalogueSourceAggregateArgs<ExtArgs extends runtime.Types.Extension
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    *
+   * Select which fields to average
+  **/
+  _avg?: CatalogueSourceAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   *
+   * Select which fields to sum
+  **/
+  _sum?: CatalogueSourceSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   *
    * Select which fields to find the minimum value
   **/
   _min?: CatalogueSourceMinAggregateInputType
@@ -209,6 +263,8 @@ export type CatalogueSourceGroupByArgs<ExtArgs extends runtime.Types.Extensions.
   take?: number
   skip?: number
   _count?: CatalogueSourceCountAggregateInputType | true
+  _avg?: CatalogueSourceAvgAggregateInputType
+  _sum?: CatalogueSourceSumAggregateInputType
   _min?: CatalogueSourceMinAggregateInputType
   _max?: CatalogueSourceMaxAggregateInputType
 }
@@ -227,10 +283,16 @@ export type CatalogueSourceGroupByOutputType = {
   syncSchedule: string | null
   headerFingerprint: string | null
   lastSyncedAt: Date | null
+  nextSyncAt: Date | null
   lastErrorSummary: string | null
+  syncLeaseId: string | null
+  syncLeaseExpiresAt: Date | null
+  syncVersion: number
   createdAt: Date
   updatedAt: Date
   _count: CatalogueSourceCountAggregateOutputType | null
+  _avg: CatalogueSourceAvgAggregateOutputType | null
+  _sum: CatalogueSourceSumAggregateOutputType | null
   _min: CatalogueSourceMinAggregateOutputType | null
   _max: CatalogueSourceMaxAggregateOutputType | null
 }
@@ -267,7 +329,11 @@ export type CatalogueSourceWhereInput = {
   syncSchedule?: Prisma.StringNullableFilter<"CatalogueSource"> | string | null
   headerFingerprint?: Prisma.StringNullableFilter<"CatalogueSource"> | string | null
   lastSyncedAt?: Prisma.DateTimeNullableFilter<"CatalogueSource"> | Date | string | null
+  nextSyncAt?: Prisma.DateTimeNullableFilter<"CatalogueSource"> | Date | string | null
   lastErrorSummary?: Prisma.StringNullableFilter<"CatalogueSource"> | string | null
+  syncLeaseId?: Prisma.UuidNullableFilter<"CatalogueSource"> | string | null
+  syncLeaseExpiresAt?: Prisma.DateTimeNullableFilter<"CatalogueSource"> | Date | string | null
+  syncVersion?: Prisma.IntFilter<"CatalogueSource"> | number
   createdAt?: Prisma.DateTimeFilter<"CatalogueSource"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"CatalogueSource"> | Date | string
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
@@ -290,7 +356,11 @@ export type CatalogueSourceOrderByWithRelationInput = {
   syncSchedule?: Prisma.SortOrderInput | Prisma.SortOrder
   headerFingerprint?: Prisma.SortOrderInput | Prisma.SortOrder
   lastSyncedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  nextSyncAt?: Prisma.SortOrderInput | Prisma.SortOrder
   lastErrorSummary?: Prisma.SortOrderInput | Prisma.SortOrder
+  syncLeaseId?: Prisma.SortOrderInput | Prisma.SortOrder
+  syncLeaseExpiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  syncVersion?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   tenant?: Prisma.TenantOrderByWithRelationInput
@@ -317,7 +387,11 @@ export type CatalogueSourceWhereUniqueInput = Prisma.AtLeast<{
   syncSchedule?: Prisma.StringNullableFilter<"CatalogueSource"> | string | null
   headerFingerprint?: Prisma.StringNullableFilter<"CatalogueSource"> | string | null
   lastSyncedAt?: Prisma.DateTimeNullableFilter<"CatalogueSource"> | Date | string | null
+  nextSyncAt?: Prisma.DateTimeNullableFilter<"CatalogueSource"> | Date | string | null
   lastErrorSummary?: Prisma.StringNullableFilter<"CatalogueSource"> | string | null
+  syncLeaseId?: Prisma.UuidNullableFilter<"CatalogueSource"> | string | null
+  syncLeaseExpiresAt?: Prisma.DateTimeNullableFilter<"CatalogueSource"> | Date | string | null
+  syncVersion?: Prisma.IntFilter<"CatalogueSource"> | number
   createdAt?: Prisma.DateTimeFilter<"CatalogueSource"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"CatalogueSource"> | Date | string
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
@@ -340,12 +414,18 @@ export type CatalogueSourceOrderByWithAggregationInput = {
   syncSchedule?: Prisma.SortOrderInput | Prisma.SortOrder
   headerFingerprint?: Prisma.SortOrderInput | Prisma.SortOrder
   lastSyncedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  nextSyncAt?: Prisma.SortOrderInput | Prisma.SortOrder
   lastErrorSummary?: Prisma.SortOrderInput | Prisma.SortOrder
+  syncLeaseId?: Prisma.SortOrderInput | Prisma.SortOrder
+  syncLeaseExpiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  syncVersion?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.CatalogueSourceCountOrderByAggregateInput
+  _avg?: Prisma.CatalogueSourceAvgOrderByAggregateInput
   _max?: Prisma.CatalogueSourceMaxOrderByAggregateInput
   _min?: Prisma.CatalogueSourceMinOrderByAggregateInput
+  _sum?: Prisma.CatalogueSourceSumOrderByAggregateInput
 }
 
 export type CatalogueSourceScalarWhereWithAggregatesInput = {
@@ -365,7 +445,11 @@ export type CatalogueSourceScalarWhereWithAggregatesInput = {
   syncSchedule?: Prisma.StringNullableWithAggregatesFilter<"CatalogueSource"> | string | null
   headerFingerprint?: Prisma.StringNullableWithAggregatesFilter<"CatalogueSource"> | string | null
   lastSyncedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"CatalogueSource"> | Date | string | null
+  nextSyncAt?: Prisma.DateTimeNullableWithAggregatesFilter<"CatalogueSource"> | Date | string | null
   lastErrorSummary?: Prisma.StringNullableWithAggregatesFilter<"CatalogueSource"> | string | null
+  syncLeaseId?: Prisma.UuidNullableWithAggregatesFilter<"CatalogueSource"> | string | null
+  syncLeaseExpiresAt?: Prisma.DateTimeNullableWithAggregatesFilter<"CatalogueSource"> | Date | string | null
+  syncVersion?: Prisma.IntWithAggregatesFilter<"CatalogueSource"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"CatalogueSource"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"CatalogueSource"> | Date | string
 }
@@ -383,7 +467,11 @@ export type CatalogueSourceCreateInput = {
   syncSchedule?: string | null
   headerFingerprint?: string | null
   lastSyncedAt?: Date | string | null
+  nextSyncAt?: Date | string | null
   lastErrorSummary?: string | null
+  syncLeaseId?: string | null
+  syncLeaseExpiresAt?: Date | string | null
+  syncVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutCatalogueSourcesInput
@@ -406,7 +494,11 @@ export type CatalogueSourceUncheckedCreateInput = {
   syncSchedule?: string | null
   headerFingerprint?: string | null
   lastSyncedAt?: Date | string | null
+  nextSyncAt?: Date | string | null
   lastErrorSummary?: string | null
+  syncLeaseId?: string | null
+  syncLeaseExpiresAt?: Date | string | null
+  syncVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutSourceInput
@@ -427,7 +519,11 @@ export type CatalogueSourceUpdateInput = {
   syncSchedule?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headerFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  nextSyncAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastErrorSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  syncLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  syncLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  syncVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutCatalogueSourcesNestedInput
@@ -450,7 +546,11 @@ export type CatalogueSourceUncheckedUpdateInput = {
   syncSchedule?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headerFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  nextSyncAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastErrorSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  syncLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  syncLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  syncVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   products?: Prisma.ProductUncheckedUpdateManyWithoutSourceNestedInput
@@ -472,7 +572,11 @@ export type CatalogueSourceCreateManyInput = {
   syncSchedule?: string | null
   headerFingerprint?: string | null
   lastSyncedAt?: Date | string | null
+  nextSyncAt?: Date | string | null
   lastErrorSummary?: string | null
+  syncLeaseId?: string | null
+  syncLeaseExpiresAt?: Date | string | null
+  syncVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -490,7 +594,11 @@ export type CatalogueSourceUpdateManyMutationInput = {
   syncSchedule?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headerFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  nextSyncAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastErrorSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  syncLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  syncLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  syncVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -509,7 +617,11 @@ export type CatalogueSourceUncheckedUpdateManyInput = {
   syncSchedule?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headerFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  nextSyncAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastErrorSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  syncLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  syncLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  syncVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -548,9 +660,17 @@ export type CatalogueSourceCountOrderByAggregateInput = {
   syncSchedule?: Prisma.SortOrder
   headerFingerprint?: Prisma.SortOrder
   lastSyncedAt?: Prisma.SortOrder
+  nextSyncAt?: Prisma.SortOrder
   lastErrorSummary?: Prisma.SortOrder
+  syncLeaseId?: Prisma.SortOrder
+  syncLeaseExpiresAt?: Prisma.SortOrder
+  syncVersion?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type CatalogueSourceAvgOrderByAggregateInput = {
+  syncVersion?: Prisma.SortOrder
 }
 
 export type CatalogueSourceMaxOrderByAggregateInput = {
@@ -567,7 +687,11 @@ export type CatalogueSourceMaxOrderByAggregateInput = {
   syncSchedule?: Prisma.SortOrder
   headerFingerprint?: Prisma.SortOrder
   lastSyncedAt?: Prisma.SortOrder
+  nextSyncAt?: Prisma.SortOrder
   lastErrorSummary?: Prisma.SortOrder
+  syncLeaseId?: Prisma.SortOrder
+  syncLeaseExpiresAt?: Prisma.SortOrder
+  syncVersion?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -586,9 +710,17 @@ export type CatalogueSourceMinOrderByAggregateInput = {
   syncSchedule?: Prisma.SortOrder
   headerFingerprint?: Prisma.SortOrder
   lastSyncedAt?: Prisma.SortOrder
+  nextSyncAt?: Prisma.SortOrder
   lastErrorSummary?: Prisma.SortOrder
+  syncLeaseId?: Prisma.SortOrder
+  syncLeaseExpiresAt?: Prisma.SortOrder
+  syncVersion?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type CatalogueSourceSumOrderByAggregateInput = {
+  syncVersion?: Prisma.SortOrder
 }
 
 export type CatalogueSourceScalarRelationFilter = {
@@ -703,7 +835,11 @@ export type CatalogueSourceCreateWithoutTenantInput = {
   syncSchedule?: string | null
   headerFingerprint?: string | null
   lastSyncedAt?: Date | string | null
+  nextSyncAt?: Date | string | null
   lastErrorSummary?: string | null
+  syncLeaseId?: string | null
+  syncLeaseExpiresAt?: Date | string | null
+  syncVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   products?: Prisma.ProductCreateNestedManyWithoutSourceInput
@@ -724,7 +860,11 @@ export type CatalogueSourceUncheckedCreateWithoutTenantInput = {
   syncSchedule?: string | null
   headerFingerprint?: string | null
   lastSyncedAt?: Date | string | null
+  nextSyncAt?: Date | string | null
   lastErrorSummary?: string | null
+  syncLeaseId?: string | null
+  syncLeaseExpiresAt?: Date | string | null
+  syncVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutSourceInput
@@ -775,7 +915,11 @@ export type CatalogueSourceScalarWhereInput = {
   syncSchedule?: Prisma.StringNullableFilter<"CatalogueSource"> | string | null
   headerFingerprint?: Prisma.StringNullableFilter<"CatalogueSource"> | string | null
   lastSyncedAt?: Prisma.DateTimeNullableFilter<"CatalogueSource"> | Date | string | null
+  nextSyncAt?: Prisma.DateTimeNullableFilter<"CatalogueSource"> | Date | string | null
   lastErrorSummary?: Prisma.StringNullableFilter<"CatalogueSource"> | string | null
+  syncLeaseId?: Prisma.UuidNullableFilter<"CatalogueSource"> | string | null
+  syncLeaseExpiresAt?: Prisma.DateTimeNullableFilter<"CatalogueSource"> | Date | string | null
+  syncVersion?: Prisma.IntFilter<"CatalogueSource"> | number
   createdAt?: Prisma.DateTimeFilter<"CatalogueSource"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"CatalogueSource"> | Date | string
 }
@@ -793,7 +937,11 @@ export type CatalogueSourceCreateWithoutProductsInput = {
   syncSchedule?: string | null
   headerFingerprint?: string | null
   lastSyncedAt?: Date | string | null
+  nextSyncAt?: Date | string | null
   lastErrorSummary?: string | null
+  syncLeaseId?: string | null
+  syncLeaseExpiresAt?: Date | string | null
+  syncVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutCatalogueSourcesInput
@@ -815,7 +963,11 @@ export type CatalogueSourceUncheckedCreateWithoutProductsInput = {
   syncSchedule?: string | null
   headerFingerprint?: string | null
   lastSyncedAt?: Date | string | null
+  nextSyncAt?: Date | string | null
   lastErrorSummary?: string | null
+  syncLeaseId?: string | null
+  syncLeaseExpiresAt?: Date | string | null
+  syncVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   mappings?: Prisma.CatalogueMappingUncheckedCreateNestedManyWithoutSourceInput
@@ -851,7 +1003,11 @@ export type CatalogueSourceUpdateWithoutProductsInput = {
   syncSchedule?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headerFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  nextSyncAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastErrorSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  syncLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  syncLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  syncVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutCatalogueSourcesNestedInput
@@ -873,7 +1029,11 @@ export type CatalogueSourceUncheckedUpdateWithoutProductsInput = {
   syncSchedule?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headerFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  nextSyncAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastErrorSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  syncLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  syncLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  syncVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   mappings?: Prisma.CatalogueMappingUncheckedUpdateManyWithoutSourceNestedInput
@@ -893,7 +1053,11 @@ export type CatalogueSourceCreateWithoutMappingsInput = {
   syncSchedule?: string | null
   headerFingerprint?: string | null
   lastSyncedAt?: Date | string | null
+  nextSyncAt?: Date | string | null
   lastErrorSummary?: string | null
+  syncLeaseId?: string | null
+  syncLeaseExpiresAt?: Date | string | null
+  syncVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutCatalogueSourcesInput
@@ -915,7 +1079,11 @@ export type CatalogueSourceUncheckedCreateWithoutMappingsInput = {
   syncSchedule?: string | null
   headerFingerprint?: string | null
   lastSyncedAt?: Date | string | null
+  nextSyncAt?: Date | string | null
   lastErrorSummary?: string | null
+  syncLeaseId?: string | null
+  syncLeaseExpiresAt?: Date | string | null
+  syncVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutSourceInput
@@ -951,7 +1119,11 @@ export type CatalogueSourceUpdateWithoutMappingsInput = {
   syncSchedule?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headerFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  nextSyncAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastErrorSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  syncLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  syncLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  syncVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutCatalogueSourcesNestedInput
@@ -973,7 +1145,11 @@ export type CatalogueSourceUncheckedUpdateWithoutMappingsInput = {
   syncSchedule?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headerFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  nextSyncAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastErrorSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  syncLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  syncLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  syncVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   products?: Prisma.ProductUncheckedUpdateManyWithoutSourceNestedInput
@@ -993,7 +1169,11 @@ export type CatalogueSourceCreateWithoutImportRunsInput = {
   syncSchedule?: string | null
   headerFingerprint?: string | null
   lastSyncedAt?: Date | string | null
+  nextSyncAt?: Date | string | null
   lastErrorSummary?: string | null
+  syncLeaseId?: string | null
+  syncLeaseExpiresAt?: Date | string | null
+  syncVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutCatalogueSourcesInput
@@ -1015,7 +1195,11 @@ export type CatalogueSourceUncheckedCreateWithoutImportRunsInput = {
   syncSchedule?: string | null
   headerFingerprint?: string | null
   lastSyncedAt?: Date | string | null
+  nextSyncAt?: Date | string | null
   lastErrorSummary?: string | null
+  syncLeaseId?: string | null
+  syncLeaseExpiresAt?: Date | string | null
+  syncVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutSourceInput
@@ -1051,7 +1235,11 @@ export type CatalogueSourceUpdateWithoutImportRunsInput = {
   syncSchedule?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headerFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  nextSyncAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastErrorSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  syncLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  syncLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  syncVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutCatalogueSourcesNestedInput
@@ -1073,7 +1261,11 @@ export type CatalogueSourceUncheckedUpdateWithoutImportRunsInput = {
   syncSchedule?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headerFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  nextSyncAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastErrorSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  syncLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  syncLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  syncVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   products?: Prisma.ProductUncheckedUpdateManyWithoutSourceNestedInput
@@ -1093,7 +1285,11 @@ export type CatalogueSourceCreateManyTenantInput = {
   syncSchedule?: string | null
   headerFingerprint?: string | null
   lastSyncedAt?: Date | string | null
+  nextSyncAt?: Date | string | null
   lastErrorSummary?: string | null
+  syncLeaseId?: string | null
+  syncLeaseExpiresAt?: Date | string | null
+  syncVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1111,7 +1307,11 @@ export type CatalogueSourceUpdateWithoutTenantInput = {
   syncSchedule?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headerFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  nextSyncAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastErrorSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  syncLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  syncLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  syncVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   products?: Prisma.ProductUpdateManyWithoutSourceNestedInput
@@ -1132,7 +1332,11 @@ export type CatalogueSourceUncheckedUpdateWithoutTenantInput = {
   syncSchedule?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headerFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  nextSyncAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastErrorSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  syncLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  syncLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  syncVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   products?: Prisma.ProductUncheckedUpdateManyWithoutSourceNestedInput
@@ -1153,7 +1357,11 @@ export type CatalogueSourceUncheckedUpdateManyWithoutTenantInput = {
   syncSchedule?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headerFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  nextSyncAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastErrorSummary?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  syncLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  syncLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  syncVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1221,7 +1429,11 @@ export type CatalogueSourceSelect<ExtArgs extends runtime.Types.Extensions.Inter
   syncSchedule?: boolean
   headerFingerprint?: boolean
   lastSyncedAt?: boolean
+  nextSyncAt?: boolean
   lastErrorSummary?: boolean
+  syncLeaseId?: boolean
+  syncLeaseExpiresAt?: boolean
+  syncVersion?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
@@ -1245,7 +1457,11 @@ export type CatalogueSourceSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   syncSchedule?: boolean
   headerFingerprint?: boolean
   lastSyncedAt?: boolean
+  nextSyncAt?: boolean
   lastErrorSummary?: boolean
+  syncLeaseId?: boolean
+  syncLeaseExpiresAt?: boolean
+  syncVersion?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
@@ -1265,7 +1481,11 @@ export type CatalogueSourceSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   syncSchedule?: boolean
   headerFingerprint?: boolean
   lastSyncedAt?: boolean
+  nextSyncAt?: boolean
   lastErrorSummary?: boolean
+  syncLeaseId?: boolean
+  syncLeaseExpiresAt?: boolean
+  syncVersion?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
@@ -1285,12 +1505,16 @@ export type CatalogueSourceSelectScalar = {
   syncSchedule?: boolean
   headerFingerprint?: boolean
   lastSyncedAt?: boolean
+  nextSyncAt?: boolean
   lastErrorSummary?: boolean
+  syncLeaseId?: boolean
+  syncLeaseExpiresAt?: boolean
+  syncVersion?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type CatalogueSourceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "type" | "displayName" | "status" | "createdByUserId" | "spreadsheetId" | "sheetName" | "credentialRef" | "objectKey" | "syncSchedule" | "headerFingerprint" | "lastSyncedAt" | "lastErrorSummary" | "createdAt" | "updatedAt", ExtArgs["result"]["catalogueSource"]>
+export type CatalogueSourceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "type" | "displayName" | "status" | "createdByUserId" | "spreadsheetId" | "sheetName" | "credentialRef" | "objectKey" | "syncSchedule" | "headerFingerprint" | "lastSyncedAt" | "nextSyncAt" | "lastErrorSummary" | "syncLeaseId" | "syncLeaseExpiresAt" | "syncVersion" | "createdAt" | "updatedAt", ExtArgs["result"]["catalogueSource"]>
 export type CatalogueSourceInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   products?: boolean | Prisma.CatalogueSource$productsArgs<ExtArgs>
@@ -1327,7 +1551,11 @@ export type $CatalogueSourcePayload<ExtArgs extends runtime.Types.Extensions.Int
     syncSchedule: string | null
     headerFingerprint: string | null
     lastSyncedAt: Date | null
+    nextSyncAt: Date | null
     lastErrorSummary: string | null
+    syncLeaseId: string | null
+    syncLeaseExpiresAt: Date | null
+    syncVersion: number
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["catalogueSource"]>
@@ -1770,7 +1998,11 @@ export interface CatalogueSourceFieldRefs {
   readonly syncSchedule: Prisma.FieldRef<"CatalogueSource", 'String'>
   readonly headerFingerprint: Prisma.FieldRef<"CatalogueSource", 'String'>
   readonly lastSyncedAt: Prisma.FieldRef<"CatalogueSource", 'DateTime'>
+  readonly nextSyncAt: Prisma.FieldRef<"CatalogueSource", 'DateTime'>
   readonly lastErrorSummary: Prisma.FieldRef<"CatalogueSource", 'String'>
+  readonly syncLeaseId: Prisma.FieldRef<"CatalogueSource", 'String'>
+  readonly syncLeaseExpiresAt: Prisma.FieldRef<"CatalogueSource", 'DateTime'>
+  readonly syncVersion: Prisma.FieldRef<"CatalogueSource", 'Int'>
   readonly createdAt: Prisma.FieldRef<"CatalogueSource", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"CatalogueSource", 'DateTime'>
 }

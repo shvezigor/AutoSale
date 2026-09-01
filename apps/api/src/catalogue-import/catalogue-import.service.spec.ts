@@ -32,6 +32,7 @@ const migrationNames = [
   '20260831091500_catalogue_tenant_relations',
   '20260831100000_catalogue_source_object_key',
   '20260901090000_catalogue_mapping_leases',
+  '20260901120000_catalogue_sync_fencing',
 ];
 
 class MemoryStorage implements ObjectStorage {
@@ -358,6 +359,34 @@ describe('CatalogueImportService', () => {
 
     expect(await prisma.catalogueImportRun.findUniqueOrThrow({ where: { id: uploaded.id }, select: { status: true, mappingId: true } }))
       .toEqual({ status: 'UPLOADED', mappingId: null });
+  });
+
+  it('lets an owner review, preview, and confirm a server-side Google snapshot without exposing rows in status', async () => {
+    const source = await prisma.catalogueSource.create({ data: {
+      tenantId, type: 'GOOGLE_SHEETS', displayName: 'Google catalogue', status: 'PAUSED',
+      spreadsheetId: 'private-sheet-id', sheetName: 'Products', syncSchedule: 'MANUAL',
+    } });
+    const snapshotObjectKey = `catalogue/${tenantId}/${source.id}/google/revision-1.json`;
+    await storage.put({
+      key: snapshotObjectKey,
+      contentType: 'application/vnd.autosale.catalogue-table+json',
+      body: Buffer.from(JSON.stringify({ headers: ['sku', 'name', 'price'], rows: [['LUNA-1', 'Private Luna', '12,50']], fingerprint: 'google-fingerprint' })),
+    });
+    const run = await prisma.catalogueImportRun.create({ data: {
+      tenantId, sourceId: source.id, status: 'MAPPING_REVIEW', idempotencyKey: `google:${source.id}:revision-1:review`,
+      sourceRevision: 'revision-1', sourceHeaders: ['sku', 'name', 'price'], snapshotObjectKey, totalRows: 1,
+    } });
+
+    const status = await service.status(tenantId, run.id);
+    expect(status).toMatchObject({ id: run.id, status: 'MAPPING_REVIEW', headers: ['sku', 'name', 'price'] });
+    expect(JSON.stringify(status)).not.toContain('Private Luna');
+
+    const preview = await service.updateMapping(tenantId, ownerUserId, run.id, { columns: [
+      { source: 'sku', target: 'sku' }, { source: 'name', target: 'name' }, { source: 'price', target: 'price' },
+    ] });
+    expect(preview.rows[0]?.product).toMatchObject({ sku: 'LUNA-1', name: 'Private Luna', price: 12.5 });
+    await expect(service.confirm(tenantId, ownerUserId, run.id)).resolves.toMatchObject({ status: 'COMPLETED', createdRows: 1 });
+    await expect(prisma.product.findUnique({ where: { tenantId_sku: { tenantId, sku: 'LUNA-1' } } })).resolves.toMatchObject({ sourceId: source.id });
   });
 
   async function uploadAndMap(csv: string) {

@@ -42,7 +42,7 @@ describe('CatalogueSourcesService', () => {
       serviceAccountEmail: 'catalogue-reader@example.iam.gserviceaccount.com',
       authorizationAction: 'SHARE_WITH_SERVICE_ACCOUNT',
     });
-    expect(prisma.catalogueSource.create).toHaveBeenCalledWith({ data: {
+    expect(prisma.catalogueSource.create).toHaveBeenCalledWith({ data: expect.objectContaining({
       tenantId,
       createdByUserId: userId,
       type: 'GOOGLE_SHEETS',
@@ -51,7 +51,8 @@ describe('CatalogueSourcesService', () => {
       sheetName: 'Товари',
       syncSchedule: 'HOURLY',
       status: 'PENDING',
-    } });
+      nextSyncAt: expect.any(Date),
+    }) });
     expect(prisma.googleSheetsDestination.findUnique).not.toHaveBeenCalled();
     expect(prisma.googleSheetsDestination.update).not.toHaveBeenCalled();
     expect(prisma.googleSheetsDestination.upsert).not.toHaveBeenCalled();
@@ -67,7 +68,7 @@ describe('CatalogueSourcesService', () => {
     const prisma = { catalogueSource: {
       findMany: vi.fn().mockResolvedValue([row]),
       findFirst: vi.fn().mockResolvedValue(row),
-    } };
+    }, catalogueImportRun: { findFirst: vi.fn().mockResolvedValue({ id: '77777777-7777-4777-8777-777777777777', status: 'MAPPING_REVIEW', sourceHeaders: ['sku', 'name'] }) } };
     const service = new CatalogueSourcesService(prisma as never, undefined, undefined, { serviceAccountEmail: 'reader@example.com' });
 
     const health = await service.listHealth(tenantId);
@@ -79,7 +80,9 @@ describe('CatalogueSourcesService', () => {
     expect(JSON.stringify(health)).not.toContain('private-sheet-id');
     await expect(service.getConfiguration(tenantId, sourceId)).resolves.toMatchObject({
       spreadsheetId: 'private-sheet-id', sheetName: 'Товари', syncSchedule: 'DAILY', serviceAccountEmail: 'reader@example.com',
+      pendingReview: { runId: '77777777-7777-4777-8777-777777777777', headers: ['sku', 'name'] },
     });
+    expect(JSON.stringify(await service.getConfiguration(tenantId, sourceId))).not.toContain('private product');
   });
 
   it('tests connectivity without returning rows and records only a safe failure category', async () => {

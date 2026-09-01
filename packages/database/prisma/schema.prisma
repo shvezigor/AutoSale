@@ -516,7 +516,11 @@ model CatalogueSource {
   syncSchedule     String?                @map("sync_schedule")
   headerFingerprint String?               @map("header_fingerprint")
   lastSyncedAt     DateTime?              @map("last_synced_at")
+  nextSyncAt       DateTime?              @map("next_sync_at")
   lastErrorSummary String?                @map("last_error_summary")
+  syncLeaseId      String?                @map("sync_lease_id") @db.Uuid
+  syncLeaseExpiresAt DateTime?            @map("sync_lease_expires_at")
+  syncVersion      Int                    @default(0) @map("sync_version")
   createdAt        DateTime               @default(now()) @map("created_at")
   updatedAt        DateTime               @updatedAt @map("updated_at")
   tenant           Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
@@ -525,6 +529,7 @@ model CatalogueSource {
   importRuns       CatalogueImportRun[]
 
   @@index([tenantId, status])
+  @@index([type, status, nextSyncAt, id])
   @@unique([tenantId, id])
   @@map("catalogue_sources")
 }
@@ -568,6 +573,9 @@ model CatalogueImportRun {
   status          CatalogueImportStatus  @default(UPLOADED)
   idempotencyKey  String                 @map("idempotency_key")
   sourceRevision  String?                @map("source_revision")
+  sourceHeaders   Json?                  @map("source_headers")
+  snapshotObjectKey String?              @map("snapshot_object_key")
+  sourceSyncVersion Int?                 @map("source_sync_version")
   totalRows       Int                    @default(0) @map("total_rows")
   validRows       Int                    @default(0) @map("valid_rows")
   createdRows     Int                    @default(0) @map("created_rows")

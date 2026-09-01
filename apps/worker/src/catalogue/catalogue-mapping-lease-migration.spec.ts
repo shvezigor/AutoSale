@@ -50,6 +50,7 @@ describe('catalogue mapping lease migration', () => {
     await pool.query('INSERT INTO "catalogue_mappings" ("id", "tenant_id", "source_id", "version", "source_fingerprint", "columns") VALUES ($1, $2, $3, $4, $5, $6::jsonb)', [mappingId, tenantId, sourceId, 1, 'legacy-fingerprint', '[]']);
     await pool.query('INSERT INTO "catalogue_import_runs" ("id", "tenant_id", "source_id", "mapping_id", "status", "idempotency_key") VALUES ($1, $2, $3, $4, $5, $6)', [runId, tenantId, sourceId, mappingId, 'MAPPING', 'legacy-mapping-run']);
     await pool.query(await readFile(resolve(migrationRoot, '20260901090000_catalogue_mapping_leases', 'migration.sql'), 'utf8'));
+    await pool.query(await readFile(resolve(migrationRoot, '20260901120000_catalogue_sync_fencing', 'migration.sql'), 'utf8'));
     await pool.end();
     prisma = createPrismaClient(connectionString);
   }, 60_000);
