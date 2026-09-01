@@ -12,6 +12,9 @@ import { TeamModule } from './team/team.module.js';
 import { AdminModule } from './admin/admin.module.js';
 import { InstagramOAuthModule } from './integrations/instagram-oauth.module.js';
 import { DemoScenarioModule } from './demo/demo-scenario.module.js';
+import { CatalogueModule } from './catalogue/catalogue.module.js';
+import { CatalogueImportModule } from './catalogue-import/catalogue-import.module.js';
+import { CatalogueSourcesModule } from './catalogue-sources/catalogue-sources.module.js';
 
 @Module({
   controllers: [HealthController],
@@ -31,6 +34,9 @@ export class AppModule {
         OrdersModule.register(env),
         InstagramOAuthModule.register(env),
         DemoScenarioModule.register(env),
+        CatalogueModule.register(env),
+        CatalogueImportModule.register(env),
+        CatalogueSourcesModule.register(env),
       ],
     };
   }

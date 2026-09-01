@@ -21,6 +21,8 @@
     "@nestjs/swagger": "11.4.7",
     "argon2": "0.44.0",
     "bullmq": "5.58.5",
+    "csv-parse": "6.1.0",
+    "exceljs": "4.4.0",
     "ioredis": "5.11.1",
     "nodemailer": "^7.0.13",
     "reflect-metadata": "^0.2.2",

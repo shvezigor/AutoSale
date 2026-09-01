@@ -21,12 +21,16 @@ describe('InstagramProcessor', () => {
     const migrationPaths = [
       '20260826090000_init_webhook_events',
       '20260826123000_conversations_messages',
+      '20260826210000_product_catalog',
       '20260827160000_self_hosted_auth',
       '20260827170000_tenant_access_status',
       '20260827230000_instagram_connections',
       '20260828_meta_instagram_oauth',
       '20260828150000_instagram_oauth_attempt_guard',
       '20260829120000_instagram_credential_cleanup_queue',
+      '20260831090000_catalogue_import',
+      '20260831091500_catalogue_tenant_relations',
+      '20260831100000_catalogue_source_object_key',
     ];
     const pool = new pg.Pool({ connectionString });
     for (const migrationPath of migrationPaths) {

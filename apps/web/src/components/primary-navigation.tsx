@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { mutatingFetch } from '../auth/csrf-fetch';
 
 type NavigationSession = Pick<PublicSession, 'name' | 'email' | 'membershipRole'>;
-type Destination = 'conversations' | 'orders' | 'team' | 'settings';
+type Destination = 'conversations' | 'orders' | 'catalogue' | 'team' | 'settings';
 
 export function PrimaryNavigation({ active, session }: { active: Destination; session: NavigationSession }) {
   const router = useRouter();
@@ -23,6 +23,7 @@ export function PrimaryNavigation({ active, session }: { active: Destination; se
     <nav aria-label="Головна навігація">
       <Link className={`nav-item${active === 'conversations' ? ' active' : ''}`} href="/conversations"><span>Діалоги</span></Link>
       <Link className={`nav-item${active === 'orders' ? ' active' : ''}`} href="/orders"><span>Замовлення</span></Link>
+      {session.membershipRole && <Link className={`nav-item${active === 'catalogue' ? ' active' : ''}`} href="/catalogue"><span>Каталог</span></Link>}
       {isOwner && <Link className={`nav-item${active === 'team' ? ' active' : ''}`} href="/team"><span>Команда</span></Link>}
       {session.membershipRole && <Link className={`nav-item${active === 'settings' ? ' active' : ''}`} href="/settings"><span>Налаштування</span></Link>}
     </nav>
