@@ -1,6 +1,6 @@
 import { CatalogueSkuOwnershipError } from '@autosale/database';
-import { GoogleSheetsReadError, googleSheetsStructureFingerprint } from '@autosale/integrations';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { GoogleSheetsReadError, GoogleSheetsTableValidationError, googleSheetsStructureFingerprint } from '@autosale/integrations';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { GoogleCatalogueSyncProcessor } from './google-catalogue-sync.processor.js';
 
@@ -31,12 +31,17 @@ describe('GoogleCatalogueSyncProcessor', () => {
     storage = { put: vi.fn().mockResolvedValue({ key: 'snapshot', etag: 'etag' }) };
   });
 
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it('reuses a confirmed mapping when the normalized structure is unchanged', async () => {
     const processor = new GoogleCatalogueSyncProcessor(prisma as never, sheets as never, storage, importer);
 
     await expect(processor.process({ tenantId, sourceId })).resolves.toMatchObject({ status: 'COMPLETED', revision: 'revision-1' });
     expect(importer.importTable).toHaveBeenCalledWith(expect.objectContaining({
       tenantId, sourceId, headers, rows: [['LUNA-01', 'Luna']], mapping: mapping.columns,
+      ownershipPolicy: 'FENCE_CROSS_SOURCE', lease: expect.objectContaining({ syncVersion: 2, ttlMs: 300_000 }),
     }));
     expect(prisma.catalogueImportRun.create).toHaveBeenCalledWith({ data: expect.objectContaining({
       tenantId, sourceId, mappingId, status: 'PROCESSING', idempotencyKey: `google:${sourceId}:revision-1:mapping:1`, sourceRevision: 'revision-1',
@@ -63,6 +68,19 @@ describe('GoogleCatalogueSyncProcessor', () => {
     expect(prisma.catalogueImportRun.create).not.toHaveBeenCalled();
   });
 
+  it('refreshes and exposes an existing owner preview instead of deadlocking on its idempotency key', async () => {
+    prisma.catalogueImportRun.findUnique.mockResolvedValue({ id: 'preview-run', status: 'PREVIEW_READY', sourceSyncVersion: 1 });
+    const processor = new GoogleCatalogueSyncProcessor(prisma as never, sheets as never, storage, importer);
+
+    await expect(processor.process({ tenantId, sourceId })).resolves.toMatchObject({ status: 'PREVIEW_READY', runId: 'preview-run' });
+    expect(importer.importTable).not.toHaveBeenCalled();
+    expect(prisma.catalogueImportRun.create).not.toHaveBeenCalled();
+    expect(prisma.catalogueImportRun.updateMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: { id: 'preview-run', tenantId, status: 'PREVIEW_READY' },
+      data: expect.objectContaining({ sourceSyncVersion: 2, snapshotObjectKey: expect.any(String) }),
+    }));
+  });
+
   it('does not let manual and scheduled jobs concurrently claim the same source version', async () => {
     let claims = 0;
     prisma.catalogueSource.updateMany.mockImplementation(({ data }) => Promise.resolve(data.syncVersion ? { count: ++claims === 1 ? 1 : 0 } : { count: 1 }));
@@ -75,6 +93,48 @@ describe('GoogleCatalogueSyncProcessor', () => {
 
     expect([first.status, second.status]).toEqual(expect.arrayContaining(['COMPLETED', 'BUSY']));
     expect(importer.importTable).toHaveBeenCalledTimes(1);
+  });
+
+  it('renews a long import lease so a competing claimant remains fenced after more than five minutes', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-09-01T08:00:00.000Z'));
+    const leaseState: { id: string | null; expiresAt: number; version: number } = { id: null, expiresAt: 0, version: 1 };
+    prisma.catalogueSource.findFirst.mockImplementation(async () => ({
+      ...source, syncVersion: leaseState.version, syncSchedule: 'MANUAL', syncLeaseId: leaseState.id,
+      syncLeaseExpiresAt: leaseState.id ? new Date(leaseState.expiresAt) : null,
+    }));
+    prisma.catalogueSource.updateMany.mockImplementation(async ({ where, data }) => {
+      if (data.syncVersion?.increment) {
+        if (where.syncVersion !== leaseState.version || (leaseState.id && leaseState.expiresAt > Date.now())) return { count: 0 };
+        leaseState.id = data.syncLeaseId;
+        leaseState.expiresAt = data.syncLeaseExpiresAt.getTime();
+        leaseState.version += 1;
+        return { count: 1 };
+      }
+      if (data.syncLeaseExpiresAt instanceof Date && data.syncLeaseId === undefined) {
+        if (where.syncLeaseId !== leaseState.id || where.syncVersion !== leaseState.version || leaseState.expiresAt <= Date.now()) return { count: 0 };
+        leaseState.expiresAt = data.syncLeaseExpiresAt.getTime();
+        return { count: 1 };
+      }
+      if (where.syncLeaseId !== leaseState.id || where.syncVersion !== leaseState.version) return { count: 0 };
+      if (data.syncLeaseId === null) { leaseState.id = null; leaseState.expiresAt = 0; }
+      return { count: 1 };
+    });
+    let finishImport!: (value: CatalogueImportCountsFixture) => void;
+    importer.importTable.mockImplementation(() => importer.importTable.mock.calls.length === 1
+      ? new Promise((resolve) => { finishImport = resolve; })
+      : Promise.resolve({ totalRows: 1, validRows: 1, createdRows: 1, updatedRows: 0, skippedRows: 0, failedRows: 0, rowErrors: [] }));
+    const firstProcessor = new GoogleCatalogueSyncProcessor(prisma as never, sheets as never, storage, importer);
+    const first = firstProcessor.process({ tenantId, sourceId });
+    for (let turn = 0; turn < 20 && importer.importTable.mock.calls.length === 0; turn += 1) await Promise.resolve();
+    expect(importer.importTable).toHaveBeenCalledOnce();
+
+    await vi.advanceTimersByTimeAsync(6 * 60_000);
+    const competitor = new GoogleCatalogueSyncProcessor(prisma as never, sheets as never, storage, importer);
+    await expect(competitor.process({ tenantId, sourceId })).resolves.toEqual({ status: 'BUSY' });
+
+    finishImport({ totalRows: 1, validRows: 1, createdRows: 1, updatedRows: 0, skippedRows: 0, failedRows: 0, rowErrors: [] });
+    await expect(first).resolves.toMatchObject({ status: 'COMPLETED' });
   });
 
   it('retries a failed run and recovers stale processing while a fresh processing run stays in progress', async () => {
@@ -122,6 +182,19 @@ describe('GoogleCatalogueSyncProcessor', () => {
     expect(prisma.catalogueSource.updateMany).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ status: 'ERROR', lastErrorSummary: 'RATE_LIMIT' }) }));
   });
 
+  it('pauses without a provider retry when the downloaded table violates local structure bounds', async () => {
+    sheets.readTable.mockRejectedValue(new GoogleSheetsTableValidationError('COLUMN_LIMIT', 'Google Sheets table exceeds 100 columns'));
+    const processor = new GoogleCatalogueSyncProcessor(prisma as never, sheets as never, storage, importer);
+
+    await expect(processor.process({ tenantId, sourceId })).resolves.toMatchObject({
+      status: 'FAILED', reason: 'TABLE_VALIDATION', validationCode: 'COLUMN_LIMIT',
+    });
+    expect(importer.importTable).not.toHaveBeenCalled();
+    expect(prisma.catalogueSource.updateMany).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({ status: 'PAUSED', lastErrorSummary: 'TABLE_COLUMN_LIMIT' }),
+    }));
+  });
+
   it('releases its source lease when persisting a review snapshot fails', async () => {
     storage.put.mockRejectedValue(new Error('storage unavailable'));
     const processor = new GoogleCatalogueSyncProcessor(prisma as never, sheets as never, storage, importer);
@@ -143,7 +216,7 @@ describe('GoogleCatalogueSyncProcessor', () => {
   });
 
   function prismaDouble() {
-    return {
+    const delegates = {
       catalogueSource: {
         findFirst: vi.fn().mockResolvedValue({ ...source, syncVersion: 1, syncSchedule: 'MANUAL', syncLeaseId: null, syncLeaseExpiresAt: null }),
         updateMany: vi.fn().mockResolvedValue({ count: 1 }),
@@ -156,5 +229,11 @@ describe('GoogleCatalogueSyncProcessor', () => {
       },
       product: { findMany: vi.fn().mockResolvedValue([]) },
     };
+    return { ...delegates, $transaction: vi.fn().mockImplementation((work) => work(delegates)) };
   }
 });
+
+type CatalogueImportCountsFixture = {
+  totalRows: number; validRows: number; createdRows: number; updatedRows: number; skippedRows: number; failedRows: number;
+  rowErrors: Array<{ rowNumber?: number; errors: string[] }>;
+};

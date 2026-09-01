@@ -2,7 +2,7 @@ import { createHash, randomUUID } from 'node:crypto';
 import { basename, extname } from 'node:path';
 
 import { catalogueTargetFieldSchema, type CatalogueImportSummary, type CataloguePreview, type CatalogueTargetField } from '@autosale/contracts';
-import { buildCatalogueImportPlan, importCatalogueTable, Prisma, type PrismaClient } from '@autosale/database';
+import { buildCatalogueImportPlan, CatalogueImportLeaseLostError, importCatalogueTable, Prisma, type PrismaClient } from '@autosale/database';
 import { googleSheetsStructureFingerprint, type ObjectStorage } from '@autosale/integrations';
 import { BadRequestException, ConflictException, NotFoundException, ServiceUnavailableException, UnprocessableEntityException } from '@nestjs/common';
 
@@ -11,6 +11,8 @@ import { parseCatalogueSource, type ParsedCell, type ParsedTable } from './sourc
 export const MAX_CATALOGUE_UPLOAD_BYTES = 5 * 1024 * 1024;
 const REMAPPABLE_STATUSES = ['UPLOADED', 'MAPPING', 'MAPPING_REVIEW', 'PREVIEW_READY'] as const;
 const XLSX_MEDIA_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+const SOURCE_LEASE_MS = 5 * 60_000;
+const SOURCE_HEARTBEAT_MS = 60_000;
 const supportedFiles = new Map([
   ['.csv', { mediaTypes: new Set(['text/csv', 'application/csv']), sourceType: 'CSV_UPLOAD' as const }],
   ['.xlsx', { mediaTypes: new Set([XLSX_MEDIA_TYPE]), sourceType: 'XLSX_UPLOAD' as const }],
@@ -213,22 +215,16 @@ export class CatalogueImportService {
   }
 
   async confirm(tenantId: string, userId: string, runId: string): Promise<CatalogueImportSummary> {
-    const lock = await this.prisma.catalogueImportRun.updateMany({
-      where: { id: runId, tenantId, status: 'PREVIEW_READY' },
-      data: { status: 'PROCESSING', requestedByUserId: userId, startedAt: new Date() },
-    });
-    if (lock.count !== 1) {
-      const existing = await this.prisma.catalogueImportRun.findFirst({ where: { id: runId, tenantId } });
-      if (!existing) throw new NotFoundException('Catalogue import not found');
-      if (existing.status === 'COMPLETED') return mapSummary(existing);
-      throw new ConflictException('Catalogue import cannot be confirmed');
-    }
+    const claim = await this.claimConfirmation(tenantId, userId, runId);
+    if ('completed' in claim) return claim.completed;
+    const heartbeat = claim.lease ? this.startLeaseHeartbeat(tenantId, claim.sourceId, claim.lease) : undefined;
 
     try {
       const run = await this.loadRun(tenantId, runId);
       if (!run.mapping) throw new ConflictException('Catalogue mapping is not confirmed');
       const table = await this.loadTable(run.source.objectKey, run.source.type, run.snapshotObjectKey);
       if (table.fingerprint !== run.mapping.sourceFingerprint) throw new ConflictException('Catalogue headers changed');
+      await heartbeat?.assertOwned();
       const result = await importCatalogueTable(this.prisma, {
         tenantId,
         sourceId: run.sourceId,
@@ -236,33 +232,136 @@ export class CatalogueImportService {
         rows: table.rows.map((row) => table.headers.map((header) => row[header] ?? null)),
         mapping: readMapping(run.mapping.columns),
         transformSettings: run.mapping.transformSettings,
+        ownershipPolicy: run.source.type === 'GOOGLE_SHEETS' ? 'FENCE_CROSS_SOURCE' : 'REASSIGN',
+        ...(claim.lease ? { lease: claim.lease } : {}),
       });
+      await heartbeat?.assertOwned();
 
-      const completed = await this.prisma.catalogueImportRun.update({
-        where: { id: runId },
-        data: {
-          status: 'COMPLETED',
-          ...result,
-          rowErrors: result.rowErrors as Prisma.InputJsonValue,
-          completedAt: new Date(),
-        },
-      });
-      if (run.source.type === 'GOOGLE_SHEETS') {
-        await this.prisma.catalogueSource.updateMany({
-          where: { id: run.sourceId, tenantId, type: 'GOOGLE_SHEETS' },
-          data: {
-            status: 'ACTIVE', lastSyncedAt: new Date(), nextSyncAt: nextSyncAt(run.source.syncSchedule), lastErrorSummary: null,
-          },
-        });
-      }
+      const completed = await this.completeConfirmation(tenantId, runId, run, result, claim.lease);
       return mapSummary(completed);
     } catch (error) {
       await this.prisma.catalogueImportRun.updateMany({
-        where: { id: runId, tenantId, status: 'PROCESSING' },
+        where: {
+          id: runId, tenantId, status: 'PROCESSING',
+          ...(claim.lease ? { sourceSyncVersion: claim.lease.syncVersion } : {}),
+        },
         data: { status: 'FAILED', rowErrors: [{ errors: ['IMPORT_FAILED'] }], completedAt: new Date() },
       });
+      if (claim.lease) {
+        await this.prisma.catalogueSource.updateMany({
+          where: { id: claim.sourceId, tenantId, syncLeaseId: claim.lease.id, syncVersion: claim.lease.syncVersion },
+          data: { status: 'ERROR', lastErrorSummary: 'IMPORT_FAILED', syncLeaseId: null, syncLeaseExpiresAt: null },
+        });
+      }
       throw error;
+    } finally {
+      await heartbeat?.stop();
     }
+  }
+
+  private startLeaseHeartbeat(tenantId: string, sourceId: string, lease: { id: string; syncVersion: number; ttlMs: number }) {
+    let lost = false;
+    let renewal = Promise.resolve();
+    const renew = () => {
+      renewal = renewal.then(async () => {
+        const now = new Date();
+        const renewed = await this.prisma.catalogueSource.updateMany({
+          where: {
+            id: sourceId, tenantId, type: 'GOOGLE_SHEETS', syncLeaseId: lease.id,
+            syncVersion: lease.syncVersion, syncLeaseExpiresAt: { gt: now },
+          },
+          data: { syncLeaseExpiresAt: new Date(now.getTime() + lease.ttlMs) },
+        });
+        if (renewed.count !== 1) lost = true;
+      }).catch(() => { lost = true; });
+    };
+    const timer = setInterval(renew, SOURCE_HEARTBEAT_MS);
+    timer.unref?.();
+    return {
+      assertOwned: async () => {
+        await renewal;
+        if (lost) throw new CatalogueImportLeaseLostError();
+      },
+      stop: async () => {
+        clearInterval(timer);
+        await renewal;
+      },
+    };
+  }
+
+  private async claimConfirmation(tenantId: string, userId: string, runId: string): Promise<
+    { sourceId: string; lease?: { id: string; syncVersion: number; ttlMs: number } } | { completed: CatalogueImportSummary }
+  > {
+    return this.prisma.$transaction(async (tx) => {
+      const run = await tx.catalogueImportRun.findFirst({
+        where: { id: runId, tenantId },
+        include: { source: { select: { type: true, syncVersion: true } } },
+      });
+      if (!run) throw new NotFoundException('Catalogue import not found');
+      if (run.status === 'COMPLETED') return { completed: mapSummary(run) };
+      if (run.status !== 'PREVIEW_READY') throw new ConflictException('Catalogue import cannot be confirmed');
+
+      const now = new Date();
+      if (run.source.type !== 'GOOGLE_SHEETS') {
+        const locked = await tx.catalogueImportRun.updateMany({
+          where: { id: runId, tenantId, status: 'PREVIEW_READY' },
+          data: { status: 'PROCESSING', requestedByUserId: userId, startedAt: now },
+        });
+        if (locked.count !== 1) throw new ConflictException('Catalogue import cannot be confirmed');
+        return { sourceId: run.sourceId };
+      }
+
+      if (run.sourceSyncVersion === null || run.sourceSyncVersion !== run.source.syncVersion) {
+        throw new ConflictException('Catalogue source changed after this preview');
+      }
+      const leaseId = randomUUID();
+      const claimed = await tx.catalogueSource.updateMany({
+        where: {
+          id: run.sourceId, tenantId, type: 'GOOGLE_SHEETS', syncVersion: run.sourceSyncVersion,
+          OR: [{ syncLeaseId: null }, { syncLeaseExpiresAt: { lte: now } }],
+        },
+        data: { syncLeaseId: leaseId, syncLeaseExpiresAt: new Date(now.getTime() + SOURCE_LEASE_MS), syncVersion: { increment: 1 } },
+      });
+      if (claimed.count !== 1) throw new ConflictException('Catalogue source changed after this preview');
+      const syncVersion = run.sourceSyncVersion + 1;
+      const locked = await tx.catalogueImportRun.updateMany({
+        where: { id: runId, tenantId, status: 'PREVIEW_READY', sourceSyncVersion: run.sourceSyncVersion },
+        data: { status: 'PROCESSING', requestedByUserId: userId, startedAt: now, sourceSyncVersion: syncVersion },
+      });
+      if (locked.count !== 1) throw new ConflictException('Catalogue import cannot be confirmed');
+      return { sourceId: run.sourceId, lease: { id: leaseId, syncVersion, ttlMs: SOURCE_LEASE_MS } };
+    });
+  }
+
+  private async completeConfirmation(
+    tenantId: string,
+    runId: string,
+    run: Awaited<ReturnType<CatalogueImportService['loadRun']>>,
+    result: Awaited<ReturnType<typeof importCatalogueTable>>,
+    lease?: { id: string; syncVersion: number; ttlMs: number },
+  ) {
+    return this.prisma.$transaction(async (tx) => {
+      const completedAt = new Date();
+      if (lease) {
+        const activated = await tx.catalogueSource.updateMany({
+          where: {
+            id: run.sourceId, tenantId, type: 'GOOGLE_SHEETS', syncLeaseId: lease.id,
+            syncVersion: lease.syncVersion, syncLeaseExpiresAt: { gt: completedAt },
+          },
+          data: {
+            status: 'ACTIVE', lastSyncedAt: completedAt, nextSyncAt: nextSyncAt(run.source.syncSchedule), lastErrorSummary: null,
+            syncLeaseId: null, syncLeaseExpiresAt: null,
+          },
+        });
+        if (activated.count !== 1) throw new CatalogueImportLeaseLostError();
+      }
+      const updated = await tx.catalogueImportRun.updateMany({
+        where: { id: runId, tenantId, status: 'PROCESSING', ...(lease ? { sourceSyncVersion: lease.syncVersion } : {}) },
+        data: { status: 'COMPLETED', ...result, rowErrors: result.rowErrors as Prisma.InputJsonValue, completedAt },
+      });
+      if (updated.count !== 1) throw new CatalogueImportLeaseLostError();
+      return tx.catalogueImportRun.findFirstOrThrow({ where: { id: runId, tenantId } });
+    });
   }
 
   private async buildPreview(tenantId: string, table: ParsedTable, mapping: CatalogueColumnMapping[], clearEmptyFields: Set<CatalogueTargetField>): Promise<{ rows: InternalPreviewRow[]; totals: CataloguePreview['totals'] }> {
@@ -284,7 +383,7 @@ export class CatalogueImportService {
     const run = await this.prisma.catalogueImportRun.findFirst({
       where: { id: runId, tenantId },
       include: {
-        source: { select: { type: true, objectKey: true, syncSchedule: true } },
+        source: { select: { type: true, objectKey: true, syncSchedule: true, syncVersion: true, syncLeaseId: true, syncLeaseExpiresAt: true } },
         mapping: { select: { sourceFingerprint: true, columns: true, transformSettings: true } },
       },
     });

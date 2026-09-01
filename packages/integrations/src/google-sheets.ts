@@ -9,8 +9,11 @@ export type GoogleSheetsUpsertResult = { action: 'appended' | 'updated'; rowNumb
 export type GoogleSheetsCell = string | number | boolean | null;
 export type GoogleSheetsTable = { headers: string[]; rows: GoogleSheetsCell[][]; revision: string };
 export type GoogleSheetsReadErrorCode = 'AUTHORIZATION' | 'NOT_FOUND' | 'RATE_LIMIT' | 'RETRYABLE';
+export type GoogleSheetsTableValidationErrorCode = 'ROW_LIMIT' | 'COLUMN_LIMIT' | 'CELL_LIMIT' | 'HEADER_INVALID';
 const MAX_TABLE_COLUMNS = 100;
 const MAX_TABLE_CELL_CHARACTERS = 10_000;
+/** Sparse rows are checked for 5,000 rows beyond the accepted table boundary. */
+const TABLE_OVERFLOW_SCAN_ROWS = 5_000;
 
 export function googleSheetsStructureFingerprint(headers: string[]): string {
   const normalized = headers.map((header) => header.normalize('NFKC').trim().replace(/\s+/g, ' ').toLocaleLowerCase('en-US'));
@@ -30,6 +33,15 @@ export class GoogleSheetsReadError extends Error {
   }
 }
 
+export class GoogleSheetsTableValidationError extends Error {
+  override readonly name = 'GoogleSheetsTableValidationError';
+  readonly retryable = false;
+
+  constructor(readonly code: GoogleSheetsTableValidationErrorCode, message: string) {
+    super(message);
+  }
+}
+
 export class GoogleSheetsAdapter {
   constructor(private readonly auth: AccessTokenProvider, private readonly fetchFn: FetchLike = fetch) {}
 
@@ -41,7 +53,9 @@ export class GoogleSheetsAdapter {
     try {
       const token = await this.auth.getAccessToken();
       const quotedSheet = `'${input.sheetName.replaceAll("'", "''")}'`;
-      const range = encodeURIComponent(`${quotedSheet}!A1:${columnName(MAX_TABLE_COLUMNS)}${input.maxRows + 2}`);
+      // A row-only range makes every populated column visible; the finite row end
+      // also lets us detect sparse overflow without requesting an unbounded sheet.
+      const range = encodeURIComponent(`${quotedSheet}!1:${input.maxRows + 1 + TABLE_OVERFLOW_SCAN_ROWS}`);
       const url = `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(input.spreadsheetId)}/values/${range}?majorDimension=ROWS&valueRenderOption=UNFORMATTED_VALUE`;
       response = await this.fetchFn(url, { headers: { authorization: `Bearer ${token}` } });
     } catch {
@@ -55,17 +69,26 @@ export class GoogleSheetsAdapter {
       throw new GoogleSheetsReadError('RETRYABLE', true);
     }
     const values = Array.isArray(body.values) ? body.values.map((row) => Array.isArray(row) ? row.map(normalizeCell) : []) : [];
-    if (values.some((row) => row.length > MAX_TABLE_COLUMNS)) throw new RangeError(`Google Sheets table exceeds ${MAX_TABLE_COLUMNS} columns`);
+    if (values.some((row) => row.length > MAX_TABLE_COLUMNS)) {
+      throw new GoogleSheetsTableValidationError('COLUMN_LIMIT', `Google Sheets table exceeds ${MAX_TABLE_COLUMNS} columns`);
+    }
     if (values.some((row) => row.some((cell) => typeof cell === 'string' && cell.length > MAX_TABLE_CELL_CHARACTERS))) {
-      throw new RangeError('Google Sheets cell exceeds the character limit');
+      throw new GoogleSheetsTableValidationError('CELL_LIMIT', 'Google Sheets cell exceeds the character limit');
     }
     const headers = (values[0] ?? []).map((value) => String(value ?? ''));
-    const rows = values.slice(1);
-    if (rows.length > input.maxRows) throw new RangeError(`Google Sheets table exceeds ${input.maxRows} rows`);
+    const overflowRows = values.slice(input.maxRows + 1);
+    if (overflowRows.some((row) => row.some((cell) => cell !== null && cell !== ''))) {
+      throw new GoogleSheetsTableValidationError('ROW_LIMIT', `Google Sheets table exceeds ${input.maxRows} rows`);
+    }
+    const rows = values.slice(1, input.maxRows + 1);
     if (headers.length > 0) {
       const normalizedHeaders = headers.map(normalizeHeader);
-      if (normalizedHeaders.some((header) => header.length === 0)) throw new RangeError('Google Sheets table contains an empty header');
-      if (new Set(normalizedHeaders).size !== normalizedHeaders.length) throw new RangeError('Google Sheets table contains a duplicate header');
+      if (normalizedHeaders.some((header) => header.length === 0)) {
+        throw new GoogleSheetsTableValidationError('HEADER_INVALID', 'Google Sheets table contains an empty header');
+      }
+      if (new Set(normalizedHeaders).size !== normalizedHeaders.length) {
+        throw new GoogleSheetsTableValidationError('HEADER_INVALID', 'Google Sheets table contains a duplicate header');
+      }
     }
     return {
       headers,

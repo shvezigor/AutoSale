@@ -104,7 +104,7 @@ An import run records:
 7. The owner reviews the mapping. Low-confidence, conflicting, or missing required mappings are highlighted.
 8. The system parses and validates the complete source using the confirmed mapping and displays a preview plus created/updated/skipped/error counts.
 9. The owner confirms the import.
-10. A background job performs tenant-scoped SKU upserts in bounded batches and saves an import report.
+10. The importer validates all rows and tenant SKU collisions before mutation, then performs every product upsert in one serializable transaction and saves an import report. A late collision or lost source fence rolls back the whole product mutation.
 11. The internal catalogue becomes available to deterministic candidate search and order recognition.
 
 If OpenAI is unavailable or returns invalid output, the owner can configure mappings manually. AI assistance is not a hard dependency for importing a known structure.
@@ -127,6 +127,12 @@ Supported first-release fields are SKU, name, description, price, currency, stoc
 
 Products are matched by `(tenantId, sku)`. A repeated import updates that product rather than appending another record. The import records which fields changed and who confirmed the mapping.
 
+Source ownership is explicit at the import boundary:
+
+- CSV and XLSX uploads are replaceable snapshots. A changed file creates a new source record but may update and take provenance ownership of an existing tenant SKU, including a changed product name.
+- Google Sheets sources are continuously synchronized owners. They may update SKUs already owned by the same source, but a SKU owned by another Google or file source is a collision that pauses before mutation.
+- Preview counts remain tenant-SKU based; the ownership policy affects confirmation safety, not whether an existing SKU is reported as an update.
+
 Products missing from a later source revision remain unchanged by default. The owner may request a separate deactivation preview. Only after confirmation can products that belong to that source be marked inactive. Imports never hard-delete products because historical orders may reference them.
 
 ## Google Sheets Synchronization
@@ -147,6 +153,10 @@ A Google catalogue source supports **Synchronize now** and an optional schedule.
 - no unresolved SKU collision exists.
 
 When the structure changes, synchronization pauses before product mutation and creates a mapping review task for the owner. The last valid internal catalogue remains available.
+
+Google reads request complete rows so columns beyond the 100-column cap remain detectable. Reads accept at most 5,000 product rows and scan a finite additional 5,000-row window for sparse overflow; structural limit failures are owner-fixable validation errors, never provider retries.
+
+Every Google synchronization or snapshot confirmation atomically claims the source version with a renewable five-minute token lease. A one-minute heartbeat renews the lease during long reads/imports. The product transaction checks the token, version, and unexpired lease before and after mutation, and completion atomically fences the run/source state, so an expired or replaced claimant cannot commit or mark the source active. A preview stores its source version and cannot be confirmed after configuration changes; a refreshed identical preview is reassigned to the current fenced version and remains visible to the owner.
 
 Order export continues through its existing destination and idempotent `orderId` mapping. Catalogue synchronization never writes order rows, and order export never mutates catalogue source data.
 

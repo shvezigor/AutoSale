@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { GoogleSheetsAdapter, GoogleSheetsReadError } from './google-sheets.js';
+import { GoogleSheetsAdapter, GoogleSheetsReadError, GoogleSheetsTableValidationError } from './google-sheets.js';
 
 describe('GoogleSheetsAdapter', () => {
   it('reads a bounded evaluated table and returns a deterministic revision', async () => {
@@ -17,7 +17,7 @@ describe('GoogleSheetsAdapter', () => {
       revision: '505c4e531312346fc2a9c36b2cb78bb5299d0208a9a96f9bcc8b5d93ba1fcbbe',
     });
     expect(fetchFn).toHaveBeenCalledWith(
-      expect.stringContaining("values/'%D0%A2%D0%BE%D0%B2%D0%B0%D1%80%D0%B8'!A1%3ACV5002"),
+      expect.stringContaining("values/'%D0%A2%D0%BE%D0%B2%D0%B0%D1%80%D0%B8'!1%3A10001"),
       expect.objectContaining({ headers: { authorization: 'Bearer token' } }),
     );
     expect(fetchFn.mock.calls[0]?.[0]).toContain('majorDimension=ROWS');
@@ -61,7 +61,7 @@ describe('GoogleSheetsAdapter', () => {
     await expect(adapter.readTable({ spreadsheetId: 'sheet-1', sheetName: "Owner's Products", maxRows: 10 })).resolves.toEqual({
       headers: [], rows: [], revision: '63debde3011fa7ace0b1f7dad44f3a58bf5b8d8689dca36a2ba3b06fb137f563',
     });
-    expect(fetchFn.mock.calls[0]?.[0]).toContain("'Owner''s%20Products'!A1%3ACV12");
+    expect(fetchFn.mock.calls[0]?.[0]).toContain("'Owner''s%20Products'!1%3A5011");
   });
 
   it('rejects a response that exceeds the configured maximum rows', async () => {
@@ -71,14 +71,27 @@ describe('GoogleSheetsAdapter', () => {
     await expect(adapter.readTable({ spreadsheetId: 'sheet-1', sheetName: 'Products', maxRows: 2 })).rejects.toThrow('exceeds 2 rows');
   });
 
-  it('bounds rows and columns at the API and rejects a populated sentinel row', async () => {
+  it('scans a finite 5000-row overflow window and rejects sparse data beyond the row cap', async () => {
+    const sparseRows = [['SKU'], ['A'], ['B'], ...Array.from({ length: 4_999 }, () => []), ['OUTSIDE-LIMIT']];
     const fetchFn = vi.fn().mockResolvedValue({
-      ok: true, status: 200, json: async () => ({ values: [['SKU'], ['A'], [], ['OUTSIDE-LIMIT']] }),
+      ok: true, status: 200, json: async () => ({ values: sparseRows }),
     });
     const adapter = new GoogleSheetsAdapter({ getAccessToken: async () => 'token' }, fetchFn);
 
     await expect(adapter.readTable({ spreadsheetId: 'sheet-1', sheetName: 'Products', maxRows: 2 })).rejects.toThrow('exceeds 2 rows');
-    expect(fetchFn.mock.calls[0]?.[0]).toContain("'Products'!A1%3ACV4");
+    expect(fetchFn.mock.calls[0]?.[0]).toContain("'Products'!1%3A5003");
+  });
+
+  it('requests complete rows so a populated 101st column cannot be hidden by the range', async () => {
+    const fetchFn = vi.fn().mockResolvedValue({
+      ok: true, status: 200, json: async () => ({ values: [Array.from({ length: 101 }, (_, index) => `column-${index}`)] }),
+    });
+    const adapter = new GoogleSheetsAdapter({ getAccessToken: async () => 'token' }, fetchFn);
+
+    const failure = adapter.readTable({ spreadsheetId: 'sheet-1', sheetName: 'Products', maxRows: 10 });
+    await expect(failure).rejects.toBeInstanceOf(GoogleSheetsTableValidationError);
+    await expect(failure).rejects.toMatchObject({ code: 'COLUMN_LIMIT', retryable: false });
+    expect(fetchFn.mock.calls[0]?.[0]).toContain("'Products'!1%3A5011");
   });
 
   it.each([
@@ -91,7 +104,10 @@ describe('GoogleSheetsAdapter', () => {
       ok: true, status: 200, json: async () => ({ values }),
     }));
 
-    await expect(adapter.readTable({ spreadsheetId: 'sheet-1', sheetName: 'Products', maxRows: 10 })).rejects.toThrow(message);
+    const failure = adapter.readTable({ spreadsheetId: 'sheet-1', sheetName: 'Products', maxRows: 10 });
+    await expect(failure).rejects.toBeInstanceOf(GoogleSheetsTableValidationError);
+    await expect(failure).rejects.toMatchObject({ retryable: false });
+    await expect(failure).rejects.toThrow(message);
   });
 
   it('reads the configured sheet header through the v4 values endpoint', async () => {

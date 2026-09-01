@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { CatalogueSkuOwnershipError, buildCatalogueImportPlan, importCatalogueTable } from './index.js';
+import { CatalogueImportLeaseLostError, CatalogueSkuOwnershipError, buildCatalogueImportPlan, importCatalogueTable } from './index.js';
 
 const mapping = [
   { source: 'sku', target: 'sku' as const }, { source: 'name', target: 'name' as const },
@@ -45,24 +45,79 @@ describe('catalogue table import engine', () => {
     expect(prisma.product.upsert).not.toHaveBeenCalled();
   });
 
-  it('fences an SKU owned by another source inside the upsert transaction', async () => {
+  it('lets a changed file upload replace the tenant product and its source ownership', async () => {
+    const prisma = prismaDouble([{ sku: 'LUNA-1', sourceId: 'old-upload' }]);
+
+    await expect(importCatalogueTable(prisma as never, {
+      tenantId: 'tenant-1', sourceId: 'new-upload', ownershipPolicy: 'REASSIGN', mapping: mapping.slice(0, 2), transformSettings: null,
+      headers: ['SKU', 'Name'], rows: [['LUNA-1', 'Luna renamed by Task 7']],
+    })).resolves.toMatchObject({ validRows: 1, updatedRows: 1 });
+    expect(prisma.product.upsert).toHaveBeenCalledWith(expect.objectContaining({
+      update: expect.objectContaining({ sourceId: 'new-upload', name: 'Luna renamed by Task 7' }),
+    }));
+  });
+
+  it('fences a Google SKU owned by another source inside the upsert transaction', async () => {
     const prisma = prismaDouble([{ sku: 'LUNA-1', sourceId: 'source-2' }]);
 
     await expect(importCatalogueTable(prisma as never, {
-      tenantId: 'tenant-1', sourceId: 'source-1', mapping: mapping.slice(0, 2), transformSettings: null,
+      tenantId: 'tenant-1', sourceId: 'source-1', ownershipPolicy: 'FENCE_CROSS_SOURCE', mapping: mapping.slice(0, 2), transformSettings: null,
       headers: ['SKU', 'Name'], rows: [['LUNA-1', 'Luna']],
     })).rejects.toBeInstanceOf(CatalogueSkuOwnershipError);
     expect(prisma.product.upsert).not.toHaveBeenCalled();
   });
+
+  it('validates every SKU collision before mutating any product', async () => {
+    const prisma = prismaDouble([{ sku: 'SKU-101', sourceId: 'another-google-source' }]);
+    const rows = Array.from({ length: 101 }, (_, index) => [`SKU-${index + 1}`, `Product ${index + 1}`]);
+
+    await expect(importCatalogueTable(prisma as never, {
+      tenantId: 'tenant-1', sourceId: 'google-source', ownershipPolicy: 'FENCE_CROSS_SOURCE', mapping: mapping.slice(0, 2), transformSettings: null,
+      headers: ['SKU', 'Name'], rows,
+    })).rejects.toBeInstanceOf(CatalogueSkuOwnershipError);
+    expect(prisma.product.upsert).not.toHaveBeenCalled();
+  });
+
+  it('rolls back product mutation when the source lease fence is lost before commit', async () => {
+    const prisma = prismaDouble([], { leaseCounts: [1, 0], transactionalWrites: true });
+
+    await expect(importCatalogueTable(prisma as never, {
+      tenantId: 'tenant-1', sourceId: 'google-source', ownershipPolicy: 'FENCE_CROSS_SOURCE', mapping: mapping.slice(0, 2), transformSettings: null,
+      headers: ['SKU', 'Name'], rows: [['LUNA-1', 'Luna']],
+      lease: { id: 'lease-1', syncVersion: 7, ttlMs: 300_000 },
+    })).rejects.toBeInstanceOf(CatalogueImportLeaseLostError);
+    expect(prisma.committedWrites).toEqual([]);
+  });
 });
 
-function prismaDouble(existing: Array<{ sku: string; sourceId: string | null }>) {
+function prismaDouble(
+  existing: Array<{ sku: string; sourceId: string | null }>,
+  options: { leaseCounts?: number[]; transactionalWrites?: boolean } = {},
+) {
+  const committedWrites: unknown[] = [];
+  let pendingWrites: unknown[] = [];
   const product = {
     findMany: vi.fn().mockImplementation(({ where }) => Promise.resolve(existing.filter((row) => !where.sku?.in || where.sku.in.includes(row.sku)))),
-    upsert: vi.fn().mockResolvedValue({}),
+    upsert: vi.fn().mockImplementation(async (args) => {
+      (options.transactionalWrites ? pendingWrites : committedWrites).push(args);
+      return {};
+    }),
   };
+  const catalogueSource = { updateMany: vi.fn().mockImplementation(async () => ({ count: options.leaseCounts?.shift() ?? 1 })) };
   return {
+    committedWrites,
     product,
-    $transaction: vi.fn().mockImplementation(async (work) => typeof work === 'function' ? work({ product }) : Promise.all(work)),
+    catalogueSource,
+    $transaction: vi.fn().mockImplementation(async (work) => {
+      if (typeof work !== 'function') return Promise.all(work);
+      pendingWrites = [];
+      try {
+        const result = await work({ product, catalogueSource });
+        committedWrites.push(...pendingWrites);
+        return result;
+      } finally {
+        pendingWrites = [];
+      }
+    }),
   };
 }

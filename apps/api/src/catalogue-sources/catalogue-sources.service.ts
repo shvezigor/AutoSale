@@ -1,5 +1,5 @@
 import type { PrismaClient } from '@autosale/database';
-import { GoogleSheetsReadError, googleSheetsStructureFingerprint, type GoogleSheetsAdapter } from '@autosale/integrations';
+import { GoogleSheetsReadError, GoogleSheetsTableValidationError, googleSheetsStructureFingerprint, type GoogleSheetsAdapter } from '@autosale/integrations';
 import { BadRequestException, ConflictException, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
 
 export type CatalogueSyncSchedule = 'MANUAL' | 'HOURLY' | 'DAILY';
@@ -105,7 +105,7 @@ export class CatalogueSourcesService {
     });
     if (!source) throw new NotFoundException('Catalogue source not found');
     const pending = await this.prisma.catalogueImportRun.findFirst({
-      where: { tenantId, sourceId, status: 'MAPPING_REVIEW' }, orderBy: { createdAt: 'desc' },
+      where: { tenantId, sourceId, status: { in: ['MAPPING_REVIEW', 'PREVIEW_READY'] } }, orderBy: { createdAt: 'desc' },
       select: { id: true, sourceHeaders: true },
     });
     return this.ownerView(source, pending ? { runId: pending.id, headers: safeHeaders(pending.sourceHeaders) } : null);
@@ -135,6 +135,13 @@ export class CatalogueSourcesService {
       return { connected: true, headers: table.headers, fingerprint };
     } catch (error) {
       if (error instanceof BadRequestException) throw error;
+      if (error instanceof GoogleSheetsTableValidationError) {
+        await this.prisma.catalogueSource.updateMany({
+          where: { id: sourceId, tenantId, type: 'GOOGLE_SHEETS' },
+          data: { status: 'PAUSED', lastErrorSummary: `TABLE_${error.code}` },
+        });
+        throw new BadRequestException('Google Sheets table structure is invalid');
+      }
       const failure = error instanceof GoogleSheetsReadError ? error : new GoogleSheetsReadError('RETRYABLE', true);
       await this.prisma.catalogueSource.updateMany({
         where: { id: sourceId, tenantId, type: 'GOOGLE_SHEETS' },

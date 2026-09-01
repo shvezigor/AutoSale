@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
+import { GoogleSheetsTableValidationError } from '@autosale/integrations';
+
 import { CatalogueSourcesService } from './catalogue-sources.service.js';
 
 describe('CatalogueSourcesService', () => {
@@ -68,7 +70,7 @@ describe('CatalogueSourcesService', () => {
     const prisma = { catalogueSource: {
       findMany: vi.fn().mockResolvedValue([row]),
       findFirst: vi.fn().mockResolvedValue(row),
-    }, catalogueImportRun: { findFirst: vi.fn().mockResolvedValue({ id: '77777777-7777-4777-8777-777777777777', status: 'MAPPING_REVIEW', sourceHeaders: ['sku', 'name'] }) } };
+    }, catalogueImportRun: { findFirst: vi.fn().mockResolvedValue({ id: '77777777-7777-4777-8777-777777777777', status: 'PREVIEW_READY', sourceHeaders: ['sku', 'name'] }) } };
     const service = new CatalogueSourcesService(prisma as never, undefined, undefined, { serviceAccountEmail: 'reader@example.com' });
 
     const health = await service.listHealth(tenantId);
@@ -82,6 +84,9 @@ describe('CatalogueSourcesService', () => {
       spreadsheetId: 'private-sheet-id', sheetName: 'Товари', syncSchedule: 'DAILY', serviceAccountEmail: 'reader@example.com',
       pendingReview: { runId: '77777777-7777-4777-8777-777777777777', headers: ['sku', 'name'] },
     });
+    expect(prisma.catalogueImportRun.findFirst).toHaveBeenCalledWith(expect.objectContaining({
+      where: { tenantId, sourceId, status: { in: ['MAPPING_REVIEW', 'PREVIEW_READY'] } },
+    }));
     expect(JSON.stringify(await service.getConfiguration(tenantId, sourceId))).not.toContain('private product');
   });
 
@@ -101,6 +106,20 @@ describe('CatalogueSourcesService', () => {
       where: { id: sourceId, tenantId, type: 'GOOGLE_SHEETS' },
       data: { status: 'ACTIVE', headerFingerprint: result.fingerprint, lastErrorSummary: null },
     });
+  });
+
+  it('reports local Google table structure violations as owner-fixable instead of retryable provider failures', async () => {
+    const source = { id: sourceId, spreadsheetId: 'sheet-id', sheetName: 'Товари' };
+    const prisma = { catalogueSource: {
+      findFirst: vi.fn().mockResolvedValue(source), updateMany: vi.fn().mockResolvedValue({ count: 1 }),
+    } };
+    const sheets = { readTable: vi.fn().mockRejectedValue(new GoogleSheetsTableValidationError('COLUMN_LIMIT', 'Google Sheets table exceeds 100 columns')) };
+    const service = new CatalogueSourcesService(prisma as never, sheets as never);
+
+    await expect(service.checkConnectivity(tenantId, sourceId)).rejects.toThrow('Google Sheets table structure is invalid');
+    expect(prisma.catalogueSource.updateMany).toHaveBeenCalledWith(expect.objectContaining({
+      data: { status: 'PAUSED', lastErrorSummary: 'TABLE_COLUMN_LIMIT' },
+    }));
   });
 
   it('queues an idempotent manual synchronization using only internal ids', async () => {

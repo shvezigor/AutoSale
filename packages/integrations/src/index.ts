@@ -5,9 +5,11 @@ export {
   googleSheetsStructureFingerprint,
   GoogleSheetsAdapter,
   GoogleSheetsReadError,
+  GoogleSheetsTableValidationError,
   type GoogleSheetsCell,
   type GoogleSheetsReadErrorCode,
   type GoogleSheetsTable,
+  type GoogleSheetsTableValidationErrorCode,
 } from './google-sheets.js';
 export {
   MetaInstagramClient,

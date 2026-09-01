@@ -169,6 +169,17 @@ describe('CatalogueImportService', () => {
     ]);
   });
 
+  it('re-imports a changed file from a new upload source and updates the existing tenant SKU name', async () => {
+    const first = await uploadAndMap('SKU,Name,Description,Price,Aliases\nTASK7-01,Original Task 7 name,,,');
+    await service.confirm(tenantId, ownerUserId, first.id);
+    const second = await uploadAndMap('SKU,Name,Description,Price,Aliases\nTASK7-01,Changed Task 7 name,,,');
+
+    await expect(service.confirm(tenantId, ownerUserId, second.id)).resolves.toMatchObject({ status: 'COMPLETED', updatedRows: 1 });
+    await expect(prisma.product.findUniqueOrThrow({
+      where: { tenantId_sku: { tenantId, sku: 'TASK7-01' } }, select: { name: true, sourceId: true },
+    })).resolves.toEqual({ name: 'Changed Task 7 name', sourceId: second.sourceId });
+  });
+
   it('never reads a run or mapping through a different tenant', async () => {
     const run = await uploadAndMap('SKU,Name,Description,Price,Aliases\nLUNA-01,Luna,,,');
 
@@ -374,7 +385,7 @@ describe('CatalogueImportService', () => {
     });
     const run = await prisma.catalogueImportRun.create({ data: {
       tenantId, sourceId: source.id, status: 'MAPPING_REVIEW', idempotencyKey: `google:${source.id}:revision-1:review`,
-      sourceRevision: 'revision-1', sourceHeaders: ['sku', 'name', 'price'], snapshotObjectKey, totalRows: 1,
+      sourceRevision: 'revision-1', sourceHeaders: ['sku', 'name', 'price'], snapshotObjectKey, sourceSyncVersion: source.syncVersion, totalRows: 1,
     } });
 
     const status = await service.status(tenantId, run.id);
@@ -387,6 +398,34 @@ describe('CatalogueImportService', () => {
     expect(preview.rows[0]?.product).toMatchObject({ sku: 'LUNA-1', name: 'Private Luna', price: 12.5 });
     await expect(service.confirm(tenantId, ownerUserId, run.id)).resolves.toMatchObject({ status: 'COMPLETED', createdRows: 1 });
     await expect(prisma.product.findUnique({ where: { tenantId_sku: { tenantId, sku: 'LUNA-1' } } })).resolves.toMatchObject({ sourceId: source.id });
+  });
+
+  it('does not import or activate a Google snapshot after the source configuration version changes', async () => {
+    const source = await prisma.catalogueSource.create({ data: {
+      tenantId, type: 'GOOGLE_SHEETS', displayName: 'Stale Google catalogue', status: 'PAUSED',
+      spreadsheetId: 'private-sheet-id', sheetName: 'Products', syncSchedule: 'MANUAL', syncVersion: 4,
+    } });
+    const snapshotObjectKey = `catalogue/${tenantId}/${source.id}/google/stale-revision.json`;
+    await storage.put({
+      key: snapshotObjectKey,
+      contentType: 'application/vnd.autosale.catalogue-table+json',
+      body: Buffer.from(JSON.stringify({ headers: ['sku', 'name'], rows: [['STALE-1', 'Must not import']] })),
+    });
+    const run = await prisma.catalogueImportRun.create({ data: {
+      tenantId, sourceId: source.id, status: 'MAPPING_REVIEW', idempotencyKey: `google:${source.id}:stale-revision:review`,
+      sourceRevision: 'stale-revision', sourceHeaders: ['sku', 'name'], snapshotObjectKey, sourceSyncVersion: 4, totalRows: 1,
+    } });
+    await service.updateMapping(tenantId, ownerUserId, run.id, { columns: [
+      { source: 'sku', target: 'sku' }, { source: 'name', target: 'name' },
+    ] });
+    await prisma.catalogueSource.update({ where: { id: source.id }, data: { syncVersion: { increment: 1 }, status: 'PENDING' } });
+
+    await expect(service.confirm(tenantId, ownerUserId, run.id)).rejects.toMatchObject({
+      constructor: ConflictException, message: 'Catalogue source changed after this preview',
+    });
+    expect(await prisma.product.count({ where: { tenantId, sku: 'STALE-1' } })).toBe(0);
+    expect(await prisma.catalogueImportRun.findUniqueOrThrow({ where: { id: run.id }, select: { status: true } })).toEqual({ status: 'PREVIEW_READY' });
+    expect(await prisma.catalogueSource.findUniqueOrThrow({ where: { id: source.id }, select: { status: true } })).toEqual({ status: 'PENDING' });
   });
 
   async function uploadAndMap(csv: string) {

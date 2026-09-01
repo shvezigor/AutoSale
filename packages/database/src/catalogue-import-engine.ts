@@ -7,6 +7,10 @@ export type CatalogueColumn = { source: string; target: CatalogueTarget };
 export type CatalogueTableInput = {
   tenantId: string;
   sourceId: string;
+  /** File snapshots may replace tenant-wide SKUs; live Google sources may only update their own SKUs. */
+  ownershipPolicy?: 'REASSIGN' | 'FENCE_CROSS_SOURCE';
+  /** A renewable Google source lease, checked inside the product commit transaction. */
+  lease?: { id: string; syncVersion: number; ttlMs: number };
   headers: string[];
   rows: CatalogueCell[][];
   mapping: CatalogueColumn[];
@@ -37,6 +41,11 @@ export type CatalogueImportCounts = {
 export class CatalogueSkuOwnershipError extends Error {
   override readonly name = 'CatalogueSkuOwnershipError';
   constructor() { super('Catalogue SKU belongs to another source'); }
+}
+
+export class CatalogueImportLeaseLostError extends Error {
+  override readonly name = 'CatalogueImportLeaseLostError';
+  constructor() { super('Catalogue synchronization lease was lost'); }
 }
 
 export async function buildCatalogueImportPlan(prisma: Pick<PrismaClient, 'product'>, input: CatalogueTableInput): Promise<CatalogueImportPlan> {
@@ -78,7 +87,10 @@ export async function buildCatalogueImportPlan(prisma: Pick<PrismaClient, 'produ
 export async function importCatalogueTable(prisma: PrismaClient, input: CatalogueTableInput): Promise<CatalogueImportCounts> {
   const plan = await buildCatalogueImportPlan(prisma, input);
   const validRows = plan.rows.filter((row): row is CatalogueImportPlanRow & { product: CatalogueImportProduct } => Boolean(row.product) && row.errors.length === 0);
-  await upsertCatalogueProducts(prisma, { tenantId: input.tenantId, sourceId: input.sourceId, rows: validRows });
+  await upsertCatalogueProducts(prisma, {
+    tenantId: input.tenantId, sourceId: input.sourceId, rows: validRows,
+    ownershipPolicy: input.ownershipPolicy ?? 'FENCE_CROSS_SOURCE', lease: input.lease,
+  });
   return {
     totalRows: plan.rows.length,
     validRows: validRows.length,
@@ -92,32 +104,60 @@ export async function importCatalogueTable(prisma: PrismaClient, input: Catalogu
 
 export async function upsertCatalogueProducts(
   prisma: PrismaClient,
-  input: { tenantId: string; sourceId: string; rows: Array<{ rowNumber: number; product: CatalogueImportProduct; presentTargets: ReadonlySet<string> }>; batchSize?: number },
+  input: {
+    tenantId: string;
+    sourceId: string;
+    rows: Array<{ rowNumber: number; product: CatalogueImportProduct; presentTargets: ReadonlySet<string> }>;
+    ownershipPolicy?: 'REASSIGN' | 'FENCE_CROSS_SOURCE';
+    lease?: { id: string; syncVersion: number; ttlMs: number } | undefined;
+    batchSize?: number;
+  },
 ): Promise<void> {
-  const batchSize = input.batchSize ?? 100;
-  for (let offset = 0; offset < input.rows.length; offset += batchSize) {
-    const batch = input.rows.slice(offset, offset + batchSize);
-    await serializableRetry(prisma, async (tx) => {
-      const owned = await tx.product.findMany({
-        where: { tenantId: input.tenantId, sku: { in: batch.map((row) => row.product.sku) } },
-        select: { sku: true, sourceId: true },
-      });
-      if (owned.some((product) => product.sourceId !== null && product.sourceId !== input.sourceId)) throw new CatalogueSkuOwnershipError();
-      for (const row of batch) {
-        await tx.product.upsert({
-          where: { tenantId_sku: { tenantId: input.tenantId, sku: row.product.sku } },
-          create: productCreate(input.tenantId, input.sourceId, row),
-          update: productUpdate(input.sourceId, row),
-        });
-      }
+  await serializableRetry(prisma, async (tx) => {
+    if (input.lease) await renewImportLease(tx, input, input.lease);
+    const owned = await tx.product.findMany({
+      where: { tenantId: input.tenantId, sku: { in: input.rows.map((row) => row.product.sku) } },
+      select: { sku: true, sourceId: true },
     });
-  }
+    if ((input.ownershipPolicy ?? 'FENCE_CROSS_SOURCE') === 'FENCE_CROSS_SOURCE'
+      && owned.some((product) => product.sourceId !== null && product.sourceId !== input.sourceId)) {
+      throw new CatalogueSkuOwnershipError();
+    }
+    for (const row of input.rows) {
+      await tx.product.upsert({
+        where: { tenantId_sku: { tenantId: input.tenantId, sku: row.product.sku } },
+        create: productCreate(input.tenantId, input.sourceId, row),
+        update: productUpdate(input.sourceId, row),
+      });
+    }
+    if (input.lease) await renewImportLease(tx, input, input.lease);
+  });
+}
+
+async function renewImportLease(
+  tx: Prisma.TransactionClient,
+  input: { tenantId: string; sourceId: string },
+  lease: { id: string; syncVersion: number; ttlMs: number },
+): Promise<void> {
+  const now = new Date();
+  const renewed = await tx.catalogueSource.updateMany({
+    where: {
+      id: input.sourceId, tenantId: input.tenantId, type: 'GOOGLE_SHEETS', syncLeaseId: lease.id,
+      syncVersion: lease.syncVersion, syncLeaseExpiresAt: { gt: now },
+    },
+    data: { syncLeaseExpiresAt: new Date(now.getTime() + lease.ttlMs) },
+  });
+  if (renewed.count !== 1) throw new CatalogueImportLeaseLostError();
 }
 
 async function serializableRetry(prisma: PrismaClient, operation: (tx: Prisma.TransactionClient) => Promise<void>): Promise<void> {
   for (let attempt = 0; attempt < 3; attempt += 1) {
     try {
-      await prisma.$transaction(operation, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+      await prisma.$transaction(operation, {
+        isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+        maxWait: 10_000,
+        timeout: 10 * 60_000,
+      });
       return;
     } catch (error) {
       if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== 'P2034' || attempt === 2) throw error;
