@@ -398,6 +398,8 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 export const ModelName = {
   Tenant: 'Tenant',
+  GoogleConnection: 'GoogleConnection',
+  GoogleOAuthAttempt: 'GoogleOAuthAttempt',
   InstagramConnection: 'InstagramConnection',
   InstagramOAuthState: 'InstagramOAuthState',
   InstagramCredentialCleanup: 'InstagramCredentialCleanup',
@@ -437,7 +439,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "tenant" | "instagramConnection" | "instagramOAuthState" | "instagramCredentialCleanup" | "user" | "tenantMembership" | "session" | "emailVerificationToken" | "passwordResetToken" | "tenantInvitation" | "securityAuditLog" | "webhookEvent" | "conversation" | "message" | "googleSheetsDestination" | "tenantSettings" | "order" | "orderExport" | "auditLog" | "orderItem" | "product" | "catalogueSource" | "catalogueMapping" | "catalogueImportRun" | "attachment"
+    modelProps: "tenant" | "googleConnection" | "googleOAuthAttempt" | "instagramConnection" | "instagramOAuthState" | "instagramCredentialCleanup" | "user" | "tenantMembership" | "session" | "emailVerificationToken" | "passwordResetToken" | "tenantInvitation" | "securityAuditLog" | "webhookEvent" | "conversation" | "message" | "googleSheetsDestination" | "tenantSettings" | "order" | "orderExport" | "auditLog" | "orderItem" | "product" | "catalogueSource" | "catalogueMapping" | "catalogueImportRun" | "attachment"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -512,6 +514,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.TenantCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.TenantCountAggregateOutputType> | number
+        }
+      }
+    }
+    GoogleConnection: {
+      payload: Prisma.$GoogleConnectionPayload<ExtArgs>
+      fields: Prisma.GoogleConnectionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.GoogleConnectionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoogleConnectionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.GoogleConnectionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoogleConnectionPayload>
+        }
+        findFirst: {
+          args: Prisma.GoogleConnectionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoogleConnectionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.GoogleConnectionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoogleConnectionPayload>
+        }
+        findMany: {
+          args: Prisma.GoogleConnectionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoogleConnectionPayload>[]
+        }
+        create: {
+          args: Prisma.GoogleConnectionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoogleConnectionPayload>
+        }
+        createMany: {
+          args: Prisma.GoogleConnectionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.GoogleConnectionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoogleConnectionPayload>[]
+        }
+        delete: {
+          args: Prisma.GoogleConnectionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoogleConnectionPayload>
+        }
+        update: {
+          args: Prisma.GoogleConnectionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoogleConnectionPayload>
+        }
+        deleteMany: {
+          args: Prisma.GoogleConnectionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.GoogleConnectionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.GoogleConnectionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoogleConnectionPayload>[]
+        }
+        upsert: {
+          args: Prisma.GoogleConnectionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoogleConnectionPayload>
+        }
+        aggregate: {
+          args: Prisma.GoogleConnectionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateGoogleConnection>
+        }
+        groupBy: {
+          args: Prisma.GoogleConnectionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.GoogleConnectionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.GoogleConnectionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.GoogleConnectionCountAggregateOutputType> | number
+        }
+      }
+    }
+    GoogleOAuthAttempt: {
+      payload: Prisma.$GoogleOAuthAttemptPayload<ExtArgs>
+      fields: Prisma.GoogleOAuthAttemptFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.GoogleOAuthAttemptFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoogleOAuthAttemptPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.GoogleOAuthAttemptFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoogleOAuthAttemptPayload>
+        }
+        findFirst: {
+          args: Prisma.GoogleOAuthAttemptFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoogleOAuthAttemptPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.GoogleOAuthAttemptFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoogleOAuthAttemptPayload>
+        }
+        findMany: {
+          args: Prisma.GoogleOAuthAttemptFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoogleOAuthAttemptPayload>[]
+        }
+        create: {
+          args: Prisma.GoogleOAuthAttemptCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoogleOAuthAttemptPayload>
+        }
+        createMany: {
+          args: Prisma.GoogleOAuthAttemptCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.GoogleOAuthAttemptCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoogleOAuthAttemptPayload>[]
+        }
+        delete: {
+          args: Prisma.GoogleOAuthAttemptDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoogleOAuthAttemptPayload>
+        }
+        update: {
+          args: Prisma.GoogleOAuthAttemptUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoogleOAuthAttemptPayload>
+        }
+        deleteMany: {
+          args: Prisma.GoogleOAuthAttemptDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.GoogleOAuthAttemptUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.GoogleOAuthAttemptUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoogleOAuthAttemptPayload>[]
+        }
+        upsert: {
+          args: Prisma.GoogleOAuthAttemptUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoogleOAuthAttemptPayload>
+        }
+        aggregate: {
+          args: Prisma.GoogleOAuthAttemptAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateGoogleOAuthAttempt>
+        }
+        groupBy: {
+          args: Prisma.GoogleOAuthAttemptGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.GoogleOAuthAttemptGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.GoogleOAuthAttemptCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.GoogleOAuthAttemptCountAggregateOutputType> | number
         }
       }
     }
@@ -2342,6 +2492,40 @@ export const TenantScalarFieldEnum = {
 export type TenantScalarFieldEnum = (typeof TenantScalarFieldEnum)[keyof typeof TenantScalarFieldEnum]
 
 
+export const GoogleConnectionScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  googleSubject: 'googleSubject',
+  accountEmail: 'accountEmail',
+  status: 'status',
+  encryptedRefreshToken: 'encryptedRefreshToken',
+  credentialGenerationId: 'credentialGenerationId',
+  grantedScopes: 'grantedScopes',
+  connectedByUserId: 'connectedByUserId',
+  lastVerifiedAt: 'lastVerifiedAt',
+  lastErrorCode: 'lastErrorCode',
+  disconnectedAt: 'disconnectedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type GoogleConnectionScalarFieldEnum = (typeof GoogleConnectionScalarFieldEnum)[keyof typeof GoogleConnectionScalarFieldEnum]
+
+
+export const GoogleOAuthAttemptScalarFieldEnum = {
+  id: 'id',
+  tokenHash: 'tokenHash',
+  tenantId: 'tenantId',
+  userId: 'userId',
+  returnPath: 'returnPath',
+  expiresAt: 'expiresAt',
+  usedAt: 'usedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type GoogleOAuthAttemptScalarFieldEnum = (typeof GoogleOAuthAttemptScalarFieldEnum)[keyof typeof GoogleOAuthAttemptScalarFieldEnum]
+
+
 export const InstagramConnectionScalarFieldEnum = {
   id: 'id',
   tenantId: 'tenantId',
@@ -2871,6 +3055,20 @@ export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaM
 
 
 /**
+ * Reference to a field of type 'GoogleConnectionStatus'
+ */
+export type EnumGoogleConnectionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'GoogleConnectionStatus'>
+
+
+
+/**
+ * Reference to a field of type 'GoogleConnectionStatus[]'
+ */
+export type ListEnumGoogleConnectionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'GoogleConnectionStatus[]'>
+
+
+
+/**
  * Reference to a field of type 'InstagramConnectionStatus'
  */
 export type EnumInstagramConnectionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'InstagramConnectionStatus'>
@@ -3196,6 +3394,8 @@ export interface PrismaClientOptionsWithAdapter extends PrismaClientBaseOptions 
 export type PrismaClientOptions = PrismaClientOptionsWithAccelerateUrl | PrismaClientOptionsWithAdapter
 export type GlobalOmitConfig = {
   tenant?: Prisma.TenantOmit
+  googleConnection?: Prisma.GoogleConnectionOmit
+  googleOAuthAttempt?: Prisma.GoogleOAuthAttemptOmit
   instagramConnection?: Prisma.InstagramConnectionOmit
   instagramOAuthState?: Prisma.InstagramOAuthStateOmit
   instagramCredentialCleanup?: Prisma.InstagramCredentialCleanupOmit

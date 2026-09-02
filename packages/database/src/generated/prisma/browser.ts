@@ -23,6 +23,16 @@ export * from './enums.js';
  */
 export type Tenant = Prisma.TenantModel
 /**
+ * Model GoogleConnection
+ *
+ */
+export type GoogleConnection = Prisma.GoogleConnectionModel
+/**
+ * Model GoogleOAuthAttempt
+ *
+ */
+export type GoogleOAuthAttempt = Prisma.GoogleOAuthAttemptModel
+/**
  * Model InstagramConnection
  *
  */

@@ -580,10 +580,6 @@ export type EnumInstagramConnectionStatusFieldUpdateOperationsInput = {
   set?: $Enums.InstagramConnectionStatus
 }
 
-export type NullableDateTimeFieldUpdateOperationsInput = {
-  set?: Date | string | null
-}
-
 export type InstagramConnectionCreateNestedManyWithoutConnectedByInput = {
   create?: Prisma.XOR<Prisma.InstagramConnectionCreateWithoutConnectedByInput, Prisma.InstagramConnectionUncheckedCreateWithoutConnectedByInput> | Prisma.InstagramConnectionCreateWithoutConnectedByInput[] | Prisma.InstagramConnectionUncheckedCreateWithoutConnectedByInput[]
   connectOrCreate?: Prisma.InstagramConnectionCreateOrConnectWithoutConnectedByInput | Prisma.InstagramConnectionCreateOrConnectWithoutConnectedByInput[]

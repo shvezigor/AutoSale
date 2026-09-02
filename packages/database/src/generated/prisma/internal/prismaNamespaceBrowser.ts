@@ -52,6 +52,8 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   Tenant: 'Tenant',
+  GoogleConnection: 'GoogleConnection',
+  GoogleOAuthAttempt: 'GoogleOAuthAttempt',
   InstagramConnection: 'InstagramConnection',
   InstagramOAuthState: 'InstagramOAuthState',
   InstagramCredentialCleanup: 'InstagramCredentialCleanup',
@@ -104,6 +106,40 @@ export const TenantScalarFieldEnum = {
 } as const
 
 export type TenantScalarFieldEnum = (typeof TenantScalarFieldEnum)[keyof typeof TenantScalarFieldEnum]
+
+
+export const GoogleConnectionScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  googleSubject: 'googleSubject',
+  accountEmail: 'accountEmail',
+  status: 'status',
+  encryptedRefreshToken: 'encryptedRefreshToken',
+  credentialGenerationId: 'credentialGenerationId',
+  grantedScopes: 'grantedScopes',
+  connectedByUserId: 'connectedByUserId',
+  lastVerifiedAt: 'lastVerifiedAt',
+  lastErrorCode: 'lastErrorCode',
+  disconnectedAt: 'disconnectedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type GoogleConnectionScalarFieldEnum = (typeof GoogleConnectionScalarFieldEnum)[keyof typeof GoogleConnectionScalarFieldEnum]
+
+
+export const GoogleOAuthAttemptScalarFieldEnum = {
+  id: 'id',
+  tokenHash: 'tokenHash',
+  tenantId: 'tenantId',
+  userId: 'userId',
+  returnPath: 'returnPath',
+  expiresAt: 'expiresAt',
+  usedAt: 'usedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type GoogleOAuthAttemptScalarFieldEnum = (typeof GoogleOAuthAttemptScalarFieldEnum)[keyof typeof GoogleOAuthAttemptScalarFieldEnum]
 
 
 export const InstagramConnectionScalarFieldEnum = {

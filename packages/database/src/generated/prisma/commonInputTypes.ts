@@ -163,11 +163,11 @@ export type StringNullableFilter<$PrismaModel = never> = {
   not?: Prisma.NestedStringNullableFilter<$PrismaModel> | string | null
 }
 
-export type EnumInstagramConnectionStatusFilter<$PrismaModel = never> = {
-  equals?: $Enums.InstagramConnectionStatus | Prisma.EnumInstagramConnectionStatusFieldRefInput<$PrismaModel>
-  in?: $Enums.InstagramConnectionStatus[] | Prisma.ListEnumInstagramConnectionStatusFieldRefInput<$PrismaModel>
-  notIn?: $Enums.InstagramConnectionStatus[] | Prisma.ListEnumInstagramConnectionStatusFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedEnumInstagramConnectionStatusFilter<$PrismaModel> | $Enums.InstagramConnectionStatus
+export type EnumGoogleConnectionStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.GoogleConnectionStatus | Prisma.EnumGoogleConnectionStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.GoogleConnectionStatus[] | Prisma.ListEnumGoogleConnectionStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.GoogleConnectionStatus[] | Prisma.ListEnumGoogleConnectionStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumGoogleConnectionStatusFilter<$PrismaModel> | $Enums.GoogleConnectionStatus
 }
 
 export type DateTimeNullableFilter<$PrismaModel = never> = {
@@ -199,14 +199,14 @@ export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedStringNullableFilter<$PrismaModel>
 }
 
-export type EnumInstagramConnectionStatusWithAggregatesFilter<$PrismaModel = never> = {
-  equals?: $Enums.InstagramConnectionStatus | Prisma.EnumInstagramConnectionStatusFieldRefInput<$PrismaModel>
-  in?: $Enums.InstagramConnectionStatus[] | Prisma.ListEnumInstagramConnectionStatusFieldRefInput<$PrismaModel>
-  notIn?: $Enums.InstagramConnectionStatus[] | Prisma.ListEnumInstagramConnectionStatusFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedEnumInstagramConnectionStatusWithAggregatesFilter<$PrismaModel> | $Enums.InstagramConnectionStatus
+export type EnumGoogleConnectionStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.GoogleConnectionStatus | Prisma.EnumGoogleConnectionStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.GoogleConnectionStatus[] | Prisma.ListEnumGoogleConnectionStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.GoogleConnectionStatus[] | Prisma.ListEnumGoogleConnectionStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumGoogleConnectionStatusWithAggregatesFilter<$PrismaModel> | $Enums.GoogleConnectionStatus
   _count?: Prisma.NestedIntFilter<$PrismaModel>
-  _min?: Prisma.NestedEnumInstagramConnectionStatusFilter<$PrismaModel>
-  _max?: Prisma.NestedEnumInstagramConnectionStatusFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumGoogleConnectionStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumGoogleConnectionStatusFilter<$PrismaModel>
 }
 
 export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -221,6 +221,23 @@ export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
   _min?: Prisma.NestedDateTimeNullableFilter<$PrismaModel>
   _max?: Prisma.NestedDateTimeNullableFilter<$PrismaModel>
+}
+
+export type EnumInstagramConnectionStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.InstagramConnectionStatus | Prisma.EnumInstagramConnectionStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.InstagramConnectionStatus[] | Prisma.ListEnumInstagramConnectionStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.InstagramConnectionStatus[] | Prisma.ListEnumInstagramConnectionStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumInstagramConnectionStatusFilter<$PrismaModel> | $Enums.InstagramConnectionStatus
+}
+
+export type EnumInstagramConnectionStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.InstagramConnectionStatus | Prisma.EnumInstagramConnectionStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.InstagramConnectionStatus[] | Prisma.ListEnumInstagramConnectionStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.InstagramConnectionStatus[] | Prisma.ListEnumInstagramConnectionStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumInstagramConnectionStatusWithAggregatesFilter<$PrismaModel> | $Enums.InstagramConnectionStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumInstagramConnectionStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumInstagramConnectionStatusFilter<$PrismaModel>
 }
 
 export type EnumInstagramCredentialCleanupStateFilter<$PrismaModel = never> = {
@@ -751,11 +768,11 @@ export type NestedStringNullableFilter<$PrismaModel = never> = {
   not?: Prisma.NestedStringNullableFilter<$PrismaModel> | string | null
 }
 
-export type NestedEnumInstagramConnectionStatusFilter<$PrismaModel = never> = {
-  equals?: $Enums.InstagramConnectionStatus | Prisma.EnumInstagramConnectionStatusFieldRefInput<$PrismaModel>
-  in?: $Enums.InstagramConnectionStatus[] | Prisma.ListEnumInstagramConnectionStatusFieldRefInput<$PrismaModel>
-  notIn?: $Enums.InstagramConnectionStatus[] | Prisma.ListEnumInstagramConnectionStatusFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedEnumInstagramConnectionStatusFilter<$PrismaModel> | $Enums.InstagramConnectionStatus
+export type NestedEnumGoogleConnectionStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.GoogleConnectionStatus | Prisma.EnumGoogleConnectionStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.GoogleConnectionStatus[] | Prisma.ListEnumGoogleConnectionStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.GoogleConnectionStatus[] | Prisma.ListEnumGoogleConnectionStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumGoogleConnectionStatusFilter<$PrismaModel> | $Enums.GoogleConnectionStatus
 }
 
 export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
@@ -786,14 +803,14 @@ export type NestedStringNullableWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedStringNullableFilter<$PrismaModel>
 }
 
-export type NestedEnumInstagramConnectionStatusWithAggregatesFilter<$PrismaModel = never> = {
-  equals?: $Enums.InstagramConnectionStatus | Prisma.EnumInstagramConnectionStatusFieldRefInput<$PrismaModel>
-  in?: $Enums.InstagramConnectionStatus[] | Prisma.ListEnumInstagramConnectionStatusFieldRefInput<$PrismaModel>
-  notIn?: $Enums.InstagramConnectionStatus[] | Prisma.ListEnumInstagramConnectionStatusFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedEnumInstagramConnectionStatusWithAggregatesFilter<$PrismaModel> | $Enums.InstagramConnectionStatus
+export type NestedEnumGoogleConnectionStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.GoogleConnectionStatus | Prisma.EnumGoogleConnectionStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.GoogleConnectionStatus[] | Prisma.ListEnumGoogleConnectionStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.GoogleConnectionStatus[] | Prisma.ListEnumGoogleConnectionStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumGoogleConnectionStatusWithAggregatesFilter<$PrismaModel> | $Enums.GoogleConnectionStatus
   _count?: Prisma.NestedIntFilter<$PrismaModel>
-  _min?: Prisma.NestedEnumInstagramConnectionStatusFilter<$PrismaModel>
-  _max?: Prisma.NestedEnumInstagramConnectionStatusFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumGoogleConnectionStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumGoogleConnectionStatusFilter<$PrismaModel>
 }
 
 export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -808,6 +825,23 @@ export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
   _min?: Prisma.NestedDateTimeNullableFilter<$PrismaModel>
   _max?: Prisma.NestedDateTimeNullableFilter<$PrismaModel>
+}
+
+export type NestedEnumInstagramConnectionStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.InstagramConnectionStatus | Prisma.EnumInstagramConnectionStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.InstagramConnectionStatus[] | Prisma.ListEnumInstagramConnectionStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.InstagramConnectionStatus[] | Prisma.ListEnumInstagramConnectionStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumInstagramConnectionStatusFilter<$PrismaModel> | $Enums.InstagramConnectionStatus
+}
+
+export type NestedEnumInstagramConnectionStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.InstagramConnectionStatus | Prisma.EnumInstagramConnectionStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.InstagramConnectionStatus[] | Prisma.ListEnumInstagramConnectionStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.InstagramConnectionStatus[] | Prisma.ListEnumInstagramConnectionStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumInstagramConnectionStatusWithAggregatesFilter<$PrismaModel> | $Enums.InstagramConnectionStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumInstagramConnectionStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumInstagramConnectionStatusFilter<$PrismaModel>
 }
 
 export type NestedEnumInstagramCredentialCleanupStateFilter<$PrismaModel = never> = {

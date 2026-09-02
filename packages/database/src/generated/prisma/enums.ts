@@ -45,6 +45,17 @@ export const InstagramConnectionStatus = {
 export type InstagramConnectionStatus = (typeof InstagramConnectionStatus)[keyof typeof InstagramConnectionStatus]
 
 
+export const GoogleConnectionStatus = {
+  ACTIVE: 'ACTIVE',
+  REAUTHORIZATION_REQUIRED: 'REAUTHORIZATION_REQUIRED',
+  DISCONNECTING: 'DISCONNECTING',
+  ERROR: 'ERROR',
+  DISCONNECTED: 'DISCONNECTED'
+} as const
+
+export type GoogleConnectionStatus = (typeof GoogleConnectionStatus)[keyof typeof GoogleConnectionStatus]
+
+
 export const InstagramCredentialCleanupOperationStatus = {
   PENDING: 'PENDING',
   SUCCEEDED: 'SUCCEEDED',
