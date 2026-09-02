@@ -94,6 +94,11 @@ button:disabled { opacity: .72; cursor: not-allowed; }
 .settings-header { max-width: 760px; margin-bottom: 28px; }
 .settings-header h1 { margin: 0 0 8px; font-size: 30px; letter-spacing: -.7px; }
 .settings-header p, .settings-card-heading p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
+.settings-index { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); max-width: 760px; margin-bottom: 34px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.settings-index a { display: grid; gap: 4px; padding: 14px 12px; color: var(--ink); font-size: 13px; font-weight: 700; border-right: 1px solid var(--border); transition: background .16s ease, color .16s ease; }
+.settings-index a:last-child { border-right: 0; }.settings-index a:hover, .settings-index a:focus-visible { background: var(--accent-soft); color: var(--accent); outline: 0; }.settings-index span { color: var(--muted); font-size: 11px; font-weight: 450; }
+.settings-section { max-width: 760px; margin-bottom: 46px; scroll-margin-top: 24px; }.settings-section-heading { margin-bottom: 14px; }.settings-section-heading h2 { margin: 4px 0 6px; font-size: 21px; letter-spacing: -.35px; }.settings-section-heading p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.5; }.settings-kicker { color: var(--accent); font-size: 11px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
+.settings-section .settings-card, .settings-section .catalogue-source-settings { max-width: none; margin-top: 14px; }
 .settings-card { max-width: 760px; padding: 28px; border: 1px solid var(--border); border-radius: 12px; background: white; }
 .settings-card-heading { display: flex; justify-content: space-between; gap: 20px; padding-bottom: 22px; border-bottom: 1px solid var(--border); }
 .settings-card-heading h2 { margin: 0 0 6px; font-size: 18px; }
@@ -160,6 +165,7 @@ button:disabled { opacity: .72; cursor: not-allowed; }
 .catalogue-header { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 26px; }
 .catalogue-header h1 { margin: 0 0 8px; font-size: 30px; letter-spacing: -.7px; }
 .catalogue-header p { max-width: 670px; margin: 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
+.catalogue-settings-link { margin: -10px 0 20px; color: var(--muted); font-size: 12px; }.catalogue-settings-link a { color: var(--accent); font-weight: 650; }
 .catalogue-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 18px; }
 .catalogue-toolbar form { display: flex; width: min(100%, 480px); gap: 8px; }
 .catalogue-toolbar input { width: 100%; min-height: 42px; border: 1px solid var(--border); border-radius: 8px; padding: 9px 11px; outline: 0; background: white; color: var(--ink); font-size: 14px; }

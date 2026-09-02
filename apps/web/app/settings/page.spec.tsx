@@ -18,6 +18,30 @@ afterEach(() => {
 });
 
 describe('SettingsPage', () => {
+  it('groups owner settings and loads catalogue sources in the Google section', async () => {
+    getServerSession.mockResolvedValue({
+      userId: '3e6855ae-48a2-4d4d-8c39-5bf7d10f1a03',
+      email: 'owner@example.com',
+      name: 'Олена',
+      platformRole: 'USER',
+      tenantId: '1f713392-fdbc-4e3c-9824-db207934bff4',
+      membershipRole: 'OWNER',
+    });
+    authenticatedApiFetch
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ status: 'DISCONNECTED', accountId: null, username: null, tokenExpiresAt: null, lastVerifiedAt: null, lastErrorCode: null, cleanupStatus: 'NONE', cleanupErrorCode: null, cleanupAbandonEligible: false }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ approvalMode: 'REVIEW', minimumConfidence: 0.8, promptVersion: 'v1' }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ spreadsheetId: null, sheetName: 'Orders', status: 'NOT_CONFIGURED', requiredHeaders: ['order_id'], lastValidatedAt: null, errorSummary: null }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ([{ id: '44444444-4444-4444-8444-444444444444', type: 'GOOGLE_SHEETS', displayName: 'Каталог Google Sheets', status: 'PENDING', lastSyncedAt: null, lastErrorSummary: null, updatedAt: '2026-09-01T08:00:00.000Z' }]) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ id: '44444444-4444-4444-8444-444444444444', type: 'GOOGLE_SHEETS', displayName: 'Каталог Google Sheets', status: 'PENDING', lastSyncedAt: null, lastErrorSummary: null, updatedAt: '2026-09-01T08:00:00.000Z', spreadsheetId: 'sheet-id', sheetName: 'Товари', syncSchedule: 'DAILY', serviceAccountEmail: 'autosale@example.iam.gserviceaccount.com', authorizationAction: 'SHARE_SPREADSHEET' }) });
+
+    render(await SettingsPage());
+
+    expect(screen.getByRole('navigation', { name: 'Розділи налаштувань' })).toBeInTheDocument();
+    expect(screen.getAllByRole('heading', { name: 'Google Sheets' })).toHaveLength(2);
+    expect(screen.getByRole('heading', { name: 'Google Sheets джерело' })).toBeInTheDocument();
+    expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/catalogue/sources/44444444-4444-4444-8444-444444444444');
+  });
+
   it('shows a manager only the safe Instagram connection card', async () => {
     getServerSession.mockResolvedValue({
       userId: '3e6855ae-48a2-4d4d-8c39-5bf7d10f1a03',
