@@ -20,7 +20,7 @@ describe('CataloguePage', () => {
 
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/catalogue?page=2&pageSize=25&search=Luna');
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/catalogue/sources');
-    expect(screen.getByText('Стан джерела каталогу')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Налаштування → Google' })).toHaveAttribute('href', '/settings#google');
     expect(screen.getByText('Товарів за цим запитом не знайдено.')).toBeInTheDocument();
   });
 

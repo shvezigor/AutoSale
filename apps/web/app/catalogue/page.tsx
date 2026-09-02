@@ -3,7 +3,7 @@ import type { CatalogueProduct } from '../../../../packages/contracts/src/catalo
 import { authenticatedApiFetch, getServerSession } from '../../src/auth/session';
 import { CatalogueTable } from '../../src/components/catalogue-table';
 import { CatalogueImportWizard } from '../../src/components/catalogue-import-wizard';
-import { CatalogueSourceSettings, type CatalogueSourceConfiguration, type CatalogueSourceHealth } from '../../src/components/catalogue-source-settings';
+import type { CatalogueSourceConfiguration, CatalogueSourceHealth } from '../../src/components/catalogue-source-settings';
 import { PrimaryNavigation } from '../../src/components/primary-navigation';
 
 export const dynamic = 'force-dynamic';
@@ -36,7 +36,7 @@ export default async function CataloguePage({ searchParams }: CataloguePageProps
   }
 
   const reviewRuns = configurations.flatMap((source) => source.pendingReview ? [{ id: source.pendingReview.runId, sourceName: source.displayName, headers: source.pendingReview.headers }] : []);
-  return <main className="catalogue-layout"><PrimaryNavigation active="catalogue" session={session} /><section className="catalogue-content"><header className="catalogue-header"><h1>Каталог товарів</h1><p>{session.membershipRole === 'OWNER' ? 'Додавайте та оновлюйте товари, які AI використовує для розпізнавання замовлень.' : 'Переглядайте товари, які AI використовує для розпізнавання замовлень.'}</p></header><CatalogueSourceSettings role={session.membershipRole} sources={sources} configurations={configurations} /><CatalogueImportWizard session={session} reviewRuns={reviewRuns} /><CatalogueTable page={catalogue.page} pageSize={catalogue.pageSize} products={catalogue.items} search={search} session={session} total={catalogue.total} /></section></main>;
+  return <main className="catalogue-layout"><PrimaryNavigation active="catalogue" session={session} /><section className="catalogue-content"><header className="catalogue-header"><h1>Каталог товарів</h1><p>{session.membershipRole === 'OWNER' ? 'Додавайте та оновлюйте товари, які AI використовує для розпізнавання замовлень.' : 'Переглядайте товари, які AI використовує для розпізнавання замовлень.'}</p></header><p className="catalogue-settings-link">Джерела каталогу налаштовуються в розділі <a href="/settings#google">Налаштування → Google</a>.</p><CatalogueImportWizard session={session} reviewRuns={reviewRuns} /><CatalogueTable page={catalogue.page} pageSize={catalogue.pageSize} products={catalogue.items} search={search} session={session} total={catalogue.total} /></section></main>;
 }
 
 function positiveInteger(value: string | string[] | undefined) { const parsed = Number(Array.isArray(value) ? value[0] : value); return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : null; }
