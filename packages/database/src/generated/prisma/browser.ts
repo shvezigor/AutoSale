@@ -83,6 +83,16 @@ export type WebhookEvent = Prisma.WebhookEventModel
  */
 export type Conversation = Prisma.ConversationModel
 /**
+ * Model InstagramCustomerProfile
+ *
+ */
+export type InstagramCustomerProfile = Prisma.InstagramCustomerProfileModel
+/**
+ * Model InstagramAvatarCleanup
+ *
+ */
+export type InstagramAvatarCleanup = Prisma.InstagramAvatarCleanupModel
+/**
  * Model Message
  *
  */

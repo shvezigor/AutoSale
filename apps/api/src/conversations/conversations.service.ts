@@ -32,6 +32,16 @@ export class ConversationsService {
       orderBy: [{ lastMessageAt: 'desc' }, { id: 'desc' }],
       take: limit + 1,
       include: {
+        profile: {
+          select: {
+            id: true,
+            displayName: true,
+            username: true,
+            avatarStorageKey: true,
+            avatarChecksum: true,
+            refreshVersion: true,
+          },
+        },
         messages: {
           orderBy: [{ sourceTimestamp: 'desc' }, { id: 'desc' }],
           take: 1,
@@ -48,7 +58,9 @@ export class ConversationsService {
       items: page.map((conversation) => ({
         id: conversation.id,
         channel: 'INSTAGRAM',
-        participantName: conversation.displayName,
+        participantName: participantName(conversation.profile, conversation.displayName),
+        participantUsername: conversation.profile?.username ?? null,
+        participantAvatarUrl: profileAvatarUrl(conversation.profile),
         lastMessagePreview: conversation.messages[0]?.text ?? null,
         lastMessageAt: conversation.lastMessageAt.toISOString(),
       })),
@@ -63,6 +75,16 @@ export class ConversationsService {
     const conversation = await this.prisma.conversation.findFirst({
       where: { id, tenantId },
       include: {
+        profile: {
+          select: {
+            id: true,
+            displayName: true,
+            username: true,
+            avatarStorageKey: true,
+            avatarChecksum: true,
+            refreshVersion: true,
+          },
+        },
         messages: {
           orderBy: [{ sourceTimestamp: 'asc' }, { id: 'asc' }],
           include: { attachments: { orderBy: { createdAt: 'asc' } } },
@@ -77,7 +99,9 @@ export class ConversationsService {
     return {
       id: conversation.id,
       channel: 'INSTAGRAM',
-      participantName: conversation.displayName,
+      participantName: participantName(conversation.profile, conversation.displayName),
+      participantUsername: conversation.profile?.username ?? null,
+      participantAvatarUrl: profileAvatarUrl(conversation.profile),
       messages: conversation.messages.map((message) => ({
         id: message.id,
         direction: message.direction === 'OUTBOUND' ? 'OUTBOUND' : 'INBOUND',
@@ -93,6 +117,25 @@ export class ConversationsService {
       })),
     };
   }
+}
+
+function participantName(
+  profile: { displayName: string | null; username: string | null } | null,
+  legacyDisplayName: string | null,
+): string | null {
+  if (!profile) return legacyDisplayName;
+  return profile.displayName ?? (profile.username ? null : legacyDisplayName);
+}
+
+function profileAvatarUrl(profile: {
+  id: string;
+  avatarStorageKey: string | null;
+  avatarChecksum: string | null;
+  refreshVersion: number;
+} | null): string | null {
+  if (!profile?.avatarStorageKey) return null;
+  const version = encodeURIComponent(profile.avatarChecksum ?? `r${profile.refreshVersion}`);
+  return `/api/media/instagram-profiles/${profile.id}/avatar?v=${version}`;
 }
 
 function encodeCursor(cursor: ConversationCursor): string {

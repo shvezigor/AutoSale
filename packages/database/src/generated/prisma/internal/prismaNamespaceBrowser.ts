@@ -64,6 +64,8 @@ export const ModelName = {
   SecurityAuditLog: 'SecurityAuditLog',
   WebhookEvent: 'WebhookEvent',
   Conversation: 'Conversation',
+  InstagramCustomerProfile: 'InstagramCustomerProfile',
+  InstagramAvatarCleanup: 'InstagramAvatarCleanup',
   Message: 'Message',
   GoogleSheetsDestination: 'GoogleSheetsDestination',
   TenantSettings: 'TenantSettings',
@@ -290,6 +292,7 @@ export const ConversationScalarFieldEnum = {
   channel: 'channel',
   externalConversationId: 'externalConversationId',
   participantId: 'participantId',
+  profileId: 'profileId',
   displayName: 'displayName',
   lastMessageAt: 'lastMessageAt',
   createdAt: 'createdAt',
@@ -297,6 +300,49 @@ export const ConversationScalarFieldEnum = {
 } as const
 
 export type ConversationScalarFieldEnum = (typeof ConversationScalarFieldEnum)[keyof typeof ConversationScalarFieldEnum]
+
+
+export const InstagramCustomerProfileScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  participantId: 'participantId',
+  displayName: 'displayName',
+  username: 'username',
+  avatarSourceUrl: 'avatarSourceUrl',
+  avatarStorageKey: 'avatarStorageKey',
+  avatarChecksum: 'avatarChecksum',
+  avatarContentType: 'avatarContentType',
+  status: 'status',
+  refreshVersion: 'refreshVersion',
+  attempts: 'attempts',
+  nextAttemptAt: 'nextAttemptAt',
+  refreshAfter: 'refreshAfter',
+  leaseId: 'leaseId',
+  leaseExpiresAt: 'leaseExpiresAt',
+  lastErrorCode: 'lastErrorCode',
+  lastRefreshedAt: 'lastRefreshedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type InstagramCustomerProfileScalarFieldEnum = (typeof InstagramCustomerProfileScalarFieldEnum)[keyof typeof InstagramCustomerProfileScalarFieldEnum]
+
+
+export const InstagramAvatarCleanupScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  storageKey: 'storageKey',
+  status: 'status',
+  attempts: 'attempts',
+  nextAttemptAt: 'nextAttemptAt',
+  leaseId: 'leaseId',
+  leaseExpiresAt: 'leaseExpiresAt',
+  lastErrorCode: 'lastErrorCode',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type InstagramAvatarCleanupScalarFieldEnum = (typeof InstagramAvatarCleanupScalarFieldEnum)[keyof typeof InstagramAvatarCleanupScalarFieldEnum]
 
 
 export const MessageScalarFieldEnum = {

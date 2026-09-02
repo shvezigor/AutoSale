@@ -26,6 +26,8 @@ describe('ConversationsController', () => {
           id: conversationId,
           channel: 'INSTAGRAM',
           participantName: 'Олена',
+          participantUsername: 'olena',
+          participantAvatarUrl: '/api/media/instagram-profiles/profile/avatar?v=v1',
           lastMessagePreview: 'Вітаю',
           lastMessageAt: '2026-08-26T12:00:00.000Z',
         },
@@ -36,6 +38,8 @@ describe('ConversationsController', () => {
       id: conversationId,
       channel: 'INSTAGRAM',
       participantName: 'Олена',
+      participantUsername: 'olena',
+      participantAvatarUrl: '/api/media/instagram-profiles/profile/avatar?v=v1',
       messages: [],
     });
     const moduleRef = await Test.createTestingModule({
@@ -86,5 +90,8 @@ describe('ConversationsController', () => {
 
     expect(document.paths['/api/conversations']?.get?.responses?.['200']).toBeDefined();
     expect(document.paths['/api/conversations/{id}']?.get?.responses?.['200']).toBeDefined();
+    const response = document.paths['/api/conversations']?.get?.responses?.['200'];
+    expect(JSON.stringify(response)).toContain('participantAvatarUrl');
+    expect(JSON.stringify(response)).toContain('participantUsername');
   });
 });

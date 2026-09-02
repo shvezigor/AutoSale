@@ -31,6 +31,7 @@ describe('InstagramProcessor', () => {
       '20260831090000_catalogue_import',
       '20260831091500_catalogue_tenant_relations',
       '20260831100000_catalogue_source_object_key',
+      '20260902090000_instagram_customer_profiles',
     ];
     const pool = new pg.Pool({ connectionString });
     for (const migrationPath of migrationPaths) {
@@ -71,6 +72,12 @@ describe('InstagramProcessor', () => {
 
     expect(await prisma.conversation.count()).toBe(1);
     expect(await prisma.message.count()).toBe(1);
+    expect(await prisma.instagramCustomerProfile.count({
+      where: { tenantId, participantId: 'ig-user-100' },
+    })).toBe(1);
+    expect(await prisma.conversation.findFirstOrThrow({
+      where: { tenantId, participantId: 'ig-user-100' },
+    })).toMatchObject({ profileId: expect.any(String) });
     expect(await prisma.webhookEvent.findUniqueOrThrow({ where: { id: event.id } })).toMatchObject({
       status: 'PROCESSED',
       processedAt: expect.any(Date),
