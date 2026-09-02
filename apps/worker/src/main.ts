@@ -13,6 +13,7 @@ import { metrics, StructuredLogger } from '@autosale/observability';
 
 import { createWorkerHealthServer } from './health-server.js';
 import { InstagramProcessor } from './instagram/instagram.processor.js';
+import { InstagramAvatarCleanupReconciler } from './instagram/instagram-avatar-cleanup-reconciler.js';
 import { InstagramAvatarCopyService } from './instagram/instagram-avatar-copy.service.js';
 import { InstagramProfileEnrichmentService } from './instagram/instagram-profile-enrichment.service.js';
 import { InstagramProfileReconciler } from './instagram/instagram-profile-reconciler.js';
@@ -140,6 +141,7 @@ async function bootstrap(): Promise<void> {
     },
   });
   const instagramProfileReconciler = new InstagramProfileReconciler(prisma, instagramProfileQueue);
+  const instagramAvatarCleanupReconciler = new InstagramAvatarCleanupReconciler(prisma, storage);
   const catalogueWorker = new Worker(
     'catalogue',
     async (job) => {
@@ -247,8 +249,10 @@ async function bootstrap(): Promise<void> {
     reconcilingInstagramProfiles = true;
     try {
       const result = await instagramProfileReconciler.reconcile();
+      const cleanup = await instagramAvatarCleanupReconciler.reconcile();
       metrics.set('autosale_queue_backlog', result.attempted, { queue: 'instagram_profile' });
-      if (result.failed > 0) {
+      metrics.set('autosale_queue_backlog', cleanup.attempted, { queue: 'instagram_avatar_cleanup' });
+      if (result.failed > 0 || cleanup.failed > 0) {
         metrics.increment('autosale_operations_total', { operation: 'instagram_profile_reconcile', result: 'failure' });
       }
     } catch (error) {

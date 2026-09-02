@@ -100,6 +100,7 @@ export class InstagramProfileEnrichmentService {
       contentType: profile.avatarContentType,
     };
     let avatarErrorCode: string | null = null;
+    let copiedAvatarKey: string | null = null;
 
     if (!result.profilePictureUrl) {
       avatar = { sourceUrl: null, storageKey: null, checksum: null, contentType: null };
@@ -116,6 +117,7 @@ export class InstagramProfileEnrichmentService {
           checksum: copied.checksum,
           contentType: copied.contentType,
         };
+        copiedAvatarKey = copied.key;
       } catch (error) {
         if (!(error instanceof AvatarCopyError) || error.retryable) {
           await this.markRetryable(job, leaseId, 'META_AVATAR_TRANSIENT', startedAt);
@@ -126,23 +128,44 @@ export class InstagramProfileEnrichmentService {
     }
 
     const refreshAfter = new Date(startedAt.getTime() + REFRESH_INTERVAL_MS);
-    await this.prisma.instagramCustomerProfile.updateMany({
-      where: fencedClaim(job, leaseId),
-      data: {
-        displayName,
-        username,
-        avatarSourceUrl: avatar.sourceUrl,
-        avatarStorageKey: avatar.storageKey,
-        avatarChecksum: avatar.checksum,
-        avatarContentType: avatar.contentType,
-        status: 'READY',
-        nextAttemptAt: refreshAfter,
-        refreshAfter,
-        leaseId: null,
-        leaseExpiresAt: null,
-        lastErrorCode: avatarErrorCode,
-        lastRefreshedAt: startedAt,
-      },
+    await this.prisma.$transaction(async (transaction) => {
+      const updated = await transaction.instagramCustomerProfile.updateMany({
+        where: fencedClaim(job, leaseId),
+        data: {
+          displayName,
+          username,
+          avatarSourceUrl: avatar.sourceUrl,
+          avatarStorageKey: avatar.storageKey,
+          avatarChecksum: avatar.checksum,
+          avatarContentType: avatar.contentType,
+          status: 'READY',
+          nextAttemptAt: refreshAfter,
+          refreshAfter,
+          leaseId: null,
+          leaseExpiresAt: null,
+          lastErrorCode: avatarErrorCode,
+          lastRefreshedAt: startedAt,
+        },
+      });
+      if (updated.count === 0 && copiedAvatarKey) {
+        await transaction.instagramAvatarCleanup.upsert({
+          where: { storageKey: copiedAvatarKey },
+          create: {
+            tenantId: job.tenantId,
+            storageKey: copiedAvatarKey,
+            nextAttemptAt: startedAt,
+          },
+          update: {
+            tenantId: job.tenantId,
+            status: 'PENDING',
+            attempts: 0,
+            nextAttemptAt: startedAt,
+            leaseId: null,
+            leaseExpiresAt: null,
+            lastErrorCode: null,
+          },
+        });
+      }
     });
   }
 

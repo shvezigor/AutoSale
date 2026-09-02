@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { InstagramProfileReconciler } from './instagram-profile-reconciler.js';
 
 describe('InstagramProfileReconciler', () => {
-  it('queues due profiles with a tenant, participant, and version-stable job id', async () => {
+  it('queues due profiles with a tenant, participant, and due-attempt-stable job id', async () => {
     const now = new Date('2026-09-02T10:00:00.000Z');
     const updateMany = vi.fn().mockResolvedValue({ count: 0 });
     const findMany = vi.fn().mockResolvedValue([{
@@ -11,6 +11,8 @@ describe('InstagramProfileReconciler', () => {
       tenantId: '22222222-2222-4222-8222-222222222222',
       participantId: 'ig-user-100',
       refreshVersion: 3,
+      attempts: 2,
+      nextAttemptAt: now,
     }]);
     const add = vi.fn().mockResolvedValue(undefined);
     const reconciler = new InstagramProfileReconciler(
@@ -40,7 +42,7 @@ describe('InstagramProfileReconciler', () => {
         refreshVersion: 3,
       },
       {
-        jobId: 'instagram-profile:11111111-1111-4111-8111-111111111111:v3',
+        jobId: 'instagram-profile:11111111-1111-4111-8111-111111111111:v3:a2:due1788343200000',
         removeOnFail: true,
       },
     );

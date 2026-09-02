@@ -15,6 +15,7 @@ describe('ConversationsService', () => {
   let service: ConversationsService;
   let tenantId: string;
   let newestId: string;
+  let usernameOnlyId: string;
 
   beforeAll(async () => {
     container = await new PostgreSqlContainer('postgres:17.6-alpine').start();
@@ -72,7 +73,7 @@ describe('ConversationsService', () => {
           externalConversationId: `user-${index}`,
           participantId: `user-${index}`,
           profileId: profile.id,
-          displayName: null,
+          displayName: index === 1 ? 'Застаріле ім’я' : null,
           lastMessageAt,
         },
       });
@@ -90,6 +91,7 @@ describe('ConversationsService', () => {
         },
       });
       if (index === 2) newestId = conversation.id;
+      if (index === 1) usernameOnlyId = conversation.id;
     }
     await prisma.conversation.create({
       data: {
@@ -146,6 +148,15 @@ describe('ConversationsService', () => {
       participantAvatarUrl: expect.stringContaining('/api/media/instagram-profiles/'),
       messages: [{ text: 'Повідомлення 2' }],
     });
+  });
+
+  it('prefers a current profile username over a stale legacy name in list and detail responses', async () => {
+    const list = await service.list(tenantId, { limit: 20 });
+    const summary = list.items.find((item) => item.id === usernameOnlyId);
+    const detail = await service.detail(tenantId, usernameOnlyId);
+
+    expect(summary).toMatchObject({ participantName: null, participantUsername: 'username_only' });
+    expect(detail).toMatchObject({ participantName: null, participantUsername: 'username_only' });
   });
 
   it('treats foreign and unknown conversation ids as not found', async () => {

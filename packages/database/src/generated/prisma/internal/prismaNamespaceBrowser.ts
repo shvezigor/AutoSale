@@ -65,6 +65,7 @@ export const ModelName = {
   WebhookEvent: 'WebhookEvent',
   Conversation: 'Conversation',
   InstagramCustomerProfile: 'InstagramCustomerProfile',
+  InstagramAvatarCleanup: 'InstagramAvatarCleanup',
   Message: 'Message',
   GoogleSheetsDestination: 'GoogleSheetsDestination',
   TenantSettings: 'TenantSettings',
@@ -325,6 +326,23 @@ export const InstagramCustomerProfileScalarFieldEnum = {
 } as const
 
 export type InstagramCustomerProfileScalarFieldEnum = (typeof InstagramCustomerProfileScalarFieldEnum)[keyof typeof InstagramCustomerProfileScalarFieldEnum]
+
+
+export const InstagramAvatarCleanupScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  storageKey: 'storageKey',
+  status: 'status',
+  attempts: 'attempts',
+  nextAttemptAt: 'nextAttemptAt',
+  leaseId: 'leaseId',
+  leaseExpiresAt: 'leaseExpiresAt',
+  lastErrorCode: 'lastErrorCode',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type InstagramAvatarCleanupScalarFieldEnum = (typeof InstagramAvatarCleanupScalarFieldEnum)[keyof typeof InstagramAvatarCleanupScalarFieldEnum]
 
 
 export const MessageScalarFieldEnum = {

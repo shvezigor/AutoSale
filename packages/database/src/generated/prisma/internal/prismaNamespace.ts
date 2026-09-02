@@ -411,6 +411,7 @@ export const ModelName = {
   WebhookEvent: 'WebhookEvent',
   Conversation: 'Conversation',
   InstagramCustomerProfile: 'InstagramCustomerProfile',
+  InstagramAvatarCleanup: 'InstagramAvatarCleanup',
   Message: 'Message',
   GoogleSheetsDestination: 'GoogleSheetsDestination',
   TenantSettings: 'TenantSettings',
@@ -438,7 +439,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "tenant" | "instagramConnection" | "instagramOAuthState" | "instagramCredentialCleanup" | "user" | "tenantMembership" | "session" | "emailVerificationToken" | "passwordResetToken" | "tenantInvitation" | "securityAuditLog" | "webhookEvent" | "conversation" | "instagramCustomerProfile" | "message" | "googleSheetsDestination" | "tenantSettings" | "order" | "orderExport" | "auditLog" | "orderItem" | "product" | "catalogueSource" | "catalogueMapping" | "catalogueImportRun" | "attachment"
+    modelProps: "tenant" | "instagramConnection" | "instagramOAuthState" | "instagramCredentialCleanup" | "user" | "tenantMembership" | "session" | "emailVerificationToken" | "passwordResetToken" | "tenantInvitation" | "securityAuditLog" | "webhookEvent" | "conversation" | "instagramCustomerProfile" | "instagramAvatarCleanup" | "message" | "googleSheetsDestination" | "tenantSettings" | "order" | "orderExport" | "auditLog" | "orderItem" | "product" | "catalogueSource" | "catalogueMapping" | "catalogueImportRun" | "attachment"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1475,6 +1476,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.InstagramCustomerProfileCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.InstagramCustomerProfileCountAggregateOutputType> | number
+        }
+      }
+    }
+    InstagramAvatarCleanup: {
+      payload: Prisma.$InstagramAvatarCleanupPayload<ExtArgs>
+      fields: Prisma.InstagramAvatarCleanupFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.InstagramAvatarCleanupFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InstagramAvatarCleanupPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.InstagramAvatarCleanupFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InstagramAvatarCleanupPayload>
+        }
+        findFirst: {
+          args: Prisma.InstagramAvatarCleanupFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InstagramAvatarCleanupPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.InstagramAvatarCleanupFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InstagramAvatarCleanupPayload>
+        }
+        findMany: {
+          args: Prisma.InstagramAvatarCleanupFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InstagramAvatarCleanupPayload>[]
+        }
+        create: {
+          args: Prisma.InstagramAvatarCleanupCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InstagramAvatarCleanupPayload>
+        }
+        createMany: {
+          args: Prisma.InstagramAvatarCleanupCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.InstagramAvatarCleanupCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InstagramAvatarCleanupPayload>[]
+        }
+        delete: {
+          args: Prisma.InstagramAvatarCleanupDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InstagramAvatarCleanupPayload>
+        }
+        update: {
+          args: Prisma.InstagramAvatarCleanupUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InstagramAvatarCleanupPayload>
+        }
+        deleteMany: {
+          args: Prisma.InstagramAvatarCleanupDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.InstagramAvatarCleanupUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.InstagramAvatarCleanupUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InstagramAvatarCleanupPayload>[]
+        }
+        upsert: {
+          args: Prisma.InstagramAvatarCleanupUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InstagramAvatarCleanupPayload>
+        }
+        aggregate: {
+          args: Prisma.InstagramAvatarCleanupAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateInstagramAvatarCleanup>
+        }
+        groupBy: {
+          args: Prisma.InstagramAvatarCleanupGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.InstagramAvatarCleanupGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.InstagramAvatarCleanupCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.InstagramAvatarCleanupCountAggregateOutputType> | number
         }
       }
     }
@@ -2637,6 +2712,23 @@ export const InstagramCustomerProfileScalarFieldEnum = {
 export type InstagramCustomerProfileScalarFieldEnum = (typeof InstagramCustomerProfileScalarFieldEnum)[keyof typeof InstagramCustomerProfileScalarFieldEnum]
 
 
+export const InstagramAvatarCleanupScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  storageKey: 'storageKey',
+  status: 'status',
+  attempts: 'attempts',
+  nextAttemptAt: 'nextAttemptAt',
+  leaseId: 'leaseId',
+  leaseExpiresAt: 'leaseExpiresAt',
+  lastErrorCode: 'lastErrorCode',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type InstagramAvatarCleanupScalarFieldEnum = (typeof InstagramAvatarCleanupScalarFieldEnum)[keyof typeof InstagramAvatarCleanupScalarFieldEnum]
+
+
 export const MessageScalarFieldEnum = {
   id: 'id',
   tenantId: 'tenantId',
@@ -3311,6 +3403,7 @@ export type GlobalOmitConfig = {
   webhookEvent?: Prisma.WebhookEventOmit
   conversation?: Prisma.ConversationOmit
   instagramCustomerProfile?: Prisma.InstagramCustomerProfileOmit
+  instagramAvatarCleanup?: Prisma.InstagramAvatarCleanupOmit
   message?: Prisma.MessageOmit
   googleSheetsDestination?: Prisma.GoogleSheetsDestinationOmit
   tenantSettings?: Prisma.TenantSettingsOmit

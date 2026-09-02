@@ -40,7 +40,7 @@ export class InstagramProfileReconciler {
       },
       orderBy: [{ nextAttemptAt: 'asc' }, { id: 'asc' }],
       take: 100,
-      select: { id: true, tenantId: true, participantId: true, refreshVersion: true },
+      select: { id: true, tenantId: true, participantId: true, refreshVersion: true, attempts: true, nextAttemptAt: true },
     });
     let failed = 0;
     for (const profile of due) {
@@ -54,7 +54,7 @@ export class InstagramProfileReconciler {
             refreshVersion: profile.refreshVersion,
           },
           {
-            jobId: `instagram-profile:${profile.id}:v${profile.refreshVersion}`,
+            jobId: `instagram-profile:${profile.id}:v${profile.refreshVersion}:a${profile.attempts}:due${profile.nextAttemptAt.getTime()}`,
             removeOnFail: true,
           },
         );

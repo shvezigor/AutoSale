@@ -29,7 +29,7 @@ describe('ConversationList', () => {
     );
   });
 
-  it('prefers a username before the generic fallback when Meta has no name', () => {
+  it('renders the current username when the API suppresses a stale legacy name', () => {
     render(<ConversationList conversations={[{
       ...fixtureSummary,
       participantName: null,

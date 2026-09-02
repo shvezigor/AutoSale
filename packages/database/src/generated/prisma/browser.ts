@@ -88,6 +88,11 @@ export type Conversation = Prisma.ConversationModel
  */
 export type InstagramCustomerProfile = Prisma.InstagramCustomerProfileModel
 /**
+ * Model InstagramAvatarCleanup
+ *
+ */
+export type InstagramAvatarCleanup = Prisma.InstagramAvatarCleanupModel
+/**
  * Model Message
  *
  */

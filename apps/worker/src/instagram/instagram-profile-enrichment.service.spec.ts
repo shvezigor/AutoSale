@@ -9,6 +9,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vites
 
 import { AvatarCopyError } from './instagram-avatar-copy.service.js';
 import { InstagramProfileEnrichmentService } from './instagram-profile-enrichment.service.js';
+import { InstagramProfileReconciler } from './instagram-profile-reconciler.js';
 
 const NOW = new Date('2026-09-02T10:00:00.000Z');
 const PARTICIPANT = 'ig-user-shared';
@@ -34,6 +35,7 @@ describe('InstagramProfileEnrichmentService', () => {
       '20260828150000_instagram_oauth_attempt_guard',
       '20260829120000_instagram_credential_cleanup_queue',
       '20260902090000_instagram_customer_profiles',
+      '20260902130000_instagram_avatar_cleanup',
     ]) {
       await pool.query(await readFile(resolve(
         process.cwd(),
@@ -47,6 +49,7 @@ describe('InstagramProfileEnrichmentService', () => {
   beforeEach(async () => {
     getUserProfile.mockReset();
     copy.mockReset();
+    await prisma.instagramAvatarCleanup.deleteMany();
     await prisma.instagramCustomerProfile.deleteMany();
     await prisma.instagramConnection.deleteMany();
     await prisma.tenant.deleteMany();
@@ -134,6 +137,42 @@ describe('InstagramProfileEnrichmentService', () => {
 
     expect(await prisma.instagramCustomerProfile.findUniqueOrThrow({ where: { id: profile.id } }))
       .toMatchObject({ avatarStorageKey: 'new-key', avatarChecksum: 'new-checksum', refreshVersion: 5 });
+    expect(await prisma.instagramAvatarCleanup.findUniqueOrThrow({ where: { storageKey: 'old-key' } }))
+      .toMatchObject({ tenantId: profile.tenantId, status: 'PENDING' });
+  });
+
+  it('durably records a copied orphan when the fenced profile switch loses a race', async () => {
+    const profile = await seedProfile('a', {
+      status: 'READY',
+      avatarSourceUrl: 'https://scontent.fbcdn.net/old.jpg',
+      avatarStorageKey: 'old-key',
+      avatarChecksum: 'old-checksum',
+      avatarContentType: 'image/jpeg',
+      refreshVersion: 4,
+    });
+    await prisma.instagramCustomerProfile.update({
+      where: { id: profile.id },
+      data: { status: 'PENDING', refreshVersion: 5 },
+    });
+    getUserProfile.mockResolvedValue({
+      name: 'Olena',
+      username: 'olena',
+      profilePictureUrl: 'https://scontent.fbcdn.net/new.jpg',
+    });
+    copy.mockImplementationOnce(async () => {
+      await prisma.instagramCustomerProfile.update({
+        where: { id: profile.id },
+        data: { refreshVersion: 6 },
+      });
+      return { key: 'orphan-key', checksum: 'orphan', contentType: 'image/webp' };
+    });
+
+    await service().process({ ...job(profile), refreshVersion: 5 });
+
+    expect(await prisma.instagramCustomerProfile.findUniqueOrThrow({ where: { id: profile.id } }))
+      .toMatchObject({ avatarStorageKey: 'old-key', refreshVersion: 6 });
+    expect(await prisma.instagramAvatarCleanup.findUniqueOrThrow({ where: { storageKey: 'orphan-key' } }))
+      .toMatchObject({ tenantId: profile.tenantId, status: 'PENDING' });
   });
 
   it('preserves the previous good profile and avatar on a transient Meta failure', async () => {
@@ -159,6 +198,41 @@ describe('InstagramProfileEnrichmentService', () => {
         status: 'RETRYABLE_FAILURE',
         lastErrorCode: 'META_PROFILE_TRANSIENT',
       });
+  });
+
+  it('dispatches a new due attempt after an immediate BullMQ retry skipped the retry window', async () => {
+    let currentTime = NOW;
+    const profile = await seedProfile('a');
+    const retainedJobs = new Map<string, ReturnType<typeof job>>();
+    const queue = {
+      add: vi.fn(async (_name: string, data: ReturnType<typeof job>, options: { jobId: string }) => {
+        if (!retainedJobs.has(options.jobId)) retainedJobs.set(options.jobId, data);
+      }),
+    };
+    const reconciler = new InstagramProfileReconciler(prisma, queue as never, () => currentTime);
+    const enrichment = service(() => currentTime);
+    getUserProfile
+      .mockRejectedValueOnce(new MetaInstagramError(503, 2, true))
+      .mockResolvedValueOnce({ name: 'Recovered', username: 'recovered', profilePictureUrl: null });
+
+    await reconciler.reconcile();
+    const firstJob = [...retainedJobs.values()][0]!;
+    await expect(enrichment.process(firstJob)).rejects.toBeInstanceOf(MetaInstagramError);
+
+    await enrichment.process(firstJob);
+    expect(getUserProfile).toHaveBeenCalledTimes(1);
+    expect((await prisma.instagramCustomerProfile.findUniqueOrThrow({ where: { id: profile.id } })).attempts)
+      .toBe(1);
+
+    currentTime = new Date(NOW.getTime() + 5 * 60_000);
+    await reconciler.reconcile();
+    expect(retainedJobs.size).toBe(2);
+    const dueJob = [...retainedJobs.values()][1]!;
+    await enrichment.process(dueJob);
+
+    expect(getUserProfile).toHaveBeenCalledTimes(2);
+    expect(await prisma.instagramCustomerProfile.findUniqueOrThrow({ where: { id: profile.id } }))
+      .toMatchObject({ status: 'READY', displayName: 'Recovered', attempts: 2 });
   });
 
   it('stores an empty successful response without inventing a fallback profile', async () => {
@@ -208,13 +282,13 @@ describe('InstagramProfileEnrichmentService', () => {
       });
   });
 
-  function service(): InstagramProfileEnrichmentService {
+  function service(clock: () => Date = () => NOW): InstagramProfileEnrichmentService {
     return new InstagramProfileEnrichmentService(
       prisma,
       { getUserProfile } as never,
       { copy } as never,
       cipher,
-      () => NOW,
+      clock,
     );
   }
 

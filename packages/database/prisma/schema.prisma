@@ -368,6 +368,23 @@ model InstagramCustomerProfile {
   @@map("instagram_customer_profiles")
 }
 
+model InstagramAvatarCleanup {
+  id             String   @id @default(uuid()) @db.Uuid
+  tenantId       String   @map("tenant_id") @db.Uuid
+  storageKey     String   @unique @map("storage_key")
+  status         String   @default("PENDING")
+  attempts       Int      @default(0)
+  nextAttemptAt  DateTime @default(now()) @map("next_attempt_at")
+  leaseId        String?  @map("lease_id") @db.Uuid
+  leaseExpiresAt DateTime? @map("lease_expires_at")
+  lastErrorCode  String?  @map("last_error_code")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@index([status, nextAttemptAt])
+  @@map("instagram_avatar_cleanups")
+}
+
 model Message {
   id                String       @id @default(uuid()) @db.Uuid
   tenantId          String       @map("tenant_id") @db.Uuid

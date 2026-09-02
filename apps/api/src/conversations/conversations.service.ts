@@ -58,7 +58,7 @@ export class ConversationsService {
       items: page.map((conversation) => ({
         id: conversation.id,
         channel: 'INSTAGRAM',
-        participantName: conversation.profile?.displayName ?? conversation.displayName,
+        participantName: participantName(conversation.profile, conversation.displayName),
         participantUsername: conversation.profile?.username ?? null,
         participantAvatarUrl: profileAvatarUrl(conversation.profile),
         lastMessagePreview: conversation.messages[0]?.text ?? null,
@@ -99,7 +99,7 @@ export class ConversationsService {
     return {
       id: conversation.id,
       channel: 'INSTAGRAM',
-      participantName: conversation.profile?.displayName ?? conversation.displayName,
+      participantName: participantName(conversation.profile, conversation.displayName),
       participantUsername: conversation.profile?.username ?? null,
       participantAvatarUrl: profileAvatarUrl(conversation.profile),
       messages: conversation.messages.map((message) => ({
@@ -117,6 +117,14 @@ export class ConversationsService {
       })),
     };
   }
+}
+
+function participantName(
+  profile: { displayName: string | null; username: string | null } | null,
+  legacyDisplayName: string | null,
+): string | null {
+  if (!profile) return legacyDisplayName;
+  return profile.displayName ?? (profile.username ? null : legacyDisplayName);
 }
 
 function profileAvatarUrl(profile: {
