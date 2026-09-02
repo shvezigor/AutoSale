@@ -21,7 +21,13 @@ interface ProfileClient {
 }
 
 interface AvatarCopier {
-  copy(input: { tenantId: string; profileId: string; refreshVersion: number; sourceUrl: string }): ReturnType<InstagramAvatarCopyService['copy']>;
+  copy(input: {
+    tenantId: string;
+    profileId: string;
+    refreshVersion: number;
+    leaseId: string;
+    sourceUrl: string;
+  }): ReturnType<InstagramAvatarCopyService['copy']>;
 }
 
 export class InstagramProfileEnrichmentService {
@@ -55,7 +61,8 @@ export class InstagramProfileEnrichmentService {
       },
     });
     const profile = claimed[0];
-    if (!profile) return;
+    if (!profile || profile.leaseId !== leaseId) return;
+    const claimedLeaseId = profile.leaseId;
 
     const connection = await this.prisma.instagramConnection.findFirst({
       where: {
@@ -67,7 +74,7 @@ export class InstagramProfileEnrichmentService {
       select: { encryptedAccessToken: true },
     });
     if (!connection?.encryptedAccessToken) {
-      await this.markUnavailable(job, leaseId, 'META_PROFILE_CREDENTIAL_UNAVAILABLE', startedAt);
+      await this.markUnavailable(job, claimedLeaseId, 'META_PROFILE_CREDENTIAL_UNAVAILABLE', startedAt);
       return;
     }
 
@@ -75,7 +82,7 @@ export class InstagramProfileEnrichmentService {
     try {
       accessToken = this.cipher.decrypt(connection.encryptedAccessToken);
     } catch {
-      await this.markUnavailable(job, leaseId, 'META_PROFILE_CREDENTIAL_INVALID', startedAt);
+      await this.markUnavailable(job, claimedLeaseId, 'META_PROFILE_CREDENTIAL_INVALID', startedAt);
       return;
     }
 
@@ -84,10 +91,10 @@ export class InstagramProfileEnrichmentService {
       result = await this.meta.getUserProfile(job.participantId, accessToken);
     } catch (error) {
       if (isTransientMetaError(error)) {
-        await this.markRetryable(job, leaseId, 'META_PROFILE_TRANSIENT', startedAt);
+        await this.markRetryable(job, claimedLeaseId, 'META_PROFILE_TRANSIENT', startedAt);
         throw error;
       }
-      await this.markUnavailable(job, leaseId, 'META_PROFILE_UNAVAILABLE', startedAt);
+      await this.markUnavailable(job, claimedLeaseId, 'META_PROFILE_UNAVAILABLE', startedAt);
       return;
     }
 
@@ -110,6 +117,7 @@ export class InstagramProfileEnrichmentService {
           tenantId: job.tenantId,
           profileId: job.profileId,
           refreshVersion: job.refreshVersion,
+          leaseId: claimedLeaseId,
           sourceUrl: result.profilePictureUrl,
         });
         avatar = {
@@ -121,7 +129,7 @@ export class InstagramProfileEnrichmentService {
         copiedAvatarKey = copied.key;
       } catch (error) {
         if (!(error instanceof AvatarCopyError) || error.retryable) {
-          await this.markRetryable(job, leaseId, 'META_AVATAR_TRANSIENT', startedAt);
+          await this.markRetryable(job, claimedLeaseId, 'META_AVATAR_TRANSIENT', startedAt);
           throw error;
         }
         avatarErrorCode = error.code;
@@ -131,7 +139,7 @@ export class InstagramProfileEnrichmentService {
     const refreshAfter = new Date(startedAt.getTime() + REFRESH_INTERVAL_MS);
     await this.prisma.$transaction(async (transaction) => {
       const updated = await transaction.instagramCustomerProfile.updateMany({
-        where: fencedClaim(job, leaseId),
+        where: fencedClaim(job, claimedLeaseId),
         data: {
           displayName,
           username,

@@ -239,10 +239,101 @@ describe('InstagramProfileEnrichmentService', () => {
     releaseDelete();
     await expect(cleanupRunning).resolves.toMatchObject({ deleted: 1 });
 
-    expect(firstKey).toMatch(/\/versions\/1\/sha256\//);
-    expect(currentKey).toMatch(/\/versions\/3\/sha256\//);
+    expect(firstKey).toMatch(/\/versions\/1\/leases\/[a-f\d-]+\/sha256\//);
+    expect(currentKey).toMatch(/\/versions\/3\/leases\/[a-f\d-]+\/sha256\//);
     expect(currentKey).not.toBe(firstKey);
     expect(objects.get(currentKey)).toEqual(avatarA);
+  });
+
+  it('keeps same-version reclaimed avatar bytes available while stale cleanup deletes the losing claim', async () => {
+    let currentTime = NOW;
+    const profile = await seedProfile('same-version-reclaim');
+    await prisma.instagramAvatarCleanup.deleteMany();
+    const avatar = Uint8Array.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10]);
+    const objects = new Map<string, Uint8Array>();
+    let signalOldPutStarted!: () => void;
+    let releaseOldPut!: () => void;
+    let signalNewPutStarted!: () => void;
+    let releaseNewPut!: () => void;
+    let signalDeleteStarted!: () => void;
+    let releaseDelete!: () => void;
+    const oldPutStarted = new Promise<void>((resolve) => { signalOldPutStarted = resolve; });
+    const oldPutReleased = new Promise<void>((resolve) => { releaseOldPut = resolve; });
+    const newPutStarted = new Promise<void>((resolve) => { signalNewPutStarted = resolve; });
+    const newPutReleased = new Promise<void>((resolve) => { releaseNewPut = resolve; });
+    const deleteStarted = new Promise<void>((resolve) => { signalDeleteStarted = resolve; });
+    const deleteReleased = new Promise<void>((resolve) => { releaseDelete = resolve; });
+    let putAttempt = 0;
+    const storage = {
+      put: vi.fn(async (input: { key: string; body: Uint8Array }) => {
+        const attempt = ++putAttempt;
+        if (attempt === 1) {
+          objects.set(input.key, input.body);
+          signalOldPutStarted();
+          await oldPutReleased;
+        } else {
+          signalNewPutStarted();
+          await newPutReleased;
+          objects.set(input.key, input.body);
+        }
+        return { key: input.key, etag: `etag-${attempt}` };
+      }),
+      get: vi.fn(),
+      delete: vi.fn(async (key: string) => {
+        signalDeleteStarted();
+        await deleteReleased;
+        objects.delete(key);
+      }),
+    };
+    const avatarCopier = new InstagramAvatarCopyService(storage, {
+      resolveHost: async () => [{ address: '157.240.1.10', family: 4 }],
+      requestPinned: async () => imageResponse(avatar, 'image/jpeg'),
+    });
+    const enrichment = new InstagramProfileEnrichmentService(
+      prisma,
+      { getUserProfile } as never,
+      avatarCopier,
+      cipher,
+      () => currentTime,
+    );
+    getUserProfile.mockResolvedValue({
+      name: 'Olena',
+      username: 'olena',
+      profilePictureUrl: 'https://scontent.fbcdn.net/avatar.jpg',
+    });
+
+    const oldProcessing = enrichment.process(job(profile));
+    await oldPutStarted;
+
+    currentTime = new Date(NOW.getTime() + 5 * 60_000);
+    const newProcessing = enrichment.process(job(profile));
+    await newPutStarted;
+
+    releaseOldPut();
+    await oldProcessing;
+    const losingCleanup = await prisma.instagramAvatarCleanup.findFirstOrThrow();
+
+    const cleanup = new InstagramAvatarCleanupReconciler(
+      prisma,
+      storage,
+      () => new Date('2030-09-02T10:00:00.000Z'),
+    );
+    const cleanupRunning = cleanup.reconcile();
+    await deleteStarted;
+
+    releaseNewPut();
+    await newProcessing;
+    const currentKey = (await prisma.instagramCustomerProfile.findUniqueOrThrow({
+      where: { id: profile.id },
+    })).avatarStorageKey!;
+
+    releaseDelete();
+    await expect(cleanupRunning).resolves.toMatchObject({ deleted: 1 });
+
+    expect(losingCleanup.storageKey).toMatch(/\/versions\/1\/leases\/[a-f\d-]+\/sha256\//);
+    expect(currentKey).toMatch(/\/versions\/1\/leases\/[a-f\d-]+\/sha256\//);
+    expect(currentKey).not.toBe(losingCleanup.storageKey);
+    expect(objects.get(currentKey)).toEqual(avatar);
   });
 
   it('preserves the previous good profile and avatar on a transient Meta failure', async () => {

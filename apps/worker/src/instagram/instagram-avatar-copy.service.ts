@@ -8,6 +8,7 @@ import type { ObjectStorage } from '@autosale/integrations';
 const DEFAULT_MAX_BYTES = 2 * 1024 * 1024;
 const DEFAULT_TIMEOUT_MS = 10_000;
 const ALLOWED_HOST_SUFFIXES = ['cdninstagram.com', 'fbcdn.net', 'fbsbx.com'] as const;
+const UUID_V4_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const MIME_EXTENSIONS = new Map([
   ['image/jpeg', 'jpg'],
   ['image/png', 'png'],
@@ -65,7 +66,13 @@ export class InstagramAvatarCopyService {
     this.timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   }
 
-  async copy(input: { tenantId: string; profileId: string; refreshVersion: number; sourceUrl: string }): Promise<{
+  async copy(input: {
+    tenantId: string;
+    profileId: string;
+    refreshVersion: number;
+    leaseId: string;
+    sourceUrl: string;
+  }): Promise<{
     key: string;
     etag: string;
     checksum: string;
@@ -74,6 +81,9 @@ export class InstagramAvatarCopyService {
     try {
       if (!Number.isSafeInteger(input.refreshVersion) || input.refreshVersion < 1) {
         throw new AvatarCopyError('INVALID_AVATAR_REFRESH_VERSION', false, 'Avatar refresh version is invalid');
+      }
+      if (!UUID_V4_PATTERN.test(input.leaseId)) {
+        throw new AvatarCopyError('INVALID_AVATAR_LEASE_ID', false, 'Avatar refresh lease id is invalid');
       }
       const url = parseAllowedUrl(input.sourceUrl);
       const addresses = await this.resolveHost(url.hostname);
@@ -108,7 +118,7 @@ export class InstagramAvatarCopyService {
         throw new AvatarCopyError('INVALID_AVATAR_BODY', false, 'Avatar bytes do not match the declared content type');
       }
       const checksum = createHash('sha256').update(body).digest('hex');
-      const key = `tenants/${input.tenantId}/instagram/profiles/${input.profileId}/versions/${input.refreshVersion}/sha256/${checksum}.${extension}`;
+      const key = `tenants/${input.tenantId}/instagram/profiles/${input.profileId}/versions/${input.refreshVersion}/leases/${input.leaseId}/sha256/${checksum}.${extension}`;
       const stored = await this.storage.put({ key, body, contentType });
       return { ...stored, checksum, contentType };
     } catch (error) {

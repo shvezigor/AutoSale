@@ -7,6 +7,7 @@ import {
 } from './instagram-avatar-copy.service.js';
 
 const JPEG = Uint8Array.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10]);
+const LEASE_ID = '11111111-1111-4111-8111-111111111111';
 
 describe('InstagramAvatarCopyService', () => {
   const put = vi.fn();
@@ -34,6 +35,7 @@ describe('InstagramAvatarCopyService', () => {
       tenantId: 'tenant-a',
       profileId: 'profile-a',
       refreshVersion: 7,
+      leaseId: LEASE_ID,
       sourceUrl: 'https://scontent.cdninstagram.com/v/avatar.jpg?sig=opaque',
     })).resolves.toMatchObject({
       checksum: expect.stringMatching(/^[a-f\d]{64}$/),
@@ -47,7 +49,7 @@ describe('InstagramAvatarCopyService', () => {
       expect.any(AbortSignal),
     );
     expect(put).toHaveBeenCalledWith({
-      key: expect.stringMatching(/^tenants\/tenant-a\/instagram\/profiles\/profile-a\/versions\/7\/sha256\/[a-f\d]{64}\.jpg$/),
+      key: expect.stringMatching(new RegExp(`^tenants/tenant-a/instagram/profiles/profile-a/versions/7/leases/${LEASE_ID}/sha256/[a-f\\d]{64}\\.jpg$`)),
       body: JPEG,
       contentType: 'image/jpeg',
     });
@@ -60,7 +62,7 @@ describe('InstagramAvatarCopyService', () => {
   ])('rejects a malicious avatar URL before DNS or HTTP (%s)', async (sourceUrl) => {
     const service = new InstagramAvatarCopyService(storage, { resolveHost, requestPinned });
 
-    await expect(service.copy({ tenantId: 'tenant-a', profileId: 'profile-a', refreshVersion: 1, sourceUrl }))
+    await expect(service.copy({ tenantId: 'tenant-a', profileId: 'profile-a', refreshVersion: 1, leaseId: LEASE_ID, sourceUrl }))
       .rejects.toMatchObject({ code: 'UNSAFE_AVATAR_URL', retryable: false });
     expect(resolveHost).not.toHaveBeenCalled();
     expect(requestPinned).not.toHaveBeenCalled();
@@ -78,6 +80,7 @@ describe('InstagramAvatarCopyService', () => {
       tenantId: 'tenant-a',
       profileId: 'profile-a',
       refreshVersion: 1,
+      leaseId: LEASE_ID,
       sourceUrl: 'https://platform-lookaside.fbsbx.com/avatar.jpg',
     })).rejects.toMatchObject({ code: 'UNSAFE_AVATAR_ADDRESS', retryable: false });
     expect(requestPinned).not.toHaveBeenCalled();
@@ -95,8 +98,24 @@ describe('InstagramAvatarCopyService', () => {
       tenantId: 'tenant-a',
       profileId: 'profile-a',
       refreshVersion: 1,
+      leaseId: LEASE_ID,
       sourceUrl: 'https://scontent.fbcdn.net/avatar.png',
     })).rejects.toMatchObject({ code: 'AVATAR_TOO_LARGE', retryable: false });
+    expect(put).not.toHaveBeenCalled();
+  });
+
+  it('rejects an invalid lease id before DNS, HTTP, or object storage', async () => {
+    const service = new InstagramAvatarCopyService(storage, { resolveHost, requestPinned });
+
+    await expect(service.copy({
+      tenantId: 'tenant-a',
+      profileId: 'profile-a',
+      refreshVersion: 1,
+      leaseId: '../../winner',
+      sourceUrl: 'https://scontent.fbcdn.net/avatar.jpg',
+    })).rejects.toMatchObject({ code: 'INVALID_AVATAR_LEASE_ID', retryable: false });
+    expect(resolveHost).not.toHaveBeenCalled();
+    expect(requestPinned).not.toHaveBeenCalled();
     expect(put).not.toHaveBeenCalled();
   });
 });
