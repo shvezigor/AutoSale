@@ -54,6 +54,7 @@ export const ModelName = {
   Tenant: 'Tenant',
   GoogleConnection: 'GoogleConnection',
   GoogleOAuthAttempt: 'GoogleOAuthAttempt',
+  GoogleCredentialCleanup: 'GoogleCredentialCleanup',
   InstagramConnection: 'InstagramConnection',
   InstagramOAuthState: 'InstagramOAuthState',
   InstagramCredentialCleanup: 'InstagramCredentialCleanup',
@@ -140,6 +141,22 @@ export const GoogleOAuthAttemptScalarFieldEnum = {
 } as const
 
 export type GoogleOAuthAttemptScalarFieldEnum = (typeof GoogleOAuthAttemptScalarFieldEnum)[keyof typeof GoogleOAuthAttemptScalarFieldEnum]
+
+
+export const GoogleCredentialCleanupScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  credentialGenerationId: 'credentialGenerationId',
+  encryptedRefreshToken: 'encryptedRefreshToken',
+  status: 'status',
+  attempts: 'attempts',
+  lastErrorCode: 'lastErrorCode',
+  terminalAt: 'terminalAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type GoogleCredentialCleanupScalarFieldEnum = (typeof GoogleCredentialCleanupScalarFieldEnum)[keyof typeof GoogleCredentialCleanupScalarFieldEnum]
 
 
 export const InstagramConnectionScalarFieldEnum = {

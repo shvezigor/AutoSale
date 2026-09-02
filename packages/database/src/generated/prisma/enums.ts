@@ -56,6 +56,15 @@ export const GoogleConnectionStatus = {
 export type GoogleConnectionStatus = (typeof GoogleConnectionStatus)[keyof typeof GoogleConnectionStatus]
 
 
+export const GoogleCredentialCleanupStatus = {
+  PENDING: 'PENDING',
+  FAILED: 'FAILED',
+  SUCCEEDED: 'SUCCEEDED'
+} as const
+
+export type GoogleCredentialCleanupStatus = (typeof GoogleCredentialCleanupStatus)[keyof typeof GoogleCredentialCleanupStatus]
+
+
 export const InstagramCredentialCleanupOperationStatus = {
   PENDING: 'PENDING',
   SUCCEEDED: 'SUCCEEDED',

@@ -14,6 +14,7 @@ export type GoogleTokenIdentity = {
 export interface GoogleOAuthClientPort {
   getAuthorizationUrl(input: { state: string; accessType: 'offline' }): string;
   exchangeCode(code: string): Promise<GoogleTokenIdentity>;
+  revokeRefreshToken(token: string): Promise<void>;
 }
 
 export class GoogleOAuthClient implements GoogleOAuthClientPort {
@@ -68,5 +69,14 @@ export class GoogleOAuthClient implements GoogleOAuthClientPort {
       email: identity.email_verified === true && typeof identity.email === 'string' ? identity.email : null,
       grantedScopes: typeof token.scope === 'string' ? token.scope.split(/\s+/).filter(Boolean) : [],
     };
+  }
+
+  async revokeRefreshToken(token: string): Promise<void> {
+    const response = await this.fetchFn('https://oauth2.googleapis.com/revoke', {
+      method: 'POST',
+      headers: { 'content-type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ token }),
+    });
+    if (!response.ok) throw new Error('Google token revocation failed');
   }
 }

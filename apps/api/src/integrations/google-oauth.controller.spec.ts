@@ -11,6 +11,7 @@ import { CsrfService } from '../auth/csrf.service.js';
 import { SessionService } from '../auth/session.service.js';
 import { GoogleOAuthController } from './google-oauth.controller.js';
 import { GoogleOAuthService } from './google-oauth.service.js';
+import { GoogleCredentialCleanupService } from './google-credential-cleanup.service.js';
 
 describe('GoogleOAuthController', () => {
   const owner: AuthPrincipal = { userId: 'owner', email: 'o@example.com', name: 'Owner', platformRole: 'USER', tenantId: 'tenant', membershipRole: 'OWNER', sessionId: 'owner-session' };
@@ -19,17 +20,20 @@ describe('GoogleOAuthController', () => {
   const start = vi.fn();
   const summary = vi.fn();
   const complete = vi.fn();
+  const disconnect = vi.fn();
   let app: INestApplication;
 
   beforeEach(async () => {
     start.mockReset().mockResolvedValue({ authorizationUrl: 'https://accounts.google.com/auth' });
     summary.mockReset().mockResolvedValue({ status: 'ACTIVE', email: 'o@example.com' });
     complete.mockReset().mockResolvedValue({ returnPath: '/settings?tab=google', summary: { status: 'ACTIVE' } });
+    disconnect.mockReset().mockResolvedValue({ status: 'DISCONNECTED' });
     const resolve = vi.fn(async (token: string) => token === 'owner' ? owner : token === 'manager' ? manager : null);
     const module = await Test.createTestingModule({
       controllers: [GoogleOAuthController],
       providers: [
         { provide: GoogleOAuthService, useValue: { start, summary, complete } },
+        { provide: GoogleCredentialCleanupService, useValue: { disconnect } },
         { provide: SessionService, useValue: { resolve } },
         { provide: CsrfService, useValue: csrf },
         { provide: AUTH_HTTP_CONFIG, useValue: { cookieName: 'autosale_session', production: false } },

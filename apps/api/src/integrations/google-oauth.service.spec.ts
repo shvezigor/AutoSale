@@ -35,6 +35,7 @@ const createFixture = () => {
       email: 'owner@example.com',
       grantedScopes: ['openid', 'email', 'https://www.googleapis.com/auth/drive.file'],
     }),
+    revokeRefreshToken: vi.fn().mockResolvedValue(undefined),
   };
   const cipher = new CredentialCipher(Buffer.alloc(32, 9));
   const service = new GoogleOAuthService(prisma as never, client, states as never, cipher, () => new Date('2026-09-02T20:00:00.000Z'));

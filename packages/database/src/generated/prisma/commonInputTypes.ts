@@ -223,6 +223,50 @@ export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedDateTimeNullableFilter<$PrismaModel>
 }
 
+export type EnumGoogleCredentialCleanupStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.GoogleCredentialCleanupStatus | Prisma.EnumGoogleCredentialCleanupStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.GoogleCredentialCleanupStatus[] | Prisma.ListEnumGoogleCredentialCleanupStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.GoogleCredentialCleanupStatus[] | Prisma.ListEnumGoogleCredentialCleanupStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumGoogleCredentialCleanupStatusFilter<$PrismaModel> | $Enums.GoogleCredentialCleanupStatus
+}
+
+export type IntFilter<$PrismaModel = never> = {
+  equals?: number | Prisma.IntFieldRefInput<$PrismaModel>
+  in?: number[] | Prisma.ListIntFieldRefInput<$PrismaModel>
+  notIn?: number[] | Prisma.ListIntFieldRefInput<$PrismaModel>
+  lt?: number | Prisma.IntFieldRefInput<$PrismaModel>
+  lte?: number | Prisma.IntFieldRefInput<$PrismaModel>
+  gt?: number | Prisma.IntFieldRefInput<$PrismaModel>
+  gte?: number | Prisma.IntFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedIntFilter<$PrismaModel> | number
+}
+
+export type EnumGoogleCredentialCleanupStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.GoogleCredentialCleanupStatus | Prisma.EnumGoogleCredentialCleanupStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.GoogleCredentialCleanupStatus[] | Prisma.ListEnumGoogleCredentialCleanupStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.GoogleCredentialCleanupStatus[] | Prisma.ListEnumGoogleCredentialCleanupStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumGoogleCredentialCleanupStatusWithAggregatesFilter<$PrismaModel> | $Enums.GoogleCredentialCleanupStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumGoogleCredentialCleanupStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumGoogleCredentialCleanupStatusFilter<$PrismaModel>
+}
+
+export type IntWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: number | Prisma.IntFieldRefInput<$PrismaModel>
+  in?: number[] | Prisma.ListIntFieldRefInput<$PrismaModel>
+  notIn?: number[] | Prisma.ListIntFieldRefInput<$PrismaModel>
+  lt?: number | Prisma.IntFieldRefInput<$PrismaModel>
+  lte?: number | Prisma.IntFieldRefInput<$PrismaModel>
+  gt?: number | Prisma.IntFieldRefInput<$PrismaModel>
+  gte?: number | Prisma.IntFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedIntWithAggregatesFilter<$PrismaModel> | number
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _avg?: Prisma.NestedFloatFilter<$PrismaModel>
+  _sum?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedIntFilter<$PrismaModel>
+  _max?: Prisma.NestedIntFilter<$PrismaModel>
+}
+
 export type EnumInstagramConnectionStatusFilter<$PrismaModel = never> = {
   equals?: $Enums.InstagramConnectionStatus | Prisma.EnumInstagramConnectionStatusFieldRefInput<$PrismaModel>
   in?: $Enums.InstagramConnectionStatus[] | Prisma.ListEnumInstagramConnectionStatusFieldRefInput<$PrismaModel>
@@ -254,17 +298,6 @@ export type EnumInstagramCredentialCleanupOperationStatusFilter<$PrismaModel = n
   not?: Prisma.NestedEnumInstagramCredentialCleanupOperationStatusFilter<$PrismaModel> | $Enums.InstagramCredentialCleanupOperationStatus
 }
 
-export type IntFilter<$PrismaModel = never> = {
-  equals?: number | Prisma.IntFieldRefInput<$PrismaModel>
-  in?: number[] | Prisma.ListIntFieldRefInput<$PrismaModel>
-  notIn?: number[] | Prisma.ListIntFieldRefInput<$PrismaModel>
-  lt?: number | Prisma.IntFieldRefInput<$PrismaModel>
-  lte?: number | Prisma.IntFieldRefInput<$PrismaModel>
-  gt?: number | Prisma.IntFieldRefInput<$PrismaModel>
-  gte?: number | Prisma.IntFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedIntFilter<$PrismaModel> | number
-}
-
 export type EnumInstagramCredentialCleanupStateWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.InstagramCredentialCleanupState | Prisma.EnumInstagramCredentialCleanupStateFieldRefInput<$PrismaModel>
   in?: $Enums.InstagramCredentialCleanupState[] | Prisma.ListEnumInstagramCredentialCleanupStateFieldRefInput<$PrismaModel>
@@ -283,22 +316,6 @@ export type EnumInstagramCredentialCleanupOperationStatusWithAggregatesFilter<$P
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumInstagramCredentialCleanupOperationStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumInstagramCredentialCleanupOperationStatusFilter<$PrismaModel>
-}
-
-export type IntWithAggregatesFilter<$PrismaModel = never> = {
-  equals?: number | Prisma.IntFieldRefInput<$PrismaModel>
-  in?: number[] | Prisma.ListIntFieldRefInput<$PrismaModel>
-  notIn?: number[] | Prisma.ListIntFieldRefInput<$PrismaModel>
-  lt?: number | Prisma.IntFieldRefInput<$PrismaModel>
-  lte?: number | Prisma.IntFieldRefInput<$PrismaModel>
-  gt?: number | Prisma.IntFieldRefInput<$PrismaModel>
-  gte?: number | Prisma.IntFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedIntWithAggregatesFilter<$PrismaModel> | number
-  _count?: Prisma.NestedIntFilter<$PrismaModel>
-  _avg?: Prisma.NestedFloatFilter<$PrismaModel>
-  _sum?: Prisma.NestedIntFilter<$PrismaModel>
-  _min?: Prisma.NestedIntFilter<$PrismaModel>
-  _max?: Prisma.NestedIntFilter<$PrismaModel>
 }
 
 export type EnumPlatformRoleFilter<$PrismaModel = never> = {
@@ -827,6 +844,50 @@ export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedDateTimeNullableFilter<$PrismaModel>
 }
 
+export type NestedEnumGoogleCredentialCleanupStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.GoogleCredentialCleanupStatus | Prisma.EnumGoogleCredentialCleanupStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.GoogleCredentialCleanupStatus[] | Prisma.ListEnumGoogleCredentialCleanupStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.GoogleCredentialCleanupStatus[] | Prisma.ListEnumGoogleCredentialCleanupStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumGoogleCredentialCleanupStatusFilter<$PrismaModel> | $Enums.GoogleCredentialCleanupStatus
+}
+
+export type NestedEnumGoogleCredentialCleanupStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.GoogleCredentialCleanupStatus | Prisma.EnumGoogleCredentialCleanupStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.GoogleCredentialCleanupStatus[] | Prisma.ListEnumGoogleCredentialCleanupStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.GoogleCredentialCleanupStatus[] | Prisma.ListEnumGoogleCredentialCleanupStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumGoogleCredentialCleanupStatusWithAggregatesFilter<$PrismaModel> | $Enums.GoogleCredentialCleanupStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumGoogleCredentialCleanupStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumGoogleCredentialCleanupStatusFilter<$PrismaModel>
+}
+
+export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: number | Prisma.IntFieldRefInput<$PrismaModel>
+  in?: number[] | Prisma.ListIntFieldRefInput<$PrismaModel>
+  notIn?: number[] | Prisma.ListIntFieldRefInput<$PrismaModel>
+  lt?: number | Prisma.IntFieldRefInput<$PrismaModel>
+  lte?: number | Prisma.IntFieldRefInput<$PrismaModel>
+  gt?: number | Prisma.IntFieldRefInput<$PrismaModel>
+  gte?: number | Prisma.IntFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedIntWithAggregatesFilter<$PrismaModel> | number
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _avg?: Prisma.NestedFloatFilter<$PrismaModel>
+  _sum?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedIntFilter<$PrismaModel>
+  _max?: Prisma.NestedIntFilter<$PrismaModel>
+}
+
+export type NestedFloatFilter<$PrismaModel = never> = {
+  equals?: number | Prisma.FloatFieldRefInput<$PrismaModel>
+  in?: number[] | Prisma.ListFloatFieldRefInput<$PrismaModel>
+  notIn?: number[] | Prisma.ListFloatFieldRefInput<$PrismaModel>
+  lt?: number | Prisma.FloatFieldRefInput<$PrismaModel>
+  lte?: number | Prisma.FloatFieldRefInput<$PrismaModel>
+  gt?: number | Prisma.FloatFieldRefInput<$PrismaModel>
+  gte?: number | Prisma.FloatFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedFloatFilter<$PrismaModel> | number
+}
+
 export type NestedEnumInstagramConnectionStatusFilter<$PrismaModel = never> = {
   equals?: $Enums.InstagramConnectionStatus | Prisma.EnumInstagramConnectionStatusFieldRefInput<$PrismaModel>
   in?: $Enums.InstagramConnectionStatus[] | Prisma.ListEnumInstagramConnectionStatusFieldRefInput<$PrismaModel>
@@ -876,33 +937,6 @@ export type NestedEnumInstagramCredentialCleanupOperationStatusWithAggregatesFil
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumInstagramCredentialCleanupOperationStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumInstagramCredentialCleanupOperationStatusFilter<$PrismaModel>
-}
-
-export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
-  equals?: number | Prisma.IntFieldRefInput<$PrismaModel>
-  in?: number[] | Prisma.ListIntFieldRefInput<$PrismaModel>
-  notIn?: number[] | Prisma.ListIntFieldRefInput<$PrismaModel>
-  lt?: number | Prisma.IntFieldRefInput<$PrismaModel>
-  lte?: number | Prisma.IntFieldRefInput<$PrismaModel>
-  gt?: number | Prisma.IntFieldRefInput<$PrismaModel>
-  gte?: number | Prisma.IntFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedIntWithAggregatesFilter<$PrismaModel> | number
-  _count?: Prisma.NestedIntFilter<$PrismaModel>
-  _avg?: Prisma.NestedFloatFilter<$PrismaModel>
-  _sum?: Prisma.NestedIntFilter<$PrismaModel>
-  _min?: Prisma.NestedIntFilter<$PrismaModel>
-  _max?: Prisma.NestedIntFilter<$PrismaModel>
-}
-
-export type NestedFloatFilter<$PrismaModel = never> = {
-  equals?: number | Prisma.FloatFieldRefInput<$PrismaModel>
-  in?: number[] | Prisma.ListFloatFieldRefInput<$PrismaModel>
-  notIn?: number[] | Prisma.ListFloatFieldRefInput<$PrismaModel>
-  lt?: number | Prisma.FloatFieldRefInput<$PrismaModel>
-  lte?: number | Prisma.FloatFieldRefInput<$PrismaModel>
-  gt?: number | Prisma.FloatFieldRefInput<$PrismaModel>
-  gte?: number | Prisma.FloatFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedFloatFilter<$PrismaModel> | number
 }
 
 export type NestedEnumPlatformRoleFilter<$PrismaModel = never> = {

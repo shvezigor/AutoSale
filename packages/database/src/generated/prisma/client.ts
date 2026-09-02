@@ -57,6 +57,11 @@ export type GoogleConnection = Prisma.GoogleConnectionModel
  */
 export type GoogleOAuthAttempt = Prisma.GoogleOAuthAttemptModel
 /**
+ * Model GoogleCredentialCleanup
+ *
+ */
+export type GoogleCredentialCleanup = Prisma.GoogleCredentialCleanupModel
+/**
  * Model InstagramConnection
  *
  */

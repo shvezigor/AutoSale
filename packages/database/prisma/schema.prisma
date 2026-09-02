@@ -42,6 +42,12 @@ enum GoogleConnectionStatus {
   DISCONNECTED
 }
 
+enum GoogleCredentialCleanupStatus {
+  PENDING
+  FAILED
+  SUCCEEDED
+}
+
 enum InstagramCredentialCleanupOperationStatus {
   PENDING
   SUCCEEDED
@@ -110,6 +116,7 @@ model Tenant {
   instagramOAuthCurrentAttemptId String? @db.Uuid @map("instagram_oauth_current_attempt_id")
   googleConnection GoogleConnection?
   googleOAuthAttempts GoogleOAuthAttempt[]
+  googleCredentialCleanups GoogleCredentialCleanup[]
 
   @@index([status])
   @@map("tenants")
@@ -153,6 +160,24 @@ model GoogleOAuthAttempt {
   @@index([tenantId, usedAt])
   @@index([expiresAt, usedAt])
   @@map("google_oauth_attempts")
+}
+
+model GoogleCredentialCleanup {
+  id                     String                        @id @default(uuid()) @db.Uuid
+  tenantId               String                        @map("tenant_id") @db.Uuid
+  credentialGenerationId String                        @unique @map("credential_generation_id") @db.Uuid
+  encryptedRefreshToken  String                        @map("encrypted_refresh_token")
+  status                 GoogleCredentialCleanupStatus @default(PENDING)
+  attempts               Int                           @default(0)
+  lastErrorCode          String?                       @map("last_error_code")
+  terminalAt             DateTime?                     @map("terminal_at")
+  createdAt              DateTime                      @default(now()) @map("created_at")
+  updatedAt              DateTime                      @updatedAt @map("updated_at")
+  tenant                 Tenant                        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, terminalAt])
+  @@index([status, updatedAt])
+  @@map("google_credential_cleanups")
 }
 
 model InstagramConnection {

@@ -400,6 +400,7 @@ export const ModelName = {
   Tenant: 'Tenant',
   GoogleConnection: 'GoogleConnection',
   GoogleOAuthAttempt: 'GoogleOAuthAttempt',
+  GoogleCredentialCleanup: 'GoogleCredentialCleanup',
   InstagramConnection: 'InstagramConnection',
   InstagramOAuthState: 'InstagramOAuthState',
   InstagramCredentialCleanup: 'InstagramCredentialCleanup',
@@ -439,7 +440,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "tenant" | "googleConnection" | "googleOAuthAttempt" | "instagramConnection" | "instagramOAuthState" | "instagramCredentialCleanup" | "user" | "tenantMembership" | "session" | "emailVerificationToken" | "passwordResetToken" | "tenantInvitation" | "securityAuditLog" | "webhookEvent" | "conversation" | "message" | "googleSheetsDestination" | "tenantSettings" | "order" | "orderExport" | "auditLog" | "orderItem" | "product" | "catalogueSource" | "catalogueMapping" | "catalogueImportRun" | "attachment"
+    modelProps: "tenant" | "googleConnection" | "googleOAuthAttempt" | "googleCredentialCleanup" | "instagramConnection" | "instagramOAuthState" | "instagramCredentialCleanup" | "user" | "tenantMembership" | "session" | "emailVerificationToken" | "passwordResetToken" | "tenantInvitation" | "securityAuditLog" | "webhookEvent" | "conversation" | "message" | "googleSheetsDestination" | "tenantSettings" | "order" | "orderExport" | "auditLog" | "orderItem" | "product" | "catalogueSource" | "catalogueMapping" | "catalogueImportRun" | "attachment"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -662,6 +663,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.GoogleOAuthAttemptCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.GoogleOAuthAttemptCountAggregateOutputType> | number
+        }
+      }
+    }
+    GoogleCredentialCleanup: {
+      payload: Prisma.$GoogleCredentialCleanupPayload<ExtArgs>
+      fields: Prisma.GoogleCredentialCleanupFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.GoogleCredentialCleanupFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoogleCredentialCleanupPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.GoogleCredentialCleanupFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoogleCredentialCleanupPayload>
+        }
+        findFirst: {
+          args: Prisma.GoogleCredentialCleanupFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoogleCredentialCleanupPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.GoogleCredentialCleanupFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoogleCredentialCleanupPayload>
+        }
+        findMany: {
+          args: Prisma.GoogleCredentialCleanupFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoogleCredentialCleanupPayload>[]
+        }
+        create: {
+          args: Prisma.GoogleCredentialCleanupCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoogleCredentialCleanupPayload>
+        }
+        createMany: {
+          args: Prisma.GoogleCredentialCleanupCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.GoogleCredentialCleanupCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoogleCredentialCleanupPayload>[]
+        }
+        delete: {
+          args: Prisma.GoogleCredentialCleanupDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoogleCredentialCleanupPayload>
+        }
+        update: {
+          args: Prisma.GoogleCredentialCleanupUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoogleCredentialCleanupPayload>
+        }
+        deleteMany: {
+          args: Prisma.GoogleCredentialCleanupDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.GoogleCredentialCleanupUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.GoogleCredentialCleanupUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoogleCredentialCleanupPayload>[]
+        }
+        upsert: {
+          args: Prisma.GoogleCredentialCleanupUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoogleCredentialCleanupPayload>
+        }
+        aggregate: {
+          args: Prisma.GoogleCredentialCleanupAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateGoogleCredentialCleanup>
+        }
+        groupBy: {
+          args: Prisma.GoogleCredentialCleanupGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.GoogleCredentialCleanupGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.GoogleCredentialCleanupCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.GoogleCredentialCleanupCountAggregateOutputType> | number
         }
       }
     }
@@ -2526,6 +2601,22 @@ export const GoogleOAuthAttemptScalarFieldEnum = {
 export type GoogleOAuthAttemptScalarFieldEnum = (typeof GoogleOAuthAttemptScalarFieldEnum)[keyof typeof GoogleOAuthAttemptScalarFieldEnum]
 
 
+export const GoogleCredentialCleanupScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  credentialGenerationId: 'credentialGenerationId',
+  encryptedRefreshToken: 'encryptedRefreshToken',
+  status: 'status',
+  attempts: 'attempts',
+  lastErrorCode: 'lastErrorCode',
+  terminalAt: 'terminalAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type GoogleCredentialCleanupScalarFieldEnum = (typeof GoogleCredentialCleanupScalarFieldEnum)[keyof typeof GoogleCredentialCleanupScalarFieldEnum]
+
+
 export const InstagramConnectionScalarFieldEnum = {
   id: 'id',
   tenantId: 'tenantId',
@@ -3069,6 +3160,34 @@ export type ListEnumGoogleConnectionStatusFieldRefInput<$PrismaModel> = FieldRef
 
 
 /**
+ * Reference to a field of type 'GoogleCredentialCleanupStatus'
+ */
+export type EnumGoogleCredentialCleanupStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'GoogleCredentialCleanupStatus'>
+
+
+
+/**
+ * Reference to a field of type 'GoogleCredentialCleanupStatus[]'
+ */
+export type ListEnumGoogleCredentialCleanupStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'GoogleCredentialCleanupStatus[]'>
+
+
+
+/**
+ * Reference to a field of type 'Int'
+ */
+export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
+
+
+
+/**
+ * Reference to a field of type 'Int[]'
+ */
+export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+
+
+
+/**
  * Reference to a field of type 'InstagramConnectionStatus'
  */
 export type EnumInstagramConnectionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'InstagramConnectionStatus'>
@@ -3107,20 +3226,6 @@ export type EnumInstagramCredentialCleanupOperationStatusFieldRefInput<$PrismaMo
  * Reference to a field of type 'InstagramCredentialCleanupOperationStatus[]'
  */
 export type ListEnumInstagramCredentialCleanupOperationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'InstagramCredentialCleanupOperationStatus[]'>
-
-
-
-/**
- * Reference to a field of type 'Int'
- */
-export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
-
-
-
-/**
- * Reference to a field of type 'Int[]'
- */
-export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
 
 
 
@@ -3396,6 +3501,7 @@ export type GlobalOmitConfig = {
   tenant?: Prisma.TenantOmit
   googleConnection?: Prisma.GoogleConnectionOmit
   googleOAuthAttempt?: Prisma.GoogleOAuthAttemptOmit
+  googleCredentialCleanup?: Prisma.GoogleCredentialCleanupOmit
   instagramConnection?: Prisma.InstagramConnectionOmit
   instagramOAuthState?: Prisma.InstagramOAuthStateOmit
   instagramCredentialCleanup?: Prisma.InstagramCredentialCleanupOmit

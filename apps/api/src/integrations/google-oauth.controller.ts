@@ -5,12 +5,16 @@ import { z } from 'zod';
 
 import { CurrentPrincipal, Public, RequireMembership, SkipCsrf } from '../auth/auth.decorators.js';
 import { GoogleOAuthService } from './google-oauth.service.js';
+import { GoogleCredentialCleanupService } from './google-credential-cleanup.service.js';
 
 const connectSchema = z.object({ returnPath: z.string().max(2_048).optional() }).strict();
 
 @Controller('api/integrations/google')
 export class GoogleOAuthController {
-  constructor(@Inject(GoogleOAuthService) private readonly google: GoogleOAuthService) {}
+  constructor(
+    @Inject(GoogleOAuthService) private readonly google: GoogleOAuthService,
+    @Inject(GoogleCredentialCleanupService) private readonly cleanup: GoogleCredentialCleanupService,
+  ) {}
 
   @Get()
   @RequireMembership('MANAGER')
@@ -24,6 +28,12 @@ export class GoogleOAuthController {
     const parsed = connectSchema.safeParse(body ?? {});
     if (!parsed.success) throw new BadRequestException('Invalid Google connection request');
     return this.google.start(principal.tenantId!, principal.userId, parsed.data.returnPath);
+  }
+
+  @Post('disconnect')
+  @RequireMembership('OWNER')
+  disconnect(@CurrentPrincipal() principal: AuthPrincipal) {
+    return this.cleanup.disconnect(principal.tenantId!, principal.userId);
   }
 
   @Get('callback')

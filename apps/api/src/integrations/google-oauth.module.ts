@@ -9,6 +9,7 @@ import { GoogleOAuthClient, type GoogleOAuthClientPort } from './google-oauth.cl
 import { GoogleOAuthController } from './google-oauth.controller.js';
 import { GoogleOAuthService } from './google-oauth.service.js';
 import { GoogleOAuthStateService } from './google-oauth-state.service.js';
+import { GoogleCredentialCleanupService } from './google-credential-cleanup.service.js';
 
 @Module({})
 export class GoogleOAuthModule {
@@ -23,11 +24,13 @@ export class GoogleOAuthModule {
       new GoogleOAuthStateService(prisma),
       new CredentialCipher(Buffer.from(env.INTEGRATION_ENCRYPTION_KEY, 'base64')),
     );
+    const cleanup = new GoogleCredentialCleanupService(prisma, client, new CredentialCipher(Buffer.from(env.INTEGRATION_ENCRYPTION_KEY, 'base64')));
     return {
       module: GoogleOAuthModule,
       controllers: [GoogleOAuthController],
       providers: [
         { provide: GoogleOAuthService, useValue: service },
+        { provide: GoogleCredentialCleanupService, useValue: cleanup },
         { provide: GoogleOAuthPrismaLifecycle, useValue: new GoogleOAuthPrismaLifecycle(prisma) },
       ],
       exports: [GoogleOAuthService],
@@ -38,6 +41,7 @@ export class GoogleOAuthModule {
 class UnconfiguredGoogleOAuthClient implements GoogleOAuthClientPort {
   getAuthorizationUrl(): string { throw new Error('Google OAuth is not configured'); }
   async exchangeCode(): Promise<never> { throw new Error('Google OAuth is not configured'); }
+  async revokeRefreshToken(): Promise<never> { throw new Error('Google OAuth is not configured'); }
 }
 
 class GoogleOAuthPrismaLifecycle implements OnApplicationShutdown {

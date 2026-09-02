@@ -11,6 +11,7 @@
 export type * from './models/Tenant.js'
 export type * from './models/GoogleConnection.js'
 export type * from './models/GoogleOAuthAttempt.js'
+export type * from './models/GoogleCredentialCleanup.js'
 export type * from './models/InstagramConnection.js'
 export type * from './models/InstagramOAuthState.js'
 export type * from './models/InstagramCredentialCleanup.js'
