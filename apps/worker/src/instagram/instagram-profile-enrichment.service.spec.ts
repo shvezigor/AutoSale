@@ -7,7 +7,8 @@ import { PostgreSqlContainer, type StartedPostgreSqlContainer } from '@testconta
 import pg from 'pg';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { AvatarCopyError } from './instagram-avatar-copy.service.js';
+import { AvatarCopyError, InstagramAvatarCopyService } from './instagram-avatar-copy.service.js';
+import { InstagramAvatarCleanupReconciler } from './instagram-avatar-cleanup-reconciler.js';
 import { InstagramProfileEnrichmentService } from './instagram-profile-enrichment.service.js';
 import { InstagramProfileReconciler } from './instagram-profile-reconciler.js';
 
@@ -175,6 +176,75 @@ describe('InstagramProfileEnrichmentService', () => {
       .toMatchObject({ tenantId: profile.tenantId, status: 'PENDING' });
   });
 
+  it('keeps later reverted avatar bytes available while an older cleanup is deleting', async () => {
+    const profile = await seedProfile('cleanup-race');
+    await prisma.instagramAvatarCleanup.deleteMany();
+    const avatarA = Uint8Array.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10]);
+    const avatarB = Uint8Array.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x11]);
+    const objects = new Map<string, Uint8Array>();
+    let signalDeleteStarted!: () => void;
+    let releaseDelete!: () => void;
+    const deleteStarted = new Promise<void>((resolve) => { signalDeleteStarted = resolve; });
+    const deleteReleased = new Promise<void>((resolve) => { releaseDelete = resolve; });
+    const storage = {
+      put: vi.fn(async (input: { key: string; body: Uint8Array }) => {
+        objects.set(input.key, input.body);
+        return { key: input.key, etag: 'etag' };
+      }),
+      get: vi.fn(),
+      delete: vi.fn(async (key: string) => {
+        signalDeleteStarted();
+        await deleteReleased;
+        objects.delete(key);
+      }),
+    };
+    const avatarCopier = new InstagramAvatarCopyService(storage, {
+      resolveHost: async () => [{ address: '157.240.1.10', family: 4 }],
+      requestPinned: async (url) => imageResponse(
+        url.pathname.endsWith('/a.jpg') ? avatarA : avatarB,
+        'image/jpeg',
+      ),
+    });
+    const enrichment = new InstagramProfileEnrichmentService(
+      prisma,
+      { getUserProfile } as never,
+      avatarCopier,
+      cipher,
+      () => NOW,
+    );
+
+    getUserProfile.mockResolvedValue({ name: 'Olena', username: 'olena', profilePictureUrl: 'https://scontent.fbcdn.net/a.jpg' });
+    await enrichment.process(job(profile));
+    const firstKey = (await prisma.instagramCustomerProfile.findUniqueOrThrow({ where: { id: profile.id } })).avatarStorageKey!;
+
+    await prisma.instagramCustomerProfile.update({
+      where: { id: profile.id },
+      data: { status: 'PENDING', nextAttemptAt: NOW, refreshVersion: 2 },
+    });
+    getUserProfile.mockResolvedValue({ name: 'Olena', username: 'olena', profilePictureUrl: 'https://scontent.fbcdn.net/b.jpg' });
+    await enrichment.process({ ...job(profile), refreshVersion: 2 });
+
+    const cleanup = new InstagramAvatarCleanupReconciler(prisma, storage, () => new Date('2030-09-02T10:00:00.000Z'));
+    const cleanupRunning = cleanup.reconcile();
+    await deleteStarted;
+
+    await prisma.instagramCustomerProfile.update({
+      where: { id: profile.id },
+      data: { status: 'PENDING', nextAttemptAt: NOW, refreshVersion: 3 },
+    });
+    getUserProfile.mockResolvedValue({ name: 'Olena', username: 'olena', profilePictureUrl: 'https://scontent.fbcdn.net/a.jpg' });
+    await enrichment.process({ ...job(profile), refreshVersion: 3 });
+    const currentKey = (await prisma.instagramCustomerProfile.findUniqueOrThrow({ where: { id: profile.id } })).avatarStorageKey!;
+
+    releaseDelete();
+    await expect(cleanupRunning).resolves.toMatchObject({ deleted: 1 });
+
+    expect(firstKey).toMatch(/\/versions\/1\/sha256\//);
+    expect(currentKey).toMatch(/\/versions\/3\/sha256\//);
+    expect(currentKey).not.toBe(firstKey);
+    expect(objects.get(currentKey)).toEqual(avatarA);
+  });
+
   it('preserves the previous good profile and avatar on a transient Meta failure', async () => {
     const profile = await seedProfile('a', {
       displayName: 'Previous Name',
@@ -324,5 +394,13 @@ function job(profile: { id: string; tenantId: string; participantId: string; ref
     tenantId: profile.tenantId,
     participantId: profile.participantId,
     refreshVersion: profile.refreshVersion,
+  };
+}
+
+function imageResponse(body: Uint8Array, contentType: string) {
+  return {
+    status: 200,
+    headers: { 'content-type': contentType },
+    body: (async function* () { yield body; })(),
   };
 }

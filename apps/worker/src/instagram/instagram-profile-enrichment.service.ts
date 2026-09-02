@@ -21,7 +21,7 @@ interface ProfileClient {
 }
 
 interface AvatarCopier {
-  copy(input: { tenantId: string; profileId: string; sourceUrl: string }): ReturnType<InstagramAvatarCopyService['copy']>;
+  copy(input: { tenantId: string; profileId: string; refreshVersion: number; sourceUrl: string }): ReturnType<InstagramAvatarCopyService['copy']>;
 }
 
 export class InstagramProfileEnrichmentService {
@@ -109,6 +109,7 @@ export class InstagramProfileEnrichmentService {
         const copied = await this.avatars.copy({
           tenantId: job.tenantId,
           profileId: job.profileId,
+          refreshVersion: job.refreshVersion,
           sourceUrl: result.profilePictureUrl,
         });
         avatar = {

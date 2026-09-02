@@ -65,13 +65,16 @@ export class InstagramAvatarCopyService {
     this.timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   }
 
-  async copy(input: { tenantId: string; profileId: string; sourceUrl: string }): Promise<{
+  async copy(input: { tenantId: string; profileId: string; refreshVersion: number; sourceUrl: string }): Promise<{
     key: string;
     etag: string;
     checksum: string;
     contentType: string;
   }> {
     try {
+      if (!Number.isSafeInteger(input.refreshVersion) || input.refreshVersion < 1) {
+        throw new AvatarCopyError('INVALID_AVATAR_REFRESH_VERSION', false, 'Avatar refresh version is invalid');
+      }
       const url = parseAllowedUrl(input.sourceUrl);
       const addresses = await this.resolveHost(url.hostname);
       if (addresses.length === 0) {
@@ -105,7 +108,7 @@ export class InstagramAvatarCopyService {
         throw new AvatarCopyError('INVALID_AVATAR_BODY', false, 'Avatar bytes do not match the declared content type');
       }
       const checksum = createHash('sha256').update(body).digest('hex');
-      const key = `tenants/${input.tenantId}/instagram/profiles/${input.profileId}/sha256/${checksum}.${extension}`;
+      const key = `tenants/${input.tenantId}/instagram/profiles/${input.profileId}/versions/${input.refreshVersion}/sha256/${checksum}.${extension}`;
       const stored = await this.storage.put({ key, body, contentType });
       return { ...stored, checksum, contentType };
     } catch (error) {

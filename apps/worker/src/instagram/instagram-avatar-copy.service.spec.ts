@@ -33,6 +33,7 @@ describe('InstagramAvatarCopyService', () => {
     await expect(service.copy({
       tenantId: 'tenant-a',
       profileId: 'profile-a',
+      refreshVersion: 7,
       sourceUrl: 'https://scontent.cdninstagram.com/v/avatar.jpg?sig=opaque',
     })).resolves.toMatchObject({
       checksum: expect.stringMatching(/^[a-f\d]{64}$/),
@@ -46,7 +47,7 @@ describe('InstagramAvatarCopyService', () => {
       expect.any(AbortSignal),
     );
     expect(put).toHaveBeenCalledWith({
-      key: expect.stringMatching(/^tenants\/tenant-a\/instagram\/profiles\/profile-a\/sha256\/[a-f\d]{64}\.jpg$/),
+      key: expect.stringMatching(/^tenants\/tenant-a\/instagram\/profiles\/profile-a\/versions\/7\/sha256\/[a-f\d]{64}\.jpg$/),
       body: JPEG,
       contentType: 'image/jpeg',
     });
@@ -59,7 +60,7 @@ describe('InstagramAvatarCopyService', () => {
   ])('rejects a malicious avatar URL before DNS or HTTP (%s)', async (sourceUrl) => {
     const service = new InstagramAvatarCopyService(storage, { resolveHost, requestPinned });
 
-    await expect(service.copy({ tenantId: 'tenant-a', profileId: 'profile-a', sourceUrl }))
+    await expect(service.copy({ tenantId: 'tenant-a', profileId: 'profile-a', refreshVersion: 1, sourceUrl }))
       .rejects.toMatchObject({ code: 'UNSAFE_AVATAR_URL', retryable: false });
     expect(resolveHost).not.toHaveBeenCalled();
     expect(requestPinned).not.toHaveBeenCalled();
@@ -76,6 +77,7 @@ describe('InstagramAvatarCopyService', () => {
     await expect(service.copy({
       tenantId: 'tenant-a',
       profileId: 'profile-a',
+      refreshVersion: 1,
       sourceUrl: 'https://platform-lookaside.fbsbx.com/avatar.jpg',
     })).rejects.toMatchObject({ code: 'UNSAFE_AVATAR_ADDRESS', retryable: false });
     expect(requestPinned).not.toHaveBeenCalled();
@@ -92,6 +94,7 @@ describe('InstagramAvatarCopyService', () => {
     await expect(service.copy({
       tenantId: 'tenant-a',
       profileId: 'profile-a',
+      refreshVersion: 1,
       sourceUrl: 'https://scontent.fbcdn.net/avatar.png',
     })).rejects.toMatchObject({ code: 'AVATAR_TOO_LARGE', retryable: false });
     expect(put).not.toHaveBeenCalled();
