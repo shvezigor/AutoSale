@@ -2,11 +2,11 @@
 
 ## Task 1: Verify Meta and Google access prerequisites
 
-**Description:** Prove access to a test Instagram Professional account, required Meta permissions/webhooks, and a restricted Google service account before implementation depends on them.
+**Description:** Prove access to a test Instagram Professional account, required Meta permissions/webhooks, and a staging Google OAuth/Picker application before implementation depends on them.
 
 **Acceptance criteria:**
 - [ ] Meta webhook verification and one real message event are demonstrated.
-- [ ] The Google service account can read and append to only the selected test spreadsheet.
+- [ ] A tenant owner can authorize Google and grant access only to a selected private test spreadsheet through Picker.
 - [ ] Required approvals, credentials, and unresolved vendor gates are documented.
 
 **Verification:**
@@ -265,12 +265,12 @@
 - [ ] Corrections and approvals are auditable.
 - [ ] Human review of extraction evaluation completed.
 
-## Task 12: Configure and validate a Google Sheets destination
+## Task 12: Configure and validate a Google Sheets destination (superseded by Tasks 20–28)
 
-**Description:** Add tenant-scoped spreadsheet configuration, service-account authentication, header mapping, and a connectivity check.
+**Description:** The destination validation and export behavior remain required, but customer authentication is replaced by the approved tenant OAuth/Picker flow in Tasks 20–28.
 
 **Acceptance criteria:**
-- [ ] Credentials are supplied as a mounted secret or secret reference, never committed.
+- [ ] Credentials come from the tenant OAuth connection, are encrypted, and are never committed or returned to the browser.
 - [ ] Spreadsheet ID, tab, and required headers are validated before activation.
 - [ ] Access outside the selected spreadsheet is not required.
 
@@ -411,3 +411,186 @@
 - [ ] Clean-host restore test passes.
 - [ ] Secrets scan is clean.
 - [ ] Client accepts the end-to-end workflow.
+
+## Task 18: Send manual Instagram replies from the AutoSale inbox
+
+**Description:** Let an authenticated manager reply to an Instagram conversation from AutoSale through the official Instagram Send API. Persist the outbound message idempotently and reconcile it with Meta's echo webhook.
+
+**Acceptance criteria:**
+- [ ] The conversation page has an accessible message composer with pending, sent, and failed states.
+- [ ] The API sends text replies only for an active tenant-bound Instagram connection and never exposes the access token.
+- [ ] Meta echo webhooks reconcile with the locally initiated reply without creating duplicate messages.
+- [ ] Provider limits and expired/revoked credentials produce actionable errors and safe retry behavior.
+- [ ] A configured manager confirmation phrase sent from AutoSale can trigger the existing AI order-recognition flow exactly once.
+
+**Verification:**
+- [ ] Unit and integration tests cover authorization, Send API errors, idempotency, and echo reconciliation.
+- [ ] Browser test sends a reply from AutoSale and observes it once in both Instagram and the AutoSale conversation.
+- [ ] End-to-end test confirms that a manager reply containing a trigger phrase starts AI order recognition.
+
+**Dependencies:** Tasks 5, 6, 8, 9, and an active Meta Instagram OAuth connection.
+
+**Files likely touched:**
+- `packages/integrations/src/meta-instagram.ts`
+- `apps/api/src/conversations/`
+- `apps/web/app/conversations/[id]/`
+- `apps/worker/src/instagram/`
+- `packages/database/prisma/schema.prisma`
+
+**Estimated scope:** Medium
+
+## Task 19: Enrich Instagram conversations with customer profile details
+
+**Description:** Resolve the Instagram customer's permitted profile fields through the official Meta API and display their username/name and avatar in the AutoSale inbox instead of the generic “Клієнт Instagram” label. Keep customer-sent message attachments in the existing media-copy pipeline.
+
+**Acceptance criteria:**
+- [ ] A new Instagram conversation schedules idempotent profile enrichment for its participant ID.
+- [ ] AutoSale stores only profile fields permitted and returned by Meta, including username/display name and profile-picture URL when available.
+- [ ] Profile pictures are copied or refreshed safely so expired remote URLs do not break the inbox.
+- [ ] Conversation list and detail views show the customer avatar and best available name.
+- [ ] Missing, private, revoked, rate-limited, or unavailable profile fields fall back to “Клієнт Instagram” without blocking message ingestion.
+- [ ] Profile refreshes do not overwrite newer data or mix customers or tenants.
+
+**Verification:**
+- [ ] Unit and integration tests cover complete, partial, unavailable, expired-image, and rate-limited profile responses.
+- [ ] Browser test verifies the avatar/name display and the generic fallback.
+- [ ] End-to-end test receives a real message and verifies that the correct sender profile is attached to the conversation without exposing access tokens.
+
+**Dependencies:** Tasks 5, 6, and an active Meta Instagram OAuth connection with the required profile access.
+
+**Files likely touched:**
+- `packages/integrations/src/meta-instagram.ts`
+- `packages/database/prisma/schema.prisma`
+- `apps/worker/src/instagram/`
+- `apps/api/src/conversations/`
+- `apps/web/src/components/`
+
+**Estimated scope:** Medium
+
+## Google Sheets OAuth — Current First Priority
+
+The approved design is in `docs/superpowers/specs/2026-09-02-google-sheets-oauth-connection-design.md`. Exact TDD steps and commits are in `docs/superpowers/plans/2026-09-02-google-sheets-oauth-connection.md`.
+
+## Task 20: Configure Google Cloud and the OAuth deployment contract
+
+**Description:** Create the AutoSale Google OAuth/Picker configuration boundary and document the development, staging, and production Google Cloud setup.
+
+**Acceptance criteria:**
+- [ ] Sheets, Drive, and Picker APIs, OAuth client, production origin, callback, branding, and least-privilege scope are documented.
+- [ ] Partial or unsafe environment configuration fails startup without exposing secrets.
+- [ ] Picker API key is restricted to the production origin and Picker API.
+
+**Verification:** Config tests, typecheck, Compose configuration validation, and manual Google Console checklist.
+
+**Dependencies:** Approved Google OAuth design. **Estimated scope:** Medium
+
+## Task 21: Persist tenant Google connections and OAuth attempts
+
+**Description:** Add tenant-bound encrypted credential state and single-use authorization attempts.
+
+**Acceptance criteria:**
+- [ ] Refresh tokens are encrypted and never returned or logged.
+- [ ] State is expiring, single-use, and bound to tenant, owner, and safe return path.
+- [ ] Database constraints prevent cross-tenant or duplicate active connections.
+
+**Verification:** PostgreSQL migration tests, replay/expiry tests, Prisma validation, and API typecheck.
+
+**Dependencies:** Task 20. **Estimated scope:** Medium
+
+## Task 22: Implement OAuth connect, callback, reconnect, and summary
+
+**Description:** Let an owner authorize AutoSale with Google and safely persist/refresh the tenant grant.
+
+**Acceptance criteria:**
+- [ ] Only owners can initiate or replace a connection.
+- [ ] Callback validates state, identity, scopes, subject, and refresh-token lifecycle.
+- [ ] Safe API responses expose status and owner-visible email but no credential material.
+
+**Verification:** Unit/controller tests for success, cancellation, replay, mismatch, missing token, and reconnect.
+
+**Dependencies:** Task 21. **Estimated scope:** Medium
+
+## Task 23: Disconnect Google and clean credentials durably
+
+**Description:** Stop new Google work immediately, revoke the grant where possible, and remove only the matching credential generation.
+
+**Acceptance criteria:**
+- [ ] Disconnect pauses dependent catalogue sources and destinations without deleting internal data.
+- [ ] Failed revocation is retryable and cannot block a later safe reconnect indefinitely.
+- [ ] A stale cleanup cannot delete a newer credential.
+
+**Verification:** Cleanup/reconciler migration tests and reconnect concurrency tests.
+
+**Dependencies:** Task 22. **Estimated scope:** Medium
+
+## Task 24: Select private spreadsheets with Google Picker
+
+**Description:** Replace raw ID-only onboarding with owner sign-in, Picker selection, server validation, and tab selection.
+
+**Acceptance criteria:**
+- [ ] Owner selects only Google Sheets files explicitly shared with AutoSale.
+- [ ] Backend verifies file type/access and lists real tabs before saving.
+- [ ] Cancellation, inaccessible files, deleted files, and provider errors are actionable.
+
+**Verification:** Component/API tests plus a real private staging spreadsheet.
+
+**Dependencies:** Task 22. **Estimated scope:** Medium
+
+## Task 25: Use tenant OAuth for Google catalogue synchronization
+
+**Description:** Feed tenant access tokens into the existing Google catalogue, AI mapping, and scheduled synchronization pipeline.
+
+**Acceptance criteria:**
+- [ ] Selected private sheet can create a mapping review and confirmed catalogue import.
+- [ ] Scheduled/manual sync refreshes tokens without browser presence.
+- [ ] Revoked access pauses safely and preserves the last valid catalogue.
+
+**Verification:** Catalogue sync, fencing, mapping, scheduler, and tenant-isolation tests.
+
+**Dependencies:** Tasks 23–24. **Estimated scope:** Medium
+
+## Task 26: Use tenant OAuth for Google order export
+
+**Description:** Validate a Picker-selected destination and export approved orders with existing exactly-once semantics.
+
+**Acceptance criteria:**
+- [ ] First export appends and later changes update by stable `order_id`.
+- [ ] Repeated clicks, retries, timeouts, and reconnects do not duplicate rows.
+- [ ] Catalogue and order spreadsheet configuration remain independent.
+
+**Verification:** Settings/worker integration tests and real staging export.
+
+**Dependencies:** Tasks 23–24. **Estimated scope:** Medium
+
+## Task 27: Deliver the Google connection wizard
+
+**Description:** Add the owner experience for connection, file/tab selection, purpose selection, validation, synchronization, reconnect, and disconnect.
+
+**Acceptance criteria:**
+- [ ] Owner never handles API keys, JSON credentials, or refresh tokens.
+- [ ] Catalogue and order-export sections show selected file, tab, status, and safe errors.
+- [ ] Managers and platform administrators retain the approved privacy boundaries.
+
+**Verification:** Role/accessibility component tests and production web build.
+
+**Dependencies:** Tasks 24–26. **Estimated scope:** Medium
+
+## Task 28: Complete Google staging and production readiness
+
+**Description:** Verify the complete private-Sheets workflow, migrate away from production service-account use, and prepare Google verification.
+
+**Acceptance criteria:**
+- [ ] Real OAuth → Picker → catalogue import → AI mapping → order export flow passes.
+- [ ] Revoke, reconnect, disconnect, deleted-tab, quota, and restart recovery cases pass.
+- [ ] Production branding, domains, policies, scopes, evidence, and credentials are configured.
+
+**Verification:** Full test/typecheck/E2E/build suite and sanitized acceptance record.
+
+**Dependencies:** Tasks 20–27. **Estimated scope:** Medium
+
+## Checkpoint: Google Sheets OAuth complete
+
+- [ ] A customer connects Google without technical credentials.
+- [ ] A private catalogue synchronizes into AutoSale.
+- [ ] An approved order reaches the selected sheet exactly once.
+- [ ] Revocation and disconnect stop access without losing internal business data.

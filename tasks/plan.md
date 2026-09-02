@@ -40,7 +40,7 @@ The schema and integration interfaces will carry `tenant_id` from the beginning,
 - **AI boundary:** OpenAI Responses API adapter returning a strict, versioned JSON schema. The model extracts facts from prompts, conversation context, images, and supplied catalogue candidates; local validation rejects unknown SKUs and incomplete output.
 - **Approval policy:** each tenant selects `ALWAYS`, `NEVER`, or `ON_LOW_CONFIDENCE`. Automatic approval is permitted only after schema, catalogue, completeness, and duplicate validation.
 - **Instagram boundary:** official Meta APIs only. Raw webhook payloads are retained for replay and audit.
-- **Google Sheets boundary:** a dedicated adapter using the Google Sheets API. The MVP authenticates with a service account and grants it access only to the selected spreadsheet. OAuth can replace this adapter credential strategy later.
+- **Google Sheets boundary:** a dedicated adapter using the Google Sheets API. Each tenant owner connects Google through AutoSale's OAuth web application and explicitly selects files through Google Picker using the least-privilege `drive.file` scope. A service account remains development-only during migration.
 - **Idempotency:** unique external message IDs, unique order trigger IDs, and a unique `(tenant_id, order_id, destination)` export key prevent duplicate orders and rows.
 - **Portability:** one production-oriented Docker Compose definition, environment-based secrets, versioned database migrations, named volumes, and documented backup/restore procedures.
 
@@ -114,7 +114,7 @@ The exact client spreadsheet can add mapped columns through configuration withou
 
 - [ ] All containers become healthy from a clean checkout.
 - [ ] Meta webhook challenge succeeds in a test environment.
-- [ ] Google service account can access only the selected spreadsheet.
+- [ ] A tenant owner can authorize the staging Google OAuth client and select only the intended private spreadsheet through Picker.
 - [ ] Review results before building domain features.
 
 ### Phase 2: First vertical slice — Instagram message to inbox
@@ -144,7 +144,21 @@ The exact client spreadsheet can add mapped columns through configuration withou
 - [ ] Manager corrections are audited.
 - [ ] Extraction evaluations meet the agreed acceptance threshold.
 
-### Phase 4: Third vertical slice — approved order to Google Sheets
+### Phase 4 (current first priority): Tenant Google OAuth and Picker
+
+- [ ] Task 20: Configure the AutoSale Google Cloud project and OAuth contract.
+- [ ] Task 21: Persist tenant Google connections and single-use OAuth attempts.
+- [ ] Task 22: Implement OAuth start, callback, reconnect, and safe connection summary.
+- [ ] Task 23: Add durable disconnect and credential cleanup.
+- [ ] Task 24: Select and validate private spreadsheets through Google Picker.
+- [ ] Task 25: Use tenant OAuth for catalogue synchronization.
+- [ ] Task 26: Use tenant OAuth for idempotent order export.
+- [ ] Task 27: Deliver the owner-facing Google connection wizard.
+- [ ] Task 28: Complete staging, verification, migration, and end-to-end acceptance.
+
+Detailed execution steps: `docs/superpowers/plans/2026-09-02-google-sheets-oauth-connection.md`.
+
+### Phase 5: Approved order to Google Sheets
 
 - [ ] Task 12: Configure and validate a Google Sheets destination.
 - [ ] Task 13: Synchronize approved orders idempotently.
@@ -157,7 +171,7 @@ The exact client spreadsheet can add mapped columns through configuration withou
 - [ ] API retries and job retries do not duplicate rows.
 - [ ] A revoked credential produces an actionable error without losing the order.
 
-### Phase 5: Operational readiness
+### Phase 6: Operational readiness
 
 - [ ] Task 15: Add audit, structured logs, metrics, and error reporting.
 - [ ] Task 16: Add backup, restore, migration, and deployment procedures.
@@ -222,7 +236,7 @@ v
 - A Meta developer app or authority to create one.
 - Exact confirmation phrases and 50–100 anonymized example conversations for the first evaluation set.
 - Product catalogue with stable SKU, canonical name, variations, aliases, and reference photos where available.
-- Google spreadsheet ID, sheet/tab name, exact desired columns, and service-account sharing approval.
+- Access to create/configure the AutoSale Google Cloud project, a private staging spreadsheet, final catalogue/export tabs, and approval to submit Google OAuth verification materials.
 - Rules for incomplete customer phone, delivery data, multiple products, edits, and cancellations.
 - Target deployment environment: Linux VPS requirements, domain, and backup destination.
 
