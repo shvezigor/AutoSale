@@ -40,6 +40,34 @@ describe('parseApiEnv', () => {
     expect(parseApiEnv({ ...validEnv, GOOGLE_SERVICE_ACCOUNT_FILE: '' }).GOOGLE_SERVICE_ACCOUNT_FILE).toBeUndefined();
   });
 
+  it('accepts a complete Google OAuth server configuration', () => {
+    const parsed = parseApiEnv({
+      ...validEnv,
+      GOOGLE_OAUTH_CLIENT_ID: '123456789.apps.googleusercontent.com',
+      GOOGLE_OAUTH_CLIENT_SECRET: 'google-client-secret',
+      GOOGLE_OAUTH_REDIRECT_URI: 'https://autosale.example.com/api/integrations/google/callback',
+    });
+
+    expect(parsed.GOOGLE_OAUTH_CLIENT_ID).toBe('123456789.apps.googleusercontent.com');
+  });
+
+  it('rejects a partial Google OAuth server configuration', () => {
+    expect(() => parseApiEnv({
+      ...validEnv,
+      GOOGLE_OAUTH_CLIENT_ID: '123456789.apps.googleusercontent.com',
+    })).toThrow(/Google OAuth configuration/i);
+  });
+
+  it('requires an HTTPS Google OAuth callback in production', () => {
+    expect(() => parseApiEnv({
+      ...validEnv,
+      NODE_ENV: 'production',
+      GOOGLE_OAUTH_CLIENT_ID: '123456789.apps.googleusercontent.com',
+      GOOGLE_OAUTH_CLIENT_SECRET: 'google-client-secret',
+      GOOGLE_OAUTH_REDIRECT_URI: 'http://sales-aito.com/api/integrations/google/callback',
+    })).toThrow(/HTTPS/i);
+  });
+
   it('rejects a short session pepper', () => {
     expect(() => parseApiEnv({ ...validEnv, SESSION_PEPPER: 'short' })).toThrow();
   });
