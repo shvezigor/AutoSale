@@ -42,7 +42,7 @@ button, input { font: inherit; }
 .conversation-row:hover, .conversation-row:focus-visible { background: var(--surface); outline: none; }
 .conversation-row[data-selected="true"] { background: var(--surface-blue); }
 .conversation-row[data-selected="true"]::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 3px; background: var(--accent); }
-.avatar { flex: 0 0 auto; display: grid; place-items: center; width: 43px; height: 43px; border-radius: 50%; background: #dce8fa; color: #23466f; font-size: 13px; font-weight: 750; }
+.avatar { flex: 0 0 auto; display: grid; place-items: center; width: 43px; height: 43px; border-radius: 50%; background: #dce8fa; color: #23466f; font-size: 13px; font-weight: 750; object-fit: cover; overflow: hidden; }
 .avatar.large { width: 46px; height: 46px; }
 .conversation-copy { min-width: 0; flex: 1; }
 .conversation-line { display: flex; justify-content: space-between; gap: 8px; font-size: 14px; }

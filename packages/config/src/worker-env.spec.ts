@@ -13,6 +13,10 @@ const validEnv = {
   S3_SECRET_ACCESS_KEY: 'minio-secret-key',
   OPENAI_API_KEY: 'sk-test-not-a-real-key-value',
   OPENAI_MODEL: 'gpt-5.4-mini',
+  META_APP_ID: '123456789012345',
+  META_APP_SECRET: 'meta-app-secret-value',
+  META_GRAPH_API_VERSION: 'v24.0',
+  INTEGRATION_ENCRYPTION_KEY: Buffer.alloc(32, 7).toString('base64'),
 };
 
 describe('parseWorkerEnv', () => {
@@ -30,5 +34,9 @@ describe('parseWorkerEnv', () => {
     const { OPENAI_API_KEY: _omitted, ...incompleteEnv } = validEnv;
 
     expect(() => parseWorkerEnv(incompleteEnv)).toThrow();
+  });
+
+  it('rejects an invalid credential encryption key', () => {
+    expect(() => parseWorkerEnv({ ...validEnv, INTEGRATION_ENCRYPTION_KEY: 'short' })).toThrow();
   });
 });

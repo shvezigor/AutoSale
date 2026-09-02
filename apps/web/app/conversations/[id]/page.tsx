@@ -7,14 +7,20 @@ export default async function ConversationDetailPage({ params }: { params: Promi
   const { id } = await params;
   const [list, conversation, session] = await Promise.all([getConversations(), getConversation(id), getServerSession()]);
   if (!session) return null;
-  const name = conversation.participantName ?? 'Клієнт Instagram';
+  const name = conversation.participantName ??
+    (conversation.participantUsername ? `@${conversation.participantUsername}` : 'Клієнт Instagram');
+  const accountLabel = conversation.participantName && conversation.participantUsername
+    ? `@${conversation.participantUsername} · Instagram`
+    : 'Instagram';
 
   return (
     <InboxShell conversations={list.items} selectedId={id} session={session}>
       <section className="conversation-panel">
         <header className="conversation-header">
-          <span className="avatar large" aria-hidden="true">{name[0]}</span>
-          <span><h2>{name}</h2><small>Instagram</small></span>
+          {conversation.participantAvatarUrl
+            ? <img className="avatar large" src={conversation.participantAvatarUrl} alt={`Фото профілю ${name}`} />
+            : <span className="avatar large" aria-hidden="true">{name[0]}</span>}
+          <span><h2>{name}</h2><small>{accountLabel}</small></span>
         </header>
         <div className="thread-scroll"><p className="day-label">Сьогодні</p><MessageThread conversation={conversation} /></div>
         <div className="composer" aria-label="Поле відповіді недоступне на цьому етапі">
@@ -29,7 +35,7 @@ export default async function ConversationDetailPage({ params }: { params: Promi
           <p>Створіть замовлення, щоб додати позиції та змінити статус.</p>
           <button type="button" disabled>Створити замовлення</button>
         </div>
-        <section className="customer-data"><h3>Дані клієнта</h3><dl><div><dt>Канал</dt><dd>Instagram</dd></div><div><dt>Ім’я</dt><dd>{name}</dd></div></dl></section>
+        <section className="customer-data"><h3>Дані клієнта</h3><dl><div><dt>Канал</dt><dd>Instagram</dd></div><div><dt>Ім’я</dt><dd>{name}</dd></div>{conversation.participantUsername && <div><dt>Username</dt><dd>@{conversation.participantUsername}</dd></div>}</dl></section>
       </aside>
     </InboxShell>
   );

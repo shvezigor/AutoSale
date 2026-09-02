@@ -1,4 +1,5 @@
 export type { ObjectStorage } from './object-storage.js';
+export { CredentialCipher } from './credential-cipher.js';
 export { S3ObjectStorage, type S3ObjectStorageConfig } from './s3-object-storage.js';
 export {
   createGoogleSheetsAdapter,
@@ -19,4 +20,5 @@ export {
   type MetaInstagramCodeExchangeInput,
   type MetaInstagramIdentity,
   type MetaInstagramToken,
+  type MetaInstagramUserProfile,
 } from './meta-instagram.js';

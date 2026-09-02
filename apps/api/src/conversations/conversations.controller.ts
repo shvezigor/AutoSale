@@ -73,11 +73,13 @@ function conversationListOpenApiSchema(): OpenApiSchema {
       type: 'array',
       items: {
         type: 'object',
-        required: ['id', 'channel', 'participantName', 'lastMessagePreview', 'lastMessageAt'],
+        required: ['id', 'channel', 'participantName', 'participantUsername', 'participantAvatarUrl', 'lastMessagePreview', 'lastMessageAt'],
         properties: {
           id: { type: 'string', format: 'uuid' },
           channel: { type: 'string', enum: ['INSTAGRAM'] },
           participantName: { type: 'string', nullable: true },
+          participantUsername: { type: 'string', nullable: true },
+          participantAvatarUrl: { type: 'string', nullable: true },
           lastMessagePreview: { type: 'string', nullable: true },
           lastMessageAt: { type: 'string', format: 'date-time' },
         },
@@ -91,11 +93,13 @@ function conversationListOpenApiSchema(): OpenApiSchema {
 function conversationDetailOpenApiSchema(): OpenApiSchema {
   return {
   type: 'object',
-  required: ['id', 'channel', 'participantName', 'messages'],
+  required: ['id', 'channel', 'participantName', 'participantUsername', 'participantAvatarUrl', 'messages'],
   properties: {
     id: { type: 'string', format: 'uuid' },
     channel: { type: 'string', enum: ['INSTAGRAM'] },
     participantName: { type: 'string', nullable: true },
+    participantUsername: { type: 'string', nullable: true },
+    participantAvatarUrl: { type: 'string', nullable: true },
     messages: {
       type: 'array',
       items: {

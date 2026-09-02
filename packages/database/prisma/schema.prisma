@@ -99,6 +99,7 @@ model Tenant {
   instagramConnection InstagramConnection?
   instagramOAuthStates InstagramOAuthState[]
   instagramCredentialCleanups InstagramCredentialCleanup[]
+  instagramCustomerProfiles InstagramCustomerProfile[]
   instagramOAuthCurrentAttemptId String? @db.Uuid @map("instagram_oauth_current_attempt_id")
 
   @@index([status])
@@ -321,17 +322,50 @@ model Conversation {
   channel                String
   externalConversationId String    @map("external_conversation_id")
   participantId          String    @map("participant_id")
+  profileId              String?   @map("profile_id") @db.Uuid
   displayName            String?   @map("display_name")
   lastMessageAt          DateTime  @map("last_message_at")
   createdAt              DateTime  @default(now()) @map("created_at")
   updatedAt              DateTime  @updatedAt @map("updated_at")
   tenant                 Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  profile                InstagramCustomerProfile? @relation(fields: [tenantId, profileId], references: [tenantId, id], onDelete: Restrict)
   messages               Message[]
   orders                 Order[]
 
   @@unique([tenantId, channel, externalConversationId])
   @@index([tenantId, lastMessageAt])
   @@map("conversations")
+}
+
+model InstagramCustomerProfile {
+  id                 String    @id @default(uuid()) @db.Uuid
+  tenantId           String    @map("tenant_id") @db.Uuid
+  participantId      String    @map("participant_id")
+  displayName        String?   @map("display_name")
+  username           String?
+  avatarSourceUrl    String?   @map("avatar_source_url")
+  avatarStorageKey   String?   @map("avatar_storage_key")
+  avatarChecksum     String?   @map("avatar_checksum")
+  avatarContentType  String?   @map("avatar_content_type")
+  status             String    @default("PENDING")
+  refreshVersion     Int       @default(1) @map("refresh_version")
+  attempts           Int       @default(0)
+  nextAttemptAt      DateTime  @default(now()) @map("next_attempt_at")
+  refreshAfter       DateTime? @map("refresh_after")
+  leaseId            String?   @map("lease_id") @db.Uuid
+  leaseExpiresAt     DateTime? @map("lease_expires_at")
+  lastErrorCode      String?   @map("last_error_code")
+  lastRefreshedAt    DateTime? @map("last_refreshed_at")
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+  tenant             Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  conversations      Conversation[]
+
+  @@unique([tenantId, participantId])
+  @@unique([tenantId, id])
+  @@index([status, nextAttemptAt])
+  @@index([status, refreshAfter])
+  @@map("instagram_customer_profiles")
 }
 
 model Message {

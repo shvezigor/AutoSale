@@ -12,15 +12,20 @@ const tenantId = '22222222-2222-4222-8222-222222222222';
 describe('MediaController', () => {
   let app: INestApplication | undefined;
   const load = vi.fn();
+  const loadProfileAvatar = vi.fn();
 
   beforeEach(async () => {
     load.mockReset().mockResolvedValue({
       body: Uint8Array.from([137, 80, 78, 71]),
       contentType: 'image/png',
     });
+    loadProfileAvatar.mockReset().mockResolvedValue({
+      body: Uint8Array.from([255, 216, 255]),
+      contentType: 'image/jpeg',
+    });
     const moduleRef = await Test.createTestingModule({
       controllers: [MediaController],
-      providers: [{ provide: MediaService, useValue: { load } }],
+      providers: [{ provide: MediaService, useValue: { load, loadProfileAvatar } }],
     }).compile();
     app = moduleRef.createNestApplication();
     app.use((request: { principal?: unknown }, _response: unknown, next: () => void) => {
@@ -40,5 +45,15 @@ describe('MediaController', () => {
 
     expect(Buffer.from(response.body as Uint8Array)).toEqual(Buffer.from([137, 80, 78, 71]));
     expect(load).toHaveBeenCalledWith(tenantId, attachmentId);
+  });
+
+  it('serves a tenant-scoped cached profile avatar from an authenticated route', async () => {
+    await request(app!.getHttpServer())
+      .get(`/api/media/instagram-profiles/${attachmentId}/avatar?v=checksum`)
+      .expect(200)
+      .expect('Content-Type', /image\/jpeg/)
+      .expect('Cache-Control', /private/);
+
+    expect(loadProfileAvatar).toHaveBeenCalledWith(tenantId, attachmentId);
   });
 });

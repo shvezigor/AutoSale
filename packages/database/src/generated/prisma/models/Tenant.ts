@@ -209,6 +209,7 @@ export type TenantWhereInput = {
   instagramConnection?: Prisma.XOR<Prisma.InstagramConnectionNullableScalarRelationFilter, Prisma.InstagramConnectionWhereInput> | null
   instagramOAuthStates?: Prisma.InstagramOAuthStateListRelationFilter
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupListRelationFilter
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileListRelationFilter
 }
 
 export type TenantOrderByWithRelationInput = {
@@ -237,6 +238,7 @@ export type TenantOrderByWithRelationInput = {
   instagramConnection?: Prisma.InstagramConnectionOrderByWithRelationInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateOrderByRelationAggregateInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupOrderByRelationAggregateInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileOrderByRelationAggregateInput
 }
 
 export type TenantWhereUniqueInput = Prisma.AtLeast<{
@@ -268,6 +270,7 @@ export type TenantWhereUniqueInput = Prisma.AtLeast<{
   instagramConnection?: Prisma.XOR<Prisma.InstagramConnectionNullableScalarRelationFilter, Prisma.InstagramConnectionWhereInput> | null
   instagramOAuthStates?: Prisma.InstagramOAuthStateListRelationFilter
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupListRelationFilter
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileListRelationFilter
 }, "id" | "key">
 
 export type TenantOrderByWithAggregationInput = {
@@ -320,6 +323,7 @@ export type TenantCreateInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateInput = {
@@ -348,6 +352,7 @@ export type TenantUncheckedCreateInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUpdateInput = {
@@ -376,6 +381,7 @@ export type TenantUpdateInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateInput = {
@@ -404,6 +410,7 @@ export type TenantUncheckedUpdateInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateManyInput = {
@@ -616,6 +623,20 @@ export type TenantUpdateOneRequiredWithoutConversationsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.TenantUpdateToOneWithWhereWithoutConversationsInput, Prisma.TenantUpdateWithoutConversationsInput>, Prisma.TenantUncheckedUpdateWithoutConversationsInput>
 }
 
+export type TenantCreateNestedOneWithoutInstagramCustomerProfilesInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutInstagramCustomerProfilesInput, Prisma.TenantUncheckedCreateWithoutInstagramCustomerProfilesInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutInstagramCustomerProfilesInput
+  connect?: Prisma.TenantWhereUniqueInput
+}
+
+export type TenantUpdateOneRequiredWithoutInstagramCustomerProfilesNestedInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutInstagramCustomerProfilesInput, Prisma.TenantUncheckedCreateWithoutInstagramCustomerProfilesInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutInstagramCustomerProfilesInput
+  upsert?: Prisma.TenantUpsertWithoutInstagramCustomerProfilesInput
+  connect?: Prisma.TenantWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TenantUpdateToOneWithWhereWithoutInstagramCustomerProfilesInput, Prisma.TenantUpdateWithoutInstagramCustomerProfilesInput>, Prisma.TenantUncheckedUpdateWithoutInstagramCustomerProfilesInput>
+}
+
 export type TenantCreateNestedOneWithoutMessagesInput = {
   create?: Prisma.XOR<Prisma.TenantCreateWithoutMessagesInput, Prisma.TenantUncheckedCreateWithoutMessagesInput>
   connectOrCreate?: Prisma.TenantCreateOrConnectWithoutMessagesInput
@@ -781,6 +802,7 @@ export type TenantCreateWithoutInstagramConnectionInput = {
   securityAuditLogs?: Prisma.SecurityAuditLogCreateNestedManyWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutInstagramConnectionInput = {
@@ -808,6 +830,7 @@ export type TenantUncheckedCreateWithoutInstagramConnectionInput = {
   securityAuditLogs?: Prisma.SecurityAuditLogUncheckedCreateNestedManyWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutInstagramConnectionInput = {
@@ -851,6 +874,7 @@ export type TenantUpdateWithoutInstagramConnectionInput = {
   securityAuditLogs?: Prisma.SecurityAuditLogUpdateManyWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutInstagramConnectionInput = {
@@ -878,6 +902,7 @@ export type TenantUncheckedUpdateWithoutInstagramConnectionInput = {
   securityAuditLogs?: Prisma.SecurityAuditLogUncheckedUpdateManyWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutInstagramOAuthStatesInput = {
@@ -905,6 +930,7 @@ export type TenantCreateWithoutInstagramOAuthStatesInput = {
   securityAuditLogs?: Prisma.SecurityAuditLogCreateNestedManyWithoutTenantInput
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutInstagramOAuthStatesInput = {
@@ -932,6 +958,7 @@ export type TenantUncheckedCreateWithoutInstagramOAuthStatesInput = {
   securityAuditLogs?: Prisma.SecurityAuditLogUncheckedCreateNestedManyWithoutTenantInput
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutInstagramOAuthStatesInput = {
@@ -975,6 +1002,7 @@ export type TenantUpdateWithoutInstagramOAuthStatesInput = {
   securityAuditLogs?: Prisma.SecurityAuditLogUpdateManyWithoutTenantNestedInput
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutInstagramOAuthStatesInput = {
@@ -1002,6 +1030,7 @@ export type TenantUncheckedUpdateWithoutInstagramOAuthStatesInput = {
   securityAuditLogs?: Prisma.SecurityAuditLogUncheckedUpdateManyWithoutTenantNestedInput
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutInstagramCredentialCleanupsInput = {
@@ -1029,6 +1058,7 @@ export type TenantCreateWithoutInstagramCredentialCleanupsInput = {
   securityAuditLogs?: Prisma.SecurityAuditLogCreateNestedManyWithoutTenantInput
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutInstagramCredentialCleanupsInput = {
@@ -1056,6 +1086,7 @@ export type TenantUncheckedCreateWithoutInstagramCredentialCleanupsInput = {
   securityAuditLogs?: Prisma.SecurityAuditLogUncheckedCreateNestedManyWithoutTenantInput
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutInstagramCredentialCleanupsInput = {
@@ -1099,6 +1130,7 @@ export type TenantUpdateWithoutInstagramCredentialCleanupsInput = {
   securityAuditLogs?: Prisma.SecurityAuditLogUpdateManyWithoutTenantNestedInput
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutInstagramCredentialCleanupsInput = {
@@ -1126,6 +1158,7 @@ export type TenantUncheckedUpdateWithoutInstagramCredentialCleanupsInput = {
   securityAuditLogs?: Prisma.SecurityAuditLogUncheckedUpdateManyWithoutTenantNestedInput
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutMembershipsInput = {
@@ -1153,6 +1186,7 @@ export type TenantCreateWithoutMembershipsInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutMembershipsInput = {
@@ -1180,6 +1214,7 @@ export type TenantUncheckedCreateWithoutMembershipsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutMembershipsInput = {
@@ -1223,6 +1258,7 @@ export type TenantUpdateWithoutMembershipsInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutMembershipsInput = {
@@ -1250,6 +1286,7 @@ export type TenantUncheckedUpdateWithoutMembershipsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutSessionsInput = {
@@ -1277,6 +1314,7 @@ export type TenantCreateWithoutSessionsInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutSessionsInput = {
@@ -1304,6 +1342,7 @@ export type TenantUncheckedCreateWithoutSessionsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutSessionsInput = {
@@ -1347,6 +1386,7 @@ export type TenantUpdateWithoutSessionsInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutSessionsInput = {
@@ -1374,6 +1414,7 @@ export type TenantUncheckedUpdateWithoutSessionsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutInvitationsInput = {
@@ -1401,6 +1442,7 @@ export type TenantCreateWithoutInvitationsInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutInvitationsInput = {
@@ -1428,6 +1470,7 @@ export type TenantUncheckedCreateWithoutInvitationsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutInvitationsInput = {
@@ -1471,6 +1514,7 @@ export type TenantUpdateWithoutInvitationsInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutInvitationsInput = {
@@ -1498,6 +1542,7 @@ export type TenantUncheckedUpdateWithoutInvitationsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutSecurityAuditLogsInput = {
@@ -1525,6 +1570,7 @@ export type TenantCreateWithoutSecurityAuditLogsInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutSecurityAuditLogsInput = {
@@ -1552,6 +1598,7 @@ export type TenantUncheckedCreateWithoutSecurityAuditLogsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutSecurityAuditLogsInput = {
@@ -1595,6 +1642,7 @@ export type TenantUpdateWithoutSecurityAuditLogsInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutSecurityAuditLogsInput = {
@@ -1622,6 +1670,7 @@ export type TenantUncheckedUpdateWithoutSecurityAuditLogsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutEventsInput = {
@@ -1649,6 +1698,7 @@ export type TenantCreateWithoutEventsInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutEventsInput = {
@@ -1676,6 +1726,7 @@ export type TenantUncheckedCreateWithoutEventsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutEventsInput = {
@@ -1719,6 +1770,7 @@ export type TenantUpdateWithoutEventsInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutEventsInput = {
@@ -1746,6 +1798,7 @@ export type TenantUncheckedUpdateWithoutEventsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutConversationsInput = {
@@ -1773,6 +1826,7 @@ export type TenantCreateWithoutConversationsInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutConversationsInput = {
@@ -1800,6 +1854,7 @@ export type TenantUncheckedCreateWithoutConversationsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutConversationsInput = {
@@ -1843,6 +1898,7 @@ export type TenantUpdateWithoutConversationsInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutConversationsInput = {
@@ -1853,6 +1909,135 @@ export type TenantUncheckedUpdateWithoutConversationsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
+  messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
+  settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
+  catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
+  catalogueMappings?: Prisma.CatalogueMappingUncheckedUpdateManyWithoutTenantNestedInput
+  catalogueImportRuns?: Prisma.CatalogueImportRunUncheckedUpdateManyWithoutTenantNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedUpdateOneWithoutTenantNestedInput
+  orderExports?: Prisma.OrderExportUncheckedUpdateManyWithoutTenantNestedInput
+  memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutTenantNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutTenantNestedInput
+  invitations?: Prisma.TenantInvitationUncheckedUpdateManyWithoutTenantNestedInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUncheckedUpdateManyWithoutTenantNestedInput
+  instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
+  instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
+}
+
+export type TenantCreateWithoutInstagramCustomerProfilesInput = {
+  id?: string
+  key: string
+  name: string
+  status?: $Enums.AccessStatus
+  createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
+  events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
+  conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
+  messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
+  settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
+  products?: Prisma.ProductCreateNestedManyWithoutTenantInput
+  catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
+  catalogueMappings?: Prisma.CatalogueMappingCreateNestedManyWithoutTenantInput
+  catalogueImportRuns?: Prisma.CatalogueImportRunCreateNestedManyWithoutTenantInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationCreateNestedOneWithoutTenantInput
+  orderExports?: Prisma.OrderExportCreateNestedManyWithoutTenantInput
+  memberships?: Prisma.TenantMembershipCreateNestedManyWithoutTenantInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutTenantInput
+  invitations?: Prisma.TenantInvitationCreateNestedManyWithoutTenantInput
+  securityAuditLogs?: Prisma.SecurityAuditLogCreateNestedManyWithoutTenantInput
+  instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
+  instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+}
+
+export type TenantUncheckedCreateWithoutInstagramCustomerProfilesInput = {
+  id?: string
+  key: string
+  name: string
+  status?: $Enums.AccessStatus
+  createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
+  events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
+  conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
+  messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
+  settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
+  catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
+  catalogueMappings?: Prisma.CatalogueMappingUncheckedCreateNestedManyWithoutTenantInput
+  catalogueImportRuns?: Prisma.CatalogueImportRunUncheckedCreateNestedManyWithoutTenantInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedCreateNestedOneWithoutTenantInput
+  orderExports?: Prisma.OrderExportUncheckedCreateNestedManyWithoutTenantInput
+  memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutTenantInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutTenantInput
+  invitations?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutTenantInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUncheckedCreateNestedManyWithoutTenantInput
+  instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
+  instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+}
+
+export type TenantCreateOrConnectWithoutInstagramCustomerProfilesInput = {
+  where: Prisma.TenantWhereUniqueInput
+  create: Prisma.XOR<Prisma.TenantCreateWithoutInstagramCustomerProfilesInput, Prisma.TenantUncheckedCreateWithoutInstagramCustomerProfilesInput>
+}
+
+export type TenantUpsertWithoutInstagramCustomerProfilesInput = {
+  update: Prisma.XOR<Prisma.TenantUpdateWithoutInstagramCustomerProfilesInput, Prisma.TenantUncheckedUpdateWithoutInstagramCustomerProfilesInput>
+  create: Prisma.XOR<Prisma.TenantCreateWithoutInstagramCustomerProfilesInput, Prisma.TenantUncheckedCreateWithoutInstagramCustomerProfilesInput>
+  where?: Prisma.TenantWhereInput
+}
+
+export type TenantUpdateToOneWithWhereWithoutInstagramCustomerProfilesInput = {
+  where?: Prisma.TenantWhereInput
+  data: Prisma.XOR<Prisma.TenantUpdateWithoutInstagramCustomerProfilesInput, Prisma.TenantUncheckedUpdateWithoutInstagramCustomerProfilesInput>
+}
+
+export type TenantUpdateWithoutInstagramCustomerProfilesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
+  conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
+  messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
+  settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
+  products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
+  catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
+  catalogueMappings?: Prisma.CatalogueMappingUpdateManyWithoutTenantNestedInput
+  catalogueImportRuns?: Prisma.CatalogueImportRunUpdateManyWithoutTenantNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUpdateOneWithoutTenantNestedInput
+  orderExports?: Prisma.OrderExportUpdateManyWithoutTenantNestedInput
+  memberships?: Prisma.TenantMembershipUpdateManyWithoutTenantNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutTenantNestedInput
+  invitations?: Prisma.TenantInvitationUpdateManyWithoutTenantNestedInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUpdateManyWithoutTenantNestedInput
+  instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
+  instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+}
+
+export type TenantUncheckedUpdateWithoutInstagramCustomerProfilesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
+  conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
@@ -1897,6 +2082,7 @@ export type TenantCreateWithoutMessagesInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutMessagesInput = {
@@ -1924,6 +2110,7 @@ export type TenantUncheckedCreateWithoutMessagesInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutMessagesInput = {
@@ -1967,6 +2154,7 @@ export type TenantUpdateWithoutMessagesInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutMessagesInput = {
@@ -1994,6 +2182,7 @@ export type TenantUncheckedUpdateWithoutMessagesInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutSheetsDestinationInput = {
@@ -2021,6 +2210,7 @@ export type TenantCreateWithoutSheetsDestinationInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutSheetsDestinationInput = {
@@ -2048,6 +2238,7 @@ export type TenantUncheckedCreateWithoutSheetsDestinationInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutSheetsDestinationInput = {
@@ -2091,6 +2282,7 @@ export type TenantUpdateWithoutSheetsDestinationInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutSheetsDestinationInput = {
@@ -2118,6 +2310,7 @@ export type TenantUncheckedUpdateWithoutSheetsDestinationInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutSettingsInput = {
@@ -2145,6 +2338,7 @@ export type TenantCreateWithoutSettingsInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutSettingsInput = {
@@ -2172,6 +2366,7 @@ export type TenantUncheckedCreateWithoutSettingsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutSettingsInput = {
@@ -2215,6 +2410,7 @@ export type TenantUpdateWithoutSettingsInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutSettingsInput = {
@@ -2242,6 +2438,7 @@ export type TenantUncheckedUpdateWithoutSettingsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutOrdersInput = {
@@ -2269,6 +2466,7 @@ export type TenantCreateWithoutOrdersInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutOrdersInput = {
@@ -2296,6 +2494,7 @@ export type TenantUncheckedCreateWithoutOrdersInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutOrdersInput = {
@@ -2339,6 +2538,7 @@ export type TenantUpdateWithoutOrdersInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutOrdersInput = {
@@ -2366,6 +2566,7 @@ export type TenantUncheckedUpdateWithoutOrdersInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutOrderExportsInput = {
@@ -2393,6 +2594,7 @@ export type TenantCreateWithoutOrderExportsInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutOrderExportsInput = {
@@ -2420,6 +2622,7 @@ export type TenantUncheckedCreateWithoutOrderExportsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutOrderExportsInput = {
@@ -2463,6 +2666,7 @@ export type TenantUpdateWithoutOrderExportsInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutOrderExportsInput = {
@@ -2490,6 +2694,7 @@ export type TenantUncheckedUpdateWithoutOrderExportsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutAuditLogsInput = {
@@ -2517,6 +2722,7 @@ export type TenantCreateWithoutAuditLogsInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutAuditLogsInput = {
@@ -2544,6 +2750,7 @@ export type TenantUncheckedCreateWithoutAuditLogsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutAuditLogsInput = {
@@ -2587,6 +2794,7 @@ export type TenantUpdateWithoutAuditLogsInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutAuditLogsInput = {
@@ -2614,6 +2822,7 @@ export type TenantUncheckedUpdateWithoutAuditLogsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutProductsInput = {
@@ -2641,6 +2850,7 @@ export type TenantCreateWithoutProductsInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutProductsInput = {
@@ -2668,6 +2878,7 @@ export type TenantUncheckedCreateWithoutProductsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutProductsInput = {
@@ -2711,6 +2922,7 @@ export type TenantUpdateWithoutProductsInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutProductsInput = {
@@ -2738,6 +2950,7 @@ export type TenantUncheckedUpdateWithoutProductsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutCatalogueSourcesInput = {
@@ -2765,6 +2978,7 @@ export type TenantCreateWithoutCatalogueSourcesInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutCatalogueSourcesInput = {
@@ -2792,6 +3006,7 @@ export type TenantUncheckedCreateWithoutCatalogueSourcesInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutCatalogueSourcesInput = {
@@ -2835,6 +3050,7 @@ export type TenantUpdateWithoutCatalogueSourcesInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutCatalogueSourcesInput = {
@@ -2862,6 +3078,7 @@ export type TenantUncheckedUpdateWithoutCatalogueSourcesInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutCatalogueMappingsInput = {
@@ -2889,6 +3106,7 @@ export type TenantCreateWithoutCatalogueMappingsInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutCatalogueMappingsInput = {
@@ -2916,6 +3134,7 @@ export type TenantUncheckedCreateWithoutCatalogueMappingsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutCatalogueMappingsInput = {
@@ -2959,6 +3178,7 @@ export type TenantUpdateWithoutCatalogueMappingsInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutCatalogueMappingsInput = {
@@ -2986,6 +3206,7 @@ export type TenantUncheckedUpdateWithoutCatalogueMappingsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutCatalogueImportRunsInput = {
@@ -3013,6 +3234,7 @@ export type TenantCreateWithoutCatalogueImportRunsInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutCatalogueImportRunsInput = {
@@ -3040,6 +3262,7 @@ export type TenantUncheckedCreateWithoutCatalogueImportRunsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutCatalogueImportRunsInput = {
@@ -3083,6 +3306,7 @@ export type TenantUpdateWithoutCatalogueImportRunsInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutCatalogueImportRunsInput = {
@@ -3110,6 +3334,7 @@ export type TenantUncheckedUpdateWithoutCatalogueImportRunsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 
@@ -3134,6 +3359,7 @@ export type TenantCountOutputType = {
   securityAuditLogs: number
   instagramOAuthStates: number
   instagramCredentialCleanups: number
+  instagramCustomerProfiles: number
 }
 
 export type TenantCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -3153,6 +3379,7 @@ export type TenantCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions
   securityAuditLogs?: boolean | TenantCountOutputTypeCountSecurityAuditLogsArgs
   instagramOAuthStates?: boolean | TenantCountOutputTypeCountInstagramOAuthStatesArgs
   instagramCredentialCleanups?: boolean | TenantCountOutputTypeCountInstagramCredentialCleanupsArgs
+  instagramCustomerProfiles?: boolean | TenantCountOutputTypeCountInstagramCustomerProfilesArgs
 }
 
 /**
@@ -3277,6 +3504,13 @@ export type TenantCountOutputTypeCountInstagramCredentialCleanupsArgs<ExtArgs ex
   where?: Prisma.InstagramCredentialCleanupWhereInput
 }
 
+/**
+ * TenantCountOutputType without action
+ */
+export type TenantCountOutputTypeCountInstagramCustomerProfilesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.InstagramCustomerProfileWhereInput
+}
+
 
 export type TenantSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -3304,6 +3538,7 @@ export type TenantSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   instagramConnection?: boolean | Prisma.Tenant$instagramConnectionArgs<ExtArgs>
   instagramOAuthStates?: boolean | Prisma.Tenant$instagramOAuthStatesArgs<ExtArgs>
   instagramCredentialCleanups?: boolean | Prisma.Tenant$instagramCredentialCleanupsArgs<ExtArgs>
+  instagramCustomerProfiles?: boolean | Prisma.Tenant$instagramCustomerProfilesArgs<ExtArgs>
   _count?: boolean | Prisma.TenantCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["tenant"]>
 
@@ -3355,6 +3590,7 @@ export type TenantInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   instagramConnection?: boolean | Prisma.Tenant$instagramConnectionArgs<ExtArgs>
   instagramOAuthStates?: boolean | Prisma.Tenant$instagramOAuthStatesArgs<ExtArgs>
   instagramCredentialCleanups?: boolean | Prisma.Tenant$instagramCredentialCleanupsArgs<ExtArgs>
+  instagramCustomerProfiles?: boolean | Prisma.Tenant$instagramCustomerProfilesArgs<ExtArgs>
   _count?: boolean | Prisma.TenantCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type TenantIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -3382,6 +3618,7 @@ export type $TenantPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     instagramConnection: Prisma.$InstagramConnectionPayload<ExtArgs> | null
     instagramOAuthStates: Prisma.$InstagramOAuthStatePayload<ExtArgs>[]
     instagramCredentialCleanups: Prisma.$InstagramCredentialCleanupPayload<ExtArgs>[]
+    instagramCustomerProfiles: Prisma.$InstagramCustomerProfilePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -3803,6 +4040,7 @@ export interface Prisma__TenantClient<T, Null = never, ExtArgs extends runtime.T
   instagramConnection<T extends Prisma.Tenant$instagramConnectionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$instagramConnectionArgs<ExtArgs>>): Prisma.Prisma__InstagramConnectionClient<runtime.Types.Result.GetResult<Prisma.$InstagramConnectionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   instagramOAuthStates<T extends Prisma.Tenant$instagramOAuthStatesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$instagramOAuthStatesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InstagramOAuthStatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   instagramCredentialCleanups<T extends Prisma.Tenant$instagramCredentialCleanupsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$instagramCredentialCleanupsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InstagramCredentialCleanupPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  instagramCustomerProfiles<T extends Prisma.Tenant$instagramCustomerProfilesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$instagramCustomerProfilesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InstagramCustomerProfilePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4669,6 +4907,30 @@ export type Tenant$instagramCredentialCleanupsArgs<ExtArgs extends runtime.Types
   take?: number
   skip?: number
   distinct?: Prisma.InstagramCredentialCleanupScalarFieldEnum | Prisma.InstagramCredentialCleanupScalarFieldEnum[]
+}
+
+/**
+ * Tenant.instagramCustomerProfiles
+ */
+export type Tenant$instagramCustomerProfilesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the InstagramCustomerProfile
+   */
+  select?: Prisma.InstagramCustomerProfileSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the InstagramCustomerProfile
+   */
+  omit?: Prisma.InstagramCustomerProfileOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.InstagramCustomerProfileInclude<ExtArgs> | null
+  where?: Prisma.InstagramCustomerProfileWhereInput
+  orderBy?: Prisma.InstagramCustomerProfileOrderByWithRelationInput | Prisma.InstagramCustomerProfileOrderByWithRelationInput[]
+  cursor?: Prisma.InstagramCustomerProfileWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.InstagramCustomerProfileScalarFieldEnum | Prisma.InstagramCustomerProfileScalarFieldEnum[]
 }
 
 /**

@@ -9,6 +9,8 @@ export const conversationSummarySchema = z.object({
   id: z.string().uuid(),
   channel: z.literal('INSTAGRAM'),
   participantName: z.string().nullable(),
+  participantUsername: z.string().nullable(),
+  participantAvatarUrl: z.string().nullable(),
   lastMessagePreview: z.string().nullable(),
   lastMessageAt: z.string().datetime(),
 });
@@ -38,6 +40,8 @@ export const conversationDetailResponseSchema = z.object({
   id: z.string().uuid(),
   channel: z.literal('INSTAGRAM'),
   participantName: z.string().nullable(),
+  participantUsername: z.string().nullable(),
+  participantAvatarUrl: z.string().nullable(),
   messages: z.array(conversationMessageSchema),
 });
 

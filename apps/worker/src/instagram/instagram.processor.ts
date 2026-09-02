@@ -29,6 +29,22 @@ export class InstagramProcessor {
 
     for (const normalized of messages) {
       const persisted = await this.prisma.$transaction(async (transaction) => {
+        const profile = normalized.direction === 'INBOUND'
+          ? await transaction.instagramCustomerProfile.upsert({
+              where: {
+                tenantId_participantId: {
+                  tenantId: event.tenantId,
+                  participantId: normalized.externalConversationId,
+                },
+              },
+              create: {
+                tenantId: event.tenantId,
+                participantId: normalized.externalConversationId,
+              },
+              update: {},
+            })
+          : null;
+
         const conversation = await transaction.conversation.upsert({
           where: {
             tenantId_channel_externalConversationId: {
@@ -37,12 +53,16 @@ export class InstagramProcessor {
               externalConversationId: normalized.externalConversationId,
             },
           },
-          update: { participantId: normalized.externalConversationId },
+          update: {
+            participantId: normalized.externalConversationId,
+            ...(profile ? { profileId: profile.id } : {}),
+          },
           create: {
             tenantId: event.tenantId,
             channel: 'INSTAGRAM',
             externalConversationId: normalized.externalConversationId,
             participantId: normalized.externalConversationId,
+            profileId: profile?.id ?? null,
             lastMessageAt: normalized.sourceTimestamp,
           },
         });

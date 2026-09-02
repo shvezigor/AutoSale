@@ -14,7 +14,8 @@ export function ConversationList({ conversations, selectedId }: ConversationList
   return (
     <nav aria-label="Список діалогів" className="conversation-list">
       {conversations.map((conversation) => {
-        const name = conversation.participantName ?? 'Клієнт Instagram';
+        const name = conversation.participantName ??
+          (conversation.participantUsername ? `@${conversation.participantUsername}` : 'Клієнт Instagram');
         return (
           <Link
             className="conversation-row"
@@ -22,7 +23,9 @@ export function ConversationList({ conversations, selectedId }: ConversationList
             href={`/conversations/${conversation.id}`}
             key={conversation.id}
           >
-            <span className="avatar" aria-hidden="true">{initials(name)}</span>
+            {conversation.participantAvatarUrl
+              ? <img className="avatar" src={conversation.participantAvatarUrl} alt={`Фото профілю ${name}`} />
+              : <span className="avatar" aria-hidden="true">{initials(name)}</span>}
             <span className="conversation-copy">
               <span className="conversation-line">
                 <strong>{name}</strong>
