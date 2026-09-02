@@ -239,10 +239,12 @@ export class InstagramOAuthService {
     let expiresIn: number;
     let identity: { accountId: string; username: string | null };
     let grantedScopes: string[];
+    let providerPhase: 'TOKEN_EXCHANGE' | 'IDENTITY' = 'TOKEN_EXCHANGE';
     try {
       const token = await this.meta.exchangeCode({ code, redirectUri: this.callbackUri });
       accessToken = token.accessToken;
       expiresIn = token.expiresIn;
+      providerPhase = 'IDENTITY';
       identity = await this.meta.getIdentity(accessToken);
       grantedScopes = token.grantedScopes;
     } catch (error) {
@@ -251,6 +253,7 @@ export class InstagramOAuthService {
         binding,
         authorizationFailure ? 'REAUTH_REQUIRED' : 'ERROR',
         authorizationFailure ? 'META_AUTHORIZATION_FAILED' : 'META_PROVIDER_FAILED',
+        safeProviderDiagnostics(error, providerPhase),
       );
       throw safeFailure();
     }
@@ -1032,6 +1035,7 @@ export class InstagramOAuthService {
     binding: OAuthBinding,
     status: 'REAUTH_REQUIRED' | 'ERROR',
     lastErrorCode: string,
+    metadata: Record<string, string> = {},
   ): Promise<void> {
     try {
       await this.withCurrentAttempt(binding, async (transaction) => {
@@ -1044,7 +1048,7 @@ export class InstagramOAuthService {
           binding,
           'INSTAGRAM_CALLBACK_FAILED',
           'FAILURE',
-          { errorCode: lastErrorCode },
+          { errorCode: lastErrorCode, ...metadata },
         );
       });
     } catch {
@@ -1053,7 +1057,7 @@ export class InstagramOAuthService {
         binding,
         'INSTAGRAM_CALLBACK_FAILED',
         'FAILURE',
-        { errorCode: lastErrorCode },
+        { errorCode: lastErrorCode, ...metadata },
       );
     }
   }
@@ -1257,6 +1261,21 @@ function isExpiredActiveConnection(connection: SafeConnectionRow, now: Date): bo
   return connection.status === 'ACTIVE' &&
     connection.tokenExpiresAt !== null &&
     connection.tokenExpiresAt.getTime() <= now.getTime();
+}
+
+function safeProviderDiagnostics(
+  error: unknown,
+  providerPhase: 'TOKEN_EXCHANGE' | 'IDENTITY',
+): Record<string, string> {
+  const diagnostics: Record<string, string> = { providerPhase };
+  if (!(error instanceof MetaInstagramError)) return diagnostics;
+  if (error.status !== null) diagnostics.providerStatus = String(error.status);
+  if (error.providerCode !== null) diagnostics.providerCode = String(error.providerCode);
+  if (error.errorSubcode !== null) diagnostics.providerSubcode = String(error.errorSubcode);
+  if (error.isTransient !== null) diagnostics.providerTransient = String(error.isTransient);
+  if (error.responseStage !== null) diagnostics.providerResponseStage = error.responseStage;
+  if (error.responseShape !== null) diagnostics.providerResponseShape = error.responseShape;
+  return diagnostics;
 }
 
 function isAuthorizationFailure(error: unknown): boolean {

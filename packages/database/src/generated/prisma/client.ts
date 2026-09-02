@@ -147,6 +147,21 @@ export type OrderItem = Prisma.OrderItemModel
  */
 export type Product = Prisma.ProductModel
 /**
+ * Model CatalogueSource
+ *
+ */
+export type CatalogueSource = Prisma.CatalogueSourceModel
+/**
+ * Model CatalogueMapping
+ *
+ */
+export type CatalogueMapping = Prisma.CatalogueMappingModel
+/**
+ * Model CatalogueImportRun
+ *
+ */
+export type CatalogueImportRun = Prisma.CatalogueImportRunModel
+/**
  * Model Attachment
  *
  */

@@ -1,12 +1,101 @@
+import { createHash } from 'node:crypto';
+
 import { GoogleAuth } from 'google-auth-library';
 
 interface AccessTokenProvider { getAccessToken(): Promise<string> }
 type FetchLike = (input: string, init: { headers: { authorization: string; 'content-type'?: string }; method?: string; body?: string }) => Promise<{ ok: boolean; status: number; json(): Promise<unknown> }>;
 
 export type GoogleSheetsUpsertResult = { action: 'appended' | 'updated'; rowNumber: number };
+export type GoogleSheetsCell = string | number | boolean | null;
+export type GoogleSheetsTable = { headers: string[]; rows: GoogleSheetsCell[][]; revision: string };
+export type GoogleSheetsReadErrorCode = 'AUTHORIZATION' | 'NOT_FOUND' | 'RATE_LIMIT' | 'RETRYABLE';
+export type GoogleSheetsTableValidationErrorCode = 'ROW_LIMIT' | 'COLUMN_LIMIT' | 'CELL_LIMIT' | 'HEADER_INVALID';
+const MAX_TABLE_COLUMNS = 100;
+const MAX_TABLE_CELL_CHARACTERS = 10_000;
+/** Sparse rows are checked for 5,000 rows beyond the accepted table boundary. */
+const TABLE_OVERFLOW_SCAN_ROWS = 5_000;
+
+export function googleSheetsStructureFingerprint(headers: string[]): string {
+  const normalized = headers.map((header) => header.normalize('NFKC').trim().replace(/\s+/g, ' ').toLocaleLowerCase('en-US'));
+  return createHash('sha256').update(JSON.stringify(normalized)).digest('hex');
+}
+
+export class GoogleSheetsReadError extends Error {
+  override readonly name = 'GoogleSheetsReadError';
+
+  constructor(readonly code: GoogleSheetsReadErrorCode, readonly retryable: boolean) {
+    super({
+      AUTHORIZATION: 'Google Sheets access is not authorized',
+      NOT_FOUND: 'Google spreadsheet or tab was not found',
+      RATE_LIMIT: 'Google Sheets rate limit was reached',
+      RETRYABLE: 'Google Sheets is temporarily unavailable',
+    }[code]);
+  }
+}
+
+export class GoogleSheetsTableValidationError extends Error {
+  override readonly name = 'GoogleSheetsTableValidationError';
+  readonly retryable = false;
+
+  constructor(readonly code: GoogleSheetsTableValidationErrorCode, message: string) {
+    super(message);
+  }
+}
 
 export class GoogleSheetsAdapter {
   constructor(private readonly auth: AccessTokenProvider, private readonly fetchFn: FetchLike = fetch) {}
+
+  async readTable(input: { spreadsheetId: string; sheetName: string; maxRows: number }): Promise<GoogleSheetsTable> {
+    if (!Number.isSafeInteger(input.maxRows) || input.maxRows < 1 || input.maxRows > 5_000) {
+      throw new RangeError('Google Sheets row limit must be between 1 and 5000');
+    }
+    let response: Awaited<ReturnType<FetchLike>>;
+    try {
+      const token = await this.auth.getAccessToken();
+      const quotedSheet = `'${input.sheetName.replaceAll("'", "''")}'`;
+      // A row-only range makes every populated column visible; the finite row end
+      // also lets us detect sparse overflow without requesting an unbounded sheet.
+      const range = encodeURIComponent(`${quotedSheet}!1:${input.maxRows + 1 + TABLE_OVERFLOW_SCAN_ROWS}`);
+      const url = `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(input.spreadsheetId)}/values/${range}?majorDimension=ROWS&valueRenderOption=UNFORMATTED_VALUE`;
+      response = await this.fetchFn(url, { headers: { authorization: `Bearer ${token}` } });
+    } catch {
+      throw new GoogleSheetsReadError('RETRYABLE', true);
+    }
+    if (!response.ok) throw classifyReadFailure(response.status);
+    let body: { values?: unknown[][] };
+    try {
+      body = await response.json() as { values?: unknown[][] };
+    } catch {
+      throw new GoogleSheetsReadError('RETRYABLE', true);
+    }
+    const values = Array.isArray(body.values) ? body.values.map((row) => Array.isArray(row) ? row.map(normalizeCell) : []) : [];
+    if (values.some((row) => row.length > MAX_TABLE_COLUMNS)) {
+      throw new GoogleSheetsTableValidationError('COLUMN_LIMIT', `Google Sheets table exceeds ${MAX_TABLE_COLUMNS} columns`);
+    }
+    if (values.some((row) => row.some((cell) => typeof cell === 'string' && cell.length > MAX_TABLE_CELL_CHARACTERS))) {
+      throw new GoogleSheetsTableValidationError('CELL_LIMIT', 'Google Sheets cell exceeds the character limit');
+    }
+    const headers = (values[0] ?? []).map((value) => String(value ?? ''));
+    const overflowRows = values.slice(input.maxRows + 1);
+    if (overflowRows.some((row) => row.some((cell) => cell !== null && cell !== ''))) {
+      throw new GoogleSheetsTableValidationError('ROW_LIMIT', `Google Sheets table exceeds ${input.maxRows} rows`);
+    }
+    const rows = values.slice(1, input.maxRows + 1);
+    if (headers.length > 0) {
+      const normalizedHeaders = headers.map(normalizeHeader);
+      if (normalizedHeaders.some((header) => header.length === 0)) {
+        throw new GoogleSheetsTableValidationError('HEADER_INVALID', 'Google Sheets table contains an empty header');
+      }
+      if (new Set(normalizedHeaders).size !== normalizedHeaders.length) {
+        throw new GoogleSheetsTableValidationError('HEADER_INVALID', 'Google Sheets table contains a duplicate header');
+      }
+    }
+    return {
+      headers,
+      rows,
+      revision: createHash('sha256').update(JSON.stringify({ headers, rows })).digest('hex'),
+    };
+  }
 
   async readHeader(input: { spreadsheetId: string; sheetName: string }): Promise<string[]> {
     const token = await this.auth.getAccessToken();
@@ -41,6 +130,21 @@ export class GoogleSheetsAdapter {
     const result = await response.json() as { updates?: { updatedRange?: string } };
     return { action: 'appended', rowNumber: rowNumberFromRange(result.updates?.updatedRange) ?? (idsBody.values?.length ?? 1) + 1 };
   }
+}
+
+function normalizeHeader(value: string): string {
+  return value.normalize('NFKC').trim().replace(/\s+/g, ' ').toLocaleLowerCase('en-US');
+}
+
+function classifyReadFailure(status: number): GoogleSheetsReadError {
+  if (status === 401 || status === 403) return new GoogleSheetsReadError('AUTHORIZATION', false);
+  if (status === 400 || status === 404) return new GoogleSheetsReadError('NOT_FOUND', false);
+  if (status === 429) return new GoogleSheetsReadError('RATE_LIMIT', true);
+  return new GoogleSheetsReadError('RETRYABLE', true);
+}
+
+function normalizeCell(value: unknown): GoogleSheetsCell {
+  return typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' || value === null ? value : String(value ?? '');
 }
 
 function columnName(count: number): string {

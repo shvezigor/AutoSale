@@ -108,7 +108,7 @@ describe('MetaInstagramClient', () => {
         .mockResolvedValueOnce(response({ access_token: 'long-lived-token' })),
     });
 
-    await expect(client.exchangeCode({ code: 'code', redirectUri: 'https://example.test/callback' })).rejects.toEqual(expect.objectContaining({ name: 'MetaInstagramError', status: 200 }));
+    await expect(client.exchangeCode({ code: 'code', redirectUri: 'https://example.test/callback' })).rejects.toEqual(expect.objectContaining({ name: 'MetaInstagramError', status: 200, responseStage: 'LONG_LIVED_TOKEN' }));
   });
 
   it('gets the professional account identity from graph.instagram.com without putting the token in the URL', async () => {
@@ -140,17 +140,33 @@ describe('MetaInstagramClient', () => {
     );
   });
 
+  it('accepts the top-level short-lived token shape returned by Instagram Login', async () => {
+    const fetchFn = vi.fn<typeof fetch>()
+      .mockResolvedValueOnce(response({
+        access_token: 'short-lived-token',
+        user_id: 17841400379535404,
+        permissions: ['instagram_business_basic', 'instagram_business_manage_messages'],
+      }))
+      .mockResolvedValueOnce(response({ access_token: 'long-lived-token', expires_in: 60 }));
+    const client = new MetaInstagramClient({ ...config, fetch: fetchFn });
+
+    await expect(client.exchangeCode({ code: 'code', redirectUri: 'https://example.test/callback' })).resolves.toEqual({
+      accessToken: 'long-lived-token',
+      expiresIn: 60,
+      grantedScopes: ['instagram_business_basic', 'instagram_business_manage_messages'],
+    });
+  });
+
   it.each([
     { data: [] },
     { data: [{}] },
-    { data: [{ access_token: 'short-lived-token', user_id: '10200000000000000', permissions: ['instagram_business_basic'] }] },
     { data: [{ access_token: 'short-lived-token', user_id: '10200000000000000', permission: 'instagram_business_basic', status: 'granted' }] },
   ])('rejects malformed or Facebook-style permission payloads', async (payload) => {
     const client = new MetaInstagramClient({
       ...config,
       fetch: vi.fn<typeof fetch>().mockResolvedValue(response(payload)),
     });
-    await expect(client.exchangeCode({ code: 'code', redirectUri: 'https://example.test/callback' })).rejects.toEqual(expect.objectContaining({ name: 'MetaInstagramError', status: 200, providerCode: null }));
+    await expect(client.exchangeCode({ code: 'code', redirectUri: 'https://example.test/callback' })).rejects.toEqual(expect.objectContaining({ name: 'MetaInstagramError', status: 200, providerCode: null, responseStage: 'SHORT_LIVED_TOKEN' }));
   });
 
   it.each([
@@ -173,16 +189,19 @@ describe('MetaInstagramClient', () => {
       fetch: vi.fn<typeof fetch>().mockResolvedValue(response(payload)),
     });
 
-    await expect(client.exchangeCode({ code: 'code', redirectUri: 'https://example.test/callback' })).rejects.toEqual(expect.objectContaining({ name: 'MetaInstagramError', status: 200, providerCode: null }));
+    await expect(client.exchangeCode({ code: 'code', redirectUri: 'https://example.test/callback' })).rejects.toEqual(expect.objectContaining({ name: 'MetaInstagramError', status: 200, providerCode: null, responseStage: 'SHORT_LIVED_TOKEN' }));
   });
 
-  it('rejects a top-level identity alternative', async () => {
+  it('accepts the top-level identity shape returned by Instagram Login', async () => {
     const client = new MetaInstagramClient({
       ...config,
       fetch: vi.fn<typeof fetch>().mockResolvedValue(response({ user_id: '17841400000000000', username: 'shop_account' })),
     });
 
-    await expect(client.getIdentity('access-token')).rejects.toEqual(expect.objectContaining({ name: 'MetaInstagramError', status: 200, providerCode: null }));
+    await expect(client.getIdentity('access-token')).resolves.toEqual({
+      accountId: '17841400000000000',
+      username: 'shop_account',
+    });
   });
 
   it('subscribes the current account to message webhooks', async () => {

@@ -5,4 +5,5 @@ export interface ObjectStorage {
     contentType: string;
   }): Promise<{ key: string; etag: string }>;
   get(key: string): Promise<{ body: Uint8Array; contentType: string }>;
+  delete(key: string): Promise<void>;
 }

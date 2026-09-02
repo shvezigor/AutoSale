@@ -580,6 +580,27 @@ describe('InstagramOAuthService', () => {
     expect(serializedAudits).not.toContain('secret token rejected by provider');
   });
 
+  it('audits only safe provider diagnostics for a failed token exchange', async () => {
+    const { service, meta, auditCreate } = setup();
+    meta.exchangeCode.mockRejectedValue(new MetaInstagramError(500, 2, true, 33));
+
+    await expect(service.completeCallback('authorization-code', 'raw-state')).rejects.toThrow('Instagram connection failed');
+
+    expect(auditCreate).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        action: 'INSTAGRAM_CALLBACK_FAILED',
+        metadata: {
+          errorCode: 'META_PROVIDER_FAILED',
+          providerPhase: 'TOKEN_EXCHANGE',
+          providerStatus: '500',
+          providerCode: '2',
+          providerSubcode: '33',
+          providerTransient: 'true',
+        },
+      }),
+    });
+  });
+
   it('returns a safe summary without credential fields', async () => {
     const { service, findUnique } = setup();
     findUnique.mockResolvedValue(connection());
