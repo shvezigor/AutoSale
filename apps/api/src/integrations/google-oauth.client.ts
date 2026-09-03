@@ -14,6 +14,7 @@ export type GoogleTokenIdentity = {
 export interface GoogleOAuthClientPort {
   getAuthorizationUrl(input: { state: string; accessType: 'offline' }): string;
   exchangeCode(code: string): Promise<GoogleTokenIdentity>;
+  refreshAccessToken(refreshToken: string): Promise<string>;
   revokeRefreshToken(token: string): Promise<void>;
 }
 
@@ -78,5 +79,22 @@ export class GoogleOAuthClient implements GoogleOAuthClientPort {
       body: new URLSearchParams({ token }),
     });
     if (!response.ok) throw new Error('Google token revocation failed');
+  }
+
+  async refreshAccessToken(refreshToken: string): Promise<string> {
+    const response = await this.fetchFn(TOKEN_ENDPOINT, {
+      method: 'POST',
+      headers: { 'content-type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        client_id: this.clientId,
+        client_secret: this.clientSecret,
+        refresh_token: refreshToken,
+        grant_type: 'refresh_token',
+      }),
+    });
+    if (!response.ok) throw new Error('Google access token refresh failed');
+    const body = await response.json() as { access_token?: unknown };
+    if (typeof body.access_token !== 'string') throw new Error('Google access token response invalid');
+    return body.access_token;
   }
 }

@@ -10,6 +10,9 @@ import { GoogleOAuthController } from './google-oauth.controller.js';
 import { GoogleOAuthService } from './google-oauth.service.js';
 import { GoogleOAuthStateService } from './google-oauth-state.service.js';
 import { GoogleCredentialCleanupService } from './google-credential-cleanup.service.js';
+import { GoogleFilesClient } from './google-files.client.js';
+import { GoogleFilesController } from './google-files.controller.js';
+import { GoogleFilesService } from './google-files.service.js';
 
 @Module({})
 export class GoogleOAuthModule {
@@ -25,15 +28,17 @@ export class GoogleOAuthModule {
       new CredentialCipher(Buffer.from(env.INTEGRATION_ENCRYPTION_KEY, 'base64')),
     );
     const cleanup = new GoogleCredentialCleanupService(prisma, client, new CredentialCipher(Buffer.from(env.INTEGRATION_ENCRYPTION_KEY, 'base64')));
+    const files = new GoogleFilesService(service, new GoogleFilesClient());
     return {
       module: GoogleOAuthModule,
-      controllers: [GoogleOAuthController],
+      controllers: [GoogleOAuthController, GoogleFilesController],
       providers: [
         { provide: GoogleOAuthService, useValue: service },
         { provide: GoogleCredentialCleanupService, useValue: cleanup },
+        { provide: GoogleFilesService, useValue: files },
         { provide: GoogleOAuthPrismaLifecycle, useValue: new GoogleOAuthPrismaLifecycle(prisma) },
       ],
-      exports: [GoogleOAuthService],
+      exports: [GoogleOAuthService, GoogleFilesService],
     };
   }
 }
@@ -41,6 +46,7 @@ export class GoogleOAuthModule {
 class UnconfiguredGoogleOAuthClient implements GoogleOAuthClientPort {
   getAuthorizationUrl(): string { throw new Error('Google OAuth is not configured'); }
   async exchangeCode(): Promise<never> { throw new Error('Google OAuth is not configured'); }
+  async refreshAccessToken(): Promise<never> { throw new Error('Google OAuth is not configured'); }
   async revokeRefreshToken(): Promise<never> { throw new Error('Google OAuth is not configured'); }
 }
 

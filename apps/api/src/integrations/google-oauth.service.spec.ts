@@ -14,6 +14,7 @@ const createFixture = () => {
     tenantMembership: { findFirst: vi.fn().mockResolvedValue({ id: 'membership' }) },
     googleConnection: {
       findUnique: vi.fn(async () => connection),
+      updateMany: vi.fn().mockResolvedValue({ count: 1 }),
       upsert: vi.fn(async ({ create, update }: any) => {
         connection = connection
           ? { createdAt: new Date('2026-09-02T19:00:00.000Z'), lastErrorCode: null, ...connection, ...update }
@@ -36,6 +37,7 @@ const createFixture = () => {
       grantedScopes: ['openid', 'email', 'https://www.googleapis.com/auth/drive.file'],
     }),
     revokeRefreshToken: vi.fn().mockResolvedValue(undefined),
+    refreshAccessToken: vi.fn().mockResolvedValue('access-token'),
   };
   const cipher = new CredentialCipher(Buffer.alloc(32, 9));
   const service = new GoogleOAuthService(prisma as never, client, states as never, cipher, () => new Date('2026-09-02T20:00:00.000Z'));
@@ -87,5 +89,14 @@ describe('GoogleOAuthService', () => {
     client.exchangeCode.mockResolvedValue({ refreshToken: null, subject: 'new-subject', email: 'new@example.com', grantedScopes: ['https://www.googleapis.com/auth/drive.file'] });
 
     await expect(service.complete({ code: 'authorization-code', state: 'state-value' })).rejects.toThrow('Google connection failed');
+  });
+
+  it('refreshes a short-lived access token only from the active tenant connection', async () => {
+    const { service, client, cipher, setConnection } = createFixture();
+    setConnection({ tenantId, encryptedRefreshToken: cipher.encrypt('refresh-a'), credentialGenerationId: 'generation-a', status: 'ACTIVE' });
+
+    await expect(service.getAccessToken(tenantId)).resolves.toBe('access-token');
+
+    expect(client.refreshAccessToken).toHaveBeenCalledWith('refresh-a');
   });
 });

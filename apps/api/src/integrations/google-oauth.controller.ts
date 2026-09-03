@@ -1,5 +1,5 @@
 import type { AuthPrincipal } from '@autosale/contracts/auth';
-import { BadRequestException, Body, Controller, Get, Inject, Post, Query, Res } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Header, Inject, Post, Query, Res } from '@nestjs/common';
 import type { Response } from 'express';
 import { z } from 'zod';
 
@@ -34,6 +34,13 @@ export class GoogleOAuthController {
   @RequireMembership('OWNER')
   disconnect(@CurrentPrincipal() principal: AuthPrincipal) {
     return this.cleanup.disconnect(principal.tenantId!, principal.userId);
+  }
+
+  @Get('access-token')
+  @RequireMembership('OWNER')
+  @Header('Cache-Control', 'no-store')
+  async accessToken(@CurrentPrincipal() principal: AuthPrincipal) {
+    return { accessToken: await this.google.getAccessToken(principal.tenantId!) };
   }
 
   @Get('callback')

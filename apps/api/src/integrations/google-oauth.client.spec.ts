@@ -28,4 +28,12 @@ describe('GoogleOAuthClient', () => {
     expect(fetchFn.mock.calls[0]?.[1]?.body?.toString()).toContain('client_secret=client-secret');
     expect(fetchFn.mock.calls[1]?.[1]?.headers).toEqual({ authorization: 'Bearer access' });
   });
+
+  it('refreshes a short-lived access token without exposing the refresh token', async () => {
+    const fetchFn = vi.fn().mockResolvedValue(new Response(JSON.stringify({ access_token: 'short-lived' }), { status: 200 }));
+    const client = new GoogleOAuthClient('client-id', 'client-secret', 'https://sales-aito.com/api/integrations/google/callback', fetchFn);
+
+    await expect(client.refreshAccessToken('refresh-a')).resolves.toBe('short-lived');
+    expect(fetchFn.mock.calls[0]?.[1]?.body?.toString()).toContain('refresh_token=refresh-a');
+  });
 });

@@ -110,6 +110,25 @@ export class GoogleOAuthService {
     };
   }
 
+  async getAccessToken(tenantId: string): Promise<string> {
+    const connection = await this.prisma.googleConnection.findUnique({
+      where: { tenantId },
+      select: { status: true, encryptedRefreshToken: true, credentialGenerationId: true },
+    });
+    if (connection?.status !== 'ACTIVE' || !connection.encryptedRefreshToken || !connection.credentialGenerationId) {
+      throw new Error(SAFE_FAILURE);
+    }
+    try {
+      return await this.client.refreshAccessToken(this.cipher.decrypt(connection.encryptedRefreshToken));
+    } catch {
+      await this.prisma.googleConnection.updateMany({
+        where: { tenantId, credentialGenerationId: connection.credentialGenerationId },
+        data: { status: 'REAUTHORIZATION_REQUIRED', lastErrorCode: 'GOOGLE_TOKEN_REFRESH_FAILED' },
+      });
+      throw new Error(SAFE_FAILURE);
+    }
+  }
+
   private async audit(tenantId: string, userId: string, action: string, result: string): Promise<void> {
     await this.prisma.securityAuditLog.create({ data: { tenantId, userId, actor: 'USER', action, result, metadata: {} } });
   }

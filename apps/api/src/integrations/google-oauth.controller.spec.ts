@@ -21,6 +21,7 @@ describe('GoogleOAuthController', () => {
   const summary = vi.fn();
   const complete = vi.fn();
   const disconnect = vi.fn();
+  const getAccessToken = vi.fn();
   let app: INestApplication;
 
   beforeEach(async () => {
@@ -28,11 +29,12 @@ describe('GoogleOAuthController', () => {
     summary.mockReset().mockResolvedValue({ status: 'ACTIVE', email: 'o@example.com' });
     complete.mockReset().mockResolvedValue({ returnPath: '/settings?tab=google', summary: { status: 'ACTIVE' } });
     disconnect.mockReset().mockResolvedValue({ status: 'DISCONNECTED' });
+    getAccessToken.mockReset().mockResolvedValue('short-lived-token');
     const resolve = vi.fn(async (token: string) => token === 'owner' ? owner : token === 'manager' ? manager : null);
     const module = await Test.createTestingModule({
       controllers: [GoogleOAuthController],
       providers: [
-        { provide: GoogleOAuthService, useValue: { start, summary, complete } },
+        { provide: GoogleOAuthService, useValue: { start, summary, complete, getAccessToken } },
         { provide: GoogleCredentialCleanupService, useValue: { disconnect } },
         { provide: SessionService, useValue: { resolve } },
         { provide: CsrfService, useValue: csrf },
@@ -59,5 +61,12 @@ describe('GoogleOAuthController', () => {
     await request(app.getHttpServer()).get('/api/integrations/google/callback').query({ code: 'code', state: 'state' }).expect(302).expect('Location', '/settings?tab=google&google=connected');
     complete.mockRejectedValue(new Error('secret provider description'));
     await request(app.getHttpServer()).get('/api/integrations/google/callback').query({ error: 'access_denied', error_description: 'secret' }).expect(302).expect('Location', '/settings?google=error');
+  });
+
+  it('returns a non-cacheable short-lived Picker token only to the owner', async () => {
+    await request(app.getHttpServer()).get('/api/integrations/google/access-token').set('Cookie', 'autosale_session=manager').expect(403);
+    const response = await request(app.getHttpServer()).get('/api/integrations/google/access-token').set('Cookie', 'autosale_session=owner').expect(200);
+    expect(response.headers['cache-control']).toBe('no-store');
+    expect(response.body).toEqual({ accessToken: 'short-lived-token' });
   });
 });
