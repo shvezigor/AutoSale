@@ -94,7 +94,7 @@ export class GoogleOAuthService {
     }
   }
 
-  async summary(tenantId: string): Promise<GoogleConnectionSummary> {
+  async summary(tenantId: string, includePrivateAccount = true): Promise<GoogleConnectionSummary> {
     const connection = await this.prisma.googleConnection.findUnique({
       where: { tenantId },
       select: { status: true, accountEmail: true, grantedScopes: true, createdAt: true, lastVerifiedAt: true, lastErrorCode: true },
@@ -102,8 +102,8 @@ export class GoogleOAuthService {
     if (!connection) return { status: 'NOT_CONNECTED', email: null, grantedScopes: [], connectedAt: null, lastVerifiedAt: null, lastErrorCode: null };
     return {
       status: connection.status,
-      email: connection.accountEmail,
-      grantedScopes: connection.grantedScopes?.split(/\s+/).filter(Boolean) ?? [],
+      email: includePrivateAccount ? connection.accountEmail : null,
+      grantedScopes: includePrivateAccount ? connection.grantedScopes?.split(/\s+/).filter(Boolean) ?? [] : [],
       connectedAt: connection.createdAt.toISOString(),
       lastVerifiedAt: connection.lastVerifiedAt?.toISOString() ?? null,
       lastErrorCode: connection.lastErrorCode,

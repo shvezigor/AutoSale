@@ -19,7 +19,7 @@ export class GoogleOAuthController {
   @Get()
   @RequireMembership('MANAGER')
   summary(@CurrentPrincipal() principal: AuthPrincipal) {
-    return this.google.summary(principal.tenantId!);
+    return this.google.summary(principal.tenantId!, principal.membershipRole === 'OWNER');
   }
 
   @Post('connect')

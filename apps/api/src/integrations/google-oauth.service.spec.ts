@@ -99,4 +99,14 @@ describe('GoogleOAuthService', () => {
 
     expect(client.refreshAccessToken).toHaveBeenCalledWith('refresh-a');
   });
+
+  it('hides account identity and scopes from manager-safe summaries', async () => {
+    const { service, setConnection } = createFixture();
+    setConnection({
+      status: 'ACTIVE', accountEmail: 'owner@gmail.com', grantedScopes: 'openid email drive.file',
+      createdAt: new Date('2026-09-03T06:00:00.000Z'), lastVerifiedAt: new Date('2026-09-03T06:00:00.000Z'), lastErrorCode: null,
+    });
+
+    await expect(service.summary(tenantId, false)).resolves.toMatchObject({ email: null, grantedScopes: [] });
+  });
 });

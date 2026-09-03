@@ -29,6 +29,7 @@ describe('SettingsPage', () => {
     });
     authenticatedApiFetch
       .mockResolvedValueOnce({ ok: true, json: async () => ({ status: 'DISCONNECTED', accountId: null, username: null, tokenExpiresAt: null, lastVerifiedAt: null, lastErrorCode: null, cleanupStatus: 'NONE', cleanupErrorCode: null, cleanupAbandonEligible: false }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ status: 'ACTIVE', email: 'owner@gmail.com', grantedScopes: ['drive.file'], connectedAt: '2026-09-01T08:00:00.000Z', lastVerifiedAt: '2026-09-01T08:00:00.000Z', lastErrorCode: null }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ approvalMode: 'REVIEW', minimumConfidence: 0.8, promptVersion: 'v1' }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ spreadsheetId: null, sheetName: 'Orders', status: 'NOT_CONFIGURED', requiredHeaders: ['order_id'], lastValidatedAt: null, errorSummary: null }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ([{ id: '44444444-4444-4444-8444-444444444444', type: 'GOOGLE_SHEETS', displayName: 'Каталог Google Sheets', status: 'PENDING', lastSyncedAt: null, lastErrorSummary: null, updatedAt: '2026-09-01T08:00:00.000Z' }]) })
@@ -51,9 +52,10 @@ describe('SettingsPage', () => {
       tenantId: '1f713392-fdbc-4e3c-9824-db207934bff4',
       membershipRole: 'MANAGER',
     });
-    authenticatedApiFetch.mockResolvedValue({
-      ok: true,
-      json: async () => ({
+    authenticatedApiFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
         status: 'ACTIVE',
         accountId: '17841400000000000',
         username: 'autosale_store',
@@ -63,16 +65,22 @@ describe('SettingsPage', () => {
         cleanupStatus: 'NONE',
         cleanupErrorCode: null,
         cleanupAbandonEligible: false,
-      }),
-    });
+        }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ status: 'ACTIVE', email: null, grantedScopes: [], connectedAt: null, lastVerifiedAt: null, lastErrorCode: null }),
+      });
 
     render(await SettingsPage());
 
-    expect(authenticatedApiFetch).toHaveBeenCalledTimes(1);
+    expect(authenticatedApiFetch).toHaveBeenCalledTimes(2);
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/integrations/instagram');
+    expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/integrations/google');
     expect(screen.getByText('@autosale_store')).toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Підтвердження замовлень' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('heading', { name: 'Google Sheets' })).not.toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Google Sheets' })).toBeInTheDocument();
+    expect(screen.getByText('Google підключено')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /Instagram/ })).not.toBeInTheDocument();
   });
 });

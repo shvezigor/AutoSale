@@ -53,7 +53,7 @@ describe('CatalogueSourceSettings', () => {
     expect(mutatingFetch).toHaveBeenCalledWith(`/api/catalogue/sources/${source.id}`, expect.objectContaining({ method: 'PATCH', body: expect.stringContaining('"syncSchedule":"HOURLY"') }));
     expect(mutatingFetch).toHaveBeenCalledWith(`/api/catalogue/sources/${source.id}/check`, { method: 'POST' });
     expect(mutatingFetch).toHaveBeenCalledWith(`/api/catalogue/sources/${source.id}/sync`, { method: 'POST' });
-    expect(screen.getByText(/reader@example\.iam\.gserviceaccount\.com/)).toBeInTheDocument();
+    expect(screen.getByText(/Оберіть приватну таблицю через Google Picker/)).toBeInTheDocument();
     expect(screen.queryByLabelText(/private key|credential|json/i)).not.toBeInTheDocument();
   });
 

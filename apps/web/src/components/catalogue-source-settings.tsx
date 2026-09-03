@@ -3,6 +3,7 @@
 import { useState } from 'react';
 
 import { mutatingFetch } from '../auth/csrf-fetch';
+import { GooglePickerButton, type GooglePickerSelection } from './google-picker-button';
 
 export type CatalogueSourceHealth = {
   id: string; type: string; displayName: string; status: string; lastSyncedAt: string | null; lastErrorSummary: string | null; updatedAt: string;
@@ -17,10 +18,12 @@ export function CatalogueSourceSettings({
   role,
   sources,
   configurations,
+  googleConnected = true,
 }: {
   role: 'OWNER' | 'MANAGER';
   sources: CatalogueSourceHealth[];
   configurations: CatalogueSourceConfiguration[];
+  googleConnected?: boolean;
 }) {
   const [current, setCurrent] = useState(configurations[0] ?? null);
   const [displayName, setDisplayName] = useState(current?.displayName ?? 'Каталог Google Sheets');
@@ -30,6 +33,7 @@ export function CatalogueSourceSettings({
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [tabs, setTabs] = useState<Array<{ sheetId: number; title: string }>>([]);
 
   if (role === 'MANAGER') return <HealthList sources={sources} />;
 
@@ -39,6 +43,7 @@ export function CatalogueSourceSettings({
     setSpreadsheet(configuration?.spreadsheetId ?? '');
     setSheetName(configuration?.sheetName ?? 'Товари');
     setSchedule(configuration?.syncSchedule ?? 'MANUAL');
+    setTabs([]);
     setMessage(null); setError(null);
   }
 
@@ -66,6 +71,20 @@ export function CatalogueSourceSettings({
     if (result) setCurrent(result);
   }
 
+  async function selectSpreadsheet(selection: GooglePickerSelection) {
+    setPending(true); setMessage(null); setError(null);
+    try {
+      const response = await fetch(`/api/integrations/google/files/${encodeURIComponent(selection.fileId)}/tabs`, { cache: 'no-store' });
+      const body = await response.json() as { spreadsheetId?: string; tabs?: Array<{ sheetId: number; title: string }>; message?: string };
+      if (!response.ok || body.spreadsheetId !== selection.fileId || !body.tabs?.length) throw new Error(body.message ?? 'Не вдалося перевірити таблицю');
+      setSpreadsheet(body.spreadsheetId);
+      setTabs(body.tabs);
+      setSheetName(body.tabs[0]!.title);
+      setMessage('Таблицю каталогу перевірено.');
+    } catch (reason) { setError(reason instanceof Error ? reason.message : 'Не вдалося перевірити таблицю'); }
+    finally { setPending(false); }
+  }
+
   async function remove() {
     if (!current) return;
     const result = await mutate(`/api/catalogue/sources/${current.id}`, { method: 'DELETE' }, 'Джерело видалено');
@@ -78,13 +97,15 @@ export function CatalogueSourceSettings({
       <label><span>Оберіть джерело</span><select aria-label="Оберіть джерело" value={current?.id ?? ''} onChange={(event) => select(configurations.find((item) => item.id === event.target.value) ?? null)}><option value="">Нове джерело</option>{configurations.map((item) => <option key={item.id} value={item.id}>{item.displayName}</option>)}</select></label>
       <button className="secondary-button" type="button" onClick={() => select(null)}>Додати джерело</button>
     </div>
+    {!googleConnected && <p className="settings-step-notice">Спочатку підключіть Google-акаунт.</p>}
+    <GooglePickerButton disabled={pending || !googleConnected} onSelected={(selection) => void selectSpreadsheet(selection)} />
     <div className="catalogue-source-grid">
       <label><span>Назва джерела</span><input aria-label="Назва джерела" value={displayName} onChange={(event) => setDisplayName(event.target.value)} /></label>
       <label><span>Google таблиця: URL або ID</span><input aria-label="Google таблиця" value={spreadsheet} onChange={(event) => setSpreadsheet(event.target.value)} /></label>
-      <label><span>Вкладка</span><input aria-label="Вкладка Google таблиці" value={sheetName} onChange={(event) => setSheetName(event.target.value)} /></label>
+      <label><span>Вкладка</span>{tabs.length > 0 ? <select aria-label="Вкладка Google таблиці" value={sheetName} onChange={(event) => setSheetName(event.target.value)}>{tabs.map((tab) => <option key={tab.sheetId} value={tab.title}>{tab.title}</option>)}</select> : <input aria-label="Вкладка Google таблиці" value={sheetName} onChange={(event) => setSheetName(event.target.value)} />}</label>
       <label><span>Розклад синхронізації</span><select aria-label="Розклад синхронізації" value={schedule} onChange={(event) => setSchedule(event.target.value as typeof schedule)}><option value="MANUAL">Лише вручну</option><option value="HOURLY">Щогодини</option><option value="DAILY">Щодня</option></select></label>
     </div>
-    <p className="catalogue-source-hint">{current?.serviceAccountEmail ? <>Надайте доступ до таблиці для <strong>{current.serviceAccountEmail}</strong>.</> : 'Спочатку адміністратор сервера має налаштувати service account.'} Ключ JSON не завантажується у браузер.</p>
+    <p className="catalogue-source-hint">Оберіть приватну таблицю через Google Picker. AutoSale збереже лише посилання на файл і вкладку, а не ваші ключі.</p>
     <div className="catalogue-source-actions">
       <button disabled={pending || !displayName.trim() || !spreadsheet.trim() || !sheetName.trim()} onClick={() => void save()} type="button">Зберегти джерело</button>
       <button className="secondary-button" disabled={pending || !current} onClick={() => current && void mutate(`/api/catalogue/sources/${current.id}/check`, { method: 'POST' }, 'Доступ підтверджено')} type="button">Перевірити доступ</button>

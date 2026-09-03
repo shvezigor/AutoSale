@@ -51,6 +51,7 @@ describe('GoogleOAuthController', () => {
 
   it('allows a manager to read status but only an owner with CSRF to connect', async () => {
     await request(app.getHttpServer()).get('/api/integrations/google').set('Cookie', 'autosale_session=manager').expect(200);
+    expect(summary).toHaveBeenCalledWith('tenant', false);
     await request(app.getHttpServer()).post('/api/integrations/google/connect').set('Cookie', 'autosale_session=manager').set('x-csrf-token', csrf.issue(manager.sessionId)).expect(403);
     await request(app.getHttpServer()).post('/api/integrations/google/connect').set('Cookie', 'autosale_session=owner').expect(403);
     await request(app.getHttpServer()).post('/api/integrations/google/connect').set('Cookie', 'autosale_session=owner').set('x-csrf-token', csrf.issue(owner.sessionId)).send({ returnPath: '/settings?tab=google' }).expect(201);
