@@ -2,12 +2,23 @@ import { Buffer } from 'node:buffer';
 
 import { parseWorkerEnv } from '@autosale/config/worker-env';
 import { createPrismaClient } from '@autosale/database';
-import { CredentialCipher, createGoogleSheetsAdapter, GoogleOAuthTokenProvider, GoogleSheetsAdapter, S3ObjectStorage } from '@autosale/integrations';
+import {
+  createGoogleSheetsAdapter,
+  CredentialCipher,
+  GoogleOAuthTokenProvider,
+  GoogleSheetsAdapter,
+  MetaInstagramClient,
+  S3ObjectStorage,
+} from '@autosale/integrations';
 import { Queue, Worker } from 'bullmq';
 import { metrics, StructuredLogger } from '@autosale/observability';
 
 import { createWorkerHealthServer } from './health-server.js';
 import { InstagramProcessor } from './instagram/instagram.processor.js';
+import { InstagramAvatarCleanupReconciler } from './instagram/instagram-avatar-cleanup-reconciler.js';
+import { InstagramAvatarCopyService } from './instagram/instagram-avatar-copy.service.js';
+import { InstagramProfileEnrichmentService } from './instagram/instagram-profile-enrichment.service.js';
+import { InstagramProfileReconciler } from './instagram/instagram-profile-reconciler.js';
 import { MediaCopyService } from './instagram/media-copy.service.js';
 import { createOpenAiOrderRecognizer } from './orders/openai-order-recognizer.js';
 import { OrderRecognitionService } from './orders/order-recognition.service.js';
@@ -85,10 +96,35 @@ async function bootstrap(): Promise<void> {
     new MediaCopyService(storage),
     orderProcessor,
   );
+  const profileEnrichment = new InstagramProfileEnrichmentService(
+    prisma,
+    new MetaInstagramClient({
+      appId: env.META_APP_ID,
+      appSecret: env.META_APP_SECRET,
+      graphVersion: env.META_GRAPH_API_VERSION,
+    }),
+    new InstagramAvatarCopyService(storage),
+    new CredentialCipher(Buffer.from(env.INTEGRATION_ENCRYPTION_KEY, 'base64')),
+  );
   const redis = new URL(env.REDIS_URL);
   const worker = new Worker(
     'instagram',
     async (job) => {
+      if (
+        job.name === 'instagram.profile.enrich' &&
+        typeof job.data?.profileId === 'string' &&
+        typeof job.data?.tenantId === 'string' &&
+        typeof job.data?.participantId === 'string' &&
+        Number.isInteger(job.data?.refreshVersion)
+      ) {
+        await profileEnrichment.process({
+          profileId: job.data.profileId,
+          tenantId: job.data.tenantId,
+          participantId: job.data.participantId,
+          refreshVersion: job.data.refreshVersion,
+        });
+        return;
+      }
       if (job.name !== 'instagram.normalize' || typeof job.data?.eventId !== 'string') return;
       const correlationId = typeof job.data.correlationId === 'string' ? job.data.correlationId : job.data.eventId;
       const started = performance.now();
@@ -115,6 +151,23 @@ async function bootstrap(): Promise<void> {
       concurrency: 5,
     },
   );
+  const instagramProfileQueue = new Queue('instagram', {
+    connection: {
+      host: redis.hostname,
+      port: Number(redis.port || 6379),
+      username: redis.username || undefined,
+      password: redis.password || undefined,
+      tls: redis.protocol === 'rediss:' ? {} : undefined,
+    },
+    defaultJobOptions: {
+      attempts: 5,
+      backoff: { type: 'exponential', delay: 1_000 },
+      removeOnComplete: 1_000,
+      removeOnFail: true,
+    },
+  });
+  const instagramProfileReconciler = new InstagramProfileReconciler(prisma, instagramProfileQueue);
+  const instagramAvatarCleanupReconciler = new InstagramAvatarCleanupReconciler(prisma, storage);
   const catalogueWorker = new Worker(
     'catalogue',
     async (job) => {
@@ -216,6 +269,26 @@ async function bootstrap(): Promise<void> {
     }
   };
   const catalogueReconcileTimer = setInterval(() => void reconcileCatalogueMappings(), 5_000);
+  let reconcilingInstagramProfiles = false;
+  const reconcileInstagramProfiles = async (): Promise<void> => {
+    if (reconcilingInstagramProfiles) return;
+    reconcilingInstagramProfiles = true;
+    try {
+      const result = await instagramProfileReconciler.reconcile();
+      const cleanup = await instagramAvatarCleanupReconciler.reconcile();
+      metrics.set('autosale_queue_backlog', result.attempted, { queue: 'instagram_profile' });
+      metrics.set('autosale_queue_backlog', cleanup.attempted, { queue: 'instagram_avatar_cleanup' });
+      if (result.failed > 0 || cleanup.failed > 0) {
+        metrics.increment('autosale_operations_total', { operation: 'instagram_profile_reconcile', result: 'failure' });
+      }
+    } catch (error) {
+      metrics.increment('autosale_operations_total', { operation: 'instagram_profile_reconcile', result: 'failure' });
+      logger.warn('instagram_profile_reconcile_failed', { correlationId: 'system:instagram-profile', errorCode: error instanceof Error ? error.name : 'UNKNOWN' });
+    } finally {
+      reconcilingInstagramProfiles = false;
+    }
+  };
+  const instagramProfileReconcileTimer = setInterval(() => void reconcileInstagramProfiles(), 5_000);
   let schedulingCatalogueSources = false;
   const scheduleCatalogueSources = async (): Promise<void> => {
     if (schedulingCatalogueSources) return;
@@ -232,6 +305,7 @@ async function bootstrap(): Promise<void> {
   const catalogueScheduleTimer = setInterval(() => void scheduleCatalogueSources(), 60_000);
   void pollExports();
   void reconcileCatalogueMappings();
+  void reconcileInstagramProfiles();
   void scheduleCatalogueSources();
   logger.info('service_started', { correlationId: 'system:startup', healthPort: env.HEALTH_PORT });
 
@@ -240,8 +314,10 @@ async function bootstrap(): Promise<void> {
   const shutdown = async (): Promise<void> => {
     clearInterval(sheetsTimer);
     clearInterval(catalogueReconcileTimer);
+    clearInterval(instagramProfileReconcileTimer);
     clearInterval(catalogueScheduleTimer);
     await worker.close();
+    await instagramProfileQueue.close();
     await catalogueWorker.close();
     await catalogueQueue.close();
     await prisma.$disconnect();

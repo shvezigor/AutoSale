@@ -26,4 +26,5 @@ export {
   type MetaInstagramCodeExchangeInput,
   type MetaInstagramIdentity,
   type MetaInstagramToken,
+  type MetaInstagramUserProfile,
 } from './meta-instagram.js';

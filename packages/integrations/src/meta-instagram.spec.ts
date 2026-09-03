@@ -126,6 +126,56 @@ describe('MetaInstagramClient', () => {
     expect(init).toMatchObject({ headers: { authorization: 'Bearer access-token-that-must-not-leak' } });
   });
 
+  it('gets a messaging participant profile with a bearer token outside the URL', async () => {
+    const fetchFn = vi.fn<typeof fetch>().mockResolvedValue(response({
+      id: 'ig-user-100',
+      name: '  Olena Koval  ',
+      username: 'olena.koval',
+      profile_pic: 'https://scontent.cdninstagram.com/avatar.jpg',
+    }));
+    const client = new MetaInstagramClient({ ...config, fetch: fetchFn });
+
+    await expect(
+      client.getUserProfile('ig-user-100', 'profile-token-that-must-not-leak'),
+    ).resolves.toEqual({
+      name: '  Olena Koval  ',
+      username: 'olena.koval',
+      profilePictureUrl: 'https://scontent.cdninstagram.com/avatar.jpg',
+    });
+
+    const [requestUrl, init] = fetchFn.mock.calls[0] ?? [];
+    expect(String(requestUrl)).toBe(
+      'https://graph.instagram.com/v24.0/ig-user-100?fields=name%2Cusername%2Cprofile_pic',
+    );
+    expect(String(requestUrl)).not.toContain('profile-token-that-must-not-leak');
+    expect(init).toMatchObject({
+      headers: { authorization: 'Bearer profile-token-that-must-not-leak' },
+    });
+  });
+
+  it('accepts profile fields that Meta omits or returns as null', async () => {
+    const client = new MetaInstagramClient({
+      ...config,
+      fetch: vi.fn<typeof fetch>().mockResolvedValue(response({ id: 'ig-user-100', name: null })),
+    });
+
+    await expect(client.getUserProfile('ig-user-100', 'access-token')).resolves.toEqual({
+      name: null,
+      username: null,
+      profilePictureUrl: null,
+    });
+  });
+
+  it('rejects malformed participant ids before making a profile request', async () => {
+    const fetchFn = vi.fn<typeof fetch>();
+    const client = new MetaInstagramClient({ ...config, fetch: fetchFn });
+
+    await expect(client.getUserProfile('../me', 'access-token')).rejects.toThrow(
+      'Invalid Instagram participant id',
+    );
+    expect(fetchFn).not.toHaveBeenCalled();
+  });
+
   it('uses permissions from code exchange without a separate permissions request', async () => {
     const fetchFn = vi.fn<typeof fetch>()
       .mockResolvedValueOnce(response(documentedShortLivedTokenEnvelope))

@@ -15,6 +15,7 @@ describe('ConversationsService', () => {
   let service: ConversationsService;
   let tenantId: string;
   let newestId: string;
+  let usernameOnlyId: string;
 
   beforeAll(async () => {
     container = await new PostgreSqlContainer('postgres:17.6-alpine').start();
@@ -26,6 +27,7 @@ describe('ConversationsService', () => {
       '20260827160000_self_hosted_auth',
       '20260827170000_tenant_access_status',
       '20260828150000_instagram_oauth_attempt_guard',
+      '20260902090000_instagram_customer_profiles',
     ]) {
       const sql = await readFile(
         resolve(
@@ -52,13 +54,26 @@ describe('ConversationsService', () => {
       new Date('2026-08-26T12:00:00.000Z'),
     ];
     for (const [index, lastMessageAt] of times.entries()) {
+      const profile = await prisma.instagramCustomerProfile.create({
+        data: {
+          tenantId,
+          participantId: `user-${index}`,
+          displayName: index === 2 ? 'Олена Коваль' : null,
+          username: index === 2 ? 'olena.koval' : index === 1 ? 'username_only' : null,
+          avatarStorageKey: index === 2 ? 'tenant-a/avatar.jpg' : null,
+          avatarChecksum: index === 2 ? 'avatar-v1' : null,
+          avatarContentType: index === 2 ? 'image/jpeg' : null,
+          status: 'READY',
+        },
+      });
       const conversation = await prisma.conversation.create({
         data: {
           tenantId,
           channel: 'INSTAGRAM',
           externalConversationId: `user-${index}`,
           participantId: `user-${index}`,
-          displayName: `Клієнт ${index}`,
+          profileId: profile.id,
+          displayName: index === 1 ? 'Застаріле ім’я' : null,
           lastMessageAt,
         },
       });
@@ -76,6 +91,7 @@ describe('ConversationsService', () => {
         },
       });
       if (index === 2) newestId = conversation.id;
+      if (index === 1) usernameOnlyId = conversation.id;
     }
     await prisma.conversation.create({
       data: {
@@ -102,7 +118,22 @@ describe('ConversationsService', () => {
       'Повідомлення 1',
     ]);
     expect(first.nextCursor).toEqual(expect.any(String));
+    expect(first.items[0]).toMatchObject({
+      participantName: 'Олена Коваль',
+      participantUsername: 'olena.koval',
+      participantAvatarUrl: expect.stringMatching(/^\/api\/media\/instagram-profiles\/.+\/avatar\?v=avatar-v1$/),
+    });
+    expect(first.items[1]).toMatchObject({
+      participantName: null,
+      participantUsername: 'username_only',
+      participantAvatarUrl: null,
+    });
     expect(second.items.map((item) => item.lastMessagePreview)).toEqual(['Повідомлення 0']);
+    expect(second.items[0]).toMatchObject({
+      participantName: null,
+      participantUsername: null,
+      participantAvatarUrl: null,
+    });
     expect(second.nextCursor).toBeNull();
   });
 
@@ -112,8 +143,20 @@ describe('ConversationsService', () => {
     expect(detail).toMatchObject({
       id: newestId,
       channel: 'INSTAGRAM',
+      participantName: 'Олена Коваль',
+      participantUsername: 'olena.koval',
+      participantAvatarUrl: expect.stringContaining('/api/media/instagram-profiles/'),
       messages: [{ text: 'Повідомлення 2' }],
     });
+  });
+
+  it('prefers a current profile username over a stale legacy name in list and detail responses', async () => {
+    const list = await service.list(tenantId, { limit: 20 });
+    const summary = list.items.find((item) => item.id === usernameOnlyId);
+    const detail = await service.detail(tenantId, usernameOnlyId);
+
+    expect(summary).toMatchObject({ participantName: null, participantUsername: 'username_only' });
+    expect(detail).toMatchObject({ participantName: null, participantUsername: 'username_only' });
   });
 
   it('treats foreign and unknown conversation ids as not found', async () => {

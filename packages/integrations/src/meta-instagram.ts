@@ -26,13 +26,19 @@ export interface MetaInstagramIdentity {
   username: string | null;
 }
 
+export interface MetaInstagramUserProfile {
+  name: string | null;
+  username: string | null;
+  profilePictureUrl: string | null;
+}
+
 export class MetaInstagramError extends Error {
   constructor(
     readonly status: number | null,
     readonly providerCode: number | string | null,
     readonly isTransient: boolean | null = null,
     readonly errorSubcode: number | null = null,
-    readonly responseStage: 'SHORT_LIVED_TOKEN' | 'LONG_LIVED_TOKEN' | 'IDENTITY' | null = null,
+    readonly responseStage: 'SHORT_LIVED_TOKEN' | 'LONG_LIVED_TOKEN' | 'IDENTITY' | 'PROFILE' | null = null,
     readonly responseShape: string | null = null,
   ) {
     super('Meta Instagram API request failed');
@@ -104,6 +110,33 @@ export class MetaInstagramClient {
       throw new MetaInstagramError(200, null, null, null, 'IDENTITY');
     }
     return { accountId: entry.user_id, username: typeof entry.username === 'string' ? entry.username : null };
+  }
+
+  async getUserProfile(
+    participantId: string,
+    accessToken: string,
+  ): Promise<MetaInstagramUserProfile> {
+    if (!/^[A-Za-z0-9_-]{1,128}$/.test(participantId)) {
+      throw new Error('Invalid Instagram participant id');
+    }
+
+    const url = this.graphUrl(participantId);
+    url.searchParams.set('fields', 'name,username,profile_pic');
+    const payload = await this.requestJson(url, this.authorized(accessToken));
+    if (
+      !isRecord(payload) ||
+      !isOptionalNullableString(payload.name) ||
+      !isOptionalNullableString(payload.username) ||
+      !isOptionalNullableString(payload.profile_pic)
+    ) {
+      throw new MetaInstagramError(200, null, null, null, 'PROFILE');
+    }
+
+    return {
+      name: typeof payload.name === 'string' ? payload.name : null,
+      username: typeof payload.username === 'string' ? payload.username : null,
+      profilePictureUrl: typeof payload.profile_pic === 'string' ? payload.profile_pic : null,
+    };
   }
 
 
@@ -187,6 +220,10 @@ export class MetaInstagramClient {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
+}
+
+function isOptionalNullableString(value: unknown): boolean {
+  return value === undefined || value === null || typeof value === 'string';
 }
 
 function providerCode(payload: unknown): number | string | null {
