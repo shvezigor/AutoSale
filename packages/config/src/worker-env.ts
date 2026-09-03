@@ -1,4 +1,12 @@
+import { Buffer } from 'node:buffer';
+
 import { z } from 'zod';
+
+const optionalNonEmptyString = z.preprocess((value) => value === '' ? undefined : value, z.string().min(1).optional());
+const canonicalEncryptionKey = z.string().refine((value) => {
+  const decoded = Buffer.from(value, 'base64');
+  return decoded.length === 32 && decoded.toString('base64') === value;
+}, 'must be canonical base64 encoding of 32 bytes');
 
 export const workerEnvSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']),
@@ -13,6 +21,13 @@ export const workerEnvSchema = z.object({
   OPENAI_API_KEY: z.string().min(20),
   OPENAI_MODEL: z.string().min(1).default('gpt-5.4-mini'),
   GOOGLE_SERVICE_ACCOUNT_FILE: z.preprocess((value) => value === '' ? undefined : value, z.string().min(1).optional()),
+  INTEGRATION_ENCRYPTION_KEY: canonicalEncryptionKey,
+  GOOGLE_OAUTH_CLIENT_ID: optionalNonEmptyString,
+  GOOGLE_OAUTH_CLIENT_SECRET: optionalNonEmptyString,
+}).superRefine((environment, context) => {
+  if ((environment.GOOGLE_OAUTH_CLIENT_ID === undefined) !== (environment.GOOGLE_OAUTH_CLIENT_SECRET === undefined)) {
+    context.addIssue({ code: 'custom', message: 'Google OAuth worker configuration must include client ID and client secret' });
+  }
 });
 
 export type WorkerEnv = z.infer<typeof workerEnvSchema>;

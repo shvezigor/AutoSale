@@ -10,7 +10,7 @@ describe('GoogleCatalogueSyncProcessor', () => {
   const mappingId = '55555555-5555-4555-8555-555555555555';
   const headers = ['SKU', 'Name'];
   const fingerprint = googleSheetsStructureFingerprint(headers);
-  const source = { id: sourceId, tenantId, type: 'GOOGLE_SHEETS', spreadsheetId: 'sheet-id', sheetName: 'Products', status: 'ACTIVE' };
+  const source = { id: sourceId, tenantId, type: 'GOOGLE_SHEETS', spreadsheetId: 'sheet-id', sheetName: 'Products', credentialRef: null, status: 'ACTIVE' };
   const mapping = {
     id: mappingId,
     version: 1,
@@ -47,6 +47,19 @@ describe('GoogleCatalogueSyncProcessor', () => {
       tenantId, sourceId, mappingId, status: 'PROCESSING', idempotencyKey: `google:${sourceId}:revision-1:mapping:1`, sourceRevision: 'revision-1',
     }) });
     expect(prisma.catalogueSource.updateMany).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ status: 'ACTIVE', lastErrorSummary: null }) }));
+  });
+
+  it('resolves tenant OAuth credentials for every synchronization without putting tokens in job data', async () => {
+    prisma.catalogueSource.findFirst.mockResolvedValue({
+      ...source, credentialRef: 'connection-a', syncVersion: 1, syncSchedule: 'MANUAL', syncLeaseId: null, syncLeaseExpiresAt: null,
+    });
+    const oauthSheets = vi.fn().mockResolvedValue(sheets);
+    const processor = new GoogleCatalogueSyncProcessor(prisma as never, undefined, storage, importer, oauthSheets);
+
+    await expect(processor.process({ tenantId, sourceId })).resolves.toMatchObject({ status: 'COMPLETED' });
+
+    expect(oauthSheets).toHaveBeenCalledWith(tenantId, 'connection-a');
+    expect(sheets.readTable).toHaveBeenCalledWith({ spreadsheetId: 'sheet-id', sheetName: 'Products', maxRows: 5_000 });
   });
 
   it('pauses for mapping review before mutation when the structure changes', async () => {

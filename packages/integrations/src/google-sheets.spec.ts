@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import { GoogleSheetsAdapter, GoogleSheetsReadError, GoogleSheetsTableValidationError } from './google-sheets.js';
+import { GoogleOAuthAccessError } from './google-oauth-token-provider.js';
 
 describe('GoogleSheetsAdapter', () => {
   it('reads a bounded evaluated table and returns a deterministic revision', async () => {
@@ -52,6 +53,12 @@ describe('GoogleSheetsAdapter', () => {
     const failure = adapter.readTable({ spreadsheetId: 'sheet-1', sheetName: 'Products', maxRows: 10 });
     await expect(failure).rejects.toMatchObject({ code: 'RETRYABLE', retryable: true });
     await expect(failure).rejects.not.toThrow(/private URL/i);
+  });
+
+  it('classifies a rejected OAuth refresh as non-retryable authorization failure', async () => {
+    const adapter = new GoogleSheetsAdapter({ getAccessToken: async () => { throw new GoogleOAuthAccessError(); } }, vi.fn());
+    await expect(adapter.readTable({ spreadsheetId: 'sheet-1', sheetName: 'Products', maxRows: 10 }))
+      .rejects.toMatchObject({ code: 'AUTHORIZATION', retryable: false });
   });
 
   it('quotes apostrophes in tab names and represents an empty sheet deterministically', async () => {

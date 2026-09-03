@@ -60,6 +60,30 @@ describe('CatalogueSourcesService', () => {
     expect(prisma.googleSheetsDestination.upsert).not.toHaveBeenCalled();
   });
 
+  it('binds a Picker-verified source to the active tenant OAuth connection', async () => {
+    const created = {
+      id: sourceId, tenantId, type: 'GOOGLE_SHEETS', displayName: 'OAuth каталог', status: 'PENDING',
+      spreadsheetId: 'sheet-oauth', sheetName: 'Товари', credentialRef: 'connection-a', syncSchedule: 'MANUAL',
+      lastSyncedAt: null, lastErrorSummary: null, updatedAt: new Date('2026-09-01T08:00:00.000Z'),
+    };
+    const prisma = {
+      googleConnection: { findUnique: vi.fn().mockResolvedValue({ id: 'connection-a', status: 'ACTIVE' }) },
+      catalogueSource: { create: vi.fn().mockResolvedValue(created) },
+    };
+    const oauth = {
+      verifySpreadsheet: vi.fn().mockResolvedValue({ tabs: [{ sheetId: 1, title: 'Товари' }] }),
+      sheetsForConnection: vi.fn(),
+    };
+    const service = new CatalogueSourcesService(prisma as never, undefined, undefined, { oauthRequired: true }, oauth);
+
+    await service.create(tenantId, userId, {
+      displayName: 'OAuth каталог', spreadsheet: 'sheet-oauth', sheetName: 'Товари', syncSchedule: 'MANUAL',
+    });
+
+    expect(oauth.verifySpreadsheet).toHaveBeenCalledWith(tenantId, 'connection-a', 'sheet-oauth');
+    expect(prisma.catalogueSource.create).toHaveBeenCalledWith({ data: expect.objectContaining({ credentialRef: 'connection-a' }) });
+  });
+
   it('returns manager-safe health separately from owner-only configuration', async () => {
     const row = {
       id: sourceId, type: 'GOOGLE_SHEETS', displayName: 'Каталог', status: 'ACTIVE',

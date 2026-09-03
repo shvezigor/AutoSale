@@ -25,17 +25,23 @@ type SourceRow = {
 };
 
 type CatalogueQueue = { add(name: string, data: { tenantId: string; sourceId: string }, options?: Record<string, unknown>): Promise<unknown> };
+type OAuthCatalogueAccess = {
+  verifySpreadsheet(tenantId: string, connectionId: string, spreadsheetId: string): Promise<{ tabs: Array<{ sheetId: number; title: string }> }>;
+  sheetsForConnection(tenantId: string, connectionId: string): Promise<Pick<GoogleSheetsAdapter, 'readTable'>>;
+};
 
 export class CatalogueSourcesService {
   constructor(
     private readonly prisma: PrismaClient,
     private readonly sheets?: Pick<GoogleSheetsAdapter, 'readTable'>,
     private readonly queue?: CatalogueQueue,
-    private readonly config: { serviceAccountEmail?: string } = {},
+    private readonly config: { serviceAccountEmail?: string; oauthRequired?: boolean } = {},
+    private readonly oauth?: OAuthCatalogueAccess,
   ) {}
 
   async create(tenantId: string, userId: string, input: CatalogueSourceInput) {
     const spreadsheetId = parseGoogleSpreadsheetId(input.spreadsheet);
+    const credentialRef = await this.verifyOAuthBinding(tenantId, spreadsheetId, input.sheetName);
     const source = await this.prisma.catalogueSource.create({
       data: {
         tenantId,
@@ -44,6 +50,7 @@ export class CatalogueSourcesService {
         displayName: input.displayName,
         spreadsheetId,
         sheetName: input.sheetName,
+        credentialRef,
         syncSchedule: input.syncSchedule,
         nextSyncAt: initialNextSyncAt(input.syncSchedule),
         status: 'PENDING',
@@ -54,6 +61,7 @@ export class CatalogueSourcesService {
 
   async update(tenantId: string, sourceId: string, input: CatalogueSourceInput) {
     const spreadsheetId = parseGoogleSpreadsheetId(input.spreadsheet);
+    const credentialRef = await this.verifyOAuthBinding(tenantId, spreadsheetId, input.sheetName);
     const now = new Date();
     const updated = await this.prisma.catalogueSource.updateMany({
       where: { id: sourceId, tenantId, type: 'GOOGLE_SHEETS', OR: [{ syncLeaseId: null }, { syncLeaseExpiresAt: { lte: now } }] },
@@ -61,6 +69,7 @@ export class CatalogueSourcesService {
         displayName: input.displayName,
         spreadsheetId,
         sheetName: input.sheetName,
+        credentialRef,
         syncSchedule: input.syncSchedule,
         nextSyncAt: initialNextSyncAt(input.syncSchedule),
         syncVersion: { increment: 1 },
@@ -114,12 +123,16 @@ export class CatalogueSourcesService {
   async checkConnectivity(tenantId: string, sourceId: string) {
     const source = await this.prisma.catalogueSource.findFirst({
       where: { id: sourceId, tenantId, type: 'GOOGLE_SHEETS' },
-      select: { id: true, spreadsheetId: true, sheetName: true },
+      select: { id: true, spreadsheetId: true, sheetName: true, credentialRef: true },
     });
     if (!source) throw new NotFoundException('Catalogue source not found');
-    if (!this.sheets || !source.spreadsheetId || !source.sheetName) throw new BadRequestException('Google service account is not configured');
+    if (!source.spreadsheetId || !source.sheetName) throw new BadRequestException('Google Sheets source is not configured');
     try {
-      const table = await this.sheets.readTable({ spreadsheetId: source.spreadsheetId, sheetName: source.sheetName, maxRows: 5_000 });
+      const sheets = source.credentialRef && this.oauth
+        ? await this.oauth.sheetsForConnection(tenantId, source.credentialRef)
+        : this.sheets;
+      if (!sheets) throw new BadRequestException('Google connection is not configured');
+      const table = await sheets.readTable({ spreadsheetId: source.spreadsheetId, sheetName: source.sheetName, maxRows: 5_000 });
       if (table.headers.length === 0 || table.headers.every((header) => !header.trim())) {
         await this.prisma.catalogueSource.updateMany({
           where: { id: sourceId, tenantId, type: 'GOOGLE_SHEETS' },
@@ -181,9 +194,23 @@ export class CatalogueSourcesService {
       lastErrorSummary: source.lastErrorSummary,
       updatedAt: source.updatedAt.toISOString(),
       serviceAccountEmail: this.config.serviceAccountEmail ?? null,
-      authorizationAction: this.config.serviceAccountEmail ? 'SHARE_WITH_SERVICE_ACCOUNT' : 'CONFIGURE_SERVICE_ACCOUNT',
+      authorizationAction: this.config.oauthRequired
+        ? 'CONNECTED_WITH_GOOGLE'
+        : this.config.serviceAccountEmail ? 'SHARE_WITH_SERVICE_ACCOUNT' : 'CONFIGURE_SERVICE_ACCOUNT',
       pendingReview,
     };
+  }
+
+  private async verifyOAuthBinding(tenantId: string, spreadsheetId: string, sheetName: string): Promise<string | null> {
+    if (!this.config.oauthRequired) return null;
+    const connection = await this.prisma.googleConnection.findUnique({
+      where: { tenantId },
+      select: { id: true, status: true },
+    });
+    if (connection?.status !== 'ACTIVE' || !this.oauth) throw new BadRequestException('Connect Google before selecting a spreadsheet');
+    const metadata = await this.oauth.verifySpreadsheet(tenantId, connection.id, spreadsheetId);
+    if (!metadata.tabs.some((tab) => tab.title === sheetName)) throw new BadRequestException('Selected Google sheet tab is unavailable');
+    return connection.id;
   }
 }
 

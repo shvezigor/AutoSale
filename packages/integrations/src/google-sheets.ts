@@ -2,6 +2,8 @@ import { createHash } from 'node:crypto';
 
 import { GoogleAuth } from 'google-auth-library';
 
+import { GoogleOAuthAccessError } from './google-oauth-token-provider.js';
+
 interface AccessTokenProvider { getAccessToken(): Promise<string> }
 type FetchLike = (input: string, init: { headers: { authorization: string; 'content-type'?: string }; method?: string; body?: string }) => Promise<{ ok: boolean; status: number; json(): Promise<unknown> }>;
 
@@ -58,7 +60,8 @@ export class GoogleSheetsAdapter {
       const range = encodeURIComponent(`${quotedSheet}!1:${input.maxRows + 1 + TABLE_OVERFLOW_SCAN_ROWS}`);
       const url = `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(input.spreadsheetId)}/values/${range}?majorDimension=ROWS&valueRenderOption=UNFORMATTED_VALUE`;
       response = await this.fetchFn(url, { headers: { authorization: `Bearer ${token}` } });
-    } catch {
+    } catch (error) {
+      if (error instanceof GoogleOAuthAccessError) throw new GoogleSheetsReadError('AUTHORIZATION', false);
       throw new GoogleSheetsReadError('RETRYABLE', true);
     }
     if (!response.ok) throw classifyReadFailure(response.status);

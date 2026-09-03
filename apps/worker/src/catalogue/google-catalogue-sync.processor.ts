@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 
 import type { CatalogueTargetField } from '@autosale/contracts';
 import { CatalogueImportLeaseLostError, CatalogueSkuOwnershipError, importCatalogueTable, type CatalogueImportCounts, type PrismaClient } from '@autosale/database';
-import { GoogleSheetsReadError, GoogleSheetsTableValidationError, googleSheetsStructureFingerprint, type GoogleSheetsAdapter, type GoogleSheetsCell, type ObjectStorage } from '@autosale/integrations';
+import { GoogleOAuthAccessError, GoogleSheetsReadError, GoogleSheetsTableValidationError, googleSheetsStructureFingerprint, type GoogleSheetsAdapter, type GoogleSheetsCell, type ObjectStorage } from '@autosale/integrations';
 
 type MappingColumn = { source: string; target: CatalogueTargetField };
 type TableImporter = { importTable(input: {
@@ -19,9 +19,10 @@ export class GoogleCatalogueSyncProcessor {
 
   constructor(
     private readonly prisma: PrismaClient,
-    private readonly sheets: Pick<GoogleSheetsAdapter, 'readTable'>,
+    private readonly sheets: Pick<GoogleSheetsAdapter, 'readTable'> | undefined,
     private readonly storage: Pick<ObjectStorage, 'put'>,
     importer?: TableImporter,
+    private readonly oauthSheets?: (tenantId: string, connectionId: string) => Promise<Pick<GoogleSheetsAdapter, 'readTable'>>,
   ) {
     this.importer = importer ?? { importTable: (input) => importCatalogueTable(prisma, input) };
   }
@@ -29,7 +30,7 @@ export class GoogleCatalogueSyncProcessor {
   async process(input: { tenantId: string; sourceId: string }) {
     const source = await this.prisma.catalogueSource.findFirst({
       where: { id: input.sourceId, tenantId: input.tenantId, type: 'GOOGLE_SHEETS' },
-      select: { id: true, spreadsheetId: true, sheetName: true, syncSchedule: true, syncVersion: true, syncLeaseId: true, syncLeaseExpiresAt: true },
+      select: { id: true, spreadsheetId: true, sheetName: true, credentialRef: true, syncSchedule: true, syncVersion: true, syncLeaseId: true, syncLeaseExpiresAt: true },
     });
     if (!source?.spreadsheetId || !source.sheetName) throw new Error('Google catalogue source is unavailable');
     const now = new Date();
@@ -49,7 +50,11 @@ export class GoogleCatalogueSyncProcessor {
     try {
     let table: Awaited<ReturnType<GoogleSheetsAdapter['readTable']>>;
     try {
-      table = await this.sheets.readTable({ spreadsheetId: source.spreadsheetId, sheetName: source.sheetName, maxRows: 5_000 });
+      const sheets = source.credentialRef && this.oauthSheets
+        ? await this.oauthSheets(input.tenantId, source.credentialRef)
+        : this.sheets;
+      if (!sheets) throw new GoogleOAuthAccessError();
+      table = await sheets.readTable({ spreadsheetId: source.spreadsheetId, sheetName: source.sheetName, maxRows: 5_000 });
     } catch (error) {
       if (error instanceof GoogleSheetsTableValidationError) {
         await this.prisma.catalogueSource.updateMany({ where: leaseWhere, data: {
@@ -57,7 +62,11 @@ export class GoogleCatalogueSyncProcessor {
         } });
         return { status: 'FAILED' as const, reason: 'TABLE_VALIDATION' as const, validationCode: error.code };
       }
-      const failure = error instanceof GoogleSheetsReadError ? error : new GoogleSheetsReadError('RETRYABLE', true);
+      const failure = error instanceof GoogleSheetsReadError
+        ? error
+        : error instanceof GoogleOAuthAccessError
+          ? new GoogleSheetsReadError('AUTHORIZATION', false)
+          : new GoogleSheetsReadError('RETRYABLE', true);
       await this.prisma.catalogueSource.updateMany({ where: leaseWhere, data: {
         status: failure.code === 'AUTHORIZATION' ? 'DISCONNECTED' : 'ERROR', lastErrorSummary: failure.code,
         syncLeaseId: null, syncLeaseExpiresAt: null,

@@ -1,6 +1,8 @@
+import { Buffer } from 'node:buffer';
+
 import { parseWorkerEnv } from '@autosale/config/worker-env';
 import { createPrismaClient } from '@autosale/database';
-import { createGoogleSheetsAdapter, S3ObjectStorage } from '@autosale/integrations';
+import { CredentialCipher, createGoogleSheetsAdapter, GoogleOAuthTokenProvider, GoogleSheetsAdapter, S3ObjectStorage } from '@autosale/integrations';
 import { Queue, Worker } from 'bullmq';
 import { metrics, StructuredLogger } from '@autosale/observability';
 
@@ -35,7 +37,31 @@ async function bootstrap(): Promise<void> {
   const catalogueMapper = createOpenAiColumnMapper(env.OPENAI_API_KEY, env.OPENAI_MODEL);
   const catalogueMappingProcessor = new CatalogueMappingProcessor(prisma, storage, catalogueMapper);
   const googleSheets = env.GOOGLE_SERVICE_ACCOUNT_FILE ? createGoogleSheetsAdapter(env.GOOGLE_SERVICE_ACCOUNT_FILE) : undefined;
-  const catalogueSyncProcessor = googleSheets ? new GoogleCatalogueSyncProcessor(prisma, googleSheets, storage) : undefined;
+  const googleOAuthTokens = env.GOOGLE_OAUTH_CLIENT_ID && env.GOOGLE_OAUTH_CLIENT_SECRET
+    ? new GoogleOAuthTokenProvider({
+      findConnection: async (connectionId, tenantId) => prisma.googleConnection.findFirst({
+        where: { id: connectionId, tenantId },
+        select: { id: true, tenantId: true, status: true, encryptedRefreshToken: true, credentialGenerationId: true },
+      }),
+      markReauthorizationRequired: async (tenantId, credentialGenerationId) => {
+        await prisma.googleConnection.updateMany({
+          where: { tenantId, credentialGenerationId },
+          data: { status: 'REAUTHORIZATION_REQUIRED', lastErrorCode: 'GOOGLE_TOKEN_REFRESH_FAILED' },
+        });
+      },
+    }, new CredentialCipher(Buffer.from(env.INTEGRATION_ENCRYPTION_KEY, 'base64')), {
+      clientId: env.GOOGLE_OAUTH_CLIENT_ID,
+      clientSecret: env.GOOGLE_OAUTH_CLIENT_SECRET,
+    })
+    : undefined;
+  const oauthSheets = googleOAuthTokens
+    ? async (tenantId: string, connectionId: string) => new GoogleSheetsAdapter({
+      getAccessToken: () => googleOAuthTokens.getAccessToken(connectionId, tenantId),
+    })
+    : undefined;
+  const catalogueSyncProcessor = googleSheets || oauthSheets
+    ? new GoogleCatalogueSyncProcessor(prisma, googleSheets, storage, undefined, oauthSheets)
+    : undefined;
   const orderProcessor = new TriggeredOrderProcessor(
     prisma,
     new OrderRecognitionService(orderRecognizer),

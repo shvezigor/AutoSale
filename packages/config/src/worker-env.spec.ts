@@ -1,3 +1,5 @@
+import { Buffer } from 'node:buffer';
+
 import { describe, expect, it } from 'vitest';
 
 import { parseWorkerEnv } from './worker-env.js';
@@ -13,6 +15,9 @@ const validEnv = {
   S3_SECRET_ACCESS_KEY: 'minio-secret-key',
   OPENAI_API_KEY: 'sk-test-not-a-real-key-value',
   OPENAI_MODEL: 'gpt-5.4-mini',
+  INTEGRATION_ENCRYPTION_KEY: Buffer.alloc(32, 1).toString('base64'),
+  GOOGLE_OAUTH_CLIENT_ID: 'google-client-id',
+  GOOGLE_OAUTH_CLIENT_SECRET: 'google-client-secret',
 };
 
 describe('parseWorkerEnv', () => {
@@ -29,6 +34,11 @@ describe('parseWorkerEnv', () => {
   it('rejects a missing OpenAI API key', () => {
     const { OPENAI_API_KEY: _omitted, ...incompleteEnv } = validEnv;
 
+    expect(() => parseWorkerEnv(incompleteEnv)).toThrow();
+  });
+
+  it('rejects partial Google OAuth worker credentials', () => {
+    const { GOOGLE_OAUTH_CLIENT_SECRET: _omitted, ...incompleteEnv } = validEnv;
     expect(() => parseWorkerEnv(incompleteEnv)).toThrow();
   });
 });

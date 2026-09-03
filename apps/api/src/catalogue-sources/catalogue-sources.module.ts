@@ -1,13 +1,15 @@
+import { Buffer } from 'node:buffer';
 import { readFileSync } from 'node:fs';
 
 import type { ApiEnv } from '@autosale/config/api-env';
 import { createPrismaClient } from '@autosale/database';
-import { createGoogleSheetsAdapter } from '@autosale/integrations';
+import { CredentialCipher, createGoogleSheetsAdapter, GoogleOAuthTokenProvider, GoogleSheetsAdapter } from '@autosale/integrations';
 import { DynamicModule, Module } from '@nestjs/common';
 import { Queue } from 'bullmq';
 
 import { CatalogueSourcesController } from './catalogue-sources.controller.js';
 import { CatalogueSourcesService } from './catalogue-sources.service.js';
+import { GoogleFilesClient } from '../integrations/google-files.client.js';
 
 @Module({})
 export class CatalogueSourcesModule {
@@ -17,12 +19,41 @@ export class CatalogueSourcesModule {
       controllers: [CatalogueSourcesController],
       providers: [{
         provide: CatalogueSourcesService,
-        useFactory: () => new CatalogueSourcesService(
-          createPrismaClient(env.DATABASE_URL),
-          env.GOOGLE_SERVICE_ACCOUNT_FILE ? createGoogleSheetsAdapter(env.GOOGLE_SERVICE_ACCOUNT_FILE) : undefined,
-          new Queue('catalogue', { connection: queueConnection(env.REDIS_URL) }),
-          serviceAccountConfig(env.GOOGLE_SERVICE_ACCOUNT_FILE),
-        ),
+        useFactory: () => {
+          const prisma = createPrismaClient(env.DATABASE_URL);
+          const oauthTokens = env.GOOGLE_OAUTH_CLIENT_ID && env.GOOGLE_OAUTH_CLIENT_SECRET
+            ? new GoogleOAuthTokenProvider({
+              findConnection: async (connectionId, tenantId) => prisma.googleConnection.findFirst({
+                where: { id: connectionId, tenantId },
+                select: { id: true, tenantId: true, status: true, encryptedRefreshToken: true, credentialGenerationId: true },
+              }),
+              markReauthorizationRequired: async (tenantId, credentialGenerationId) => {
+                await prisma.googleConnection.updateMany({
+                  where: { tenantId, credentialGenerationId },
+                  data: { status: 'REAUTHORIZATION_REQUIRED', lastErrorCode: 'GOOGLE_TOKEN_REFRESH_FAILED' },
+                });
+              },
+            }, new CredentialCipher(Buffer.from(env.INTEGRATION_ENCRYPTION_KEY, 'base64')), {
+              clientId: env.GOOGLE_OAUTH_CLIENT_ID,
+              clientSecret: env.GOOGLE_OAUTH_CLIENT_SECRET,
+            })
+            : undefined;
+          const files = new GoogleFilesClient();
+          const oauth = oauthTokens ? {
+            verifySpreadsheet: async (tenantId: string, connectionId: string, spreadsheetId: string) =>
+              files.inspectSpreadsheet(await oauthTokens.getAccessToken(connectionId, tenantId), spreadsheetId),
+            sheetsForConnection: async (tenantId: string, connectionId: string) => new GoogleSheetsAdapter({
+              getAccessToken: () => oauthTokens.getAccessToken(connectionId, tenantId),
+            }),
+          } : undefined;
+          return new CatalogueSourcesService(
+            prisma,
+            env.GOOGLE_SERVICE_ACCOUNT_FILE ? createGoogleSheetsAdapter(env.GOOGLE_SERVICE_ACCOUNT_FILE) : undefined,
+            new Queue('catalogue', { connection: queueConnection(env.REDIS_URL) }),
+            { ...serviceAccountConfig(env.GOOGLE_SERVICE_ACCOUNT_FILE), oauthRequired: oauth !== undefined },
+            oauth,
+          );
+        },
       }],
     };
   }
