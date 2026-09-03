@@ -439,6 +439,7 @@ model GoogleSheetsDestination {
   tenantId        String    @unique @map("tenant_id") @db.Uuid
   spreadsheetId   String    @map("spreadsheet_id")
   sheetName       String    @map("sheet_name")
+  credentialRef   String?   @map("credential_ref") @db.Uuid
   requiredHeaders Json      @map("required_headers")
   status          String    @default("PENDING")
   lastValidatedAt DateTime? @map("last_validated_at")
@@ -448,6 +449,7 @@ model GoogleSheetsDestination {
   tenant          Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   exports         OrderExport[]
 
+  @@index([credentialRef])
   @@map("google_sheets_destinations")
 }
 

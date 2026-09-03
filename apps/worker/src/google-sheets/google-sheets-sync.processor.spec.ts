@@ -34,4 +34,21 @@ describe('GoogleSheetsSyncProcessor', () => {
     await expect(new GoogleSheetsSyncProcessor(prisma as never, sheets as never).process('export-1')).rejects.toThrow('HTTP 503');
     expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ data: expect.objectContaining({ status: 'FAILED', errorSummary: 'Google Sheets API returned HTTP 503' }) }));
   });
+
+  it('resolves the destination tenant OAuth connection for each export', async () => {
+    const update = vi.fn().mockResolvedValue({});
+    const prisma = {
+      orderExport: { findUniqueOrThrow: vi.fn().mockResolvedValue({ id: 'export-1', orderId: 'order-42', tenantId: 'tenant-a' }), update },
+      order: { findUniqueOrThrow: vi.fn().mockResolvedValue({ id: 'order-42', tenantId: 'tenant-a', status: 'APPROVED', extraction: {}, items: [] }) },
+      googleSheetsDestination: { findUniqueOrThrow: vi.fn().mockResolvedValue({ spreadsheetId: 'sheet-id', sheetName: 'Orders', credentialRef: 'connection-a', requiredHeaders: ['order_id'] }) },
+      product: { findMany: vi.fn().mockResolvedValue([]) },
+    };
+    const sheets = { upsertRow: vi.fn().mockResolvedValue({ action: 'appended', rowNumber: 2 }) };
+    const oauthSheets = vi.fn().mockResolvedValue(sheets);
+
+    await new GoogleSheetsSyncProcessor(prisma as never, undefined, oauthSheets).process('export-1');
+
+    expect(oauthSheets).toHaveBeenCalledWith('tenant-a', 'connection-a');
+    expect(sheets.upsertRow).toHaveBeenCalledOnce();
+  });
 });

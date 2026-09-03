@@ -374,6 +374,7 @@ export const GoogleSheetsDestinationScalarFieldEnum = {
   tenantId: 'tenantId',
   spreadsheetId: 'spreadsheetId',
   sheetName: 'sheetName',
+  credentialRef: 'credentialRef',
   requiredHeaders: 'requiredHeaders',
   status: 'status',
   lastValidatedAt: 'lastValidatedAt',

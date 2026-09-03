@@ -170,7 +170,7 @@ async function bootstrap(): Promise<void> {
   });
   const catalogueReconciler = new CatalogueMappingReconciler(prisma, catalogueQueue);
   const catalogueScheduler = new CatalogueSyncScheduler(prisma, catalogueQueue);
-  const sheetsProcessor = googleSheets ? new GoogleSheetsSyncProcessor(prisma, googleSheets) : undefined;
+  const sheetsProcessor = googleSheets || oauthSheets ? new GoogleSheetsSyncProcessor(prisma, googleSheets, oauthSheets) : undefined;
   let polling = false;
   const pollExports = async (): Promise<void> => {
     if (polling) return;

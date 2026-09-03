@@ -4,7 +4,11 @@ import type { GoogleSheetsAdapter } from '@autosale/integrations';
 type Extraction = { customer?: { name?: string | null; phone?: string | null; instagramUsername?: string | null }; delivery?: { city?: string | null; address?: string | null; novaPoshtaBranch?: string | null } };
 
 export class GoogleSheetsSyncProcessor {
-  constructor(private readonly prisma: PrismaClient, private readonly sheets: Pick<GoogleSheetsAdapter, 'upsertRow'>) {}
+  constructor(
+    private readonly prisma: PrismaClient,
+    private readonly sheets: Pick<GoogleSheetsAdapter, 'upsertRow'> | undefined,
+    private readonly oauthSheets?: (tenantId: string, connectionId: string) => Promise<Pick<GoogleSheetsAdapter, 'upsertRow'>>,
+  ) {}
 
   async process(exportId: string): Promise<void> {
     const record = await this.prisma.orderExport.findUniqueOrThrow({ where: { id: exportId } });
@@ -13,10 +17,14 @@ export class GoogleSheetsSyncProcessor {
       const order = await this.prisma.order.findUniqueOrThrow({ where: { id: record.orderId }, include: { items: { orderBy: { createdAt: 'asc' } } } });
       if (order.status !== 'APPROVED' && order.status !== 'AUTO_APPROVED') throw new Error('Only approved orders can be exported');
       const destination = await this.prisma.googleSheetsDestination.findUniqueOrThrow({ where: { tenantId: record.tenantId } });
+      const sheets = destination.credentialRef && this.oauthSheets
+        ? await this.oauthSheets(record.tenantId, destination.credentialRef)
+        : this.sheets;
+      if (!sheets) throw new Error('Google connection is not configured');
       const headers = stringArray(destination.requiredHeaders);
       const products = headers.includes('product_name') ? await this.prisma.product.findMany({ where: { tenantId: order.tenantId, sku: { in: order.items.flatMap((item) => item.catalogId ? [item.catalogId] : []) } }, select: { sku: true, name: true } }) : [];
       const values = mapRow(headers, order, new Map(products.map((product) => [product.sku, product.name])));
-      const result = await this.sheets.upsertRow({ spreadsheetId: destination.spreadsheetId, sheetName: destination.sheetName, orderId: order.id, values });
+      const result = await sheets.upsertRow({ spreadsheetId: destination.spreadsheetId, sheetName: destination.sheetName, orderId: order.id, values });
       await this.prisma.orderExport.update({ where: { id: exportId }, data: { status: 'SUCCEEDED', rowNumber: result.rowNumber, lastSyncedAt: new Date(), errorSummary: null } });
     } catch (error) {
       const summary = error instanceof Error ? error.message.slice(0, 500) : 'Unknown Google Sheets synchronization error';

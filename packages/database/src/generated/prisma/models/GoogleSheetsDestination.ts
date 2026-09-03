@@ -29,6 +29,7 @@ export type GoogleSheetsDestinationMinAggregateOutputType = {
   tenantId: string | null
   spreadsheetId: string | null
   sheetName: string | null
+  credentialRef: string | null
   status: string | null
   lastValidatedAt: Date | null
   errorSummary: string | null
@@ -41,6 +42,7 @@ export type GoogleSheetsDestinationMaxAggregateOutputType = {
   tenantId: string | null
   spreadsheetId: string | null
   sheetName: string | null
+  credentialRef: string | null
   status: string | null
   lastValidatedAt: Date | null
   errorSummary: string | null
@@ -53,6 +55,7 @@ export type GoogleSheetsDestinationCountAggregateOutputType = {
   tenantId: number
   spreadsheetId: number
   sheetName: number
+  credentialRef: number
   requiredHeaders: number
   status: number
   lastValidatedAt: number
@@ -68,6 +71,7 @@ export type GoogleSheetsDestinationMinAggregateInputType = {
   tenantId?: true
   spreadsheetId?: true
   sheetName?: true
+  credentialRef?: true
   status?: true
   lastValidatedAt?: true
   errorSummary?: true
@@ -80,6 +84,7 @@ export type GoogleSheetsDestinationMaxAggregateInputType = {
   tenantId?: true
   spreadsheetId?: true
   sheetName?: true
+  credentialRef?: true
   status?: true
   lastValidatedAt?: true
   errorSummary?: true
@@ -92,6 +97,7 @@ export type GoogleSheetsDestinationCountAggregateInputType = {
   tenantId?: true
   spreadsheetId?: true
   sheetName?: true
+  credentialRef?: true
   requiredHeaders?: true
   status?: true
   lastValidatedAt?: true
@@ -178,6 +184,7 @@ export type GoogleSheetsDestinationGroupByOutputType = {
   tenantId: string
   spreadsheetId: string
   sheetName: string
+  credentialRef: string | null
   requiredHeaders: runtime.JsonValue
   status: string
   lastValidatedAt: Date | null
@@ -212,6 +219,7 @@ export type GoogleSheetsDestinationWhereInput = {
   tenantId?: Prisma.UuidFilter<"GoogleSheetsDestination"> | string
   spreadsheetId?: Prisma.StringFilter<"GoogleSheetsDestination"> | string
   sheetName?: Prisma.StringFilter<"GoogleSheetsDestination"> | string
+  credentialRef?: Prisma.UuidNullableFilter<"GoogleSheetsDestination"> | string | null
   requiredHeaders?: Prisma.JsonFilter<"GoogleSheetsDestination">
   status?: Prisma.StringFilter<"GoogleSheetsDestination"> | string
   lastValidatedAt?: Prisma.DateTimeNullableFilter<"GoogleSheetsDestination"> | Date | string | null
@@ -227,6 +235,7 @@ export type GoogleSheetsDestinationOrderByWithRelationInput = {
   tenantId?: Prisma.SortOrder
   spreadsheetId?: Prisma.SortOrder
   sheetName?: Prisma.SortOrder
+  credentialRef?: Prisma.SortOrderInput | Prisma.SortOrder
   requiredHeaders?: Prisma.SortOrder
   status?: Prisma.SortOrder
   lastValidatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -245,6 +254,7 @@ export type GoogleSheetsDestinationWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.GoogleSheetsDestinationWhereInput | Prisma.GoogleSheetsDestinationWhereInput[]
   spreadsheetId?: Prisma.StringFilter<"GoogleSheetsDestination"> | string
   sheetName?: Prisma.StringFilter<"GoogleSheetsDestination"> | string
+  credentialRef?: Prisma.UuidNullableFilter<"GoogleSheetsDestination"> | string | null
   requiredHeaders?: Prisma.JsonFilter<"GoogleSheetsDestination">
   status?: Prisma.StringFilter<"GoogleSheetsDestination"> | string
   lastValidatedAt?: Prisma.DateTimeNullableFilter<"GoogleSheetsDestination"> | Date | string | null
@@ -260,6 +270,7 @@ export type GoogleSheetsDestinationOrderByWithAggregationInput = {
   tenantId?: Prisma.SortOrder
   spreadsheetId?: Prisma.SortOrder
   sheetName?: Prisma.SortOrder
+  credentialRef?: Prisma.SortOrderInput | Prisma.SortOrder
   requiredHeaders?: Prisma.SortOrder
   status?: Prisma.SortOrder
   lastValidatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -279,6 +290,7 @@ export type GoogleSheetsDestinationScalarWhereWithAggregatesInput = {
   tenantId?: Prisma.UuidWithAggregatesFilter<"GoogleSheetsDestination"> | string
   spreadsheetId?: Prisma.StringWithAggregatesFilter<"GoogleSheetsDestination"> | string
   sheetName?: Prisma.StringWithAggregatesFilter<"GoogleSheetsDestination"> | string
+  credentialRef?: Prisma.UuidNullableWithAggregatesFilter<"GoogleSheetsDestination"> | string | null
   requiredHeaders?: Prisma.JsonWithAggregatesFilter<"GoogleSheetsDestination">
   status?: Prisma.StringWithAggregatesFilter<"GoogleSheetsDestination"> | string
   lastValidatedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"GoogleSheetsDestination"> | Date | string | null
@@ -291,6 +303,7 @@ export type GoogleSheetsDestinationCreateInput = {
   id?: string
   spreadsheetId: string
   sheetName: string
+  credentialRef?: string | null
   requiredHeaders: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: string
   lastValidatedAt?: Date | string | null
@@ -306,6 +319,7 @@ export type GoogleSheetsDestinationUncheckedCreateInput = {
   tenantId: string
   spreadsheetId: string
   sheetName: string
+  credentialRef?: string | null
   requiredHeaders: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: string
   lastValidatedAt?: Date | string | null
@@ -319,6 +333,7 @@ export type GoogleSheetsDestinationUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   spreadsheetId?: Prisma.StringFieldUpdateOperationsInput | string
   sheetName?: Prisma.StringFieldUpdateOperationsInput | string
+  credentialRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiredHeaders?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.StringFieldUpdateOperationsInput | string
   lastValidatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -334,6 +349,7 @@ export type GoogleSheetsDestinationUncheckedUpdateInput = {
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   spreadsheetId?: Prisma.StringFieldUpdateOperationsInput | string
   sheetName?: Prisma.StringFieldUpdateOperationsInput | string
+  credentialRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiredHeaders?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.StringFieldUpdateOperationsInput | string
   lastValidatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -348,6 +364,7 @@ export type GoogleSheetsDestinationCreateManyInput = {
   tenantId: string
   spreadsheetId: string
   sheetName: string
+  credentialRef?: string | null
   requiredHeaders: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: string
   lastValidatedAt?: Date | string | null
@@ -360,6 +377,7 @@ export type GoogleSheetsDestinationUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   spreadsheetId?: Prisma.StringFieldUpdateOperationsInput | string
   sheetName?: Prisma.StringFieldUpdateOperationsInput | string
+  credentialRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiredHeaders?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.StringFieldUpdateOperationsInput | string
   lastValidatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -373,6 +391,7 @@ export type GoogleSheetsDestinationUncheckedUpdateManyInput = {
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   spreadsheetId?: Prisma.StringFieldUpdateOperationsInput | string
   sheetName?: Prisma.StringFieldUpdateOperationsInput | string
+  credentialRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiredHeaders?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.StringFieldUpdateOperationsInput | string
   lastValidatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -391,6 +410,7 @@ export type GoogleSheetsDestinationCountOrderByAggregateInput = {
   tenantId?: Prisma.SortOrder
   spreadsheetId?: Prisma.SortOrder
   sheetName?: Prisma.SortOrder
+  credentialRef?: Prisma.SortOrder
   requiredHeaders?: Prisma.SortOrder
   status?: Prisma.SortOrder
   lastValidatedAt?: Prisma.SortOrder
@@ -404,6 +424,7 @@ export type GoogleSheetsDestinationMaxOrderByAggregateInput = {
   tenantId?: Prisma.SortOrder
   spreadsheetId?: Prisma.SortOrder
   sheetName?: Prisma.SortOrder
+  credentialRef?: Prisma.SortOrder
   status?: Prisma.SortOrder
   lastValidatedAt?: Prisma.SortOrder
   errorSummary?: Prisma.SortOrder
@@ -416,6 +437,7 @@ export type GoogleSheetsDestinationMinOrderByAggregateInput = {
   tenantId?: Prisma.SortOrder
   spreadsheetId?: Prisma.SortOrder
   sheetName?: Prisma.SortOrder
+  credentialRef?: Prisma.SortOrder
   status?: Prisma.SortOrder
   lastValidatedAt?: Prisma.SortOrder
   errorSummary?: Prisma.SortOrder
@@ -478,6 +500,7 @@ export type GoogleSheetsDestinationCreateWithoutTenantInput = {
   id?: string
   spreadsheetId: string
   sheetName: string
+  credentialRef?: string | null
   requiredHeaders: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: string
   lastValidatedAt?: Date | string | null
@@ -491,6 +514,7 @@ export type GoogleSheetsDestinationUncheckedCreateWithoutTenantInput = {
   id?: string
   spreadsheetId: string
   sheetName: string
+  credentialRef?: string | null
   requiredHeaders: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: string
   lastValidatedAt?: Date | string | null
@@ -520,6 +544,7 @@ export type GoogleSheetsDestinationUpdateWithoutTenantInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   spreadsheetId?: Prisma.StringFieldUpdateOperationsInput | string
   sheetName?: Prisma.StringFieldUpdateOperationsInput | string
+  credentialRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiredHeaders?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.StringFieldUpdateOperationsInput | string
   lastValidatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -533,6 +558,7 @@ export type GoogleSheetsDestinationUncheckedUpdateWithoutTenantInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   spreadsheetId?: Prisma.StringFieldUpdateOperationsInput | string
   sheetName?: Prisma.StringFieldUpdateOperationsInput | string
+  credentialRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiredHeaders?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.StringFieldUpdateOperationsInput | string
   lastValidatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -546,6 +572,7 @@ export type GoogleSheetsDestinationCreateWithoutExportsInput = {
   id?: string
   spreadsheetId: string
   sheetName: string
+  credentialRef?: string | null
   requiredHeaders: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: string
   lastValidatedAt?: Date | string | null
@@ -560,6 +587,7 @@ export type GoogleSheetsDestinationUncheckedCreateWithoutExportsInput = {
   tenantId: string
   spreadsheetId: string
   sheetName: string
+  credentialRef?: string | null
   requiredHeaders: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: string
   lastValidatedAt?: Date | string | null
@@ -588,6 +616,7 @@ export type GoogleSheetsDestinationUpdateWithoutExportsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   spreadsheetId?: Prisma.StringFieldUpdateOperationsInput | string
   sheetName?: Prisma.StringFieldUpdateOperationsInput | string
+  credentialRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiredHeaders?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.StringFieldUpdateOperationsInput | string
   lastValidatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -602,6 +631,7 @@ export type GoogleSheetsDestinationUncheckedUpdateWithoutExportsInput = {
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   spreadsheetId?: Prisma.StringFieldUpdateOperationsInput | string
   sheetName?: Prisma.StringFieldUpdateOperationsInput | string
+  credentialRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiredHeaders?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.StringFieldUpdateOperationsInput | string
   lastValidatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -646,6 +676,7 @@ export type GoogleSheetsDestinationSelect<ExtArgs extends runtime.Types.Extensio
   tenantId?: boolean
   spreadsheetId?: boolean
   sheetName?: boolean
+  credentialRef?: boolean
   requiredHeaders?: boolean
   status?: boolean
   lastValidatedAt?: boolean
@@ -662,6 +693,7 @@ export type GoogleSheetsDestinationSelectCreateManyAndReturn<ExtArgs extends run
   tenantId?: boolean
   spreadsheetId?: boolean
   sheetName?: boolean
+  credentialRef?: boolean
   requiredHeaders?: boolean
   status?: boolean
   lastValidatedAt?: boolean
@@ -676,6 +708,7 @@ export type GoogleSheetsDestinationSelectUpdateManyAndReturn<ExtArgs extends run
   tenantId?: boolean
   spreadsheetId?: boolean
   sheetName?: boolean
+  credentialRef?: boolean
   requiredHeaders?: boolean
   status?: boolean
   lastValidatedAt?: boolean
@@ -690,6 +723,7 @@ export type GoogleSheetsDestinationSelectScalar = {
   tenantId?: boolean
   spreadsheetId?: boolean
   sheetName?: boolean
+  credentialRef?: boolean
   requiredHeaders?: boolean
   status?: boolean
   lastValidatedAt?: boolean
@@ -698,7 +732,7 @@ export type GoogleSheetsDestinationSelectScalar = {
   updatedAt?: boolean
 }
 
-export type GoogleSheetsDestinationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "spreadsheetId" | "sheetName" | "requiredHeaders" | "status" | "lastValidatedAt" | "errorSummary" | "createdAt" | "updatedAt", ExtArgs["result"]["googleSheetsDestination"]>
+export type GoogleSheetsDestinationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "spreadsheetId" | "sheetName" | "credentialRef" | "requiredHeaders" | "status" | "lastValidatedAt" | "errorSummary" | "createdAt" | "updatedAt", ExtArgs["result"]["googleSheetsDestination"]>
 export type GoogleSheetsDestinationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   exports?: boolean | Prisma.GoogleSheetsDestination$exportsArgs<ExtArgs>
@@ -722,6 +756,7 @@ export type $GoogleSheetsDestinationPayload<ExtArgs extends runtime.Types.Extens
     tenantId: string
     spreadsheetId: string
     sheetName: string
+    credentialRef: string | null
     requiredHeaders: runtime.JsonValue
     status: string
     lastValidatedAt: Date | null
@@ -1157,6 +1192,7 @@ export interface GoogleSheetsDestinationFieldRefs {
   readonly tenantId: Prisma.FieldRef<"GoogleSheetsDestination", 'String'>
   readonly spreadsheetId: Prisma.FieldRef<"GoogleSheetsDestination", 'String'>
   readonly sheetName: Prisma.FieldRef<"GoogleSheetsDestination", 'String'>
+  readonly credentialRef: Prisma.FieldRef<"GoogleSheetsDestination", 'String'>
   readonly requiredHeaders: Prisma.FieldRef<"GoogleSheetsDestination", 'Json'>
   readonly status: Prisma.FieldRef<"GoogleSheetsDestination", 'String'>
   readonly lastValidatedAt: Prisma.FieldRef<"GoogleSheetsDestination", 'DateTime'>
