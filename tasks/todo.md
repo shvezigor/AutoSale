@@ -590,6 +590,78 @@ The approved design is in `docs/superpowers/specs/2026-09-02-google-sheets-oauth
 
 ## Checkpoint: Google Sheets OAuth complete
 
+## Google Sign-In — Next Authentication Priority
+
+The approved design is in `docs/superpowers/specs/2026-09-03-google-sign-in-design.md`. Google identity authentication remains separate from the existing tenant Google Sheets authorization.
+
+## Task 29: Add the Google identity and sign-in attempt domain model
+
+**Description:** Persist Google identities and one-time sign-in/onboarding attempts, and allow active Google-only users to exist without a password hash.
+
+**Acceptance criteria:** Google subjects and users are uniquely linked; raw state, grants, codes, and provider tokens are never persisted; existing password accounts remain compatible.
+
+**Verification:** Prisma migration tests, database uniqueness/concurrency tests, and password-login regression tests.
+
+**Dependencies:** Existing self-hosted auth and Google Cloud configuration. **Estimated scope:** Medium
+
+## Task 30: Implement the Google OpenID Connect client and state protection
+
+**Description:** Add a dedicated identity-only Google client with `openid email profile`, strict ID-token validation, hashed single-use state, safe return paths, and rate limiting.
+
+**Acceptance criteria:** Issuer, audience, expiry, subject, and verified email are validated; replay, cancellation, malformed claims, and unsafe redirects fail closed.
+
+**Verification:** Client, state, callback, and adversarial redirect unit tests.
+
+**Dependencies:** Task 29. **Estimated scope:** Medium
+
+## Task 31: Sign in and automatically link existing AutoSale users
+
+**Description:** Create normal AutoSale sessions for linked identities and automatically link an unlinked Google subject to an active user with the same Google-verified normalized email.
+
+**Acceptance criteria:** Linking is atomic and auditable; identity conflicts never relink accounts; no Google token becomes a Sheets credential.
+
+**Verification:** Service/controller tests for linked, matched-email, conflict, replay, cookies, and security audit events.
+
+**Dependencies:** Task 30. **Estimated scope:** Medium
+
+## Task 32: Onboard a new Google owner and workspace
+
+**Description:** Use a short-lived protected onboarding grant to collect the business name and atomically create an active user, tenant, `OWNER` membership, identity, and session.
+
+**Acceptance criteria:** Repeated or concurrent completion creates exactly one workspace; expired grants are rejected safely; no password or email verification is required for Google-verified email.
+
+**Verification:** Transaction/concurrency integration tests and onboarding API tests.
+
+**Dependencies:** Tasks 29–31. **Estimated scope:** Medium
+
+## Task 33: Add Google sign-in and onboarding UI
+
+**Description:** Add Google buttons to login/register and a focused business-name onboarding page with safe loading, validation, cancellation, expiry, and redirect behavior.
+
+**Acceptance criteria:** Existing password flows remain available; validated `next` is preserved for existing users; onboarding asks only for business name.
+
+**Verification:** Component, route, accessibility, and browser-flow tests.
+
+**Dependencies:** Task 32. **Estimated scope:** Medium
+
+## Task 34: Configure, roll out, and observe Google Sign-In
+
+**Description:** Document the production callback and consent-screen setup, add an environment feature flag, privacy-safe metrics/audit events, and staged rollout/rollback checks.
+
+**Acceptance criteria:** Production callback is verified; partial configuration fails startup; disabling sign-in leaves password auth and Google Sheets connections operational.
+
+**Verification:** Config tests, full `pnpm test`, production Docker build, manual existing-user/new-user acceptance, and callback telemetry review.
+
+**Dependencies:** Tasks 29–33. **Estimated scope:** Medium
+
+## Checkpoint: Google Sign-In complete
+
+- [ ] Existing linked users sign in through Google and receive the standard AutoSale session.
+- [ ] Matching verified emails link to the existing user without creating duplicates.
+- [ ] New users complete business-name onboarding and receive one owner workspace.
+- [ ] Password auth and Google Sheets authorization remain independent and fully functional.
+- [ ] Replay, conflict, concurrency, cancellation, rollback, and production callback checks pass.
+
 - [ ] A customer connects Google without technical credentials.
 - [ ] A private catalogue synchronizes into AutoSale.
 - [ ] An approved order reaches the selected sheet exactly once.
