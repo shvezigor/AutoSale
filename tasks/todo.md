@@ -592,7 +592,7 @@ The approved design is in `docs/superpowers/specs/2026-09-02-google-sheets-oauth
 
 ## Google Sign-In — Next Authentication Priority
 
-The approved design is in `docs/superpowers/specs/2026-09-03-google-sign-in-design.md`. Google identity authentication remains separate from the existing tenant Google Sheets authorization.
+The approved design is in `docs/superpowers/specs/2026-09-03-google-sign-in-design.md`. The TDD implementation sequence is in `docs/superpowers/plans/2026-09-03-google-sign-in.md`. Google identity authentication remains separate from the existing tenant Google Sheets authorization.
 
 ## Task 29: Add the Google identity and sign-in attempt domain model
 
