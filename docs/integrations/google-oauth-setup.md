@@ -35,3 +35,13 @@ Store server secrets in deployment secret storage or `.env` outside Git. Never p
 ## Staging verification
 
 Use a private test spreadsheet. The owner must authorize Google, select that file through Picker, list its tabs, import a catalogue, and export one order. Then revoke the grant and confirm AutoSale requests reconnection without losing internal products or orders.
+
+Run the ordinary browser smoke test with `pnpm test:e2e`. The real provider flow is opt-in:
+
+```sh
+E2E_GOOGLE_LIVE=1 E2E_GOOGLE_SPREADSHEET_NAME="AutoSale staging" pnpm test:e2e -- google-oauth-sheets.spec.ts
+```
+
+Provide the staging owner credentials through `E2E_OWNER_EMAIL` and `E2E_OWNER_PASSWORD`. Do not place them in the repository or CI logs. Complete the Google login and consent interactively when Google requires it; do not automate CAPTCHA or MFA.
+
+Acceptance must verify: catalogue mapping review before mutation, one stable `order_id` row after retry/worker restart, preserved internal data after revoked access, reconnect recovery, deleted tab/file errors, and bounded handling of quota responses.

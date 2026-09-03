@@ -5,7 +5,7 @@
 - Linux x86_64/arm64, Docker Engine із Compose v2, Git і щонайменше 4 ГБ RAM.
 - DNS домену спрямований на сервер; відкриті лише TCP 80/443 і адміністративний SSH.
 - Репозиторій розгорнутий під окремим системним користувачем без root-login.
-- `.env` створений із `.env.example`; `secrets/google-service-account.json` доставлений окремим захищеним каналом і має права `0600`.
+- `.env` створений із `.env.example`. Для tenant Google Sheets використовується OAuth; service-account JSON дозволений лише як тимчасовий development fallback і не потрібен у production.
 
 ## Реліз
 
@@ -39,6 +39,21 @@ firewall-ом (або змініть binding на loopback).
 Після зміни домену оновіть **і** Meta redirect URI, **і** Meta webhook
 callback, потім повторіть webhook verification та приймальний OAuth-тест.
 Детальний runbook: [`../integrations/meta-instagram-oauth.md`](../integrations/meta-instagram-oauth.md).
+
+## Google OAuth і приватні таблиці
+
+У production використовується один Google Cloud застосунок AutoSale для всіх клієнтів. Кожен власник організації входить у власний Google-акаунт у Settings і через Picker дозволяє доступ лише до обраних ним файлів. Він не вводить Client ID, Client Secret або JSON-ключ.
+
+Перед релізом:
+
+1. Увімкніть Google Sheets API, Google Drive API та Google Picker API.
+2. Налаштуйте OAuth consent screen, verified domain `sales-aito.com`, homepage, Privacy Policy і Terms.
+3. Додайте origin `https://sales-aito.com` і callback `https://sales-aito.com/api/integrations/google/callback`.
+4. Обмежте Picker API key точним production origin та Google Picker API.
+5. Задайте `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`, `GOOGLE_OAUTH_REDIRECT_URI`, `NEXT_PUBLIC_GOOGLE_OAUTH_CLIENT_ID` і `NEXT_PUBLIC_GOOGLE_PICKER_API_KEY` через deployment secrets/environment.
+6. Не задавайте `GOOGLE_SERVICE_ACCOUNT_FILE` для production tenant operations.
+
+Після зміни публічного домену одночасно оновіть callback у Google Console і `GOOGLE_OAUTH_REDIRECT_URI`. Повний checklist: [`../integrations/google-oauth-setup.md`](../integrations/google-oauth-setup.md).
 
 ## Відкат
 

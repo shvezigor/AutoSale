@@ -23,11 +23,14 @@ API приймає безпечний `x-request-id` або генерує UUID 
 - `autosale_operation_duration_seconds` — histogram фонового процесу.
 - `autosale_queue_backlog{queue="google_sheets"}` — поточна кількість знайдених pending export.
 
+Для Google OAuth відстежуйте лише tenant-safe події: connect success/failure, refresh failure за стабільним кодом, reconnect-required, cleanup retry/terminal і тривалість Sheets/Drive операції. Заборонено логувати authorization code, access/refresh token, Google email, назву/ID таблиці, назву вкладки або її рядки.
+
 У labels заборонені order ID, request ID, URL, повідомлення помилки та інші необмежені значення.
 
 ## Початкові сигнали
 
-- **Page:** частка `sheets_export/failure` понад 5% протягом 10 хвилин, якщо було щонайменше 20 спроб. Перевірити Google credentials, quota та останні `sheets_export_failed` за `correlationId`.
+- **Page:** частка `sheets_export/failure` понад 5% протягом 10 хвилин, якщо було щонайменше 20 спроб. Перевірити стан tenant OAuth, quota та останні `sheets_export_failed` за `correlationId`.
+- **Ticket:** зростає кількість `REAUTHORIZATION_REQUIRED` або terminal cleanup. Власнику показати reconnect; не відновлювати grant вручну й не копіювати токени в support channel.
 - **Page:** найстаріший pending export очікує понад 10 хвилин. Перевірити worker health, mounted secret і backlog.
 - **Ticket:** p95 HTTP latency понад 2 секунди протягом 30 хвилин. Перевірити маршрут, PostgreSQL і зовнішні залежності.
 

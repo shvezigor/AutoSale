@@ -476,8 +476,8 @@ The approved design is in `docs/superpowers/specs/2026-09-02-google-sheets-oauth
 **Description:** Create the AutoSale Google OAuth/Picker configuration boundary and document the development, staging, and production Google Cloud setup.
 
 **Acceptance criteria:**
-- [ ] Sheets, Drive, and Picker APIs, OAuth client, production origin, callback, branding, and least-privilege scope are documented.
-- [ ] Partial or unsafe environment configuration fails startup without exposing secrets.
+- [x] Sheets, Drive, and Picker APIs, OAuth client, production origin, callback, branding, and least-privilege scope are documented.
+- [x] Partial or unsafe environment configuration fails startup without exposing secrets.
 - [ ] Picker API key is restricted to the production origin and Picker API.
 
 **Verification:** Config tests, typecheck, Compose configuration validation, and manual Google Console checklist.
@@ -489,9 +489,9 @@ The approved design is in `docs/superpowers/specs/2026-09-02-google-sheets-oauth
 **Description:** Add tenant-bound encrypted credential state and single-use authorization attempts.
 
 **Acceptance criteria:**
-- [ ] Refresh tokens are encrypted and never returned or logged.
-- [ ] State is expiring, single-use, and bound to tenant, owner, and safe return path.
-- [ ] Database constraints prevent cross-tenant or duplicate active connections.
+- [x] Refresh tokens are encrypted and never returned or logged.
+- [x] State is expiring, single-use, and bound to tenant, owner, and safe return path.
+- [x] Database constraints prevent cross-tenant or duplicate active connections.
 
 **Verification:** PostgreSQL migration tests, replay/expiry tests, Prisma validation, and API typecheck.
 
@@ -502,9 +502,9 @@ The approved design is in `docs/superpowers/specs/2026-09-02-google-sheets-oauth
 **Description:** Let an owner authorize AutoSale with Google and safely persist/refresh the tenant grant.
 
 **Acceptance criteria:**
-- [ ] Only owners can initiate or replace a connection.
-- [ ] Callback validates state, identity, scopes, subject, and refresh-token lifecycle.
-- [ ] Safe API responses expose status and owner-visible email but no credential material.
+- [x] Only owners can initiate or replace a connection.
+- [x] Callback validates state, identity, scopes, subject, and refresh-token lifecycle.
+- [x] Safe API responses expose status and owner-visible email but no credential material.
 
 **Verification:** Unit/controller tests for success, cancellation, replay, mismatch, missing token, and reconnect.
 
@@ -515,9 +515,9 @@ The approved design is in `docs/superpowers/specs/2026-09-02-google-sheets-oauth
 **Description:** Stop new Google work immediately, revoke the grant where possible, and remove only the matching credential generation.
 
 **Acceptance criteria:**
-- [ ] Disconnect pauses dependent catalogue sources and destinations without deleting internal data.
-- [ ] Failed revocation is retryable and cannot block a later safe reconnect indefinitely.
-- [ ] A stale cleanup cannot delete a newer credential.
+- [x] Disconnect pauses dependent catalogue sources and destinations without deleting internal data.
+- [x] Failed revocation is retryable and cannot block a later safe reconnect indefinitely.
+- [x] A stale cleanup cannot delete a newer credential.
 
 **Verification:** Cleanup/reconciler migration tests and reconnect concurrency tests.
 
@@ -529,8 +529,8 @@ The approved design is in `docs/superpowers/specs/2026-09-02-google-sheets-oauth
 
 **Acceptance criteria:**
 - [ ] Owner selects only Google Sheets files explicitly shared with AutoSale.
-- [ ] Backend verifies file type/access and lists real tabs before saving.
-- [ ] Cancellation, inaccessible files, deleted files, and provider errors are actionable.
+- [x] Backend verifies file type/access and lists real tabs before saving.
+- [x] Cancellation, inaccessible files, deleted files, and provider errors are actionable.
 
 **Verification:** Component/API tests plus a real private staging spreadsheet.
 
@@ -542,8 +542,8 @@ The approved design is in `docs/superpowers/specs/2026-09-02-google-sheets-oauth
 
 **Acceptance criteria:**
 - [ ] Selected private sheet can create a mapping review and confirmed catalogue import.
-- [ ] Scheduled/manual sync refreshes tokens without browser presence.
-- [ ] Revoked access pauses safely and preserves the last valid catalogue.
+- [x] Scheduled/manual sync refreshes tokens without browser presence.
+- [x] Revoked access pauses safely and preserves the last valid catalogue.
 
 **Verification:** Catalogue sync, fencing, mapping, scheduler, and tenant-isolation tests.
 
@@ -554,9 +554,9 @@ The approved design is in `docs/superpowers/specs/2026-09-02-google-sheets-oauth
 **Description:** Validate a Picker-selected destination and export approved orders with existing exactly-once semantics.
 
 **Acceptance criteria:**
-- [ ] First export appends and later changes update by stable `order_id`.
-- [ ] Repeated clicks, retries, timeouts, and reconnects do not duplicate rows.
-- [ ] Catalogue and order spreadsheet configuration remain independent.
+- [x] First export appends and later changes update by stable `order_id`.
+- [x] Repeated clicks, retries, timeouts, and reconnects do not duplicate rows.
+- [x] Catalogue and order spreadsheet configuration remain independent.
 
 **Verification:** Settings/worker integration tests and real staging export.
 
@@ -567,9 +567,9 @@ The approved design is in `docs/superpowers/specs/2026-09-02-google-sheets-oauth
 **Description:** Add the owner experience for connection, file/tab selection, purpose selection, validation, synchronization, reconnect, and disconnect.
 
 **Acceptance criteria:**
-- [ ] Owner never handles API keys, JSON credentials, or refresh tokens.
-- [ ] Catalogue and order-export sections show selected file, tab, status, and safe errors.
-- [ ] Managers and platform administrators retain the approved privacy boundaries.
+- [x] Owner never handles API keys, JSON credentials, or refresh tokens.
+- [x] Catalogue and order-export sections show selected file, tab, status, and safe errors.
+- [x] Managers and platform administrators retain the approved privacy boundaries.
 
 **Verification:** Role/accessibility component tests and production web build.
 
