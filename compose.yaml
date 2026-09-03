@@ -139,7 +139,6 @@ services:
       META_APP_ID: ${META_APP_ID}
       META_APP_SECRET: ${META_APP_SECRET}
       META_GRAPH_API_VERSION: ${META_GRAPH_API_VERSION}
-      INTEGRATION_ENCRYPTION_KEY: ${INTEGRATION_ENCRYPTION_KEY}
     depends_on:
       migrate:
         condition: service_completed_successfully
