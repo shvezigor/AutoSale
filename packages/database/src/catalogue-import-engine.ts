@@ -80,7 +80,7 @@ export async function buildCatalogueImportPlan(prisma: Pick<PrismaClient, 'produ
     totals: {
       created: rows.filter((row) => row.product && row.errors.length === 0 && !existingSkus.has(row.product.sku)).length,
       updated: rows.filter((row) => row.product && row.errors.length === 0 && existingSkus.has(row.product.sku)).length,
-      skipped: rows.filter((row) => row.codes.includes('EMPTY_ROW')).length,
+      skipped: rows.filter((row) => row.codes.includes('EMPTY_ROW') || row.codes.includes('CATEGORY_ROW')).length,
       failed: rows.filter((row) => row.errors.length > 0).length,
     },
   };
@@ -220,14 +220,19 @@ function mapRow(values: CatalogueCell[], rowNumber: number, sourceId: string, in
   const mapped = new Map<CatalogueTarget, CatalogueCell | undefined>();
   for (const column of mapping) if (column.target !== 'ignore') mapped.set(column.target, values[indexes.get(column.source) ?? -1]);
   if ([...mapped.values()].every((value) => value === null || value === undefined || value === '')) return { rowNumber, errors: [], codes: ['EMPTY_ROW'], presentTargets };
+  const hasSkuMapping = mapping.some((column) => column.target === 'sku');
+  const hasPriceMapping = mapping.some((column) => column.target === 'price');
+  if (!hasSkuMapping && hasPriceMapping && !nonEmpty(mapped.get('price'))) {
+    return { rowNumber, errors: [], codes: ['CATEGORY_ROW'], presentTargets };
+  }
   const errors: string[] = [];
   const codes: string[] = [];
   const name = textValue(mapped.get('name'));
   if (!name) { errors.push('Name is required'); codes.push('NAME_REQUIRED'); }
-  const hasSkuMapping = mapping.some((column) => column.target === 'sku');
   const suppliedSku = textValue(mapped.get('sku'))?.toUpperCase();
   if (hasSkuMapping && !suppliedSku) { errors.push('SKU is required'); codes.push('SKU_REQUIRED'); }
-  const sku = suppliedSku ?? (!hasSkuMapping && name ? generatedSku(sourceId, name) : undefined);
+  const skuDiscriminator = hasPriceMapping ? textValue(mapped.get('price')) : undefined;
+  const sku = suppliedSku ?? (!hasSkuMapping && name ? generatedSku(sourceId, name, skuDiscriminator) : undefined);
   const product: CatalogueImportProduct = { sku: sku ?? '', name: name ?? '', aliases: [], imageUrls: [], attributes: {}, active: true };
   applyExplicitClears(product, presentTargets, mapped, clearFields);
   for (const target of ['description', 'category', 'brand', 'color', 'size'] as const) assignText(product, presentTargets, mapped, target);
@@ -262,8 +267,9 @@ function mapRow(values: CatalogueCell[], rowNumber: number, sourceId: string, in
   return errors.length > 0 ? { rowNumber, errors, codes, presentTargets } : { rowNumber, product, errors, codes, presentTargets };
 }
 
-function generatedSku(sourceId: string, name: string): string {
-  const identity = `${sourceId}\0${name.normalize('NFKC').trim().replace(/\s+/g, ' ').toLocaleLowerCase('en-US')}`;
+function generatedSku(sourceId: string, name: string, discriminator?: string): string {
+  const normalizedName = name.normalize('NFKC').trim().replace(/\s+/g, ' ').toLocaleLowerCase('en-US');
+  const identity = `${sourceId}\0${normalizedName}\0${discriminator?.trim() ?? ''}`;
   return `AUTO-${createHash('sha256').update(identity).digest('hex').slice(0, 12).toUpperCase()}`;
 }
 

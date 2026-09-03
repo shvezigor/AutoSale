@@ -27,6 +27,22 @@ describe('catalogue table import engine', () => {
     expect(first.rows[0]?.codes).not.toContain('SKU_REQUIRED');
   });
 
+  it('distinguishes same-name priced variants and skips unpriced category rows in a name-only source', async () => {
+    const prisma = prismaDouble([]);
+    const plan = await buildCatalogueImportPlan(prisma as never, {
+      tenantId: 'tenant-1', sourceId: 'google-source',
+      mapping: [{ source: 'name', target: 'name' }, { source: 'price', target: 'price' }],
+      transformSettings: null, headers: ['Name', 'Price'],
+      rows: [['Двері двокольорові', 158], ['Двері двокольорові', 165], ['Додаткова комплектація', '']],
+    });
+
+    expect(plan.totals).toEqual({ created: 2, updated: 0, skipped: 1, failed: 0 });
+    expect(plan.rows[0]?.product?.sku).toMatch(/^AUTO-[A-F0-9]{12}$/);
+    expect(plan.rows[1]?.product?.sku).toMatch(/^AUTO-[A-F0-9]{12}$/);
+    expect(plan.rows[0]?.product?.sku).not.toBe(plan.rows[1]?.product?.sku);
+    expect(plan.rows[2]).toMatchObject({ codes: ['CATEGORY_ROW'], errors: [] });
+  });
+
   it('uses the production normalization and validation semantics for every supported value type', async () => {
     const prisma = prismaDouble([{ sku: 'OLD', sourceId: 'source-1' }]);
     const plan = await buildCatalogueImportPlan(prisma as never, {
