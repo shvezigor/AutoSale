@@ -14,6 +14,22 @@ const preview = { rows: [], totals: { created: 1, updated: 1, skipped: 0, failed
 afterEach(() => { cleanup(); mutatingFetch.mockReset(); vi.unstubAllGlobals(); vi.useRealTimers(); });
 
 describe('CatalogueImportWizard', () => {
+  it('allows a name-only source because AutoSale will generate stable SKUs', async () => {
+    const nameOnlyProposal = { ...proposal, headers: ['ассортимент', 'оптовая цена €'], mapping: { ...proposal.mapping, columns: [
+      { source: 'ассортимент', target: 'name', confidence: 0.96 },
+      { source: 'оптовая цена €', target: 'price', confidence: 0.99 },
+    ] } };
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(response(nameOnlyProposal)));
+    render(<CatalogueImportWizard session={{ membershipRole: 'OWNER' }} reviewRuns={[{ id: runId, sourceName: 'Google catalogue', headers: nameOnlyProposal.headers }]} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Переглянути Google catalogue' }));
+    await screen.findByText('AI запропонував зіставлення');
+    fireEvent.click(screen.getByRole('button', { name: 'Перевірити зіставлення' }));
+
+    expect(screen.getByText('Обов’язкові поля зіставлено')).toBeInTheDocument();
+    expect(screen.getByText(/SKU буде згенеровано автоматично/)).toBeInTheDocument();
+  });
+
   it('opens a pending Google run in the same owner review and confirmation workflow', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(response({ ...proposal, headers: ['sku', 'name', 'note'] })));
     render(<CatalogueImportWizard session={{ membershipRole: 'OWNER' }} reviewRuns={[{ id: runId, sourceName: 'Google catalogue', headers: ['sku', 'name', 'note'] }]} />);
@@ -68,7 +84,7 @@ describe('CatalogueImportWizard', () => {
     await screen.findByText('AI недоступний — зіставте колонки вручну');
     fireEvent.change(screen.getByLabelText('sku'), { target: { value: 'sku' } });
     fireEvent.click(screen.getByRole('button', { name: 'Перевірити зіставлення' }));
-    expect(screen.getByText('Зіставте обов’язкові поля SKU та назву.')).toBeInTheDocument();
+    expect(screen.getByText('Зіставте обов’язкове поле назви.')).toBeInTheDocument();
   });
 
   it('keeps polling confirmed work until a terminal completed status reports progress totals', async () => {

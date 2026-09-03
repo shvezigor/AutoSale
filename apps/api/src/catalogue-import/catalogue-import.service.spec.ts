@@ -400,6 +400,30 @@ describe('CatalogueImportService', () => {
     await expect(prisma.product.findUnique({ where: { tenantId_sku: { tenantId, sku: 'LUNA-1' } } })).resolves.toMatchObject({ sourceId: source.id });
   });
 
+  it('previews and imports a Google catalogue without an SKU column using a stable generated SKU', async () => {
+    const source = await prisma.catalogueSource.create({ data: {
+      tenantId, type: 'GOOGLE_SHEETS', displayName: 'Google without SKU', status: 'PAUSED',
+      spreadsheetId: 'private-sheet-id', sheetName: 'Products', syncSchedule: 'MANUAL',
+    } });
+    const snapshotObjectKey = `catalogue/${tenantId}/${source.id}/google/no-sku.json`;
+    await storage.put({
+      key: snapshotObjectKey, contentType: 'application/vnd.autosale.catalogue-table+json',
+      body: Buffer.from(JSON.stringify({ headers: ['name', 'price'], rows: [['Private Luna', '12,50']] })),
+    });
+    const run = await prisma.catalogueImportRun.create({ data: {
+      tenantId, sourceId: source.id, status: 'MAPPING_REVIEW', idempotencyKey: `google:${source.id}:no-sku:review`,
+      sourceRevision: 'no-sku', sourceHeaders: ['name', 'price'], snapshotObjectKey, sourceSyncVersion: source.syncVersion, totalRows: 1,
+    } });
+
+    const preview = await service.updateMapping(tenantId, ownerUserId, run.id, { columns: [
+      { source: 'name', target: 'name' }, { source: 'price', target: 'price' },
+    ] });
+    const generatedSku = preview.rows[0]?.product?.sku;
+    expect(generatedSku).toMatch(/^AUTO-[A-F0-9]{12}$/);
+    await expect(service.confirm(tenantId, ownerUserId, run.id)).resolves.toMatchObject({ status: 'COMPLETED', createdRows: 1 });
+    await expect(prisma.product.findUnique({ where: { tenantId_sku: { tenantId, sku: generatedSku! } } })).resolves.toMatchObject({ name: 'Private Luna', sourceId: source.id });
+  });
+
   it('does not import or activate a Google snapshot after the source configuration version changes', async () => {
     const source = await prisma.catalogueSource.create({ data: {
       tenantId, type: 'GOOGLE_SHEETS', displayName: 'Stale Google catalogue', status: 'PAUSED',

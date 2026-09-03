@@ -72,7 +72,7 @@ export class OpenAiColumnMapper {
       text: { format: { type: 'json_schema', name: 'catalogue_column_mapping', strict: true, schema: mappingJsonSchema } },
     });
     try {
-      const proposal = catalogueMappingProposalSchema.parse(JSON.parse(response.output_text));
+      const proposal = normalizeSemanticMappings(catalogueMappingProposalSchema.parse(JSON.parse(response.output_text)));
       const sources = new Set(proposal.columns.map((column) => column.source));
       if (proposal.columns.length !== safeInput.headers.length
         || proposal.columns.some((column) => !safeInput.headers.includes(column.source))
@@ -96,6 +96,18 @@ export class OpenAiColumnMapper {
       throw new Error('OpenAI returned an invalid catalogue column mapping');
     }
   }
+}
+
+function normalizeSemanticMappings(proposal: CatalogueMappingProposal): CatalogueMappingProposal {
+  if (proposal.columns.some((column) => column.target === 'name')) return proposal;
+  return {
+    ...proposal,
+    columns: proposal.columns.map((column) =>
+      column.target === 'description' && /(?:асортимент|ассортимент|assortment)/i.test(column.source)
+        ? { ...column, target: 'name' as const }
+        : column,
+    ),
+  };
 }
 
 export function createOpenAiColumnMapper(apiKey: string, model: string): OpenAiColumnMapper {

@@ -194,7 +194,7 @@ export class CatalogueImportService {
     const table = await this.loadTable(run.source.objectKey, run.source.type, run.snapshotObjectKey);
     if (table.fingerprint !== run.mapping.sourceFingerprint) throw new ConflictException('Catalogue headers changed');
     const mapping = readMapping(run.mapping.columns);
-    const preview = await this.buildPreview(tenantId, table, mapping, readClearFields(run.mapping.transformSettings));
+    const preview = await this.buildPreview(tenantId, run.sourceId, table, mapping, readClearFields(run.mapping.transformSettings));
     return publicPreview(preview);
   }
 
@@ -364,10 +364,10 @@ export class CatalogueImportService {
     });
   }
 
-  private async buildPreview(tenantId: string, table: ParsedTable, mapping: CatalogueColumnMapping[], clearEmptyFields: Set<CatalogueTargetField>): Promise<{ rows: InternalPreviewRow[]; totals: CataloguePreview['totals'] }> {
+  private async buildPreview(tenantId: string, sourceId: string, table: ParsedTable, mapping: CatalogueColumnMapping[], clearEmptyFields: Set<CatalogueTargetField>): Promise<{ rows: InternalPreviewRow[]; totals: CataloguePreview['totals'] }> {
     const plan = await buildCatalogueImportPlan(this.prisma, {
       tenantId,
-      sourceId: '',
+      sourceId,
       headers: table.headers,
       rows: table.rows.map((row) => table.headers.map((header) => row[header] ?? null)),
       mapping,
@@ -442,8 +442,8 @@ function validateMapping(columns: CatalogueColumnMapping[], headers: string[]): 
   if (new Set(normalized.map((column) => column.source)).size !== normalized.length) throw new BadRequestException('Mapped source columns must be unique');
   if (normalized.some((column) => !headers.includes(column.source))) throw new BadRequestException('Mapped source column is missing');
   const targets = normalized.filter((column) => column.target !== 'ignore').map((column) => column.target);
-  if (new Set(targets).size !== targets.length || !targets.includes('sku') || !targets.includes('name')) {
-    throw new BadRequestException('SKU and name mappings are required and targets must be unique');
+  if (new Set(targets).size !== targets.length || !targets.includes('name')) {
+    throw new BadRequestException('Name mapping is required and targets must be unique');
   }
   return normalized;
 }

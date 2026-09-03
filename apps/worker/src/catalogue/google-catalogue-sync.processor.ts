@@ -264,6 +264,6 @@ function readMapping(value: unknown): MappingColumn[] {
     ? [{ source: normalizeHeader((item as Record<string, unknown>).source as string), target: (item as Record<string, unknown>).target as CatalogueTargetField }]
     : []);
 }
-function hasRequiredMapping(mapping: MappingColumn[], headers: string[]) { const available = new Set(headers.map(normalizeHeader)); return ['sku', 'name'].every((target) => mapping.some((column) => column.target === target && available.has(column.source))); }
+function hasRequiredMapping(mapping: MappingColumn[], headers: string[]) { const available = new Set(headers.map(normalizeHeader)); return mapping.some((column) => column.target === 'name' && available.has(column.source)); }
 function normalizeHeader(value: string) { return value.normalize('NFKC').trim().replace(/\s+/g, ' ').toLocaleLowerCase('en-US'); }
 function nextSyncAt(schedule: string | null): Date | null { const interval = schedule === 'HOURLY' ? 60 * 60_000 : schedule === 'DAILY' ? 24 * 60 * 60_000 : null; return interval === null ? null : new Date(Date.now() + interval); }

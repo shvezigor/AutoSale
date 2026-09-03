@@ -3,6 +3,27 @@ import { describe, expect, it, vi } from 'vitest';
 import { OpenAiColumnMapper } from './openai-column-mapper.js';
 
 describe('OpenAiColumnMapper', () => {
+  it('normalizes an assortment column to the product name when the model calls it a description', async () => {
+    const mapper = new OpenAiColumnMapper({ responses: { create: vi.fn().mockResolvedValue({
+      id: 'resp_assortment', model: 'gpt-5.4-mini',
+      output_text: JSON.stringify({ columns: [
+        { source: 'ассортимент', target: 'description', confidence: 0.96 },
+        { source: 'оптовая цена €', target: 'price', confidence: 0.99 },
+      ] }),
+    }) } }, 'gpt-5.4-mini');
+
+    const result = await mapper.suggest({
+      headers: ['ассортимент', 'оптовая цена €'],
+      primitiveTypes: { ассортимент: 'string', 'оптовая цена €': 'number' },
+      sampleRows: [{ ассортимент: 'Двері Неаполь', 'оптовая цена €': 158 }],
+    });
+
+    expect(result.proposal.columns).toEqual([
+      { source: 'ассортимент', target: 'name', confidence: 0.96 },
+      { source: 'оптовая цена €', target: 'price', confidence: 0.99 },
+    ]);
+  });
+
   it('classifies Ukrainian product headers using strict structured output', async () => {
     const create = vi.fn().mockResolvedValue({
       id: 'resp_columns_1',

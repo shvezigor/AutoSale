@@ -1,3 +1,5 @@
+import { createHash } from 'node:crypto';
+
 import { Prisma, type PrismaClient } from './generated/prisma/client.js';
 
 export type CatalogueTarget = 'sku' | 'name' | 'description' | 'price' | 'currency' | 'stockQuantity'
@@ -52,7 +54,7 @@ export async function buildCatalogueImportPlan(prisma: Pick<PrismaClient, 'produ
   const headerIndex = new Map(input.headers.map((header, index) => [normalizeHeader(header), index]));
   const normalizedMapping = input.mapping.map((column) => ({ ...column, source: normalizeHeader(column.source) }));
   const clearFields = readClearFields(input.transformSettings);
-  const rows = input.rows.map((values, index) => mapRow(values, index + 2, headerIndex, normalizedMapping, clearFields));
+  const rows = input.rows.map((values, index) => mapRow(values, index + 2, input.sourceId, headerIndex, normalizedMapping, clearFields));
   const skuRows = new Map<string, number[]>();
   for (const row of rows) {
     if (!row.product?.sku) continue;
@@ -213,17 +215,19 @@ function productUpdate(sourceId: string, row: { rowNumber: number; product: Cata
   return update;
 }
 
-function mapRow(values: CatalogueCell[], rowNumber: number, indexes: Map<string, number>, mapping: CatalogueColumn[], clearFields: Set<CatalogueTarget>): CatalogueImportPlanRow {
+function mapRow(values: CatalogueCell[], rowNumber: number, sourceId: string, indexes: Map<string, number>, mapping: CatalogueColumn[], clearFields: Set<CatalogueTarget>): CatalogueImportPlanRow {
   const presentTargets = new Set<CatalogueTarget>();
   const mapped = new Map<CatalogueTarget, CatalogueCell | undefined>();
   for (const column of mapping) if (column.target !== 'ignore') mapped.set(column.target, values[indexes.get(column.source) ?? -1]);
   if ([...mapped.values()].every((value) => value === null || value === undefined || value === '')) return { rowNumber, errors: [], codes: ['EMPTY_ROW'], presentTargets };
   const errors: string[] = [];
   const codes: string[] = [];
-  const sku = textValue(mapped.get('sku'))?.toUpperCase();
   const name = textValue(mapped.get('name'));
-  if (!sku) { errors.push('SKU is required'); codes.push('SKU_REQUIRED'); }
   if (!name) { errors.push('Name is required'); codes.push('NAME_REQUIRED'); }
+  const hasSkuMapping = mapping.some((column) => column.target === 'sku');
+  const suppliedSku = textValue(mapped.get('sku'))?.toUpperCase();
+  if (hasSkuMapping && !suppliedSku) { errors.push('SKU is required'); codes.push('SKU_REQUIRED'); }
+  const sku = suppliedSku ?? (!hasSkuMapping && name ? generatedSku(sourceId, name) : undefined);
   const product: CatalogueImportProduct = { sku: sku ?? '', name: name ?? '', aliases: [], imageUrls: [], attributes: {}, active: true };
   applyExplicitClears(product, presentTargets, mapped, clearFields);
   for (const target of ['description', 'category', 'brand', 'color', 'size'] as const) assignText(product, presentTargets, mapped, target);
@@ -256,6 +260,11 @@ function mapRow(values: CatalogueCell[], rowNumber: number, indexes: Map<string,
     else { product.attributes = attributes; presentTargets.add('attributes'); }
   }
   return errors.length > 0 ? { rowNumber, errors, codes, presentTargets } : { rowNumber, product, errors, codes, presentTargets };
+}
+
+function generatedSku(sourceId: string, name: string): string {
+  const identity = `${sourceId}\0${name.normalize('NFKC').trim().replace(/\s+/g, ' ').toLocaleLowerCase('en-US')}`;
+  return `AUTO-${createHash('sha256').update(identity).digest('hex').slice(0, 12).toUpperCase()}`;
 }
 
 function applyExplicitClears(product: CatalogueImportProduct, present: Set<CatalogueTarget>, mapped: Map<CatalogueTarget, CatalogueCell | undefined>, clearFields: Set<CatalogueTarget>) {

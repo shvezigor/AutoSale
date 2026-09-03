@@ -11,6 +11,22 @@ const mapping = [
 ];
 
 describe('catalogue table import engine', () => {
+  it('generates the same SKU from source and product name when the source has no SKU column', async () => {
+    const prisma = prismaDouble([]);
+    const input = {
+      tenantId: 'tenant-1', sourceId: 'google-source', mapping: [{ source: 'name', target: 'name' as const }],
+      transformSettings: null, headers: ['Name'], rows: [['Двері Неаполь'], ['Двері Флоренція']],
+    };
+
+    const first = await buildCatalogueImportPlan(prisma as never, input);
+    const reordered = await buildCatalogueImportPlan(prisma as never, { ...input, rows: [...input.rows].reverse() });
+
+    expect(first.rows[0]?.product?.sku).toMatch(/^AUTO-[A-F0-9]{12}$/);
+    expect(first.rows[0]?.product?.sku).toBe(reordered.rows[1]?.product?.sku);
+    expect(first.rows[0]?.product?.sku).not.toBe(first.rows[1]?.product?.sku);
+    expect(first.rows[0]?.codes).not.toContain('SKU_REQUIRED');
+  });
+
   it('uses the production normalization and validation semantics for every supported value type', async () => {
     const prisma = prismaDouble([{ sku: 'OLD', sourceId: 'source-1' }]);
     const plan = await buildCatalogueImportPlan(prisma as never, {
