@@ -68,7 +68,7 @@ describe('GoogleCatalogueSyncProcessor', () => {
 
     await expect(processor.process({ tenantId, sourceId })).resolves.toMatchObject({ status: 'MAPPING_REVIEW' });
     expect(importer.importTable).not.toHaveBeenCalled();
-    expect(prisma.catalogueImportRun.create).toHaveBeenCalledWith({ data: expect.objectContaining({ status: 'MAPPING_REVIEW', mappingId: null }) });
+    expect(prisma.catalogueImportRun.create).toHaveBeenCalledWith({ data: expect.objectContaining({ status: 'UPLOADED', mappingId: null }) });
     expect(prisma.catalogueSource.updateMany).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ status: 'PAUSED', lastErrorSummary: 'STRUCTURE_CHANGED' }) }));
   });
 

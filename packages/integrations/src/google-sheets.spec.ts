@@ -25,6 +25,49 @@ describe('GoogleSheetsAdapter', () => {
     expect(fetchFn.mock.calls[0]?.[0]).toContain('valueRenderOption=UNFORMATTED_VALUE');
   });
 
+  it('skips leading title rows and uses the first widest row as catalogue headers', async () => {
+    const fetchFn = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ values: [
+        ['ПП Метр на Метр Украина Г.Луцк пр.Победы 24'],
+        [],
+        ['Артикул', 'Назва', 'Ціна', 'Залишок'],
+        ['M-01', 'Двері Luna', 12500, 3],
+        ['M-02', 'Двері Nova', 13200, 1],
+      ] }),
+    });
+    const adapter = new GoogleSheetsAdapter({ getAccessToken: async () => 'token' }, fetchFn);
+
+    const table = await adapter.readTable({ spreadsheetId: 'sheet-1', sheetName: 'Прайс', maxRows: 10 });
+
+    expect(table.headers).toEqual(['Артикул', 'Назва', 'Ціна', 'Залишок']);
+    expect(table.rows).toEqual([
+      ['M-01', 'Двері Luna', 12500, 3],
+      ['M-02', 'Двері Nova', 13200, 1],
+    ]);
+  });
+
+  it('prefers semantic product headers over equally wide contact rows', async () => {
+    const fetchFn = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ values: [
+        ['моб.+38(095) 205 84 10', 'Двері ТМ MetrDoor'],
+        ['e-mail:sales@example.com', 'www.example.com'],
+        [],
+        ['Асортимент', 'Оптова ціна €'],
+        ['860х2050 двокольорові', 158],
+      ] }),
+    });
+    const adapter = new GoogleSheetsAdapter({ getAccessToken: async () => 'token' }, fetchFn);
+
+    const table = await adapter.readTable({ spreadsheetId: 'sheet-1', sheetName: 'Прайс', maxRows: 10 });
+
+    expect(table.headers).toEqual(['Асортимент', 'Оптова ціна €']);
+    expect(table.rows).toEqual([['860х2050 двокольорові', 158]]);
+  });
+
   it.each([
     [403, 'AUTHORIZATION', false],
     [400, 'NOT_FOUND', false],

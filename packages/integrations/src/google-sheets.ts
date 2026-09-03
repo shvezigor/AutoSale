@@ -14,6 +14,7 @@ export type GoogleSheetsReadErrorCode = 'AUTHORIZATION' | 'NOT_FOUND' | 'RATE_LI
 export type GoogleSheetsTableValidationErrorCode = 'ROW_LIMIT' | 'COLUMN_LIMIT' | 'CELL_LIMIT' | 'HEADER_INVALID';
 const MAX_TABLE_COLUMNS = 100;
 const MAX_TABLE_CELL_CHARACTERS = 10_000;
+const HEADER_SCAN_ROWS = 20;
 /** Sparse rows are checked for 5,000 rows beyond the accepted table boundary. */
 const TABLE_OVERFLOW_SCAN_ROWS = 5_000;
 
@@ -78,12 +79,13 @@ export class GoogleSheetsAdapter {
     if (values.some((row) => row.some((cell) => typeof cell === 'string' && cell.length > MAX_TABLE_CELL_CHARACTERS))) {
       throw new GoogleSheetsTableValidationError('CELL_LIMIT', 'Google Sheets cell exceeds the character limit');
     }
-    const headers = (values[0] ?? []).map((value) => String(value ?? ''));
-    const overflowRows = values.slice(input.maxRows + 1);
+    const headerIndex = findHeaderRowIndex(values);
+    const headers = (values[headerIndex] ?? []).map((value) => String(value ?? ''));
+    const overflowRows = values.slice(headerIndex + input.maxRows + 1);
     if (overflowRows.some((row) => row.some((cell) => cell !== null && cell !== ''))) {
       throw new GoogleSheetsTableValidationError('ROW_LIMIT', `Google Sheets table exceeds ${input.maxRows} rows`);
     }
-    const rows = values.slice(1, input.maxRows + 1);
+    const rows = values.slice(headerIndex + 1, headerIndex + input.maxRows + 1);
     if (headers.length > 0) {
       const normalizedHeaders = headers.map(normalizeHeader);
       if (normalizedHeaders.some((header) => header.length === 0)) {
@@ -134,6 +136,58 @@ export class GoogleSheetsAdapter {
     return { action: 'appended', rowNumber: rowNumberFromRange(result.updates?.updatedRange) ?? (idsBody.values?.length ?? 1) + 1 };
   }
 }
+
+function findHeaderRowIndex(values: GoogleSheetsCell[][]): number {
+  let bestIndex = 0;
+  let bestScore = -1;
+  for (const [index, row] of values.slice(0, HEADER_SCAN_ROWS).entries()) {
+    const cells = row
+      .filter((cell) => cell !== null && String(cell).trim() !== '')
+      .map((cell) => String(cell).trim().toLocaleLowerCase());
+    const semanticMatches = cells.filter((cell) =>
+      HEADER_KEYWORDS.some((keyword) => cell.includes(keyword)),
+    ).length;
+    const contactMatches = cells.filter(
+      (cell) => /(?:https?:\/\/|www\.|@|(?:\+?\d[\d\s().-]{7,}\d))/.test(cell),
+    ).length;
+    const score = semanticMatches * 100 + cells.length - contactMatches * 10;
+    if (score > bestScore) {
+      bestIndex = index;
+      bestScore = score;
+    }
+  }
+  return bestIndex;
+}
+
+const HEADER_KEYWORDS = [
+  'sku',
+  'артикул',
+  'код',
+  'name',
+  'назва',
+  'наименование',
+  'товар',
+  'product',
+  'асортимент',
+  'ассортимент',
+  'price',
+  'ціна',
+  'цена',
+  'quantity',
+  'кількість',
+  'количество',
+  'stock',
+  'залишок',
+  'остаток',
+  'category',
+  'категор',
+  'brand',
+  'бренд',
+  'description',
+  'опис',
+  'currency',
+  'валют',
+];
 
 function normalizeHeader(value: string): string {
   return value.normalize('NFKC').trim().replace(/\s+/g, ' ').toLocaleLowerCase('en-US');

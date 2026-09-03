@@ -7,6 +7,41 @@ const tenantId = '11111111-1111-4111-8111-111111111111';
 const runId = '22222222-2222-4222-8222-222222222222';
 
 describe('CatalogueMappingProcessor', () => {
+  it('maps a Google Sheets snapshot with AI', async () => {
+    const updateMany = vi.fn().mockResolvedValue({ count: 1 });
+    const prisma = {
+      catalogueImportRun: {
+        updateMany,
+        findFirst: vi.fn().mockResolvedValue({
+          id: runId,
+          tenantId,
+          sourceId: 'source-google',
+          snapshotObjectKey: 'catalogue/google/snapshot.json',
+          source: { objectKey: null, type: 'GOOGLE_SHEETS', headerFingerprint: 'fingerprint-google' },
+        }),
+      },
+      catalogueMapping: { findFirst: vi.fn().mockResolvedValue(null), create: vi.fn().mockResolvedValue({ id: 'mapping-google' }) },
+      $transaction: async (work: (tx: unknown) => Promise<unknown>) => work(prisma),
+    };
+    const mapper = { suggest: vi.fn().mockResolvedValue({
+      proposal: { columns: [{ source: 'ассортимент', target: 'name', confidence: 0.99 }, { source: 'оптовая цена €', target: 'price', confidence: 0.98 }] },
+      metadata: { responseId: 'resp-google', model: 'gpt-5.4-mini', promptVersion: 'catalogue-column-mapping-v1', schemaVersion: 'catalogue-mapping-proposal-v1', latencyMs: 80, inputTokens: 50, outputTokens: 20 },
+    }) };
+    const storage = { get: vi.fn().mockResolvedValue({
+      body: Buffer.from(JSON.stringify({ headers: ['Ассортимент', 'оптовая цена €'], rows: [['Двері Неаполь', 158]] })),
+      contentType: 'application/vnd.autosale.catalogue-table+json',
+    }) };
+
+    await new CatalogueMappingProcessor(prisma as never, storage as never, mapper).process({ tenantId, runId });
+
+    expect(storage.get).toHaveBeenCalledWith('catalogue/google/snapshot.json');
+    expect(mapper.suggest).toHaveBeenCalledWith({
+      headers: ['ассортимент', 'оптовая цена €'],
+      primitiveTypes: { ассортимент: 'string', 'оптовая цена €': 'number' },
+      sampleRows: [{ ассортимент: 'Двері Неаполь', 'оптовая цена €': '158' }],
+    });
+  });
+
   it('persists a reviewed AI draft and moves the tenant run to mapping review', async () => {
     const create = vi.fn().mockResolvedValue({ id: 'mapping-1' });
     const updateMany = vi.fn().mockResolvedValue({ count: 1 });

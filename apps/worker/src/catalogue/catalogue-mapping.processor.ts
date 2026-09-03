@@ -59,8 +59,9 @@ export class CatalogueMappingProcessor {
         where: { id: job.runId, tenantId: job.tenantId, status: 'MAPPING', mappingLeaseId: leaseId },
         include: { source: { select: { objectKey: true, type: true, headerFingerprint: true } } },
       });
-      if (!run?.source.objectKey || run.source.type === 'GOOGLE_SHEETS' || !run.source.headerFingerprint) throw new Error('source unavailable');
-      const input = await this.loadSource(run.source.objectKey, run.source.type);
+      const objectKey = run?.source.type === 'GOOGLE_SHEETS' ? run.snapshotObjectKey : run?.source.objectKey;
+      if (!run || !objectKey || !run.source.headerFingerprint) throw new Error('source unavailable');
+      const input = await this.loadSource(objectKey, run.source.type);
       if (!await heartbeat()) return { status: 'SKIPPED', proposal: null };
       const suggestion = await this.mapper.suggest(input);
       if (!await heartbeat()) return { status: 'SKIPPED', proposal: null };
@@ -106,16 +107,27 @@ export class CatalogueMappingProcessor {
     }
   }
 
-  private async loadSource(objectKey: string, type: 'CSV_UPLOAD' | 'XLSX_UPLOAD'): Promise<CatalogueColumnMappingInput> {
+  private async loadSource(objectKey: string, type: 'CSV_UPLOAD' | 'XLSX_UPLOAD' | 'GOOGLE_SHEETS'): Promise<CatalogueColumnMappingInput> {
     const object = await this.storage.get(objectKey);
     const body = Buffer.from(object.body);
     if (body.length === 0 || body.length > MAX_SOURCE_BYTES) throw new Error('source size is invalid');
-    const rows = type === 'CSV_UPLOAD' ? csvRows(body) : await xlsxRows(body);
+    const rows = type === 'CSV_UPLOAD' ? csvRows(body) : type === 'XLSX_UPLOAD' ? await xlsxRows(body) : googleSnapshotRows(body);
     const headers = normalizedHeaders(rows.shift() ?? []);
     if (headers.length === 0) throw new Error('source headers are invalid');
     const records = rows.filter((row) => row.some((value) => value !== '')).slice(0, 5).map((row) => Object.fromEntries(headers.map((header, index) => [header, boundedCell(row[index])])));
     return { headers, primitiveTypes: inferTypes(headers, records), sampleRows: records };
   }
+}
+
+function googleSnapshotRows(body: Buffer): string[][] {
+  const parsed = JSON.parse(body.toString('utf8')) as { headers?: unknown; rows?: unknown };
+  if (!Array.isArray(parsed.headers) || !Array.isArray(parsed.rows)) throw new Error('Google Sheets snapshot is invalid');
+  const headers = parsed.headers.map((cell) => String(cell ?? ''));
+  const rows = parsed.rows.map((row) => {
+    if (!Array.isArray(row)) throw new Error('Google Sheets snapshot row is invalid');
+    return row.map((cell) => String(cell ?? ''));
+  });
+  return [headers, ...rows];
 }
 
 function leaseExpiry(now: Date): Date { return new Date(now.getTime() + CATALOGUE_MAPPING_LEASE_MS); }

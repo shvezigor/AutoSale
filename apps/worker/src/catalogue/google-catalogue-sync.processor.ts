@@ -230,16 +230,16 @@ export class GoogleCatalogueSyncProcessor {
       where: { tenantId_idempotencyKey: { tenantId: input.tenantId, idempotencyKey } }, select: { id: true, status: true },
     });
     const run = existing ?? await this.prisma.catalogueImportRun.create({ data: {
-      tenantId: input.tenantId, sourceId: input.sourceId, mappingId: null, status: 'MAPPING_REVIEW', idempotencyKey,
+      tenantId: input.tenantId, sourceId: input.sourceId, mappingId: null, status: 'UPLOADED', idempotencyKey,
       sourceRevision: table.revision, sourceHeaders: table.headers, snapshotObjectKey, sourceSyncVersion: leaseWhere.syncVersion,
-      totalRows: table.rows.length, rowErrors: [{ errors: [reason] }], completedAt: new Date(),
+      totalRows: table.rows.length, rowErrors: [{ errors: [reason] }],
     } });
     if (existing) {
       await this.prisma.catalogueImportRun.updateMany({
-        where: { id: existing.id, tenantId: input.tenantId, status: 'MAPPING_REVIEW' },
+        where: { id: existing.id, tenantId: input.tenantId, status: { in: ['UPLOADED', 'MAPPING_REVIEW'] } },
         data: {
           sourceRevision: table.revision, sourceHeaders: table.headers, snapshotObjectKey, sourceSyncVersion: leaseWhere.syncVersion,
-          totalRows: table.rows.length, rowErrors: [{ errors: [reason] }], completedAt: new Date(),
+          totalRows: table.rows.length, rowErrors: [{ errors: [reason] }], status: 'UPLOADED', completedAt: null,
         },
       });
     }
