@@ -9,6 +9,11 @@ const isCanonicalIntegrationEncryptionKey = (value: string): boolean => {
 };
 
 const optionalNonEmptyString = z.preprocess((value) => value === '' ? undefined : value, z.string().min(1).optional());
+const optionalUrl = z.preprocess((value) => value === '' ? undefined : value, z.string().url().optional());
+const optionalBoolean = z.preprocess(
+  (value) => value === undefined || value === '' ? undefined : value === true || value === 'true',
+  z.boolean().default(false),
+);
 
 export const apiEnvSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']),
@@ -33,7 +38,9 @@ export const apiEnvSchema = z.object({
   GOOGLE_SERVICE_ACCOUNT_FILE: z.preprocess((value) => value === '' ? undefined : value, z.string().min(1).optional()),
   GOOGLE_OAUTH_CLIENT_ID: optionalNonEmptyString,
   GOOGLE_OAUTH_CLIENT_SECRET: optionalNonEmptyString,
-  GOOGLE_OAUTH_REDIRECT_URI: z.preprocess((value) => value === '' ? undefined : value, z.string().url().optional()),
+  GOOGLE_OAUTH_REDIRECT_URI: optionalUrl,
+  GOOGLE_SIGN_IN_ENABLED: optionalBoolean,
+  GOOGLE_SIGN_IN_REDIRECT_URI: optionalUrl,
   SESSION_COOKIE_NAME: z.string().regex(/^[A-Za-z0-9_-]+$/).default('autosale_session'),
   SESSION_PEPPER: z.string().min(32),
   AUTH_TOKEN_PEPPER: z.string().min(32),
@@ -63,6 +70,25 @@ export const apiEnvSchema = z.object({
       code: 'custom',
       path: ['GOOGLE_OAUTH_REDIRECT_URI'],
       message: 'Google OAuth redirect URI must use HTTPS in production',
+    });
+  }
+
+  if (environment.GOOGLE_SIGN_IN_ENABLED && (
+    !environment.GOOGLE_OAUTH_CLIENT_ID
+    || !environment.GOOGLE_OAUTH_CLIENT_SECRET
+    || !environment.GOOGLE_SIGN_IN_REDIRECT_URI
+  )) {
+    context.addIssue({
+      code: 'custom',
+      message: 'Google Sign-In configuration must include client ID, client secret, and redirect URI',
+    });
+  }
+
+  if (environment.NODE_ENV === 'production' && environment.GOOGLE_SIGN_IN_REDIRECT_URI?.startsWith('http://')) {
+    context.addIssue({
+      code: 'custom',
+      path: ['GOOGLE_SIGN_IN_REDIRECT_URI'],
+      message: 'Google Sign-In redirect URI must use HTTPS in production',
     });
   }
 });

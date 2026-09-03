@@ -27,7 +27,40 @@ const validEnv = {
 
 describe('parseApiEnv', () => {
   it('coerces a valid API environment', () => {
-    expect(parseApiEnv(validEnv)).toEqual({ ...validEnv, PORT: 3001, SMTP_PORT: 587 });
+    expect(parseApiEnv(validEnv)).toEqual({ ...validEnv, PORT: 3001, SMTP_PORT: 587, GOOGLE_SIGN_IN_ENABLED: false });
+  });
+
+  it('requires a complete Google Sign-In configuration when the feature is enabled', () => {
+    expect(() => parseApiEnv({
+      ...validEnv,
+      GOOGLE_SIGN_IN_ENABLED: 'true',
+    })).toThrow(/Google Sign-In configuration/i);
+  });
+
+  it('accepts the dedicated Google Sign-In callback when enabled', () => {
+    const parsed = parseApiEnv({
+      ...validEnv,
+      GOOGLE_SIGN_IN_ENABLED: 'true',
+      GOOGLE_OAUTH_CLIENT_ID: '123456789.apps.googleusercontent.com',
+      GOOGLE_OAUTH_CLIENT_SECRET: 'google-client-secret',
+      GOOGLE_OAUTH_REDIRECT_URI: 'https://autosale.example.com/api/integrations/google/callback',
+      GOOGLE_SIGN_IN_REDIRECT_URI: 'https://autosale.example.com/api/auth/google/callback',
+    });
+
+    expect(parsed.GOOGLE_SIGN_IN_ENABLED).toBe(true);
+    expect(parsed.GOOGLE_SIGN_IN_REDIRECT_URI).toBe('https://autosale.example.com/api/auth/google/callback');
+  });
+
+  it('requires an HTTPS Google Sign-In callback in production', () => {
+    expect(() => parseApiEnv({
+      ...validEnv,
+      NODE_ENV: 'production',
+      GOOGLE_SIGN_IN_ENABLED: 'true',
+      GOOGLE_OAUTH_CLIENT_ID: '123456789.apps.googleusercontent.com',
+      GOOGLE_OAUTH_CLIENT_SECRET: 'google-client-secret',
+      GOOGLE_OAUTH_REDIRECT_URI: 'https://sales-aito.com/api/integrations/google/callback',
+      GOOGLE_SIGN_IN_REDIRECT_URI: 'http://sales-aito.com/api/auth/google/callback',
+    })).toThrow(/HTTPS/i);
   });
 
   it('rejects an environment without the Meta app secret', () => {

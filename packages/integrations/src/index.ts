@@ -1,6 +1,12 @@
 export type { ObjectStorage } from './object-storage.js';
 export { CredentialCipher } from './credential-cipher.js';
 export {
+  GoogleSignInClient,
+  type GoogleSignInClientConfig,
+  type GoogleSignInClientPort,
+  type GoogleSignInIdentity,
+} from './google-sign-in.js';
+export {
   GoogleOAuthAccessError,
   GoogleOAuthTokenProvider,
   type GoogleOAuthConnectionRecord,
