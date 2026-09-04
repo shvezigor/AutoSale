@@ -35,4 +35,19 @@ describe('AuthService', () => {
     await expect(auth.requestPasswordReset('missing@example.com')).resolves.toEqual({ accepted: true });
     expect(email.sendPasswordReset).not.toHaveBeenCalled();
   });
+
+  it('rejects password login for a Google-only account without attempting password verification', async () => {
+    const prisma = { user: { findUnique: vi.fn(async () => ({
+      id: '10000000-0000-4000-8000-000000000002', email: 'owner@example.com', name: 'Owner',
+      passwordHash: null, status: 'ACTIVE', emailVerifiedAt: new Date(), platformRole: 'USER', memberships: [],
+    })) } } as unknown as PrismaClient;
+    const crypto = new CryptoService();
+    const verifyPassword = vi.spyOn(crypto, 'verifyPassword');
+    const email: EmailDelivery = { sendVerification: vi.fn(), sendPasswordReset: vi.fn(), sendInvitation: vi.fn() };
+    const auth = new AuthService(prisma, crypto, {} as never, email, 't'.repeat(32), 'http://localhost');
+
+    await expect(auth.login({ email: 'owner@example.com', password: 'correct horse battery' }, {}))
+      .rejects.toThrow('Invalid credentials');
+    expect(verifyPassword).not.toHaveBeenCalled();
+  });
 });

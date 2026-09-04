@@ -67,7 +67,7 @@ export class AuthService {
   async login(input: LoginRequest, metadata: SessionMetadata): Promise<{ session: PublicSession; rawToken: string; expiresAt: Date }> {
     const email = input.email.trim().toLowerCase();
     const user = await this.prisma.user.findUnique({ where: { email }, include: { memberships: true } });
-    const valid = user ? await this.crypto.verifyPassword(user.passwordHash, input.password) : false;
+    const valid = user?.passwordHash ? await this.crypto.verifyPassword(user.passwordHash, input.password) : false;
     if (!user || !valid || user.status !== 'ACTIVE' || !user.emailVerifiedAt) {
       throw new UnauthorizedException('Invalid credentials');
     }
