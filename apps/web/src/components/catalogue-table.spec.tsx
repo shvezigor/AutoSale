@@ -1,7 +1,11 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render as rtlRender, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { CatalogueTable } from './catalogue-table';
+import { ActivityProvider } from './activity-provider';
+import { ToastProvider } from './toast-provider';
+
+function render(ui: React.ReactElement) { return rtlRender(<ToastProvider><ActivityProvider>{ui}</ActivityProvider></ToastProvider>); }
 
 const product = {
   id: 'b6c1a440-a39d-41d1-b9c2-ebdac84d4c48',

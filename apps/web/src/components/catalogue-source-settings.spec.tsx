@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render as rtlRender, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const { mutatingFetch } = vi.hoisted(() => ({ mutatingFetch: vi.fn() }));
@@ -9,6 +9,10 @@ vi.mock('./google-picker-button', () => ({
 }));
 
 import { CatalogueSourceSettings } from './catalogue-source-settings';
+import { ActivityProvider } from './activity-provider';
+import { ToastProvider } from './toast-provider';
+
+function render(ui: React.ReactElement) { return rtlRender(<ToastProvider><ActivityProvider>{ui}</ActivityProvider></ToastProvider>); }
 
 const source = {
   id: '44444444-4444-4444-8444-444444444444', type: 'GOOGLE_SHEETS', displayName: 'Каталог', status: 'ACTIVE',
@@ -37,7 +41,7 @@ describe('CatalogueSourceSettings', () => {
     const file = new File(['Name,Price\nСукня,1200'], 'products.csv', { type: 'text/csv' });
     fireEvent.change(input, { target: { files: [file] } });
     await waitFor(() => expect(mutatingFetch).toHaveBeenCalledWith('/api/catalogue/imports/upload', expect.objectContaining({ method: 'POST', body: expect.any(FormData) })));
-    expect(await screen.findByText(/AutoSale розпізнає колонки/)).toBeInTheDocument();
+    expect((await screen.findAllByText(/AutoSale розпізнає колонки/)).length).toBeGreaterThan(0);
   });
 
   it('starts synchronization immediately after a Google table is saved', async () => {

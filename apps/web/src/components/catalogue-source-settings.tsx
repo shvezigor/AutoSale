@@ -3,7 +3,10 @@
 import { useRef, useState } from 'react';
 
 import { mutatingFetch } from '../auth/csrf-fetch';
+import { useActivity } from './activity-provider';
 import { GooglePickerButton, type GooglePickerSelection } from './google-picker-button';
+import { LoadingButton } from './loading-button';
+import { useToast } from './toast-provider';
 
 export type CatalogueSourceHealth = {
   id: string; type: string; displayName: string; status: string; lastSyncedAt: string | null; lastErrorSummary: string | null; updatedAt: string;
@@ -38,6 +41,8 @@ export function CatalogueSourceSettings({
   const [error, setError] = useState<string | null>(null);
   const [tabs, setTabs] = useState<Array<{ sheetId: number; title: string }>>([]);
   const fileInput = useRef<HTMLInputElement>(null);
+  const activity = useActivity();
+  const toast = useToast();
 
   if (role === 'MANAGER') return <HealthList sources={sources} />;
 
@@ -54,13 +59,14 @@ export function CatalogueSourceSettings({
   async function mutate(path: string, init: RequestInit, success: string) {
     setPending(true); setMessage(null); setError(null);
     try {
-      const response = await mutatingFetch(path, init);
+      const response = await activity.run(success, () => mutatingFetch(path, init));
       const body = await response.json().catch(() => ({})) as CatalogueSourceConfiguration & { message?: string };
       if (!response.ok) throw new Error(body.message ?? 'Операцію не виконано');
       setMessage(success);
+      toast.show({ type: 'success', title: success });
       return body;
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : 'Операцію не виконано');
+      const text = reason instanceof Error ? reason.message : 'Операцію не виконано'; setError(text); toast.show({ type: 'error', title: 'Операцію не виконано', message: text });
       return null;
     } finally {
       setPending(false);
@@ -81,7 +87,7 @@ export function CatalogueSourceSettings({
   async function selectSpreadsheet(selection: GooglePickerSelection) {
     setPending(true); setMessage(null); setError(null);
     try {
-      const response = await fetch(`/api/integrations/google/files/${encodeURIComponent(selection.fileId)}/tabs`, { cache: 'no-store' });
+      const response = await activity.run('Перевіряємо таблицю товарів', () => fetch(`/api/integrations/google/files/${encodeURIComponent(selection.fileId)}/tabs`, { cache: 'no-store' }));
       const body = await response.json() as { spreadsheetId?: string; tabs?: Array<{ sheetId: number; title: string }>; message?: string };
       if (!response.ok || body.spreadsheetId !== selection.fileId || !body.tabs?.length) throw new Error(body.message ?? 'Не вдалося перевірити таблицю');
       setSpreadsheet(body.spreadsheetId);
@@ -89,7 +95,7 @@ export function CatalogueSourceSettings({
       setSheetName(body.tabs[0]!.title);
       setDisplayName(selection.name);
       setMessage(body.tabs.length === 1 ? 'Таблицю розпізнано. Натисніть «Завантажити товари».' : 'Оберіть вкладку з товарами.');
-    } catch (reason) { setError(reason instanceof Error ? reason.message : 'Не вдалося перевірити таблицю'); }
+    } catch (reason) { const text = reason instanceof Error ? reason.message : 'Не вдалося перевірити таблицю'; setError(text); toast.show({ type: 'error', title: 'Не вдалося перевірити таблицю', message: text }); }
     finally { setPending(false); }
   }
 
@@ -99,11 +105,11 @@ export function CatalogueSourceSettings({
     try {
       const form = new FormData();
       form.set('file', file);
-      const response = await mutatingFetch('/api/catalogue/imports/upload', { method: 'POST', body: form });
+      const response = await activity.run('Завантажуємо каталог', () => mutatingFetch('/api/catalogue/imports/upload', { method: 'POST', body: form }));
       const body = await response.json() as { status?: string; message?: string };
       if (!response.ok) throw new Error(body.message ?? 'Не вдалося завантажити файл');
-      setMessage(body.status === 'COMPLETED' ? 'Готово — товари завантажено.' : 'Файл прийнято. AutoSale розпізнає колонки й завантажить товари.');
-    } catch (reason) { setError(reason instanceof Error ? reason.message : 'Не вдалося завантажити файл'); }
+      const success = body.status === 'COMPLETED' ? 'Готово — товари завантажено.' : 'Файл прийнято. AutoSale розпізнає колонки й завантажить товари.'; setMessage(success); toast.show({ type: 'success', title: 'Каталог прийнято в обробку', message: success });
+    } catch (reason) { const text = reason instanceof Error ? reason.message : 'Не вдалося завантажити файл'; setError(text); toast.show({ type: 'error', title: 'Не вдалося завантажити файл', message: text }); }
     finally { setPending(false); if (fileInput.current) fileInput.current.value = ''; }
   }
 
@@ -121,8 +127,8 @@ export function CatalogueSourceSettings({
     {current?.latestRun && <ImportRunState run={current.latestRun} />}
     {tabs.length > 1 && <label className="data-tab-choice"><span>Вкладка з товарами</span><select aria-label="Вкладка Google таблиці" value={sheetName} onChange={(event) => setSheetName(event.target.value)}>{tabs.map((tab) => <option key={tab.sheetId} value={tab.title}>{tab.title}</option>)}</select></label>}
     <div className="catalogue-source-actions">
-      {spreadsheet && <button disabled={pending || !displayName.trim() || !sheetName.trim()} onClick={() => void save()} type="button">Завантажити товари</button>}
-      {current && <button className="text-button" disabled={pending} onClick={() => void remove()} type="button">Замінити джерело</button>}
+      {spreadsheet && <LoadingButton pending={pending} pendingLabel="Завантажуємо…" disabled={!displayName.trim() || !sheetName.trim()} onClick={() => void save()} type="button">Завантажити товари</LoadingButton>}
+      {current && <LoadingButton className="text-button" pending={pending} pendingLabel="Замінюємо…" onClick={() => void remove()} type="button">Замінити джерело</LoadingButton>}
     </div>
     {message && <p className="save-success">{message}</p>}{error && <p className="save-error" role="alert">{error}</p>}
   </section>;

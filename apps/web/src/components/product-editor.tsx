@@ -4,6 +4,8 @@ import { useRouter } from 'next/navigation';
 import { FormEvent, useState } from 'react';
 
 import { mutatingFetch } from '../auth/csrf-fetch';
+import { useActivity } from './activity-provider';
+import { useToast } from './toast-provider';
 
 export type EditableProduct = {
   id?: string | undefined;
@@ -44,6 +46,8 @@ export function ProductEditor({ product, onClose }: ProductEditorProps) {
   const [aliasesText, setAliasesText] = useState((initial.aliases ?? []).join(', '));
   const [state, setState] = useState<SaveState>('idle');
   const editing = Boolean(product?.id);
+  const activity = useActivity();
+  const toast = useToast();
 
   function update<K extends keyof typeof form>(field: K, value: (typeof form)[K]) {
     setForm((current) => ({ ...current, [field]: value }));
@@ -56,20 +60,23 @@ export function ProductEditor({ product, onClose }: ProductEditorProps) {
     if (new Set(aliases).size !== aliases.length) { setState('validation-error'); return; }
     setState('saving');
     try {
-      const response = await mutatingFetch(editing ? `/api/catalogue/${product!.id}` : '/api/catalogue', {
+      const response = await activity.run('Зберігаємо товар', () => mutatingFetch(editing ? `/api/catalogue/${product!.id}` : '/api/catalogue', {
         method: editing ? 'PATCH' : 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify(buildPayload(form, aliases)),
-      });
+      }));
       if (!response.ok) {
         setState('error');
+        toast.show({ type: 'error', title: 'Не вдалося зберегти товар' });
         return;
       }
 
       setState('saved');
+      toast.show({ type: 'success', title: editing ? 'Зміни товару збережено' : 'Товар додано' });
       router.refresh();
     } catch {
       setState('error');
+      toast.show({ type: 'error', title: 'Не вдалося зберегти товар' });
     }
   }
 

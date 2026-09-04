@@ -1,7 +1,11 @@
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render as rtlRender, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { ProductEditor } from './product-editor';
+import { ActivityProvider } from './activity-provider';
+import { ToastProvider } from './toast-provider';
+
+function render(ui: React.ReactElement) { return rtlRender(<ToastProvider><ActivityProvider>{ui}</ActivityProvider></ToastProvider>); }
 
 const refresh = vi.fn();
 vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh }) }));
@@ -60,7 +64,7 @@ describe('ProductEditor', () => {
       createdAt: expect.any(String),
       updatedAt: expect.any(String),
     }));
-    expect(screen.getByRole('status')).toHaveTextContent('Зміни збережено');
+    expect(screen.getAllByRole('status').some((element) => element.textContent?.includes('Зміни збережено'))).toBe(true);
     expect(refresh).toHaveBeenCalled();
   });
 
