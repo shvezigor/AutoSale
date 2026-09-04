@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const { authenticatedApiFetch, getServerSession } = vi.hoisted(() => ({
@@ -37,9 +37,16 @@ describe('SettingsPage', () => {
 
     render(await SettingsPage());
 
-    expect(screen.getByRole('navigation', { name: 'Розділи налаштувань' })).toBeInTheDocument();
+    expect(screen.getByRole('tablist', { name: 'Розділи налаштувань' })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /Соцмережі/ })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.queryByRole('heading', { name: 'Google Sheets' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Підтвердження замовлень' })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('tab', { name: /Google/ }));
+
     expect(screen.getAllByRole('heading', { name: 'Google Sheets' })).toHaveLength(2);
     expect(screen.getByRole('heading', { name: 'Google Sheets джерело' })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Підключення каналів' })).not.toBeInTheDocument();
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/catalogue/sources/44444444-4444-4444-8444-444444444444');
   });
 
@@ -79,6 +86,7 @@ describe('SettingsPage', () => {
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/integrations/google');
     expect(screen.getByText('@autosale_store')).toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Підтвердження замовлень' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('tab', { name: /Google/ }));
     expect(screen.getByRole('heading', { name: 'Google Sheets' })).toBeInTheDocument();
     expect(screen.getByText('Google підключено')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /Instagram/ })).not.toBeInTheDocument();

@@ -31,7 +31,7 @@ export function GoogleConnectionSettings({
     setPending(true); setError(null);
     try {
       const response = await mutatingFetch('/api/integrations/google/connect', {
-        method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ returnPath: '/settings#google' }),
+        method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ returnPath: '/settings?tab=google' }),
       });
       const body = await response.json() as { authorizationUrl?: string; message?: string };
       if (!response.ok || !body.authorizationUrl) throw new Error(body.message ?? 'Не вдалося розпочати підключення Google');
