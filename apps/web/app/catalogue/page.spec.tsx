@@ -32,4 +32,13 @@ describe('CataloguePage', () => {
 
     await expect(CataloguePage({ searchParams: Promise.resolve({}) })).rejects.toThrow('Не вдалося завантажити каталог');
   });
+
+  it('passes an allowed page size to the catalogue API', async () => {
+    getServerSession.mockResolvedValue({ name: 'Іван', email: 'manager@example.com', membershipRole: 'MANAGER' });
+    authenticatedApiFetch.mockResolvedValueOnce({ ok: true, json: async () => ({ items: [], page: 1, pageSize: 50, total: 0 }) });
+
+    render(await CataloguePage({ searchParams: Promise.resolve({ pageSize: '50' }) }));
+
+    expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/catalogue?page=1&pageSize=50');
+  });
 });

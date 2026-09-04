@@ -6,7 +6,7 @@ import { PrimaryNavigation } from '../../src/components/primary-navigation';
 
 export const dynamic = 'force-dynamic';
 
-type CataloguePageProps = { searchParams: Promise<{ page?: string | string[]; search?: string | string[] }> };
+type CataloguePageProps = { searchParams: Promise<{ page?: string | string[]; pageSize?: string | string[]; search?: string | string[] }> };
 type CatalogueResponse = { items: CatalogueProduct[]; page: number; pageSize: number; total: number };
 
 export default async function CataloguePage({ searchParams }: CataloguePageProps) {
@@ -16,8 +16,9 @@ export default async function CataloguePage({ searchParams }: CataloguePageProps
 
   const params = await searchParams;
   const page = positiveInteger(params.page) ?? 1;
+  const pageSize = allowedPageSize(params.pageSize);
   const search = textParam(params.search);
-  const query = new URLSearchParams({ page: String(page), pageSize: '25' });
+  const query = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
   if (search) query.set('search', search);
   const response = await authenticatedApiFetch(`/api/catalogue?${query.toString()}`);
   if (!response.ok) throw new Error('Не вдалося завантажити каталог');
@@ -27,4 +28,5 @@ export default async function CataloguePage({ searchParams }: CataloguePageProps
 }
 
 function positiveInteger(value: string | string[] | undefined) { const parsed = Number(Array.isArray(value) ? value[0] : value); return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : null; }
+function allowedPageSize(value: string | string[] | undefined) { const parsed = positiveInteger(value); return parsed && [10, 25, 50, 100].includes(parsed) ? parsed : 25; }
 function textParam(value: string | string[] | undefined) { return (Array.isArray(value) ? value[0] : value)?.trim().slice(0, 200) ?? ''; }

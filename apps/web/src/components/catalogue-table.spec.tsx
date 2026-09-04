@@ -44,4 +44,18 @@ describe('CatalogueTable', () => {
     fireEvent.submit(screen.getByRole('search'));
     expect(replace).toHaveBeenCalledWith('/catalogue?search=Luna');
   });
+
+  it('shows numbered pagination and lets the user change the rows per page', () => {
+    render(<CatalogueTable session={{ membershipRole: 'MANAGER' }} products={[product]} page={2} pageSize={25} total={60} search="Luna" />);
+
+    expect(screen.getByRole('navigation', { name: 'Сторінки каталогу' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Сторінка 2' })).toHaveAttribute('aria-current', 'page');
+    expect(screen.getByText('26–50 із 60')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Сторінка 3' }));
+    expect(replace).toHaveBeenCalledWith('/catalogue?search=Luna&page=3');
+
+    fireEvent.change(screen.getByLabelText('Рядків на сторінці'), { target: { value: '50' } });
+    expect(replace).toHaveBeenCalledWith('/catalogue?search=Luna&pageSize=50');
+  });
 });

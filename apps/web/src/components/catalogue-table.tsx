@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { FormEvent, useState } from 'react';
 
 import { ProductEditor, type EditableProduct } from './product-editor';
+import { TablePagination } from './table-pagination';
 
 type CatalogueSession = { membershipRole: 'OWNER' | 'MANAGER' | null };
 type CatalogueTableProps = { session: CatalogueSession; products: EditableProduct[]; page: number; pageSize: number; total: number; search?: string };
@@ -13,10 +14,10 @@ export function CatalogueTable({ session, products, page, pageSize, total, searc
   const [query, setQuery] = useState(search);
   const [editing, setEditing] = useState<EditableProduct | 'new' | null>(null);
   const isOwner = session.membershipRole === 'OWNER';
-  const pageCount = Math.max(1, Math.ceil(total / pageSize));
 
-  function changePage(nextPage: number) { router.replace(catalogueUrl(query, nextPage)); }
-  function submitSearch(event: FormEvent<HTMLFormElement>) { event.preventDefault(); router.replace(catalogueUrl(query, 1)); }
+  function changePage(nextPage: number) { router.replace(catalogueUrl(query, nextPage, pageSize)); }
+  function changePageSize(nextPageSize: number) { router.replace(catalogueUrl(query, 1, nextPageSize)); }
+  function submitSearch(event: FormEvent<HTMLFormElement>) { event.preventDefault(); router.replace(catalogueUrl(query, 1, pageSize)); }
 
   return <>
     <div className="catalogue-toolbar">
@@ -29,7 +30,7 @@ export function CatalogueTable({ session, products, page, pageSize, total, searc
       <div className="catalogue-table-wrap"><table className="catalogue-table"><caption className="sr-only">Товари каталогу</caption><thead><tr><th scope="col">Товар</th><th scope="col">Артикул</th><th scope="col">Ціна</th><th scope="col">Залишок</th><th scope="col">Статус</th>{isOwner && <th scope="col"><span className="sr-only">Дії</span></th>}</tr></thead><tbody>{products.map((product) => <CatalogueRow isOwner={isOwner} key={product.id ?? product.sku} onEdit={() => setEditing(product)} product={product} />)}</tbody></table></div>
       <div className="catalogue-cards">{products.map((product) => <CatalogueCard isOwner={isOwner} key={product.id ?? product.sku} onEdit={() => setEditing(product)} product={product} />)}</div>
     </>}
-    {total > pageSize && <nav aria-label="Сторінки каталогу" className="catalogue-pagination"><button disabled={page <= 1} onClick={() => changePage(page - 1)} type="button">Попередня</button><span>Сторінка {page} з {pageCount}</span><button disabled={page >= pageCount} onClick={() => changePage(page + 1)} type="button">Наступна</button></nav>}
+    {total > 0 && <TablePagination ariaLabel="Сторінки каталогу" onPageChange={changePage} onPageSizeChange={changePageSize} page={page} pageSize={pageSize} total={total} />}
   </>;
 }
 
@@ -43,4 +44,4 @@ function CatalogueCard({ product, isOwner, onEdit }: { product: EditableProduct;
 
 function Status({ active }: { active: boolean }) { return <span className={`catalogue-status${active ? ' is-active' : ''}`}>{active ? 'Активний' : 'Неактивний'}</span>; }
 function priceLabel(product: EditableProduct) { return product.price === null || product.price === undefined ? '—' : new Intl.NumberFormat('uk-UA', { maximumFractionDigits: 2 }).format(product.price) + (product.currency ? ` ${product.currency}` : ''); }
-function catalogueUrl(query: string, page: number) { const params = new URLSearchParams(); if (query.trim()) params.set('search', query.trim()); if (page > 1) params.set('page', String(page)); const serialized = params.toString(); return serialized ? `/catalogue?${serialized}` : '/catalogue'; }
+function catalogueUrl(query: string, page: number, pageSize: number) { const params = new URLSearchParams(); if (query.trim()) params.set('search', query.trim()); if (page > 1) params.set('page', String(page)); if (pageSize !== 25) params.set('pageSize', String(pageSize)); const serialized = params.toString(); return serialized ? `/catalogue?${serialized}` : '/catalogue'; }
