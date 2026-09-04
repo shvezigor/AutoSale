@@ -109,9 +109,34 @@ describe('CatalogueSourcesService', () => {
       pendingReview: { runId: '77777777-7777-4777-8777-777777777777', headers: ['sku', 'name'] },
     });
     expect(prisma.catalogueImportRun.findFirst).toHaveBeenCalledWith(expect.objectContaining({
-      where: { tenantId, sourceId, status: { in: ['MAPPING_REVIEW', 'PREVIEW_READY'] } },
+      where: { tenantId, sourceId },
+      orderBy: { createdAt: 'desc' },
     }));
     expect(JSON.stringify(await service.getConfiguration(tenantId, sourceId))).not.toContain('private product');
+  });
+
+  it('does not expose an obsolete mapping review after a newer import completed', async () => {
+    const row = {
+      id: sourceId, type: 'GOOGLE_SHEETS', displayName: 'Каталог', status: 'ACTIVE',
+      spreadsheetId: 'private-sheet-id', sheetName: 'Товари', syncSchedule: 'DAILY',
+      lastSyncedAt: new Date('2026-09-01T09:00:00.000Z'), lastErrorSummary: null,
+      updatedAt: new Date('2026-09-01T09:00:00.000Z'),
+    };
+    const prisma = {
+      catalogueSource: { findFirst: vi.fn().mockResolvedValue(row) },
+      catalogueImportRun: { findFirst: vi.fn().mockResolvedValue({
+        id: '88888888-8888-4888-8888-888888888888',
+        status: 'COMPLETED',
+        sourceHeaders: ['sku', 'name'],
+      }) },
+    };
+    const service = new CatalogueSourcesService(prisma as never);
+
+    await expect(service.getConfiguration(tenantId, sourceId)).resolves.toMatchObject({ pendingReview: null });
+    expect(prisma.catalogueImportRun.findFirst).toHaveBeenCalledWith(expect.objectContaining({
+      where: { tenantId, sourceId },
+      orderBy: { createdAt: 'desc' },
+    }));
   });
 
   it('tests connectivity without returning rows and records only a safe failure category', async () => {

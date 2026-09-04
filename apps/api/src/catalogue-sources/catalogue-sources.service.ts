@@ -113,11 +113,14 @@ export class CatalogueSourcesService {
       where: { id: sourceId, tenantId, type: 'GOOGLE_SHEETS' },
     });
     if (!source) throw new NotFoundException('Catalogue source not found');
-    const pending = await this.prisma.catalogueImportRun.findFirst({
-      where: { tenantId, sourceId, status: { in: ['MAPPING_REVIEW', 'PREVIEW_READY'] } }, orderBy: { createdAt: 'desc' },
-      select: { id: true, sourceHeaders: true },
+    const latestRun = await this.prisma.catalogueImportRun.findFirst({
+      where: { tenantId, sourceId }, orderBy: { createdAt: 'desc' },
+      select: { id: true, status: true, sourceHeaders: true },
     });
-    return this.ownerView(source, pending ? { runId: pending.id, headers: safeHeaders(pending.sourceHeaders) } : null);
+    const pendingReview = latestRun && ['MAPPING_REVIEW', 'PREVIEW_READY'].includes(latestRun.status)
+      ? { runId: latestRun.id, headers: safeHeaders(latestRun.sourceHeaders) }
+      : null;
+    return this.ownerView(source, pendingReview);
   }
 
   async checkConnectivity(tenantId: string, sourceId: string) {
