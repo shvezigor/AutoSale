@@ -88,7 +88,7 @@ expect(created).toMatchObject({ tenantId, userId, readAt: null });
 
 - [ ] **Step 2: Run the test and verify the model is absent**
 
-Run: `pnpm --filter @autosale/database test -- notifications.postgres.spec.ts`  
+Run: `pnpm --filter @autosale/database test -- notifications.postgres.spec.ts`
 Expected: FAIL because `userNotification` is not generated.
 
 - [ ] **Step 3: Add schema and SQL migration**
@@ -127,7 +127,7 @@ The SQL creates the enum, table, two foreign keys with `ON DELETE CASCADE`, and 
 
 - [ ] **Step 4: Generate client and run database tests**
 
-Run: `pnpm --filter @autosale/database generate && pnpm --filter @autosale/database test`  
+Run: `pnpm --filter @autosale/database generate && pnpm --filter @autosale/database test`
 Expected: PASS.
 
 - [ ] **Step 5: Commit**
@@ -168,7 +168,7 @@ Assert `create()` rejects `https://evil.example`, `//evil.example`, and `/admin`
 
 - [ ] **Step 2: Verify service tests fail**
 
-Run: `pnpm --filter @autosale/api test -- notifications.service.spec.ts`  
+Run: `pnpm --filter @autosale/api test -- notifications.service.spec.ts`
 Expected: FAIL because the service does not exist.
 
 - [ ] **Step 3: Implement service and contracts**
@@ -191,7 +191,7 @@ export type CreateNotificationInput = {
 
 - [ ] **Step 4: Run service tests**
 
-Run: `pnpm --filter @autosale/api test -- notifications.service.spec.ts`  
+Run: `pnpm --filter @autosale/api test -- notifications.service.spec.ts`
 Expected: PASS.
 
 - [ ] **Step 5: Write failing controller tests**
@@ -226,7 +226,7 @@ Export `NotificationService` from the dynamic module so later business modules c
 
 - [ ] **Step 7: Run API tests and typecheck**
 
-Run: `pnpm --filter @autosale/api test && pnpm --filter @autosale/api typecheck`  
+Run: `pnpm --filter @autosale/api test && pnpm --filter @autosale/api typecheck`
 Expected: PASS.
 
 - [ ] **Step 8: Commit**
@@ -266,7 +266,7 @@ expect(screen.queryByText('Готово')).not.toBeInTheDocument();
 
 - [ ] **Step 2: Verify toast tests fail**
 
-Run: `pnpm --filter @autosale/web test -- toast-provider.spec.tsx`  
+Run: `pnpm --filter @autosale/web test -- toast-provider.spec.tsx`
 Expected: FAIL because provider is absent.
 
 - [ ] **Step 3: Implement toast provider**
@@ -295,7 +295,7 @@ Use existing `--accent`, `--surface`, `--border`, `--ink`, and `--muted`; add se
 
 - [ ] **Step 7: Run component tests and typecheck**
 
-Run: `pnpm --filter @autosale/web test -- toast-provider.spec.tsx activity-provider.spec.tsx loading-button.spec.tsx && pnpm --filter @autosale/web typecheck`  
+Run: `pnpm --filter @autosale/web test -- toast-provider.spec.tsx activity-provider.spec.tsx loading-button.spec.tsx && pnpm --filter @autosale/web typecheck`
 Expected: PASS.
 
 - [ ] **Step 8: Commit**
@@ -376,7 +376,7 @@ Use a 56px header, subtle bottom border, 40px minimum icon targets, 360px notifi
 
 - [ ] **Step 7: Run tests and typecheck**
 
-Run: `pnpm --filter @autosale/web test -- app-header.spec.tsx authenticated-shell.spec.tsx primary-navigation.spec.tsx && pnpm --filter @autosale/web typecheck`  
+Run: `pnpm --filter @autosale/web test -- app-header.spec.tsx authenticated-shell.spec.tsx primary-navigation.spec.tsx && pnpm --filter @autosale/web typecheck`
 Expected: PASS.
 
 - [ ] **Step 8: Commit**
@@ -413,7 +413,7 @@ For each page/component spec, assert the bell and profile trigger appear exactly
 
 - [ ] **Step 2: Verify tests fail**
 
-Run: `pnpm --filter @autosale/web test -- page.spec.tsx inbox-shell.spec.tsx route-skeleton.spec.tsx`  
+Run: `pnpm --filter @autosale/web test -- page.spec.tsx inbox-shell.spec.tsx route-skeleton.spec.tsx`
 Expected: FAIL because pages still render `PrimaryNavigation` directly.
 
 - [ ] **Step 3: Convert layouts incrementally**
@@ -426,7 +426,7 @@ Skeletons mirror the page hierarchy with three to eight restrained blocks, inclu
 
 - [ ] **Step 5: Run all web tests and build**
 
-Run: `pnpm --filter @autosale/web test && pnpm --filter @autosale/web typecheck && pnpm --filter @autosale/web build`  
+Run: `pnpm --filter @autosale/web test && pnpm --filter @autosale/web typecheck && pnpm --filter @autosale/web build`
 Expected: PASS.
 
 - [ ] **Step 6: Commit**
@@ -461,7 +461,7 @@ Wrap each network sequence once with `activity.run()`, use `LoadingButton`, and 
 
 - [ ] **Step 3: Run Google Sheets tests**
 
-Run: `pnpm --filter @autosale/web test -- google-sheets-settings-form.spec.tsx`  
+Run: `pnpm --filter @autosale/web test -- google-sheets-settings-form.spec.tsx`
 Expected: PASS.
 
 - [ ] **Step 4: Write failing tests for remaining mutation components**
@@ -474,7 +474,7 @@ Keep inline validation errors beside fields. Use toast only for operation outcom
 
 - [ ] **Step 6: Run targeted and full web tests**
 
-Run: `pnpm --filter @autosale/web test && pnpm --filter @autosale/web typecheck`  
+Run: `pnpm --filter @autosale/web test && pnpm --filter @autosale/web typecheck`
 Expected: PASS.
 
 - [ ] **Step 7: Commit**
@@ -536,15 +536,15 @@ For Google Sheets export failure, load `order.approvedBy` together with the expo
 
 - [ ] **Step 4: Run targeted API tests**
 
-Run: `pnpm --filter @autosale/api test -- catalogue-import.service.spec.ts catalogue-sources.service.spec.ts google-sheets-settings.service.spec.ts google-oauth.service.spec.ts instagram-oauth.service.spec.ts`  
+Run: `pnpm --filter @autosale/api test -- catalogue-import.service.spec.ts catalogue-sources.service.spec.ts google-sheets-settings.service.spec.ts google-oauth.service.spec.ts instagram-oauth.service.spec.ts`
 Expected: PASS.
 
-Run: `pnpm --filter @autosale/worker test -- google-sheets-sync.processor.spec.ts worker-notification.service.spec.ts`  
+Run: `pnpm --filter @autosale/worker test -- google-sheets-sync.processor.spec.ts worker-notification.service.spec.ts`
 Expected: PASS.
 
 - [ ] **Step 5: Run full API tests and typecheck**
 
-Run: `pnpm --filter @autosale/api test && pnpm --filter @autosale/api typecheck && pnpm --filter @autosale/worker test && pnpm --filter @autosale/worker typecheck`  
+Run: `pnpm --filter @autosale/api test && pnpm --filter @autosale/api typecheck && pnpm --filter @autosale/worker test && pnpm --filter @autosale/worker typecheck`
 Expected: PASS.
 
 - [ ] **Step 6: Commit**
@@ -589,17 +589,17 @@ Cover:
 
 - [ ] **Step 4: Run focused browser tests**
 
-Run: `pnpm test:e2e -- tests/notifications-ui.spec.ts`  
+Run: `pnpm test:e2e -- tests/notifications-ui.spec.ts`
 Expected: PASS.
 
 - [ ] **Step 5: Run complete verification**
 
-Run: `pnpm test && pnpm typecheck && pnpm build`  
+Run: `pnpm test && pnpm typecheck && pnpm build`
 Expected: all workspaces PASS.
 
 - [ ] **Step 6: Build and smoke-test Docker deployment**
 
-Run: `docker compose up -d --build`  
+Run: `docker compose up -d --build`
 Then verify `docker compose ps`, API health endpoint, login, settings, catalogue, orders, team, conversations, bell, profile menu, toast stack, and database migration status.
 
 - [ ] **Step 7: Commit verification artifacts**
@@ -611,5 +611,5 @@ git commit -m "test: verify notifications user experience"
 
 - [ ] **Step 8: Final branch review**
 
-Run: `git diff --check master...HEAD && git log --oneline master..HEAD`  
+Run: `git diff --check master...HEAD && git log --oneline master..HEAD`
 Review for secrets, raw customer data, duplicated loaders, inaccessible clickable divs, and unrelated worktree changes. Only then merge to `master`, push `origin/master`, rebuild Docker, and verify production at `https://sales-aito.com`.
