@@ -94,7 +94,7 @@ describe('CatalogueSourcesService', () => {
     const prisma = { catalogueSource: {
       findMany: vi.fn().mockResolvedValue([row]),
       findFirst: vi.fn().mockResolvedValue(row),
-    }, catalogueImportRun: { findFirst: vi.fn().mockResolvedValue({ id: '77777777-7777-4777-8777-777777777777', status: 'PREVIEW_READY', sourceHeaders: ['sku', 'name'] }) } };
+    }, catalogueImportRun: { findFirst: vi.fn().mockResolvedValue({ id: '77777777-7777-4777-8777-777777777777', status: 'PREVIEW_READY', sourceHeaders: ['sku', 'name'], createdRows: 2, updatedRows: 1, skippedRows: 0, failedRows: 0 }) } };
     const service = new CatalogueSourcesService(prisma as never, undefined, undefined, { serviceAccountEmail: 'reader@example.com' });
 
     const health = await service.listHealth(tenantId);
@@ -107,6 +107,7 @@ describe('CatalogueSourcesService', () => {
     await expect(service.getConfiguration(tenantId, sourceId)).resolves.toMatchObject({
       spreadsheetId: 'private-sheet-id', sheetName: 'Товари', syncSchedule: 'DAILY', serviceAccountEmail: 'reader@example.com',
       pendingReview: { runId: '77777777-7777-4777-8777-777777777777', headers: ['sku', 'name'] },
+      latestRun: { id: '77777777-7777-4777-8777-777777777777', status: 'PREVIEW_READY', createdRows: 2, updatedRows: 1, skippedRows: 0, failedRows: 0 },
     });
     expect(prisma.catalogueImportRun.findFirst).toHaveBeenCalledWith(expect.objectContaining({
       where: { tenantId, sourceId },
@@ -127,12 +128,12 @@ describe('CatalogueSourcesService', () => {
       catalogueImportRun: { findFirst: vi.fn().mockResolvedValue({
         id: '88888888-8888-4888-8888-888888888888',
         status: 'COMPLETED',
-        sourceHeaders: ['sku', 'name'],
+        sourceHeaders: ['sku', 'name'], createdRows: 4, updatedRows: 3, skippedRows: 1, failedRows: 0,
       }) },
     };
     const service = new CatalogueSourcesService(prisma as never);
 
-    await expect(service.getConfiguration(tenantId, sourceId)).resolves.toMatchObject({ pendingReview: null });
+    await expect(service.getConfiguration(tenantId, sourceId)).resolves.toMatchObject({ pendingReview: null, latestRun: { status: 'COMPLETED', createdRows: 4, updatedRows: 3, skippedRows: 1, failedRows: 0 } });
     expect(prisma.catalogueImportRun.findFirst).toHaveBeenCalledWith(expect.objectContaining({
       where: { tenantId, sourceId },
       orderBy: { createdAt: 'desc' },

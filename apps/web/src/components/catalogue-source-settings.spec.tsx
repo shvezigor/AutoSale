@@ -36,6 +36,25 @@ describe('CatalogueSourceSettings', () => {
     expect(await screen.findByText(/AutoSale розпізнає колонки/)).toBeInTheDocument();
   });
 
+  it('shows a concise completion summary and no preview for a completed import', () => {
+    render(<CatalogueSourceSettings role="OWNER" sources={[source]} configurations={[{
+      ...configuration,
+      latestRun: { id: 'run-1', status: 'COMPLETED', createdRows: 12, updatedRows: 3, skippedRows: 1, failedRows: 0 },
+    }]} />);
+    expect(screen.getByText('Готово')).toBeInTheDocument();
+    expect(screen.getByText('Додано: 12 · оновлено: 3 · пропущено: 1')).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /Перевірити/ })).not.toBeInTheDocument();
+  });
+
+  it('offers review only when the latest import is uncertain', () => {
+    render(<CatalogueSourceSettings role="OWNER" sources={[source]} configurations={[{
+      ...configuration,
+      latestRun: { id: 'run-review', status: 'MAPPING_REVIEW', createdRows: 0, updatedRows: 0, skippedRows: 0, failedRows: 0 },
+    }]} />);
+    expect(screen.getByText('Потрібна перевірка')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Перевірити сумнівні поля' })).toHaveAttribute('href', '/catalogue?review=run-review');
+  });
+
   it('shows managers only health without tenant data actions', () => {
     render(<CatalogueSourceSettings role="MANAGER" sources={[source]} configurations={[configuration]} />);
     expect(screen.getByText('Активне')).toBeInTheDocument();

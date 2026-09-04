@@ -12,6 +12,7 @@ export type CatalogueSourceConfiguration = CatalogueSourceHealth & {
   spreadsheetId: string | null; sheetName: string | null; syncSchedule: 'MANUAL' | 'HOURLY' | 'DAILY';
   serviceAccountEmail: string | null; authorizationAction: string;
   pendingReview?: { runId: string; headers: string[] } | null;
+  latestRun?: { id: string; status: string; createdRows: number; updatedRows: number; skippedRows: number; failedRows: number } | null;
 };
 
 export function CatalogueSourceSettings({
@@ -114,6 +115,7 @@ export function CatalogueSourceSettings({
     {!googleConnected && <p className="settings-step-notice">Під час вибору таблиці Google один раз попросить доступ до неї.</p>}
     <div className="data-source-actions"><GooglePickerButton label="Обрати Google-таблицю" connected={googleConnected} intent="catalogue" autoOpen={autoOpenPicker} disabled={pending} onSelected={(selection) => void selectSpreadsheet(selection)} /><span>або</span><button className="secondary-button" disabled={pending} type="button" onClick={() => fileInput.current?.click()}>Завантажити CSV або Excel</button><input ref={fileInput} className="sr-only" type="file" accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onChange={(event) => void uploadFile(event.target.files?.[0])} /></div>
     {spreadsheet && <div className="data-selection-summary"><span>Джерело товарів</span><strong>{displayName}</strong></div>}
+    {current?.latestRun && <ImportRunState run={current.latestRun} />}
     {tabs.length > 1 && <label className="data-tab-choice"><span>Вкладка з товарами</span><select aria-label="Вкладка Google таблиці" value={sheetName} onChange={(event) => setSheetName(event.target.value)}>{tabs.map((tab) => <option key={tab.sheetId} value={tab.title}>{tab.title}</option>)}</select></label>}
     <div className="catalogue-source-actions">
       {spreadsheet && <button disabled={pending || !displayName.trim() || !sheetName.trim()} onClick={() => void save()} type="button">Завантажити товари</button>}
@@ -121,6 +123,13 @@ export function CatalogueSourceSettings({
     </div>
     {message && <p className="save-success">{message}</p>}{error && <p className="save-error" role="alert">{error}</p>}
   </section>;
+}
+
+function ImportRunState({ run }: { run: NonNullable<CatalogueSourceConfiguration['latestRun']> }) {
+  if (run.status === 'COMPLETED') return <div className="data-import-result is-ready"><strong>Готово</strong><span>Додано: {run.createdRows} · оновлено: {run.updatedRows} · пропущено: {run.skippedRows}</span></div>;
+  if (run.status === 'MAPPING_REVIEW' || run.status === 'PREVIEW_READY') return <div className="data-import-result is-review"><strong>Потрібна перевірка</strong><span>AutoSale не впевнений у відповідності колонок.</span><a href={`/catalogue?review=${encodeURIComponent(run.id)}`}>Перевірити сумнівні поля</a></div>;
+  if (run.status === 'FAILED') return <div className="data-import-result is-error"><strong>Не вдалося завантажити</strong><span>Перевірте файл або спробуйте ще раз.</span></div>;
+  return <div className="data-import-result is-working" aria-live="polite"><strong>Розпізнаємо товари</strong><span>Обрано → аналізуємо → завантажуємо</span></div>;
 }
 
 function HealthList({ sources }: { sources: CatalogueSourceHealth[] }) {

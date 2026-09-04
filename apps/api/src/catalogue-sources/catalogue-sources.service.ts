@@ -56,7 +56,7 @@ export class CatalogueSourcesService {
         status: 'PENDING',
       },
     });
-    return this.ownerView(source, null);
+    return this.ownerView(source, null, null);
   }
 
   async update(tenantId: string, sourceId: string, input: CatalogueSourceInput) {
@@ -115,12 +115,19 @@ export class CatalogueSourcesService {
     if (!source) throw new NotFoundException('Catalogue source not found');
     const latestRun = await this.prisma.catalogueImportRun.findFirst({
       where: { tenantId, sourceId }, orderBy: { createdAt: 'desc' },
-      select: { id: true, status: true, sourceHeaders: true },
+      select: { id: true, status: true, sourceHeaders: true, createdRows: true, updatedRows: true, skippedRows: true, failedRows: true },
     });
     const pendingReview = latestRun && ['MAPPING_REVIEW', 'PREVIEW_READY'].includes(latestRun.status)
       ? { runId: latestRun.id, headers: safeHeaders(latestRun.sourceHeaders) }
       : null;
-    return this.ownerView(source, pendingReview);
+    return this.ownerView(source, pendingReview, latestRun ? {
+      id: latestRun.id,
+      status: latestRun.status,
+      createdRows: latestRun.createdRows,
+      updatedRows: latestRun.updatedRows,
+      skippedRows: latestRun.skippedRows,
+      failedRows: latestRun.failedRows,
+    } : null);
   }
 
   async checkConnectivity(tenantId: string, sourceId: string) {
@@ -184,7 +191,11 @@ export class CatalogueSourcesService {
     }
   }
 
-  private ownerView(source: SourceRow, pendingReview: { runId: string; headers: string[] } | null) {
+  private ownerView(
+    source: SourceRow,
+    pendingReview: { runId: string; headers: string[] } | null,
+    latestRun: { id: string; status: string; createdRows: number; updatedRows: number; skippedRows: number; failedRows: number } | null,
+  ) {
     return {
       id: source.id,
       type: source.type,
@@ -201,6 +212,7 @@ export class CatalogueSourcesService {
         ? 'CONNECTED_WITH_GOOGLE'
         : this.config.serviceAccountEmail ? 'SHARE_WITH_SERVICE_ACCOUNT' : 'CONFIGURE_SERVICE_ACCOUNT',
       pendingReview,
+      latestRun,
     };
   }
 
