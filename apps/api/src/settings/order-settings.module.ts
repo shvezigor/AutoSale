@@ -10,6 +10,7 @@ import { OrderSettingsService } from './order-settings.service.js';
 import { GoogleSheetsSettingsController } from './google-sheets-settings.controller.js';
 import { GoogleSheetsSettingsService } from './google-sheets-settings.service.js';
 import { GoogleFilesClient } from '../integrations/google-files.client.js';
+import { NotificationService } from '../notifications/notifications.service.js';
 
 @Module({})
 export class OrderSettingsModule {
@@ -25,7 +26,8 @@ export class OrderSettingsModule {
         },
         {
           provide: GoogleSheetsSettingsService,
-          useFactory: () => {
+          inject: [NotificationService],
+          useFactory: (notifications: NotificationService) => {
             const prisma = createPrismaClient(env.DATABASE_URL);
             const oauthTokens = env.GOOGLE_OAUTH_CLIENT_ID && env.GOOGLE_OAUTH_CLIENT_SECRET
               ? new GoogleOAuthTokenProvider({
@@ -57,6 +59,7 @@ export class OrderSettingsModule {
               env.GOOGLE_SERVICE_ACCOUNT_FILE ? createGoogleSheetsAdapter(env.GOOGLE_SERVICE_ACCOUNT_FILE) : undefined,
               { oauthRequired: oauth !== undefined },
               oauth,
+              notifications,
             );
           },
         },

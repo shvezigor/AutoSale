@@ -63,6 +63,7 @@ describe('CatalogueImportService', () => {
   let prisma: PrismaClient;
   let storage: MemoryStorage;
   let service: CatalogueImportService;
+  let notifications: { create: ReturnType<typeof vi.fn> };
   let tenantId: string;
   let otherTenantId: string;
 
@@ -86,7 +87,8 @@ describe('CatalogueImportService', () => {
     await prisma.catalogueMapping.deleteMany();
     await prisma.catalogueSource.deleteMany();
     storage = new MemoryStorage();
-    service = new CatalogueImportService(prisma, storage);
+    notifications = { create: vi.fn().mockResolvedValue(undefined) };
+    service = new CatalogueImportService(prisma, storage, undefined, notifications as never);
   });
 
   afterAll(async () => {
@@ -155,6 +157,9 @@ describe('CatalogueImportService', () => {
 
     expect(first).toEqual(second);
     expect(first).toMatchObject({ status: 'COMPLETED', totalRows: 4, validRows: 2, createdRows: 1, updatedRows: 1, skippedRows: 0, failedRows: 2 });
+    expect(notifications.create).toHaveBeenCalledWith(expect.objectContaining({
+      tenantId, userId: ownerUserId, type: 'SUCCESS', category: 'CATALOGUE_IMPORT_COMPLETED', actionUrl: '/catalogue',
+    }));
     const luna = await prisma.product.findUniqueOrThrow({ where: { tenantId_sku: { tenantId, sku: 'LUNA-01' } }, select: { name: true, description: true, price: true, aliases: true, active: true } });
     expect({ ...luna, price: Number(luna.price) }).toEqual({ name: 'Luna Lamp', description: 'Keep me', price: 1234.5, aliases: ['Moon', 'Night Light'], active: true });
     expect(await prisma.product.findUniqueOrThrow({ where: { tenantId_sku: { tenantId, sku: 'LEGACY-01' } }, select: { active: true } })).toEqual({ active: true });

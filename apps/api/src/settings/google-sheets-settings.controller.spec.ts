@@ -33,7 +33,7 @@ describe('GoogleSheetsSettingsController', () => {
 
   it('validates the configured destination', async () => {
     await request(app.getHttpServer()).post('/api/settings/google-sheets/validate').expect(201, { valid: true, missingHeaders: [], status: 'ACTIVE' });
-    expect(validate).toHaveBeenCalledWith(tenantId);
+    expect(validate).toHaveBeenCalledWith(tenantId, 'owner');
   });
 
   it('rejects an empty spreadsheet id', async () => {

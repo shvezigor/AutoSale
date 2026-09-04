@@ -4,9 +4,10 @@ import { basename, extname } from 'node:path';
 import { catalogueTargetFieldSchema, type CatalogueImportSummary, type CataloguePreview, type CatalogueTargetField } from '@autosale/contracts';
 import { buildCatalogueImportPlan, CatalogueImportLeaseLostError, importCatalogueTable, Prisma, type PrismaClient } from '@autosale/database';
 import { googleSheetsStructureFingerprint, type ObjectStorage } from '@autosale/integrations';
-import { BadRequestException, ConflictException, NotFoundException, ServiceUnavailableException, UnprocessableEntityException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Logger, NotFoundException, ServiceUnavailableException, UnprocessableEntityException } from '@nestjs/common';
 
 import { parseCatalogueSource, type ParsedCell, type ParsedTable } from './source-parser.js';
+import { NotificationService } from '../notifications/notifications.service.js';
 
 export const MAX_CATALOGUE_UPLOAD_BYTES = 5 * 1024 * 1024;
 const REMAPPABLE_STATUSES = ['UPLOADED', 'MAPPING', 'MAPPING_REVIEW', 'PREVIEW_READY'] as const;
@@ -55,10 +56,12 @@ type InternalPreviewRow = CataloguePreview['rows'][number] & {
 };
 
 export class CatalogueImportService {
+  private readonly logger = new Logger(CatalogueImportService.name);
   constructor(
     private readonly prisma: PrismaClient,
     private readonly storage: ObjectStorage,
     private readonly mappingQueue?: CatalogueMappingQueue,
+    private readonly notifications?: NotificationService,
   ) {}
 
   async upload(tenantId: string, userId: string, file: CatalogueUploadFile): Promise<CatalogueUploadResult> {
@@ -238,6 +241,7 @@ export class CatalogueImportService {
       await heartbeat?.assertOwned();
 
       const completed = await this.completeConfirmation(tenantId, runId, run, result, claim.lease);
+      await this.notify({ tenantId, userId, type: 'SUCCESS', category: 'CATALOGUE_IMPORT_COMPLETED', title: 'Каталог товарів оновлено', message: `Додано: ${result.createdRows}, оновлено: ${result.updatedRows}`, actionUrl: '/catalogue' });
       return mapSummary(completed);
     } catch (error) {
       await this.prisma.catalogueImportRun.updateMany({
@@ -253,10 +257,16 @@ export class CatalogueImportService {
           data: { status: 'ERROR', lastErrorSummary: 'IMPORT_FAILED', syncLeaseId: null, syncLeaseExpiresAt: null },
         });
       }
+      await this.notify({ tenantId, userId, type: 'ERROR', category: 'CATALOGUE_IMPORT_FAILED', title: 'Не вдалося оновити каталог', actionUrl: '/settings?tab=data' });
       throw error;
     } finally {
       await heartbeat?.stop();
     }
+  }
+
+  private async notify(input: Parameters<NotificationService['create']>[0]) {
+    try { await this.notifications?.create(input); }
+    catch { this.logger.warn(`notification_create_failed category=${input.category}`); }
   }
 
   private startLeaseHeartbeat(tenantId: string, sourceId: string, lease: { id: string; syncVersion: number; ttlMs: number }) {

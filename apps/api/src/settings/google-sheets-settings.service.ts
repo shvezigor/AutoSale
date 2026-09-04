@@ -1,6 +1,8 @@
 import type { PrismaClient } from '@autosale/database';
 import type { GoogleSheetsAdapter } from '@autosale/integrations';
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, Logger } from '@nestjs/common';
+
+import { NotificationService } from '../notifications/notifications.service.js';
 
 const requiredHeaders = ['order_id', 'created_at', 'status', 'channel', 'conversation_id', 'customer_name', 'customer_phone', 'sku', 'product_name', 'quantity', 'delivery_city', 'delivery_branch', 'manager_note', 'confidence', 'updated_at'];
 type OAuthDestinationAccess = {
@@ -9,11 +11,13 @@ type OAuthDestinationAccess = {
 };
 
 export class GoogleSheetsSettingsService {
+  private readonly logger = new Logger(GoogleSheetsSettingsService.name);
   constructor(
     private readonly prisma: PrismaClient,
     private readonly sheets?: GoogleSheetsAdapter,
     private readonly config: { oauthRequired?: boolean } = {},
     private readonly oauth?: OAuthDestinationAccess,
+    private readonly notifications?: NotificationService,
   ) {}
 
   async get(tenantId: string) {
@@ -31,7 +35,7 @@ export class GoogleSheetsSettingsService {
     return this.map(row);
   }
 
-  async validate(tenantId: string) {
+  async validate(tenantId: string, userId?: string) {
     const destination = await this.prisma.googleSheetsDestination.findUnique({ where: { tenantId } });
     if (!destination) throw new BadRequestException('Google Sheets destination is not configured');
     try {
@@ -48,6 +52,7 @@ export class GoogleSheetsSettingsService {
       const missingHeaders = requiredHeaders.filter((name) => !header.includes(name));
       const status = missingHeaders.length === 0 ? 'ACTIVE' : 'INVALID_HEADERS';
       await this.prisma.googleSheetsDestination.update({ where: { tenantId }, data: { status, lastValidatedAt: new Date(), errorSummary: missingHeaders.length ? `Missing headers: ${missingHeaders.join(', ')}` : null } });
+      if (initialized && userId) await this.notify({ tenantId, userId, type: 'SUCCESS', category: 'ORDER_SHEET_TEMPLATE_CREATED', title: 'Шаблон таблиці замовлень створено', actionUrl: '/settings?tab=data' });
       return { valid: missingHeaders.length === 0, missingHeaders, status, initialized };
     } catch (error) {
       if (error instanceof BadRequestException) throw error;
@@ -55,6 +60,11 @@ export class GoogleSheetsSettingsService {
       await this.prisma.googleSheetsDestination.update({ where: { tenantId }, data: { status: 'ERROR', lastValidatedAt: new Date(), errorSummary: summary } });
       throw new BadRequestException(summary);
     }
+  }
+
+  private async notify(input: Parameters<NotificationService['create']>[0]) {
+    try { await this.notifications?.create(input); }
+    catch { this.logger.warn(`notification_create_failed category=${input.category}`); }
   }
 
   private map(row: { spreadsheetId: string; sheetName: string; status: string; requiredHeaders: unknown; lastValidatedAt: Date | null; errorSummary: string | null }) {

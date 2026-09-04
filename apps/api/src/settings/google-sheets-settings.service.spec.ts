@@ -60,9 +60,14 @@ describe('GoogleSheetsSettingsService OAuth destination', () => {
       initializeHeaderIfEmpty: vi.fn().mockResolvedValue(true),
     };
     const oauth = { verifySpreadsheet: vi.fn(), sheetsForConnection: vi.fn().mockResolvedValue(sheets) };
-    const service = new GoogleSheetsSettingsService(prisma as never, undefined, { oauthRequired: true }, oauth);
+    const notifications = { create: vi.fn().mockResolvedValue(undefined) };
+    const service = new GoogleSheetsSettingsService(prisma as never, undefined, { oauthRequired: true }, oauth, notifications as never);
 
-    await expect(service.validate('tenant-a')).resolves.toMatchObject({ valid: true, status: 'ACTIVE', initialized: true });
+    await expect(service.validate('tenant-a', 'user-a')).resolves.toMatchObject({ valid: true, status: 'ACTIVE', initialized: true });
     expect(sheets.initializeHeaderIfEmpty).toHaveBeenCalledWith({ spreadsheetId: 'sheet-a', sheetName: 'Orders', headers: fullHeader });
+    expect(notifications.create).toHaveBeenCalledWith({
+      tenantId: 'tenant-a', userId: 'user-a', type: 'SUCCESS', category: 'ORDER_SHEET_TEMPLATE_CREATED',
+      title: 'Шаблон таблиці замовлень створено', actionUrl: '/settings?tab=data',
+    });
   });
 });

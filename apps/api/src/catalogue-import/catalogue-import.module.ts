@@ -6,6 +6,7 @@ import { Queue } from 'bullmq';
 
 import { CatalogueImportController } from './catalogue-import.controller.js';
 import { CatalogueImportService } from './catalogue-import.service.js';
+import { NotificationService } from '../notifications/notifications.service.js';
 
 @Module({})
 export class CatalogueImportModule {
@@ -15,7 +16,8 @@ export class CatalogueImportModule {
       controllers: [CatalogueImportController],
       providers: [{
         provide: CatalogueImportService,
-        useFactory: () => new CatalogueImportService(
+        inject: [NotificationService],
+        useFactory: (notifications: NotificationService) => new CatalogueImportService(
           createPrismaClient(env.DATABASE_URL),
           new S3ObjectStorage({
             endpoint: env.S3_ENDPOINT,
@@ -26,6 +28,7 @@ export class CatalogueImportModule {
             forcePathStyle: true,
           }),
           new Queue('catalogue', { connection: queueConnection(env.REDIS_URL) }),
+          notifications,
         ),
       }],
     };

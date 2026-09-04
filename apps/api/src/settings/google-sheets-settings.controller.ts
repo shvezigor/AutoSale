@@ -22,5 +22,5 @@ export class GoogleSheetsSettingsController {
     return this.settings.update(principal.tenantId!, parsed.data);
   }
 
-  @Post('validate') validate(@CurrentPrincipal() principal: AuthPrincipal) { return this.settings.validate(principal.tenantId!); }
+  @Post('validate') validate(@CurrentPrincipal() principal: AuthPrincipal) { return this.settings.validate(principal.tenantId!, principal.userId); }
 }
