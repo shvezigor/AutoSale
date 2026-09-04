@@ -88,6 +88,13 @@ enum CatalogueImportStatus {
   CANCELLED
 }
 
+enum NotificationType {
+  SUCCESS
+  ERROR
+  WARNING
+  INFO
+}
+
 model Tenant {
   id        String         @id @default(uuid()) @db.Uuid
   key       String         @unique
@@ -118,6 +125,7 @@ model Tenant {
   googleConnection GoogleConnection?
   googleOAuthAttempts GoogleOAuthAttempt[]
   googleCredentialCleanups GoogleCredentialCleanup[]
+  notifications UserNotification[]
 
   @@index([status])
   @@map("tenants")
@@ -276,9 +284,29 @@ model User {
   googleOAuthAttempts      GoogleOAuthAttempt[]
   googleConnections        GoogleConnection[] @relation("GoogleConnectionConnectedBy")
   googleIdentity           GoogleIdentity?
+  notifications            UserNotification[]
 
   @@index([status])
   @@map("users")
+}
+
+model UserNotification {
+  id        String           @id @default(uuid()) @db.Uuid
+  tenantId  String           @map("tenant_id") @db.Uuid
+  userId    String           @map("user_id") @db.Uuid
+  type      NotificationType
+  category  String
+  title     String
+  message   String?
+  actionUrl String?          @map("action_url")
+  readAt    DateTime?        @map("read_at")
+  createdAt DateTime         @default(now()) @map("created_at")
+  tenant    Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, userId, createdAt(sort: Desc)])
+  @@index([tenantId, userId, readAt])
+  @@map("user_notifications")
 }
 
 model GoogleIdentity {

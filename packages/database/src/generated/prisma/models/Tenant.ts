@@ -213,6 +213,7 @@ export type TenantWhereInput = {
   googleConnection?: Prisma.XOR<Prisma.GoogleConnectionNullableScalarRelationFilter, Prisma.GoogleConnectionWhereInput> | null
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptListRelationFilter
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupListRelationFilter
+  notifications?: Prisma.UserNotificationListRelationFilter
 }
 
 export type TenantOrderByWithRelationInput = {
@@ -245,6 +246,7 @@ export type TenantOrderByWithRelationInput = {
   googleConnection?: Prisma.GoogleConnectionOrderByWithRelationInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptOrderByRelationAggregateInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupOrderByRelationAggregateInput
+  notifications?: Prisma.UserNotificationOrderByRelationAggregateInput
 }
 
 export type TenantWhereUniqueInput = Prisma.AtLeast<{
@@ -280,6 +282,7 @@ export type TenantWhereUniqueInput = Prisma.AtLeast<{
   googleConnection?: Prisma.XOR<Prisma.GoogleConnectionNullableScalarRelationFilter, Prisma.GoogleConnectionWhereInput> | null
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptListRelationFilter
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupListRelationFilter
+  notifications?: Prisma.UserNotificationListRelationFilter
 }, "id" | "key">
 
 export type TenantOrderByWithAggregationInput = {
@@ -336,6 +339,7 @@ export type TenantCreateInput = {
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateInput = {
@@ -368,6 +372,7 @@ export type TenantUncheckedCreateInput = {
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUpdateInput = {
@@ -400,6 +405,7 @@ export type TenantUpdateInput = {
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateInput = {
@@ -432,6 +438,7 @@ export type TenantUncheckedUpdateInput = {
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateManyInput = {
@@ -596,6 +603,20 @@ export type TenantUpdateOneRequiredWithoutInstagramCredentialCleanupsNestedInput
   upsert?: Prisma.TenantUpsertWithoutInstagramCredentialCleanupsInput
   connect?: Prisma.TenantWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.TenantUpdateToOneWithWhereWithoutInstagramCredentialCleanupsInput, Prisma.TenantUpdateWithoutInstagramCredentialCleanupsInput>, Prisma.TenantUncheckedUpdateWithoutInstagramCredentialCleanupsInput>
+}
+
+export type TenantCreateNestedOneWithoutNotificationsInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutNotificationsInput, Prisma.TenantUncheckedCreateWithoutNotificationsInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutNotificationsInput
+  connect?: Prisma.TenantWhereUniqueInput
+}
+
+export type TenantUpdateOneRequiredWithoutNotificationsNestedInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutNotificationsInput, Prisma.TenantUncheckedCreateWithoutNotificationsInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutNotificationsInput
+  upsert?: Prisma.TenantUpsertWithoutNotificationsInput
+  connect?: Prisma.TenantWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TenantUpdateToOneWithWhereWithoutNotificationsInput, Prisma.TenantUpdateWithoutNotificationsInput>, Prisma.TenantUncheckedUpdateWithoutNotificationsInput>
 }
 
 export type TenantCreateNestedOneWithoutMembershipsInput = {
@@ -869,6 +890,7 @@ export type TenantCreateWithoutGoogleConnectionInput = {
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutGoogleConnectionInput = {
@@ -900,6 +922,7 @@ export type TenantUncheckedCreateWithoutGoogleConnectionInput = {
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutGoogleConnectionInput = {
@@ -947,6 +970,7 @@ export type TenantUpdateWithoutGoogleConnectionInput = {
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutGoogleConnectionInput = {
@@ -978,6 +1002,7 @@ export type TenantUncheckedUpdateWithoutGoogleConnectionInput = {
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutGoogleOAuthAttemptsInput = {
@@ -1009,6 +1034,7 @@ export type TenantCreateWithoutGoogleOAuthAttemptsInput = {
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutGoogleOAuthAttemptsInput = {
@@ -1040,6 +1066,7 @@ export type TenantUncheckedCreateWithoutGoogleOAuthAttemptsInput = {
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutGoogleOAuthAttemptsInput = {
@@ -1087,6 +1114,7 @@ export type TenantUpdateWithoutGoogleOAuthAttemptsInput = {
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutGoogleOAuthAttemptsInput = {
@@ -1118,6 +1146,7 @@ export type TenantUncheckedUpdateWithoutGoogleOAuthAttemptsInput = {
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutGoogleCredentialCleanupsInput = {
@@ -1149,6 +1178,7 @@ export type TenantCreateWithoutGoogleCredentialCleanupsInput = {
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutGoogleCredentialCleanupsInput = {
@@ -1180,6 +1210,7 @@ export type TenantUncheckedCreateWithoutGoogleCredentialCleanupsInput = {
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutGoogleCredentialCleanupsInput = {
@@ -1227,6 +1258,7 @@ export type TenantUpdateWithoutGoogleCredentialCleanupsInput = {
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutGoogleCredentialCleanupsInput = {
@@ -1258,6 +1290,7 @@ export type TenantUncheckedUpdateWithoutGoogleCredentialCleanupsInput = {
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutInstagramConnectionInput = {
@@ -1289,6 +1322,7 @@ export type TenantCreateWithoutInstagramConnectionInput = {
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutInstagramConnectionInput = {
@@ -1320,6 +1354,7 @@ export type TenantUncheckedCreateWithoutInstagramConnectionInput = {
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutInstagramConnectionInput = {
@@ -1367,6 +1402,7 @@ export type TenantUpdateWithoutInstagramConnectionInput = {
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutInstagramConnectionInput = {
@@ -1398,6 +1434,7 @@ export type TenantUncheckedUpdateWithoutInstagramConnectionInput = {
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutInstagramOAuthStatesInput = {
@@ -1429,6 +1466,7 @@ export type TenantCreateWithoutInstagramOAuthStatesInput = {
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutInstagramOAuthStatesInput = {
@@ -1460,6 +1498,7 @@ export type TenantUncheckedCreateWithoutInstagramOAuthStatesInput = {
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutInstagramOAuthStatesInput = {
@@ -1507,6 +1546,7 @@ export type TenantUpdateWithoutInstagramOAuthStatesInput = {
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutInstagramOAuthStatesInput = {
@@ -1538,6 +1578,7 @@ export type TenantUncheckedUpdateWithoutInstagramOAuthStatesInput = {
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutInstagramCredentialCleanupsInput = {
@@ -1569,6 +1610,7 @@ export type TenantCreateWithoutInstagramCredentialCleanupsInput = {
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutInstagramCredentialCleanupsInput = {
@@ -1600,6 +1642,7 @@ export type TenantUncheckedCreateWithoutInstagramCredentialCleanupsInput = {
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutInstagramCredentialCleanupsInput = {
@@ -1647,6 +1690,7 @@ export type TenantUpdateWithoutInstagramCredentialCleanupsInput = {
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutInstagramCredentialCleanupsInput = {
@@ -1674,6 +1718,151 @@ export type TenantUncheckedUpdateWithoutInstagramCredentialCleanupsInput = {
   securityAuditLogs?: Prisma.SecurityAuditLogUncheckedUpdateManyWithoutTenantNestedInput
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
+  googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutTenantNestedInput
+}
+
+export type TenantCreateWithoutNotificationsInput = {
+  id?: string
+  key: string
+  name: string
+  status?: $Enums.AccessStatus
+  createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
+  events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
+  conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
+  messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
+  settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
+  products?: Prisma.ProductCreateNestedManyWithoutTenantInput
+  catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
+  catalogueMappings?: Prisma.CatalogueMappingCreateNestedManyWithoutTenantInput
+  catalogueImportRuns?: Prisma.CatalogueImportRunCreateNestedManyWithoutTenantInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationCreateNestedOneWithoutTenantInput
+  orderExports?: Prisma.OrderExportCreateNestedManyWithoutTenantInput
+  memberships?: Prisma.TenantMembershipCreateNestedManyWithoutTenantInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutTenantInput
+  invitations?: Prisma.TenantInvitationCreateNestedManyWithoutTenantInput
+  securityAuditLogs?: Prisma.SecurityAuditLogCreateNestedManyWithoutTenantInput
+  instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
+  instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
+  googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
+  googleCredentialCleanups?: Prisma.GoogleCredentialCleanupCreateNestedManyWithoutTenantInput
+}
+
+export type TenantUncheckedCreateWithoutNotificationsInput = {
+  id?: string
+  key: string
+  name: string
+  status?: $Enums.AccessStatus
+  createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
+  events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
+  conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
+  messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
+  settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
+  catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
+  catalogueMappings?: Prisma.CatalogueMappingUncheckedCreateNestedManyWithoutTenantInput
+  catalogueImportRuns?: Prisma.CatalogueImportRunUncheckedCreateNestedManyWithoutTenantInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedCreateNestedOneWithoutTenantInput
+  orderExports?: Prisma.OrderExportUncheckedCreateNestedManyWithoutTenantInput
+  memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutTenantInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutTenantInput
+  invitations?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutTenantInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUncheckedCreateNestedManyWithoutTenantInput
+  instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
+  instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
+  googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+}
+
+export type TenantCreateOrConnectWithoutNotificationsInput = {
+  where: Prisma.TenantWhereUniqueInput
+  create: Prisma.XOR<Prisma.TenantCreateWithoutNotificationsInput, Prisma.TenantUncheckedCreateWithoutNotificationsInput>
+}
+
+export type TenantUpsertWithoutNotificationsInput = {
+  update: Prisma.XOR<Prisma.TenantUpdateWithoutNotificationsInput, Prisma.TenantUncheckedUpdateWithoutNotificationsInput>
+  create: Prisma.XOR<Prisma.TenantCreateWithoutNotificationsInput, Prisma.TenantUncheckedCreateWithoutNotificationsInput>
+  where?: Prisma.TenantWhereInput
+}
+
+export type TenantUpdateToOneWithWhereWithoutNotificationsInput = {
+  where?: Prisma.TenantWhereInput
+  data: Prisma.XOR<Prisma.TenantUpdateWithoutNotificationsInput, Prisma.TenantUncheckedUpdateWithoutNotificationsInput>
+}
+
+export type TenantUpdateWithoutNotificationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
+  conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
+  messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
+  settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
+  products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
+  catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
+  catalogueMappings?: Prisma.CatalogueMappingUpdateManyWithoutTenantNestedInput
+  catalogueImportRuns?: Prisma.CatalogueImportRunUpdateManyWithoutTenantNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUpdateOneWithoutTenantNestedInput
+  orderExports?: Prisma.OrderExportUpdateManyWithoutTenantNestedInput
+  memberships?: Prisma.TenantMembershipUpdateManyWithoutTenantNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutTenantNestedInput
+  invitations?: Prisma.TenantInvitationUpdateManyWithoutTenantNestedInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUpdateManyWithoutTenantNestedInput
+  instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
+  instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
+  googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
+  googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUpdateManyWithoutTenantNestedInput
+}
+
+export type TenantUncheckedUpdateWithoutNotificationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
+  conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
+  messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
+  settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
+  catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
+  catalogueMappings?: Prisma.CatalogueMappingUncheckedUpdateManyWithoutTenantNestedInput
+  catalogueImportRuns?: Prisma.CatalogueImportRunUncheckedUpdateManyWithoutTenantNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedUpdateOneWithoutTenantNestedInput
+  orderExports?: Prisma.OrderExportUncheckedUpdateManyWithoutTenantNestedInput
+  memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutTenantNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutTenantNestedInput
+  invitations?: Prisma.TenantInvitationUncheckedUpdateManyWithoutTenantNestedInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUncheckedUpdateManyWithoutTenantNestedInput
+  instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
+  instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
@@ -1709,6 +1898,7 @@ export type TenantCreateWithoutMembershipsInput = {
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutMembershipsInput = {
@@ -1740,6 +1930,7 @@ export type TenantUncheckedCreateWithoutMembershipsInput = {
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutMembershipsInput = {
@@ -1787,6 +1978,7 @@ export type TenantUpdateWithoutMembershipsInput = {
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutMembershipsInput = {
@@ -1818,6 +2010,7 @@ export type TenantUncheckedUpdateWithoutMembershipsInput = {
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutSessionsInput = {
@@ -1849,6 +2042,7 @@ export type TenantCreateWithoutSessionsInput = {
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutSessionsInput = {
@@ -1880,6 +2074,7 @@ export type TenantUncheckedCreateWithoutSessionsInput = {
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutSessionsInput = {
@@ -1927,6 +2122,7 @@ export type TenantUpdateWithoutSessionsInput = {
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutSessionsInput = {
@@ -1958,6 +2154,7 @@ export type TenantUncheckedUpdateWithoutSessionsInput = {
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutInvitationsInput = {
@@ -1989,6 +2186,7 @@ export type TenantCreateWithoutInvitationsInput = {
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutInvitationsInput = {
@@ -2020,6 +2218,7 @@ export type TenantUncheckedCreateWithoutInvitationsInput = {
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutInvitationsInput = {
@@ -2067,6 +2266,7 @@ export type TenantUpdateWithoutInvitationsInput = {
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutInvitationsInput = {
@@ -2098,6 +2298,7 @@ export type TenantUncheckedUpdateWithoutInvitationsInput = {
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutSecurityAuditLogsInput = {
@@ -2129,6 +2330,7 @@ export type TenantCreateWithoutSecurityAuditLogsInput = {
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutSecurityAuditLogsInput = {
@@ -2160,6 +2362,7 @@ export type TenantUncheckedCreateWithoutSecurityAuditLogsInput = {
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutSecurityAuditLogsInput = {
@@ -2207,6 +2410,7 @@ export type TenantUpdateWithoutSecurityAuditLogsInput = {
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutSecurityAuditLogsInput = {
@@ -2238,6 +2442,7 @@ export type TenantUncheckedUpdateWithoutSecurityAuditLogsInput = {
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutEventsInput = {
@@ -2269,6 +2474,7 @@ export type TenantCreateWithoutEventsInput = {
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutEventsInput = {
@@ -2300,6 +2506,7 @@ export type TenantUncheckedCreateWithoutEventsInput = {
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutEventsInput = {
@@ -2347,6 +2554,7 @@ export type TenantUpdateWithoutEventsInput = {
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutEventsInput = {
@@ -2378,6 +2586,7 @@ export type TenantUncheckedUpdateWithoutEventsInput = {
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutConversationsInput = {
@@ -2409,6 +2618,7 @@ export type TenantCreateWithoutConversationsInput = {
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutConversationsInput = {
@@ -2440,6 +2650,7 @@ export type TenantUncheckedCreateWithoutConversationsInput = {
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutConversationsInput = {
@@ -2487,6 +2698,7 @@ export type TenantUpdateWithoutConversationsInput = {
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutConversationsInput = {
@@ -2518,6 +2730,7 @@ export type TenantUncheckedUpdateWithoutConversationsInput = {
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutInstagramCustomerProfilesInput = {
@@ -2549,6 +2762,7 @@ export type TenantCreateWithoutInstagramCustomerProfilesInput = {
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutInstagramCustomerProfilesInput = {
@@ -2580,6 +2794,7 @@ export type TenantUncheckedCreateWithoutInstagramCustomerProfilesInput = {
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutInstagramCustomerProfilesInput = {
@@ -2627,6 +2842,7 @@ export type TenantUpdateWithoutInstagramCustomerProfilesInput = {
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutInstagramCustomerProfilesInput = {
@@ -2658,6 +2874,7 @@ export type TenantUncheckedUpdateWithoutInstagramCustomerProfilesInput = {
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutMessagesInput = {
@@ -2689,6 +2906,7 @@ export type TenantCreateWithoutMessagesInput = {
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutMessagesInput = {
@@ -2720,6 +2938,7 @@ export type TenantUncheckedCreateWithoutMessagesInput = {
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutMessagesInput = {
@@ -2767,6 +2986,7 @@ export type TenantUpdateWithoutMessagesInput = {
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutMessagesInput = {
@@ -2798,6 +3018,7 @@ export type TenantUncheckedUpdateWithoutMessagesInput = {
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutSheetsDestinationInput = {
@@ -2829,6 +3050,7 @@ export type TenantCreateWithoutSheetsDestinationInput = {
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutSheetsDestinationInput = {
@@ -2860,6 +3082,7 @@ export type TenantUncheckedCreateWithoutSheetsDestinationInput = {
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutSheetsDestinationInput = {
@@ -2907,6 +3130,7 @@ export type TenantUpdateWithoutSheetsDestinationInput = {
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutSheetsDestinationInput = {
@@ -2938,6 +3162,7 @@ export type TenantUncheckedUpdateWithoutSheetsDestinationInput = {
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutSettingsInput = {
@@ -2969,6 +3194,7 @@ export type TenantCreateWithoutSettingsInput = {
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutSettingsInput = {
@@ -3000,6 +3226,7 @@ export type TenantUncheckedCreateWithoutSettingsInput = {
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutSettingsInput = {
@@ -3047,6 +3274,7 @@ export type TenantUpdateWithoutSettingsInput = {
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutSettingsInput = {
@@ -3078,6 +3306,7 @@ export type TenantUncheckedUpdateWithoutSettingsInput = {
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutOrdersInput = {
@@ -3109,6 +3338,7 @@ export type TenantCreateWithoutOrdersInput = {
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutOrdersInput = {
@@ -3140,6 +3370,7 @@ export type TenantUncheckedCreateWithoutOrdersInput = {
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutOrdersInput = {
@@ -3187,6 +3418,7 @@ export type TenantUpdateWithoutOrdersInput = {
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutOrdersInput = {
@@ -3218,6 +3450,7 @@ export type TenantUncheckedUpdateWithoutOrdersInput = {
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutOrderExportsInput = {
@@ -3249,6 +3482,7 @@ export type TenantCreateWithoutOrderExportsInput = {
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutOrderExportsInput = {
@@ -3280,6 +3514,7 @@ export type TenantUncheckedCreateWithoutOrderExportsInput = {
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutOrderExportsInput = {
@@ -3327,6 +3562,7 @@ export type TenantUpdateWithoutOrderExportsInput = {
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutOrderExportsInput = {
@@ -3358,6 +3594,7 @@ export type TenantUncheckedUpdateWithoutOrderExportsInput = {
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutAuditLogsInput = {
@@ -3389,6 +3626,7 @@ export type TenantCreateWithoutAuditLogsInput = {
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutAuditLogsInput = {
@@ -3420,6 +3658,7 @@ export type TenantUncheckedCreateWithoutAuditLogsInput = {
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutAuditLogsInput = {
@@ -3467,6 +3706,7 @@ export type TenantUpdateWithoutAuditLogsInput = {
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutAuditLogsInput = {
@@ -3498,6 +3738,7 @@ export type TenantUncheckedUpdateWithoutAuditLogsInput = {
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutProductsInput = {
@@ -3529,6 +3770,7 @@ export type TenantCreateWithoutProductsInput = {
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutProductsInput = {
@@ -3560,6 +3802,7 @@ export type TenantUncheckedCreateWithoutProductsInput = {
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutProductsInput = {
@@ -3607,6 +3850,7 @@ export type TenantUpdateWithoutProductsInput = {
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutProductsInput = {
@@ -3638,6 +3882,7 @@ export type TenantUncheckedUpdateWithoutProductsInput = {
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutCatalogueSourcesInput = {
@@ -3669,6 +3914,7 @@ export type TenantCreateWithoutCatalogueSourcesInput = {
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutCatalogueSourcesInput = {
@@ -3700,6 +3946,7 @@ export type TenantUncheckedCreateWithoutCatalogueSourcesInput = {
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutCatalogueSourcesInput = {
@@ -3747,6 +3994,7 @@ export type TenantUpdateWithoutCatalogueSourcesInput = {
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutCatalogueSourcesInput = {
@@ -3778,6 +4026,7 @@ export type TenantUncheckedUpdateWithoutCatalogueSourcesInput = {
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutCatalogueMappingsInput = {
@@ -3809,6 +4058,7 @@ export type TenantCreateWithoutCatalogueMappingsInput = {
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutCatalogueMappingsInput = {
@@ -3840,6 +4090,7 @@ export type TenantUncheckedCreateWithoutCatalogueMappingsInput = {
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutCatalogueMappingsInput = {
@@ -3887,6 +4138,7 @@ export type TenantUpdateWithoutCatalogueMappingsInput = {
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutCatalogueMappingsInput = {
@@ -3918,6 +4170,7 @@ export type TenantUncheckedUpdateWithoutCatalogueMappingsInput = {
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutCatalogueImportRunsInput = {
@@ -3949,6 +4202,7 @@ export type TenantCreateWithoutCatalogueImportRunsInput = {
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutCatalogueImportRunsInput = {
@@ -3980,6 +4234,7 @@ export type TenantUncheckedCreateWithoutCatalogueImportRunsInput = {
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutCatalogueImportRunsInput = {
@@ -4027,6 +4282,7 @@ export type TenantUpdateWithoutCatalogueImportRunsInput = {
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutCatalogueImportRunsInput = {
@@ -4058,6 +4314,7 @@ export type TenantUncheckedUpdateWithoutCatalogueImportRunsInput = {
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 
@@ -4085,6 +4342,7 @@ export type TenantCountOutputType = {
   instagramCustomerProfiles: number
   googleOAuthAttempts: number
   googleCredentialCleanups: number
+  notifications: number
 }
 
 export type TenantCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -4107,6 +4365,7 @@ export type TenantCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions
   instagramCustomerProfiles?: boolean | TenantCountOutputTypeCountInstagramCustomerProfilesArgs
   googleOAuthAttempts?: boolean | TenantCountOutputTypeCountGoogleOAuthAttemptsArgs
   googleCredentialCleanups?: boolean | TenantCountOutputTypeCountGoogleCredentialCleanupsArgs
+  notifications?: boolean | TenantCountOutputTypeCountNotificationsArgs
 }
 
 /**
@@ -4252,6 +4511,13 @@ export type TenantCountOutputTypeCountGoogleCredentialCleanupsArgs<ExtArgs exten
   where?: Prisma.GoogleCredentialCleanupWhereInput
 }
 
+/**
+ * TenantCountOutputType without action
+ */
+export type TenantCountOutputTypeCountNotificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.UserNotificationWhereInput
+}
+
 
 export type TenantSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -4283,6 +4549,7 @@ export type TenantSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   googleConnection?: boolean | Prisma.Tenant$googleConnectionArgs<ExtArgs>
   googleOAuthAttempts?: boolean | Prisma.Tenant$googleOAuthAttemptsArgs<ExtArgs>
   googleCredentialCleanups?: boolean | Prisma.Tenant$googleCredentialCleanupsArgs<ExtArgs>
+  notifications?: boolean | Prisma.Tenant$notificationsArgs<ExtArgs>
   _count?: boolean | Prisma.TenantCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["tenant"]>
 
@@ -4338,6 +4605,7 @@ export type TenantInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   googleConnection?: boolean | Prisma.Tenant$googleConnectionArgs<ExtArgs>
   googleOAuthAttempts?: boolean | Prisma.Tenant$googleOAuthAttemptsArgs<ExtArgs>
   googleCredentialCleanups?: boolean | Prisma.Tenant$googleCredentialCleanupsArgs<ExtArgs>
+  notifications?: boolean | Prisma.Tenant$notificationsArgs<ExtArgs>
   _count?: boolean | Prisma.TenantCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type TenantIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -4369,6 +4637,7 @@ export type $TenantPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     googleConnection: Prisma.$GoogleConnectionPayload<ExtArgs> | null
     googleOAuthAttempts: Prisma.$GoogleOAuthAttemptPayload<ExtArgs>[]
     googleCredentialCleanups: Prisma.$GoogleCredentialCleanupPayload<ExtArgs>[]
+    notifications: Prisma.$UserNotificationPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -4794,6 +5063,7 @@ export interface Prisma__TenantClient<T, Null = never, ExtArgs extends runtime.T
   googleConnection<T extends Prisma.Tenant$googleConnectionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$googleConnectionArgs<ExtArgs>>): Prisma.Prisma__GoogleConnectionClient<runtime.Types.Result.GetResult<Prisma.$GoogleConnectionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   googleOAuthAttempts<T extends Prisma.Tenant$googleOAuthAttemptsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$googleOAuthAttemptsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$GoogleOAuthAttemptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   googleCredentialCleanups<T extends Prisma.Tenant$googleCredentialCleanupsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$googleCredentialCleanupsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$GoogleCredentialCleanupPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  notifications<T extends Prisma.Tenant$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserNotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -5751,6 +6021,30 @@ export type Tenant$googleCredentialCleanupsArgs<ExtArgs extends runtime.Types.Ex
   take?: number
   skip?: number
   distinct?: Prisma.GoogleCredentialCleanupScalarFieldEnum | Prisma.GoogleCredentialCleanupScalarFieldEnum[]
+}
+
+/**
+ * Tenant.notifications
+ */
+export type Tenant$notificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the UserNotification
+   */
+  select?: Prisma.UserNotificationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the UserNotification
+   */
+  omit?: Prisma.UserNotificationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserNotificationInclude<ExtArgs> | null
+  where?: Prisma.UserNotificationWhereInput
+  orderBy?: Prisma.UserNotificationOrderByWithRelationInput | Prisma.UserNotificationOrderByWithRelationInput[]
+  cursor?: Prisma.UserNotificationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.UserNotificationScalarFieldEnum | Prisma.UserNotificationScalarFieldEnum[]
 }
 
 /**

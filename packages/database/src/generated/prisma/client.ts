@@ -82,6 +82,11 @@ export type InstagramCredentialCleanup = Prisma.InstagramCredentialCleanupModel
  */
 export type User = Prisma.UserModel
 /**
+ * Model UserNotification
+ *
+ */
+export type UserNotification = Prisma.UserNotificationModel
+/**
  * Model GoogleIdentity
  *
  */

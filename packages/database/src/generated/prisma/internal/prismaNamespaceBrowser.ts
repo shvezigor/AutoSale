@@ -59,6 +59,7 @@ export const ModelName = {
   InstagramOAuthState: 'InstagramOAuthState',
   InstagramCredentialCleanup: 'InstagramCredentialCleanup',
   User: 'User',
+  UserNotification: 'UserNotification',
   GoogleIdentity: 'GoogleIdentity',
   GoogleSignInAttempt: 'GoogleSignInAttempt',
   TenantMembership: 'TenantMembership',
@@ -242,6 +243,22 @@ export const UserScalarFieldEnum = {
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
+
+
+export const UserNotificationScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  userId: 'userId',
+  type: 'type',
+  category: 'category',
+  title: 'title',
+  message: 'message',
+  actionUrl: 'actionUrl',
+  readAt: 'readAt',
+  createdAt: 'createdAt'
+} as const
+
+export type UserNotificationScalarFieldEnum = (typeof UserNotificationScalarFieldEnum)[keyof typeof UserNotificationScalarFieldEnum]
 
 
 export const GoogleIdentityScalarFieldEnum = {

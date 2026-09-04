@@ -118,3 +118,13 @@ export const CatalogueImportStatus = {
 } as const
 
 export type CatalogueImportStatus = (typeof CatalogueImportStatus)[keyof typeof CatalogueImportStatus]
+
+
+export const NotificationType = {
+  SUCCESS: 'SUCCESS',
+  ERROR: 'ERROR',
+  WARNING: 'WARNING',
+  INFO: 'INFO'
+} as const
+
+export type NotificationType = (typeof NotificationType)[keyof typeof NotificationType]
