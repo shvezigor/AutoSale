@@ -2,10 +2,11 @@
 
 import Link from 'next/link';
 import { type FormEvent, type ReactNode, useState } from 'react';
+import { GoogleSignInButton } from './google-sign-in-button';
 
 type SubmitResult = { ok: boolean; previewUrl?: string };
 
-export function LoginForm({ submit }: { submit: (input: { email: string; password: string }) => Promise<SubmitResult> }) {
+export function LoginForm({ submit, googleReturnPath }: { submit: (input: { email: string; password: string }) => Promise<SubmitResult>; googleReturnPath?: string }) {
   const [state, setState] = useState<'idle' | 'submitting' | 'error'>('idle');
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setState('submitting');
@@ -14,6 +15,7 @@ export function LoginForm({ submit }: { submit: (input: { email: string; passwor
     setState(result.ok ? 'idle' : 'error');
   }
   return <AuthFrame title="Вхід в AutoSale" description="Продовжуйте роботу із замовленнями та діалогами.">
+    <GoogleSignInButton returnPath={googleReturnPath} />
     <form className="auth-form" onSubmit={(event) => void onSubmit(event)}>
       <Field label="Email" name="email" type="email" autoComplete="email" />
       <Field label="Пароль" name="password" type="password" autoComplete="current-password" />
@@ -37,6 +39,7 @@ export function RegisterForm({ submit }: { submit: (input: { name: string; tenan
   }
   if (state === 'success') return <AuthFrame title="Перевірте вашу електронну пошту" description="Ми надіслали посилання для активації акаунта.">{previewUrl && <Link className="primary-button button-link" data-testid="dev-verification-link" href={previewUrl}>Активувати тестовий акаунт</Link>}<Link className="auth-link" href="/login">Перейти до входу</Link></AuthFrame>;
   return <AuthFrame title="Створіть робочий простір" description="Зареєструйте власника та організацію AutoSale.">
+    <GoogleSignInButton />
     <form className="auth-form" onSubmit={(event) => void onSubmit(event)}>
       <Field label="Ім’я" name="name" autoComplete="name" />
       <Field label="Назва організації" name="tenantName" autoComplete="organization" />

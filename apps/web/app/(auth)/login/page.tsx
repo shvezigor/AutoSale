@@ -8,7 +8,8 @@ import { safeNextPath } from '../../../src/auth/paths';
 
 function LoginContent() {
   const params = useSearchParams();
-  return <LoginForm submit={async (input) => { const result = await login(input); if (result.ok) window.location.assign(safeNextPath(params.get('next'))); return result; }} />;
+  const next = safeNextPath(params.get('next'));
+  return <LoginForm googleReturnPath={next} submit={async (input) => { const result = await login(input); if (result.ok) window.location.assign(next); return result; }} />;
 }
 
 export default function LoginPage() { return <Suspense fallback={<main className="route-state">Завантаження…</main>}><LoginContent /></Suspense>; }

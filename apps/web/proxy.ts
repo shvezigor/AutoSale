@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const authPaths = ['/login', '/register', '/verify-email', '/forgot-password', '/reset-password', '/invite'];
+const authPaths = ['/login', '/register', '/verify-email', '/forgot-password', '/reset-password', '/invite', '/onboarding/google'];
 const publicPaths = ['/privacy', '/terms'];
 
 export async function proxy(request: NextRequest) {

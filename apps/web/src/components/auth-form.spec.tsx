@@ -10,6 +10,8 @@ describe('authentication forms', () => {
     const submit = vi.fn().mockResolvedValue({ ok: false });
     render(<LoginForm submit={submit} />);
 
+    expect(screen.getByRole('button', { name: 'Продовжити з Google' })).toBeInTheDocument();
+
     fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'owner@example.com' } });
     fireEvent.change(screen.getByLabelText('Пароль'), { target: { value: 'wrong-password' } });
     fireEvent.click(screen.getByRole('button', { name: 'Увійти' }));
@@ -21,6 +23,8 @@ describe('authentication forms', () => {
   it('collects all required owner registration fields', async () => {
     const submit = vi.fn().mockResolvedValue({ ok: true });
     render(<RegisterForm submit={submit} />);
+
+    expect(screen.getByRole('button', { name: 'Продовжити з Google' })).toBeInTheDocument();
 
     fireEvent.change(screen.getByLabelText('Ім’я'), { target: { value: 'Олена' } });
     fireEvent.change(screen.getByLabelText('Назва організації'), { target: { value: 'Крамниця' } });
