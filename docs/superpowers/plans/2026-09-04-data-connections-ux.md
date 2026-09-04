@@ -132,8 +132,8 @@
 **Interfaces:**
 - No new interface; validates the integrated flow.
 
-- [ ] Run `pnpm test` and fix only regressions caused by this feature, adding a failing regression test before each fix.
-- [ ] Run `pnpm build` and resolve type/build failures.
+- [x] Run `pnpm test` and fix only regressions caused by this feature, adding a failing regression test before each fix.
+- [x] Run `pnpm build` and resolve type/build failures.
 - [ ] Run the settings and Google OAuth Playwright scenarios.
 - [ ] Start the Docker stack and inspect desktop/mobile `/settings?tab=data` in a real browser.
 - [ ] Record completed work and remaining real-service dependencies in `tasks/todo.md`.

@@ -678,3 +678,23 @@ The approved design is in `docs/superpowers/specs/2026-09-03-google-sign-in-desi
 - [ ] A private catalogue synchronizes into AutoSale.
 - [ ] An approved order reaches the selected sheet exactly once.
 - [ ] Revocation and disconnect stop access without losing internal business data.
+
+## Task 35: Simplify product data and order export setup
+
+**Status:** Implementation complete on `codex/data-connections-ux`; live Google acceptance remains.
+
+**Description:** Replace the technical Google configuration flow with one data workspace. Owners choose a Google Sheet or upload CSV/XLSX for products, while order export is connected through the same Picker flow. Confident mappings import automatically; uncertain mappings alone require review.
+
+**Acceptance criteria:**
+- [x] Settings contain a dedicated `Дані` tab with separate product-source and order-export cards.
+- [x] Google authorization resumes the intended Picker action automatically.
+- [x] Catalogue source selection triggers synchronization immediately.
+- [x] Confident AI mappings import without a preview; uncertain mappings retain manager review.
+- [x] Missing SKU is accepted and generated stably during import.
+- [x] A one-tab order spreadsheet is saved and validated automatically; multi-tab files ask for one tab choice.
+- [x] API source summaries remain tenant-safe and managers cannot inspect owner data.
+- [x] Automated regression suite passes: web 84, worker 96, API 273 tests; production web build passes.
+- [ ] Run the complete production OAuth → Picker → catalogue import → order export flow against a real customer spreadsheet.
+- [ ] Verify desktop/mobile layout in the deployed Docker stack after merge.
+
+**Dependencies:** Tasks 20–28. **Estimated scope:** Medium
