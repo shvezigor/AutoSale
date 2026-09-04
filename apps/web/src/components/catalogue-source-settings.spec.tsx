@@ -3,6 +3,10 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const { mutatingFetch } = vi.hoisted(() => ({ mutatingFetch: vi.fn() }));
 vi.mock('../auth/csrf-fetch', () => ({ mutatingFetch }));
+vi.mock('./google-picker-button', () => ({
+  GooglePickerButton: ({ label = 'Обрати Google-таблицю', onSelected }: { label?: string; onSelected: (selection: { fileId: string; name: string }) => void }) =>
+    <button type="button" onClick={() => onSelected({ fileId: 'sheet-new', name: 'Мої товари' })}>{label}</button>,
+}));
 
 import { CatalogueSourceSettings } from './catalogue-source-settings';
 
@@ -34,6 +38,20 @@ describe('CatalogueSourceSettings', () => {
     fireEvent.change(input, { target: { files: [file] } });
     await waitFor(() => expect(mutatingFetch).toHaveBeenCalledWith('/api/catalogue/imports/upload', expect.objectContaining({ method: 'POST', body: expect.any(FormData) })));
     expect(await screen.findByText(/AutoSale розпізнає колонки/)).toBeInTheDocument();
+  });
+
+  it('starts synchronization immediately after a Google table is saved', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({ spreadsheetId: 'sheet-new', tabs: [{ sheetId: 1, title: 'Товари' }] }) }));
+    mutatingFetch
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ ...configuration, id: 'source-new', spreadsheetId: 'sheet-new', displayName: 'Мої товари' }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ queued: true }) });
+    render(<CatalogueSourceSettings role="OWNER" sources={[]} configurations={[]} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Обрати Google-таблицю' }));
+    await screen.findByText(/Таблицю розпізнано/);
+    fireEvent.click(screen.getByRole('button', { name: 'Завантажити товари' }));
+
+    await waitFor(() => expect(mutatingFetch).toHaveBeenLastCalledWith('/api/catalogue/sources/source-new/sync', { method: 'POST' }));
   });
 
   it('shows a concise completion summary and no preview for a completed import', () => {

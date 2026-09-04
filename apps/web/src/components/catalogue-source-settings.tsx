@@ -72,7 +72,10 @@ export function CatalogueSourceSettings({
     const result = await mutate(current ? `/api/catalogue/sources/${current.id}` : '/api/catalogue/sources', {
       method: current ? 'PATCH' : 'POST', headers: { 'content-type': 'application/json' }, body,
     }, 'Джерело збережено');
-    if (result) setCurrent(result);
+    if (result) {
+      setCurrent(result);
+      await mutate(`/api/catalogue/sources/${result.id}/sync`, { method: 'POST' }, 'Таблицю підключено. Розпізнаємо й завантажуємо товари.');
+    }
   }
 
   async function selectSpreadsheet(selection: GooglePickerSelection) {
