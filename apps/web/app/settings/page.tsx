@@ -2,7 +2,7 @@ import { authenticatedApiFetch, getServerSession } from '../../src/auth/session'
 import type { PublicSession } from '../../../../packages/contracts/src/auth';
 import { GoogleSheetsSettingsForm, type GoogleSheetsSettings } from '../../src/components/google-sheets-settings-form';
 import { OrderSettingsForm, type OrderSettings } from '../../src/components/order-settings-form';
-import { PrimaryNavigation } from '../../src/components/primary-navigation';
+import { AuthenticatedShell } from '../../src/components/authenticated-shell';
 import { InstagramSettingsForm, type InstagramConnectionSummary } from '../../src/components/instagram-settings-form';
 import { DemoScenarioCard } from '../../src/components/demo-scenario-card';
 import { CatalogueSourceSettings, type CatalogueSourceConfiguration, type CatalogueSourceHealth } from '../../src/components/catalogue-source-settings';
@@ -87,7 +87,7 @@ function SettingsLayout({
       content: <section className="settings-section"><div className="settings-section-heading"><h2>Правила обробки</h2><p>Визначте, коли менеджер має перевірити замовлення, яке розпізнав AI.</p></div><OrderSettingsForm initial={settings} /><DemoScenarioCard /></section>,
     }] : []),
   ];
-  return <main className="settings-layout"><PrimaryNavigation active="settings" session={session} /><section className="settings-content"><header className="settings-header"><h1>Налаштування</h1><p>{isManager ? 'Переглядайте стан підключень.' : 'Керуйте підключеннями та автоматичною обробкою замовлень.'}</p></header><SettingsTabs initialTab={initialTab} tabs={tabs} /></section></main>;
+  return <AuthenticatedShell active="settings" session={session}><main className="settings-layout-content"><section className="settings-content"><header className="settings-header"><h1>Налаштування</h1><p>{isManager ? 'Переглядайте стан підключень.' : 'Керуйте підключеннями та автоматичною обробкою замовлень.'}</p></header><SettingsTabs initialTab={initialTab} tabs={tabs} /></section></main></AuthenticatedShell>;
 }
 
 function textParam(value: string | string[] | undefined) { return (Array.isArray(value) ? value[0] : value)?.trim().toLowerCase() ?? ''; }

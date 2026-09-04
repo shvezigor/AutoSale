@@ -1,11 +1,18 @@
 import { cleanup, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { InboxShell } from './inbox-shell';
 
 vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
 
-afterEach(cleanup);
+beforeEach(() => {
+  vi.stubGlobal('fetch', vi.fn(() => new Promise(() => undefined)));
+});
+
+afterEach(() => {
+  cleanup();
+  vi.unstubAllGlobals();
+});
 
 describe('InboxShell role navigation', () => {
   it('shows team only to the tenant owner while retaining settings access', () => {

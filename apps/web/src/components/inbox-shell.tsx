@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import type { PublicSession } from '../../../../packages/contracts/src/auth';
 
 import { ConversationList } from './conversation-list';
-import { PrimaryNavigation } from './primary-navigation';
+import { AuthenticatedShell } from './authenticated-shell';
 
 export function InboxShell({
   conversations,
@@ -17,8 +17,7 @@ export function InboxShell({
   children: ReactNode;
 }) {
   return (
-    <main className="app-shell">
-      <PrimaryNavigation active="conversations" session={session} />
+    <AuthenticatedShell active="conversations" session={session}><main className="app-shell app-shell-content">
       <section className="inbox-sidebar">
         <header className="inbox-heading">
           <h1>Діалоги</h1>
@@ -33,7 +32,7 @@ export function InboxShell({
         <footer className="dialog-count">Усього діалогів: {conversations.length}</footer>
       </section>
       {children}
-    </main>
+    </main></AuthenticatedShell>
   );
 }
 
