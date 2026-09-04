@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import { mutatingFetch } from '../auth/csrf-fetch';
 import { GooglePickerButton, type GooglePickerSelection } from './google-picker-button';
@@ -19,11 +19,13 @@ export function CatalogueSourceSettings({
   sources,
   configurations,
   googleConnected = true,
+  autoOpenPicker = false,
 }: {
   role: 'OWNER' | 'MANAGER';
   sources: CatalogueSourceHealth[];
   configurations: CatalogueSourceConfiguration[];
   googleConnected?: boolean;
+  autoOpenPicker?: boolean;
 }) {
   const [current, setCurrent] = useState(configurations[0] ?? null);
   const [displayName, setDisplayName] = useState(current?.displayName ?? 'Каталог Google Sheets');
@@ -34,6 +36,7 @@ export function CatalogueSourceSettings({
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [tabs, setTabs] = useState<Array<{ sheetId: number; title: string }>>([]);
+  const fileInput = useRef<HTMLInputElement>(null);
 
   if (role === 'MANAGER') return <HealthList sources={sources} />;
 
@@ -80,9 +83,24 @@ export function CatalogueSourceSettings({
       setSpreadsheet(body.spreadsheetId);
       setTabs(body.tabs);
       setSheetName(body.tabs[0]!.title);
-      setMessage('Таблицю каталогу перевірено.');
+      setDisplayName(selection.name);
+      setMessage(body.tabs.length === 1 ? 'Таблицю розпізнано. Натисніть «Завантажити товари».' : 'Оберіть вкладку з товарами.');
     } catch (reason) { setError(reason instanceof Error ? reason.message : 'Не вдалося перевірити таблицю'); }
     finally { setPending(false); }
+  }
+
+  async function uploadFile(file: File | undefined) {
+    if (!file) return;
+    setPending(true); setMessage(null); setError(null);
+    try {
+      const form = new FormData();
+      form.set('file', file);
+      const response = await mutatingFetch('/api/catalogue/imports/upload', { method: 'POST', body: form });
+      const body = await response.json() as { status?: string; message?: string };
+      if (!response.ok) throw new Error(body.message ?? 'Не вдалося завантажити файл');
+      setMessage(body.status === 'COMPLETED' ? 'Готово — товари завантажено.' : 'Файл прийнято. AutoSale розпізнає колонки й завантажить товари.');
+    } catch (reason) { setError(reason instanceof Error ? reason.message : 'Не вдалося завантажити файл'); }
+    finally { setPending(false); if (fileInput.current) fileInput.current.value = ''; }
   }
 
   async function remove() {
@@ -91,26 +109,15 @@ export function CatalogueSourceSettings({
     if (result) select(null);
   }
 
-  return <section className="catalogue-source-settings" aria-labelledby="catalogue-source-title">
-    <div className="catalogue-source-heading"><div><h2 id="catalogue-source-title">Google Sheets джерело</h2><p>Синхронізуйте товари з окремої таблиці, не змінюючи експорт замовлень.</p></div>{current && <span className={`catalogue-status ${current.status === 'ACTIVE' ? 'is-active' : ''}`}>{statusLabel(current.status)}</span>}</div>
+  return <section className="catalogue-source-settings data-task-card" aria-labelledby="catalogue-source-title">
+    <div className="catalogue-source-heading"><div><h2 id="catalogue-source-title">Товари</h2><p>Оберіть таблицю або файл — AutoSale сам розпізнає колонки та підготує каталог.</p></div>{current && <span className={`catalogue-status ${current.status === 'ACTIVE' ? 'is-active' : ''}`}>{statusLabel(current.status)}</span>}</div>
+    {!googleConnected && <p className="settings-step-notice">Під час вибору таблиці Google один раз попросить доступ до неї.</p>}
+    <div className="data-source-actions"><GooglePickerButton label="Обрати Google-таблицю" connected={googleConnected} intent="catalogue" autoOpen={autoOpenPicker} disabled={pending} onSelected={(selection) => void selectSpreadsheet(selection)} /><span>або</span><button className="secondary-button" disabled={pending} type="button" onClick={() => fileInput.current?.click()}>Завантажити CSV або Excel</button><input ref={fileInput} className="sr-only" type="file" accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onChange={(event) => void uploadFile(event.target.files?.[0])} /></div>
+    {spreadsheet && <div className="data-selection-summary"><span>Джерело товарів</span><strong>{displayName}</strong></div>}
+    {tabs.length > 1 && <label className="data-tab-choice"><span>Вкладка з товарами</span><select aria-label="Вкладка Google таблиці" value={sheetName} onChange={(event) => setSheetName(event.target.value)}>{tabs.map((tab) => <option key={tab.sheetId} value={tab.title}>{tab.title}</option>)}</select></label>}
     <div className="catalogue-source-actions">
-      <label><span>Оберіть джерело</span><select aria-label="Оберіть джерело" value={current?.id ?? ''} onChange={(event) => select(configurations.find((item) => item.id === event.target.value) ?? null)}><option value="">Нове джерело</option>{configurations.map((item) => <option key={item.id} value={item.id}>{item.displayName}</option>)}</select></label>
-      <button className="secondary-button" type="button" onClick={() => select(null)}>Додати джерело</button>
-    </div>
-    {!googleConnected && <p className="settings-step-notice">Спочатку підключіть Google-акаунт.</p>}
-    <GooglePickerButton disabled={pending || !googleConnected} onSelected={(selection) => void selectSpreadsheet(selection)} />
-    <div className="catalogue-source-grid">
-      <label><span>Назва джерела</span><input aria-label="Назва джерела" value={displayName} onChange={(event) => setDisplayName(event.target.value)} /></label>
-      <label><span>Google таблиця: URL або ID</span><input aria-label="Google таблиця" value={spreadsheet} onChange={(event) => setSpreadsheet(event.target.value)} /></label>
-      <label><span>Вкладка</span>{tabs.length > 0 ? <select aria-label="Вкладка Google таблиці" value={sheetName} onChange={(event) => setSheetName(event.target.value)}>{tabs.map((tab) => <option key={tab.sheetId} value={tab.title}>{tab.title}</option>)}</select> : <input aria-label="Вкладка Google таблиці" value={sheetName} onChange={(event) => setSheetName(event.target.value)} />}</label>
-      <label><span>Розклад синхронізації</span><select aria-label="Розклад синхронізації" value={schedule} onChange={(event) => setSchedule(event.target.value as typeof schedule)}><option value="MANUAL">Лише вручну</option><option value="HOURLY">Щогодини</option><option value="DAILY">Щодня</option></select></label>
-    </div>
-    <p className="catalogue-source-hint">Оберіть приватну таблицю через Google Picker. AutoSale збереже лише посилання на файл і вкладку, а не ваші ключі.</p>
-    <div className="catalogue-source-actions">
-      <button disabled={pending || !displayName.trim() || !spreadsheet.trim() || !sheetName.trim()} onClick={() => void save()} type="button">Зберегти джерело</button>
-      <button className="secondary-button" disabled={pending || !current} onClick={() => current && void mutate(`/api/catalogue/sources/${current.id}/check`, { method: 'POST' }, 'Доступ підтверджено')} type="button">Перевірити доступ</button>
-      <button className="secondary-button" disabled={pending || !current} onClick={() => current && void mutate(`/api/catalogue/sources/${current.id}/sync`, { method: 'POST' }, 'Синхронізацію заплановано')} type="button">Синхронізувати зараз</button>
-      {current && <button className="text-button" disabled={pending} onClick={() => void remove()} type="button">Видалити джерело</button>}
+      {spreadsheet && <button disabled={pending || !displayName.trim() || !sheetName.trim()} onClick={() => void save()} type="button">Завантажити товари</button>}
+      {current && <button className="text-button" disabled={pending} onClick={() => void remove()} type="button">Замінити джерело</button>}
     </div>
     {message && <p className="save-success">{message}</p>}{error && <p className="save-error" role="alert">{error}</p>}
   </section>;

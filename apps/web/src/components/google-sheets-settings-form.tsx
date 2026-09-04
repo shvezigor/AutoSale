@@ -13,7 +13,7 @@ export interface GoogleSheetsSettings {
   errorSummary: string | null;
 }
 
-export function GoogleSheetsSettingsForm({ initial, googleConnected = true }: { initial: GoogleSheetsSettings; googleConnected?: boolean }) {
+export function GoogleSheetsSettingsForm({ initial, googleConnected = true, autoOpenPicker = false }: { initial: GoogleSheetsSettings; googleConnected?: boolean; autoOpenPicker?: boolean }) {
   const [settings, setSettings] = useState(initial);
   const [spreadsheetId, setSpreadsheetId] = useState(initial.spreadsheetId ?? '');
   const [sheetName, setSheetName] = useState(initial.sheetName);
@@ -60,13 +60,13 @@ export function GoogleSheetsSettingsForm({ initial, googleConnected = true }: { 
     finally { setPending(false); }
   }
 
-  return <section className="settings-card sheets-card" aria-labelledby="sheets-title">
-    <div className="settings-card-heading"><div><h2 id="sheets-title">Google Sheets</h2><p>Таблиця для підтверджених замовлень.</p></div><span className={`connection-status status-${settings.status.toLowerCase()}`}>{statusLabel(settings.status)}</span></div>
-    {!googleConnected && <p className="settings-step-notice">Крок 1: спочатку підключіть Google-акаунт вище.</p>}
-    <GooglePickerButton disabled={pending || !googleConnected} onSelected={(selection) => void selectSpreadsheet(selection)} />
-    <div className="sheets-fields"><label><span>ID Google таблиці</span><input aria-label="ID Google таблиці" value={spreadsheetId} onChange={(event) => setSpreadsheetId(event.target.value)} placeholder="Обирається через Google Picker" /></label><label><span>Назва вкладки</span>{tabs.length > 0 ? <select aria-label="Назва вкладки" value={sheetName} onChange={(event) => setSheetName(event.target.value)}>{tabs.map((tab) => <option key={tab.sheetId} value={tab.title}>{tab.title}</option>)}</select> : <input aria-label="Назва вкладки" value={sheetName} onChange={(event) => setSheetName(event.target.value)} />}</label></div>
-    <p className="sheets-hint">Підключіть Google-акаунт і оберіть таблицю у Picker. Секретні ключі та refresh token у браузер не передаються.</p>
-    <div className="settings-actions"><button disabled={pending || !spreadsheetId.trim() || !sheetName.trim()} onClick={() => void save()} type="button">Зберегти Google Sheets</button><button className="secondary-button" disabled={pending || settings.status === 'NOT_CONFIGURED'} onClick={() => void validate()} type="button">Перевірити доступ</button>{message && <span className="save-success">{message}</span>}{error && <span className="save-error" role="alert">{error}</span>}</div>
+  return <section className="settings-card sheets-card data-task-card" aria-labelledby="sheets-title">
+    <div className="settings-card-heading"><div><h2 id="sheets-title">Експорт замовлень</h2><p>Підтверджені замовлення автоматично записуватимуться у вибрану таблицю.</p></div><span className={`connection-status status-${settings.status.toLowerCase()}`}>{statusLabel(settings.status)}</span></div>
+    {!googleConnected && <p className="settings-step-notice">Під час вибору Google один раз попросить доступ до обраної таблиці.</p>}
+    <GooglePickerButton label="Обрати таблицю для замовлень" connected={googleConnected} intent="orders" autoOpen={autoOpenPicker} disabled={pending} onSelected={(selection) => void selectSpreadsheet(selection)} />
+    {spreadsheetId && <div className="data-selection-summary"><span>Таблицю обрано</span><strong>{sheetName || 'Оберіть вкладку'}</strong></div>}
+    {tabs.length > 1 && <label className="data-tab-choice"><span>Куди записувати замовлення</span><select aria-label="Назва вкладки" value={sheetName} onChange={(event) => setSheetName(event.target.value)}>{tabs.map((tab) => <option key={tab.sheetId} value={tab.title}>{tab.title}</option>)}</select></label>}
+    <div className="settings-actions">{spreadsheetId && <button disabled={pending || !sheetName.trim()} onClick={() => void save()} type="button">Зберегти підключення</button>}<button className="text-button" disabled={pending || settings.status === 'NOT_CONFIGURED'} onClick={() => void validate()} type="button">Перевірити</button>{message && <span className="save-success">{message}</span>}{error && <span className="save-error" role="alert">{error}</span>}</div>
   </section>;
 }
 

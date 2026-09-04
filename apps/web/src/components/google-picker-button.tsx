@@ -1,15 +1,26 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { mutatingFetch } from '../auth/csrf-fetch';
 
 export type GooglePickerSelection = { fileId: string; name: string };
 export type GooglePickerLauncher = () => Promise<GooglePickerSelection | null>;
 
 export function GooglePickerButton({
+  label = 'Обрати Google-таблицю',
+  connected = true,
+  intent = 'catalogue',
+  navigate = (url) => window.location.assign(url),
+  autoOpen = false,
   disabled = false,
   onSelected,
   pickerLauncher = openGooglePicker,
 }: {
+  label?: string;
+  connected?: boolean;
+  intent?: 'catalogue' | 'orders';
+  navigate?: (url: string) => void;
+  autoOpen?: boolean;
   disabled?: boolean;
   onSelected: (selection: GooglePickerSelection) => void;
   pickerLauncher?: GooglePickerLauncher;
@@ -17,11 +28,28 @@ export function GooglePickerButton({
   const [pending, setPending] = useState(false);
   const [selectedName, setSelectedName] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const autoOpened = useRef(false);
+
+  useEffect(() => {
+    if (!autoOpen || autoOpened.current || disabled) return;
+    autoOpened.current = true;
+    void choose();
+  }, [autoOpen, disabled]);
 
   async function choose() {
     setPending(true);
     setError(null);
     try {
+      if (!connected) {
+        const response = await mutatingFetch('/api/integrations/google/connect', {
+          method: 'POST', headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ returnPath: `/settings?tab=data&action=pick-${intent}` }),
+        });
+        const body = await response.json() as { authorizationUrl?: string; message?: string };
+        if (!response.ok || !body.authorizationUrl) throw new Error(body.message ?? 'Google authorization failed');
+        navigate(body.authorizationUrl);
+        return;
+      }
       const selection = await pickerLauncher();
       if (selection) {
         setSelectedName(selection.name);
@@ -36,7 +64,7 @@ export function GooglePickerButton({
 
   return <div className="google-picker-control">
     <button type="button" className="secondary-button" disabled={disabled || pending} onClick={() => void choose()}>
-      {pending ? 'Відкриваємо Google…' : 'Обрати Google таблицю'}
+      {pending ? 'Відкриваємо Google…' : label}
     </button>
     {selectedName && <span className="save-success">Обрано: {selectedName}</span>}
     {error && <span className="save-error" role="alert">{error}</span>}

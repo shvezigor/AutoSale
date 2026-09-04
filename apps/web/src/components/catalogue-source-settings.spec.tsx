@@ -12,60 +12,34 @@ const source = {
 };
 const configuration = {
   ...source, spreadsheetId: 'sheet-id', sheetName: 'Товари',
-  serviceAccountEmail: 'reader@example.iam.gserviceaccount.com', authorizationAction: 'SHARE_WITH_SERVICE_ACCOUNT',
-  syncSchedule: 'MANUAL' as const,
+  serviceAccountEmail: null, authorizationAction: 'GOOGLE_OAUTH', syncSchedule: 'MANUAL' as const,
 };
 
-afterEach(() => { cleanup(); mutatingFetch.mockReset(); });
+afterEach(() => { cleanup(); mutatingFetch.mockReset(); vi.unstubAllGlobals(); });
 
 describe('CatalogueSourceSettings', () => {
-  it('supports adding, selecting, and editing multiple independent sources', async () => {
-    const second = { ...source, id: '55555555-5555-4555-8555-555555555555', displayName: 'Wholesale' };
-    const secondConfiguration = { ...configuration, ...second, spreadsheetId: 'wholesale-sheet' };
-    mutatingFetch.mockResolvedValueOnce(response(secondConfiguration));
-    render(<CatalogueSourceSettings role="OWNER" sources={[source, second]} configurations={[configuration, secondConfiguration]} />);
-
-    fireEvent.change(screen.getByLabelText('Оберіть джерело'), { target: { value: second.id } });
-    expect(screen.getByLabelText('Google таблиця')).toHaveValue('wholesale-sheet');
-    fireEvent.click(screen.getByRole('button', { name: 'Додати джерело' }));
-    expect(screen.getByLabelText('Google таблиця')).toHaveValue('');
-    fireEvent.change(screen.getByLabelText('Назва джерела'), { target: { value: 'Retail' } });
-    fireEvent.change(screen.getByLabelText('Google таблиця'), { target: { value: 'retail-sheet' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Зберегти джерело' }));
-    await waitFor(() => expect(mutatingFetch).toHaveBeenCalledWith('/api/catalogue/sources', expect.objectContaining({ method: 'POST' })));
+  it('presents Google Sheets and local file as the two product source actions', () => {
+    render(<CatalogueSourceSettings role="OWNER" sources={[]} configurations={[]} />);
+    expect(screen.getByRole('heading', { name: 'Товари' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Обрати Google-таблицю' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Завантажити CSV або Excel' })).toBeInTheDocument();
+    expect(screen.queryByLabelText('Google таблиця')).not.toBeInTheDocument();
   });
 
-  it('lets an owner save a tab and schedule, test access, and synchronize now without collecting credentials', async () => {
-    mutatingFetch
-      .mockResolvedValueOnce(response({ ...configuration, syncSchedule: 'HOURLY' }))
-      .mockResolvedValueOnce(response({ connected: true, headers: ['SKU', 'Name'], fingerprint: 'fingerprint' }))
-      .mockResolvedValueOnce(response({ queued: true, sourceId: source.id }));
-    render(<CatalogueSourceSettings role="OWNER" sources={[source]} configurations={[configuration]} />);
-
-    fireEvent.change(screen.getByLabelText('Розклад синхронізації'), { target: { value: 'HOURLY' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Зберегти джерело' }));
-    await waitFor(() => expect(screen.getByText('Джерело збережено')).toBeInTheDocument());
-    fireEvent.click(screen.getByRole('button', { name: 'Перевірити доступ' }));
-    await waitFor(() => expect(screen.getByText('Доступ підтверджено')).toBeInTheDocument());
-    fireEvent.click(screen.getByRole('button', { name: 'Синхронізувати зараз' }));
-    await waitFor(() => expect(screen.getByText('Синхронізацію заплановано')).toBeInTheDocument());
-
-    expect(mutatingFetch).toHaveBeenCalledWith(`/api/catalogue/sources/${source.id}`, expect.objectContaining({ method: 'PATCH', body: expect.stringContaining('"syncSchedule":"HOURLY"') }));
-    expect(mutatingFetch).toHaveBeenCalledWith(`/api/catalogue/sources/${source.id}/check`, { method: 'POST' });
-    expect(mutatingFetch).toHaveBeenCalledWith(`/api/catalogue/sources/${source.id}/sync`, { method: 'POST' });
-    expect(screen.getByText(/Оберіть приватну таблицю через Google Picker/)).toBeInTheDocument();
-    expect(screen.queryByLabelText(/private key|credential|json/i)).not.toBeInTheDocument();
+  it('uploads a local catalogue into the existing import pipeline', async () => {
+    mutatingFetch.mockResolvedValueOnce({ ok: true, json: async () => ({ status: 'UPLOADED' }) });
+    render(<CatalogueSourceSettings role="OWNER" sources={[]} configurations={[]} />);
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    const file = new File(['Name,Price\nСукня,1200'], 'products.csv', { type: 'text/csv' });
+    fireEvent.change(input, { target: { files: [file] } });
+    await waitFor(() => expect(mutatingFetch).toHaveBeenCalledWith('/api/catalogue/imports/upload', expect.objectContaining({ method: 'POST', body: expect.any(FormData) })));
+    expect(await screen.findByText(/AutoSale розпізнає колонки/)).toBeInTheDocument();
   });
 
-  it('shows a manager only health and last synchronization time', () => {
-    render(<CatalogueSourceSettings role="MANAGER" sources={[source]} configurations={[]} />);
-
+  it('shows managers only health without tenant data actions', () => {
+    render(<CatalogueSourceSettings role="MANAGER" sources={[source]} configurations={[configuration]} />);
     expect(screen.getByText('Активне')).toBeInTheDocument();
-    expect(screen.getByText(/01\.09\.2026/)).toBeInTheDocument();
-    expect(screen.queryByLabelText(/Google таблиця/i)).not.toBeInTheDocument();
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
     expect(screen.queryByText('sheet-id')).not.toBeInTheDocument();
   });
 });
-
-function response(body: unknown) { return { ok: true, json: async () => body }; }

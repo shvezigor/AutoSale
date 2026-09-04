@@ -18,7 +18,7 @@ afterEach(() => {
 });
 
 describe('SettingsPage', () => {
-  it('groups owner settings and loads catalogue sources in the Google section', async () => {
+  it('groups catalogue and order destinations in the Data section', async () => {
     getServerSession.mockResolvedValue({
       userId: '3e6855ae-48a2-4d4d-8c39-5bf7d10f1a03',
       email: 'owner@example.com',
@@ -42,10 +42,11 @@ describe('SettingsPage', () => {
     expect(screen.queryByRole('heading', { name: 'Google Sheets' })).not.toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Підтвердження замовлень' })).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('tab', { name: /Google/ }));
+    fireEvent.click(screen.getByRole('tab', { name: /Дані/ }));
 
-    expect(screen.getAllByRole('heading', { name: 'Google Sheets' })).toHaveLength(2);
-    expect(screen.getByRole('heading', { name: 'Google Sheets джерело' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Товари' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Експорт замовлень' })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Google-акаунт' })).not.toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Підключення каналів' })).not.toBeInTheDocument();
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/catalogue/sources/44444444-4444-4444-8444-444444444444');
   });
@@ -86,9 +87,8 @@ describe('SettingsPage', () => {
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/integrations/google');
     expect(screen.getByText('@autosale_store')).toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Підтвердження замовлень' })).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole('tab', { name: /Google/ }));
-    expect(screen.getByRole('heading', { name: 'Google Sheets' })).toBeInTheDocument();
-    expect(screen.getByText('Google підключено')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('tab', { name: /Дані/ }));
+    expect(screen.getByRole('heading', { name: 'Дані та синхронізація' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /Instagram/ })).not.toBeInTheDocument();
   });
 });

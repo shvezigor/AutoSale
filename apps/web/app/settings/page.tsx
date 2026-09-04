@@ -6,16 +6,18 @@ import { PrimaryNavigation } from '../../src/components/primary-navigation';
 import { InstagramSettingsForm, type InstagramConnectionSummary } from '../../src/components/instagram-settings-form';
 import { DemoScenarioCard } from '../../src/components/demo-scenario-card';
 import { CatalogueSourceSettings, type CatalogueSourceConfiguration, type CatalogueSourceHealth } from '../../src/components/catalogue-source-settings';
-import { GoogleConnectionSettings, type GoogleConnectionSummary } from '../../src/components/google-connection-settings';
+import type { GoogleConnectionSummary } from '../../src/components/google-connection-settings';
 import { SettingsTabs, type SettingsTabId } from '../../src/components/settings-tabs';
 
 export const dynamic = 'force-dynamic';
 
-export default async function SettingsPage({ searchParams = Promise.resolve({}) }: { searchParams?: Promise<{ tab?: string | string[] }> } = {}) {
+export default async function SettingsPage({ searchParams = Promise.resolve({}) }: { searchParams?: Promise<{ tab?: string | string[]; action?: string | string[] }> } = {}) {
   const session = await getServerSession();
   if (!session) return null;
-  const requestedTab = textParam((await searchParams).tab);
-  const initialTab: SettingsTabId = requestedTab === 'google' || requestedTab === 'orders' ? requestedTab : 'social';
+  const query = await searchParams;
+  const requestedTab = textParam(query.tab);
+  const pickerAction = textParam(query.action);
+  const initialTab: SettingsTabId = requestedTab === 'google' || requestedTab === 'data' ? 'data' : requestedTab === 'orders' ? 'orders' : 'social';
   const [instagramResponse, googleResponse] = await Promise.all([
     authenticatedApiFetch('/api/integrations/instagram'),
     authenticatedApiFetch('/api/integrations/google'),
@@ -23,7 +25,7 @@ export default async function SettingsPage({ searchParams = Promise.resolve({}) 
   if (!instagramResponse.ok || !googleResponse.ok) throw new Error('Не вдалося завантажити налаштування');
   const instagram = (await instagramResponse.json()) as InstagramConnectionSummary;
   const google = (await googleResponse.json()) as GoogleConnectionSummary;
-  if (session.membershipRole === 'MANAGER') return <SettingsLayout google={google} instagram={instagram} initialTab={initialTab} session={session} />;
+  if (session.membershipRole === 'MANAGER') return <SettingsLayout google={google} instagram={instagram} initialTab={initialTab} pickerAction={pickerAction} session={session} />;
 
   const [response, sheetsResponse, catalogueSourcesResponse] = await Promise.all([
     authenticatedApiFetch('/api/settings/orders'),
@@ -39,13 +41,14 @@ export default async function SettingsPage({ searchParams = Promise.resolve({}) 
     if (!sourceResponse.ok) throw new Error('Не вдалося завантажити джерело каталогу');
     return await sourceResponse.json() as CatalogueSourceConfiguration;
   }));
-  return <SettingsLayout google={google} instagram={instagram} initialTab={initialTab} session={session} settings={settings} sheets={sheets} catalogueSources={catalogueSources} catalogueConfigurations={catalogueConfigurations} />;
+  return <SettingsLayout google={google} instagram={instagram} initialTab={initialTab} pickerAction={pickerAction} session={session} settings={settings} sheets={sheets} catalogueSources={catalogueSources} catalogueConfigurations={catalogueConfigurations} />;
 }
 
 function SettingsLayout({
   instagram,
   google,
   initialTab,
+  pickerAction,
   session,
   settings,
   sheets,
@@ -55,6 +58,7 @@ function SettingsLayout({
   instagram: InstagramConnectionSummary;
   google: GoogleConnectionSummary;
   initialTab: SettingsTabId;
+  pickerAction: string;
   session: PublicSession;
   settings?: OrderSettings;
   sheets?: GoogleSheetsSettings;
@@ -71,10 +75,10 @@ function SettingsLayout({
       content: <section className="settings-section"><div className="settings-section-heading"><h2>Підключення каналів</h2><p>Керуйте каналами, з яких AutoSale отримує діалоги та замовлення.</p></div><InstagramSettingsForm initial={instagram} membershipRole={session.membershipRole} /></section>,
     },
     {
-      id: 'google' as const,
-      label: 'Google',
-      description: 'Sheets і каталог',
-      content: <section className="settings-section"><div className="settings-section-heading"><h2>Google Sheets</h2><p>{isManager ? 'Стан Google-інтеграції без доступу до даних акаунта чи таблиць.' : 'Окремо керуйте таблицею товарів і таблицею підтверджених замовлень.'}</p></div><GoogleConnectionSettings initial={google} role={session.membershipRole!} />{settings && <><GoogleSheetsSettingsForm initial={sheets!} googleConnected={googleConnected} /><CatalogueSourceSettings role={session.membershipRole!} sources={catalogueSources} configurations={catalogueConfigurations} googleConnected={googleConnected} /></>}</section>,
+      id: 'data' as const,
+      label: 'Дані',
+      description: 'Товари й експорт',
+      content: <section className="settings-section data-workspace"><div className="settings-section-heading"><h2>Дані та синхронізація</h2><p>{isManager ? 'Стан підключень без доступу до таблиць і даних клієнтів.' : 'Оберіть, звідки брати товари та куди записувати підтверджені замовлення.'}</p>{!isManager && <span className={`data-account-state status-${google.status.toLowerCase()}`}>{googleConnected && google.email ? `Google: ${google.email}` : 'Google попросить доступ під час вибору таблиці'}</span>}</div>{settings ? <div className="data-workspace-grid"><CatalogueSourceSettings role={session.membershipRole!} sources={catalogueSources} configurations={catalogueConfigurations} googleConnected={googleConnected} autoOpenPicker={pickerAction === 'pick-catalogue'} /><GoogleSheetsSettingsForm initial={sheets!} googleConnected={googleConnected} autoOpenPicker={pickerAction === 'pick-orders'} /></div> : <div className="settings-card"><p>Власник керує джерелами даних. Менеджерам доступний лише стан інтеграцій.</p></div>}</section>,
     },
     ...(settings ? [{
       id: 'orders' as const,
