@@ -8,6 +8,7 @@ import {
 
 import { CredentialCipher } from './credential-cipher.js';
 import { InstagramOAuthStateService } from './instagram-oauth-state.service.js';
+import { NotificationService } from '../notifications/notifications.service.js';
 
 const CALLBACK_PATH = '/api/integrations/instagram/callback';
 const REQUIRED_SCOPES = [
@@ -167,6 +168,7 @@ export class InstagramOAuthService {
     private readonly cipher: CredentialCipher,
     appPublicUrl: string,
     private readonly now: () => Date = () => new Date(),
+    private readonly notifications?: NotificationService,
   ) {
     this.callbackUri = new URL(CALLBACK_PATH, ensureTrailingSlash(appPublicUrl)).toString();
   }
@@ -1059,6 +1061,20 @@ export class InstagramOAuthService {
         'FAILURE',
         { errorCode: lastErrorCode, ...metadata },
       );
+    }
+    if (status === 'REAUTH_REQUIRED') {
+      try {
+        await this.notifications?.create({
+          tenantId: binding.tenantId,
+          userId: binding.userId,
+          type: 'WARNING',
+          category: 'INSTAGRAM_REAUTHORIZATION_REQUIRED',
+          title: 'Потрібно повторно підключити Instagram',
+          actionUrl: '/settings?tab=instagram',
+        });
+      } catch {
+        // OAuth result remains authoritative when notification persistence fails.
+      }
     }
   }
 

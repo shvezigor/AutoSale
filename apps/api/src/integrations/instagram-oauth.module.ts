@@ -11,6 +11,7 @@ import { InstagramOAuthService } from './instagram-oauth.service.js';
 import { InstagramOAuthStateService } from './instagram-oauth-state.service.js';
 import { MetaSignedRequest } from './meta-signed-request.js';
 import { MetaDataDeletionReceipt } from './meta-data-deletion-receipt.js';
+import { NotificationService } from '../notifications/notifications.service.js';
 
 @Module({})
 export class InstagramOAuthModule {
@@ -28,6 +29,8 @@ export class InstagramOAuthModule {
       new InstagramOAuthStateService(prisma),
       new CredentialCipher(Buffer.from(env.INTEGRATION_ENCRYPTION_KEY, 'base64')),
       env.APP_PUBLIC_URL,
+      undefined,
+      new NotificationService(prisma as never),
     );
 
     return {

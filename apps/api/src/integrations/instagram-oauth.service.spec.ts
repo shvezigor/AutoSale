@@ -142,6 +142,7 @@ function setup(nowFn: () => Date = () => now) {
     revoke: vi.fn().mockResolvedValue(undefined),
   };
   const cipher = new CredentialCipher(Buffer.alloc(32, 7));
+  const notifications = { create: vi.fn().mockResolvedValue(undefined) };
   const service = new InstagramOAuthService(
     prisma as never,
     meta as never,
@@ -149,6 +150,7 @@ function setup(nowFn: () => Date = () => now) {
     cipher,
     'https://demo.ngrok-free.app',
     nowFn,
+    notifications as never,
   );
 
   return {
@@ -156,7 +158,7 @@ function setup(nowFn: () => Date = () => now) {
     cleanupCreate, cleanupFindUnique, cleanupFindFirst, cleanupFindMany, cleanupUpdateManyAndReturn,
     cleanupUpdateMany,
     oauthStateUpdateMany, auditCreate,
-    tenantFindUnique, tenantUpdateMany, membershipFindUnique,
+    tenantFindUnique, tenantUpdateMany, membershipFindUnique, notifications,
   };
 }
 
@@ -560,7 +562,7 @@ describe('InstagramOAuthService', () => {
   });
 
   it('normalizes provider authorization failure and never exposes provider text', async () => {
-    const { service, meta, updateMany, auditCreate } = setup();
+    const { service, meta, updateMany, auditCreate, notifications } = setup();
     const providerFailure = new MetaInstagramError(401, 190);
     Object.defineProperty(providerFailure, 'message', { value: 'secret token rejected by provider' });
     meta.exchangeCode.mockRejectedValue(providerFailure);
@@ -571,6 +573,12 @@ describe('InstagramOAuthService', () => {
       where: { tenantId: 'tenant-a' },
       data: { status: 'REAUTH_REQUIRED', lastErrorCode: 'META_AUTHORIZATION_FAILED' },
     });
+    expect(notifications.create).toHaveBeenCalledWith(expect.objectContaining({
+      tenantId: 'tenant-a',
+      userId: 'user-a',
+      category: 'INSTAGRAM_REAUTHORIZATION_REQUIRED',
+      actionUrl: '/settings?tab=instagram',
+    }));
     await expect(service.completeCallback('authorization-code', 'raw-state')).rejects.not.toThrow('secret token rejected by provider');
     const serializedAudits = JSON.stringify(auditCreate.mock.calls);
     expect(serializedAudits).toContain('META_AUTHORIZATION_FAILED');
