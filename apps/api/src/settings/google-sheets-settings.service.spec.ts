@@ -42,4 +42,27 @@ describe('GoogleSheetsSettingsService OAuth destination', () => {
     await expect(service.validate('tenant-a')).resolves.toMatchObject({ valid: true, status: 'ACTIVE' });
     expect(oauth.sheetsForConnection).toHaveBeenCalledWith('tenant-a', 'connection-a');
   });
+
+  it('initializes an empty destination with the AutoSale template before activating it', async () => {
+    const destination = { spreadsheetId: 'sheet-a', sheetName: 'Orders', credentialRef: 'connection-a', requiredHeaders: [] };
+    const prisma = {
+      googleSheetsDestination: {
+        findUnique: vi.fn().mockResolvedValue(destination),
+        update: vi.fn().mockResolvedValue({}),
+      },
+    };
+    const fullHeader = [
+      'order_id', 'created_at', 'status', 'channel', 'conversation_id', 'customer_name', 'customer_phone',
+      'sku', 'product_name', 'quantity', 'delivery_city', 'delivery_branch', 'manager_note', 'confidence', 'updated_at',
+    ];
+    const sheets = {
+      readHeader: vi.fn().mockResolvedValueOnce([]).mockResolvedValueOnce(fullHeader),
+      initializeHeaderIfEmpty: vi.fn().mockResolvedValue(true),
+    };
+    const oauth = { verifySpreadsheet: vi.fn(), sheetsForConnection: vi.fn().mockResolvedValue(sheets) };
+    const service = new GoogleSheetsSettingsService(prisma as never, undefined, { oauthRequired: true }, oauth);
+
+    await expect(service.validate('tenant-a')).resolves.toMatchObject({ valid: true, status: 'ACTIVE', initialized: true });
+    expect(sheets.initializeHeaderIfEmpty).toHaveBeenCalledWith({ spreadsheetId: 'sheet-a', sheetName: 'Orders', headers: fullHeader });
+  });
 });

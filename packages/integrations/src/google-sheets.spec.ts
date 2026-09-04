@@ -173,6 +173,27 @@ describe('GoogleSheetsAdapter', () => {
     await expect(adapter.readHeader({ spreadsheetId: 'forbidden', sheetName: 'Orders' })).rejects.toThrow('Google Sheets API returned HTTP 403');
   });
 
+  it('appends template headers when the selected tab is empty', async () => {
+    const fetchFn = vi.fn()
+      .mockResolvedValueOnce({ ok: true, status: 200, json: async () => ({}) })
+      .mockResolvedValueOnce({ ok: true, status: 200, json: async () => ({ updates: { updatedRange: "'Orders'!A1:C1" } }) });
+    const adapter = new GoogleSheetsAdapter({ getAccessToken: async () => 'token' }, fetchFn);
+
+    await expect(adapter.initializeHeaderIfEmpty({ spreadsheetId: 'sheet-id', sheetName: 'Orders', headers: ['order_id', 'status', 'sku'] })).resolves.toBe(true);
+
+    expect(fetchFn).toHaveBeenCalledTimes(2);
+    expect(fetchFn.mock.calls[1]?.[0]).toContain("values/'Orders'!A%3AC:append");
+    expect(fetchFn.mock.calls[1]?.[1]).toMatchObject({ method: 'POST', body: JSON.stringify({ values: [['order_id', 'status', 'sku']] }) });
+  });
+
+  it('never writes template headers over a non-empty tab', async () => {
+    const fetchFn = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({ values: [['Клієнт', 'Телефон']] }) });
+    const adapter = new GoogleSheetsAdapter({ getAccessToken: async () => 'token' }, fetchFn);
+
+    await expect(adapter.initializeHeaderIfEmpty({ spreadsheetId: 'sheet-id', sheetName: 'Orders', headers: ['order_id', 'status'] })).resolves.toBe(false);
+    expect(fetchFn).toHaveBeenCalledTimes(1);
+  });
+
   it('appends a new order only after confirming its order_id is absent', async () => {
     const fetchFn = vi.fn()
       .mockResolvedValueOnce({ ok: true, status: 200, json: async () => ({ values: [['order_id'], ['another-order']] }) })

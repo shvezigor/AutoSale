@@ -111,6 +111,24 @@ export class GoogleSheetsAdapter {
     return Array.isArray(body.values?.[0]) ? body.values[0].map(String) : [];
   }
 
+  async initializeHeaderIfEmpty(input: { spreadsheetId: string; sheetName: string; headers: string[] }): Promise<boolean> {
+    if (input.headers.length === 0 || input.headers.some((header) => header.trim().length === 0)) throw new RangeError('Google Sheets template headers must not be empty');
+    const currentHeader = await this.readHeader(input);
+    if (currentHeader.some((cell) => cell.trim().length > 0)) return false;
+
+    const token = await this.auth.getAccessToken();
+    const quotedSheet = `'${input.sheetName.replaceAll("'", "''")}'`;
+    const lastColumn = columnName(input.headers.length);
+    const range = encodeURIComponent(`${quotedSheet}!A:${lastColumn}`);
+    const response = await this.fetchFn(`https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(input.spreadsheetId)}/values/${range}:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`, {
+      method: 'POST',
+      headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
+      body: JSON.stringify({ values: [input.headers] }),
+    });
+    if (!response.ok) throw new Error(`Google Sheets API returned HTTP ${response.status}`);
+    return true;
+  }
+
   async upsertRow(input: { spreadsheetId: string; sheetName: string; orderId: string; values: Array<string | number | null> }): Promise<GoogleSheetsUpsertResult> {
     const token = await this.auth.getAccessToken();
     const base = `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(input.spreadsheetId)}/values/`;

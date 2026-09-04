@@ -5,7 +5,7 @@ import { BadRequestException } from '@nestjs/common';
 const requiredHeaders = ['order_id', 'created_at', 'status', 'channel', 'conversation_id', 'customer_name', 'customer_phone', 'sku', 'product_name', 'quantity', 'delivery_city', 'delivery_branch', 'manager_note', 'confidence', 'updated_at'];
 type OAuthDestinationAccess = {
   verifySpreadsheet(tenantId: string, connectionId: string, spreadsheetId: string): Promise<{ tabs: Array<{ sheetId: number; title: string }> }>;
-  sheetsForConnection(tenantId: string, connectionId: string): Promise<Pick<GoogleSheetsAdapter, 'readHeader'>>;
+  sheetsForConnection(tenantId: string, connectionId: string): Promise<Pick<GoogleSheetsAdapter, 'readHeader' | 'initializeHeaderIfEmpty'>>;
 };
 
 export class GoogleSheetsSettingsService {
@@ -39,11 +39,16 @@ export class GoogleSheetsSettingsService {
         ? await this.oauth.sheetsForConnection(tenantId, destination.credentialRef)
         : this.sheets;
       if (!sheets) throw new BadRequestException('Google connection is not configured');
-      const header = await sheets.readHeader({ spreadsheetId: destination.spreadsheetId, sheetName: destination.sheetName });
+      let header = await sheets.readHeader({ spreadsheetId: destination.spreadsheetId, sheetName: destination.sheetName });
+      let initialized = false;
+      if (header.every((cell) => cell.trim().length === 0)) {
+        initialized = await sheets.initializeHeaderIfEmpty({ spreadsheetId: destination.spreadsheetId, sheetName: destination.sheetName, headers: requiredHeaders });
+        header = await sheets.readHeader({ spreadsheetId: destination.spreadsheetId, sheetName: destination.sheetName });
+      }
       const missingHeaders = requiredHeaders.filter((name) => !header.includes(name));
       const status = missingHeaders.length === 0 ? 'ACTIVE' : 'INVALID_HEADERS';
       await this.prisma.googleSheetsDestination.update({ where: { tenantId }, data: { status, lastValidatedAt: new Date(), errorSummary: missingHeaders.length ? `Missing headers: ${missingHeaders.join(', ')}` : null } });
-      return { valid: missingHeaders.length === 0, missingHeaders, status };
+      return { valid: missingHeaders.length === 0, missingHeaders, status, initialized };
     } catch (error) {
       if (error instanceof BadRequestException) throw error;
       const summary = error instanceof Error ? error.message : 'Google Sheets validation failed';

@@ -59,10 +59,10 @@ export function GoogleSheetsSettingsForm({ initial, googleConnected = true, auto
     setPending(true); setMessage(null); setError(null);
     try {
       const response = await mutatingFetch('/api/settings/google-sheets/validate', { method: 'POST' });
-      const body = await response.json() as { valid?: boolean; missingHeaders?: string[]; message?: string };
+      const body = await response.json() as { valid?: boolean; missingHeaders?: string[]; initialized?: boolean; message?: string };
       if (!response.ok) throw new Error(body.message ?? 'Не вдалося перевірити доступ');
       if (!body.valid) throw new Error(`Відсутні колонки: ${body.missingHeaders?.join(', ')}`);
-      setSettings({ ...currentSettings, status: 'ACTIVE' }); setMessage('Підключення активне');
+      setSettings({ ...currentSettings, status: 'ACTIVE' }); setMessage(body.initialized ? 'Шаблон AutoSale створено. Експорт активний.' : 'Підключення активне');
     } catch (reason) { setError(reason instanceof Error ? reason.message : 'Сталася помилка'); }
     finally { setPending(false); }
   }
