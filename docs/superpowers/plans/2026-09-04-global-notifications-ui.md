@@ -493,14 +493,17 @@ git commit -m "feat(web): surface background operation feedback"
 - Modify/Test: `apps/api/src/integrations/google-oauth.service.ts`
 - Modify/Test: `apps/api/src/integrations/instagram-oauth.service.ts`
 - Modify: respective modules to inject `NotificationService`.
+- Create/Test: `apps/worker/src/notifications/worker-notification.service.ts`
+- Modify/Test: `apps/worker/src/google-sheets/google-sheets-sync.processor.ts`
+- Modify: `apps/worker/src/main.ts`
 
 **Interfaces:**
 - Consumes: `NotificationService.create()` from Task 2.
-- Produces categories: `CATALOGUE_IMPORT_COMPLETED`, `CATALOGUE_IMPORT_FAILED`, `CATALOGUE_SYNC_COMPLETED`, `CATALOGUE_SYNC_FAILED`, `ORDER_SHEET_TEMPLATE_CREATED`, `GOOGLE_REAUTHORIZATION_REQUIRED`, `INSTAGRAM_REAUTHORIZATION_REQUIRED`.
+- Produces categories: `CATALOGUE_IMPORT_COMPLETED`, `CATALOGUE_IMPORT_FAILED`, `CATALOGUE_SYNC_COMPLETED`, `CATALOGUE_SYNC_FAILED`, `ORDER_SHEET_TEMPLATE_CREATED`, `ORDER_EXPORT_FAILED`, `GOOGLE_REAUTHORIZATION_REQUIRED`, `INSTAGRAM_REAUTHORIZATION_REQUIRED`.
 
 - [ ] **Step 1: Write failing outcome tests**
 
-For each service, mock `NotificationService`. Verify exact recipient user, type, category, safe title/message, and internal action URL. For operations without a known initiating user, do not create a guessed notification.
+For each API service, mock `NotificationService`. For the worker, mock `WorkerNotificationService`, which writes the same `UserNotification` model through Prisma. Verify exact recipient user, type, category, safe title/message, and internal action URL. For operations without a known initiating user, do not create a guessed notification.
 
 ```ts
 expect(notifications.create).toHaveBeenCalledWith(expect.objectContaining({
@@ -529,20 +532,25 @@ Never include tokens, raw third-party payloads, full customer data, or stack tra
 
 Reuse `requestedByUserId`, `connectedByUserId`, and controller principal IDs already present. Extend only method signatures that currently discard an available user ID; update their tests and callers in the same step.
 
+For Google Sheets export failure, load `order.approvedBy` together with the export. Create `ORDER_EXPORT_FAILED` only when `approvedBy` is a UUID belonging to an active membership in the same tenant; otherwise log the failure without a user notification. Use `/orders/{orderId}` as `actionUrl`.
+
 - [ ] **Step 4: Run targeted API tests**
 
 Run: `pnpm --filter @autosale/api test -- catalogue-import.service.spec.ts catalogue-sources.service.spec.ts google-sheets-settings.service.spec.ts google-oauth.service.spec.ts instagram-oauth.service.spec.ts`  
 Expected: PASS.
 
+Run: `pnpm --filter @autosale/worker test -- google-sheets-sync.processor.spec.ts worker-notification.service.spec.ts`  
+Expected: PASS.
+
 - [ ] **Step 5: Run full API tests and typecheck**
 
-Run: `pnpm --filter @autosale/api test && pnpm --filter @autosale/api typecheck`  
+Run: `pnpm --filter @autosale/api test && pnpm --filter @autosale/api typecheck && pnpm --filter @autosale/worker test && pnpm --filter @autosale/worker typecheck`  
 Expected: PASS.
 
 - [ ] **Step 6: Commit**
 
 ```bash
-git add apps/api/src
+git add apps/api/src apps/worker/src
 git commit -m "feat(api): notify users about integration outcomes"
 ```
 
