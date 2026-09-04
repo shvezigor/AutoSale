@@ -31,6 +31,7 @@ import { GoogleCatalogueSyncProcessor } from './catalogue/google-catalogue-sync.
 import { CatalogueSyncScheduler } from './catalogue/catalogue-sync-scheduler.js';
 import { CatalogueAutoImporter } from './catalogue/catalogue-auto-importer.js';
 import { WorkerNotificationService } from './notifications/worker-notification.service.js';
+import { NotificationRetentionReconciler } from './notifications/notification-retention.reconciler.js';
 
 async function bootstrap(): Promise<void> {
   const env = parseWorkerEnv(process.env);
@@ -226,6 +227,7 @@ async function bootstrap(): Promise<void> {
   const catalogueReconciler = new CatalogueMappingReconciler(prisma, catalogueQueue);
   const catalogueScheduler = new CatalogueSyncScheduler(prisma, catalogueQueue);
   const sheetsProcessor = googleSheets || oauthSheets ? new GoogleSheetsSyncProcessor(prisma, googleSheets, oauthSheets, new WorkerNotificationService(prisma as never)) : undefined;
+  const notificationRetention = new NotificationRetentionReconciler(prisma as never);
   let polling = false;
   const pollExports = async (): Promise<void> => {
     if (polling) return;
@@ -305,10 +307,25 @@ async function bootstrap(): Promise<void> {
     }
   };
   const catalogueScheduleTimer = setInterval(() => void scheduleCatalogueSources(), 60_000);
+  let reconcilingNotificationRetention = false;
+  const reconcileNotificationRetention = async (): Promise<void> => {
+    if (reconcilingNotificationRetention) return;
+    reconcilingNotificationRetention = true;
+    try {
+      const deleted = await notificationRetention.reconcile();
+      if (deleted > 0) logger.info('notification_retention_completed', { correlationId: 'system:notification-retention', deleted });
+    } catch (error) {
+      logger.warn('notification_retention_failed', { correlationId: 'system:notification-retention', errorCode: error instanceof Error ? error.name : 'UNKNOWN' });
+    } finally {
+      reconcilingNotificationRetention = false;
+    }
+  };
+  const notificationRetentionTimer = setInterval(() => void reconcileNotificationRetention(), 24 * 60 * 60_000);
   void pollExports();
   void reconcileCatalogueMappings();
   void reconcileInstagramProfiles();
   void scheduleCatalogueSources();
+  void reconcileNotificationRetention();
   logger.info('service_started', { correlationId: 'system:startup', healthPort: env.HEALTH_PORT });
 
   server.listen(env.HEALTH_PORT, '0.0.0.0');
@@ -318,6 +335,7 @@ async function bootstrap(): Promise<void> {
     clearInterval(catalogueReconcileTimer);
     clearInterval(instagramProfileReconcileTimer);
     clearInterval(catalogueScheduleTimer);
+    clearInterval(notificationRetentionTimer);
     await worker.close();
     await instagramProfileQueue.close();
     await catalogueWorker.close();
