@@ -2,6 +2,9 @@
 
 import { useState } from 'react';
 import { mutatingFetch } from '../auth/csrf-fetch';
+import { useActivity } from './activity-provider';
+import { LoadingButton } from './loading-button';
+import { useToast } from './toast-provider';
 
 export interface OrderSettings {
   approvalMode: 'ALWAYS' | 'NEVER' | 'ON_LOW_CONFIDENCE';
@@ -35,15 +38,18 @@ const modes: Array<{
 export function OrderSettingsForm({ initial }: { initial: OrderSettings }) {
   const [mode, setMode] = useState(initial.approvalMode);
   const [state, setState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const activity = useActivity();
+  const toast = useToast();
 
   async function save() {
     setState('saving');
-    const response = await mutatingFetch('/api/settings/orders', {
+    const response = await activity.run('Зберігаємо правила підтвердження', () => mutatingFetch('/api/settings/orders', {
       method: 'PATCH',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ approvalMode: mode }),
-    });
+    }));
     setState(response.ok ? 'saved' : 'error');
+    toast.show(response.ok ? { type: 'success', title: 'Налаштування збережено' } : { type: 'error', title: 'Не вдалося зберегти налаштування' });
   }
 
   return (
@@ -71,9 +77,7 @@ export function OrderSettingsForm({ initial }: { initial: OrderSettings }) {
         ))}
       </fieldset>
       <div className="settings-actions">
-        <button disabled={state === 'saving'} onClick={() => void save()} type="button">
-          {state === 'saving' ? 'Збереження…' : 'Зберегти налаштування'}
-        </button>
+        <LoadingButton pending={state === 'saving'} pendingLabel="Зберігаємо…" onClick={() => void save()} type="button">Зберегти налаштування</LoadingButton>
         {state === 'saved' && <span className="save-success">Налаштування збережено</span>}
         {state === 'error' && <span className="save-error">Не вдалося зберегти</span>}
       </div>

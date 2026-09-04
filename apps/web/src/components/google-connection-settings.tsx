@@ -3,6 +3,9 @@
 import { useState } from 'react';
 
 import { mutatingFetch } from '../auth/csrf-fetch';
+import { useActivity } from './activity-provider';
+import { LoadingButton } from './loading-button';
+import { useToast } from './toast-provider';
 
 export type GoogleConnectionSummary = {
   status: string;
@@ -26,18 +29,20 @@ export function GoogleConnectionSettings({
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const owner = role === 'OWNER';
+  const activity = useActivity();
+  const toast = useToast();
 
   async function connect() {
     setPending(true); setError(null);
     try {
-      const response = await mutatingFetch('/api/integrations/google/connect', {
+      const response = await activity.run('Підключаємо Google', () => mutatingFetch('/api/integrations/google/connect', {
         method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ returnPath: '/settings?tab=google' }),
-      });
+      }));
       const body = await response.json() as { authorizationUrl?: string; message?: string };
       if (!response.ok || !body.authorizationUrl) throw new Error(body.message ?? 'Не вдалося розпочати підключення Google');
       navigate(body.authorizationUrl);
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : 'Не вдалося підключити Google');
+      const text = reason instanceof Error ? reason.message : 'Не вдалося підключити Google'; setError(text); toast.show({ type: 'error', title: 'Не вдалося підключити Google', message: text });
       setPending(false);
     }
   }
@@ -45,12 +50,13 @@ export function GoogleConnectionSettings({
   async function disconnect() {
     setPending(true); setError(null);
     try {
-      const response = await mutatingFetch('/api/integrations/google/disconnect', { method: 'POST' });
+      const response = await activity.run('Відключаємо Google', () => mutatingFetch('/api/integrations/google/disconnect', { method: 'POST' }));
       const body = await response.json() as { status?: string; message?: string };
       if (!response.ok) throw new Error(body.message ?? 'Не вдалося відключити Google');
       setConnection({ ...connection, status: body.status ?? 'DISCONNECTING', email: null, grantedScopes: [] });
+      toast.show({ type: 'success', title: 'Google відключається' });
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : 'Не вдалося відключити Google');
+      const text = reason instanceof Error ? reason.message : 'Не вдалося відключити Google'; setError(text); toast.show({ type: 'error', title: 'Не вдалося відключити Google', message: text });
     } finally {
       setPending(false);
     }
@@ -69,8 +75,8 @@ export function GoogleConnectionSettings({
     </div>
     {owner && connection.email && <div className="google-account-summary"><span>Підключений акаунт</span><strong>{connection.email}</strong></div>}
     {owner && <div className="settings-actions">
-      {connectAction && <button type="button" disabled={pending} onClick={() => void connect()}>{connectAction}</button>}
-      {connection.status === 'ACTIVE' && <button type="button" className="text-button" disabled={pending} onClick={() => void disconnect()}>Відключити Google</button>}
+      {connectAction && <LoadingButton type="button" pending={pending} pendingLabel="Підключаємо…" onClick={() => void connect()}>{connectAction}</LoadingButton>}
+      {connection.status === 'ACTIVE' && <LoadingButton type="button" className="text-button" pending={pending} pendingLabel="Відключаємо…" onClick={() => void disconnect()}>Відключити Google</LoadingButton>}
       {connection.status === 'DISCONNECTING' && <span>Завершуємо безпечне відключення…</span>}
     </div>}
     {error && <p className="save-error" role="alert">{error}</p>}

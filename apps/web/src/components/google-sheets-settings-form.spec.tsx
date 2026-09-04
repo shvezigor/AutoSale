@@ -7,12 +7,16 @@ vi.mock('./google-picker-button', () => ({
 }));
 
 import { GoogleSheetsSettingsForm } from './google-sheets-settings-form';
+import { ActivityProvider } from './activity-provider';
+import { ToastProvider } from './toast-provider';
+
+function renderForm(ui: React.ReactElement) { return render(<ToastProvider><ActivityProvider>{ui}</ActivityProvider></ToastProvider>); }
 
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
 describe('GoogleSheetsSettingsForm', () => {
   it('uses a business-facing order export card without spreadsheet id input', () => {
-    render(<GoogleSheetsSettingsForm initial={{ spreadsheetId: null, sheetName: 'Orders', status: 'NOT_CONFIGURED', requiredHeaders: ['order_id'], lastValidatedAt: null, errorSummary: null }} />);
+    renderForm(<GoogleSheetsSettingsForm initial={{ spreadsheetId: null, sheetName: 'Orders', status: 'NOT_CONFIGURED', requiredHeaders: ['order_id'], lastValidatedAt: null, errorSummary: null }} />);
 
     expect(screen.getByRole('heading', { name: 'Експорт замовлень' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Обрати таблицю для замовлень' })).toBeInTheDocument();
@@ -25,7 +29,7 @@ describe('GoogleSheetsSettingsForm', () => {
       .mockResolvedValueOnce({ ok: true, json: async () => ({ token: 'csrf-token-2' }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ valid: true, missingHeaders: [], status: 'ACTIVE', initialized: true }) });
     vi.stubGlobal('fetch', fetchMock);
-    render(<GoogleSheetsSettingsForm initial={{ spreadsheetId: null, sheetName: 'Orders', status: 'NOT_CONFIGURED', requiredHeaders: ['order_id'], lastValidatedAt: null, errorSummary: null }} />);
+    renderForm(<GoogleSheetsSettingsForm initial={{ spreadsheetId: null, sheetName: 'Orders', status: 'NOT_CONFIGURED', requiredHeaders: ['order_id'], lastValidatedAt: null, errorSummary: null }} />);
 
     expect(screen.getByRole('heading', { name: 'Експорт замовлень' })).toBeInTheDocument();
     expect(screen.queryByLabelText(/private key/i)).not.toBeInTheDocument();
@@ -39,7 +43,7 @@ describe('GoogleSheetsSettingsForm', () => {
       .mockResolvedValueOnce({ ok: true, json: async () => ({ token: 'csrf-check' }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ valid: true, missingHeaders: [], status: 'ACTIVE', initialized: true }) });
     vi.stubGlobal('fetch', fetchMock);
-    render(<GoogleSheetsSettingsForm initial={{ spreadsheetId: null, sheetName: 'Orders', status: 'NOT_CONFIGURED', requiredHeaders: ['order_id'], lastValidatedAt: null, errorSummary: null }} />);
+    renderForm(<GoogleSheetsSettingsForm initial={{ spreadsheetId: null, sheetName: 'Orders', status: 'NOT_CONFIGURED', requiredHeaders: ['order_id'], lastValidatedAt: null, errorSummary: null }} />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Обрати таблицю для замовлень' }));
 

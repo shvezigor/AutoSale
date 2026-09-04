@@ -2,6 +2,8 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { OrderSettingsForm } from './order-settings-form';
+import { ActivityProvider } from './activity-provider';
+import { ToastProvider } from './toast-provider';
 
 describe('OrderSettingsForm', () => {
   afterEach(() => vi.unstubAllGlobals());
@@ -12,14 +14,14 @@ describe('OrderSettingsForm', () => {
       .mockResolvedValueOnce({ ok: true });
     vi.stubGlobal('fetch', fetchMock);
     render(
-      <OrderSettingsForm
+      <ToastProvider><ActivityProvider><OrderSettingsForm
         initial={{
           approvalMode: 'ALWAYS',
           autoApprovalThreshold: 0.9,
           promptVersion: 'instagram-order-v1',
           triggerPhrases: ['беремо замовлення в роботу'],
         }}
-      />,
+      /></ActivityProvider></ToastProvider>,
     );
 
     fireEvent.click(screen.getByLabelText('Без підтвердження'));
@@ -35,6 +37,6 @@ describe('OrderSettingsForm', () => {
         }),
       ),
     );
-    expect(await screen.findByText('Налаштування збережено')).toBeInTheDocument();
+    expect((await screen.findAllByText('Налаштування збережено')).length).toBeGreaterThan(0);
   });
 });

@@ -2,6 +2,10 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { GoogleConnectionSettings } from './google-connection-settings';
+import { ActivityProvider } from './activity-provider';
+import { ToastProvider } from './toast-provider';
+
+function renderConnection(ui: React.ReactElement) { return render(<ToastProvider><ActivityProvider>{ui}</ActivityProvider></ToastProvider>); }
 
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
@@ -12,13 +16,13 @@ const active = {
 
 describe('GoogleConnectionSettings', () => {
   it('shows account details and disconnect controls only to the owner', () => {
-    render(<GoogleConnectionSettings initial={active} role="OWNER" />);
+    renderConnection(<GoogleConnectionSettings initial={active} role="OWNER" />);
     expect(screen.getByText('owner@gmail.com')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Відключити Google' })).toBeInTheDocument();
   });
 
   it('shows a manager only safe connection health', () => {
-    render(<GoogleConnectionSettings initial={{ ...active, email: null, grantedScopes: [] }} role="MANAGER" />);
+    renderConnection(<GoogleConnectionSettings initial={{ ...active, email: null, grantedScopes: [] }} role="MANAGER" />);
     expect(screen.getByText('Google підключено')).toBeInTheDocument();
     expect(screen.queryByText('owner@gmail.com')).not.toBeInTheDocument();
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
@@ -29,7 +33,7 @@ describe('GoogleConnectionSettings', () => {
     ['REAUTHORIZATION_REQUIRED', 'Підключити повторно'],
     ['ERROR', 'Підключити повторно'],
   ])('offers the correct owner action for %s', (status, action) => {
-    render(<GoogleConnectionSettings initial={{ ...active, status, email: null }} role="OWNER" />);
+    renderConnection(<GoogleConnectionSettings initial={{ ...active, status, email: null }} role="OWNER" />);
     expect(screen.getByRole('button', { name: action })).toBeInTheDocument();
   });
 
@@ -39,7 +43,7 @@ describe('GoogleConnectionSettings', () => {
       .mockResolvedValueOnce({ ok: true, json: async () => ({ token: 'csrf' }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ authorizationUrl: 'https://accounts.google.com/oauth' }) });
     vi.stubGlobal('fetch', fetchMock);
-    render(<GoogleConnectionSettings initial={{ ...active, status: 'NOT_CONNECTED', email: null }} role="OWNER" navigate={assign} />);
+    renderConnection(<GoogleConnectionSettings initial={{ ...active, status: 'NOT_CONNECTED', email: null }} role="OWNER" navigate={assign} />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Підключити Google' }));
 
