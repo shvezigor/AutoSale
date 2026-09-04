@@ -596,6 +596,8 @@ The approved design is in `docs/superpowers/specs/2026-09-03-google-sign-in-desi
 
 ## Task 29: Add the Google identity and sign-in attempt domain model
 
+**Status:** Completed in `1c0b57f`.
+
 **Description:** Persist Google identities and one-time sign-in/onboarding attempts, and allow active Google-only users to exist without a password hash.
 
 **Acceptance criteria:** Google subjects and users are uniquely linked; raw state, grants, codes, and provider tokens are never persisted; existing password accounts remain compatible.
@@ -605,6 +607,8 @@ The approved design is in `docs/superpowers/specs/2026-09-03-google-sign-in-desi
 **Dependencies:** Existing self-hosted auth and Google Cloud configuration. **Estimated scope:** Medium
 
 ## Task 30: Implement the Google OpenID Connect client and state protection
+
+**Status:** Completed in `bce921d` and `a31f51b`.
 
 **Description:** Add a dedicated identity-only Google client with `openid email profile`, strict ID-token validation, hashed single-use state, safe return paths, and rate limiting.
 
@@ -616,6 +620,8 @@ The approved design is in `docs/superpowers/specs/2026-09-03-google-sign-in-desi
 
 ## Task 31: Sign in and automatically link existing AutoSale users
 
+**Status:** Completed in `03c77d5` and `2760a32`.
+
 **Description:** Create normal AutoSale sessions for linked identities and automatically link an unlinked Google subject to an active user with the same Google-verified normalized email.
 
 **Acceptance criteria:** Linking is atomic and auditable; identity conflicts never relink accounts; no Google token becomes a Sheets credential.
@@ -625,6 +631,8 @@ The approved design is in `docs/superpowers/specs/2026-09-03-google-sign-in-desi
 **Dependencies:** Task 30. **Estimated scope:** Medium
 
 ## Task 32: Onboard a new Google owner and workspace
+
+**Status:** Completed in `03c77d5` and `2760a32`.
 
 **Description:** Use a short-lived protected onboarding grant to collect the business name and atomically create an active user, tenant, `OWNER` membership, identity, and session.
 
@@ -636,6 +644,8 @@ The approved design is in `docs/superpowers/specs/2026-09-03-google-sign-in-desi
 
 ## Task 33: Add Google sign-in and onboarding UI
 
+**Status:** Completed in `71e1f07`.
+
 **Description:** Add Google buttons to login/register and a focused business-name onboarding page with safe loading, validation, cancellation, expiry, and redirect behavior.
 
 **Acceptance criteria:** Existing password flows remain available; validated `next` is preserved for existing users; onboarding asks only for business name.
@@ -645,6 +655,8 @@ The approved design is in `docs/superpowers/specs/2026-09-03-google-sign-in-desi
 **Dependencies:** Task 32. **Estimated scope:** Medium
 
 ## Task 34: Configure, roll out, and observe Google Sign-In
+
+**Status:** Implementation and operator documentation complete; live Google callback and production smoke tests remain.
 
 **Description:** Document the production callback and consent-screen setup, add an environment feature flag, privacy-safe metrics/audit events, and staged rollout/rollback checks.
 
