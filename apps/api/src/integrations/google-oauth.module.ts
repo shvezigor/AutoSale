@@ -13,6 +13,7 @@ import { GoogleCredentialCleanupService } from './google-credential-cleanup.serv
 import { GoogleFilesClient } from './google-files.client.js';
 import { GoogleFilesController } from './google-files.controller.js';
 import { GoogleFilesService } from './google-files.service.js';
+import { NotificationService } from '../notifications/notifications.service.js';
 
 @Module({})
 export class GoogleOAuthModule {
@@ -26,6 +27,8 @@ export class GoogleOAuthModule {
       client,
       new GoogleOAuthStateService(prisma),
       new CredentialCipher(Buffer.from(env.INTEGRATION_ENCRYPTION_KEY, 'base64')),
+      undefined,
+      new NotificationService(prisma as never),
     );
     const cleanup = new GoogleCredentialCleanupService(prisma, client, new CredentialCipher(Buffer.from(env.INTEGRATION_ENCRYPTION_KEY, 'base64')));
     const files = new GoogleFilesService(service, new GoogleFilesClient());

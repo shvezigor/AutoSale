@@ -5,6 +5,7 @@ import type { PrismaClient } from '@autosale/database';
 import { CredentialCipher } from './credential-cipher.js';
 import type { GoogleOAuthClientPort } from './google-oauth.client.js';
 import { GoogleOAuthStateService } from './google-oauth-state.service.js';
+import { NotificationService } from '../notifications/notifications.service.js';
 
 const DRIVE_FILE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
 const SAFE_FAILURE = 'Google connection failed';
@@ -25,6 +26,7 @@ export class GoogleOAuthService {
     private readonly states: GoogleOAuthStateService,
     private readonly cipher: CredentialCipher,
     private readonly now: () => Date = () => new Date(),
+    private readonly notifications?: NotificationService,
   ) {}
 
   async start(tenantId: string, userId: string, returnPath?: string): Promise<{ authorizationUrl: string }> {
@@ -90,6 +92,7 @@ export class GoogleOAuthService {
       return { returnPath: binding.returnPath, summary: await this.summary(binding.tenantId) };
     } catch {
       await this.audit(binding.tenantId, binding.userId, 'GOOGLE_CONNECT_FAILED', 'FAILURE');
+      await this.notify({ tenantId: binding.tenantId, userId: binding.userId, type: 'ERROR', category: 'GOOGLE_REAUTHORIZATION_REQUIRED', title: 'Google потребує повторного підключення', actionUrl: '/settings?tab=google' });
       throw new Error(SAFE_FAILURE);
     }
   }
@@ -113,7 +116,7 @@ export class GoogleOAuthService {
   async getAccessToken(tenantId: string): Promise<string> {
     const connection = await this.prisma.googleConnection.findUnique({
       where: { tenantId },
-      select: { status: true, encryptedRefreshToken: true, credentialGenerationId: true },
+      select: { status: true, encryptedRefreshToken: true, credentialGenerationId: true, connectedByUserId: true },
     });
     if (connection?.status !== 'ACTIVE' || !connection.encryptedRefreshToken || !connection.credentialGenerationId) {
       throw new Error(SAFE_FAILURE);
@@ -125,11 +128,16 @@ export class GoogleOAuthService {
         where: { tenantId, credentialGenerationId: connection.credentialGenerationId },
         data: { status: 'REAUTHORIZATION_REQUIRED', lastErrorCode: 'GOOGLE_TOKEN_REFRESH_FAILED' },
       });
+      if (connection.connectedByUserId) await this.notify({ tenantId, userId: connection.connectedByUserId, type: 'WARNING', category: 'GOOGLE_REAUTHORIZATION_REQUIRED', title: 'Потрібно повторно підключити Google', actionUrl: '/settings?tab=google' });
       throw new Error(SAFE_FAILURE);
     }
   }
 
   private async audit(tenantId: string, userId: string, action: string, result: string): Promise<void> {
     await this.prisma.securityAuditLog.create({ data: { tenantId, userId, actor: 'USER', action, result, metadata: {} } });
+  }
+
+  private async notify(input: Parameters<NotificationService['create']>[0]) {
+    try { await this.notifications?.create(input); } catch { /* business flow must not fail on notification delivery */ }
   }
 }

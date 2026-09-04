@@ -40,8 +40,9 @@ const createFixture = () => {
     refreshAccessToken: vi.fn().mockResolvedValue('access-token'),
   };
   const cipher = new CredentialCipher(Buffer.alloc(32, 9));
-  const service = new GoogleOAuthService(prisma as never, client, states as never, cipher, () => new Date('2026-09-02T20:00:00.000Z'));
-  return { service, prisma, client, states, cipher, getConnection: () => connection, setConnection: (value: any) => { connection = value; } };
+  const notifications = { create: vi.fn().mockResolvedValue(undefined) };
+  const service = new GoogleOAuthService(prisma as never, client, states as never, cipher, () => new Date('2026-09-02T20:00:00.000Z'), notifications as never);
+  return { service, prisma, client, states, cipher, notifications, getConnection: () => connection, setConnection: (value: any) => { connection = value; } };
 };
 
 describe('GoogleOAuthService', () => {
@@ -84,11 +85,21 @@ describe('GoogleOAuthService', () => {
   });
 
   it('rejects a tokenless reconnect for a different Google subject', async () => {
-    const { service, client, cipher, setConnection } = createFixture();
+    const { service, client, cipher, notifications, setConnection } = createFixture();
     setConnection({ tenantId, googleSubject: 'old-subject', encryptedRefreshToken: cipher.encrypt('existing-token'), status: 'ACTIVE' });
     client.exchangeCode.mockResolvedValue({ refreshToken: null, subject: 'new-subject', email: 'new@example.com', grantedScopes: ['https://www.googleapis.com/auth/drive.file'] });
 
     await expect(service.complete({ code: 'authorization-code', state: 'state-value' })).rejects.toThrow('Google connection failed');
+    expect(notifications.create).toHaveBeenCalledWith(expect.objectContaining({ tenantId, userId, category: 'GOOGLE_REAUTHORIZATION_REQUIRED', actionUrl: '/settings?tab=google' }));
+  });
+
+  it('notifies the connecting owner when token refresh requires authorization', async () => {
+    const { service, client, cipher, notifications, setConnection } = createFixture();
+    setConnection({ tenantId, connectedByUserId: userId, encryptedRefreshToken: cipher.encrypt('refresh-a'), credentialGenerationId: 'generation-a', status: 'ACTIVE' });
+    client.refreshAccessToken.mockRejectedValue(new Error('provider unavailable'));
+
+    await expect(service.getAccessToken(tenantId)).rejects.toThrow('Google connection failed');
+    expect(notifications.create).toHaveBeenCalledWith(expect.objectContaining({ tenantId, userId, type: 'WARNING', category: 'GOOGLE_REAUTHORIZATION_REQUIRED' }));
   });
 
   it('refreshes a short-lived access token only from the active tenant connection', async () => {
