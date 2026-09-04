@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render as rtlRender, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import {
@@ -6,6 +6,10 @@ import {
   isTrustedMetaAuthorizationUrl,
   type InstagramConnectionSummary,
 } from './instagram-settings-form';
+import { ActivityProvider } from './activity-provider';
+import { ToastProvider } from './toast-provider';
+
+function render(ui: React.ReactElement) { return rtlRender(<ToastProvider><ActivityProvider>{ui}</ActivityProvider></ToastProvider>); }
 
 const initial = (overrides: Partial<InstagramConnectionSummary> = {}): InstagramConnectionSummary => ({
   status: 'NOT_CONNECTED',
@@ -105,7 +109,7 @@ describe('InstagramSettingsForm', () => {
     expect(screen.queryByRole('button', { name: 'Підключити Instagram' })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Повторити очищення' }));
 
-    await waitFor(() => expect(screen.getByText('Очищення Instagram завершено')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getAllByText('Очищення Instagram завершено').length).toBeGreaterThan(0));
     expect(fetchMock).toHaveBeenCalledWith(
       '/api/integrations/instagram/cleanup',
       expect.objectContaining({
@@ -135,7 +139,7 @@ describe('InstagramSettingsForm', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Повторити очищення' }));
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('Не вдалося очистити підключення Instagram');
+    expect((await screen.findAllByRole('alert')).some((element) => element.textContent?.includes('Не вдалося очистити підключення Instagram'))).toBe(true);
     expect(screen.getByRole('button', { name: 'Повторити очищення' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Підключити Instagram' })).not.toBeInTheDocument();
   });
@@ -246,7 +250,7 @@ describe('InstagramSettingsForm', () => {
     expect(fetchMock).not.toHaveBeenCalled();
 
     fireEvent.click(screen.getByRole('button', { name: 'Так, відключити' }));
-    await waitFor(() => expect(screen.getByText('Instagram відключено')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getAllByText('Instagram відключено').length).toBeGreaterThan(0));
     expect(fetchMock).toHaveBeenCalledWith(
       '/api/integrations/instagram/disconnect',
       expect.objectContaining({
@@ -265,7 +269,7 @@ describe('InstagramSettingsForm', () => {
 
     startMetaAuthorization();
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('Не вдалося розпочати підключення Instagram');
+    expect((await screen.findAllByRole('alert')).some((element) => element.textContent?.includes('Не вдалося розпочати підключення Instagram'))).toBe(true);
     expect(fetchMock).toHaveBeenCalledWith(
       '/api/integrations/instagram/connect',
       expect.objectContaining({

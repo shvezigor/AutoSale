@@ -4,6 +4,8 @@ import type { InstagramConnectionSummary as ContractInstagramConnectionSummary }
 import { useState } from 'react';
 
 import { mutatingFetch } from '../auth/csrf-fetch';
+import { useActivity } from './activity-provider';
+import { useToast } from './toast-provider';
 
 export type InstagramConnectionSummary = ContractInstagramConnectionSummary;
 
@@ -42,16 +44,18 @@ export function InstagramSettingsForm({
     (isPermanentCleanupFailure(connection) || connection.cleanupAbandonEligible);
   const actionLabel = connectionActionLabel(connection.status);
   const visibleErrorCode = connection.cleanupErrorCode ?? connection.lastErrorCode;
+  const activity = useActivity();
+  const toast = useToast();
 
   async function connect() {
     setPendingAction('connect');
     setMessage(null);
     try {
-      const response = await mutatingFetch('/api/integrations/instagram/connect', {
+      const response = await activity.run('Підключаємо Instagram', () => mutatingFetch('/api/integrations/instagram/connect', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ returnPath: '/settings' }),
-      });
+      }));
       const payload = await jsonOrNull(response);
       const authorizationUrl = isRecord(payload) ? payload.authorizationUrl : null;
       if (!response.ok || typeof authorizationUrl !== 'string' || !isTrustedMetaAuthorizationUrl(authorizationUrl)) {
@@ -60,6 +64,7 @@ export function InstagramSettingsForm({
       window.location.href = authorizationUrl;
     } catch {
       setMessage({ kind: 'error', text: 'Не вдалося розпочати підключення Instagram' });
+      toast.show({ type: 'error', title: 'Не вдалося підключити Instagram' });
     } finally {
       setPendingAction(null);
     }
@@ -69,15 +74,17 @@ export function InstagramSettingsForm({
     setPendingAction('disconnect');
     setMessage(null);
     try {
-      const response = await mutatingFetch('/api/integrations/instagram/disconnect', { method: 'POST' });
+      const response = await activity.run('Відключаємо Instagram', () => mutatingFetch('/api/integrations/instagram/disconnect', { method: 'POST' }));
       const payload = await jsonOrNull(response);
       if (!response.ok || !isInstagramConnectionSummary(payload)) throw new Error('disconnect failed');
       setConnection(payload);
       setConfirmingDisconnect(false);
       setConfirmingDeadLetter(false);
       setMessage({ kind: 'success', text: 'Instagram відключено' });
+      toast.show({ type: 'success', title: 'Instagram відключено' });
     } catch {
       setMessage({ kind: 'error', text: 'Не вдалося відключити Instagram' });
+      toast.show({ type: 'error', title: 'Не вдалося відключити Instagram' });
     } finally {
       setPendingAction(null);
     }
@@ -87,14 +94,16 @@ export function InstagramSettingsForm({
     setPendingAction('cleanup');
     setMessage(null);
     try {
-      const response = await mutatingFetch('/api/integrations/instagram/cleanup', { method: 'POST' });
+      const response = await activity.run('Очищаємо підключення Instagram', () => mutatingFetch('/api/integrations/instagram/cleanup', { method: 'POST' }));
       const payload = await jsonOrNull(response);
       if (!response.ok || !isInstagramConnectionSummary(payload)) throw new Error('cleanup failed');
       setConnection(payload);
       if (isCleanupPending(payload)) throw new Error('cleanup failed');
       setMessage({ kind: 'success', text: 'Очищення Instagram завершено' });
+      toast.show({ type: 'success', title: 'Очищення Instagram завершено' });
     } catch {
       setMessage({ kind: 'error', text: 'Не вдалося очистити підключення Instagram' });
+      toast.show({ type: 'error', title: 'Не вдалося очистити Instagram' });
     } finally {
       setPendingAction(null);
     }
@@ -104,18 +113,20 @@ export function InstagramSettingsForm({
     setPendingAction('deadLetter');
     setMessage(null);
     try {
-      const response = await mutatingFetch('/api/integrations/instagram/cleanup/dead-letter', {
+      const response = await activity.run('Розблоковуємо Instagram', () => mutatingFetch('/api/integrations/instagram/cleanup/dead-letter', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ confirmation: 'ABANDON_REMOTE_CLEANUP' }),
-      });
+      }));
       const payload = await jsonOrNull(response);
       if (!response.ok || !isInstagramConnectionSummary(payload) || isCleanupPending(payload)) throw new Error('dead letter failed');
       setConnection(payload);
       setConfirmingDeadLetter(false);
       setMessage({ kind: 'success', text: 'Підключення Instagram розблоковано' });
+      toast.show({ type: 'success', title: 'Instagram розблоковано' });
     } catch {
       setMessage({ kind: 'error', text: 'Не вдалося розблокувати підключення Instagram' });
+      toast.show({ type: 'error', title: 'Не вдалося розблокувати Instagram' });
     } finally {
       setPendingAction(null);
     }
