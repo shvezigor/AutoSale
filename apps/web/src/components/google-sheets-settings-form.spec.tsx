@@ -1,6 +1,11 @@
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+vi.mock('./google-picker-button', () => ({
+  GooglePickerButton: ({ label, onSelected }: { label: string; onSelected: (selection: { fileId: string; name: string }) => void }) =>
+    <button type="button" onClick={() => onSelected({ fileId: 'orders-sheet', name: 'Продажі' })}>{label}</button>,
+}));
+
 import { GoogleSheetsSettingsForm } from './google-sheets-settings-form';
 
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
@@ -24,5 +29,21 @@ describe('GoogleSheetsSettingsForm', () => {
 
     expect(screen.getByRole('heading', { name: 'Експорт замовлень' })).toBeInTheDocument();
     expect(screen.queryByLabelText(/private key/i)).not.toBeInTheDocument();
+  });
+
+  it('automatically saves and validates a spreadsheet with one tab', async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ spreadsheetId: 'orders-sheet', tabs: [{ sheetId: 7, title: 'Замовлення' }] }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ token: 'csrf-save' }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ spreadsheetId: 'orders-sheet', sheetName: 'Замовлення', status: 'PENDING', requiredHeaders: ['order_id'] }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ token: 'csrf-check' }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ valid: true, missingHeaders: [], status: 'ACTIVE' }) });
+    vi.stubGlobal('fetch', fetchMock);
+    render(<GoogleSheetsSettingsForm initial={{ spreadsheetId: null, sheetName: 'Orders', status: 'NOT_CONFIGURED', requiredHeaders: ['order_id'], lastValidatedAt: null, errorSummary: null }} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Обрати таблицю для замовлень' }));
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledWith('/api/settings/google-sheets', expect.objectContaining({ method: 'PATCH', body: JSON.stringify({ spreadsheetId: 'orders-sheet', sheetName: 'Замовлення' }) })));
+    await waitFor(() => expect(screen.getByText('Підключення активне')).toBeInTheDocument());
   });
 });
