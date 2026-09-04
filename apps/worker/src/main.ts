@@ -29,6 +29,7 @@ import { createOpenAiColumnMapper } from './catalogue/openai-column-mapper.js';
 import { CatalogueMappingReconciler } from './catalogue/catalogue-mapping-reconciler.js';
 import { GoogleCatalogueSyncProcessor } from './catalogue/google-catalogue-sync.processor.js';
 import { CatalogueSyncScheduler } from './catalogue/catalogue-sync-scheduler.js';
+import { CatalogueAutoImporter } from './catalogue/catalogue-auto-importer.js';
 
 async function bootstrap(): Promise<void> {
   const env = parseWorkerEnv(process.env);
@@ -46,7 +47,7 @@ async function bootstrap(): Promise<void> {
   await storage.ensureBucket();
   const orderRecognizer = createOpenAiOrderRecognizer(env.OPENAI_API_KEY, env.OPENAI_MODEL);
   const catalogueMapper = createOpenAiColumnMapper(env.OPENAI_API_KEY, env.OPENAI_MODEL);
-  const catalogueMappingProcessor = new CatalogueMappingProcessor(prisma, storage, catalogueMapper);
+  const catalogueMappingProcessor = new CatalogueMappingProcessor(prisma, storage, catalogueMapper, new CatalogueAutoImporter(prisma, storage));
   const googleSheets = env.GOOGLE_SERVICE_ACCOUNT_FILE ? createGoogleSheetsAdapter(env.GOOGLE_SERVICE_ACCOUNT_FILE) : undefined;
   const googleOAuthTokens = env.GOOGLE_OAUTH_CLIENT_ID && env.GOOGLE_OAUTH_CLIENT_SECRET
     ? new GoogleOAuthTokenProvider({

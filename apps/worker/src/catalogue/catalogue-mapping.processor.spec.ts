@@ -7,6 +7,31 @@ const tenantId = '11111111-1111-4111-8111-111111111111';
 const runId = '22222222-2222-4222-8222-222222222222';
 
 describe('CatalogueMappingProcessor', () => {
+  it('automatically imports a confident mapping when an auto importer is available', async () => {
+    const updateMany = vi.fn().mockResolvedValue({ count: 1 });
+    const prisma = {
+      catalogueImportRun: {
+        updateMany,
+        findFirst: vi.fn().mockResolvedValue({ id: runId, tenantId, sourceId: 'source-auto', requestedByUserId: 'owner-1', source: { objectKey: 'catalogue/auto.csv', type: 'CSV_UPLOAD', headerFingerprint: 'fingerprint-auto' } }),
+      },
+      catalogueMapping: { findFirst: vi.fn().mockResolvedValue(null), create: vi.fn().mockResolvedValue({ id: 'mapping-auto' }) },
+      $transaction: async (work: (tx: unknown) => Promise<unknown>) => work(prisma),
+    };
+    const proposal = { columns: [{ source: 'назва', target: 'name' as const, confidence: 0.99 }] };
+    const mapper = { suggest: vi.fn().mockResolvedValue({
+      proposal,
+      metadata: { responseId: 'resp-auto', model: 'model', promptVersion: 'v1', schemaVersion: 'schema', latencyMs: 1, inputTokens: 1, outputTokens: 1 },
+    }) };
+    const storage = { get: vi.fn().mockResolvedValue({ body: Buffer.from('Назва\nСукня\n'), contentType: 'text/csv' }) };
+    const autoImporter = { process: vi.fn().mockResolvedValue({ status: 'COMPLETED' }) };
+
+    await expect(new CatalogueMappingProcessor(prisma as never, storage as never, mapper, autoImporter).process({ tenantId, runId }))
+      .resolves.toEqual({ status: 'COMPLETED', proposal });
+
+    expect(updateMany).toHaveBeenLastCalledWith(expect.objectContaining({ data: expect.objectContaining({ status: 'PREVIEW_READY' }) }));
+    expect(autoImporter.process).toHaveBeenCalledWith({ tenantId, runId });
+  });
+
   it('maps a Google Sheets snapshot with AI', async () => {
     const updateMany = vi.fn().mockResolvedValue({ count: 1 });
     const prisma = {

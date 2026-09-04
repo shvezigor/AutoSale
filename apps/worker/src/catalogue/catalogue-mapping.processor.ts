@@ -5,6 +5,7 @@ import { randomUUID } from 'node:crypto';
 import ExcelJS from 'exceljs';
 
 import type { CatalogueColumnMappingInput, CatalogueMappingSuggestion } from './openai-column-mapper.js';
+import { decideCatalogueImport } from './catalogue-import-decision.js';
 
 const MAX_SOURCE_BYTES = 5 * 1024 * 1024;
 export const CATALOGUE_MAPPING_LEASE_MS = 5 * 60 * 1_000;
@@ -13,15 +14,17 @@ export const CATALOGUE_MAPPING_HEARTBEAT_MS = 60 * 1_000;
 export type CatalogueMappingJob = { tenantId: string; runId: string };
 
 type Mapper = { suggest(input: CatalogueColumnMappingInput): Promise<CatalogueMappingSuggestion> };
+type AutoImporter = { process(input: CatalogueMappingJob): Promise<{ status: 'COMPLETED' }> };
 
 export class CatalogueMappingProcessor {
   constructor(
     private readonly prisma: PrismaClient,
     private readonly storage: ObjectStorage,
     private readonly mapper: Mapper,
+    private readonly autoImporter?: AutoImporter,
   ) {}
 
-  async process(job: CatalogueMappingJob): Promise<{ status: 'MAPPING_REVIEW' | 'SKIPPED'; proposal: CatalogueMappingSuggestion['proposal'] | null }> {
+  async process(job: CatalogueMappingJob): Promise<{ status: 'COMPLETED' | 'MAPPING_REVIEW' | 'SKIPPED'; proposal: CatalogueMappingSuggestion['proposal'] | null }> {
     const leaseId = randomUUID();
     const claimedAt = new Date();
     const claimed = await this.prisma.catalogueImportRun.updateMany({
@@ -37,6 +40,7 @@ export class CatalogueMappingProcessor {
     if (claimed.count !== 1) return { status: 'SKIPPED', proposal: null };
 
     let ownsLease = true;
+    let autoImportStarted = false;
     const heartbeat = async (): Promise<boolean> => {
       if (!ownsLease) return false;
       const now = new Date();
@@ -65,6 +69,8 @@ export class CatalogueMappingProcessor {
       if (!await heartbeat()) return { status: 'SKIPPED', proposal: null };
       const suggestion = await this.mapper.suggest(input);
       if (!await heartbeat()) return { status: 'SKIPPED', proposal: null };
+      const decision = this.autoImporter ? decideCatalogueImport({ columns: suggestion.proposal.columns, sampleRows: input.sampleRows }) : { action: 'REVIEW_REQUIRED' as const, reasons: [] };
+      const autoImport = decision.action === 'AUTO_IMPORT';
 
       await this.prisma.$transaction(async (tx) => {
         const latest = await tx.catalogueMapping.findFirst({
@@ -76,7 +82,7 @@ export class CatalogueMappingProcessor {
             sourceFingerprint: run.source.headerFingerprint!, columns: suggestion.proposal.columns,
             aiModel: suggestion.metadata.model, promptVersion: suggestion.metadata.promptVersion, schemaVersion: suggestion.metadata.schemaVersion,
             aiLatencyMs: suggestion.metadata.latencyMs, aiInputTokens: suggestion.metadata.inputTokens, aiOutputTokens: suggestion.metadata.outputTokens,
-            ownerModified: false, confirmedAt: null, confirmedByUserId: null,
+            ownerModified: false, confirmedAt: autoImport ? new Date() : null, confirmedByUserId: autoImport ? run.requestedByUserId : null,
           },
         });
         const assigned = await tx.catalogueImportRun.updateMany({
@@ -84,12 +90,24 @@ export class CatalogueMappingProcessor {
             id: job.runId, tenantId: job.tenantId, status: 'MAPPING', mappingLeaseId: leaseId,
             mappingLeaseExpiresAt: { gt: new Date() },
           },
-          data: { mappingId: mapping.id, status: 'MAPPING_REVIEW', mappingLeaseId: null, mappingLeaseExpiresAt: null },
+          data: {
+            mappingId: mapping.id,
+            status: autoImport ? 'PREVIEW_READY' : 'MAPPING_REVIEW',
+            mappingLeaseId: null,
+            mappingLeaseExpiresAt: null,
+            ...(!autoImport && decision.reasons.length > 0 ? { rowErrors: [{ errors: decision.reasons }] } : {}),
+          },
         });
         if (assigned.count !== 1) throw new Error('mapping assignment lost');
       });
+      if (autoImport) {
+        autoImportStarted = true;
+        await this.autoImporter!.process(job);
+        return { status: 'COMPLETED', proposal: suggestion.proposal };
+      }
       return { status: 'MAPPING_REVIEW', proposal: suggestion.proposal };
-    } catch {
+    } catch (error) {
+      if (autoImportStarted) throw error;
       if (!ownsLease) return { status: 'SKIPPED', proposal: null };
       const fallback = await this.prisma.catalogueImportRun.updateMany({
         where: {
