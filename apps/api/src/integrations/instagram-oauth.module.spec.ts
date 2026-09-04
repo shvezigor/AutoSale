@@ -29,6 +29,7 @@ const env = {
   SESSION_PEPPER: 's'.repeat(32),
   AUTH_TOKEN_PEPPER: 'a'.repeat(32),
   APP_PUBLIC_URL: 'https://demo.ngrok-free.app',
+  GOOGLE_SIGN_IN_ENABLED: false,
   SMTP_PORT: 587,
 } satisfies ApiEnv;
 
