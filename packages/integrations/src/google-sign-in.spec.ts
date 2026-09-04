@@ -19,6 +19,7 @@ describe('GoogleSignInClient', () => {
     expect(url.searchParams.get('response_type')).toBe('code');
     expect(url.searchParams.get('redirect_uri')).toBe(configuration.redirectUri);
     expect(url.searchParams.get('state')).toBe('opaque-state');
+    expect(url.searchParams.get('prompt')).toBeNull();
     expect(url.search).not.toMatch(/drive|spreadsheets/i);
   });
 

@@ -36,7 +36,6 @@ export class GoogleSignInClient implements GoogleSignInClientPort {
     return this.oauth.generateAuthUrl({
       access_type: 'online',
       include_granted_scopes: false,
-      prompt: 'select_account',
       redirect_uri: this.config.redirectUri,
       response_type: 'code',
       scope: IDENTITY_SCOPES,
