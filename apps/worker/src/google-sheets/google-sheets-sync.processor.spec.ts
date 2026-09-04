@@ -25,14 +25,16 @@ describe('GoogleSheetsSyncProcessor', () => {
   it('keeps a safe failure state before rethrowing a retryable error', async () => {
     const update = vi.fn().mockResolvedValue({});
     const prisma = {
-      orderExport: { findUniqueOrThrow: vi.fn().mockResolvedValue({ id: 'export-1', orderId: 'order-42' }), update },
-      order: { findUniqueOrThrow: vi.fn().mockResolvedValue({ id: 'order-42', status: 'APPROVED', extraction: {}, items: [] }) },
+      orderExport: { findUniqueOrThrow: vi.fn().mockResolvedValue({ id: 'export-1', orderId: 'order-42', tenantId: 'tenant-a' }), update },
+      order: { findUniqueOrThrow: vi.fn().mockResolvedValue({ id: 'order-42', status: 'APPROVED', approvedBy: 'user-a', extraction: {}, items: [] }) },
       googleSheetsDestination: { findUniqueOrThrow: vi.fn().mockResolvedValue({ spreadsheetId: 'sheet-id', sheetName: 'Orders', requiredHeaders: ['order_id'] }) },
     };
     const sheets = { upsertRow: vi.fn().mockRejectedValue(new Error('Google Sheets API returned HTTP 503')) };
+    const notifications = { orderExportFailed: vi.fn().mockResolvedValue(undefined) };
 
-    await expect(new GoogleSheetsSyncProcessor(prisma as never, sheets as never).process('export-1')).rejects.toThrow('HTTP 503');
+    await expect(new GoogleSheetsSyncProcessor(prisma as never, sheets as never, undefined, notifications as never).process('export-1')).rejects.toThrow('HTTP 503');
     expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ data: expect.objectContaining({ status: 'FAILED', errorSummary: 'Google Sheets API returned HTTP 503' }) }));
+    expect(notifications.orderExportFailed).toHaveBeenCalledWith('tenant-a', 'user-a', 'order-42');
   });
 
   it('resolves the destination tenant OAuth connection for each export', async () => {

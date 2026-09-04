@@ -30,6 +30,7 @@ import { CatalogueMappingReconciler } from './catalogue/catalogue-mapping-reconc
 import { GoogleCatalogueSyncProcessor } from './catalogue/google-catalogue-sync.processor.js';
 import { CatalogueSyncScheduler } from './catalogue/catalogue-sync-scheduler.js';
 import { CatalogueAutoImporter } from './catalogue/catalogue-auto-importer.js';
+import { WorkerNotificationService } from './notifications/worker-notification.service.js';
 
 async function bootstrap(): Promise<void> {
   const env = parseWorkerEnv(process.env);
@@ -224,7 +225,7 @@ async function bootstrap(): Promise<void> {
   });
   const catalogueReconciler = new CatalogueMappingReconciler(prisma, catalogueQueue);
   const catalogueScheduler = new CatalogueSyncScheduler(prisma, catalogueQueue);
-  const sheetsProcessor = googleSheets || oauthSheets ? new GoogleSheetsSyncProcessor(prisma, googleSheets, oauthSheets) : undefined;
+  const sheetsProcessor = googleSheets || oauthSheets ? new GoogleSheetsSyncProcessor(prisma, googleSheets, oauthSheets, new WorkerNotificationService(prisma as never)) : undefined;
   let polling = false;
   const pollExports = async (): Promise<void> => {
     if (polling) return;

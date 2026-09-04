@@ -1,5 +1,6 @@
 import type { PrismaClient } from '@autosale/database';
 import type { GoogleSheetsAdapter } from '@autosale/integrations';
+import { WorkerNotificationService } from '../notifications/worker-notification.service.js';
 
 type Extraction = { customer?: { name?: string | null; phone?: string | null; instagramUsername?: string | null }; delivery?: { city?: string | null; address?: string | null; novaPoshtaBranch?: string | null } };
 
@@ -8,13 +9,16 @@ export class GoogleSheetsSyncProcessor {
     private readonly prisma: PrismaClient,
     private readonly sheets: Pick<GoogleSheetsAdapter, 'upsertRow'> | undefined,
     private readonly oauthSheets?: (tenantId: string, connectionId: string) => Promise<Pick<GoogleSheetsAdapter, 'upsertRow'>>,
+    private readonly notifications?: WorkerNotificationService,
   ) {}
 
   async process(exportId: string): Promise<void> {
     const record = await this.prisma.orderExport.findUniqueOrThrow({ where: { id: exportId } });
     await this.prisma.orderExport.update({ where: { id: exportId }, data: { status: 'PROCESSING', attempts: { increment: 1 }, lastAttemptAt: new Date() } });
+    let approvedBy: string | null = null;
     try {
       const order = await this.prisma.order.findUniqueOrThrow({ where: { id: record.orderId }, include: { items: { orderBy: { createdAt: 'asc' } } } });
+      approvedBy = typeof order.approvedBy === 'string' ? order.approvedBy : null;
       if (order.status !== 'APPROVED' && order.status !== 'AUTO_APPROVED') throw new Error('Only approved orders can be exported');
       const destination = await this.prisma.googleSheetsDestination.findUniqueOrThrow({ where: { tenantId: record.tenantId } });
       const sheets = destination.credentialRef && this.oauthSheets
@@ -29,6 +33,7 @@ export class GoogleSheetsSyncProcessor {
     } catch (error) {
       const summary = error instanceof Error ? error.message.slice(0, 500) : 'Unknown Google Sheets synchronization error';
       await this.prisma.orderExport.update({ where: { id: exportId }, data: { status: 'FAILED', errorSummary: summary } });
+      try { await this.notifications?.orderExportFailed(record.tenantId, approvedBy, record.orderId); } catch { /* export retry remains authoritative */ }
       throw error;
     }
   }
