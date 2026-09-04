@@ -58,6 +58,16 @@ export type InstagramCredentialCleanup = Prisma.InstagramCredentialCleanupModel
  */
 export type User = Prisma.UserModel
 /**
+ * Model GoogleIdentity
+ *
+ */
+export type GoogleIdentity = Prisma.GoogleIdentityModel
+/**
+ * Model GoogleSignInAttempt
+ *
+ */
+export type GoogleSignInAttempt = Prisma.GoogleSignInAttemptModel
+/**
  * Model TenantMembership
  *
  */

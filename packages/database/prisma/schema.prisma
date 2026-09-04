@@ -258,7 +258,7 @@ model User {
   id                      String                   @id @default(uuid()) @db.Uuid
   email                   String                   @unique
   name                    String
-  passwordHash            String                   @map("password_hash")
+  passwordHash            String?                  @map("password_hash")
   emailVerifiedAt         DateTime?                @map("email_verified_at")
   platformRole            PlatformRole             @default(USER) @map("platform_role")
   status                  AccessStatus              @default(PENDING)
@@ -275,9 +275,41 @@ model User {
   instagramCleanupsDeadLettered InstagramCredentialCleanup[] @relation("InstagramCleanupDeadLetteredBy")
   googleOAuthAttempts      GoogleOAuthAttempt[]
   googleConnections        GoogleConnection[] @relation("GoogleConnectionConnectedBy")
+  googleIdentity           GoogleIdentity?
 
   @@index([status])
   @@map("users")
+}
+
+model GoogleIdentity {
+  id            String   @id @default(uuid()) @db.Uuid
+  userId        String   @unique @map("user_id") @db.Uuid
+  googleSubject String   @unique @map("google_subject")
+  emailAtLink   String   @map("email_at_link")
+  createdAt     DateTime @default(now()) @map("created_at")
+  lastUsedAt    DateTime @default(now()) @map("last_used_at")
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("google_identities")
+}
+
+model GoogleSignInAttempt {
+  id                  String    @id @default(uuid()) @db.Uuid
+  stateTokenHash      String    @unique @map("state_token_hash")
+  returnPath          String    @default("/conversations") @map("return_path")
+  stateExpiresAt      DateTime  @map("state_expires_at")
+  stateUsedAt         DateTime? @map("state_used_at")
+  onboardingTokenHash String?   @unique @map("onboarding_token_hash")
+  onboardingExpiresAt DateTime? @map("onboarding_expires_at")
+  onboardingUsedAt    DateTime? @map("onboarding_used_at")
+  googleSubject       String?   @map("google_subject")
+  verifiedEmail       String?   @map("verified_email")
+  displayName         String?   @map("display_name")
+  createdAt           DateTime  @default(now()) @map("created_at")
+
+  @@index([stateExpiresAt, stateUsedAt])
+  @@index([onboardingExpiresAt, onboardingUsedAt])
+  @@map("google_sign_in_attempts")
 }
 
 model TenantMembership {

@@ -59,6 +59,8 @@ export const ModelName = {
   InstagramOAuthState: 'InstagramOAuthState',
   InstagramCredentialCleanup: 'InstagramCredentialCleanup',
   User: 'User',
+  GoogleIdentity: 'GoogleIdentity',
+  GoogleSignInAttempt: 'GoogleSignInAttempt',
   TenantMembership: 'TenantMembership',
   Session: 'Session',
   EmailVerificationToken: 'EmailVerificationToken',
@@ -240,6 +242,36 @@ export const UserScalarFieldEnum = {
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
+
+
+export const GoogleIdentityScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  googleSubject: 'googleSubject',
+  emailAtLink: 'emailAtLink',
+  createdAt: 'createdAt',
+  lastUsedAt: 'lastUsedAt'
+} as const
+
+export type GoogleIdentityScalarFieldEnum = (typeof GoogleIdentityScalarFieldEnum)[keyof typeof GoogleIdentityScalarFieldEnum]
+
+
+export const GoogleSignInAttemptScalarFieldEnum = {
+  id: 'id',
+  stateTokenHash: 'stateTokenHash',
+  returnPath: 'returnPath',
+  stateExpiresAt: 'stateExpiresAt',
+  stateUsedAt: 'stateUsedAt',
+  onboardingTokenHash: 'onboardingTokenHash',
+  onboardingExpiresAt: 'onboardingExpiresAt',
+  onboardingUsedAt: 'onboardingUsedAt',
+  googleSubject: 'googleSubject',
+  verifiedEmail: 'verifiedEmail',
+  displayName: 'displayName',
+  createdAt: 'createdAt'
+} as const
+
+export type GoogleSignInAttemptScalarFieldEnum = (typeof GoogleSignInAttemptScalarFieldEnum)[keyof typeof GoogleSignInAttemptScalarFieldEnum]
 
 
 export const TenantMembershipScalarFieldEnum = {
