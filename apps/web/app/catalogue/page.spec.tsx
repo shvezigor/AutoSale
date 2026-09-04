@@ -19,8 +19,10 @@ describe('CataloguePage', () => {
     render(await CataloguePage({ searchParams: Promise.resolve({ page: '2', search: 'Luna' }) }));
 
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/catalogue?page=2&pageSize=25&search=Luna');
-    expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/catalogue/sources');
-    expect(screen.getByRole('link', { name: 'Налаштування → Google' })).toHaveAttribute('href', '/settings?tab=google');
+    expect(authenticatedApiFetch).toHaveBeenCalledTimes(1);
+    expect(screen.queryByRole('heading', { name: 'Оберіть джерело' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Обрати файл' })).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Налаштування → Дані' })).toHaveAttribute('href', '/settings?tab=data');
     expect(screen.getByText('Товарів за цим запитом не знайдено.')).toBeInTheDocument();
   });
 
