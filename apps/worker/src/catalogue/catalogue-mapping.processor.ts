@@ -7,7 +7,9 @@ import ExcelJS from 'exceljs';
 import type { CatalogueColumnMappingInput, CatalogueMappingSuggestion } from './openai-column-mapper.js';
 import { decideCatalogueImport } from './catalogue-import-decision.js';
 
-const MAX_SOURCE_BYTES = 5 * 1024 * 1024;
+// Google snapshots can legitimately contain several rich-text description cells.
+// Keep this bounded, but aligned with the supported 5,000-row catalogue envelope.
+const MAX_SOURCE_BYTES = 32 * 1024 * 1024;
 export const CATALOGUE_MAPPING_LEASE_MS = 5 * 60 * 1_000;
 export const CATALOGUE_MAPPING_HEARTBEAT_MS = 60 * 1_000;
 
