@@ -701,17 +701,18 @@ The approved design is in `docs/superpowers/specs/2026-09-03-google-sign-in-desi
 
 ## Task 36: Reliable catalogue reload and mobile navigation
 
-**Status:** Implemented on `codex/catalogue-reset-mobile-nav`; live acceptance remains.
+**Status:** Implemented and verified on the deployed Docker stack.
 
 **Description:** Explain failed catalogue replacements clearly, let owners clear all tenant products before a full reload, provide a reusable accessible confirmation dialog, and expose the complete application navigation through a mobile drawer.
 
 **Acceptance criteria:**
 - [x] A current source failure takes precedence over an older successful import summary.
-- [x] `TABLE_COLUMN_LIMIT` explains that the selected sheet contains more than 100 columns.
+- [x] Wide Google Sheets catalogues support up to 500 columns and long product descriptions up to 65,536 characters.
+- [x] Repeated source headings are disambiguated internally by column without modifying the customer's Google Sheet.
 - [x] Only an owner can clear products, and only inside their current workspace.
 - [x] Clearing preserves orders and records an audit event with the deleted count.
 - [x] Confirmation requires one explicit click, not typed text; progress and completion are visible globally.
 - [x] Mobile users can open every permitted navigation destination and close the drawer by link, backdrop, or Escape.
-- [ ] Verify the complete flow against a real replacement spreadsheet after deployment.
+- [x] Verify the real replacement spreadsheet through Google Sheets read and AI mapping; uncertain mappings open the review screen before import.
 
 **Dependencies:** Task 35. **Estimated scope:** Small

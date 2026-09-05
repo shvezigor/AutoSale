@@ -649,7 +649,7 @@ function parseTableSnapshot(buffer: Buffer, contentType: string): ParsedTable {
   const parsed = JSON.parse(buffer.toString('utf8')) as unknown;
   if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) throw new Error('Invalid catalogue table snapshot');
   const candidate = parsed as { headers?: unknown; rows?: unknown };
-  if (!Array.isArray(candidate.headers) || candidate.headers.length === 0 || candidate.headers.length > 100
+  if (!Array.isArray(candidate.headers) || candidate.headers.length === 0 || candidate.headers.length > 500
     || candidate.headers.some((header) => typeof header !== 'string') || !Array.isArray(candidate.rows) || candidate.rows.length > 5_000) {
     throw new Error('Invalid catalogue table snapshot');
   }
@@ -666,7 +666,7 @@ function parseTableSnapshot(buffer: Buffer, contentType: string): ParsedTable {
 }
 
 function readHeaders(value: Prisma.JsonValue | null): string[] {
-  return Array.isArray(value) ? value.filter((header): header is string => typeof header === 'string').slice(0, 100) : [];
+  return Array.isArray(value) ? value.filter((header): header is string => typeof header === 'string').slice(0, 500) : [];
 }
 
 function nextSyncAt(schedule: string | null): Date | null {

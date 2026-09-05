@@ -11,6 +11,25 @@ function Harness({ action }: { action: () => void }) {
 }
 
 describe('ConfirmProvider', () => {
+  it('traps focus, cancels with Escape, and restores focus without deleting', async () => {
+    const action = vi.fn();
+    render(<ConfirmProvider><Harness action={action} /></ConfirmProvider>);
+    const trigger = screen.getByRole('button', { name: 'Очистити' });
+    trigger.focus();
+    fireEvent.click(trigger);
+    const cancel = screen.getByRole('button', { name: 'Скасувати' });
+    const approve = screen.getByRole('button', { name: 'Так, очистити' });
+    expect(cancel).toHaveFocus();
+    fireEvent.keyDown(document, { key: 'Tab', shiftKey: true });
+    expect(approve).toHaveFocus();
+    fireEvent.keyDown(document, { key: 'Tab' });
+    expect(cancel).toHaveFocus();
+    fireEvent.keyDown(document, { key: 'Escape' });
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    expect(trigger).toHaveFocus();
+    expect(action).not.toHaveBeenCalled();
+  });
+
   it('resolves a reusable confirmation without requiring typed text', async () => {
     const action = vi.fn();
     render(<ConfirmProvider><Harness action={action} /></ConfirmProvider>);

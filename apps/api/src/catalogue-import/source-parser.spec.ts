@@ -42,8 +42,8 @@ describe('parseCatalogueSource', () => {
     await expect(parseCatalogueSource(Buffer.from(`SKU\n${'x'.repeat(65_537)}`), 'text/csv')).rejects.toThrow();
   });
 
-  it('rejects more than 100 columns', async () => {
-    const headers = Array.from({ length: 101 }, (_, index) => `column-${index + 1}`).join(',');
+  it('rejects more than 500 columns', async () => {
+    const headers = Array.from({ length: 501 }, (_, index) => `column-${index + 1}`).join(',');
     await expect(parseCatalogueSource(Buffer.from(`${headers}\n`), 'text/csv')).rejects.toThrow();
   });
 

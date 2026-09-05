@@ -77,6 +77,16 @@ describe('CatalogueSourceSettings', () => {
     expect(screen.getByRole('link', { name: 'Перевірити сумнівні поля' })).toHaveAttribute('href', '/catalogue?review=run-review');
   });
 
+  it('polls queued work and replaces the loading state with its completed result', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({ ...configuration, updatedAt: '2026-09-05T12:00:00Z', latestRun: { id: 'new-run', status: 'COMPLETED', createdRows: 234, updatedRows: 0, skippedRows: 0, failedRows: 0 } }) }));
+    mutatingFetch.mockResolvedValueOnce({ ok: true, json: async () => configuration }).mockResolvedValueOnce({ ok: true, json: async () => ({ queued: true }) });
+    render(<CatalogueSourceSettings role="OWNER" sources={[source]} configurations={[configuration]} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Завантажити товари' }));
+    await screen.findByText('Розпізнаємо й завантажуємо товари…');
+    await screen.findByText('Готово', {}, { timeout: 4000 });
+    expect(screen.getByText('Додано: 234 · оновлено: 0 · пропущено: 0')).toBeInTheDocument();
+  });
+
   it('shows the current source error instead of a stale completed import', () => {
     render(<CatalogueSourceSettings role="OWNER" sources={[{ ...source, status: 'PAUSED', lastErrorSummary: 'TABLE_COLUMN_LIMIT' }]} configurations={[{
       ...configuration,
@@ -85,7 +95,7 @@ describe('CatalogueSourceSettings', () => {
       latestRun: { id: 'run-old', status: 'COMPLETED', createdRows: 14, updatedRows: 0, skippedRows: 5, failedRows: 0 },
     }]} />);
     expect(screen.getByText('Забагато колонок у таблиці')).toBeInTheDocument();
-    expect(screen.getByText(/понад 100 колонок/)).toBeInTheDocument();
+    expect(screen.getByText(/до 500 колонок/)).toBeInTheDocument();
     expect(screen.queryByText('Готово')).not.toBeInTheDocument();
   });
 

@@ -132,9 +132,19 @@ describe('GoogleSheetsAdapter', () => {
     expect(fetchFn.mock.calls[0]?.[0]).toContain("'Products'!1%3A5003");
   });
 
-  it('requests complete rows so a populated 101st column cannot be hidden by the range', async () => {
+  it('preserves all 234 columns of a wide supplier catalogue', async () => {
+    const headers = Array.from({ length: 234 }, (_, index) => `column-${index}`);
+    headers[233] = 'SKU';
+    const row = headers.map((_, index) => String(index));
+    const adapter = new GoogleSheetsAdapter({ getAccessToken: async () => 'token' }, vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({ values: [headers, row] }) }));
+    const result = await adapter.readTable({ spreadsheetId: 'sheet', sheetName: 'Products', maxRows: 10 });
+    expect(result.headers).toEqual(headers);
+    expect(result.rows[0]).toEqual(row);
+  });
+
+  it('requests complete rows so a populated 501st column cannot be hidden by the range', async () => {
     const fetchFn = vi.fn().mockResolvedValue({
-      ok: true, status: 200, json: async () => ({ values: [Array.from({ length: 101 }, (_, index) => `column-${index}`)] }),
+      ok: true, status: 200, json: async () => ({ values: [Array.from({ length: 501 }, (_, index) => `column-${index}`)] }),
     });
     const adapter = new GoogleSheetsAdapter({ getAccessToken: async () => 'token' }, fetchFn);
 
@@ -146,9 +156,8 @@ describe('GoogleSheetsAdapter', () => {
 
   it.each([
     [[['', 'Name']], 'empty'],
-    [[[' SKU ', 'sku']], 'duplicate'],
-    [[Array.from({ length: 101 }, (_, index) => `column-${index}`)], '100 columns'],
-    [[['SKU'], ['x'.repeat(10_001)]], 'cell'],
+    [[Array.from({ length: 501 }, (_, index) => `column-${index}`)], '500 columns'],
+    [[['SKU'], ['x'.repeat(65_537)]], 'cell'],
   ] as const)('rejects invalid bounded table structures without returning row data: %s', async (values, message) => {
     const adapter = new GoogleSheetsAdapter({ getAccessToken: async () => 'token' }, vi.fn().mockResolvedValue({
       ok: true, status: 200, json: async () => ({ values }),
@@ -206,6 +215,22 @@ describe('GoogleSheetsAdapter', () => {
 
     expect(fetchFn.mock.calls[1]?.[0]).toContain("values/'Orders'!A%3AA:append");
     expect(fetchFn.mock.calls[1]?.[1]).toMatchObject({ method: 'POST', body: JSON.stringify({ values: [['order-42', 'APPROVED', 'SKU-7']] }) });
+  });
+
+  it('disambiguates repeated catalogue headers by column without dropping values', async () => {
+    const fetchFn = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({
+      values: [['Name', 'Бренд', ' бренд ', 'Бренд [B]'], ['Казан', 'A', 'B', 'C']],
+    }) });
+    const adapter = new GoogleSheetsAdapter({ getAccessToken: async () => 'token' }, fetchFn);
+    const input = { spreadsheetId: 'sheet', sheetName: 'Products', maxRows: 10 };
+    const table = await adapter.readTable(input);
+    expect(new Set(table.headers.map((header) => header.trim().toLowerCase())).size).toBe(4);
+    expect(table.headers[0]).toBe('Name');
+    expect(table.headers[1]).toContain('[B]');
+    expect(table.headers[2]).toContain('[C]');
+    expect(table.rows).toEqual([['Казан', 'A', 'B', 'C']]);
+    expect((await adapter.readTable(input)).revision).toBe(table.revision);
+    expect(fetchFn.mock.calls.every((call) => !call[1]?.method)).toBe(true);
   });
 
   it('updates the existing order row instead of appending a duplicate', async () => {

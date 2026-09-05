@@ -230,7 +230,7 @@ export class CatalogueSourcesService {
 }
 
 function safeHeaders(value: unknown): string[] {
-  return Array.isArray(value) ? value.filter((header): header is string => typeof header === 'string').slice(0, 100) : [];
+  return Array.isArray(value) ? value.filter((header): header is string => typeof header === 'string').slice(0, 500) : [];
 }
 
 function initialNextSyncAt(schedule: CatalogueSyncSchedule): Date | null {

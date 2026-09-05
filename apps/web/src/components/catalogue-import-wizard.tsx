@@ -14,12 +14,12 @@ type Preview = { totals: { created: number; updated: number; skipped: number; fa
 const targets: Target[] = ['ignore', 'sku', 'name', 'description', 'price', 'currency', 'stockQuantity', 'category', 'brand', 'aliases', 'color', 'size', 'imageUrls', 'active', 'attributes'];
 const stepLabels = ['Джерело', 'Завантаження', 'Аналіз колонок', 'Зіставлення', 'Перевірка', 'Попередній перегляд', 'Підтвердження та прогрес'];
 
-export function CatalogueImportWizard({ session, reviewRuns = [] }: { session: Session; reviewRuns?: Array<{ id: string; sourceName: string; headers: string[] }> }) {
+export function CatalogueImportWizard({ session, reviewRuns = [], initialReview }: { session: Session; reviewRuns?: Array<{ id: string; sourceName: string; headers: string[] }>; initialReview?: { id: string; headers: string[] } }) {
   const [file, setFile] = useState<File | null>(null);
-  const [runId, setRunId] = useState<string | null>(null);
-  const [headers, setHeaders] = useState<string[]>([]);
+  const [runId, setRunId] = useState<string | null>(initialReview?.id ?? null);
+  const [headers, setHeaders] = useState<string[]>(initialReview?.headers ?? []);
   const [columns, setColumns] = useState<Column[]>([]);
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(initialReview ? 3 : 1);
   const [manualFallback, setManualFallback] = useState(false);
   const [preview, setPreview] = useState<Preview | null>(null);
   const [confirmed, setConfirmed] = useState(false);

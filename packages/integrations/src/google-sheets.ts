@@ -12,8 +12,8 @@ export type GoogleSheetsCell = string | number | boolean | null;
 export type GoogleSheetsTable = { headers: string[]; rows: GoogleSheetsCell[][]; revision: string };
 export type GoogleSheetsReadErrorCode = 'AUTHORIZATION' | 'NOT_FOUND' | 'RATE_LIMIT' | 'RETRYABLE';
 export type GoogleSheetsTableValidationErrorCode = 'ROW_LIMIT' | 'COLUMN_LIMIT' | 'CELL_LIMIT' | 'HEADER_INVALID';
-const MAX_TABLE_COLUMNS = 100;
-const MAX_TABLE_CELL_CHARACTERS = 10_000;
+const MAX_TABLE_COLUMNS = 500;
+const MAX_TABLE_CELL_CHARACTERS = 65_536;
 const HEADER_SCAN_ROWS = 20;
 /** Sparse rows are checked for 5,000 rows beyond the accepted table boundary. */
 const TABLE_OVERFLOW_SCAN_ROWS = 5_000;
@@ -80,7 +80,7 @@ export class GoogleSheetsAdapter {
       throw new GoogleSheetsTableValidationError('CELL_LIMIT', 'Google Sheets cell exceeds the character limit');
     }
     const headerIndex = findHeaderRowIndex(values);
-    const headers = (values[headerIndex] ?? []).map((value) => String(value ?? ''));
+    let headers = (values[headerIndex] ?? []).map((value) => String(value ?? ''));
     const overflowRows = values.slice(headerIndex + input.maxRows + 1);
     if (overflowRows.some((row) => row.some((cell) => cell !== null && cell !== ''))) {
       throw new GoogleSheetsTableValidationError('ROW_LIMIT', `Google Sheets table exceeds ${input.maxRows} rows`);
@@ -92,7 +92,18 @@ export class GoogleSheetsAdapter {
         throw new GoogleSheetsTableValidationError('HEADER_INVALID', 'Google Sheets table contains an empty header');
       }
       if (new Set(normalizedHeaders).size !== normalizedHeaders.length) {
-        throw new GoogleSheetsTableValidationError('HEADER_INVALID', 'Google Sheets table contains a duplicate header');
+        // Preserve every column and its values. Labels change only in our snapshot,
+        // never in the customer's sheet; position makes repeated attributes distinct.
+        const reserved = new Set(normalizedHeaders);
+        const counts = new Map<string, number>();
+        normalizedHeaders.forEach((header) => counts.set(header, (counts.get(header) ?? 0) + 1));
+        headers = headers.map((header, index) => {
+          if (counts.get(normalizedHeaders[index]!) === 1) return header;
+          let label = `${header.trim()} [${columnName(index + 1)}]`;
+          while (reserved.has(normalizeHeader(label))) label += ' [duplicate]';
+          reserved.add(normalizeHeader(label));
+          return label;
+        });
       }
     }
     return {

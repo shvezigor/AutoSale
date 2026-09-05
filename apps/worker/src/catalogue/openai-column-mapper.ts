@@ -126,7 +126,7 @@ export function createOpenAiColumnMapper(apiKey: string, model: string): OpenAiC
 }
 
 function boundedInput(input: CatalogueColumnMappingInput): CatalogueColumnMappingInput {
-  const headers = input.headers.map((header) => header.trim()).filter((header, index, all) => header.length > 0 && all.indexOf(header) === index).slice(0, 100);
+  const headers = input.headers.map((header) => header.trim()).filter((header, index, all) => header.length > 0 && all.indexOf(header) === index).slice(0, 500);
   const primitiveTypes = Object.fromEntries(headers.map((header) => [header, input.primitiveTypes[header] ?? 'empty']));
   return {
     headers,

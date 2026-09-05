@@ -41,4 +41,15 @@ describe('CataloguePage', () => {
 
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/catalogue?page=1&pageSize=50');
   });
+
+  it('opens only a requested tenant-safe mapping review for an owner', async () => {
+    const id = 'af09af2a-5201-4009-a273-fb54885ea038';
+    getServerSession.mockResolvedValue({ name: 'Іван', email: 'owner@example.com', membershipRole: 'OWNER' });
+    authenticatedApiFetch
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ items: [], page: 1, pageSize: 25, total: 0 }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ id, status: 'MAPPING_REVIEW', headers: ['Артикул', 'Назва'] }) });
+    render(await CataloguePage({ searchParams: Promise.resolve({ review: id }) }));
+    expect(authenticatedApiFetch).toHaveBeenCalledWith(`/api/catalogue/imports/${id}`);
+    expect(screen.getByRole('heading', { name: 'Аналіз колонок' })).toBeInTheDocument();
+  });
 });

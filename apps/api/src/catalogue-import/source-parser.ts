@@ -13,7 +13,7 @@ export type ParsedTable = {
 
 const CSV_MEDIA_TYPES = new Set(['text/csv', 'application/csv']);
 const XLSX_MEDIA_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-const MAX_COLUMNS = 100;
+const MAX_COLUMNS = 500;
 const MAX_ROWS = 10_000;
 const MAX_CELL_BYTES = 65_536;
 const MAX_XLSX_ENTRIES = 256;

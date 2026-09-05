@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { mutatingFetch } from '../auth/csrf-fetch';
 import { useActivity } from './activity-provider';
@@ -37,12 +37,47 @@ export function CatalogueSourceSettings({
   const [sheetName, setSheetName] = useState(current?.sheetName ?? 'Товари');
   const [schedule, setSchedule] = useState<'MANUAL' | 'HOURLY' | 'DAILY'>(current?.syncSchedule ?? 'MANUAL');
   const [pending, setPending] = useState(false);
+  const [tracking, setTracking] = useState<{ id: string; previousRun: string | undefined; updatedAt: string; started: number } | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [tabs, setTabs] = useState<Array<{ sheetId: number; title: string }>>([]);
   const fileInput = useRef<HTMLInputElement>(null);
   const activity = useActivity();
   const toast = useToast();
+
+  useEffect(() => {
+    if (!tracking) return;
+    const controller = new AbortController();
+    let timer: ReturnType<typeof setTimeout>;
+    async function poll() {
+      try {
+        const response = await fetch(`/api/catalogue/sources/${tracking!.id}`, { cache: 'no-store', signal: controller.signal });
+        if (!response.ok) throw new Error('Не вдалося перевірити стан імпорту');
+        const next = await response.json() as CatalogueSourceConfiguration;
+        if (controller.signal.aborted) return;
+        const changed = next.updatedAt !== tracking!.updatedAt;
+        const terminal = ['COMPLETED', 'FAILED', 'MAPPING_REVIEW', 'PREVIEW_READY'].includes(next.latestRun?.status ?? '');
+        if (changed && (next.lastErrorSummary || (terminal && (next.latestRun?.id !== tracking!.previousRun || next.status === 'ACTIVE')))) {
+          setCurrent(next); setTracking(null); setMessage(null);
+          toast.show(next.lastErrorSummary || next.latestRun?.status === 'FAILED'
+            ? { type: 'error', title: 'Не вдалося завантажити товари', message: 'Причину показано в картці джерела.' }
+            : next.latestRun?.status === 'COMPLETED'
+              ? { type: 'success', title: 'Товари завантажено', message: `Додано: ${next.latestRun.createdRows} · оновлено: ${next.latestRun.updatedRows}` }
+              : { type: 'warning', title: 'Потрібна перевірка колонок' });
+          return;
+        }
+        if (changed && next.latestRun?.id !== tracking!.previousRun) setCurrent(next);
+      } catch {
+        if (controller.signal.aborted) return;
+      }
+      if (Date.now() - tracking!.started > 5 * 60_000) {
+        setTracking(null); setMessage('Обробка триває довше очікуваного. Результат буде в центрі сповіщень.'); return;
+      }
+      timer = setTimeout(() => void poll(), 2000);
+    }
+    timer = setTimeout(() => void poll(), 2000);
+    return () => { controller.abort(); clearTimeout(timer); };
+  }, [tracking, toast]);
 
   if (role === 'MANAGER') return <HealthList sources={sources} />;
 
@@ -80,7 +115,8 @@ export function CatalogueSourceSettings({
     }, 'Джерело збережено');
     if (result) {
       setCurrent(result);
-      await mutate(`/api/catalogue/sources/${result.id}/sync`, { method: 'POST' }, 'Таблицю підключено. Розпізнаємо й завантажуємо товари.');
+      const queued = await mutate(`/api/catalogue/sources/${result.id}/sync`, { method: 'POST' }, 'Таблицю підключено. Розпізнаємо й завантажуємо товари.');
+      if (queued) setTracking({ id: result.id, previousRun: result.latestRun?.id, updatedAt: result.updatedAt, started: Date.now() });
     }
   }
 
@@ -124,7 +160,7 @@ export function CatalogueSourceSettings({
     {!googleConnected && <p className="settings-step-notice">Під час вибору таблиці Google один раз попросить доступ до неї.</p>}
     <div className="data-source-actions"><GooglePickerButton label="Обрати Google-таблицю" connected={googleConnected} intent="catalogue" autoOpen={autoOpenPicker} disabled={pending} onSelected={(selection) => void selectSpreadsheet(selection)} /><span>або</span><button className="secondary-button" disabled={pending} type="button" onClick={() => fileInput.current?.click()}>Завантажити CSV або Excel</button><input ref={fileInput} className="sr-only" type="file" accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onChange={(event) => void uploadFile(event.target.files?.[0])} /></div>
     {spreadsheet && <div className="data-selection-summary"><span>Джерело товарів</span><strong>{displayName}</strong></div>}
-    {current?.lastErrorSummary ? <SourceErrorState code={current.lastErrorSummary} /> : current?.latestRun && <ImportRunState run={current.latestRun} />}
+    {tracking ? <div className="data-import-result is-working" role="status" aria-busy="true"><strong>Розпізнаємо й завантажуємо товари…</strong><span>Результат з’явиться тут автоматично.</span></div> : current?.lastErrorSummary ? <SourceErrorState code={current.lastErrorSummary} /> : current?.latestRun && current.spreadsheetId === spreadsheet && current.sheetName === sheetName && <ImportRunState run={current.latestRun} />}
     {tabs.length > 1 && <label className="data-tab-choice"><span>Вкладка з товарами</span><select aria-label="Вкладка Google таблиці" value={sheetName} onChange={(event) => setSheetName(event.target.value)}>{tabs.map((tab) => <option key={tab.sheetId} value={tab.title}>{tab.title}</option>)}</select></label>}
     <div className="catalogue-source-actions">
       {spreadsheet && <LoadingButton pending={pending} pendingLabel="Завантажуємо…" disabled={!displayName.trim() || !sheetName.trim()} onClick={() => void save()} type="button">Завантажити товари</LoadingButton>}
@@ -135,7 +171,8 @@ export function CatalogueSourceSettings({
 }
 
 function SourceErrorState({ code }: { code: string }) {
-  if (code === 'TABLE_COLUMN_LIMIT') return <div className="data-import-result is-error" role="alert"><strong>Забагато колонок у таблиці</strong><span>У таблиці понад 100 колонок. Видаліть зайві колонки або оберіть іншу вкладку.</span></div>;
+  if (code === 'TABLE_CELL_LIMIT') return <div className="data-import-result is-error" role="alert"><strong>Завеликий текст у комірці</strong><span>Опис або інша комірка перевищує допустимий розмір. Скоротіть довгий текст і повторіть імпорт.</span></div>;
+  if (code === 'TABLE_COLUMN_LIMIT') return <div className="data-import-result is-error" role="alert"><strong>Забагато колонок у таблиці</strong><span>Підтримуємо до 500 колонок. Повторіть завантаження; якщо помилка залишиться, оберіть вужчу таблицю.</span></div>;
   return <div className="data-import-result is-error" role="alert"><strong>Не вдалося завантажити товари</strong><span>Перевірте доступ і структуру таблиці або оберіть інше джерело.</span></div>;
 }
 
