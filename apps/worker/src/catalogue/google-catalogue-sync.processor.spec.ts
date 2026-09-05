@@ -23,12 +23,14 @@ describe('GoogleCatalogueSyncProcessor', () => {
   let sheets: { readTable: ReturnType<typeof vi.fn> };
   let importer: { importTable: ReturnType<typeof vi.fn> };
   let storage: { put: ReturnType<typeof vi.fn> };
+  let notifications: { catalogueSyncCompleted: ReturnType<typeof vi.fn>; catalogueSyncFailed: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     prisma = prismaDouble();
     sheets = { readTable: vi.fn().mockResolvedValue({ headers, rows: [['LUNA-01', 'Luna']], revision: 'revision-1' }) };
     importer = { importTable: vi.fn().mockResolvedValue({ totalRows: 1, validRows: 1, createdRows: 1, updatedRows: 0, skippedRows: 0, failedRows: 0, rowErrors: [] }) };
     storage = { put: vi.fn().mockResolvedValue({ key: 'snapshot', etag: 'etag' }) };
+    notifications = { catalogueSyncCompleted: vi.fn().mockResolvedValue(undefined), catalogueSyncFailed: vi.fn().mockResolvedValue(undefined) };
   });
 
   afterEach(() => {
@@ -36,7 +38,7 @@ describe('GoogleCatalogueSyncProcessor', () => {
   });
 
   it('reuses a confirmed mapping when the normalized structure is unchanged', async () => {
-    const processor = new GoogleCatalogueSyncProcessor(prisma as never, sheets as never, storage, importer);
+    const processor = new GoogleCatalogueSyncProcessor(prisma as never, sheets as never, storage, importer, undefined, notifications);
 
     await expect(processor.process({ tenantId, sourceId })).resolves.toMatchObject({ status: 'COMPLETED', revision: 'revision-1' });
     expect(importer.importTable).toHaveBeenCalledWith(expect.objectContaining({
@@ -47,6 +49,7 @@ describe('GoogleCatalogueSyncProcessor', () => {
       tenantId, sourceId, mappingId, status: 'PROCESSING', idempotencyKey: `google:${sourceId}:revision-1:mapping:1`, sourceRevision: 'revision-1',
     }) });
     expect(prisma.catalogueSource.updateMany).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ status: 'ACTIVE', lastErrorSummary: null }) }));
+    expect(notifications.catalogueSyncCompleted).toHaveBeenCalledWith(tenantId, 'owner-user', { createdRows: 1, updatedRows: 0 });
   });
 
   it('resolves tenant OAuth credentials for every synchronization without putting tokens in job data', async () => {
@@ -188,11 +191,12 @@ describe('GoogleCatalogueSyncProcessor', () => {
 
   it('keeps the previous catalogue and exposes only a retryable category on Google failure', async () => {
     sheets.readTable.mockRejectedValue(new GoogleSheetsReadError('RATE_LIMIT', true));
-    const processor = new GoogleCatalogueSyncProcessor(prisma as never, sheets as never, storage, importer);
+    const processor = new GoogleCatalogueSyncProcessor(prisma as never, sheets as never, storage, importer, undefined, notifications);
 
     await expect(processor.process({ tenantId, sourceId })).rejects.toMatchObject({ code: 'RATE_LIMIT', retryable: true });
     expect(importer.importTable).not.toHaveBeenCalled();
     expect(prisma.catalogueSource.updateMany).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ status: 'ERROR', lastErrorSummary: 'RATE_LIMIT' }) }));
+    expect(notifications.catalogueSyncFailed).toHaveBeenCalledWith(tenantId, 'owner-user');
   });
 
   it('pauses without a provider retry when the downloaded table violates local structure bounds', async () => {
@@ -231,7 +235,7 @@ describe('GoogleCatalogueSyncProcessor', () => {
   function prismaDouble() {
     const delegates = {
       catalogueSource: {
-        findFirst: vi.fn().mockResolvedValue({ ...source, syncVersion: 1, syncSchedule: 'MANUAL', syncLeaseId: null, syncLeaseExpiresAt: null }),
+        findFirst: vi.fn().mockResolvedValue({ ...source, createdByUserId: 'owner-user', syncVersion: 1, syncSchedule: 'MANUAL', syncLeaseId: null, syncLeaseExpiresAt: null }),
         updateMany: vi.fn().mockResolvedValue({ count: 1 }),
       },
       catalogueMapping: { findFirst: vi.fn().mockResolvedValue(mapping) },

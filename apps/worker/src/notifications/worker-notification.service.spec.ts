@@ -15,4 +15,22 @@ describe('WorkerNotificationService', () => {
     await new WorkerNotificationService(prisma).orderExportFailed('tenant-a', null, 'order-a');
     expect(create).not.toHaveBeenCalled();
   });
+
+  it('reports catalogue synchronization outcomes to the active source owner', async () => {
+    const create = vi.fn().mockResolvedValue({});
+    const prisma = { tenantMembership: { findFirst: vi.fn().mockResolvedValue({ id: 'membership' }) }, userNotification: { create } };
+    const service = new WorkerNotificationService(prisma);
+
+    await service.catalogueSyncCompleted('tenant-a', 'user-a', { createdRows: 3, updatedRows: 2 });
+    await service.catalogueSyncFailed('tenant-a', 'user-a');
+
+    expect(create).toHaveBeenNthCalledWith(1, { data: expect.objectContaining({
+      tenantId: 'tenant-a', userId: 'user-a', type: 'SUCCESS', category: 'CATALOGUE_SYNC_COMPLETED',
+      message: 'Додано: 3, оновлено: 2', actionUrl: '/catalogue',
+    }) });
+    expect(create).toHaveBeenNthCalledWith(2, { data: expect.objectContaining({
+      tenantId: 'tenant-a', userId: 'user-a', type: 'ERROR', category: 'CATALOGUE_SYNC_FAILED',
+      actionUrl: '/settings?tab=data',
+    }) });
+  });
 });

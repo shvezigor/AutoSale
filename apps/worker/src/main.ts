@@ -73,8 +73,9 @@ async function bootstrap(): Promise<void> {
       getAccessToken: () => googleOAuthTokens.getAccessToken(connectionId, tenantId),
     })
     : undefined;
+  const workerNotifications = new WorkerNotificationService(prisma as never);
   const catalogueSyncProcessor = googleSheets || oauthSheets
-    ? new GoogleCatalogueSyncProcessor(prisma, googleSheets, storage, undefined, oauthSheets)
+    ? new GoogleCatalogueSyncProcessor(prisma, googleSheets, storage, undefined, oauthSheets, workerNotifications)
     : undefined;
   const orderProcessor = new TriggeredOrderProcessor(
     prisma,
@@ -226,7 +227,7 @@ async function bootstrap(): Promise<void> {
   });
   const catalogueReconciler = new CatalogueMappingReconciler(prisma, catalogueQueue);
   const catalogueScheduler = new CatalogueSyncScheduler(prisma, catalogueQueue);
-  const sheetsProcessor = googleSheets || oauthSheets ? new GoogleSheetsSyncProcessor(prisma, googleSheets, oauthSheets, new WorkerNotificationService(prisma as never)) : undefined;
+  const sheetsProcessor = googleSheets || oauthSheets ? new GoogleSheetsSyncProcessor(prisma, googleSheets, oauthSheets, workerNotifications) : undefined;
   const notificationRetention = new NotificationRetentionReconciler(prisma as never);
   let polling = false;
   const pollExports = async (): Promise<void> => {

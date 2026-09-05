@@ -9,6 +9,10 @@ type TableImporter = { importTable(input: {
   tenantId: string; sourceId: string; headers: string[]; rows: GoogleSheetsCell[][]; mapping: MappingColumn[]; transformSettings: unknown;
   ownershipPolicy: 'FENCE_CROSS_SOURCE'; lease: { id: string; syncVersion: number; ttlMs: number };
 }): Promise<CatalogueImportCounts> };
+type CatalogueSyncNotifications = {
+  catalogueSyncCompleted(tenantId: string, userId: string | null, counts: { createdRows: number; updatedRows: number }): Promise<void>;
+  catalogueSyncFailed(tenantId: string, userId: string | null): Promise<void>;
+};
 const SOURCE_LEASE_MS = 5 * 60_000;
 const SOURCE_HEARTBEAT_MS = 60_000;
 const STALE_PROCESSING_MS = 10 * 60_000;
@@ -23,6 +27,7 @@ export class GoogleCatalogueSyncProcessor {
     private readonly storage: Pick<ObjectStorage, 'put'>,
     importer?: TableImporter,
     private readonly oauthSheets?: (tenantId: string, connectionId: string) => Promise<Pick<GoogleSheetsAdapter, 'readTable'>>,
+    private readonly notifications?: CatalogueSyncNotifications,
   ) {
     this.importer = importer ?? { importTable: (input) => importCatalogueTable(prisma, input) };
   }
@@ -30,7 +35,7 @@ export class GoogleCatalogueSyncProcessor {
   async process(input: { tenantId: string; sourceId: string }) {
     const source = await this.prisma.catalogueSource.findFirst({
       where: { id: input.sourceId, tenantId: input.tenantId, type: 'GOOGLE_SHEETS' },
-      select: { id: true, spreadsheetId: true, sheetName: true, credentialRef: true, syncSchedule: true, syncVersion: true, syncLeaseId: true, syncLeaseExpiresAt: true },
+      select: { id: true, createdByUserId: true, spreadsheetId: true, sheetName: true, credentialRef: true, syncSchedule: true, syncVersion: true, syncLeaseId: true, syncLeaseExpiresAt: true },
     });
     if (!source?.spreadsheetId || !source.sheetName) throw new Error('Google catalogue source is unavailable');
     const now = new Date();
@@ -60,6 +65,7 @@ export class GoogleCatalogueSyncProcessor {
         await this.prisma.catalogueSource.updateMany({ where: leaseWhere, data: {
           status: 'PAUSED', lastErrorSummary: `TABLE_${error.code}`, syncLeaseId: null, syncLeaseExpiresAt: null,
         } });
+        await this.notifyFailed(input.tenantId, source.createdByUserId);
         return { status: 'FAILED' as const, reason: 'TABLE_VALIDATION' as const, validationCode: error.code };
       }
       const failure = error instanceof GoogleSheetsReadError
@@ -71,6 +77,7 @@ export class GoogleCatalogueSyncProcessor {
         status: failure.code === 'AUTHORIZATION' ? 'DISCONNECTED' : 'ERROR', lastErrorSummary: failure.code,
         syncLeaseId: null, syncLeaseExpiresAt: null,
       } });
+      await this.notifyFailed(input.tenantId, source.createdByUserId);
       throw failure;
     }
 
@@ -87,6 +94,7 @@ export class GoogleCatalogueSyncProcessor {
       await this.prisma.catalogueSource.updateMany({ where: leaseWhere, data: {
         status: 'ERROR', lastErrorSummary: 'SNAPSHOT_WRITE_FAILED', syncLeaseId: null, syncLeaseExpiresAt: null,
       } });
+      await this.notifyFailed(input.tenantId, source.createdByUserId);
       throw new Error('Catalogue snapshot could not be stored');
     }
 
@@ -170,6 +178,7 @@ export class GoogleCatalogueSyncProcessor {
         });
         if (completed.count !== 1) throw new CatalogueImportLeaseLostError();
       });
+      await this.notifyCompleted(input.tenantId, source.createdByUserId, result);
       return { status: 'COMPLETED' as const, revision: table.revision, runId, ...result };
     } catch (error) {
       const collision = error instanceof CatalogueSkuOwnershipError;
@@ -185,12 +194,32 @@ export class GoogleCatalogueSyncProcessor {
         status: collision ? 'PAUSED' : 'ERROR', lastErrorSummary: collision ? 'SKU_COLLISION' : leaseLost ? 'LEASE_LOST' : 'IMPORT_FAILED',
         syncLeaseId: null, syncLeaseExpiresAt: null,
       } });
+      await this.notifyFailed(input.tenantId, source.createdByUserId);
       if (collision) return { status: 'FAILED' as const, revision: table.revision, runId, reason: 'SKU_COLLISION' as const };
       throw new Error('Catalogue synchronization failed');
     }
     } finally {
       await heartbeat.stop();
       await this.releaseLease(leaseWhere, source.syncSchedule);
+    }
+  }
+
+  private async notifyCompleted(tenantId: string, userId: string | null, result: CatalogueImportCounts): Promise<void> {
+    try {
+      await this.notifications?.catalogueSyncCompleted(tenantId, userId, {
+        createdRows: result.createdRows,
+        updatedRows: result.updatedRows,
+      });
+    } catch {
+      // Synchronization remains authoritative when notification persistence fails.
+    }
+  }
+
+  private async notifyFailed(tenantId: string, userId: string | null): Promise<void> {
+    try {
+      await this.notifications?.catalogueSyncFailed(tenantId, userId);
+    } catch {
+      // Synchronization remains authoritative when notification persistence fails.
     }
   }
 
