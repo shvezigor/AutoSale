@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { OpenAiColumnMapper } from './openai-column-mapper.js';
+import { CatalogueMappingProviderError, CatalogueMappingResponseError, OpenAiColumnMapper } from './openai-column-mapper.js';
 
 describe('OpenAiColumnMapper', () => {
   it('normalizes an assortment column to the product name when the model calls it a description', async () => {
@@ -67,7 +67,7 @@ describe('OpenAiColumnMapper', () => {
     }) } }, 'gpt-5.4-mini');
 
     await expect(mapper.suggest({ headers: ['Артикул'], primitiveTypes: { Артикул: 'string' }, sampleRows: [] }))
-      .rejects.toThrow('OpenAI returned an invalid catalogue column mapping');
+      .rejects.toBeInstanceOf(CatalogueMappingResponseError);
   });
 
   it('rejects a proposal that omits a supplied source header instead of silently losing it', async () => {
@@ -78,7 +78,17 @@ describe('OpenAiColumnMapper', () => {
 
     await expect(mapper.suggest({
       headers: ['Артикул', 'Невідомо'], primitiveTypes: { Артикул: 'string', Невідомо: 'string' }, sampleRows: [],
-    })).rejects.toThrow('OpenAI returned an invalid catalogue column mapping');
+    })).rejects.toBeInstanceOf(CatalogueMappingResponseError);
+  });
+
+  it('preserves a safe provider status for diagnostics', async () => {
+    const providerError = Object.assign(new Error('secret provider detail'), { status: 400 });
+    const mapper = new OpenAiColumnMapper({ responses: { create: vi.fn().mockRejectedValue(providerError) } }, 'gpt-5.4-mini');
+
+    const error = await mapper.suggest({ headers: ['Артикул'], primitiveTypes: { Артикул: 'string' }, sampleRows: [] }).catch((caught: unknown) => caught);
+
+    expect(error).toBeInstanceOf(CatalogueMappingProviderError);
+    expect(error).toMatchObject({ status: 400, message: 'Catalogue mapping provider request failed' });
   });
 
   it('does not send more than five bounded samples to the provider', async () => {

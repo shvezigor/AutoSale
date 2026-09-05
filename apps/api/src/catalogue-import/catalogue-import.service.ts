@@ -494,7 +494,7 @@ function hasMappingFailure(value: Prisma.JsonValue | null): boolean {
   return Array.isArray(value) && value.some((item) => {
     if (!item || typeof item !== 'object' || Array.isArray(item)) return false;
     const errors = (item as Record<string, unknown>).errors;
-    return Array.isArray(errors) && errors.includes('MAPPING_UNAVAILABLE');
+    return Array.isArray(errors) && errors.some((error) => typeof error === 'string' && error.startsWith('MAPPING_'));
   });
 }
 

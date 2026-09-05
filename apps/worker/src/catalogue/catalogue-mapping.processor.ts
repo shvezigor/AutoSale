@@ -4,7 +4,7 @@ import { parse as parseCsv } from 'csv-parse/sync';
 import { randomUUID } from 'node:crypto';
 import ExcelJS from 'exceljs';
 
-import type { CatalogueColumnMappingInput, CatalogueMappingSuggestion } from './openai-column-mapper.js';
+import { CatalogueMappingProviderError, CatalogueMappingResponseError, type CatalogueColumnMappingInput, type CatalogueMappingSuggestion } from './openai-column-mapper.js';
 import { decideCatalogueImport } from './catalogue-import-decision.js';
 
 // Google snapshots can legitimately contain several rich-text description cells.
@@ -118,7 +118,7 @@ export class CatalogueMappingProcessor {
         },
         data: {
           mappingId: null, status: 'MAPPING_REVIEW', mappingLeaseId: null, mappingLeaseExpiresAt: null,
-          rowErrors: [{ errors: ['MAPPING_UNAVAILABLE'] }],
+          rowErrors: [{ errors: [mappingFailureCode(error)] }],
         },
       });
       return fallback.count === 1 ? { status: 'MAPPING_REVIEW', proposal: null } : { status: 'SKIPPED', proposal: null };
@@ -137,6 +137,12 @@ export class CatalogueMappingProcessor {
     const records = rows.filter((row) => row.some((value) => value !== '')).slice(0, 5).map((row) => Object.fromEntries(headers.map((header, index) => [header, boundedCell(row[index])])));
     return { headers, primitiveTypes: inferTypes(headers, records), sampleRows: records };
   }
+}
+
+function mappingFailureCode(error: unknown): string {
+  if (error instanceof CatalogueMappingProviderError) return error.status ? `MAPPING_PROVIDER_${error.status}` : 'MAPPING_PROVIDER_ERROR';
+  if (error instanceof CatalogueMappingResponseError) return 'MAPPING_RESPONSE_INVALID';
+  return 'MAPPING_SOURCE_INVALID';
 }
 
 function googleSnapshotRows(body: Buffer): string[][] {

@@ -36,6 +36,20 @@ export type CatalogueMappingSuggestion = {
   };
 };
 
+export class CatalogueMappingProviderError extends Error {
+  constructor(readonly status: number | null) {
+    super('Catalogue mapping provider request failed');
+    this.name = 'CatalogueMappingProviderError';
+  }
+}
+
+export class CatalogueMappingResponseError extends Error {
+  constructor() {
+    super('Catalogue mapping provider returned an invalid response');
+    this.name = 'CatalogueMappingResponseError';
+  }
+}
+
 const targetValues = ['sku', 'name', 'description', 'price', 'currency', 'stockQuantity', 'category', 'brand', 'aliases', 'color', 'size', 'imageUrls', 'active', 'attributes', 'ignore'];
 
 // Kept structurally aligned with catalogueMappingProposalSchema. The Responses
@@ -74,14 +88,23 @@ export class OpenAiColumnMapper {
           primitiveTypes: Object.fromEntries(headers.map((header) => [header, safeInput.primitiveTypes[header]])),
           sampleRows: safeInput.sampleRows.map((row) => Object.fromEntries(headers.map((header) => [header, row[header] ?? null]))),
         };
-        const response = await this.client.responses.create({
-          model: this.model, store: false, max_output_tokens: 32_000,
-          instructions: 'Classify catalogue column headers only. You may use the supplied primitive types and bounded samples solely to infer what each header represents. Do not transform, copy, infer, or invent product row values. Return exactly one mapping for every supplied header, with each source appearing once. target must be a supported catalogue target, and target must be ignore when evidence is insufficient.',
-          input: JSON.stringify(batch),
-          text: { format: { type: 'json_schema', name: 'catalogue_column_mapping', strict: true, schema: schemaForHeaders(headers) } },
-        });
+        let response: Awaited<ReturnType<ResponsesClient['responses']['create']>>;
+        try {
+          response = await this.client.responses.create({
+            model: this.model, store: false, max_output_tokens: 32_000,
+            instructions: 'Classify catalogue column headers only. You may use the supplied primitive types and bounded samples solely to infer what each header represents. Do not transform, copy, infer, or invent product row values. Return exactly one mapping for every supplied header, with each source appearing once. target must be a supported catalogue target, and target must be ignore when evidence is insufficient.',
+            input: JSON.stringify(batch),
+            text: { format: { type: 'json_schema', name: 'catalogue_column_mapping', strict: true, schema: schemaForHeaders(headers) } },
+          });
+        } catch (error) {
+          throw new CatalogueMappingProviderError(providerStatus(error));
+        }
         responses.push(response);
-        columns.push(...catalogueMappingProposalSchema.parse(JSON.parse(response.output_text)).columns);
+        try {
+          columns.push(...catalogueMappingProposalSchema.parse(JSON.parse(response.output_text)).columns);
+        } catch {
+          throw new CatalogueMappingResponseError();
+        }
       }
       const proposal = normalizeSemanticMappings(catalogueMappingProposalSchema.parse({ columns }));
       const sources = new Set(proposal.columns.map((column) => column.source));
@@ -103,10 +126,17 @@ export class OpenAiColumnMapper {
           outputTokens: responses.reduce((sum, response) => sum + (response.usage?.output_tokens ?? 0), 0),
         },
       };
-    } catch {
-      throw new Error('OpenAI returned an invalid catalogue column mapping');
+    } catch (error) {
+      if (error instanceof CatalogueMappingProviderError || error instanceof CatalogueMappingResponseError) throw error;
+      throw new CatalogueMappingResponseError();
     }
   }
+}
+
+function providerStatus(error: unknown): number | null {
+  if (!error || typeof error !== 'object' || !('status' in error)) return null;
+  const status = (error as { status?: unknown }).status;
+  return typeof status === 'number' && Number.isInteger(status) ? status : null;
 }
 
 function schemaForHeaders(headers: string[]) {
