@@ -98,4 +98,15 @@ describe('OpenAiColumnMapper', () => {
     expect(input.sampleRows).toHaveLength(5);
     expect(input.sampleRows[0]?.['Колонка']).toHaveLength(500);
   });
+
+  it('maps wide catalogues in complete batches and merges every source', async () => {
+    const create = vi.fn().mockImplementation(async (request: { input: string }) => {
+      const batch = JSON.parse(request.input) as { headers: string[] };
+      return { id: `resp-${create.mock.calls.length}`, model: 'gpt-5.4-mini', output_text: JSON.stringify({ columns: batch.headers.map((source) => ({ source, target: 'ignore', confidence: 0.7 })) }) };
+    });
+    const headers = Array.from({ length: 120 }, (_, index) => `Поле ${index}`);
+    const result = await new OpenAiColumnMapper({ responses: { create } }, 'gpt-5.4-mini').suggest({ headers, primitiveTypes: Object.fromEntries(headers.map((header) => [header, 'string'])), sampleRows: [] });
+    expect(create).toHaveBeenCalledTimes(3);
+    expect(result.proposal.columns.map((column) => column.source)).toEqual(headers);
+  });
 });

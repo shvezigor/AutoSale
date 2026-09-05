@@ -64,16 +64,26 @@ export class OpenAiColumnMapper {
   async suggest(input: CatalogueColumnMappingInput): Promise<CatalogueMappingSuggestion> {
     const safeInput = boundedInput(input);
     const started = performance.now();
-    const response = await this.client.responses.create({
-      model: this.model,
-      store: false,
-      max_output_tokens: 32_000,
-      instructions: 'Classify catalogue column headers only. You may use the supplied primitive types and bounded samples solely to infer what each header represents. Do not transform, copy, infer, or invent product row values. Return exactly one mapping for every supplied header, with each source appearing once. target must be a supported catalogue target, and target must be ignore when evidence is insufficient.',
-      input: JSON.stringify(safeInput),
-      text: { format: { type: 'json_schema', name: 'catalogue_column_mapping', strict: true, schema: mappingJsonSchema } },
-    });
+    const responses: Awaited<ReturnType<ResponsesClient['responses']['create']>>[] = [];
+    const columns: CatalogueMappingProposal['columns'] = [];
     try {
-      const proposal = normalizeSemanticMappings(catalogueMappingProposalSchema.parse(JSON.parse(response.output_text)));
+      for (let offset = 0; offset < safeInput.headers.length; offset += 50) {
+        const headers = safeInput.headers.slice(offset, offset + 50);
+        const batch = {
+          headers,
+          primitiveTypes: Object.fromEntries(headers.map((header) => [header, safeInput.primitiveTypes[header]])),
+          sampleRows: safeInput.sampleRows.map((row) => Object.fromEntries(headers.map((header) => [header, row[header] ?? null]))),
+        };
+        const response = await this.client.responses.create({
+          model: this.model, store: false, max_output_tokens: 32_000,
+          instructions: 'Classify catalogue column headers only. You may use the supplied primitive types and bounded samples solely to infer what each header represents. Do not transform, copy, infer, or invent product row values. Return exactly one mapping for every supplied header, with each source appearing once. target must be a supported catalogue target, and target must be ignore when evidence is insufficient.',
+          input: JSON.stringify(batch),
+          text: { format: { type: 'json_schema', name: 'catalogue_column_mapping', strict: true, schema: mappingJsonSchema } },
+        });
+        responses.push(response);
+        columns.push(...catalogueMappingProposalSchema.parse(JSON.parse(response.output_text)).columns);
+      }
+      const proposal = normalizeSemanticMappings(catalogueMappingProposalSchema.parse({ columns }));
       const sources = new Set(proposal.columns.map((column) => column.source));
       if (proposal.columns.length !== safeInput.headers.length
         || proposal.columns.some((column) => !safeInput.headers.includes(column.source))
@@ -84,13 +94,13 @@ export class OpenAiColumnMapper {
       return {
         proposal,
         metadata: {
-          responseId: response.id,
-          model: response.model,
+          responseId: responses.at(-1)?.id ?? 'unknown',
+          model: responses.at(-1)?.model ?? this.model,
           promptVersion: CATALOGUE_MAPPING_PROMPT_VERSION,
           schemaVersion: CATALOGUE_MAPPING_SCHEMA_VERSION,
           latencyMs: Math.round(performance.now() - started),
-          inputTokens: response.usage?.input_tokens ?? 0,
-          outputTokens: response.usage?.output_tokens ?? 0,
+          inputTokens: responses.reduce((sum, response) => sum + (response.usage?.input_tokens ?? 0), 0),
+          outputTokens: responses.reduce((sum, response) => sum + (response.usage?.output_tokens ?? 0), 0),
         },
       };
     } catch {
