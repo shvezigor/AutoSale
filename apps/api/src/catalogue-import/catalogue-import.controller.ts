@@ -16,7 +16,7 @@ const mappingSchema = z.object({
     source: z.string().trim().min(1).max(500),
     target: targetSchema,
     confidence: z.number().min(0).max(1).optional(),
-  }).strict()).min(2).max(100),
+  }).strict()).min(2).max(500),
   clearEmptyFields: z.array(targetSchema.exclude(['sku', 'name', 'active', 'ignore'])).max(12).optional(),
 }).strict();
 

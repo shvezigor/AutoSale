@@ -99,6 +99,24 @@ describe('CatalogueImportController', () => {
     expect(imports.confirmCalls).toHaveLength(1);
   });
 
+  it('accepts mappings for wide Google Sheets catalogues', async () => {
+    const mapping = {
+      columns: Array.from({ length: 234 }, (_, index) => ({
+        source: `column-${index + 1}`,
+        target: index === 0 ? 'sku' : index === 1 ? 'name' : 'ignore',
+      })),
+    };
+
+    await request(app.getHttpServer())
+      .patch(`/api/catalogue/imports/${runId}/mapping`)
+      .set('Cookie', 'session=owner')
+      .set('x-csrf-token', 'csrf')
+      .send(mapping)
+      .expect(200, preview);
+
+    expect(imports.mappingCalls).toEqual([[tenantId, 'owner-user', runId, mapping]]);
+  });
+
   it('returns only the owner-visible import status and draft mapping, never source data', async () => {
     const response = await request(app.getHttpServer()).get(`/api/catalogue/imports/${runId}`).set('Cookie', 'session=owner').expect(200);
 
