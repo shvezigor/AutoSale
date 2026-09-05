@@ -14,13 +14,15 @@ export class CatalogueMappingReconciler {
           { status: 'MAPPING', mappingLeaseId: { not: null }, mappingLeaseExpiresAt: { lt: now } },
         ],
       },
-      select: { id: true, tenantId: true }, orderBy: { updatedAt: 'asc' }, take: 100,
+      select: { id: true, tenantId: true, updatedAt: true }, orderBy: { updatedAt: 'asc' }, take: 100,
     });
     let enqueued = 0;
     for (const run of runs) {
       try {
         await this.queue.add('catalogue.mapping', { tenantId: run.tenantId, runId: run.id }, {
-          jobId: `catalogue.mapping:${run.id}`, removeOnComplete: 1_000, removeOnFail: 5_000,
+          // A run can legitimately return to UPLOADED after its structure changes.
+          // Version the queue id so a retained completed BullMQ job cannot block recovery.
+          jobId: `catalogue.mapping:${run.id}:${run.updatedAt.getTime()}`, removeOnComplete: 1_000, removeOnFail: 5_000,
         });
         enqueued += 1;
       } catch {
