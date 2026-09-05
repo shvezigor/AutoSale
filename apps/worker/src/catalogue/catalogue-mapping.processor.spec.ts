@@ -123,7 +123,7 @@ describe('CatalogueMappingProcessor', () => {
 
     expect(updateMany).toHaveBeenLastCalledWith(expect.objectContaining({
       where: expect.objectContaining({ id: runId, tenantId, status: 'MAPPING', mappingLeaseId: expect.any(String), mappingLeaseExpiresAt: { gt: expect.any(Date) } }),
-      data: expect.objectContaining({ mappingId: null, status: 'MAPPING_REVIEW', mappingLeaseId: null, mappingLeaseExpiresAt: null, rowErrors: [{ errors: ['MAPPING_SOURCE_INVALID'] }] }),
+      data: expect.objectContaining({ mappingId: null, status: 'MAPPING_REVIEW', mappingLeaseId: null, mappingLeaseExpiresAt: null, rowErrors: [{ errors: ['MAPPING_RESPONSE_INVALID'] }] }),
     }));
   });
 

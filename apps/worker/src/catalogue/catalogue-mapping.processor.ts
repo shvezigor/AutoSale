@@ -43,6 +43,7 @@ export class CatalogueMappingProcessor {
 
     let ownsLease = true;
     let autoImportStarted = false;
+    let failureCode = 'MAPPING_RUN_UNAVAILABLE';
     const heartbeat = async (): Promise<boolean> => {
       if (!ownsLease) return false;
       const now = new Date();
@@ -67,13 +68,16 @@ export class CatalogueMappingProcessor {
       });
       const objectKey = run?.source.type === 'GOOGLE_SHEETS' ? run.snapshotObjectKey : run?.source.objectKey;
       if (!run || !objectKey || !run.source.headerFingerprint) throw new Error('source unavailable');
+      failureCode = 'MAPPING_SOURCE_INVALID';
       const input = await this.loadSource(objectKey, run.source.type);
       if (!await heartbeat()) return { status: 'SKIPPED', proposal: null };
+      failureCode = 'MAPPING_RESPONSE_INVALID';
       const suggestion = await this.mapper.suggest(input);
       if (!await heartbeat()) return { status: 'SKIPPED', proposal: null };
       const decision = this.autoImporter ? decideCatalogueImport({ columns: suggestion.proposal.columns, sampleRows: input.sampleRows }) : { action: 'REVIEW_REQUIRED' as const, reasons: [] };
       const autoImport = decision.action === 'AUTO_IMPORT';
 
+      failureCode = 'MAPPING_PERSIST_FAILED';
       await this.prisma.$transaction(async (tx) => {
         const latest = await tx.catalogueMapping.findFirst({
           where: { tenantId: job.tenantId, sourceId: run.sourceId }, orderBy: { version: 'desc' }, select: { version: true },
@@ -118,7 +122,7 @@ export class CatalogueMappingProcessor {
         },
         data: {
           mappingId: null, status: 'MAPPING_REVIEW', mappingLeaseId: null, mappingLeaseExpiresAt: null,
-          rowErrors: [{ errors: [mappingFailureCode(error)] }],
+          rowErrors: [{ errors: [mappingFailureCode(error, failureCode)] }],
         },
       });
       return fallback.count === 1 ? { status: 'MAPPING_REVIEW', proposal: null } : { status: 'SKIPPED', proposal: null };
@@ -139,10 +143,10 @@ export class CatalogueMappingProcessor {
   }
 }
 
-function mappingFailureCode(error: unknown): string {
+function mappingFailureCode(error: unknown, fallback: string): string {
   if (error instanceof CatalogueMappingProviderError) return error.status ? `MAPPING_PROVIDER_${error.status}` : 'MAPPING_PROVIDER_ERROR';
   if (error instanceof CatalogueMappingResponseError) return 'MAPPING_RESPONSE_INVALID';
-  return 'MAPPING_SOURCE_INVALID';
+  return fallback;
 }
 
 function googleSnapshotRows(body: Buffer): string[][] {
