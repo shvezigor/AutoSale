@@ -42,7 +42,8 @@ describe('CatalogueMappingProcessor', () => {
           tenantId,
           sourceId: 'source-google',
           snapshotObjectKey: 'catalogue/google/snapshot.json',
-          source: { objectKey: null, type: 'GOOGLE_SHEETS', headerFingerprint: 'fingerprint-google' },
+          sourceHeaders: ['Ассортимент', 'оптовая цена €'],
+          source: { objectKey: null, type: 'GOOGLE_SHEETS', headerFingerprint: null },
         }),
       },
       catalogueMapping: { findFirst: vi.fn().mockResolvedValue(null), create: vi.fn().mockResolvedValue({ id: 'mapping-google' }) },
@@ -65,6 +66,9 @@ describe('CatalogueMappingProcessor', () => {
       primitiveTypes: { ассортимент: 'string', 'оптовая цена €': 'number' },
       sampleRows: [{ ассортимент: 'Двері Неаполь', 'оптовая цена €': '158' }],
     });
+    expect(prisma.catalogueMapping.create).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({ sourceFingerprint: expect.any(String) }),
+    }));
   });
 
   it('persists a reviewed AI draft and moves the tenant run to mapping review', async () => {

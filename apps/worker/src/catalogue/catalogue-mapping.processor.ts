@@ -1,5 +1,5 @@
 import type { PrismaClient } from '@autosale/database';
-import type { ObjectStorage } from '@autosale/integrations';
+import { googleSheetsStructureFingerprint, type ObjectStorage } from '@autosale/integrations';
 import { parse as parseCsv } from 'csv-parse/sync';
 import { randomUUID } from 'node:crypto';
 import ExcelJS from 'exceljs';
@@ -67,7 +67,10 @@ export class CatalogueMappingProcessor {
         include: { source: { select: { objectKey: true, type: true, headerFingerprint: true } } },
       });
       const objectKey = run?.source.type === 'GOOGLE_SHEETS' ? run.snapshotObjectKey : run?.source.objectKey;
-      if (!run || !objectKey || !run.source.headerFingerprint) throw new Error('source unavailable');
+      const sourceFingerprint = run?.source.type === 'GOOGLE_SHEETS'
+        ? fingerprintFromHeaders(run.sourceHeaders)
+        : run?.source.headerFingerprint;
+      if (!run || !objectKey || !sourceFingerprint) throw new Error('source unavailable');
       failureCode = 'MAPPING_SOURCE_INVALID';
       const input = await this.loadSource(objectKey, run.source.type);
       if (!await heartbeat()) return { status: 'SKIPPED', proposal: null };
@@ -85,7 +88,7 @@ export class CatalogueMappingProcessor {
         const mapping = await tx.catalogueMapping.create({
           data: {
             tenantId: job.tenantId, sourceId: run.sourceId, version: (latest?.version ?? 0) + 1,
-            sourceFingerprint: run.source.headerFingerprint!, columns: suggestion.proposal.columns,
+            sourceFingerprint, columns: suggestion.proposal.columns,
             aiModel: suggestion.metadata.model, promptVersion: suggestion.metadata.promptVersion, schemaVersion: suggestion.metadata.schemaVersion,
             aiLatencyMs: suggestion.metadata.latencyMs, aiInputTokens: suggestion.metadata.inputTokens, aiOutputTokens: suggestion.metadata.outputTokens,
             ownerModified: false, confirmedAt: autoImport ? new Date() : null, confirmedByUserId: autoImport ? run.requestedByUserId : null,
@@ -141,6 +144,11 @@ export class CatalogueMappingProcessor {
     const records = rows.filter((row) => row.some((value) => value !== '')).slice(0, 5).map((row) => Object.fromEntries(headers.map((header, index) => [header, boundedCell(row[index])])));
     return { headers, primitiveTypes: inferTypes(headers, records), sampleRows: records };
   }
+}
+
+function fingerprintFromHeaders(value: unknown): string | null {
+  if (!Array.isArray(value) || value.length === 0 || value.some((header) => typeof header !== 'string')) return null;
+  return googleSheetsStructureFingerprint(value as string[]);
 }
 
 function mappingFailureCode(error: unknown, fallback: string): string {
