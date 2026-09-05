@@ -22,11 +22,13 @@ describe('CatalogueController', () => {
   const list = vi.fn();
   const create = vi.fn();
   const update = vi.fn();
+  const clear = vi.fn();
 
   beforeEach(async () => {
     list.mockReset().mockResolvedValue({ items: [product], page: 1, pageSize: 25, total: 1 });
     create.mockReset().mockResolvedValue(product);
     update.mockReset().mockResolvedValue(product);
+    clear.mockReset().mockResolvedValue({ deleted: 14 });
     const sessions = {
       resolve: vi.fn(async (token: string) => token === 'owner'
         ? { userId: 'owner', email: 'owner@example.com', platformRole: 'USER', tenantId, membershipRole: 'OWNER', sessionId: 'owner-session' }
@@ -37,7 +39,7 @@ describe('CatalogueController', () => {
     const moduleRef = await Test.createTestingModule({
       controllers: [CatalogueController],
       providers: [
-        { provide: CatalogueService, useValue: { list, create, update } },
+        { provide: CatalogueService, useValue: { list, create, update, clear } },
         {
           provide: APP_GUARD,
           useFactory: () => new AuthGuard(
@@ -81,5 +83,12 @@ describe('CatalogueController', () => {
     await request(app.getHttpServer()).post('/api/catalogue').set('Cookie', 'session=manager').send({ sku: 'LUNA-01', name: 'Luna', aliases: [] }).expect(403);
 
     expect(create).not.toHaveBeenCalled();
+  });
+
+  it('allows only an owner to clear the tenant catalogue', async () => {
+    await request(app.getHttpServer()).delete('/api/catalogue').set('Cookie', 'session=owner').set('x-csrf-token', 'csrf').expect(200, { deleted: 14 });
+    expect(clear).toHaveBeenCalledWith(tenantId, 'owner');
+
+    await request(app.getHttpServer()).delete('/api/catalogue').set('Cookie', 'session=manager').set('x-csrf-token', 'csrf').expect(403);
   });
 });

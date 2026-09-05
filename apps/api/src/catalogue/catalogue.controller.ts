@@ -1,5 +1,5 @@
 import type { AuthPrincipal } from '@autosale/contracts/auth';
-import { BadRequestException, Body, Controller, Get, Inject, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Inject, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { z } from 'zod';
 
@@ -64,6 +64,12 @@ export class CatalogueController {
   @RequireMembership('OWNER')
   create(@CurrentPrincipal() principal: AuthPrincipal, @Body() body: unknown) {
     return this.catalogue.create(principal.tenantId!, parseCreate(body));
+  }
+
+  @Delete()
+  @RequireMembership('OWNER')
+  clear(@CurrentPrincipal() principal: AuthPrincipal) {
+    return this.catalogue.clear(principal.tenantId!, principal.userId);
   }
 
   @Patch(':id')

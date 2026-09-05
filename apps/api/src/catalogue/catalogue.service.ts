@@ -81,6 +81,21 @@ export class CatalogueService {
     return this.findOne(tenantId, id);
   }
 
+  async clear(tenantId: string, userId: string): Promise<{ deleted: number }> {
+    return this.prisma.$transaction(async (transaction) => {
+      const result = await transaction.product.deleteMany({ where: { tenantId } });
+      await transaction.securityAuditLog.create({ data: {
+        tenantId,
+        userId,
+        actor: 'USER',
+        action: 'CATALOGUE_CLEARED',
+        result: 'SUCCESS',
+        metadata: { deleted: result.count },
+      } });
+      return { deleted: result.count };
+    });
+  }
+
   private async findOne(tenantId: string, id: string): Promise<CatalogueProduct> {
     const row = await this.prisma.product.findFirst({ where: { id, tenantId }, select: productSelect });
     if (!row) throw new NotFoundException('Catalogue product not found');

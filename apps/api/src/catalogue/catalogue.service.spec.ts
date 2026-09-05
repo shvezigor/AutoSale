@@ -78,4 +78,18 @@ describe('CatalogueService', () => {
     expect(updateMany).toHaveBeenCalledWith(expect.objectContaining({ where: { id: product.id, tenantId: 'tenant-b' } }));
     expect(findFirst).not.toHaveBeenCalled();
   });
+
+  it('clears only the authenticated tenant catalogue and writes an audit event', async () => {
+    const deleteMany = vi.fn().mockResolvedValue({ count: 14 });
+    const auditCreate = vi.fn().mockResolvedValue({});
+    const transaction = { product: { deleteMany }, securityAuditLog: { create: auditCreate } };
+    const service = new CatalogueService({ $transaction: vi.fn((operation) => operation(transaction)) } as never);
+
+    await expect(service.clear('tenant-a', 'user-a')).resolves.toEqual({ deleted: 14 });
+
+    expect(deleteMany).toHaveBeenCalledWith({ where: { tenantId: 'tenant-a' } });
+    expect(auditCreate).toHaveBeenCalledWith({ data: expect.objectContaining({
+      tenantId: 'tenant-a', userId: 'user-a', actor: 'USER', action: 'CATALOGUE_CLEARED', result: 'SUCCESS', metadata: { deleted: 14 },
+    }) });
+  });
 });

@@ -77,6 +77,18 @@ describe('CatalogueSourceSettings', () => {
     expect(screen.getByRole('link', { name: 'Перевірити сумнівні поля' })).toHaveAttribute('href', '/catalogue?review=run-review');
   });
 
+  it('shows the current source error instead of a stale completed import', () => {
+    render(<CatalogueSourceSettings role="OWNER" sources={[{ ...source, status: 'PAUSED', lastErrorSummary: 'TABLE_COLUMN_LIMIT' }]} configurations={[{
+      ...configuration,
+      status: 'PAUSED',
+      lastErrorSummary: 'TABLE_COLUMN_LIMIT',
+      latestRun: { id: 'run-old', status: 'COMPLETED', createdRows: 14, updatedRows: 0, skippedRows: 5, failedRows: 0 },
+    }]} />);
+    expect(screen.getByText('Забагато колонок у таблиці')).toBeInTheDocument();
+    expect(screen.getByText(/понад 100 колонок/)).toBeInTheDocument();
+    expect(screen.queryByText('Готово')).not.toBeInTheDocument();
+  });
+
   it('shows managers only health without tenant data actions', () => {
     render(<CatalogueSourceSettings role="MANAGER" sources={[source]} configurations={[configuration]} />);
     expect(screen.getByText('Активне')).toBeInTheDocument();

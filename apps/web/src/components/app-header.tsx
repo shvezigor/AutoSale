@@ -10,10 +10,10 @@ import { mutatingFetch } from '../auth/csrf-fetch';
 
 type HeaderSession = Pick<PublicSession, 'name' | 'email' | 'membershipRole'>;
 
-export function AppHeader({ session }: { session: HeaderSession }) {
+export function AppHeader({ session, menuOpen = false, menuTriggerRef, onMenuToggle }: { session: HeaderSession; menuOpen?: boolean; menuTriggerRef?: RefObject<HTMLButtonElement | null>; onMenuToggle?: () => void }) {
   const [open, setOpen] = useState<'notifications' | 'profile' | null>(null);
   return <header className="app-header">
-    <span className="app-header-context">Робочий простір</span>
+    <div className="app-header-leading">{onMenuToggle && <button ref={menuTriggerRef} className="mobile-menu-trigger" type="button" aria-label={menuOpen ? 'Закрити меню' : 'Відкрити меню'} aria-expanded={menuOpen} aria-controls="mobile-navigation" onClick={onMenuToggle}><span /><span /><span /></button>}<span className="app-header-context">Робочий простір</span></div>
     <div className="app-header-actions">
       <NotificationCenter open={open === 'notifications'} onToggle={() => setOpen((value) => value === 'notifications' ? null : 'notifications')} onClose={() => setOpen(null)} />
       <ProfileMenu session={session} open={open === 'profile'} onToggle={() => setOpen((value) => value === 'profile' ? null : 'profile')} onClose={() => setOpen(null)} />

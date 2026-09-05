@@ -698,3 +698,20 @@ The approved design is in `docs/superpowers/specs/2026-09-03-google-sign-in-desi
 - [ ] Verify desktop/mobile layout in the deployed Docker stack after merge.
 
 **Dependencies:** Tasks 20–28. **Estimated scope:** Medium
+
+## Task 36: Reliable catalogue reload and mobile navigation
+
+**Status:** Implemented on `codex/catalogue-reset-mobile-nav`; live acceptance remains.
+
+**Description:** Explain failed catalogue replacements clearly, let owners clear all tenant products before a full reload, provide a reusable accessible confirmation dialog, and expose the complete application navigation through a mobile drawer.
+
+**Acceptance criteria:**
+- [x] A current source failure takes precedence over an older successful import summary.
+- [x] `TABLE_COLUMN_LIMIT` explains that the selected sheet contains more than 100 columns.
+- [x] Only an owner can clear products, and only inside their current workspace.
+- [x] Clearing preserves orders and records an audit event with the deleted count.
+- [x] Confirmation requires one explicit click, not typed text; progress and completion are visible globally.
+- [x] Mobile users can open every permitted navigation destination and close the drawer by link, backdrop, or Escape.
+- [ ] Verify the complete flow against a real replacement spreadsheet after deployment.
+
+**Dependencies:** Task 35. **Estimated scope:** Small

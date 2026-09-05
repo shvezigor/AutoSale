@@ -1,11 +1,15 @@
 import { cleanup, fireEvent, render as rtlRender, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+const { mutatingFetch } = vi.hoisted(() => ({ mutatingFetch: vi.fn() }));
+vi.mock('../auth/csrf-fetch', () => ({ mutatingFetch }));
+
 import { CatalogueTable } from './catalogue-table';
 import { ActivityProvider } from './activity-provider';
 import { ToastProvider } from './toast-provider';
+import { ConfirmProvider } from './confirm-provider';
 
-function render(ui: React.ReactElement) { return rtlRender(<ToastProvider><ActivityProvider>{ui}</ActivityProvider></ToastProvider>); }
+function render(ui: React.ReactElement) { return rtlRender(<ToastProvider><ActivityProvider><ConfirmProvider>{ui}</ConfirmProvider></ActivityProvider></ToastProvider>); }
 
 const product = {
   id: 'b6c1a440-a39d-41d1-b9c2-ebdac84d4c48',
@@ -28,7 +32,7 @@ const product = {
 const replace = vi.fn();
 vi.mock('next/navigation', () => ({ useRouter: () => ({ replace }) }));
 
-afterEach(() => { cleanup(); replace.mockReset(); });
+afterEach(() => { cleanup(); replace.mockReset(); mutatingFetch.mockReset(); });
 
 describe('CatalogueTable', () => {
   it('shows catalogue rows but no editing controls to a manager', () => {
@@ -61,5 +65,19 @@ describe('CatalogueTable', () => {
 
     fireEvent.change(screen.getByLabelText('Рядків на сторінці'), { target: { value: '50' } });
     expect(replace).toHaveBeenCalledWith('/catalogue?search=Luna&pageSize=50');
+  });
+
+  it('clears the catalogue only after the owner confirms', async () => {
+    mutatingFetch.mockResolvedValue({ ok: true, json: async () => ({ deleted: 14 }) });
+    render(<CatalogueTable session={{ membershipRole: 'OWNER' }} products={[product]} page={1} pageSize={25} total={14} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Очистити каталог' }));
+    expect(screen.getByRole('dialog', { name: 'Очистити всі товари?' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Скасувати' })).toBeInTheDocument();
+    expect(screen.queryByLabelText(/введіть/i)).not.toBeInTheDocument();
+    expect(mutatingFetch).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'Так, очистити' }));
+    await screen.findByText('Каталог очищено');
+    expect(mutatingFetch).toHaveBeenCalledWith('/api/catalogue', { method: 'DELETE' });
   });
 });

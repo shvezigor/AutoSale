@@ -124,7 +124,7 @@ export function CatalogueSourceSettings({
     {!googleConnected && <p className="settings-step-notice">Під час вибору таблиці Google один раз попросить доступ до неї.</p>}
     <div className="data-source-actions"><GooglePickerButton label="Обрати Google-таблицю" connected={googleConnected} intent="catalogue" autoOpen={autoOpenPicker} disabled={pending} onSelected={(selection) => void selectSpreadsheet(selection)} /><span>або</span><button className="secondary-button" disabled={pending} type="button" onClick={() => fileInput.current?.click()}>Завантажити CSV або Excel</button><input ref={fileInput} className="sr-only" type="file" accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onChange={(event) => void uploadFile(event.target.files?.[0])} /></div>
     {spreadsheet && <div className="data-selection-summary"><span>Джерело товарів</span><strong>{displayName}</strong></div>}
-    {current?.latestRun && <ImportRunState run={current.latestRun} />}
+    {current?.lastErrorSummary ? <SourceErrorState code={current.lastErrorSummary} /> : current?.latestRun && <ImportRunState run={current.latestRun} />}
     {tabs.length > 1 && <label className="data-tab-choice"><span>Вкладка з товарами</span><select aria-label="Вкладка Google таблиці" value={sheetName} onChange={(event) => setSheetName(event.target.value)}>{tabs.map((tab) => <option key={tab.sheetId} value={tab.title}>{tab.title}</option>)}</select></label>}
     <div className="catalogue-source-actions">
       {spreadsheet && <LoadingButton pending={pending} pendingLabel="Завантажуємо…" disabled={!displayName.trim() || !sheetName.trim()} onClick={() => void save()} type="button">Завантажити товари</LoadingButton>}
@@ -132,6 +132,11 @@ export function CatalogueSourceSettings({
     </div>
     {message && <p className="save-success">{message}</p>}{error && <p className="save-error" role="alert">{error}</p>}
   </section>;
+}
+
+function SourceErrorState({ code }: { code: string }) {
+  if (code === 'TABLE_COLUMN_LIMIT') return <div className="data-import-result is-error" role="alert"><strong>Забагато колонок у таблиці</strong><span>У таблиці понад 100 колонок. Видаліть зайві колонки або оберіть іншу вкладку.</span></div>;
+  return <div className="data-import-result is-error" role="alert"><strong>Не вдалося завантажити товари</strong><span>Перевірте доступ і структуру таблиці або оберіть інше джерело.</span></div>;
 }
 
 function ImportRunState({ run }: { run: NonNullable<CatalogueSourceConfiguration['latestRun']> }) {
