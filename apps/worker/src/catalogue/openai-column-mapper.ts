@@ -106,7 +106,7 @@ export class OpenAiColumnMapper {
           throw new CatalogueMappingResponseError();
         }
       }
-      const proposal = normalizeSemanticMappings(catalogueMappingProposalSchema.parse({ columns }));
+      const proposal = normalizeConfidentMappings(normalizeSemanticMappings(catalogueMappingProposalSchema.parse({ columns })));
       const sources = new Set(proposal.columns.map((column) => column.source));
       if (proposal.columns.length !== safeInput.headers.length
         || proposal.columns.some((column) => !safeInput.headers.includes(column.source))
@@ -161,6 +161,22 @@ function normalizeSemanticMappings(proposal: CatalogueMappingProposal): Catalogu
     columns: proposal.columns.map((column) =>
       column.target === 'description' && /(?:асортимент|ассортимент|assortment)/i.test(column.source)
         ? { ...column, target: 'name' as const }
+        : column,
+    ),
+  };
+}
+
+function normalizeConfidentMappings(proposal: CatalogueMappingProposal): CatalogueMappingProposal {
+  const winners = new Map<string, CatalogueMappingProposal['columns'][number]>();
+  for (const column of proposal.columns) {
+    if (column.target === 'ignore' || column.confidence < 0.9) continue;
+    const current = winners.get(column.target);
+    if (!current || column.confidence > current.confidence) winners.set(column.target, column);
+  }
+  return {
+    columns: proposal.columns.map((column) =>
+      column.target !== 'ignore' && winners.get(column.target) !== column
+        ? { ...column, target: 'ignore' as const }
         : column,
     ),
   };

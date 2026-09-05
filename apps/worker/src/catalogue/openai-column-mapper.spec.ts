@@ -119,4 +119,28 @@ describe('OpenAiColumnMapper', () => {
     expect(create).toHaveBeenCalledTimes(3);
     expect(result.proposal.columns.map((column) => column.source)).toEqual(headers);
   });
+
+  it('keeps only the strongest confident source for each catalogue field', async () => {
+    const mapper = new OpenAiColumnMapper({ responses: { create: vi.fn().mockResolvedValue({
+      id: 'resp_duplicates', model: 'gpt-5.4-mini', output_text: JSON.stringify({ columns: [
+        { source: 'Заголовок', target: 'name', confidence: 0.7 },
+        { source: 'Наименование', target: 'name', confidence: 0.98 },
+        { source: 'Цена старая', target: 'price', confidence: 0.78 },
+        { source: 'Цена', target: 'price', confidence: 0.99 },
+      ] }),
+    }) } }, 'gpt-5.4-mini');
+
+    const result = await mapper.suggest({
+      headers: ['Заголовок', 'Наименование', 'Цена старая', 'Цена'],
+      primitiveTypes: { Заголовок: 'string', Наименование: 'string', 'Цена старая': 'number', Цена: 'number' },
+      sampleRows: [],
+    });
+
+    expect(result.proposal.columns).toEqual([
+      { source: 'Заголовок', target: 'ignore', confidence: 0.7 },
+      { source: 'Наименование', target: 'name', confidence: 0.98 },
+      { source: 'Цена старая', target: 'ignore', confidence: 0.78 },
+      { source: 'Цена', target: 'price', confidence: 0.99 },
+    ]);
+  });
 });
