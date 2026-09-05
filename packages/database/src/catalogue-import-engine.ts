@@ -230,9 +230,8 @@ function mapRow(values: CatalogueCell[], rowNumber: number, sourceId: string, in
   const name = textValue(mapped.get('name'));
   if (!name) { errors.push('Name is required'); codes.push('NAME_REQUIRED'); }
   const suppliedSku = textValue(mapped.get('sku'))?.toUpperCase();
-  if (hasSkuMapping && !suppliedSku) { errors.push('SKU is required'); codes.push('SKU_REQUIRED'); }
   const skuDiscriminator = hasPriceMapping ? textValue(mapped.get('price')) : undefined;
-  const sku = suppliedSku ?? (!hasSkuMapping && name ? generatedSku(sourceId, name, skuDiscriminator) : undefined);
+  const sku = suppliedSku ?? (name ? generatedSku(sourceId, name, skuDiscriminator) : undefined);
   const product: CatalogueImportProduct = { sku: sku ?? '', name: name ?? '', aliases: [], imageUrls: [], attributes: {}, active: true };
   applyExplicitClears(product, presentTargets, mapped, clearFields);
   for (const target of ['description', 'category', 'brand', 'color', 'size'] as const) assignText(product, presentTargets, mapped, target);

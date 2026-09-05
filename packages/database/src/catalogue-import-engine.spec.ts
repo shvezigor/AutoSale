@@ -27,6 +27,18 @@ describe('catalogue table import engine', () => {
     expect(first.rows[0]?.codes).not.toContain('SKU_REQUIRED');
   });
 
+  it('generates an SKU when a mapped SKU cell is empty', async () => {
+    const plan = await buildCatalogueImportPlan(prismaDouble([]) as never, {
+      tenantId: 'tenant-1', sourceId: 'google-source',
+      mapping: [{ source: 'sku', target: 'sku' }, { source: 'name', target: 'name' }],
+      transformSettings: null, headers: ['SKU', 'Name'], rows: [['', 'Двері Неаполь']],
+    });
+
+    expect(plan.totals).toEqual({ created: 1, updated: 0, skipped: 0, failed: 0 });
+    expect(plan.rows[0]?.product?.sku).toMatch(/^AUTO-[A-F0-9]{12}$/);
+    expect(plan.rows[0]?.codes).not.toContain('SKU_REQUIRED');
+  });
+
   it('distinguishes same-name priced variants and skips unpriced category rows in a name-only source', async () => {
     const prisma = prismaDouble([]);
     const plan = await buildCatalogueImportPlan(prisma as never, {
