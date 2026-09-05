@@ -67,6 +67,7 @@ export class OpenAiColumnMapper {
     const response = await this.client.responses.create({
       model: this.model,
       store: false,
+      max_output_tokens: 32_000,
       instructions: 'Classify catalogue column headers only. You may use the supplied primitive types and bounded samples solely to infer what each header represents. Do not transform, copy, infer, or invent product row values. Return exactly one mapping for every supplied header, with each source appearing once. target must be a supported catalogue target, and target must be ignore when evidence is insufficient.',
       input: JSON.stringify(safeInput),
       text: { format: { type: 'json_schema', name: 'catalogue_column_mapping', strict: true, schema: mappingJsonSchema } },

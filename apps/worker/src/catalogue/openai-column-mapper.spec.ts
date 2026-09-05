@@ -55,7 +55,7 @@ describe('OpenAiColumnMapper', () => {
       schemaVersion: 'catalogue-mapping-proposal-v1', latencyMs: expect.any(Number), inputTokens: 88, outputTokens: 42,
     });
     expect(create).toHaveBeenCalledWith(expect.objectContaining({
-      model: 'gpt-5.4-mini', store: false,
+      model: 'gpt-5.4-mini', store: false, max_output_tokens: 32_000,
       text: { format: expect.objectContaining({ type: 'json_schema', strict: true }) },
     }));
   });
