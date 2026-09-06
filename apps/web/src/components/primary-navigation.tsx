@@ -55,14 +55,14 @@ export function PrimaryNavigation({
 
   return <aside className={`primary-nav ${className}`.trim()}>
     <div className="primary-nav-brand-row">
-      <Link className="brand" href="/conversations" {...navigationHandler}><span className="brand-mark" aria-hidden="true">A</span><span className="brand-label">AutoSale</span></Link>
+      <Link className="brand" href="/conversations" aria-label="AutoSale" {...navigationHandler}><span className="brand-mark" aria-hidden="true">A</span><span className="brand-label">AutoSale</span></Link>
       {onToggleCollapse && <button className="sidebar-toggle" type="button" aria-label={collapsed ? 'Розгорнути меню' : 'Згорнути меню'} aria-expanded={!collapsed} onClick={onToggleCollapse}><CollapseIcon data-collapsed={collapsed} /></button>}
     </div>
     <nav aria-label={ariaLabel} id={navId}>
       {visibleItems.map((item) => {
         const Icon = item.icon;
         const active = isNavigationItemActive(pathname, item.href);
-        return <Link className={`nav-item${active ? ' active' : ''}`} href={item.href} aria-current={active ? 'page' : undefined} {...navigationHandler} key={item.href}>
+        return <Link className={`nav-item${active ? ' active' : ''}`} href={item.href} aria-label={collapsed ? item.label : undefined} aria-current={active ? 'page' : undefined} {...navigationHandler} key={item.href}>
           <Icon className="nav-icon" aria-hidden="true" />
           <span className="nav-label">{item.label}</span>
           <span className="nav-tooltip" aria-hidden="true">{item.label}</span>

@@ -38,4 +38,12 @@ describe('PrimaryNavigation', () => {
 
     expect(screen.getByRole('link', { name: label })).toHaveAttribute('aria-current', 'page');
   });
+
+  it('keeps every destination named when the navigation is collapsed', () => {
+    usePathname.mockReturnValue('/settings');
+    render(<PrimaryNavigation session={ownerSession} collapsed />);
+
+    expect(screen.getByRole('link', { name: 'Замовлення' })).toHaveAttribute('aria-label', 'Замовлення');
+    expect(screen.getByRole('link', { name: 'Налаштування' })).toHaveAttribute('aria-current', 'page');
+  });
 });
