@@ -116,14 +116,16 @@ describe('CatalogueImportService', () => {
     expect(sourceStorage.credentialRef).toBeNull();
 
     const preview = await service.preview(tenantId, run.id);
+    const generatedSku = preview.rows[2]?.product?.sku;
+    expect(generatedSku).toMatch(/^AUTO-[A-F0-9]{12}$/);
 
     expect(preview.rows).toEqual([
       { rowNumber: 2, product: { sku: 'LUNA-01', name: 'Luna Lamp', price: 1234.5, aliases: ['Moon', 'Night Light'], imageUrls: [], attributes: {}, active: true }, errors: [] },
       { rowNumber: 3, product: { sku: 'SOL-02', name: 'Sol Chair', price: 89.95, aliases: ['Sun'], imageUrls: [], attributes: {}, active: true }, errors: [] },
-      { rowNumber: 4, errors: ['SKU is required'] },
+      { rowNumber: 4, product: { sku: generatedSku, name: 'Missing SKU', price: 12, aliases: [], imageUrls: [], attributes: {}, active: true }, errors: [] },
       { rowNumber: 5, errors: ['Name is required', 'Price must be a non-negative number'] },
     ]);
-    expect(preview.totals).toEqual({ created: 1, updated: 1, skipped: 0, failed: 2 });
+    expect(preview.totals).toEqual({ created: 2, updated: 1, skipped: 0, failed: 1 });
     expect(await prisma.product.count({ where: { tenantId } })).toBe(1);
 
     const duplicateRun = await uploadAndMap([
@@ -156,7 +158,7 @@ describe('CatalogueImportService', () => {
     const second = await service.confirm(tenantId, ownerUserId, run.id);
 
     expect(first).toEqual(second);
-    expect(first).toMatchObject({ status: 'COMPLETED', totalRows: 4, validRows: 2, createdRows: 1, updatedRows: 1, skippedRows: 0, failedRows: 2 });
+    expect(first).toMatchObject({ status: 'COMPLETED', totalRows: 4, validRows: 3, createdRows: 2, updatedRows: 1, skippedRows: 0, failedRows: 1 });
     expect(notifications.create).toHaveBeenCalledWith(expect.objectContaining({
       tenantId, userId: ownerUserId, type: 'SUCCESS', category: 'CATALOGUE_IMPORT_COMPLETED', actionUrl: '/catalogue',
     }));
@@ -169,7 +171,6 @@ describe('CatalogueImportService', () => {
     const persistedRun = await prisma.catalogueImportRun.findUniqueOrThrow({ where: { id: run.id }, select: { rowErrors: true } });
     expect(JSON.stringify(persistedRun.rowErrors)).not.toContain('Missing SKU');
     expect(persistedRun.rowErrors).toEqual([
-      { rowNumber: 4, errors: ['SKU_REQUIRED'] },
       { rowNumber: 5, errors: ['NAME_REQUIRED', 'PRICE_INVALID'] },
     ]);
   });
@@ -194,7 +195,7 @@ describe('CatalogueImportService', () => {
   });
 
   it('bounds the persisted privacy-safe error report without losing aggregate failure counts', async () => {
-    const invalidRows = Array.from({ length: 101 }, (_, index) => `,Missing SKU ${index + 1},,,`);
+    const invalidRows = Array.from({ length: 101 }, (_, index) => `ERR-${index + 1},,,,`);
     const run = await uploadAndMap(['SKU,Name,Description,Price,Aliases', ...invalidRows].join('\n'));
 
     const result = await service.confirm(tenantId, ownerUserId, run.id);
