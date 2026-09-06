@@ -1,23 +1,19 @@
 import type { ConversationListResponse } from '../../../../packages/contracts/src/conversations';
 import type { ReactNode } from 'react';
-import type { PublicSession } from '../../../../packages/contracts/src/auth';
 
 import { ConversationList } from './conversation-list';
-import { AuthenticatedShell } from './authenticated-shell';
 
 export function InboxShell({
   conversations,
   selectedId,
-  session,
   children,
 }: {
   conversations: ConversationListResponse['items'];
   selectedId?: string;
-  session: Pick<PublicSession, 'name' | 'email' | 'membershipRole'>;
   children: ReactNode;
 }) {
   return (
-    <AuthenticatedShell active="conversations" session={session}><main className="app-shell app-shell-content">
+    <main className="app-shell app-shell-content">
       <section className="inbox-sidebar">
         <header className="inbox-heading">
           <h1>Діалоги</h1>
@@ -32,7 +28,7 @@ export function InboxShell({
         <footer className="dialog-count">Усього діалогів: {conversations.length}</footer>
       </section>
       {children}
-    </main></AuthenticatedShell>
+    </main>
   );
 }
 

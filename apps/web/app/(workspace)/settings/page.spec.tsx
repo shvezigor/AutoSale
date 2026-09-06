@@ -1,20 +1,26 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { authenticatedApiFetch, getServerSession } = vi.hoisted(() => ({
   authenticatedApiFetch: vi.fn(),
   getServerSession: vi.fn(),
 }));
 
-vi.mock('../../src/auth/session', () => ({ authenticatedApiFetch, getServerSession }));
+vi.mock('../../../src/auth/session', () => ({ authenticatedApiFetch, getServerSession }));
 vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
 
 import SettingsPage from './page';
+import WorkspaceLayout from '../layout';
+
+beforeEach(() => {
+  vi.stubGlobal('fetch', vi.fn(() => new Promise(() => undefined)));
+});
 
 afterEach(() => {
   cleanup();
   authenticatedApiFetch.mockReset();
   getServerSession.mockReset();
+  vi.unstubAllGlobals();
 });
 
 describe('SettingsPage', () => {
@@ -35,7 +41,7 @@ describe('SettingsPage', () => {
       .mockResolvedValueOnce({ ok: true, json: async () => ([{ id: '44444444-4444-4444-8444-444444444444', type: 'GOOGLE_SHEETS', displayName: 'Каталог Google Sheets', status: 'PENDING', lastSyncedAt: null, lastErrorSummary: null, updatedAt: '2026-09-01T08:00:00.000Z' }]) })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ id: '44444444-4444-4444-8444-444444444444', type: 'GOOGLE_SHEETS', displayName: 'Каталог Google Sheets', status: 'PENDING', lastSyncedAt: null, lastErrorSummary: null, updatedAt: '2026-09-01T08:00:00.000Z', spreadsheetId: 'sheet-id', sheetName: 'Товари', syncSchedule: 'DAILY', serviceAccountEmail: 'autosale@example.iam.gserviceaccount.com', authorizationAction: 'SHARE_SPREADSHEET' }) });
 
-    render(await SettingsPage());
+    render(await WorkspaceLayout({ children: await SettingsPage() }));
 
     expect(screen.getByRole('tablist', { name: 'Розділи налаштувань' })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /Соцмережі/ })).toHaveAttribute('aria-selected', 'true');
@@ -80,7 +86,7 @@ describe('SettingsPage', () => {
         json: async () => ({ status: 'ACTIVE', email: null, grantedScopes: [], connectedAt: null, lastVerifiedAt: null, lastErrorCode: null }),
       });
 
-    render(await SettingsPage());
+    render(await WorkspaceLayout({ children: await SettingsPage() }));
 
     expect(authenticatedApiFetch).toHaveBeenCalledTimes(2);
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/integrations/instagram');

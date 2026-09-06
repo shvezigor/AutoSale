@@ -1,13 +1,11 @@
-import { getConversations } from '../../src/api/conversations';
-import { InboxShell } from '../../src/components/inbox-shell';
-import { getServerSession } from '../../src/auth/session';
+import { getConversations } from '../../../src/api/conversations';
+import { InboxShell } from '../../../src/components/inbox-shell';
 
 export default async function ConversationsPage() {
-  const [conversations, session] = await Promise.all([getConversations(), getServerSession()]);
-  if (!session) return null;
+  const conversations = await getConversations();
 
   return (
-    <InboxShell conversations={conversations.items} session={session}>
+    <InboxShell conversations={conversations.items}>
       <section className="conversation-empty">
         <div className="empty-icon" aria-hidden="true">↗</div>
         <h2>Оберіть діалог</h2>

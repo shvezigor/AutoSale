@@ -1,12 +1,10 @@
-import { getConversation, getConversations } from '../../../src/api/conversations';
-import { InboxShell } from '../../../src/components/inbox-shell';
-import { MessageThread } from '../../../src/components/message-thread';
-import { getServerSession } from '../../../src/auth/session';
+import { getConversation, getConversations } from '../../../../src/api/conversations';
+import { InboxShell } from '../../../../src/components/inbox-shell';
+import { MessageThread } from '../../../../src/components/message-thread';
 
 export default async function ConversationDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [list, conversation, session] = await Promise.all([getConversations(), getConversation(id), getServerSession()]);
-  if (!session) return null;
+  const [list, conversation] = await Promise.all([getConversations(), getConversation(id)]);
   const name = conversation.participantName ??
     (conversation.participantUsername ? `@${conversation.participantUsername}` : 'Клієнт Instagram');
   const accountLabel = conversation.participantName && conversation.participantUsername
@@ -14,7 +12,7 @@ export default async function ConversationDetailPage({ params }: { params: Promi
     : 'Instagram';
 
   return (
-    <InboxShell conversations={list.items} selectedId={id} session={session}>
+    <InboxShell conversations={list.items} selectedId={id}>
       <section className="conversation-panel">
         <header className="conversation-header">
           {conversation.participantAvatarUrl
