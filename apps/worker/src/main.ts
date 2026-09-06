@@ -51,15 +51,16 @@ async function bootstrap(): Promise<void> {
   await storage.ensureBucket();
   const orderRecognizer = createOpenAiOrderRecognizer(env.OPENAI_API_KEY, env.OPENAI_MODEL);
   const catalogueMapper = createOpenAiColumnMapper(env.OPENAI_API_KEY, env.OPENAI_MODEL);
+  const catalogueHybrid = {
+    structureAnalyzer: createOpenAiTableStructureAnalyzer(env.OPENAI_API_KEY, env.OPENAI_MODEL),
+    ambiguousRows: createOpenAiAmbiguousRowClassifier(env.OPENAI_API_KEY, env.OPENAI_MODEL),
+  };
   const catalogueMappingProcessor = new CatalogueMappingProcessor(
     prisma,
     storage,
     catalogueMapper,
     new CatalogueAutoImporter(prisma, storage),
-    {
-      structureAnalyzer: createOpenAiTableStructureAnalyzer(env.OPENAI_API_KEY, env.OPENAI_MODEL),
-      ambiguousRows: createOpenAiAmbiguousRowClassifier(env.OPENAI_API_KEY, env.OPENAI_MODEL),
-    },
+    catalogueHybrid,
   );
   const googleSheets = env.GOOGLE_SERVICE_ACCOUNT_FILE ? createGoogleSheetsAdapter(env.GOOGLE_SERVICE_ACCOUNT_FILE) : undefined;
   const googleOAuthTokens = env.GOOGLE_OAUTH_CLIENT_ID && env.GOOGLE_OAUTH_CLIENT_SECRET
@@ -86,7 +87,7 @@ async function bootstrap(): Promise<void> {
     : undefined;
   const workerNotifications = new WorkerNotificationService(prisma as never);
   const catalogueSyncProcessor = googleSheets || oauthSheets
-    ? new GoogleCatalogueSyncProcessor(prisma, googleSheets, storage, undefined, oauthSheets, workerNotifications)
+    ? new GoogleCatalogueSyncProcessor(prisma, googleSheets, storage, undefined, oauthSheets, workerNotifications, catalogueHybrid)
     : undefined;
   const orderProcessor = new TriggeredOrderProcessor(
     prisma,
@@ -190,9 +191,14 @@ async function bootstrap(): Promise<void> {
         if (!catalogueSyncProcessor) throw new Error('Google catalogue synchronization is unavailable');
         const started = performance.now();
         try {
-          await catalogueSyncProcessor.process({ tenantId: job.data.tenantId, sourceId: job.data.sourceId });
-          metrics.increment('autosale_operations_total', { operation: 'catalogue_sync', result: 'success' });
-          logger.info('catalogue_sync_completed', { correlationId: job.data.sourceId, sourceId: job.data.sourceId });
+          const result = await catalogueSyncProcessor.process({ tenantId: job.data.tenantId, sourceId: job.data.sourceId });
+          if (result.status === 'FAILED') {
+            metrics.increment('autosale_operations_total', { operation: 'catalogue_sync', result: 'failure' });
+            logger.warn('catalogue_sync_failed', { correlationId: job.data.sourceId, sourceId: job.data.sourceId, errorCode: result.reason });
+          } else {
+            metrics.increment('autosale_operations_total', { operation: 'catalogue_sync', result: 'success' });
+            logger.info('catalogue_sync_completed', { correlationId: job.data.sourceId, sourceId: job.data.sourceId });
+          }
         } catch (error) {
           metrics.increment('autosale_operations_total', { operation: 'catalogue_sync', result: 'failure' });
           logger.warn('catalogue_sync_failed', { correlationId: job.data.sourceId, sourceId: job.data.sourceId, errorCode: error instanceof Error ? error.name : 'UNKNOWN' });

@@ -1,12 +1,16 @@
 import { randomUUID } from 'node:crypto';
 
-import type { CatalogueTargetField } from '@autosale/contracts';
+import { catalogueStructurePlanSchema, type AmbiguousRowClassification, type CatalogueStructurePlan, type CatalogueTargetField, type RawCatalogueMatrix, type TableStructureProposal } from '@autosale/contracts';
 import { CatalogueImportLeaseLostError, CatalogueSkuOwnershipError, importCatalogueTable, type CatalogueImportCounts, type PrismaClient } from '@autosale/database';
 import { GoogleOAuthAccessError, GoogleSheetsReadError, GoogleSheetsTableValidationError, googleSheetsStructureFingerprint, type GoogleSheetsAdapter, type GoogleSheetsCell, type ObjectStorage } from '@autosale/integrations';
+import { buildCatalogueStructureProfile } from './catalogue-table-profiler.js';
+import { applyAmbiguousDecisions, normalizeCatalogueRows, type ClassifiedCatalogueRow } from './catalogue-row-classifier.js';
+import type { TableStructureSuggestion } from './openai-table-structure-analyzer.js';
 
 type MappingColumn = { source: string; target: CatalogueTargetField };
 type TableImporter = { importTable(input: {
   tenantId: string; sourceId: string; headers: string[]; rows: GoogleSheetsCell[][]; mapping: MappingColumn[]; transformSettings: unknown;
+  sourceRowNumbers?: number[];
   ownershipPolicy: 'FENCE_CROSS_SOURCE'; lease: { id: string; syncVersion: number; ttlMs: number };
 }): Promise<CatalogueImportCounts> };
 type CatalogueSyncNotifications = {
@@ -23,11 +27,15 @@ export class GoogleCatalogueSyncProcessor {
 
   constructor(
     private readonly prisma: PrismaClient,
-    private readonly sheets: Pick<GoogleSheetsAdapter, 'readTable'> | undefined,
+    private readonly sheets: Pick<GoogleSheetsAdapter, 'readTable' | 'readMatrix'> | undefined,
     private readonly storage: Pick<ObjectStorage, 'put'>,
     importer?: TableImporter,
-    private readonly oauthSheets?: (tenantId: string, connectionId: string) => Promise<Pick<GoogleSheetsAdapter, 'readTable'>>,
+    private readonly oauthSheets?: (tenantId: string, connectionId: string) => Promise<Pick<GoogleSheetsAdapter, 'readTable' | 'readMatrix'>>,
     private readonly notifications?: CatalogueSyncNotifications,
+    private readonly hybrid?: {
+      structureAnalyzer: { analyze(profile: ReturnType<typeof buildCatalogueStructureProfile>): Promise<TableStructureSuggestion> };
+      ambiguousRows: { classify(rows: ClassifiedCatalogueRow[]): Promise<AmbiguousRowClassification[]> };
+    },
   ) {
     this.importer = importer ?? { importTable: (input) => importCatalogueTable(prisma, input) };
   }
@@ -53,13 +61,24 @@ export class GoogleCatalogueSyncProcessor {
     const heartbeat = this.startLeaseHeartbeat(leaseWhere);
 
     try {
-    let table: Awaited<ReturnType<GoogleSheetsAdapter['readTable']>>;
+    let table: { headers: string[]; rows: GoogleSheetsCell[][]; revision: string; sourceRowNumbers?: number[] };
     try {
       const sheets = source.credentialRef && this.oauthSheets
         ? await this.oauthSheets(input.tenantId, source.credentialRef)
         : this.sheets;
       if (!sheets) throw new GoogleOAuthAccessError();
-      table = await sheets.readTable({ spreadsheetId: source.spreadsheetId, sheetName: source.sheetName, maxRows: 5_000 });
+      if (this.hybrid) {
+        const matrix = await sheets.readMatrix({ spreadsheetId: source.spreadsheetId, sheetName: source.sheetName, maxRows: 5_000 });
+        const prepared = await this.prepareHybridTable(input, matrix, source.createdByUserId);
+        table = prepared.table;
+        if (!prepared.confident) {
+          const reviewKey = `catalogue/${input.tenantId}/${input.sourceId}/google/${matrix.revision}.json`;
+          await this.storage.put({ key: reviewKey, contentType: SNAPSHOT_CONTENT_TYPE, body: Buffer.from(JSON.stringify(table)) });
+          return await this.pauseForReview(input, table, reviewKey, googleSheetsStructureFingerprint(table.headers), leaseWhere, 'STRUCTURE_CHANGED');
+        }
+      } else {
+        table = await sheets.readTable({ spreadsheetId: source.spreadsheetId, sheetName: source.sheetName, maxRows: 5_000 });
+      }
     } catch (error) {
       if (error instanceof GoogleSheetsTableValidationError) {
         await this.prisma.catalogueSource.updateMany({ where: leaseWhere, data: {
@@ -89,7 +108,7 @@ export class GoogleCatalogueSyncProcessor {
     const columns = readMapping(mapping?.columns);
     const snapshotObjectKey = `catalogue/${input.tenantId}/${input.sourceId}/google/${table.revision}.json`;
     try {
-      await this.storage.put({ key: snapshotObjectKey, contentType: SNAPSHOT_CONTENT_TYPE, body: Buffer.from(JSON.stringify({ headers: table.headers, rows: table.rows })) });
+      await this.storage.put({ key: snapshotObjectKey, contentType: SNAPSHOT_CONTENT_TYPE, body: Buffer.from(JSON.stringify({ headers: table.headers, rows: table.rows, sourceRowNumbers: table.sourceRowNumbers })) });
     } catch {
       await this.prisma.catalogueSource.updateMany({ where: leaseWhere, data: {
         status: 'ERROR', lastErrorSummary: 'SNAPSHOT_WRITE_FAILED', syncLeaseId: null, syncLeaseExpiresAt: null,
@@ -159,6 +178,7 @@ export class GoogleCatalogueSyncProcessor {
       await heartbeat.assertOwned();
       const result = await this.importer.importTable({
         tenantId: input.tenantId, sourceId: input.sourceId, headers: table.headers, rows: table.rows,
+        ...(table.sourceRowNumbers ? { sourceRowNumbers: table.sourceRowNumbers } : {}),
         mapping: columns, transformSettings: mapping.transformSettings, ownershipPolicy: 'FENCE_CROSS_SOURCE',
         lease: { id: leaseId, syncVersion, ttlMs: SOURCE_LEASE_MS },
       });
@@ -202,6 +222,62 @@ export class GoogleCatalogueSyncProcessor {
       await heartbeat.stop();
       await this.releaseLease(leaseWhere, source.syncSchedule);
     }
+  }
+
+  private async prepareHybridTable(
+    input: { tenantId: string; sourceId: string },
+    matrix: RawCatalogueMatrix,
+    userId: string | null,
+  ): Promise<{ table: { headers: string[]; rows: GoogleSheetsCell[][]; revision: string; sourceRowNumbers: number[] }; confident: boolean }> {
+    const existing = await this.prisma.catalogueMapping.findFirst({
+      where: { tenantId: input.tenantId, sourceId: input.sourceId, confirmedAt: { not: null } },
+      orderBy: { version: 'desc' },
+      select: { id: true, version: true, sourceFingerprint: true, columns: true, transformSettings: true },
+    });
+    const storedPlan = readStructurePlan(existing?.transformSettings);
+    let proposal: TableStructureProposal;
+    let metadata: TableStructureSuggestion['metadata'] | null = null;
+    let reused = false;
+    if (storedPlan && structurePlanMatches(matrix, storedPlan, readMapping(existing?.columns))) {
+      proposal = proposalFromPlan(storedPlan);
+      reused = true;
+    } else {
+      const suggestion = await this.hybrid!.structureAnalyzer.analyze(buildCatalogueStructureProfile(matrix));
+      proposal = suggestion.proposal;
+      metadata = suggestion.metadata;
+    }
+    const local = normalizeCatalogueRows({ matrix, proposal });
+    const decisions = local.ambiguous.length ? await this.hybrid!.ambiguousRows.classify(local.ambiguous) : [];
+    const normalized = applyAmbiguousDecisions(local, decisions);
+    const sourceRowNumbers = normalized.products.map((row) => row.sourceRowNumber);
+    const confident = proposal.structureConfidence >= 0.9
+      && proposal.columns.filter((column) => column.target !== 'ignore').every((column) => column.confidence >= 0.9)
+      && decisions.every((decision) => decision.confidence >= 0.9)
+      && sourceRowNumbers.length > 0;
+    if (!reused && confident && metadata) {
+      const latest = await this.prisma.catalogueMapping.findFirst({
+        where: { tenantId: input.tenantId, sourceId: input.sourceId }, orderBy: { version: 'desc' }, select: { version: true },
+      });
+      const columns = proposal.columns.filter((column) => column.target !== 'ignore').map((column, index) => ({
+        source: normalizeHeader(normalized.headers[index]!), target: column.target, confidence: column.confidence,
+      }));
+      const structurePlan = {
+        version: 2 as const, ...proposal, productRowNumbers: sourceRowNumbers,
+        skippedRowNumbers: normalized.skippedRowNumbers, sourceRowNumbers, sourceRevision: matrix.revision,
+      };
+      await this.prisma.catalogueMapping.create({ data: {
+        tenantId: input.tenantId, sourceId: input.sourceId, version: (latest?.version ?? 0) + 1,
+        sourceFingerprint: googleSheetsStructureFingerprint(normalized.headers), columns,
+        transformSettings: { clearEmptyFields: [], structurePlan },
+        aiModel: metadata.model, promptVersion: metadata.promptVersion, schemaVersion: metadata.schemaVersion,
+        aiLatencyMs: metadata.latencyMs, aiInputTokens: metadata.inputTokens, aiOutputTokens: metadata.outputTokens,
+        ownerModified: false, confirmedAt: new Date(), confirmedByUserId: userId,
+      } });
+    }
+    return {
+      table: { headers: normalized.headers, rows: normalized.products.map((row) => row.cells), revision: matrix.revision, sourceRowNumbers },
+      confident,
+    };
   }
 
   private async notifyCompleted(tenantId: string, userId: string | null, result: CatalogueImportCounts): Promise<void> {
@@ -292,6 +368,30 @@ function readMapping(value: unknown): MappingColumn[] {
     && typeof (item as Record<string, unknown>).source === 'string' && typeof (item as Record<string, unknown>).target === 'string'
     ? [{ source: normalizeHeader((item as Record<string, unknown>).source as string), target: (item as Record<string, unknown>).target as CatalogueTargetField }]
     : []);
+}
+function readStructurePlan(value: unknown): CatalogueStructurePlan | null {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+  const parsed = catalogueStructurePlanSchema.safeParse((value as { structurePlan?: unknown }).structurePlan);
+  return parsed.success ? parsed.data : null;
+}
+function structurePlanMatches(matrix: RawCatalogueMatrix, plan: CatalogueStructurePlan, mapping: MappingColumn[]): boolean {
+  try {
+    const normalized = normalizeCatalogueRows({ matrix, proposal: proposalFromPlan(plan) });
+    const expected = mapping.map((column) => column.source);
+    return expected.length > 0
+      && normalized.headers.map(normalizeHeader).every((header, index) => header === expected[index]);
+  } catch {
+    return false;
+  }
+}
+function proposalFromPlan(plan: CatalogueStructurePlan): TableStructureProposal {
+  return {
+    headerStartRow: plan.headerStartRow,
+    headerEndRow: plan.headerEndRow,
+    dataStartRow: plan.dataStartRow,
+    structureConfidence: plan.structureConfidence,
+    columns: plan.columns,
+  };
 }
 function hasRequiredMapping(mapping: MappingColumn[], headers: string[]) { const available = new Set(headers.map(normalizeHeader)); return mapping.some((column) => column.target === 'name' && available.has(column.source)); }
 function normalizeHeader(value: string) { return value.normalize('NFKC').trim().replace(/\s+/g, ' ').toLocaleLowerCase('en-US'); }

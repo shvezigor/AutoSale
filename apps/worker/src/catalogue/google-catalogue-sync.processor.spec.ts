@@ -52,6 +52,91 @@ describe('GoogleCatalogueSyncProcessor', () => {
     expect(notifications.catalogueSyncCompleted).toHaveBeenCalledWith(tenantId, 'owner-user', { createdRows: 1, updatedRows: 0 });
   });
 
+  it('imports Google rows from a two-line header with original source coordinates', async () => {
+    const matrix = {
+      revision: 'metrdoor-1',
+      rows: [
+        { rowNumber: 21, cells: [null, null, null, null, null, 'Асортимент', null, 'Ціна (грн)'] },
+        { rowNumber: 22, cells: [null, null, null, null, null, '', null, 'Роздріб'] },
+        { rowNumber: 24, cells: [null, null, null, null, null, '860х2050 Регіон', null, 2420] },
+      ],
+    };
+    const createdMapping = {
+      id: mappingId, version: 1,
+      sourceFingerprint: googleSheetsStructureFingerprint(['Асортимент', 'Ціна (грн) / Роздріб']),
+      columns: [{ source: 'асортимент', target: 'name' }, { source: 'ціна (грн) / роздріб', target: 'price' }],
+      transformSettings: { clearEmptyFields: [] }, confirmedAt: new Date(),
+    };
+    prisma.catalogueMapping.findFirst
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(null)
+      .mockResolvedValue(createdMapping);
+    const structureAnalyzer = { analyze: vi.fn().mockResolvedValue({
+      proposal: {
+        headerStartRow: 21, headerEndRow: 22, dataStartRow: 24, structureConfidence: 0.98,
+        columns: [{ index: 5, label: 'Асортимент', target: 'name', confidence: 0.99 }, { index: 7, label: 'Ціна', target: 'price', confidence: 0.99 }],
+      },
+      metadata: { responseId: 'r', model: 'm', promptVersion: 'v', schemaVersion: 's', latencyMs: 1, inputTokens: 1, outputTokens: 1 },
+    }) };
+    const hybridSheets = { readMatrix: vi.fn().mockResolvedValue(matrix) };
+    const processor = new GoogleCatalogueSyncProcessor(
+      prisma as never, hybridSheets as never, storage, importer, undefined, notifications,
+      { structureAnalyzer, ambiguousRows: { classify: vi.fn().mockResolvedValue([]) } },
+    );
+
+    await expect(processor.process({ tenantId, sourceId })).resolves.toMatchObject({ status: 'COMPLETED' });
+
+    expect(importer.importTable).toHaveBeenCalledWith(expect.objectContaining({
+      headers: ['Асортимент', 'Ціна (грн) / Роздріб'], rows: [['860х2050 Регіон', 2420]], sourceRowNumbers: [24],
+    }));
+  });
+
+  it('reuses a confirmed structure plan while labels remain valid', async () => {
+    const structurePlan = {
+      version: 2, headerStartRow: 1, headerEndRow: 1, dataStartRow: 2, structureConfidence: 0.98,
+      columns: [{ index: 0, label: 'Name', target: 'name', confidence: 0.99 }, { index: 1, label: 'Price', target: 'price', confidence: 0.99 }],
+      productRowNumbers: [2], skippedRowNumbers: [], sourceRowNumbers: [2], sourceRevision: 'old',
+    };
+    prisma.catalogueMapping.findFirst.mockResolvedValue({
+      ...mapping,
+      sourceFingerprint: googleSheetsStructureFingerprint(['Name', 'Price']),
+      columns: [{ source: 'name', target: 'name' }, { source: 'price', target: 'price' }],
+      transformSettings: { structurePlan },
+    });
+    const structureAnalyzer = { analyze: vi.fn() };
+    const processor = new GoogleCatalogueSyncProcessor(
+      prisma as never,
+      { readMatrix: vi.fn().mockResolvedValue({ revision: 'new', rows: [{ rowNumber: 1, cells: ['Name', 'Price'] }, { rowNumber: 2, cells: ['Luna', 99] }] }) } as never,
+      storage, importer, undefined, notifications,
+      { structureAnalyzer, ambiguousRows: { classify: vi.fn().mockResolvedValue([]) } },
+    );
+
+    await expect(processor.process({ tenantId, sourceId })).resolves.toMatchObject({ status: 'COMPLETED' });
+    expect(structureAnalyzer.analyze).not.toHaveBeenCalled();
+    expect(importer.importTable).toHaveBeenCalledWith(expect.objectContaining({ rows: [['Luna', 99]], sourceRowNumbers: [2] }));
+  });
+
+  it('does not mutate the catalogue when fresh structure analysis is uncertain', async () => {
+    prisma.catalogueMapping.findFirst.mockResolvedValue(null);
+    const structureAnalyzer = { analyze: vi.fn().mockResolvedValue({
+      proposal: {
+        headerStartRow: 1, headerEndRow: 1, dataStartRow: 2, structureConfidence: 0.6,
+        columns: [{ index: 0, label: 'Name', target: 'name', confidence: 0.7 }],
+      },
+      metadata: { responseId: 'r', model: 'm', promptVersion: 'v', schemaVersion: 's', latencyMs: 1, inputTokens: 1, outputTokens: 1 },
+    }) };
+    const processor = new GoogleCatalogueSyncProcessor(
+      prisma as never,
+      { readMatrix: vi.fn().mockResolvedValue({ revision: 'uncertain', rows: [{ rowNumber: 1, cells: ['Name'] }, { rowNumber: 2, cells: ['Luna'] }] }) } as never,
+      storage, importer, undefined, notifications,
+      { structureAnalyzer, ambiguousRows: { classify: vi.fn().mockResolvedValue([{ rowNumber: 2, kind: 'PRODUCT', confidence: 0.7 }]) } },
+    );
+
+    await expect(processor.process({ tenantId, sourceId })).resolves.toMatchObject({ status: 'MAPPING_REVIEW' });
+    expect(importer.importTable).not.toHaveBeenCalled();
+    expect(prisma.catalogueSource.updateMany).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ status: 'PAUSED' }) }));
+  });
+
   it('resolves tenant OAuth credentials for every synchronization without putting tokens in job data', async () => {
     prisma.catalogueSource.findFirst.mockResolvedValue({
       ...source, credentialRef: 'connection-a', syncVersion: 1, syncSchedule: 'MANUAL', syncLeaseId: null, syncLeaseExpiresAt: null,
@@ -252,7 +337,7 @@ describe('GoogleCatalogueSyncProcessor', () => {
         findFirst: vi.fn().mockResolvedValue({ ...source, createdByUserId: 'owner-user', syncVersion: 1, syncSchedule: 'MANUAL', syncLeaseId: null, syncLeaseExpiresAt: null }),
         updateMany: vi.fn().mockResolvedValue({ count: 1 }),
       },
-      catalogueMapping: { findFirst: vi.fn().mockResolvedValue(mapping) },
+      catalogueMapping: { findFirst: vi.fn().mockResolvedValue(mapping), create: vi.fn().mockResolvedValue({ id: mappingId }) },
       catalogueImportRun: {
         findUnique: vi.fn().mockResolvedValue(null),
         create: vi.fn().mockImplementation(({ data }) => Promise.resolve({ id: 'run-1', ...data })),
