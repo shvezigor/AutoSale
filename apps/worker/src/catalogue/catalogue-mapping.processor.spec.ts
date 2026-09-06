@@ -7,6 +7,87 @@ const tenantId = '11111111-1111-4111-8111-111111111111';
 const runId = '22222222-2222-4222-8222-222222222222';
 
 describe('CatalogueMappingProcessor', () => {
+  it('analyses raw upload structure and persists an exact version-2 normalized snapshot', async () => {
+    const updateMany = vi.fn().mockResolvedValue({ count: 1 });
+    const create = vi.fn().mockResolvedValue({ id: 'mapping-v2' });
+    const prisma = {
+      catalogueImportRun: {
+        updateMany,
+        findFirst: vi.fn().mockResolvedValue({
+          id: runId, tenantId, sourceId: 'source-v2', requestedByUserId: 'owner-1', sourceRevision: 'revision-v2',
+          source: { objectKey: 'catalogue/raw.csv', type: 'CSV_UPLOAD', headerFingerprint: 'raw-shape' },
+        }),
+      },
+      catalogueMapping: { findFirst: vi.fn().mockResolvedValue(null), create },
+      $transaction: async (work: (tx: unknown) => Promise<unknown>) => work(prisma),
+    };
+    const storage = {
+      get: vi.fn().mockResolvedValue({ body: Buffer.from('Прайс\n\nНазва,Ціна\nДвері,2400\n'), contentType: 'text/csv' }),
+      put: vi.fn().mockResolvedValue({ key: 'normalized', etag: '1' }),
+    };
+    const structureAnalyzer = { analyze: vi.fn().mockResolvedValue({
+      proposal: {
+        headerStartRow: 3, headerEndRow: 3, dataStartRow: 4, structureConfidence: 0.98,
+        columns: [
+          { index: 0, label: 'Назва', target: 'name', confidence: 0.99 },
+          { index: 1, label: 'Ціна', target: 'price', confidence: 0.99 },
+        ],
+      },
+      metadata: { responseId: 'resp-v2', model: 'model', promptVersion: 'structure-v1', schemaVersion: 'structure-schema-v1', latencyMs: 3, inputTokens: 4, outputTokens: 5 },
+    }) };
+    const ambiguousRows = { classify: vi.fn().mockResolvedValue([]) };
+    const autoImporter = { process: vi.fn().mockResolvedValue({ status: 'COMPLETED' }) };
+    const mapper = { suggest: vi.fn() };
+
+    await expect(new CatalogueMappingProcessor(
+      prisma as never, storage as never, mapper, autoImporter, { structureAnalyzer, ambiguousRows },
+    ).process({ tenantId, runId })).resolves.toMatchObject({ status: 'COMPLETED' });
+
+    expect(mapper.suggest).not.toHaveBeenCalled();
+    expect(storage.put).toHaveBeenCalledWith(expect.objectContaining({
+      contentType: 'application/vnd.autosale.catalogue-table+json',
+      body: expect.any(Buffer),
+    }));
+    const snapshot = JSON.parse(Buffer.from(storage.put.mock.calls[0]![0].body).toString()) as { sourceRowNumbers: number[] };
+    expect(snapshot.sourceRowNumbers).toEqual([4]);
+    expect(create).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({
+      transformSettings: expect.objectContaining({ structurePlan: expect.objectContaining({ version: 2, headerStartRow: 3, sourceRowNumbers: [4] }) }),
+    }) }));
+    expect(updateMany).toHaveBeenLastCalledWith(expect.objectContaining({ data: expect.objectContaining({ snapshotObjectKey: expect.any(String), status: 'PREVIEW_READY' }) }));
+    expect(autoImporter.process).toHaveBeenCalledWith({ tenantId, runId });
+  });
+
+  it('routes low-confidence structure to review without importing', async () => {
+    const updateMany = vi.fn().mockResolvedValue({ count: 1 });
+    const prisma = {
+      catalogueImportRun: { updateMany, findFirst: vi.fn().mockResolvedValue({
+        id: runId, tenantId, sourceId: 'source-v2', requestedByUserId: 'owner-1', sourceRevision: 'revision-v2',
+        source: { objectKey: 'catalogue/raw.csv', type: 'CSV_UPLOAD', headerFingerprint: 'raw-shape' },
+      }) },
+      catalogueMapping: { findFirst: vi.fn().mockResolvedValue(null), create: vi.fn().mockResolvedValue({ id: 'mapping-v2' }) },
+      $transaction: async (work: (tx: unknown) => Promise<unknown>) => work(prisma),
+    };
+    const storage = {
+      get: vi.fn().mockResolvedValue({ body: Buffer.from('Назва,Ціна\nДвері,2400\n'), contentType: 'text/csv' }),
+      put: vi.fn().mockResolvedValue({ key: 'normalized', etag: '1' }),
+    };
+    const structureAnalyzer = { analyze: vi.fn().mockResolvedValue({
+      proposal: {
+        headerStartRow: 1, headerEndRow: 1, dataStartRow: 2, structureConfidence: 0.7,
+        columns: [{ index: 0, label: 'Назва', target: 'name', confidence: 0.99 }, { index: 1, label: 'Ціна', target: 'price', confidence: 0.99 }],
+      },
+      metadata: { responseId: 'resp', model: 'model', promptVersion: 'v2', schemaVersion: 'v2', latencyMs: 1, inputTokens: 1, outputTokens: 1 },
+    }) };
+    const autoImporter = { process: vi.fn() };
+
+    await expect(new CatalogueMappingProcessor(
+      prisma as never, storage as never, { suggest: vi.fn() }, autoImporter,
+      { structureAnalyzer, ambiguousRows: { classify: vi.fn().mockResolvedValue([]) } },
+    ).process({ tenantId, runId })).resolves.toMatchObject({ status: 'MAPPING_REVIEW' });
+
+    expect(autoImporter.process).not.toHaveBeenCalled();
+  });
+
   it('automatically imports a confident mapping when an auto importer is available', async () => {
     const updateMany = vi.fn().mockResolvedValue({ count: 1 });
     const prisma = {

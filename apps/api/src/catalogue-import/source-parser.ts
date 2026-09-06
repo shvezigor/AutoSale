@@ -11,6 +11,7 @@ export type ParsedTable = {
   headers: string[];
   rows: Array<Record<string, ParsedCell>>;
   fingerprint: string;
+  sourceRowNumbers?: number[];
 };
 
 const CSV_MEDIA_TYPES = new Set(['text/csv', 'application/csv']);

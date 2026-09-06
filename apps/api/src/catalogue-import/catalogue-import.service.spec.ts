@@ -367,6 +367,20 @@ describe('CatalogueImportService', () => {
     expect(await prisma.catalogueImportRun.findUniqueOrThrow({ where: { id: first.id } })).toMatchObject({ tenantId, status: 'UPLOADED' });
   });
 
+  it('accepts a late header row for hybrid structure analysis without claiming row one is the header', async () => {
+    const hybridService = new CatalogueImportService(prisma, storage, undefined, undefined, true);
+
+    const uploaded = await hybridService.upload(tenantId, ownerUserId, {
+      originalName: 'late-header.csv', mediaType: 'text/csv',
+      buffer: Buffer.from('Прайс постачальника\n\nНазва,Ціна\nДвері,2400\n'),
+    });
+
+    expect(uploaded.headers).toEqual([]);
+    expect(uploaded.totalRows).toBe(4);
+    expect(await prisma.catalogueImportRun.findUniqueOrThrow({ where: { id: uploaded.id }, select: { sourceHeaders: true } }))
+      .toEqual({ sourceHeaders: [] });
+  });
+
   it('keeps a durable uploaded dispatch record when the immediate queue enqueue fails', async () => {
     const queuedService = new CatalogueImportService(prisma, storage, { add: vi.fn().mockRejectedValue(new Error('redis unavailable')) });
 

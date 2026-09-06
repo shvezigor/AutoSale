@@ -1,11 +1,16 @@
+import type { CatalogueMappingProposal, RawCatalogueMatrix, TableStructureProposal } from '@autosale/contracts';
 import type { PrismaClient } from '@autosale/database';
-import { googleSheetsStructureFingerprint, type ObjectStorage } from '@autosale/integrations';
+import { googleSheetsStructureFingerprint, matrixFromRows, type ObjectStorage } from '@autosale/integrations';
 import { parse as parseCsv } from 'csv-parse/sync';
 import { randomUUID } from 'node:crypto';
 import ExcelJS from 'exceljs';
 
 import { CatalogueMappingProviderError, CatalogueMappingResponseError, type CatalogueColumnMappingInput, type CatalogueMappingSuggestion } from './openai-column-mapper.js';
 import { decideCatalogueImport } from './catalogue-import-decision.js';
+import { buildCatalogueStructureProfile } from './catalogue-table-profiler.js';
+import { applyAmbiguousDecisions, normalizeCatalogueRows, type ClassifiedCatalogueRow } from './catalogue-row-classifier.js';
+import type { TableStructureSuggestion } from './openai-table-structure-analyzer.js';
+import type { AmbiguousRowClassification } from '@autosale/contracts';
 
 // Google snapshots can legitimately contain several rich-text description cells.
 // Keep this bounded, but aligned with the supported 5,000-row catalogue envelope.
@@ -17,6 +22,10 @@ export type CatalogueMappingJob = { tenantId: string; runId: string };
 
 type Mapper = { suggest(input: CatalogueColumnMappingInput): Promise<CatalogueMappingSuggestion> };
 type AutoImporter = { process(input: CatalogueMappingJob): Promise<{ status: 'COMPLETED' }> };
+type HybridDependencies = {
+  structureAnalyzer: { analyze(profile: ReturnType<typeof buildCatalogueStructureProfile>): Promise<TableStructureSuggestion> };
+  ambiguousRows: { classify(rows: ClassifiedCatalogueRow[]): Promise<AmbiguousRowClassification[]> };
+};
 
 export class CatalogueMappingProcessor {
   constructor(
@@ -24,6 +33,7 @@ export class CatalogueMappingProcessor {
     private readonly storage: ObjectStorage,
     private readonly mapper: Mapper,
     private readonly autoImporter?: AutoImporter,
+    private readonly hybrid?: HybridDependencies,
   ) {}
 
   async process(job: CatalogueMappingJob): Promise<{ status: 'COMPLETED' | 'MAPPING_REVIEW' | 'SKIPPED'; proposal: CatalogueMappingSuggestion['proposal'] | null }> {
@@ -67,10 +77,14 @@ export class CatalogueMappingProcessor {
         include: { source: { select: { objectKey: true, type: true, headerFingerprint: true } } },
       });
       const objectKey = run?.source.type === 'GOOGLE_SHEETS' ? run.snapshotObjectKey : run?.source.objectKey;
+      if (!run || !objectKey) throw new Error('source unavailable');
+      if (this.hybrid) {
+        return await this.processHybrid(job, run, objectKey, leaseId, heartbeat);
+      }
       const sourceFingerprint = run?.source.type === 'GOOGLE_SHEETS'
         ? fingerprintFromHeaders(run.sourceHeaders)
         : run?.source.headerFingerprint;
-      if (!run || !objectKey || !sourceFingerprint) throw new Error('source unavailable');
+      if (!sourceFingerprint) throw new Error('source unavailable');
       failureCode = 'MAPPING_SOURCE_INVALID';
       const input = await this.loadSource(objectKey, run.source.type);
       if (!await heartbeat()) return { status: 'SKIPPED', proposal: null };
@@ -134,6 +148,98 @@ export class CatalogueMappingProcessor {
     }
   }
 
+  private async processHybrid(
+    job: CatalogueMappingJob,
+    run: {
+      sourceId: string;
+      requestedByUserId: string | null;
+      sourceRevision: string | null;
+      source: { type: 'CSV_UPLOAD' | 'XLSX_UPLOAD' | 'GOOGLE_SHEETS' };
+    },
+    objectKey: string,
+    leaseId: string,
+    heartbeat: () => Promise<boolean>,
+  ): Promise<{ status: 'COMPLETED' | 'MAPPING_REVIEW' | 'SKIPPED'; proposal: CatalogueMappingProposal | null }> {
+    const object = await this.storage.get(objectKey);
+    const body = Buffer.from(object.body);
+    if (body.length === 0 || body.length > MAX_SOURCE_BYTES) throw new Error('source size is invalid');
+    const revision = run.sourceRevision ?? `stored:${objectKey}`;
+    const matrix = await rawMatrix(body, run.source.type, revision);
+    if (!await heartbeat()) return { status: 'SKIPPED', proposal: null };
+
+    const structure = await this.hybrid!.structureAnalyzer.analyze(buildCatalogueStructureProfile(matrix));
+    if (!await heartbeat()) return { status: 'SKIPPED', proposal: null };
+    const local = normalizeCatalogueRows({ matrix, proposal: structure.proposal });
+    const decisions = local.ambiguous.length > 0 ? await this.hybrid!.ambiguousRows.classify(local.ambiguous) : [];
+    if (!await heartbeat()) return { status: 'SKIPPED', proposal: null };
+    const normalized = applyAmbiguousDecisions(local, decisions);
+    const columns = structure.proposal.columns.filter((column) => column.target !== 'ignore').map((column, index) => ({
+      source: normalizeHeader(normalized.headers[index]!),
+      target: column.target,
+      confidence: column.confidence,
+    }));
+    const proposal: CatalogueMappingProposal = { columns };
+    const sourceRowNumbers = normalized.products.map((row) => row.sourceRowNumber);
+    const snapshot = {
+      headers: normalized.headers,
+      rows: normalized.products.map((row) => row.cells),
+      sourceRowNumbers,
+    };
+    const normalizedObjectKey = `catalogue/${job.tenantId}/${run.sourceId}/normalized/${job.runId}.json`;
+    await this.storage.put({
+      key: normalizedObjectKey,
+      body: Buffer.from(JSON.stringify(snapshot)),
+      contentType: 'application/vnd.autosale.catalogue-table+json',
+    });
+    const sourceFingerprint = googleSheetsStructureFingerprint(normalized.headers);
+    const structurePlan = {
+      version: 2 as const,
+      ...structure.proposal,
+      productRowNumbers: sourceRowNumbers,
+      skippedRowNumbers: normalized.skippedRowNumbers,
+      sourceRowNumbers,
+      sourceRevision: revision,
+    };
+    const confident = hybridIsConfident(structure.proposal, decisions, normalized.products.length);
+    const autoImport = Boolean(this.autoImporter) && confident;
+
+    await this.prisma.$transaction(async (tx) => {
+      const latest = await tx.catalogueMapping.findFirst({
+        where: { tenantId: job.tenantId, sourceId: run.sourceId }, orderBy: { version: 'desc' }, select: { version: true },
+      });
+      const mapping = await tx.catalogueMapping.create({
+        data: {
+          tenantId: job.tenantId, sourceId: run.sourceId, version: (latest?.version ?? 0) + 1,
+          sourceFingerprint, columns,
+          transformSettings: { clearEmptyFields: [], structurePlan },
+          aiModel: structure.metadata.model, promptVersion: structure.metadata.promptVersion, schemaVersion: structure.metadata.schemaVersion,
+          aiLatencyMs: structure.metadata.latencyMs, aiInputTokens: structure.metadata.inputTokens, aiOutputTokens: structure.metadata.outputTokens,
+          ownerModified: false, confirmedAt: autoImport ? new Date() : null, confirmedByUserId: autoImport ? run.requestedByUserId : null,
+        },
+      });
+      const assigned = await tx.catalogueImportRun.updateMany({
+        where: { id: job.runId, tenantId: job.tenantId, status: 'MAPPING', mappingLeaseId: leaseId, mappingLeaseExpiresAt: { gt: new Date() } },
+        data: {
+          mappingId: mapping.id,
+          snapshotObjectKey: normalizedObjectKey,
+          sourceHeaders: normalized.headers,
+          totalRows: normalized.products.length,
+          skippedRows: normalized.skippedRowNumbers.length,
+          status: autoImport ? 'PREVIEW_READY' : 'MAPPING_REVIEW',
+          mappingLeaseId: null,
+          mappingLeaseExpiresAt: null,
+          ...(!confident ? { rowErrors: [{ errors: ['LOW_STRUCTURE_CONFIDENCE'] }] } : {}),
+        },
+      });
+      if (assigned.count !== 1) throw new Error('mapping assignment lost');
+    });
+    if (autoImport) {
+      await this.autoImporter!.process(job);
+      return { status: 'COMPLETED', proposal };
+    }
+    return { status: 'MAPPING_REVIEW', proposal };
+  }
+
   private async loadSource(objectKey: string, type: 'CSV_UPLOAD' | 'XLSX_UPLOAD' | 'GOOGLE_SHEETS'): Promise<CatalogueColumnMappingInput> {
     const object = await this.storage.get(objectKey);
     const body = Buffer.from(object.body);
@@ -144,6 +250,53 @@ export class CatalogueMappingProcessor {
     const records = rows.filter((row) => row.some((value) => value !== '')).slice(0, 5).map((row) => Object.fromEntries(headers.map((header, index) => [header, boundedCell(row[index])])));
     return { headers, primitiveTypes: inferTypes(headers, records), sampleRows: records };
   }
+}
+
+function hybridIsConfident(
+  proposal: TableStructureProposal,
+  decisions: AmbiguousRowClassification[],
+  productCount: number,
+): boolean {
+  const meaningful = proposal.columns.filter((column) => column.target !== 'ignore');
+  return proposal.structureConfidence >= 0.9
+    && meaningful.some((column) => column.target === 'name')
+    && meaningful.every((column) => column.confidence >= 0.9)
+    && decisions.every((decision) => decision.confidence >= 0.9)
+    && productCount > 0;
+}
+
+async function rawMatrix(
+  body: Buffer,
+  type: 'CSV_UPLOAD' | 'XLSX_UPLOAD' | 'GOOGLE_SHEETS',
+  revision: string,
+): Promise<RawCatalogueMatrix> {
+  if (type === 'CSV_UPLOAD') {
+    const rows = parseCsv(body, { bom: true, relax_column_count: true, skip_empty_lines: false }) as unknown[][];
+    return matrixFromRows(rows, revision);
+  }
+  if (type === 'GOOGLE_SHEETS') {
+    const parsed = JSON.parse(body.toString('utf8')) as { headers?: unknown; rows?: unknown };
+    if (!Array.isArray(parsed.headers) || !Array.isArray(parsed.rows)) throw new Error('Google Sheets snapshot is invalid');
+    return matrixFromRows([parsed.headers, ...parsed.rows.filter(Array.isArray)], revision);
+  }
+  const workbook = new ExcelJS.Workbook();
+  await workbook.xlsx.load(body as unknown as ExcelJS.Buffer);
+  const rows: unknown[][] = [];
+  workbook.worksheets[0]?.eachRow({ includeEmpty: true }, (row) => {
+    rows.push(Array.isArray(row.values) ? Array.from(row.values.slice(1), excelCell) : []);
+  });
+  return matrixFromRows(rows, revision);
+}
+
+function excelCell(value: unknown): string | number | boolean | null {
+  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') return value;
+  if (value instanceof Date) return value.toISOString();
+  if (value && typeof value === 'object' && 'result' in value) return excelCell((value as { result?: unknown }).result);
+  return null;
+}
+
+function normalizeHeader(value: string): string {
+  return value.normalize('NFKC').trim().replace(/\s+/g, ' ').toLocaleLowerCase('en-US');
 }
 
 function fingerprintFromHeaders(value: unknown): string | null {

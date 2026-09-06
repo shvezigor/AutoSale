@@ -6,7 +6,7 @@ import { buildCatalogueImportPlan, CatalogueImportLeaseLostError, importCatalogu
 import { googleSheetsStructureFingerprint, type ObjectStorage } from '@autosale/integrations';
 import { BadRequestException, ConflictException, Logger, NotFoundException, ServiceUnavailableException, UnprocessableEntityException } from '@nestjs/common';
 
-import { parseCatalogueSource, type ParsedCell, type ParsedTable } from './source-parser.js';
+import { parseCatalogueMatrix, parseCatalogueSource, type ParsedCell, type ParsedTable } from './source-parser.js';
 import { NotificationService } from '../notifications/notifications.service.js';
 
 export const MAX_CATALOGUE_UPLOAD_BYTES = 5 * 1024 * 1024;
@@ -62,6 +62,7 @@ export class CatalogueImportService {
     private readonly storage: ObjectStorage,
     private readonly mappingQueue?: CatalogueMappingQueue,
     private readonly notifications?: NotificationService,
+    private readonly hybridStructureAnalysis = false,
   ) {}
 
   async upload(tenantId: string, userId: string, file: CatalogueUploadFile): Promise<CatalogueUploadResult> {
@@ -73,16 +74,32 @@ export class CatalogueImportService {
     const fileType = supportedFiles.get(extension);
     if (!fileType?.mediaTypes.has(file.mediaType)) throw new BadRequestException('Unsupported catalogue upload');
 
-    let table: ParsedTable;
+    const sourceRevision = createHash('sha256').update(file.buffer).digest('hex');
+    let headers: string[];
+    let totalRows: number;
+    let fingerprint: string;
     try {
-      table = await parseCatalogueSource(file.buffer, file.mediaType);
+      if (this.hybridStructureAnalysis) {
+        const matrix = await parseCatalogueMatrix(file.buffer, file.mediaType, sourceRevision);
+        headers = [];
+        totalRows = matrix.rows.length;
+        fingerprint = createHash('sha256').update(JSON.stringify(matrix.rows.map((row) => ({
+          rowNumber: row.rowNumber,
+          width: row.cells.length,
+          populated: row.cells.map((cell, index) => cell === null || cell === '' ? null : index).filter((index) => index !== null),
+        })))).digest('hex');
+      } else {
+        const table = await parseCatalogueSource(file.buffer, file.mediaType);
+        headers = table.headers;
+        totalRows = table.rows.length;
+        fingerprint = table.fingerprint;
+      }
     } catch {
       throw new BadRequestException('Invalid catalogue source');
     }
-    const sourceRevision = createHash('sha256').update(file.buffer).digest('hex');
     const idempotencyKey = `upload:${sourceRevision}`;
     const existing = await this.findUploadRunByRevision(tenantId, idempotencyKey);
-    if (existing) return { ...mapSummary(existing), headers: table.headers, fingerprint: existing.source.headerFingerprint ?? table.fingerprint };
+    if (existing) return { ...mapSummary(existing), headers, fingerprint: existing.source.headerFingerprint ?? fingerprint };
 
     const objectKey = `catalogue/${tenantId}/${sourceRevision}/${randomUUID()}${extension}`;
     let storedObjectKey: string | null = null;
@@ -99,7 +116,7 @@ export class CatalogueImportService {
             status: 'PENDING',
             createdByUserId: userId,
             objectKey,
-            headerFingerprint: table.fingerprint,
+            headerFingerprint: fingerprint,
           },
         });
         return tx.catalogueImportRun.create({
@@ -110,12 +127,12 @@ export class CatalogueImportService {
             status: 'UPLOADED',
             idempotencyKey,
             sourceRevision,
-            sourceHeaders: table.headers,
-            totalRows: table.rows.length,
+            sourceHeaders: headers,
+            totalRows,
           },
         });
       });
-      const result = { ...mapSummary(run), headers: table.headers, fingerprint: table.fingerprint };
+      const result = { ...mapSummary(run), headers, fingerprint };
       try {
         await this.mappingQueue?.add('catalogue.mapping', { tenantId, runId: run.id }, { jobId: `catalogue.mapping:${run.id}`, removeOnComplete: 1_000, removeOnFail: 5_000 });
       } catch {
@@ -126,7 +143,7 @@ export class CatalogueImportService {
       await this.deleteStoredObject(storedObjectKey);
       if (isUniqueConstraintError(error)) {
         const persisted = await this.findUploadRunByRevision(tenantId, idempotencyKey);
-        if (persisted) return { ...mapSummary(persisted), headers: table.headers, fingerprint: persisted.source.headerFingerprint ?? table.fingerprint };
+        if (persisted) return { ...mapSummary(persisted), headers, fingerprint: persisted.source.headerFingerprint ?? fingerprint };
       }
       throw new ServiceUnavailableException('Catalogue import is temporarily unavailable');
     }
@@ -233,6 +250,7 @@ export class CatalogueImportService {
         sourceId: run.sourceId,
         headers: table.headers,
         rows: table.rows.map((row) => table.headers.map((header) => row[header] ?? null)),
+        ...(table.sourceRowNumbers ? { sourceRowNumbers: table.sourceRowNumbers } : {}),
         mapping: readMapping(run.mapping.columns),
         transformSettings: run.mapping.transformSettings,
         ownershipPolicy: run.source.type === 'GOOGLE_SHEETS' ? 'FENCE_CROSS_SOURCE' : 'REASSIGN',
@@ -380,6 +398,7 @@ export class CatalogueImportService {
       sourceId,
       headers: table.headers,
       rows: table.rows.map((row) => table.headers.map((header) => row[header] ?? null)),
+      ...(table.sourceRowNumbers ? { sourceRowNumbers: table.sourceRowNumbers } : {}),
       mapping,
       transformSettings: { clearEmptyFields: [...clearEmptyFields] },
     });
@@ -648,7 +667,7 @@ function parseTableSnapshot(buffer: Buffer, contentType: string): ParsedTable {
   }
   const parsed = JSON.parse(buffer.toString('utf8')) as unknown;
   if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) throw new Error('Invalid catalogue table snapshot');
-  const candidate = parsed as { headers?: unknown; rows?: unknown };
+  const candidate = parsed as { headers?: unknown; rows?: unknown; sourceRowNumbers?: unknown };
   if (!Array.isArray(candidate.headers) || candidate.headers.length === 0 || candidate.headers.length > 500
     || candidate.headers.some((header) => typeof header !== 'string') || !Array.isArray(candidate.rows) || candidate.rows.length > 5_000) {
     throw new Error('Invalid catalogue table snapshot');
@@ -662,7 +681,17 @@ function parseTableSnapshot(buffer: Buffer, contentType: string): ParsedTable {
     }
     return Object.fromEntries(normalizedHeaders.map((header, index) => [header, (row[index] ?? null) as ParsedCell]));
   });
-  return { headers: normalizedHeaders, rows, fingerprint: googleSheetsStructureFingerprint(headers) };
+  if (candidate.sourceRowNumbers !== undefined && (!Array.isArray(candidate.sourceRowNumbers)
+    || candidate.sourceRowNumbers.length !== rows.length
+    || candidate.sourceRowNumbers.some((row) => !Number.isInteger(row) || Number(row) < 1))) {
+    throw new Error('Invalid catalogue table snapshot');
+  }
+  return {
+    headers: normalizedHeaders,
+    rows,
+    fingerprint: googleSheetsStructureFingerprint(headers),
+    ...(Array.isArray(candidate.sourceRowNumbers) ? { sourceRowNumbers: candidate.sourceRowNumbers.map(Number) } : {}),
+  };
 }
 
 function readHeaders(value: Prisma.JsonValue | null): string[] {

@@ -26,6 +26,8 @@ import { TriggeredOrderProcessor } from './orders/triggered-order.processor.js';
 import { GoogleSheetsSyncProcessor } from './google-sheets/google-sheets-sync.processor.js';
 import { CatalogueMappingProcessor } from './catalogue/catalogue-mapping.processor.js';
 import { createOpenAiColumnMapper } from './catalogue/openai-column-mapper.js';
+import { createOpenAiTableStructureAnalyzer } from './catalogue/openai-table-structure-analyzer.js';
+import { createOpenAiAmbiguousRowClassifier } from './catalogue/openai-ambiguous-row-classifier.js';
 import { CatalogueMappingReconciler } from './catalogue/catalogue-mapping-reconciler.js';
 import { GoogleCatalogueSyncProcessor } from './catalogue/google-catalogue-sync.processor.js';
 import { CatalogueSyncScheduler } from './catalogue/catalogue-sync-scheduler.js';
@@ -49,7 +51,16 @@ async function bootstrap(): Promise<void> {
   await storage.ensureBucket();
   const orderRecognizer = createOpenAiOrderRecognizer(env.OPENAI_API_KEY, env.OPENAI_MODEL);
   const catalogueMapper = createOpenAiColumnMapper(env.OPENAI_API_KEY, env.OPENAI_MODEL);
-  const catalogueMappingProcessor = new CatalogueMappingProcessor(prisma, storage, catalogueMapper, new CatalogueAutoImporter(prisma, storage));
+  const catalogueMappingProcessor = new CatalogueMappingProcessor(
+    prisma,
+    storage,
+    catalogueMapper,
+    new CatalogueAutoImporter(prisma, storage),
+    {
+      structureAnalyzer: createOpenAiTableStructureAnalyzer(env.OPENAI_API_KEY, env.OPENAI_MODEL),
+      ambiguousRows: createOpenAiAmbiguousRowClassifier(env.OPENAI_API_KEY, env.OPENAI_MODEL),
+    },
+  );
   const googleSheets = env.GOOGLE_SERVICE_ACCOUNT_FILE ? createGoogleSheetsAdapter(env.GOOGLE_SERVICE_ACCOUNT_FILE) : undefined;
   const googleOAuthTokens = env.GOOGLE_OAUTH_CLIENT_ID && env.GOOGLE_OAUTH_CLIENT_SECRET
     ? new GoogleOAuthTokenProvider({

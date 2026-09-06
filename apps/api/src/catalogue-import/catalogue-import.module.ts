@@ -29,6 +29,7 @@ export class CatalogueImportModule {
           }),
           new Queue('catalogue', { connection: queueConnection(env.REDIS_URL) }),
           notifications,
+          true,
         ),
       }],
     };

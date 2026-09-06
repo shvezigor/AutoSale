@@ -26,10 +26,10 @@ export class CatalogueAutoImporter {
       },
     });
     if (!run?.mapping) throw new Error('Auto import is unavailable');
-    const objectKey = run.source.type === 'GOOGLE_SHEETS' ? run.snapshotObjectKey : run.source.objectKey;
+    const objectKey = run.snapshotObjectKey ?? run.source.objectKey;
     if (!objectKey) throw new Error('Auto import source is unavailable');
     const object = await this.storage.get(objectKey);
-    const table = await readTable(Buffer.from(object.body), run.source.type);
+    const table = await readTable(Buffer.from(object.body), run.source.type, object.contentType);
     const mapping = readMapping(run.mapping.columns);
     const lease = run.source.type === 'GOOGLE_SHEETS' ? await this.claimGoogle(input, run.sourceId, run.sourceSyncVersion) : undefined;
     if (!lease) {
@@ -46,6 +46,7 @@ export class CatalogueAutoImporter {
         sourceId: run.sourceId,
         headers: table.headers,
         rows: table.rows,
+        ...(table.sourceRowNumbers ? { sourceRowNumbers: table.sourceRowNumbers } : {}),
         mapping,
         transformSettings: run.mapping.transformSettings,
         ownershipPolicy: run.source.type === 'GOOGLE_SHEETS' ? 'FENCE_CROSS_SOURCE' : 'REASSIGN',
@@ -98,11 +99,22 @@ export class CatalogueAutoImporter {
   }
 }
 
-async function readTable(body: Buffer, type: 'CSV_UPLOAD' | 'XLSX_UPLOAD' | 'GOOGLE_SHEETS'): Promise<{ headers: string[]; rows: Array<Array<string | number | boolean | null>> }> {
-  if (type === 'GOOGLE_SHEETS') {
+async function readTable(
+  body: Buffer,
+  type: 'CSV_UPLOAD' | 'XLSX_UPLOAD' | 'GOOGLE_SHEETS',
+  contentType: string,
+): Promise<{ headers: string[]; rows: Array<Array<string | number | boolean | null>>; sourceRowNumbers?: number[] }> {
+  if (contentType === 'application/vnd.autosale.catalogue-table+json') {
     const parsed = JSON.parse(body.toString('utf8')) as { headers?: unknown; rows?: unknown };
     if (!Array.isArray(parsed.headers) || !Array.isArray(parsed.rows)) throw new Error('Invalid Google catalogue snapshot');
-    return { headers: normalizeHeaders(parsed.headers.map(String)), rows: parsed.rows.map((row) => Array.isArray(row) ? row.map(cell) : []) };
+    const sourceRowNumbers = (parsed as { sourceRowNumbers?: unknown }).sourceRowNumbers;
+    if (sourceRowNumbers !== undefined && (!Array.isArray(sourceRowNumbers) || sourceRowNumbers.length !== parsed.rows.length
+      || sourceRowNumbers.some((row) => !Number.isInteger(row) || Number(row) < 1))) throw new Error('Invalid source row coordinates');
+    return {
+      headers: normalizeHeaders(parsed.headers.map(String)),
+      rows: parsed.rows.map((row) => Array.isArray(row) ? row.map(cell) : []),
+      ...(Array.isArray(sourceRowNumbers) ? { sourceRowNumbers: sourceRowNumbers.map(Number) } : {}),
+    };
   }
   if (type === 'CSV_UPLOAD') {
     const rows = parseCsv(body, { bom: true, relax_column_count: true, skip_empty_lines: true }) as unknown[][];
