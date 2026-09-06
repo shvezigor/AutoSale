@@ -104,13 +104,12 @@ describe('GoogleSheetsAdapter', () => {
       .rejects.toMatchObject({ code: 'AUTHORIZATION', retryable: false });
   });
 
-  it('quotes apostrophes in tab names and represents an empty sheet deterministically', async () => {
+  it('quotes apostrophes in tab names and rejects an empty sheet', async () => {
     const fetchFn = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) });
     const adapter = new GoogleSheetsAdapter({ getAccessToken: async () => 'token' }, fetchFn);
 
-    await expect(adapter.readTable({ spreadsheetId: 'sheet-1', sheetName: "Owner's Products", maxRows: 10 })).resolves.toEqual({
-      headers: [], rows: [], revision: '63debde3011fa7ace0b1f7dad44f3a58bf5b8d8689dca36a2ba3b06fb137f563',
-    });
+    await expect(adapter.readTable({ spreadsheetId: 'sheet-1', sheetName: "Owner's Products", maxRows: 10 }))
+      .rejects.toMatchObject({ code: 'HEADER_INVALID', retryable: false });
     expect(fetchFn.mock.calls[0]?.[0]).toContain("'Owner''s%20Products'!1%3A5011");
   });
 
