@@ -1,30 +1,16 @@
 import { cleanup, render, screen } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 
 import { InboxShell } from './inbox-shell';
 
-vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
+afterEach(cleanup);
 
-beforeEach(() => {
-  vi.stubGlobal('fetch', vi.fn(() => new Promise(() => undefined)));
-});
+describe('InboxShell', () => {
+  it('renders inbox content without nesting the global navigation', () => {
+    render(<InboxShell conversations={[]}><div>Порожній діалог</div></InboxShell>);
 
-afterEach(() => {
-  cleanup();
-  vi.unstubAllGlobals();
-});
-
-describe('InboxShell role navigation', () => {
-  it('shows team only to the tenant owner while retaining settings access', () => {
-    render(<InboxShell conversations={[]} session={{ name: 'Олена', email: 'owner@example.com', membershipRole: 'OWNER' } as never}><div /></InboxShell>);
-    expect(screen.getByRole('link', { name: 'Команда' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Налаштування' })).toBeInTheDocument();
-  });
-
-  it('shows managers settings without team management', () => {
-    render(<InboxShell conversations={[]} session={{ name: 'Іван', email: 'manager@example.com', membershipRole: 'MANAGER' } as never}><div /></InboxShell>);
-    expect(screen.queryByRole('link', { name: 'Команда' })).not.toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Налаштування' })).toBeInTheDocument();
-    expect(screen.getByText('Іван')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Діалоги' })).toBeInTheDocument();
+    expect(screen.getByText('Порожній діалог')).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'AutoSale' })).not.toBeInTheDocument();
   });
 });

@@ -1,13 +1,15 @@
 import { cleanup, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { authenticatedApiFetch, getServerSession } = vi.hoisted(() => ({ authenticatedApiFetch: vi.fn(), getServerSession: vi.fn() }));
-vi.mock('../../src/auth/session', () => ({ authenticatedApiFetch, getServerSession }));
-vi.mock('next/navigation', () => ({ useRouter: () => ({ replace: vi.fn(), refresh: vi.fn() }) }));
+vi.mock('../../../src/auth/session', () => ({ authenticatedApiFetch, getServerSession }));
+vi.mock('next/navigation', () => ({ usePathname: () => '/catalogue', useRouter: () => ({ replace: vi.fn(), refresh: vi.fn() }) }));
 
 import CataloguePage from './page';
+import WorkspaceLayout from '../layout';
 
-afterEach(() => { cleanup(); authenticatedApiFetch.mockReset(); getServerSession.mockReset(); });
+beforeEach(() => { vi.stubGlobal('fetch', vi.fn(() => new Promise(() => undefined))); });
+afterEach(() => { cleanup(); authenticatedApiFetch.mockReset(); getServerSession.mockReset(); vi.unstubAllGlobals(); });
 
 describe('CataloguePage', () => {
   it('loads the requested server page for the authenticated membership', async () => {
@@ -16,7 +18,7 @@ describe('CataloguePage', () => {
       .mockResolvedValueOnce({ ok: true, json: async () => ({ items: [], page: 2, pageSize: 25, total: 0 }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ([{ id: '44444444-4444-4444-8444-444444444444', type: 'GOOGLE_SHEETS', displayName: 'Каталог', status: 'ACTIVE', lastSyncedAt: null, lastErrorSummary: null, updatedAt: '2026-09-01T08:00:00.000Z' }]) });
 
-    render(await CataloguePage({ searchParams: Promise.resolve({ page: '2', search: 'Luna' }) }));
+    render(await WorkspaceLayout({ children: await CataloguePage({ searchParams: Promise.resolve({ page: '2', search: 'Luna' }) }) }));
 
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/catalogue?page=2&pageSize=25&search=Luna');
     expect(authenticatedApiFetch).toHaveBeenCalledTimes(1);
@@ -37,7 +39,7 @@ describe('CataloguePage', () => {
     getServerSession.mockResolvedValue({ name: 'Іван', email: 'manager@example.com', membershipRole: 'MANAGER' });
     authenticatedApiFetch.mockResolvedValueOnce({ ok: true, json: async () => ({ items: [], page: 1, pageSize: 50, total: 0 }) });
 
-    render(await CataloguePage({ searchParams: Promise.resolve({ pageSize: '50' }) }));
+    render(await WorkspaceLayout({ children: await CataloguePage({ searchParams: Promise.resolve({ pageSize: '50' }) }) }));
 
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/catalogue?page=1&pageSize=50');
   });
@@ -48,7 +50,7 @@ describe('CataloguePage', () => {
     authenticatedApiFetch
       .mockResolvedValueOnce({ ok: true, json: async () => ({ items: [], page: 1, pageSize: 25, total: 0 }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ id, status: 'MAPPING_REVIEW', headers: ['Артикул', 'Назва'] }) });
-    render(await CataloguePage({ searchParams: Promise.resolve({ review: id }) }));
+    render(await WorkspaceLayout({ children: await CataloguePage({ searchParams: Promise.resolve({ review: id }) }) }));
     expect(authenticatedApiFetch).toHaveBeenCalledWith(`/api/catalogue/imports/${id}`);
     expect(screen.getByRole('heading', { name: 'Аналіз колонок' })).toBeInTheDocument();
   });
