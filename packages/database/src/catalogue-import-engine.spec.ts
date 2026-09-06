@@ -89,6 +89,15 @@ describe('catalogue table import engine', () => {
     expect(prisma.product.upsert).not.toHaveBeenCalled();
   });
 
+  it('preserves the original source row number in normalized import errors', async () => {
+    const plan = await buildCatalogueImportPlan(prismaDouble([]) as never, {
+      tenantId: 'tenant-1', sourceId: 'source-1', mapping: mapping.slice(0, 2), transformSettings: null,
+      headers: ['SKU', 'Name'], rows: [['BAD', '']], sourceRowNumbers: [24],
+    });
+
+    expect(plan.rows[0]).toMatchObject({ rowNumber: 24, codes: ['NAME_REQUIRED'] });
+  });
+
   it('lets a changed file upload replace the tenant product and its source ownership', async () => {
     const prisma = prismaDouble([{ sku: 'LUNA-1', sourceId: 'old-upload' }]);
 

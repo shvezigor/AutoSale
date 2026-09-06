@@ -15,6 +15,8 @@ export type CatalogueTableInput = {
   lease?: { id: string; syncVersion: number; ttlMs: number };
   headers: string[];
   rows: CatalogueCell[][];
+  /** Original one-based source coordinates when rows were structurally normalized. */
+  sourceRowNumbers?: number[];
   mapping: CatalogueColumn[];
   transformSettings: unknown;
 };
@@ -54,7 +56,14 @@ export async function buildCatalogueImportPlan(prisma: Pick<PrismaClient, 'produ
   const headerIndex = new Map(input.headers.map((header, index) => [normalizeHeader(header), index]));
   const normalizedMapping = input.mapping.map((column) => ({ ...column, source: normalizeHeader(column.source) }));
   const clearFields = readClearFields(input.transformSettings);
-  const rows = input.rows.map((values, index) => mapRow(values, index + 2, input.sourceId, headerIndex, normalizedMapping, clearFields));
+  const rows = input.rows.map((values, index) => mapRow(
+    values,
+    input.sourceRowNumbers?.[index] ?? index + 2,
+    input.sourceId,
+    headerIndex,
+    normalizedMapping,
+    clearFields,
+  ));
   const skuRows = new Map<string, number[]>();
   for (const row of rows) {
     if (!row.product?.sku) continue;
