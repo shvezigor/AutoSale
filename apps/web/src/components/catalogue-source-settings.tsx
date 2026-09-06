@@ -47,6 +47,11 @@ export function CatalogueSourceSettings({
 
   useEffect(() => {
     if (!tracking) return;
+    return activity.begin('Розпізнаємо й завантажуємо товари');
+  }, [activity.begin, tracking?.id]);
+
+  useEffect(() => {
+    if (!tracking) return;
     const controller = new AbortController();
     let timer: ReturnType<typeof setTimeout>;
     async function poll() {
@@ -121,7 +126,7 @@ export function CatalogueSourceSettings({
   }
 
   async function selectSpreadsheet(selection: GooglePickerSelection) {
-    setPending(true); setMessage(null); setError(null);
+    setPending(true); setMessage(null); setError(null); setTabs([]);
     try {
       const response = await activity.run('Перевіряємо таблицю товарів', () => fetch(`/api/integrations/google/files/${encodeURIComponent(selection.fileId)}/tabs`, { cache: 'no-store' }));
       const body = await response.json() as { spreadsheetId?: string; tabs?: Array<{ sheetId: number; title: string }>; message?: string };
@@ -160,8 +165,8 @@ export function CatalogueSourceSettings({
     {!googleConnected && <p className="settings-step-notice">Під час вибору таблиці Google один раз попросить доступ до неї.</p>}
     <div className="data-source-actions"><GooglePickerButton label="Обрати Google-таблицю" connected={googleConnected} intent="catalogue" autoOpen={autoOpenPicker} disabled={pending} onSelected={(selection) => void selectSpreadsheet(selection)} /><span>або</span><button className="secondary-button" disabled={pending} type="button" onClick={() => fileInput.current?.click()}>Завантажити CSV або Excel</button><input ref={fileInput} className="sr-only" type="file" accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onChange={(event) => void uploadFile(event.target.files?.[0])} /></div>
     {spreadsheet && <div className="data-selection-summary"><span>Джерело товарів</span><strong>{displayName}</strong></div>}
-    {tracking ? <div className="data-import-result is-working" role="status" aria-busy="true"><strong>Розпізнаємо й завантажуємо товари…</strong><span>Результат з’явиться тут автоматично.</span></div> : current?.lastErrorSummary ? <SourceErrorState code={current.lastErrorSummary} /> : current?.latestRun && current.spreadsheetId === spreadsheet && current.sheetName === sheetName && <ImportRunState run={current.latestRun} />}
     {tabs.length > 1 && <label className="data-tab-choice"><span>Вкладка з товарами</span><select aria-label="Вкладка Google таблиці" value={sheetName} onChange={(event) => setSheetName(event.target.value)}>{tabs.map((tab) => <option key={tab.sheetId} value={tab.title}>{tab.title}</option>)}</select></label>}
+    {spreadsheet && <div className="data-import-status-slot">{tracking ? <div className="data-import-result is-working" role="status" aria-busy="true"><strong>Розпізнаємо й завантажуємо товари…</strong><span>Результат з’явиться тут автоматично.</span></div> : current?.spreadsheetId === spreadsheet && current?.sheetName === sheetName && current.lastErrorSummary ? <SourceErrorState code={current.lastErrorSummary} /> : current?.spreadsheetId === spreadsheet && current?.sheetName === sheetName && current.latestRun ? <ImportRunState run={current.latestRun} /> : null}</div>}
     <div className="catalogue-source-actions">
       {spreadsheet && <LoadingButton pending={pending} pendingLabel="Завантажуємо…" disabled={!displayName.trim() || !sheetName.trim()} onClick={() => void save()} type="button">Завантажити товари</LoadingButton>}
       {current && <LoadingButton className="text-button" pending={pending} pendingLabel="Замінюємо…" onClick={() => void remove()} type="button">Замінити джерело</LoadingButton>}

@@ -18,9 +18,12 @@ describe('ActivityProvider', () => {
     fireEvent.click(screen.getByRole('button', { name: 'First' }));
     fireEvent.click(screen.getByRole('button', { name: 'Second' }));
     expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuetext', '2 активні операції');
+    expect(document.querySelector('.activity-overlay')).toHaveAttribute('aria-busy', 'true');
+    expect(document.querySelector('.activity-spinner')).toBeInTheDocument();
     resolveFirst?.();
     await waitFor(() => expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuetext', '1 активна операція'));
     resolveSecond?.();
     await waitFor(() => expect(screen.queryByRole('progressbar')).not.toBeInTheDocument());
+    expect(document.querySelector('.activity-overlay')).not.toBeInTheDocument();
   });
 });

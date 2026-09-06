@@ -108,6 +108,18 @@ describe('CatalogueSourceSettings', () => {
     expect(screen.getByText(/Оберіть аркуш із таблицею товарів/)).toBeInTheDocument();
   });
 
+  it('hides an error from the old source after another Google table is selected', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({ spreadsheetId: 'sheet-new', tabs: [{ sheetId: 1, title: 'Товари' }] }) }));
+    render(<CatalogueSourceSettings role="OWNER" sources={[{ ...source, status: 'PAUSED', lastErrorSummary: 'TABLE_HEADER_INVALID' }]} configurations={[{
+      ...configuration, status: 'PAUSED', lastErrorSummary: 'TABLE_HEADER_INVALID', latestRun: null,
+    }]} />);
+
+    expect(screen.getByText('Аркуш порожній або не має заголовків')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Обрати Google-таблицю' }));
+    await screen.findByText(/Таблицю розпізнано/);
+    expect(screen.queryByText('Аркуш порожній або не має заголовків')).not.toBeInTheDocument();
+  });
+
   it('shows managers only health without tenant data actions', () => {
     render(<CatalogueSourceSettings role="MANAGER" sources={[source]} configurations={[configuration]} />);
     expect(screen.getByText('Активне')).toBeInTheDocument();
