@@ -5,7 +5,7 @@ import { getServerSession } from '../../src/auth/session';
 import WorkspaceLayout from './layout';
 
 vi.mock('../../src/auth/session', () => ({ getServerSession: vi.fn() }));
-vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
+vi.mock('next/navigation', () => ({ usePathname: () => '/catalogue', useRouter: () => ({ refresh: vi.fn() }) }));
 
 const ownerSession = {
   userId: 'user-1',

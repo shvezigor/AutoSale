@@ -3,19 +3,39 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { PrimaryNavigation } from './primary-navigation';
 
-afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
+const { usePathname } = vi.hoisted(() => ({ usePathname: vi.fn() }));
+vi.mock('next/navigation', () => ({ usePathname }));
+
+const managerSession = { name: 'Іван', email: 'manager@example.com', membershipRole: 'MANAGER' as const };
+const ownerSession = { name: 'Олена', email: 'owner@example.com', membershipRole: 'OWNER' as const };
+
+afterEach(() => { cleanup(); usePathname.mockReset(); });
 
 describe('PrimaryNavigation', () => {
   it('shows settings but hides team management from managers', () => {
-    render(<PrimaryNavigation active="orders" session={{ name: 'Іван', email: 'manager@example.com', membershipRole: 'MANAGER' }} />);
+    usePathname.mockReturnValue('/orders');
+    render(<PrimaryNavigation session={managerSession} />);
     expect(screen.queryByRole('link', { name: 'Команда' })).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Налаштування' })).toHaveAttribute('href', '/settings');
     expect(screen.getByRole('link', { name: 'Каталог' })).toHaveAttribute('href', '/catalogue');
   });
 
   it('leaves profile actions to the application header', () => {
-    render(<PrimaryNavigation active="conversations" session={{ name: 'Олена', email: 'owner@example.com', membershipRole: 'OWNER' }} />);
+    usePathname.mockReturnValue('/conversations');
+    render(<PrimaryNavigation session={ownerSession} />);
     expect(screen.queryByRole('button', { name: 'Вийти' })).not.toBeInTheDocument();
     expect(screen.queryByText('Власник')).not.toBeInTheDocument();
+  });
+
+  it.each([
+    ['/orders', 'Замовлення'],
+    ['/orders/123', 'Замовлення'],
+    ['/catalogue', 'Каталог'],
+    ['/conversations/456', 'Діалоги'],
+  ])('marks %s as the current section', (pathname, label) => {
+    usePathname.mockReturnValue(pathname);
+    render(<PrimaryNavigation session={ownerSession} />);
+
+    expect(screen.getByRole('link', { name: label })).toHaveAttribute('aria-current', 'page');
   });
 });

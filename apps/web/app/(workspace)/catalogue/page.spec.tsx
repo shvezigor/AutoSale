@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { authenticatedApiFetch, getServerSession } = vi.hoisted(() => ({ authenticatedApiFetch: vi.fn(), getServerSession: vi.fn() }));
 vi.mock('../../../src/auth/session', () => ({ authenticatedApiFetch, getServerSession }));
-vi.mock('next/navigation', () => ({ useRouter: () => ({ replace: vi.fn(), refresh: vi.fn() }) }));
+vi.mock('next/navigation', () => ({ usePathname: () => '/catalogue', useRouter: () => ({ replace: vi.fn(), refresh: vi.fn() }) }));
 
 import CataloguePage from './page';
 import WorkspaceLayout from '../layout';

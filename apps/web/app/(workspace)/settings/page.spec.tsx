@@ -7,7 +7,7 @@ const { authenticatedApiFetch, getServerSession } = vi.hoisted(() => ({
 }));
 
 vi.mock('../../../src/auth/session', () => ({ authenticatedApiFetch, getServerSession }));
-vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
+vi.mock('next/navigation', () => ({ usePathname: () => '/settings', useRouter: () => ({ refresh: vi.fn() }) }));
 
 import SettingsPage from './page';
 import WorkspaceLayout from '../layout';
