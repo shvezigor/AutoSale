@@ -108,9 +108,9 @@ export class GoogleCatalogueSyncProcessor {
     const idempotencyKey = `google:${input.sourceId}:${table.revision}:mapping:${mapping.version}`;
     const existing = await this.prisma.catalogueImportRun.findUnique({
       where: { tenantId_idempotencyKey: { tenantId: input.tenantId, idempotencyKey } },
-      select: { id: true, status: true, mappingId: true, startedAt: true },
+      select: { id: true, status: true, mappingId: true, startedAt: true, failedRows: true },
     });
-    if (existing?.status === 'COMPLETED') {
+    if (existing?.status === 'COMPLETED' && existing.failedRows === 0) {
       await this.releaseLease(leaseWhere, source.syncSchedule);
       return { status: 'NOOP' as const, revision: table.revision, runId: existing.id };
     }
@@ -136,7 +136,7 @@ export class GoogleCatalogueSyncProcessor {
     }
 
     let runId: string;
-    if (existing && (existing.status === 'FAILED' || existing.status === 'PROCESSING')) {
+    if (existing && (existing.status === 'FAILED' || existing.status === 'PROCESSING' || (existing.status === 'COMPLETED' && existing.failedRows > 0))) {
       const recovered = await this.prisma.catalogueImportRun.updateMany({
         where: { id: existing.id, tenantId: input.tenantId, status: existing.status },
         data: {

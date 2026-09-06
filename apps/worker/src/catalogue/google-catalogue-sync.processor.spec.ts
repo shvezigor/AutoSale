@@ -76,7 +76,7 @@ describe('GoogleCatalogueSyncProcessor', () => {
   });
 
   it('does not import a revision that already completed', async () => {
-    prisma.catalogueImportRun.findUnique.mockResolvedValue({ id: 'existing-run', status: 'COMPLETED' });
+    prisma.catalogueImportRun.findUnique.mockResolvedValue({ id: 'existing-run', status: 'COMPLETED', failedRows: 0 });
     const processor = new GoogleCatalogueSyncProcessor(prisma as never, sheets as never, storage, importer);
 
     await expect(processor.process({ tenantId, sourceId })).resolves.toMatchObject({ status: 'NOOP', revision: 'revision-1' });
@@ -166,9 +166,23 @@ describe('GoogleCatalogueSyncProcessor', () => {
     expect(importer.importTable).toHaveBeenCalledTimes(2);
   });
 
+  it('retries a completed revision when some rows previously failed', async () => {
+    prisma.catalogueImportRun.findUnique.mockResolvedValue({
+      id: 'partial-run', status: 'COMPLETED', mappingId, startedAt: new Date(), failedRows: 9,
+    });
+    const processor = new GoogleCatalogueSyncProcessor(prisma as never, sheets as never, storage, importer);
+
+    await expect(processor.process({ tenantId, sourceId })).resolves.toMatchObject({ status: 'COMPLETED' });
+    expect(importer.importTable).toHaveBeenCalledOnce();
+    expect(prisma.catalogueImportRun.updateMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: { id: 'partial-run', tenantId, status: 'COMPLETED' },
+      data: expect.objectContaining({ status: 'PROCESSING', rowErrors: [] }),
+    }));
+  });
+
   it('includes the confirmed mapping version in idempotency and does not advance lastSyncedAt on a completed no-op', async () => {
     prisma.catalogueMapping.findFirst.mockResolvedValue({ ...mapping, version: 7 });
-    prisma.catalogueImportRun.findUnique.mockResolvedValue({ id: 'existing-run', status: 'COMPLETED', mappingId, startedAt: new Date() });
+    prisma.catalogueImportRun.findUnique.mockResolvedValue({ id: 'existing-run', status: 'COMPLETED', mappingId, startedAt: new Date(), failedRows: 0 });
     const processor = new GoogleCatalogueSyncProcessor(prisma as never, sheets as never, storage, importer);
 
     await expect(processor.process({ tenantId, sourceId })).resolves.toMatchObject({ status: 'NOOP' });
