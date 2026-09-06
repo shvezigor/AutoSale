@@ -14,7 +14,7 @@ export type GoogleSheetsReadErrorCode = 'AUTHORIZATION' | 'NOT_FOUND' | 'RATE_LI
 export type GoogleSheetsTableValidationErrorCode = 'ROW_LIMIT' | 'COLUMN_LIMIT' | 'CELL_LIMIT' | 'HEADER_INVALID';
 const MAX_TABLE_COLUMNS = 500;
 const MAX_TABLE_CELL_CHARACTERS = 65_536;
-const HEADER_SCAN_ROWS = 20;
+const HEADER_SCAN_ROWS = 100;
 /** Sparse rows are checked for 5,000 rows beyond the accepted table boundary. */
 const TABLE_OVERFLOW_SCAN_ROWS = 5_000;
 
@@ -80,7 +80,9 @@ export class GoogleSheetsAdapter {
       throw new GoogleSheetsTableValidationError('CELL_LIMIT', 'Google Sheets cell exceeds the character limit');
     }
     const headerIndex = findHeaderRowIndex(values);
-    let headers = (values[headerIndex] ?? []).map((value) => String(value ?? ''));
+    const rawHeaders = (values[headerIndex] ?? []).map((value) => String(value ?? ''));
+    const namedColumnIndexes = rawHeaders.flatMap((header, index) => header.trim() ? [index] : []);
+    let headers = namedColumnIndexes.map((index) => rawHeaders[index]!);
     if (headers.length === 0) {
       throw new GoogleSheetsTableValidationError('HEADER_INVALID', 'Google Sheets table is empty');
     }
@@ -88,12 +90,11 @@ export class GoogleSheetsAdapter {
     if (overflowRows.some((row) => row.some((cell) => cell !== null && cell !== ''))) {
       throw new GoogleSheetsTableValidationError('ROW_LIMIT', `Google Sheets table exceeds ${input.maxRows} rows`);
     }
-    const rows = values.slice(headerIndex + 1, headerIndex + input.maxRows + 1);
+    const rows = values
+      .slice(headerIndex + 1, headerIndex + input.maxRows + 1)
+      .map((row) => namedColumnIndexes.map((index) => row[index] ?? null));
     if (headers.length > 0) {
       const normalizedHeaders = headers.map(normalizeHeader);
-      if (normalizedHeaders.some((header) => header.length === 0)) {
-        throw new GoogleSheetsTableValidationError('HEADER_INVALID', 'Google Sheets table contains an empty header');
-      }
       if (new Set(normalizedHeaders).size !== normalizedHeaders.length) {
         // Preserve every column and its values. Labels change only in our snapshot,
         // never in the customer's sheet; position makes repeated attributes distinct.

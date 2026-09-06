@@ -68,6 +68,25 @@ describe('GoogleSheetsAdapter', () => {
     expect(table.rows).toEqual([['860х2050 двокольорові', 158]]);
   });
 
+  it('finds a supplier header after row 20 and ignores unnamed spacer columns', async () => {
+    const leadingRows = Array.from({ length: 20 }, (_, index) => index === 3 ? [null, null, null, null, null, 'Контакти постачальника'] : []);
+    const fetchFn = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ values: [
+        ...leadingRows,
+        [null, null, null, null, null, 'Асортимент', null, 'Ціна (грн)'],
+        [null, null, null, null, null, '860х2050 Регіон', null, 2420],
+      ] }),
+    });
+    const adapter = new GoogleSheetsAdapter({ getAccessToken: async () => 'token' }, fetchFn);
+
+    await expect(adapter.readTable({ spreadsheetId: 'sheet-1', sheetName: 'прайс', maxRows: 100 })).resolves.toMatchObject({
+      headers: ['Асортимент', 'Ціна (грн)'],
+      rows: [['860х2050 Регіон', 2420]],
+    });
+  });
+
   it.each([
     [403, 'AUTHORIZATION', false],
     [400, 'NOT_FOUND', false],
@@ -155,7 +174,7 @@ describe('GoogleSheetsAdapter', () => {
 
   it.each([
     [[], 'empty'],
-    [[['', 'Name']], 'empty'],
+    [[['', '']], 'empty'],
     [[Array.from({ length: 501 }, (_, index) => `column-${index}`)], '500 columns'],
     [[['SKU'], ['x'.repeat(65_537)]], 'cell'],
   ] as const)('rejects invalid bounded table structures without returning row data: %s', async (values, message) => {
