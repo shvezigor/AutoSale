@@ -4,6 +4,26 @@ import { GoogleSheetsAdapter, GoogleSheetsReadError, GoogleSheetsTableValidation
 import { GoogleOAuthAccessError } from './google-oauth-token-provider.js';
 
 describe('GoogleSheetsAdapter', () => {
+  it('reads a raw matrix without choosing headers or compacting sparse coordinates', async () => {
+    const fetchFn = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ values: [
+        ['Прайс постачальника'],
+        [],
+        [null, null, 'Назва', null, 'Ціна'],
+        [null, null, 'Сукня', null, 1200],
+      ] }),
+    });
+    const adapter = new GoogleSheetsAdapter({ getAccessToken: async () => 'token' }, fetchFn);
+
+    const matrix = await adapter.readMatrix({ spreadsheetId: 'sheet-1', sheetName: 'Прайс', maxRows: 5_000 });
+
+    expect(matrix.rows[2]).toEqual({ rowNumber: 3, cells: [null, null, 'Назва', null, 'Ціна'] });
+    expect(matrix.rows[3]).toEqual({ rowNumber: 4, cells: [null, null, 'Сукня', null, 1200] });
+    expect(matrix.revision).toMatch(/^[a-f0-9]{64}$/);
+  });
+
   it('reads a bounded evaluated table and returns a deterministic revision', async () => {
     const fetchFn = vi.fn().mockResolvedValue({
       ok: true,

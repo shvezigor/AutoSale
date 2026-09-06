@@ -3,6 +3,8 @@ import { createHash } from 'node:crypto';
 import { GoogleAuth } from 'google-auth-library';
 
 import { GoogleOAuthAccessError } from './google-oauth-token-provider.js';
+import { matrixFromRows } from './catalogue-matrix.js';
+import type { RawCatalogueMatrix } from '@autosale/contracts';
 
 interface AccessTokenProvider { getAccessToken(): Promise<string> }
 type FetchLike = (input: string, init: { headers: { authorization: string; 'content-type'?: string }; method?: string; body?: string }) => Promise<{ ok: boolean; status: number; json(): Promise<unknown> }>;
@@ -48,7 +50,55 @@ export class GoogleSheetsTableValidationError extends Error {
 export class GoogleSheetsAdapter {
   constructor(private readonly auth: AccessTokenProvider, private readonly fetchFn: FetchLike = fetch) {}
 
+  async readMatrix(input: { spreadsheetId: string; sheetName: string; maxRows: number }): Promise<RawCatalogueMatrix> {
+    const values = await this.readValues(input);
+    if (values.slice(input.maxRows).some((row) => row.some((cell) => cell !== null && cell !== ''))) {
+      throw new GoogleSheetsTableValidationError('ROW_LIMIT', `Google Sheets table exceeds ${input.maxRows} rows`);
+    }
+    const accepted = values.slice(0, input.maxRows);
+    const revision = createHash('sha256').update(JSON.stringify(accepted)).digest('hex');
+    return matrixFromRows(accepted, revision);
+  }
+
   async readTable(input: { spreadsheetId: string; sheetName: string; maxRows: number }): Promise<GoogleSheetsTable> {
+    const values = await this.readValues(input);
+    const headerIndex = findHeaderRowIndex(values);
+    const rawHeaders = (values[headerIndex] ?? []).map((value) => String(value ?? ''));
+    const namedColumnIndexes = rawHeaders.flatMap((header, index) => header.trim() ? [index] : []);
+    let headers = namedColumnIndexes.map((index) => rawHeaders[index]!);
+    if (headers.length === 0) {
+      throw new GoogleSheetsTableValidationError('HEADER_INVALID', 'Google Sheets table is empty');
+    }
+    const overflowRows = values.slice(headerIndex + input.maxRows + 1);
+    if (overflowRows.some((row) => row.some((cell) => cell !== null && cell !== ''))) {
+      throw new GoogleSheetsTableValidationError('ROW_LIMIT', `Google Sheets table exceeds ${input.maxRows} rows`);
+    }
+    const rows = values
+      .slice(headerIndex + 1, headerIndex + input.maxRows + 1)
+      .map((row) => namedColumnIndexes.map((index) => row[index] ?? null));
+    if (headers.length > 0) {
+      const normalizedHeaders = headers.map(normalizeHeader);
+      if (new Set(normalizedHeaders).size !== normalizedHeaders.length) {
+        const reserved = new Set(normalizedHeaders);
+        const counts = new Map<string, number>();
+        normalizedHeaders.forEach((header) => counts.set(header, (counts.get(header) ?? 0) + 1));
+        headers = headers.map((header, index) => {
+          if (counts.get(normalizedHeaders[index]!) === 1) return header;
+          let label = `${header.trim()} [${columnName(index + 1)}]`;
+          while (reserved.has(normalizeHeader(label))) label += ' [duplicate]';
+          reserved.add(normalizeHeader(label));
+          return label;
+        });
+      }
+    }
+    return {
+      headers,
+      rows,
+      revision: createHash('sha256').update(JSON.stringify({ headers, rows })).digest('hex'),
+    };
+  }
+
+  private async readValues(input: { spreadsheetId: string; sheetName: string; maxRows: number }): Promise<GoogleSheetsCell[][]> {
     if (!Number.isSafeInteger(input.maxRows) || input.maxRows < 1 || input.maxRows > 5_000) {
       throw new RangeError('Google Sheets row limit must be between 1 and 5000');
     }
@@ -79,42 +129,7 @@ export class GoogleSheetsAdapter {
     if (values.some((row) => row.some((cell) => typeof cell === 'string' && cell.length > MAX_TABLE_CELL_CHARACTERS))) {
       throw new GoogleSheetsTableValidationError('CELL_LIMIT', 'Google Sheets cell exceeds the character limit');
     }
-    const headerIndex = findHeaderRowIndex(values);
-    const rawHeaders = (values[headerIndex] ?? []).map((value) => String(value ?? ''));
-    const namedColumnIndexes = rawHeaders.flatMap((header, index) => header.trim() ? [index] : []);
-    let headers = namedColumnIndexes.map((index) => rawHeaders[index]!);
-    if (headers.length === 0) {
-      throw new GoogleSheetsTableValidationError('HEADER_INVALID', 'Google Sheets table is empty');
-    }
-    const overflowRows = values.slice(headerIndex + input.maxRows + 1);
-    if (overflowRows.some((row) => row.some((cell) => cell !== null && cell !== ''))) {
-      throw new GoogleSheetsTableValidationError('ROW_LIMIT', `Google Sheets table exceeds ${input.maxRows} rows`);
-    }
-    const rows = values
-      .slice(headerIndex + 1, headerIndex + input.maxRows + 1)
-      .map((row) => namedColumnIndexes.map((index) => row[index] ?? null));
-    if (headers.length > 0) {
-      const normalizedHeaders = headers.map(normalizeHeader);
-      if (new Set(normalizedHeaders).size !== normalizedHeaders.length) {
-        // Preserve every column and its values. Labels change only in our snapshot,
-        // never in the customer's sheet; position makes repeated attributes distinct.
-        const reserved = new Set(normalizedHeaders);
-        const counts = new Map<string, number>();
-        normalizedHeaders.forEach((header) => counts.set(header, (counts.get(header) ?? 0) + 1));
-        headers = headers.map((header, index) => {
-          if (counts.get(normalizedHeaders[index]!) === 1) return header;
-          let label = `${header.trim()} [${columnName(index + 1)}]`;
-          while (reserved.has(normalizeHeader(label))) label += ' [duplicate]';
-          reserved.add(normalizeHeader(label));
-          return label;
-        });
-      }
-    }
-    return {
-      headers,
-      rows,
-      revision: createHash('sha256').update(JSON.stringify({ headers, rows })).digest('hex'),
-    };
+    return values;
   }
 
   async readHeader(input: { spreadsheetId: string; sheetName: string }): Promise<string[]> {

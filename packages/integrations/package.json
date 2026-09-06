@@ -17,6 +17,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
+    "@autosale/contracts": "workspace:*",
     "@aws-sdk/client-s3": "3.1118.0",
     "google-auth-library": "^11.0.2"
   },

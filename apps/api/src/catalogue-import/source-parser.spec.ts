@@ -4,7 +4,7 @@ import { resolve } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import ExcelJS from 'exceljs';
 
-import { parseCatalogueSource } from './source-parser.js';
+import { parseCatalogueMatrix, parseCatalogueSource } from './source-parser.js';
 
 const fixtures = resolve(process.cwd(), '../../tests/fixtures/catalogue');
 
@@ -13,6 +13,36 @@ afterEach(() => {
 });
 
 describe('parseCatalogueSource', () => {
+  it('preserves late CSV header coordinates for structure analysis', async () => {
+    const parsed = await parseCatalogueMatrix(
+      Buffer.from('Прайс постачальника\n\n,,Назва,,Ціна\n,,Сукня,,1200'),
+      'text/csv',
+      'revision-1',
+    );
+
+    expect(parsed.rows[2]).toEqual({ rowNumber: 3, cells: [null, null, 'Назва', null, 'Ціна'] });
+    expect(parsed.rows[3]).toEqual({ rowNumber: 4, cells: [null, null, 'Сукня', null, '1200'] });
+  });
+
+  it('preserves late XLSX header coordinates for structure analysis', async () => {
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet('Products');
+    sheet.getCell('A1').value = 'Прайс постачальника';
+    sheet.getCell('C4').value = 'Назва';
+    sheet.getCell('E4').value = 'Ціна';
+    sheet.getCell('C5').value = 'Сукня';
+    sheet.getCell('E5').value = 1200;
+
+    const parsed = await parseCatalogueMatrix(
+      Buffer.from(await workbook.xlsx.writeBuffer()),
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'revision-2',
+    );
+
+    expect(parsed.rows[3]).toEqual({ rowNumber: 4, cells: [null, null, 'Назва', null, 'Ціна'] });
+    expect(parsed.rows[4]).toEqual({ rowNumber: 5, cells: [null, null, 'Сукня', null, 1200] });
+  });
+
   it.each([
     ['products.csv', 'text/csv'],
     ['products.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'],

@@ -2,6 +2,8 @@ import { createHash } from 'node:crypto';
 
 import { parse as parseCsv } from 'csv-parse/sync';
 import ExcelJS from 'exceljs';
+import { matrixFromRows } from '@autosale/integrations';
+import type { RawCatalogueMatrix } from '@autosale/contracts';
 
 export type ParsedCell = string | number | boolean | null;
 
@@ -23,14 +25,9 @@ const MAX_XLSX_COMPRESSION_RATIO = 1_000;
 const ENCRYPTED_OFFICE_MAGIC = Buffer.from('d0cf11e0a1b11ae1', 'hex');
 
 export async function parseCatalogueSource(buffer: Buffer, mediaType: string): Promise<ParsedTable> {
-  if (!CSV_MEDIA_TYPES.has(mediaType) && mediaType !== XLSX_MEDIA_TYPE) {
-    throw new Error('Unsupported catalogue source type');
-  }
-  if (mediaType === XLSX_MEDIA_TYPE && buffer.subarray(0, ENCRYPTED_OFFICE_MAGIC.length).equals(ENCRYPTED_OFFICE_MAGIC)) {
-    throw new Error('Encrypted workbooks are not supported');
-  }
+  validateSourceType(buffer, mediaType);
   const matrix = CSV_MEDIA_TYPES.has(mediaType)
-    ? readCsv(buffer)
+    ? readCsv(buffer, false)
     : await readWorkbook(buffer);
   const headers = (matrix[0] ?? []).map((cell) => String(cell).trim().toLocaleLowerCase('en-US'));
   validateBounds(matrix, headers);
@@ -40,6 +37,14 @@ export async function parseCatalogueSource(buffer: Buffer, mediaType: string): P
     rows,
     fingerprint: createHash('sha256').update(JSON.stringify(headers)).digest('hex'),
   };
+}
+
+export async function parseCatalogueMatrix(buffer: Buffer, mediaType: string, revision: string): Promise<RawCatalogueMatrix> {
+  validateSourceType(buffer, mediaType);
+  const rows = CSV_MEDIA_TYPES.has(mediaType)
+    ? readCsv(buffer, true)
+    : await readWorkbook(buffer);
+  return matrixFromRows(rows, revision);
 }
 
 async function readWorkbook(buffer: Buffer): Promise<unknown[][]> {
@@ -56,12 +61,12 @@ async function readWorkbook(buffer: Buffer): Promise<unknown[][]> {
   return rows;
 }
 
-function readCsv(buffer: Buffer): unknown[][] {
+function readCsv(buffer: Buffer, preserveCoordinates: boolean): unknown[][] {
   let rowCount = 0;
   return parseCsv(buffer, {
     bom: true,
-    relax_column_count: false,
-    skip_empty_lines: true,
+    relax_column_count: preserveCoordinates,
+    skip_empty_lines: !preserveCoordinates,
     max_record_size: MAX_COLUMNS * (MAX_CELL_BYTES + 8),
     on_record(record) {
       rowCount += 1;
@@ -76,6 +81,15 @@ function readCsv(buffer: Buffer): unknown[][] {
       return record;
     },
   }) as unknown[][];
+}
+
+function validateSourceType(buffer: Buffer, mediaType: string): void {
+  if (!CSV_MEDIA_TYPES.has(mediaType) && mediaType !== XLSX_MEDIA_TYPE) {
+    throw new Error('Unsupported catalogue source type');
+  }
+  if (mediaType === XLSX_MEDIA_TYPE && buffer.subarray(0, ENCRYPTED_OFFICE_MAGIC.length).equals(ENCRYPTED_OFFICE_MAGIC)) {
+    throw new Error('Encrypted workbooks are not supported');
+  }
 }
 
 function readExcelCell(value: ExcelJS.CellValue | undefined): unknown {
