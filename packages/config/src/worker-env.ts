@@ -20,6 +20,7 @@ export const workerEnvSchema = z.object({
   S3_SECRET_ACCESS_KEY: z.string().min(8),
   OPENAI_API_KEY: z.string().min(20),
   OPENAI_MODEL: z.string().min(1).default('gpt-5.4-mini'),
+  CATALOGUE_AI_STRUCTURE_ANALYSIS: z.enum(['true', 'false']).default('true').transform((value) => value === 'true'),
   META_APP_ID: z.string().regex(/^\d{5,32}$/),
   META_APP_SECRET: z.string().min(16),
   META_GRAPH_API_VERSION: z.string().regex(/^v\d+\.\d+$/),

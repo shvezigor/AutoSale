@@ -60,7 +60,7 @@ async function bootstrap(): Promise<void> {
     storage,
     catalogueMapper,
     new CatalogueAutoImporter(prisma, storage),
-    catalogueHybrid,
+    env.CATALOGUE_AI_STRUCTURE_ANALYSIS ? catalogueHybrid : undefined,
   );
   const googleSheets = env.GOOGLE_SERVICE_ACCOUNT_FILE ? createGoogleSheetsAdapter(env.GOOGLE_SERVICE_ACCOUNT_FILE) : undefined;
   const googleOAuthTokens = env.GOOGLE_OAUTH_CLIENT_ID && env.GOOGLE_OAUTH_CLIENT_SECRET
@@ -87,7 +87,7 @@ async function bootstrap(): Promise<void> {
     : undefined;
   const workerNotifications = new WorkerNotificationService(prisma as never);
   const catalogueSyncProcessor = googleSheets || oauthSheets
-    ? new GoogleCatalogueSyncProcessor(prisma, googleSheets, storage, undefined, oauthSheets, workerNotifications, catalogueHybrid)
+    ? new GoogleCatalogueSyncProcessor(prisma, googleSheets, storage, undefined, oauthSheets, workerNotifications, env.CATALOGUE_AI_STRUCTURE_ANALYSIS ? catalogueHybrid : undefined)
     : undefined;
   const orderProcessor = new TriggeredOrderProcessor(
     prisma,

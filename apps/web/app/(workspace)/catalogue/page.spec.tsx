@@ -52,6 +52,6 @@ describe('CataloguePage', () => {
       .mockResolvedValueOnce({ ok: true, json: async () => ({ id, status: 'MAPPING_REVIEW', headers: ['Артикул', 'Назва'] }) });
     render(await WorkspaceLayout({ children: await CataloguePage({ searchParams: Promise.resolve({ review: id }) }) }));
     expect(authenticatedApiFetch).toHaveBeenCalledWith(`/api/catalogue/imports/${id}`);
-    expect(screen.getByRole('heading', { name: 'Аналіз колонок' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Читаємо таблицю' })).toBeInTheDocument();
   });
 });

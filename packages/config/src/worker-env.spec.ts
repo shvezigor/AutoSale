@@ -25,7 +25,12 @@ const validEnv = {
 
 describe('parseWorkerEnv', () => {
   it('accepts a complete worker environment', () => {
-    expect(parseWorkerEnv(validEnv)).toEqual({ ...validEnv, HEALTH_PORT: 3002 });
+    expect(parseWorkerEnv(validEnv)).toEqual({ ...validEnv, HEALTH_PORT: 3002, CATALOGUE_AI_STRUCTURE_ANALYSIS: true });
+  });
+
+  it('enables hybrid catalogue analysis by default and accepts an explicit rollback', () => {
+    expect(parseWorkerEnv(validEnv).CATALOGUE_AI_STRUCTURE_ANALYSIS).toBe(true);
+    expect(parseWorkerEnv({ ...validEnv, CATALOGUE_AI_STRUCTURE_ANALYSIS: 'false' }).CATALOGUE_AI_STRUCTURE_ANALYSIS).toBe(false);
   });
 
   it('rejects a missing object-storage bucket', () => {

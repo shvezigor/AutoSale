@@ -27,7 +27,7 @@ const validEnv = {
 
 describe('parseApiEnv', () => {
   it('coerces a valid API environment', () => {
-    expect(parseApiEnv(validEnv)).toEqual({ ...validEnv, PORT: 3001, SMTP_PORT: 587, GOOGLE_SIGN_IN_ENABLED: false });
+    expect(parseApiEnv(validEnv)).toEqual({ ...validEnv, PORT: 3001, SMTP_PORT: 587, GOOGLE_SIGN_IN_ENABLED: false, CATALOGUE_AI_STRUCTURE_ANALYSIS: true });
   });
 
   it('requires a complete Google Sign-In configuration when the feature is enabled', () => {

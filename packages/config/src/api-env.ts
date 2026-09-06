@@ -40,6 +40,7 @@ export const apiEnvSchema = z.object({
   GOOGLE_OAUTH_CLIENT_SECRET: optionalNonEmptyString,
   GOOGLE_OAUTH_REDIRECT_URI: optionalUrl,
   GOOGLE_SIGN_IN_ENABLED: optionalBoolean,
+  CATALOGUE_AI_STRUCTURE_ANALYSIS: z.enum(['true', 'false']).default('true').transform((value) => value === 'true'),
   GOOGLE_SIGN_IN_REDIRECT_URI: optionalUrl,
   SESSION_COOKIE_NAME: z.string().regex(/^[A-Za-z0-9_-]+$/).default('autosale_session'),
   SESSION_PEPPER: z.string().min(32),
