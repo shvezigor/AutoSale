@@ -716,3 +716,23 @@ The approved design is in `docs/superpowers/specs/2026-09-03-google-sign-in-desi
 - [x] Verify the real replacement spreadsheet through Google Sheets read and AI mapping; uncertain mappings open the review screen before import.
 
 **Dependencies:** Task 35. **Estimated scope:** Small
+
+## Task 37: Persistent workspace shell and smooth navigation
+
+**Status:** Completed and deployed for acceptance on 6 September 2026.
+
+**Description:** Move all authenticated customer routes under one persistent Next.js App Router layout, add a collapsible desktop sidebar, retain the existing mobile drawer, and animate only the changing workspace content instead of remounting the whole application shell.
+
+**Acceptance criteria:**
+- [x] Dialogues, orders, catalogue, team, and settings share one persistent authenticated layout without changing their public URLs.
+- [x] Internal navigation uses Next.js client-side links; Google and Meta OAuth keep their required external browser navigation.
+- [x] Desktop navigation expands to 240 px, collapses to a stable 72 px icon rail, and restores the preference without a first-frame width jump.
+- [x] Active and nested routes expose `aria-current`; collapsed links and icon controls retain accessible names.
+- [x] Mobile navigation remains a modal drawer with backdrop, Escape, focus return, and close-on-navigation behavior.
+- [x] Route-level loading and error states replace only workspace content; transitions respect `prefers-reduced-motion`.
+- [x] Production Docker stack is healthy and the deployed domain returns HTTP 200.
+- [x] Browser acceptance confirms desktop collapse, persistence after refresh, accessible navigation labels, and route changes on `https://sales-aito.com`.
+
+**Verification:** `pnpm test` — web 118, API 292, worker 105, config 18, contracts 20, database 14, integrations 73, observability 5 tests passed; `pnpm typecheck`; `pnpm --filter @autosale/web build`; `git diff --check`; Docker Compose rebuild and health checks.
+
+**Dependencies:** Tasks 35–36. **Estimated scope:** Medium
