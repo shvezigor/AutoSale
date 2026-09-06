@@ -81,6 +81,9 @@ export class GoogleSheetsAdapter {
     }
     const headerIndex = findHeaderRowIndex(values);
     let headers = (values[headerIndex] ?? []).map((value) => String(value ?? ''));
+    if (headers.length === 0) {
+      throw new GoogleSheetsTableValidationError('HEADER_INVALID', 'Google Sheets table is empty');
+    }
     const overflowRows = values.slice(headerIndex + input.maxRows + 1);
     if (overflowRows.some((row) => row.some((cell) => cell !== null && cell !== ''))) {
       throw new GoogleSheetsTableValidationError('ROW_LIMIT', `Google Sheets table exceeds ${input.maxRows} rows`);

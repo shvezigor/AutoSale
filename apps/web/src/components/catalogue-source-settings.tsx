@@ -171,6 +171,7 @@ export function CatalogueSourceSettings({
 }
 
 function SourceErrorState({ code }: { code: string }) {
+  if (code === 'TABLE_HEADER_INVALID') return <div className="data-import-result is-error" role="alert"><strong>Аркуш порожній або не має заголовків</strong><span>Оберіть аркуш із таблицею товарів, де перший змістовний рядок містить назви колонок.</span></div>;
   if (code === 'TABLE_CELL_LIMIT') return <div className="data-import-result is-error" role="alert"><strong>Завеликий текст у комірці</strong><span>Опис або інша комірка перевищує допустимий розмір. Скоротіть довгий текст і повторіть імпорт.</span></div>;
   if (code === 'TABLE_COLUMN_LIMIT') return <div className="data-import-result is-error" role="alert"><strong>Забагато колонок у таблиці</strong><span>Підтримуємо до 500 колонок. Повторіть завантаження; якщо помилка залишиться, оберіть вужчу таблицю.</span></div>;
   return <div className="data-import-result is-error" role="alert"><strong>Не вдалося завантажити товари</strong><span>Перевірте доступ і структуру таблиці або оберіть інше джерело.</span></div>;

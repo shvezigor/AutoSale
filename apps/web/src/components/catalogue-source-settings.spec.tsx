@@ -99,6 +99,15 @@ describe('CatalogueSourceSettings', () => {
     expect(screen.queryByText('Готово')).not.toBeInTheDocument();
   });
 
+  it('explains how to recover when the selected Google sheet is empty', () => {
+    render(<CatalogueSourceSettings role="OWNER" sources={[{ ...source, status: 'PAUSED', lastErrorSummary: 'TABLE_HEADER_INVALID' }]} configurations={[{
+      ...configuration, status: 'PAUSED', lastErrorSummary: 'TABLE_HEADER_INVALID', latestRun: null,
+    }]} />);
+
+    expect(screen.getByText('Аркуш порожній або не має заголовків')).toBeInTheDocument();
+    expect(screen.getByText(/Оберіть аркуш із таблицею товарів/)).toBeInTheDocument();
+  });
+
   it('shows managers only health without tenant data actions', () => {
     render(<CatalogueSourceSettings role="MANAGER" sources={[source]} configurations={[configuration]} />);
     expect(screen.getByText('Активне')).toBeInTheDocument();

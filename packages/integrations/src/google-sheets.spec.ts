@@ -155,6 +155,7 @@ describe('GoogleSheetsAdapter', () => {
   });
 
   it.each([
+    [[], 'empty'],
     [[['', 'Name']], 'empty'],
     [[Array.from({ length: 501 }, (_, index) => `column-${index}`)], '500 columns'],
     [[['SKU'], ['x'.repeat(65_537)]], 'cell'],
