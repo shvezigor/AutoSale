@@ -52,6 +52,57 @@ export const catalogueMappingProposalSchema = z.object({
   }).strict()),
 }).strict();
 
+export const rawCatalogueCellSchema = z.union([z.string(), z.number(), z.boolean(), z.null()]);
+
+export const rawCatalogueMatrixSchema = z.object({
+  rows: z.array(z.object({
+    rowNumber: z.number().int().positive(),
+    cells: z.array(rawCatalogueCellSchema).max(500),
+  }).strict()).max(5_000),
+  revision: z.string().min(1),
+}).strict();
+
+const tableStructureProposalBaseSchema = z.object({
+  headerStartRow: z.number().int().positive(),
+  headerEndRow: z.number().int().positive(),
+  dataStartRow: z.number().int().positive(),
+  structureConfidence: z.number().min(0).max(1),
+  columns: z.array(z.object({
+    index: z.number().int().min(0).max(499),
+    label: z.string().min(1).max(300),
+    target: catalogueTargetFieldSchema,
+    confidence: z.number().min(0).max(1),
+  }).strict()).min(1).max(500),
+}).strict();
+
+function validateTableStructureRows(
+  value: { headerStartRow: number; headerEndRow: number; dataStartRow: number },
+  context: z.RefinementCtx,
+) {
+  if (value.headerEndRow < value.headerStartRow || value.headerEndRow - value.headerStartRow > 2) {
+    context.addIssue({ code: 'custom', message: 'Header span must contain one to three rows' });
+  }
+  if (value.dataStartRow <= value.headerEndRow) {
+    context.addIssue({ code: 'custom', message: 'Data must start after headers' });
+  }
+}
+
+export const tableStructureProposalSchema = tableStructureProposalBaseSchema.superRefine(validateTableStructureRows);
+
+export const ambiguousRowClassificationSchema = z.object({
+  rowNumber: z.number().int().positive(),
+  kind: z.enum(['PRODUCT', 'SKIP']),
+  confidence: z.number().min(0).max(1),
+}).strict();
+
+export const catalogueStructurePlanSchema = tableStructureProposalBaseSchema.extend({
+  version: z.literal(2),
+  productRowNumbers: z.array(z.number().int().positive()).max(5_000),
+  skippedRowNumbers: z.array(z.number().int().positive()).max(5_000),
+  sourceRowNumbers: z.array(z.number().int().positive()).max(5_000),
+  sourceRevision: z.string().min(1),
+}).strict().superRefine(validateTableStructureRows);
+
 export const catalogueSourceSummarySchema = z.object({
   id: z.string().uuid(),
   type: catalogueSourceTypeSchema,
@@ -99,5 +150,10 @@ export type GoogleCatalogueSourceInput = z.infer<typeof googleCatalogueSourceInp
 export type CatalogueProduct = z.infer<typeof catalogueProductSchema>;
 export type CatalogueSourceSummary = z.infer<typeof catalogueSourceSummarySchema>;
 export type CatalogueMappingProposal = z.infer<typeof catalogueMappingProposalSchema>;
+export type RawCatalogueCell = z.infer<typeof rawCatalogueCellSchema>;
+export type RawCatalogueMatrix = z.infer<typeof rawCatalogueMatrixSchema>;
+export type TableStructureProposal = z.infer<typeof tableStructureProposalSchema>;
+export type AmbiguousRowClassification = z.infer<typeof ambiguousRowClassificationSchema>;
+export type CatalogueStructurePlan = z.infer<typeof catalogueStructurePlanSchema>;
 export type CataloguePreview = z.infer<typeof cataloguePreviewSchema>;
 export type CatalogueImportSummary = z.infer<typeof catalogueImportSummarySchema>;
