@@ -8,7 +8,8 @@ type Target = 'sku' | 'name' | 'description' | 'price' | 'currency' | 'stockQuan
 type Column = { source: string; target: Target; confidence?: number };
 type Session = { membershipRole: 'OWNER' | 'MANAGER' | null };
 type UploadResult = { id: string; headers: string[] };
-type Status = { status: string; headers?: string[]; mapping: { columns: Column[] } | null; mappingFailure: 'MAPPING_UNAVAILABLE' | null; createdRows?: number; updatedRows?: number; skippedRows?: number; failedRows?: number };
+type Analysis = { version: 2; headerRows: number[]; productRows: number; skippedRows: number; confidenceBand: 'HIGH' | 'MEDIUM' | 'LOW'; reviewReasons: string[] };
+type Status = { status: string; headers?: string[]; mapping: { columns: Column[] } | null; mappingFailure: 'MAPPING_UNAVAILABLE' | null; analysis?: Analysis | null; createdRows?: number; updatedRows?: number; skippedRows?: number; failedRows?: number };
 type Preview = { totals: { created: number; updated: number; skipped: number; failed: number } };
 
 const targets: Target[] = ['ignore', 'sku', 'name', 'description', 'price', 'currency', 'stockQuantity', 'category', 'brand', 'aliases', 'color', 'size', 'imageUrls', 'active', 'attributes'];
@@ -32,12 +33,17 @@ export function CatalogueImportWizard({ session, reviewRuns = [], initialReview 
       const response = await fetch(`/api/catalogue/imports/${id}`, { cache: 'no-store' });
       if (!response.ok) throw new Error('status unavailable');
       const status = await response.json() as Status;
+      setImportStatus(status);
       if (status.status === 'MAPPING_REVIEW') {
         const availableHeaders = status.headers?.length ? status.headers : fallbackHeaders;
         const proposed = status.mapping?.columns ?? availableHeaders.map((source) => ({ source, target: 'ignore' as const }));
         setColumns(proposed);
         setManualFallback(Boolean(status.mappingFailure) || !status.mapping);
         setStep(4);
+        return;
+      }
+      if (status.status === 'COMPLETED' || status.status === 'FAILED') {
+        setStep(7);
         return;
       }
       window.setTimeout(() => void pollStatus(id, fallbackHeaders), 1_500);
@@ -126,10 +132,22 @@ export function CatalogueImportWizard({ session, reviewRuns = [], initialReview 
     {error ? <p className="catalogue-import-error" role="alert">{error}</p> : null}
     {step === 1 ? <div className="catalogue-import-panel"><h2>Оберіть джерело</h2><p>Завантажте CSV або XLSX або продовжте перевірку Google Sheets. Дані рядків залишаються на сервері.</p>{reviewRuns.map((run) => <button key={run.id} type="button" className="secondary-button" onClick={() => openReview(run)}>Переглянути {run.sourceName}</button>)}<button type="button" className="secondary-button" onClick={() => setStep(2)}>Обрати файл</button></div> : null}
     {step === 2 ? <div className="catalogue-import-panel"><h2>Завантажте каталог</h2><label>Файл каталогу<input aria-label="Файл каталогу" type="file" accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onChange={(event) => setFile(event.target.files?.[0] ?? null)} /></label><button type="button" className="primary-button" onClick={() => void upload()}>Завантажити каталог</button></div> : null}
-    {step === 3 ? <div className="catalogue-import-panel" aria-live="polite"><h2>Аналіз колонок</h2><p>AI аналізує лише назви колонок, типи та до п’яти обмежених прикладів.</p><p>Готуємо пропозицію зіставлення…</p></div> : null}
-    {step === 4 ? <div className="catalogue-import-panel"><h2>{manualFallback ? 'AI недоступний — зіставте колонки вручну' : 'AI запропонував зіставлення'}</h2><p>Перевірте кожну колонку перед імпортом. AI не змінює значення товарів.</p><div className="catalogue-mapping-grid">{columns.map((column) => <label key={column.source}>{column.source}<small>{column.confidence === undefined ? 'ручне зіставлення' : `${Math.round(column.confidence * 100)}%`}</small><select aria-label={column.source} value={column.target} onChange={updateColumn(column.source)}>{targets.map((target) => <option key={target} value={target}>{target}</option>)}</select></label>)}</div><button type="button" className="primary-button" onClick={checkMapping}>Перевірити зіставлення</button></div> : null}
+    {step === 3 ? <div className="catalogue-import-panel" aria-live="polite" aria-busy="true"><h2>{analysisStage(importStatus?.status)}</h2><p>AutoSale аналізує обмежений профіль таблиці та не показує її рядки у статусі.</p></div> : null}
+    {step === 4 ? <div className="catalogue-import-panel"><h2>{manualFallback ? 'AI недоступний — зіставте колонки вручну' : 'AI запропонував зіставлення'}</h2><p>Перевірте кожну колонку перед імпортом. AI не змінює значення товарів.</p>{importStatus?.analysis && importStatus.analysis.confidenceBand !== 'HIGH' ? <div className="catalogue-analysis-review"><p>Рядки заголовків: {formatHeaderRows(importStatus.analysis.headerRows)}</p><a href="#catalogue-mapping">Перевірити сумнівні поля</a></div> : null}<div id="catalogue-mapping" className="catalogue-mapping-grid">{columns.map((column) => <label key={column.source}>{column.source}<small>{column.confidence === undefined ? 'ручне зіставлення' : `${Math.round(column.confidence * 100)}%`}</small><select aria-label={column.source} value={column.target} onChange={updateColumn(column.source)}>{targets.map((target) => <option key={target} value={target}>{target}</option>)}</select></label>)}</div><button type="button" className="primary-button" onClick={checkMapping}>Перевірити зіставлення</button></div> : null}
     {step === 5 ? <div className="catalogue-import-panel"><h2>Обов’язкові поля зіставлено</h2><p>{columns.some((column) => column.target === 'sku') ? 'SKU та назва готові до перевірки без зміни товарів.' : 'SKU буде згенеровано автоматично та стабільно з назви товару.'}</p><button type="button" className="primary-button" onClick={() => void createPreview()}>Створити попередній перегляд</button></div> : null}
     {step === 6 && preview ? <div className="catalogue-import-panel"><h2>Попередній перегляд</h2><dl className="catalogue-import-totals"><div><dt>Нових</dt><dd>Нових: {preview.totals.created}</dd></div><div><dt>Оновлень</dt><dd>Оновлень: {preview.totals.updated}</dd></div><div><dt>Пропущено</dt><dd>{preview.totals.skipped}</dd></div><div><dt>Помилок</dt><dd>{preview.totals.failed}</dd></div></dl><label className="catalogue-confirmation"><input type="checkbox" checked={confirmed} onChange={(event) => setConfirmed(event.target.checked)} />Я підтверджую зіставлення та підсумки попереднього перегляду</label><button type="button" className="primary-button" disabled={!confirmed} onClick={() => void confirmImport()}>Підтвердити імпорт</button></div> : null}
     {step === 7 ? <div className="catalogue-import-panel" aria-live="polite">{importStatus?.status === 'COMPLETED' ? <><h2>Імпорт завершено</h2><p>Створено: {importStatus.createdRows ?? 0}</p><p>Оновлено: {importStatus.updatedRows ?? 0}</p></> : importStatus?.status === 'FAILED' ? <><h2>Імпорт не завершено</h2><p>Помилок: {importStatus.failedRows ?? 0}</p></> : <><h2>Імпорт обробляється</h2><p>Каталог оновиться після завершення без видалення наявних товарів.</p></>}{error ? <button type="button" className="secondary-button" onClick={() => setStatusRetry((value) => value + 1)}>Оновити стан</button> : null}</div> : null}
   </section>;
+}
+
+function analysisStage(status?: string): string {
+  if (status === 'MAPPING') return 'Розпізнаємо структуру таблиці';
+  if (status === 'PREVIEW_READY') return 'Перевіряємо товарні рядки';
+  if (status === 'PROCESSING') return 'Завантажуємо товари';
+  return 'Читаємо таблицю';
+}
+
+function formatHeaderRows(rows: number[]): string {
+  if (rows.length === 0) return 'не визначено';
+  return rows.length === 1 ? String(rows[0]) : `${rows[0]}–${rows.at(-1)}`;
 }

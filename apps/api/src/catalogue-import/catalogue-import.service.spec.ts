@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
 import { createPrismaClient, Prisma, type PrismaClient } from '@autosale/database';
-import type { ObjectStorage } from '@autosale/integrations';
+import { googleSheetsStructureFingerprint, type ObjectStorage } from '@autosale/integrations';
 import { ConflictException, ServiceUnavailableException, UnprocessableEntityException } from '@nestjs/common';
 import { PostgreSqlContainer, type StartedPostgreSqlContainer } from '@testcontainers/postgresql';
 import pg from 'pg';
@@ -408,8 +408,21 @@ describe('CatalogueImportService', () => {
       sourceRevision: 'revision-1', sourceHeaders: ['sku', 'name', 'price'], snapshotObjectKey, sourceSyncVersion: source.syncVersion, totalRows: 1,
     } });
 
+    const structureMapping = await prisma.catalogueMapping.create({ data: {
+      tenantId, sourceId: source.id, version: 1, sourceFingerprint: googleSheetsStructureFingerprint(['sku', 'name', 'price']), columns: [],
+      transformSettings: { structurePlan: {
+        version: 2, headerStartRow: 21, headerEndRow: 22, dataStartRow: 24, structureConfidence: 0.96, columns: [{ index: 1, label: 'name', target: 'name', confidence: 0.98 }],
+        productRowNumbers: Array.from({ length: 46 }, (_, index) => index + 24), skippedRowNumbers: Array.from({ length: 12 }, (_, index) => index + 1),
+        sourceRowNumbers: Array.from({ length: 46 }, (_, index) => index + 24), sourceRevision: 'revision-1',
+      } },
+    } });
+    await prisma.catalogueImportRun.update({ where: { id: run.id }, data: { mappingId: structureMapping.id } });
+
     const status = await service.status(tenantId, run.id);
-    expect(status).toMatchObject({ id: run.id, status: 'MAPPING_REVIEW', headers: ['sku', 'name', 'price'] });
+    expect(status).toMatchObject({
+      id: run.id, status: 'MAPPING_REVIEW', headers: ['sku', 'name', 'price'],
+      analysis: { version: 2, headerRows: [21, 22], productRows: 46, skippedRows: 12, confidenceBand: 'HIGH', reviewReasons: [] },
+    });
     expect(JSON.stringify(status)).not.toContain('Private Luna');
 
     const preview = await service.updateMapping(tenantId, ownerUserId, run.id, { columns: [

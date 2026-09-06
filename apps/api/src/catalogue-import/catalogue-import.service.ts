@@ -47,6 +47,10 @@ export type CatalogueImportStatusResult = CatalogueImportSummary & {
   headers: string[];
   mapping: { columns: CatalogueColumnMapping[]; aiModel: string | null; promptVersion: string | null; schemaVersion: string | null } | null;
   mappingFailure: 'MAPPING_UNAVAILABLE' | null;
+  analysis: {
+    version: 2; headerRows: number[]; productRows: number; skippedRows: number;
+    confidenceBand: 'HIGH' | 'MEDIUM' | 'LOW'; reviewReasons: string[];
+  } | null;
 };
 
 type PreviewProduct = NonNullable<CataloguePreview['rows'][number]['product']>;
@@ -221,9 +225,10 @@ export class CatalogueImportService {
   async status(tenantId: string, runId: string): Promise<CatalogueImportStatusResult> {
     const run = await this.prisma.catalogueImportRun.findFirst({
       where: { id: runId, tenantId },
-      include: { mapping: { select: { columns: true, aiModel: true, promptVersion: true, schemaVersion: true } } },
+      include: { mapping: { select: { columns: true, transformSettings: true, aiModel: true, promptVersion: true, schemaVersion: true } } },
     });
     if (!run) throw new NotFoundException('Catalogue import not found');
+    const plan = readStructurePlan(run.mapping?.transformSettings);
     return {
       ...mapSummary(run),
       headers: readHeaders(run.sourceHeaders),
@@ -231,6 +236,14 @@ export class CatalogueImportService {
         columns: readProposalColumns(run.mapping.columns), aiModel: run.mapping.aiModel, promptVersion: run.mapping.promptVersion, schemaVersion: run.mapping.schemaVersion,
       } : null,
       mappingFailure: hasMappingFailure(run.rowErrors) ? 'MAPPING_UNAVAILABLE' : null,
+      analysis: plan ? {
+        version: 2,
+        headerRows: Array.from({ length: plan.headerEndRow - plan.headerStartRow + 1 }, (_, index) => plan.headerStartRow + index),
+        productRows: plan.productRowNumbers.length,
+        skippedRows: plan.skippedRowNumbers.length,
+        confidenceBand: plan.structureConfidence >= 0.9 ? 'HIGH' : plan.structureConfidence >= 0.7 ? 'MEDIUM' : 'LOW',
+        reviewReasons: readReviewReasons(run.rowErrors),
+      } : null,
     };
   }
 
@@ -696,6 +709,23 @@ function parseTableSnapshot(buffer: Buffer, contentType: string): ParsedTable {
 
 function readHeaders(value: Prisma.JsonValue | null): string[] {
   return Array.isArray(value) ? value.filter((header): header is string => typeof header === 'string').slice(0, 500) : [];
+}
+
+function readStructurePlan(value: Prisma.JsonValue | null | undefined) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+  const candidate = (value as { structurePlan?: unknown }).structurePlan;
+  if (!candidate || typeof candidate !== 'object' || Array.isArray(candidate)) return null;
+  const plan = candidate as Record<string, unknown>;
+  if (plan.version !== 2 || !Number.isInteger(plan.headerStartRow) || !Number.isInteger(plan.headerEndRow)
+    || typeof plan.structureConfidence !== 'number' || !Array.isArray(plan.productRowNumbers) || !Array.isArray(plan.skippedRowNumbers)) return null;
+  return plan as unknown as { version: 2; headerStartRow: number; headerEndRow: number; structureConfidence: number; productRowNumbers: number[]; skippedRowNumbers: number[] };
+}
+
+function readReviewReasons(value: Prisma.JsonValue | null): string[] {
+  if (!Array.isArray(value)) return [];
+  return [...new Set(value.flatMap((entry) => entry && typeof entry === 'object' && !Array.isArray(entry) && Array.isArray((entry as { errors?: unknown }).errors)
+    ? (entry as { errors: unknown[] }).errors.filter((reason): reason is string => typeof reason === 'string').slice(0, 10)
+    : []))];
 }
 
 function nextSyncAt(schedule: string | null): Date | null {

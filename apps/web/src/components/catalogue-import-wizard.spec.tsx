@@ -14,6 +14,29 @@ const preview = { rows: [], totals: { created: 1, updated: 1, skipped: 0, failed
 afterEach(() => { cleanup(); mutatingFetch.mockReset(); vi.unstubAllGlobals(); vi.useRealTimers(); });
 
 describe('CatalogueImportWizard', () => {
+  it('shows structural details only for a review that needs attention', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(response({
+      ...proposal,
+      analysis: { version: 2, headerRows: [21, 22], productRows: 40, skippedRows: 5, confidenceBand: 'LOW', reviewReasons: ['LOW_STRUCTURE_CONFIDENCE'] },
+    })));
+    render(<CatalogueImportWizard session={{ membershipRole: 'OWNER' }} initialReview={{ id: runId, headers: proposal.headers }} />);
+
+    await screen.findByText('AI запропонував зіставлення');
+    expect(screen.getByText('Рядки заголовків: 21–22')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Перевірити сумнівні поля' })).toBeInTheDocument();
+  });
+
+  it('shows backend-driven structure recognition progress without a cosmetic timer', async () => {
+    vi.stubGlobal('fetch', vi.fn()
+      .mockResolvedValueOnce(response({ ...upload, status: 'MAPPING', mapping: null, mappingFailure: null, analysis: null }))
+      .mockResolvedValue(response(proposal)));
+    render(<CatalogueImportWizard session={{ membershipRole: 'OWNER' }} initialReview={{ id: runId, headers: [] }} />);
+
+    expect(await screen.findByText('Розпізнаємо структуру таблиці')).toBeInTheDocument();
+    expect(screen.queryByText(/Рядки заголовків:/)).not.toBeInTheDocument();
+    await screen.findByText('AI запропонував зіставлення', {}, { timeout: 2_500 });
+  });
+
   it('allows a name-only source because AutoSale will generate stable SKUs', async () => {
     const nameOnlyProposal = { ...proposal, headers: ['ассортимент', 'оптовая цена €'], mapping: { ...proposal.mapping, columns: [
       { source: 'ассортимент', target: 'name', confidence: 0.96 },

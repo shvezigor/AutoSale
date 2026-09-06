@@ -166,7 +166,7 @@ export function CatalogueSourceSettings({
     <div className="data-source-actions"><GooglePickerButton label="Обрати Google-таблицю" connected={googleConnected} intent="catalogue" autoOpen={autoOpenPicker} disabled={pending} onSelected={(selection) => void selectSpreadsheet(selection)} /><span>або</span><button className="secondary-button" disabled={pending} type="button" onClick={() => fileInput.current?.click()}>Завантажити CSV або Excel</button><input ref={fileInput} className="sr-only" type="file" accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onChange={(event) => void uploadFile(event.target.files?.[0])} /></div>
     {spreadsheet && <div className="data-selection-summary"><span>Джерело товарів</span><strong>{displayName}</strong></div>}
     {tabs.length > 1 && <label className="data-tab-choice"><span>Вкладка з товарами</span><select aria-label="Вкладка Google таблиці" value={sheetName} onChange={(event) => setSheetName(event.target.value)}>{tabs.map((tab) => <option key={tab.sheetId} value={tab.title}>{tab.title}</option>)}</select></label>}
-    {spreadsheet && <div className="data-import-status-slot">{tracking ? <div className="data-import-result is-working" role="status" aria-busy="true"><strong>Розпізнаємо й завантажуємо товари…</strong><span>Результат з’явиться тут автоматично.</span></div> : current?.spreadsheetId === spreadsheet && current?.sheetName === sheetName && current.lastErrorSummary ? <SourceErrorState code={current.lastErrorSummary} /> : current?.spreadsheetId === spreadsheet && current?.sheetName === sheetName && current.latestRun ? <ImportRunState run={current.latestRun} /> : null}</div>}
+    {spreadsheet && <div className="data-import-status-slot">{tracking ? <div className="data-import-result is-working" role="status" aria-busy="true"><strong>{sourceAnalysisStage(current?.latestRun?.status)}</strong><span>Результат з’явиться тут автоматично.</span></div> : current?.spreadsheetId === spreadsheet && current?.sheetName === sheetName && current.lastErrorSummary ? <SourceErrorState code={current.lastErrorSummary} /> : current?.spreadsheetId === spreadsheet && current?.sheetName === sheetName && current.latestRun ? <ImportRunState run={current.latestRun} /> : null}</div>}
     <div className="catalogue-source-actions">
       {spreadsheet && <LoadingButton pending={pending} pendingLabel="Завантажуємо…" disabled={!displayName.trim() || !sheetName.trim()} onClick={() => void save()} type="button">Завантажити товари</LoadingButton>}
       {current && <LoadingButton className="text-button" pending={pending} pendingLabel="Замінюємо…" onClick={() => void remove()} type="button">Замінити джерело</LoadingButton>}
@@ -195,3 +195,9 @@ function HealthList({ sources }: { sources: CatalogueSourceHealth[] }) {
 
 function formatDate(value: string) { return new Intl.DateTimeFormat('uk-UA', { year: 'numeric', month: '2-digit', day: '2-digit', timeZone: 'Europe/Kyiv' }).format(new Date(value)); }
 function statusLabel(status: string) { return ({ ACTIVE: 'Активне', PENDING: 'Очікує', PAUSED: 'Призупинено', ERROR: 'Помилка', DISCONNECTED: 'Немає доступу' } as Record<string, string>)[status] ?? status; }
+function sourceAnalysisStage(status?: string) {
+  if (status === 'MAPPING') return 'Розпізнаємо структуру таблиці';
+  if (status === 'PREVIEW_READY') return 'Перевіряємо товарні рядки';
+  if (status === 'PROCESSING') return 'Завантажуємо товари';
+  return 'Читаємо таблицю';
+}

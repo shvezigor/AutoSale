@@ -82,7 +82,7 @@ describe('CatalogueSourceSettings', () => {
     mutatingFetch.mockResolvedValueOnce({ ok: true, json: async () => configuration }).mockResolvedValueOnce({ ok: true, json: async () => ({ queued: true }) });
     render(<CatalogueSourceSettings role="OWNER" sources={[source]} configurations={[configuration]} />);
     fireEvent.click(screen.getByRole('button', { name: 'Завантажити товари' }));
-    await screen.findByText('Розпізнаємо й завантажуємо товари…');
+    await screen.findByText('Читаємо таблицю');
     await screen.findByText('Готово', {}, { timeout: 4000 });
     expect(screen.getByText('Додано: 234 · оновлено: 0 · пропущено: 0')).toBeInTheDocument();
   });
