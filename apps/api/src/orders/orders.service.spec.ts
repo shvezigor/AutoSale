@@ -4,6 +4,41 @@ import { describe, expect, it, vi } from 'vitest';
 import { OrdersService } from './orders.service.js';
 
 describe('OrdersService Google Sheets retry', () => {
+  it('returns the pending Sheets export immediately after approval', async () => {
+    const baseOrder = {
+      id: 'order-1', tenantId: 'tenant-1', status: 'NEEDS_REVIEW', extraction: {}, validationIssues: [],
+      overallConfidence: 1, createdAt: new Date('2026-09-07T10:00:00.000Z'),
+      conversation: { displayName: 'Олена', channel: 'INSTAGRAM' },
+      items: [{ id: 'item-1', catalogId: 'SKU-1', originalText: 'Товар', quantity: 1, color: null, size: null, confidence: 1 }],
+      exports: [],
+    };
+    const pendingExport = {
+      status: 'PENDING', attempts: 0, rowNumber: null, lastAttemptAt: null, lastSyncedAt: null,
+      errorSummary: null, destination: { status: 'ACTIVE' },
+    };
+    const approvedOrder = { ...baseOrder, status: 'APPROVED' };
+    const findFirst = vi.fn()
+      .mockResolvedValueOnce(baseOrder)
+      .mockResolvedValueOnce({ ...approvedOrder, exports: [pendingExport] });
+    const upsert = vi.fn().mockResolvedValue(pendingExport);
+    const prisma = {
+      order: { findFirst },
+      product: { findMany: vi.fn().mockResolvedValue([{ sku: 'SKU-1', name: 'Товар' }]) },
+      googleSheetsDestination: { findUnique: vi.fn().mockResolvedValue({ id: 'destination-1', status: 'ACTIVE' }) },
+      orderExport: { upsert },
+      $transaction: vi.fn(async (callback: (tx: unknown) => unknown) => callback({
+        order: { update: vi.fn().mockResolvedValue(approvedOrder) },
+        auditLog: { create: vi.fn().mockResolvedValue({}) },
+      })),
+    };
+
+    const result = await new OrdersService(prisma as never).approve('tenant-1', 'order-1', 'manager-1');
+
+    expect(upsert).toHaveBeenCalled();
+    expect(result.status).toBe('APPROVED');
+    expect(result.sheetsExport).toMatchObject({ status: 'PENDING', retryAllowed: false });
+  });
+
   it('moves one failed export back to pending when its destination is active', async () => {
     const update = vi.fn().mockResolvedValue({ status: 'PENDING', attempts: 2, rowNumber: null, lastAttemptAt: null, lastSyncedAt: null, errorSummary: null });
     const prisma = {

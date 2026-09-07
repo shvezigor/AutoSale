@@ -21,7 +21,7 @@ export function OrderReviewPanel({ initialOrder }: { initialOrder: ManagerOrder 
     try {
       const response = await mutatingFetch(`/api/orders/${order.id}/${action}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ actor: 'Андрій' }) });
       if (!response.ok) throw new Error('Не вдалося змінити статус замовлення');
-      const next = await response.json() as ManagerOrder; setOrder(next); setDraft(next);
+      const next = await response.json() as ManagerOrder; setOrder(next); setDraft(next); setSheetsExport(next.sheetsExport);
     } catch (reason) { setError(reason instanceof Error ? reason.message : 'Сталася помилка'); }
     finally { setPending(false); }
   }

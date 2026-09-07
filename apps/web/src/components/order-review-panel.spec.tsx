@@ -34,6 +34,21 @@ describe('OrderReviewPanel', () => {
     expect(fetch).toHaveBeenCalledWith(`/api/orders/${order.id}/approve`, expect.objectContaining({ method: 'POST' }));
   });
 
+  it('shows a pending Sheets export immediately after approval', async () => {
+    const sheetsExport: NonNullable<ManagerOrder['sheetsExport']> = {
+      status: 'PENDING', attempts: 0, rowNumber: null, lastAttemptAt: null,
+      lastSyncedAt: null, errorSummary: null, retryAllowed: false,
+    };
+    vi.stubGlobal('fetch', vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ token: 'csrf-token' }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ ...order, status: 'APPROVED', sheetsExport }) }));
+    render(<OrderReviewPanel initialOrder={order} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Підтвердити' }));
+
+    await waitFor(() => expect(screen.getByText('Очікує синхронізації')).toBeInTheDocument());
+  });
+
   it('does not allow approval when validation issues remain', () => {
     render(<OrderReviewPanel initialOrder={{ ...order, validationIssues: ['customer.phone'] }} />);
     expect(screen.getByRole('button', { name: 'Підтвердити' })).toBeDisabled();

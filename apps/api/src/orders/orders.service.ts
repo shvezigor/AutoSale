@@ -25,9 +25,9 @@ export class OrdersService {
   }
 
   async approve(tenantId: string, id: string, actor: string): Promise<ManagerOrder> {
-    const order = await this.transition(tenantId, id, actor, 'APPROVED', 'ORDER_APPROVED');
+    await this.transition(tenantId, id, actor, 'APPROVED', 'ORDER_APPROVED');
     await this.ensurePendingExport(tenantId, id);
-    return order;
+    return this.detail(tenantId, id);
   }
 
   private async ensurePendingExport(tenantId: string, orderId: string): Promise<void> {
