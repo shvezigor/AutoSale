@@ -458,6 +458,16 @@ export const MessageScalarFieldEnum = {
   senderId: 'senderId',
   text: 'text',
   sourceTimestamp: 'sourceTimestamp',
+  clientIdempotencyKey: 'clientIdempotencyKey',
+  sentByUserId: 'sentByUserId',
+  providerMessageId: 'providerMessageId',
+  deliveryStatus: 'deliveryStatus',
+  deliveryAttempts: 'deliveryAttempts',
+  deliveryLeaseId: 'deliveryLeaseId',
+  deliveryLeaseExpiresAt: 'deliveryLeaseExpiresAt',
+  nextDeliveryAttemptAt: 'nextDeliveryAttemptAt',
+  lastDeliveryAttemptAt: 'lastDeliveryAttemptAt',
+  deliveryErrorCode: 'deliveryErrorCode',
   createdAt: 'createdAt'
 } as const
 

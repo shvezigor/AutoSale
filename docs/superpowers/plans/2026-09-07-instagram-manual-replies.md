@@ -117,7 +117,7 @@ git commit -m "feat: define Instagram reply contracts"
 - Produces: Prisma `OutboundDeliveryStatus`; nullable outbound metadata on `Message`.
 - Produces database constraints: unique `(tenant_id, client_idempotency_key)` where key is non-null and unique `(tenant_id, provider_message_id)` where provider ID is non-null.
 
-- [ ] **Step 1: Write a failing PostgreSQL migration test**
+- [x] **Step 1: Write a failing PostgreSQL migration test**
 
 Use the existing Testcontainers migration runner pattern. Prove that a local outbound message can have no `rawEventId`, that duplicate client keys fail in one tenant, that the same key is allowed in another tenant, and that delivery metadata survives a read:
 
@@ -131,13 +131,13 @@ const created = await prisma.message.create({ data: {
 expect(created).toMatchObject({ rawEventId: null, deliveryStatus: 'PENDING', deliveryAttempts: 0 });
 ```
 
-- [ ] **Step 2: Run and verify red**
+- [x] **Step 2: Run and verify red**
 
 Run: `pnpm --filter @autosale/database exec vitest run src/instagram-outbound-messages.postgres.spec.ts`
 
 Expected: FAIL because the migration and Prisma fields are absent.
 
-- [ ] **Step 3: Add enum, nullable relation, fields, indexes, and SQL guards**
+- [x] **Step 3: Add enum, nullable relation, fields, indexes, and SQL guards**
 
 Add:
 
@@ -166,13 +166,13 @@ Add `instagramMessagesSent Message[] @relation("InstagramMessageSender")` to `Us
 
 Use partial unique indexes in SQL for non-null client/provider identifiers. Add a check constraint requiring local delivery fields only on `OUTBOUND` records and `raw_event_id IS NULL` only when `client_idempotency_key IS NOT NULL`.
 
-- [ ] **Step 4: Regenerate Prisma and run database verification**
+- [x] **Step 4: Regenerate Prisma and run database verification**
 
 Run: `pnpm --filter @autosale/database generate && pnpm --filter @autosale/database test && pnpm --filter @autosale/database typecheck`
 
 Expected: migration test and existing database tests pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add packages/database/prisma packages/database/src/generated packages/database/src/instagram-outbound-messages.postgres.spec.ts

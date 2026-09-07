@@ -34,6 +34,14 @@ enum InstagramConnectionStatus {
   DISCONNECTED
 }
 
+enum OutboundDeliveryStatus {
+  PENDING
+  SENDING
+  SENT
+  FAILED
+  UNKNOWN
+}
+
 enum GoogleConnectionStatus {
   ACTIVE
   REAUTHORIZATION_REQUIRED
@@ -280,6 +288,7 @@ model User {
   securityAuditLogs       SecurityAuditLog[]
   instagramOAuthStates    InstagramOAuthState[]
   instagramConnections    InstagramConnection[]    @relation("InstagramConnectionConnectedBy")
+  instagramMessagesSent   Message[]                 @relation("InstagramMessageSender")
   instagramCleanupsDeadLettered InstagramCredentialCleanup[] @relation("InstagramCleanupDeadLetteredBy")
   googleOAuthAttempts      GoogleOAuthAttempt[]
   googleConnections        GoogleConnection[] @relation("GoogleConnectionConnectedBy")
@@ -526,22 +535,34 @@ model Message {
   id                String       @id @default(uuid()) @db.Uuid
   tenantId          String       @map("tenant_id") @db.Uuid
   conversationId    String       @map("conversation_id") @db.Uuid
-  rawEventId        String       @map("raw_event_id") @db.Uuid
+  rawEventId        String?      @map("raw_event_id") @db.Uuid
   channel           String
   externalMessageId String       @map("external_message_id")
   direction         String
   senderId          String       @map("sender_id")
   text              String?
   sourceTimestamp   DateTime     @map("source_timestamp")
+  clientIdempotencyKey   String?                 @map("client_idempotency_key") @db.Uuid
+  sentByUserId           String?                 @map("sent_by_user_id") @db.Uuid
+  providerMessageId      String?                 @map("provider_message_id")
+  deliveryStatus         OutboundDeliveryStatus? @map("delivery_status")
+  deliveryAttempts       Int                     @default(0) @map("delivery_attempts")
+  deliveryLeaseId        String?                 @map("delivery_lease_id") @db.Uuid
+  deliveryLeaseExpiresAt DateTime?               @map("delivery_lease_expires_at")
+  nextDeliveryAttemptAt  DateTime?               @map("next_delivery_attempt_at")
+  lastDeliveryAttemptAt  DateTime?               @map("last_delivery_attempt_at")
+  deliveryErrorCode      String?                 @map("delivery_error_code")
   createdAt         DateTime     @default(now()) @map("created_at")
   tenant            Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   conversation      Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  rawEvent          WebhookEvent @relation(fields: [rawEventId], references: [id], onDelete: Restrict)
+  rawEvent          WebhookEvent? @relation(fields: [rawEventId], references: [id], onDelete: Restrict)
+  sentBy            User?         @relation("InstagramMessageSender", fields: [sentByUserId], references: [id], onDelete: SetNull)
   attachments       Attachment[]
   triggeredOrders   Order[]      @relation("OrderTriggerMessage")
 
   @@unique([tenantId, channel, externalMessageId])
   @@index([conversationId, sourceTimestamp])
+  @@index([deliveryStatus, nextDeliveryAttemptAt])
   @@map("messages")
 }
 

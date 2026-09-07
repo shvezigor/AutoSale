@@ -3286,6 +3286,16 @@ export const MessageScalarFieldEnum = {
   senderId: 'senderId',
   text: 'text',
   sourceTimestamp: 'sourceTimestamp',
+  clientIdempotencyKey: 'clientIdempotencyKey',
+  sentByUserId: 'sentByUserId',
+  providerMessageId: 'providerMessageId',
+  deliveryStatus: 'deliveryStatus',
+  deliveryAttempts: 'deliveryAttempts',
+  deliveryLeaseId: 'deliveryLeaseId',
+  deliveryLeaseExpiresAt: 'deliveryLeaseExpiresAt',
+  nextDeliveryAttemptAt: 'nextDeliveryAttemptAt',
+  lastDeliveryAttemptAt: 'lastDeliveryAttemptAt',
+  deliveryErrorCode: 'deliveryErrorCode',
   createdAt: 'createdAt'
 } as const
 
@@ -3748,6 +3758,20 @@ export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'J
  * Reference to a field of type 'QueryMode'
  */
 export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
+
+
+
+/**
+ * Reference to a field of type 'OutboundDeliveryStatus'
+ */
+export type EnumOutboundDeliveryStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'OutboundDeliveryStatus'>
+
+
+
+/**
+ * Reference to a field of type 'OutboundDeliveryStatus[]'
+ */
+export type ListEnumOutboundDeliveryStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'OutboundDeliveryStatus[]'>
 
 
 

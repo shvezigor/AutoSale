@@ -391,9 +391,9 @@ export type WebhookEventMinOrderByAggregateInput = {
   processedAt?: Prisma.SortOrder
 }
 
-export type WebhookEventScalarRelationFilter = {
-  is?: Prisma.WebhookEventWhereInput
-  isNot?: Prisma.WebhookEventWhereInput
+export type WebhookEventNullableScalarRelationFilter = {
+  is?: Prisma.WebhookEventWhereInput | null
+  isNot?: Prisma.WebhookEventWhereInput | null
 }
 
 export type WebhookEventCreateNestedManyWithoutTenantInput = {
@@ -444,10 +444,12 @@ export type WebhookEventCreateNestedOneWithoutMessagesInput = {
   connect?: Prisma.WebhookEventWhereUniqueInput
 }
 
-export type WebhookEventUpdateOneRequiredWithoutMessagesNestedInput = {
+export type WebhookEventUpdateOneWithoutMessagesNestedInput = {
   create?: Prisma.XOR<Prisma.WebhookEventCreateWithoutMessagesInput, Prisma.WebhookEventUncheckedCreateWithoutMessagesInput>
   connectOrCreate?: Prisma.WebhookEventCreateOrConnectWithoutMessagesInput
   upsert?: Prisma.WebhookEventUpsertWithoutMessagesInput
+  disconnect?: Prisma.WebhookEventWhereInput | boolean
+  delete?: Prisma.WebhookEventWhereInput | boolean
   connect?: Prisma.WebhookEventWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.WebhookEventUpdateToOneWithWhereWithoutMessagesInput, Prisma.WebhookEventUpdateWithoutMessagesInput>, Prisma.WebhookEventUncheckedUpdateWithoutMessagesInput>
 }

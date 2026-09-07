@@ -45,6 +45,17 @@ export const InstagramConnectionStatus = {
 export type InstagramConnectionStatus = (typeof InstagramConnectionStatus)[keyof typeof InstagramConnectionStatus]
 
 
+export const OutboundDeliveryStatus = {
+  PENDING: 'PENDING',
+  SENDING: 'SENDING',
+  SENT: 'SENT',
+  FAILED: 'FAILED',
+  UNKNOWN: 'UNKNOWN'
+} as const
+
+export type OutboundDeliveryStatus = (typeof OutboundDeliveryStatus)[keyof typeof OutboundDeliveryStatus]
+
+
 export const GoogleConnectionStatus = {
   ACTIVE: 'ACTIVE',
   REAUTHORIZATION_REQUIRED: 'REAUTHORIZATION_REQUIRED',

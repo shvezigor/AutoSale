@@ -20,8 +20,18 @@ export type MessageModel = runtime.Types.Result.DefaultSelection<Prisma.$Message
 
 export type AggregateMessage = {
   _count: MessageCountAggregateOutputType | null
+  _avg: MessageAvgAggregateOutputType | null
+  _sum: MessageSumAggregateOutputType | null
   _min: MessageMinAggregateOutputType | null
   _max: MessageMaxAggregateOutputType | null
+}
+
+export type MessageAvgAggregateOutputType = {
+  deliveryAttempts: number | null
+}
+
+export type MessageSumAggregateOutputType = {
+  deliveryAttempts: number | null
 }
 
 export type MessageMinAggregateOutputType = {
@@ -35,6 +45,16 @@ export type MessageMinAggregateOutputType = {
   senderId: string | null
   text: string | null
   sourceTimestamp: Date | null
+  clientIdempotencyKey: string | null
+  sentByUserId: string | null
+  providerMessageId: string | null
+  deliveryStatus: $Enums.OutboundDeliveryStatus | null
+  deliveryAttempts: number | null
+  deliveryLeaseId: string | null
+  deliveryLeaseExpiresAt: Date | null
+  nextDeliveryAttemptAt: Date | null
+  lastDeliveryAttemptAt: Date | null
+  deliveryErrorCode: string | null
   createdAt: Date | null
 }
 
@@ -49,6 +69,16 @@ export type MessageMaxAggregateOutputType = {
   senderId: string | null
   text: string | null
   sourceTimestamp: Date | null
+  clientIdempotencyKey: string | null
+  sentByUserId: string | null
+  providerMessageId: string | null
+  deliveryStatus: $Enums.OutboundDeliveryStatus | null
+  deliveryAttempts: number | null
+  deliveryLeaseId: string | null
+  deliveryLeaseExpiresAt: Date | null
+  nextDeliveryAttemptAt: Date | null
+  lastDeliveryAttemptAt: Date | null
+  deliveryErrorCode: string | null
   createdAt: Date | null
 }
 
@@ -63,10 +93,28 @@ export type MessageCountAggregateOutputType = {
   senderId: number
   text: number
   sourceTimestamp: number
+  clientIdempotencyKey: number
+  sentByUserId: number
+  providerMessageId: number
+  deliveryStatus: number
+  deliveryAttempts: number
+  deliveryLeaseId: number
+  deliveryLeaseExpiresAt: number
+  nextDeliveryAttemptAt: number
+  lastDeliveryAttemptAt: number
+  deliveryErrorCode: number
   createdAt: number
   _all: number
 }
 
+
+export type MessageAvgAggregateInputType = {
+  deliveryAttempts?: true
+}
+
+export type MessageSumAggregateInputType = {
+  deliveryAttempts?: true
+}
 
 export type MessageMinAggregateInputType = {
   id?: true
@@ -79,6 +127,16 @@ export type MessageMinAggregateInputType = {
   senderId?: true
   text?: true
   sourceTimestamp?: true
+  clientIdempotencyKey?: true
+  sentByUserId?: true
+  providerMessageId?: true
+  deliveryStatus?: true
+  deliveryAttempts?: true
+  deliveryLeaseId?: true
+  deliveryLeaseExpiresAt?: true
+  nextDeliveryAttemptAt?: true
+  lastDeliveryAttemptAt?: true
+  deliveryErrorCode?: true
   createdAt?: true
 }
 
@@ -93,6 +151,16 @@ export type MessageMaxAggregateInputType = {
   senderId?: true
   text?: true
   sourceTimestamp?: true
+  clientIdempotencyKey?: true
+  sentByUserId?: true
+  providerMessageId?: true
+  deliveryStatus?: true
+  deliveryAttempts?: true
+  deliveryLeaseId?: true
+  deliveryLeaseExpiresAt?: true
+  nextDeliveryAttemptAt?: true
+  lastDeliveryAttemptAt?: true
+  deliveryErrorCode?: true
   createdAt?: true
 }
 
@@ -107,6 +175,16 @@ export type MessageCountAggregateInputType = {
   senderId?: true
   text?: true
   sourceTimestamp?: true
+  clientIdempotencyKey?: true
+  sentByUserId?: true
+  providerMessageId?: true
+  deliveryStatus?: true
+  deliveryAttempts?: true
+  deliveryLeaseId?: true
+  deliveryLeaseExpiresAt?: true
+  nextDeliveryAttemptAt?: true
+  lastDeliveryAttemptAt?: true
+  deliveryErrorCode?: true
   createdAt?: true
   _all?: true
 }
@@ -149,6 +227,18 @@ export type MessageAggregateArgs<ExtArgs extends runtime.Types.Extensions.Intern
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    *
+   * Select which fields to average
+  **/
+  _avg?: MessageAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   *
+   * Select which fields to sum
+  **/
+  _sum?: MessageSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   *
    * Select which fields to find the minimum value
   **/
   _min?: MessageMinAggregateInputType
@@ -179,6 +269,8 @@ export type MessageGroupByArgs<ExtArgs extends runtime.Types.Extensions.Internal
   take?: number
   skip?: number
   _count?: MessageCountAggregateInputType | true
+  _avg?: MessageAvgAggregateInputType
+  _sum?: MessageSumAggregateInputType
   _min?: MessageMinAggregateInputType
   _max?: MessageMaxAggregateInputType
 }
@@ -187,15 +279,27 @@ export type MessageGroupByOutputType = {
   id: string
   tenantId: string
   conversationId: string
-  rawEventId: string
+  rawEventId: string | null
   channel: string
   externalMessageId: string
   direction: string
   senderId: string
   text: string | null
   sourceTimestamp: Date
+  clientIdempotencyKey: string | null
+  sentByUserId: string | null
+  providerMessageId: string | null
+  deliveryStatus: $Enums.OutboundDeliveryStatus | null
+  deliveryAttempts: number
+  deliveryLeaseId: string | null
+  deliveryLeaseExpiresAt: Date | null
+  nextDeliveryAttemptAt: Date | null
+  lastDeliveryAttemptAt: Date | null
+  deliveryErrorCode: string | null
   createdAt: Date
   _count: MessageCountAggregateOutputType | null
+  _avg: MessageAvgAggregateOutputType | null
+  _sum: MessageSumAggregateOutputType | null
   _min: MessageMinAggregateOutputType | null
   _max: MessageMaxAggregateOutputType | null
 }
@@ -222,17 +326,28 @@ export type MessageWhereInput = {
   id?: Prisma.UuidFilter<"Message"> | string
   tenantId?: Prisma.UuidFilter<"Message"> | string
   conversationId?: Prisma.UuidFilter<"Message"> | string
-  rawEventId?: Prisma.UuidFilter<"Message"> | string
+  rawEventId?: Prisma.UuidNullableFilter<"Message"> | string | null
   channel?: Prisma.StringFilter<"Message"> | string
   externalMessageId?: Prisma.StringFilter<"Message"> | string
   direction?: Prisma.StringFilter<"Message"> | string
   senderId?: Prisma.StringFilter<"Message"> | string
   text?: Prisma.StringNullableFilter<"Message"> | string | null
   sourceTimestamp?: Prisma.DateTimeFilter<"Message"> | Date | string
+  clientIdempotencyKey?: Prisma.UuidNullableFilter<"Message"> | string | null
+  sentByUserId?: Prisma.UuidNullableFilter<"Message"> | string | null
+  providerMessageId?: Prisma.StringNullableFilter<"Message"> | string | null
+  deliveryStatus?: Prisma.EnumOutboundDeliveryStatusNullableFilter<"Message"> | $Enums.OutboundDeliveryStatus | null
+  deliveryAttempts?: Prisma.IntFilter<"Message"> | number
+  deliveryLeaseId?: Prisma.UuidNullableFilter<"Message"> | string | null
+  deliveryLeaseExpiresAt?: Prisma.DateTimeNullableFilter<"Message"> | Date | string | null
+  nextDeliveryAttemptAt?: Prisma.DateTimeNullableFilter<"Message"> | Date | string | null
+  lastDeliveryAttemptAt?: Prisma.DateTimeNullableFilter<"Message"> | Date | string | null
+  deliveryErrorCode?: Prisma.StringNullableFilter<"Message"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Message"> | Date | string
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
   conversation?: Prisma.XOR<Prisma.ConversationScalarRelationFilter, Prisma.ConversationWhereInput>
-  rawEvent?: Prisma.XOR<Prisma.WebhookEventScalarRelationFilter, Prisma.WebhookEventWhereInput>
+  rawEvent?: Prisma.XOR<Prisma.WebhookEventNullableScalarRelationFilter, Prisma.WebhookEventWhereInput> | null
+  sentBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   attachments?: Prisma.AttachmentListRelationFilter
   triggeredOrders?: Prisma.OrderListRelationFilter
 }
@@ -241,17 +356,28 @@ export type MessageOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   tenantId?: Prisma.SortOrder
   conversationId?: Prisma.SortOrder
-  rawEventId?: Prisma.SortOrder
+  rawEventId?: Prisma.SortOrderInput | Prisma.SortOrder
   channel?: Prisma.SortOrder
   externalMessageId?: Prisma.SortOrder
   direction?: Prisma.SortOrder
   senderId?: Prisma.SortOrder
   text?: Prisma.SortOrderInput | Prisma.SortOrder
   sourceTimestamp?: Prisma.SortOrder
+  clientIdempotencyKey?: Prisma.SortOrderInput | Prisma.SortOrder
+  sentByUserId?: Prisma.SortOrderInput | Prisma.SortOrder
+  providerMessageId?: Prisma.SortOrderInput | Prisma.SortOrder
+  deliveryStatus?: Prisma.SortOrderInput | Prisma.SortOrder
+  deliveryAttempts?: Prisma.SortOrder
+  deliveryLeaseId?: Prisma.SortOrderInput | Prisma.SortOrder
+  deliveryLeaseExpiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  nextDeliveryAttemptAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastDeliveryAttemptAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  deliveryErrorCode?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   tenant?: Prisma.TenantOrderByWithRelationInput
   conversation?: Prisma.ConversationOrderByWithRelationInput
   rawEvent?: Prisma.WebhookEventOrderByWithRelationInput
+  sentBy?: Prisma.UserOrderByWithRelationInput
   attachments?: Prisma.AttachmentOrderByRelationAggregateInput
   triggeredOrders?: Prisma.OrderOrderByRelationAggregateInput
 }
@@ -264,17 +390,28 @@ export type MessageWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.MessageWhereInput | Prisma.MessageWhereInput[]
   tenantId?: Prisma.UuidFilter<"Message"> | string
   conversationId?: Prisma.UuidFilter<"Message"> | string
-  rawEventId?: Prisma.UuidFilter<"Message"> | string
+  rawEventId?: Prisma.UuidNullableFilter<"Message"> | string | null
   channel?: Prisma.StringFilter<"Message"> | string
   externalMessageId?: Prisma.StringFilter<"Message"> | string
   direction?: Prisma.StringFilter<"Message"> | string
   senderId?: Prisma.StringFilter<"Message"> | string
   text?: Prisma.StringNullableFilter<"Message"> | string | null
   sourceTimestamp?: Prisma.DateTimeFilter<"Message"> | Date | string
+  clientIdempotencyKey?: Prisma.UuidNullableFilter<"Message"> | string | null
+  sentByUserId?: Prisma.UuidNullableFilter<"Message"> | string | null
+  providerMessageId?: Prisma.StringNullableFilter<"Message"> | string | null
+  deliveryStatus?: Prisma.EnumOutboundDeliveryStatusNullableFilter<"Message"> | $Enums.OutboundDeliveryStatus | null
+  deliveryAttempts?: Prisma.IntFilter<"Message"> | number
+  deliveryLeaseId?: Prisma.UuidNullableFilter<"Message"> | string | null
+  deliveryLeaseExpiresAt?: Prisma.DateTimeNullableFilter<"Message"> | Date | string | null
+  nextDeliveryAttemptAt?: Prisma.DateTimeNullableFilter<"Message"> | Date | string | null
+  lastDeliveryAttemptAt?: Prisma.DateTimeNullableFilter<"Message"> | Date | string | null
+  deliveryErrorCode?: Prisma.StringNullableFilter<"Message"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Message"> | Date | string
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
   conversation?: Prisma.XOR<Prisma.ConversationScalarRelationFilter, Prisma.ConversationWhereInput>
-  rawEvent?: Prisma.XOR<Prisma.WebhookEventScalarRelationFilter, Prisma.WebhookEventWhereInput>
+  rawEvent?: Prisma.XOR<Prisma.WebhookEventNullableScalarRelationFilter, Prisma.WebhookEventWhereInput> | null
+  sentBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   attachments?: Prisma.AttachmentListRelationFilter
   triggeredOrders?: Prisma.OrderListRelationFilter
 }, "id" | "tenantId_channel_externalMessageId">
@@ -283,17 +420,29 @@ export type MessageOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   tenantId?: Prisma.SortOrder
   conversationId?: Prisma.SortOrder
-  rawEventId?: Prisma.SortOrder
+  rawEventId?: Prisma.SortOrderInput | Prisma.SortOrder
   channel?: Prisma.SortOrder
   externalMessageId?: Prisma.SortOrder
   direction?: Prisma.SortOrder
   senderId?: Prisma.SortOrder
   text?: Prisma.SortOrderInput | Prisma.SortOrder
   sourceTimestamp?: Prisma.SortOrder
+  clientIdempotencyKey?: Prisma.SortOrderInput | Prisma.SortOrder
+  sentByUserId?: Prisma.SortOrderInput | Prisma.SortOrder
+  providerMessageId?: Prisma.SortOrderInput | Prisma.SortOrder
+  deliveryStatus?: Prisma.SortOrderInput | Prisma.SortOrder
+  deliveryAttempts?: Prisma.SortOrder
+  deliveryLeaseId?: Prisma.SortOrderInput | Prisma.SortOrder
+  deliveryLeaseExpiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  nextDeliveryAttemptAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastDeliveryAttemptAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  deliveryErrorCode?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.MessageCountOrderByAggregateInput
+  _avg?: Prisma.MessageAvgOrderByAggregateInput
   _max?: Prisma.MessageMaxOrderByAggregateInput
   _min?: Prisma.MessageMinOrderByAggregateInput
+  _sum?: Prisma.MessageSumOrderByAggregateInput
 }
 
 export type MessageScalarWhereWithAggregatesInput = {
@@ -303,13 +452,23 @@ export type MessageScalarWhereWithAggregatesInput = {
   id?: Prisma.UuidWithAggregatesFilter<"Message"> | string
   tenantId?: Prisma.UuidWithAggregatesFilter<"Message"> | string
   conversationId?: Prisma.UuidWithAggregatesFilter<"Message"> | string
-  rawEventId?: Prisma.UuidWithAggregatesFilter<"Message"> | string
+  rawEventId?: Prisma.UuidNullableWithAggregatesFilter<"Message"> | string | null
   channel?: Prisma.StringWithAggregatesFilter<"Message"> | string
   externalMessageId?: Prisma.StringWithAggregatesFilter<"Message"> | string
   direction?: Prisma.StringWithAggregatesFilter<"Message"> | string
   senderId?: Prisma.StringWithAggregatesFilter<"Message"> | string
   text?: Prisma.StringNullableWithAggregatesFilter<"Message"> | string | null
   sourceTimestamp?: Prisma.DateTimeWithAggregatesFilter<"Message"> | Date | string
+  clientIdempotencyKey?: Prisma.UuidNullableWithAggregatesFilter<"Message"> | string | null
+  sentByUserId?: Prisma.UuidNullableWithAggregatesFilter<"Message"> | string | null
+  providerMessageId?: Prisma.StringNullableWithAggregatesFilter<"Message"> | string | null
+  deliveryStatus?: Prisma.EnumOutboundDeliveryStatusNullableWithAggregatesFilter<"Message"> | $Enums.OutboundDeliveryStatus | null
+  deliveryAttempts?: Prisma.IntWithAggregatesFilter<"Message"> | number
+  deliveryLeaseId?: Prisma.UuidNullableWithAggregatesFilter<"Message"> | string | null
+  deliveryLeaseExpiresAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Message"> | Date | string | null
+  nextDeliveryAttemptAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Message"> | Date | string | null
+  lastDeliveryAttemptAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Message"> | Date | string | null
+  deliveryErrorCode?: Prisma.StringNullableWithAggregatesFilter<"Message"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Message"> | Date | string
 }
 
@@ -321,10 +480,20 @@ export type MessageCreateInput = {
   senderId: string
   text?: string | null
   sourceTimestamp: Date | string
+  clientIdempotencyKey?: string | null
+  providerMessageId?: string | null
+  deliveryStatus?: $Enums.OutboundDeliveryStatus | null
+  deliveryAttempts?: number
+  deliveryLeaseId?: string | null
+  deliveryLeaseExpiresAt?: Date | string | null
+  nextDeliveryAttemptAt?: Date | string | null
+  lastDeliveryAttemptAt?: Date | string | null
+  deliveryErrorCode?: string | null
   createdAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMessagesInput
   conversation: Prisma.ConversationCreateNestedOneWithoutMessagesInput
-  rawEvent: Prisma.WebhookEventCreateNestedOneWithoutMessagesInput
+  rawEvent?: Prisma.WebhookEventCreateNestedOneWithoutMessagesInput
+  sentBy?: Prisma.UserCreateNestedOneWithoutInstagramMessagesSentInput
   attachments?: Prisma.AttachmentCreateNestedManyWithoutMessageInput
   triggeredOrders?: Prisma.OrderCreateNestedManyWithoutTriggerMessageInput
 }
@@ -333,13 +502,23 @@ export type MessageUncheckedCreateInput = {
   id?: string
   tenantId: string
   conversationId: string
-  rawEventId: string
+  rawEventId?: string | null
   channel: string
   externalMessageId: string
   direction: string
   senderId: string
   text?: string | null
   sourceTimestamp: Date | string
+  clientIdempotencyKey?: string | null
+  sentByUserId?: string | null
+  providerMessageId?: string | null
+  deliveryStatus?: $Enums.OutboundDeliveryStatus | null
+  deliveryAttempts?: number
+  deliveryLeaseId?: string | null
+  deliveryLeaseExpiresAt?: Date | string | null
+  nextDeliveryAttemptAt?: Date | string | null
+  lastDeliveryAttemptAt?: Date | string | null
+  deliveryErrorCode?: string | null
   createdAt?: Date | string
   attachments?: Prisma.AttachmentUncheckedCreateNestedManyWithoutMessageInput
   triggeredOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutTriggerMessageInput
@@ -353,10 +532,20 @@ export type MessageUpdateInput = {
   senderId?: Prisma.StringFieldUpdateOperationsInput | string
   text?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceTimestamp?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  clientIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryStatus?: Prisma.NullableEnumOutboundDeliveryStatusFieldUpdateOperationsInput | $Enums.OutboundDeliveryStatus | null
+  deliveryAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  deliveryLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  nextDeliveryAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastDeliveryAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deliveryErrorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMessagesNestedInput
   conversation?: Prisma.ConversationUpdateOneRequiredWithoutMessagesNestedInput
-  rawEvent?: Prisma.WebhookEventUpdateOneRequiredWithoutMessagesNestedInput
+  rawEvent?: Prisma.WebhookEventUpdateOneWithoutMessagesNestedInput
+  sentBy?: Prisma.UserUpdateOneWithoutInstagramMessagesSentNestedInput
   attachments?: Prisma.AttachmentUpdateManyWithoutMessageNestedInput
   triggeredOrders?: Prisma.OrderUpdateManyWithoutTriggerMessageNestedInput
 }
@@ -365,13 +554,23 @@ export type MessageUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   conversationId?: Prisma.StringFieldUpdateOperationsInput | string
-  rawEventId?: Prisma.StringFieldUpdateOperationsInput | string
+  rawEventId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   channel?: Prisma.StringFieldUpdateOperationsInput | string
   externalMessageId?: Prisma.StringFieldUpdateOperationsInput | string
   direction?: Prisma.StringFieldUpdateOperationsInput | string
   senderId?: Prisma.StringFieldUpdateOperationsInput | string
   text?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceTimestamp?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  clientIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sentByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryStatus?: Prisma.NullableEnumOutboundDeliveryStatusFieldUpdateOperationsInput | $Enums.OutboundDeliveryStatus | null
+  deliveryAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  deliveryLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  nextDeliveryAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastDeliveryAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deliveryErrorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   attachments?: Prisma.AttachmentUncheckedUpdateManyWithoutMessageNestedInput
   triggeredOrders?: Prisma.OrderUncheckedUpdateManyWithoutTriggerMessageNestedInput
@@ -381,13 +580,23 @@ export type MessageCreateManyInput = {
   id?: string
   tenantId: string
   conversationId: string
-  rawEventId: string
+  rawEventId?: string | null
   channel: string
   externalMessageId: string
   direction: string
   senderId: string
   text?: string | null
   sourceTimestamp: Date | string
+  clientIdempotencyKey?: string | null
+  sentByUserId?: string | null
+  providerMessageId?: string | null
+  deliveryStatus?: $Enums.OutboundDeliveryStatus | null
+  deliveryAttempts?: number
+  deliveryLeaseId?: string | null
+  deliveryLeaseExpiresAt?: Date | string | null
+  nextDeliveryAttemptAt?: Date | string | null
+  lastDeliveryAttemptAt?: Date | string | null
+  deliveryErrorCode?: string | null
   createdAt?: Date | string
 }
 
@@ -399,6 +608,15 @@ export type MessageUpdateManyMutationInput = {
   senderId?: Prisma.StringFieldUpdateOperationsInput | string
   text?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceTimestamp?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  clientIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryStatus?: Prisma.NullableEnumOutboundDeliveryStatusFieldUpdateOperationsInput | $Enums.OutboundDeliveryStatus | null
+  deliveryAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  deliveryLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  nextDeliveryAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastDeliveryAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deliveryErrorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -406,13 +624,23 @@ export type MessageUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   conversationId?: Prisma.StringFieldUpdateOperationsInput | string
-  rawEventId?: Prisma.StringFieldUpdateOperationsInput | string
+  rawEventId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   channel?: Prisma.StringFieldUpdateOperationsInput | string
   externalMessageId?: Prisma.StringFieldUpdateOperationsInput | string
   direction?: Prisma.StringFieldUpdateOperationsInput | string
   senderId?: Prisma.StringFieldUpdateOperationsInput | string
   text?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceTimestamp?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  clientIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sentByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryStatus?: Prisma.NullableEnumOutboundDeliveryStatusFieldUpdateOperationsInput | $Enums.OutboundDeliveryStatus | null
+  deliveryAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  deliveryLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  nextDeliveryAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastDeliveryAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deliveryErrorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -443,7 +671,21 @@ export type MessageCountOrderByAggregateInput = {
   senderId?: Prisma.SortOrder
   text?: Prisma.SortOrder
   sourceTimestamp?: Prisma.SortOrder
+  clientIdempotencyKey?: Prisma.SortOrder
+  sentByUserId?: Prisma.SortOrder
+  providerMessageId?: Prisma.SortOrder
+  deliveryStatus?: Prisma.SortOrder
+  deliveryAttempts?: Prisma.SortOrder
+  deliveryLeaseId?: Prisma.SortOrder
+  deliveryLeaseExpiresAt?: Prisma.SortOrder
+  nextDeliveryAttemptAt?: Prisma.SortOrder
+  lastDeliveryAttemptAt?: Prisma.SortOrder
+  deliveryErrorCode?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+}
+
+export type MessageAvgOrderByAggregateInput = {
+  deliveryAttempts?: Prisma.SortOrder
 }
 
 export type MessageMaxOrderByAggregateInput = {
@@ -457,6 +699,16 @@ export type MessageMaxOrderByAggregateInput = {
   senderId?: Prisma.SortOrder
   text?: Prisma.SortOrder
   sourceTimestamp?: Prisma.SortOrder
+  clientIdempotencyKey?: Prisma.SortOrder
+  sentByUserId?: Prisma.SortOrder
+  providerMessageId?: Prisma.SortOrder
+  deliveryStatus?: Prisma.SortOrder
+  deliveryAttempts?: Prisma.SortOrder
+  deliveryLeaseId?: Prisma.SortOrder
+  deliveryLeaseExpiresAt?: Prisma.SortOrder
+  nextDeliveryAttemptAt?: Prisma.SortOrder
+  lastDeliveryAttemptAt?: Prisma.SortOrder
+  deliveryErrorCode?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -471,7 +723,21 @@ export type MessageMinOrderByAggregateInput = {
   senderId?: Prisma.SortOrder
   text?: Prisma.SortOrder
   sourceTimestamp?: Prisma.SortOrder
+  clientIdempotencyKey?: Prisma.SortOrder
+  sentByUserId?: Prisma.SortOrder
+  providerMessageId?: Prisma.SortOrder
+  deliveryStatus?: Prisma.SortOrder
+  deliveryAttempts?: Prisma.SortOrder
+  deliveryLeaseId?: Prisma.SortOrder
+  deliveryLeaseExpiresAt?: Prisma.SortOrder
+  nextDeliveryAttemptAt?: Prisma.SortOrder
+  lastDeliveryAttemptAt?: Prisma.SortOrder
+  deliveryErrorCode?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+}
+
+export type MessageSumOrderByAggregateInput = {
+  deliveryAttempts?: Prisma.SortOrder
 }
 
 export type MessageScalarRelationFilter = {
@@ -518,6 +784,48 @@ export type MessageUncheckedUpdateManyWithoutTenantNestedInput = {
   connect?: Prisma.MessageWhereUniqueInput | Prisma.MessageWhereUniqueInput[]
   update?: Prisma.MessageUpdateWithWhereUniqueWithoutTenantInput | Prisma.MessageUpdateWithWhereUniqueWithoutTenantInput[]
   updateMany?: Prisma.MessageUpdateManyWithWhereWithoutTenantInput | Prisma.MessageUpdateManyWithWhereWithoutTenantInput[]
+  deleteMany?: Prisma.MessageScalarWhereInput | Prisma.MessageScalarWhereInput[]
+}
+
+export type MessageCreateNestedManyWithoutSentByInput = {
+  create?: Prisma.XOR<Prisma.MessageCreateWithoutSentByInput, Prisma.MessageUncheckedCreateWithoutSentByInput> | Prisma.MessageCreateWithoutSentByInput[] | Prisma.MessageUncheckedCreateWithoutSentByInput[]
+  connectOrCreate?: Prisma.MessageCreateOrConnectWithoutSentByInput | Prisma.MessageCreateOrConnectWithoutSentByInput[]
+  createMany?: Prisma.MessageCreateManySentByInputEnvelope
+  connect?: Prisma.MessageWhereUniqueInput | Prisma.MessageWhereUniqueInput[]
+}
+
+export type MessageUncheckedCreateNestedManyWithoutSentByInput = {
+  create?: Prisma.XOR<Prisma.MessageCreateWithoutSentByInput, Prisma.MessageUncheckedCreateWithoutSentByInput> | Prisma.MessageCreateWithoutSentByInput[] | Prisma.MessageUncheckedCreateWithoutSentByInput[]
+  connectOrCreate?: Prisma.MessageCreateOrConnectWithoutSentByInput | Prisma.MessageCreateOrConnectWithoutSentByInput[]
+  createMany?: Prisma.MessageCreateManySentByInputEnvelope
+  connect?: Prisma.MessageWhereUniqueInput | Prisma.MessageWhereUniqueInput[]
+}
+
+export type MessageUpdateManyWithoutSentByNestedInput = {
+  create?: Prisma.XOR<Prisma.MessageCreateWithoutSentByInput, Prisma.MessageUncheckedCreateWithoutSentByInput> | Prisma.MessageCreateWithoutSentByInput[] | Prisma.MessageUncheckedCreateWithoutSentByInput[]
+  connectOrCreate?: Prisma.MessageCreateOrConnectWithoutSentByInput | Prisma.MessageCreateOrConnectWithoutSentByInput[]
+  upsert?: Prisma.MessageUpsertWithWhereUniqueWithoutSentByInput | Prisma.MessageUpsertWithWhereUniqueWithoutSentByInput[]
+  createMany?: Prisma.MessageCreateManySentByInputEnvelope
+  set?: Prisma.MessageWhereUniqueInput | Prisma.MessageWhereUniqueInput[]
+  disconnect?: Prisma.MessageWhereUniqueInput | Prisma.MessageWhereUniqueInput[]
+  delete?: Prisma.MessageWhereUniqueInput | Prisma.MessageWhereUniqueInput[]
+  connect?: Prisma.MessageWhereUniqueInput | Prisma.MessageWhereUniqueInput[]
+  update?: Prisma.MessageUpdateWithWhereUniqueWithoutSentByInput | Prisma.MessageUpdateWithWhereUniqueWithoutSentByInput[]
+  updateMany?: Prisma.MessageUpdateManyWithWhereWithoutSentByInput | Prisma.MessageUpdateManyWithWhereWithoutSentByInput[]
+  deleteMany?: Prisma.MessageScalarWhereInput | Prisma.MessageScalarWhereInput[]
+}
+
+export type MessageUncheckedUpdateManyWithoutSentByNestedInput = {
+  create?: Prisma.XOR<Prisma.MessageCreateWithoutSentByInput, Prisma.MessageUncheckedCreateWithoutSentByInput> | Prisma.MessageCreateWithoutSentByInput[] | Prisma.MessageUncheckedCreateWithoutSentByInput[]
+  connectOrCreate?: Prisma.MessageCreateOrConnectWithoutSentByInput | Prisma.MessageCreateOrConnectWithoutSentByInput[]
+  upsert?: Prisma.MessageUpsertWithWhereUniqueWithoutSentByInput | Prisma.MessageUpsertWithWhereUniqueWithoutSentByInput[]
+  createMany?: Prisma.MessageCreateManySentByInputEnvelope
+  set?: Prisma.MessageWhereUniqueInput | Prisma.MessageWhereUniqueInput[]
+  disconnect?: Prisma.MessageWhereUniqueInput | Prisma.MessageWhereUniqueInput[]
+  delete?: Prisma.MessageWhereUniqueInput | Prisma.MessageWhereUniqueInput[]
+  connect?: Prisma.MessageWhereUniqueInput | Prisma.MessageWhereUniqueInput[]
+  update?: Prisma.MessageUpdateWithWhereUniqueWithoutSentByInput | Prisma.MessageUpdateWithWhereUniqueWithoutSentByInput[]
+  updateMany?: Prisma.MessageUpdateManyWithWhereWithoutSentByInput | Prisma.MessageUpdateManyWithWhereWithoutSentByInput[]
   deleteMany?: Prisma.MessageScalarWhereInput | Prisma.MessageScalarWhereInput[]
 }
 
@@ -605,6 +913,10 @@ export type MessageUncheckedUpdateManyWithoutConversationNestedInput = {
   deleteMany?: Prisma.MessageScalarWhereInput | Prisma.MessageScalarWhereInput[]
 }
 
+export type NullableEnumOutboundDeliveryStatusFieldUpdateOperationsInput = {
+  set?: $Enums.OutboundDeliveryStatus | null
+}
+
 export type MessageCreateNestedOneWithoutTriggeredOrdersInput = {
   create?: Prisma.XOR<Prisma.MessageCreateWithoutTriggeredOrdersInput, Prisma.MessageUncheckedCreateWithoutTriggeredOrdersInput>
   connectOrCreate?: Prisma.MessageCreateOrConnectWithoutTriggeredOrdersInput
@@ -641,9 +953,19 @@ export type MessageCreateWithoutTenantInput = {
   senderId: string
   text?: string | null
   sourceTimestamp: Date | string
+  clientIdempotencyKey?: string | null
+  providerMessageId?: string | null
+  deliveryStatus?: $Enums.OutboundDeliveryStatus | null
+  deliveryAttempts?: number
+  deliveryLeaseId?: string | null
+  deliveryLeaseExpiresAt?: Date | string | null
+  nextDeliveryAttemptAt?: Date | string | null
+  lastDeliveryAttemptAt?: Date | string | null
+  deliveryErrorCode?: string | null
   createdAt?: Date | string
   conversation: Prisma.ConversationCreateNestedOneWithoutMessagesInput
-  rawEvent: Prisma.WebhookEventCreateNestedOneWithoutMessagesInput
+  rawEvent?: Prisma.WebhookEventCreateNestedOneWithoutMessagesInput
+  sentBy?: Prisma.UserCreateNestedOneWithoutInstagramMessagesSentInput
   attachments?: Prisma.AttachmentCreateNestedManyWithoutMessageInput
   triggeredOrders?: Prisma.OrderCreateNestedManyWithoutTriggerMessageInput
 }
@@ -651,13 +973,23 @@ export type MessageCreateWithoutTenantInput = {
 export type MessageUncheckedCreateWithoutTenantInput = {
   id?: string
   conversationId: string
-  rawEventId: string
+  rawEventId?: string | null
   channel: string
   externalMessageId: string
   direction: string
   senderId: string
   text?: string | null
   sourceTimestamp: Date | string
+  clientIdempotencyKey?: string | null
+  sentByUserId?: string | null
+  providerMessageId?: string | null
+  deliveryStatus?: $Enums.OutboundDeliveryStatus | null
+  deliveryAttempts?: number
+  deliveryLeaseId?: string | null
+  deliveryLeaseExpiresAt?: Date | string | null
+  nextDeliveryAttemptAt?: Date | string | null
+  lastDeliveryAttemptAt?: Date | string | null
+  deliveryErrorCode?: string | null
   createdAt?: Date | string
   attachments?: Prisma.AttachmentUncheckedCreateNestedManyWithoutMessageInput
   triggeredOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutTriggerMessageInput
@@ -696,14 +1028,100 @@ export type MessageScalarWhereInput = {
   id?: Prisma.UuidFilter<"Message"> | string
   tenantId?: Prisma.UuidFilter<"Message"> | string
   conversationId?: Prisma.UuidFilter<"Message"> | string
-  rawEventId?: Prisma.UuidFilter<"Message"> | string
+  rawEventId?: Prisma.UuidNullableFilter<"Message"> | string | null
   channel?: Prisma.StringFilter<"Message"> | string
   externalMessageId?: Prisma.StringFilter<"Message"> | string
   direction?: Prisma.StringFilter<"Message"> | string
   senderId?: Prisma.StringFilter<"Message"> | string
   text?: Prisma.StringNullableFilter<"Message"> | string | null
   sourceTimestamp?: Prisma.DateTimeFilter<"Message"> | Date | string
+  clientIdempotencyKey?: Prisma.UuidNullableFilter<"Message"> | string | null
+  sentByUserId?: Prisma.UuidNullableFilter<"Message"> | string | null
+  providerMessageId?: Prisma.StringNullableFilter<"Message"> | string | null
+  deliveryStatus?: Prisma.EnumOutboundDeliveryStatusNullableFilter<"Message"> | $Enums.OutboundDeliveryStatus | null
+  deliveryAttempts?: Prisma.IntFilter<"Message"> | number
+  deliveryLeaseId?: Prisma.UuidNullableFilter<"Message"> | string | null
+  deliveryLeaseExpiresAt?: Prisma.DateTimeNullableFilter<"Message"> | Date | string | null
+  nextDeliveryAttemptAt?: Prisma.DateTimeNullableFilter<"Message"> | Date | string | null
+  lastDeliveryAttemptAt?: Prisma.DateTimeNullableFilter<"Message"> | Date | string | null
+  deliveryErrorCode?: Prisma.StringNullableFilter<"Message"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Message"> | Date | string
+}
+
+export type MessageCreateWithoutSentByInput = {
+  id?: string
+  channel: string
+  externalMessageId: string
+  direction: string
+  senderId: string
+  text?: string | null
+  sourceTimestamp: Date | string
+  clientIdempotencyKey?: string | null
+  providerMessageId?: string | null
+  deliveryStatus?: $Enums.OutboundDeliveryStatus | null
+  deliveryAttempts?: number
+  deliveryLeaseId?: string | null
+  deliveryLeaseExpiresAt?: Date | string | null
+  nextDeliveryAttemptAt?: Date | string | null
+  lastDeliveryAttemptAt?: Date | string | null
+  deliveryErrorCode?: string | null
+  createdAt?: Date | string
+  tenant: Prisma.TenantCreateNestedOneWithoutMessagesInput
+  conversation: Prisma.ConversationCreateNestedOneWithoutMessagesInput
+  rawEvent?: Prisma.WebhookEventCreateNestedOneWithoutMessagesInput
+  attachments?: Prisma.AttachmentCreateNestedManyWithoutMessageInput
+  triggeredOrders?: Prisma.OrderCreateNestedManyWithoutTriggerMessageInput
+}
+
+export type MessageUncheckedCreateWithoutSentByInput = {
+  id?: string
+  tenantId: string
+  conversationId: string
+  rawEventId?: string | null
+  channel: string
+  externalMessageId: string
+  direction: string
+  senderId: string
+  text?: string | null
+  sourceTimestamp: Date | string
+  clientIdempotencyKey?: string | null
+  providerMessageId?: string | null
+  deliveryStatus?: $Enums.OutboundDeliveryStatus | null
+  deliveryAttempts?: number
+  deliveryLeaseId?: string | null
+  deliveryLeaseExpiresAt?: Date | string | null
+  nextDeliveryAttemptAt?: Date | string | null
+  lastDeliveryAttemptAt?: Date | string | null
+  deliveryErrorCode?: string | null
+  createdAt?: Date | string
+  attachments?: Prisma.AttachmentUncheckedCreateNestedManyWithoutMessageInput
+  triggeredOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutTriggerMessageInput
+}
+
+export type MessageCreateOrConnectWithoutSentByInput = {
+  where: Prisma.MessageWhereUniqueInput
+  create: Prisma.XOR<Prisma.MessageCreateWithoutSentByInput, Prisma.MessageUncheckedCreateWithoutSentByInput>
+}
+
+export type MessageCreateManySentByInputEnvelope = {
+  data: Prisma.MessageCreateManySentByInput | Prisma.MessageCreateManySentByInput[]
+  skipDuplicates?: boolean
+}
+
+export type MessageUpsertWithWhereUniqueWithoutSentByInput = {
+  where: Prisma.MessageWhereUniqueInput
+  update: Prisma.XOR<Prisma.MessageUpdateWithoutSentByInput, Prisma.MessageUncheckedUpdateWithoutSentByInput>
+  create: Prisma.XOR<Prisma.MessageCreateWithoutSentByInput, Prisma.MessageUncheckedCreateWithoutSentByInput>
+}
+
+export type MessageUpdateWithWhereUniqueWithoutSentByInput = {
+  where: Prisma.MessageWhereUniqueInput
+  data: Prisma.XOR<Prisma.MessageUpdateWithoutSentByInput, Prisma.MessageUncheckedUpdateWithoutSentByInput>
+}
+
+export type MessageUpdateManyWithWhereWithoutSentByInput = {
+  where: Prisma.MessageScalarWhereInput
+  data: Prisma.XOR<Prisma.MessageUpdateManyMutationInput, Prisma.MessageUncheckedUpdateManyWithoutSentByInput>
 }
 
 export type MessageCreateWithoutRawEventInput = {
@@ -714,9 +1132,19 @@ export type MessageCreateWithoutRawEventInput = {
   senderId: string
   text?: string | null
   sourceTimestamp: Date | string
+  clientIdempotencyKey?: string | null
+  providerMessageId?: string | null
+  deliveryStatus?: $Enums.OutboundDeliveryStatus | null
+  deliveryAttempts?: number
+  deliveryLeaseId?: string | null
+  deliveryLeaseExpiresAt?: Date | string | null
+  nextDeliveryAttemptAt?: Date | string | null
+  lastDeliveryAttemptAt?: Date | string | null
+  deliveryErrorCode?: string | null
   createdAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMessagesInput
   conversation: Prisma.ConversationCreateNestedOneWithoutMessagesInput
+  sentBy?: Prisma.UserCreateNestedOneWithoutInstagramMessagesSentInput
   attachments?: Prisma.AttachmentCreateNestedManyWithoutMessageInput
   triggeredOrders?: Prisma.OrderCreateNestedManyWithoutTriggerMessageInput
 }
@@ -731,6 +1159,16 @@ export type MessageUncheckedCreateWithoutRawEventInput = {
   senderId: string
   text?: string | null
   sourceTimestamp: Date | string
+  clientIdempotencyKey?: string | null
+  sentByUserId?: string | null
+  providerMessageId?: string | null
+  deliveryStatus?: $Enums.OutboundDeliveryStatus | null
+  deliveryAttempts?: number
+  deliveryLeaseId?: string | null
+  deliveryLeaseExpiresAt?: Date | string | null
+  nextDeliveryAttemptAt?: Date | string | null
+  lastDeliveryAttemptAt?: Date | string | null
+  deliveryErrorCode?: string | null
   createdAt?: Date | string
   attachments?: Prisma.AttachmentUncheckedCreateNestedManyWithoutMessageInput
   triggeredOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutTriggerMessageInput
@@ -770,9 +1208,19 @@ export type MessageCreateWithoutConversationInput = {
   senderId: string
   text?: string | null
   sourceTimestamp: Date | string
+  clientIdempotencyKey?: string | null
+  providerMessageId?: string | null
+  deliveryStatus?: $Enums.OutboundDeliveryStatus | null
+  deliveryAttempts?: number
+  deliveryLeaseId?: string | null
+  deliveryLeaseExpiresAt?: Date | string | null
+  nextDeliveryAttemptAt?: Date | string | null
+  lastDeliveryAttemptAt?: Date | string | null
+  deliveryErrorCode?: string | null
   createdAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMessagesInput
-  rawEvent: Prisma.WebhookEventCreateNestedOneWithoutMessagesInput
+  rawEvent?: Prisma.WebhookEventCreateNestedOneWithoutMessagesInput
+  sentBy?: Prisma.UserCreateNestedOneWithoutInstagramMessagesSentInput
   attachments?: Prisma.AttachmentCreateNestedManyWithoutMessageInput
   triggeredOrders?: Prisma.OrderCreateNestedManyWithoutTriggerMessageInput
 }
@@ -780,13 +1228,23 @@ export type MessageCreateWithoutConversationInput = {
 export type MessageUncheckedCreateWithoutConversationInput = {
   id?: string
   tenantId: string
-  rawEventId: string
+  rawEventId?: string | null
   channel: string
   externalMessageId: string
   direction: string
   senderId: string
   text?: string | null
   sourceTimestamp: Date | string
+  clientIdempotencyKey?: string | null
+  sentByUserId?: string | null
+  providerMessageId?: string | null
+  deliveryStatus?: $Enums.OutboundDeliveryStatus | null
+  deliveryAttempts?: number
+  deliveryLeaseId?: string | null
+  deliveryLeaseExpiresAt?: Date | string | null
+  nextDeliveryAttemptAt?: Date | string | null
+  lastDeliveryAttemptAt?: Date | string | null
+  deliveryErrorCode?: string | null
   createdAt?: Date | string
   attachments?: Prisma.AttachmentUncheckedCreateNestedManyWithoutMessageInput
   triggeredOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutTriggerMessageInput
@@ -826,10 +1284,20 @@ export type MessageCreateWithoutTriggeredOrdersInput = {
   senderId: string
   text?: string | null
   sourceTimestamp: Date | string
+  clientIdempotencyKey?: string | null
+  providerMessageId?: string | null
+  deliveryStatus?: $Enums.OutboundDeliveryStatus | null
+  deliveryAttempts?: number
+  deliveryLeaseId?: string | null
+  deliveryLeaseExpiresAt?: Date | string | null
+  nextDeliveryAttemptAt?: Date | string | null
+  lastDeliveryAttemptAt?: Date | string | null
+  deliveryErrorCode?: string | null
   createdAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMessagesInput
   conversation: Prisma.ConversationCreateNestedOneWithoutMessagesInput
-  rawEvent: Prisma.WebhookEventCreateNestedOneWithoutMessagesInput
+  rawEvent?: Prisma.WebhookEventCreateNestedOneWithoutMessagesInput
+  sentBy?: Prisma.UserCreateNestedOneWithoutInstagramMessagesSentInput
   attachments?: Prisma.AttachmentCreateNestedManyWithoutMessageInput
 }
 
@@ -837,13 +1305,23 @@ export type MessageUncheckedCreateWithoutTriggeredOrdersInput = {
   id?: string
   tenantId: string
   conversationId: string
-  rawEventId: string
+  rawEventId?: string | null
   channel: string
   externalMessageId: string
   direction: string
   senderId: string
   text?: string | null
   sourceTimestamp: Date | string
+  clientIdempotencyKey?: string | null
+  sentByUserId?: string | null
+  providerMessageId?: string | null
+  deliveryStatus?: $Enums.OutboundDeliveryStatus | null
+  deliveryAttempts?: number
+  deliveryLeaseId?: string | null
+  deliveryLeaseExpiresAt?: Date | string | null
+  nextDeliveryAttemptAt?: Date | string | null
+  lastDeliveryAttemptAt?: Date | string | null
+  deliveryErrorCode?: string | null
   createdAt?: Date | string
   attachments?: Prisma.AttachmentUncheckedCreateNestedManyWithoutMessageInput
 }
@@ -872,10 +1350,20 @@ export type MessageUpdateWithoutTriggeredOrdersInput = {
   senderId?: Prisma.StringFieldUpdateOperationsInput | string
   text?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceTimestamp?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  clientIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryStatus?: Prisma.NullableEnumOutboundDeliveryStatusFieldUpdateOperationsInput | $Enums.OutboundDeliveryStatus | null
+  deliveryAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  deliveryLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  nextDeliveryAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastDeliveryAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deliveryErrorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMessagesNestedInput
   conversation?: Prisma.ConversationUpdateOneRequiredWithoutMessagesNestedInput
-  rawEvent?: Prisma.WebhookEventUpdateOneRequiredWithoutMessagesNestedInput
+  rawEvent?: Prisma.WebhookEventUpdateOneWithoutMessagesNestedInput
+  sentBy?: Prisma.UserUpdateOneWithoutInstagramMessagesSentNestedInput
   attachments?: Prisma.AttachmentUpdateManyWithoutMessageNestedInput
 }
 
@@ -883,13 +1371,23 @@ export type MessageUncheckedUpdateWithoutTriggeredOrdersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   conversationId?: Prisma.StringFieldUpdateOperationsInput | string
-  rawEventId?: Prisma.StringFieldUpdateOperationsInput | string
+  rawEventId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   channel?: Prisma.StringFieldUpdateOperationsInput | string
   externalMessageId?: Prisma.StringFieldUpdateOperationsInput | string
   direction?: Prisma.StringFieldUpdateOperationsInput | string
   senderId?: Prisma.StringFieldUpdateOperationsInput | string
   text?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceTimestamp?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  clientIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sentByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryStatus?: Prisma.NullableEnumOutboundDeliveryStatusFieldUpdateOperationsInput | $Enums.OutboundDeliveryStatus | null
+  deliveryAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  deliveryLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  nextDeliveryAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastDeliveryAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deliveryErrorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   attachments?: Prisma.AttachmentUncheckedUpdateManyWithoutMessageNestedInput
 }
@@ -902,10 +1400,20 @@ export type MessageCreateWithoutAttachmentsInput = {
   senderId: string
   text?: string | null
   sourceTimestamp: Date | string
+  clientIdempotencyKey?: string | null
+  providerMessageId?: string | null
+  deliveryStatus?: $Enums.OutboundDeliveryStatus | null
+  deliveryAttempts?: number
+  deliveryLeaseId?: string | null
+  deliveryLeaseExpiresAt?: Date | string | null
+  nextDeliveryAttemptAt?: Date | string | null
+  lastDeliveryAttemptAt?: Date | string | null
+  deliveryErrorCode?: string | null
   createdAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMessagesInput
   conversation: Prisma.ConversationCreateNestedOneWithoutMessagesInput
-  rawEvent: Prisma.WebhookEventCreateNestedOneWithoutMessagesInput
+  rawEvent?: Prisma.WebhookEventCreateNestedOneWithoutMessagesInput
+  sentBy?: Prisma.UserCreateNestedOneWithoutInstagramMessagesSentInput
   triggeredOrders?: Prisma.OrderCreateNestedManyWithoutTriggerMessageInput
 }
 
@@ -913,13 +1421,23 @@ export type MessageUncheckedCreateWithoutAttachmentsInput = {
   id?: string
   tenantId: string
   conversationId: string
-  rawEventId: string
+  rawEventId?: string | null
   channel: string
   externalMessageId: string
   direction: string
   senderId: string
   text?: string | null
   sourceTimestamp: Date | string
+  clientIdempotencyKey?: string | null
+  sentByUserId?: string | null
+  providerMessageId?: string | null
+  deliveryStatus?: $Enums.OutboundDeliveryStatus | null
+  deliveryAttempts?: number
+  deliveryLeaseId?: string | null
+  deliveryLeaseExpiresAt?: Date | string | null
+  nextDeliveryAttemptAt?: Date | string | null
+  lastDeliveryAttemptAt?: Date | string | null
+  deliveryErrorCode?: string | null
   createdAt?: Date | string
   triggeredOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutTriggerMessageInput
 }
@@ -948,10 +1466,20 @@ export type MessageUpdateWithoutAttachmentsInput = {
   senderId?: Prisma.StringFieldUpdateOperationsInput | string
   text?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceTimestamp?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  clientIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryStatus?: Prisma.NullableEnumOutboundDeliveryStatusFieldUpdateOperationsInput | $Enums.OutboundDeliveryStatus | null
+  deliveryAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  deliveryLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  nextDeliveryAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastDeliveryAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deliveryErrorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMessagesNestedInput
   conversation?: Prisma.ConversationUpdateOneRequiredWithoutMessagesNestedInput
-  rawEvent?: Prisma.WebhookEventUpdateOneRequiredWithoutMessagesNestedInput
+  rawEvent?: Prisma.WebhookEventUpdateOneWithoutMessagesNestedInput
+  sentBy?: Prisma.UserUpdateOneWithoutInstagramMessagesSentNestedInput
   triggeredOrders?: Prisma.OrderUpdateManyWithoutTriggerMessageNestedInput
 }
 
@@ -959,13 +1487,23 @@ export type MessageUncheckedUpdateWithoutAttachmentsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   conversationId?: Prisma.StringFieldUpdateOperationsInput | string
-  rawEventId?: Prisma.StringFieldUpdateOperationsInput | string
+  rawEventId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   channel?: Prisma.StringFieldUpdateOperationsInput | string
   externalMessageId?: Prisma.StringFieldUpdateOperationsInput | string
   direction?: Prisma.StringFieldUpdateOperationsInput | string
   senderId?: Prisma.StringFieldUpdateOperationsInput | string
   text?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceTimestamp?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  clientIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sentByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryStatus?: Prisma.NullableEnumOutboundDeliveryStatusFieldUpdateOperationsInput | $Enums.OutboundDeliveryStatus | null
+  deliveryAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  deliveryLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  nextDeliveryAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastDeliveryAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deliveryErrorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   triggeredOrders?: Prisma.OrderUncheckedUpdateManyWithoutTriggerMessageNestedInput
 }
@@ -973,13 +1511,23 @@ export type MessageUncheckedUpdateWithoutAttachmentsInput = {
 export type MessageCreateManyTenantInput = {
   id?: string
   conversationId: string
-  rawEventId: string
+  rawEventId?: string | null
   channel: string
   externalMessageId: string
   direction: string
   senderId: string
   text?: string | null
   sourceTimestamp: Date | string
+  clientIdempotencyKey?: string | null
+  sentByUserId?: string | null
+  providerMessageId?: string | null
+  deliveryStatus?: $Enums.OutboundDeliveryStatus | null
+  deliveryAttempts?: number
+  deliveryLeaseId?: string | null
+  deliveryLeaseExpiresAt?: Date | string | null
+  nextDeliveryAttemptAt?: Date | string | null
+  lastDeliveryAttemptAt?: Date | string | null
+  deliveryErrorCode?: string | null
   createdAt?: Date | string
 }
 
@@ -991,9 +1539,19 @@ export type MessageUpdateWithoutTenantInput = {
   senderId?: Prisma.StringFieldUpdateOperationsInput | string
   text?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceTimestamp?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  clientIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryStatus?: Prisma.NullableEnumOutboundDeliveryStatusFieldUpdateOperationsInput | $Enums.OutboundDeliveryStatus | null
+  deliveryAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  deliveryLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  nextDeliveryAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastDeliveryAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deliveryErrorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   conversation?: Prisma.ConversationUpdateOneRequiredWithoutMessagesNestedInput
-  rawEvent?: Prisma.WebhookEventUpdateOneRequiredWithoutMessagesNestedInput
+  rawEvent?: Prisma.WebhookEventUpdateOneWithoutMessagesNestedInput
+  sentBy?: Prisma.UserUpdateOneWithoutInstagramMessagesSentNestedInput
   attachments?: Prisma.AttachmentUpdateManyWithoutMessageNestedInput
   triggeredOrders?: Prisma.OrderUpdateManyWithoutTriggerMessageNestedInput
 }
@@ -1001,13 +1559,23 @@ export type MessageUpdateWithoutTenantInput = {
 export type MessageUncheckedUpdateWithoutTenantInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   conversationId?: Prisma.StringFieldUpdateOperationsInput | string
-  rawEventId?: Prisma.StringFieldUpdateOperationsInput | string
+  rawEventId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   channel?: Prisma.StringFieldUpdateOperationsInput | string
   externalMessageId?: Prisma.StringFieldUpdateOperationsInput | string
   direction?: Prisma.StringFieldUpdateOperationsInput | string
   senderId?: Prisma.StringFieldUpdateOperationsInput | string
   text?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceTimestamp?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  clientIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sentByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryStatus?: Prisma.NullableEnumOutboundDeliveryStatusFieldUpdateOperationsInput | $Enums.OutboundDeliveryStatus | null
+  deliveryAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  deliveryLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  nextDeliveryAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastDeliveryAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deliveryErrorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   attachments?: Prisma.AttachmentUncheckedUpdateManyWithoutMessageNestedInput
   triggeredOrders?: Prisma.OrderUncheckedUpdateManyWithoutTriggerMessageNestedInput
@@ -1016,13 +1584,119 @@ export type MessageUncheckedUpdateWithoutTenantInput = {
 export type MessageUncheckedUpdateManyWithoutTenantInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   conversationId?: Prisma.StringFieldUpdateOperationsInput | string
-  rawEventId?: Prisma.StringFieldUpdateOperationsInput | string
+  rawEventId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   channel?: Prisma.StringFieldUpdateOperationsInput | string
   externalMessageId?: Prisma.StringFieldUpdateOperationsInput | string
   direction?: Prisma.StringFieldUpdateOperationsInput | string
   senderId?: Prisma.StringFieldUpdateOperationsInput | string
   text?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceTimestamp?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  clientIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sentByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryStatus?: Prisma.NullableEnumOutboundDeliveryStatusFieldUpdateOperationsInput | $Enums.OutboundDeliveryStatus | null
+  deliveryAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  deliveryLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  nextDeliveryAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastDeliveryAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deliveryErrorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type MessageCreateManySentByInput = {
+  id?: string
+  tenantId: string
+  conversationId: string
+  rawEventId?: string | null
+  channel: string
+  externalMessageId: string
+  direction: string
+  senderId: string
+  text?: string | null
+  sourceTimestamp: Date | string
+  clientIdempotencyKey?: string | null
+  providerMessageId?: string | null
+  deliveryStatus?: $Enums.OutboundDeliveryStatus | null
+  deliveryAttempts?: number
+  deliveryLeaseId?: string | null
+  deliveryLeaseExpiresAt?: Date | string | null
+  nextDeliveryAttemptAt?: Date | string | null
+  lastDeliveryAttemptAt?: Date | string | null
+  deliveryErrorCode?: string | null
+  createdAt?: Date | string
+}
+
+export type MessageUpdateWithoutSentByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  channel?: Prisma.StringFieldUpdateOperationsInput | string
+  externalMessageId?: Prisma.StringFieldUpdateOperationsInput | string
+  direction?: Prisma.StringFieldUpdateOperationsInput | string
+  senderId?: Prisma.StringFieldUpdateOperationsInput | string
+  text?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceTimestamp?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  clientIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryStatus?: Prisma.NullableEnumOutboundDeliveryStatusFieldUpdateOperationsInput | $Enums.OutboundDeliveryStatus | null
+  deliveryAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  deliveryLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  nextDeliveryAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastDeliveryAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deliveryErrorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutMessagesNestedInput
+  conversation?: Prisma.ConversationUpdateOneRequiredWithoutMessagesNestedInput
+  rawEvent?: Prisma.WebhookEventUpdateOneWithoutMessagesNestedInput
+  attachments?: Prisma.AttachmentUpdateManyWithoutMessageNestedInput
+  triggeredOrders?: Prisma.OrderUpdateManyWithoutTriggerMessageNestedInput
+}
+
+export type MessageUncheckedUpdateWithoutSentByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  conversationId?: Prisma.StringFieldUpdateOperationsInput | string
+  rawEventId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  channel?: Prisma.StringFieldUpdateOperationsInput | string
+  externalMessageId?: Prisma.StringFieldUpdateOperationsInput | string
+  direction?: Prisma.StringFieldUpdateOperationsInput | string
+  senderId?: Prisma.StringFieldUpdateOperationsInput | string
+  text?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceTimestamp?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  clientIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryStatus?: Prisma.NullableEnumOutboundDeliveryStatusFieldUpdateOperationsInput | $Enums.OutboundDeliveryStatus | null
+  deliveryAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  deliveryLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  nextDeliveryAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastDeliveryAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deliveryErrorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  attachments?: Prisma.AttachmentUncheckedUpdateManyWithoutMessageNestedInput
+  triggeredOrders?: Prisma.OrderUncheckedUpdateManyWithoutTriggerMessageNestedInput
+}
+
+export type MessageUncheckedUpdateManyWithoutSentByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  conversationId?: Prisma.StringFieldUpdateOperationsInput | string
+  rawEventId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  channel?: Prisma.StringFieldUpdateOperationsInput | string
+  externalMessageId?: Prisma.StringFieldUpdateOperationsInput | string
+  direction?: Prisma.StringFieldUpdateOperationsInput | string
+  senderId?: Prisma.StringFieldUpdateOperationsInput | string
+  text?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceTimestamp?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  clientIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryStatus?: Prisma.NullableEnumOutboundDeliveryStatusFieldUpdateOperationsInput | $Enums.OutboundDeliveryStatus | null
+  deliveryAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  deliveryLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  nextDeliveryAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastDeliveryAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deliveryErrorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -1036,6 +1710,16 @@ export type MessageCreateManyRawEventInput = {
   senderId: string
   text?: string | null
   sourceTimestamp: Date | string
+  clientIdempotencyKey?: string | null
+  sentByUserId?: string | null
+  providerMessageId?: string | null
+  deliveryStatus?: $Enums.OutboundDeliveryStatus | null
+  deliveryAttempts?: number
+  deliveryLeaseId?: string | null
+  deliveryLeaseExpiresAt?: Date | string | null
+  nextDeliveryAttemptAt?: Date | string | null
+  lastDeliveryAttemptAt?: Date | string | null
+  deliveryErrorCode?: string | null
   createdAt?: Date | string
 }
 
@@ -1047,9 +1731,19 @@ export type MessageUpdateWithoutRawEventInput = {
   senderId?: Prisma.StringFieldUpdateOperationsInput | string
   text?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceTimestamp?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  clientIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryStatus?: Prisma.NullableEnumOutboundDeliveryStatusFieldUpdateOperationsInput | $Enums.OutboundDeliveryStatus | null
+  deliveryAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  deliveryLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  nextDeliveryAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastDeliveryAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deliveryErrorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMessagesNestedInput
   conversation?: Prisma.ConversationUpdateOneRequiredWithoutMessagesNestedInput
+  sentBy?: Prisma.UserUpdateOneWithoutInstagramMessagesSentNestedInput
   attachments?: Prisma.AttachmentUpdateManyWithoutMessageNestedInput
   triggeredOrders?: Prisma.OrderUpdateManyWithoutTriggerMessageNestedInput
 }
@@ -1064,6 +1758,16 @@ export type MessageUncheckedUpdateWithoutRawEventInput = {
   senderId?: Prisma.StringFieldUpdateOperationsInput | string
   text?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceTimestamp?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  clientIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sentByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryStatus?: Prisma.NullableEnumOutboundDeliveryStatusFieldUpdateOperationsInput | $Enums.OutboundDeliveryStatus | null
+  deliveryAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  deliveryLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  nextDeliveryAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastDeliveryAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deliveryErrorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   attachments?: Prisma.AttachmentUncheckedUpdateManyWithoutMessageNestedInput
   triggeredOrders?: Prisma.OrderUncheckedUpdateManyWithoutTriggerMessageNestedInput
@@ -1079,19 +1783,39 @@ export type MessageUncheckedUpdateManyWithoutRawEventInput = {
   senderId?: Prisma.StringFieldUpdateOperationsInput | string
   text?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceTimestamp?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  clientIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sentByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryStatus?: Prisma.NullableEnumOutboundDeliveryStatusFieldUpdateOperationsInput | $Enums.OutboundDeliveryStatus | null
+  deliveryAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  deliveryLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  nextDeliveryAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastDeliveryAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deliveryErrorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type MessageCreateManyConversationInput = {
   id?: string
   tenantId: string
-  rawEventId: string
+  rawEventId?: string | null
   channel: string
   externalMessageId: string
   direction: string
   senderId: string
   text?: string | null
   sourceTimestamp: Date | string
+  clientIdempotencyKey?: string | null
+  sentByUserId?: string | null
+  providerMessageId?: string | null
+  deliveryStatus?: $Enums.OutboundDeliveryStatus | null
+  deliveryAttempts?: number
+  deliveryLeaseId?: string | null
+  deliveryLeaseExpiresAt?: Date | string | null
+  nextDeliveryAttemptAt?: Date | string | null
+  lastDeliveryAttemptAt?: Date | string | null
+  deliveryErrorCode?: string | null
   createdAt?: Date | string
 }
 
@@ -1103,9 +1827,19 @@ export type MessageUpdateWithoutConversationInput = {
   senderId?: Prisma.StringFieldUpdateOperationsInput | string
   text?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceTimestamp?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  clientIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryStatus?: Prisma.NullableEnumOutboundDeliveryStatusFieldUpdateOperationsInput | $Enums.OutboundDeliveryStatus | null
+  deliveryAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  deliveryLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  nextDeliveryAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastDeliveryAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deliveryErrorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMessagesNestedInput
-  rawEvent?: Prisma.WebhookEventUpdateOneRequiredWithoutMessagesNestedInput
+  rawEvent?: Prisma.WebhookEventUpdateOneWithoutMessagesNestedInput
+  sentBy?: Prisma.UserUpdateOneWithoutInstagramMessagesSentNestedInput
   attachments?: Prisma.AttachmentUpdateManyWithoutMessageNestedInput
   triggeredOrders?: Prisma.OrderUpdateManyWithoutTriggerMessageNestedInput
 }
@@ -1113,13 +1847,23 @@ export type MessageUpdateWithoutConversationInput = {
 export type MessageUncheckedUpdateWithoutConversationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
-  rawEventId?: Prisma.StringFieldUpdateOperationsInput | string
+  rawEventId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   channel?: Prisma.StringFieldUpdateOperationsInput | string
   externalMessageId?: Prisma.StringFieldUpdateOperationsInput | string
   direction?: Prisma.StringFieldUpdateOperationsInput | string
   senderId?: Prisma.StringFieldUpdateOperationsInput | string
   text?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceTimestamp?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  clientIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sentByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryStatus?: Prisma.NullableEnumOutboundDeliveryStatusFieldUpdateOperationsInput | $Enums.OutboundDeliveryStatus | null
+  deliveryAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  deliveryLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  nextDeliveryAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastDeliveryAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deliveryErrorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   attachments?: Prisma.AttachmentUncheckedUpdateManyWithoutMessageNestedInput
   triggeredOrders?: Prisma.OrderUncheckedUpdateManyWithoutTriggerMessageNestedInput
@@ -1128,13 +1872,23 @@ export type MessageUncheckedUpdateWithoutConversationInput = {
 export type MessageUncheckedUpdateManyWithoutConversationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
-  rawEventId?: Prisma.StringFieldUpdateOperationsInput | string
+  rawEventId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   channel?: Prisma.StringFieldUpdateOperationsInput | string
   externalMessageId?: Prisma.StringFieldUpdateOperationsInput | string
   direction?: Prisma.StringFieldUpdateOperationsInput | string
   senderId?: Prisma.StringFieldUpdateOperationsInput | string
   text?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceTimestamp?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  clientIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sentByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryStatus?: Prisma.NullableEnumOutboundDeliveryStatusFieldUpdateOperationsInput | $Enums.OutboundDeliveryStatus | null
+  deliveryAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  deliveryLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  nextDeliveryAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastDeliveryAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deliveryErrorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -1189,10 +1943,21 @@ export type MessageSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   senderId?: boolean
   text?: boolean
   sourceTimestamp?: boolean
+  clientIdempotencyKey?: boolean
+  sentByUserId?: boolean
+  providerMessageId?: boolean
+  deliveryStatus?: boolean
+  deliveryAttempts?: boolean
+  deliveryLeaseId?: boolean
+  deliveryLeaseExpiresAt?: boolean
+  nextDeliveryAttemptAt?: boolean
+  lastDeliveryAttemptAt?: boolean
+  deliveryErrorCode?: boolean
   createdAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
-  rawEvent?: boolean | Prisma.WebhookEventDefaultArgs<ExtArgs>
+  rawEvent?: boolean | Prisma.Message$rawEventArgs<ExtArgs>
+  sentBy?: boolean | Prisma.Message$sentByArgs<ExtArgs>
   attachments?: boolean | Prisma.Message$attachmentsArgs<ExtArgs>
   triggeredOrders?: boolean | Prisma.Message$triggeredOrdersArgs<ExtArgs>
   _count?: boolean | Prisma.MessageCountOutputTypeDefaultArgs<ExtArgs>
@@ -1209,10 +1974,21 @@ export type MessageSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   senderId?: boolean
   text?: boolean
   sourceTimestamp?: boolean
+  clientIdempotencyKey?: boolean
+  sentByUserId?: boolean
+  providerMessageId?: boolean
+  deliveryStatus?: boolean
+  deliveryAttempts?: boolean
+  deliveryLeaseId?: boolean
+  deliveryLeaseExpiresAt?: boolean
+  nextDeliveryAttemptAt?: boolean
+  lastDeliveryAttemptAt?: boolean
+  deliveryErrorCode?: boolean
   createdAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
-  rawEvent?: boolean | Prisma.WebhookEventDefaultArgs<ExtArgs>
+  rawEvent?: boolean | Prisma.Message$rawEventArgs<ExtArgs>
+  sentBy?: boolean | Prisma.Message$sentByArgs<ExtArgs>
 }, ExtArgs["result"]["message"]>
 
 export type MessageSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1226,10 +2002,21 @@ export type MessageSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   senderId?: boolean
   text?: boolean
   sourceTimestamp?: boolean
+  clientIdempotencyKey?: boolean
+  sentByUserId?: boolean
+  providerMessageId?: boolean
+  deliveryStatus?: boolean
+  deliveryAttempts?: boolean
+  deliveryLeaseId?: boolean
+  deliveryLeaseExpiresAt?: boolean
+  nextDeliveryAttemptAt?: boolean
+  lastDeliveryAttemptAt?: boolean
+  deliveryErrorCode?: boolean
   createdAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
-  rawEvent?: boolean | Prisma.WebhookEventDefaultArgs<ExtArgs>
+  rawEvent?: boolean | Prisma.Message$rawEventArgs<ExtArgs>
+  sentBy?: boolean | Prisma.Message$sentByArgs<ExtArgs>
 }, ExtArgs["result"]["message"]>
 
 export type MessageSelectScalar = {
@@ -1243,14 +2030,25 @@ export type MessageSelectScalar = {
   senderId?: boolean
   text?: boolean
   sourceTimestamp?: boolean
+  clientIdempotencyKey?: boolean
+  sentByUserId?: boolean
+  providerMessageId?: boolean
+  deliveryStatus?: boolean
+  deliveryAttempts?: boolean
+  deliveryLeaseId?: boolean
+  deliveryLeaseExpiresAt?: boolean
+  nextDeliveryAttemptAt?: boolean
+  lastDeliveryAttemptAt?: boolean
+  deliveryErrorCode?: boolean
   createdAt?: boolean
 }
 
-export type MessageOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "conversationId" | "rawEventId" | "channel" | "externalMessageId" | "direction" | "senderId" | "text" | "sourceTimestamp" | "createdAt", ExtArgs["result"]["message"]>
+export type MessageOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "conversationId" | "rawEventId" | "channel" | "externalMessageId" | "direction" | "senderId" | "text" | "sourceTimestamp" | "clientIdempotencyKey" | "sentByUserId" | "providerMessageId" | "deliveryStatus" | "deliveryAttempts" | "deliveryLeaseId" | "deliveryLeaseExpiresAt" | "nextDeliveryAttemptAt" | "lastDeliveryAttemptAt" | "deliveryErrorCode" | "createdAt", ExtArgs["result"]["message"]>
 export type MessageInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
-  rawEvent?: boolean | Prisma.WebhookEventDefaultArgs<ExtArgs>
+  rawEvent?: boolean | Prisma.Message$rawEventArgs<ExtArgs>
+  sentBy?: boolean | Prisma.Message$sentByArgs<ExtArgs>
   attachments?: boolean | Prisma.Message$attachmentsArgs<ExtArgs>
   triggeredOrders?: boolean | Prisma.Message$triggeredOrdersArgs<ExtArgs>
   _count?: boolean | Prisma.MessageCountOutputTypeDefaultArgs<ExtArgs>
@@ -1258,12 +2056,14 @@ export type MessageInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
 export type MessageIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
-  rawEvent?: boolean | Prisma.WebhookEventDefaultArgs<ExtArgs>
+  rawEvent?: boolean | Prisma.Message$rawEventArgs<ExtArgs>
+  sentBy?: boolean | Prisma.Message$sentByArgs<ExtArgs>
 }
 export type MessageIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
-  rawEvent?: boolean | Prisma.WebhookEventDefaultArgs<ExtArgs>
+  rawEvent?: boolean | Prisma.Message$rawEventArgs<ExtArgs>
+  sentBy?: boolean | Prisma.Message$sentByArgs<ExtArgs>
 }
 
 export type $MessagePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1271,7 +2071,8 @@ export type $MessagePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
   objects: {
     tenant: Prisma.$TenantPayload<ExtArgs>
     conversation: Prisma.$ConversationPayload<ExtArgs>
-    rawEvent: Prisma.$WebhookEventPayload<ExtArgs>
+    rawEvent: Prisma.$WebhookEventPayload<ExtArgs> | null
+    sentBy: Prisma.$UserPayload<ExtArgs> | null
     attachments: Prisma.$AttachmentPayload<ExtArgs>[]
     triggeredOrders: Prisma.$OrderPayload<ExtArgs>[]
   }
@@ -1279,13 +2080,23 @@ export type $MessagePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     id: string
     tenantId: string
     conversationId: string
-    rawEventId: string
+    rawEventId: string | null
     channel: string
     externalMessageId: string
     direction: string
     senderId: string
     text: string | null
     sourceTimestamp: Date
+    clientIdempotencyKey: string | null
+    sentByUserId: string | null
+    providerMessageId: string | null
+    deliveryStatus: $Enums.OutboundDeliveryStatus | null
+    deliveryAttempts: number
+    deliveryLeaseId: string | null
+    deliveryLeaseExpiresAt: Date | null
+    nextDeliveryAttemptAt: Date | null
+    lastDeliveryAttemptAt: Date | null
+    deliveryErrorCode: string | null
     createdAt: Date
   }, ExtArgs["result"]["message"]>
   composites: {}
@@ -1683,7 +2494,8 @@ export interface Prisma__MessageClient<T, Null = never, ExtArgs extends runtime.
   readonly [Symbol.toStringTag]: "PrismaPromise"
   tenant<T extends Prisma.TenantDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TenantDefaultArgs<ExtArgs>>): Prisma.Prisma__TenantClient<runtime.Types.Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   conversation<T extends Prisma.ConversationDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ConversationDefaultArgs<ExtArgs>>): Prisma.Prisma__ConversationClient<runtime.Types.Result.GetResult<Prisma.$ConversationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-  rawEvent<T extends Prisma.WebhookEventDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.WebhookEventDefaultArgs<ExtArgs>>): Prisma.Prisma__WebhookEventClient<runtime.Types.Result.GetResult<Prisma.$WebhookEventPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  rawEvent<T extends Prisma.Message$rawEventArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Message$rawEventArgs<ExtArgs>>): Prisma.Prisma__WebhookEventClient<runtime.Types.Result.GetResult<Prisma.$WebhookEventPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  sentBy<T extends Prisma.Message$sentByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Message$sentByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   attachments<T extends Prisma.Message$attachmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Message$attachmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AttachmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   triggeredOrders<T extends Prisma.Message$triggeredOrdersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Message$triggeredOrdersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
@@ -1725,6 +2537,16 @@ export interface MessageFieldRefs {
   readonly senderId: Prisma.FieldRef<"Message", 'String'>
   readonly text: Prisma.FieldRef<"Message", 'String'>
   readonly sourceTimestamp: Prisma.FieldRef<"Message", 'DateTime'>
+  readonly clientIdempotencyKey: Prisma.FieldRef<"Message", 'String'>
+  readonly sentByUserId: Prisma.FieldRef<"Message", 'String'>
+  readonly providerMessageId: Prisma.FieldRef<"Message", 'String'>
+  readonly deliveryStatus: Prisma.FieldRef<"Message", 'OutboundDeliveryStatus'>
+  readonly deliveryAttempts: Prisma.FieldRef<"Message", 'Int'>
+  readonly deliveryLeaseId: Prisma.FieldRef<"Message", 'String'>
+  readonly deliveryLeaseExpiresAt: Prisma.FieldRef<"Message", 'DateTime'>
+  readonly nextDeliveryAttemptAt: Prisma.FieldRef<"Message", 'DateTime'>
+  readonly lastDeliveryAttemptAt: Prisma.FieldRef<"Message", 'DateTime'>
+  readonly deliveryErrorCode: Prisma.FieldRef<"Message", 'String'>
   readonly createdAt: Prisma.FieldRef<"Message", 'DateTime'>
 }
 
@@ -2124,6 +2946,44 @@ export type MessageDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Limit how many Messages to delete.
    */
   limit?: number
+}
+
+/**
+ * Message.rawEvent
+ */
+export type Message$rawEventArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the WebhookEvent
+   */
+  select?: Prisma.WebhookEventSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the WebhookEvent
+   */
+  omit?: Prisma.WebhookEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WebhookEventInclude<ExtArgs> | null
+  where?: Prisma.WebhookEventWhereInput
+}
+
+/**
+ * Message.sentBy
+ */
+export type Message$sentByArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
 }
 
 /**
