@@ -176,6 +176,98 @@ describe('MetaInstagramClient', () => {
     expect(fetchFn).not.toHaveBeenCalled();
   });
 
+  it('sends a text message with the documented Instagram request shape', async () => {
+    const fetchFn = vi.fn<typeof fetch>().mockResolvedValue(response({
+      recipient_id: 'ig-customer-1',
+      message_id: 'mid.123',
+    }));
+    const client = new MetaInstagramClient({ ...config, fetch: fetchFn });
+
+    await expect(
+      client.sendText('ig-customer-1', 'Вітаю', 'secret-token'),
+    ).resolves.toEqual({ recipientId: 'ig-customer-1', messageId: 'mid.123' });
+
+    const [requestUrl, init] = fetchFn.mock.calls[0] ?? [];
+    expect(String(requestUrl)).toBe('https://graph.instagram.com/v24.0/me/messages');
+    expect(init).toMatchObject({
+      method: 'POST',
+      headers: {
+        authorization: 'Bearer secret-token',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        recipient: { id: 'ig-customer-1' },
+        message: { text: 'Вітаю' },
+      }),
+    });
+    expect(String(requestUrl)).not.toContain('secret-token');
+  });
+
+  it.each([
+    ['../me', 'Вітаю'],
+    ['', 'Вітаю'],
+    ['ig-customer-1', ''],
+    ['ig-customer-1', 'x'.repeat(1_001)],
+  ])('rejects invalid outbound message input before fetch', async (recipientId, text) => {
+    const fetchFn = vi.fn<typeof fetch>();
+    const client = new MetaInstagramClient({ ...config, fetch: fetchFn });
+
+    await expect(client.sendText(recipientId, text, 'secret-token')).rejects.toThrow();
+    expect(fetchFn).not.toHaveBeenCalled();
+  });
+
+  it('rejects a malformed successful send response without retaining its body', async () => {
+    const client = new MetaInstagramClient({
+      ...config,
+      fetch: vi.fn<typeof fetch>().mockResolvedValue(response({
+        recipient_id: 'ig-customer-1',
+        provider_secret: 'response-value-that-must-not-leak',
+      })),
+    });
+
+    const failure = client.sendText('ig-customer-1', 'Вітаю', 'secret-token');
+    await expect(failure).rejects.toEqual(expect.objectContaining({
+      name: 'MetaInstagramError',
+      status: 200,
+      providerCode: null,
+      responseStage: 'SEND',
+    }));
+    await expect(failure).rejects.not.toThrow('response-value-that-must-not-leak');
+  });
+
+  it.each([
+    ['invalid token', documentedNonTransientMetaErrorEnvelope, 400, 190, false],
+    ['transient provider failure', documentedTransientMetaErrorEnvelope, 503, 2, true],
+  ])('sanitizes a send %s response', async (_name, envelope, status, providerCode, isTransient) => {
+    const client = new MetaInstagramClient({
+      ...config,
+      fetch: vi.fn<typeof fetch>().mockResolvedValue(response(envelope, status)),
+    });
+
+    const failure = client.sendText('ig-customer-1', 'Вітаю', 'secret-token');
+    await expect(failure).rejects.toEqual(expect.objectContaining({
+      name: 'MetaInstagramError', status, providerCode, isTransient,
+    }));
+    await expect(failure).rejects.not.toThrow('secret-token');
+    await expect(failure).rejects.not.toThrow('must not be retained');
+  });
+
+  it('sanitizes an ambiguous send timeout', async () => {
+    const client = new MetaInstagramClient({
+      ...config,
+      fetch: vi.fn<typeof fetch>().mockRejectedValue(
+        new DOMException('Abort secret-token provider-message-text', 'AbortError'),
+      ),
+    });
+
+    const failure = client.sendText('ig-customer-1', 'Вітаю', 'secret-token');
+    await expect(failure).rejects.toEqual(expect.objectContaining({
+      name: 'MetaInstagramError', status: null, providerCode: null,
+    }));
+    await expect(failure).rejects.not.toThrow('secret-token');
+    await expect(failure).rejects.not.toThrow('provider-message-text');
+  });
+
   it('uses permissions from code exchange without a separate permissions request', async () => {
     const fetchFn = vi.fn<typeof fetch>()
       .mockResolvedValueOnce(response(documentedShortLivedTokenEnvelope))

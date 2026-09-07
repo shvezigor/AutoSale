@@ -192,7 +192,7 @@ git commit -m "feat: persist Instagram outbound delivery state"
 - Produces: `MetaInstagramClient.sendText(recipientId: string, text: string, accessToken: string): Promise<{ recipientId: string; messageId: string }>`.
 - Consumes: existing `MetaInstagramError`, bearer-token request helper, graph version configuration.
 
-- [ ] **Step 1: Write failing adapter tests**
+- [x] **Step 1: Write failing adapter tests**
 
 Cover the exact request and sanitized failures:
 
@@ -212,23 +212,23 @@ expect(fetchFn).toHaveBeenCalledWith(
 
 Add cases for invalid participant ID before fetch, malformed 200 response, 190 invalid-token response, transient response, timeout, and assertions that neither token nor provider text appears in the thrown error.
 
-- [ ] **Step 2: Run and verify red**
+- [x] **Step 2: Run and verify red**
 
 Run: `pnpm --filter @autosale/integrations exec vitest run src/meta-instagram.spec.ts`
 
 Expected: FAIL because `sendText` is missing.
 
-- [ ] **Step 3: Implement the smallest adapter method**
+- [x] **Step 3: Implement the smallest adapter method**
 
 Validate participant IDs with the existing allowlist. POST JSON to `me/messages`; accept only a non-empty string `recipient_id` and `message_id`; otherwise throw `MetaInstagramError` with a new response stage `SEND` and no raw body.
 
-- [ ] **Step 4: Run integration package checks**
+- [x] **Step 4: Run integration package checks**
 
 Run: `pnpm --filter @autosale/integrations test && pnpm --filter @autosale/integrations typecheck`
 
 Expected: all tests pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add packages/integrations/src/meta-instagram.ts packages/integrations/src/meta-instagram.spec.ts packages/integrations/src/index.ts

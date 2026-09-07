@@ -32,13 +32,18 @@ export interface MetaInstagramUserProfile {
   profilePictureUrl: string | null;
 }
 
+export interface MetaInstagramSendResult {
+  recipientId: string;
+  messageId: string;
+}
+
 export class MetaInstagramError extends Error {
   constructor(
     readonly status: number | null,
     readonly providerCode: number | string | null,
     readonly isTransient: boolean | null = null,
     readonly errorSubcode: number | null = null,
-    readonly responseStage: 'SHORT_LIVED_TOKEN' | 'LONG_LIVED_TOKEN' | 'IDENTITY' | 'PROFILE' | null = null,
+    readonly responseStage: 'SHORT_LIVED_TOKEN' | 'LONG_LIVED_TOKEN' | 'IDENTITY' | 'PROFILE' | 'SEND' | null = null,
     readonly responseShape: string | null = null,
   ) {
     super('Meta Instagram API request failed');
@@ -136,6 +141,60 @@ export class MetaInstagramClient {
       name: typeof payload.name === 'string' ? payload.name : null,
       username: typeof payload.username === 'string' ? payload.username : null,
       profilePictureUrl: typeof payload.profile_pic === 'string' ? payload.profile_pic : null,
+    };
+  }
+
+  async sendText(
+    recipientId: string,
+    text: string,
+    accessToken: string,
+  ): Promise<MetaInstagramSendResult> {
+    if (!/^[A-Za-z0-9_-]{1,128}$/.test(recipientId)) {
+      throw new Error('Invalid Instagram participant id');
+    }
+    if (text.trim().length === 0 || text.length > 1_000) {
+      throw new Error('Invalid Instagram message text');
+    }
+
+    let payload: unknown;
+    try {
+      payload = await this.requestJson(this.graphUrl('me/messages'), {
+        method: 'POST',
+        headers: {
+          authorization: `Bearer ${accessToken}`,
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          recipient: { id: recipientId },
+          message: { text },
+        }),
+      });
+    } catch (error) {
+      if (error instanceof MetaInstagramError) {
+        throw new MetaInstagramError(
+          error.status,
+          error.providerCode,
+          error.isTransient,
+          error.errorSubcode,
+          'SEND',
+        );
+      }
+      throw error;
+    }
+
+    if (
+      !isRecord(payload) ||
+      typeof payload.recipient_id !== 'string' ||
+      payload.recipient_id.length === 0 ||
+      typeof payload.message_id !== 'string' ||
+      payload.message_id.length === 0
+    ) {
+      throw new MetaInstagramError(200, null, null, null, 'SEND');
+    }
+
+    return {
+      recipientId: payload.recipient_id,
+      messageId: payload.message_id,
     };
   }
 
