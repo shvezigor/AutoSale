@@ -409,19 +409,19 @@ git commit -m "feat: deliver Instagram replies durably"
 - Consumes: local outbound `providerMessageId`, `clientIdempotencyKey`, and delivery state.
 - Produces: one canonical `Message` row after a Meta echo; returns/uses `wasCreated: false` for reconciliation so order triggering remains exactly once.
 
-- [ ] **Step 1: Add failing PostgreSQL echo tests**
+- [x] **Step 1: Add failing PostgreSQL echo tests**
 
 Seed a local `SENT` message with provider ID `mid.123`, then process an echo with `mid.123`. Assert message count stays one, `providerMessageId` remains `mid.123`, `rawEventId` is linked to the echo event, and the order trigger is not invoked twice.
 
 Add the bounded fallback case: same tenant/conversation/direction/normalized text within 30 seconds reconciles only when exactly one candidate exists. Zero or multiple candidates create/use the ordinary webhook-unique row rather than guessing.
 
-- [ ] **Step 2: Run processor tests and verify red**
+- [x] **Step 2: Run processor tests and verify red**
 
 Run: `pnpm --filter @autosale/worker exec vitest run src/instagram/instagram.processor.spec.ts`
 
 Expected: FAIL with duplicate outbound rows or uniqueness conflict.
 
-- [ ] **Step 3: Implement provider-first, unique-fallback reconciliation**
+- [x] **Step 3: Implement provider-first, unique-fallback reconciliation**
 
 For outbound normalized events, inside the existing transaction:
 
@@ -432,13 +432,13 @@ For outbound normalized events, inside the existing transaction:
 
 Keep attachment behavior and inbound profile enrichment unchanged. Call `processIfTriggered` only when this canonical outbound content has not previously been evaluated; rely on the existing one-order-per-trigger constraint as the final guard.
 
-- [ ] **Step 4: Run Instagram processor and order-trigger regression suites**
+- [x] **Step 4: Run Instagram processor and order-trigger regression suites**
 
 Run: `pnpm --filter @autosale/worker exec vitest run src/instagram/instagram.processor.spec.ts src/instagram/instagram-normalizer.spec.ts src/orders/triggered-order.processor.spec.ts`
 
 Expected: all tests pass and an AutoSale confirmation reply starts at most one draft.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/worker/src/instagram

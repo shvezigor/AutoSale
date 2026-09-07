@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
@@ -160,7 +161,156 @@ describe('InstagramProcessor', () => {
     });
     expect(processIfTriggered).toHaveBeenCalledWith(message.id);
   });
+
+  it('reconciles a Meta echo by provider message id without creating or retriggering it', async () => {
+    processIfTriggered.mockReset();
+    const timestamp = new Date('2026-09-07T12:00:00.000Z');
+    const conversation = await prisma.conversation.create({
+      data: {
+        tenantId,
+        channel: 'INSTAGRAM',
+        externalConversationId: 'ig-provider-echo',
+        participantId: 'ig-provider-echo',
+        lastMessageAt: timestamp,
+      },
+    });
+    const localId = randomUUID();
+    await prisma.message.create({
+      data: {
+        id: localId,
+        tenantId,
+        conversationId: conversation.id,
+        rawEventId: null,
+        channel: 'INSTAGRAM',
+        externalMessageId: `local:${localId}`,
+        direction: 'OUTBOUND',
+        senderId: 'page',
+        text: 'Дякуємо',
+        sourceTimestamp: timestamp,
+        clientIdempotencyKey: randomUUID(),
+        providerMessageId: 'mid.provider.123',
+        deliveryStatus: 'SENT',
+      },
+    });
+    const event = await prisma.webhookEvent.create({
+      data: {
+        tenantId,
+        provider: 'META',
+        externalEventId: 'mid.provider.123',
+        payload: echoPayload('ig-provider-echo', 'mid.provider.123', 'Дякуємо', timestamp),
+      },
+    });
+
+    await new InstagramProcessor(prisma, { copy }, { processIfTriggered }).process(event.id);
+
+    expect(await prisma.message.count({ where: { conversationId: conversation.id } })).toBe(1);
+    await expect(prisma.message.findUniqueOrThrow({ where: { id: localId } })).resolves.toMatchObject({
+      rawEventId: event.id,
+      providerMessageId: 'mid.provider.123',
+      deliveryStatus: 'SENT',
+      deliveryErrorCode: null,
+    });
+    expect(processIfTriggered).not.toHaveBeenCalled();
+  });
+
+  it('reconciles exactly one narrow text/time candidate when the provider id is not stored yet', async () => {
+    const timestamp = new Date('2026-09-07T12:10:00.000Z');
+    const conversation = await prisma.conversation.create({
+      data: {
+        tenantId,
+        channel: 'INSTAGRAM',
+        externalConversationId: 'ig-fallback-echo',
+        participantId: 'ig-fallback-echo',
+        lastMessageAt: timestamp,
+      },
+    });
+    const localId = await seedLocalOutbound(conversation.id, 'Унікальний текст', timestamp);
+    const event = await prisma.webhookEvent.create({
+      data: {
+        tenantId,
+        provider: 'META',
+        externalEventId: 'mid.fallback.123',
+        payload: echoPayload('ig-fallback-echo', 'mid.fallback.123', 'Унікальний текст', timestamp),
+      },
+    });
+
+    await new InstagramProcessor(prisma, { copy }).process(event.id);
+
+    expect(await prisma.message.count({ where: { conversationId: conversation.id } })).toBe(1);
+    await expect(prisma.message.findUniqueOrThrow({ where: { id: localId } })).resolves.toMatchObject({
+      rawEventId: event.id,
+      providerMessageId: 'mid.fallback.123',
+      deliveryStatus: 'SENT',
+    });
+  });
+
+  it('does not guess when multiple fallback candidates match the same echo', async () => {
+    const timestamp = new Date('2026-09-07T12:20:00.000Z');
+    const conversation = await prisma.conversation.create({
+      data: {
+        tenantId,
+        channel: 'INSTAGRAM',
+        externalConversationId: 'ig-ambiguous-echo',
+        participantId: 'ig-ambiguous-echo',
+        lastMessageAt: timestamp,
+      },
+    });
+    await seedLocalOutbound(conversation.id, 'Однаковий текст', timestamp);
+    await seedLocalOutbound(conversation.id, 'Однаковий текст', timestamp);
+    const event = await prisma.webhookEvent.create({
+      data: {
+        tenantId,
+        provider: 'META',
+        externalEventId: 'mid.ambiguous.123',
+        payload: echoPayload('ig-ambiguous-echo', 'mid.ambiguous.123', 'Однаковий текст', timestamp),
+      },
+    });
+
+    await new InstagramProcessor(prisma, { copy }).process(event.id);
+
+    expect(await prisma.message.count({ where: { conversationId: conversation.id } })).toBe(3);
+    await expect(prisma.message.findFirstOrThrow({
+      where: { conversationId: conversation.id, externalMessageId: 'mid.ambiguous.123' },
+    })).resolves.toMatchObject({ rawEventId: event.id, providerMessageId: null });
+  });
+
+  async function seedLocalOutbound(conversationId: string, text: string, timestamp: Date): Promise<string> {
+    const id = randomUUID();
+    await prisma.message.create({
+      data: {
+        id,
+        tenantId,
+        conversationId,
+        rawEventId: null,
+        channel: 'INSTAGRAM',
+        externalMessageId: `local:${id}`,
+        direction: 'OUTBOUND',
+        senderId: 'page',
+        text,
+        sourceTimestamp: timestamp,
+        clientIdempotencyKey: randomUUID(),
+        deliveryStatus: 'UNKNOWN',
+        deliveryErrorCode: 'INSTAGRAM_DELIVERY_UNKNOWN',
+      },
+    });
+    return id;
+  }
 });
+
+function echoPayload(recipientId: string, mid: string, text: string, timestamp: Date) {
+  return {
+    object: 'instagram',
+    entry: [{
+      id: 'page',
+      messaging: [{
+        sender: { id: 'page' },
+        recipient: { id: recipientId },
+        timestamp: timestamp.getTime(),
+        message: { mid, is_echo: true, text },
+      }],
+    }],
+  };
+}
 
 async function loadFixture(name: string): Promise<Record<string, unknown>> {
   const content = await readFile(

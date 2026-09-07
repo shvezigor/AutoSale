@@ -1,4 +1,4 @@
-import type { PrismaClient } from '@autosale/database';
+import type { Prisma, PrismaClient } from '@autosale/database';
 
 import { MediaCopyError } from './media-copy.service.js';
 import { normalizeInstagramEvent } from './instagram-normalizer.js';
@@ -72,34 +72,61 @@ export class InstagramProcessor {
           data: { lastMessageAt: normalized.sourceTimestamp },
         });
 
-        const created = await transaction.message.createMany({
-          data: [
-            {
+        const reconciled = normalized.direction === 'OUTBOUND'
+          ? await findOutboundEchoCandidate(transaction, {
               tenantId: event.tenantId,
               conversationId: conversation.id,
-              rawEventId: event.id,
-              channel: 'INSTAGRAM',
-              externalMessageId: normalized.externalMessageId,
-              direction: normalized.direction,
-              senderId: normalized.senderId,
+              providerMessageId: normalized.externalMessageId,
               text: normalized.text,
               sourceTimestamp: normalized.sourceTimestamp,
-            },
-          ],
-          skipDuplicates: true,
-        });
+            })
+          : null;
 
-        const message = await transaction.message.findUniqueOrThrow({
-          where: {
-            tenantId_channel_externalMessageId: {
-              tenantId: event.tenantId,
-              channel: 'INSTAGRAM',
-              externalMessageId: normalized.externalMessageId,
+        let message;
+        let wasCreated = false;
+        if (reconciled) {
+          message = await transaction.message.update({
+            where: { id: reconciled.id },
+            data: {
+              rawEventId: event.id,
+              providerMessageId: normalized.externalMessageId,
+              deliveryStatus: 'SENT',
+              deliveryErrorCode: null,
+              deliveryLeaseId: null,
+              deliveryLeaseExpiresAt: null,
+              nextDeliveryAttemptAt: null,
             },
-          },
-        });
+          });
+        } else {
+          const created = await transaction.message.createMany({
+            data: [
+              {
+                tenantId: event.tenantId,
+                conversationId: conversation.id,
+                rawEventId: event.id,
+                channel: 'INSTAGRAM',
+                externalMessageId: normalized.externalMessageId,
+                direction: normalized.direction,
+                senderId: normalized.senderId,
+                text: normalized.text,
+                sourceTimestamp: normalized.sourceTimestamp,
+              },
+            ],
+            skipDuplicates: true,
+          });
+          wasCreated = created.count === 1;
+          message = await transaction.message.findUniqueOrThrow({
+            where: {
+              tenantId_channel_externalMessageId: {
+                tenantId: event.tenantId,
+                channel: 'INSTAGRAM',
+                externalMessageId: normalized.externalMessageId,
+              },
+            },
+          });
+        }
 
-        if (created.count === 1 && normalized.attachments.length > 0) {
+        if (wasCreated && normalized.attachments.length > 0) {
           await transaction.attachment.createMany({
             data: normalized.attachments.map((attachment) => ({
               messageId: message.id,
@@ -111,7 +138,7 @@ export class InstagramProcessor {
 
         return {
           messageId: message.id,
-          wasCreated: created.count === 1,
+          wasCreated,
           attachments: await transaction.attachment.findMany({
             where: { messageId: message.id, copyStatus: { in: ['PENDING', 'RETRYABLE_FAILURE'] } },
           }),
@@ -156,6 +183,54 @@ export class InstagramProcessor {
       data: { status: 'PROCESSED', processedAt: new Date() },
     });
   }
+}
+
+async function findOutboundEchoCandidate(
+  transaction: Prisma.TransactionClient,
+  input: {
+    tenantId: string;
+    conversationId: string;
+    providerMessageId: string;
+    text: string | null;
+    sourceTimestamp: Date;
+  },
+): Promise<{ id: string } | null> {
+  const providerMatch = await transaction.message.findFirst({
+    where: {
+      tenantId: input.tenantId,
+      conversationId: input.conversationId,
+      direction: 'OUTBOUND',
+      providerMessageId: input.providerMessageId,
+    },
+    select: { id: true },
+  });
+  if (providerMatch) return providerMatch;
+  if (input.text === null) return null;
+
+  const candidates = await transaction.message.findMany({
+    where: {
+      tenantId: input.tenantId,
+      conversationId: input.conversationId,
+      direction: 'OUTBOUND',
+      clientIdempotencyKey: { not: null },
+      providerMessageId: null,
+      sourceTimestamp: {
+        gte: new Date(input.sourceTimestamp.getTime() - 30_000),
+        lte: new Date(input.sourceTimestamp.getTime() + 30_000),
+      },
+    },
+    select: { id: true, text: true },
+    take: 3,
+  });
+  const expectedText = normalizeEchoText(input.text);
+  const matches = candidates.filter((candidate) =>
+    candidate.text !== null && normalizeEchoText(candidate.text) === expectedText,
+  );
+  return matches.length === 1 ? { id: matches[0]!.id } : null;
+}
+
+function normalizeEchoText(value: string): string {
+  return value.normalize('NFKC').replace(/\s+/gu, ' ').trim();
 }
 
 function summarizeError(error: unknown): string {
