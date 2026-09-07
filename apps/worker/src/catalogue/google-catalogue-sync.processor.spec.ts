@@ -169,6 +169,23 @@ describe('GoogleCatalogueSyncProcessor', () => {
     expect(prisma.catalogueImportRun.create).not.toHaveBeenCalled();
   });
 
+  it('reimports a completed revision after its source products were cleared', async () => {
+    prisma.catalogueImportRun.findUnique.mockResolvedValue({
+      id: 'existing-run', status: 'COMPLETED', mappingId, startedAt: new Date(), failedRows: 0,
+    });
+    prisma.product.count.mockResolvedValue(0);
+    const processor = new GoogleCatalogueSyncProcessor(prisma as never, sheets as never, storage, importer);
+
+    await expect(processor.process({ tenantId, sourceId })).resolves.toMatchObject({ status: 'COMPLETED' });
+
+    expect(prisma.product.count).toHaveBeenCalledWith({ where: { tenantId, sourceId } });
+    expect(importer.importTable).toHaveBeenCalledOnce();
+    expect(prisma.catalogueImportRun.updateMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: { id: 'existing-run', tenantId, status: 'COMPLETED' },
+      data: expect.objectContaining({ status: 'PROCESSING', rowErrors: [] }),
+    }));
+  });
+
   it('refreshes and exposes an existing owner preview instead of deadlocking on its idempotency key', async () => {
     prisma.catalogueImportRun.findUnique.mockResolvedValue({ id: 'preview-run', status: 'PREVIEW_READY', sourceSyncVersion: 1 });
     const processor = new GoogleCatalogueSyncProcessor(prisma as never, sheets as never, storage, importer);
@@ -357,7 +374,7 @@ describe('GoogleCatalogueSyncProcessor', () => {
         create: vi.fn().mockImplementation(({ data }) => Promise.resolve({ id: 'run-1', ...data })),
         updateMany: vi.fn().mockResolvedValue({ count: 1 }),
       },
-      product: { findMany: vi.fn().mockResolvedValue([]) },
+      product: { findMany: vi.fn().mockResolvedValue([]), count: vi.fn().mockResolvedValue(1) },
     };
     return { ...delegates, $transaction: vi.fn().mockImplementation((work) => work(delegates)) };
   }

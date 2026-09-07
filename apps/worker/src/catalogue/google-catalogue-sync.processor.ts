@@ -133,7 +133,10 @@ export class GoogleCatalogueSyncProcessor {
       where: { tenantId_idempotencyKey: { tenantId: input.tenantId, idempotencyKey } },
       select: { id: true, status: true, mappingId: true, startedAt: true, failedRows: true },
     });
-    if (existing?.status === 'COMPLETED' && existing.failedRows === 0) {
+    const completedSourceWasCleared = existing?.status === 'COMPLETED' && existing.failedRows === 0
+      ? await this.prisma.product.count({ where: { tenantId: input.tenantId, sourceId: input.sourceId } }) === 0
+      : false;
+    if (existing?.status === 'COMPLETED' && existing.failedRows === 0 && !completedSourceWasCleared) {
       await this.releaseLease(leaseWhere, source.syncSchedule);
       return { status: 'NOOP' as const, revision: table.revision, runId: existing.id };
     }
@@ -159,7 +162,7 @@ export class GoogleCatalogueSyncProcessor {
     }
 
     let runId: string;
-    if (existing && (existing.status === 'FAILED' || existing.status === 'PROCESSING' || (existing.status === 'COMPLETED' && existing.failedRows > 0))) {
+    if (existing && (existing.status === 'FAILED' || existing.status === 'PROCESSING' || (existing.status === 'COMPLETED' && (existing.failedRows > 0 || completedSourceWasCleared)))) {
       const recovered = await this.prisma.catalogueImportRun.updateMany({
         where: { id: existing.id, tenantId: input.tenantId, status: existing.status },
         data: {
