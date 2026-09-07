@@ -1,10 +1,11 @@
 import { getConversation, getConversations } from '../../../../src/api/conversations';
+import { getServerSession } from '../../../../src/auth/session';
 import { InboxShell } from '../../../../src/components/inbox-shell';
-import { MessageThread } from '../../../../src/components/message-thread';
+import { InstagramReplyComposer } from '../../../../src/components/instagram-reply-composer';
 
 export default async function ConversationDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [list, conversation] = await Promise.all([getConversations(), getConversation(id)]);
+  const [list, conversation, session] = await Promise.all([getConversations(), getConversation(id), getServerSession()]);
   const name = conversation.participantName ??
     (conversation.participantUsername ? `@${conversation.participantUsername}` : 'Клієнт Instagram');
   const accountLabel = conversation.participantName && conversation.participantUsername
@@ -20,10 +21,10 @@ export default async function ConversationDetailPage({ params }: { params: Promi
             : <span className="avatar large" aria-hidden="true">{name[0]}</span>}
           <span><h2>{name}</h2><small>{accountLabel}</small></span>
         </header>
-        <div className="thread-scroll"><p className="day-label">Сьогодні</p><MessageThread conversation={conversation} /></div>
-        <div className="composer" aria-label="Поле відповіді недоступне на цьому етапі">
-          <span>Напишіть повідомлення…</span><button disabled type="button">Надіслати</button>
-        </div>
+        <InstagramReplyComposer
+          canManageSettings={session?.membershipRole === 'OWNER'}
+          initialConversation={conversation}
+        />
       </section>
       <aside className="order-panel">
         <h2>Інформація про замовлення</h2>

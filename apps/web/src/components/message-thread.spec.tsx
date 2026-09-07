@@ -10,6 +10,7 @@ const detail: ConversationDetailResponse = {
   participantName: 'Олена',
   participantUsername: 'olena',
   participantAvatarUrl: null,
+  replyCapability: { enabled: true, reason: null },
   messages: [
     {
       id: '22222222-2222-4222-8222-222222222222',
@@ -31,6 +32,7 @@ const detail: ConversationDetailResponse = {
           copyStatus: 'FAILED',
         },
       ],
+      delivery: null,
     },
     {
       id: '55555555-5555-4555-8555-555555555555',
@@ -39,6 +41,7 @@ const detail: ConversationDetailResponse = {
       text: 'Дякую, беремо замовлення в роботу',
       sourceTimestamp: '2026-08-26T08:02:00.000Z',
       attachments: [],
+      delivery: { status: 'SENT', attempts: 1, errorCode: null, retryAllowed: false },
     },
   ],
 };

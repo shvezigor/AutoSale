@@ -462,7 +462,7 @@ git commit -m "fix: reconcile Instagram reply echoes"
 - Consumes: Task 1 reply input/message/detail types; `mutatingFetch`; global `useToast`.
 - Produces: `InstagramReplyComposer({ initialConversation })` owning the live message list and transient polling lifecycle.
 
-- [ ] **Step 1: Write failing component tests**
+- [x] **Step 1: Write failing component tests**
 
 Test:
 
@@ -478,23 +478,23 @@ Test:
 
 Use fake timers for polling and return contract-valid JSON from fetch mocks.
 
-- [ ] **Step 2: Run and verify red**
+- [x] **Step 2: Run and verify red**
 
 Run: `pnpm --filter @autosale/web exec vitest run src/components/instagram-reply-composer.spec.tsx src/components/message-thread.spec.tsx`
 
 Expected: FAIL because the composer and delivery UI do not exist.
 
-- [ ] **Step 3: Add client API mutations and composer state machine**
+- [x] **Step 3: Add client API mutations and composer state machine**
 
 Implement `sendConversationMessage`, `retryConversationMessage`, and `getConversation` parsing every response with shared schemas. Generate the UUID with `crypto.randomUUID()` once per submit attempt and reuse it if the browser retries the same accepted operation.
 
 Render the submitted response immediately. Poll by replacing messages keyed by message ID, never by appending an entire response. Show a success toast only on transition to `SENT` and a persistent error toast on `FAILED` while keeping the inline bubble status as the primary recovery control.
 
-- [ ] **Step 4: Integrate without remounting the workspace shell**
+- [x] **Step 4: Integrate without remounting the workspace shell**
 
 Move the `MessageThread` and composer under the client component while the page remains a server component that supplies `initialConversation`. Replace the disabled placeholder. Style stable composer height, disabled state, character counter near the limit, delivery labels, and retry action for desktop and mobile. Respect `prefers-reduced-motion`.
 
-- [ ] **Step 5: Run web verification**
+- [x] **Step 5: Run web verification**
 
 Run: `pnpm --filter @autosale/web test && pnpm --filter @autosale/web typecheck && pnpm --filter @autosale/web build`
 
