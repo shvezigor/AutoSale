@@ -35,7 +35,7 @@
 - Produces: `OutboundMessageInput`, `ConversationMessage`, `ReplyCapability` inferred types.
 - Consumes: existing Zod conversation list/detail contracts.
 
-- [ ] **Step 1: Write failing contract tests**
+- [x] **Step 1: Write failing contract tests**
 
 Add tests that parse a pending outbound message and reject blank, oversized, and malformed-idempotency inputs:
 
@@ -58,13 +58,13 @@ Also require detail responses to contain:
 replyCapability: { enabled: true, reason: null }
 ```
 
-- [ ] **Step 2: Run the contract tests and verify red**
+- [x] **Step 2: Run the contract tests and verify red**
 
 Run: `pnpm --filter @autosale/contracts exec vitest run src/conversations.spec.ts`
 
 Expected: FAIL because reply schemas and delivery fields do not exist.
 
-- [ ] **Step 3: Add strict Zod schemas**
+- [x] **Step 3: Add strict Zod schemas**
 
 Implement these shapes:
 
@@ -89,13 +89,13 @@ export const replyCapabilitySchema = z.object({
 
 Add `delivery: outboundDeliverySchema.nullable()` to each message and `replyCapability` to detail.
 
-- [ ] **Step 4: Run focused and package tests**
+- [x] **Step 4: Run focused and package tests**
 
 Run: `pnpm --filter @autosale/contracts test && pnpm --filter @autosale/contracts typecheck`
 
 Expected: all contract tests pass and TypeScript reports no error.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add packages/contracts/src/conversations.ts packages/contracts/src/conversations.spec.ts packages/contracts/src/index.ts
