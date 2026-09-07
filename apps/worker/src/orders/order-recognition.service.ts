@@ -21,12 +21,20 @@ export class OrderRecognitionService {
   }> {
     const result = await this.recognizer.recognize(input);
     const productIds = new Set(input.products.map((product) => product.id));
-    const validationIssues = [...result.order.missingFields];
+    const validationIssues: string[] = [];
+
+    if (!result.order.customer.name) validationIssues.push('customer.name');
+    if (!result.order.customer.phone) validationIssues.push('customer.phone');
+    if (!result.order.delivery.city) validationIssues.push('delivery.city');
+    if (!result.order.delivery.address && !result.order.delivery.novaPoshtaBranch) {
+      validationIssues.push('delivery.address');
+    }
 
     result.order.items.forEach((item, index) => {
       if (item.catalogId === null || !productIds.has(item.catalogId)) {
         validationIssues.push(`items.${index}.catalogId`);
       }
+      if (item.quantity < 1) validationIssues.push(`items.${index}.quantity`);
     });
     if (!result.order.isOrder) validationIssues.push('isOrder');
     if (result.order.items.length === 0) validationIssues.push('items');

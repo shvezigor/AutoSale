@@ -3,6 +3,7 @@ import { Prisma, type PrismaClient } from '@autosale/database';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 
 type Extraction = {
+  isOrder?: boolean;
   customer?: ManagerOrder['customer'];
   delivery?: ManagerOrder['delivery'];
   items?: Array<{ quantity?: number; confidence?: number }>;
@@ -82,7 +83,8 @@ export class OrdersService {
 
   private async transition(tenantId: string, id: string, actor: string, status: OrderStatus, action: string): Promise<ManagerOrder> {
     const current = await this.find(tenantId, id);
-    if (status === 'APPROVED' && (jsonStrings(current.validationIssues).length > 0 || current.items.length === 0 || current.items.some((item) => !item.catalogId || item.quantity < 1))) {
+    const currentIssues = validationIssues((current.extraction ?? {}) as Extraction, current.items);
+    if (status === 'APPROVED' && currentIssues.length > 0) {
       throw new BadRequestException('Order has unresolved validation issues');
     }
     const updated = await this.prisma.$transaction(async (tx) => {
@@ -105,7 +107,13 @@ export class OrdersService {
   }
 
   private readonly include = {
-    conversation: { select: { displayName: true, channel: true } },
+    conversation: {
+      select: {
+        displayName: true,
+        channel: true,
+        profile: { select: { displayName: true, username: true } },
+      },
+    },
     items: { orderBy: { createdAt: 'asc' as const } },
     exports: { orderBy: { createdAt: 'desc' as const }, take: 1, include: { destination: { select: { status: true } } } },
   };
@@ -117,14 +125,20 @@ export class OrdersService {
 
   private map(row: Awaited<ReturnType<OrdersService['find']>>, products: Map<string, string>): ManagerOrder {
     const extraction = (row.extraction ?? {}) as Extraction;
+    const customer = {
+      name: extraction.customer?.name ?? null,
+      phone: extraction.customer?.phone ?? null,
+      instagramUsername: extraction.customer?.instagramUsername ?? row.conversation.profile?.username ?? null,
+    };
     return {
       id: row.id,
       status: row.status as OrderStatus,
-      participantName: row.conversation.displayName,
+      participantName: row.conversation.profile?.displayName ?? row.conversation.displayName ??
+        (row.conversation.profile?.username ? `@${row.conversation.profile.username}` : null),
       channel: 'INSTAGRAM',
       overallConfidence: row.overallConfidence,
-      validationIssues: jsonStrings(row.validationIssues),
-      customer: extraction.customer ?? { name: null, phone: null, instagramUsername: null },
+      validationIssues: validationIssues(extraction, row.items),
+      customer,
       delivery: extraction.delivery ?? { city: null, address: null, novaPoshtaBranch: null },
       items: row.items.map((item, index) => ({
         ...item,
@@ -149,6 +163,7 @@ export class OrdersService {
 
 function validationIssues(extraction: Extraction, items: Array<{ catalogId: string | null; quantity: number }>): string[] {
   const issues: string[] = [];
+  if (extraction.isOrder === false) issues.push('isOrder');
   if (!extraction.customer?.name) issues.push('customer.name');
   if (!extraction.customer?.phone) issues.push('customer.phone');
   if (!extraction.delivery?.city) issues.push('delivery.city');
@@ -156,8 +171,4 @@ function validationIssues(extraction: Extraction, items: Array<{ catalogId: stri
   if (items.length === 0) issues.push('items');
   items.forEach((item, index) => { if (!item.catalogId) issues.push(`items.${index}.catalogId`); if (item.quantity < 1) issues.push(`items.${index}.quantity`); });
   return issues;
-}
-
-function jsonStrings(value: Prisma.JsonValue | null): string[] {
-  return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
 }

@@ -13,7 +13,8 @@ export function OrderReviewPanel({ initialOrder }: { initialOrder: ManagerOrder 
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [sheetsExport, setSheetsExport] = useState(initialOrder.sheetsExport);
-  const unresolved = order.validationIssues.length > 0 || draft.items.length === 0 || draft.items.some((item) => !item.catalogId || item.quantity < 1);
+  const reviewIssues = validationHints(order.validationIssues, draft);
+  const unresolved = reviewIssues.length > 0;
   const final = ['APPROVED', 'AUTO_APPROVED', 'CANCELLED'].includes(order.status);
 
   async function transition(action: 'approve' | 'cancel') {
@@ -50,13 +51,38 @@ export function OrderReviewPanel({ initialOrder }: { initialOrder: ManagerOrder 
 
   return <section className="review-panel" aria-labelledby="order-heading">
     <header className="review-heading"><div><h1 id="order-heading">Замовлення</h1><span className={`order-status status-${order.status.toLowerCase()}`}>{statusLabels[order.status] ?? order.status}</span></div><strong>{Math.round((order.overallConfidence ?? 0) * 100)}%<small>впевненість</small></strong></header>
-    {unresolved && <p className="validation-warning">Потрібно заповнити: {order.validationIssues.join(', ') || 'коректний товар'}</p>}
-    <EditableFields title="Клієнт" rows={[['Ім’я', draft.customer.name, (value) => setDraft({ ...draft, customer: { ...draft.customer, name: value } })], ['Телефон', draft.customer.phone, (value) => setDraft({ ...draft, customer: { ...draft.customer, phone: value } })]]} />
-    <EditableFields title="Доставка" rows={[['Місто', draft.delivery.city, (value) => setDraft({ ...draft, delivery: { ...draft.delivery, city: value } })], ['Відділення', draft.delivery.novaPoshtaBranch, (value) => setDraft({ ...draft, delivery: { ...draft.delivery, novaPoshtaBranch: value } })]]} />
+    {unresolved && <section className="validation-warning" aria-labelledby="validation-heading"><strong id="validation-heading">Перевірте дані перед підтвердженням</strong><ul>{reviewIssues.map((issue) => <li key={issue}>{issue}</li>)}</ul></section>}
+    <div className="review-fields-grid">
+      <EditableFields title="Клієнт" rows={[['Ім’я', draft.customer.name, (value) => setDraft({ ...draft, customer: { ...draft.customer, name: value } })], ['Телефон', draft.customer.phone, (value) => setDraft({ ...draft, customer: { ...draft.customer, phone: value } })]]} />
+      <EditableFields title="Доставка" rows={[
+        ['Місто', draft.delivery.city, (value) => setDraft({ ...draft, delivery: { ...draft.delivery, city: value } })],
+        ['Відділення Нової пошти', draft.delivery.novaPoshtaBranch, (value) => setDraft({ ...draft, delivery: { ...draft.delivery, novaPoshtaBranch: value } })],
+        ['Адреса доставки', draft.delivery.address, (value) => setDraft({ ...draft, delivery: { ...draft.delivery, address: value } })],
+      ]} />
+    </div>
     <section className="review-section"><h2>Товари</h2>{draft.items.map((item, index) => <article className="review-item" data-low-confidence={item.confidence < 0.9} key={item.id}><div className="review-item-head"><label><span className="sr-only">Товар {index + 1}</span><select value={item.catalogId ?? ''} onChange={(event) => changeItem(item.id, { catalogId: event.target.value || null, productName: draft.catalogueCandidates.find((candidate) => candidate.sku === event.target.value)?.name ?? null })}><option value="">Оберіть товар</option>{draft.catalogueCandidates.map((candidate) => <option key={candidate.sku} value={candidate.sku}>{candidate.sku} — {candidate.name}</option>)}</select></label><b>{Math.round(item.confidence * 100)}%</b></div><div className="item-edit-grid"><label>Розмір<input value={item.size ?? ''} onChange={(event) => changeItem(item.id, { size: event.target.value || null })} /></label><label>Колір<input value={item.color ?? ''} onChange={(event) => changeItem(item.id, { color: event.target.value || null })} /></label><label>Кількість<input min="1" type="number" value={item.quantity} onChange={(event) => changeItem(item.id, { quantity: Number(event.target.value) })} /></label></div></article>)}</section>
     {sheetsExport && <SheetsExportState value={sheetsExport} pending={pending} retry={() => void retrySheetsExport()} />}
     <div className="review-actions"><button className="secondary" disabled={pending || final} onClick={() => void save()} type="button">Зберегти зміни</button>{saved && <p className="save-success">Зміни збережено</p>}<button disabled={pending || unresolved || final} onClick={() => void transition('approve')} type="button">Підтвердити</button><button className="secondary" disabled={pending || final} onClick={() => void transition('cancel')} type="button">Відхилити</button>{error && <p role="alert">{error}</p>}</div>
   </section>;
+}
+
+function validationHints(issues: string[], draft: ManagerOrder): string[] {
+  const hints = new Set<string>();
+  if (!draft.customer.name) hints.add('Додайте ім’я клієнта');
+  if (!draft.customer.phone) hints.add('Додайте номер телефону клієнта');
+  if (!draft.delivery.city) hints.add('Додайте місто доставки');
+  if (!draft.delivery.novaPoshtaBranch && !draft.delivery.address) {
+    hints.add('Додайте адресу або відділення доставки');
+  }
+  if (draft.items.length === 0) hints.add('Додайте хоча б один товар');
+  draft.items.forEach((item, index) => {
+    if (!item.catalogId) hints.add(`Для товару ${index + 1} виберіть позицію з каталогу`);
+    if (item.quantity < 1) hints.add(`Для товару ${index + 1} вкажіть кількість`);
+  });
+  if (issues.includes('isOrder')) {
+    hints.add('Переписка ще не містить чіткого підтвердження замовлення');
+  }
+  return [...hints];
 }
 
 function SheetsExportState({ value, pending, retry }: { value: NonNullable<ManagerOrder['sheetsExport']>; pending: boolean; retry: () => void }) {

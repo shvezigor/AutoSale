@@ -50,9 +50,26 @@ describe('OrderReviewPanel', () => {
   });
 
   it('does not allow approval when validation issues remain', () => {
-    render(<OrderReviewPanel initialOrder={{ ...order, validationIssues: ['customer.phone'] }} />);
+    render(<OrderReviewPanel initialOrder={{
+      ...order,
+      validationIssues: ['customer.phone'],
+      customer: { ...order.customer, phone: null },
+    }} />);
     expect(screen.getByRole('button', { name: 'Підтвердити' })).toBeDisabled();
-    expect(screen.getByText('Потрібно заповнити: customer.phone')).toBeInTheDocument();
+    expect(screen.getByText('Додайте номер телефону клієнта')).toBeInTheDocument();
+    expect(screen.queryByText('customer.phone')).not.toBeInTheDocument();
+  });
+
+  it('shows one clear product hint for duplicate legacy AI issue paths', () => {
+    render(<OrderReviewPanel initialOrder={{
+      ...order,
+      validationIssues: ['items[0].catalogId', 'items.0.catalogId', 'delivery.address'],
+      delivery: { ...order.delivery, novaPoshtaBranch: '24' },
+      items: [{ ...order.items[0]!, catalogId: null }],
+    }} />);
+
+    expect(screen.getAllByText('Для товару 1 виберіть позицію з каталогу')).toHaveLength(1);
+    expect(screen.queryByText(/delivery\.address|items\[0\]/)).not.toBeInTheDocument();
   });
 
   it('saves manager corrections before approval', async () => {

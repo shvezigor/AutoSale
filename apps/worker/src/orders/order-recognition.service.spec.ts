@@ -48,4 +48,23 @@ describe('OrderRecognitionService', () => {
     expect(result.status).toBe('NEEDS_REVIEW');
     expect(result.validationIssues).toContain('items.0.catalogId');
   });
+
+  it('derives required fields from extracted data instead of trusting contradictory model paths', async () => {
+    const recognize = vi.fn().mockResolvedValue({
+      order: {
+        ...completeOrder,
+        missingFields: ['customer.instagramUsername', 'delivery.address', 'items[0].catalogId'],
+      },
+      metadata: {},
+    });
+    const service = new OrderRecognitionService({ recognize });
+
+    const result = await service.recognize(
+      { messages: [], products: [{ id: 'SKU-1', name: 'Костюм', aliases: [] }] },
+      { approvalMode: 'NEVER', autoApprovalThreshold: 0.9 },
+    );
+
+    expect(result.validationIssues).toEqual([]);
+    expect(result.status).toBe('AUTO_APPROVED');
+  });
 });

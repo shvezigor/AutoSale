@@ -114,8 +114,8 @@ describe('TriggeredOrderProcessor', () => {
     const recognize = vi.fn().mockResolvedValue({
       order: {
         isOrder: true,
-        customer: { name: null, phone: null, instagramUsername: 'ig-customer' },
-        delivery: { city: null, address: null, novaPoshtaBranch: null },
+        customer: { name: 'Іван', phone: '+380501112233', instagramUsername: 'ig-customer' },
+        delivery: { city: 'Львів', address: null, novaPoshtaBranch: '12' },
         items: [
           {
             catalogId: 'SKU-1',

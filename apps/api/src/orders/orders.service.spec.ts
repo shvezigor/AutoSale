@@ -4,9 +4,38 @@ import { describe, expect, it, vi } from 'vitest';
 import { OrdersService } from './orders.service.js';
 
 describe('OrdersService Google Sheets retry', () => {
+  it('uses the current Instagram profile in order summaries and customer data', async () => {
+    const row = {
+      id: 'order-1', tenantId: 'tenant-1', status: 'NEEDS_REVIEW', extraction: {
+        customer: { name: 'Ігор', phone: '+380976536783', instagramUsername: null },
+      }, validationIssues: [], overallConfidence: 0.8,
+      createdAt: new Date('2026-09-07T10:00:00.000Z'),
+      conversation: {
+        displayName: null, channel: 'INSTAGRAM',
+        profile: { displayName: 'Davida Shvets', username: 'davidashvets' },
+      },
+      items: [], exports: [],
+    };
+    const prisma = {
+      order: { findMany: vi.fn().mockResolvedValue([row]) },
+      product: { findMany: vi.fn().mockResolvedValue([]) },
+    };
+
+    const result = await new OrdersService(prisma as never).list('tenant-1');
+
+    expect(result.items[0]).toMatchObject({
+      participantName: 'Davida Shvets',
+      customer: { name: 'Ігор', phone: '+380976536783', instagramUsername: 'davidashvets' },
+    });
+  });
+
   it('returns the pending Sheets export immediately after approval', async () => {
     const baseOrder = {
-      id: 'order-1', tenantId: 'tenant-1', status: 'NEEDS_REVIEW', extraction: {}, validationIssues: [],
+      id: 'order-1', tenantId: 'tenant-1', status: 'NEEDS_REVIEW', extraction: {
+        isOrder: true,
+        customer: { name: 'Олена', phone: '+380671234567', instagramUsername: 'olena' },
+        delivery: { city: 'Київ', address: null, novaPoshtaBranch: '24' },
+      }, validationIssues: [],
       overallConfidence: 1, createdAt: new Date('2026-09-07T10:00:00.000Z'),
       conversation: { displayName: 'Олена', channel: 'INSTAGRAM' },
       items: [{ id: 'item-1', catalogId: 'SKU-1', originalText: 'Товар', quantity: 1, color: null, size: null, confidence: 1 }],

@@ -777,3 +777,34 @@ The approved design is in `docs/superpowers/specs/2026-09-03-google-sign-in-desi
 - [ ] Verify one automatic trigger and one manual order against the real Instagram account in production.
 
 **Dependencies:** Tasks 8–11, 18–19. **Estimated scope:** Small
+
+## Task 39: Stable inbox layout and manager-friendly order review
+
+**Status:** Implemented; production acceptance pending.
+
+**Description:** Keep the conversation list, message history, composer, and order summary in independent viewport regions, and translate AI validation into clear manager actions.
+
+- [x] Give the conversation list and message history independent scrolling.
+- [x] Pin the reply composer to the bottom of the dialogue viewport.
+- [x] Correct the order page grid so the review form uses the available width.
+- [x] Recalculate required fields from extracted data instead of trusting contradictory AI `missingFields` output.
+- [x] Deduplicate validation issues and replace internal paths with Ukrainian guidance.
+- [x] Use enriched Instagram profile data as the customer-name and username fallback.
+- [ ] Verify the revised inbox and order review at desktop and mobile widths in production.
+
+**Dependencies:** Task 38. **Estimated scope:** Small
+
+## Task 40: Optional conversational AI order-intent detection
+
+**Status:** Planned.
+
+**Description:** Add an owner-controlled mode that can recognize a completed sales agreement from the conversation without requiring one exact manager phrase. Keep the deterministic trigger phrase and manual action available.
+
+- [ ] Add modes: trigger phrase only, AI suggestion, and high-confidence AI automation.
+- [ ] Evaluate only new relevant conversation revisions and prevent duplicate orders idempotently.
+- [ ] Require explicit purchase intent plus usable customer, delivery, and product data for automatic creation.
+- [ ] Send uncertain cases to the manager as a proposed order instead of silently creating one.
+- [ ] Show why AI proposed or created the order without exposing internal schema paths.
+- [ ] Track cost, latency, false positives, and manager corrections before enabling automatic mode by default.
+
+**Dependencies:** Tasks 18, 38–39. **Estimated scope:** Medium
