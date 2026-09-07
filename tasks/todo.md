@@ -414,7 +414,12 @@
 
 ## Task 18: Send manual Instagram replies from the AutoSale inbox
 
+**Status:** Design approved; implementation plan ready.
+
 **Description:** Let an authenticated manager reply to an Instagram conversation from AutoSale through the official Instagram Send API. Persist the outbound message idempotently and reconcile it with Meta's echo webhook.
+
+**Design:** `docs/superpowers/specs/2026-09-07-instagram-manual-replies-design.md`  
+**Plan:** `docs/superpowers/plans/2026-09-07-instagram-manual-replies.md`
 
 **Acceptance criteria:**
 - [ ] The conversation page has an accessible message composer with pending, sent, and failed states.
