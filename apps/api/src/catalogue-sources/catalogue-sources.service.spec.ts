@@ -111,7 +111,7 @@ describe('CatalogueSourcesService', () => {
     });
     expect(prisma.catalogueImportRun.findFirst).toHaveBeenCalledWith(expect.objectContaining({
       where: { tenantId, sourceId },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { updatedAt: 'desc' },
     }));
     expect(JSON.stringify(await service.getConfiguration(tenantId, sourceId))).not.toContain('private product');
   });
@@ -136,7 +136,7 @@ describe('CatalogueSourcesService', () => {
     await expect(service.getConfiguration(tenantId, sourceId)).resolves.toMatchObject({ pendingReview: null, latestRun: { status: 'COMPLETED', createdRows: 4, updatedRows: 3, skippedRows: 1, failedRows: 0 } });
     expect(prisma.catalogueImportRun.findFirst).toHaveBeenCalledWith(expect.objectContaining({
       where: { tenantId, sourceId },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { updatedAt: 'desc' },
     }));
   });
 

@@ -114,7 +114,7 @@ export class CatalogueSourcesService {
     });
     if (!source) throw new NotFoundException('Catalogue source not found');
     const latestRun = await this.prisma.catalogueImportRun.findFirst({
-      where: { tenantId, sourceId }, orderBy: { createdAt: 'desc' },
+      where: { tenantId, sourceId }, orderBy: { updatedAt: 'desc' },
       select: { id: true, status: true, sourceHeaders: true, createdRows: true, updatedRows: true, skippedRows: true, failedRows: true },
     });
     const pendingReview = latestRun && ['MAPPING_REVIEW', 'PREVIEW_READY'].includes(latestRun.status)
