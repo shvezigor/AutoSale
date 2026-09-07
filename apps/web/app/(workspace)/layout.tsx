@@ -7,5 +7,7 @@ export default async function WorkspaceLayout({ children }: { children: ReactNod
   const session = await getServerSession();
   if (!session) return null;
 
-  return <AuthenticatedShell session={session}>{children}</AuthenticatedShell>;
+  return <AuthenticatedShell session={session}>
+    <div className="workspace-route-transition">{children}</div>
+  </AuthenticatedShell>;
 }

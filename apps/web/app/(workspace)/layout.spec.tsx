@@ -31,7 +31,7 @@ describe('WorkspaceLayout', () => {
 
     expect(screen.getByRole('link', { name: 'AutoSale' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Меню профілю' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Каталог товарів' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Каталог товарів' }).parentElement).toHaveClass('workspace-route-transition');
   });
 
   it('does not expose workspace content without a session', async () => {

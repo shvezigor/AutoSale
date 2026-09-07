@@ -787,6 +787,8 @@ The approved design is in `docs/superpowers/specs/2026-09-03-google-sign-in-desi
 - [x] Give the conversation list and message history independent scrolling.
 - [x] Pin the reply composer to the bottom of the dialogue viewport.
 - [x] Keep new messages visible while preserving the manager's position when reading older history.
+- [x] Keep the conversation list mounted across chat navigation and update only the center and order panels.
+- [x] Refresh conversation previews independently in the background when Instagram activity changes.
 - [x] Correct the order page grid so the review form uses the available width.
 - [x] Recalculate required fields from extracted data instead of trusting contradictory AI `missingFields` output.
 - [x] Deduplicate validation issues and replace internal paths with Ukrainian guidance.

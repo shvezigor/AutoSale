@@ -3,7 +3,9 @@ import { act, cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const api = vi.hoisted(() => ({ refreshConversationList: vi.fn() }));
+const navigation = vi.hoisted(() => ({ pathname: '/conversations/11111111-1111-4111-8111-111111111111' }));
 vi.mock('../api/conversation-replies', () => api);
+vi.mock('next/navigation', () => ({ usePathname: () => navigation.pathname }));
 
 import { LiveConversationList } from './live-conversation-list';
 
@@ -26,7 +28,9 @@ describe('LiveConversationList', () => {
     api.refreshConversationList.mockResolvedValue({
       items: [{ ...initial[0], lastMessagePreview: 'Нове повідомлення' }], nextCursor: null,
     });
-    render(<LiveConversationList conversations={initial} selectedId={initial[0]!.id} />);
+    render(<LiveConversationList conversations={initial} />);
+
+    expect(screen.getByRole('link', { name: /Олена/ })).toHaveAttribute('data-selected', 'true');
 
     await act(async () => vi.advanceTimersByTimeAsync(3_000));
 

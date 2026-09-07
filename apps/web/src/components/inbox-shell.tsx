@@ -5,11 +5,9 @@ import { LiveConversationList } from './live-conversation-list';
 
 export function InboxShell({
   conversations,
-  selectedId,
   children,
 }: {
   conversations: ConversationListResponse['items'];
-  selectedId?: string;
   children: ReactNode;
 }) {
   return (
@@ -24,7 +22,7 @@ export function InboxShell({
             <input placeholder="Пошук у діалогах" type="search" />
           </label>
         </header>
-        <LiveConversationList conversations={conversations} selectedId={selectedId} />
+        <LiveConversationList conversations={conversations} />
       </section>
       {children}
     </main>

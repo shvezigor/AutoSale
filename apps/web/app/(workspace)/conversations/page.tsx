@@ -1,11 +1,6 @@
-import { getConversations } from '../../../src/api/conversations';
-import { InboxShell } from '../../../src/components/inbox-shell';
-
-export default async function ConversationsPage() {
-  const conversations = await getConversations();
-
+export default function ConversationsPage() {
   return (
-    <InboxShell conversations={conversations.items}>
+    <div className="conversation-detail-transition">
       <section className="conversation-empty">
         <div className="empty-icon" aria-hidden="true">↗</div>
         <h2>Оберіть діалог</h2>
@@ -19,6 +14,6 @@ export default async function ConversationsPage() {
           <p>Оберіть діалог, щоб переглянути дані клієнта.</p>
         </div>
       </aside>
-    </InboxShell>
+    </div>
   );
 }

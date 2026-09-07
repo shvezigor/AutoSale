@@ -1,6 +1,7 @@
 'use client';
 
 import type { ConversationListResponse } from '../../../../packages/contracts/src/conversations';
+import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
 import { refreshConversationList } from '../api/conversation-replies';
@@ -10,11 +11,10 @@ const POLL_INTERVAL_MS = 3_000;
 
 export function LiveConversationList({
   conversations: initialConversations,
-  selectedId,
 }: {
   conversations: ConversationListResponse['items'];
-  selectedId?: string | undefined;
 }) {
+  const pathname = usePathname();
   const [conversations, setConversations] = useState(initialConversations);
   const refreshInFlight = useRef(false);
 
@@ -41,8 +41,14 @@ export function LiveConversationList({
 
   return (
     <>
-      <ConversationList conversations={conversations} selectedId={selectedId} />
+      <ConversationList conversations={conversations} selectedId={selectedConversationId(pathname)} />
       <footer className="dialog-count">Усього діалогів: {conversations.length}</footer>
     </>
   );
+}
+
+function selectedConversationId(pathname: string | null): string | undefined {
+  if (!pathname) return undefined;
+  const match = pathname.match(/^\/conversations\/([^/]+)/);
+  return match?.[1] ? decodeURIComponent(match[1]) : undefined;
 }

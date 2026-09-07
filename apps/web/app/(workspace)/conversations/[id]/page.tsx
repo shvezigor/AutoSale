@@ -1,13 +1,12 @@
-import { getConversation, getConversationOrder, getConversations } from '../../../../src/api/conversations';
+import { getConversation, getConversationOrder } from '../../../../src/api/conversations';
 import { getServerSession } from '../../../../src/auth/session';
-import { InboxShell } from '../../../../src/components/inbox-shell';
 import { InstagramReplyComposer } from '../../../../src/components/instagram-reply-composer';
 import { ConversationOrderPanel } from '../../../../src/components/conversation-order-panel';
 
 export default async function ConversationDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [list, conversation, orderState, session] = await Promise.all([
-    getConversations(), getConversation(id), getConversationOrder(id), getServerSession(),
+  const [conversation, orderState, session] = await Promise.all([
+    getConversation(id), getConversationOrder(id), getServerSession(),
   ]);
   const name = conversation.participantName ??
     (conversation.participantUsername ? `@${conversation.participantUsername}` : 'Клієнт Instagram');
@@ -16,7 +15,7 @@ export default async function ConversationDetailPage({ params }: { params: Promi
     : 'Instagram';
 
   return (
-    <InboxShell conversations={list.items} selectedId={id}>
+    <div className="conversation-detail-transition" key={id}>
       <section className="conversation-panel">
         <header className="conversation-header">
           {conversation.participantAvatarUrl
@@ -27,6 +26,7 @@ export default async function ConversationDetailPage({ params }: { params: Promi
         <InstagramReplyComposer
           canManageSettings={session?.membershipRole === 'OWNER'}
           initialConversation={conversation}
+          key={conversation.id}
         />
       </section>
       <ConversationOrderPanel
@@ -34,7 +34,8 @@ export default async function ConversationDetailPage({ params }: { params: Promi
         customerName={name}
         customerUsername={conversation.participantUsername}
         initialState={orderState}
+        key={id}
       />
-    </InboxShell>
+    </div>
   );
 }

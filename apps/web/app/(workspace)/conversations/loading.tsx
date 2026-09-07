@@ -1,5 +1,7 @@
 import { RouteSkeleton } from '../../../src/components/route-skeleton';
 
 export default function LoadingConversations() {
-  return <RouteSkeleton variant="conversation" />;
+  return <div className="conversation-detail-transition conversation-detail-loading">
+    <RouteSkeleton variant="conversation" />
+  </div>;
 }
