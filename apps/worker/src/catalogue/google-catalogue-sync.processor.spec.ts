@@ -298,6 +298,20 @@ describe('GoogleCatalogueSyncProcessor', () => {
     expect(notifications.catalogueSyncFailed).toHaveBeenCalledWith(tenantId, 'owner-user');
   });
 
+  it('does not publish a final source error while BullMQ still has a retry available', async () => {
+    sheets.readTable.mockRejectedValue(new GoogleSheetsReadError('RETRYABLE', true));
+    const processor = new GoogleCatalogueSyncProcessor(prisma as never, sheets as never, storage, importer, undefined, notifications);
+
+    await expect(processor.process({ tenantId, sourceId, finalAttempt: false } as never)).rejects.toMatchObject({
+      code: 'RETRYABLE', retryable: true,
+    });
+
+    expect(prisma.catalogueSource.updateMany).not.toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({ status: 'ERROR', lastErrorSummary: 'RETRYABLE' }),
+    }));
+    expect(notifications.catalogueSyncFailed).not.toHaveBeenCalled();
+  });
+
   it('pauses without a provider retry when the downloaded table violates local structure bounds', async () => {
     sheets.readTable.mockRejectedValue(new GoogleSheetsTableValidationError('COLUMN_LIMIT', 'Google Sheets table exceeds 100 columns'));
     const processor = new GoogleCatalogueSyncProcessor(prisma as never, sheets as never, storage, importer);

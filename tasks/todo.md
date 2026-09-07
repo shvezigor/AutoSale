@@ -729,14 +729,14 @@ The approved design is in `docs/superpowers/specs/2026-09-03-google-sign-in-desi
 
 ## Task 35: Hybrid AI catalogue structure analysis
 
-**Status:** Implemented; production acceptance with the real supplier sheet remains.
+**Status:** Implemented and verified with the real supplier sheet in production on 7 September 2026.
 
 - [x] Preserve original row and column coordinates for CSV, XLSX, and Google Sheets.
 - [x] Detect multi-row headers and semantic columns with strict OpenAI structured output.
 - [x] Classify obvious rows locally and send only ambiguous rows to AI.
 - [x] Reuse confirmed Google Sheet layouts and pause safely when the structure changes.
 - [x] Show backend-driven progress and concise review context without exposing source rows.
-- [ ] Verify the real MetrDoor sheet after production deployment.
+- [x] Verify the real MetrDoor sheet after production deployment: version-2 analysis found header rows 21–22, data from row 24, confidence 0.97, 46 product rows, and 13 skipped structure rows.
 - [x] Desktop navigation expands to 240 px, collapses to a stable 72 px icon rail, and restores the preference without a first-frame width jump.
 - [x] Active and nested routes expose `aria-current`; collapsed links and icon controls retain accessible names.
 - [x] Mobile navigation remains a modal drawer with backdrop, Escape, focus return, and close-on-navigation behavior.

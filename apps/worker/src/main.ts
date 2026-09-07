@@ -191,7 +191,12 @@ async function bootstrap(): Promise<void> {
         if (!catalogueSyncProcessor) throw new Error('Google catalogue synchronization is unavailable');
         const started = performance.now();
         try {
-          const result = await catalogueSyncProcessor.process({ tenantId: job.data.tenantId, sourceId: job.data.sourceId });
+          const configuredAttempts = typeof job.opts.attempts === 'number' ? job.opts.attempts : 1;
+          const result = await catalogueSyncProcessor.process({
+            tenantId: job.data.tenantId,
+            sourceId: job.data.sourceId,
+            finalAttempt: job.attemptsMade + 1 >= configuredAttempts,
+          });
           if (result.status === 'FAILED') {
             metrics.increment('autosale_operations_total', { operation: 'catalogue_sync', result: 'failure' });
             logger.warn('catalogue_sync_failed', { correlationId: job.data.sourceId, sourceId: job.data.sourceId, errorCode: result.reason });

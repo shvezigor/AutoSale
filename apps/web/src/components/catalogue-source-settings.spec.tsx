@@ -87,6 +87,38 @@ describe('CatalogueSourceSettings', () => {
     expect(screen.getByText('Додано: 234 · оновлено: 0 · пропущено: 0')).toBeInTheDocument();
   });
 
+  it('keeps polling after a retryable Google read failure until the queued retry succeeds', async () => {
+    vi.stubGlobal('fetch', vi.fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          ...configuration,
+          status: 'ERROR',
+          lastErrorSummary: 'RETRYABLE',
+          updatedAt: '2026-09-05T12:00:00Z',
+          latestRun: null,
+        }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          ...configuration,
+          status: 'ACTIVE',
+          lastErrorSummary: null,
+          updatedAt: '2026-09-05T12:00:33Z',
+          latestRun: { id: 'retried-run', status: 'COMPLETED', createdRows: 0, updatedRows: 46, skippedRows: 0, failedRows: 0 },
+        }),
+      }));
+    mutatingFetch.mockResolvedValueOnce({ ok: true, json: async () => configuration }).mockResolvedValueOnce({ ok: true, json: async () => ({ queued: true }) });
+    render(<CatalogueSourceSettings role="OWNER" sources={[source]} configurations={[configuration]} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Завантажити товари' }));
+
+    await screen.findByText('Готово', {}, { timeout: 7000 });
+    expect(screen.getByText('Додано: 0 · оновлено: 46 · пропущено: 0')).toBeInTheDocument();
+    expect(screen.queryByText('Не вдалося завантажити товари')).not.toBeInTheDocument();
+  }, 8000);
+
   it('shows the current source error instead of a stale completed import', () => {
     render(<CatalogueSourceSettings role="OWNER" sources={[{ ...source, status: 'PAUSED', lastErrorSummary: 'TABLE_COLUMN_LIMIT' }]} configurations={[{
       ...configuration,

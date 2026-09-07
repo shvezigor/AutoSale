@@ -40,7 +40,7 @@ export class GoogleCatalogueSyncProcessor {
     this.importer = importer ?? { importTable: (input) => importCatalogueTable(prisma, input) };
   }
 
-  async process(input: { tenantId: string; sourceId: string }) {
+  async process(input: { tenantId: string; sourceId: string; finalAttempt?: boolean }) {
     const source = await this.prisma.catalogueSource.findFirst({
       where: { id: input.sourceId, tenantId: input.tenantId, type: 'GOOGLE_SHEETS' },
       select: { id: true, createdByUserId: true, spreadsheetId: true, sheetName: true, credentialRef: true, syncSchedule: true, syncVersion: true, syncLeaseId: true, syncLeaseExpiresAt: true },
@@ -92,6 +92,10 @@ export class GoogleCatalogueSyncProcessor {
         : error instanceof GoogleOAuthAccessError
           ? new GoogleSheetsReadError('AUTHORIZATION', false)
           : new GoogleSheetsReadError('RETRYABLE', true);
+      if (failure.retryable && input.finalAttempt === false) {
+        await this.releaseLease(leaseWhere, source.syncSchedule);
+        throw failure;
+      }
       await this.prisma.catalogueSource.updateMany({ where: leaseWhere, data: {
         status: failure.code === 'AUTHORIZATION' ? 'DISCONNECTED' : 'ERROR', lastErrorSummary: failure.code,
         syncLeaseId: null, syncLeaseExpiresAt: null,

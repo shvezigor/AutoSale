@@ -62,7 +62,8 @@ export function CatalogueSourceSettings({
         if (controller.signal.aborted) return;
         const changed = next.updatedAt !== tracking!.updatedAt;
         const terminal = ['COMPLETED', 'FAILED', 'MAPPING_REVIEW', 'PREVIEW_READY'].includes(next.latestRun?.status ?? '');
-        if (changed && (next.lastErrorSummary || (terminal && (next.latestRun?.id !== tracking!.previousRun || next.status === 'ACTIVE')))) {
+        const retryPending = next.lastErrorSummary === 'RETRYABLE' || next.lastErrorSummary === 'RATE_LIMIT';
+        if (changed && ((!retryPending && next.lastErrorSummary) || (terminal && (next.latestRun?.id !== tracking!.previousRun || next.status === 'ACTIVE')))) {
           setCurrent(next); setTracking(null); setMessage(null);
           toast.show(next.lastErrorSummary || next.latestRun?.status === 'FAILED'
             ? { type: 'error', title: 'Не вдалося завантажити товари', message: 'Причину показано в картці джерела.' }
@@ -75,7 +76,7 @@ export function CatalogueSourceSettings({
       } catch {
         if (controller.signal.aborted) return;
       }
-      if (Date.now() - tracking!.started > 5 * 60_000) {
+      if (Date.now() - tracking!.started > 10 * 60_000) {
         setTracking(null); setMessage('Обробка триває довше очікуваного. Результат буде в центрі сповіщень.'); return;
       }
       timer = setTimeout(() => void poll(), 2000);
