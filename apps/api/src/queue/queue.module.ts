@@ -2,6 +2,7 @@ import { DynamicModule, Module } from '@nestjs/common';
 import { Queue } from 'bullmq';
 
 export const INSTAGRAM_NORMALIZE_QUEUE = Symbol('INSTAGRAM_NORMALIZE_QUEUE');
+export const INSTAGRAM_QUEUE = Symbol('INSTAGRAM_QUEUE');
 
 @Module({})
 export class QueueModule {
@@ -30,8 +31,12 @@ export class QueueModule {
               },
             }),
         },
+        {
+          provide: INSTAGRAM_QUEUE,
+          useExisting: INSTAGRAM_NORMALIZE_QUEUE,
+        },
       ],
-      exports: [INSTAGRAM_NORMALIZE_QUEUE],
+      exports: [INSTAGRAM_NORMALIZE_QUEUE, INSTAGRAM_QUEUE],
     };
   }
 }

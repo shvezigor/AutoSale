@@ -1,26 +1,30 @@
 import {
   conversationQuerySchema,
+  outboundMessageInputSchema,
   type ConversationDetailResponse,
   type ConversationListResponse,
+  type ConversationMessage,
 } from '@autosale/contracts/conversations';
 import type { AuthPrincipal } from '@autosale/contracts/auth';
 import {
   BadRequestException,
+  Body,
   Controller,
   Get,
   Inject,
   Param,
   ParseUUIDPipe,
+  Post,
   Query,
 } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { ZodError } from 'zod';
 
 import { CurrentPrincipal, RequireMembership } from '../auth/auth.decorators.js';
 import { ConversationsService } from './conversations.service.js';
 
 type OpenApiSchema = {
-  type: 'array' | 'object' | 'string';
+  type: 'array' | 'boolean' | 'integer' | 'object' | 'string';
   format?: string;
   nullable?: boolean;
   enum?: string[];
@@ -62,6 +66,38 @@ export class ConversationsController {
   ): Promise<ConversationDetailResponse> {
     return this.conversations.detail(principal.tenantId!, id);
   }
+
+  @Post(':id/messages')
+  @ApiOperation({ summary: 'Send an Instagram conversation reply' })
+  @ApiCreatedResponse({ schema: conversationMessageOpenApiSchema() })
+  send(
+    @CurrentPrincipal() principal: AuthPrincipal,
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Body() raw: unknown,
+  ): Promise<ConversationMessage> {
+    try {
+      return this.conversations.send(
+        principal.tenantId!,
+        principal.userId,
+        id,
+        outboundMessageInputSchema.parse(raw),
+      );
+    } catch (error) {
+      if (error instanceof ZodError) throw new BadRequestException('Invalid Instagram reply');
+      throw error;
+    }
+  }
+
+  @Post(':id/messages/:messageId/retry')
+  @ApiOperation({ summary: 'Retry a safely retryable Instagram reply' })
+  @ApiCreatedResponse({ schema: conversationMessageOpenApiSchema() })
+  retry(
+    @CurrentPrincipal() principal: AuthPrincipal,
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Param('messageId', new ParseUUIDPipe({ version: '4' })) messageId: string,
+  ): Promise<ConversationMessage> {
+    return this.conversations.retry(principal.tenantId!, principal.userId, id, messageId);
+  }
 }
 
 function conversationListOpenApiSchema(): OpenApiSchema {
@@ -93,27 +129,51 @@ function conversationListOpenApiSchema(): OpenApiSchema {
 function conversationDetailOpenApiSchema(): OpenApiSchema {
   return {
   type: 'object',
-  required: ['id', 'channel', 'participantName', 'participantUsername', 'participantAvatarUrl', 'messages'],
+  required: ['id', 'channel', 'participantName', 'participantUsername', 'participantAvatarUrl', 'replyCapability', 'messages'],
   properties: {
     id: { type: 'string', format: 'uuid' },
     channel: { type: 'string', enum: ['INSTAGRAM'] },
     participantName: { type: 'string', nullable: true },
     participantUsername: { type: 'string', nullable: true },
     participantAvatarUrl: { type: 'string', nullable: true },
+    replyCapability: {
+      type: 'object',
+      required: ['enabled', 'reason'],
+      properties: {
+        enabled: { type: 'boolean' },
+        reason: { type: 'string', nullable: true, enum: ['NOT_CONNECTED', 'RECONNECT_REQUIRED'] },
+      },
+    },
     messages: {
       type: 'array',
-      items: {
+      items: conversationMessageOpenApiSchema(),
+    },
+  },
+  };
+}
+
+function conversationMessageOpenApiSchema(): OpenApiSchema {
+  return {
+    type: 'object',
+    required: ['id', 'direction', 'senderId', 'text', 'sourceTimestamp', 'attachments', 'delivery'],
+    properties: {
+      id: { type: 'string', format: 'uuid' },
+      direction: { type: 'string', enum: ['INBOUND', 'OUTBOUND'] },
+      senderId: { type: 'string' },
+      text: { type: 'string', nullable: true },
+      sourceTimestamp: { type: 'string', format: 'date-time' },
+      attachments: { type: 'array', items: { type: 'object' } },
+      delivery: {
         type: 'object',
+        nullable: true,
+        required: ['status', 'attempts', 'errorCode', 'retryAllowed'],
         properties: {
-          id: { type: 'string', format: 'uuid' },
-          direction: { type: 'string', enum: ['INBOUND', 'OUTBOUND'] },
-          senderId: { type: 'string' },
-          text: { type: 'string', nullable: true },
-          sourceTimestamp: { type: 'string', format: 'date-time' },
-          attachments: { type: 'array', items: { type: 'object' } },
+          status: { type: 'string', enum: ['PENDING', 'SENDING', 'SENT', 'FAILED', 'UNKNOWN'] },
+          attempts: { type: 'integer' },
+          errorCode: { type: 'string', nullable: true },
+          retryAllowed: { type: 'boolean' },
         },
       },
     },
-  },
   };
 }

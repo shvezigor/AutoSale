@@ -1,11 +1,12 @@
-import { readFile } from 'node:fs/promises';
+import { randomUUID } from 'node:crypto';
+import { readFile, readdir } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
 import { createPrismaClient, type PrismaClient } from '@autosale/database';
-import { NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { PostgreSqlContainer, type StartedPostgreSqlContainer } from '@testcontainers/postgresql';
 import pg from 'pg';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ConversationsService } from './conversations.service.js';
 
@@ -14,26 +15,24 @@ describe('ConversationsService', () => {
   let prisma: PrismaClient;
   let service: ConversationsService;
   let tenantId: string;
+  let otherTenantId: string;
+  let actorUserId: string;
   let newestId: string;
   let usernameOnlyId: string;
+  const queue = { add: vi.fn() };
 
   beforeAll(async () => {
     container = await new PostgreSqlContainer('postgres:17.6-alpine').start();
     const connectionString = container.getConnectionUri();
     const pool = new pg.Pool({ connectionString });
-    for (const migrationName of [
-      '20260826090000_init_webhook_events',
-      '20260826123000_conversations_messages',
-      '20260827160000_self_hosted_auth',
-      '20260827170000_tenant_access_status',
-      '20260828150000_instagram_oauth_attempt_guard',
-      '20260902090000_instagram_customer_profiles',
-    ]) {
+    const migrationsPath = resolve(process.cwd(), '../../packages/database/prisma/migrations');
+    const migrationNames = (await readdir(migrationsPath, { withFileTypes: true }))
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => entry.name)
+      .sort((left, right) => migrationOrderKey(left).localeCompare(migrationOrderKey(right)));
+    for (const migrationName of migrationNames) {
       const sql = await readFile(
-        resolve(
-          process.cwd(),
-          `../../packages/database/prisma/migrations/${migrationName}/migration.sql`,
-        ),
+        resolve(migrationsPath, migrationName, 'migration.sql'),
         'utf8',
       );
       await pool.query(sql);
@@ -43,7 +42,24 @@ describe('ConversationsService', () => {
     const tenant = await prisma.tenant.create({ data: { key: 'a', name: 'A' } });
     const otherTenant = await prisma.tenant.create({ data: { key: 'b', name: 'B' } });
     tenantId = tenant.id;
-    service = new ConversationsService(prisma);
+    otherTenantId = otherTenant.id;
+    const actor = await prisma.user.create({
+      data: { email: 'manager@example.com', name: 'Manager', status: 'ACTIVE' },
+    });
+    actorUserId = actor.id;
+    await prisma.tenantMembership.create({
+      data: { tenantId, userId: actorUserId, role: 'MANAGER', status: 'ACTIVE' },
+    });
+    await prisma.instagramConnection.create({
+      data: {
+        tenantId,
+        externalAccountId: 'instagram-shop-account',
+        status: 'ACTIVE',
+        encryptedAccessToken: 'encrypted-token',
+        tokenExpiresAt: new Date('2099-01-01T00:00:00.000Z'),
+      },
+    });
+    service = new ConversationsService(prisma, queue);
 
     const event = await prisma.webhookEvent.create({
       data: { tenantId, provider: 'META', externalEventId: 'seed-a', payload: {} },
@@ -109,6 +125,10 @@ describe('ConversationsService', () => {
     await container?.stop();
   });
 
+  beforeEach(() => {
+    queue.add.mockReset().mockResolvedValue(undefined);
+  });
+
   it('orders newest first, isolates the tenant, and paginates by cursor', async () => {
     const first = await service.list(tenantId, { limit: 2 });
     const second = await service.list(tenantId, { limit: 2, cursor: first.nextCursor! });
@@ -169,4 +189,152 @@ describe('ConversationsService', () => {
       NotFoundException,
     );
   });
+
+  it('creates one durable outbound reply and replays the same idempotency key', async () => {
+    const idempotencyKey = randomUUID();
+
+    const first = await service.send(tenantId, actorUserId, newestId, {
+      text: '  Вітаю  ',
+      idempotencyKey,
+    });
+    const replay = await service.send(tenantId, actorUserId, newestId, {
+      text: 'Вітаю',
+      idempotencyKey,
+    });
+
+    expect(first).toMatchObject({
+      direction: 'OUTBOUND',
+      senderId: 'instagram-shop-account',
+      text: 'Вітаю',
+      delivery: { status: 'PENDING', attempts: 0, errorCode: null, retryAllowed: false },
+    });
+    expect(replay.id).toBe(first.id);
+    await expect(prisma.message.count({
+      where: { tenantId, clientIdempotencyKey: idempotencyKey },
+    })).resolves.toBe(1);
+    expect(queue.add).toHaveBeenCalledTimes(1);
+    expect(queue.add).toHaveBeenCalledWith(
+      'instagram.message.send',
+      { tenantId, messageId: first.id },
+      { jobId: first.id, attempts: 1, removeOnComplete: true, removeOnFail: true },
+    );
+  });
+
+  it('keeps an accepted reply durable when queue wake-up fails', async () => {
+    queue.add.mockRejectedValueOnce(new Error('redis-details-that-must-not-leak'));
+    const idempotencyKey = randomUUID();
+
+    const sent = await service.send(tenantId, actorUserId, newestId, {
+      text: 'Відповідь збережена',
+      idempotencyKey,
+    });
+
+    expect(sent.delivery?.status).toBe('PENDING');
+    await expect(prisma.message.findFirst({
+      where: { tenantId, clientIdempotencyKey: idempotencyKey },
+    })).resolves.toMatchObject({ id: sent.id, deliveryStatus: 'PENDING' });
+  });
+
+  it('does not expose a foreign conversation through send', async () => {
+    const foreign = await prisma.conversation.findFirstOrThrow({
+      where: { tenantId: otherTenantId },
+    });
+
+    await expect(service.send(tenantId, actorUserId, foreign.id, {
+      text: 'Вітаю',
+      idempotencyKey: randomUUID(),
+    })).rejects.toBeInstanceOf(NotFoundException);
+    expect(queue.add).not.toHaveBeenCalled();
+  });
+
+  it('blocks replies when the tenant Instagram connection requires authorization', async () => {
+    await prisma.instagramConnection.update({
+      where: { tenantId },
+      data: { status: 'REAUTH_REQUIRED' },
+    });
+    try {
+      await expect(service.send(tenantId, actorUserId, newestId, {
+        text: 'Вітаю',
+        idempotencyKey: randomUUID(),
+      })).rejects.toBeInstanceOf(BadRequestException);
+      expect(queue.add).not.toHaveBeenCalled();
+    } finally {
+      await prisma.instagramConnection.update({
+        where: { tenantId },
+        data: { status: 'ACTIVE' },
+      });
+    }
+  });
+
+  it('limits accepted replies to 30 per manager and tenant in a rolling minute', async () => {
+    await prisma.message.deleteMany({
+      where: { tenantId, sentByUserId: actorUserId, direction: 'OUTBOUND' },
+    });
+    const now = new Date();
+    await prisma.message.createMany({
+      data: Array.from({ length: 30 }, (_, index) => ({
+        tenantId,
+        conversationId: newestId,
+        rawEventId: null,
+        channel: 'INSTAGRAM',
+        externalMessageId: `local:${randomUUID()}`,
+        direction: 'OUTBOUND',
+        senderId: 'instagram-shop-account',
+        text: `Reply ${index}`,
+        sourceTimestamp: now,
+        clientIdempotencyKey: randomUUID(),
+        sentByUserId: actorUserId,
+        deliveryStatus: 'PENDING' as const,
+        nextDeliveryAttemptAt: now,
+      })),
+    });
+
+    await expect(service.send(tenantId, actorUserId, newestId, {
+      text: 'Вітаю',
+      idempotencyKey: randomUUID(),
+    })).rejects.toMatchObject({ status: 429 });
+    expect(queue.add).not.toHaveBeenCalled();
+  });
+
+  it('retries only a safely retryable rate-limited reply', async () => {
+    await prisma.message.deleteMany({
+      where: { tenantId, sentByUserId: actorUserId, direction: 'OUTBOUND' },
+    });
+    const retryable = await prisma.message.create({
+      data: {
+        tenantId,
+        conversationId: newestId,
+        rawEventId: null,
+        channel: 'INSTAGRAM',
+        externalMessageId: `local:${randomUUID()}`,
+        direction: 'OUTBOUND',
+        senderId: 'instagram-shop-account',
+        text: 'Повторити',
+        sourceTimestamp: new Date(),
+        clientIdempotencyKey: randomUUID(),
+        sentByUserId: actorUserId,
+        deliveryStatus: 'FAILED',
+        deliveryAttempts: 1,
+        deliveryErrorCode: 'INSTAGRAM_RATE_LIMITED',
+      },
+    });
+
+    const result = await service.retry(tenantId, actorUserId, newestId, retryable.id);
+
+    expect(result.delivery).toEqual({
+      status: 'PENDING', attempts: 1, errorCode: null, retryAllowed: false,
+    });
+    expect(queue.add).toHaveBeenCalledWith(
+      'instagram.message.send',
+      { tenantId, messageId: retryable.id },
+      { jobId: retryable.id, attempts: 1, removeOnComplete: true, removeOnFail: true },
+    );
+
+    await expect(service.retry(tenantId, actorUserId, newestId, retryable.id))
+      .rejects.toBeInstanceOf(BadRequestException);
+  });
 });
+
+function migrationOrderKey(name: string): string {
+  return name === '20260828_meta_instagram_oauth' ? '20260828000000_meta_instagram_oauth' : name;
+}

@@ -252,7 +252,7 @@ git commit -m "feat: send Instagram text messages"
 - Produces: `ConversationsService.send(tenantId, actorUserId, conversationId, input)` and `retry(tenantId, actorUserId, conversationId, messageId)`.
 - Produces queue job `instagram.message.send` with `{ tenantId, messageId }` and `jobId: messageId`.
 
-- [ ] **Step 1: Write failing service tests**
+- [x] **Step 1: Write failing service tests**
 
 Test active connection creation, replay, tenant isolation, inactive connection, rate limit, and retry state:
 
@@ -266,13 +266,13 @@ expect(queue.add).toHaveBeenCalledWith('instagram.message.send', { tenantId: 'te
 
 Set the initial limit to 30 accepted replies per user/tenant rolling minute. A queue-add rejection must not roll back the durable message and must not expose Redis details.
 
-- [ ] **Step 2: Run focused service tests and verify red**
+- [x] **Step 2: Run focused service tests and verify red**
 
 Run: `pnpm --filter @autosale/api exec vitest run src/conversations/conversations.service.spec.ts`
 
 Expected: FAIL because send/retry do not exist.
 
-- [ ] **Step 3: Implement service methods and response mapping**
+- [x] **Step 3: Implement service methods and response mapping**
 
 Inside a Prisma transaction: find `{ id, tenantId, channel: 'INSTAGRAM' }`, verify an `ACTIVE` tenant connection with non-expired credential, enforce the rolling limit, and upsert/find by tenant/client key. Create:
 
@@ -292,11 +292,11 @@ Update conversation activity in the same transaction. After commit, call `queue.
 
 Map `replyCapability` from the tenant connection and map message delivery with `retryAllowed` true only when status is `FAILED`, error code is `INSTAGRAM_RATE_LIMITED`, and the connection is active. The retry service enforces the same predicate server-side.
 
-- [ ] **Step 4: Write failing controller tests**
+- [x] **Step 4: Write failing controller tests**
 
 Add authenticated POST tests for manager and owner, missing/invalid CSRF, invalid body, cross-tenant ID, and retry. Validate each response with the shared schema and assert OpenAPI contains both routes.
 
-- [ ] **Step 5: Implement controller endpoints and queue wiring**
+- [x] **Step 5: Implement controller endpoints and queue wiring**
 
 Parse bodies with `outboundMessageInputSchema`. Add:
 
@@ -314,13 +314,13 @@ retry(@CurrentPrincipal() principal, @Param('id', uuidPipe) id, @Param('messageI
 
 Export the existing Instagram queue under a neutral token or add `INSTAGRAM_QUEUE` while preserving `INSTAGRAM_NORMALIZE_QUEUE` compatibility. Import `QueueModule.register(env.REDIS_URL)` in `ConversationsModule`. Every send/retry job uses `{ jobId: message.id, attempts: 1, removeOnComplete: true, removeOnFail: true }`; database state owns retries and removing the completed wake-up job permits a later safe manual retry of the same message.
 
-- [ ] **Step 6: Run API conversation checks**
+- [x] **Step 6: Run API conversation checks**
 
 Run: `pnpm --filter @autosale/api exec vitest run src/conversations && pnpm --filter @autosale/api typecheck`
 
 Expected: service and controller tests pass.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add apps/api/src/conversations apps/api/src/queue/queue.module.ts

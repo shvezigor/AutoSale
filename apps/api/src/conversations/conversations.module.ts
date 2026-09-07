@@ -3,19 +3,22 @@ import { createPrismaClient } from '@autosale/database';
 import { DynamicModule, Module } from '@nestjs/common';
 
 import { ConversationsController } from './conversations.controller.js';
-import { ConversationsService } from './conversations.service.js';
+import { ConversationsService, type InstagramMessageQueue } from './conversations.service.js';
+import { INSTAGRAM_QUEUE, QueueModule } from '../queue/queue.module.js';
 
 @Module({})
 export class ConversationsModule {
   static register(env: ApiEnv): DynamicModule {
     return {
       module: ConversationsModule,
+      imports: [QueueModule.register(env.REDIS_URL)],
       controllers: [ConversationsController],
       providers: [
         {
           provide: ConversationsService,
-          useFactory: () =>
-            new ConversationsService(createPrismaClient(env.DATABASE_URL)),
+          inject: [INSTAGRAM_QUEUE],
+          useFactory: (queue: InstagramMessageQueue) =>
+            new ConversationsService(createPrismaClient(env.DATABASE_URL), queue),
         },
       ],
     };
