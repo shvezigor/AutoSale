@@ -6,7 +6,7 @@
 
 **Acceptance criteria:**
 - [ ] Meta webhook verification and one real message event are demonstrated.
-- [ ] A tenant owner can authorize Google and grant access only to a selected private test spreadsheet through Picker.
+- [x] A tenant owner can authorize Google and grant access only to a selected private test spreadsheet through Picker.
 - [ ] Required approvals, credentials, and unresolved vendor gates are documented.
 
 **Verification:**
@@ -528,7 +528,7 @@ The approved design is in `docs/superpowers/specs/2026-09-02-google-sheets-oauth
 **Description:** Replace raw ID-only onboarding with owner sign-in, Picker selection, server validation, and tab selection.
 
 **Acceptance criteria:**
-- [ ] Owner selects only Google Sheets files explicitly shared with AutoSale.
+- [x] Owner selects only Google Sheets files explicitly shared with AutoSale.
 - [x] Backend verifies file type/access and lists real tabs before saving.
 - [x] Cancellation, inaccessible files, deleted files, and provider errors are actionable.
 
@@ -541,7 +541,7 @@ The approved design is in `docs/superpowers/specs/2026-09-02-google-sheets-oauth
 **Description:** Feed tenant access tokens into the existing Google catalogue, AI mapping, and scheduled synchronization pipeline.
 
 **Acceptance criteria:**
-- [ ] Selected private sheet can create a mapping review and confirmed catalogue import.
+- [x] Selected private sheet can create a mapping review and confirmed catalogue import.
 - [x] Scheduled/manual sync refreshes tokens without browser presence.
 - [x] Revoked access pauses safely and preserves the last valid catalogue.
 
@@ -580,7 +580,7 @@ The approved design is in `docs/superpowers/specs/2026-09-02-google-sheets-oauth
 **Description:** Verify the complete private-Sheets workflow, migrate away from production service-account use, and prepare Google verification.
 
 **Acceptance criteria:**
-- [ ] Real OAuth → Picker → catalogue import → AI mapping → order export flow passes.
+- [x] Real OAuth → Picker → catalogue import → AI mapping → order export flow passes.
 - [ ] Revoke, reconnect, disconnect, deleted-tab, quota, and restart recovery cases pass.
 - [ ] Production branding, domains, policies, scopes, evidence, and credentials are configured.
 
@@ -694,8 +694,8 @@ The approved design is in `docs/superpowers/specs/2026-09-03-google-sign-in-desi
 - [x] A one-tab order spreadsheet is saved and validated automatically; multi-tab files ask for one tab choice.
 - [x] API source summaries remain tenant-safe and managers cannot inspect owner data.
 - [x] Automated regression suite passes: web 84, worker 96, API 273 tests; production web build passes.
-- [ ] Run the complete production OAuth → Picker → catalogue import → order export flow against a real customer spreadsheet.
-- [ ] Verify desktop/mobile layout in the deployed Docker stack after merge.
+- [x] Run the complete production OAuth → Picker → catalogue import → order export flow against a real customer spreadsheet.
+- [x] Verify desktop/mobile layout in the deployed Docker stack after merge.
 
 **Dependencies:** Tasks 20–28. **Estimated scope:** Medium
 
@@ -747,3 +747,11 @@ The approved design is in `docs/superpowers/specs/2026-09-03-google-sign-in-desi
 **Verification:** `pnpm test` — web 118, API 292, worker 105, config 18, contracts 20, database 14, integrations 73, observability 5 tests passed; `pnpm typecheck`; `pnpm --filter @autosale/web build`; `git diff --check`; Docker Compose rebuild and health checks.
 
 **Dependencies:** Tasks 35–36. **Estimated scope:** Medium
+
+## Production Google Sheets acceptance — 7 September 2026
+
+- [x] Owner OAuth connection and Google Picker operate on `https://sales-aito.com` without exposing credentials.
+- [x] The selected MetrDoor sheet reused the structure plan for its exact source revision and imported 46 of 46 products after a full catalogue clear.
+- [x] A reviewed test order was corrected against the current catalogue, approved, and exported to the selected `SalesOrder` sheet.
+- [x] The export completed once on row 2 with status `SUCCEEDED`, one attempt, and no error summary.
+- [x] AutoSale displayed both the 46-product catalogue and the successful Google Sheets row number after a fresh page load.
