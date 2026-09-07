@@ -18,5 +18,6 @@ docker compose up -d --build
 
 - [Google Sign-In](docs/integrations/google-sign-in.md) — вхід користувачів і створення workspace.
 - [Google Sheets](docs/integrations/google-sheets-access.md) — окреме підключення таблиць клієнта.
+- [Meta / Instagram](docs/integrations/meta-access.md) — OAuth, webhook, вхідні повідомлення та відповіді з діалогу AutoSale.
 
 Google Sign-In і Google Sheets OAuth мають різні призначення, scopes, токени та життєві цикли.

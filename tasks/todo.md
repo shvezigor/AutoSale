@@ -414,7 +414,7 @@
 
 ## Task 18: Send manual Instagram replies from the AutoSale inbox
 
-**Status:** Design approved; implementation plan ready.
+**Status:** Implemented and automated verification complete; real Meta acceptance remains.
 
 **Description:** Let an authenticated manager reply to an Instagram conversation from AutoSale through the official Instagram Send API. Persist the outbound message idempotently and reconcile it with Meta's echo webhook.
 
@@ -423,14 +423,14 @@
 **Plan:** `docs/superpowers/plans/2026-09-07-instagram-manual-replies.md`
 
 **Acceptance criteria:**
-- [ ] The conversation page has an accessible message composer with pending, sent, and failed states.
-- [ ] The API sends text replies only for an active tenant-bound Instagram connection and never exposes the access token.
-- [ ] Meta echo webhooks reconcile with the locally initiated reply without creating duplicate messages.
-- [ ] Provider limits and expired/revoked credentials produce actionable errors and safe retry behavior.
-- [ ] A configured manager confirmation phrase sent from AutoSale can trigger the existing AI order-recognition flow exactly once.
+- [x] The conversation page has an accessible message composer with pending, sent, and failed states.
+- [x] The API sends text replies only for an active tenant-bound Instagram connection and never exposes the access token.
+- [x] Meta echo webhooks reconcile with the locally initiated reply without creating duplicate messages.
+- [x] Provider limits and expired/revoked credentials produce actionable errors and safe retry behavior.
+- [x] A configured manager confirmation phrase sent from AutoSale can trigger the existing AI order-recognition flow exactly once.
 
 **Verification:**
-- [ ] Unit and integration tests cover authorization, Send API errors, idempotency, and echo reconciliation.
+- [x] Unit and integration tests cover authorization, Send API errors, idempotency, and echo reconciliation.
 - [ ] Browser test sends a reply from AutoSale and observes it once in both Instagram and the AutoSale conversation.
 - [ ] End-to-end test confirms that a manager reply containing a trigger phrase starts AI order recognition.
 

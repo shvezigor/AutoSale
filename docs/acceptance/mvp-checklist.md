@@ -20,10 +20,13 @@
 - [x] 2026-09-03: tenant Google OAuth, одноразовий state, encrypted refresh token, reconnect і fenced cleanup покриті тестами.
 - [x] 2026-09-03: Google Picker, server-side file/tab validation, catalogue import і exactly-once order export використовують tenant OAuth.
 - [x] 2026-09-03: owner/manager Google settings privacy boundary, 476 tests, typecheck і production build пройшли локально.
+- [x] 2026-09-07: ручні Instagram-відповіді покриті контрактами, tenant authorization, idempotency, durable delivery, безпечними status/retry та echo reconciliation тестами.
+- [x] 2026-09-07: web-композер перевірено для Enter/Shift+Enter, optimistic pending, late echo після UNKNOWN, retry без нового bubble та недоступного підключення.
 
 ## Потребує зовнішніх тестових доступів
 
 - [ ] Надіслати реальне текстове повідомлення та фото в Instagram Professional account.
+- [ ] Надіслати реальну відповідь з AutoSale, побачити її один раз в Instagram і AutoSale та зафіксувати лише санітизовані ID/статуси.
 - [ ] Підтвердити один callback у Meta dashboard і перевірити signature/event ID evidence без PII.
 - [ ] Запустити OpenAI extraction на погодженому тестовому діалозі й перевірити поля менеджером.
 - [ ] Перевірити режими approval `ALWAYS`, `NEVER`, `ON_LOW_CONFIDENCE` на реальних запитах.

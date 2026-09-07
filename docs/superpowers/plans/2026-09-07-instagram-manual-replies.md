@@ -500,7 +500,7 @@ Run: `pnpm --filter @autosale/web test && pnpm --filter @autosale/web typecheck 
 
 Expected: all web tests, types, and production build pass.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add apps/web/src apps/web/app
@@ -520,7 +520,7 @@ git commit -m "feat: add Instagram reply composer"
 - Consumes: complete API, worker, Meta adapter, and UI flow.
 - Produces: executable fixture acceptance and documented real-Meta acceptance gate.
 
-- [ ] **Step 1: Add a failing browser acceptance test**
+- [x] **Step 1: Add a failing browser acceptance test**
 
 Using authenticated fixture data and a stub Meta endpoint, verify: open conversation, send text, see pending, worker succeeds, see sent once after polling, reload and still see one message. Add a transient failure followed by retry and confirm the same message ID/bubble is reused.
 
@@ -530,11 +530,11 @@ Run: `pnpm exec playwright test tests/e2e/instagram-manual-replies.spec.ts`
 
 Expected: FAIL until the full stack fixture wiring supports outbound delivery.
 
-- [ ] **Step 3: Complete fixture wiring and operational notes**
+- [x] **Step 3: Complete fixture wiring and operational notes**
 
 Document the required `instagram_business_manage_messages` permission, the Meta app review dependency, the customer-initiated conversation restriction, safe failure codes, and the real acceptance steps. Mark only automated criteria complete; keep real Meta checks open until the app role/permission gate is resolved.
 
-- [ ] **Step 4: Run the full verification gate**
+- [x] **Step 4: Run the full verification gate**
 
 Run:
 
@@ -549,7 +549,7 @@ docker compose --env-file .env build api worker web
 
 Expected: zero test failures, zero type/build errors, no whitespace errors, and all three production images build.
 
-- [ ] **Step 5: Deploy locally and verify health**
+- [x] **Step 5: Deploy locally and verify health**
 
 Run:
 
@@ -560,7 +560,7 @@ docker compose --env-file .env ps
 
 Verify API and worker health inside their containers and `https://sales-aito.com/health/live` returns HTTP 200. Perform fixture browser acceptance on desktop and mobile widths.
 
-- [ ] **Step 6: Commit and push**
+- [x] **Step 6: Commit and push**
 
 ```bash
 git add tests/e2e tasks/todo.md README.md
