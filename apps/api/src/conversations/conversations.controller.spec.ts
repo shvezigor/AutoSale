@@ -2,6 +2,8 @@ import {
   conversationDetailResponseSchema,
   conversationListResponseSchema,
   conversationMessageSchema,
+  conversationOrderStartResponseSchema,
+  conversationOrderStateSchema,
 } from '@autosale/contracts/conversations';
 import type { AuthPrincipal } from '@autosale/contracts/auth';
 import { BadRequestException, type INestApplication, NotFoundException } from '@nestjs/common';
@@ -36,6 +38,8 @@ describe('ConversationsController', () => {
   const detail = vi.fn();
   const send = vi.fn();
   const retry = vi.fn();
+  const createOrder = vi.fn();
+  const orderState = vi.fn();
   const resolveSession = vi.fn();
   const csrf = new CsrfService('c'.repeat(32));
   const outboundMessage = {
@@ -74,6 +78,8 @@ describe('ConversationsController', () => {
     });
     send.mockReset().mockResolvedValue(outboundMessage);
     retry.mockReset().mockResolvedValue(outboundMessage);
+    createOrder.mockReset().mockResolvedValue({ orderId: null, queued: true });
+    orderState.mockReset().mockResolvedValue({ order: null });
     resolveSession.mockReset().mockImplementation(async (token: string) => {
       if (token === 'owner-token') return owner;
       if (token === 'manager-token') return manager;
@@ -82,7 +88,7 @@ describe('ConversationsController', () => {
     const moduleRef = await Test.createTestingModule({
       controllers: [ConversationsController],
       providers: [
-        { provide: ConversationsService, useValue: { list, detail, send, retry } },
+        { provide: ConversationsService, useValue: { list, detail, send, retry, createOrder, orderState } },
         { provide: SessionService, useValue: { resolve: resolveSession } },
         { provide: CsrfService, useValue: csrf },
         { provide: AUTH_HTTP_CONFIG, useValue: { cookieName: 'autosale_session', production: false } },
@@ -190,6 +196,26 @@ describe('ConversationsController', () => {
     expect(retry).toHaveBeenCalledWith(tenantId, manager.userId, conversationId, messageId);
   });
 
+  it('starts and reports manual AI order recognition', async () => {
+    const headers = {
+      Cookie: 'autosale_session=manager-token',
+      'x-csrf-token': csrf.issue(manager.sessionId),
+    };
+    const started = await request(app!.getHttpServer())
+      .post(`/api/conversations/${conversationId}/order`)
+      .set(headers)
+      .expect(201);
+    const state = await request(app!.getHttpServer())
+      .get(`/api/conversations/${conversationId}/order`)
+      .set('Cookie', 'autosale_session=manager-token')
+      .expect(200);
+
+    expect(() => conversationOrderStartResponseSchema.parse(started.body)).not.toThrow();
+    expect(() => conversationOrderStateSchema.parse(state.body)).not.toThrow();
+    expect(createOrder).toHaveBeenCalledWith(tenantId, conversationId);
+    expect(orderState).toHaveBeenCalledWith(tenantId, conversationId);
+  });
+
   it('publishes all endpoints with response schemas in OpenAPI', () => {
     const document = SwaggerModule.createDocument(app!, new DocumentBuilder().build());
 
@@ -197,6 +223,8 @@ describe('ConversationsController', () => {
     expect(document.paths['/api/conversations/{id}']?.get?.responses?.['200']).toBeDefined();
     expect(document.paths['/api/conversations/{id}/messages']?.post?.responses?.['201']).toBeDefined();
     expect(document.paths['/api/conversations/{id}/messages/{messageId}/retry']?.post?.responses?.['201']).toBeDefined();
+    expect(document.paths['/api/conversations/{id}/order']?.get?.responses?.['200']).toBeDefined();
+    expect(document.paths['/api/conversations/{id}/order']?.post?.responses?.['201']).toBeDefined();
     const response = document.paths['/api/conversations']?.get?.responses?.['200'];
     expect(JSON.stringify(response)).toContain('participantAvatarUrl');
     expect(JSON.stringify(response)).toContain('participantUsername');

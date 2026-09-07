@@ -4,6 +4,8 @@ import type {
   ConversationDetailResponse,
   ConversationListResponse,
   ConversationMessage,
+  ConversationOrderStartResponse,
+  ConversationOrderState,
   ConversationQuery,
   OutboundMessageInput,
 } from '@autosale/contracts/conversations';
@@ -22,6 +24,11 @@ interface ConversationCursor {
 }
 
 export interface InstagramMessageQueue {
+  add(
+    name: 'instagram.order.create',
+    data: { tenantId: string; triggerMessageId: string },
+    options: { jobId: string; attempts: 1; removeOnComplete: true; removeOnFail: true },
+  ): Promise<unknown>;
   add(
     name: 'instagram.message.send',
     data: { tenantId: string; messageId: string },
@@ -140,6 +147,63 @@ export class ConversationsService {
         isDeliveryConnectionActive(connection, new Date()),
       )),
     };
+  }
+
+  async orderState(tenantId: string, conversationId: string): Promise<ConversationOrderState> {
+    const conversation = await this.prisma.conversation.findFirst({
+      where: { id: conversationId, tenantId, channel: 'INSTAGRAM' },
+      include: {
+        messages: {
+          orderBy: [{ sourceTimestamp: 'desc' }, { id: 'desc' }],
+          take: 1,
+          select: { id: true },
+        },
+      },
+    });
+    if (!conversation) throw new NotFoundException('Conversation not found');
+    const latestMessage = conversation.messages[0];
+    if (!latestMessage) return { order: null };
+    const order = await this.prisma.order.findFirst({
+      where: { triggerMessageId: latestMessage.id, tenantId, conversationId },
+      select: { id: true, status: true },
+    });
+    return { order: order ? {
+      id: order.id,
+      status: order.status as NonNullable<ConversationOrderState['order']>['status'],
+    } : null };
+  }
+
+  async createOrder(tenantId: string, conversationId: string): Promise<ConversationOrderStartResponse> {
+    const conversation = await this.prisma.conversation.findFirst({
+      where: { id: conversationId, tenantId, channel: 'INSTAGRAM' },
+      include: {
+        messages: {
+          orderBy: [{ sourceTimestamp: 'desc' }, { id: 'desc' }],
+          take: 1,
+          select: { id: true },
+        },
+      },
+    });
+    if (!conversation) throw new NotFoundException('Conversation not found');
+    const latestMessage = conversation.messages[0];
+    if (!latestMessage) throw new BadRequestException('Conversation has no messages');
+    const existing = await this.prisma.order.findFirst({
+      where: { triggerMessageId: latestMessage.id, tenantId, conversationId },
+      select: { id: true },
+    });
+    if (existing) return { orderId: existing.id, queued: false };
+
+    await this.queue.add(
+      'instagram.order.create',
+      { tenantId, triggerMessageId: latestMessage.id },
+      {
+        jobId: `manual-order-${latestMessage.id}`,
+        attempts: 1,
+        removeOnComplete: true,
+        removeOnFail: true,
+      },
+    );
+    return { orderId: null, queued: true };
   }
 
   async send(

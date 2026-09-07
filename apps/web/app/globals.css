@@ -159,6 +159,7 @@ button:disabled { opacity: .72; cursor: not-allowed; }
 .order-empty strong { font-size: 15px; }
 .order-empty p { max-width: 240px; color: var(--muted); line-height: 1.5; font-size: 12px; }
 .order-empty button { width: 100%; margin-top: 12px; }
+.order-empty .button-link { margin-top: 12px; text-decoration: none; }
 .customer-data { margin-top: 30px; }
 .customer-data h3 { padding-bottom: 12px; border-bottom: 1px solid var(--border); font-size: 14px; }
 .customer-data dl { margin: 0; }

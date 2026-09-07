@@ -5,7 +5,7 @@ import type {
   ConversationMessage,
 } from '../../../../packages/contracts/src/conversations';
 import Link from 'next/link';
-import { type FormEvent, type KeyboardEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { type FormEvent, type KeyboardEvent, useEffect, useRef, useState } from 'react';
 
 import {
   refreshConversation,
@@ -17,8 +17,6 @@ import { useToast } from './toast-provider';
 
 const MAX_MESSAGE_LENGTH = 1_000;
 const POLL_INTERVAL_MS = 2_000;
-const POLL_TIMEOUT_MS = 60_000;
-const TRANSIENT_STATUSES = new Set(['PENDING', 'SENDING', 'UNKNOWN']);
 
 export function InstagramReplyComposer({
   initialConversation,
@@ -32,7 +30,7 @@ export function InstagramReplyComposer({
   const [submitting, setSubmitting] = useState(false);
   const [retryingMessageId, setRetryingMessageId] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const pollingStartedAt = useRef<number | null>(null);
+  const refreshInFlight = useRef(false);
   const deliveryStatuses = useRef(new Map(
     initialConversation.messages.map((message) => [message.id, message.delivery?.status ?? null]),
   ));
@@ -43,10 +41,6 @@ export function InstagramReplyComposer({
     && !submitting
     && trimmedText.length > 0
     && trimmedText.length <= MAX_MESSAGE_LENGTH;
-  const hasTransientMessages = useMemo(
-    () => conversation.messages.some((message) => message.delivery && TRANSIENT_STATUSES.has(message.delivery.status)),
-    [conversation.messages],
-  );
 
   function mergeMessage(message: ConversationMessage) {
     setConversation((current) => {
@@ -105,15 +99,11 @@ export function InstagramReplyComposer({
   }
 
   useEffect(() => {
-    if (!hasTransientMessages) {
-      pollingStartedAt.current = null;
-      return;
-    }
-    pollingStartedAt.current ??= Date.now();
     let cancelled = false;
 
     const poll = async () => {
-      if (cancelled || Date.now() - (pollingStartedAt.current ?? 0) >= POLL_TIMEOUT_MS) return;
+      if (cancelled || document.visibilityState === 'hidden' || refreshInFlight.current) return;
+      refreshInFlight.current = true;
       try {
         const refreshed = await refreshConversation(conversation.id);
         if (cancelled) return;
@@ -135,6 +125,8 @@ export function InstagramReplyComposer({
         setConversation(refreshed);
       } catch {
         // A temporary refresh failure must not duplicate an outbound message.
+      } finally {
+        refreshInFlight.current = false;
       }
     };
 
@@ -143,7 +135,7 @@ export function InstagramReplyComposer({
       cancelled = true;
       window.clearInterval(timer);
     };
-  }, [conversation.id, hasTransientMessages, toast]);
+  }, [conversation.id, toast]);
 
   const disabledReason = !conversation.replyCapability.enabled
     ? replyDisabledText(conversation.replyCapability.reason)

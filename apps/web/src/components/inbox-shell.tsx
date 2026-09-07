@@ -1,7 +1,7 @@
 import type { ConversationListResponse } from '../../../../packages/contracts/src/conversations';
 import type { ReactNode } from 'react';
 
-import { ConversationList } from './conversation-list';
+import { LiveConversationList } from './live-conversation-list';
 
 export function InboxShell({
   conversations,
@@ -24,8 +24,7 @@ export function InboxShell({
             <input placeholder="Пошук у діалогах" type="search" />
           </label>
         </header>
-        <ConversationList conversations={conversations} selectedId={selectedId} />
-        <footer className="dialog-count">Усього діалогів: {conversations.length}</footer>
+        <LiveConversationList conversations={conversations} selectedId={selectedId} />
       </section>
       {children}
     </main>

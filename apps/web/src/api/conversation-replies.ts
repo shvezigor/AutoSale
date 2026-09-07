@@ -1,8 +1,14 @@
 import {
   conversationDetailResponseSchema,
+  conversationListResponseSchema,
   conversationMessageSchema,
+  conversationOrderStartResponseSchema,
+  conversationOrderStateSchema,
   type ConversationDetailResponse,
+  type ConversationListResponse,
   type ConversationMessage,
+  type ConversationOrderStartResponse,
+  type ConversationOrderState,
   type OutboundMessageInput,
 } from '../../../../packages/contracts/src/conversations';
 import { mutatingFetch } from '../auth/csrf-fetch';
@@ -22,6 +28,27 @@ export async function refreshConversation(id: string): Promise<ConversationDetai
   return parseResponse(
     await fetch(`/api/conversations/${encodeURIComponent(id)}`, { cache: 'no-store' }),
     conversationDetailResponseSchema.parse,
+  );
+}
+
+export async function refreshConversationList(): Promise<ConversationListResponse> {
+  return parseResponse(
+    await fetch('/api/conversations?limit=50', { cache: 'no-store' }),
+    conversationListResponseSchema.parse,
+  );
+}
+
+export async function refreshConversationOrder(id: string): Promise<ConversationOrderState> {
+  return parseResponse(
+    await fetch(`/api/conversations/${encodeURIComponent(id)}/order`, { cache: 'no-store' }),
+    conversationOrderStateSchema.parse,
+  );
+}
+
+export async function createConversationOrder(id: string): Promise<ConversationOrderStartResponse> {
+  return parseResponse(
+    await mutatingFetch(`/api/conversations/${encodeURIComponent(id)}/order`, { method: 'POST' }),
+    conversationOrderStartResponseSchema.parse,
   );
 }
 

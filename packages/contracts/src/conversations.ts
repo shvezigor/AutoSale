@@ -69,9 +69,25 @@ export const conversationDetailResponseSchema = z.object({
   messages: z.array(conversationMessageSchema),
 });
 
+export const conversationOrderSummarySchema = z.object({
+  id: z.string().uuid(),
+  status: z.enum(['AI_PROCESSING', 'AI_FAILED', 'NEEDS_REVIEW', 'AUTO_APPROVED', 'APPROVED', 'CANCELLED']),
+});
+
+export const conversationOrderStateSchema = z.object({
+  order: conversationOrderSummarySchema.nullable(),
+});
+
+export const conversationOrderStartResponseSchema = z.object({
+  orderId: z.string().uuid().nullable(),
+  queued: z.boolean(),
+});
+
 export type ConversationQuery = z.infer<typeof conversationQuerySchema>;
 export type ConversationListResponse = z.infer<typeof conversationListResponseSchema>;
 export type ConversationDetailResponse = z.infer<typeof conversationDetailResponseSchema>;
 export type ConversationMessage = z.infer<typeof conversationMessageSchema>;
 export type OutboundMessageInput = z.infer<typeof outboundMessageInputSchema>;
 export type ReplyCapability = z.infer<typeof replyCapabilitySchema>;
+export type ConversationOrderState = z.infer<typeof conversationOrderStateSchema>;
+export type ConversationOrderStartResponse = z.infer<typeof conversationOrderStartResponseSchema>;

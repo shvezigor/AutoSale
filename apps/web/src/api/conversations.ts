@@ -1,8 +1,10 @@
 import {
   conversationDetailResponseSchema,
   conversationListResponseSchema,
+  conversationOrderStateSchema,
   type ConversationDetailResponse,
   type ConversationListResponse,
+  type ConversationOrderState,
 } from '../../../../packages/contracts/src/conversations';
 import { authenticatedApiFetch } from '../auth/session';
 
@@ -25,6 +27,13 @@ export async function getConversation(id: string): Promise<ConversationDetailRes
   return request(
     `/api/conversations/${encodeURIComponent(id)}`,
     conversationDetailResponseSchema.parse,
+  );
+}
+
+export async function getConversationOrder(id: string): Promise<ConversationOrderState> {
+  return request(
+    `/api/conversations/${encodeURIComponent(id)}/order`,
+    conversationOrderStateSchema.parse,
   );
 }
 

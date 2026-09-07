@@ -247,6 +247,47 @@ describe('ConversationsService', () => {
     expect(queue.add).not.toHaveBeenCalled();
   });
 
+  it('queues AI recognition for the latest message when a manager creates an order manually', async () => {
+    const latest = await prisma.message.findFirstOrThrow({
+      where: { tenantId, conversationId: newestId },
+      orderBy: [{ sourceTimestamp: 'desc' }, { id: 'desc' }],
+    });
+
+    const result = await service.createOrder(tenantId, newestId);
+
+    expect(result).toEqual({ orderId: null, queued: true });
+    expect(queue.add).toHaveBeenCalledWith(
+      'instagram.order.create',
+      { tenantId, triggerMessageId: latest.id },
+      { jobId: `manual-order-${latest.id}`, attempts: 1, removeOnComplete: true, removeOnFail: true },
+    );
+  });
+
+  it('returns the existing latest order without queueing a duplicate recognition', async () => {
+    const latest = await prisma.message.findFirstOrThrow({
+      where: { tenantId, conversationId: newestId },
+      orderBy: [{ sourceTimestamp: 'desc' }, { id: 'desc' }],
+    });
+    const existing = await prisma.order.create({
+      data: {
+        tenantId, conversationId: newestId, triggerMessageId: latest.id,
+        status: 'AI_PROCESSING', promptVersion: 'instagram-order-v1',
+      },
+    });
+
+    try {
+      await expect(service.orderState(tenantId, newestId)).resolves.toEqual({
+        order: { id: existing.id, status: 'AI_PROCESSING' },
+      });
+      await expect(service.createOrder(tenantId, newestId)).resolves.toEqual({
+        orderId: existing.id, queued: false,
+      });
+      expect(queue.add).not.toHaveBeenCalled();
+    } finally {
+      await prisma.order.delete({ where: { id: existing.id } });
+    }
+  });
+
   it('blocks replies when the tenant Instagram connection requires authorization', async () => {
     await prisma.instagramConnection.update({
       where: { tenantId },

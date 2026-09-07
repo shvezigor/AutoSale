@@ -112,7 +112,26 @@ describe('InstagramReplyComposer', () => {
     await act(async () => vi.advanceTimersByTimeAsync(2_000));
     expect(screen.getByText('Надіслано')).toBeVisible();
     await act(async () => vi.advanceTimersByTimeAsync(4_000));
-    expect(api.refreshConversation).toHaveBeenCalledTimes(2);
+    expect(api.refreshConversation).toHaveBeenCalledTimes(4);
+  });
+
+  it('shows a new inbound message without reloading or switching conversations', async () => {
+    vi.useFakeTimers();
+    const inbound = {
+      id: '55555555-5555-4555-8555-555555555555',
+      direction: 'INBOUND' as const,
+      senderId: 'instagram-customer',
+      text: 'Моя адреса — Луцьк',
+      sourceTimestamp: '2026-09-07T12:01:00.000Z',
+      attachments: [],
+      delivery: null,
+    };
+    api.refreshConversation.mockResolvedValue({ ...conversation, messages: [inbound] });
+    renderComposer();
+
+    await act(async () => vi.advanceTimersByTimeAsync(2_000));
+
+    expect(screen.getByText('Моя адреса — Луцьк')).toBeVisible();
   });
 
   it('shows connection guidance and disables replies', () => {

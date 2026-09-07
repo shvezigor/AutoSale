@@ -137,6 +137,19 @@ async function bootstrap(): Promise<void> {
     'instagram',
     async (job) => {
       if (
+        job.name === 'instagram.order.create' &&
+        typeof job.data?.tenantId === 'string' &&
+        typeof job.data?.triggerMessageId === 'string'
+      ) {
+        const trigger = await prisma.message.findFirst({
+          where: { id: job.data.triggerMessageId, tenantId: job.data.tenantId },
+          select: { id: true },
+        });
+        if (!trigger) throw new Error('Manual order trigger message not found');
+        await orderProcessor.process(trigger.id);
+        return;
+      }
+      if (
         job.name === 'instagram.message.send' &&
         typeof job.data?.tenantId === 'string' &&
         typeof job.data?.messageId === 'string'

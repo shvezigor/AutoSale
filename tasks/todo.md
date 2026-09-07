@@ -762,3 +762,18 @@ The approved design is in `docs/superpowers/specs/2026-09-03-google-sign-in-desi
 - [x] The export completed once on row 2 with status `SUCCEEDED`, one attempt, and no error summary.
 - [x] AutoSale displayed both the 46-product catalogue and the successful Google Sheets row number after a fresh page load.
 - [x] Approval now returns the newly queued export and the order screen shows `Очікує синхронізації` immediately, without a manual refresh.
+
+## Task 38: Live Instagram inbox and manual AI order creation
+
+**Status:** Implemented; production acceptance pending.
+
+**Description:** Keep the open Instagram dialogue and conversation list current without a page reload, and let a manager explicitly start AI order recognition when no configured confirmation phrase was sent.
+
+- [x] Refresh an open conversation in the background and render new inbound messages without switching chats.
+- [x] Refresh conversation previews and ordering without remounting the workspace page.
+- [x] Replace the disabled placeholder with a tenant-scoped manual order action.
+- [x] Process manual requests through the same AI recognition, approval, catalogue matching, and Sheets export pipeline as automatic triggers.
+- [x] Keep repeated clicks idempotent for the latest message and expose the latest order state in the conversation.
+- [ ] Verify one automatic trigger and one manual order against the real Instagram account in production.
+
+**Dependencies:** Tasks 8–11, 18–19. **Estimated scope:** Small

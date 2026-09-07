@@ -1,9 +1,13 @@
 import {
   conversationQuerySchema,
+  conversationOrderStartResponseSchema,
+  conversationOrderStateSchema,
   outboundMessageInputSchema,
   type ConversationDetailResponse,
   type ConversationListResponse,
   type ConversationMessage,
+  type ConversationOrderStartResponse,
+  type ConversationOrderState,
 } from '@autosale/contracts/conversations';
 import type { AuthPrincipal } from '@autosale/contracts/auth';
 import {
@@ -65,6 +69,26 @@ export class ConversationsController {
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
   ): Promise<ConversationDetailResponse> {
     return this.conversations.detail(principal.tenantId!, id);
+  }
+
+  @Get(':id/order')
+  @ApiOperation({ summary: 'Get the latest order for a conversation' })
+  @ApiOkResponse({ schema: zodObjectOpenApiSchema(conversationOrderStateSchema) })
+  orderState(
+    @CurrentPrincipal() principal: AuthPrincipal,
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ): Promise<ConversationOrderState> {
+    return this.conversations.orderState(principal.tenantId!, id);
+  }
+
+  @Post(':id/order')
+  @ApiOperation({ summary: 'Start AI order recognition for a conversation' })
+  @ApiCreatedResponse({ schema: zodObjectOpenApiSchema(conversationOrderStartResponseSchema) })
+  createOrder(
+    @CurrentPrincipal() principal: AuthPrincipal,
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ): Promise<ConversationOrderStartResponse> {
+    return this.conversations.createOrder(principal.tenantId!, id);
   }
 
   @Post(':id/messages')
@@ -174,6 +198,27 @@ function conversationMessageOpenApiSchema(): OpenApiSchema {
           retryAllowed: { type: 'boolean' },
         },
       },
+    },
+  };
+}
+
+function zodObjectOpenApiSchema(schema: typeof conversationOrderStateSchema | typeof conversationOrderStartResponseSchema): OpenApiSchema {
+  if (schema === conversationOrderStateSchema) {
+    return {
+      type: 'object', required: ['order'], properties: {
+        order: {
+          type: 'object', nullable: true, required: ['id', 'status'], properties: {
+            id: { type: 'string', format: 'uuid' },
+            status: { type: 'string', enum: ['AI_PROCESSING', 'AI_FAILED', 'NEEDS_REVIEW', 'AUTO_APPROVED', 'APPROVED', 'CANCELLED'] },
+          },
+        },
+      },
+    };
+  }
+  return {
+    type: 'object', required: ['orderId', 'queued'], properties: {
+      orderId: { type: 'string', format: 'uuid', nullable: true },
+      queued: { type: 'boolean' },
     },
   };
 }
