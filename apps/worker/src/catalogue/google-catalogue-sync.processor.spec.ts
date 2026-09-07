@@ -95,7 +95,7 @@ describe('GoogleCatalogueSyncProcessor', () => {
     const structurePlan = {
       version: 2, headerStartRow: 1, headerEndRow: 1, dataStartRow: 2, structureConfidence: 0.98,
       columns: [{ index: 0, label: 'Name', target: 'name', confidence: 0.99 }, { index: 1, label: 'Price', target: 'price', confidence: 0.99 }],
-      productRowNumbers: [2], skippedRowNumbers: [], sourceRowNumbers: [2], sourceRevision: 'old',
+      productRowNumbers: [2], skippedRowNumbers: [], sourceRowNumbers: [2], sourceRevision: 'new',
     };
     prisma.catalogueMapping.findFirst.mockResolvedValue({
       ...mapping,
@@ -114,6 +114,55 @@ describe('GoogleCatalogueSyncProcessor', () => {
     await expect(processor.process({ tenantId, sourceId })).resolves.toMatchObject({ status: 'COMPLETED' });
     expect(structureAnalyzer.analyze).not.toHaveBeenCalled();
     expect(importer.importTable).toHaveBeenCalledWith(expect.objectContaining({ rows: [['Luna', 99]], sourceRowNumbers: [2] }));
+  });
+
+  it('selects the confirmed structure plan for the current source revision instead of the newest unrelated plan', async () => {
+    const matchingPlan = {
+      version: 2, headerStartRow: 21, headerEndRow: 22, dataStartRow: 24, structureConfidence: 0.98,
+      columns: [{ index: 0, label: 'Name', target: 'name', confidence: 0.99 }, { index: 1, label: 'Price', target: 'price', confidence: 0.99 }],
+      productRowNumbers: [24, 25], skippedRowNumbers: [23], sourceRowNumbers: [24, 25], sourceRevision: 'current-revision',
+    };
+    const unrelatedNewestPlan = {
+      ...matchingPlan, headerStartRow: 1, headerEndRow: 1, dataStartRow: 2,
+      productRowNumbers: [2], skippedRowNumbers: [], sourceRowNumbers: [2], sourceRevision: 'other-revision',
+    };
+    const matchingMapping = {
+      ...mapping, version: 6, sourceFingerprint: googleSheetsStructureFingerprint(['Name', 'Price']),
+      columns: [{ source: 'name', target: 'name' }, { source: 'price', target: 'price' }],
+      transformSettings: { structurePlan: matchingPlan },
+    };
+    const newestMapping = { ...matchingMapping, version: 7, transformSettings: { structurePlan: unrelatedNewestPlan } };
+    prisma.catalogueMapping.findFirst.mockImplementation(async (query: { where?: { transformSettings?: unknown } }) => (
+      query.where?.transformSettings ? matchingMapping : newestMapping
+    ));
+    const matrix = {
+      revision: 'current-revision',
+      rows: [
+        { rowNumber: 1, cells: ['Unrelated', 'Header'] },
+        { rowNumber: 2, cells: ['Wrong row', 1] },
+        { rowNumber: 21, cells: ['Name', 'Price'] },
+        { rowNumber: 22, cells: ['', ''] },
+        { rowNumber: 24, cells: ['Luna', 99] },
+        { rowNumber: 25, cells: ['Nova', 149] },
+      ],
+    };
+    const structureAnalyzer = { analyze: vi.fn() };
+    const processor = new GoogleCatalogueSyncProcessor(
+      prisma as never, { readMatrix: vi.fn().mockResolvedValue(matrix) } as never, storage, importer, undefined, notifications,
+      { structureAnalyzer, ambiguousRows: { classify: vi.fn().mockResolvedValue([]) } },
+    );
+
+    await expect(processor.process({ tenantId, sourceId })).resolves.toMatchObject({ status: 'COMPLETED' });
+
+    expect(prisma.catalogueMapping.findFirst).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({
+        transformSettings: { path: ['structurePlan', 'sourceRevision'], equals: 'current-revision' },
+      }),
+    }));
+    expect(structureAnalyzer.analyze).not.toHaveBeenCalled();
+    expect(importer.importTable).toHaveBeenCalledWith(expect.objectContaining({
+      rows: [['Luna', 99], ['Nova', 149]], sourceRowNumbers: [24, 25],
+    }));
   });
 
   it('does not mutate the catalogue when fresh structure analysis is uncertain', async () => {

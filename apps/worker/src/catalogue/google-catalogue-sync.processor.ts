@@ -237,7 +237,12 @@ export class GoogleCatalogueSyncProcessor {
     userId: string | null,
   ): Promise<{ table: { headers: string[]; rows: GoogleSheetsCell[][]; revision: string; sourceRowNumbers: number[] }; confident: boolean }> {
     const existing = await this.prisma.catalogueMapping.findFirst({
-      where: { tenantId: input.tenantId, sourceId: input.sourceId, confirmedAt: { not: null } },
+      where: {
+        tenantId: input.tenantId,
+        sourceId: input.sourceId,
+        confirmedAt: { not: null },
+        transformSettings: { path: ['structurePlan', 'sourceRevision'], equals: matrix.revision },
+      },
       orderBy: { version: 'desc' },
       select: { id: true, version: true, sourceFingerprint: true, columns: true, transformSettings: true },
     });
