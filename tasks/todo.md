@@ -755,3 +755,4 @@ The approved design is in `docs/superpowers/specs/2026-09-03-google-sign-in-desi
 - [x] A reviewed test order was corrected against the current catalogue, approved, and exported to the selected `SalesOrder` sheet.
 - [x] The export completed once on row 2 with status `SUCCEEDED`, one attempt, and no error summary.
 - [x] AutoSale displayed both the 46-product catalogue and the successful Google Sheets row number after a fresh page load.
+- [x] Approval now returns the newly queued export and the order screen shows `Очікує синхронізації` immediately, without a manual refresh.
