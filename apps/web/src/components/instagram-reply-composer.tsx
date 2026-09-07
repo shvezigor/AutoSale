@@ -30,7 +30,9 @@ export function InstagramReplyComposer({
   const [submitting, setSubmitting] = useState(false);
   const [retryingMessageId, setRetryingMessageId] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const threadRef = useRef<HTMLDivElement>(null);
   const refreshInFlight = useRef(false);
+  const keepThreadAtBottom = useRef(true);
   const deliveryStatuses = useRef(new Map(
     initialConversation.messages.map((message) => [message.id, message.delivery?.status ?? null]),
   ));
@@ -137,13 +139,29 @@ export function InstagramReplyComposer({
     };
   }, [conversation.id, toast]);
 
+  useEffect(() => {
+    if (!keepThreadAtBottom.current) return;
+    const thread = threadRef.current;
+    if (!thread) return;
+    thread.scrollTop = thread.scrollHeight;
+  }, [conversation.messages.length]);
+
   const disabledReason = !conversation.replyCapability.enabled
     ? replyDisabledText(conversation.replyCapability.reason)
     : null;
 
   return (
     <>
-      <div className="thread-scroll">
+      <div
+        aria-label="Повідомлення"
+        className="thread-scroll"
+        onScroll={(event) => {
+          const thread = event.currentTarget;
+          keepThreadAtBottom.current = thread.scrollHeight - thread.scrollTop - thread.clientHeight < 96;
+        }}
+        ref={threadRef}
+        role="region"
+      >
         <p className="day-label">Сьогодні</p>
         <MessageThread
           conversation={conversation}

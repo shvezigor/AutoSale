@@ -128,10 +128,13 @@ describe('InstagramReplyComposer', () => {
     };
     api.refreshConversation.mockResolvedValue({ ...conversation, messages: [inbound] });
     renderComposer();
+    const thread = screen.getByRole('region', { name: 'Повідомлення' });
+    Object.defineProperty(thread, 'scrollHeight', { configurable: true, value: 400 });
 
     await act(async () => vi.advanceTimersByTimeAsync(2_000));
 
     expect(screen.getByText('Моя адреса — Луцьк')).toBeVisible();
+    expect(thread.scrollTop).toBe(400);
   });
 
   it('shows connection guidance and disables replies', () => {
