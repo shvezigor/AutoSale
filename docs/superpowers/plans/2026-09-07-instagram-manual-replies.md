@@ -343,7 +343,7 @@ git commit -m "feat: accept idempotent Instagram replies"
 - Produces: `InstagramMessageDeliveryService.process({ tenantId, messageId }): Promise<'SENT' | 'RETRY' | 'FAILED' | 'UNKNOWN' | 'IGNORED'>`.
 - Produces: `InstagramMessageReconciler.reconcile(): Promise<{ attempted: number; queued: number }>`.
 
-- [ ] **Step 1: Write failing delivery tests**
+- [x] **Step 1: Write failing delivery tests**
 
 Cover atomic lease acquisition, tenant connection lookup, credential decryption at call time, success, invalid token, explicit rate-limit retry, ambiguous timeout/`5xx`, permanent failure, and competing workers. Assert logs/codes never include token or message text.
 
@@ -360,17 +360,17 @@ An explicit `429` rejection sets `PENDING`, increments attempts, and sets `nextD
 
 Meta code 190 or missing messaging permission stores `FAILED`, sets `INSTAGRAM_RECONNECT_REQUIRED`, and updates the same-generation connection to `REAUTH_REQUIRED` without touching a newer connection generation.
 
-- [ ] **Step 2: Run delivery test and verify red**
+- [x] **Step 2: Run delivery test and verify red**
 
 Run: `pnpm --filter @autosale/worker exec vitest run src/instagram/instagram-message-delivery.service.spec.ts`
 
 Expected: FAIL because the delivery service is absent.
 
-- [ ] **Step 3: Implement the focused delivery service**
+- [x] **Step 3: Implement the focused delivery service**
 
 Claim with `updateMany` constrained to tenant, ID, eligible status/time, and absent/expired lease. Fetch the claimed row with its conversation and active connection, decrypt, send, then finalize only when `deliveryLeaseId` still equals the current lease. Convert `MetaInstagramError` fields into controlled error codes. After the fenced update reaches `SENT`, call `processIfTriggered(messageId)`; its existing database uniqueness remains the exactly-once guard.
 
-- [ ] **Step 4: Write and run failing reconciler tests**
+- [x] **Step 4: Write and run failing reconciler tests**
 
 The reconciler selects due `PENDING` and expired `SENDING` rows, at most 50 per pass, and enqueues each with `jobId: message.id`:
 
@@ -378,17 +378,17 @@ Run: `pnpm --filter @autosale/worker exec vitest run src/instagram/instagram-mes
 
 Expected: FAIL because the reconciler is absent.
 
-- [ ] **Step 5: Implement reconciliation and worker wiring**
+- [x] **Step 5: Implement reconciliation and worker wiring**
 
 Handle `instagram.message.send` before the normalizer branch in the existing `instagram` worker. Instantiate one delivery service with the existing Meta client/cipher configuration. Run reconciliation every five seconds, prevent overlapping passes, emit safe backlog/operation metrics, invoke once on startup, and close its timer during shutdown.
 
-- [ ] **Step 6: Run worker package verification**
+- [x] **Step 6: Run worker package verification**
 
 Run: `pnpm --filter @autosale/worker test && pnpm --filter @autosale/worker typecheck`
 
 Expected: all worker tests pass.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add apps/worker/src/instagram apps/worker/src/main.ts

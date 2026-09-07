@@ -34,6 +34,7 @@ export class TriggeredOrderProcessor {
     const settings = await this.prisma.tenantSettings.findUniqueOrThrow({
       where: { tenantId: trigger.tenantId },
     });
+    const correlationId = trigger.rawEventId ?? trigger.id;
     const order = await this.createProcessingOrder({
       tenantId: trigger.tenantId,
       conversationId: trigger.conversationId,
@@ -104,11 +105,11 @@ export class TriggeredOrderProcessor {
       if (autoApproved) {
         await this.scheduleExport?.(order.id, trigger.tenantId);
       }
-      this.telemetry?.('ai_order_recognition_completed', { correlationId: trigger.rawEventId, orderId: order.id, result: result.status });
+      this.telemetry?.('ai_order_recognition_completed', { correlationId, orderId: order.id, result: result.status });
       return updated;
     } catch (error) {
       await this.prisma.order.update({ where: { id: order.id }, data: { status: 'AI_FAILED' } });
-      this.telemetry?.('ai_order_recognition_failed', { correlationId: trigger.rawEventId, orderId: order.id, result: 'failure' });
+      this.telemetry?.('ai_order_recognition_failed', { correlationId, orderId: order.id, result: 'failure' });
       throw error;
     }
   }

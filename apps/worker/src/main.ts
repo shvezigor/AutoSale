@@ -19,6 +19,8 @@ import { InstagramAvatarCleanupReconciler } from './instagram/instagram-avatar-c
 import { InstagramAvatarCopyService } from './instagram/instagram-avatar-copy.service.js';
 import { InstagramProfileEnrichmentService } from './instagram/instagram-profile-enrichment.service.js';
 import { InstagramProfileReconciler } from './instagram/instagram-profile-reconciler.js';
+import { InstagramMessageDeliveryService } from './instagram/instagram-message-delivery.service.js';
+import { InstagramMessageReconciler } from './instagram/instagram-message-reconciler.js';
 import { MediaCopyService } from './instagram/media-copy.service.js';
 import { createOpenAiOrderRecognizer } from './orders/openai-order-recognizer.js';
 import { OrderRecognitionService } from './orders/order-recognition.service.js';
@@ -49,6 +51,12 @@ async function bootstrap(): Promise<void> {
     forcePathStyle: true,
   });
   await storage.ensureBucket();
+  const credentialCipher = new CredentialCipher(Buffer.from(env.INTEGRATION_ENCRYPTION_KEY, 'base64'));
+  const metaInstagram = new MetaInstagramClient({
+    appId: env.META_APP_ID,
+    appSecret: env.META_APP_SECRET,
+    graphVersion: env.META_GRAPH_API_VERSION,
+  });
   const orderRecognizer = createOpenAiOrderRecognizer(env.OPENAI_API_KEY, env.OPENAI_MODEL);
   const catalogueMapper = createOpenAiColumnMapper(env.OPENAI_API_KEY, env.OPENAI_MODEL);
   const catalogueHybrid = {
@@ -75,7 +83,7 @@ async function bootstrap(): Promise<void> {
           data: { status: 'REAUTHORIZATION_REQUIRED', lastErrorCode: 'GOOGLE_TOKEN_REFRESH_FAILED' },
         });
       },
-    }, new CredentialCipher(Buffer.from(env.INTEGRATION_ENCRYPTION_KEY, 'base64')), {
+    }, credentialCipher, {
       clientId: env.GOOGLE_OAUTH_CLIENT_ID,
       clientSecret: env.GOOGLE_OAUTH_CLIENT_SECRET,
     })
@@ -114,18 +122,59 @@ async function bootstrap(): Promise<void> {
   );
   const profileEnrichment = new InstagramProfileEnrichmentService(
     prisma,
-    new MetaInstagramClient({
-      appId: env.META_APP_ID,
-      appSecret: env.META_APP_SECRET,
-      graphVersion: env.META_GRAPH_API_VERSION,
-    }),
+    metaInstagram,
     new InstagramAvatarCopyService(storage),
-    new CredentialCipher(Buffer.from(env.INTEGRATION_ENCRYPTION_KEY, 'base64')),
+    credentialCipher,
+  );
+  const messageDelivery = new InstagramMessageDeliveryService(
+    prisma,
+    metaInstagram,
+    credentialCipher,
+    orderProcessor,
   );
   const redis = new URL(env.REDIS_URL);
   const worker = new Worker(
     'instagram',
     async (job) => {
+      if (
+        job.name === 'instagram.message.send' &&
+        typeof job.data?.tenantId === 'string' &&
+        typeof job.data?.messageId === 'string'
+      ) {
+        const started = performance.now();
+        try {
+          const result = await messageDelivery.process({
+            tenantId: job.data.tenantId,
+            messageId: job.data.messageId,
+          });
+          metrics.increment('autosale_operations_total', {
+            operation: 'instagram_message_send',
+            result: result === 'SENT' || result === 'IGNORED' ? 'success' : 'failure',
+          });
+          logger.info('instagram_message_send_completed', {
+            correlationId: job.data.messageId,
+            messageId: job.data.messageId,
+            result,
+          });
+        } catch (error) {
+          metrics.increment('autosale_operations_total', {
+            operation: 'instagram_message_send', result: 'failure',
+          });
+          logger.warn('instagram_message_send_failed', {
+            correlationId: job.data.messageId,
+            messageId: job.data.messageId,
+            errorCode: error instanceof Error ? error.name : 'UNKNOWN',
+          });
+          throw error;
+        } finally {
+          metrics.observe(
+            'autosale_operation_duration_seconds',
+            (performance.now() - started) / 1000,
+            { operation: 'instagram_message_send' },
+          );
+        }
+        return;
+      }
       if (
         job.name === 'instagram.profile.enrich' &&
         typeof job.data?.profileId === 'string' &&
@@ -183,6 +232,7 @@ async function bootstrap(): Promise<void> {
     },
   });
   const instagramProfileReconciler = new InstagramProfileReconciler(prisma, instagramProfileQueue);
+  const instagramMessageReconciler = new InstagramMessageReconciler(prisma, instagramProfileQueue);
   const instagramAvatarCleanupReconciler = new InstagramAvatarCleanupReconciler(prisma, storage);
   const catalogueWorker = new Worker(
     'catalogue',
@@ -316,6 +366,30 @@ async function bootstrap(): Promise<void> {
     }
   };
   const instagramProfileReconcileTimer = setInterval(() => void reconcileInstagramProfiles(), 5_000);
+  let reconcilingInstagramMessages = false;
+  const reconcileInstagramMessages = async (): Promise<void> => {
+    if (reconcilingInstagramMessages) return;
+    reconcilingInstagramMessages = true;
+    try {
+      const result = await instagramMessageReconciler.reconcile();
+      metrics.set('autosale_queue_backlog', result.attempted, { queue: 'instagram_message' });
+      metrics.increment('autosale_operations_total', {
+        operation: 'instagram_message_reconcile',
+        result: result.queued === result.attempted ? 'success' : 'failure',
+      });
+    } catch (error) {
+      metrics.increment('autosale_operations_total', {
+        operation: 'instagram_message_reconcile', result: 'failure',
+      });
+      logger.warn('instagram_message_reconcile_failed', {
+        correlationId: 'system:instagram-message',
+        errorCode: error instanceof Error ? error.name : 'UNKNOWN',
+      });
+    } finally {
+      reconcilingInstagramMessages = false;
+    }
+  };
+  const instagramMessageReconcileTimer = setInterval(() => void reconcileInstagramMessages(), 5_000);
   let schedulingCatalogueSources = false;
   const scheduleCatalogueSources = async (): Promise<void> => {
     if (schedulingCatalogueSources) return;
@@ -347,6 +421,7 @@ async function bootstrap(): Promise<void> {
   void pollExports();
   void reconcileCatalogueMappings();
   void reconcileInstagramProfiles();
+  void reconcileInstagramMessages();
   void scheduleCatalogueSources();
   void reconcileNotificationRetention();
   logger.info('service_started', { correlationId: 'system:startup', healthPort: env.HEALTH_PORT });
@@ -357,6 +432,7 @@ async function bootstrap(): Promise<void> {
     clearInterval(sheetsTimer);
     clearInterval(catalogueReconcileTimer);
     clearInterval(instagramProfileReconcileTimer);
+    clearInterval(instagramMessageReconcileTimer);
     clearInterval(catalogueScheduleTimer);
     clearInterval(notificationRetentionTimer);
     await worker.close();

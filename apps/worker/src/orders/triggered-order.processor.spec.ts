@@ -31,6 +31,7 @@ describe('TriggeredOrderProcessor', () => {
       '20260831090000_catalogue_import',
       '20260831091500_catalogue_tenant_relations',
       '20260831100000_catalogue_source_object_key',
+      '20260907160000_instagram_outbound_messages',
     ];
     const pool = new pg.Pool({ connectionString });
     for (const migration of migrations) {

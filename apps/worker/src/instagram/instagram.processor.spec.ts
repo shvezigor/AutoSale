@@ -32,6 +32,7 @@ describe('InstagramProcessor', () => {
       '20260831091500_catalogue_tenant_relations',
       '20260831100000_catalogue_source_object_key',
       '20260902090000_instagram_customer_profiles',
+      '20260907160000_instagram_outbound_messages',
     ];
     const pool = new pg.Pool({ connectionString });
     for (const migrationPath of migrationPaths) {
