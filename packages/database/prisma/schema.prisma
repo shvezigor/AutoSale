@@ -1,9 +1,9 @@
 generator client {
-  provider            = "prisma-client"
-  output              = "../src/generated/prisma"
-  moduleFormat        = "esm"
+  provider               = "prisma-client"
+  output                 = "../src/generated/prisma"
+  moduleFormat           = "esm"
   generatedFileExtension = "ts"
-  importFileExtension = "js"
+  importFileExtension    = "js"
 }
 
 datasource db {
@@ -103,37 +103,66 @@ enum NotificationType {
   INFO
 }
 
+enum TelegramLinkPurpose {
+  PERSONAL
+  SUPPLIER_GROUP
+}
+
+enum TelegramChatRoute {
+  BOT
+  BUSINESS
+}
+
+enum TelegramDeliveryPurpose {
+  TEST
+  SUPPLIER_ORDER
+  PERSONAL_ALERT
+}
+
+enum TelegramDeliveryStatus {
+  PENDING
+  PROCESSING
+  SUCCEEDED
+  RETRYABLE
+  FAILED
+}
+
 model Tenant {
-  id        String         @id @default(uuid()) @db.Uuid
-  key       String         @unique
-  name      String
-  status    AccessStatus   @default(ACTIVE)
-  createdAt DateTime       @default(now()) @map("created_at")
-  events    WebhookEvent[]
-  conversations Conversation[]
-  messages      Message[]
-  settings      TenantSettings?
-  orders        Order[]
-  products      Product[]
-  catalogueSources CatalogueSource[]
-  catalogueMappings CatalogueMapping[]
-  catalogueImportRuns CatalogueImportRun[]
-  auditLogs     AuditLog[]
-  sheetsDestination GoogleSheetsDestination?
-  orderExports      OrderExport[]
-  memberships       TenantMembership[]
-  sessions          Session[]
-  invitations       TenantInvitation[]
-  securityAuditLogs SecurityAuditLog[]
-  instagramConnection InstagramConnection?
-  instagramOAuthStates InstagramOAuthState[]
-  instagramCredentialCleanups InstagramCredentialCleanup[]
-  instagramCustomerProfiles InstagramCustomerProfile[]
-  instagramOAuthCurrentAttemptId String? @db.Uuid @map("instagram_oauth_current_attempt_id")
-  googleConnection GoogleConnection?
-  googleOAuthAttempts GoogleOAuthAttempt[]
-  googleCredentialCleanups GoogleCredentialCleanup[]
-  notifications UserNotification[]
+  id                             String                       @id @default(uuid()) @db.Uuid
+  key                            String                       @unique
+  name                           String
+  status                         AccessStatus                 @default(ACTIVE)
+  createdAt                      DateTime                     @default(now()) @map("created_at")
+  events                         WebhookEvent[]
+  conversations                  Conversation[]
+  messages                       Message[]
+  settings                       TenantSettings?
+  orders                         Order[]
+  products                       Product[]
+  catalogueSources               CatalogueSource[]
+  catalogueMappings              CatalogueMapping[]
+  catalogueImportRuns            CatalogueImportRun[]
+  auditLogs                      AuditLog[]
+  sheetsDestination              GoogleSheetsDestination?
+  orderExports                   OrderExport[]
+  memberships                    TenantMembership[]
+  sessions                       Session[]
+  invitations                    TenantInvitation[]
+  securityAuditLogs              SecurityAuditLog[]
+  instagramConnection            InstagramConnection?
+  instagramOAuthStates           InstagramOAuthState[]
+  instagramCredentialCleanups    InstagramCredentialCleanup[]
+  instagramCustomerProfiles      InstagramCustomerProfile[]
+  instagramOAuthCurrentAttemptId String?                      @map("instagram_oauth_current_attempt_id") @db.Uuid
+  googleConnection               GoogleConnection?
+  googleOAuthAttempts            GoogleOAuthAttempt[]
+  googleCredentialCleanups       GoogleCredentialCleanup[]
+  notifications                  UserNotification[]
+  telegramLinkAttempts           TelegramLinkAttempt[]
+  telegramUserBindings           TelegramUserBinding[]
+  telegramBusinessConnections    TelegramBusinessConnection[]
+  telegramChats                  TelegramChat[]
+  telegramDeliveries             TelegramDelivery[]
 
   @@index([status])
   @@map("tenants")
@@ -198,23 +227,23 @@ model GoogleCredentialCleanup {
 }
 
 model InstagramConnection {
-  id                   String                    @id @default(uuid()) @db.Uuid
-  tenantId             String                    @unique @map("tenant_id") @db.Uuid
-  externalAccountId    String                    @unique @map("external_account_id")
-  displayName          String?                   @map("display_name")
-  status               InstagramConnectionStatus @default(LEGACY)
-  encryptedAccessToken String?                   @map("encrypted_access_token")
-  credentialGenerationId String?                 @unique @map("credential_generation_id") @db.Uuid
-  tokenExpiresAt       DateTime?                 @map("token_expires_at")
-  grantedScopes        String?                   @map("granted_scopes")
-  lastVerifiedAt       DateTime?                 @map("last_verified_at")
-  lastErrorCode        String?                   @map("last_error_code")
-  connectedByUserId    String?                   @map("connected_by_user_id") @db.Uuid
-  disconnectedAt       DateTime?                 @map("disconnected_at")
-  createdAt            DateTime                  @default(now()) @map("created_at")
-  updatedAt            DateTime                  @updatedAt @map("updated_at")
-  tenant               Tenant                    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  connectedBy          User?                     @relation("InstagramConnectionConnectedBy", fields: [connectedByUserId], references: [id], onDelete: SetNull)
+  id                     String                    @id @default(uuid()) @db.Uuid
+  tenantId               String                    @unique @map("tenant_id") @db.Uuid
+  externalAccountId      String                    @unique @map("external_account_id")
+  displayName            String?                   @map("display_name")
+  status                 InstagramConnectionStatus @default(LEGACY)
+  encryptedAccessToken   String?                   @map("encrypted_access_token")
+  credentialGenerationId String?                   @unique @map("credential_generation_id") @db.Uuid
+  tokenExpiresAt         DateTime?                 @map("token_expires_at")
+  grantedScopes          String?                   @map("granted_scopes")
+  lastVerifiedAt         DateTime?                 @map("last_verified_at")
+  lastErrorCode          String?                   @map("last_error_code")
+  connectedByUserId      String?                   @map("connected_by_user_id") @db.Uuid
+  disconnectedAt         DateTime?                 @map("disconnected_at")
+  createdAt              DateTime                  @default(now()) @map("created_at")
+  updatedAt              DateTime                  @updatedAt @map("updated_at")
+  tenant                 Tenant                    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  connectedBy            User?                     @relation("InstagramConnectionConnectedBy", fields: [connectedByUserId], references: [id], onDelete: SetNull)
 
   @@index([status])
   @@map("instagram_connections")
@@ -237,33 +266,33 @@ model InstagramOAuthState {
 }
 
 model InstagramCredentialCleanup {
-  id                       String                                    @id @default(uuid()) @db.Uuid
-  credentialGenerationId   String                                    @unique @map("credential_generation_id") @db.Uuid
-  tenantId                 String                                    @map("tenant_id") @db.Uuid
-  externalAccountId        String                                    @map("external_account_id")
-  encryptedAccessToken     String                                    @map("encrypted_access_token")
-  source                   String                                    @default("DISCONNECT")
-  state                    InstagramCredentialCleanupState           @default(ARMED)
-  callbackResolvedAt       DateTime?                                 @map("callback_resolved_at")
-  unsubscribeStatus        InstagramCredentialCleanupOperationStatus @default(PENDING) @map("unsubscribe_status")
-  unsubscribeAttemptedAt   DateTime?                                 @map("unsubscribe_attempted_at")
-  unsubscribeSucceededAt   DateTime?                                 @map("unsubscribe_succeeded_at")
-  revokeStatus             InstagramCredentialCleanupOperationStatus @default(PENDING) @map("revoke_status")
-  revokeAttemptedAt        DateTime?                                 @map("revoke_attempted_at")
-  revokeSucceededAt        DateTime?                                 @map("revoke_succeeded_at")
-  attempts                 Int                                       @default(0)
-  leaseId                  String?                                   @map("lease_id") @db.Uuid
-  leaseExpiresAt           DateTime?                                 @map("lease_expires_at")
-  version                  Int                                       @default(0)
-  lastErrorCode            String?                                   @map("last_error_code")
-  permanentFailureAt       DateTime?                                 @map("permanent_failure_at")
-  deadLetteredAt           DateTime?                                 @map("dead_lettered_at")
-  deadLetteredByUserId     String?                                   @map("dead_lettered_by_user_id") @db.Uuid
-  terminalAt               DateTime?                                 @map("terminal_at")
-  createdAt                DateTime                                  @default(now()) @map("created_at")
-  updatedAt                DateTime                                  @updatedAt @map("updated_at")
-  tenant                   Tenant                                    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  deadLetteredBy           User?                                     @relation("InstagramCleanupDeadLetteredBy", fields: [deadLetteredByUserId], references: [id], onDelete: SetNull)
+  id                     String                                    @id @default(uuid()) @db.Uuid
+  credentialGenerationId String                                    @unique @map("credential_generation_id") @db.Uuid
+  tenantId               String                                    @map("tenant_id") @db.Uuid
+  externalAccountId      String                                    @map("external_account_id")
+  encryptedAccessToken   String                                    @map("encrypted_access_token")
+  source                 String                                    @default("DISCONNECT")
+  state                  InstagramCredentialCleanupState           @default(ARMED)
+  callbackResolvedAt     DateTime?                                 @map("callback_resolved_at")
+  unsubscribeStatus      InstagramCredentialCleanupOperationStatus @default(PENDING) @map("unsubscribe_status")
+  unsubscribeAttemptedAt DateTime?                                 @map("unsubscribe_attempted_at")
+  unsubscribeSucceededAt DateTime?                                 @map("unsubscribe_succeeded_at")
+  revokeStatus           InstagramCredentialCleanupOperationStatus @default(PENDING) @map("revoke_status")
+  revokeAttemptedAt      DateTime?                                 @map("revoke_attempted_at")
+  revokeSucceededAt      DateTime?                                 @map("revoke_succeeded_at")
+  attempts               Int                                       @default(0)
+  leaseId                String?                                   @map("lease_id") @db.Uuid
+  leaseExpiresAt         DateTime?                                 @map("lease_expires_at")
+  version                Int                                       @default(0)
+  lastErrorCode          String?                                   @map("last_error_code")
+  permanentFailureAt     DateTime?                                 @map("permanent_failure_at")
+  deadLetteredAt         DateTime?                                 @map("dead_lettered_at")
+  deadLetteredByUserId   String?                                   @map("dead_lettered_by_user_id") @db.Uuid
+  terminalAt             DateTime?                                 @map("terminal_at")
+  createdAt              DateTime                                  @default(now()) @map("created_at")
+  updatedAt              DateTime                                  @updatedAt @map("updated_at")
+  tenant                 Tenant                                    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  deadLetteredBy         User?                                     @relation("InstagramCleanupDeadLetteredBy", fields: [deadLetteredByUserId], references: [id], onDelete: SetNull)
 
   @@index([tenantId, terminalAt])
   @@index([leaseExpiresAt])
@@ -271,29 +300,31 @@ model InstagramCredentialCleanup {
 }
 
 model User {
-  id                      String                   @id @default(uuid()) @db.Uuid
-  email                   String                   @unique
-  name                    String
-  passwordHash            String?                  @map("password_hash")
-  emailVerifiedAt         DateTime?                @map("email_verified_at")
-  platformRole            PlatformRole             @default(USER) @map("platform_role")
-  status                  AccessStatus              @default(PENDING)
-  createdAt               DateTime                  @default(now()) @map("created_at")
-  updatedAt               DateTime                  @updatedAt @map("updated_at")
-  memberships             TenantMembership[]
-  sessions                Session[]
-  emailVerificationTokens EmailVerificationToken[]
-  passwordResetTokens     PasswordResetToken[]
-  invitationsCreated      TenantInvitation[]       @relation("InvitationCreator")
-  securityAuditLogs       SecurityAuditLog[]
-  instagramOAuthStates    InstagramOAuthState[]
-  instagramConnections    InstagramConnection[]    @relation("InstagramConnectionConnectedBy")
-  instagramMessagesSent   Message[]                 @relation("InstagramMessageSender")
+  id                            String                       @id @default(uuid()) @db.Uuid
+  email                         String                       @unique
+  name                          String
+  passwordHash                  String?                      @map("password_hash")
+  emailVerifiedAt               DateTime?                    @map("email_verified_at")
+  platformRole                  PlatformRole                 @default(USER) @map("platform_role")
+  status                        AccessStatus                 @default(PENDING)
+  createdAt                     DateTime                     @default(now()) @map("created_at")
+  updatedAt                     DateTime                     @updatedAt @map("updated_at")
+  memberships                   TenantMembership[]
+  sessions                      Session[]
+  emailVerificationTokens       EmailVerificationToken[]
+  passwordResetTokens           PasswordResetToken[]
+  invitationsCreated            TenantInvitation[]           @relation("InvitationCreator")
+  securityAuditLogs             SecurityAuditLog[]
+  instagramOAuthStates          InstagramOAuthState[]
+  instagramConnections          InstagramConnection[]        @relation("InstagramConnectionConnectedBy")
+  instagramMessagesSent         Message[]                    @relation("InstagramMessageSender")
   instagramCleanupsDeadLettered InstagramCredentialCleanup[] @relation("InstagramCleanupDeadLetteredBy")
-  googleOAuthAttempts      GoogleOAuthAttempt[]
-  googleConnections        GoogleConnection[] @relation("GoogleConnectionConnectedBy")
-  googleIdentity           GoogleIdentity?
-  notifications            UserNotification[]
+  googleOAuthAttempts           GoogleOAuthAttempt[]
+  googleConnections             GoogleConnection[]           @relation("GoogleConnectionConnectedBy")
+  googleIdentity                GoogleIdentity?
+  notifications                 UserNotification[]
+  telegramLinkAttempts          TelegramLinkAttempt[]
+  telegramUserBindings          TelegramUserBinding[]
 
   @@index([status])
   @@map("users")
@@ -316,6 +347,119 @@ model UserNotification {
   @@index([tenantId, userId, createdAt(sort: Desc)])
   @@index([tenantId, userId, readAt])
   @@map("user_notifications")
+}
+
+model TelegramLinkAttempt {
+  id         String              @id @default(uuid()) @db.Uuid
+  tokenHash  String              @unique @map("token_hash")
+  tenantId   String              @map("tenant_id") @db.Uuid
+  userId     String              @map("user_id") @db.Uuid
+  purpose    TelegramLinkPurpose
+  returnPath String              @default("/settings?tab=telegram") @map("return_path")
+  expiresAt  DateTime            @map("expires_at")
+  usedAt     DateTime?           @map("used_at")
+  createdAt  DateTime            @default(now()) @map("created_at")
+  tenant     Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user       User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, userId, purpose, usedAt])
+  @@index([expiresAt, usedAt])
+  @@map("telegram_link_attempts")
+}
+
+model TelegramUserBinding {
+  id             String    @id @default(uuid()) @db.Uuid
+  tenantId       String    @map("tenant_id") @db.Uuid
+  userId         String    @map("user_id") @db.Uuid
+  telegramUserId String    @map("telegram_user_id")
+  privateChatId  String    @map("private_chat_id")
+  displayName    String?   @map("display_name")
+  username       String?
+  linkedAt       DateTime  @default(now()) @map("linked_at")
+  revokedAt      DateTime? @map("revoked_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+  tenant         Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, userId])
+  @@unique([tenantId, telegramUserId])
+  @@index([tenantId, revokedAt])
+  @@map("telegram_user_bindings")
+}
+
+model TelegramBusinessConnection {
+  id                   String   @id @default(uuid()) @db.Uuid
+  tenantId             String   @map("tenant_id") @db.Uuid
+  externalConnectionId String   @map("external_connection_id")
+  telegramUserId       String   @map("telegram_user_id")
+  rights               Json
+  enabled              Boolean  @default(true)
+  lastUpdatedAt        DateTime @map("last_updated_at")
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+  tenant               Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, externalConnectionId])
+  @@index([tenantId, telegramUserId, enabled])
+  @@map("telegram_business_connections")
+}
+
+model TelegramChat {
+  id                   String             @id @default(uuid()) @db.Uuid
+  tenantId             String             @map("tenant_id") @db.Uuid
+  externalChatId       String             @map("external_chat_id")
+  type                 String
+  title                String?
+  route                TelegramChatRoute
+  businessConnectionId String?            @map("business_connection_id")
+  lastObservedAt       DateTime           @map("last_observed_at")
+  createdAt            DateTime           @default(now()) @map("created_at")
+  updatedAt            DateTime           @updatedAt @map("updated_at")
+  tenant               Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  deliveries           TelegramDelivery[]
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, externalChatId, route])
+  @@index([tenantId, lastObservedAt])
+  @@map("telegram_chats")
+}
+
+model TelegramWebhookUpdate {
+  id          String    @id @default(uuid()) @db.Uuid
+  updateId    String    @unique @map("update_id")
+  status      String    @default("RECEIVED")
+  processedAt DateTime? @map("processed_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  @@index([status, createdAt])
+  @@map("telegram_webhook_updates")
+}
+
+model TelegramDelivery {
+  id                String                  @id @default(uuid()) @db.Uuid
+  tenantId          String                  @map("tenant_id") @db.Uuid
+  destinationId     String                  @map("destination_id") @db.Uuid
+  purpose           TelegramDeliveryPurpose
+  status            TelegramDeliveryStatus  @default(PENDING)
+  idempotencyKey    String                  @map("idempotency_key")
+  messageText       String                  @map("message_text")
+  providerMessageId String?                 @map("provider_message_id")
+  attempts          Int                     @default(0)
+  nextAttemptAt     DateTime                @default(now()) @map("next_attempt_at")
+  lastAttemptAt     DateTime?               @map("last_attempt_at")
+  leaseId           String?                 @map("lease_id") @db.Uuid
+  leaseExpiresAt    DateTime?               @map("lease_expires_at")
+  lastErrorCode     String?                 @map("last_error_code")
+  completedAt       DateTime?               @map("completed_at")
+  createdAt         DateTime                @default(now()) @map("created_at")
+  updatedAt         DateTime                @updatedAt @map("updated_at")
+  tenant            Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  destination       TelegramChat            @relation(fields: [tenantId, destinationId], references: [tenantId, id], onDelete: Restrict)
+
+  @@unique([tenantId, idempotencyKey])
+  @@index([status, nextAttemptAt])
+  @@index([leaseExpiresAt])
+  @@map("telegram_deliveries")
 }
 
 model GoogleIdentity {
@@ -366,18 +510,18 @@ model TenantMembership {
 }
 
 model Session {
-  id        String    @id @default(uuid()) @db.Uuid
-  userId    String    @map("user_id") @db.Uuid
-  tenantId  String?   @map("tenant_id") @db.Uuid
-  tokenHash String    @unique @map("token_hash")
-  expiresAt DateTime  @map("expires_at")
-  lastSeenAt DateTime @default(now()) @map("last_seen_at")
-  ipPrefix  String?   @map("ip_prefix")
-  userAgent String?   @map("user_agent")
-  revokedAt DateTime? @map("revoked_at")
-  createdAt DateTime  @default(now()) @map("created_at")
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tenant    Tenant?   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id         String    @id @default(uuid()) @db.Uuid
+  userId     String    @map("user_id") @db.Uuid
+  tenantId   String?   @map("tenant_id") @db.Uuid
+  tokenHash  String    @unique @map("token_hash")
+  expiresAt  DateTime  @map("expires_at")
+  lastSeenAt DateTime  @default(now()) @map("last_seen_at")
+  ipPrefix   String?   @map("ip_prefix")
+  userAgent  String?   @map("user_agent")
+  revokedAt  DateTime? @map("revoked_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant     Tenant?   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([userId, expiresAt])
   @@index([expiresAt, revokedAt])
@@ -463,17 +607,17 @@ model WebhookEvent {
 }
 
 model Conversation {
-  id                     String    @id @default(uuid()) @db.Uuid
-  tenantId               String    @map("tenant_id") @db.Uuid
+  id                     String                    @id @default(uuid()) @db.Uuid
+  tenantId               String                    @map("tenant_id") @db.Uuid
   channel                String
-  externalConversationId String    @map("external_conversation_id")
-  participantId          String    @map("participant_id")
-  profileId              String?   @map("profile_id") @db.Uuid
-  displayName            String?   @map("display_name")
-  lastMessageAt          DateTime  @map("last_message_at")
-  createdAt              DateTime  @default(now()) @map("created_at")
-  updatedAt              DateTime  @updatedAt @map("updated_at")
-  tenant                 Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  externalConversationId String                    @map("external_conversation_id")
+  participantId          String                    @map("participant_id")
+  profileId              String?                   @map("profile_id") @db.Uuid
+  displayName            String?                   @map("display_name")
+  lastMessageAt          DateTime                  @map("last_message_at")
+  createdAt              DateTime                  @default(now()) @map("created_at")
+  updatedAt              DateTime                  @updatedAt @map("updated_at")
+  tenant                 Tenant                    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   profile                InstagramCustomerProfile? @relation(fields: [tenantId, profileId], references: [tenantId, id], onDelete: Restrict)
   messages               Message[]
   orders                 Order[]
@@ -484,28 +628,28 @@ model Conversation {
 }
 
 model InstagramCustomerProfile {
-  id                 String    @id @default(uuid()) @db.Uuid
-  tenantId           String    @map("tenant_id") @db.Uuid
-  participantId      String    @map("participant_id")
-  displayName        String?   @map("display_name")
-  username           String?
-  avatarSourceUrl    String?   @map("avatar_source_url")
-  avatarStorageKey   String?   @map("avatar_storage_key")
-  avatarChecksum     String?   @map("avatar_checksum")
-  avatarContentType  String?   @map("avatar_content_type")
-  status             String    @default("PENDING")
-  refreshVersion     Int       @default(1) @map("refresh_version")
-  attempts           Int       @default(0)
-  nextAttemptAt      DateTime  @default(now()) @map("next_attempt_at")
-  refreshAfter       DateTime? @map("refresh_after")
-  leaseId            String?   @map("lease_id") @db.Uuid
-  leaseExpiresAt     DateTime? @map("lease_expires_at")
-  lastErrorCode      String?   @map("last_error_code")
-  lastRefreshedAt    DateTime? @map("last_refreshed_at")
-  createdAt          DateTime  @default(now()) @map("created_at")
-  updatedAt          DateTime  @updatedAt @map("updated_at")
-  tenant             Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  conversations      Conversation[]
+  id                String         @id @default(uuid()) @db.Uuid
+  tenantId          String         @map("tenant_id") @db.Uuid
+  participantId     String         @map("participant_id")
+  displayName       String?        @map("display_name")
+  username          String?
+  avatarSourceUrl   String?        @map("avatar_source_url")
+  avatarStorageKey  String?        @map("avatar_storage_key")
+  avatarChecksum    String?        @map("avatar_checksum")
+  avatarContentType String?        @map("avatar_content_type")
+  status            String         @default("PENDING")
+  refreshVersion    Int            @default(1) @map("refresh_version")
+  attempts          Int            @default(0)
+  nextAttemptAt     DateTime       @default(now()) @map("next_attempt_at")
+  refreshAfter      DateTime?      @map("refresh_after")
+  leaseId           String?        @map("lease_id") @db.Uuid
+  leaseExpiresAt    DateTime?      @map("lease_expires_at")
+  lastErrorCode     String?        @map("last_error_code")
+  lastRefreshedAt   DateTime?      @map("last_refreshed_at")
+  createdAt         DateTime       @default(now()) @map("created_at")
+  updatedAt         DateTime       @updatedAt @map("updated_at")
+  tenant            Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  conversations     Conversation[]
 
   @@unique([tenantId, participantId])
   @@unique([tenantId, id])
@@ -515,33 +659,33 @@ model InstagramCustomerProfile {
 }
 
 model InstagramAvatarCleanup {
-  id             String   @id @default(uuid()) @db.Uuid
-  tenantId       String   @map("tenant_id") @db.Uuid
-  storageKey     String   @unique @map("storage_key")
-  status         String   @default("PENDING")
-  attempts       Int      @default(0)
-  nextAttemptAt  DateTime @default(now()) @map("next_attempt_at")
-  leaseId        String?  @map("lease_id") @db.Uuid
+  id             String    @id @default(uuid()) @db.Uuid
+  tenantId       String    @map("tenant_id") @db.Uuid
+  storageKey     String    @unique @map("storage_key")
+  status         String    @default("PENDING")
+  attempts       Int       @default(0)
+  nextAttemptAt  DateTime  @default(now()) @map("next_attempt_at")
+  leaseId        String?   @map("lease_id") @db.Uuid
   leaseExpiresAt DateTime? @map("lease_expires_at")
-  lastErrorCode  String?  @map("last_error_code")
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
+  lastErrorCode  String?   @map("last_error_code")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
 
   @@index([status, nextAttemptAt])
   @@map("instagram_avatar_cleanups")
 }
 
 model Message {
-  id                String       @id @default(uuid()) @db.Uuid
-  tenantId          String       @map("tenant_id") @db.Uuid
-  conversationId    String       @map("conversation_id") @db.Uuid
-  rawEventId        String?      @map("raw_event_id") @db.Uuid
-  channel           String
-  externalMessageId String       @map("external_message_id")
-  direction         String
-  senderId          String       @map("sender_id")
-  text              String?
-  sourceTimestamp   DateTime     @map("source_timestamp")
+  id                     String                  @id @default(uuid()) @db.Uuid
+  tenantId               String                  @map("tenant_id") @db.Uuid
+  conversationId         String                  @map("conversation_id") @db.Uuid
+  rawEventId             String?                 @map("raw_event_id") @db.Uuid
+  channel                String
+  externalMessageId      String                  @map("external_message_id")
+  direction              String
+  senderId               String                  @map("sender_id")
+  text                   String?
+  sourceTimestamp        DateTime                @map("source_timestamp")
   clientIdempotencyKey   String?                 @map("client_idempotency_key") @db.Uuid
   sentByUserId           String?                 @map("sent_by_user_id") @db.Uuid
   providerMessageId      String?                 @map("provider_message_id")
@@ -552,13 +696,13 @@ model Message {
   nextDeliveryAttemptAt  DateTime?               @map("next_delivery_attempt_at")
   lastDeliveryAttemptAt  DateTime?               @map("last_delivery_attempt_at")
   deliveryErrorCode      String?                 @map("delivery_error_code")
-  createdAt         DateTime     @default(now()) @map("created_at")
-  tenant            Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  conversation      Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  rawEvent          WebhookEvent? @relation(fields: [rawEventId], references: [id], onDelete: Restrict)
-  sentBy            User?         @relation("InstagramMessageSender", fields: [sentByUserId], references: [id], onDelete: SetNull)
-  attachments       Attachment[]
-  triggeredOrders   Order[]      @relation("OrderTriggerMessage")
+  createdAt              DateTime                @default(now()) @map("created_at")
+  tenant                 Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  conversation           Conversation            @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  rawEvent               WebhookEvent?           @relation(fields: [rawEventId], references: [id], onDelete: Restrict)
+  sentBy                 User?                   @relation("InstagramMessageSender", fields: [sentByUserId], references: [id], onDelete: SetNull)
+  attachments            Attachment[]
+  triggeredOrders        Order[]                 @relation("OrderTriggerMessage")
 
   @@unique([tenantId, channel, externalMessageId])
   @@index([conversationId, sourceTimestamp])
@@ -567,18 +711,18 @@ model Message {
 }
 
 model GoogleSheetsDestination {
-  id              String    @id @default(uuid()) @db.Uuid
-  tenantId        String    @unique @map("tenant_id") @db.Uuid
-  spreadsheetId   String    @map("spreadsheet_id")
-  sheetName       String    @map("sheet_name")
-  credentialRef   String?   @map("credential_ref") @db.Uuid
-  requiredHeaders Json      @map("required_headers")
-  status          String    @default("PENDING")
-  lastValidatedAt DateTime? @map("last_validated_at")
-  errorSummary    String?   @map("error_summary")
-  createdAt       DateTime  @default(now()) @map("created_at")
-  updatedAt       DateTime  @updatedAt @map("updated_at")
-  tenant          Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id              String        @id @default(uuid()) @db.Uuid
+  tenantId        String        @unique @map("tenant_id") @db.Uuid
+  spreadsheetId   String        @map("spreadsheet_id")
+  sheetName       String        @map("sheet_name")
+  credentialRef   String?       @map("credential_ref") @db.Uuid
+  requiredHeaders Json          @map("required_headers")
+  status          String        @default("PENDING")
+  lastValidatedAt DateTime?     @map("last_validated_at")
+  errorSummary    String?       @map("error_summary")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+  tenant          Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   exports         OrderExport[]
 
   @@index([credentialRef])
@@ -600,26 +744,26 @@ model TenantSettings {
 }
 
 model Order {
-  id                String      @id @default(uuid()) @db.Uuid
-  tenantId          String      @map("tenant_id") @db.Uuid
-  conversationId    String      @map("conversation_id") @db.Uuid
-  triggerMessageId  String      @unique @map("trigger_message_id") @db.Uuid
-  status            String      @default("AI_PROCESSING")
+  id                String        @id @default(uuid()) @db.Uuid
+  tenantId          String        @map("tenant_id") @db.Uuid
+  conversationId    String        @map("conversation_id") @db.Uuid
+  triggerMessageId  String        @unique @map("trigger_message_id") @db.Uuid
+  status            String        @default("AI_PROCESSING")
   extraction        Json?
-  validationIssues  Json?       @map("validation_issues")
-  overallConfidence Float?      @map("overall_confidence")
-  aiResponseId      String?     @map("ai_response_id")
-  aiModel           String?     @map("ai_model")
-  promptVersion     String      @map("prompt_version")
-  inputTokens       Int?        @map("input_tokens")
-  outputTokens      Int?        @map("output_tokens")
-  approvedAt        DateTime?   @map("approved_at")
-  approvedBy        String?     @map("approved_by")
-  createdAt         DateTime    @default(now()) @map("created_at")
-  updatedAt         DateTime    @updatedAt @map("updated_at")
-  tenant            Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  conversation      Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  triggerMessage    Message     @relation("OrderTriggerMessage", fields: [triggerMessageId], references: [id], onDelete: Restrict)
+  validationIssues  Json?         @map("validation_issues")
+  overallConfidence Float?        @map("overall_confidence")
+  aiResponseId      String?       @map("ai_response_id")
+  aiModel           String?       @map("ai_model")
+  promptVersion     String        @map("prompt_version")
+  inputTokens       Int?          @map("input_tokens")
+  outputTokens      Int?          @map("output_tokens")
+  approvedAt        DateTime?     @map("approved_at")
+  approvedBy        String?       @map("approved_by")
+  createdAt         DateTime      @default(now()) @map("created_at")
+  updatedAt         DateTime      @updatedAt @map("updated_at")
+  tenant            Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  conversation      Conversation  @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  triggerMessage    Message       @relation("OrderTriggerMessage", fields: [triggerMessageId], references: [id], onDelete: Restrict)
   items             OrderItem[]
   auditLogs         AuditLog[]
   exports           OrderExport[]
@@ -630,20 +774,20 @@ model Order {
 }
 
 model OrderExport {
-  id            String    @id @default(uuid()) @db.Uuid
-  tenantId      String    @map("tenant_id") @db.Uuid
-  orderId       String    @map("order_id") @db.Uuid
-  destinationId String    @map("destination_id") @db.Uuid
-  status        String    @default("PENDING")
-  attempts      Int       @default(0)
-  rowNumber     Int?      @map("row_number")
-  lastAttemptAt DateTime? @map("last_attempt_at")
-  lastSyncedAt  DateTime? @map("last_synced_at")
-  errorSummary  String?   @map("error_summary")
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
-  tenant        Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  order         Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  id            String                  @id @default(uuid()) @db.Uuid
+  tenantId      String                  @map("tenant_id") @db.Uuid
+  orderId       String                  @map("order_id") @db.Uuid
+  destinationId String                  @map("destination_id") @db.Uuid
+  status        String                  @default("PENDING")
+  attempts      Int                     @default(0)
+  rowNumber     Int?                    @map("row_number")
+  lastAttemptAt DateTime?               @map("last_attempt_at")
+  lastSyncedAt  DateTime?               @map("last_synced_at")
+  errorSummary  String?                 @map("error_summary")
+  createdAt     DateTime                @default(now()) @map("created_at")
+  updatedAt     DateTime                @updatedAt @map("updated_at")
+  tenant        Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  order         Order                   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   destination   GoogleSheetsDestination @relation(fields: [destinationId], references: [id], onDelete: Cascade)
 
   @@unique([orderId, destinationId])
@@ -714,57 +858,57 @@ model Product {
 }
 
 model CatalogueSource {
-  id               String                 @id @default(uuid()) @db.Uuid
-  tenantId         String                 @map("tenant_id") @db.Uuid
-  type             CatalogueSourceType
-  displayName      String                 @map("display_name")
-  status           CatalogueSourceStatus  @default(PENDING)
-  createdByUserId  String?                @map("created_by_user_id") @db.Uuid
-  spreadsheetId    String?                @map("spreadsheet_id")
-  sheetName        String?                @map("sheet_name")
-  credentialRef    String?                @map("credential_ref")
-  objectKey        String?                @map("object_key")
-  syncSchedule     String?                @map("sync_schedule")
-  headerFingerprint String?               @map("header_fingerprint")
-  lastSyncedAt     DateTime?              @map("last_synced_at")
-  nextSyncAt       DateTime?              @map("next_sync_at")
-  lastErrorSummary String?                @map("last_error_summary")
-  syncLeaseId      String?                @map("sync_lease_id") @db.Uuid
-  syncLeaseExpiresAt DateTime?            @map("sync_lease_expires_at")
-  syncVersion      Int                    @default(0) @map("sync_version")
-  createdAt        DateTime               @default(now()) @map("created_at")
-  updatedAt        DateTime               @updatedAt @map("updated_at")
-  tenant           Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  products         Product[]               @relation("ProductSource")
-  mappings         CatalogueMapping[]
-  importRuns       CatalogueImportRun[]
+  id                 String                @id @default(uuid()) @db.Uuid
+  tenantId           String                @map("tenant_id") @db.Uuid
+  type               CatalogueSourceType
+  displayName        String                @map("display_name")
+  status             CatalogueSourceStatus @default(PENDING)
+  createdByUserId    String?               @map("created_by_user_id") @db.Uuid
+  spreadsheetId      String?               @map("spreadsheet_id")
+  sheetName          String?               @map("sheet_name")
+  credentialRef      String?               @map("credential_ref")
+  objectKey          String?               @map("object_key")
+  syncSchedule       String?               @map("sync_schedule")
+  headerFingerprint  String?               @map("header_fingerprint")
+  lastSyncedAt       DateTime?             @map("last_synced_at")
+  nextSyncAt         DateTime?             @map("next_sync_at")
+  lastErrorSummary   String?               @map("last_error_summary")
+  syncLeaseId        String?               @map("sync_lease_id") @db.Uuid
+  syncLeaseExpiresAt DateTime?             @map("sync_lease_expires_at")
+  syncVersion        Int                   @default(0) @map("sync_version")
+  createdAt          DateTime              @default(now()) @map("created_at")
+  updatedAt          DateTime              @updatedAt @map("updated_at")
+  tenant             Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  products           Product[]             @relation("ProductSource")
+  mappings           CatalogueMapping[]
+  importRuns         CatalogueImportRun[]
 
+  @@unique([tenantId, id])
   @@index([tenantId, status])
   @@index([type, status, nextSyncAt, id])
-  @@unique([tenantId, id])
   @@map("catalogue_sources")
 }
 
 model CatalogueMapping {
-  id                String            @id @default(uuid()) @db.Uuid
-  tenantId          String            @map("tenant_id") @db.Uuid
-  sourceId          String            @map("source_id") @db.Uuid
+  id                String               @id @default(uuid()) @db.Uuid
+  tenantId          String               @map("tenant_id") @db.Uuid
+  sourceId          String               @map("source_id") @db.Uuid
   version           Int
-  sourceFingerprint String            @map("source_fingerprint")
+  sourceFingerprint String               @map("source_fingerprint")
   columns           Json
-  transformSettings Json?             @map("transform_settings")
-  aiModel           String?           @map("ai_model")
-  promptVersion     String?           @map("prompt_version")
-  schemaVersion     String?           @map("schema_version")
-  aiLatencyMs       Int?              @map("ai_latency_ms")
-  aiInputTokens     Int?              @map("ai_input_tokens")
-  aiOutputTokens    Int?              @map("ai_output_tokens")
-  ownerModified     Boolean           @default(false) @map("owner_modified")
-  confirmedAt       DateTime?         @map("confirmed_at")
-  confirmedByUserId String?           @map("confirmed_by_user_id") @db.Uuid
-  createdAt         DateTime          @default(now()) @map("created_at")
-  tenant            Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  source            CatalogueSource   @relation(fields: [tenantId, sourceId], references: [tenantId, id], onDelete: Cascade)
+  transformSettings Json?                @map("transform_settings")
+  aiModel           String?              @map("ai_model")
+  promptVersion     String?              @map("prompt_version")
+  schemaVersion     String?              @map("schema_version")
+  aiLatencyMs       Int?                 @map("ai_latency_ms")
+  aiInputTokens     Int?                 @map("ai_input_tokens")
+  aiOutputTokens    Int?                 @map("ai_output_tokens")
+  ownerModified     Boolean              @default(false) @map("owner_modified")
+  confirmedAt       DateTime?            @map("confirmed_at")
+  confirmedByUserId String?              @map("confirmed_by_user_id") @db.Uuid
+  createdAt         DateTime             @default(now()) @map("created_at")
+  tenant            Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  source            CatalogueSource      @relation(fields: [tenantId, sourceId], references: [tenantId, id], onDelete: Cascade)
   importRuns        CatalogueImportRun[]
 
   @@unique([sourceId, version])
@@ -774,33 +918,33 @@ model CatalogueMapping {
 }
 
 model CatalogueImportRun {
-  id              String                 @id @default(uuid()) @db.Uuid
-  tenantId        String                 @map("tenant_id") @db.Uuid
-  sourceId        String                 @map("source_id") @db.Uuid
-  mappingId       String?                @map("mapping_id") @db.Uuid
-  mappingLeaseId  String?                @map("mapping_lease_id") @db.Uuid
-  mappingLeaseExpiresAt DateTime?        @map("mapping_lease_expires_at")
-  requestedByUserId String?              @map("requested_by_user_id") @db.Uuid
-  status          CatalogueImportStatus  @default(UPLOADED)
-  idempotencyKey  String                 @map("idempotency_key")
-  sourceRevision  String?                @map("source_revision")
-  sourceHeaders   Json?                  @map("source_headers")
-  snapshotObjectKey String?              @map("snapshot_object_key")
-  sourceSyncVersion Int?                 @map("source_sync_version")
-  totalRows       Int                    @default(0) @map("total_rows")
-  validRows       Int                    @default(0) @map("valid_rows")
-  createdRows     Int                    @default(0) @map("created_rows")
-  updatedRows     Int                    @default(0) @map("updated_rows")
-  skippedRows     Int                    @default(0) @map("skipped_rows")
-  failedRows      Int                    @default(0) @map("failed_rows")
-  rowErrors       Json?                  @map("row_errors")
-  startedAt       DateTime?              @map("started_at")
-  completedAt     DateTime?              @map("completed_at")
-  createdAt       DateTime               @default(now()) @map("created_at")
-  updatedAt       DateTime               @updatedAt @map("updated_at")
-  tenant          Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  source          CatalogueSource        @relation(fields: [tenantId, sourceId], references: [tenantId, id], onDelete: Cascade)
-  mapping         CatalogueMapping?      @relation(fields: [tenantId, mappingId], references: [tenantId, id], onDelete: Restrict)
+  id                    String                @id @default(uuid()) @db.Uuid
+  tenantId              String                @map("tenant_id") @db.Uuid
+  sourceId              String                @map("source_id") @db.Uuid
+  mappingId             String?               @map("mapping_id") @db.Uuid
+  mappingLeaseId        String?               @map("mapping_lease_id") @db.Uuid
+  mappingLeaseExpiresAt DateTime?             @map("mapping_lease_expires_at")
+  requestedByUserId     String?               @map("requested_by_user_id") @db.Uuid
+  status                CatalogueImportStatus @default(UPLOADED)
+  idempotencyKey        String                @map("idempotency_key")
+  sourceRevision        String?               @map("source_revision")
+  sourceHeaders         Json?                 @map("source_headers")
+  snapshotObjectKey     String?               @map("snapshot_object_key")
+  sourceSyncVersion     Int?                  @map("source_sync_version")
+  totalRows             Int                   @default(0) @map("total_rows")
+  validRows             Int                   @default(0) @map("valid_rows")
+  createdRows           Int                   @default(0) @map("created_rows")
+  updatedRows           Int                   @default(0) @map("updated_rows")
+  skippedRows           Int                   @default(0) @map("skipped_rows")
+  failedRows            Int                   @default(0) @map("failed_rows")
+  rowErrors             Json?                 @map("row_errors")
+  startedAt             DateTime?             @map("started_at")
+  completedAt           DateTime?             @map("completed_at")
+  createdAt             DateTime              @default(now()) @map("created_at")
+  updatedAt             DateTime              @updatedAt @map("updated_at")
+  tenant                Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  source                CatalogueSource       @relation(fields: [tenantId, sourceId], references: [tenantId, id], onDelete: Cascade)
+  mapping               CatalogueMapping?     @relation(fields: [tenantId, mappingId], references: [tenantId, id], onDelete: Restrict)
 
   @@unique([tenantId, idempotencyKey])
   @@index([sourceId, createdAt])

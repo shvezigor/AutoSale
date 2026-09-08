@@ -853,13 +853,13 @@ The approved design is in `docs/superpowers/specs/2026-09-03-google-sign-in-desi
 **Description:** Persist link attempts, member bindings, business/group chat summaries, and durable delivery state with stable idempotency constraints.
 
 **Acceptance criteria:**
-- [ ] Link attempts are hashed, expiring, single-use, and bound to tenant, user, and purpose.
-- [ ] External Telegram identifiers are stored losslessly as strings without cross-tenant uniqueness mistakes.
-- [ ] Each logical delivery has one durable row and a stable unique idempotency key.
+- [x] Link attempts are hashed, expiring, single-use, and bound to tenant, user, and purpose.
+- [x] External Telegram identifiers are stored losslessly as strings without cross-tenant uniqueness mistakes.
+- [x] Each logical delivery has one durable row and a stable unique idempotency key.
 
 **Verification:**
-- [ ] `pnpm --filter @autosale/contracts test`
-- [ ] `pnpm --filter @autosale/database test`
+- [x] `pnpm --filter @autosale/contracts test`
+- [x] `pnpm --filter @autosale/database test`
 
 **Dependencies:** Task 42
 
@@ -869,9 +869,9 @@ The approved design is in `docs/superpowers/specs/2026-09-03-google-sign-in-desi
 
 ## Checkpoint: Telegram provider foundation
 
-- [ ] Configuration, adapter, contract, and migration tests pass.
-- [ ] Partial production configuration fails without printing secrets.
-- [ ] Schema constraints demonstrate tenant isolation and delivery idempotency.
+- [x] Configuration, adapter, contract, and migration tests pass.
+- [x] Partial production configuration fails without printing secrets.
+- [x] Schema constraints demonstrate tenant isolation and delivery idempotency.
 
 ## Task 44: Receive and verify Telegram webhook updates
 
