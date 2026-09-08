@@ -22,6 +22,36 @@ const order: ManagerOrder = {
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
 describe('OrderReviewPanel', () => {
+  it('hides the save action until editable order data changes', () => {
+    render(<OrderReviewPanel initialOrder={order} />);
+
+    expect(screen.queryByRole('button', { name: 'Зберегти зміни' })).not.toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText('Телефон'), { target: { value: '+380501112233' } });
+
+    expect(screen.getByRole('button', { name: 'Зберегти зміни' })).toBeInTheDocument();
+  });
+
+  it('shows progress while approval is pending', async () => {
+    let completeApproval!: (value: { ok: boolean; json: () => Promise<ManagerOrder> }) => void;
+    const approval = new Promise<{ ok: boolean; json: () => Promise<ManagerOrder> }>((resolve) => {
+      completeApproval = resolve;
+    });
+    vi.stubGlobal('fetch', vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ token: 'csrf-token' }) })
+      .mockReturnValueOnce(approval));
+    render(<OrderReviewPanel initialOrder={order} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Підтвердити' }));
+
+    const pendingButton = await screen.findByRole('button', { name: 'Підтверджуємо…' });
+    expect(pendingButton).toBeDisabled();
+    expect(pendingButton).toHaveAttribute('aria-busy', 'true');
+
+    completeApproval({ ok: true, json: async () => ({ ...order, status: 'APPROVED' }) });
+    await waitFor(() => expect(screen.getByText('Підтверджено')).toBeInTheDocument());
+  });
+
   it('approves a complete order and shows the new status', async () => {
     vi.stubGlobal('fetch', vi.fn()
       .mockResolvedValueOnce({ ok: true, json: async () => ({ token: 'csrf-token' }) })
@@ -81,6 +111,7 @@ describe('OrderReviewPanel', () => {
     fireEvent.change(screen.getByLabelText('Телефон'), { target: { value: '+380501112233' } });
     fireEvent.click(screen.getByRole('button', { name: 'Зберегти зміни' }));
     await waitFor(() => expect(screen.getByText('Зміни збережено')).toBeInTheDocument());
+    expect(screen.queryByRole('button', { name: 'Зберегти зміни' })).not.toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledWith(`/api/orders/${order.id}`, expect.objectContaining({ method: 'PATCH' }));
   });
 

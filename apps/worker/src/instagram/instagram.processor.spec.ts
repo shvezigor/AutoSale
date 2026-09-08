@@ -188,7 +188,7 @@ describe('InstagramProcessor', () => {
     })).resolves.toMatchObject({ profileId: expect.any(String) });
   });
 
-  it('reconciles a Meta echo by provider message id without creating or retriggering it', async () => {
+  it('checks a reconciled outbound Meta echo for an order trigger', async () => {
     processIfTriggered.mockReset();
     const timestamp = new Date('2026-09-07T12:00:00.000Z');
     const conversation = await prisma.conversation.create({
@@ -236,7 +236,8 @@ describe('InstagramProcessor', () => {
       deliveryStatus: 'SENT',
       deliveryErrorCode: null,
     });
-    expect(processIfTriggered).not.toHaveBeenCalled();
+    expect(processIfTriggered).toHaveBeenCalledOnce();
+    expect(processIfTriggered).toHaveBeenCalledWith(localId);
   });
 
   it('reconciles exactly one narrow text/time candidate when the provider id is not stored yet', async () => {

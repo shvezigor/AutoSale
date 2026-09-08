@@ -171,7 +171,7 @@ export class InstagramProcessor {
         }
       }
 
-      if (persisted.wasCreated) {
+      if (persisted.wasCreated || normalized.direction === 'OUTBOUND') {
         await this.orders?.processIfTriggered(persisted.messageId);
       }
     }
