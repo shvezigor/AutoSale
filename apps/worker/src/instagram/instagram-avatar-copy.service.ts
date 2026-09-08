@@ -163,9 +163,7 @@ function requestPinnedHttps(
   signal: AbortSignal,
 ): Promise<PinnedAvatarResponse> {
   return new Promise((resolve, reject) => {
-    const pinnedLookup: LookupFunction = (_hostname, _options, callback) => {
-      callback(null, address.address, address.family);
-    };
+    const pinnedLookup = createPinnedLookup(address);
     const outgoing = request(url, {
       method: 'GET',
       agent: false,
@@ -188,6 +186,16 @@ function requestPinnedHttps(
     outgoing.once('error', reject);
     outgoing.end();
   });
+}
+
+export function createPinnedLookup(address: ResolvedAvatarAddress): LookupFunction {
+  return (_hostname, options, callback) => {
+    if (options.all) {
+      callback(null, [address]);
+      return;
+    }
+    callback(null, address.address, address.family);
+  };
 }
 
 function singleHeader(value: string | string[] | undefined): string | undefined {

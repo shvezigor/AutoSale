@@ -5,6 +5,7 @@ import {
   InstagramAvatarCopyService,
   type PinnedAvatarResponse,
 } from './instagram-avatar-copy.service.js';
+import * as avatarCopyModule from './instagram-avatar-copy.service.js';
 
 const JPEG = Uint8Array.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10]);
 const LEASE_ID = '11111111-1111-4111-8111-111111111111';
@@ -22,6 +23,27 @@ describe('InstagramAvatarCopyService', () => {
     }));
     resolveHost.mockReset().mockResolvedValue([{ address: '157.240.1.10', family: 4 }]);
     requestPinned.mockReset().mockResolvedValue(imageResponse(JPEG, 'image/jpeg'));
+  });
+
+  it('returns a pinned address array when Node requests all lookup results', async () => {
+    const createPinnedLookup = (avatarCopyModule as typeof avatarCopyModule & {
+      createPinnedLookup?: (address: { address: string; family: 4 | 6 }) => (
+        hostname: string,
+        options: { all?: boolean },
+        callback: (error: Error | null, result: unknown, family?: number) => void,
+      ) => void;
+    }).createPinnedLookup;
+    expect(createPinnedLookup).toBeTypeOf('function');
+
+    const result = await new Promise<{ address: string; family: number }[]>((resolve, reject) => {
+      createPinnedLookup!({ address: '157.240.1.10', family: 4 })(
+        'scontent.cdninstagram.com',
+        { all: true },
+        (error, addresses) => error ? reject(error) : resolve(addresses as { address: string; family: number }[]),
+      );
+    });
+
+    expect(result).toEqual([{ address: '157.240.1.10', family: 4 }]);
   });
 
   it('pins an allowlisted HTTPS avatar to a public resolved address before storing it', async () => {

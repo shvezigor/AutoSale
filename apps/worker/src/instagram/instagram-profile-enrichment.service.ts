@@ -8,6 +8,7 @@ import { AvatarCopyError, type InstagramAvatarCopyService } from './instagram-av
 const LEASE_MS = 5 * 60_000;
 const RETRY_DELAY_MS = 5 * 60_000;
 const REFRESH_INTERVAL_MS = 24 * 60 * 60_000;
+const MAX_AVATAR_ATTEMPTS = 6;
 
 export interface InstagramProfileEnrichmentJob {
   profileId: string;
@@ -129,7 +130,12 @@ export class InstagramProfileEnrichmentService {
         copiedAvatarKey = copied.key;
       } catch (error) {
         if (!(error instanceof AvatarCopyError) || error.retryable) {
-          await this.markRetryable(job, claimedLeaseId, 'META_AVATAR_TRANSIENT', startedAt);
+          const errorCode = error instanceof AvatarCopyError ? error.code : 'META_AVATAR_TRANSIENT';
+          if (profile.attempts >= MAX_AVATAR_ATTEMPTS) {
+            await this.markUnavailable(job, claimedLeaseId, errorCode, startedAt);
+            return;
+          }
+          await this.markRetryable(job, claimedLeaseId, errorCode, startedAt);
           throw error;
         }
         avatarErrorCode = error.code;

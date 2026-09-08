@@ -443,6 +443,45 @@ describe('InstagramProfileEnrichmentService', () => {
       });
   });
 
+  it('keeps the concrete error code when an avatar download can be retried', async () => {
+    const profile = await seedProfile('a');
+    getUserProfile.mockResolvedValue({
+      name: 'Safe Name',
+      username: 'safe_name',
+      profilePictureUrl: 'https://scontent.fbcdn.net/avatar.jpg',
+    });
+    copy.mockRejectedValue(new AvatarCopyError('AVATAR_DNS_FAILURE', true, 'dns'));
+
+    await expect(service().process(job(profile))).rejects.toBeInstanceOf(AvatarCopyError);
+
+    expect(await prisma.instagramCustomerProfile.findUniqueOrThrow({ where: { id: profile.id } }))
+      .toMatchObject({
+        status: 'RETRYABLE_FAILURE',
+        attempts: 1,
+        lastErrorCode: 'AVATAR_DNS_FAILURE',
+      });
+  });
+
+  it('backs off for a day after six failed avatar download attempts', async () => {
+    const profile = await seedProfile('a', { attempts: 5 });
+    getUserProfile.mockResolvedValue({
+      name: 'Safe Name',
+      username: 'safe_name',
+      profilePictureUrl: 'https://scontent.fbcdn.net/avatar.jpg',
+    });
+    copy.mockRejectedValue(new AvatarCopyError('AVATAR_UPSTREAM_FAILURE', true, 'upstream'));
+
+    await expect(service().process(job(profile))).resolves.toBeUndefined();
+
+    expect(await prisma.instagramCustomerProfile.findUniqueOrThrow({ where: { id: profile.id } }))
+      .toMatchObject({
+        status: 'UNAVAILABLE',
+        attempts: 6,
+        nextAttemptAt: new Date(NOW.getTime() + 24 * 60 * 60_000),
+        lastErrorCode: 'AVATAR_UPSTREAM_FAILURE',
+      });
+  });
+
   function service(clock: () => Date = () => NOW): InstagramProfileEnrichmentService {
     return new InstagramProfileEnrichmentService(
       prisma,

@@ -162,6 +162,32 @@ describe('InstagramProcessor', () => {
     expect(processIfTriggered).toHaveBeenCalledWith(message.id);
   });
 
+  it('links a customer profile when the first observed event is an outbound echo', async () => {
+    const timestamp = new Date('2026-09-07T11:30:00.000Z');
+    const event = await prisma.webhookEvent.create({
+      data: {
+        tenantId,
+        provider: 'META',
+        externalEventId: 'mid.first-outbound-profile',
+        payload: echoPayload(
+          'ig-first-outbound-profile',
+          'mid.first-outbound-profile',
+          'Вітаємо',
+          timestamp,
+        ),
+      },
+    });
+
+    await new InstagramProcessor(prisma, { copy }).process(event.id);
+
+    expect(await prisma.instagramCustomerProfile.count({
+      where: { tenantId, participantId: 'ig-first-outbound-profile' },
+    })).toBe(1);
+    await expect(prisma.conversation.findFirstOrThrow({
+      where: { tenantId, participantId: 'ig-first-outbound-profile' },
+    })).resolves.toMatchObject({ profileId: expect.any(String) });
+  });
+
   it('reconciles a Meta echo by provider message id without creating or retriggering it', async () => {
     processIfTriggered.mockReset();
     const timestamp = new Date('2026-09-07T12:00:00.000Z');
