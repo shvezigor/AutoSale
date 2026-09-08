@@ -878,12 +878,12 @@ The approved design is in `docs/superpowers/specs/2026-09-03-google-sign-in-desi
 **Description:** Add a public endpoint that verifies Telegram's webhook secret and processes only supported, validated connection/link updates.
 
 **Acceptance criteria:**
-- [ ] Invalid or missing secret headers and malformed updates produce no state change.
-- [ ] Replayed update IDs are acknowledged without duplicate processing.
-- [ ] Valid Start, group Start, and business-connection updates invoke narrow tenant-safe services.
+- [x] Invalid or missing secret headers and malformed updates produce no state change.
+- [x] Replayed update IDs are acknowledged without duplicate processing.
+- [x] Valid Start, group Start, and business-connection updates invoke narrow tenant-safe services.
 
 **Verification:**
-- [ ] `pnpm --filter @autosale/api test`
+- [x] `pnpm --filter @autosale/api test`
 
 **Dependencies:** Task 43
 
@@ -896,12 +896,12 @@ The approved design is in `docs/superpowers/specs/2026-09-03-google-sign-in-desi
 **Description:** Let authenticated members generate safe deep links, inspect their own connection status, and unlink without deleting AutoSale business data.
 
 **Acceptance criteria:**
-- [ ] Personal link is membership-scoped; supplier-group link is owner-only.
-- [ ] Safe summaries expose status and display labels but no secrets or another user's private chat ID.
-- [ ] Unlink revokes the binding and future delivery while preserving audit history.
+- [x] Personal link is membership-scoped; supplier-group link is owner-only.
+- [x] Safe summaries expose status and display labels but no secrets or another user's private chat ID.
+- [x] Unlink revokes the binding and future delivery while preserving audit history.
 
 **Verification:**
-- [ ] `pnpm --filter @autosale/api test`
+- [x] `pnpm --filter @autosale/api test`
 
 **Dependencies:** Tasks 43–44
 

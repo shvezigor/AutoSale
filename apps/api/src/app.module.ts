@@ -17,6 +17,7 @@ import { CatalogueImportModule } from './catalogue-import/catalogue-import.modul
 import { CatalogueSourcesModule } from './catalogue-sources/catalogue-sources.module.js';
 import { GoogleOAuthModule } from './integrations/google-oauth.module.js';
 import { NotificationsModule } from './notifications/notifications.module.js';
+import { TelegramModule } from './integrations/telegram.module.js';
 
 @Module({
   controllers: [HealthController],
@@ -37,6 +38,7 @@ export class AppModule {
         InstagramOAuthModule.register(env),
         GoogleOAuthModule.register(env),
         NotificationsModule.register(env),
+        TelegramModule.register(env),
         DemoScenarioModule.register(env),
         CatalogueModule.register(env),
         CatalogueImportModule.register(env),
