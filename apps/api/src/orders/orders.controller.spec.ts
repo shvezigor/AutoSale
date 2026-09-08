@@ -33,7 +33,7 @@ describe('OrdersController', () => {
   const retrySheetsExport = vi.fn();
 
   beforeEach(async () => {
-    list.mockReset().mockResolvedValue({ items: [order] });
+    list.mockReset().mockResolvedValue({ items: [order], page: 1, pageSize: 25, total: 1 });
     detail.mockReset().mockResolvedValue(order);
     approve.mockReset().mockResolvedValue({ ...order, status: 'APPROVED' });
     cancel.mockReset().mockResolvedValue({ ...order, status: 'CANCELLED' });
@@ -55,10 +55,19 @@ describe('OrdersController', () => {
 
   it('lists reviewable orders and returns their details', async () => {
     const response = await request(app.getHttpServer()).get('/api/orders').expect(200);
-    expect(response.body).toEqual({ items: [order] });
+    expect(response.body).toEqual({ items: [order], page: 1, pageSize: 25, total: 1 });
     await request(app.getHttpServer()).get(`/api/orders/${orderId}`).expect(200, order);
-    expect(list).toHaveBeenCalledWith(tenantId);
+    expect(list).toHaveBeenCalledWith(tenantId, { page: 1, pageSize: 25 });
     expect(detail).toHaveBeenCalledWith(tenantId, orderId);
+  });
+
+  it('validates order search, status and pagination query parameters', async () => {
+    await request(app.getHttpServer())
+      .get('/api/orders?search=%D0%90%D0%B2%D0%B0%D0%BD%D0%B3%D0%B0%D1%80%D0%B4&status=NEEDS_REVIEW&page=2&pageSize=10')
+      .expect(200);
+    expect(list).toHaveBeenCalledWith(tenantId, { search: 'Авангард', status: 'NEEDS_REVIEW', page: 2, pageSize: 10 });
+
+    await request(app.getHttpServer()).get('/api/orders?status=UNKNOWN').expect(400);
   });
 
   it('approves a valid order with the manager actor', async () => {

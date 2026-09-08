@@ -9,15 +9,43 @@ type Extraction = {
   items?: Array<{ quantity?: number; confidence?: number }>;
 };
 
+export type OrderListQuery = {
+  search?: string | undefined;
+  status?: OrderStatus | undefined;
+  page: number;
+  pageSize: number;
+};
+
 export class OrdersService {
   constructor(private readonly prisma: PrismaClient) {}
 
-  async list(tenantId: string): Promise<OrderListResponse> {
-    const [rows, products] = await Promise.all([
-      this.prisma.order.findMany({ where: { tenantId }, orderBy: { createdAt: 'desc' }, include: this.include }),
+  async list(tenantId: string, query: OrderListQuery): Promise<OrderListResponse> {
+    const search = query.search?.trim();
+    const where: Prisma.OrderWhereInput = {
+      tenantId,
+      ...(query.status ? { status: query.status } : {}),
+      ...(search ? {
+        OR: [
+          { conversation: { is: { displayName: { contains: search, mode: 'insensitive' } } } },
+          { conversation: { is: { profile: { is: { displayName: { contains: search, mode: 'insensitive' } } } } } },
+          { conversation: { is: { profile: { is: { username: { contains: search, mode: 'insensitive' } } } } } },
+          { items: { some: { originalText: { contains: search, mode: 'insensitive' } } } },
+          { items: { some: { catalogId: { contains: search, mode: 'insensitive' } } } },
+        ],
+      } : {}),
+    };
+    const [rows, total, products] = await Promise.all([
+      this.prisma.order.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip: (query.page - 1) * query.pageSize,
+        take: query.pageSize,
+        include: this.include,
+      }),
+      this.prisma.order.count({ where }),
       this.productNames(tenantId),
     ]);
-    return { items: rows.map((row) => this.map(row, products)) };
+    return { items: rows.map((row) => this.map(row, products)), page: query.page, pageSize: query.pageSize, total };
   }
 
   async detail(tenantId: string, id: string): Promise<ManagerOrder> {

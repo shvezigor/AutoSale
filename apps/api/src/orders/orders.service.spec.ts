@@ -17,16 +17,42 @@ describe('OrdersService Google Sheets retry', () => {
       items: [], exports: [],
     };
     const prisma = {
-      order: { findMany: vi.fn().mockResolvedValue([row]) },
+      order: { findMany: vi.fn().mockResolvedValue([row]), count: vi.fn().mockResolvedValue(1) },
       product: { findMany: vi.fn().mockResolvedValue([]) },
     };
 
-    const result = await new OrdersService(prisma as never).list('tenant-1');
+    const result = await new OrdersService(prisma as never).list('tenant-1', { page: 1, pageSize: 25 });
 
     expect(result.items[0]).toMatchObject({
       participantName: 'Davida Shvets',
       customer: { name: 'Ігор', phone: '+380976536783', instagramUsername: 'davidashvets' },
     });
+    expect(result).toMatchObject({ page: 1, pageSize: 25, total: 1 });
+  });
+
+  it('paginates and filters orders inside the authenticated tenant', async () => {
+    const findMany = vi.fn().mockResolvedValue([]);
+    const count = vi.fn().mockResolvedValue(0);
+    const prisma = {
+      order: { findMany, count },
+      product: { findMany: vi.fn().mockResolvedValue([]) },
+    };
+
+    const result = await new OrdersService(prisma as never).list('tenant-a', {
+      search: 'Авангард',
+      status: 'NEEDS_REVIEW',
+      page: 2,
+      pageSize: 10,
+    });
+
+    expect(findMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({ tenantId: 'tenant-a', status: 'NEEDS_REVIEW' }),
+      orderBy: { createdAt: 'desc' },
+      skip: 10,
+      take: 10,
+    }));
+    expect(count).toHaveBeenCalledWith({ where: expect.objectContaining({ tenantId: 'tenant-a', status: 'NEEDS_REVIEW' }) });
+    expect(result).toEqual({ items: [], page: 2, pageSize: 10, total: 0 });
   });
 
   it('returns the pending Sheets export immediately after approval', async () => {

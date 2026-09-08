@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, Inject, Param, ParseUUIDPipe, Patch, Post } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Inject, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { z } from 'zod';
 import type { ManagerOrderUpdate } from '@autosale/contracts/orders';
@@ -8,6 +8,12 @@ import { CurrentPrincipal, RequireMembership } from '../auth/auth.decorators.js'
 import { OrdersService } from './orders.service.js';
 
 const actorSchema = z.object({ actor: z.string().trim().min(1).max(120) }).strict();
+const listSchema = z.object({
+  search: z.string().trim().min(1).max(200).optional(),
+  status: z.enum(['AI_PROCESSING', 'AI_FAILED', 'NEEDS_REVIEW', 'AUTO_APPROVED', 'APPROVED', 'CANCELLED']).optional(),
+  page: z.coerce.number().int().min(1).default(1),
+  pageSize: z.coerce.number().int().min(1).max(100).default(25),
+}).strict();
 const updateSchema = z.object({
   actor: z.string().trim().min(1).max(120),
   customer: z.object({ name: z.string().trim().nullable().optional(), phone: z.string().trim().nullable().optional(), instagramUsername: z.string().trim().nullable().optional() }).strict().optional(),
@@ -21,7 +27,11 @@ const updateSchema = z.object({
 export class OrdersController {
   constructor(@Inject(OrdersService) private readonly orders: OrdersService) {}
 
-  @Get() list(@CurrentPrincipal() principal: AuthPrincipal) { return this.orders.list(principal.tenantId!); }
+  @Get() list(@CurrentPrincipal() principal: AuthPrincipal, @Query() query: unknown) {
+    const parsed = listSchema.safeParse(query);
+    if (!parsed.success) throw new BadRequestException('Invalid orders query');
+    return this.orders.list(principal.tenantId!, parsed.data);
+  }
 
   @Get(':id') detail(@CurrentPrincipal() principal: AuthPrincipal, @Param('id', new ParseUUIDPipe({ version: '4' })) id: string) { return this.orders.detail(principal.tenantId!, id); }
 

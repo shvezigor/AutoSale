@@ -40,4 +40,9 @@ export interface ManagerOrderUpdate {
   items?: Array<{ id: string; catalogId: string | null; quantity: number; color: string | null; size: string | null }>;
 }
 
-export interface OrderListResponse { items: ManagerOrder[] }
+export interface OrderListResponse {
+  items: ManagerOrder[];
+  page: number;
+  pageSize: number;
+  total: number;
+}
