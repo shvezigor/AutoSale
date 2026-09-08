@@ -21,33 +21,76 @@ export class OrderRecognitionService {
   }> {
     const result = await this.recognizer.recognize(input);
     const productIds = new Set(input.products.map((product) => product.id));
+    const order = {
+      ...result.order,
+      items: result.order.items.map((item) => ({
+        ...item,
+        catalogId: item.catalogId === null
+          ? findUnambiguousCatalogueId(item.originalText, input.products)
+          : item.catalogId,
+      })),
+    };
     const validationIssues: string[] = [];
 
-    if (!result.order.customer.name) validationIssues.push('customer.name');
-    if (!result.order.customer.phone) validationIssues.push('customer.phone');
-    if (!result.order.delivery.city) validationIssues.push('delivery.city');
-    if (!result.order.delivery.address && !result.order.delivery.novaPoshtaBranch) {
+    if (!order.customer.name) validationIssues.push('customer.name');
+    if (!order.customer.phone) validationIssues.push('customer.phone');
+    if (!order.delivery.city) validationIssues.push('delivery.city');
+    if (!order.delivery.address && !order.delivery.novaPoshtaBranch) {
       validationIssues.push('delivery.address');
     }
 
-    result.order.items.forEach((item, index) => {
+    order.items.forEach((item, index) => {
       if (item.catalogId === null || !productIds.has(item.catalogId)) {
         validationIssues.push(`items.${index}.catalogId`);
       }
       if (item.quantity < 1) validationIssues.push(`items.${index}.quantity`);
     });
-    if (!result.order.isOrder) validationIssues.push('isOrder');
-    if (result.order.items.length === 0) validationIssues.push('items');
+    if (!order.isOrder) validationIssues.push('isOrder');
+    if (order.items.length === 0) validationIssues.push('items');
 
     return {
       ...result,
+      order,
       validationIssues,
       status: decideOrderStatus({
         mode: settings.approvalMode,
-        confidence: result.order.overallConfidence,
+        confidence: order.overallConfidence,
         threshold: settings.autoApprovalThreshold,
         isComplete: validationIssues.length === 0,
       }),
     };
   }
+}
+
+function findUnambiguousCatalogueId(
+  originalText: string,
+  products: OrderRecognitionInput['products'],
+): string | null {
+  const normalizedItem = normalizeProductText(originalText);
+  if (!normalizedItem) return null;
+
+  const matches = new Set<string>();
+  for (const product of products) {
+    for (const candidate of [product.name, ...product.aliases]) {
+      const normalizedCandidate = normalizeProductText(candidate);
+      if (
+        normalizedCandidate.length >= 3 &&
+        (` ${normalizedItem} `.includes(` ${normalizedCandidate} `) ||
+          ` ${normalizedCandidate} `.includes(` ${normalizedItem} `))
+      ) {
+        matches.add(product.id);
+      }
+    }
+  }
+  return matches.size === 1 ? [...matches][0]! : null;
+}
+
+function normalizeProductText(value: string): string {
+  return value
+    .normalize('NFKC')
+    .toLocaleLowerCase('uk-UA')
+    .replace(/[xх×]/gu, 'x')
+    .replace(/[^\p{L}\p{N}]+/gu, ' ')
+    .replace(/\s+/gu, ' ')
+    .trim();
 }

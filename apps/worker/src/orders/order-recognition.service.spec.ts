@@ -67,4 +67,47 @@ describe('OrderRecognitionService', () => {
     expect(result.validationIssues).toEqual([]);
     expect(result.status).toBe('AUTO_APPROVED');
   });
+
+  it('fills only an unambiguous normalized catalogue match omitted by the model', async () => {
+    const recognize = vi.fn().mockResolvedValue({
+      order: {
+        ...completeOrder,
+        items: [{
+          ...completeOrder.items[0],
+          catalogId: null,
+          originalText: 'двері 860х2050 Колізей (VINARIT) Вологостійка МДФ',
+          size: '860х2050',
+          confidence: 0.99,
+        }],
+      },
+      metadata: {},
+    });
+    const service = new OrderRecognitionService({ recognize });
+
+    const unique = await service.recognize(
+      {
+        messages: [],
+        products: [
+          { id: 'AUTO-5E44CA0A3C32', name: '860х2050      Колізей (VINARIT) Вологостійка МДФ', aliases: [] },
+          { id: 'AUTO-E179854373E0', name: '860х2050 Колізей (плівка мат)', aliases: [] },
+        ],
+      },
+      { approvalMode: 'NEVER', autoApprovalThreshold: 0.9 },
+    );
+    const ambiguous = await service.recognize(
+      {
+        messages: [],
+        products: [
+          { id: 'DOOR-860', name: 'Колізей', aliases: [] },
+          { id: 'DOOR-960', name: 'Колізей', aliases: [] },
+        ],
+      },
+      { approvalMode: 'NEVER', autoApprovalThreshold: 0.9 },
+    );
+
+    expect(unique.order.items[0]?.catalogId).toBe('AUTO-5E44CA0A3C32');
+    expect(unique.validationIssues).not.toContain('items.0.catalogId');
+    expect(ambiguous.order.items[0]?.catalogId).toBeNull();
+    expect(ambiguous.validationIssues).toContain('items.0.catalogId');
+  });
 });
