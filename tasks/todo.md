@@ -835,12 +835,12 @@ The approved design is in `docs/superpowers/specs/2026-09-03-google-sign-in-desi
 **Description:** Provide a narrow HTTPS adapter for bot identity validation and text delivery with bounded Telegram error mapping.
 
 **Acceptance criteria:**
-- [ ] The adapter supports `getMe` and text delivery without exposing the configured token.
-- [ ] Network, authorization, rate-limit, forbidden-chat, and provider failures map to bounded safe codes.
-- [ ] Tests use a fake HTTPS boundary and never contact Telegram.
+- [x] The adapter supports `getMe` and text delivery without exposing the configured token.
+- [x] Network, authorization, rate-limit, forbidden-chat, and provider failures map to bounded safe codes.
+- [x] Tests use a fake HTTPS boundary and never contact Telegram.
 
 **Verification:**
-- [ ] `pnpm --filter @autosale/integrations test`
+- [x] `pnpm --filter @autosale/integrations test`
 
 **Dependencies:** Task 41
 

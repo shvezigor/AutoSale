@@ -35,3 +35,12 @@ export {
   type MetaInstagramToken,
   type MetaInstagramUserProfile,
 } from './meta-instagram.js';
+export {
+  TelegramBotClient,
+  TelegramBotError,
+  type TelegramBotClientConfig,
+  type TelegramBotErrorCode,
+  type TelegramBotIdentity,
+  type TelegramSendTextInput,
+  type TelegramSendTextResult,
+} from './telegram-bot.js';
