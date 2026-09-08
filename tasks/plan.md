@@ -243,3 +243,77 @@ v
 ## Definition of Done
 
 The MVP is complete only when a real Instagram test conversation can be ingested, reviewed, approved, and reflected exactly once in Google Sheets; all state remains recoverable after container restart; external outages produce visible retryable failures; and the documented backup can restore the system on another Docker host.
+
+## Telegram platform implementation plan
+
+Approved capability map: `CAPABILITY-MAP-telegram-integration.md`. Current module spec: `SPEC-telegram-platform.md`.
+
+### Architecture decisions
+
+- AutoSale operates one optional shared bot configured by the operator; customers never create a bot or submit a token.
+- Telegram webhook updates are accepted only with the configured secret header and persisted through narrow, validated commands rather than as raw payload history.
+- A hashed, expiring, single-use deep-link token binds a Telegram identity or group to the authenticated tenant/user.
+- PostgreSQL delivery rows are authoritative. BullMQ only wakes workers, and a reconciler recovers missed wake-ups and expired leases.
+- Telegram numeric identifiers remain strings, provider errors become bounded safe codes, and personal alerts omit order PII by default.
+- Supplier delivery supports Telegram Business when Telegram permits the target chat and a bot-managed group fallback when it does not.
+
+### Dependency graph
+
+```text
+Shared config and Bot API adapter
+             |
+             v
+Persistence and contracts
+       |             |
+       v             v
+Webhook receiver   Link/summary API
+       \             /
+        v           v
+       Durable delivery worker
+                 |
+                 v
+       Minimal Telegram settings UI
+```
+
+### Phase 1: Provider and persistence foundations
+
+- [ ] Task 41: Add optional shared-bot configuration.
+- [ ] Task 42: Add a safe Bot API adapter.
+- [ ] Task 43: Add tenant-safe Telegram contracts and persistence.
+
+Checkpoint: focused configuration, adapter, contract, and migration tests pass; partial production configuration fails closed.
+
+### Phase 2: Secure linking and delivery
+
+- [ ] Task 44: Receive and verify Telegram webhook updates.
+- [ ] Task 45: Link and summarize personal or group Telegram destinations.
+- [ ] Task 46: Deliver queued Telegram messages durably.
+
+Checkpoint: replayed or ambiguous updates do not duplicate bindings or deliveries; tenant, user, and purpose boundaries are covered by tests.
+
+### Phase 3: User-visible platform slice
+
+- [ ] Task 47: Add the minimal Telegram connection card and test notification.
+
+Checkpoint: a member can generate a private deep link, see connected state after Start, send one test alert, and unlink; responsive UI, full tests, typecheck, build, and Docker health pass.
+
+### Sequential versus parallel work
+
+- Tasks 41–43 are sequential because they define shared configuration, the provider adapter, and persistence contracts.
+- After Task 43, webhook validation and authenticated link APIs are logically independent, but this implementation remains sequential to avoid shared-module churn.
+- Supplier dispatch and personal event preferences start only after Task 47 validates the platform slice.
+
+### Risks and mitigations
+
+| Risk | Impact | Mitigation |
+|---|---|---|
+| Bot token or webhook secret leaks | High | Environment-only secrets, redaction, no token API fields, secret-header verification |
+| Queue wake-up is lost | High | Commit delivery first; due-delivery reconciler re-enqueues from PostgreSQL |
+| Telegram retries a webhook | Medium | Provider update ID uniqueness and transactional single-use link consumption |
+| A link binds the wrong tenant or user | High | Short-lived random token, hashed storage, tenant/user/purpose binding, explicit Start |
+| Telegram returns ambiguous network failure | Medium | Stable delivery idempotency key, retry state, provider message ID when known, bounded attempts |
+| Production bot is not configured yet | Medium | Optional startup configuration, explicit unavailable summary, fake provider tests, live acceptance deferred |
+
+### External prerequisite
+
+Implementation and automated verification do not require a real Telegram credential. Live acceptance and production webhook registration require an operator-created AutoSale bot token, bot username, and independently generated webhook secret supplied through `.env`, never committed.

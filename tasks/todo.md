@@ -811,3 +811,152 @@ The approved design is in `docs/superpowers/specs/2026-09-03-google-sign-in-desi
 - [ ] Track cost, latency, false positives, and manager corrections before enabling automatic mode by default.
 
 **Dependencies:** Tasks 18, 38–39. **Estimated scope:** Medium
+
+## Task 41: Add optional shared-bot configuration
+
+**Description:** Configure one operator-owned AutoSale bot without making Telegram credentials mandatory when the integration is unused.
+
+**Acceptance criteria:**
+- [ ] Complete Telegram configuration is optional outside live use, while partial configuration fails startup clearly.
+- [ ] Customers never submit or receive a bot token, and logs/errors never expose it.
+- [ ] API and worker parse the same bot username, token, and webhook-secret contract.
+
+**Verification:**
+- [ ] `pnpm --filter @autosale/config test`
+
+**Dependencies:** None
+
+**Files likely touched:** `.env.example`, API and worker environment schemas, and their colocated specs.
+
+**Estimated scope:** Medium
+
+## Task 42: Add a safe Bot API adapter
+
+**Description:** Provide a narrow HTTPS adapter for bot identity validation and text delivery with bounded Telegram error mapping.
+
+**Acceptance criteria:**
+- [ ] The adapter supports `getMe` and text delivery without exposing the configured token.
+- [ ] Network, authorization, rate-limit, forbidden-chat, and provider failures map to bounded safe codes.
+- [ ] Tests use a fake HTTPS boundary and never contact Telegram.
+
+**Verification:**
+- [ ] `pnpm --filter @autosale/integrations test`
+
+**Dependencies:** Task 41
+
+**Files likely touched:** `packages/integrations/src/telegram-bot.ts`, its spec, and package exports.
+
+**Estimated scope:** Small
+
+## Task 43: Add tenant-safe Telegram contracts and persistence
+
+**Description:** Persist link attempts, member bindings, business/group chat summaries, and durable delivery state with stable idempotency constraints.
+
+**Acceptance criteria:**
+- [ ] Link attempts are hashed, expiring, single-use, and bound to tenant, user, and purpose.
+- [ ] External Telegram identifiers are stored losslessly as strings without cross-tenant uniqueness mistakes.
+- [ ] Each logical delivery has one durable row and a stable unique idempotency key.
+
+**Verification:**
+- [ ] `pnpm --filter @autosale/contracts test`
+- [ ] `pnpm --filter @autosale/database test`
+
+**Dependencies:** Task 42
+
+**Files likely touched:** `packages/contracts/src/telegram.ts`, contract specs, `packages/database/prisma/schema.prisma`, one additive migration.
+
+**Estimated scope:** Medium
+
+## Checkpoint: Telegram provider foundation
+
+- [ ] Configuration, adapter, contract, and migration tests pass.
+- [ ] Partial production configuration fails without printing secrets.
+- [ ] Schema constraints demonstrate tenant isolation and delivery idempotency.
+
+## Task 44: Receive and verify Telegram webhook updates
+
+**Description:** Add a public endpoint that verifies Telegram's webhook secret and processes only supported, validated connection/link updates.
+
+**Acceptance criteria:**
+- [ ] Invalid or missing secret headers and malformed updates produce no state change.
+- [ ] Replayed update IDs are acknowledged without duplicate processing.
+- [ ] Valid Start, group Start, and business-connection updates invoke narrow tenant-safe services.
+
+**Verification:**
+- [ ] `pnpm --filter @autosale/api test`
+
+**Dependencies:** Task 43
+
+**Files likely touched:** Telegram API controller/service/module and specs, `apps/api/src/app.module.ts`.
+
+**Estimated scope:** Medium
+
+## Task 45: Link and summarize personal or group Telegram destinations
+
+**Description:** Let authenticated members generate safe deep links, inspect their own connection status, and unlink without deleting AutoSale business data.
+
+**Acceptance criteria:**
+- [ ] Personal link is membership-scoped; supplier-group link is owner-only.
+- [ ] Safe summaries expose status and display labels but no secrets or another user's private chat ID.
+- [ ] Unlink revokes the binding and future delivery while preserving audit history.
+
+**Verification:**
+- [ ] `pnpm --filter @autosale/api test`
+
+**Dependencies:** Tasks 43–44
+
+**Files likely touched:** Telegram API controller/service/module and specs, shared contracts.
+
+**Estimated scope:** Medium
+
+## Task 46: Deliver queued Telegram messages durably
+
+**Description:** Claim PostgreSQL deliveries in the worker, send through the shared Bot API, and reconcile retryable or abandoned work.
+
+**Acceptance criteria:**
+- [ ] The database delivery exists before queue wake-up, and missed wake-ups are recovered.
+- [ ] Success records the provider message ID; retryable and terminal failures store only safe codes.
+- [ ] Repeated jobs, worker restarts, and expired leases cannot produce a second logical delivery request.
+
+**Verification:**
+- [ ] `pnpm --filter @autosale/worker test`
+
+**Dependencies:** Tasks 41–45
+
+**Files likely touched:** Telegram worker processor/reconciler/module and specs.
+
+**Estimated scope:** Medium
+
+## Checkpoint: Telegram durable connection flow
+
+- [ ] Valid Start links one member exactly once.
+- [ ] Webhook replay and queue retry tests pass.
+- [ ] A fake Bot API test message reaches `SUCCEEDED` exactly once.
+
+## Task 47: Add the minimal Telegram connection card and test notification
+
+**Description:** Add a Telegram settings tab where a member can open the shared bot, see connection status, send a privacy-safe test alert, and unlink.
+
+**Acceptance criteria:**
+- [ ] The card explains the single Start action and never asks for BotFather or a token.
+- [ ] Pending actions show stable loading state and global success/error notifications.
+- [ ] Owner and manager see only data permitted for their own membership, on desktop and mobile.
+
+**Verification:**
+- [ ] `pnpm --filter @autosale/web test`
+- [ ] `pnpm typecheck`
+- [ ] `pnpm build`
+- [ ] Browser check at desktop and 390px widths.
+
+**Dependencies:** Tasks 44–46
+
+**Files likely touched:** settings page/tabs, Telegram settings component and spec, API client, `apps/web/app/globals.css`.
+
+**Estimated scope:** Medium
+
+## Checkpoint: Telegram platform module complete
+
+- [ ] Full automated suite passes and production images build.
+- [ ] Docker services remain healthy without live Telegram credentials.
+- [ ] With operator credentials, one Start action links a test user and one test notification is delivered exactly once.
+- [ ] Human review approves the platform before `supplier-dispatch` implementation starts.
