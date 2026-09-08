@@ -590,7 +590,7 @@ model TenantSettings {
   tenantId              String   @unique @map("tenant_id") @db.Uuid
   approvalMode          String   @default("ALWAYS") @map("approval_mode")
   autoApprovalThreshold Float    @default(0.9) @map("auto_approval_threshold")
-  promptVersion         String   @default("instagram-order-v1") @map("prompt_version")
+  promptVersion         String   @default("instagram-order-v2") @map("prompt_version")
   triggerPhrases        Json     @map("trigger_phrases")
   createdAt             DateTime @default(now()) @map("created_at")
   updatedAt             DateTime @updatedAt @map("updated_at")

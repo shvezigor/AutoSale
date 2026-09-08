@@ -1,4 +1,5 @@
 import type { ApiEnv } from '@autosale/config/api-env';
+import { INSTAGRAM_ORDER_PROMPT_VERSION } from '@autosale/contracts';
 import { createPrismaClient } from '@autosale/database';
 import { DynamicModule, Module } from '@nestjs/common';
 
@@ -43,7 +44,7 @@ export class MetaModule {
                 tenantId: env.DEFAULT_TENANT_ID,
                 approvalMode: 'ALWAYS',
                 autoApprovalThreshold: 0.9,
-                promptVersion: 'instagram-order-v1',
+                promptVersion: INSTAGRAM_ORDER_PROMPT_VERSION,
                 triggerPhrases: [
                   'беремо замовлення в роботу',
                   'замовлення прийнято',

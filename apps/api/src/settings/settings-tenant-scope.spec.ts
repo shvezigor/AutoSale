@@ -8,7 +8,7 @@ describe('settings tenant scope', () => {
     const upsert = vi.fn().mockResolvedValue({
       approvalMode: 'ALWAYS',
       autoApprovalThreshold: 0.9,
-      promptVersion: 'instagram-order-v1',
+      promptVersion: 'instagram-order-v2',
       triggerPhrases: ['беремо замовлення в роботу', 'замовлення прийнято'],
     });
     const service = new OrderSettingsService({ tenantSettings: { upsert } } as never);
@@ -18,7 +18,7 @@ describe('settings tenant scope', () => {
     expect(settings).toEqual({
       approvalMode: 'ALWAYS',
       autoApprovalThreshold: 0.9,
-      promptVersion: 'instagram-order-v1',
+      promptVersion: 'instagram-order-v2',
       triggerPhrases: ['беремо замовлення в роботу', 'замовлення прийнято'],
     });
     expect(upsert).toHaveBeenCalledWith({
@@ -28,7 +28,7 @@ describe('settings tenant scope', () => {
         tenantId: 'tenant-b',
         approvalMode: 'ALWAYS',
         autoApprovalThreshold: 0.9,
-        promptVersion: 'instagram-order-v1',
+        promptVersion: 'instagram-order-v2',
         triggerPhrases: ['беремо замовлення в роботу', 'замовлення прийнято'],
       },
     });

@@ -1,5 +1,7 @@
 export type OrderStatus = 'AI_PROCESSING' | 'AI_FAILED' | 'NEEDS_REVIEW' | 'AUTO_APPROVED' | 'APPROVED' | 'CANCELLED';
 
+export const INSTAGRAM_ORDER_PROMPT_VERSION = 'instagram-order-v2' as const;
+
 export interface ManagerOrder {
   id: string;
   status: OrderStatus;

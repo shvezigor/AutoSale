@@ -1,4 +1,5 @@
 import { Prisma, type PrismaClient } from '@autosale/database';
+import { INSTAGRAM_ORDER_PROMPT_VERSION } from '@autosale/contracts';
 
 export interface OrderSettingsResponse {
   approvalMode: 'ALWAYS' | 'NEVER' | 'ON_LOW_CONFIDENCE';
@@ -25,7 +26,7 @@ export class OrderSettingsService {
           tenantId,
           approvalMode: 'ALWAYS',
           autoApprovalThreshold: 0.9,
-          promptVersion: 'instagram-order-v1',
+          promptVersion: INSTAGRAM_ORDER_PROMPT_VERSION,
           triggerPhrases: [
             'беремо замовлення в роботу',
             'замовлення прийнято',

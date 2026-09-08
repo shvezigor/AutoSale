@@ -1,5 +1,8 @@
 import OpenAI from 'openai';
 import { z } from 'zod';
+import { INSTAGRAM_ORDER_PROMPT_VERSION } from '@autosale/contracts';
+
+export const ORDER_RECOGNITION_PROMPT_VERSION = INSTAGRAM_ORDER_PROMPT_VERSION;
 
 const nullableText = z.string().nullable();
 
@@ -105,12 +108,29 @@ export class OpenAiOrderRecognizer {
       outputTokens: number;
     };
   }> {
+    const anchorMessageId = input.messages.at(-1)?.id ?? null;
     const response = await this.client.responses.create({
       model: this.model,
       store: false,
       instructions:
-        'Extract only facts explicitly supported by the Instagram conversation and supplied catalogue. Never invent missing values. catalogId must be one of the supplied product ids or null. Return missing field paths in missingFields.',
-      input: JSON.stringify(input),
+        [
+          'Extract the latest current order from an Instagram conversation and the supplied catalogue.',
+          'Messages are ordered from oldest to newest. The anchor is the final message and closes the order being recognized.',
+          'Identify the latest purchase intent that leads to the anchor. Earlier completed orders are historical context and must not supply products for the current order.',
+          'A newer explicitly named product replaces an older product unless the customer explicitly asks to add another item, repeat the previous order, or order both.',
+          'Give the strongest weight to the most recent explicit product description and match it using all available details such as dimensions, model, brand, material, color, and size.',
+          'Extract only facts explicitly supported by the current order context. Never invent missing values.',
+          'catalogId must be one of the supplied product ids or null. Return missing field paths in missingFields.',
+        ].join(' '),
+      input: JSON.stringify({
+        ...input,
+        recognitionTarget: {
+          anchorMessageId,
+          messageOrder: 'oldest_to_newest',
+          scope: 'latest_purchase_intent_before_anchor',
+          newerProductPolicy: 'replace_older_unless_explicitly_added_or_repeated',
+        },
+      }),
       text: {
         format: {
           type: 'json_schema',
