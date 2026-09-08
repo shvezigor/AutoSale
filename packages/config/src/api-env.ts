@@ -51,6 +51,18 @@ export const apiEnvSchema = z.object({
   SMTP_USER: z.preprocess((value) => value === '' ? undefined : value, z.string().min(1).optional()),
   SMTP_PASSWORD: z.preprocess((value) => value === '' ? undefined : value, z.string().min(1).optional()),
   SMTP_FROM: z.preprocess((value) => value === '' ? undefined : value, z.string().min(3).optional()),
+  TELEGRAM_BOT_TOKEN: z.preprocess(
+    (value) => value === '' ? undefined : value,
+    z.string().regex(/^\d{5,20}:[A-Za-z0-9_-]{30,}$/).optional(),
+  ),
+  TELEGRAM_BOT_USERNAME: z.preprocess(
+    (value) => value === '' ? undefined : value,
+    z.string().regex(/^[A-Za-z][A-Za-z0-9_]{4,31}$/).optional(),
+  ),
+  TELEGRAM_WEBHOOK_SECRET: z.preprocess(
+    (value) => value === '' ? undefined : value,
+    z.string().min(32).max(256).regex(/^[A-Za-z0-9_-]+$/).optional(),
+  ),
 }).superRefine((environment, context) => {
   const googleOAuthValues = [
     environment.GOOGLE_OAUTH_CLIENT_ID,
@@ -90,6 +102,20 @@ export const apiEnvSchema = z.object({
       code: 'custom',
       path: ['GOOGLE_SIGN_IN_REDIRECT_URI'],
       message: 'Google Sign-In redirect URI must use HTTPS in production',
+    });
+  }
+
+  const telegramValues = [
+    environment.TELEGRAM_BOT_TOKEN,
+    environment.TELEGRAM_BOT_USERNAME,
+    environment.TELEGRAM_WEBHOOK_SECRET,
+  ];
+  const configuredTelegramValues = telegramValues.filter((value) => value !== undefined);
+
+  if (configuredTelegramValues.length > 0 && configuredTelegramValues.length !== telegramValues.length) {
+    context.addIssue({
+      code: 'custom',
+      message: 'Telegram bot configuration must include token, username, and webhook secret',
     });
   }
 });

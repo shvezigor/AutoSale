@@ -817,12 +817,12 @@ The approved design is in `docs/superpowers/specs/2026-09-03-google-sign-in-desi
 **Description:** Configure one operator-owned AutoSale bot without making Telegram credentials mandatory when the integration is unused.
 
 **Acceptance criteria:**
-- [ ] Complete Telegram configuration is optional outside live use, while partial configuration fails startup clearly.
-- [ ] Customers never submit or receive a bot token, and logs/errors never expose it.
-- [ ] API and worker parse the same bot username, token, and webhook-secret contract.
+- [x] Complete Telegram configuration is optional outside live use, while partial configuration fails startup clearly.
+- [x] Customers never submit or receive a bot token, and logs/errors never expose it.
+- [x] API and worker parse the same bot username, token, and webhook-secret contract.
 
 **Verification:**
-- [ ] `pnpm --filter @autosale/config test`
+- [x] `pnpm --filter @autosale/config test`
 
 **Dependencies:** None
 

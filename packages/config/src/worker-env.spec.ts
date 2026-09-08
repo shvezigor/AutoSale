@@ -50,6 +50,24 @@ describe('parseWorkerEnv', () => {
     expect(() => parseWorkerEnv(incompleteEnv)).toThrow();
   });
 
+  it('accepts a complete optional Telegram bot configuration', () => {
+    const parsed = parseWorkerEnv({
+      ...validEnv,
+      TELEGRAM_BOT_TOKEN: '123456789:abcdefghijklmnopqrstuvwxyz_ABCDEFGHI',
+      TELEGRAM_BOT_USERNAME: 'AutoSaleBot',
+      TELEGRAM_WEBHOOK_SECRET: 'telegram-webhook-secret-with-32-chars',
+    });
+
+    expect(parsed.TELEGRAM_BOT_USERNAME).toBe('AutoSaleBot');
+  });
+
+  it('rejects a partial Telegram bot configuration', () => {
+    expect(() => parseWorkerEnv({
+      ...validEnv,
+      TELEGRAM_BOT_USERNAME: 'AutoSaleBot',
+    })).toThrow(/Telegram bot configuration/i);
+  });
+
   it('rejects an invalid credential encryption key', () => {
     expect(() => parseWorkerEnv({ ...validEnv, INTEGRATION_ENCRYPTION_KEY: 'short' })).toThrow();
   });

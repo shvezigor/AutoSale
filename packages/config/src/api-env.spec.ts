@@ -91,6 +91,33 @@ describe('parseApiEnv', () => {
     })).toThrow(/Google OAuth configuration/i);
   });
 
+  it('accepts a complete optional Telegram bot configuration', () => {
+    const parsed = parseApiEnv({
+      ...validEnv,
+      TELEGRAM_BOT_TOKEN: '123456789:abcdefghijklmnopqrstuvwxyz_ABCDEFGHI',
+      TELEGRAM_BOT_USERNAME: 'AutoSaleBot',
+      TELEGRAM_WEBHOOK_SECRET: 'telegram-webhook-secret-with-32-chars',
+    });
+
+    expect(parsed.TELEGRAM_BOT_USERNAME).toBe('AutoSaleBot');
+  });
+
+  it('rejects a partial Telegram bot configuration', () => {
+    expect(() => parseApiEnv({
+      ...validEnv,
+      TELEGRAM_BOT_TOKEN: '123456789:abcdefghijklmnopqrstuvwxyz_ABCDEFGHI',
+    })).toThrow(/Telegram bot configuration/i);
+  });
+
+  it('rejects an invalid Telegram bot username', () => {
+    expect(() => parseApiEnv({
+      ...validEnv,
+      TELEGRAM_BOT_TOKEN: '123456789:abcdefghijklmnopqrstuvwxyz_ABCDEFGHI',
+      TELEGRAM_BOT_USERNAME: '@bad username',
+      TELEGRAM_WEBHOOK_SECRET: 'telegram-webhook-secret-with-32-chars',
+    })).toThrow();
+  });
+
   it('requires an HTTPS Google OAuth callback in production', () => {
     expect(() => parseApiEnv({
       ...validEnv,

@@ -28,9 +28,31 @@ export const workerEnvSchema = z.object({
   INTEGRATION_ENCRYPTION_KEY: canonicalEncryptionKey,
   GOOGLE_OAUTH_CLIENT_ID: optionalNonEmptyString,
   GOOGLE_OAUTH_CLIENT_SECRET: optionalNonEmptyString,
+  TELEGRAM_BOT_TOKEN: z.preprocess(
+    (value) => value === '' ? undefined : value,
+    z.string().regex(/^\d{5,20}:[A-Za-z0-9_-]{30,}$/).optional(),
+  ),
+  TELEGRAM_BOT_USERNAME: z.preprocess(
+    (value) => value === '' ? undefined : value,
+    z.string().regex(/^[A-Za-z][A-Za-z0-9_]{4,31}$/).optional(),
+  ),
+  TELEGRAM_WEBHOOK_SECRET: z.preprocess(
+    (value) => value === '' ? undefined : value,
+    z.string().min(32).max(256).regex(/^[A-Za-z0-9_-]+$/).optional(),
+  ),
 }).superRefine((environment, context) => {
   if ((environment.GOOGLE_OAUTH_CLIENT_ID === undefined) !== (environment.GOOGLE_OAUTH_CLIENT_SECRET === undefined)) {
     context.addIssue({ code: 'custom', message: 'Google OAuth worker configuration must include client ID and client secret' });
+  }
+
+  const telegramValues = [
+    environment.TELEGRAM_BOT_TOKEN,
+    environment.TELEGRAM_BOT_USERNAME,
+    environment.TELEGRAM_WEBHOOK_SECRET,
+  ];
+
+  if (telegramValues.some((value) => value !== undefined) && telegramValues.some((value) => value === undefined)) {
+    context.addIssue({ code: 'custom', message: 'Telegram bot configuration must include token, username, and webhook secret' });
   }
 });
 
