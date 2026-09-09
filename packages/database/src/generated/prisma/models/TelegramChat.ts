@@ -224,6 +224,7 @@ export type TelegramChatWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"TelegramChat"> | Date | string
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
   deliveries?: Prisma.TelegramDeliveryListRelationFilter
+  supplierSetting?: Prisma.XOR<Prisma.TelegramSupplierSettingNullableScalarRelationFilter, Prisma.TelegramSupplierSettingWhereInput> | null
 }
 
 export type TelegramChatOrderByWithRelationInput = {
@@ -239,6 +240,7 @@ export type TelegramChatOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   tenant?: Prisma.TenantOrderByWithRelationInput
   deliveries?: Prisma.TelegramDeliveryOrderByRelationAggregateInput
+  supplierSetting?: Prisma.TelegramSupplierSettingOrderByWithRelationInput
 }
 
 export type TelegramChatWhereUniqueInput = Prisma.AtLeast<{
@@ -259,6 +261,7 @@ export type TelegramChatWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"TelegramChat"> | Date | string
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
   deliveries?: Prisma.TelegramDeliveryListRelationFilter
+  supplierSetting?: Prisma.XOR<Prisma.TelegramSupplierSettingNullableScalarRelationFilter, Prisma.TelegramSupplierSettingWhereInput> | null
 }, "id" | "tenantId_id" | "tenantId_externalChatId_route">
 
 export type TelegramChatOrderByWithAggregationInput = {
@@ -305,6 +308,7 @@ export type TelegramChatCreateInput = {
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutTelegramChatsInput
   deliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutDestinationInput
+  supplierSetting?: Prisma.TelegramSupplierSettingCreateNestedOneWithoutDestinationInput
 }
 
 export type TelegramChatUncheckedCreateInput = {
@@ -319,6 +323,7 @@ export type TelegramChatUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutDestinationInput
+  supplierSetting?: Prisma.TelegramSupplierSettingUncheckedCreateNestedOneWithoutDestinationInput
 }
 
 export type TelegramChatUpdateInput = {
@@ -333,6 +338,7 @@ export type TelegramChatUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutTelegramChatsNestedInput
   deliveries?: Prisma.TelegramDeliveryUpdateManyWithoutDestinationNestedInput
+  supplierSetting?: Prisma.TelegramSupplierSettingUpdateOneWithoutDestinationNestedInput
 }
 
 export type TelegramChatUncheckedUpdateInput = {
@@ -347,6 +353,7 @@ export type TelegramChatUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutDestinationNestedInput
+  supplierSetting?: Prisma.TelegramSupplierSettingUncheckedUpdateOneWithoutDestinationNestedInput
 }
 
 export type TelegramChatCreateManyInput = {
@@ -498,6 +505,20 @@ export type EnumTelegramChatRouteFieldUpdateOperationsInput = {
   set?: $Enums.TelegramChatRoute
 }
 
+export type TelegramChatCreateNestedOneWithoutSupplierSettingInput = {
+  create?: Prisma.XOR<Prisma.TelegramChatCreateWithoutSupplierSettingInput, Prisma.TelegramChatUncheckedCreateWithoutSupplierSettingInput>
+  connectOrCreate?: Prisma.TelegramChatCreateOrConnectWithoutSupplierSettingInput
+  connect?: Prisma.TelegramChatWhereUniqueInput
+}
+
+export type TelegramChatUpdateOneRequiredWithoutSupplierSettingNestedInput = {
+  create?: Prisma.XOR<Prisma.TelegramChatCreateWithoutSupplierSettingInput, Prisma.TelegramChatUncheckedCreateWithoutSupplierSettingInput>
+  connectOrCreate?: Prisma.TelegramChatCreateOrConnectWithoutSupplierSettingInput
+  upsert?: Prisma.TelegramChatUpsertWithoutSupplierSettingInput
+  connect?: Prisma.TelegramChatWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TelegramChatUpdateToOneWithWhereWithoutSupplierSettingInput, Prisma.TelegramChatUpdateWithoutSupplierSettingInput>, Prisma.TelegramChatUncheckedUpdateWithoutSupplierSettingInput>
+}
+
 export type TelegramChatCreateNestedOneWithoutDeliveriesInput = {
   create?: Prisma.XOR<Prisma.TelegramChatCreateWithoutDeliveriesInput, Prisma.TelegramChatUncheckedCreateWithoutDeliveriesInput>
   connectOrCreate?: Prisma.TelegramChatCreateOrConnectWithoutDeliveriesInput
@@ -523,6 +544,7 @@ export type TelegramChatCreateWithoutTenantInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutDestinationInput
+  supplierSetting?: Prisma.TelegramSupplierSettingCreateNestedOneWithoutDestinationInput
 }
 
 export type TelegramChatUncheckedCreateWithoutTenantInput = {
@@ -536,6 +558,7 @@ export type TelegramChatUncheckedCreateWithoutTenantInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutDestinationInput
+  supplierSetting?: Prisma.TelegramSupplierSettingUncheckedCreateNestedOneWithoutDestinationInput
 }
 
 export type TelegramChatCreateOrConnectWithoutTenantInput = {
@@ -580,6 +603,78 @@ export type TelegramChatScalarWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"TelegramChat"> | Date | string
 }
 
+export type TelegramChatCreateWithoutSupplierSettingInput = {
+  id?: string
+  externalChatId: string
+  type: string
+  title?: string | null
+  route: $Enums.TelegramChatRoute
+  businessConnectionId?: string | null
+  lastObservedAt: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tenant: Prisma.TenantCreateNestedOneWithoutTelegramChatsInput
+  deliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutDestinationInput
+}
+
+export type TelegramChatUncheckedCreateWithoutSupplierSettingInput = {
+  id?: string
+  tenantId: string
+  externalChatId: string
+  type: string
+  title?: string | null
+  route: $Enums.TelegramChatRoute
+  businessConnectionId?: string | null
+  lastObservedAt: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutDestinationInput
+}
+
+export type TelegramChatCreateOrConnectWithoutSupplierSettingInput = {
+  where: Prisma.TelegramChatWhereUniqueInput
+  create: Prisma.XOR<Prisma.TelegramChatCreateWithoutSupplierSettingInput, Prisma.TelegramChatUncheckedCreateWithoutSupplierSettingInput>
+}
+
+export type TelegramChatUpsertWithoutSupplierSettingInput = {
+  update: Prisma.XOR<Prisma.TelegramChatUpdateWithoutSupplierSettingInput, Prisma.TelegramChatUncheckedUpdateWithoutSupplierSettingInput>
+  create: Prisma.XOR<Prisma.TelegramChatCreateWithoutSupplierSettingInput, Prisma.TelegramChatUncheckedCreateWithoutSupplierSettingInput>
+  where?: Prisma.TelegramChatWhereInput
+}
+
+export type TelegramChatUpdateToOneWithWhereWithoutSupplierSettingInput = {
+  where?: Prisma.TelegramChatWhereInput
+  data: Prisma.XOR<Prisma.TelegramChatUpdateWithoutSupplierSettingInput, Prisma.TelegramChatUncheckedUpdateWithoutSupplierSettingInput>
+}
+
+export type TelegramChatUpdateWithoutSupplierSettingInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  externalChatId?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  route?: Prisma.EnumTelegramChatRouteFieldUpdateOperationsInput | $Enums.TelegramChatRoute
+  businessConnectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastObservedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutTelegramChatsNestedInput
+  deliveries?: Prisma.TelegramDeliveryUpdateManyWithoutDestinationNestedInput
+}
+
+export type TelegramChatUncheckedUpdateWithoutSupplierSettingInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  externalChatId?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  route?: Prisma.EnumTelegramChatRouteFieldUpdateOperationsInput | $Enums.TelegramChatRoute
+  businessConnectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastObservedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutDestinationNestedInput
+}
+
 export type TelegramChatCreateWithoutDeliveriesInput = {
   id?: string
   externalChatId: string
@@ -591,6 +686,7 @@ export type TelegramChatCreateWithoutDeliveriesInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutTelegramChatsInput
+  supplierSetting?: Prisma.TelegramSupplierSettingCreateNestedOneWithoutDestinationInput
 }
 
 export type TelegramChatUncheckedCreateWithoutDeliveriesInput = {
@@ -604,6 +700,7 @@ export type TelegramChatUncheckedCreateWithoutDeliveriesInput = {
   lastObservedAt: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
+  supplierSetting?: Prisma.TelegramSupplierSettingUncheckedCreateNestedOneWithoutDestinationInput
 }
 
 export type TelegramChatCreateOrConnectWithoutDeliveriesInput = {
@@ -633,6 +730,7 @@ export type TelegramChatUpdateWithoutDeliveriesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutTelegramChatsNestedInput
+  supplierSetting?: Prisma.TelegramSupplierSettingUpdateOneWithoutDestinationNestedInput
 }
 
 export type TelegramChatUncheckedUpdateWithoutDeliveriesInput = {
@@ -646,6 +744,7 @@ export type TelegramChatUncheckedUpdateWithoutDeliveriesInput = {
   lastObservedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  supplierSetting?: Prisma.TelegramSupplierSettingUncheckedUpdateOneWithoutDestinationNestedInput
 }
 
 export type TelegramChatCreateManyTenantInput = {
@@ -671,6 +770,7 @@ export type TelegramChatUpdateWithoutTenantInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deliveries?: Prisma.TelegramDeliveryUpdateManyWithoutDestinationNestedInput
+  supplierSetting?: Prisma.TelegramSupplierSettingUpdateOneWithoutDestinationNestedInput
 }
 
 export type TelegramChatUncheckedUpdateWithoutTenantInput = {
@@ -684,6 +784,7 @@ export type TelegramChatUncheckedUpdateWithoutTenantInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutDestinationNestedInput
+  supplierSetting?: Prisma.TelegramSupplierSettingUncheckedUpdateOneWithoutDestinationNestedInput
 }
 
 export type TelegramChatUncheckedUpdateManyWithoutTenantInput = {
@@ -742,6 +843,7 @@ export type TelegramChatSelect<ExtArgs extends runtime.Types.Extensions.Internal
   updatedAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   deliveries?: boolean | Prisma.TelegramChat$deliveriesArgs<ExtArgs>
+  supplierSetting?: boolean | Prisma.TelegramChat$supplierSettingArgs<ExtArgs>
   _count?: boolean | Prisma.TelegramChatCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["telegramChat"]>
 
@@ -790,6 +892,7 @@ export type TelegramChatOmit<ExtArgs extends runtime.Types.Extensions.InternalAr
 export type TelegramChatInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   deliveries?: boolean | Prisma.TelegramChat$deliveriesArgs<ExtArgs>
+  supplierSetting?: boolean | Prisma.TelegramChat$supplierSettingArgs<ExtArgs>
   _count?: boolean | Prisma.TelegramChatCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type TelegramChatIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -804,6 +907,7 @@ export type $TelegramChatPayload<ExtArgs extends runtime.Types.Extensions.Intern
   objects: {
     tenant: Prisma.$TenantPayload<ExtArgs>
     deliveries: Prisma.$TelegramDeliveryPayload<ExtArgs>[]
+    supplierSetting: Prisma.$TelegramSupplierSettingPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1212,6 +1316,7 @@ export interface Prisma__TelegramChatClient<T, Null = never, ExtArgs extends run
   readonly [Symbol.toStringTag]: "PrismaPromise"
   tenant<T extends Prisma.TenantDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TenantDefaultArgs<ExtArgs>>): Prisma.Prisma__TenantClient<runtime.Types.Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   deliveries<T extends Prisma.TelegramChat$deliveriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TelegramChat$deliveriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TelegramDeliveryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  supplierSetting<T extends Prisma.TelegramChat$supplierSettingArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TelegramChat$supplierSettingArgs<ExtArgs>>): Prisma.Prisma__TelegramSupplierSettingClient<runtime.Types.Result.GetResult<Prisma.$TelegramSupplierSettingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1673,6 +1778,25 @@ export type TelegramChat$deliveriesArgs<ExtArgs extends runtime.Types.Extensions
   take?: number
   skip?: number
   distinct?: Prisma.TelegramDeliveryScalarFieldEnum | Prisma.TelegramDeliveryScalarFieldEnum[]
+}
+
+/**
+ * TelegramChat.supplierSetting
+ */
+export type TelegramChat$supplierSettingArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TelegramSupplierSetting
+   */
+  select?: Prisma.TelegramSupplierSettingSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the TelegramSupplierSetting
+   */
+  omit?: Prisma.TelegramSupplierSettingOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TelegramSupplierSettingInclude<ExtArgs> | null
+  where?: Prisma.TelegramSupplierSettingWhereInput
 }
 
 /**

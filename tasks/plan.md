@@ -323,7 +323,7 @@ Implementation and automated verification do not require a real Telegram credent
 Approved downstream spec: `SPEC-telegram-supplier-dispatch.md`.
 
 - [x] Task 48: Accept permitted `business_message` updates and observe Business destinations without storing message contents.
-- [ ] Task 49: Let an owner select one observed Business chat or bot-managed group as the supplier destination.
-- [ ] Task 50: Queue an idempotent, privacy-safe supplier message from an approved order.
-- [ ] Task 51: Add supplier configuration and delivery status to Settings and order details.
+- [x] Task 49: Let an owner select one observed Business chat or bot-managed group as the supplier destination.
+- [x] Task 50: Queue an idempotent, privacy-safe supplier message from an approved order.
+- [x] Task 51: Add supplier configuration and delivery status to Settings and order details.
 - [ ] Task 52: Expand the production webhook subscriptions and validate one end-to-end Telegram Business delivery.

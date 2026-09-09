@@ -410,6 +410,7 @@ export const ModelName = {
   TelegramUserBinding: 'TelegramUserBinding',
   TelegramBusinessConnection: 'TelegramBusinessConnection',
   TelegramChat: 'TelegramChat',
+  TelegramSupplierSetting: 'TelegramSupplierSetting',
   TelegramWebhookUpdate: 'TelegramWebhookUpdate',
   TelegramDelivery: 'TelegramDelivery',
   GoogleIdentity: 'GoogleIdentity',
@@ -451,7 +452,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "tenant" | "googleConnection" | "googleOAuthAttempt" | "googleCredentialCleanup" | "instagramConnection" | "instagramOAuthState" | "instagramCredentialCleanup" | "user" | "userNotification" | "telegramLinkAttempt" | "telegramUserBinding" | "telegramBusinessConnection" | "telegramChat" | "telegramWebhookUpdate" | "telegramDelivery" | "googleIdentity" | "googleSignInAttempt" | "tenantMembership" | "session" | "emailVerificationToken" | "passwordResetToken" | "tenantInvitation" | "securityAuditLog" | "webhookEvent" | "conversation" | "instagramCustomerProfile" | "instagramAvatarCleanup" | "message" | "googleSheetsDestination" | "tenantSettings" | "order" | "orderExport" | "auditLog" | "orderItem" | "product" | "catalogueSource" | "catalogueMapping" | "catalogueImportRun" | "attachment"
+    modelProps: "tenant" | "googleConnection" | "googleOAuthAttempt" | "googleCredentialCleanup" | "instagramConnection" | "instagramOAuthState" | "instagramCredentialCleanup" | "user" | "userNotification" | "telegramLinkAttempt" | "telegramUserBinding" | "telegramBusinessConnection" | "telegramChat" | "telegramSupplierSetting" | "telegramWebhookUpdate" | "telegramDelivery" | "googleIdentity" | "googleSignInAttempt" | "tenantMembership" | "session" | "emailVerificationToken" | "passwordResetToken" | "tenantInvitation" | "securityAuditLog" | "webhookEvent" | "conversation" | "instagramCustomerProfile" | "instagramAvatarCleanup" | "message" | "googleSheetsDestination" | "tenantSettings" | "order" | "orderExport" | "auditLog" | "orderItem" | "product" | "catalogueSource" | "catalogueMapping" | "catalogueImportRun" | "attachment"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1414,6 +1415,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.TelegramChatCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.TelegramChatCountAggregateOutputType> | number
+        }
+      }
+    }
+    TelegramSupplierSetting: {
+      payload: Prisma.$TelegramSupplierSettingPayload<ExtArgs>
+      fields: Prisma.TelegramSupplierSettingFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TelegramSupplierSettingFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelegramSupplierSettingPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TelegramSupplierSettingFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelegramSupplierSettingPayload>
+        }
+        findFirst: {
+          args: Prisma.TelegramSupplierSettingFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelegramSupplierSettingPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TelegramSupplierSettingFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelegramSupplierSettingPayload>
+        }
+        findMany: {
+          args: Prisma.TelegramSupplierSettingFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelegramSupplierSettingPayload>[]
+        }
+        create: {
+          args: Prisma.TelegramSupplierSettingCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelegramSupplierSettingPayload>
+        }
+        createMany: {
+          args: Prisma.TelegramSupplierSettingCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TelegramSupplierSettingCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelegramSupplierSettingPayload>[]
+        }
+        delete: {
+          args: Prisma.TelegramSupplierSettingDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelegramSupplierSettingPayload>
+        }
+        update: {
+          args: Prisma.TelegramSupplierSettingUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelegramSupplierSettingPayload>
+        }
+        deleteMany: {
+          args: Prisma.TelegramSupplierSettingDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TelegramSupplierSettingUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TelegramSupplierSettingUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelegramSupplierSettingPayload>[]
+        }
+        upsert: {
+          args: Prisma.TelegramSupplierSettingUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelegramSupplierSettingPayload>
+        }
+        aggregate: {
+          args: Prisma.TelegramSupplierSettingAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTelegramSupplierSetting>
+        }
+        groupBy: {
+          args: Prisma.TelegramSupplierSettingGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TelegramSupplierSettingGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TelegramSupplierSettingCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TelegramSupplierSettingCountAggregateOutputType> | number
         }
       }
     }
@@ -3601,6 +3676,17 @@ export const TelegramChatScalarFieldEnum = {
 export type TelegramChatScalarFieldEnum = (typeof TelegramChatScalarFieldEnum)[keyof typeof TelegramChatScalarFieldEnum]
 
 
+export const TelegramSupplierSettingScalarFieldEnum = {
+  tenantId: 'tenantId',
+  destinationId: 'destinationId',
+  autoDispatch: 'autoDispatch',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TelegramSupplierSettingScalarFieldEnum = (typeof TelegramSupplierSettingScalarFieldEnum)[keyof typeof TelegramSupplierSettingScalarFieldEnum]
+
+
 export const TelegramWebhookUpdateScalarFieldEnum = {
   id: 'id',
   updateId: 'updateId',
@@ -4617,6 +4703,7 @@ export type GlobalOmitConfig = {
   telegramUserBinding?: Prisma.TelegramUserBindingOmit
   telegramBusinessConnection?: Prisma.TelegramBusinessConnectionOmit
   telegramChat?: Prisma.TelegramChatOmit
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingOmit
   telegramWebhookUpdate?: Prisma.TelegramWebhookUpdateOmit
   telegramDelivery?: Prisma.TelegramDeliveryOmit
   googleIdentity?: Prisma.GoogleIdentityOmit

@@ -10,10 +10,11 @@ const statusLabels: Record<string, string> = { NEEDS_REVIEW: 'Потребує �
 export function OrderReviewPanel({ initialOrder }: { initialOrder: ManagerOrder }) {
   const [order, setOrder] = useState(initialOrder);
   const [draft, setDraft] = useState(initialOrder);
-  const [pendingAction, setPendingAction] = useState<'save' | 'approve' | 'cancel' | 'sheets' | null>(null);
+  const [pendingAction, setPendingAction] = useState<'save' | 'approve' | 'cancel' | 'sheets' | 'supplier' | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [sheetsExport, setSheetsExport] = useState(initialOrder.sheetsExport);
+  const [supplierMessage, setSupplierMessage] = useState<string | null>(null);
   const reviewIssues = validationHints(order.validationIssues, draft);
   const unresolved = reviewIssues.length > 0;
   const final = ['APPROVED', 'AUTO_APPROVED', 'CANCELLED'].includes(order.status);
@@ -50,6 +51,17 @@ export function OrderReviewPanel({ initialOrder }: { initialOrder: ManagerOrder 
     finally { setPendingAction(null); }
   }
 
+  async function sendToSupplier() {
+    setPendingAction('supplier'); setError(null); setSupplierMessage(null);
+    try {
+      const response = await mutatingFetch(`/api/integrations/telegram/supplier/orders/${order.id}`, { method: 'POST' });
+      if (!response.ok) throw new Error('Спочатку виберіть чат постачальника в налаштуваннях Telegram');
+      const result = await response.json() as { status: string };
+      setSupplierMessage(result.status === 'SUCCEEDED' ? 'Замовлення вже надіслано постачальнику' : 'Замовлення поставлено в чергу постачальнику');
+    } catch (reason) { setError(reason instanceof Error ? reason.message : 'Не вдалося надіслати замовлення'); }
+    finally { setPendingAction(null); }
+  }
+
   const changeDraft = (next: ManagerOrder) => { setDraft(next); setSaved(false); };
   const changeItem = (id: string, values: Partial<ManagerOrder['items'][number]>) => changeDraft({ ...draft, items: draft.items.map((item) => item.id === id ? { ...item, ...values } : item) });
 
@@ -66,7 +78,17 @@ export function OrderReviewPanel({ initialOrder }: { initialOrder: ManagerOrder 
     </div>
     <section className="review-section"><h2>Товари</h2>{draft.items.map((item, index) => <article className="review-item" data-low-confidence={item.confidence < 0.9} key={item.id}><div className="review-item-head"><label><span className="sr-only">Товар {index + 1}</span><select value={item.catalogId ?? ''} onChange={(event) => changeItem(item.id, { catalogId: event.target.value || null, productName: draft.catalogueCandidates.find((candidate) => candidate.sku === event.target.value)?.name ?? null })}><option value="">Оберіть товар</option>{draft.catalogueCandidates.map((candidate) => <option key={candidate.sku} value={candidate.sku}>{candidate.sku} — {candidate.name}</option>)}</select></label><b>{Math.round(item.confidence * 100)}%</b></div><div className="item-edit-grid"><label>Розмір<input value={item.size ?? ''} onChange={(event) => changeItem(item.id, { size: event.target.value || null })} /></label><label>Колір<input value={item.color ?? ''} onChange={(event) => changeItem(item.id, { color: event.target.value || null })} /></label><label>Кількість<input min="1" type="number" value={item.quantity} onChange={(event) => changeItem(item.id, { quantity: Number(event.target.value) })} /></label></div></article>)}</section>
     {sheetsExport && <SheetsExportState value={sheetsExport} pending={pending} retry={() => void retrySheetsExport()} />}
-    <div className="review-actions">{saved && <p className="save-success">Зміни збережено</p>}{error && <p role="alert">{error}</p>}<button className="secondary" disabled={pending || final} onClick={() => void transition('cancel')} type="button">Відхилити</button>{hasChanges && <LoadingButton className="secondary" pending={pendingAction === 'save'} pendingLabel="Зберігаємо…" disabled={pending || final} onClick={() => void save()} type="button">Зберегти зміни</LoadingButton>}<LoadingButton pending={pendingAction === 'approve'} pendingLabel="Підтверджуємо…" disabled={pending || unresolved || final} onClick={() => void transition('approve')} type="button">Підтвердити</LoadingButton></div>
+    <div className="review-actions">
+      {saved && <p className="save-success">Зміни збережено</p>}
+      {supplierMessage && <p className="save-success">{supplierMessage}</p>}
+      {error && <p role="alert">{error}</p>}
+      {!final && <>
+        <button className="secondary" disabled={pending} onClick={() => void transition('cancel')} type="button">Відхилити</button>
+        {hasChanges && <LoadingButton className="secondary" pending={pendingAction === 'save'} pendingLabel="Зберігаємо…" disabled={pending} onClick={() => void save()} type="button">Зберегти зміни</LoadingButton>}
+        <LoadingButton pending={pendingAction === 'approve'} pendingLabel="Підтверджуємо…" disabled={pending || unresolved} onClick={() => void transition('approve')} type="button">Підтвердити</LoadingButton>
+      </>}
+      {(order.status === 'APPROVED' || order.status === 'AUTO_APPROVED') && <LoadingButton pending={pendingAction === 'supplier'} pendingLabel="Надсилаємо…" disabled={pending} onClick={() => void sendToSupplier()} type="button">Надіслати постачальнику</LoadingButton>}
+    </div>
   </section>;
 }
 

@@ -133,4 +133,21 @@ describe('OrderReviewPanel', () => {
     await waitFor(() => expect(screen.getByText('Очікує синхронізації')).toBeInTheDocument());
     expect(fetchMock).toHaveBeenCalledWith(`/api/orders/${order.id}/sheets-export/retry`, expect.objectContaining({ method: 'POST' }));
   });
+
+  it('sends an approved order to the configured Telegram supplier with progress feedback', async () => {
+    let finishRequest!: (value: { ok: boolean; json: () => Promise<{ deliveryId: string; status: string }> }) => void;
+    const pendingRequest = new Promise<{ ok: boolean; json: () => Promise<{ deliveryId: string; status: string }> }>((resolve) => { finishRequest = resolve; });
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ token: 'csrf-token' }) })
+      .mockReturnValueOnce(pendingRequest);
+    vi.stubGlobal('fetch', fetchMock);
+    render(<OrderReviewPanel initialOrder={{ ...order, status: 'APPROVED' }} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Надіслати постачальнику' }));
+
+    expect(await screen.findByRole('button', { name: 'Надсилаємо…' })).toHaveAttribute('aria-busy', 'true');
+    finishRequest({ ok: true, json: async () => ({ deliveryId: 'delivery-1', status: 'PENDING' }) });
+    await waitFor(() => expect(screen.getByText('Замовлення поставлено в чергу постачальнику')).toBeInTheDocument());
+    expect(fetchMock).toHaveBeenCalledWith(`/api/integrations/telegram/supplier/orders/${order.id}`, expect.objectContaining({ method: 'POST' }));
+  });
 });

@@ -8,6 +8,7 @@ const manager: AuthPrincipal = {
   userId: 'manager', email: 'manager@example.com', name: 'Manager', platformRole: 'USER',
   tenantId: 'tenant', membershipRole: 'MANAGER', sessionId: 'session',
 };
+const owner: AuthPrincipal = { ...manager, userId: 'owner', membershipRole: 'OWNER' };
 
 describe('TelegramController', () => {
   it('allows personal linking for a member but reserves supplier groups for owners', async () => {
@@ -32,5 +33,26 @@ describe('TelegramController', () => {
     const controller = new TelegramController({ queueTest } as never);
 
     await expect(controller.test(manager)).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('shows supplier destinations to members but lets only the owner select one', async () => {
+    const supplierSettings = vi.fn().mockResolvedValue({ destinations: [] });
+    const saveSupplierSettings = vi.fn().mockResolvedValue({ selectedDestinationId: '11111111-1111-4111-8111-111111111111' });
+    const controller = new TelegramController({ supplierSettings, saveSupplierSettings } as never);
+    const input = { destinationId: '11111111-1111-4111-8111-111111111111', autoDispatch: false };
+
+    await expect(controller.supplierSettings(manager)).resolves.toEqual({ destinations: [] });
+    expect(() => controller.saveSupplierSettings(manager, input)).toThrow(ForbiddenException);
+    await expect(controller.saveSupplierSettings(owner, input)).resolves.toMatchObject({ selectedDestinationId: input.destinationId });
+    expect(saveSupplierSettings).toHaveBeenCalledWith('tenant', input);
+  });
+
+  it('queues an approved order for the configured supplier inside the current tenant', async () => {
+    const queueSupplierOrder = vi.fn().mockResolvedValue({ deliveryId: 'delivery-1', status: 'PENDING' });
+    const controller = new TelegramController({ queueSupplierOrder } as never);
+
+    await expect(controller.sendSupplierOrder(manager, '11111111-1111-4111-8111-111111111111'))
+      .resolves.toEqual({ deliveryId: 'delivery-1', status: 'PENDING' });
+    expect(queueSupplierOrder).toHaveBeenCalledWith('tenant', '11111111-1111-4111-8111-111111111111');
   });
 });

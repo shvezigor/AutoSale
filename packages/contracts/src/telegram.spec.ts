@@ -5,6 +5,7 @@ import {
   telegramDeliveryJobSchema,
   telegramLinkPurposeSchema,
   telegramLinkResponseSchema,
+  telegramSupplierSettingsSchema,
 } from './telegram.js';
 
 describe('Telegram contracts', () => {
@@ -51,5 +52,23 @@ describe('Telegram contracts', () => {
       deliveryId: '11111111-1111-4111-8111-111111111111',
     })).toEqual({ deliveryId: '11111111-1111-4111-8111-111111111111' });
     expect(() => telegramDeliveryJobSchema.parse({ deliveryId: 'bad', text: 'PII must not enter Redis' })).toThrow();
+  });
+
+  it('exposes supplier destinations without Telegram external identifiers', () => {
+    const settings = {
+      businessConnected: true,
+      selectedDestinationId: '11111111-1111-4111-8111-111111111111',
+      autoDispatch: false,
+      destinations: [{
+        id: '11111111-1111-4111-8111-111111111111', title: 'Постачальник', route: 'BUSINESS',
+        lastObservedAt: '2026-09-09T12:00:00.000Z',
+      }],
+    };
+
+    expect(telegramSupplierSettingsSchema.parse(settings)).toEqual(settings);
+    expect(() => telegramSupplierSettingsSchema.parse({
+      ...settings,
+      destinations: [{ ...settings.destinations[0], externalChatId: '123456789' }],
+    })).toThrow();
   });
 });

@@ -1,6 +1,9 @@
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
 
-import type { TelegramConnectionSummary, TelegramLinkPurpose, TelegramLinkResponse } from '@autosale/contracts';
+import type {
+  TelegramConnectionSummary, TelegramLinkPurpose, TelegramLinkResponse,
+  TelegramSupplierSettings, TelegramSupplierSettingsUpdate,
+} from '@autosale/contracts';
 import { Prisma, type PrismaClient } from '@autosale/database';
 import { z } from 'zod';
 
@@ -112,6 +115,102 @@ export class TelegramService {
       // PostgreSQL remains the source of truth; the worker reconciler retries the wake-up.
     }
     return { deliveryId: delivery.id, status: 'PENDING' };
+  }
+
+  async supplierSettings(tenantId: string): Promise<TelegramSupplierSettings> {
+    const [connections, setting] = await Promise.all([
+      this.prisma.telegramBusinessConnection.findMany({
+        where: { tenantId, enabled: true }, select: { externalConnectionId: true },
+      }),
+      this.prisma.telegramSupplierSetting.findUnique({ where: { tenantId } }),
+    ]);
+    const connectionIds = connections.map((connection) => connection.externalConnectionId);
+    const destinations = await this.prisma.telegramChat.findMany({
+      where: {
+        tenantId,
+        OR: [
+          { route: 'BOT', type: { in: ['group', 'supergroup'] } },
+          ...(connectionIds.length > 0 ? [{ route: 'BUSINESS' as const, businessConnectionId: { in: connectionIds } }] : []),
+        ],
+      },
+      orderBy: { lastObservedAt: 'desc' },
+      select: { id: true, title: true, route: true, lastObservedAt: true },
+    });
+    return {
+      businessConnected: connections.length > 0,
+      selectedDestinationId: setting?.destinationId ?? null,
+      autoDispatch: setting?.autoDispatch ?? false,
+      destinations: destinations.map((destination) => ({
+        id: destination.id,
+        title: destination.title?.trim() || (destination.route === 'BUSINESS' ? 'Telegram Business чат' : 'Telegram група'),
+        route: destination.route,
+        lastObservedAt: destination.lastObservedAt.toISOString(),
+      })),
+    };
+  }
+
+  async saveSupplierSettings(tenantId: string, input: TelegramSupplierSettingsUpdate): Promise<TelegramSupplierSettings> {
+    const destination = await this.prisma.telegramChat.findFirst({
+      where: { id: input.destinationId, tenantId }, select: { id: true, route: true, type: true, businessConnectionId: true },
+    });
+    if (!destination || (destination.route === 'BOT' && !['group', 'supergroup'].includes(destination.type))) {
+      throw new Error('Telegram supplier destination unavailable');
+    }
+    if (destination.route === 'BUSINESS') {
+      const connection = await this.prisma.telegramBusinessConnection.findFirst({
+        where: { tenantId, externalConnectionId: destination.businessConnectionId ?? '', enabled: true }, select: { id: true },
+      });
+      if (!connection) throw new Error('Telegram supplier destination unavailable');
+    }
+    await this.prisma.telegramSupplierSetting.upsert({
+      where: { tenantId },
+      create: { tenantId, destinationId: destination.id, autoDispatch: false },
+      update: { destinationId: destination.id, autoDispatch: false },
+    });
+    return this.supplierSettings(tenantId);
+  }
+
+  async queueSupplierOrder(tenantId: string, orderId: string): Promise<{ deliveryId: string; status: string }> {
+    if (!this.options.botUsername || !this.options.queue) throw new Error('Telegram is not configured');
+    const order = await this.prisma.order.findFirst({
+      where: { id: orderId, tenantId },
+      select: {
+        id: true, status: true,
+        items: { select: { catalogId: true, originalText: true, quantity: true, size: true, color: true } },
+      },
+    });
+    if (!order) throw new Error('Order not found');
+    if (!['APPROVED', 'AUTO_APPROVED'].includes(order.status)) throw new Error('Approved order required');
+    const setting = await this.prisma.telegramSupplierSetting.findUnique({
+      where: { tenantId }, select: { destinationId: true },
+    });
+    if (!setting) throw new Error('Telegram supplier destination required');
+    const products = await this.prisma.product.findMany({
+      where: { tenantId, sku: { in: order.items.flatMap((item) => item.catalogId ? [item.catalogId] : []) } },
+      select: { sku: true, name: true },
+    });
+    const names = new Map(products.map((product) => [product.sku, product.name]));
+    const idempotencyKey = `supplier-order:${order.id}`;
+    const delivery = await this.prisma.telegramDelivery.upsert({
+      where: { tenantId_idempotencyKey: { tenantId, idempotencyKey } },
+      create: {
+        tenantId, destinationId: setting.destinationId, purpose: 'SUPPLIER_ORDER', idempotencyKey,
+        messageText: supplierOrderMessage(order.id, order.items, names), nextAttemptAt: this.now(),
+      },
+      update: {},
+      select: { id: true, status: true },
+    });
+    if (delivery.status === 'PENDING' || delivery.status === 'RETRYABLE') {
+      try {
+        await this.options.queue.add(
+          'telegram.deliver', { deliveryId: delivery.id },
+          { jobId: `telegram:${delivery.id}`, attempts: 1, removeOnComplete: true, removeOnFail: true },
+        );
+      } catch {
+        // PostgreSQL remains authoritative; the reconciler will wake this delivery.
+      }
+    }
+    return { deliveryId: delivery.id, status: delivery.status };
   }
 
   async handleWebhook(input: unknown): Promise<'PROCESSED' | 'REPLAY' | 'IGNORED'> {
@@ -237,4 +336,18 @@ function safeReturnPath(value: string | undefined): string {
   } catch {
     return '/settings?tab=telegram';
   }
+}
+
+function supplierOrderMessage(
+  orderId: string,
+  items: Array<{ catalogId: string | null; originalText: string; quantity: number; size: string | null; color: string | null }>,
+  productNames: Map<string, string>,
+): string {
+  const lines = items.map((item, index) => {
+    const sku = item.catalogId ?? 'Без артикулу';
+    const name = item.catalogId ? productNames.get(item.catalogId) ?? item.originalText : item.originalText;
+    const details = [`Кількість: ${item.quantity}`, item.size ? `Розмір: ${item.size}` : null, item.color ? `Колір: ${item.color}` : null].filter(Boolean).join(' · ');
+    return `${index + 1}. ${sku} — ${name}\n${details}`;
+  });
+  return [`Нове замовлення AutoSale #${orderId.slice(0, 8)}`, '', ...lines].join('\n').slice(0, 4_096);
 }

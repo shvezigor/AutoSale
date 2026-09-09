@@ -219,6 +219,7 @@ export type TenantWhereInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionListRelationFilter
   telegramChats?: Prisma.TelegramChatListRelationFilter
   telegramDeliveries?: Prisma.TelegramDeliveryListRelationFilter
+  telegramSupplierSetting?: Prisma.XOR<Prisma.TelegramSupplierSettingNullableScalarRelationFilter, Prisma.TelegramSupplierSettingWhereInput> | null
 }
 
 export type TenantOrderByWithRelationInput = {
@@ -257,6 +258,7 @@ export type TenantOrderByWithRelationInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionOrderByRelationAggregateInput
   telegramChats?: Prisma.TelegramChatOrderByRelationAggregateInput
   telegramDeliveries?: Prisma.TelegramDeliveryOrderByRelationAggregateInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingOrderByWithRelationInput
 }
 
 export type TenantWhereUniqueInput = Prisma.AtLeast<{
@@ -298,6 +300,7 @@ export type TenantWhereUniqueInput = Prisma.AtLeast<{
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionListRelationFilter
   telegramChats?: Prisma.TelegramChatListRelationFilter
   telegramDeliveries?: Prisma.TelegramDeliveryListRelationFilter
+  telegramSupplierSetting?: Prisma.XOR<Prisma.TelegramSupplierSettingNullableScalarRelationFilter, Prisma.TelegramSupplierSettingWhereInput> | null
 }, "id" | "key">
 
 export type TenantOrderByWithAggregationInput = {
@@ -360,6 +363,7 @@ export type TenantCreateInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingCreateNestedOneWithoutTenantInput
 }
 
 export type TenantUncheckedCreateInput = {
@@ -398,6 +402,7 @@ export type TenantUncheckedCreateInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatUncheckedCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedCreateNestedOneWithoutTenantInput
 }
 
 export type TenantUpdateInput = {
@@ -436,6 +441,7 @@ export type TenantUpdateInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateInput = {
@@ -474,6 +480,7 @@ export type TenantUncheckedUpdateInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUncheckedUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantCreateManyInput = {
@@ -708,6 +715,20 @@ export type TenantUpdateOneRequiredWithoutTelegramChatsNestedInput = {
   upsert?: Prisma.TenantUpsertWithoutTelegramChatsInput
   connect?: Prisma.TenantWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.TenantUpdateToOneWithWhereWithoutTelegramChatsInput, Prisma.TenantUpdateWithoutTelegramChatsInput>, Prisma.TenantUncheckedUpdateWithoutTelegramChatsInput>
+}
+
+export type TenantCreateNestedOneWithoutTelegramSupplierSettingInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutTelegramSupplierSettingInput, Prisma.TenantUncheckedCreateWithoutTelegramSupplierSettingInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutTelegramSupplierSettingInput
+  connect?: Prisma.TenantWhereUniqueInput
+}
+
+export type TenantUpdateOneRequiredWithoutTelegramSupplierSettingNestedInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutTelegramSupplierSettingInput, Prisma.TenantUncheckedCreateWithoutTelegramSupplierSettingInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutTelegramSupplierSettingInput
+  upsert?: Prisma.TenantUpsertWithoutTelegramSupplierSettingInput
+  connect?: Prisma.TenantWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TenantUpdateToOneWithWhereWithoutTelegramSupplierSettingInput, Prisma.TenantUpdateWithoutTelegramSupplierSettingInput>, Prisma.TenantUncheckedUpdateWithoutTelegramSupplierSettingInput>
 }
 
 export type TenantCreateNestedOneWithoutTelegramDeliveriesInput = {
@@ -1001,6 +1022,7 @@ export type TenantCreateWithoutGoogleConnectionInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingCreateNestedOneWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutGoogleConnectionInput = {
@@ -1038,6 +1060,7 @@ export type TenantUncheckedCreateWithoutGoogleConnectionInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatUncheckedCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedCreateNestedOneWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutGoogleConnectionInput = {
@@ -1091,6 +1114,7 @@ export type TenantUpdateWithoutGoogleConnectionInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutGoogleConnectionInput = {
@@ -1128,6 +1152,7 @@ export type TenantUncheckedUpdateWithoutGoogleConnectionInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUncheckedUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutGoogleOAuthAttemptsInput = {
@@ -1165,6 +1190,7 @@ export type TenantCreateWithoutGoogleOAuthAttemptsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingCreateNestedOneWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutGoogleOAuthAttemptsInput = {
@@ -1202,6 +1228,7 @@ export type TenantUncheckedCreateWithoutGoogleOAuthAttemptsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatUncheckedCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedCreateNestedOneWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutGoogleOAuthAttemptsInput = {
@@ -1255,6 +1282,7 @@ export type TenantUpdateWithoutGoogleOAuthAttemptsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutGoogleOAuthAttemptsInput = {
@@ -1292,6 +1320,7 @@ export type TenantUncheckedUpdateWithoutGoogleOAuthAttemptsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUncheckedUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutGoogleCredentialCleanupsInput = {
@@ -1329,6 +1358,7 @@ export type TenantCreateWithoutGoogleCredentialCleanupsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingCreateNestedOneWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutGoogleCredentialCleanupsInput = {
@@ -1366,6 +1396,7 @@ export type TenantUncheckedCreateWithoutGoogleCredentialCleanupsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatUncheckedCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedCreateNestedOneWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutGoogleCredentialCleanupsInput = {
@@ -1419,6 +1450,7 @@ export type TenantUpdateWithoutGoogleCredentialCleanupsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutGoogleCredentialCleanupsInput = {
@@ -1456,6 +1488,7 @@ export type TenantUncheckedUpdateWithoutGoogleCredentialCleanupsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUncheckedUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutInstagramConnectionInput = {
@@ -1493,6 +1526,7 @@ export type TenantCreateWithoutInstagramConnectionInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingCreateNestedOneWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutInstagramConnectionInput = {
@@ -1530,6 +1564,7 @@ export type TenantUncheckedCreateWithoutInstagramConnectionInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatUncheckedCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedCreateNestedOneWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutInstagramConnectionInput = {
@@ -1583,6 +1618,7 @@ export type TenantUpdateWithoutInstagramConnectionInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutInstagramConnectionInput = {
@@ -1620,6 +1656,7 @@ export type TenantUncheckedUpdateWithoutInstagramConnectionInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUncheckedUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutInstagramOAuthStatesInput = {
@@ -1657,6 +1694,7 @@ export type TenantCreateWithoutInstagramOAuthStatesInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingCreateNestedOneWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutInstagramOAuthStatesInput = {
@@ -1694,6 +1732,7 @@ export type TenantUncheckedCreateWithoutInstagramOAuthStatesInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatUncheckedCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedCreateNestedOneWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutInstagramOAuthStatesInput = {
@@ -1747,6 +1786,7 @@ export type TenantUpdateWithoutInstagramOAuthStatesInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutInstagramOAuthStatesInput = {
@@ -1784,6 +1824,7 @@ export type TenantUncheckedUpdateWithoutInstagramOAuthStatesInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUncheckedUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutInstagramCredentialCleanupsInput = {
@@ -1821,6 +1862,7 @@ export type TenantCreateWithoutInstagramCredentialCleanupsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingCreateNestedOneWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutInstagramCredentialCleanupsInput = {
@@ -1858,6 +1900,7 @@ export type TenantUncheckedCreateWithoutInstagramCredentialCleanupsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatUncheckedCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedCreateNestedOneWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutInstagramCredentialCleanupsInput = {
@@ -1911,6 +1954,7 @@ export type TenantUpdateWithoutInstagramCredentialCleanupsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutInstagramCredentialCleanupsInput = {
@@ -1948,6 +1992,7 @@ export type TenantUncheckedUpdateWithoutInstagramCredentialCleanupsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUncheckedUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutNotificationsInput = {
@@ -1985,6 +2030,7 @@ export type TenantCreateWithoutNotificationsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingCreateNestedOneWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutNotificationsInput = {
@@ -2022,6 +2068,7 @@ export type TenantUncheckedCreateWithoutNotificationsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatUncheckedCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedCreateNestedOneWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutNotificationsInput = {
@@ -2075,6 +2122,7 @@ export type TenantUpdateWithoutNotificationsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutNotificationsInput = {
@@ -2112,6 +2160,7 @@ export type TenantUncheckedUpdateWithoutNotificationsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUncheckedUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutTelegramLinkAttemptsInput = {
@@ -2149,6 +2198,7 @@ export type TenantCreateWithoutTelegramLinkAttemptsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingCreateNestedOneWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutTelegramLinkAttemptsInput = {
@@ -2186,6 +2236,7 @@ export type TenantUncheckedCreateWithoutTelegramLinkAttemptsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatUncheckedCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedCreateNestedOneWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutTelegramLinkAttemptsInput = {
@@ -2239,6 +2290,7 @@ export type TenantUpdateWithoutTelegramLinkAttemptsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutTelegramLinkAttemptsInput = {
@@ -2276,6 +2328,7 @@ export type TenantUncheckedUpdateWithoutTelegramLinkAttemptsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUncheckedUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutTelegramUserBindingsInput = {
@@ -2313,6 +2366,7 @@ export type TenantCreateWithoutTelegramUserBindingsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingCreateNestedOneWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutTelegramUserBindingsInput = {
@@ -2350,6 +2404,7 @@ export type TenantUncheckedCreateWithoutTelegramUserBindingsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatUncheckedCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedCreateNestedOneWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutTelegramUserBindingsInput = {
@@ -2403,6 +2458,7 @@ export type TenantUpdateWithoutTelegramUserBindingsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutTelegramUserBindingsInput = {
@@ -2440,6 +2496,7 @@ export type TenantUncheckedUpdateWithoutTelegramUserBindingsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUncheckedUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutTelegramBusinessConnectionsInput = {
@@ -2477,6 +2534,7 @@ export type TenantCreateWithoutTelegramBusinessConnectionsInput = {
   telegramUserBindings?: Prisma.TelegramUserBindingCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingCreateNestedOneWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutTelegramBusinessConnectionsInput = {
@@ -2514,6 +2572,7 @@ export type TenantUncheckedCreateWithoutTelegramBusinessConnectionsInput = {
   telegramUserBindings?: Prisma.TelegramUserBindingUncheckedCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatUncheckedCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedCreateNestedOneWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutTelegramBusinessConnectionsInput = {
@@ -2567,6 +2626,7 @@ export type TenantUpdateWithoutTelegramBusinessConnectionsInput = {
   telegramUserBindings?: Prisma.TelegramUserBindingUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutTelegramBusinessConnectionsInput = {
@@ -2604,6 +2664,7 @@ export type TenantUncheckedUpdateWithoutTelegramBusinessConnectionsInput = {
   telegramUserBindings?: Prisma.TelegramUserBindingUncheckedUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUncheckedUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutTelegramChatsInput = {
@@ -2641,6 +2702,7 @@ export type TenantCreateWithoutTelegramChatsInput = {
   telegramUserBindings?: Prisma.TelegramUserBindingCreateNestedManyWithoutTenantInput
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingCreateNestedOneWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutTelegramChatsInput = {
@@ -2678,6 +2740,7 @@ export type TenantUncheckedCreateWithoutTelegramChatsInput = {
   telegramUserBindings?: Prisma.TelegramUserBindingUncheckedCreateNestedManyWithoutTenantInput
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedCreateNestedOneWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutTelegramChatsInput = {
@@ -2731,6 +2794,7 @@ export type TenantUpdateWithoutTelegramChatsInput = {
   telegramUserBindings?: Prisma.TelegramUserBindingUpdateManyWithoutTenantNestedInput
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutTelegramChatsInput = {
@@ -2767,6 +2831,175 @@ export type TenantUncheckedUpdateWithoutTelegramChatsInput = {
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedUpdateManyWithoutTenantNestedInput
   telegramUserBindings?: Prisma.TelegramUserBindingUncheckedUpdateManyWithoutTenantNestedInput
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedUpdateManyWithoutTenantNestedInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedUpdateOneWithoutTenantNestedInput
+}
+
+export type TenantCreateWithoutTelegramSupplierSettingInput = {
+  id?: string
+  key: string
+  name: string
+  status?: $Enums.AccessStatus
+  createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
+  events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
+  conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
+  messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
+  settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
+  products?: Prisma.ProductCreateNestedManyWithoutTenantInput
+  catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
+  catalogueMappings?: Prisma.CatalogueMappingCreateNestedManyWithoutTenantInput
+  catalogueImportRuns?: Prisma.CatalogueImportRunCreateNestedManyWithoutTenantInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationCreateNestedOneWithoutTenantInput
+  orderExports?: Prisma.OrderExportCreateNestedManyWithoutTenantInput
+  memberships?: Prisma.TenantMembershipCreateNestedManyWithoutTenantInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutTenantInput
+  invitations?: Prisma.TenantInvitationCreateNestedManyWithoutTenantInput
+  securityAuditLogs?: Prisma.SecurityAuditLogCreateNestedManyWithoutTenantInput
+  instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
+  instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
+  googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
+  googleCredentialCleanups?: Prisma.GoogleCredentialCleanupCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationCreateNestedManyWithoutTenantInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptCreateNestedManyWithoutTenantInput
+  telegramUserBindings?: Prisma.TelegramUserBindingCreateNestedManyWithoutTenantInput
+  telegramBusinessConnections?: Prisma.TelegramBusinessConnectionCreateNestedManyWithoutTenantInput
+  telegramChats?: Prisma.TelegramChatCreateNestedManyWithoutTenantInput
+  telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutTenantInput
+}
+
+export type TenantUncheckedCreateWithoutTelegramSupplierSettingInput = {
+  id?: string
+  key: string
+  name: string
+  status?: $Enums.AccessStatus
+  createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
+  events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
+  conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
+  messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
+  settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
+  catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
+  catalogueMappings?: Prisma.CatalogueMappingUncheckedCreateNestedManyWithoutTenantInput
+  catalogueImportRuns?: Prisma.CatalogueImportRunUncheckedCreateNestedManyWithoutTenantInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedCreateNestedOneWithoutTenantInput
+  orderExports?: Prisma.OrderExportUncheckedCreateNestedManyWithoutTenantInput
+  memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutTenantInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutTenantInput
+  invitations?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutTenantInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUncheckedCreateNestedManyWithoutTenantInput
+  instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
+  instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
+  googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutTenantInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedCreateNestedManyWithoutTenantInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUncheckedCreateNestedManyWithoutTenantInput
+  telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedCreateNestedManyWithoutTenantInput
+  telegramChats?: Prisma.TelegramChatUncheckedCreateNestedManyWithoutTenantInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutTenantInput
+}
+
+export type TenantCreateOrConnectWithoutTelegramSupplierSettingInput = {
+  where: Prisma.TenantWhereUniqueInput
+  create: Prisma.XOR<Prisma.TenantCreateWithoutTelegramSupplierSettingInput, Prisma.TenantUncheckedCreateWithoutTelegramSupplierSettingInput>
+}
+
+export type TenantUpsertWithoutTelegramSupplierSettingInput = {
+  update: Prisma.XOR<Prisma.TenantUpdateWithoutTelegramSupplierSettingInput, Prisma.TenantUncheckedUpdateWithoutTelegramSupplierSettingInput>
+  create: Prisma.XOR<Prisma.TenantCreateWithoutTelegramSupplierSettingInput, Prisma.TenantUncheckedCreateWithoutTelegramSupplierSettingInput>
+  where?: Prisma.TenantWhereInput
+}
+
+export type TenantUpdateToOneWithWhereWithoutTelegramSupplierSettingInput = {
+  where?: Prisma.TenantWhereInput
+  data: Prisma.XOR<Prisma.TenantUpdateWithoutTelegramSupplierSettingInput, Prisma.TenantUncheckedUpdateWithoutTelegramSupplierSettingInput>
+}
+
+export type TenantUpdateWithoutTelegramSupplierSettingInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
+  conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
+  messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
+  settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
+  products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
+  catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
+  catalogueMappings?: Prisma.CatalogueMappingUpdateManyWithoutTenantNestedInput
+  catalogueImportRuns?: Prisma.CatalogueImportRunUpdateManyWithoutTenantNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUpdateOneWithoutTenantNestedInput
+  orderExports?: Prisma.OrderExportUpdateManyWithoutTenantNestedInput
+  memberships?: Prisma.TenantMembershipUpdateManyWithoutTenantNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutTenantNestedInput
+  invitations?: Prisma.TenantInvitationUpdateManyWithoutTenantNestedInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUpdateManyWithoutTenantNestedInput
+  instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
+  instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
+  googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
+  googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUpdateManyWithoutTenantNestedInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUpdateManyWithoutTenantNestedInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUpdateManyWithoutTenantNestedInput
+  telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUpdateManyWithoutTenantNestedInput
+  telegramChats?: Prisma.TelegramChatUpdateManyWithoutTenantNestedInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutTenantNestedInput
+}
+
+export type TenantUncheckedUpdateWithoutTelegramSupplierSettingInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
+  conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
+  messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
+  settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
+  catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
+  catalogueMappings?: Prisma.CatalogueMappingUncheckedUpdateManyWithoutTenantNestedInput
+  catalogueImportRuns?: Prisma.CatalogueImportRunUncheckedUpdateManyWithoutTenantNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedUpdateOneWithoutTenantNestedInput
+  orderExports?: Prisma.OrderExportUncheckedUpdateManyWithoutTenantNestedInput
+  memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutTenantNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutTenantNestedInput
+  invitations?: Prisma.TenantInvitationUncheckedUpdateManyWithoutTenantNestedInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUncheckedUpdateManyWithoutTenantNestedInput
+  instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
+  instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
+  googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutTenantNestedInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUncheckedUpdateManyWithoutTenantNestedInput
+  telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedUpdateManyWithoutTenantNestedInput
+  telegramChats?: Prisma.TelegramChatUncheckedUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutTenantNestedInput
 }
 
@@ -2805,6 +3038,7 @@ export type TenantCreateWithoutTelegramDeliveriesInput = {
   telegramUserBindings?: Prisma.TelegramUserBindingCreateNestedManyWithoutTenantInput
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingCreateNestedOneWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutTelegramDeliveriesInput = {
@@ -2842,6 +3076,7 @@ export type TenantUncheckedCreateWithoutTelegramDeliveriesInput = {
   telegramUserBindings?: Prisma.TelegramUserBindingUncheckedCreateNestedManyWithoutTenantInput
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatUncheckedCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedCreateNestedOneWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutTelegramDeliveriesInput = {
@@ -2895,6 +3130,7 @@ export type TenantUpdateWithoutTelegramDeliveriesInput = {
   telegramUserBindings?: Prisma.TelegramUserBindingUpdateManyWithoutTenantNestedInput
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutTelegramDeliveriesInput = {
@@ -2932,6 +3168,7 @@ export type TenantUncheckedUpdateWithoutTelegramDeliveriesInput = {
   telegramUserBindings?: Prisma.TelegramUserBindingUncheckedUpdateManyWithoutTenantNestedInput
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUncheckedUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutMembershipsInput = {
@@ -2969,6 +3206,7 @@ export type TenantCreateWithoutMembershipsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingCreateNestedOneWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutMembershipsInput = {
@@ -3006,6 +3244,7 @@ export type TenantUncheckedCreateWithoutMembershipsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatUncheckedCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedCreateNestedOneWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutMembershipsInput = {
@@ -3059,6 +3298,7 @@ export type TenantUpdateWithoutMembershipsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutMembershipsInput = {
@@ -3096,6 +3336,7 @@ export type TenantUncheckedUpdateWithoutMembershipsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUncheckedUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutSessionsInput = {
@@ -3133,6 +3374,7 @@ export type TenantCreateWithoutSessionsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingCreateNestedOneWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutSessionsInput = {
@@ -3170,6 +3412,7 @@ export type TenantUncheckedCreateWithoutSessionsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatUncheckedCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedCreateNestedOneWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutSessionsInput = {
@@ -3223,6 +3466,7 @@ export type TenantUpdateWithoutSessionsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutSessionsInput = {
@@ -3260,6 +3504,7 @@ export type TenantUncheckedUpdateWithoutSessionsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUncheckedUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutInvitationsInput = {
@@ -3297,6 +3542,7 @@ export type TenantCreateWithoutInvitationsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingCreateNestedOneWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutInvitationsInput = {
@@ -3334,6 +3580,7 @@ export type TenantUncheckedCreateWithoutInvitationsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatUncheckedCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedCreateNestedOneWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutInvitationsInput = {
@@ -3387,6 +3634,7 @@ export type TenantUpdateWithoutInvitationsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutInvitationsInput = {
@@ -3424,6 +3672,7 @@ export type TenantUncheckedUpdateWithoutInvitationsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUncheckedUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutSecurityAuditLogsInput = {
@@ -3461,6 +3710,7 @@ export type TenantCreateWithoutSecurityAuditLogsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingCreateNestedOneWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutSecurityAuditLogsInput = {
@@ -3498,6 +3748,7 @@ export type TenantUncheckedCreateWithoutSecurityAuditLogsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatUncheckedCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedCreateNestedOneWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutSecurityAuditLogsInput = {
@@ -3551,6 +3802,7 @@ export type TenantUpdateWithoutSecurityAuditLogsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutSecurityAuditLogsInput = {
@@ -3588,6 +3840,7 @@ export type TenantUncheckedUpdateWithoutSecurityAuditLogsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUncheckedUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutEventsInput = {
@@ -3625,6 +3878,7 @@ export type TenantCreateWithoutEventsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingCreateNestedOneWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutEventsInput = {
@@ -3662,6 +3916,7 @@ export type TenantUncheckedCreateWithoutEventsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatUncheckedCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedCreateNestedOneWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutEventsInput = {
@@ -3715,6 +3970,7 @@ export type TenantUpdateWithoutEventsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutEventsInput = {
@@ -3752,6 +4008,7 @@ export type TenantUncheckedUpdateWithoutEventsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUncheckedUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutConversationsInput = {
@@ -3789,6 +4046,7 @@ export type TenantCreateWithoutConversationsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingCreateNestedOneWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutConversationsInput = {
@@ -3826,6 +4084,7 @@ export type TenantUncheckedCreateWithoutConversationsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatUncheckedCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedCreateNestedOneWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutConversationsInput = {
@@ -3879,6 +4138,7 @@ export type TenantUpdateWithoutConversationsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutConversationsInput = {
@@ -3916,6 +4176,7 @@ export type TenantUncheckedUpdateWithoutConversationsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUncheckedUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutInstagramCustomerProfilesInput = {
@@ -3953,6 +4214,7 @@ export type TenantCreateWithoutInstagramCustomerProfilesInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingCreateNestedOneWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutInstagramCustomerProfilesInput = {
@@ -3990,6 +4252,7 @@ export type TenantUncheckedCreateWithoutInstagramCustomerProfilesInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatUncheckedCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedCreateNestedOneWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutInstagramCustomerProfilesInput = {
@@ -4043,6 +4306,7 @@ export type TenantUpdateWithoutInstagramCustomerProfilesInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutInstagramCustomerProfilesInput = {
@@ -4080,6 +4344,7 @@ export type TenantUncheckedUpdateWithoutInstagramCustomerProfilesInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUncheckedUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutMessagesInput = {
@@ -4117,6 +4382,7 @@ export type TenantCreateWithoutMessagesInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingCreateNestedOneWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutMessagesInput = {
@@ -4154,6 +4420,7 @@ export type TenantUncheckedCreateWithoutMessagesInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatUncheckedCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedCreateNestedOneWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutMessagesInput = {
@@ -4207,6 +4474,7 @@ export type TenantUpdateWithoutMessagesInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutMessagesInput = {
@@ -4244,6 +4512,7 @@ export type TenantUncheckedUpdateWithoutMessagesInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUncheckedUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutSheetsDestinationInput = {
@@ -4281,6 +4550,7 @@ export type TenantCreateWithoutSheetsDestinationInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingCreateNestedOneWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutSheetsDestinationInput = {
@@ -4318,6 +4588,7 @@ export type TenantUncheckedCreateWithoutSheetsDestinationInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatUncheckedCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedCreateNestedOneWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutSheetsDestinationInput = {
@@ -4371,6 +4642,7 @@ export type TenantUpdateWithoutSheetsDestinationInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutSheetsDestinationInput = {
@@ -4408,6 +4680,7 @@ export type TenantUncheckedUpdateWithoutSheetsDestinationInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUncheckedUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutSettingsInput = {
@@ -4445,6 +4718,7 @@ export type TenantCreateWithoutSettingsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingCreateNestedOneWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutSettingsInput = {
@@ -4482,6 +4756,7 @@ export type TenantUncheckedCreateWithoutSettingsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatUncheckedCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedCreateNestedOneWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutSettingsInput = {
@@ -4535,6 +4810,7 @@ export type TenantUpdateWithoutSettingsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutSettingsInput = {
@@ -4572,6 +4848,7 @@ export type TenantUncheckedUpdateWithoutSettingsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUncheckedUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutOrdersInput = {
@@ -4609,6 +4886,7 @@ export type TenantCreateWithoutOrdersInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingCreateNestedOneWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutOrdersInput = {
@@ -4646,6 +4924,7 @@ export type TenantUncheckedCreateWithoutOrdersInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatUncheckedCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedCreateNestedOneWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutOrdersInput = {
@@ -4699,6 +4978,7 @@ export type TenantUpdateWithoutOrdersInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutOrdersInput = {
@@ -4736,6 +5016,7 @@ export type TenantUncheckedUpdateWithoutOrdersInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUncheckedUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutOrderExportsInput = {
@@ -4773,6 +5054,7 @@ export type TenantCreateWithoutOrderExportsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingCreateNestedOneWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutOrderExportsInput = {
@@ -4810,6 +5092,7 @@ export type TenantUncheckedCreateWithoutOrderExportsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatUncheckedCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedCreateNestedOneWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutOrderExportsInput = {
@@ -4863,6 +5146,7 @@ export type TenantUpdateWithoutOrderExportsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutOrderExportsInput = {
@@ -4900,6 +5184,7 @@ export type TenantUncheckedUpdateWithoutOrderExportsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUncheckedUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutAuditLogsInput = {
@@ -4937,6 +5222,7 @@ export type TenantCreateWithoutAuditLogsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingCreateNestedOneWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutAuditLogsInput = {
@@ -4974,6 +5260,7 @@ export type TenantUncheckedCreateWithoutAuditLogsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatUncheckedCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedCreateNestedOneWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutAuditLogsInput = {
@@ -5027,6 +5314,7 @@ export type TenantUpdateWithoutAuditLogsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutAuditLogsInput = {
@@ -5064,6 +5352,7 @@ export type TenantUncheckedUpdateWithoutAuditLogsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUncheckedUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutProductsInput = {
@@ -5101,6 +5390,7 @@ export type TenantCreateWithoutProductsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingCreateNestedOneWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutProductsInput = {
@@ -5138,6 +5428,7 @@ export type TenantUncheckedCreateWithoutProductsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatUncheckedCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedCreateNestedOneWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutProductsInput = {
@@ -5191,6 +5482,7 @@ export type TenantUpdateWithoutProductsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutProductsInput = {
@@ -5228,6 +5520,7 @@ export type TenantUncheckedUpdateWithoutProductsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUncheckedUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutCatalogueSourcesInput = {
@@ -5265,6 +5558,7 @@ export type TenantCreateWithoutCatalogueSourcesInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingCreateNestedOneWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutCatalogueSourcesInput = {
@@ -5302,6 +5596,7 @@ export type TenantUncheckedCreateWithoutCatalogueSourcesInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatUncheckedCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedCreateNestedOneWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutCatalogueSourcesInput = {
@@ -5355,6 +5650,7 @@ export type TenantUpdateWithoutCatalogueSourcesInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutCatalogueSourcesInput = {
@@ -5392,6 +5688,7 @@ export type TenantUncheckedUpdateWithoutCatalogueSourcesInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUncheckedUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutCatalogueMappingsInput = {
@@ -5429,6 +5726,7 @@ export type TenantCreateWithoutCatalogueMappingsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingCreateNestedOneWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutCatalogueMappingsInput = {
@@ -5466,6 +5764,7 @@ export type TenantUncheckedCreateWithoutCatalogueMappingsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatUncheckedCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedCreateNestedOneWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutCatalogueMappingsInput = {
@@ -5519,6 +5818,7 @@ export type TenantUpdateWithoutCatalogueMappingsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutCatalogueMappingsInput = {
@@ -5556,6 +5856,7 @@ export type TenantUncheckedUpdateWithoutCatalogueMappingsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUncheckedUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutCatalogueImportRunsInput = {
@@ -5593,6 +5894,7 @@ export type TenantCreateWithoutCatalogueImportRunsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingCreateNestedOneWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutCatalogueImportRunsInput = {
@@ -5630,6 +5932,7 @@ export type TenantUncheckedCreateWithoutCatalogueImportRunsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedCreateNestedManyWithoutTenantInput
   telegramChats?: Prisma.TelegramChatUncheckedCreateNestedManyWithoutTenantInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedCreateNestedOneWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutCatalogueImportRunsInput = {
@@ -5683,6 +5986,7 @@ export type TenantUpdateWithoutCatalogueImportRunsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUpdateOneWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutCatalogueImportRunsInput = {
@@ -5720,6 +6024,7 @@ export type TenantUncheckedUpdateWithoutCatalogueImportRunsInput = {
   telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedUpdateManyWithoutTenantNestedInput
   telegramChats?: Prisma.TelegramChatUncheckedUpdateManyWithoutTenantNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedUpdateOneWithoutTenantNestedInput
 }
 
 
@@ -6005,6 +6310,7 @@ export type TenantSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   telegramBusinessConnections?: boolean | Prisma.Tenant$telegramBusinessConnectionsArgs<ExtArgs>
   telegramChats?: boolean | Prisma.Tenant$telegramChatsArgs<ExtArgs>
   telegramDeliveries?: boolean | Prisma.Tenant$telegramDeliveriesArgs<ExtArgs>
+  telegramSupplierSetting?: boolean | Prisma.Tenant$telegramSupplierSettingArgs<ExtArgs>
   _count?: boolean | Prisma.TenantCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["tenant"]>
 
@@ -6066,6 +6372,7 @@ export type TenantInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   telegramBusinessConnections?: boolean | Prisma.Tenant$telegramBusinessConnectionsArgs<ExtArgs>
   telegramChats?: boolean | Prisma.Tenant$telegramChatsArgs<ExtArgs>
   telegramDeliveries?: boolean | Prisma.Tenant$telegramDeliveriesArgs<ExtArgs>
+  telegramSupplierSetting?: boolean | Prisma.Tenant$telegramSupplierSettingArgs<ExtArgs>
   _count?: boolean | Prisma.TenantCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type TenantIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -6103,6 +6410,7 @@ export type $TenantPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     telegramBusinessConnections: Prisma.$TelegramBusinessConnectionPayload<ExtArgs>[]
     telegramChats: Prisma.$TelegramChatPayload<ExtArgs>[]
     telegramDeliveries: Prisma.$TelegramDeliveryPayload<ExtArgs>[]
+    telegramSupplierSetting: Prisma.$TelegramSupplierSettingPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -6534,6 +6842,7 @@ export interface Prisma__TenantClient<T, Null = never, ExtArgs extends runtime.T
   telegramBusinessConnections<T extends Prisma.Tenant$telegramBusinessConnectionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$telegramBusinessConnectionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TelegramBusinessConnectionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   telegramChats<T extends Prisma.Tenant$telegramChatsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$telegramChatsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TelegramChatPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   telegramDeliveries<T extends Prisma.Tenant$telegramDeliveriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$telegramDeliveriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TelegramDeliveryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  telegramSupplierSetting<T extends Prisma.Tenant$telegramSupplierSettingArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$telegramSupplierSettingArgs<ExtArgs>>): Prisma.Prisma__TelegramSupplierSettingClient<runtime.Types.Result.GetResult<Prisma.$TelegramSupplierSettingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -7635,6 +7944,25 @@ export type Tenant$telegramDeliveriesArgs<ExtArgs extends runtime.Types.Extensio
   take?: number
   skip?: number
   distinct?: Prisma.TelegramDeliveryScalarFieldEnum | Prisma.TelegramDeliveryScalarFieldEnum[]
+}
+
+/**
+ * Tenant.telegramSupplierSetting
+ */
+export type Tenant$telegramSupplierSettingArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TelegramSupplierSetting
+   */
+  select?: Prisma.TelegramSupplierSettingSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the TelegramSupplierSetting
+   */
+  omit?: Prisma.TelegramSupplierSettingOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TelegramSupplierSettingInclude<ExtArgs> | null
+  where?: Prisma.TelegramSupplierSettingWhereInput
 }
 
 /**

@@ -1,6 +1,6 @@
 import type { AuthPrincipal } from '@autosale/contracts/auth';
-import { telegramLinkPurposeSchema } from '@autosale/contracts';
-import { BadRequestException, Body, Controller, Delete, ForbiddenException, Get, Inject, Post } from '@nestjs/common';
+import { telegramLinkPurposeSchema, telegramSupplierSettingsUpdateSchema } from '@autosale/contracts';
+import { BadRequestException, Body, Controller, Delete, ForbiddenException, Get, Inject, Param, ParseUUIDPipe, Post, Put } from '@nestjs/common';
 import { z } from 'zod';
 
 import { CurrentPrincipal, RequireMembership } from '../auth/auth.decorators.js';
@@ -48,6 +48,37 @@ export class TelegramController {
         error.message === 'Telegram personal connection required' ||
         error.message === 'Telegram is not configured'
       )) throw new BadRequestException('Telegram connection is unavailable');
+      throw error;
+    }
+  }
+
+  @Get('supplier')
+  @RequireMembership('MANAGER')
+  supplierSettings(@CurrentPrincipal() principal: AuthPrincipal) {
+    return this.telegram.supplierSettings(principal.tenantId!);
+  }
+
+  @Put('supplier')
+  @RequireMembership('OWNER')
+  saveSupplierSettings(@CurrentPrincipal() principal: AuthPrincipal, @Body() body: unknown) {
+    if (principal.membershipRole !== 'OWNER') throw new ForbiddenException('Only workspace owners can configure suppliers');
+    const parsed = telegramSupplierSettingsUpdateSchema.safeParse(body);
+    if (!parsed.success) throw new BadRequestException('Invalid Telegram supplier settings');
+    return this.telegram.saveSupplierSettings(principal.tenantId!, parsed.data);
+  }
+
+  @Post('supplier/orders/:id')
+  @RequireMembership('MANAGER')
+  async sendSupplierOrder(
+    @CurrentPrincipal() principal: AuthPrincipal,
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ) {
+    try {
+      return await this.telegram.queueSupplierOrder(principal.tenantId!, id);
+    } catch (error) {
+      if (error instanceof Error && [
+        'Approved order required', 'Telegram supplier destination required', 'Telegram is not configured',
+      ].includes(error.message)) throw new BadRequestException(error.message);
       throw error;
     }
   }

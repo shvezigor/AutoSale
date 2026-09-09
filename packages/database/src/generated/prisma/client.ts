@@ -24,7 +24,7 @@ export * as $Enums from './enums.js'
 export * from "./enums.js"
 /**
  * ## Prisma Client
- * 
+ *
  * Type-safe database client for TypeScript
  * @example
  * ```
@@ -106,6 +106,11 @@ export type TelegramBusinessConnection = Prisma.TelegramBusinessConnectionModel
  * 
  */
 export type TelegramChat = Prisma.TelegramChatModel
+/**
+ * Model TelegramSupplierSetting
+ *
+ */
+export type TelegramSupplierSetting = Prisma.TelegramSupplierSettingModel
 /**
  * Model TelegramWebhookUpdate
  * 

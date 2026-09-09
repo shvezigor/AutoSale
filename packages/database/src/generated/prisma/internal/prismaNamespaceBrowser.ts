@@ -64,6 +64,7 @@ export const ModelName = {
   TelegramUserBinding: 'TelegramUserBinding',
   TelegramBusinessConnection: 'TelegramBusinessConnection',
   TelegramChat: 'TelegramChat',
+  TelegramSupplierSetting: 'TelegramSupplierSetting',
   TelegramWebhookUpdate: 'TelegramWebhookUpdate',
   TelegramDelivery: 'TelegramDelivery',
   GoogleIdentity: 'GoogleIdentity',
@@ -327,6 +328,17 @@ export const TelegramChatScalarFieldEnum = {
 } as const
 
 export type TelegramChatScalarFieldEnum = (typeof TelegramChatScalarFieldEnum)[keyof typeof TelegramChatScalarFieldEnum]
+
+
+export const TelegramSupplierSettingScalarFieldEnum = {
+  tenantId: 'tenantId',
+  destinationId: 'destinationId',
+  autoDispatch: 'autoDispatch',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TelegramSupplierSettingScalarFieldEnum = (typeof TelegramSupplierSettingScalarFieldEnum)[keyof typeof TelegramSupplierSettingScalarFieldEnum]
 
 
 export const TelegramWebhookUpdateScalarFieldEnum = {

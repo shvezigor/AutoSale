@@ -163,6 +163,7 @@ model Tenant {
   telegramBusinessConnections    TelegramBusinessConnection[]
   telegramChats                  TelegramChat[]
   telegramDeliveries             TelegramDelivery[]
+  telegramSupplierSetting        TelegramSupplierSetting?
 
   @@index([status])
   @@map("tenants")
@@ -417,11 +418,25 @@ model TelegramChat {
   updatedAt            DateTime           @updatedAt @map("updated_at")
   tenant               Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   deliveries           TelegramDelivery[]
+  supplierSetting      TelegramSupplierSetting?
 
   @@unique([tenantId, id])
   @@unique([tenantId, externalChatId, route])
   @@index([tenantId, lastObservedAt])
   @@map("telegram_chats")
+}
+
+model TelegramSupplierSetting {
+  tenantId      String       @id @map("tenant_id") @db.Uuid
+  destinationId String       @map("destination_id") @db.Uuid
+  autoDispatch  Boolean      @default(false) @map("auto_dispatch")
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
+  tenant        Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  destination   TelegramChat @relation(fields: [tenantId, destinationId], references: [tenantId, id], onDelete: Restrict)
+
+  @@unique([tenantId, destinationId])
+  @@map("telegram_supplier_settings")
 }
 
 model TelegramWebhookUpdate {

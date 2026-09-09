@@ -28,6 +28,7 @@ describe('TelegramService webhook processing', () => {
 
   beforeEach(async () => {
     await prisma.telegramDelivery.deleteMany();
+    await prisma.telegramSupplierSetting.deleteMany();
     await prisma.telegramChat.deleteMany();
     await prisma.telegramBusinessConnection.deleteMany();
     await prisma.telegramUserBinding.deleteMany();
@@ -200,6 +201,36 @@ describe('TelegramService webhook processing', () => {
 
     await expect(service.queueTest(tenantId, userId)).rejects.toThrow('Telegram personal connection required');
     await expect(prisma.telegramDelivery.count()).resolves.toBe(0);
+  });
+
+  it('lists safe supplier destinations and lets the tenant owner select one', async () => {
+    await prisma.telegramBusinessConnection.create({ data: {
+      tenantId, externalConnectionId: 'business-1', telegramUserId: '987654321',
+      rights: { can_reply: true }, enabled: true, lastUpdatedAt: new Date(),
+    } });
+    const destination = await prisma.telegramChat.create({ data: {
+      tenantId, externalChatId: '123456789', type: 'private', title: 'Постачальник', route: 'BUSINESS',
+      businessConnectionId: 'business-1', lastObservedAt: new Date('2026-09-09T12:00:00.000Z'),
+    } });
+    const service = new TelegramService(prisma);
+
+    await expect(service.supplierSettings(tenantId)).resolves.toEqual({
+      businessConnected: true, selectedDestinationId: null, autoDispatch: false,
+      destinations: [{ id: destination.id, title: 'Постачальник', route: 'BUSINESS', lastObservedAt: '2026-09-09T12:00:00.000Z' }],
+    });
+    await expect(service.saveSupplierSettings(tenantId, { destinationId: destination.id, autoDispatch: false }))
+      .resolves.toMatchObject({ selectedDestinationId: destination.id, autoDispatch: false });
+  });
+
+  it('cannot select a supplier destination from another tenant', async () => {
+    const otherTenantId = '33333333-3333-4333-8333-333333333333';
+    await prisma.tenant.create({ data: { id: otherTenantId, key: 'telegram-other', name: 'Other tenant' } });
+    const foreign = await prisma.telegramChat.create({ data: {
+      tenantId: otherTenantId, externalChatId: '-100555', type: 'supergroup', title: 'Foreign', route: 'BOT', lastObservedAt: new Date(),
+    } });
+
+    await expect(new TelegramService(prisma).saveSupplierSettings(tenantId, { destinationId: foreign.id, autoDispatch: false }))
+      .rejects.toThrow('Telegram supplier destination unavailable');
   });
 });
 

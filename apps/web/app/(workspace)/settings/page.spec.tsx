@@ -37,6 +37,7 @@ describe('SettingsPage', () => {
       .mockResolvedValueOnce({ ok: true, json: async () => ({ status: 'DISCONNECTED', accountId: null, username: null, tokenExpiresAt: null, lastVerifiedAt: null, lastErrorCode: null, cleanupStatus: 'NONE', cleanupErrorCode: null, cleanupAbandonEligible: false }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ status: 'ACTIVE', email: 'owner@gmail.com', grantedScopes: ['drive.file'], connectedAt: '2026-09-01T08:00:00.000Z', lastVerifiedAt: '2026-09-01T08:00:00.000Z', lastErrorCode: null }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ available: true, botUsername: 'AutoSaleBot', personal: { connected: false, displayName: null, username: null, linkedAt: null } }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ businessConnected: true, selectedDestinationId: null, autoDispatch: false, destinations: [] }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ approvalMode: 'REVIEW', minimumConfidence: 0.8, promptVersion: 'v1' }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ spreadsheetId: null, sheetName: 'Orders', status: 'NOT_CONFIGURED', requiredHeaders: ['order_id'], lastValidatedAt: null, errorSummary: null }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ([{ id: '44444444-4444-4444-8444-444444444444', type: 'GOOGLE_SHEETS', displayName: 'Каталог Google Sheets', status: 'PENDING', lastSyncedAt: null, lastErrorSummary: null, updatedAt: '2026-09-01T08:00:00.000Z' }]) })
@@ -57,6 +58,8 @@ describe('SettingsPage', () => {
     expect(screen.queryByRole('heading', { name: 'Google-акаунт' })).not.toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Підключення каналів' })).not.toBeInTheDocument();
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/catalogue/sources/44444444-4444-4444-8444-444444444444');
+    fireEvent.click(screen.getByRole('tab', { name: /Telegram/ }));
+    expect(screen.getByRole('heading', { name: 'Постачальник' })).toBeInTheDocument();
   });
 
   it('shows a manager only the safe Instagram connection card', async () => {

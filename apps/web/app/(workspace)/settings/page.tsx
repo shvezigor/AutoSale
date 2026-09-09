@@ -8,6 +8,8 @@ import { CatalogueSourceSettings, type CatalogueSourceConfiguration, type Catalo
 import type { GoogleConnectionSummary } from '../../../src/components/google-connection-settings';
 import { SettingsTabs, type SettingsTabId } from '../../../src/components/settings-tabs';
 import { TelegramSettingsCard, type TelegramConnectionSummary } from '../../../src/components/telegram-settings-card';
+import { TelegramSupplierSettings } from '../../../src/components/telegram-supplier-settings';
+import type { TelegramSupplierSettings as TelegramSupplierConfiguration } from '../../../../../packages/contracts/src/telegram';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,12 +33,14 @@ export default async function SettingsPage({ searchParams = Promise.resolve({}) 
   const telegram = (await telegramResponse.json()) as TelegramConnectionSummary;
   if (session.membershipRole === 'MANAGER') return <SettingsLayout google={google} instagram={instagram} telegram={telegram} initialTab={initialTab} pickerAction={pickerAction} session={session} />;
 
-  const [response, sheetsResponse, catalogueSourcesResponse] = await Promise.all([
+  const [supplierResponse, response, sheetsResponse, catalogueSourcesResponse] = await Promise.all([
+    authenticatedApiFetch('/api/integrations/telegram/supplier'),
     authenticatedApiFetch('/api/settings/orders'),
     authenticatedApiFetch('/api/settings/google-sheets'),
     authenticatedApiFetch('/api/catalogue/sources'),
   ]);
-  if (!response.ok || !sheetsResponse.ok || !catalogueSourcesResponse.ok) throw new Error('Не вдалося завантажити налаштування');
+  if (!supplierResponse.ok || !response.ok || !sheetsResponse.ok || !catalogueSourcesResponse.ok) throw new Error('Не вдалося завантажити налаштування');
+  const supplier = (await supplierResponse.json()) as TelegramSupplierConfiguration;
   const settings = (await response.json()) as OrderSettings;
   const sheets = (await sheetsResponse.json()) as GoogleSheetsSettings;
   const catalogueSources = await catalogueSourcesResponse.json() as CatalogueSourceHealth[];
@@ -45,13 +49,14 @@ export default async function SettingsPage({ searchParams = Promise.resolve({}) 
     if (!sourceResponse.ok) throw new Error('Не вдалося завантажити джерело каталогу');
     return await sourceResponse.json() as CatalogueSourceConfiguration;
   }));
-  return <SettingsLayout google={google} instagram={instagram} telegram={telegram} initialTab={initialTab} pickerAction={pickerAction} session={session} settings={settings} sheets={sheets} catalogueSources={catalogueSources} catalogueConfigurations={catalogueConfigurations} />;
+  return <SettingsLayout google={google} instagram={instagram} telegram={telegram} supplier={supplier} initialTab={initialTab} pickerAction={pickerAction} session={session} settings={settings} sheets={sheets} catalogueSources={catalogueSources} catalogueConfigurations={catalogueConfigurations} />;
 }
 
 function SettingsLayout({
   instagram,
   google,
   telegram,
+  supplier,
   initialTab,
   pickerAction,
   session,
@@ -63,6 +68,7 @@ function SettingsLayout({
   instagram: InstagramConnectionSummary;
   google: GoogleConnectionSummary;
   telegram: TelegramConnectionSummary;
+  supplier?: TelegramSupplierConfiguration;
   initialTab: SettingsTabId;
   pickerAction: string;
   session: PublicSession;
@@ -84,7 +90,7 @@ function SettingsLayout({
       id: 'telegram' as const,
       label: 'Telegram',
       description: 'Особисті сповіщення',
-      content: <section className="settings-section"><div className="settings-section-heading"><h2>Telegram-сповіщення</h2><p>Підключіть свій Telegram одним натисканням і перевірте доставку повідомлень.</p></div><TelegramSettingsCard initial={telegram} /></section>,
+      content: <section className="settings-section"><div className="settings-section-heading"><h2>Telegram</h2><p>Підключіть особисті сповіщення та виберіть чат постачальника.</p></div><TelegramSettingsCard initial={telegram} />{supplier && <TelegramSupplierSettings initial={supplier} />}</section>,
     },
     {
       id: 'data' as const,

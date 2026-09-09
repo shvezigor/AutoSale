@@ -26,9 +26,28 @@ export const telegramDeliveryJobSchema = z.object({
   deliveryId: z.string().uuid(),
 }).strict();
 
+export const telegramSupplierSettingsSchema = z.object({
+  businessConnected: z.boolean(),
+  selectedDestinationId: z.string().uuid().nullable(),
+  autoDispatch: z.boolean(),
+  destinations: z.array(z.object({
+    id: z.string().uuid(),
+    title: z.string().min(1).max(255),
+    route: z.enum(['BOT', 'BUSINESS']),
+    lastObservedAt: z.string().datetime(),
+  }).strict()),
+}).strict();
+
+export const telegramSupplierSettingsUpdateSchema = z.object({
+  destinationId: z.string().uuid(),
+  autoDispatch: z.literal(false).default(false),
+}).strict();
+
 export type TelegramLinkPurpose = z.infer<typeof telegramLinkPurposeSchema>;
 export type TelegramDeliveryPurpose = z.infer<typeof telegramDeliveryPurposeSchema>;
 export type TelegramDeliveryStatus = z.infer<typeof telegramDeliveryStatusSchema>;
 export type TelegramConnectionSummary = z.infer<typeof telegramConnectionSummarySchema>;
 export type TelegramLinkResponse = z.infer<typeof telegramLinkResponseSchema>;
 export type TelegramDeliveryJob = z.infer<typeof telegramDeliveryJobSchema>;
+export type TelegramSupplierSettings = z.infer<typeof telegramSupplierSettingsSchema>;
+export type TelegramSupplierSettingsUpdate = z.infer<typeof telegramSupplierSettingsUpdateSchema>;
