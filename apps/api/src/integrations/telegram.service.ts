@@ -317,7 +317,7 @@ export class TelegramService {
       ?? null;
     const title = [displayName || null, message.chat.username ? `(@${message.chat.username})` : null].filter(Boolean).join(' ') || null;
     const externalChatId = String(message.chat.id);
-    await transaction.telegramChat.upsert({
+    const destination = await transaction.telegramChat.upsert({
       where: {
         tenantId_externalChatId_route: {
           tenantId: connections[0].tenantId, externalChatId, route: 'BUSINESS',
@@ -330,6 +330,11 @@ export class TelegramService {
       update: {
         type: message.chat.type, title, businessConnectionId: message.business_connection_id, lastObservedAt: this.now(),
       },
+    });
+    await transaction.telegramSupplierSetting.upsert({
+      where: { tenantId: connections[0].tenantId },
+      create: { tenantId: connections[0].tenantId, destinationId: destination.id, autoDispatch: false },
+      update: {},
     });
     return 'PROCESSED';
   }

@@ -111,11 +111,14 @@ describe('TelegramService webhook processing', () => {
       },
     })).resolves.toBe('PROCESSED');
 
-    await expect(prisma.telegramChat.findUnique({
+    const observed = await prisma.telegramChat.findUnique({
       where: { tenantId_externalChatId_route: { tenantId, externalChatId: '123456789', route: 'BUSINESS' } },
-    })).resolves.toMatchObject({
+    });
+    expect(observed).toMatchObject({
       type: 'private', title: 'Supplier (@supplier_shop)', route: 'BUSINESS', businessConnectionId: 'business-1',
     });
+    await expect(prisma.telegramSupplierSetting.findUnique({ where: { tenantId } }))
+      .resolves.toMatchObject({ destinationId: observed!.id, autoDispatch: false });
     expect(JSON.stringify(await prisma.telegramChat.findMany())).not.toContain('Private supplier message');
   });
 
