@@ -126,6 +126,23 @@ describe('TelegramService webhook processing', () => {
     await expect(prisma.telegramWebhookUpdate.count()).resolves.toBe(0);
   });
 
+  it('acknowledges well-formed Telegram updates it does not consume', async () => {
+    const service = new TelegramService(prisma);
+
+    await expect(service.handleWebhook({
+      update_id: 106,
+      message: {
+        message_id: 43,
+        date: 1_788_000_000,
+        chat: { id: 987654321, type: 'private' },
+        from: { id: 987654321, is_bot: false, first_name: 'Ihor' },
+        photo: [{ file_id: 'photo', file_unique_id: 'photo', width: 32, height: 32 }],
+      },
+    })).resolves.toBe('IGNORED');
+    await expect(prisma.telegramWebhookUpdate.findUnique({ where: { updateId: '106' } }))
+      .resolves.toMatchObject({ status: 'IGNORED' });
+  });
+
   it('creates a short-lived hashed personal deep link without storing its raw token', async () => {
     const now = new Date('2026-09-08T12:00:00.000Z');
     const service = new TelegramService(prisma, () => now, { botUsername: 'AutoSaleBot', token: () => 'deterministic_token_value_1234567890' });

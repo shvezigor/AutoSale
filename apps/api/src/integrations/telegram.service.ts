@@ -32,6 +32,7 @@ const updateSchema = z.object({
   business_connection: businessConnectionSchema.optional(),
   business_message: businessMessageSchema.optional(),
 }).passthrough().refine((value) => value.message !== undefined || value.business_connection !== undefined || value.business_message !== undefined);
+const updateEnvelopeSchema = z.object({ update_id: z.number().safe().int().nonnegative() }).passthrough();
 
 type TelegramUpdate = z.infer<typeof updateSchema>;
 
@@ -214,15 +215,23 @@ export class TelegramService {
   }
 
   async handleWebhook(input: unknown): Promise<'PROCESSED' | 'REPLAY' | 'IGNORED'> {
+    const envelope = updateEnvelopeSchema.safeParse(input);
+    if (!envelope.success) throw new Error('Invalid Telegram update');
     const parsed = updateSchema.safeParse(input);
-    if (!parsed.success) throw new Error('Invalid Telegram update');
+    const updateId = String(envelope.data.update_id);
 
     try {
       return await this.prisma.$transaction(async (transaction) => {
-        await transaction.telegramWebhookUpdate.create({ data: { updateId: String(parsed.data.update_id) } });
+        await transaction.telegramWebhookUpdate.create({ data: { updateId } });
+        if (!parsed.success) {
+          await transaction.telegramWebhookUpdate.update({
+            where: { updateId }, data: { status: 'IGNORED', processedAt: this.now() },
+          });
+          return 'IGNORED';
+        }
         const result = await this.process(transaction, parsed.data);
         await transaction.telegramWebhookUpdate.update({
-          where: { updateId: String(parsed.data.update_id) },
+          where: { updateId },
           data: { status: result, processedAt: this.now() },
         });
         return result === 'IGNORED' ? 'IGNORED' : 'PROCESSED';
