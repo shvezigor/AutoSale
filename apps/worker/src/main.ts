@@ -1,6 +1,7 @@
 import { Buffer } from 'node:buffer';
 
 import { parseWorkerEnv } from '@autosale/config/worker-env';
+import { telegramDeliveryJobSchema } from '@autosale/contracts';
 import { createPrismaClient } from '@autosale/database';
 import {
   createGoogleSheetsAdapter,
@@ -9,6 +10,7 @@ import {
   GoogleSheetsAdapter,
   MetaInstagramClient,
   S3ObjectStorage,
+  TelegramBotClient,
 } from '@autosale/integrations';
 import { Queue, Worker } from 'bullmq';
 import { metrics, StructuredLogger } from '@autosale/observability';
@@ -36,6 +38,8 @@ import { CatalogueSyncScheduler } from './catalogue/catalogue-sync-scheduler.js'
 import { CatalogueAutoImporter } from './catalogue/catalogue-auto-importer.js';
 import { WorkerNotificationService } from './notifications/worker-notification.service.js';
 import { NotificationRetentionReconciler } from './notifications/notification-retention.reconciler.js';
+import { TelegramDeliveryReconciler } from './telegram/telegram-delivery-reconciler.js';
+import { TelegramDeliveryService } from './telegram/telegram-delivery.service.js';
 
 async function bootstrap(): Promise<void> {
   const env = parseWorkerEnv(process.env);
@@ -133,6 +137,63 @@ async function bootstrap(): Promise<void> {
     orderProcessor,
   );
   const redis = new URL(env.REDIS_URL);
+  const redisConnection = {
+    host: redis.hostname,
+    port: Number(redis.port || 6379),
+    username: redis.username || undefined,
+    password: redis.password || undefined,
+    tls: redis.protocol === 'rediss:' ? {} : undefined,
+  };
+  const telegramBot = env.TELEGRAM_BOT_TOKEN
+    ? new TelegramBotClient({ token: env.TELEGRAM_BOT_TOKEN })
+    : undefined;
+  const telegramDelivery = telegramBot
+    ? new TelegramDeliveryService(prisma, telegramBot)
+    : undefined;
+  const telegramWorker = telegramDelivery
+    ? new Worker(
+      'telegram',
+      async (job) => {
+        if (job.name !== 'telegram.deliver') return;
+        const parsed = telegramDeliveryJobSchema.safeParse(job.data);
+        if (!parsed.success) return;
+        const started = performance.now();
+        try {
+          const result = await telegramDelivery.process(parsed.data);
+          metrics.increment('autosale_operations_total', {
+            operation: 'telegram_delivery',
+            result: result === 'SUCCEEDED' || result === 'IGNORED' || result === 'RETRY' ? 'success' : 'failure',
+          });
+          logger.info('telegram_delivery_completed', {
+            correlationId: parsed.data.deliveryId,
+            deliveryId: parsed.data.deliveryId,
+            result,
+          });
+        } catch (error) {
+          metrics.increment('autosale_operations_total', { operation: 'telegram_delivery', result: 'failure' });
+          logger.warn('telegram_delivery_failed', {
+            correlationId: parsed.data.deliveryId,
+            deliveryId: parsed.data.deliveryId,
+            errorCode: error instanceof Error ? error.name : 'UNKNOWN',
+          });
+          throw error;
+        } finally {
+          metrics.observe(
+            'autosale_operation_duration_seconds',
+            (performance.now() - started) / 1_000,
+            { operation: 'telegram_delivery' },
+          );
+        }
+      },
+      { connection: redisConnection, concurrency: 4 },
+    )
+    : undefined;
+  const telegramQueue = telegramDelivery
+    ? new Queue('telegram', { connection: redisConnection })
+    : undefined;
+  const telegramDeliveryReconciler = telegramQueue
+    ? new TelegramDeliveryReconciler(prisma, telegramQueue)
+    : undefined;
   const worker = new Worker(
     'instagram',
     async (job) => {
@@ -431,12 +492,33 @@ async function bootstrap(): Promise<void> {
     }
   };
   const notificationRetentionTimer = setInterval(() => void reconcileNotificationRetention(), 24 * 60 * 60_000);
+  let reconcilingTelegramDeliveries = false;
+  const reconcileTelegramDeliveries = async (): Promise<void> => {
+    if (!telegramDeliveryReconciler || reconcilingTelegramDeliveries) return;
+    reconcilingTelegramDeliveries = true;
+    try {
+      const result = await telegramDeliveryReconciler.reconcile();
+      metrics.set('autosale_queue_backlog', result.attempted, { queue: 'telegram_delivery' });
+    } catch (error) {
+      metrics.increment('autosale_operations_total', { operation: 'telegram_delivery_reconcile', result: 'failure' });
+      logger.warn('telegram_delivery_reconcile_failed', {
+        correlationId: 'system:telegram-delivery',
+        errorCode: error instanceof Error ? error.name : 'UNKNOWN',
+      });
+    } finally {
+      reconcilingTelegramDeliveries = false;
+    }
+  };
+  const telegramDeliveryTimer = telegramDeliveryReconciler
+    ? setInterval(() => void reconcileTelegramDeliveries(), 5_000)
+    : undefined;
   void pollExports();
   void reconcileCatalogueMappings();
   void reconcileInstagramProfiles();
   void reconcileInstagramMessages();
   void scheduleCatalogueSources();
   void reconcileNotificationRetention();
+  void reconcileTelegramDeliveries();
   logger.info('service_started', { correlationId: 'system:startup', healthPort: env.HEALTH_PORT });
 
   server.listen(env.HEALTH_PORT, '0.0.0.0');
@@ -448,6 +530,9 @@ async function bootstrap(): Promise<void> {
     clearInterval(instagramMessageReconcileTimer);
     clearInterval(catalogueScheduleTimer);
     clearInterval(notificationRetentionTimer);
+    if (telegramDeliveryTimer) clearInterval(telegramDeliveryTimer);
+    await telegramWorker?.close();
+    await telegramQueue?.close();
     await worker.close();
     await instagramProfileQueue.close();
     await catalogueWorker.close();

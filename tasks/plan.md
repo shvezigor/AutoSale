@@ -277,17 +277,17 @@ Webhook receiver   Link/summary API
 
 ### Phase 1: Provider and persistence foundations
 
-- [ ] Task 41: Add optional shared-bot configuration.
-- [ ] Task 42: Add a safe Bot API adapter.
-- [ ] Task 43: Add tenant-safe Telegram contracts and persistence.
+- [x] Task 41: Add optional shared-bot configuration.
+- [x] Task 42: Add a safe Bot API adapter.
+- [x] Task 43: Add tenant-safe Telegram contracts and persistence.
 
 Checkpoint: focused configuration, adapter, contract, and migration tests pass; partial production configuration fails closed.
 
 ### Phase 2: Secure linking and delivery
 
-- [ ] Task 44: Receive and verify Telegram webhook updates.
-- [ ] Task 45: Link and summarize personal or group Telegram destinations.
-- [ ] Task 46: Deliver queued Telegram messages durably.
+- [x] Task 44: Receive and verify Telegram webhook updates.
+- [x] Task 45: Link and summarize personal or group Telegram destinations.
+- [x] Task 46: Deliver queued Telegram messages durably.
 
 Checkpoint: replayed or ambiguous updates do not duplicate bindings or deliveries; tenant, user, and purpose boundaries are covered by tests.
 

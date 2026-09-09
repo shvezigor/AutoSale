@@ -911,15 +911,17 @@ The approved design is in `docs/superpowers/specs/2026-09-03-google-sign-in-desi
 
 ## Task 46: Deliver queued Telegram messages durably
 
+**Status:** Implemented and verified on 9 September 2026.
+
 **Description:** Claim PostgreSQL deliveries in the worker, send through the shared Bot API, and reconcile retryable or abandoned work.
 
 **Acceptance criteria:**
-- [ ] The database delivery exists before queue wake-up, and missed wake-ups are recovered.
-- [ ] Success records the provider message ID; retryable and terminal failures store only safe codes.
-- [ ] Repeated jobs, worker restarts, and expired leases cannot produce a second logical delivery request.
+- [x] The database delivery exists before queue wake-up, and missed wake-ups are recovered.
+- [x] Success records the provider message ID; retryable and terminal failures store only safe codes.
+- [x] Repeated jobs, worker restarts, and expired leases cannot produce a second logical delivery request.
 
 **Verification:**
-- [ ] `pnpm --filter @autosale/worker test`
+- [x] `pnpm --filter @autosale/worker test`
 
 **Dependencies:** Tasks 41–45
 
@@ -929,9 +931,9 @@ The approved design is in `docs/superpowers/specs/2026-09-03-google-sign-in-desi
 
 ## Checkpoint: Telegram durable connection flow
 
-- [ ] Valid Start links one member exactly once.
-- [ ] Webhook replay and queue retry tests pass.
-- [ ] A fake Bot API test message reaches `SUCCEEDED` exactly once.
+- [x] Valid Start links one member exactly once.
+- [x] Webhook replay and queue retry tests pass.
+- [x] A fake Bot API test message reaches `SUCCEEDED` exactly once.
 
 ## Task 47: Add the minimal Telegram connection card and test notification
 
