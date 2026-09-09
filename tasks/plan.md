@@ -293,7 +293,7 @@ Checkpoint: replayed or ambiguous updates do not duplicate bindings or deliverie
 
 ### Phase 3: User-visible platform slice
 
-- [ ] Task 47: Add the minimal Telegram connection card and test notification.
+- [x] Task 47: Add the minimal Telegram connection card and test notification.
 
 Checkpoint: a member can generate a private deep link, see connected state after Start, send one test alert, and unlink; responsive UI, full tests, typecheck, build, and Docker health pass.
 
