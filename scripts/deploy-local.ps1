@@ -11,8 +11,10 @@ try {
       throw "DATABASE_URL is missing for $service. Deployment stopped before touching running containers."
     }
   }
-  & docker compose --env-file $deploymentEnv -p autosale build api web worker
+  & docker compose --env-file $deploymentEnv -p autosale build migrate api web worker
   if ($LASTEXITCODE -ne 0) { throw 'Build failed. Running containers were not changed.' }
+  & docker compose --env-file $deploymentEnv -p autosale run --rm migrate
+  if ($LASTEXITCODE -ne 0) { throw 'Database migration failed. Running application containers were not changed.' }
   & docker compose --env-file $deploymentEnv -p autosale up -d --no-deps api web worker
   if ($LASTEXITCODE -ne 0) { throw 'Deployment failed. Inspect container status.' }
   & docker compose --env-file $deploymentEnv -p autosale ps

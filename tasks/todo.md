@@ -948,7 +948,7 @@ The approved design is in `docs/superpowers/specs/2026-09-03-google-sign-in-desi
 - [x] `pnpm --filter @autosale/web test`
 - [x] `pnpm typecheck`
 - [x] `pnpm build`
-- [ ] Browser check at desktop and 390px widths.
+- [x] Browser check at desktop and 390px widths.
 
 **Dependencies:** Tasks 44–46
 
@@ -958,7 +958,7 @@ The approved design is in `docs/superpowers/specs/2026-09-03-google-sign-in-desi
 
 ## Checkpoint: Telegram platform module complete
 
-- [ ] Full automated suite passes and production images build.
-- [ ] Docker services remain healthy without live Telegram credentials.
+- [x] Full automated suite passes and production images build.
+- [x] Docker services remain healthy without live Telegram credentials.
 - [ ] With operator credentials, one Start action links a test user and one test notification is delivered exactly once.
 - [ ] Human review approves the platform before `supplier-dispatch` implementation starts.
