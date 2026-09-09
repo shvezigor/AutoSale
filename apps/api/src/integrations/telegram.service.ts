@@ -10,6 +10,7 @@ const userSchema = z.object({
 }).passthrough();
 const chatSchema = z.object({
   id: z.number().safe().int(), type: z.enum(['private', 'group', 'supergroup']), title: z.string().max(255).optional(),
+  first_name: z.string().max(128).optional(), last_name: z.string().max(128).optional(), username: z.string().max(32).optional(),
 }).passthrough();
 const messageSchema = z.object({
   text: z.string().max(4_096), from: userSchema, chat: chatSchema,
@@ -18,11 +19,16 @@ const businessConnectionSchema = z.object({
   id: z.string().min(1).max(128), user: userSchema, date: z.number().int(),
   rights: z.record(z.string(), z.unknown()), is_enabled: z.boolean(),
 }).passthrough();
+const businessMessageSchema = z.object({
+  business_connection_id: z.string().min(1).max(128),
+  message_id: z.number().safe().int(), date: z.number().int(), chat: chatSchema,
+}).passthrough();
 const updateSchema = z.object({
   update_id: z.number().safe().int().nonnegative(),
   message: messageSchema.optional(),
   business_connection: businessConnectionSchema.optional(),
-}).passthrough().refine((value) => value.message !== undefined || value.business_connection !== undefined);
+  business_message: businessMessageSchema.optional(),
+}).passthrough().refine((value) => value.message !== undefined || value.business_connection !== undefined || value.business_message !== undefined);
 
 type TelegramUpdate = z.infer<typeof updateSchema>;
 
@@ -131,6 +137,7 @@ export class TelegramService {
   private async process(transaction: Prisma.TransactionClient, update: TelegramUpdate): Promise<'PROCESSED' | 'IGNORED'> {
     if (update.message) return this.processStart(transaction, update.message);
     if (update.business_connection) return this.processBusinessConnection(transaction, update.business_connection);
+    if (update.business_message) return this.processBusinessMessage(transaction, update.business_message);
     return 'IGNORED';
   }
 
@@ -185,6 +192,35 @@ export class TelegramService {
       update: {
         rights: connection.rights as Prisma.InputJsonValue, enabled: connection.is_enabled,
         lastUpdatedAt: new Date(connection.date * 1_000),
+      },
+    });
+    return 'PROCESSED';
+  }
+
+  private async processBusinessMessage(transaction: Prisma.TransactionClient, message: z.infer<typeof businessMessageSchema>): Promise<'PROCESSED' | 'IGNORED'> {
+    const connections = await transaction.telegramBusinessConnection.findMany({
+      where: { externalConnectionId: message.business_connection_id, enabled: true },
+      select: { id: true, tenantId: true }, take: 2,
+    });
+    if (connections.length !== 1 || !connections[0]) return 'IGNORED';
+
+    const displayName = message.chat.title
+      ?? [message.chat.first_name, message.chat.last_name].filter(Boolean).join(' ')
+      ?? null;
+    const title = [displayName || null, message.chat.username ? `(@${message.chat.username})` : null].filter(Boolean).join(' ') || null;
+    const externalChatId = String(message.chat.id);
+    await transaction.telegramChat.upsert({
+      where: {
+        tenantId_externalChatId_route: {
+          tenantId: connections[0].tenantId, externalChatId, route: 'BUSINESS',
+        },
+      },
+      create: {
+        tenantId: connections[0].tenantId, externalChatId, type: message.chat.type, title,
+        route: 'BUSINESS', businessConnectionId: message.business_connection_id, lastObservedAt: this.now(),
+      },
+      update: {
+        type: message.chat.type, title, businessConnectionId: message.business_connection_id, lastObservedAt: this.now(),
       },
     });
     return 'PROCESSED';

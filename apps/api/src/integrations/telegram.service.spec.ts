@@ -92,6 +92,32 @@ describe('TelegramService webhook processing', () => {
     });
   });
 
+  it('observes a permitted Telegram Business chat without persisting message contents', async () => {
+    await prisma.telegramBusinessConnection.create({ data: {
+      tenantId, externalConnectionId: 'business-1', telegramUserId: '987654321',
+      rights: { can_reply: true }, enabled: true, lastUpdatedAt: new Date(),
+    } });
+    const service = new TelegramService(prisma);
+
+    await expect(service.handleWebhook({
+      update_id: 105,
+      business_message: {
+        message_id: 42,
+        business_connection_id: 'business-1',
+        date: 1_788_000_000,
+        text: 'Private supplier message that must not be stored',
+        chat: { id: 123456789, type: 'private', first_name: 'Supplier', username: 'supplier_shop' },
+      },
+    })).resolves.toBe('PROCESSED');
+
+    await expect(prisma.telegramChat.findUnique({
+      where: { tenantId_externalChatId_route: { tenantId, externalChatId: '123456789', route: 'BUSINESS' } },
+    })).resolves.toMatchObject({
+      type: 'private', title: 'Supplier (@supplier_shop)', route: 'BUSINESS', businessConnectionId: 'business-1',
+    });
+    expect(JSON.stringify(await prisma.telegramChat.findMany())).not.toContain('Private supplier message');
+  });
+
   it('rejects malformed updates before recording a replay marker', async () => {
     const service = new TelegramService(prisma);
 
