@@ -2,7 +2,7 @@
 
 import { type KeyboardEvent, type ReactNode, useEffect, useRef, useState } from 'react';
 
-export type SettingsTabId = 'social' | 'data' | 'orders';
+export type SettingsTabId = 'social' | 'telegram' | 'data' | 'orders';
 
 type SettingsTab = {
   id: SettingsTabId;

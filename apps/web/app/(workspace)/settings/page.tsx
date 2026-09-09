@@ -7,6 +7,7 @@ import { DemoScenarioCard } from '../../../src/components/demo-scenario-card';
 import { CatalogueSourceSettings, type CatalogueSourceConfiguration, type CatalogueSourceHealth } from '../../../src/components/catalogue-source-settings';
 import type { GoogleConnectionSummary } from '../../../src/components/google-connection-settings';
 import { SettingsTabs, type SettingsTabId } from '../../../src/components/settings-tabs';
+import { TelegramSettingsCard, type TelegramConnectionSummary } from '../../../src/components/telegram-settings-card';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,15 +17,19 @@ export default async function SettingsPage({ searchParams = Promise.resolve({}) 
   const query = await searchParams;
   const requestedTab = textParam(query.tab);
   const pickerAction = textParam(query.action);
-  const initialTab: SettingsTabId = requestedTab === 'google' || requestedTab === 'data' ? 'data' : requestedTab === 'orders' ? 'orders' : 'social';
-  const [instagramResponse, googleResponse] = await Promise.all([
+  const initialTab: SettingsTabId = requestedTab === 'google' || requestedTab === 'data'
+    ? 'data'
+    : requestedTab === 'orders' ? 'orders' : requestedTab === 'telegram' ? 'telegram' : 'social';
+  const [instagramResponse, googleResponse, telegramResponse] = await Promise.all([
     authenticatedApiFetch('/api/integrations/instagram'),
     authenticatedApiFetch('/api/integrations/google'),
+    authenticatedApiFetch('/api/integrations/telegram'),
   ]);
-  if (!instagramResponse.ok || !googleResponse.ok) throw new Error('Не вдалося завантажити налаштування');
+  if (!instagramResponse.ok || !googleResponse.ok || !telegramResponse.ok) throw new Error('Не вдалося завантажити налаштування');
   const instagram = (await instagramResponse.json()) as InstagramConnectionSummary;
   const google = (await googleResponse.json()) as GoogleConnectionSummary;
-  if (session.membershipRole === 'MANAGER') return <SettingsLayout google={google} instagram={instagram} initialTab={initialTab} pickerAction={pickerAction} session={session} />;
+  const telegram = (await telegramResponse.json()) as TelegramConnectionSummary;
+  if (session.membershipRole === 'MANAGER') return <SettingsLayout google={google} instagram={instagram} telegram={telegram} initialTab={initialTab} pickerAction={pickerAction} session={session} />;
 
   const [response, sheetsResponse, catalogueSourcesResponse] = await Promise.all([
     authenticatedApiFetch('/api/settings/orders'),
@@ -40,12 +45,13 @@ export default async function SettingsPage({ searchParams = Promise.resolve({}) 
     if (!sourceResponse.ok) throw new Error('Не вдалося завантажити джерело каталогу');
     return await sourceResponse.json() as CatalogueSourceConfiguration;
   }));
-  return <SettingsLayout google={google} instagram={instagram} initialTab={initialTab} pickerAction={pickerAction} session={session} settings={settings} sheets={sheets} catalogueSources={catalogueSources} catalogueConfigurations={catalogueConfigurations} />;
+  return <SettingsLayout google={google} instagram={instagram} telegram={telegram} initialTab={initialTab} pickerAction={pickerAction} session={session} settings={settings} sheets={sheets} catalogueSources={catalogueSources} catalogueConfigurations={catalogueConfigurations} />;
 }
 
 function SettingsLayout({
   instagram,
   google,
+  telegram,
   initialTab,
   pickerAction,
   session,
@@ -56,6 +62,7 @@ function SettingsLayout({
 }: {
   instagram: InstagramConnectionSummary;
   google: GoogleConnectionSummary;
+  telegram: TelegramConnectionSummary;
   initialTab: SettingsTabId;
   pickerAction: string;
   session: PublicSession;
@@ -72,6 +79,12 @@ function SettingsLayout({
       label: 'Соцмережі',
       description: 'Instagram',
       content: <section className="settings-section"><div className="settings-section-heading"><h2>Підключення каналів</h2><p>Керуйте каналами, з яких AutoSale отримує діалоги та замовлення.</p></div><InstagramSettingsForm initial={instagram} membershipRole={session.membershipRole} /></section>,
+    },
+    {
+      id: 'telegram' as const,
+      label: 'Telegram',
+      description: 'Особисті сповіщення',
+      content: <section className="settings-section"><div className="settings-section-heading"><h2>Telegram-сповіщення</h2><p>Підключіть свій Telegram одним натисканням і перевірте доставку повідомлень.</p></div><TelegramSettingsCard initial={telegram} /></section>,
     },
     {
       id: 'data' as const,

@@ -36,6 +36,7 @@ describe('SettingsPage', () => {
     authenticatedApiFetch
       .mockResolvedValueOnce({ ok: true, json: async () => ({ status: 'DISCONNECTED', accountId: null, username: null, tokenExpiresAt: null, lastVerifiedAt: null, lastErrorCode: null, cleanupStatus: 'NONE', cleanupErrorCode: null, cleanupAbandonEligible: false }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ status: 'ACTIVE', email: 'owner@gmail.com', grantedScopes: ['drive.file'], connectedAt: '2026-09-01T08:00:00.000Z', lastVerifiedAt: '2026-09-01T08:00:00.000Z', lastErrorCode: null }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ available: true, botUsername: 'AutoSaleBot', personal: { connected: false, displayName: null, username: null, linkedAt: null } }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ approvalMode: 'REVIEW', minimumConfidence: 0.8, promptVersion: 'v1' }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ spreadsheetId: null, sheetName: 'Orders', status: 'NOT_CONFIGURED', requiredHeaders: ['order_id'], lastValidatedAt: null, errorSummary: null }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ([{ id: '44444444-4444-4444-8444-444444444444', type: 'GOOGLE_SHEETS', displayName: 'Каталог Google Sheets', status: 'PENDING', lastSyncedAt: null, lastErrorSummary: null, updatedAt: '2026-09-01T08:00:00.000Z' }]) })
@@ -45,6 +46,7 @@ describe('SettingsPage', () => {
 
     expect(screen.getByRole('tablist', { name: 'Розділи налаштувань' })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /Соцмережі/ })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByRole('tab', { name: /Telegram/ })).toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Google Sheets' })).not.toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Підтвердження замовлень' })).not.toBeInTheDocument();
 
@@ -84,17 +86,24 @@ describe('SettingsPage', () => {
       .mockResolvedValueOnce({
         ok: true,
         json: async () => ({ status: 'ACTIVE', email: null, grantedScopes: [], connectedAt: null, lastVerifiedAt: null, lastErrorCode: null }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ available: true, botUsername: 'AutoSaleBot', personal: { connected: true, displayName: 'Іван', username: 'ivan_manager', linkedAt: '2026-09-01T08:00:00.000Z' } }),
       });
 
     render(await WorkspaceLayout({ children: await SettingsPage() }));
 
-    expect(authenticatedApiFetch).toHaveBeenCalledTimes(2);
+    expect(authenticatedApiFetch).toHaveBeenCalledTimes(3);
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/integrations/instagram');
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/integrations/google');
+    expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/integrations/telegram');
     expect(screen.getByText('@autosale_store')).toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Підтвердження замовлень' })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('tab', { name: /Дані/ }));
     expect(screen.getByRole('heading', { name: 'Дані та синхронізація' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /Instagram/ })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('tab', { name: /Telegram/ }));
+    expect(screen.getByText('@ivan_manager')).toBeInTheDocument();
   });
 });

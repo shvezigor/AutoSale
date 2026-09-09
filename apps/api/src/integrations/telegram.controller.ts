@@ -37,4 +37,18 @@ export class TelegramController {
   unlink(@CurrentPrincipal() principal: AuthPrincipal) {
     return this.telegram.unlink(principal.tenantId!, principal.userId);
   }
+
+  @Post('test')
+  @RequireMembership('MANAGER')
+  async test(@CurrentPrincipal() principal: AuthPrincipal) {
+    try {
+      return await this.telegram.queueTest(principal.tenantId!, principal.userId);
+    } catch (error) {
+      if (error instanceof Error && (
+        error.message === 'Telegram personal connection required' ||
+        error.message === 'Telegram is not configured'
+      )) throw new BadRequestException('Telegram connection is unavailable');
+      throw error;
+    }
+  }
 }

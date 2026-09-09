@@ -1,4 +1,4 @@
-import { createHash, randomBytes } from 'node:crypto';
+import { createHash, randomBytes, randomUUID } from 'node:crypto';
 
 import type { TelegramConnectionSummary, TelegramLinkPurpose, TelegramLinkResponse } from '@autosale/contracts';
 import { Prisma, type PrismaClient } from '@autosale/database';
@@ -26,11 +26,19 @@ const updateSchema = z.object({
 
 type TelegramUpdate = z.infer<typeof updateSchema>;
 
+interface TelegramDeliveryQueue {
+  add(
+    name: 'telegram.deliver',
+    data: { deliveryId: string },
+    options: { jobId: string; attempts: 1; removeOnComplete: true; removeOnFail: true },
+  ): Promise<unknown>;
+}
+
 export class TelegramService {
   constructor(
     private readonly prisma: PrismaClient,
     private readonly now: () => Date = () => new Date(),
-    private readonly options: { botUsername?: string; token?: () => string } = {},
+    private readonly options: { botUsername?: string; token?: () => string; queue?: TelegramDeliveryQueue } = {},
   ) {}
 
   async startLink(tenantId: string, userId: string, purpose: TelegramLinkPurpose, returnPath?: string): Promise<TelegramLinkResponse> {
@@ -65,6 +73,39 @@ export class TelegramService {
       where: { tenantId, userId, revokedAt: null }, data: { revokedAt: this.now() },
     });
     return { disconnected: result.count > 0 };
+  }
+
+  async queueTest(tenantId: string, userId: string): Promise<{ deliveryId: string; status: 'PENDING' }> {
+    if (!this.options.botUsername || !this.options.queue) throw new Error('Telegram is not configured');
+    const binding = await this.prisma.telegramUserBinding.findUnique({
+      where: { tenantId_userId: { tenantId, userId } },
+      select: { privateChatId: true, revokedAt: true },
+    });
+    if (!binding || binding.revokedAt) throw new Error('Telegram personal connection required');
+    const destination = await this.prisma.telegramChat.findUnique({
+      where: { tenantId_externalChatId_route: { tenantId, externalChatId: binding.privateChatId, route: 'BOT' } },
+      select: { id: true },
+    });
+    if (!destination) throw new Error('Telegram personal connection required');
+
+    const delivery = await this.prisma.telegramDelivery.create({ data: {
+      tenantId,
+      destinationId: destination.id,
+      purpose: 'TEST',
+      idempotencyKey: `test:${userId}:${randomUUID()}`,
+      messageText: 'AutoSale підключено. Тестове сповіщення працює.',
+      nextAttemptAt: this.now(),
+    } });
+    try {
+      await this.options.queue.add(
+        'telegram.deliver',
+        { deliveryId: delivery.id },
+        { jobId: `telegram:${delivery.id}`, attempts: 1, removeOnComplete: true, removeOnFail: true },
+      );
+    } catch {
+      // PostgreSQL remains the source of truth; the worker reconciler retries the wake-up.
+    }
+    return { deliveryId: delivery.id, status: 'PENDING' };
   }
 
   async handleWebhook(input: unknown): Promise<'PROCESSED' | 'REPLAY' | 'IGNORED'> {

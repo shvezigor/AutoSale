@@ -940,14 +940,14 @@ The approved design is in `docs/superpowers/specs/2026-09-03-google-sign-in-desi
 **Description:** Add a Telegram settings tab where a member can open the shared bot, see connection status, send a privacy-safe test alert, and unlink.
 
 **Acceptance criteria:**
-- [ ] The card explains the single Start action and never asks for BotFather or a token.
-- [ ] Pending actions show stable loading state and global success/error notifications.
-- [ ] Owner and manager see only data permitted for their own membership, on desktop and mobile.
+- [x] The card explains the single Start action and never asks for BotFather or a token.
+- [x] Pending actions show stable loading state and global success/error notifications.
+- [x] Owner and manager see only data permitted for their own membership, on desktop and mobile.
 
 **Verification:**
-- [ ] `pnpm --filter @autosale/web test`
-- [ ] `pnpm typecheck`
-- [ ] `pnpm build`
+- [x] `pnpm --filter @autosale/web test`
+- [x] `pnpm typecheck`
+- [x] `pnpm build`
 - [ ] Browser check at desktop and 390px widths.
 
 **Dependencies:** Tasks 44–46

@@ -5,7 +5,7 @@ import { resolve } from 'node:path';
 import { createPrismaClient, type PrismaClient } from '@autosale/database';
 import { PostgreSqlContainer, type StartedPostgreSqlContainer } from '@testcontainers/postgresql';
 import pg from 'pg';
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { TelegramService } from './telegram.service.js';
 
@@ -124,6 +124,56 @@ describe('TelegramService webhook processing', () => {
     await expect(service.unlink(tenantId, userId)).resolves.toEqual({ disconnected: true });
     await expect(prisma.telegramUserBinding.count()).resolves.toBe(1);
     await expect(service.summary(tenantId, userId)).resolves.toMatchObject({ personal: { connected: false } });
+  });
+
+  it('persists a privacy-safe test notification before waking the delivery worker', async () => {
+    await prisma.telegramUserBinding.create({ data: {
+      tenantId, userId, telegramUserId: '987654321', privateChatId: '987654321', displayName: 'Ihor',
+    } });
+    const chat = await prisma.telegramChat.create({ data: {
+      tenantId, externalChatId: '987654321', type: 'private', route: 'BOT', lastObservedAt: new Date(),
+    } });
+    const add = vi.fn(async (_name: string, data: { deliveryId: string }) => {
+      await expect(prisma.telegramDelivery.findUnique({ where: { id: data.deliveryId } })).resolves.toMatchObject({
+        tenantId,
+        destinationId: chat.id,
+        purpose: 'TEST',
+        status: 'PENDING',
+        messageText: 'AutoSale підключено. Тестове сповіщення працює.',
+      });
+    });
+    const service = new TelegramService(prisma, undefined, { botUsername: 'AutoSaleBot', queue: { add } });
+
+    const result = await service.queueTest(tenantId, userId);
+
+    expect(result).toMatchObject({ status: 'PENDING' });
+    expect(add).toHaveBeenCalledWith('telegram.deliver', { deliveryId: result.deliveryId }, {
+      jobId: `telegram:${result.deliveryId}`, attempts: 1, removeOnComplete: true, removeOnFail: true,
+    });
+  });
+
+  it('keeps a persisted test notification pending when the queue wake-up fails', async () => {
+    await prisma.telegramUserBinding.create({ data: {
+      tenantId, userId, telegramUserId: '987654321', privateChatId: '987654321', displayName: 'Ihor',
+    } });
+    await prisma.telegramChat.create({ data: {
+      tenantId, externalChatId: '987654321', type: 'private', route: 'BOT', lastObservedAt: new Date(),
+    } });
+    const service = new TelegramService(prisma, undefined, {
+      botUsername: 'AutoSaleBot',
+      queue: { add: vi.fn().mockRejectedValue(new Error('redis unavailable')) },
+    });
+
+    const result = await service.queueTest(tenantId, userId);
+
+    await expect(prisma.telegramDelivery.findUnique({ where: { id: result.deliveryId } })).resolves.toMatchObject({ status: 'PENDING' });
+  });
+
+  it('does not queue a test notification for an unlinked member', async () => {
+    const service = new TelegramService(prisma, undefined, { botUsername: 'AutoSaleBot', queue: { add: vi.fn() } });
+
+    await expect(service.queueTest(tenantId, userId)).rejects.toThrow('Telegram personal connection required');
+    await expect(prisma.telegramDelivery.count()).resolves.toBe(0);
   });
 });
 
