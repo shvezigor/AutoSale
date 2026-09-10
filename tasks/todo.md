@@ -971,4 +971,4 @@ The approved design is in `docs/superpowers/specs/2026-09-03-google-sign-in-desi
 - [x] Статус позиції синхронізується з результатом Telegram-доставки.
 - [x] Особисті Telegram-сповіщення налаштовуються окремо для кожного користувача й не містять даних клієнта.
 - [x] Старі підтверджені замовлення обробляються фоновими пакетами без повторної оцінки завершених позицій.
-- [ ] Production rollout: повна перевірка, збірка образів, міграція, health-check і короткий live smoke test.
+- [x] Production rollout: 865 тестів, typecheck, production build, Compose validation, additive migration, health-check і публічний smoke test виконано 10 вересня 2026 року; 6 історичних замовлень успішно оцінено фоновим backfill.

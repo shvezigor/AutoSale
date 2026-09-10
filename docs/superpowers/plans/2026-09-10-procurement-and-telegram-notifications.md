@@ -10,6 +10,8 @@
 
 **Spec:** `docs/superpowers/specs/2026-09-10-procurement-and-telegram-notifications-design.md`
 
+**Status:** Виконано й розгорнуто 10 вересня 2026 року. Повний прогін: 865 тестів, typecheck і production build успішні; усі Docker-сервіси healthy, 6 історичних замовлень оброблено backfill без помилок.
+
 ## Global Constraints
 
 - Не змінювати approval-семантику `Order.status`; procurement має окремі стани.
