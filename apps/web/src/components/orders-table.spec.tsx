@@ -43,6 +43,16 @@ describe('OrdersTable', () => {
     expect(push).not.toHaveBeenCalled();
   });
 
+  it('preserves the current table query as the return destination', () => {
+    render(<OrdersTable orders={[order]} page={3} pageSize={50} total={120} search="Ігор" status="APPROVED" procurementStatus="NEEDS_ORDER" />);
+    const returnTo = '/orders?search=%D0%86%D0%B3%D0%BE%D1%80&status=APPROVED&procurementStatus=NEEDS_ORDER&page=3&pageSize=50';
+    const expected = `/orders/${order.id}?returnTo=${encodeURIComponent(returnTo)}`;
+
+    fireEvent.click(screen.getByRole('row', { name: /Авангард VINARIT/ }));
+    expect(push).toHaveBeenCalledWith(expected);
+    expect(screen.getAllByRole('link', { name: /Переглянути замовлення/ })[0]).toHaveAttribute('href', expected);
+  });
+
   it('keeps search, approval, procurement and pagination in the URL without scrolling to the top', () => {
     render(<OrdersTable orders={[order]} page={2} pageSize={25} total={60} search="Авангард" status="NEEDS_REVIEW" procurementStatus="NEEDS_ORDER" />);
 

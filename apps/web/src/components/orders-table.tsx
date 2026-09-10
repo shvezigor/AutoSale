@@ -41,6 +41,7 @@ export function OrdersTable({ orders, page, pageSize, total, search = '', status
   const submitSearch = (event: FormEvent<HTMLFormElement>) => { event.preventDefault(); navigate(1); };
   const changeStatus = (value: OrderStatus | '') => { setSelectedStatus(value); navigate(1, pageSize, value); };
   const changeProcurement = (value: ProcurementSummary | '') => { setSelectedProcurement(value); navigate(1, pageSize, selectedStatus, value); };
+  const returnTo = ordersUrl(search, status ?? '', procurementStatus ?? '', page, pageSize);
 
   return <>
     <div className="orders-toolbar">
@@ -49,20 +50,19 @@ export function OrdersTable({ orders, page, pageSize, total, search = '', status
       <label className="orders-status-filter"><span className="sr-only">Комплектація</span><select aria-label="Комплектація" onChange={(event) => changeProcurement(event.target.value as ProcurementSummary | '')} value={selectedProcurement}>{procurementStatuses.map((item) => <option key={item.value || 'all'} value={item.value}>{item.label}</option>)}</select></label>
     </div>
     {orders.length === 0 ? <p className="orders-empty" role="status">{search || status || procurementStatus ? 'Замовлень за цим запитом не знайдено.' : 'Замовлень поки немає.'}</p> : <>
-      <div className="orders-table-wrap"><table aria-label="Замовлення" className="orders-table"><thead><tr><th scope="col">Товар</th><th scope="col">Клієнт</th><th scope="col">Доставка</th><th scope="col">Статус</th><th scope="col">Комплектація</th><th scope="col">Впевненість</th><th scope="col">Дата</th><th scope="col"><span className="sr-only">Дії</span></th></tr></thead><tbody>{orders.map((order) => <OrderRow key={order.id} order={order} onOpen={() => router.push(`/orders/${order.id}`)} />)}</tbody></table></div>
-      <div className="orders-cards">{orders.map((order) => <OrderCard key={order.id} order={order} />)}</div>
+      <div className="orders-table-wrap"><table aria-label="Замовлення" className="orders-table"><thead><tr><th scope="col">Товар</th><th scope="col">Клієнт</th><th scope="col">Доставка</th><th scope="col">Статус</th><th scope="col">Комплектація</th><th scope="col">Впевненість</th><th scope="col">Дата</th><th scope="col"><span className="sr-only">Дії</span></th></tr></thead><tbody>{orders.map((order) => <OrderRow href={orderDetailUrl(order.id, returnTo)} key={order.id} order={order} onOpen={(href) => router.push(href)} />)}</tbody></table></div>
+      <div className="orders-cards">{orders.map((order) => <OrderCard href={orderDetailUrl(order.id, returnTo)} key={order.id} order={order} />)}</div>
     </>}
     {total > 0 && <TablePagination ariaLabel="Сторінки замовлень" onPageChange={(nextPage) => navigate(nextPage)} onPageSizeChange={(nextPageSize) => navigate(1, nextPageSize)} page={page} pageSize={pageSize} total={total} />}
   </>;
 }
 
-function OrderRow({ order, onOpen }: { order: ManagerOrder; onOpen: () => void }) {
-  const href = `/orders/${order.id}`;
-  return <tr className="orders-table-row" onClick={onOpen}><td><strong>{productLabel(order)}</strong><small>{productMeta(order)}</small></td><td><strong>{customerLabel(order)}</strong><small>{contactLabel(order)}</small></td><td><span className="order-delivery">{deliveryLabel(order)}</span></td><td><OrderStatusBadge status={order.status} /></td><td><ProcurementBadge status={order.procurementSummary} /></td><td className="order-confidence">{confidenceLabel(order)}</td><td><time dateTime={order.createdAt}>{dateLabel(order.createdAt)}</time></td><td><Link aria-label={viewLabel(order)} className="text-button" href={href} onClick={(event: MouseEvent<HTMLAnchorElement>) => event.stopPropagation()}>Переглянути</Link></td></tr>;
+function OrderRow({ order, href, onOpen }: { order: ManagerOrder; href: string; onOpen: (href: string) => void }) {
+  return <tr className="orders-table-row" onClick={() => onOpen(href)}><td><strong>{productLabel(order)}</strong><small>{productMeta(order)}</small></td><td><strong>{customerLabel(order)}</strong><small>{contactLabel(order)}</small></td><td><span className="order-delivery">{deliveryLabel(order)}</span></td><td><OrderStatusBadge status={order.status} /></td><td><ProcurementBadge status={order.procurementSummary} /></td><td className="order-confidence">{confidenceLabel(order)}</td><td><time dateTime={order.createdAt}>{dateLabel(order.createdAt)}</time></td><td><Link aria-label={viewLabel(order)} className="text-button" href={href} onClick={(event: MouseEvent<HTMLAnchorElement>) => event.stopPropagation()}>Переглянути</Link></td></tr>;
 }
 
-function OrderCard({ order }: { order: ManagerOrder }) {
-  return <Link aria-label={viewLabel(order)} className="orders-card" href={`/orders/${order.id}`}><div className="orders-card-heading"><span><strong>{productLabel(order)}</strong><small>{productMeta(order)}</small></span><span className="order-confidence">{confidenceLabel(order)}</span></div><dl><div><dt>Клієнт</dt><dd>{customerLabel(order)}</dd></div><div><dt>Доставка</dt><dd>{deliveryLabel(order)}</dd></div><div><dt>Комплектація</dt><dd><ProcurementBadge status={order.procurementSummary} /></dd></div><div><dt>Дата</dt><dd>{dateLabel(order.createdAt)}</dd></div></dl><div className="orders-card-actions"><OrderStatusBadge status={order.status} /><span className="text-button">Переглянути</span></div></Link>;
+function OrderCard({ order, href }: { order: ManagerOrder; href: string }) {
+  return <Link aria-label={viewLabel(order)} className="orders-card" href={href}><div className="orders-card-heading"><span><strong>{productLabel(order)}</strong><small>{productMeta(order)}</small></span><span className="order-confidence">{confidenceLabel(order)}</span></div><dl><div><dt>Клієнт</dt><dd>{customerLabel(order)}</dd></div><div><dt>Доставка</dt><dd>{deliveryLabel(order)}</dd></div><div><dt>Комплектація</dt><dd><ProcurementBadge status={order.procurementSummary} /></dd></div><div><dt>Дата</dt><dd>{dateLabel(order.createdAt)}</dd></div></dl><div className="orders-card-actions"><OrderStatusBadge status={order.status} /><span className="text-button">Переглянути</span></div></Link>;
 }
 
 function OrderStatusBadge({ status }: { status: OrderStatus }) { return <span className={`order-table-status status-${status.toLowerCase()}`}>{statusLabel(status)}</span>; }
@@ -78,3 +78,4 @@ function dateLabel(value: string) { return new Intl.DateTimeFormat('uk-UA', { da
 function statusLabel(status: OrderStatus) { return ({ AI_PROCESSING: 'AI обробляє', AI_FAILED: 'Помилка AI', NEEDS_REVIEW: 'Потребує перевірки', AUTO_APPROVED: 'Автопідтверджено', APPROVED: 'Підтверджено', CANCELLED: 'Скасовано' } satisfies Record<OrderStatus, string>)[status]; }
 function procurementLabel(status: ProcurementSummary) { return procurementStatuses.find((item) => item.value === status)?.label ?? status; }
 function ordersUrl(query: string, status: OrderStatus | '', procurementStatus: ProcurementSummary | '', page: number, pageSize: number) { const params = new URLSearchParams(); if (query.trim()) params.set('search', query.trim()); if (status) params.set('status', status); if (procurementStatus) params.set('procurementStatus', procurementStatus); if (page > 1) params.set('page', String(page)); if (pageSize !== 25) params.set('pageSize', String(pageSize)); const value = params.toString(); return value ? `/orders?${value}` : '/orders'; }
+function orderDetailUrl(orderId: string, returnTo: string) { return returnTo === '/orders' ? `/orders/${orderId}` : `/orders/${orderId}?returnTo=${encodeURIComponent(returnTo)}`; }

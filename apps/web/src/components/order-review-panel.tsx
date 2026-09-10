@@ -1,6 +1,7 @@
 'use client';
 
 import type { ManagerOrder } from '../../../../packages/contracts/src/orders';
+import Link from 'next/link';
 import { useState } from 'react';
 import { mutatingFetch } from '../auth/csrf-fetch';
 import { LoadingButton } from './loading-button';
@@ -9,7 +10,7 @@ import { SupplierDispatchDialog } from './supplier-dispatch-dialog';
 
 const statusLabels: Record<string, string> = { NEEDS_REVIEW: 'Потребує перевірки', APPROVED: 'Підтверджено', AUTO_APPROVED: 'Підтверджено автоматично', CANCELLED: 'Відхилено', AI_PROCESSING: 'AI обробляє', AI_FAILED: 'Помилка AI' };
 
-export function OrderReviewPanel({ initialOrder }: { initialOrder: ManagerOrder }) {
+export function OrderReviewPanel({ initialOrder, backHref = '/orders' }: { initialOrder: ManagerOrder; backHref?: string }) {
   const [order, setOrder] = useState(initialOrder);
   const [draft, setDraft] = useState(initialOrder);
   const [pendingAction, setPendingAction] = useState<'save' | 'approve' | 'cancel' | 'sheets' | 'handoff' | null>(null);
@@ -88,6 +89,7 @@ export function OrderReviewPanel({ initialOrder }: { initialOrder: ManagerOrder 
   const changeItem = (id: string, values: Partial<ManagerOrder['items'][number]>) => changeDraft({ ...draft, items: draft.items.map((item) => item.id === id ? { ...item, ...values } : item) });
 
   return <section className="review-panel" aria-labelledby="order-heading">
+    <Link className="order-back-link" href={backHref}><span aria-hidden="true">←</span> До таблиці замовлень</Link>
     <header className="review-heading"><div><h1 id="order-heading">Замовлення</h1><span className={`order-status status-${order.status.toLowerCase()}`}>{statusLabels[order.status] ?? order.status}</span></div><strong>{Math.round((order.overallConfidence ?? 0) * 100)}%<small>впевненість</small></strong></header>
     {unresolved && <section className="validation-warning" aria-labelledby="validation-heading"><strong id="validation-heading">Перевірте дані перед підтвердженням</strong><ul>{reviewIssues.map((issue) => <li key={issue}>{issue}</li>)}</ul></section>}
     <div className="review-fields-grid">

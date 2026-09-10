@@ -32,6 +32,13 @@ const order: ManagerOrder = {
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
 describe('OrderReviewPanel', () => {
+  it('offers a clear return to the originating orders table', () => {
+    render(<OrderReviewPanel initialOrder={order} backHref="/orders?page=3&status=APPROVED" />);
+
+    expect(screen.getByRole('link', { name: 'До таблиці замовлень' }))
+      .toHaveAttribute('href', '/orders?page=3&status=APPROVED');
+  });
+
   it('hides the save action until editable order data changes', () => {
     render(<OrderReviewPanel initialOrder={order} />);
 
