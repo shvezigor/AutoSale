@@ -9,6 +9,7 @@ describe('Telegram supplier dispatch', () => {
     const prisma = {
       order: { findFirst: vi.fn().mockResolvedValue({
         id: '11111111-1111-4111-8111-111111111111', status: 'APPROVED',
+        tenant: { name: 'ФОП Швець Ігор Олександрович' },
         items: [{ catalogId: 'SKU-1', originalText: 'Двері Авангард', quantity: 2, size: '860x2050', color: 'білий' }],
       }) },
       product: { findMany: vi.fn().mockResolvedValue([{ sku: 'SKU-1', name: 'Двері Авангард' }]) },
@@ -24,6 +25,8 @@ describe('Telegram supplier dispatch', () => {
       messageText: expect.stringContaining('SKU-1 — Двері Авангард'),
     }) }));
     const text = upsert.mock.calls[0]?.[0]?.create?.messageText as string;
+    expect(text).toContain('Нове замовлення — ФОП Швець Ігор Олександрович #11111111');
+    expect(text).not.toContain('AutoSale');
     expect(text).toContain('Кількість: 2');
     expect(text).not.toMatch(/телефон|адрес/i);
     expect(add).toHaveBeenCalledWith('telegram.deliver', { deliveryId: 'delivery-1' }, expect.any(Object));

@@ -177,6 +177,7 @@ export class TelegramService {
       where: { id: orderId, tenantId },
       select: {
         id: true, status: true,
+        tenant: { select: { name: true } },
         items: { select: { catalogId: true, originalText: true, quantity: true, size: true, color: true } },
       },
     });
@@ -196,7 +197,7 @@ export class TelegramService {
       where: { tenantId_idempotencyKey: { tenantId, idempotencyKey } },
       create: {
         tenantId, destinationId: setting.destinationId, purpose: 'SUPPLIER_ORDER', idempotencyKey,
-        messageText: supplierOrderMessage(order.id, order.items, names), nextAttemptAt: this.now(),
+        messageText: supplierOrderMessage(order.id, order.tenant.name, order.items, names), nextAttemptAt: this.now(),
       },
       update: {},
       select: { id: true, status: true },
@@ -354,6 +355,7 @@ function safeReturnPath(value: string | undefined): string {
 
 function supplierOrderMessage(
   orderId: string,
+  companyName: string,
   items: Array<{ catalogId: string | null; originalText: string; quantity: number; size: string | null; color: string | null }>,
   productNames: Map<string, string>,
 ): string {
@@ -363,5 +365,5 @@ function supplierOrderMessage(
     const details = [`Кількість: ${item.quantity}`, item.size ? `Розмір: ${item.size}` : null, item.color ? `Колір: ${item.color}` : null].filter(Boolean).join(' · ');
     return `${index + 1}. ${sku} — ${name}\n${details}`;
   });
-  return [`Нове замовлення AutoSale #${orderId.slice(0, 8)}`, '', ...lines].join('\n').slice(0, 4_096);
+  return [`Нове замовлення — ${companyName} #${orderId.slice(0, 8)}`, '', ...lines].join('\n').slice(0, 4_096);
 }
