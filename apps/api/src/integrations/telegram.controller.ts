@@ -82,4 +82,20 @@ export class TelegramController {
       throw error;
     }
   }
+
+  @Get('supplier/orders/:id/preview')
+  @RequireMembership('MANAGER')
+  async previewSupplierOrder(
+    @CurrentPrincipal() principal: AuthPrincipal,
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ) {
+    try {
+      return await this.telegram.supplierOrderPreview(principal.tenantId!, id);
+    } catch (error) {
+      if (error instanceof Error && [
+        'Approved order required', 'Telegram supplier destination required', 'No items require supplier ordering',
+      ].includes(error.message)) throw new BadRequestException(error.message);
+      throw error;
+    }
+  }
 }

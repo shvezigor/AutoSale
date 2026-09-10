@@ -266,7 +266,139 @@ describe('TelegramDeliveryService', () => {
       completedAt: now,
     });
   });
+
+  it('marks only linked supplier items as ordered after successful delivery', async () => {
+    const fixture = await createSupplierDelivery(prisma, { tenantId, destinationId, now });
+
+    await expect(new TelegramDeliveryService(prisma, { sendText }, () => now)
+      .process({ deliveryId: fixture.deliveryId })).resolves.toBe('SUCCEEDED');
+
+    await expect(prisma.orderItem.findUniqueOrThrow({ where: { id: fixture.linkedItemId } }))
+      .resolves.toMatchObject({ procurementStatus: 'ORDERED' });
+    await expect(prisma.orderItem.findUniqueOrThrow({ where: { id: fixture.unlinkedItemId } }))
+      .resolves.toMatchObject({ procurementStatus: 'SENDING' });
+  });
+
+  it('keeps supplier items sending while Telegram will retry', async () => {
+    const fixture = await createSupplierDelivery(prisma, { tenantId, destinationId, now });
+    sendText.mockRejectedValueOnce(new TelegramBotError('RATE_LIMITED', 429, 30));
+
+    await expect(new TelegramDeliveryService(prisma, { sendText }, () => now)
+      .process({ deliveryId: fixture.deliveryId })).resolves.toBe('RETRY');
+
+    await expect(prisma.orderItem.findUniqueOrThrow({ where: { id: fixture.linkedItemId } }))
+      .resolves.toMatchObject({ procurementStatus: 'SENDING' });
+  });
+
+  it('returns linked supplier items to ordering after terminal failure', async () => {
+    const fixture = await createSupplierDelivery(prisma, { tenantId, destinationId, now });
+    sendText.mockRejectedValueOnce(new TelegramBotError('FORBIDDEN', 403));
+
+    await expect(new TelegramDeliveryService(prisma, { sendText }, () => now)
+      .process({ deliveryId: fixture.deliveryId })).resolves.toBe('FAILED');
+
+    await expect(prisma.orderItem.findUniqueOrThrow({ where: { id: fixture.linkedItemId } }))
+      .resolves.toMatchObject({ procurementStatus: 'TO_ORDER', procurementReason: 'DELIVERY_FAILED' });
+  });
+
+  it('does not transition supplier items when a stale worker loses its lease', async () => {
+    const fixture = await createSupplierDelivery(prisma, { tenantId, destinationId, now });
+    let release!: () => void;
+    sendText.mockImplementationOnce(() => new Promise((resolveSend) => {
+      release = () => resolveSend({ messageId: '704', chatId: '-1001234567890' });
+    }));
+    const processing = new TelegramDeliveryService(prisma, { sendText }, () => now)
+      .process({ deliveryId: fixture.deliveryId });
+    await vi.waitFor(() => expect(sendText).toHaveBeenCalledTimes(1));
+    await prisma.telegramDelivery.update({
+      where: { id: fixture.deliveryId },
+      data: { leaseId: randomUUID() },
+    });
+    release();
+
+    await expect(processing).resolves.toBe('IGNORED');
+    await expect(prisma.orderItem.findUniqueOrThrow({ where: { id: fixture.linkedItemId } }))
+      .resolves.toMatchObject({ procurementStatus: 'SENDING' });
+  });
 });
+
+async function createSupplierDelivery(
+  client: PrismaClient,
+  input: { tenantId: string; destinationId: string; now: Date },
+): Promise<{ deliveryId: string; linkedItemId: string; unlinkedItemId: string }> {
+  const token = randomUUID();
+  const conversation = await client.conversation.create({
+    data: {
+      tenantId: input.tenantId,
+      channel: 'INSTAGRAM',
+      externalConversationId: `supplier-${token}`,
+      participantId: `participant-${token}`,
+      lastMessageAt: input.now,
+    },
+  });
+  const message = await client.message.create({
+    data: {
+      tenantId: input.tenantId,
+      conversationId: conversation.id,
+      channel: 'INSTAGRAM',
+      externalMessageId: `supplier-${token}`,
+      direction: 'OUTBOUND',
+      senderId: 'shop',
+      text: 'Order trigger',
+      sourceTimestamp: input.now,
+      clientIdempotencyKey: token,
+      deliveryStatus: 'SENT',
+    },
+  });
+  const order = await client.order.create({
+    data: {
+      tenantId: input.tenantId,
+      conversationId: conversation.id,
+      triggerMessageId: message.id,
+      status: 'APPROVED',
+      promptVersion: 'test',
+    },
+  });
+  const [linked, unlinked] = await Promise.all([
+    client.orderItem.create({
+      data: {
+        tenantId: input.tenantId,
+        orderId: order.id,
+        catalogId: 'SKU-LINKED',
+        originalText: 'Linked item',
+        quantity: 1,
+        confidence: 1,
+        procurementStatus: 'SENDING',
+      },
+    }),
+    client.orderItem.create({
+      data: {
+        tenantId: input.tenantId,
+        orderId: order.id,
+        catalogId: 'SKU-UNLINKED',
+        originalText: 'Unlinked item',
+        quantity: 1,
+        confidence: 1,
+        procurementStatus: 'SENDING',
+      },
+    }),
+  ]);
+  const delivery = await client.telegramDelivery.create({
+    data: {
+      tenantId: input.tenantId,
+      destinationId: input.destinationId,
+      orderId: order.id,
+      purpose: 'SUPPLIER_ORDER',
+      idempotencyKey: `supplier-order:${token}`,
+      messageText: 'Замовлення постачальнику',
+      nextAttemptAt: input.now,
+    },
+  });
+  await client.telegramDeliveryItem.create({
+    data: { tenantId: input.tenantId, deliveryId: delivery.id, orderItemId: linked.id },
+  });
+  return { deliveryId: delivery.id, linkedItemId: linked.id, unlinkedItemId: unlinked.id };
+}
 
 async function applyMigrations(connectionString: string): Promise<void> {
   const pool = new pg.Pool({ connectionString });

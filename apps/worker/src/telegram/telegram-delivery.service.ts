@@ -122,11 +122,35 @@ export class TelegramDeliveryService {
       completedAt: Date | null;
     },
   ): Promise<boolean> {
-    const updated = await this.prisma.telegramDelivery.updateMany({
-      where: { id: deliveryId, status: 'PROCESSING', leaseId },
-      data: { ...data, leaseId: null, leaseExpiresAt: null },
+    return this.prisma.$transaction(async (transaction) => {
+      const updated = await transaction.telegramDelivery.updateMany({
+        where: { id: deliveryId, status: 'PROCESSING', leaseId },
+        data: { ...data, leaseId: null, leaseExpiresAt: null },
+      });
+      if (updated.count !== 1) return false;
+
+      const delivery = await transaction.telegramDelivery.findUnique({
+        where: { id: deliveryId },
+        select: { tenantId: true, purpose: true },
+      });
+      if (delivery?.purpose !== 'SUPPLIER_ORDER' || data.status === 'RETRYABLE') return true;
+
+      await transaction.orderItem.updateMany({
+        where: {
+          tenantId: delivery.tenantId,
+          procurementStatus: 'SENDING',
+          deliveryItems: { some: { deliveryId } },
+        },
+        data: data.status === 'SUCCEEDED'
+          ? { procurementStatus: 'ORDERED', procurementUpdatedAt: this.now() }
+          : {
+              procurementStatus: 'TO_ORDER',
+              procurementReason: 'DELIVERY_FAILED',
+              procurementUpdatedAt: this.now(),
+            },
+      });
+      return true;
     });
-    return updated.count === 1;
   }
 }
 

@@ -55,4 +55,13 @@ describe('TelegramController', () => {
       .resolves.toEqual({ deliveryId: 'delivery-1', status: 'PENDING' });
     expect(queueSupplierOrder).toHaveBeenCalledWith('tenant', '11111111-1111-4111-8111-111111111111');
   });
+
+  it('returns a read-only supplier order preview', async () => {
+    const supplierOrderPreview = vi.fn().mockResolvedValue({ orderId: 'order', items: [] });
+    const controller = new TelegramController({ supplierOrderPreview } as never);
+
+    await expect(controller.previewSupplierOrder(manager, '11111111-1111-4111-8111-111111111111'))
+      .resolves.toEqual({ orderId: 'order', items: [] });
+    expect(supplierOrderPreview).toHaveBeenCalledWith('tenant', '11111111-1111-4111-8111-111111111111');
+  });
 });

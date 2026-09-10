@@ -2,7 +2,7 @@ import { createHash, randomBytes, randomUUID } from 'node:crypto';
 
 import type {
   TelegramConnectionSummary, TelegramLinkPurpose, TelegramLinkResponse,
-  TelegramSupplierSettings, TelegramSupplierSettingsUpdate,
+  TelegramSupplierSettings, TelegramSupplierSettingsUpdate, SupplierOrderPreview,
 } from '@autosale/contracts';
 import { Prisma, type PrismaClient } from '@autosale/database';
 import { z } from 'zod';
@@ -171,36 +171,128 @@ export class TelegramService {
     return this.supplierSettings(tenantId);
   }
 
-  async queueSupplierOrder(tenantId: string, orderId: string): Promise<{ deliveryId: string; status: string }> {
-    if (!this.options.botUsername || !this.options.queue) throw new Error('Telegram is not configured');
+  async supplierOrderPreview(tenantId: string, orderId: string): Promise<SupplierOrderPreview> {
     const order = await this.prisma.order.findFirst({
       where: { id: orderId, tenantId },
       select: {
-        id: true, status: true,
+        id: true,
+        status: true,
         tenant: { select: { name: true } },
-        items: { select: { catalogId: true, originalText: true, quantity: true, size: true, color: true } },
+        items: {
+          select: {
+            id: true, procurementStatus: true, catalogId: true, originalText: true,
+            quantity: true, size: true, color: true,
+          },
+        },
       },
     });
     if (!order) throw new Error('Order not found');
     if (!['APPROVED', 'AUTO_APPROVED'].includes(order.status)) throw new Error('Approved order required');
-    const setting = await this.prisma.telegramSupplierSetting.findUnique({
-      where: { tenantId }, select: { destinationId: true },
-    });
+    const items = order.items.filter((item) => item.procurementStatus === 'TO_ORDER');
+    if (items.length === 0) throw new Error('No items require supplier ordering');
+    const [setting, products] = await Promise.all([
+      this.prisma.telegramSupplierSetting.findUnique({
+        where: { tenantId },
+        select: { destination: { select: { title: true } } },
+      }),
+      this.prisma.product.findMany({
+        where: { tenantId, sku: { in: items.flatMap((item) => item.catalogId ? [item.catalogId] : []) } },
+        select: { sku: true, name: true },
+      }),
+    ]);
     if (!setting) throw new Error('Telegram supplier destination required');
-    const products = await this.prisma.product.findMany({
-      where: { tenantId, sku: { in: order.items.flatMap((item) => item.catalogId ? [item.catalogId] : []) } },
-      select: { sku: true, name: true },
-    });
     const names = new Map(products.map((product) => [product.sku, product.name]));
-    const idempotencyKey = `supplier-order:${order.id}`;
-    const delivery = await this.prisma.telegramDelivery.upsert({
-      where: { tenantId_idempotencyKey: { tenantId, idempotencyKey } },
-      create: {
-        tenantId, destinationId: setting.destinationId, purpose: 'SUPPLIER_ORDER', idempotencyKey,
-        messageText: supplierOrderMessage(order.id, order.tenant.name, order.items, names), nextAttemptAt: this.now(),
-      },
-      update: {},
-      select: { id: true, status: true },
+    return {
+      orderId: order.id,
+      companyName: order.tenant.name,
+      supplierName: setting.destination.title?.trim() || 'Постачальник',
+      items: items.map((item) => ({
+        orderItemId: item.id,
+        productName: item.catalogId ? names.get(item.catalogId) ?? item.originalText : item.originalText,
+        sku: item.catalogId,
+        quantity: item.quantity,
+        color: item.color,
+        size: item.size,
+      })),
+    };
+  }
+
+  async queueSupplierOrder(tenantId: string, orderId: string): Promise<{ deliveryId: string; status: string }> {
+    if (!this.options.botUsername || !this.options.queue) throw new Error('Telegram is not configured');
+    const delivery = await this.prisma.$transaction(async (transaction) => {
+      await transaction.$queryRaw(Prisma.sql`
+        SELECT "id" FROM "orders"
+        WHERE "tenant_id" = ${tenantId}::uuid AND "id" = ${orderId}::uuid
+        FOR UPDATE
+      `);
+      const active = await transaction.telegramDelivery.findFirst({
+        where: {
+          tenantId,
+          orderId,
+          purpose: 'SUPPLIER_ORDER',
+          status: { in: ['PENDING', 'PROCESSING', 'RETRYABLE'] },
+        },
+        orderBy: { createdAt: 'desc' },
+        select: { id: true, status: true },
+      });
+      if (active) return active;
+
+      const order = await transaction.order.findFirst({
+        where: { id: orderId, tenantId },
+        select: {
+          id: true,
+          status: true,
+          tenant: { select: { name: true } },
+          items: {
+            select: {
+              id: true, procurementStatus: true, catalogId: true, originalText: true,
+              quantity: true, size: true, color: true,
+            },
+          },
+        },
+      });
+      if (!order) throw new Error('Order not found');
+      if (!['APPROVED', 'AUTO_APPROVED'].includes(order.status)) throw new Error('Approved order required');
+      const items = order.items.filter((item) => item.procurementStatus === 'TO_ORDER');
+      if (items.length === 0) throw new Error('No items require supplier ordering');
+      const [setting, products] = await Promise.all([
+        transaction.telegramSupplierSetting.findUnique({
+          where: { tenantId }, select: { destinationId: true, destination: { select: { title: true } } },
+        }),
+        transaction.product.findMany({
+          where: { tenantId, sku: { in: items.flatMap((item) => item.catalogId ? [item.catalogId] : []) } },
+          select: { sku: true, name: true },
+        }),
+      ]);
+      if (!setting) throw new Error('Telegram supplier destination required');
+      const names = new Map(products.map((product) => [product.sku, product.name]));
+      const version = await transaction.order.update({
+        where: { tenantId_id: { tenantId, id: orderId } },
+        data: { supplierDispatchVersion: { increment: 1 } },
+        select: { supplierDispatchVersion: true },
+      });
+      const idempotencyKey = `supplier-order:${order.id}:${version.supplierDispatchVersion}`;
+      const created = await transaction.telegramDelivery.create({
+        data: {
+          tenantId,
+          destinationId: setting.destinationId,
+          orderId,
+          purpose: 'SUPPLIER_ORDER',
+          idempotencyKey,
+          messageText: supplierOrderMessage(order.id, order.tenant.name, items, names),
+          nextAttemptAt: this.now(),
+        },
+        select: { id: true, status: true },
+      });
+      await transaction.telegramDeliveryItem.createMany({
+        data: items.map((item) => ({ tenantId, deliveryId: created.id, orderItemId: item.id })),
+      });
+      const updated = await transaction.orderItem.updateMany({
+        where: { tenantId, id: { in: items.map((item) => item.id) }, procurementStatus: 'TO_ORDER' },
+        data: { procurementStatus: 'SENDING', procurementUpdatedAt: this.now() },
+      });
+      if (updated.count !== items.length) throw new Error('Supplier order changed during dispatch');
+      return created;
     });
     if (delivery.status === 'PENDING' || delivery.status === 'RETRYABLE') {
       try {
