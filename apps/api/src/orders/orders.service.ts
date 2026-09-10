@@ -1,5 +1,6 @@
 import type { ManagerOrder, ManagerOrderUpdate, OrderListResponse, OrderStatus } from '@autosale/contracts/orders';
-import { Prisma, type PrismaClient } from '@autosale/database';
+import { procurementSummaryFor } from '@autosale/contracts/procurement';
+import { ProcurementStore, Prisma, type PrismaClient } from '@autosale/database';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 
 type Extraction = {
@@ -17,7 +18,10 @@ export type OrderListQuery = {
 };
 
 export class OrdersService {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(
+    private readonly prisma: PrismaClient,
+    private readonly procurement = new ProcurementStore(prisma),
+  ) {}
 
   async list(tenantId: string, query: OrderListQuery): Promise<OrderListResponse> {
     const search = query.search?.trim();
@@ -55,6 +59,7 @@ export class OrdersService {
 
   async approve(tenantId: string, id: string, actor: string): Promise<ManagerOrder> {
     await this.transition(tenantId, id, actor, 'APPROVED', 'ORDER_APPROVED');
+    await this.procurement.assessApprovedOrder(tenantId, id, actor);
     await this.ensurePendingExport(tenantId, id);
     return this.detail(tenantId, id);
   }
@@ -69,8 +74,10 @@ export class OrdersService {
     });
   }
 
-  cancel(tenantId: string, id: string, actor: string): Promise<ManagerOrder> {
-    return this.transition(tenantId, id, actor, 'CANCELLED', 'ORDER_CANCELLED');
+  async cancel(tenantId: string, id: string, actor: string): Promise<ManagerOrder> {
+    await this.transition(tenantId, id, actor, 'CANCELLED', 'ORDER_CANCELLED');
+    await this.procurement.releaseOrderReservations(tenantId, id, actor);
+    return this.detail(tenantId, id);
   }
 
   async retrySheetsExport(tenantId: string, id: string): Promise<NonNullable<ManagerOrder['sheetsExport']>> {
@@ -142,8 +149,14 @@ export class OrdersService {
         profile: { select: { displayName: true, username: true } },
       },
     },
-    items: { orderBy: { createdAt: 'asc' as const } },
+    items: { orderBy: { createdAt: 'asc' as const }, include: { reservation: true } },
     exports: { orderBy: { createdAt: 'desc' as const }, take: 1, include: { destination: { select: { status: true } } } },
+    telegramDeliveries: {
+      where: { purpose: 'SUPPLIER_ORDER' as const },
+      orderBy: { createdAt: 'desc' as const },
+      take: 1,
+      include: { _count: { select: { items: true } } },
+    },
   };
 
   private async productNames(tenantId: string): Promise<Map<string, string>> {
@@ -158,6 +171,8 @@ export class OrdersService {
       phone: extraction.customer?.phone ?? null,
       instagramUsername: extraction.customer?.instagramUsername ?? row.conversation.profile?.username ?? null,
     };
+    const procurementStatuses = row.items.map((item) => item.procurementStatus ?? 'UNASSESSED');
+    const latestSupplierDelivery = row.telegramDeliveries?.[0];
     return {
       id: row.id,
       status: row.status as OrderStatus,
@@ -173,7 +188,26 @@ export class OrdersService {
         quantity: item.quantity ?? extraction.items?.[index]?.quantity ?? 1,
         confidence: item.confidence ?? extraction.items?.[index]?.confidence ?? 0,
         productName: item.catalogId ? products.get(item.catalogId) ?? null : null,
+        procurementStatus: item.procurementStatus ?? 'UNASSESSED',
+        procurementSource: item.procurementSource ?? null,
+        procurementReason: item.procurementReason ?? null,
+        stockAtDecision: item.stockAtDecision ?? null,
+        availableAtDecision: item.availableAtDecision ?? null,
+        reservation: item.reservation ? {
+          id: item.reservation.id,
+          quantity: item.reservation.quantity,
+          status: item.reservation.status,
+        } : null,
       })),
+      procurementSummary: ['APPROVED', 'AUTO_APPROVED'].includes(row.status)
+        ? procurementSummaryFor(procurementStatuses, Boolean(row.procurementHandedOffAt))
+        : 'UNASSESSED',
+      procurementHandedOffAt: row.procurementHandedOffAt?.toISOString() ?? null,
+      supplierDispatch: latestSupplierDelivery ? {
+        deliveryId: latestSupplierDelivery.id,
+        status: latestSupplierDelivery.status,
+        itemCount: latestSupplierDelivery._count.items,
+      } : null,
       catalogueCandidates: [...products].map(([sku, name]) => ({ sku, name })),
       createdAt: row.createdAt.toISOString(),
       sheetsExport: row.exports[0] ? this.mapExport(row.exports[0], row.exports[0].destination.status === 'ACTIVE') : null,

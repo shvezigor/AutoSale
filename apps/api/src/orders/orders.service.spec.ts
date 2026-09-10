@@ -86,12 +86,44 @@ describe('OrdersService Google Sheets retry', () => {
         auditLog: { create: vi.fn().mockResolvedValue({}) },
       })),
     };
+    const procurement = {
+      assessApprovedOrder: vi.fn().mockResolvedValue({ orderId: 'order-1', summary: 'READY', items: [] }),
+      releaseOrderReservations: vi.fn(),
+    };
 
-    const result = await new OrdersService(prisma as never).approve('tenant-1', 'order-1', 'manager-1');
+    const result = await new OrdersService(prisma as never, procurement as never)
+      .approve('tenant-1', 'order-1', 'manager-1');
 
+    expect(procurement.assessApprovedOrder).toHaveBeenCalledWith('tenant-1', 'order-1', 'manager-1');
     expect(upsert).toHaveBeenCalled();
     expect(result.status).toBe('APPROVED');
     expect(result.sheetsExport).toMatchObject({ status: 'PENDING', retryAllowed: false });
+  });
+
+  it('releases active reservations when an order is cancelled', async () => {
+    const baseOrder = {
+      id: 'order-1', tenantId: 'tenant-1', status: 'APPROVED', extraction: {},
+      validationIssues: [], overallConfidence: 1, createdAt: new Date(),
+      conversation: { displayName: 'Customer', channel: 'INSTAGRAM', profile: null },
+      items: [], exports: [], procurementHandedOffAt: null, telegramDeliveries: [],
+    };
+    const prisma = {
+      order: { findFirst: vi.fn().mockResolvedValue(baseOrder) },
+      product: { findMany: vi.fn().mockResolvedValue([]) },
+      $transaction: vi.fn(async (callback: (tx: unknown) => unknown) => callback({
+        order: { update: vi.fn().mockResolvedValue({ ...baseOrder, status: 'CANCELLED' }) },
+        auditLog: { create: vi.fn().mockResolvedValue({}) },
+      })),
+    };
+    const procurement = {
+      assessApprovedOrder: vi.fn(),
+      releaseOrderReservations: vi.fn().mockResolvedValue(undefined),
+    };
+
+    await new OrdersService(prisma as never, procurement as never)
+      .cancel('tenant-1', 'order-1', 'manager-1');
+
+    expect(procurement.releaseOrderReservations).toHaveBeenCalledWith('tenant-1', 'order-1', 'manager-1');
   });
 
   it('moves one failed export back to pending when its destination is active', async () => {

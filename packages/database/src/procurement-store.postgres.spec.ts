@@ -6,6 +6,8 @@ import { PostgreSqlContainer, type StartedPostgreSqlContainer } from '@testconta
 import pg from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
+import { createPrismaClient, ProcurementStore, type PrismaClient } from './index.js';
+
 const tenantA = '11111111-1111-4111-8111-111111111111';
 const tenantB = '22222222-2222-4222-8222-222222222222';
 const userA = '33333333-3333-4333-8333-333333333333';
@@ -24,15 +26,18 @@ const deliveryA = 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee';
 describe('procurement persistence constraints', () => {
   let container: StartedPostgreSqlContainer;
   let pool: pg.Pool;
+  let prisma: PrismaClient;
 
   beforeAll(async () => {
     container = await new PostgreSqlContainer('postgres:17.6-alpine').start();
     pool = new pg.Pool({ connectionString: container.getConnectionUri() });
     await applyMigrations(pool);
     await seedOrders(pool);
+    prisma = createPrismaClient(container.getConnectionUri());
   }, 60_000);
 
   afterAll(async () => {
+    await prisma?.$disconnect();
     await pool?.end();
     await container?.stop();
   });
@@ -65,7 +70,160 @@ describe('procurement persistence constraints', () => {
       VALUES ($1, $2, 'ORDER_NEEDS_REVIEW', FALSE, NOW())`, [tenantA, userA]))
       .rejects.toMatchObject({ code: '23505' });
   });
+
+  it('reserves known stock and records the automatic decision', async () => {
+    const fixture = await createApprovedOrder(prisma, { sku: 'STOCK-5', stock: 5, quantity: 2 });
+    const store = new ProcurementStore(prisma);
+
+    const assessment = await store.assessApprovedOrder(tenantA, fixture.orderId, userA);
+    const item = await prisma.orderItem.findUniqueOrThrow({
+      where: { id: fixture.itemId },
+      include: { reservation: true },
+    });
+
+    expect(assessment.summary).toBe('READY');
+    expect(item).toMatchObject({
+      procurementStatus: 'IN_STOCK',
+      procurementSource: 'AUTO',
+      procurementReason: 'STOCK_AVAILABLE',
+      stockAtDecision: 5,
+      availableAtDecision: 5,
+      reservation: { quantity: 2, status: 'ACTIVE' },
+    });
+  });
+
+  it.each([
+    { label: 'unknown stock', sku: 'UNKNOWN-STOCK', stock: null },
+    { label: 'unknown SKU', sku: 'MISSING-SKU', stock: undefined },
+  ])('marks $label for supplier ordering without a reservation', async ({ sku, stock }) => {
+    const fixture = await createApprovedOrder(prisma, {
+      sku,
+      quantity: 1,
+      ...(stock !== undefined ? { stock } : {}),
+    });
+    const store = new ProcurementStore(prisma);
+
+    await store.assessApprovedOrder(tenantA, fixture.orderId, userA);
+    const item = await prisma.orderItem.findUniqueOrThrow({
+      where: { id: fixture.itemId },
+      include: { reservation: true },
+    });
+
+    expect(item.procurementStatus).toBe('TO_ORDER');
+    expect(item.reservation).toBeNull();
+    expect(item.procurementReason).toBe(stock === null ? 'STOCK_UNKNOWN' : 'PRODUCT_UNMATCHED');
+  });
+
+  it('serializes competing reservations and remains idempotent on replay', async () => {
+    const product = await prisma.product.create({
+      data: { tenantId: tenantA, sku: 'COMPETING', name: 'Competing', aliases: [], stockQuantity: 5 },
+    });
+    const first = await createApprovedOrder(prisma, { sku: product.sku, quantity: 4 });
+    const second = await createApprovedOrder(prisma, { sku: product.sku, quantity: 4 });
+    const store = new ProcurementStore(prisma);
+
+    await Promise.all([
+      store.assessApprovedOrder(tenantA, first.orderId, userA),
+      store.assessApprovedOrder(tenantA, second.orderId, userA),
+    ]);
+    await store.assessApprovedOrder(tenantA, first.orderId, userA);
+
+    const items = await prisma.orderItem.findMany({
+      where: { id: { in: [first.itemId, second.itemId] } },
+      orderBy: { id: 'asc' },
+    });
+    const reservations = await prisma.inventoryReservation.findMany({
+      where: { tenantId: tenantA, productId: product.id, status: 'ACTIVE' },
+    });
+
+    expect(items.map((item) => item.procurementStatus).sort()).toEqual(['IN_STOCK', 'TO_ORDER']);
+    expect(reservations).toHaveLength(1);
+    expect(reservations.reduce((sum, reservation) => sum + reservation.quantity, 0)).toBe(4);
+  });
+
+  it('does not assess an order that has not been approved', async () => {
+    const fixture = await createApprovedOrder(prisma, { sku: 'NOT-APPROVED', stock: 3, quantity: 1 });
+    await prisma.order.update({ where: { id: fixture.orderId }, data: { status: 'NEEDS_REVIEW' } });
+    const store = new ProcurementStore(prisma);
+
+    await expect(store.assessApprovedOrder(tenantA, fixture.orderId, userA))
+      .rejects.toThrow('Only approved orders');
+
+    expect(await prisma.inventoryReservation.count({ where: { orderItemId: fixture.itemId } })).toBe(0);
+    expect((await prisma.orderItem.findUniqueOrThrow({ where: { id: fixture.itemId } })).procurementStatus)
+      .toBe('UNASSESSED');
+  });
+
+  it('releases an active order reservation once', async () => {
+    const fixture = await createApprovedOrder(prisma, { sku: 'RELEASE', stock: 3, quantity: 2 });
+    const store = new ProcurementStore(prisma);
+    await store.assessApprovedOrder(tenantA, fixture.orderId, userA);
+
+    await store.releaseOrderReservations(tenantA, fixture.orderId, userA);
+    await store.releaseOrderReservations(tenantA, fixture.orderId, userA);
+
+    expect(await prisma.inventoryReservation.findUniqueOrThrow({
+      where: { tenantId_orderItemId: { tenantId: tenantA, orderItemId: fixture.itemId } },
+    })).toMatchObject({ status: 'RELEASED', releasedAt: expect.any(Date) });
+    expect(await prisma.auditLog.count({
+      where: { orderId: fixture.orderId, action: 'PROCUREMENT_RESERVATIONS_RELEASED' },
+    })).toBe(1);
+  });
 });
+
+async function createApprovedOrder(
+  prisma: PrismaClient,
+  input: { sku: string; quantity: number; stock?: number | null },
+): Promise<{ orderId: string; itemId: string }> {
+  if (input.stock !== undefined) {
+    await prisma.product.create({
+      data: {
+        tenantId: tenantA,
+        sku: input.sku,
+        name: input.sku,
+        aliases: [],
+        stockQuantity: input.stock,
+      },
+    });
+  }
+  const token = randomUUID();
+  const message = await prisma.message.create({
+    data: {
+      tenantId: tenantA,
+      conversationId: conversationA,
+      channel: 'INSTAGRAM',
+      externalMessageId: `procurement-${token}`,
+      direction: 'OUTBOUND',
+      senderId: 'shop',
+      text: 'Order trigger',
+      sourceTimestamp: new Date(),
+      clientIdempotencyKey: token,
+      deliveryStatus: 'SENT',
+    },
+  });
+  const order = await prisma.order.create({
+    data: {
+      tenantId: tenantA,
+      conversationId: conversationA,
+      triggerMessageId: message.id,
+      status: 'APPROVED',
+      promptVersion: 'test',
+      approvedAt: new Date(),
+      approvedBy: userA,
+    },
+  });
+  const item = await prisma.orderItem.create({
+    data: {
+      tenantId: tenantA,
+      orderId: order.id,
+      catalogId: input.sku,
+      originalText: input.sku,
+      quantity: input.quantity,
+      confidence: 1,
+    },
+  });
+  return { orderId: order.id, itemId: item.id };
+}
 
 async function seedOrders(pool: pg.Pool): Promise<void> {
   await pool.query(`INSERT INTO tenants (id, key, name) VALUES
@@ -114,3 +272,4 @@ async function applyMigrations(pool: pg.Pool): Promise<void> {
     await pool.query(await readFile(resolve(directory, name, 'migration.sql'), 'utf8'));
   }
 }
+import { randomUUID } from 'node:crypto';

@@ -1,4 +1,4 @@
-import { Prisma, type PrismaClient } from '@autosale/database';
+import { Prisma, type PrismaClient, type ProcurementStore } from '@autosale/database';
 
 import type { ApprovalMode } from './approval-policy.js';
 import { isOrderTrigger } from './order-trigger.js';
@@ -8,6 +8,7 @@ export class TriggeredOrderProcessor {
   constructor(
     private readonly prisma: PrismaClient,
     private readonly recognition: OrderRecognitionService,
+    private readonly procurement: Pick<ProcurementStore, 'assessApprovedOrder'>,
     private readonly scheduleExport?: (orderId: string, tenantId: string) => Promise<void>,
     private readonly telemetry?: (event: string, fields: { correlationId: string; orderId: string; result: string }) => void,
   ) {}
@@ -96,13 +97,14 @@ export class TriggeredOrderProcessor {
         });
         for (const item of result.order.items) {
           await transaction.$executeRaw(Prisma.sql`
-            INSERT INTO "order_items" ("id", "order_id", "catalog_id", "original_text", "quantity", "color", "size", "confidence")
-            VALUES (gen_random_uuid(), ${order.id}::uuid, ${item.catalogId}, ${item.originalText}, ${item.quantity}, ${item.color}, ${item.size}, ${item.confidence})
+            INSERT INTO "order_items" ("id", "tenant_id", "order_id", "catalog_id", "original_text", "quantity", "color", "size", "confidence")
+            VALUES (gen_random_uuid(), ${trigger.tenantId}::uuid, ${order.id}::uuid, ${item.catalogId}, ${item.originalText}, ${item.quantity}, ${item.color}, ${item.size}, ${item.confidence})
           `);
         }
         return persisted;
       });
       if (autoApproved) {
+        await this.procurement.assessApprovedOrder(trigger.tenantId, order.id, 'SYSTEM');
         await this.scheduleExport?.(order.id, trigger.tenantId);
       }
       this.telemetry?.('ai_order_recognition_completed', { correlationId, orderId: order.id, result: result.status });

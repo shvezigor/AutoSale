@@ -2,7 +2,7 @@ import { Buffer } from 'node:buffer';
 
 import { parseWorkerEnv } from '@autosale/config/worker-env';
 import { telegramDeliveryJobSchema } from '@autosale/contracts';
-import { createPrismaClient } from '@autosale/database';
+import { createPrismaClient, ProcurementStore } from '@autosale/database';
 import {
   createGoogleSheetsAdapter,
   CredentialCipher,
@@ -104,6 +104,7 @@ async function bootstrap(): Promise<void> {
   const orderProcessor = new TriggeredOrderProcessor(
     prisma,
     new OrderRecognitionService(orderRecognizer),
+    new ProcurementStore(prisma),
     async (orderId, tenantId) => {
       const destination = await prisma.googleSheetsDestination.findUnique({ where: { tenantId } });
       if (!destination || destination.status !== 'ACTIVE') return;

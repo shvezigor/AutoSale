@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises';
+import { readdir, readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
 import { createPrismaClient, Prisma, type PrismaClient } from '@autosale/database';
@@ -16,33 +16,12 @@ describe('TriggeredOrderProcessor', () => {
   beforeAll(async () => {
     container = await new PostgreSqlContainer('postgres:17.6-alpine').start();
     const connectionString = container.getConnectionUri();
-    const migrations = [
-      '20260826090000_init_webhook_events',
-      '20260826123000_conversations_messages',
-      '20260826203000_ai_order_recognition',
-      '20260826210000_product_catalog',
-      '20260827160000_self_hosted_auth',
-      '20260827170000_tenant_access_status',
-      '20260827230000_instagram_connections',
-      '20260828_meta_instagram_oauth',
-      '20260828150000_instagram_oauth_attempt_guard',
-      '20260829120000_instagram_credential_cleanup_queue',
-      '20260902090000_instagram_customer_profiles',
-      '20260831090000_catalogue_import',
-      '20260831091500_catalogue_tenant_relations',
-      '20260831100000_catalogue_source_object_key',
-      '20260907160000_instagram_outbound_messages',
-    ];
     const pool = new pg.Pool({ connectionString });
-    for (const migration of migrations) {
+    const migrationsDirectory = resolve(process.cwd(), '../../packages/database/prisma/migrations');
+    for (const migration of (await readdir(migrationsDirectory)).sort()) {
+      if (migration === 'migration_lock.toml') continue;
       await pool.query(
-        await readFile(
-          resolve(
-            process.cwd(),
-            `../../packages/database/prisma/migrations/${migration}/migration.sql`,
-          ),
-          'utf8',
-        ),
+        await readFile(resolve(migrationsDirectory, migration, 'migration.sql'), 'utf8'),
       );
     }
     await pool.end();
@@ -137,9 +116,14 @@ describe('TriggeredOrderProcessor', () => {
       },
     });
     const telemetry = vi.fn();
+    const procurement = {
+      assessApprovedOrder: vi.fn().mockResolvedValue({ orderId: 'pending', summary: 'NEEDS_ORDER', items: [] }),
+      releaseOrderReservations: vi.fn(),
+    };
     const processor = new TriggeredOrderProcessor(
       prisma,
       new OrderRecognitionService({ recognize }),
+      procurement as never,
       undefined,
       telemetry,
     );
@@ -163,6 +147,7 @@ describe('TriggeredOrderProcessor', () => {
     );
     expect(persistedItems).toEqual([{ quantity: 1 }]);
     expect(recognize).toHaveBeenCalledTimes(1);
+    expect(procurement.assessApprovedOrder).toHaveBeenCalledWith(tenant.id, first!.id, 'SYSTEM');
     expect(telemetry).toHaveBeenCalledWith('ai_order_recognition_completed', expect.objectContaining({ orderId: first!.id, result: 'AUTO_APPROVED' }));
   });
 });
