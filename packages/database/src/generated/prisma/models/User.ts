@@ -230,6 +230,8 @@ export type UserWhereInput = {
   notifications?: Prisma.UserNotificationListRelationFilter
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptListRelationFilter
   telegramUserBindings?: Prisma.TelegramUserBindingListRelationFilter
+  procurementHandOffs?: Prisma.OrderListRelationFilter
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -258,6 +260,8 @@ export type UserOrderByWithRelationInput = {
   notifications?: Prisma.UserNotificationOrderByRelationAggregateInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptOrderByRelationAggregateInput
   telegramUserBindings?: Prisma.TelegramUserBindingOrderByRelationAggregateInput
+  procurementHandOffs?: Prisma.OrderOrderByRelationAggregateInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -289,6 +293,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   notifications?: Prisma.UserNotificationListRelationFilter
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptListRelationFilter
   telegramUserBindings?: Prisma.TelegramUserBindingListRelationFilter
+  procurementHandOffs?: Prisma.OrderListRelationFilter
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -347,6 +353,8 @@ export type UserCreateInput = {
   notifications?: Prisma.UserNotificationCreateNestedManyWithoutUserInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptCreateNestedManyWithoutUserInput
   telegramUserBindings?: Prisma.TelegramUserBindingCreateNestedManyWithoutUserInput
+  procurementHandOffs?: Prisma.OrderCreateNestedManyWithoutProcurementHandedOffByUserInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -375,6 +383,8 @@ export type UserUncheckedCreateInput = {
   notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutUserInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedCreateNestedManyWithoutUserInput
   telegramUserBindings?: Prisma.TelegramUserBindingUncheckedCreateNestedManyWithoutUserInput
+  procurementHandOffs?: Prisma.OrderUncheckedCreateNestedManyWithoutProcurementHandedOffByUserInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -403,6 +413,8 @@ export type UserUpdateInput = {
   notifications?: Prisma.UserNotificationUpdateManyWithoutUserNestedInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptUpdateManyWithoutUserNestedInput
   telegramUserBindings?: Prisma.TelegramUserBindingUpdateManyWithoutUserNestedInput
+  procurementHandOffs?: Prisma.OrderUpdateManyWithoutProcurementHandedOffByUserNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -431,6 +443,8 @@ export type UserUncheckedUpdateInput = {
   notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutUserNestedInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedUpdateManyWithoutUserNestedInput
   telegramUserBindings?: Prisma.TelegramUserBindingUncheckedUpdateManyWithoutUserNestedInput
+  procurementHandOffs?: Prisma.OrderUncheckedUpdateManyWithoutProcurementHandedOffByUserNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -753,6 +767,36 @@ export type UserUpdateOneWithoutInstagramMessagesSentNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutInstagramMessagesSentInput, Prisma.UserUpdateWithoutInstagramMessagesSentInput>, Prisma.UserUncheckedUpdateWithoutInstagramMessagesSentInput>
 }
 
+export type UserCreateNestedOneWithoutProcurementHandOffsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutProcurementHandOffsInput, Prisma.UserUncheckedCreateWithoutProcurementHandOffsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutProcurementHandOffsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutProcurementHandOffsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutProcurementHandOffsInput, Prisma.UserUncheckedCreateWithoutProcurementHandOffsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutProcurementHandOffsInput
+  upsert?: Prisma.UserUpsertWithoutProcurementHandOffsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutProcurementHandOffsInput, Prisma.UserUpdateWithoutProcurementHandOffsInput>, Prisma.UserUncheckedUpdateWithoutProcurementHandOffsInput>
+}
+
+export type UserCreateNestedOneWithoutTelegramNotificationPreferencesInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutTelegramNotificationPreferencesInput, Prisma.UserUncheckedCreateWithoutTelegramNotificationPreferencesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutTelegramNotificationPreferencesInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutTelegramNotificationPreferencesNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutTelegramNotificationPreferencesInput, Prisma.UserUncheckedCreateWithoutTelegramNotificationPreferencesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutTelegramNotificationPreferencesInput
+  upsert?: Prisma.UserUpsertWithoutTelegramNotificationPreferencesInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutTelegramNotificationPreferencesInput, Prisma.UserUpdateWithoutTelegramNotificationPreferencesInput>, Prisma.UserUncheckedUpdateWithoutTelegramNotificationPreferencesInput>
+}
+
 export type UserCreateWithoutGoogleConnectionsInput = {
   id?: string
   email: string
@@ -778,6 +822,8 @@ export type UserCreateWithoutGoogleConnectionsInput = {
   notifications?: Prisma.UserNotificationCreateNestedManyWithoutUserInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptCreateNestedManyWithoutUserInput
   telegramUserBindings?: Prisma.TelegramUserBindingCreateNestedManyWithoutUserInput
+  procurementHandOffs?: Prisma.OrderCreateNestedManyWithoutProcurementHandedOffByUserInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutGoogleConnectionsInput = {
@@ -805,6 +851,8 @@ export type UserUncheckedCreateWithoutGoogleConnectionsInput = {
   notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutUserInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedCreateNestedManyWithoutUserInput
   telegramUserBindings?: Prisma.TelegramUserBindingUncheckedCreateNestedManyWithoutUserInput
+  procurementHandOffs?: Prisma.OrderUncheckedCreateNestedManyWithoutProcurementHandedOffByUserInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutGoogleConnectionsInput = {
@@ -848,6 +896,8 @@ export type UserUpdateWithoutGoogleConnectionsInput = {
   notifications?: Prisma.UserNotificationUpdateManyWithoutUserNestedInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptUpdateManyWithoutUserNestedInput
   telegramUserBindings?: Prisma.TelegramUserBindingUpdateManyWithoutUserNestedInput
+  procurementHandOffs?: Prisma.OrderUpdateManyWithoutProcurementHandedOffByUserNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutGoogleConnectionsInput = {
@@ -875,6 +925,8 @@ export type UserUncheckedUpdateWithoutGoogleConnectionsInput = {
   notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutUserNestedInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedUpdateManyWithoutUserNestedInput
   telegramUserBindings?: Prisma.TelegramUserBindingUncheckedUpdateManyWithoutUserNestedInput
+  procurementHandOffs?: Prisma.OrderUncheckedUpdateManyWithoutProcurementHandedOffByUserNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutGoogleOAuthAttemptsInput = {
@@ -902,6 +954,8 @@ export type UserCreateWithoutGoogleOAuthAttemptsInput = {
   notifications?: Prisma.UserNotificationCreateNestedManyWithoutUserInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptCreateNestedManyWithoutUserInput
   telegramUserBindings?: Prisma.TelegramUserBindingCreateNestedManyWithoutUserInput
+  procurementHandOffs?: Prisma.OrderCreateNestedManyWithoutProcurementHandedOffByUserInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutGoogleOAuthAttemptsInput = {
@@ -929,6 +983,8 @@ export type UserUncheckedCreateWithoutGoogleOAuthAttemptsInput = {
   notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutUserInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedCreateNestedManyWithoutUserInput
   telegramUserBindings?: Prisma.TelegramUserBindingUncheckedCreateNestedManyWithoutUserInput
+  procurementHandOffs?: Prisma.OrderUncheckedCreateNestedManyWithoutProcurementHandedOffByUserInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutGoogleOAuthAttemptsInput = {
@@ -972,6 +1028,8 @@ export type UserUpdateWithoutGoogleOAuthAttemptsInput = {
   notifications?: Prisma.UserNotificationUpdateManyWithoutUserNestedInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptUpdateManyWithoutUserNestedInput
   telegramUserBindings?: Prisma.TelegramUserBindingUpdateManyWithoutUserNestedInput
+  procurementHandOffs?: Prisma.OrderUpdateManyWithoutProcurementHandedOffByUserNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutGoogleOAuthAttemptsInput = {
@@ -999,6 +1057,8 @@ export type UserUncheckedUpdateWithoutGoogleOAuthAttemptsInput = {
   notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutUserNestedInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedUpdateManyWithoutUserNestedInput
   telegramUserBindings?: Prisma.TelegramUserBindingUncheckedUpdateManyWithoutUserNestedInput
+  procurementHandOffs?: Prisma.OrderUncheckedUpdateManyWithoutProcurementHandedOffByUserNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutInstagramConnectionsInput = {
@@ -1026,6 +1086,8 @@ export type UserCreateWithoutInstagramConnectionsInput = {
   notifications?: Prisma.UserNotificationCreateNestedManyWithoutUserInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptCreateNestedManyWithoutUserInput
   telegramUserBindings?: Prisma.TelegramUserBindingCreateNestedManyWithoutUserInput
+  procurementHandOffs?: Prisma.OrderCreateNestedManyWithoutProcurementHandedOffByUserInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutInstagramConnectionsInput = {
@@ -1053,6 +1115,8 @@ export type UserUncheckedCreateWithoutInstagramConnectionsInput = {
   notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutUserInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedCreateNestedManyWithoutUserInput
   telegramUserBindings?: Prisma.TelegramUserBindingUncheckedCreateNestedManyWithoutUserInput
+  procurementHandOffs?: Prisma.OrderUncheckedCreateNestedManyWithoutProcurementHandedOffByUserInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutInstagramConnectionsInput = {
@@ -1096,6 +1160,8 @@ export type UserUpdateWithoutInstagramConnectionsInput = {
   notifications?: Prisma.UserNotificationUpdateManyWithoutUserNestedInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptUpdateManyWithoutUserNestedInput
   telegramUserBindings?: Prisma.TelegramUserBindingUpdateManyWithoutUserNestedInput
+  procurementHandOffs?: Prisma.OrderUpdateManyWithoutProcurementHandedOffByUserNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutInstagramConnectionsInput = {
@@ -1123,6 +1189,8 @@ export type UserUncheckedUpdateWithoutInstagramConnectionsInput = {
   notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutUserNestedInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedUpdateManyWithoutUserNestedInput
   telegramUserBindings?: Prisma.TelegramUserBindingUncheckedUpdateManyWithoutUserNestedInput
+  procurementHandOffs?: Prisma.OrderUncheckedUpdateManyWithoutProcurementHandedOffByUserNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutInstagramOAuthStatesInput = {
@@ -1150,6 +1218,8 @@ export type UserCreateWithoutInstagramOAuthStatesInput = {
   notifications?: Prisma.UserNotificationCreateNestedManyWithoutUserInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptCreateNestedManyWithoutUserInput
   telegramUserBindings?: Prisma.TelegramUserBindingCreateNestedManyWithoutUserInput
+  procurementHandOffs?: Prisma.OrderCreateNestedManyWithoutProcurementHandedOffByUserInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutInstagramOAuthStatesInput = {
@@ -1177,6 +1247,8 @@ export type UserUncheckedCreateWithoutInstagramOAuthStatesInput = {
   notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutUserInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedCreateNestedManyWithoutUserInput
   telegramUserBindings?: Prisma.TelegramUserBindingUncheckedCreateNestedManyWithoutUserInput
+  procurementHandOffs?: Prisma.OrderUncheckedCreateNestedManyWithoutProcurementHandedOffByUserInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutInstagramOAuthStatesInput = {
@@ -1220,6 +1292,8 @@ export type UserUpdateWithoutInstagramOAuthStatesInput = {
   notifications?: Prisma.UserNotificationUpdateManyWithoutUserNestedInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptUpdateManyWithoutUserNestedInput
   telegramUserBindings?: Prisma.TelegramUserBindingUpdateManyWithoutUserNestedInput
+  procurementHandOffs?: Prisma.OrderUpdateManyWithoutProcurementHandedOffByUserNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutInstagramOAuthStatesInput = {
@@ -1247,6 +1321,8 @@ export type UserUncheckedUpdateWithoutInstagramOAuthStatesInput = {
   notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutUserNestedInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedUpdateManyWithoutUserNestedInput
   telegramUserBindings?: Prisma.TelegramUserBindingUncheckedUpdateManyWithoutUserNestedInput
+  procurementHandOffs?: Prisma.OrderUncheckedUpdateManyWithoutProcurementHandedOffByUserNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutInstagramCleanupsDeadLetteredInput = {
@@ -1274,6 +1350,8 @@ export type UserCreateWithoutInstagramCleanupsDeadLetteredInput = {
   notifications?: Prisma.UserNotificationCreateNestedManyWithoutUserInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptCreateNestedManyWithoutUserInput
   telegramUserBindings?: Prisma.TelegramUserBindingCreateNestedManyWithoutUserInput
+  procurementHandOffs?: Prisma.OrderCreateNestedManyWithoutProcurementHandedOffByUserInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutInstagramCleanupsDeadLetteredInput = {
@@ -1301,6 +1379,8 @@ export type UserUncheckedCreateWithoutInstagramCleanupsDeadLetteredInput = {
   notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutUserInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedCreateNestedManyWithoutUserInput
   telegramUserBindings?: Prisma.TelegramUserBindingUncheckedCreateNestedManyWithoutUserInput
+  procurementHandOffs?: Prisma.OrderUncheckedCreateNestedManyWithoutProcurementHandedOffByUserInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutInstagramCleanupsDeadLetteredInput = {
@@ -1344,6 +1424,8 @@ export type UserUpdateWithoutInstagramCleanupsDeadLetteredInput = {
   notifications?: Prisma.UserNotificationUpdateManyWithoutUserNestedInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptUpdateManyWithoutUserNestedInput
   telegramUserBindings?: Prisma.TelegramUserBindingUpdateManyWithoutUserNestedInput
+  procurementHandOffs?: Prisma.OrderUpdateManyWithoutProcurementHandedOffByUserNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutInstagramCleanupsDeadLetteredInput = {
@@ -1371,6 +1453,8 @@ export type UserUncheckedUpdateWithoutInstagramCleanupsDeadLetteredInput = {
   notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutUserNestedInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedUpdateManyWithoutUserNestedInput
   telegramUserBindings?: Prisma.TelegramUserBindingUncheckedUpdateManyWithoutUserNestedInput
+  procurementHandOffs?: Prisma.OrderUncheckedUpdateManyWithoutProcurementHandedOffByUserNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutNotificationsInput = {
@@ -1398,6 +1482,8 @@ export type UserCreateWithoutNotificationsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptCreateNestedManyWithoutUserInput
   telegramUserBindings?: Prisma.TelegramUserBindingCreateNestedManyWithoutUserInput
+  procurementHandOffs?: Prisma.OrderCreateNestedManyWithoutProcurementHandedOffByUserInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutNotificationsInput = {
@@ -1425,6 +1511,8 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedCreateNestedManyWithoutUserInput
   telegramUserBindings?: Prisma.TelegramUserBindingUncheckedCreateNestedManyWithoutUserInput
+  procurementHandOffs?: Prisma.OrderUncheckedCreateNestedManyWithoutProcurementHandedOffByUserInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutNotificationsInput = {
@@ -1468,6 +1556,8 @@ export type UserUpdateWithoutNotificationsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptUpdateManyWithoutUserNestedInput
   telegramUserBindings?: Prisma.TelegramUserBindingUpdateManyWithoutUserNestedInput
+  procurementHandOffs?: Prisma.OrderUpdateManyWithoutProcurementHandedOffByUserNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutNotificationsInput = {
@@ -1495,6 +1585,8 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedUpdateManyWithoutUserNestedInput
   telegramUserBindings?: Prisma.TelegramUserBindingUncheckedUpdateManyWithoutUserNestedInput
+  procurementHandOffs?: Prisma.OrderUncheckedUpdateManyWithoutProcurementHandedOffByUserNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutTelegramLinkAttemptsInput = {
@@ -1522,6 +1614,8 @@ export type UserCreateWithoutTelegramLinkAttemptsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   notifications?: Prisma.UserNotificationCreateNestedManyWithoutUserInput
   telegramUserBindings?: Prisma.TelegramUserBindingCreateNestedManyWithoutUserInput
+  procurementHandOffs?: Prisma.OrderCreateNestedManyWithoutProcurementHandedOffByUserInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutTelegramLinkAttemptsInput = {
@@ -1549,6 +1643,8 @@ export type UserUncheckedCreateWithoutTelegramLinkAttemptsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutUserInput
   telegramUserBindings?: Prisma.TelegramUserBindingUncheckedCreateNestedManyWithoutUserInput
+  procurementHandOffs?: Prisma.OrderUncheckedCreateNestedManyWithoutProcurementHandedOffByUserInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutTelegramLinkAttemptsInput = {
@@ -1592,6 +1688,8 @@ export type UserUpdateWithoutTelegramLinkAttemptsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   notifications?: Prisma.UserNotificationUpdateManyWithoutUserNestedInput
   telegramUserBindings?: Prisma.TelegramUserBindingUpdateManyWithoutUserNestedInput
+  procurementHandOffs?: Prisma.OrderUpdateManyWithoutProcurementHandedOffByUserNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTelegramLinkAttemptsInput = {
@@ -1619,6 +1717,8 @@ export type UserUncheckedUpdateWithoutTelegramLinkAttemptsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutUserNestedInput
   telegramUserBindings?: Prisma.TelegramUserBindingUncheckedUpdateManyWithoutUserNestedInput
+  procurementHandOffs?: Prisma.OrderUncheckedUpdateManyWithoutProcurementHandedOffByUserNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutTelegramUserBindingsInput = {
@@ -1646,6 +1746,8 @@ export type UserCreateWithoutTelegramUserBindingsInput = {
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   notifications?: Prisma.UserNotificationCreateNestedManyWithoutUserInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptCreateNestedManyWithoutUserInput
+  procurementHandOffs?: Prisma.OrderCreateNestedManyWithoutProcurementHandedOffByUserInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutTelegramUserBindingsInput = {
@@ -1673,6 +1775,8 @@ export type UserUncheckedCreateWithoutTelegramUserBindingsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutUserInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedCreateNestedManyWithoutUserInput
+  procurementHandOffs?: Prisma.OrderUncheckedCreateNestedManyWithoutProcurementHandedOffByUserInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutTelegramUserBindingsInput = {
@@ -1716,6 +1820,8 @@ export type UserUpdateWithoutTelegramUserBindingsInput = {
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   notifications?: Prisma.UserNotificationUpdateManyWithoutUserNestedInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptUpdateManyWithoutUserNestedInput
+  procurementHandOffs?: Prisma.OrderUpdateManyWithoutProcurementHandedOffByUserNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTelegramUserBindingsInput = {
@@ -1743,6 +1849,8 @@ export type UserUncheckedUpdateWithoutTelegramUserBindingsInput = {
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutUserNestedInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedUpdateManyWithoutUserNestedInput
+  procurementHandOffs?: Prisma.OrderUncheckedUpdateManyWithoutProcurementHandedOffByUserNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutGoogleIdentityInput = {
@@ -1770,6 +1878,8 @@ export type UserCreateWithoutGoogleIdentityInput = {
   notifications?: Prisma.UserNotificationCreateNestedManyWithoutUserInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptCreateNestedManyWithoutUserInput
   telegramUserBindings?: Prisma.TelegramUserBindingCreateNestedManyWithoutUserInput
+  procurementHandOffs?: Prisma.OrderCreateNestedManyWithoutProcurementHandedOffByUserInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutGoogleIdentityInput = {
@@ -1797,6 +1907,8 @@ export type UserUncheckedCreateWithoutGoogleIdentityInput = {
   notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutUserInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedCreateNestedManyWithoutUserInput
   telegramUserBindings?: Prisma.TelegramUserBindingUncheckedCreateNestedManyWithoutUserInput
+  procurementHandOffs?: Prisma.OrderUncheckedCreateNestedManyWithoutProcurementHandedOffByUserInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutGoogleIdentityInput = {
@@ -1840,6 +1952,8 @@ export type UserUpdateWithoutGoogleIdentityInput = {
   notifications?: Prisma.UserNotificationUpdateManyWithoutUserNestedInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptUpdateManyWithoutUserNestedInput
   telegramUserBindings?: Prisma.TelegramUserBindingUpdateManyWithoutUserNestedInput
+  procurementHandOffs?: Prisma.OrderUpdateManyWithoutProcurementHandedOffByUserNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutGoogleIdentityInput = {
@@ -1867,6 +1981,8 @@ export type UserUncheckedUpdateWithoutGoogleIdentityInput = {
   notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutUserNestedInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedUpdateManyWithoutUserNestedInput
   telegramUserBindings?: Prisma.TelegramUserBindingUncheckedUpdateManyWithoutUserNestedInput
+  procurementHandOffs?: Prisma.OrderUncheckedUpdateManyWithoutProcurementHandedOffByUserNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutMembershipsInput = {
@@ -1894,6 +2010,8 @@ export type UserCreateWithoutMembershipsInput = {
   notifications?: Prisma.UserNotificationCreateNestedManyWithoutUserInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptCreateNestedManyWithoutUserInput
   telegramUserBindings?: Prisma.TelegramUserBindingCreateNestedManyWithoutUserInput
+  procurementHandOffs?: Prisma.OrderCreateNestedManyWithoutProcurementHandedOffByUserInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutMembershipsInput = {
@@ -1921,6 +2039,8 @@ export type UserUncheckedCreateWithoutMembershipsInput = {
   notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutUserInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedCreateNestedManyWithoutUserInput
   telegramUserBindings?: Prisma.TelegramUserBindingUncheckedCreateNestedManyWithoutUserInput
+  procurementHandOffs?: Prisma.OrderUncheckedCreateNestedManyWithoutProcurementHandedOffByUserInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutMembershipsInput = {
@@ -1964,6 +2084,8 @@ export type UserUpdateWithoutMembershipsInput = {
   notifications?: Prisma.UserNotificationUpdateManyWithoutUserNestedInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptUpdateManyWithoutUserNestedInput
   telegramUserBindings?: Prisma.TelegramUserBindingUpdateManyWithoutUserNestedInput
+  procurementHandOffs?: Prisma.OrderUpdateManyWithoutProcurementHandedOffByUserNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMembershipsInput = {
@@ -1991,6 +2113,8 @@ export type UserUncheckedUpdateWithoutMembershipsInput = {
   notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutUserNestedInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedUpdateManyWithoutUserNestedInput
   telegramUserBindings?: Prisma.TelegramUserBindingUncheckedUpdateManyWithoutUserNestedInput
+  procurementHandOffs?: Prisma.OrderUncheckedUpdateManyWithoutProcurementHandedOffByUserNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSessionsInput = {
@@ -2018,6 +2142,8 @@ export type UserCreateWithoutSessionsInput = {
   notifications?: Prisma.UserNotificationCreateNestedManyWithoutUserInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptCreateNestedManyWithoutUserInput
   telegramUserBindings?: Prisma.TelegramUserBindingCreateNestedManyWithoutUserInput
+  procurementHandOffs?: Prisma.OrderCreateNestedManyWithoutProcurementHandedOffByUserInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSessionsInput = {
@@ -2045,6 +2171,8 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutUserInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedCreateNestedManyWithoutUserInput
   telegramUserBindings?: Prisma.TelegramUserBindingUncheckedCreateNestedManyWithoutUserInput
+  procurementHandOffs?: Prisma.OrderUncheckedCreateNestedManyWithoutProcurementHandedOffByUserInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSessionsInput = {
@@ -2088,6 +2216,8 @@ export type UserUpdateWithoutSessionsInput = {
   notifications?: Prisma.UserNotificationUpdateManyWithoutUserNestedInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptUpdateManyWithoutUserNestedInput
   telegramUserBindings?: Prisma.TelegramUserBindingUpdateManyWithoutUserNestedInput
+  procurementHandOffs?: Prisma.OrderUpdateManyWithoutProcurementHandedOffByUserNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -2115,6 +2245,8 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutUserNestedInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedUpdateManyWithoutUserNestedInput
   telegramUserBindings?: Prisma.TelegramUserBindingUncheckedUpdateManyWithoutUserNestedInput
+  procurementHandOffs?: Prisma.OrderUncheckedUpdateManyWithoutProcurementHandedOffByUserNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutEmailVerificationTokensInput = {
@@ -2142,6 +2274,8 @@ export type UserCreateWithoutEmailVerificationTokensInput = {
   notifications?: Prisma.UserNotificationCreateNestedManyWithoutUserInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptCreateNestedManyWithoutUserInput
   telegramUserBindings?: Prisma.TelegramUserBindingCreateNestedManyWithoutUserInput
+  procurementHandOffs?: Prisma.OrderCreateNestedManyWithoutProcurementHandedOffByUserInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutEmailVerificationTokensInput = {
@@ -2169,6 +2303,8 @@ export type UserUncheckedCreateWithoutEmailVerificationTokensInput = {
   notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutUserInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedCreateNestedManyWithoutUserInput
   telegramUserBindings?: Prisma.TelegramUserBindingUncheckedCreateNestedManyWithoutUserInput
+  procurementHandOffs?: Prisma.OrderUncheckedCreateNestedManyWithoutProcurementHandedOffByUserInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutEmailVerificationTokensInput = {
@@ -2212,6 +2348,8 @@ export type UserUpdateWithoutEmailVerificationTokensInput = {
   notifications?: Prisma.UserNotificationUpdateManyWithoutUserNestedInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptUpdateManyWithoutUserNestedInput
   telegramUserBindings?: Prisma.TelegramUserBindingUpdateManyWithoutUserNestedInput
+  procurementHandOffs?: Prisma.OrderUpdateManyWithoutProcurementHandedOffByUserNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutEmailVerificationTokensInput = {
@@ -2239,6 +2377,8 @@ export type UserUncheckedUpdateWithoutEmailVerificationTokensInput = {
   notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutUserNestedInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedUpdateManyWithoutUserNestedInput
   telegramUserBindings?: Prisma.TelegramUserBindingUncheckedUpdateManyWithoutUserNestedInput
+  procurementHandOffs?: Prisma.OrderUncheckedUpdateManyWithoutProcurementHandedOffByUserNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutPasswordResetTokensInput = {
@@ -2266,6 +2406,8 @@ export type UserCreateWithoutPasswordResetTokensInput = {
   notifications?: Prisma.UserNotificationCreateNestedManyWithoutUserInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptCreateNestedManyWithoutUserInput
   telegramUserBindings?: Prisma.TelegramUserBindingCreateNestedManyWithoutUserInput
+  procurementHandOffs?: Prisma.OrderCreateNestedManyWithoutProcurementHandedOffByUserInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
@@ -2293,6 +2435,8 @@ export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
   notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutUserInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedCreateNestedManyWithoutUserInput
   telegramUserBindings?: Prisma.TelegramUserBindingUncheckedCreateNestedManyWithoutUserInput
+  procurementHandOffs?: Prisma.OrderUncheckedCreateNestedManyWithoutProcurementHandedOffByUserInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPasswordResetTokensInput = {
@@ -2336,6 +2480,8 @@ export type UserUpdateWithoutPasswordResetTokensInput = {
   notifications?: Prisma.UserNotificationUpdateManyWithoutUserNestedInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptUpdateManyWithoutUserNestedInput
   telegramUserBindings?: Prisma.TelegramUserBindingUpdateManyWithoutUserNestedInput
+  procurementHandOffs?: Prisma.OrderUpdateManyWithoutProcurementHandedOffByUserNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
@@ -2363,6 +2509,8 @@ export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
   notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutUserNestedInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedUpdateManyWithoutUserNestedInput
   telegramUserBindings?: Prisma.TelegramUserBindingUncheckedUpdateManyWithoutUserNestedInput
+  procurementHandOffs?: Prisma.OrderUncheckedUpdateManyWithoutProcurementHandedOffByUserNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutInvitationsCreatedInput = {
@@ -2390,6 +2538,8 @@ export type UserCreateWithoutInvitationsCreatedInput = {
   notifications?: Prisma.UserNotificationCreateNestedManyWithoutUserInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptCreateNestedManyWithoutUserInput
   telegramUserBindings?: Prisma.TelegramUserBindingCreateNestedManyWithoutUserInput
+  procurementHandOffs?: Prisma.OrderCreateNestedManyWithoutProcurementHandedOffByUserInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutInvitationsCreatedInput = {
@@ -2417,6 +2567,8 @@ export type UserUncheckedCreateWithoutInvitationsCreatedInput = {
   notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutUserInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedCreateNestedManyWithoutUserInput
   telegramUserBindings?: Prisma.TelegramUserBindingUncheckedCreateNestedManyWithoutUserInput
+  procurementHandOffs?: Prisma.OrderUncheckedCreateNestedManyWithoutProcurementHandedOffByUserInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutInvitationsCreatedInput = {
@@ -2460,6 +2612,8 @@ export type UserUpdateWithoutInvitationsCreatedInput = {
   notifications?: Prisma.UserNotificationUpdateManyWithoutUserNestedInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptUpdateManyWithoutUserNestedInput
   telegramUserBindings?: Prisma.TelegramUserBindingUpdateManyWithoutUserNestedInput
+  procurementHandOffs?: Prisma.OrderUpdateManyWithoutProcurementHandedOffByUserNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutInvitationsCreatedInput = {
@@ -2487,6 +2641,8 @@ export type UserUncheckedUpdateWithoutInvitationsCreatedInput = {
   notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutUserNestedInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedUpdateManyWithoutUserNestedInput
   telegramUserBindings?: Prisma.TelegramUserBindingUncheckedUpdateManyWithoutUserNestedInput
+  procurementHandOffs?: Prisma.OrderUncheckedUpdateManyWithoutProcurementHandedOffByUserNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSecurityAuditLogsInput = {
@@ -2514,6 +2670,8 @@ export type UserCreateWithoutSecurityAuditLogsInput = {
   notifications?: Prisma.UserNotificationCreateNestedManyWithoutUserInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptCreateNestedManyWithoutUserInput
   telegramUserBindings?: Prisma.TelegramUserBindingCreateNestedManyWithoutUserInput
+  procurementHandOffs?: Prisma.OrderCreateNestedManyWithoutProcurementHandedOffByUserInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSecurityAuditLogsInput = {
@@ -2541,6 +2699,8 @@ export type UserUncheckedCreateWithoutSecurityAuditLogsInput = {
   notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutUserInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedCreateNestedManyWithoutUserInput
   telegramUserBindings?: Prisma.TelegramUserBindingUncheckedCreateNestedManyWithoutUserInput
+  procurementHandOffs?: Prisma.OrderUncheckedCreateNestedManyWithoutProcurementHandedOffByUserInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSecurityAuditLogsInput = {
@@ -2584,6 +2744,8 @@ export type UserUpdateWithoutSecurityAuditLogsInput = {
   notifications?: Prisma.UserNotificationUpdateManyWithoutUserNestedInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptUpdateManyWithoutUserNestedInput
   telegramUserBindings?: Prisma.TelegramUserBindingUpdateManyWithoutUserNestedInput
+  procurementHandOffs?: Prisma.OrderUpdateManyWithoutProcurementHandedOffByUserNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSecurityAuditLogsInput = {
@@ -2611,6 +2773,8 @@ export type UserUncheckedUpdateWithoutSecurityAuditLogsInput = {
   notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutUserNestedInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedUpdateManyWithoutUserNestedInput
   telegramUserBindings?: Prisma.TelegramUserBindingUncheckedUpdateManyWithoutUserNestedInput
+  procurementHandOffs?: Prisma.OrderUncheckedUpdateManyWithoutProcurementHandedOffByUserNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutInstagramMessagesSentInput = {
@@ -2638,6 +2802,8 @@ export type UserCreateWithoutInstagramMessagesSentInput = {
   notifications?: Prisma.UserNotificationCreateNestedManyWithoutUserInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptCreateNestedManyWithoutUserInput
   telegramUserBindings?: Prisma.TelegramUserBindingCreateNestedManyWithoutUserInput
+  procurementHandOffs?: Prisma.OrderCreateNestedManyWithoutProcurementHandedOffByUserInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutInstagramMessagesSentInput = {
@@ -2665,6 +2831,8 @@ export type UserUncheckedCreateWithoutInstagramMessagesSentInput = {
   notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutUserInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedCreateNestedManyWithoutUserInput
   telegramUserBindings?: Prisma.TelegramUserBindingUncheckedCreateNestedManyWithoutUserInput
+  procurementHandOffs?: Prisma.OrderUncheckedCreateNestedManyWithoutProcurementHandedOffByUserInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutInstagramMessagesSentInput = {
@@ -2708,6 +2876,8 @@ export type UserUpdateWithoutInstagramMessagesSentInput = {
   notifications?: Prisma.UserNotificationUpdateManyWithoutUserNestedInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptUpdateManyWithoutUserNestedInput
   telegramUserBindings?: Prisma.TelegramUserBindingUpdateManyWithoutUserNestedInput
+  procurementHandOffs?: Prisma.OrderUpdateManyWithoutProcurementHandedOffByUserNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutInstagramMessagesSentInput = {
@@ -2735,6 +2905,272 @@ export type UserUncheckedUpdateWithoutInstagramMessagesSentInput = {
   notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutUserNestedInput
   telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedUpdateManyWithoutUserNestedInput
   telegramUserBindings?: Prisma.TelegramUserBindingUncheckedUpdateManyWithoutUserNestedInput
+  procurementHandOffs?: Prisma.OrderUncheckedUpdateManyWithoutProcurementHandedOffByUserNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutProcurementHandOffsInput = {
+  id?: string
+  email: string
+  name: string
+  passwordHash?: string | null
+  emailVerifiedAt?: Date | string | null
+  platformRole?: $Enums.PlatformRole
+  status?: $Enums.AccessStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+  invitationsCreated?: Prisma.TenantInvitationCreateNestedManyWithoutInvitedByInput
+  securityAuditLogs?: Prisma.SecurityAuditLogCreateNestedManyWithoutUserInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutUserInput
+  instagramConnections?: Prisma.InstagramConnectionCreateNestedManyWithoutConnectedByInput
+  instagramMessagesSent?: Prisma.MessageCreateNestedManyWithoutSentByInput
+  instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutUserInput
+  googleConnections?: Prisma.GoogleConnectionCreateNestedManyWithoutConnectedByInput
+  googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
+  notifications?: Prisma.UserNotificationCreateNestedManyWithoutUserInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptCreateNestedManyWithoutUserInput
+  telegramUserBindings?: Prisma.TelegramUserBindingCreateNestedManyWithoutUserInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutProcurementHandOffsInput = {
+  id?: string
+  email: string
+  name: string
+  passwordHash?: string | null
+  emailVerifiedAt?: Date | string | null
+  platformRole?: $Enums.PlatformRole
+  status?: $Enums.AccessStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  invitationsCreated?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUncheckedCreateNestedManyWithoutUserInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutUserInput
+  instagramConnections?: Prisma.InstagramConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  instagramMessagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSentByInput
+  instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
+  googleConnections?: Prisma.GoogleConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
+  notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutUserInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedCreateNestedManyWithoutUserInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUncheckedCreateNestedManyWithoutUserInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutProcurementHandOffsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutProcurementHandOffsInput, Prisma.UserUncheckedCreateWithoutProcurementHandOffsInput>
+}
+
+export type UserUpsertWithoutProcurementHandOffsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutProcurementHandOffsInput, Prisma.UserUncheckedUpdateWithoutProcurementHandOffsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutProcurementHandOffsInput, Prisma.UserUncheckedCreateWithoutProcurementHandOffsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutProcurementHandOffsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutProcurementHandOffsInput, Prisma.UserUncheckedUpdateWithoutProcurementHandOffsInput>
+}
+
+export type UserUpdateWithoutProcurementHandOffsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+  invitationsCreated?: Prisma.TenantInvitationUpdateManyWithoutInvitedByNestedInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUpdateManyWithoutUserNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutUserNestedInput
+  instagramConnections?: Prisma.InstagramConnectionUpdateManyWithoutConnectedByNestedInput
+  instagramMessagesSent?: Prisma.MessageUpdateManyWithoutSentByNestedInput
+  instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutUserNestedInput
+  googleConnections?: Prisma.GoogleConnectionUpdateManyWithoutConnectedByNestedInput
+  googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
+  notifications?: Prisma.UserNotificationUpdateManyWithoutUserNestedInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUpdateManyWithoutUserNestedInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUpdateManyWithoutUserNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutProcurementHandOffsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+  invitationsCreated?: Prisma.TenantInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUncheckedUpdateManyWithoutUserNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutUserNestedInput
+  instagramConnections?: Prisma.InstagramConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  instagramMessagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSentByNestedInput
+  instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
+  googleConnections?: Prisma.GoogleConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutUserNestedInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedUpdateManyWithoutUserNestedInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUncheckedUpdateManyWithoutUserNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutTelegramNotificationPreferencesInput = {
+  id?: string
+  email: string
+  name: string
+  passwordHash?: string | null
+  emailVerifiedAt?: Date | string | null
+  platformRole?: $Enums.PlatformRole
+  status?: $Enums.AccessStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+  invitationsCreated?: Prisma.TenantInvitationCreateNestedManyWithoutInvitedByInput
+  securityAuditLogs?: Prisma.SecurityAuditLogCreateNestedManyWithoutUserInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutUserInput
+  instagramConnections?: Prisma.InstagramConnectionCreateNestedManyWithoutConnectedByInput
+  instagramMessagesSent?: Prisma.MessageCreateNestedManyWithoutSentByInput
+  instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutUserInput
+  googleConnections?: Prisma.GoogleConnectionCreateNestedManyWithoutConnectedByInput
+  googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
+  notifications?: Prisma.UserNotificationCreateNestedManyWithoutUserInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptCreateNestedManyWithoutUserInput
+  telegramUserBindings?: Prisma.TelegramUserBindingCreateNestedManyWithoutUserInput
+  procurementHandOffs?: Prisma.OrderCreateNestedManyWithoutProcurementHandedOffByUserInput
+}
+
+export type UserUncheckedCreateWithoutTelegramNotificationPreferencesInput = {
+  id?: string
+  email: string
+  name: string
+  passwordHash?: string | null
+  emailVerifiedAt?: Date | string | null
+  platformRole?: $Enums.PlatformRole
+  status?: $Enums.AccessStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  invitationsCreated?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUncheckedCreateNestedManyWithoutUserInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutUserInput
+  instagramConnections?: Prisma.InstagramConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  instagramMessagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSentByInput
+  instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
+  googleConnections?: Prisma.GoogleConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
+  notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutUserInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedCreateNestedManyWithoutUserInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUncheckedCreateNestedManyWithoutUserInput
+  procurementHandOffs?: Prisma.OrderUncheckedCreateNestedManyWithoutProcurementHandedOffByUserInput
+}
+
+export type UserCreateOrConnectWithoutTelegramNotificationPreferencesInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutTelegramNotificationPreferencesInput, Prisma.UserUncheckedCreateWithoutTelegramNotificationPreferencesInput>
+}
+
+export type UserUpsertWithoutTelegramNotificationPreferencesInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutTelegramNotificationPreferencesInput, Prisma.UserUncheckedUpdateWithoutTelegramNotificationPreferencesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutTelegramNotificationPreferencesInput, Prisma.UserUncheckedCreateWithoutTelegramNotificationPreferencesInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutTelegramNotificationPreferencesInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutTelegramNotificationPreferencesInput, Prisma.UserUncheckedUpdateWithoutTelegramNotificationPreferencesInput>
+}
+
+export type UserUpdateWithoutTelegramNotificationPreferencesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+  invitationsCreated?: Prisma.TenantInvitationUpdateManyWithoutInvitedByNestedInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUpdateManyWithoutUserNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutUserNestedInput
+  instagramConnections?: Prisma.InstagramConnectionUpdateManyWithoutConnectedByNestedInput
+  instagramMessagesSent?: Prisma.MessageUpdateManyWithoutSentByNestedInput
+  instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutUserNestedInput
+  googleConnections?: Prisma.GoogleConnectionUpdateManyWithoutConnectedByNestedInput
+  googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
+  notifications?: Prisma.UserNotificationUpdateManyWithoutUserNestedInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUpdateManyWithoutUserNestedInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUpdateManyWithoutUserNestedInput
+  procurementHandOffs?: Prisma.OrderUpdateManyWithoutProcurementHandedOffByUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutTelegramNotificationPreferencesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+  invitationsCreated?: Prisma.TenantInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUncheckedUpdateManyWithoutUserNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutUserNestedInput
+  instagramConnections?: Prisma.InstagramConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  instagramMessagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSentByNestedInput
+  instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
+  googleConnections?: Prisma.GoogleConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutUserNestedInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedUpdateManyWithoutUserNestedInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUncheckedUpdateManyWithoutUserNestedInput
+  procurementHandOffs?: Prisma.OrderUncheckedUpdateManyWithoutProcurementHandedOffByUserNestedInput
 }
 
 
@@ -2758,6 +3194,8 @@ export type UserCountOutputType = {
   notifications: number
   telegramLinkAttempts: number
   telegramUserBindings: number
+  procurementHandOffs: number
+  telegramNotificationPreferences: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2776,6 +3214,8 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   notifications?: boolean | UserCountOutputTypeCountNotificationsArgs
   telegramLinkAttempts?: boolean | UserCountOutputTypeCountTelegramLinkAttemptsArgs
   telegramUserBindings?: boolean | UserCountOutputTypeCountTelegramUserBindingsArgs
+  procurementHandOffs?: boolean | UserCountOutputTypeCountProcurementHandOffsArgs
+  telegramNotificationPreferences?: boolean | UserCountOutputTypeCountTelegramNotificationPreferencesArgs
 }
 
 /**
@@ -2893,6 +3333,20 @@ export type UserCountOutputTypeCountTelegramUserBindingsArgs<ExtArgs extends run
   where?: Prisma.TelegramUserBindingWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountProcurementHandOffsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.OrderWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountTelegramNotificationPreferencesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TelegramNotificationPreferenceWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -2920,6 +3374,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
   telegramLinkAttempts?: boolean | Prisma.User$telegramLinkAttemptsArgs<ExtArgs>
   telegramUserBindings?: boolean | Prisma.User$telegramUserBindingsArgs<ExtArgs>
+  procurementHandOffs?: boolean | Prisma.User$procurementHandOffsArgs<ExtArgs>
+  telegramNotificationPreferences?: boolean | Prisma.User$telegramNotificationPreferencesArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -2977,6 +3433,8 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
   telegramLinkAttempts?: boolean | Prisma.User$telegramLinkAttemptsArgs<ExtArgs>
   telegramUserBindings?: boolean | Prisma.User$telegramUserBindingsArgs<ExtArgs>
+  procurementHandOffs?: boolean | Prisma.User$procurementHandOffsArgs<ExtArgs>
+  telegramNotificationPreferences?: boolean | Prisma.User$telegramNotificationPreferencesArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -3001,6 +3459,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     notifications: Prisma.$UserNotificationPayload<ExtArgs>[]
     telegramLinkAttempts: Prisma.$TelegramLinkAttemptPayload<ExtArgs>[]
     telegramUserBindings: Prisma.$TelegramUserBindingPayload<ExtArgs>[]
+    procurementHandOffs: Prisma.$OrderPayload<ExtArgs>[]
+    telegramNotificationPreferences: Prisma.$TelegramNotificationPreferencePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -3422,6 +3882,8 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   notifications<T extends Prisma.User$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserNotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   telegramLinkAttempts<T extends Prisma.User$telegramLinkAttemptsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$telegramLinkAttemptsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TelegramLinkAttemptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   telegramUserBindings<T extends Prisma.User$telegramUserBindingsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$telegramUserBindingsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TelegramUserBindingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  procurementHandOffs<T extends Prisma.User$procurementHandOffsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$procurementHandOffsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  telegramNotificationPreferences<T extends Prisma.User$telegramNotificationPreferencesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$telegramNotificationPreferencesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TelegramNotificationPreferencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4229,6 +4691,54 @@ export type User$telegramUserBindingsArgs<ExtArgs extends runtime.Types.Extensio
   take?: number
   skip?: number
   distinct?: Prisma.TelegramUserBindingScalarFieldEnum | Prisma.TelegramUserBindingScalarFieldEnum[]
+}
+
+/**
+ * User.procurementHandOffs
+ */
+export type User$procurementHandOffsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Order
+   */
+  select?: Prisma.OrderSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Order
+   */
+  omit?: Prisma.OrderOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OrderInclude<ExtArgs> | null
+  where?: Prisma.OrderWhereInput
+  orderBy?: Prisma.OrderOrderByWithRelationInput | Prisma.OrderOrderByWithRelationInput[]
+  cursor?: Prisma.OrderWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.OrderScalarFieldEnum | Prisma.OrderScalarFieldEnum[]
+}
+
+/**
+ * User.telegramNotificationPreferences
+ */
+export type User$telegramNotificationPreferencesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TelegramNotificationPreference
+   */
+  select?: Prisma.TelegramNotificationPreferenceSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the TelegramNotificationPreference
+   */
+  omit?: Prisma.TelegramNotificationPreferenceOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TelegramNotificationPreferenceInclude<ExtArgs> | null
+  where?: Prisma.TelegramNotificationPreferenceWhereInput
+  orderBy?: Prisma.TelegramNotificationPreferenceOrderByWithRelationInput | Prisma.TelegramNotificationPreferenceOrderByWithRelationInput[]
+  cursor?: Prisma.TelegramNotificationPreferenceWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TelegramNotificationPreferenceScalarFieldEnum | Prisma.TelegramNotificationPreferenceScalarFieldEnum[]
 }
 
 /**

@@ -1,3 +1,12 @@
+import type {
+  InventoryReservationSummary,
+  ProcurementDecisionSource,
+  ProcurementReason,
+  ProcurementStatus,
+  ProcurementSummary,
+  SupplierDispatchSummary,
+} from './procurement.js';
+
 export type OrderStatus = 'AI_PROCESSING' | 'AI_FAILED' | 'NEEDS_REVIEW' | 'AUTO_APPROVED' | 'APPROVED' | 'CANCELLED';
 
 export const INSTAGRAM_ORDER_PROMPT_VERSION = 'instagram-order-v2' as const;
@@ -20,7 +29,16 @@ export interface ManagerOrder {
     color: string | null;
     size: string | null;
     confidence: number;
+    procurementStatus: ProcurementStatus;
+    procurementSource: ProcurementDecisionSource | null;
+    procurementReason: ProcurementReason | null;
+    stockAtDecision: number | null;
+    availableAtDecision: number | null;
+    reservation: InventoryReservationSummary | null;
   }>;
+  procurementSummary: ProcurementSummary;
+  procurementHandedOffAt: string | null;
+  supplierDispatch: SupplierDispatchSummary | null;
   catalogueCandidates: Array<{ sku: string; name: string }>;
   createdAt: string;
   sheetsExport: {
@@ -45,4 +63,12 @@ export interface OrderListResponse {
   page: number;
   pageSize: number;
   total: number;
+}
+
+export interface OrderListQuery {
+  search?: string;
+  status?: OrderStatus;
+  procurementStatus?: ProcurementSummary;
+  page: number;
+  pageSize: number;
 }

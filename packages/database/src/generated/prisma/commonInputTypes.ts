@@ -650,6 +650,57 @@ export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedIntNullableFilter<$PrismaModel>
 }
 
+export type EnumProcurementStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.ProcurementStatus | Prisma.EnumProcurementStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.ProcurementStatus[] | Prisma.ListEnumProcurementStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ProcurementStatus[] | Prisma.ListEnumProcurementStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumProcurementStatusFilter<$PrismaModel> | $Enums.ProcurementStatus
+}
+
+export type EnumProcurementDecisionSourceNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.ProcurementDecisionSource | Prisma.EnumProcurementDecisionSourceFieldRefInput<$PrismaModel> | null
+  in?: $Enums.ProcurementDecisionSource[] | Prisma.ListEnumProcurementDecisionSourceFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.ProcurementDecisionSource[] | Prisma.ListEnumProcurementDecisionSourceFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumProcurementDecisionSourceNullableFilter<$PrismaModel> | $Enums.ProcurementDecisionSource | null
+}
+
+export type EnumProcurementReasonNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.ProcurementReason | Prisma.EnumProcurementReasonFieldRefInput<$PrismaModel> | null
+  in?: $Enums.ProcurementReason[] | Prisma.ListEnumProcurementReasonFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.ProcurementReason[] | Prisma.ListEnumProcurementReasonFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumProcurementReasonNullableFilter<$PrismaModel> | $Enums.ProcurementReason | null
+}
+
+export type EnumProcurementStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ProcurementStatus | Prisma.EnumProcurementStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.ProcurementStatus[] | Prisma.ListEnumProcurementStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ProcurementStatus[] | Prisma.ListEnumProcurementStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumProcurementStatusWithAggregatesFilter<$PrismaModel> | $Enums.ProcurementStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumProcurementStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumProcurementStatusFilter<$PrismaModel>
+}
+
+export type EnumProcurementDecisionSourceNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ProcurementDecisionSource | Prisma.EnumProcurementDecisionSourceFieldRefInput<$PrismaModel> | null
+  in?: $Enums.ProcurementDecisionSource[] | Prisma.ListEnumProcurementDecisionSourceFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.ProcurementDecisionSource[] | Prisma.ListEnumProcurementDecisionSourceFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumProcurementDecisionSourceNullableWithAggregatesFilter<$PrismaModel> | $Enums.ProcurementDecisionSource | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumProcurementDecisionSourceNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumProcurementDecisionSourceNullableFilter<$PrismaModel>
+}
+
+export type EnumProcurementReasonNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ProcurementReason | Prisma.EnumProcurementReasonFieldRefInput<$PrismaModel> | null
+  in?: $Enums.ProcurementReason[] | Prisma.ListEnumProcurementReasonFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.ProcurementReason[] | Prisma.ListEnumProcurementReasonFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumProcurementReasonNullableWithAggregatesFilter<$PrismaModel> | $Enums.ProcurementReason | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumProcurementReasonNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumProcurementReasonNullableFilter<$PrismaModel>
+}
+
 export type DecimalNullableFilter<$PrismaModel = never> = {
   equals?: runtime.Decimal | runtime.DecimalJsLike | number | string | Prisma.DecimalFieldRefInput<$PrismaModel> | null
   in?: runtime.Decimal[] | runtime.DecimalJsLike[] | number[] | string[] | Prisma.ListDecimalFieldRefInput<$PrismaModel> | null
@@ -675,6 +726,40 @@ export type DecimalNullableWithAggregatesFilter<$PrismaModel = never> = {
   _sum?: Prisma.NestedDecimalNullableFilter<$PrismaModel>
   _min?: Prisma.NestedDecimalNullableFilter<$PrismaModel>
   _max?: Prisma.NestedDecimalNullableFilter<$PrismaModel>
+}
+
+export type EnumInventoryReservationStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.InventoryReservationStatus | Prisma.EnumInventoryReservationStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.InventoryReservationStatus[] | Prisma.ListEnumInventoryReservationStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.InventoryReservationStatus[] | Prisma.ListEnumInventoryReservationStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumInventoryReservationStatusFilter<$PrismaModel> | $Enums.InventoryReservationStatus
+}
+
+export type EnumInventoryReservationStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.InventoryReservationStatus | Prisma.EnumInventoryReservationStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.InventoryReservationStatus[] | Prisma.ListEnumInventoryReservationStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.InventoryReservationStatus[] | Prisma.ListEnumInventoryReservationStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumInventoryReservationStatusWithAggregatesFilter<$PrismaModel> | $Enums.InventoryReservationStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumInventoryReservationStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumInventoryReservationStatusFilter<$PrismaModel>
+}
+
+export type EnumTelegramAlertEventTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.TelegramAlertEventType | Prisma.EnumTelegramAlertEventTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.TelegramAlertEventType[] | Prisma.ListEnumTelegramAlertEventTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.TelegramAlertEventType[] | Prisma.ListEnumTelegramAlertEventTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumTelegramAlertEventTypeFilter<$PrismaModel> | $Enums.TelegramAlertEventType
+}
+
+export type EnumTelegramAlertEventTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.TelegramAlertEventType | Prisma.EnumTelegramAlertEventTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.TelegramAlertEventType[] | Prisma.ListEnumTelegramAlertEventTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.TelegramAlertEventType[] | Prisma.ListEnumTelegramAlertEventTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumTelegramAlertEventTypeWithAggregatesFilter<$PrismaModel> | $Enums.TelegramAlertEventType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumTelegramAlertEventTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumTelegramAlertEventTypeFilter<$PrismaModel>
 }
 
 export type EnumCatalogueSourceTypeFilter<$PrismaModel = never> = {
@@ -1297,6 +1382,57 @@ export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedIntNullableFilter<$PrismaModel>
 }
 
+export type NestedEnumProcurementStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.ProcurementStatus | Prisma.EnumProcurementStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.ProcurementStatus[] | Prisma.ListEnumProcurementStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ProcurementStatus[] | Prisma.ListEnumProcurementStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumProcurementStatusFilter<$PrismaModel> | $Enums.ProcurementStatus
+}
+
+export type NestedEnumProcurementDecisionSourceNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.ProcurementDecisionSource | Prisma.EnumProcurementDecisionSourceFieldRefInput<$PrismaModel> | null
+  in?: $Enums.ProcurementDecisionSource[] | Prisma.ListEnumProcurementDecisionSourceFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.ProcurementDecisionSource[] | Prisma.ListEnumProcurementDecisionSourceFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumProcurementDecisionSourceNullableFilter<$PrismaModel> | $Enums.ProcurementDecisionSource | null
+}
+
+export type NestedEnumProcurementReasonNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.ProcurementReason | Prisma.EnumProcurementReasonFieldRefInput<$PrismaModel> | null
+  in?: $Enums.ProcurementReason[] | Prisma.ListEnumProcurementReasonFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.ProcurementReason[] | Prisma.ListEnumProcurementReasonFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumProcurementReasonNullableFilter<$PrismaModel> | $Enums.ProcurementReason | null
+}
+
+export type NestedEnumProcurementStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ProcurementStatus | Prisma.EnumProcurementStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.ProcurementStatus[] | Prisma.ListEnumProcurementStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ProcurementStatus[] | Prisma.ListEnumProcurementStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumProcurementStatusWithAggregatesFilter<$PrismaModel> | $Enums.ProcurementStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumProcurementStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumProcurementStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumProcurementDecisionSourceNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ProcurementDecisionSource | Prisma.EnumProcurementDecisionSourceFieldRefInput<$PrismaModel> | null
+  in?: $Enums.ProcurementDecisionSource[] | Prisma.ListEnumProcurementDecisionSourceFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.ProcurementDecisionSource[] | Prisma.ListEnumProcurementDecisionSourceFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumProcurementDecisionSourceNullableWithAggregatesFilter<$PrismaModel> | $Enums.ProcurementDecisionSource | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumProcurementDecisionSourceNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumProcurementDecisionSourceNullableFilter<$PrismaModel>
+}
+
+export type NestedEnumProcurementReasonNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ProcurementReason | Prisma.EnumProcurementReasonFieldRefInput<$PrismaModel> | null
+  in?: $Enums.ProcurementReason[] | Prisma.ListEnumProcurementReasonFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.ProcurementReason[] | Prisma.ListEnumProcurementReasonFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumProcurementReasonNullableWithAggregatesFilter<$PrismaModel> | $Enums.ProcurementReason | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumProcurementReasonNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumProcurementReasonNullableFilter<$PrismaModel>
+}
+
 export type NestedDecimalNullableFilter<$PrismaModel = never> = {
   equals?: runtime.Decimal | runtime.DecimalJsLike | number | string | Prisma.DecimalFieldRefInput<$PrismaModel> | null
   in?: runtime.Decimal[] | runtime.DecimalJsLike[] | number[] | string[] | Prisma.ListDecimalFieldRefInput<$PrismaModel> | null
@@ -1322,6 +1458,40 @@ export type NestedDecimalNullableWithAggregatesFilter<$PrismaModel = never> = {
   _sum?: Prisma.NestedDecimalNullableFilter<$PrismaModel>
   _min?: Prisma.NestedDecimalNullableFilter<$PrismaModel>
   _max?: Prisma.NestedDecimalNullableFilter<$PrismaModel>
+}
+
+export type NestedEnumInventoryReservationStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.InventoryReservationStatus | Prisma.EnumInventoryReservationStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.InventoryReservationStatus[] | Prisma.ListEnumInventoryReservationStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.InventoryReservationStatus[] | Prisma.ListEnumInventoryReservationStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumInventoryReservationStatusFilter<$PrismaModel> | $Enums.InventoryReservationStatus
+}
+
+export type NestedEnumInventoryReservationStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.InventoryReservationStatus | Prisma.EnumInventoryReservationStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.InventoryReservationStatus[] | Prisma.ListEnumInventoryReservationStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.InventoryReservationStatus[] | Prisma.ListEnumInventoryReservationStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumInventoryReservationStatusWithAggregatesFilter<$PrismaModel> | $Enums.InventoryReservationStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumInventoryReservationStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumInventoryReservationStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumTelegramAlertEventTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.TelegramAlertEventType | Prisma.EnumTelegramAlertEventTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.TelegramAlertEventType[] | Prisma.ListEnumTelegramAlertEventTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.TelegramAlertEventType[] | Prisma.ListEnumTelegramAlertEventTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumTelegramAlertEventTypeFilter<$PrismaModel> | $Enums.TelegramAlertEventType
+}
+
+export type NestedEnumTelegramAlertEventTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.TelegramAlertEventType | Prisma.EnumTelegramAlertEventTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.TelegramAlertEventType[] | Prisma.ListEnumTelegramAlertEventTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.TelegramAlertEventType[] | Prisma.ListEnumTelegramAlertEventTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumTelegramAlertEventTypeWithAggregatesFilter<$PrismaModel> | $Enums.TelegramAlertEventType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumTelegramAlertEventTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumTelegramAlertEventTypeFilter<$PrismaModel>
 }
 
 export type NestedEnumCatalogueSourceTypeFilter<$PrismaModel = never> = {

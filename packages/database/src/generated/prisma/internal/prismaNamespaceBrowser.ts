@@ -87,6 +87,9 @@ export const ModelName = {
   AuditLog: 'AuditLog',
   OrderItem: 'OrderItem',
   Product: 'Product',
+  InventoryReservation: 'InventoryReservation',
+  TelegramDeliveryItem: 'TelegramDeliveryItem',
+  TelegramNotificationPreference: 'TelegramNotificationPreference',
   CatalogueSource: 'CatalogueSource',
   CatalogueMapping: 'CatalogueMapping',
   CatalogueImportRun: 'CatalogueImportRun',
@@ -261,6 +264,7 @@ export const UserNotificationScalarFieldEnum = {
   title: 'title',
   message: 'message',
   actionUrl: 'actionUrl',
+  eventKey: 'eventKey',
   readAt: 'readAt',
   createdAt: 'createdAt'
 } as const
@@ -356,6 +360,8 @@ export const TelegramDeliveryScalarFieldEnum = {
   id: 'id',
   tenantId: 'tenantId',
   destinationId: 'destinationId',
+  orderId: 'orderId',
+  sourceNotificationId: 'sourceNotificationId',
   purpose: 'purpose',
   status: 'status',
   idempotencyKey: 'idempotencyKey',
@@ -635,6 +641,9 @@ export const OrderScalarFieldEnum = {
   outputTokens: 'outputTokens',
   approvedAt: 'approvedAt',
   approvedBy: 'approvedBy',
+  procurementHandedOffAt: 'procurementHandedOffAt',
+  procurementHandedOffBy: 'procurementHandedOffBy',
+  supplierDispatchVersion: 'supplierDispatchVersion',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -675,6 +684,7 @@ export type AuditLogScalarFieldEnum = (typeof AuditLogScalarFieldEnum)[keyof typ
 
 export const OrderItemScalarFieldEnum = {
   id: 'id',
+  tenantId: 'tenantId',
   orderId: 'orderId',
   catalogId: 'catalogId',
   originalText: 'originalText',
@@ -682,6 +692,12 @@ export const OrderItemScalarFieldEnum = {
   color: 'color',
   size: 'size',
   confidence: 'confidence',
+  procurementStatus: 'procurementStatus',
+  procurementSource: 'procurementSource',
+  procurementReason: 'procurementReason',
+  stockAtDecision: 'stockAtDecision',
+  availableAtDecision: 'availableAtDecision',
+  procurementUpdatedAt: 'procurementUpdatedAt',
   createdAt: 'createdAt'
 } as const
 
@@ -714,6 +730,46 @@ export const ProductScalarFieldEnum = {
 } as const
 
 export type ProductScalarFieldEnum = (typeof ProductScalarFieldEnum)[keyof typeof ProductScalarFieldEnum]
+
+
+export const InventoryReservationScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  productId: 'productId',
+  orderItemId: 'orderItemId',
+  quantity: 'quantity',
+  status: 'status',
+  consumedAt: 'consumedAt',
+  releasedAt: 'releasedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type InventoryReservationScalarFieldEnum = (typeof InventoryReservationScalarFieldEnum)[keyof typeof InventoryReservationScalarFieldEnum]
+
+
+export const TelegramDeliveryItemScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  deliveryId: 'deliveryId',
+  orderItemId: 'orderItemId',
+  createdAt: 'createdAt'
+} as const
+
+export type TelegramDeliveryItemScalarFieldEnum = (typeof TelegramDeliveryItemScalarFieldEnum)[keyof typeof TelegramDeliveryItemScalarFieldEnum]
+
+
+export const TelegramNotificationPreferenceScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  userId: 'userId',
+  eventType: 'eventType',
+  enabled: 'enabled',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TelegramNotificationPreferenceScalarFieldEnum = (typeof TelegramNotificationPreferenceScalarFieldEnum)[keyof typeof TelegramNotificationPreferenceScalarFieldEnum]
 
 
 export const CatalogueSourceScalarFieldEnum = {

@@ -30,12 +30,14 @@ export type OrderAvgAggregateOutputType = {
   overallConfidence: number | null
   inputTokens: number | null
   outputTokens: number | null
+  supplierDispatchVersion: number | null
 }
 
 export type OrderSumAggregateOutputType = {
   overallConfidence: number | null
   inputTokens: number | null
   outputTokens: number | null
+  supplierDispatchVersion: number | null
 }
 
 export type OrderMinAggregateOutputType = {
@@ -52,6 +54,9 @@ export type OrderMinAggregateOutputType = {
   outputTokens: number | null
   approvedAt: Date | null
   approvedBy: string | null
+  procurementHandedOffAt: Date | null
+  procurementHandedOffBy: string | null
+  supplierDispatchVersion: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -70,6 +75,9 @@ export type OrderMaxAggregateOutputType = {
   outputTokens: number | null
   approvedAt: Date | null
   approvedBy: string | null
+  procurementHandedOffAt: Date | null
+  procurementHandedOffBy: string | null
+  supplierDispatchVersion: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -90,6 +98,9 @@ export type OrderCountAggregateOutputType = {
   outputTokens: number
   approvedAt: number
   approvedBy: number
+  procurementHandedOffAt: number
+  procurementHandedOffBy: number
+  supplierDispatchVersion: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -100,12 +111,14 @@ export type OrderAvgAggregateInputType = {
   overallConfidence?: true
   inputTokens?: true
   outputTokens?: true
+  supplierDispatchVersion?: true
 }
 
 export type OrderSumAggregateInputType = {
   overallConfidence?: true
   inputTokens?: true
   outputTokens?: true
+  supplierDispatchVersion?: true
 }
 
 export type OrderMinAggregateInputType = {
@@ -122,6 +135,9 @@ export type OrderMinAggregateInputType = {
   outputTokens?: true
   approvedAt?: true
   approvedBy?: true
+  procurementHandedOffAt?: true
+  procurementHandedOffBy?: true
+  supplierDispatchVersion?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -140,6 +156,9 @@ export type OrderMaxAggregateInputType = {
   outputTokens?: true
   approvedAt?: true
   approvedBy?: true
+  procurementHandedOffAt?: true
+  procurementHandedOffBy?: true
+  supplierDispatchVersion?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -160,6 +179,9 @@ export type OrderCountAggregateInputType = {
   outputTokens?: true
   approvedAt?: true
   approvedBy?: true
+  procurementHandedOffAt?: true
+  procurementHandedOffBy?: true
+  supplierDispatchVersion?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -267,6 +289,9 @@ export type OrderGroupByOutputType = {
   outputTokens: number | null
   approvedAt: Date | null
   approvedBy: string | null
+  procurementHandedOffAt: Date | null
+  procurementHandedOffBy: string | null
+  supplierDispatchVersion: number
   createdAt: Date
   updatedAt: Date
   _count: OrderCountAggregateOutputType | null
@@ -310,6 +335,9 @@ export type OrderWhereInput = {
   outputTokens?: Prisma.IntNullableFilter<"Order"> | number | null
   approvedAt?: Prisma.DateTimeNullableFilter<"Order"> | Date | string | null
   approvedBy?: Prisma.StringNullableFilter<"Order"> | string | null
+  procurementHandedOffAt?: Prisma.DateTimeNullableFilter<"Order"> | Date | string | null
+  procurementHandedOffBy?: Prisma.UuidNullableFilter<"Order"> | string | null
+  supplierDispatchVersion?: Prisma.IntFilter<"Order"> | number
   createdAt?: Prisma.DateTimeFilter<"Order"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Order"> | Date | string
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
@@ -318,6 +346,8 @@ export type OrderWhereInput = {
   items?: Prisma.OrderItemListRelationFilter
   auditLogs?: Prisma.AuditLogListRelationFilter
   exports?: Prisma.OrderExportListRelationFilter
+  procurementHandedOffByUser?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  telegramDeliveries?: Prisma.TelegramDeliveryListRelationFilter
 }
 
 export type OrderOrderByWithRelationInput = {
@@ -336,6 +366,9 @@ export type OrderOrderByWithRelationInput = {
   outputTokens?: Prisma.SortOrderInput | Prisma.SortOrder
   approvedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   approvedBy?: Prisma.SortOrderInput | Prisma.SortOrder
+  procurementHandedOffAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  procurementHandedOffBy?: Prisma.SortOrderInput | Prisma.SortOrder
+  supplierDispatchVersion?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   tenant?: Prisma.TenantOrderByWithRelationInput
@@ -344,11 +377,14 @@ export type OrderOrderByWithRelationInput = {
   items?: Prisma.OrderItemOrderByRelationAggregateInput
   auditLogs?: Prisma.AuditLogOrderByRelationAggregateInput
   exports?: Prisma.OrderExportOrderByRelationAggregateInput
+  procurementHandedOffByUser?: Prisma.UserOrderByWithRelationInput
+  telegramDeliveries?: Prisma.TelegramDeliveryOrderByRelationAggregateInput
 }
 
 export type OrderWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   triggerMessageId?: string
+  tenantId_id?: Prisma.OrderTenantIdIdCompoundUniqueInput
   AND?: Prisma.OrderWhereInput | Prisma.OrderWhereInput[]
   OR?: Prisma.OrderWhereInput[]
   NOT?: Prisma.OrderWhereInput | Prisma.OrderWhereInput[]
@@ -365,6 +401,9 @@ export type OrderWhereUniqueInput = Prisma.AtLeast<{
   outputTokens?: Prisma.IntNullableFilter<"Order"> | number | null
   approvedAt?: Prisma.DateTimeNullableFilter<"Order"> | Date | string | null
   approvedBy?: Prisma.StringNullableFilter<"Order"> | string | null
+  procurementHandedOffAt?: Prisma.DateTimeNullableFilter<"Order"> | Date | string | null
+  procurementHandedOffBy?: Prisma.UuidNullableFilter<"Order"> | string | null
+  supplierDispatchVersion?: Prisma.IntFilter<"Order"> | number
   createdAt?: Prisma.DateTimeFilter<"Order"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Order"> | Date | string
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
@@ -373,7 +412,9 @@ export type OrderWhereUniqueInput = Prisma.AtLeast<{
   items?: Prisma.OrderItemListRelationFilter
   auditLogs?: Prisma.AuditLogListRelationFilter
   exports?: Prisma.OrderExportListRelationFilter
-}, "id" | "triggerMessageId">
+  procurementHandedOffByUser?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  telegramDeliveries?: Prisma.TelegramDeliveryListRelationFilter
+}, "id" | "triggerMessageId" | "tenantId_id">
 
 export type OrderOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -391,6 +432,9 @@ export type OrderOrderByWithAggregationInput = {
   outputTokens?: Prisma.SortOrderInput | Prisma.SortOrder
   approvedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   approvedBy?: Prisma.SortOrderInput | Prisma.SortOrder
+  procurementHandedOffAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  procurementHandedOffBy?: Prisma.SortOrderInput | Prisma.SortOrder
+  supplierDispatchVersion?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.OrderCountOrderByAggregateInput
@@ -419,6 +463,9 @@ export type OrderScalarWhereWithAggregatesInput = {
   outputTokens?: Prisma.IntNullableWithAggregatesFilter<"Order"> | number | null
   approvedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Order"> | Date | string | null
   approvedBy?: Prisma.StringNullableWithAggregatesFilter<"Order"> | string | null
+  procurementHandedOffAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Order"> | Date | string | null
+  procurementHandedOffBy?: Prisma.UuidNullableWithAggregatesFilter<"Order"> | string | null
+  supplierDispatchVersion?: Prisma.IntWithAggregatesFilter<"Order"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Order"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Order"> | Date | string
 }
@@ -436,6 +483,8 @@ export type OrderCreateInput = {
   outputTokens?: number | null
   approvedAt?: Date | string | null
   approvedBy?: string | null
+  procurementHandedOffAt?: Date | string | null
+  supplierDispatchVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutOrdersInput
@@ -444,6 +493,8 @@ export type OrderCreateInput = {
   items?: Prisma.OrderItemCreateNestedManyWithoutOrderInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrderInput
   exports?: Prisma.OrderExportCreateNestedManyWithoutOrderInput
+  procurementHandedOffByUser?: Prisma.UserCreateNestedOneWithoutProcurementHandOffsInput
+  telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateInput = {
@@ -462,11 +513,15 @@ export type OrderUncheckedCreateInput = {
   outputTokens?: number | null
   approvedAt?: Date | string | null
   approvedBy?: string | null
+  procurementHandedOffAt?: Date | string | null
+  procurementHandedOffBy?: string | null
+  supplierDispatchVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrderInput
   exports?: Prisma.OrderExportUncheckedCreateNestedManyWithoutOrderInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUpdateInput = {
@@ -482,6 +537,8 @@ export type OrderUpdateInput = {
   outputTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   approvedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  procurementHandedOffAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  supplierDispatchVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutOrdersNestedInput
@@ -490,6 +547,8 @@ export type OrderUpdateInput = {
   items?: Prisma.OrderItemUpdateManyWithoutOrderNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutOrderNestedInput
   exports?: Prisma.OrderExportUpdateManyWithoutOrderNestedInput
+  procurementHandedOffByUser?: Prisma.UserUpdateOneWithoutProcurementHandOffsNestedInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateInput = {
@@ -508,11 +567,15 @@ export type OrderUncheckedUpdateInput = {
   outputTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   approvedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  procurementHandedOffAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  procurementHandedOffBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supplierDispatchVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrderNestedInput
   exports?: Prisma.OrderExportUncheckedUpdateManyWithoutOrderNestedInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderCreateManyInput = {
@@ -531,6 +594,9 @@ export type OrderCreateManyInput = {
   outputTokens?: number | null
   approvedAt?: Date | string | null
   approvedBy?: string | null
+  procurementHandedOffAt?: Date | string | null
+  procurementHandedOffBy?: string | null
+  supplierDispatchVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -548,6 +614,8 @@ export type OrderUpdateManyMutationInput = {
   outputTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   approvedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  procurementHandedOffAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  supplierDispatchVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -568,6 +636,9 @@ export type OrderUncheckedUpdateManyInput = {
   outputTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   approvedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  procurementHandedOffAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  procurementHandedOffBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supplierDispatchVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -580,6 +651,16 @@ export type OrderListRelationFilter = {
 
 export type OrderOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type OrderNullableScalarRelationFilter = {
+  is?: Prisma.OrderWhereInput | null
+  isNot?: Prisma.OrderWhereInput | null
+}
+
+export type OrderTenantIdIdCompoundUniqueInput = {
+  tenantId: string
+  id: string
 }
 
 export type OrderCountOrderByAggregateInput = {
@@ -598,6 +679,9 @@ export type OrderCountOrderByAggregateInput = {
   outputTokens?: Prisma.SortOrder
   approvedAt?: Prisma.SortOrder
   approvedBy?: Prisma.SortOrder
+  procurementHandedOffAt?: Prisma.SortOrder
+  procurementHandedOffBy?: Prisma.SortOrder
+  supplierDispatchVersion?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -606,6 +690,7 @@ export type OrderAvgOrderByAggregateInput = {
   overallConfidence?: Prisma.SortOrder
   inputTokens?: Prisma.SortOrder
   outputTokens?: Prisma.SortOrder
+  supplierDispatchVersion?: Prisma.SortOrder
 }
 
 export type OrderMaxOrderByAggregateInput = {
@@ -622,6 +707,9 @@ export type OrderMaxOrderByAggregateInput = {
   outputTokens?: Prisma.SortOrder
   approvedAt?: Prisma.SortOrder
   approvedBy?: Prisma.SortOrder
+  procurementHandedOffAt?: Prisma.SortOrder
+  procurementHandedOffBy?: Prisma.SortOrder
+  supplierDispatchVersion?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -640,6 +728,9 @@ export type OrderMinOrderByAggregateInput = {
   outputTokens?: Prisma.SortOrder
   approvedAt?: Prisma.SortOrder
   approvedBy?: Prisma.SortOrder
+  procurementHandedOffAt?: Prisma.SortOrder
+  procurementHandedOffBy?: Prisma.SortOrder
+  supplierDispatchVersion?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -648,6 +739,7 @@ export type OrderSumOrderByAggregateInput = {
   overallConfidence?: Prisma.SortOrder
   inputTokens?: Prisma.SortOrder
   outputTokens?: Prisma.SortOrder
+  supplierDispatchVersion?: Prisma.SortOrder
 }
 
 export type OrderScalarRelationFilter = {
@@ -695,6 +787,64 @@ export type OrderUncheckedUpdateManyWithoutTenantNestedInput = {
   update?: Prisma.OrderUpdateWithWhereUniqueWithoutTenantInput | Prisma.OrderUpdateWithWhereUniqueWithoutTenantInput[]
   updateMany?: Prisma.OrderUpdateManyWithWhereWithoutTenantInput | Prisma.OrderUpdateManyWithWhereWithoutTenantInput[]
   deleteMany?: Prisma.OrderScalarWhereInput | Prisma.OrderScalarWhereInput[]
+}
+
+export type OrderCreateNestedManyWithoutProcurementHandedOffByUserInput = {
+  create?: Prisma.XOR<Prisma.OrderCreateWithoutProcurementHandedOffByUserInput, Prisma.OrderUncheckedCreateWithoutProcurementHandedOffByUserInput> | Prisma.OrderCreateWithoutProcurementHandedOffByUserInput[] | Prisma.OrderUncheckedCreateWithoutProcurementHandedOffByUserInput[]
+  connectOrCreate?: Prisma.OrderCreateOrConnectWithoutProcurementHandedOffByUserInput | Prisma.OrderCreateOrConnectWithoutProcurementHandedOffByUserInput[]
+  createMany?: Prisma.OrderCreateManyProcurementHandedOffByUserInputEnvelope
+  connect?: Prisma.OrderWhereUniqueInput | Prisma.OrderWhereUniqueInput[]
+}
+
+export type OrderUncheckedCreateNestedManyWithoutProcurementHandedOffByUserInput = {
+  create?: Prisma.XOR<Prisma.OrderCreateWithoutProcurementHandedOffByUserInput, Prisma.OrderUncheckedCreateWithoutProcurementHandedOffByUserInput> | Prisma.OrderCreateWithoutProcurementHandedOffByUserInput[] | Prisma.OrderUncheckedCreateWithoutProcurementHandedOffByUserInput[]
+  connectOrCreate?: Prisma.OrderCreateOrConnectWithoutProcurementHandedOffByUserInput | Prisma.OrderCreateOrConnectWithoutProcurementHandedOffByUserInput[]
+  createMany?: Prisma.OrderCreateManyProcurementHandedOffByUserInputEnvelope
+  connect?: Prisma.OrderWhereUniqueInput | Prisma.OrderWhereUniqueInput[]
+}
+
+export type OrderUpdateManyWithoutProcurementHandedOffByUserNestedInput = {
+  create?: Prisma.XOR<Prisma.OrderCreateWithoutProcurementHandedOffByUserInput, Prisma.OrderUncheckedCreateWithoutProcurementHandedOffByUserInput> | Prisma.OrderCreateWithoutProcurementHandedOffByUserInput[] | Prisma.OrderUncheckedCreateWithoutProcurementHandedOffByUserInput[]
+  connectOrCreate?: Prisma.OrderCreateOrConnectWithoutProcurementHandedOffByUserInput | Prisma.OrderCreateOrConnectWithoutProcurementHandedOffByUserInput[]
+  upsert?: Prisma.OrderUpsertWithWhereUniqueWithoutProcurementHandedOffByUserInput | Prisma.OrderUpsertWithWhereUniqueWithoutProcurementHandedOffByUserInput[]
+  createMany?: Prisma.OrderCreateManyProcurementHandedOffByUserInputEnvelope
+  set?: Prisma.OrderWhereUniqueInput | Prisma.OrderWhereUniqueInput[]
+  disconnect?: Prisma.OrderWhereUniqueInput | Prisma.OrderWhereUniqueInput[]
+  delete?: Prisma.OrderWhereUniqueInput | Prisma.OrderWhereUniqueInput[]
+  connect?: Prisma.OrderWhereUniqueInput | Prisma.OrderWhereUniqueInput[]
+  update?: Prisma.OrderUpdateWithWhereUniqueWithoutProcurementHandedOffByUserInput | Prisma.OrderUpdateWithWhereUniqueWithoutProcurementHandedOffByUserInput[]
+  updateMany?: Prisma.OrderUpdateManyWithWhereWithoutProcurementHandedOffByUserInput | Prisma.OrderUpdateManyWithWhereWithoutProcurementHandedOffByUserInput[]
+  deleteMany?: Prisma.OrderScalarWhereInput | Prisma.OrderScalarWhereInput[]
+}
+
+export type OrderUncheckedUpdateManyWithoutProcurementHandedOffByUserNestedInput = {
+  create?: Prisma.XOR<Prisma.OrderCreateWithoutProcurementHandedOffByUserInput, Prisma.OrderUncheckedCreateWithoutProcurementHandedOffByUserInput> | Prisma.OrderCreateWithoutProcurementHandedOffByUserInput[] | Prisma.OrderUncheckedCreateWithoutProcurementHandedOffByUserInput[]
+  connectOrCreate?: Prisma.OrderCreateOrConnectWithoutProcurementHandedOffByUserInput | Prisma.OrderCreateOrConnectWithoutProcurementHandedOffByUserInput[]
+  upsert?: Prisma.OrderUpsertWithWhereUniqueWithoutProcurementHandedOffByUserInput | Prisma.OrderUpsertWithWhereUniqueWithoutProcurementHandedOffByUserInput[]
+  createMany?: Prisma.OrderCreateManyProcurementHandedOffByUserInputEnvelope
+  set?: Prisma.OrderWhereUniqueInput | Prisma.OrderWhereUniqueInput[]
+  disconnect?: Prisma.OrderWhereUniqueInput | Prisma.OrderWhereUniqueInput[]
+  delete?: Prisma.OrderWhereUniqueInput | Prisma.OrderWhereUniqueInput[]
+  connect?: Prisma.OrderWhereUniqueInput | Prisma.OrderWhereUniqueInput[]
+  update?: Prisma.OrderUpdateWithWhereUniqueWithoutProcurementHandedOffByUserInput | Prisma.OrderUpdateWithWhereUniqueWithoutProcurementHandedOffByUserInput[]
+  updateMany?: Prisma.OrderUpdateManyWithWhereWithoutProcurementHandedOffByUserInput | Prisma.OrderUpdateManyWithWhereWithoutProcurementHandedOffByUserInput[]
+  deleteMany?: Prisma.OrderScalarWhereInput | Prisma.OrderScalarWhereInput[]
+}
+
+export type OrderCreateNestedOneWithoutTelegramDeliveriesInput = {
+  create?: Prisma.XOR<Prisma.OrderCreateWithoutTelegramDeliveriesInput, Prisma.OrderUncheckedCreateWithoutTelegramDeliveriesInput>
+  connectOrCreate?: Prisma.OrderCreateOrConnectWithoutTelegramDeliveriesInput
+  connect?: Prisma.OrderWhereUniqueInput
+}
+
+export type OrderUpdateOneWithoutTelegramDeliveriesNestedInput = {
+  create?: Prisma.XOR<Prisma.OrderCreateWithoutTelegramDeliveriesInput, Prisma.OrderUncheckedCreateWithoutTelegramDeliveriesInput>
+  connectOrCreate?: Prisma.OrderCreateOrConnectWithoutTelegramDeliveriesInput
+  upsert?: Prisma.OrderUpsertWithoutTelegramDeliveriesInput
+  disconnect?: Prisma.OrderWhereInput | boolean
+  delete?: Prisma.OrderWhereInput | boolean
+  connect?: Prisma.OrderWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrderUpdateToOneWithWhereWithoutTelegramDeliveriesInput, Prisma.OrderUpdateWithoutTelegramDeliveriesInput>, Prisma.OrderUncheckedUpdateWithoutTelegramDeliveriesInput>
 }
 
 export type OrderCreateNestedManyWithoutConversationInput = {
@@ -852,6 +1002,8 @@ export type OrderCreateWithoutTenantInput = {
   outputTokens?: number | null
   approvedAt?: Date | string | null
   approvedBy?: string | null
+  procurementHandedOffAt?: Date | string | null
+  supplierDispatchVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   conversation: Prisma.ConversationCreateNestedOneWithoutOrdersInput
@@ -859,6 +1011,8 @@ export type OrderCreateWithoutTenantInput = {
   items?: Prisma.OrderItemCreateNestedManyWithoutOrderInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrderInput
   exports?: Prisma.OrderExportCreateNestedManyWithoutOrderInput
+  procurementHandedOffByUser?: Prisma.UserCreateNestedOneWithoutProcurementHandOffsInput
+  telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutTenantInput = {
@@ -876,11 +1030,15 @@ export type OrderUncheckedCreateWithoutTenantInput = {
   outputTokens?: number | null
   approvedAt?: Date | string | null
   approvedBy?: string | null
+  procurementHandedOffAt?: Date | string | null
+  procurementHandedOffBy?: string | null
+  supplierDispatchVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrderInput
   exports?: Prisma.OrderExportUncheckedCreateNestedManyWithoutOrderInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutTenantInput = {
@@ -928,8 +1086,209 @@ export type OrderScalarWhereInput = {
   outputTokens?: Prisma.IntNullableFilter<"Order"> | number | null
   approvedAt?: Prisma.DateTimeNullableFilter<"Order"> | Date | string | null
   approvedBy?: Prisma.StringNullableFilter<"Order"> | string | null
+  procurementHandedOffAt?: Prisma.DateTimeNullableFilter<"Order"> | Date | string | null
+  procurementHandedOffBy?: Prisma.UuidNullableFilter<"Order"> | string | null
+  supplierDispatchVersion?: Prisma.IntFilter<"Order"> | number
   createdAt?: Prisma.DateTimeFilter<"Order"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Order"> | Date | string
+}
+
+export type OrderCreateWithoutProcurementHandedOffByUserInput = {
+  id?: string
+  status?: string
+  extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  overallConfidence?: number | null
+  aiResponseId?: string | null
+  aiModel?: string | null
+  promptVersion: string
+  inputTokens?: number | null
+  outputTokens?: number | null
+  approvedAt?: Date | string | null
+  approvedBy?: string | null
+  procurementHandedOffAt?: Date | string | null
+  supplierDispatchVersion?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tenant: Prisma.TenantCreateNestedOneWithoutOrdersInput
+  conversation: Prisma.ConversationCreateNestedOneWithoutOrdersInput
+  triggerMessage: Prisma.MessageCreateNestedOneWithoutTriggeredOrdersInput
+  items?: Prisma.OrderItemCreateNestedManyWithoutOrderInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrderInput
+  exports?: Prisma.OrderExportCreateNestedManyWithoutOrderInput
+  telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutOrderInput
+}
+
+export type OrderUncheckedCreateWithoutProcurementHandedOffByUserInput = {
+  id?: string
+  tenantId: string
+  conversationId: string
+  triggerMessageId: string
+  status?: string
+  extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  overallConfidence?: number | null
+  aiResponseId?: string | null
+  aiModel?: string | null
+  promptVersion: string
+  inputTokens?: number | null
+  outputTokens?: number | null
+  approvedAt?: Date | string | null
+  approvedBy?: string | null
+  procurementHandedOffAt?: Date | string | null
+  supplierDispatchVersion?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrderInput
+  exports?: Prisma.OrderExportUncheckedCreateNestedManyWithoutOrderInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutOrderInput
+}
+
+export type OrderCreateOrConnectWithoutProcurementHandedOffByUserInput = {
+  where: Prisma.OrderWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrderCreateWithoutProcurementHandedOffByUserInput, Prisma.OrderUncheckedCreateWithoutProcurementHandedOffByUserInput>
+}
+
+export type OrderCreateManyProcurementHandedOffByUserInputEnvelope = {
+  data: Prisma.OrderCreateManyProcurementHandedOffByUserInput | Prisma.OrderCreateManyProcurementHandedOffByUserInput[]
+  skipDuplicates?: boolean
+}
+
+export type OrderUpsertWithWhereUniqueWithoutProcurementHandedOffByUserInput = {
+  where: Prisma.OrderWhereUniqueInput
+  update: Prisma.XOR<Prisma.OrderUpdateWithoutProcurementHandedOffByUserInput, Prisma.OrderUncheckedUpdateWithoutProcurementHandedOffByUserInput>
+  create: Prisma.XOR<Prisma.OrderCreateWithoutProcurementHandedOffByUserInput, Prisma.OrderUncheckedCreateWithoutProcurementHandedOffByUserInput>
+}
+
+export type OrderUpdateWithWhereUniqueWithoutProcurementHandedOffByUserInput = {
+  where: Prisma.OrderWhereUniqueInput
+  data: Prisma.XOR<Prisma.OrderUpdateWithoutProcurementHandedOffByUserInput, Prisma.OrderUncheckedUpdateWithoutProcurementHandedOffByUserInput>
+}
+
+export type OrderUpdateManyWithWhereWithoutProcurementHandedOffByUserInput = {
+  where: Prisma.OrderScalarWhereInput
+  data: Prisma.XOR<Prisma.OrderUpdateManyMutationInput, Prisma.OrderUncheckedUpdateManyWithoutProcurementHandedOffByUserInput>
+}
+
+export type OrderCreateWithoutTelegramDeliveriesInput = {
+  id?: string
+  status?: string
+  extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  overallConfidence?: number | null
+  aiResponseId?: string | null
+  aiModel?: string | null
+  promptVersion: string
+  inputTokens?: number | null
+  outputTokens?: number | null
+  approvedAt?: Date | string | null
+  approvedBy?: string | null
+  procurementHandedOffAt?: Date | string | null
+  supplierDispatchVersion?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tenant: Prisma.TenantCreateNestedOneWithoutOrdersInput
+  conversation: Prisma.ConversationCreateNestedOneWithoutOrdersInput
+  triggerMessage: Prisma.MessageCreateNestedOneWithoutTriggeredOrdersInput
+  items?: Prisma.OrderItemCreateNestedManyWithoutOrderInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrderInput
+  exports?: Prisma.OrderExportCreateNestedManyWithoutOrderInput
+  procurementHandedOffByUser?: Prisma.UserCreateNestedOneWithoutProcurementHandOffsInput
+}
+
+export type OrderUncheckedCreateWithoutTelegramDeliveriesInput = {
+  id?: string
+  tenantId: string
+  conversationId: string
+  triggerMessageId: string
+  status?: string
+  extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  overallConfidence?: number | null
+  aiResponseId?: string | null
+  aiModel?: string | null
+  promptVersion: string
+  inputTokens?: number | null
+  outputTokens?: number | null
+  approvedAt?: Date | string | null
+  approvedBy?: string | null
+  procurementHandedOffAt?: Date | string | null
+  procurementHandedOffBy?: string | null
+  supplierDispatchVersion?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrderInput
+  exports?: Prisma.OrderExportUncheckedCreateNestedManyWithoutOrderInput
+}
+
+export type OrderCreateOrConnectWithoutTelegramDeliveriesInput = {
+  where: Prisma.OrderWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrderCreateWithoutTelegramDeliveriesInput, Prisma.OrderUncheckedCreateWithoutTelegramDeliveriesInput>
+}
+
+export type OrderUpsertWithoutTelegramDeliveriesInput = {
+  update: Prisma.XOR<Prisma.OrderUpdateWithoutTelegramDeliveriesInput, Prisma.OrderUncheckedUpdateWithoutTelegramDeliveriesInput>
+  create: Prisma.XOR<Prisma.OrderCreateWithoutTelegramDeliveriesInput, Prisma.OrderUncheckedCreateWithoutTelegramDeliveriesInput>
+  where?: Prisma.OrderWhereInput
+}
+
+export type OrderUpdateToOneWithWhereWithoutTelegramDeliveriesInput = {
+  where?: Prisma.OrderWhereInput
+  data: Prisma.XOR<Prisma.OrderUpdateWithoutTelegramDeliveriesInput, Prisma.OrderUncheckedUpdateWithoutTelegramDeliveriesInput>
+}
+
+export type OrderUpdateWithoutTelegramDeliveriesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  overallConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  aiResponseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aiModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  promptVersion?: Prisma.StringFieldUpdateOperationsInput | string
+  inputTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  outputTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  approvedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  procurementHandedOffAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  supplierDispatchVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutOrdersNestedInput
+  conversation?: Prisma.ConversationUpdateOneRequiredWithoutOrdersNestedInput
+  triggerMessage?: Prisma.MessageUpdateOneRequiredWithoutTriggeredOrdersNestedInput
+  items?: Prisma.OrderItemUpdateManyWithoutOrderNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutOrderNestedInput
+  exports?: Prisma.OrderExportUpdateManyWithoutOrderNestedInput
+  procurementHandedOffByUser?: Prisma.UserUpdateOneWithoutProcurementHandOffsNestedInput
+}
+
+export type OrderUncheckedUpdateWithoutTelegramDeliveriesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  conversationId?: Prisma.StringFieldUpdateOperationsInput | string
+  triggerMessageId?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  overallConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  aiResponseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aiModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  promptVersion?: Prisma.StringFieldUpdateOperationsInput | string
+  inputTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  outputTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  approvedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  procurementHandedOffAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  procurementHandedOffBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supplierDispatchVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrderNestedInput
+  exports?: Prisma.OrderExportUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderCreateWithoutConversationInput = {
@@ -945,6 +1304,8 @@ export type OrderCreateWithoutConversationInput = {
   outputTokens?: number | null
   approvedAt?: Date | string | null
   approvedBy?: string | null
+  procurementHandedOffAt?: Date | string | null
+  supplierDispatchVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutOrdersInput
@@ -952,6 +1313,8 @@ export type OrderCreateWithoutConversationInput = {
   items?: Prisma.OrderItemCreateNestedManyWithoutOrderInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrderInput
   exports?: Prisma.OrderExportCreateNestedManyWithoutOrderInput
+  procurementHandedOffByUser?: Prisma.UserCreateNestedOneWithoutProcurementHandOffsInput
+  telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutConversationInput = {
@@ -969,11 +1332,15 @@ export type OrderUncheckedCreateWithoutConversationInput = {
   outputTokens?: number | null
   approvedAt?: Date | string | null
   approvedBy?: string | null
+  procurementHandedOffAt?: Date | string | null
+  procurementHandedOffBy?: string | null
+  supplierDispatchVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrderInput
   exports?: Prisma.OrderExportUncheckedCreateNestedManyWithoutOrderInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutConversationInput = {
@@ -1015,6 +1382,8 @@ export type OrderCreateWithoutTriggerMessageInput = {
   outputTokens?: number | null
   approvedAt?: Date | string | null
   approvedBy?: string | null
+  procurementHandedOffAt?: Date | string | null
+  supplierDispatchVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutOrdersInput
@@ -1022,6 +1391,8 @@ export type OrderCreateWithoutTriggerMessageInput = {
   items?: Prisma.OrderItemCreateNestedManyWithoutOrderInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrderInput
   exports?: Prisma.OrderExportCreateNestedManyWithoutOrderInput
+  procurementHandedOffByUser?: Prisma.UserCreateNestedOneWithoutProcurementHandOffsInput
+  telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutTriggerMessageInput = {
@@ -1039,11 +1410,15 @@ export type OrderUncheckedCreateWithoutTriggerMessageInput = {
   outputTokens?: number | null
   approvedAt?: Date | string | null
   approvedBy?: string | null
+  procurementHandedOffAt?: Date | string | null
+  procurementHandedOffBy?: string | null
+  supplierDispatchVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrderInput
   exports?: Prisma.OrderExportUncheckedCreateNestedManyWithoutOrderInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutTriggerMessageInput = {
@@ -1085,6 +1460,8 @@ export type OrderCreateWithoutExportsInput = {
   outputTokens?: number | null
   approvedAt?: Date | string | null
   approvedBy?: string | null
+  procurementHandedOffAt?: Date | string | null
+  supplierDispatchVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutOrdersInput
@@ -1092,6 +1469,8 @@ export type OrderCreateWithoutExportsInput = {
   triggerMessage: Prisma.MessageCreateNestedOneWithoutTriggeredOrdersInput
   items?: Prisma.OrderItemCreateNestedManyWithoutOrderInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrderInput
+  procurementHandedOffByUser?: Prisma.UserCreateNestedOneWithoutProcurementHandOffsInput
+  telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutExportsInput = {
@@ -1110,10 +1489,14 @@ export type OrderUncheckedCreateWithoutExportsInput = {
   outputTokens?: number | null
   approvedAt?: Date | string | null
   approvedBy?: string | null
+  procurementHandedOffAt?: Date | string | null
+  procurementHandedOffBy?: string | null
+  supplierDispatchVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrderInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutExportsInput = {
@@ -1145,6 +1528,8 @@ export type OrderUpdateWithoutExportsInput = {
   outputTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   approvedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  procurementHandedOffAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  supplierDispatchVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutOrdersNestedInput
@@ -1152,6 +1537,8 @@ export type OrderUpdateWithoutExportsInput = {
   triggerMessage?: Prisma.MessageUpdateOneRequiredWithoutTriggeredOrdersNestedInput
   items?: Prisma.OrderItemUpdateManyWithoutOrderNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutOrderNestedInput
+  procurementHandedOffByUser?: Prisma.UserUpdateOneWithoutProcurementHandOffsNestedInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutExportsInput = {
@@ -1170,10 +1557,14 @@ export type OrderUncheckedUpdateWithoutExportsInput = {
   outputTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   approvedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  procurementHandedOffAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  procurementHandedOffBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supplierDispatchVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrderNestedInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderCreateWithoutAuditLogsInput = {
@@ -1189,6 +1580,8 @@ export type OrderCreateWithoutAuditLogsInput = {
   outputTokens?: number | null
   approvedAt?: Date | string | null
   approvedBy?: string | null
+  procurementHandedOffAt?: Date | string | null
+  supplierDispatchVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutOrdersInput
@@ -1196,6 +1589,8 @@ export type OrderCreateWithoutAuditLogsInput = {
   triggerMessage: Prisma.MessageCreateNestedOneWithoutTriggeredOrdersInput
   items?: Prisma.OrderItemCreateNestedManyWithoutOrderInput
   exports?: Prisma.OrderExportCreateNestedManyWithoutOrderInput
+  procurementHandedOffByUser?: Prisma.UserCreateNestedOneWithoutProcurementHandOffsInput
+  telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutAuditLogsInput = {
@@ -1214,10 +1609,14 @@ export type OrderUncheckedCreateWithoutAuditLogsInput = {
   outputTokens?: number | null
   approvedAt?: Date | string | null
   approvedBy?: string | null
+  procurementHandedOffAt?: Date | string | null
+  procurementHandedOffBy?: string | null
+  supplierDispatchVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
   exports?: Prisma.OrderExportUncheckedCreateNestedManyWithoutOrderInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutAuditLogsInput = {
@@ -1249,6 +1648,8 @@ export type OrderUpdateWithoutAuditLogsInput = {
   outputTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   approvedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  procurementHandedOffAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  supplierDispatchVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutOrdersNestedInput
@@ -1256,6 +1657,8 @@ export type OrderUpdateWithoutAuditLogsInput = {
   triggerMessage?: Prisma.MessageUpdateOneRequiredWithoutTriggeredOrdersNestedInput
   items?: Prisma.OrderItemUpdateManyWithoutOrderNestedInput
   exports?: Prisma.OrderExportUpdateManyWithoutOrderNestedInput
+  procurementHandedOffByUser?: Prisma.UserUpdateOneWithoutProcurementHandOffsNestedInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutAuditLogsInput = {
@@ -1274,10 +1677,14 @@ export type OrderUncheckedUpdateWithoutAuditLogsInput = {
   outputTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   approvedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  procurementHandedOffAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  procurementHandedOffBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supplierDispatchVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
   exports?: Prisma.OrderExportUncheckedUpdateManyWithoutOrderNestedInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderCreateWithoutItemsInput = {
@@ -1293,6 +1700,8 @@ export type OrderCreateWithoutItemsInput = {
   outputTokens?: number | null
   approvedAt?: Date | string | null
   approvedBy?: string | null
+  procurementHandedOffAt?: Date | string | null
+  supplierDispatchVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutOrdersInput
@@ -1300,6 +1709,8 @@ export type OrderCreateWithoutItemsInput = {
   triggerMessage: Prisma.MessageCreateNestedOneWithoutTriggeredOrdersInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrderInput
   exports?: Prisma.OrderExportCreateNestedManyWithoutOrderInput
+  procurementHandedOffByUser?: Prisma.UserCreateNestedOneWithoutProcurementHandOffsInput
+  telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutItemsInput = {
@@ -1318,10 +1729,14 @@ export type OrderUncheckedCreateWithoutItemsInput = {
   outputTokens?: number | null
   approvedAt?: Date | string | null
   approvedBy?: string | null
+  procurementHandedOffAt?: Date | string | null
+  procurementHandedOffBy?: string | null
+  supplierDispatchVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrderInput
   exports?: Prisma.OrderExportUncheckedCreateNestedManyWithoutOrderInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutItemsInput = {
@@ -1353,6 +1768,8 @@ export type OrderUpdateWithoutItemsInput = {
   outputTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   approvedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  procurementHandedOffAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  supplierDispatchVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutOrdersNestedInput
@@ -1360,6 +1777,8 @@ export type OrderUpdateWithoutItemsInput = {
   triggerMessage?: Prisma.MessageUpdateOneRequiredWithoutTriggeredOrdersNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutOrderNestedInput
   exports?: Prisma.OrderExportUpdateManyWithoutOrderNestedInput
+  procurementHandedOffByUser?: Prisma.UserUpdateOneWithoutProcurementHandOffsNestedInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutItemsInput = {
@@ -1378,10 +1797,14 @@ export type OrderUncheckedUpdateWithoutItemsInput = {
   outputTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   approvedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  procurementHandedOffAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  procurementHandedOffBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supplierDispatchVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrderNestedInput
   exports?: Prisma.OrderExportUncheckedUpdateManyWithoutOrderNestedInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderCreateManyTenantInput = {
@@ -1399,6 +1822,9 @@ export type OrderCreateManyTenantInput = {
   outputTokens?: number | null
   approvedAt?: Date | string | null
   approvedBy?: string | null
+  procurementHandedOffAt?: Date | string | null
+  procurementHandedOffBy?: string | null
+  supplierDispatchVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1416,6 +1842,8 @@ export type OrderUpdateWithoutTenantInput = {
   outputTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   approvedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  procurementHandedOffAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  supplierDispatchVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   conversation?: Prisma.ConversationUpdateOneRequiredWithoutOrdersNestedInput
@@ -1423,6 +1851,8 @@ export type OrderUpdateWithoutTenantInput = {
   items?: Prisma.OrderItemUpdateManyWithoutOrderNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutOrderNestedInput
   exports?: Prisma.OrderExportUpdateManyWithoutOrderNestedInput
+  procurementHandedOffByUser?: Prisma.UserUpdateOneWithoutProcurementHandOffsNestedInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutTenantInput = {
@@ -1440,11 +1870,15 @@ export type OrderUncheckedUpdateWithoutTenantInput = {
   outputTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   approvedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  procurementHandedOffAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  procurementHandedOffBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supplierDispatchVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrderNestedInput
   exports?: Prisma.OrderExportUncheckedUpdateManyWithoutOrderNestedInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateManyWithoutTenantInput = {
@@ -1462,6 +1896,105 @@ export type OrderUncheckedUpdateManyWithoutTenantInput = {
   outputTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   approvedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  procurementHandedOffAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  procurementHandedOffBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supplierDispatchVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type OrderCreateManyProcurementHandedOffByUserInput = {
+  id?: string
+  tenantId: string
+  conversationId: string
+  triggerMessageId: string
+  status?: string
+  extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  overallConfidence?: number | null
+  aiResponseId?: string | null
+  aiModel?: string | null
+  promptVersion: string
+  inputTokens?: number | null
+  outputTokens?: number | null
+  approvedAt?: Date | string | null
+  approvedBy?: string | null
+  procurementHandedOffAt?: Date | string | null
+  supplierDispatchVersion?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type OrderUpdateWithoutProcurementHandedOffByUserInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  overallConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  aiResponseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aiModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  promptVersion?: Prisma.StringFieldUpdateOperationsInput | string
+  inputTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  outputTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  approvedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  procurementHandedOffAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  supplierDispatchVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutOrdersNestedInput
+  conversation?: Prisma.ConversationUpdateOneRequiredWithoutOrdersNestedInput
+  triggerMessage?: Prisma.MessageUpdateOneRequiredWithoutTriggeredOrdersNestedInput
+  items?: Prisma.OrderItemUpdateManyWithoutOrderNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutOrderNestedInput
+  exports?: Prisma.OrderExportUpdateManyWithoutOrderNestedInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutOrderNestedInput
+}
+
+export type OrderUncheckedUpdateWithoutProcurementHandedOffByUserInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  conversationId?: Prisma.StringFieldUpdateOperationsInput | string
+  triggerMessageId?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  overallConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  aiResponseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aiModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  promptVersion?: Prisma.StringFieldUpdateOperationsInput | string
+  inputTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  outputTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  approvedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  procurementHandedOffAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  supplierDispatchVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrderNestedInput
+  exports?: Prisma.OrderExportUncheckedUpdateManyWithoutOrderNestedInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutOrderNestedInput
+}
+
+export type OrderUncheckedUpdateManyWithoutProcurementHandedOffByUserInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  conversationId?: Prisma.StringFieldUpdateOperationsInput | string
+  triggerMessageId?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  overallConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  aiResponseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aiModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  promptVersion?: Prisma.StringFieldUpdateOperationsInput | string
+  inputTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  outputTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  approvedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  procurementHandedOffAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  supplierDispatchVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1481,6 +2014,9 @@ export type OrderCreateManyConversationInput = {
   outputTokens?: number | null
   approvedAt?: Date | string | null
   approvedBy?: string | null
+  procurementHandedOffAt?: Date | string | null
+  procurementHandedOffBy?: string | null
+  supplierDispatchVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1498,6 +2034,8 @@ export type OrderUpdateWithoutConversationInput = {
   outputTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   approvedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  procurementHandedOffAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  supplierDispatchVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutOrdersNestedInput
@@ -1505,6 +2043,8 @@ export type OrderUpdateWithoutConversationInput = {
   items?: Prisma.OrderItemUpdateManyWithoutOrderNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutOrderNestedInput
   exports?: Prisma.OrderExportUpdateManyWithoutOrderNestedInput
+  procurementHandedOffByUser?: Prisma.UserUpdateOneWithoutProcurementHandOffsNestedInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutConversationInput = {
@@ -1522,11 +2062,15 @@ export type OrderUncheckedUpdateWithoutConversationInput = {
   outputTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   approvedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  procurementHandedOffAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  procurementHandedOffBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supplierDispatchVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrderNestedInput
   exports?: Prisma.OrderExportUncheckedUpdateManyWithoutOrderNestedInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateManyWithoutConversationInput = {
@@ -1544,6 +2088,9 @@ export type OrderUncheckedUpdateManyWithoutConversationInput = {
   outputTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   approvedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  procurementHandedOffAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  procurementHandedOffBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supplierDispatchVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1563,6 +2110,9 @@ export type OrderCreateManyTriggerMessageInput = {
   outputTokens?: number | null
   approvedAt?: Date | string | null
   approvedBy?: string | null
+  procurementHandedOffAt?: Date | string | null
+  procurementHandedOffBy?: string | null
+  supplierDispatchVersion?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1580,6 +2130,8 @@ export type OrderUpdateWithoutTriggerMessageInput = {
   outputTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   approvedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  procurementHandedOffAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  supplierDispatchVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutOrdersNestedInput
@@ -1587,6 +2139,8 @@ export type OrderUpdateWithoutTriggerMessageInput = {
   items?: Prisma.OrderItemUpdateManyWithoutOrderNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutOrderNestedInput
   exports?: Prisma.OrderExportUpdateManyWithoutOrderNestedInput
+  procurementHandedOffByUser?: Prisma.UserUpdateOneWithoutProcurementHandOffsNestedInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutTriggerMessageInput = {
@@ -1604,11 +2158,15 @@ export type OrderUncheckedUpdateWithoutTriggerMessageInput = {
   outputTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   approvedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  procurementHandedOffAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  procurementHandedOffBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supplierDispatchVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrderNestedInput
   exports?: Prisma.OrderExportUncheckedUpdateManyWithoutOrderNestedInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateManyWithoutTriggerMessageInput = {
@@ -1626,6 +2184,9 @@ export type OrderUncheckedUpdateManyWithoutTriggerMessageInput = {
   outputTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   approvedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  procurementHandedOffAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  procurementHandedOffBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supplierDispatchVersion?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1639,12 +2200,14 @@ export type OrderCountOutputType = {
   items: number
   auditLogs: number
   exports: number
+  telegramDeliveries: number
 }
 
 export type OrderCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   items?: boolean | OrderCountOutputTypeCountItemsArgs
   auditLogs?: boolean | OrderCountOutputTypeCountAuditLogsArgs
   exports?: boolean | OrderCountOutputTypeCountExportsArgs
+  telegramDeliveries?: boolean | OrderCountOutputTypeCountTelegramDeliveriesArgs
 }
 
 /**
@@ -1678,6 +2241,13 @@ export type OrderCountOutputTypeCountExportsArgs<ExtArgs extends runtime.Types.E
   where?: Prisma.OrderExportWhereInput
 }
 
+/**
+ * OrderCountOutputType without action
+ */
+export type OrderCountOutputTypeCountTelegramDeliveriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TelegramDeliveryWhereInput
+}
+
 
 export type OrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1695,6 +2265,9 @@ export type OrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   outputTokens?: boolean
   approvedAt?: boolean
   approvedBy?: boolean
+  procurementHandedOffAt?: boolean
+  procurementHandedOffBy?: boolean
+  supplierDispatchVersion?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
@@ -1703,6 +2276,8 @@ export type OrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   items?: boolean | Prisma.Order$itemsArgs<ExtArgs>
   auditLogs?: boolean | Prisma.Order$auditLogsArgs<ExtArgs>
   exports?: boolean | Prisma.Order$exportsArgs<ExtArgs>
+  procurementHandedOffByUser?: boolean | Prisma.Order$procurementHandedOffByUserArgs<ExtArgs>
+  telegramDeliveries?: boolean | Prisma.Order$telegramDeliveriesArgs<ExtArgs>
   _count?: boolean | Prisma.OrderCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["order"]>
 
@@ -1722,11 +2297,15 @@ export type OrderSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   outputTokens?: boolean
   approvedAt?: boolean
   approvedBy?: boolean
+  procurementHandedOffAt?: boolean
+  procurementHandedOffBy?: boolean
+  supplierDispatchVersion?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
   triggerMessage?: boolean | Prisma.MessageDefaultArgs<ExtArgs>
+  procurementHandedOffByUser?: boolean | Prisma.Order$procurementHandedOffByUserArgs<ExtArgs>
 }, ExtArgs["result"]["order"]>
 
 export type OrderSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1745,11 +2324,15 @@ export type OrderSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   outputTokens?: boolean
   approvedAt?: boolean
   approvedBy?: boolean
+  procurementHandedOffAt?: boolean
+  procurementHandedOffBy?: boolean
+  supplierDispatchVersion?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
   triggerMessage?: boolean | Prisma.MessageDefaultArgs<ExtArgs>
+  procurementHandedOffByUser?: boolean | Prisma.Order$procurementHandedOffByUserArgs<ExtArgs>
 }, ExtArgs["result"]["order"]>
 
 export type OrderSelectScalar = {
@@ -1768,11 +2351,14 @@ export type OrderSelectScalar = {
   outputTokens?: boolean
   approvedAt?: boolean
   approvedBy?: boolean
+  procurementHandedOffAt?: boolean
+  procurementHandedOffBy?: boolean
+  supplierDispatchVersion?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type OrderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "conversationId" | "triggerMessageId" | "status" | "extraction" | "validationIssues" | "overallConfidence" | "aiResponseId" | "aiModel" | "promptVersion" | "inputTokens" | "outputTokens" | "approvedAt" | "approvedBy" | "createdAt" | "updatedAt", ExtArgs["result"]["order"]>
+export type OrderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "conversationId" | "triggerMessageId" | "status" | "extraction" | "validationIssues" | "overallConfidence" | "aiResponseId" | "aiModel" | "promptVersion" | "inputTokens" | "outputTokens" | "approvedAt" | "approvedBy" | "procurementHandedOffAt" | "procurementHandedOffBy" | "supplierDispatchVersion" | "createdAt" | "updatedAt", ExtArgs["result"]["order"]>
 export type OrderInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
@@ -1780,17 +2366,21 @@ export type OrderInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   items?: boolean | Prisma.Order$itemsArgs<ExtArgs>
   auditLogs?: boolean | Prisma.Order$auditLogsArgs<ExtArgs>
   exports?: boolean | Prisma.Order$exportsArgs<ExtArgs>
+  procurementHandedOffByUser?: boolean | Prisma.Order$procurementHandedOffByUserArgs<ExtArgs>
+  telegramDeliveries?: boolean | Prisma.Order$telegramDeliveriesArgs<ExtArgs>
   _count?: boolean | Prisma.OrderCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type OrderIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
   triggerMessage?: boolean | Prisma.MessageDefaultArgs<ExtArgs>
+  procurementHandedOffByUser?: boolean | Prisma.Order$procurementHandedOffByUserArgs<ExtArgs>
 }
 export type OrderIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
   triggerMessage?: boolean | Prisma.MessageDefaultArgs<ExtArgs>
+  procurementHandedOffByUser?: boolean | Prisma.Order$procurementHandedOffByUserArgs<ExtArgs>
 }
 
 export type $OrderPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1802,6 +2392,8 @@ export type $OrderPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     items: Prisma.$OrderItemPayload<ExtArgs>[]
     auditLogs: Prisma.$AuditLogPayload<ExtArgs>[]
     exports: Prisma.$OrderExportPayload<ExtArgs>[]
+    procurementHandedOffByUser: Prisma.$UserPayload<ExtArgs> | null
+    telegramDeliveries: Prisma.$TelegramDeliveryPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1819,6 +2411,9 @@ export type $OrderPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     outputTokens: number | null
     approvedAt: Date | null
     approvedBy: string | null
+    procurementHandedOffAt: Date | null
+    procurementHandedOffBy: string | null
+    supplierDispatchVersion: number
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["order"]>
@@ -2221,6 +2816,8 @@ export interface Prisma__OrderClient<T, Null = never, ExtArgs extends runtime.Ty
   items<T extends Prisma.Order$itemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$itemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   auditLogs<T extends Prisma.Order$auditLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$auditLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   exports<T extends Prisma.Order$exportsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$exportsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderExportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  procurementHandedOffByUser<T extends Prisma.Order$procurementHandedOffByUserArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$procurementHandedOffByUserArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  telegramDeliveries<T extends Prisma.Order$telegramDeliveriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$telegramDeliveriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TelegramDeliveryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2265,6 +2862,9 @@ export interface OrderFieldRefs {
   readonly outputTokens: Prisma.FieldRef<"Order", 'Int'>
   readonly approvedAt: Prisma.FieldRef<"Order", 'DateTime'>
   readonly approvedBy: Prisma.FieldRef<"Order", 'String'>
+  readonly procurementHandedOffAt: Prisma.FieldRef<"Order", 'DateTime'>
+  readonly procurementHandedOffBy: Prisma.FieldRef<"Order", 'String'>
+  readonly supplierDispatchVersion: Prisma.FieldRef<"Order", 'Int'>
   readonly createdAt: Prisma.FieldRef<"Order", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Order", 'DateTime'>
 }
@@ -2737,6 +3337,49 @@ export type Order$exportsArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   take?: number
   skip?: number
   distinct?: Prisma.OrderExportScalarFieldEnum | Prisma.OrderExportScalarFieldEnum[]
+}
+
+/**
+ * Order.procurementHandedOffByUser
+ */
+export type Order$procurementHandedOffByUserArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
+}
+
+/**
+ * Order.telegramDeliveries
+ */
+export type Order$telegramDeliveriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TelegramDelivery
+   */
+  select?: Prisma.TelegramDeliverySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the TelegramDelivery
+   */
+  omit?: Prisma.TelegramDeliveryOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TelegramDeliveryInclude<ExtArgs> | null
+  where?: Prisma.TelegramDeliveryWhereInput
+  orderBy?: Prisma.TelegramDeliveryOrderByWithRelationInput | Prisma.TelegramDeliveryOrderByWithRelationInput[]
+  cursor?: Prisma.TelegramDeliveryWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TelegramDeliveryScalarFieldEnum | Prisma.TelegramDeliveryScalarFieldEnum[]
 }
 
 /**

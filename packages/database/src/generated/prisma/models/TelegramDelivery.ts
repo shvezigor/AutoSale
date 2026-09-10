@@ -38,6 +38,8 @@ export type TelegramDeliveryMinAggregateOutputType = {
   id: string | null
   tenantId: string | null
   destinationId: string | null
+  orderId: string | null
+  sourceNotificationId: string | null
   purpose: $Enums.TelegramDeliveryPurpose | null
   status: $Enums.TelegramDeliveryStatus | null
   idempotencyKey: string | null
@@ -58,6 +60,8 @@ export type TelegramDeliveryMaxAggregateOutputType = {
   id: string | null
   tenantId: string | null
   destinationId: string | null
+  orderId: string | null
+  sourceNotificationId: string | null
   purpose: $Enums.TelegramDeliveryPurpose | null
   status: $Enums.TelegramDeliveryStatus | null
   idempotencyKey: string | null
@@ -78,6 +82,8 @@ export type TelegramDeliveryCountAggregateOutputType = {
   id: number
   tenantId: number
   destinationId: number
+  orderId: number
+  sourceNotificationId: number
   purpose: number
   status: number
   idempotencyKey: number
@@ -108,6 +114,8 @@ export type TelegramDeliveryMinAggregateInputType = {
   id?: true
   tenantId?: true
   destinationId?: true
+  orderId?: true
+  sourceNotificationId?: true
   purpose?: true
   status?: true
   idempotencyKey?: true
@@ -128,6 +136,8 @@ export type TelegramDeliveryMaxAggregateInputType = {
   id?: true
   tenantId?: true
   destinationId?: true
+  orderId?: true
+  sourceNotificationId?: true
   purpose?: true
   status?: true
   idempotencyKey?: true
@@ -148,6 +158,8 @@ export type TelegramDeliveryCountAggregateInputType = {
   id?: true
   tenantId?: true
   destinationId?: true
+  orderId?: true
+  sourceNotificationId?: true
   purpose?: true
   status?: true
   idempotencyKey?: true
@@ -255,6 +267,8 @@ export type TelegramDeliveryGroupByOutputType = {
   id: string
   tenantId: string
   destinationId: string
+  orderId: string | null
+  sourceNotificationId: string | null
   purpose: $Enums.TelegramDeliveryPurpose
   status: $Enums.TelegramDeliveryStatus
   idempotencyKey: string
@@ -298,6 +312,8 @@ export type TelegramDeliveryWhereInput = {
   id?: Prisma.UuidFilter<"TelegramDelivery"> | string
   tenantId?: Prisma.UuidFilter<"TelegramDelivery"> | string
   destinationId?: Prisma.UuidFilter<"TelegramDelivery"> | string
+  orderId?: Prisma.UuidNullableFilter<"TelegramDelivery"> | string | null
+  sourceNotificationId?: Prisma.UuidNullableFilter<"TelegramDelivery"> | string | null
   purpose?: Prisma.EnumTelegramDeliveryPurposeFilter<"TelegramDelivery"> | $Enums.TelegramDeliveryPurpose
   status?: Prisma.EnumTelegramDeliveryStatusFilter<"TelegramDelivery"> | $Enums.TelegramDeliveryStatus
   idempotencyKey?: Prisma.StringFilter<"TelegramDelivery"> | string
@@ -314,12 +330,17 @@ export type TelegramDeliveryWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"TelegramDelivery"> | Date | string
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
   destination?: Prisma.XOR<Prisma.TelegramChatScalarRelationFilter, Prisma.TelegramChatWhereInput>
+  order?: Prisma.XOR<Prisma.OrderNullableScalarRelationFilter, Prisma.OrderWhereInput> | null
+  sourceNotification?: Prisma.XOR<Prisma.UserNotificationNullableScalarRelationFilter, Prisma.UserNotificationWhereInput> | null
+  items?: Prisma.TelegramDeliveryItemListRelationFilter
 }
 
 export type TelegramDeliveryOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   tenantId?: Prisma.SortOrder
   destinationId?: Prisma.SortOrder
+  orderId?: Prisma.SortOrderInput | Prisma.SortOrder
+  sourceNotificationId?: Prisma.SortOrderInput | Prisma.SortOrder
   purpose?: Prisma.SortOrder
   status?: Prisma.SortOrder
   idempotencyKey?: Prisma.SortOrder
@@ -336,16 +357,22 @@ export type TelegramDeliveryOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   tenant?: Prisma.TenantOrderByWithRelationInput
   destination?: Prisma.TelegramChatOrderByWithRelationInput
+  order?: Prisma.OrderOrderByWithRelationInput
+  sourceNotification?: Prisma.UserNotificationOrderByWithRelationInput
+  items?: Prisma.TelegramDeliveryItemOrderByRelationAggregateInput
 }
 
 export type TelegramDeliveryWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  tenantId_id?: Prisma.TelegramDeliveryTenantIdIdCompoundUniqueInput
   tenantId_idempotencyKey?: Prisma.TelegramDeliveryTenantIdIdempotencyKeyCompoundUniqueInput
   AND?: Prisma.TelegramDeliveryWhereInput | Prisma.TelegramDeliveryWhereInput[]
   OR?: Prisma.TelegramDeliveryWhereInput[]
   NOT?: Prisma.TelegramDeliveryWhereInput | Prisma.TelegramDeliveryWhereInput[]
   tenantId?: Prisma.UuidFilter<"TelegramDelivery"> | string
   destinationId?: Prisma.UuidFilter<"TelegramDelivery"> | string
+  orderId?: Prisma.UuidNullableFilter<"TelegramDelivery"> | string | null
+  sourceNotificationId?: Prisma.UuidNullableFilter<"TelegramDelivery"> | string | null
   purpose?: Prisma.EnumTelegramDeliveryPurposeFilter<"TelegramDelivery"> | $Enums.TelegramDeliveryPurpose
   status?: Prisma.EnumTelegramDeliveryStatusFilter<"TelegramDelivery"> | $Enums.TelegramDeliveryStatus
   idempotencyKey?: Prisma.StringFilter<"TelegramDelivery"> | string
@@ -362,12 +389,17 @@ export type TelegramDeliveryWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"TelegramDelivery"> | Date | string
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
   destination?: Prisma.XOR<Prisma.TelegramChatScalarRelationFilter, Prisma.TelegramChatWhereInput>
-}, "id" | "tenantId_idempotencyKey">
+  order?: Prisma.XOR<Prisma.OrderNullableScalarRelationFilter, Prisma.OrderWhereInput> | null
+  sourceNotification?: Prisma.XOR<Prisma.UserNotificationNullableScalarRelationFilter, Prisma.UserNotificationWhereInput> | null
+  items?: Prisma.TelegramDeliveryItemListRelationFilter
+}, "id" | "tenantId_id" | "tenantId_idempotencyKey">
 
 export type TelegramDeliveryOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   tenantId?: Prisma.SortOrder
   destinationId?: Prisma.SortOrder
+  orderId?: Prisma.SortOrderInput | Prisma.SortOrder
+  sourceNotificationId?: Prisma.SortOrderInput | Prisma.SortOrder
   purpose?: Prisma.SortOrder
   status?: Prisma.SortOrder
   idempotencyKey?: Prisma.SortOrder
@@ -396,6 +428,8 @@ export type TelegramDeliveryScalarWhereWithAggregatesInput = {
   id?: Prisma.UuidWithAggregatesFilter<"TelegramDelivery"> | string
   tenantId?: Prisma.UuidWithAggregatesFilter<"TelegramDelivery"> | string
   destinationId?: Prisma.UuidWithAggregatesFilter<"TelegramDelivery"> | string
+  orderId?: Prisma.UuidNullableWithAggregatesFilter<"TelegramDelivery"> | string | null
+  sourceNotificationId?: Prisma.UuidNullableWithAggregatesFilter<"TelegramDelivery"> | string | null
   purpose?: Prisma.EnumTelegramDeliveryPurposeWithAggregatesFilter<"TelegramDelivery"> | $Enums.TelegramDeliveryPurpose
   status?: Prisma.EnumTelegramDeliveryStatusWithAggregatesFilter<"TelegramDelivery"> | $Enums.TelegramDeliveryStatus
   idempotencyKey?: Prisma.StringWithAggregatesFilter<"TelegramDelivery"> | string
@@ -430,12 +464,17 @@ export type TelegramDeliveryCreateInput = {
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutTelegramDeliveriesInput
   destination: Prisma.TelegramChatCreateNestedOneWithoutDeliveriesInput
+  order?: Prisma.OrderCreateNestedOneWithoutTelegramDeliveriesInput
+  sourceNotification?: Prisma.UserNotificationCreateNestedOneWithoutTelegramDeliveriesInput
+  items?: Prisma.TelegramDeliveryItemCreateNestedManyWithoutDeliveryInput
 }
 
 export type TelegramDeliveryUncheckedCreateInput = {
   id?: string
   tenantId: string
   destinationId: string
+  orderId?: string | null
+  sourceNotificationId?: string | null
   purpose: $Enums.TelegramDeliveryPurpose
   status?: $Enums.TelegramDeliveryStatus
   idempotencyKey: string
@@ -450,6 +489,7 @@ export type TelegramDeliveryUncheckedCreateInput = {
   completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  items?: Prisma.TelegramDeliveryItemUncheckedCreateNestedManyWithoutDeliveryInput
 }
 
 export type TelegramDeliveryUpdateInput = {
@@ -470,12 +510,17 @@ export type TelegramDeliveryUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutTelegramDeliveriesNestedInput
   destination?: Prisma.TelegramChatUpdateOneRequiredWithoutDeliveriesNestedInput
+  order?: Prisma.OrderUpdateOneWithoutTelegramDeliveriesNestedInput
+  sourceNotification?: Prisma.UserNotificationUpdateOneWithoutTelegramDeliveriesNestedInput
+  items?: Prisma.TelegramDeliveryItemUpdateManyWithoutDeliveryNestedInput
 }
 
 export type TelegramDeliveryUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   destinationId?: Prisma.StringFieldUpdateOperationsInput | string
+  orderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceNotificationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purpose?: Prisma.EnumTelegramDeliveryPurposeFieldUpdateOperationsInput | $Enums.TelegramDeliveryPurpose
   status?: Prisma.EnumTelegramDeliveryStatusFieldUpdateOperationsInput | $Enums.TelegramDeliveryStatus
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
@@ -490,12 +535,15 @@ export type TelegramDeliveryUncheckedUpdateInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  items?: Prisma.TelegramDeliveryItemUncheckedUpdateManyWithoutDeliveryNestedInput
 }
 
 export type TelegramDeliveryCreateManyInput = {
   id?: string
   tenantId: string
   destinationId: string
+  orderId?: string | null
+  sourceNotificationId?: string | null
   purpose: $Enums.TelegramDeliveryPurpose
   status?: $Enums.TelegramDeliveryStatus
   idempotencyKey: string
@@ -534,6 +582,8 @@ export type TelegramDeliveryUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   destinationId?: Prisma.StringFieldUpdateOperationsInput | string
+  orderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceNotificationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purpose?: Prisma.EnumTelegramDeliveryPurposeFieldUpdateOperationsInput | $Enums.TelegramDeliveryPurpose
   status?: Prisma.EnumTelegramDeliveryStatusFieldUpdateOperationsInput | $Enums.TelegramDeliveryStatus
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
@@ -560,6 +610,11 @@ export type TelegramDeliveryOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
+export type TelegramDeliveryTenantIdIdCompoundUniqueInput = {
+  tenantId: string
+  id: string
+}
+
 export type TelegramDeliveryTenantIdIdempotencyKeyCompoundUniqueInput = {
   tenantId: string
   idempotencyKey: string
@@ -569,6 +624,8 @@ export type TelegramDeliveryCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   tenantId?: Prisma.SortOrder
   destinationId?: Prisma.SortOrder
+  orderId?: Prisma.SortOrder
+  sourceNotificationId?: Prisma.SortOrder
   purpose?: Prisma.SortOrder
   status?: Prisma.SortOrder
   idempotencyKey?: Prisma.SortOrder
@@ -593,6 +650,8 @@ export type TelegramDeliveryMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   tenantId?: Prisma.SortOrder
   destinationId?: Prisma.SortOrder
+  orderId?: Prisma.SortOrder
+  sourceNotificationId?: Prisma.SortOrder
   purpose?: Prisma.SortOrder
   status?: Prisma.SortOrder
   idempotencyKey?: Prisma.SortOrder
@@ -613,6 +672,8 @@ export type TelegramDeliveryMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   tenantId?: Prisma.SortOrder
   destinationId?: Prisma.SortOrder
+  orderId?: Prisma.SortOrder
+  sourceNotificationId?: Prisma.SortOrder
   purpose?: Prisma.SortOrder
   status?: Prisma.SortOrder
   idempotencyKey?: Prisma.SortOrder
@@ -631,6 +692,11 @@ export type TelegramDeliveryMinOrderByAggregateInput = {
 
 export type TelegramDeliverySumOrderByAggregateInput = {
   attempts?: Prisma.SortOrder
+}
+
+export type TelegramDeliveryScalarRelationFilter = {
+  is?: Prisma.TelegramDeliveryWhereInput
+  isNot?: Prisma.TelegramDeliveryWhereInput
 }
 
 export type TelegramDeliveryCreateNestedManyWithoutTenantInput = {
@@ -672,6 +738,48 @@ export type TelegramDeliveryUncheckedUpdateManyWithoutTenantNestedInput = {
   connect?: Prisma.TelegramDeliveryWhereUniqueInput | Prisma.TelegramDeliveryWhereUniqueInput[]
   update?: Prisma.TelegramDeliveryUpdateWithWhereUniqueWithoutTenantInput | Prisma.TelegramDeliveryUpdateWithWhereUniqueWithoutTenantInput[]
   updateMany?: Prisma.TelegramDeliveryUpdateManyWithWhereWithoutTenantInput | Prisma.TelegramDeliveryUpdateManyWithWhereWithoutTenantInput[]
+  deleteMany?: Prisma.TelegramDeliveryScalarWhereInput | Prisma.TelegramDeliveryScalarWhereInput[]
+}
+
+export type TelegramDeliveryCreateNestedManyWithoutSourceNotificationInput = {
+  create?: Prisma.XOR<Prisma.TelegramDeliveryCreateWithoutSourceNotificationInput, Prisma.TelegramDeliveryUncheckedCreateWithoutSourceNotificationInput> | Prisma.TelegramDeliveryCreateWithoutSourceNotificationInput[] | Prisma.TelegramDeliveryUncheckedCreateWithoutSourceNotificationInput[]
+  connectOrCreate?: Prisma.TelegramDeliveryCreateOrConnectWithoutSourceNotificationInput | Prisma.TelegramDeliveryCreateOrConnectWithoutSourceNotificationInput[]
+  createMany?: Prisma.TelegramDeliveryCreateManySourceNotificationInputEnvelope
+  connect?: Prisma.TelegramDeliveryWhereUniqueInput | Prisma.TelegramDeliveryWhereUniqueInput[]
+}
+
+export type TelegramDeliveryUncheckedCreateNestedManyWithoutSourceNotificationInput = {
+  create?: Prisma.XOR<Prisma.TelegramDeliveryCreateWithoutSourceNotificationInput, Prisma.TelegramDeliveryUncheckedCreateWithoutSourceNotificationInput> | Prisma.TelegramDeliveryCreateWithoutSourceNotificationInput[] | Prisma.TelegramDeliveryUncheckedCreateWithoutSourceNotificationInput[]
+  connectOrCreate?: Prisma.TelegramDeliveryCreateOrConnectWithoutSourceNotificationInput | Prisma.TelegramDeliveryCreateOrConnectWithoutSourceNotificationInput[]
+  createMany?: Prisma.TelegramDeliveryCreateManySourceNotificationInputEnvelope
+  connect?: Prisma.TelegramDeliveryWhereUniqueInput | Prisma.TelegramDeliveryWhereUniqueInput[]
+}
+
+export type TelegramDeliveryUpdateManyWithoutSourceNotificationNestedInput = {
+  create?: Prisma.XOR<Prisma.TelegramDeliveryCreateWithoutSourceNotificationInput, Prisma.TelegramDeliveryUncheckedCreateWithoutSourceNotificationInput> | Prisma.TelegramDeliveryCreateWithoutSourceNotificationInput[] | Prisma.TelegramDeliveryUncheckedCreateWithoutSourceNotificationInput[]
+  connectOrCreate?: Prisma.TelegramDeliveryCreateOrConnectWithoutSourceNotificationInput | Prisma.TelegramDeliveryCreateOrConnectWithoutSourceNotificationInput[]
+  upsert?: Prisma.TelegramDeliveryUpsertWithWhereUniqueWithoutSourceNotificationInput | Prisma.TelegramDeliveryUpsertWithWhereUniqueWithoutSourceNotificationInput[]
+  createMany?: Prisma.TelegramDeliveryCreateManySourceNotificationInputEnvelope
+  set?: Prisma.TelegramDeliveryWhereUniqueInput | Prisma.TelegramDeliveryWhereUniqueInput[]
+  disconnect?: Prisma.TelegramDeliveryWhereUniqueInput | Prisma.TelegramDeliveryWhereUniqueInput[]
+  delete?: Prisma.TelegramDeliveryWhereUniqueInput | Prisma.TelegramDeliveryWhereUniqueInput[]
+  connect?: Prisma.TelegramDeliveryWhereUniqueInput | Prisma.TelegramDeliveryWhereUniqueInput[]
+  update?: Prisma.TelegramDeliveryUpdateWithWhereUniqueWithoutSourceNotificationInput | Prisma.TelegramDeliveryUpdateWithWhereUniqueWithoutSourceNotificationInput[]
+  updateMany?: Prisma.TelegramDeliveryUpdateManyWithWhereWithoutSourceNotificationInput | Prisma.TelegramDeliveryUpdateManyWithWhereWithoutSourceNotificationInput[]
+  deleteMany?: Prisma.TelegramDeliveryScalarWhereInput | Prisma.TelegramDeliveryScalarWhereInput[]
+}
+
+export type TelegramDeliveryUncheckedUpdateManyWithoutSourceNotificationNestedInput = {
+  create?: Prisma.XOR<Prisma.TelegramDeliveryCreateWithoutSourceNotificationInput, Prisma.TelegramDeliveryUncheckedCreateWithoutSourceNotificationInput> | Prisma.TelegramDeliveryCreateWithoutSourceNotificationInput[] | Prisma.TelegramDeliveryUncheckedCreateWithoutSourceNotificationInput[]
+  connectOrCreate?: Prisma.TelegramDeliveryCreateOrConnectWithoutSourceNotificationInput | Prisma.TelegramDeliveryCreateOrConnectWithoutSourceNotificationInput[]
+  upsert?: Prisma.TelegramDeliveryUpsertWithWhereUniqueWithoutSourceNotificationInput | Prisma.TelegramDeliveryUpsertWithWhereUniqueWithoutSourceNotificationInput[]
+  createMany?: Prisma.TelegramDeliveryCreateManySourceNotificationInputEnvelope
+  set?: Prisma.TelegramDeliveryWhereUniqueInput | Prisma.TelegramDeliveryWhereUniqueInput[]
+  disconnect?: Prisma.TelegramDeliveryWhereUniqueInput | Prisma.TelegramDeliveryWhereUniqueInput[]
+  delete?: Prisma.TelegramDeliveryWhereUniqueInput | Prisma.TelegramDeliveryWhereUniqueInput[]
+  connect?: Prisma.TelegramDeliveryWhereUniqueInput | Prisma.TelegramDeliveryWhereUniqueInput[]
+  update?: Prisma.TelegramDeliveryUpdateWithWhereUniqueWithoutSourceNotificationInput | Prisma.TelegramDeliveryUpdateWithWhereUniqueWithoutSourceNotificationInput[]
+  updateMany?: Prisma.TelegramDeliveryUpdateManyWithWhereWithoutSourceNotificationInput | Prisma.TelegramDeliveryUpdateManyWithWhereWithoutSourceNotificationInput[]
   deleteMany?: Prisma.TelegramDeliveryScalarWhereInput | Prisma.TelegramDeliveryScalarWhereInput[]
 }
 
@@ -725,6 +833,62 @@ export type EnumTelegramDeliveryStatusFieldUpdateOperationsInput = {
   set?: $Enums.TelegramDeliveryStatus
 }
 
+export type TelegramDeliveryCreateNestedManyWithoutOrderInput = {
+  create?: Prisma.XOR<Prisma.TelegramDeliveryCreateWithoutOrderInput, Prisma.TelegramDeliveryUncheckedCreateWithoutOrderInput> | Prisma.TelegramDeliveryCreateWithoutOrderInput[] | Prisma.TelegramDeliveryUncheckedCreateWithoutOrderInput[]
+  connectOrCreate?: Prisma.TelegramDeliveryCreateOrConnectWithoutOrderInput | Prisma.TelegramDeliveryCreateOrConnectWithoutOrderInput[]
+  createMany?: Prisma.TelegramDeliveryCreateManyOrderInputEnvelope
+  connect?: Prisma.TelegramDeliveryWhereUniqueInput | Prisma.TelegramDeliveryWhereUniqueInput[]
+}
+
+export type TelegramDeliveryUncheckedCreateNestedManyWithoutOrderInput = {
+  create?: Prisma.XOR<Prisma.TelegramDeliveryCreateWithoutOrderInput, Prisma.TelegramDeliveryUncheckedCreateWithoutOrderInput> | Prisma.TelegramDeliveryCreateWithoutOrderInput[] | Prisma.TelegramDeliveryUncheckedCreateWithoutOrderInput[]
+  connectOrCreate?: Prisma.TelegramDeliveryCreateOrConnectWithoutOrderInput | Prisma.TelegramDeliveryCreateOrConnectWithoutOrderInput[]
+  createMany?: Prisma.TelegramDeliveryCreateManyOrderInputEnvelope
+  connect?: Prisma.TelegramDeliveryWhereUniqueInput | Prisma.TelegramDeliveryWhereUniqueInput[]
+}
+
+export type TelegramDeliveryUpdateManyWithoutOrderNestedInput = {
+  create?: Prisma.XOR<Prisma.TelegramDeliveryCreateWithoutOrderInput, Prisma.TelegramDeliveryUncheckedCreateWithoutOrderInput> | Prisma.TelegramDeliveryCreateWithoutOrderInput[] | Prisma.TelegramDeliveryUncheckedCreateWithoutOrderInput[]
+  connectOrCreate?: Prisma.TelegramDeliveryCreateOrConnectWithoutOrderInput | Prisma.TelegramDeliveryCreateOrConnectWithoutOrderInput[]
+  upsert?: Prisma.TelegramDeliveryUpsertWithWhereUniqueWithoutOrderInput | Prisma.TelegramDeliveryUpsertWithWhereUniqueWithoutOrderInput[]
+  createMany?: Prisma.TelegramDeliveryCreateManyOrderInputEnvelope
+  set?: Prisma.TelegramDeliveryWhereUniqueInput | Prisma.TelegramDeliveryWhereUniqueInput[]
+  disconnect?: Prisma.TelegramDeliveryWhereUniqueInput | Prisma.TelegramDeliveryWhereUniqueInput[]
+  delete?: Prisma.TelegramDeliveryWhereUniqueInput | Prisma.TelegramDeliveryWhereUniqueInput[]
+  connect?: Prisma.TelegramDeliveryWhereUniqueInput | Prisma.TelegramDeliveryWhereUniqueInput[]
+  update?: Prisma.TelegramDeliveryUpdateWithWhereUniqueWithoutOrderInput | Prisma.TelegramDeliveryUpdateWithWhereUniqueWithoutOrderInput[]
+  updateMany?: Prisma.TelegramDeliveryUpdateManyWithWhereWithoutOrderInput | Prisma.TelegramDeliveryUpdateManyWithWhereWithoutOrderInput[]
+  deleteMany?: Prisma.TelegramDeliveryScalarWhereInput | Prisma.TelegramDeliveryScalarWhereInput[]
+}
+
+export type TelegramDeliveryUncheckedUpdateManyWithoutOrderNestedInput = {
+  create?: Prisma.XOR<Prisma.TelegramDeliveryCreateWithoutOrderInput, Prisma.TelegramDeliveryUncheckedCreateWithoutOrderInput> | Prisma.TelegramDeliveryCreateWithoutOrderInput[] | Prisma.TelegramDeliveryUncheckedCreateWithoutOrderInput[]
+  connectOrCreate?: Prisma.TelegramDeliveryCreateOrConnectWithoutOrderInput | Prisma.TelegramDeliveryCreateOrConnectWithoutOrderInput[]
+  upsert?: Prisma.TelegramDeliveryUpsertWithWhereUniqueWithoutOrderInput | Prisma.TelegramDeliveryUpsertWithWhereUniqueWithoutOrderInput[]
+  createMany?: Prisma.TelegramDeliveryCreateManyOrderInputEnvelope
+  set?: Prisma.TelegramDeliveryWhereUniqueInput | Prisma.TelegramDeliveryWhereUniqueInput[]
+  disconnect?: Prisma.TelegramDeliveryWhereUniqueInput | Prisma.TelegramDeliveryWhereUniqueInput[]
+  delete?: Prisma.TelegramDeliveryWhereUniqueInput | Prisma.TelegramDeliveryWhereUniqueInput[]
+  connect?: Prisma.TelegramDeliveryWhereUniqueInput | Prisma.TelegramDeliveryWhereUniqueInput[]
+  update?: Prisma.TelegramDeliveryUpdateWithWhereUniqueWithoutOrderInput | Prisma.TelegramDeliveryUpdateWithWhereUniqueWithoutOrderInput[]
+  updateMany?: Prisma.TelegramDeliveryUpdateManyWithWhereWithoutOrderInput | Prisma.TelegramDeliveryUpdateManyWithWhereWithoutOrderInput[]
+  deleteMany?: Prisma.TelegramDeliveryScalarWhereInput | Prisma.TelegramDeliveryScalarWhereInput[]
+}
+
+export type TelegramDeliveryCreateNestedOneWithoutItemsInput = {
+  create?: Prisma.XOR<Prisma.TelegramDeliveryCreateWithoutItemsInput, Prisma.TelegramDeliveryUncheckedCreateWithoutItemsInput>
+  connectOrCreate?: Prisma.TelegramDeliveryCreateOrConnectWithoutItemsInput
+  connect?: Prisma.TelegramDeliveryWhereUniqueInput
+}
+
+export type TelegramDeliveryUpdateOneRequiredWithoutItemsNestedInput = {
+  create?: Prisma.XOR<Prisma.TelegramDeliveryCreateWithoutItemsInput, Prisma.TelegramDeliveryUncheckedCreateWithoutItemsInput>
+  connectOrCreate?: Prisma.TelegramDeliveryCreateOrConnectWithoutItemsInput
+  upsert?: Prisma.TelegramDeliveryUpsertWithoutItemsInput
+  connect?: Prisma.TelegramDeliveryWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TelegramDeliveryUpdateToOneWithWhereWithoutItemsInput, Prisma.TelegramDeliveryUpdateWithoutItemsInput>, Prisma.TelegramDeliveryUncheckedUpdateWithoutItemsInput>
+}
+
 export type TelegramDeliveryCreateWithoutTenantInput = {
   id?: string
   purpose: $Enums.TelegramDeliveryPurpose
@@ -742,11 +906,16 @@ export type TelegramDeliveryCreateWithoutTenantInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   destination: Prisma.TelegramChatCreateNestedOneWithoutDeliveriesInput
+  order?: Prisma.OrderCreateNestedOneWithoutTelegramDeliveriesInput
+  sourceNotification?: Prisma.UserNotificationCreateNestedOneWithoutTelegramDeliveriesInput
+  items?: Prisma.TelegramDeliveryItemCreateNestedManyWithoutDeliveryInput
 }
 
 export type TelegramDeliveryUncheckedCreateWithoutTenantInput = {
   id?: string
   destinationId: string
+  orderId?: string | null
+  sourceNotificationId?: string | null
   purpose: $Enums.TelegramDeliveryPurpose
   status?: $Enums.TelegramDeliveryStatus
   idempotencyKey: string
@@ -761,6 +930,7 @@ export type TelegramDeliveryUncheckedCreateWithoutTenantInput = {
   completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  items?: Prisma.TelegramDeliveryItemUncheckedCreateNestedManyWithoutDeliveryInput
 }
 
 export type TelegramDeliveryCreateOrConnectWithoutTenantInput = {
@@ -796,6 +966,8 @@ export type TelegramDeliveryScalarWhereInput = {
   id?: Prisma.UuidFilter<"TelegramDelivery"> | string
   tenantId?: Prisma.UuidFilter<"TelegramDelivery"> | string
   destinationId?: Prisma.UuidFilter<"TelegramDelivery"> | string
+  orderId?: Prisma.UuidNullableFilter<"TelegramDelivery"> | string | null
+  sourceNotificationId?: Prisma.UuidNullableFilter<"TelegramDelivery"> | string | null
   purpose?: Prisma.EnumTelegramDeliveryPurposeFilter<"TelegramDelivery"> | $Enums.TelegramDeliveryPurpose
   status?: Prisma.EnumTelegramDeliveryStatusFilter<"TelegramDelivery"> | $Enums.TelegramDeliveryStatus
   idempotencyKey?: Prisma.StringFilter<"TelegramDelivery"> | string
@@ -810,6 +982,75 @@ export type TelegramDeliveryScalarWhereInput = {
   completedAt?: Prisma.DateTimeNullableFilter<"TelegramDelivery"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"TelegramDelivery"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"TelegramDelivery"> | Date | string
+}
+
+export type TelegramDeliveryCreateWithoutSourceNotificationInput = {
+  id?: string
+  purpose: $Enums.TelegramDeliveryPurpose
+  status?: $Enums.TelegramDeliveryStatus
+  idempotencyKey: string
+  messageText: string
+  providerMessageId?: string | null
+  attempts?: number
+  nextAttemptAt?: Date | string
+  lastAttemptAt?: Date | string | null
+  leaseId?: string | null
+  leaseExpiresAt?: Date | string | null
+  lastErrorCode?: string | null
+  completedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tenant: Prisma.TenantCreateNestedOneWithoutTelegramDeliveriesInput
+  destination: Prisma.TelegramChatCreateNestedOneWithoutDeliveriesInput
+  order?: Prisma.OrderCreateNestedOneWithoutTelegramDeliveriesInput
+  items?: Prisma.TelegramDeliveryItemCreateNestedManyWithoutDeliveryInput
+}
+
+export type TelegramDeliveryUncheckedCreateWithoutSourceNotificationInput = {
+  id?: string
+  destinationId: string
+  orderId?: string | null
+  purpose: $Enums.TelegramDeliveryPurpose
+  status?: $Enums.TelegramDeliveryStatus
+  idempotencyKey: string
+  messageText: string
+  providerMessageId?: string | null
+  attempts?: number
+  nextAttemptAt?: Date | string
+  lastAttemptAt?: Date | string | null
+  leaseId?: string | null
+  leaseExpiresAt?: Date | string | null
+  lastErrorCode?: string | null
+  completedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  items?: Prisma.TelegramDeliveryItemUncheckedCreateNestedManyWithoutDeliveryInput
+}
+
+export type TelegramDeliveryCreateOrConnectWithoutSourceNotificationInput = {
+  where: Prisma.TelegramDeliveryWhereUniqueInput
+  create: Prisma.XOR<Prisma.TelegramDeliveryCreateWithoutSourceNotificationInput, Prisma.TelegramDeliveryUncheckedCreateWithoutSourceNotificationInput>
+}
+
+export type TelegramDeliveryCreateManySourceNotificationInputEnvelope = {
+  data: Prisma.TelegramDeliveryCreateManySourceNotificationInput | Prisma.TelegramDeliveryCreateManySourceNotificationInput[]
+  skipDuplicates?: boolean
+}
+
+export type TelegramDeliveryUpsertWithWhereUniqueWithoutSourceNotificationInput = {
+  where: Prisma.TelegramDeliveryWhereUniqueInput
+  update: Prisma.XOR<Prisma.TelegramDeliveryUpdateWithoutSourceNotificationInput, Prisma.TelegramDeliveryUncheckedUpdateWithoutSourceNotificationInput>
+  create: Prisma.XOR<Prisma.TelegramDeliveryCreateWithoutSourceNotificationInput, Prisma.TelegramDeliveryUncheckedCreateWithoutSourceNotificationInput>
+}
+
+export type TelegramDeliveryUpdateWithWhereUniqueWithoutSourceNotificationInput = {
+  where: Prisma.TelegramDeliveryWhereUniqueInput
+  data: Prisma.XOR<Prisma.TelegramDeliveryUpdateWithoutSourceNotificationInput, Prisma.TelegramDeliveryUncheckedUpdateWithoutSourceNotificationInput>
+}
+
+export type TelegramDeliveryUpdateManyWithWhereWithoutSourceNotificationInput = {
+  where: Prisma.TelegramDeliveryScalarWhereInput
+  data: Prisma.XOR<Prisma.TelegramDeliveryUpdateManyMutationInput, Prisma.TelegramDeliveryUncheckedUpdateManyWithoutSourceNotificationInput>
 }
 
 export type TelegramDeliveryCreateWithoutDestinationInput = {
@@ -829,10 +1070,15 @@ export type TelegramDeliveryCreateWithoutDestinationInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutTelegramDeliveriesInput
+  order?: Prisma.OrderCreateNestedOneWithoutTelegramDeliveriesInput
+  sourceNotification?: Prisma.UserNotificationCreateNestedOneWithoutTelegramDeliveriesInput
+  items?: Prisma.TelegramDeliveryItemCreateNestedManyWithoutDeliveryInput
 }
 
 export type TelegramDeliveryUncheckedCreateWithoutDestinationInput = {
   id?: string
+  orderId?: string | null
+  sourceNotificationId?: string | null
   purpose: $Enums.TelegramDeliveryPurpose
   status?: $Enums.TelegramDeliveryStatus
   idempotencyKey: string
@@ -847,6 +1093,7 @@ export type TelegramDeliveryUncheckedCreateWithoutDestinationInput = {
   completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  items?: Prisma.TelegramDeliveryItemUncheckedCreateNestedManyWithoutDeliveryInput
 }
 
 export type TelegramDeliveryCreateOrConnectWithoutDestinationInput = {
@@ -875,9 +1122,184 @@ export type TelegramDeliveryUpdateManyWithWhereWithoutDestinationInput = {
   data: Prisma.XOR<Prisma.TelegramDeliveryUpdateManyMutationInput, Prisma.TelegramDeliveryUncheckedUpdateManyWithoutDestinationInput>
 }
 
+export type TelegramDeliveryCreateWithoutOrderInput = {
+  id?: string
+  purpose: $Enums.TelegramDeliveryPurpose
+  status?: $Enums.TelegramDeliveryStatus
+  idempotencyKey: string
+  messageText: string
+  providerMessageId?: string | null
+  attempts?: number
+  nextAttemptAt?: Date | string
+  lastAttemptAt?: Date | string | null
+  leaseId?: string | null
+  leaseExpiresAt?: Date | string | null
+  lastErrorCode?: string | null
+  completedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tenant: Prisma.TenantCreateNestedOneWithoutTelegramDeliveriesInput
+  destination: Prisma.TelegramChatCreateNestedOneWithoutDeliveriesInput
+  sourceNotification?: Prisma.UserNotificationCreateNestedOneWithoutTelegramDeliveriesInput
+  items?: Prisma.TelegramDeliveryItemCreateNestedManyWithoutDeliveryInput
+}
+
+export type TelegramDeliveryUncheckedCreateWithoutOrderInput = {
+  id?: string
+  destinationId: string
+  sourceNotificationId?: string | null
+  purpose: $Enums.TelegramDeliveryPurpose
+  status?: $Enums.TelegramDeliveryStatus
+  idempotencyKey: string
+  messageText: string
+  providerMessageId?: string | null
+  attempts?: number
+  nextAttemptAt?: Date | string
+  lastAttemptAt?: Date | string | null
+  leaseId?: string | null
+  leaseExpiresAt?: Date | string | null
+  lastErrorCode?: string | null
+  completedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  items?: Prisma.TelegramDeliveryItemUncheckedCreateNestedManyWithoutDeliveryInput
+}
+
+export type TelegramDeliveryCreateOrConnectWithoutOrderInput = {
+  where: Prisma.TelegramDeliveryWhereUniqueInput
+  create: Prisma.XOR<Prisma.TelegramDeliveryCreateWithoutOrderInput, Prisma.TelegramDeliveryUncheckedCreateWithoutOrderInput>
+}
+
+export type TelegramDeliveryCreateManyOrderInputEnvelope = {
+  data: Prisma.TelegramDeliveryCreateManyOrderInput | Prisma.TelegramDeliveryCreateManyOrderInput[]
+  skipDuplicates?: boolean
+}
+
+export type TelegramDeliveryUpsertWithWhereUniqueWithoutOrderInput = {
+  where: Prisma.TelegramDeliveryWhereUniqueInput
+  update: Prisma.XOR<Prisma.TelegramDeliveryUpdateWithoutOrderInput, Prisma.TelegramDeliveryUncheckedUpdateWithoutOrderInput>
+  create: Prisma.XOR<Prisma.TelegramDeliveryCreateWithoutOrderInput, Prisma.TelegramDeliveryUncheckedCreateWithoutOrderInput>
+}
+
+export type TelegramDeliveryUpdateWithWhereUniqueWithoutOrderInput = {
+  where: Prisma.TelegramDeliveryWhereUniqueInput
+  data: Prisma.XOR<Prisma.TelegramDeliveryUpdateWithoutOrderInput, Prisma.TelegramDeliveryUncheckedUpdateWithoutOrderInput>
+}
+
+export type TelegramDeliveryUpdateManyWithWhereWithoutOrderInput = {
+  where: Prisma.TelegramDeliveryScalarWhereInput
+  data: Prisma.XOR<Prisma.TelegramDeliveryUpdateManyMutationInput, Prisma.TelegramDeliveryUncheckedUpdateManyWithoutOrderInput>
+}
+
+export type TelegramDeliveryCreateWithoutItemsInput = {
+  id?: string
+  purpose: $Enums.TelegramDeliveryPurpose
+  status?: $Enums.TelegramDeliveryStatus
+  idempotencyKey: string
+  messageText: string
+  providerMessageId?: string | null
+  attempts?: number
+  nextAttemptAt?: Date | string
+  lastAttemptAt?: Date | string | null
+  leaseId?: string | null
+  leaseExpiresAt?: Date | string | null
+  lastErrorCode?: string | null
+  completedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tenant: Prisma.TenantCreateNestedOneWithoutTelegramDeliveriesInput
+  destination: Prisma.TelegramChatCreateNestedOneWithoutDeliveriesInput
+  order?: Prisma.OrderCreateNestedOneWithoutTelegramDeliveriesInput
+  sourceNotification?: Prisma.UserNotificationCreateNestedOneWithoutTelegramDeliveriesInput
+}
+
+export type TelegramDeliveryUncheckedCreateWithoutItemsInput = {
+  id?: string
+  tenantId: string
+  destinationId: string
+  orderId?: string | null
+  sourceNotificationId?: string | null
+  purpose: $Enums.TelegramDeliveryPurpose
+  status?: $Enums.TelegramDeliveryStatus
+  idempotencyKey: string
+  messageText: string
+  providerMessageId?: string | null
+  attempts?: number
+  nextAttemptAt?: Date | string
+  lastAttemptAt?: Date | string | null
+  leaseId?: string | null
+  leaseExpiresAt?: Date | string | null
+  lastErrorCode?: string | null
+  completedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type TelegramDeliveryCreateOrConnectWithoutItemsInput = {
+  where: Prisma.TelegramDeliveryWhereUniqueInput
+  create: Prisma.XOR<Prisma.TelegramDeliveryCreateWithoutItemsInput, Prisma.TelegramDeliveryUncheckedCreateWithoutItemsInput>
+}
+
+export type TelegramDeliveryUpsertWithoutItemsInput = {
+  update: Prisma.XOR<Prisma.TelegramDeliveryUpdateWithoutItemsInput, Prisma.TelegramDeliveryUncheckedUpdateWithoutItemsInput>
+  create: Prisma.XOR<Prisma.TelegramDeliveryCreateWithoutItemsInput, Prisma.TelegramDeliveryUncheckedCreateWithoutItemsInput>
+  where?: Prisma.TelegramDeliveryWhereInput
+}
+
+export type TelegramDeliveryUpdateToOneWithWhereWithoutItemsInput = {
+  where?: Prisma.TelegramDeliveryWhereInput
+  data: Prisma.XOR<Prisma.TelegramDeliveryUpdateWithoutItemsInput, Prisma.TelegramDeliveryUncheckedUpdateWithoutItemsInput>
+}
+
+export type TelegramDeliveryUpdateWithoutItemsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  purpose?: Prisma.EnumTelegramDeliveryPurposeFieldUpdateOperationsInput | $Enums.TelegramDeliveryPurpose
+  status?: Prisma.EnumTelegramDeliveryStatusFieldUpdateOperationsInput | $Enums.TelegramDeliveryStatus
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  messageText?: Prisma.StringFieldUpdateOperationsInput | string
+  providerMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  attempts?: Prisma.IntFieldUpdateOperationsInput | number
+  nextAttemptAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  leaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastErrorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutTelegramDeliveriesNestedInput
+  destination?: Prisma.TelegramChatUpdateOneRequiredWithoutDeliveriesNestedInput
+  order?: Prisma.OrderUpdateOneWithoutTelegramDeliveriesNestedInput
+  sourceNotification?: Prisma.UserNotificationUpdateOneWithoutTelegramDeliveriesNestedInput
+}
+
+export type TelegramDeliveryUncheckedUpdateWithoutItemsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  destinationId?: Prisma.StringFieldUpdateOperationsInput | string
+  orderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceNotificationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purpose?: Prisma.EnumTelegramDeliveryPurposeFieldUpdateOperationsInput | $Enums.TelegramDeliveryPurpose
+  status?: Prisma.EnumTelegramDeliveryStatusFieldUpdateOperationsInput | $Enums.TelegramDeliveryStatus
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  messageText?: Prisma.StringFieldUpdateOperationsInput | string
+  providerMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  attempts?: Prisma.IntFieldUpdateOperationsInput | number
+  nextAttemptAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  leaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastErrorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 export type TelegramDeliveryCreateManyTenantInput = {
   id?: string
   destinationId: string
+  orderId?: string | null
+  sourceNotificationId?: string | null
   purpose: $Enums.TelegramDeliveryPurpose
   status?: $Enums.TelegramDeliveryStatus
   idempotencyKey: string
@@ -911,11 +1333,38 @@ export type TelegramDeliveryUpdateWithoutTenantInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   destination?: Prisma.TelegramChatUpdateOneRequiredWithoutDeliveriesNestedInput
+  order?: Prisma.OrderUpdateOneWithoutTelegramDeliveriesNestedInput
+  sourceNotification?: Prisma.UserNotificationUpdateOneWithoutTelegramDeliveriesNestedInput
+  items?: Prisma.TelegramDeliveryItemUpdateManyWithoutDeliveryNestedInput
 }
 
 export type TelegramDeliveryUncheckedUpdateWithoutTenantInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   destinationId?: Prisma.StringFieldUpdateOperationsInput | string
+  orderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceNotificationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purpose?: Prisma.EnumTelegramDeliveryPurposeFieldUpdateOperationsInput | $Enums.TelegramDeliveryPurpose
+  status?: Prisma.EnumTelegramDeliveryStatusFieldUpdateOperationsInput | $Enums.TelegramDeliveryStatus
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  messageText?: Prisma.StringFieldUpdateOperationsInput | string
+  providerMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  attempts?: Prisma.IntFieldUpdateOperationsInput | number
+  nextAttemptAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  leaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastErrorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  items?: Prisma.TelegramDeliveryItemUncheckedUpdateManyWithoutDeliveryNestedInput
+}
+
+export type TelegramDeliveryUncheckedUpdateManyWithoutTenantInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  destinationId?: Prisma.StringFieldUpdateOperationsInput | string
+  orderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceNotificationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purpose?: Prisma.EnumTelegramDeliveryPurposeFieldUpdateOperationsInput | $Enums.TelegramDeliveryPurpose
   status?: Prisma.EnumTelegramDeliveryStatusFieldUpdateOperationsInput | $Enums.TelegramDeliveryStatus
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
@@ -932,9 +1381,73 @@ export type TelegramDeliveryUncheckedUpdateWithoutTenantInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
-export type TelegramDeliveryUncheckedUpdateManyWithoutTenantInput = {
+export type TelegramDeliveryCreateManySourceNotificationInput = {
+  id?: string
+  destinationId: string
+  orderId?: string | null
+  purpose: $Enums.TelegramDeliveryPurpose
+  status?: $Enums.TelegramDeliveryStatus
+  idempotencyKey: string
+  messageText: string
+  providerMessageId?: string | null
+  attempts?: number
+  nextAttemptAt?: Date | string
+  lastAttemptAt?: Date | string | null
+  leaseId?: string | null
+  leaseExpiresAt?: Date | string | null
+  lastErrorCode?: string | null
+  completedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type TelegramDeliveryUpdateWithoutSourceNotificationInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  purpose?: Prisma.EnumTelegramDeliveryPurposeFieldUpdateOperationsInput | $Enums.TelegramDeliveryPurpose
+  status?: Prisma.EnumTelegramDeliveryStatusFieldUpdateOperationsInput | $Enums.TelegramDeliveryStatus
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  messageText?: Prisma.StringFieldUpdateOperationsInput | string
+  providerMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  attempts?: Prisma.IntFieldUpdateOperationsInput | number
+  nextAttemptAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  leaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastErrorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutTelegramDeliveriesNestedInput
+  destination?: Prisma.TelegramChatUpdateOneRequiredWithoutDeliveriesNestedInput
+  order?: Prisma.OrderUpdateOneWithoutTelegramDeliveriesNestedInput
+  items?: Prisma.TelegramDeliveryItemUpdateManyWithoutDeliveryNestedInput
+}
+
+export type TelegramDeliveryUncheckedUpdateWithoutSourceNotificationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   destinationId?: Prisma.StringFieldUpdateOperationsInput | string
+  orderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purpose?: Prisma.EnumTelegramDeliveryPurposeFieldUpdateOperationsInput | $Enums.TelegramDeliveryPurpose
+  status?: Prisma.EnumTelegramDeliveryStatusFieldUpdateOperationsInput | $Enums.TelegramDeliveryStatus
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  messageText?: Prisma.StringFieldUpdateOperationsInput | string
+  providerMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  attempts?: Prisma.IntFieldUpdateOperationsInput | number
+  nextAttemptAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  leaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastErrorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  items?: Prisma.TelegramDeliveryItemUncheckedUpdateManyWithoutDeliveryNestedInput
+}
+
+export type TelegramDeliveryUncheckedUpdateManyWithoutSourceNotificationInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  destinationId?: Prisma.StringFieldUpdateOperationsInput | string
+  orderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purpose?: Prisma.EnumTelegramDeliveryPurposeFieldUpdateOperationsInput | $Enums.TelegramDeliveryPurpose
   status?: Prisma.EnumTelegramDeliveryStatusFieldUpdateOperationsInput | $Enums.TelegramDeliveryStatus
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
@@ -953,6 +1466,8 @@ export type TelegramDeliveryUncheckedUpdateManyWithoutTenantInput = {
 
 export type TelegramDeliveryCreateManyDestinationInput = {
   id?: string
+  orderId?: string | null
+  sourceNotificationId?: string | null
   purpose: $Enums.TelegramDeliveryPurpose
   status?: $Enums.TelegramDeliveryStatus
   idempotencyKey: string
@@ -986,10 +1501,36 @@ export type TelegramDeliveryUpdateWithoutDestinationInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutTelegramDeliveriesNestedInput
+  order?: Prisma.OrderUpdateOneWithoutTelegramDeliveriesNestedInput
+  sourceNotification?: Prisma.UserNotificationUpdateOneWithoutTelegramDeliveriesNestedInput
+  items?: Prisma.TelegramDeliveryItemUpdateManyWithoutDeliveryNestedInput
 }
 
 export type TelegramDeliveryUncheckedUpdateWithoutDestinationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  orderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceNotificationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purpose?: Prisma.EnumTelegramDeliveryPurposeFieldUpdateOperationsInput | $Enums.TelegramDeliveryPurpose
+  status?: Prisma.EnumTelegramDeliveryStatusFieldUpdateOperationsInput | $Enums.TelegramDeliveryStatus
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  messageText?: Prisma.StringFieldUpdateOperationsInput | string
+  providerMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  attempts?: Prisma.IntFieldUpdateOperationsInput | number
+  nextAttemptAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  leaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastErrorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  items?: Prisma.TelegramDeliveryItemUncheckedUpdateManyWithoutDeliveryNestedInput
+}
+
+export type TelegramDeliveryUncheckedUpdateManyWithoutDestinationInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  orderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceNotificationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purpose?: Prisma.EnumTelegramDeliveryPurposeFieldUpdateOperationsInput | $Enums.TelegramDeliveryPurpose
   status?: Prisma.EnumTelegramDeliveryStatusFieldUpdateOperationsInput | $Enums.TelegramDeliveryStatus
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1006,7 +1547,27 @@ export type TelegramDeliveryUncheckedUpdateWithoutDestinationInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
-export type TelegramDeliveryUncheckedUpdateManyWithoutDestinationInput = {
+export type TelegramDeliveryCreateManyOrderInput = {
+  id?: string
+  destinationId: string
+  sourceNotificationId?: string | null
+  purpose: $Enums.TelegramDeliveryPurpose
+  status?: $Enums.TelegramDeliveryStatus
+  idempotencyKey: string
+  messageText: string
+  providerMessageId?: string | null
+  attempts?: number
+  nextAttemptAt?: Date | string
+  lastAttemptAt?: Date | string | null
+  leaseId?: string | null
+  leaseExpiresAt?: Date | string | null
+  lastErrorCode?: string | null
+  completedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type TelegramDeliveryUpdateWithoutOrderInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   purpose?: Prisma.EnumTelegramDeliveryPurposeFieldUpdateOperationsInput | $Enums.TelegramDeliveryPurpose
   status?: Prisma.EnumTelegramDeliveryStatusFieldUpdateOperationsInput | $Enums.TelegramDeliveryStatus
@@ -1022,14 +1583,90 @@ export type TelegramDeliveryUncheckedUpdateManyWithoutDestinationInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutTelegramDeliveriesNestedInput
+  destination?: Prisma.TelegramChatUpdateOneRequiredWithoutDeliveriesNestedInput
+  sourceNotification?: Prisma.UserNotificationUpdateOneWithoutTelegramDeliveriesNestedInput
+  items?: Prisma.TelegramDeliveryItemUpdateManyWithoutDeliveryNestedInput
 }
 
+export type TelegramDeliveryUncheckedUpdateWithoutOrderInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  destinationId?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceNotificationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purpose?: Prisma.EnumTelegramDeliveryPurposeFieldUpdateOperationsInput | $Enums.TelegramDeliveryPurpose
+  status?: Prisma.EnumTelegramDeliveryStatusFieldUpdateOperationsInput | $Enums.TelegramDeliveryStatus
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  messageText?: Prisma.StringFieldUpdateOperationsInput | string
+  providerMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  attempts?: Prisma.IntFieldUpdateOperationsInput | number
+  nextAttemptAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  leaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastErrorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  items?: Prisma.TelegramDeliveryItemUncheckedUpdateManyWithoutDeliveryNestedInput
+}
+
+export type TelegramDeliveryUncheckedUpdateManyWithoutOrderInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  destinationId?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceNotificationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purpose?: Prisma.EnumTelegramDeliveryPurposeFieldUpdateOperationsInput | $Enums.TelegramDeliveryPurpose
+  status?: Prisma.EnumTelegramDeliveryStatusFieldUpdateOperationsInput | $Enums.TelegramDeliveryStatus
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  messageText?: Prisma.StringFieldUpdateOperationsInput | string
+  providerMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  attempts?: Prisma.IntFieldUpdateOperationsInput | number
+  nextAttemptAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  leaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  leaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastErrorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+
+/**
+ * Count Type TelegramDeliveryCountOutputType
+ */
+
+export type TelegramDeliveryCountOutputType = {
+  items: number
+}
+
+export type TelegramDeliveryCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  items?: boolean | TelegramDeliveryCountOutputTypeCountItemsArgs
+}
+
+/**
+ * TelegramDeliveryCountOutputType without action
+ */
+export type TelegramDeliveryCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TelegramDeliveryCountOutputType
+   */
+  select?: Prisma.TelegramDeliveryCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * TelegramDeliveryCountOutputType without action
+ */
+export type TelegramDeliveryCountOutputTypeCountItemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TelegramDeliveryItemWhereInput
+}
 
 
 export type TelegramDeliverySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   tenantId?: boolean
   destinationId?: boolean
+  orderId?: boolean
+  sourceNotificationId?: boolean
   purpose?: boolean
   status?: boolean
   idempotencyKey?: boolean
@@ -1046,12 +1683,18 @@ export type TelegramDeliverySelect<ExtArgs extends runtime.Types.Extensions.Inte
   updatedAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   destination?: boolean | Prisma.TelegramChatDefaultArgs<ExtArgs>
+  order?: boolean | Prisma.TelegramDelivery$orderArgs<ExtArgs>
+  sourceNotification?: boolean | Prisma.TelegramDelivery$sourceNotificationArgs<ExtArgs>
+  items?: boolean | Prisma.TelegramDelivery$itemsArgs<ExtArgs>
+  _count?: boolean | Prisma.TelegramDeliveryCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["telegramDelivery"]>
 
 export type TelegramDeliverySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   tenantId?: boolean
   destinationId?: boolean
+  orderId?: boolean
+  sourceNotificationId?: boolean
   purpose?: boolean
   status?: boolean
   idempotencyKey?: boolean
@@ -1068,12 +1711,16 @@ export type TelegramDeliverySelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   updatedAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   destination?: boolean | Prisma.TelegramChatDefaultArgs<ExtArgs>
+  order?: boolean | Prisma.TelegramDelivery$orderArgs<ExtArgs>
+  sourceNotification?: boolean | Prisma.TelegramDelivery$sourceNotificationArgs<ExtArgs>
 }, ExtArgs["result"]["telegramDelivery"]>
 
 export type TelegramDeliverySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   tenantId?: boolean
   destinationId?: boolean
+  orderId?: boolean
+  sourceNotificationId?: boolean
   purpose?: boolean
   status?: boolean
   idempotencyKey?: boolean
@@ -1090,12 +1737,16 @@ export type TelegramDeliverySelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   updatedAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   destination?: boolean | Prisma.TelegramChatDefaultArgs<ExtArgs>
+  order?: boolean | Prisma.TelegramDelivery$orderArgs<ExtArgs>
+  sourceNotification?: boolean | Prisma.TelegramDelivery$sourceNotificationArgs<ExtArgs>
 }, ExtArgs["result"]["telegramDelivery"]>
 
 export type TelegramDeliverySelectScalar = {
   id?: boolean
   tenantId?: boolean
   destinationId?: boolean
+  orderId?: boolean
+  sourceNotificationId?: boolean
   purpose?: boolean
   status?: boolean
   idempotencyKey?: boolean
@@ -1112,18 +1763,26 @@ export type TelegramDeliverySelectScalar = {
   updatedAt?: boolean
 }
 
-export type TelegramDeliveryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "destinationId" | "purpose" | "status" | "idempotencyKey" | "messageText" | "providerMessageId" | "attempts" | "nextAttemptAt" | "lastAttemptAt" | "leaseId" | "leaseExpiresAt" | "lastErrorCode" | "completedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["telegramDelivery"]>
+export type TelegramDeliveryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "destinationId" | "orderId" | "sourceNotificationId" | "purpose" | "status" | "idempotencyKey" | "messageText" | "providerMessageId" | "attempts" | "nextAttemptAt" | "lastAttemptAt" | "leaseId" | "leaseExpiresAt" | "lastErrorCode" | "completedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["telegramDelivery"]>
 export type TelegramDeliveryInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   destination?: boolean | Prisma.TelegramChatDefaultArgs<ExtArgs>
+  order?: boolean | Prisma.TelegramDelivery$orderArgs<ExtArgs>
+  sourceNotification?: boolean | Prisma.TelegramDelivery$sourceNotificationArgs<ExtArgs>
+  items?: boolean | Prisma.TelegramDelivery$itemsArgs<ExtArgs>
+  _count?: boolean | Prisma.TelegramDeliveryCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type TelegramDeliveryIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   destination?: boolean | Prisma.TelegramChatDefaultArgs<ExtArgs>
+  order?: boolean | Prisma.TelegramDelivery$orderArgs<ExtArgs>
+  sourceNotification?: boolean | Prisma.TelegramDelivery$sourceNotificationArgs<ExtArgs>
 }
 export type TelegramDeliveryIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   destination?: boolean | Prisma.TelegramChatDefaultArgs<ExtArgs>
+  order?: boolean | Prisma.TelegramDelivery$orderArgs<ExtArgs>
+  sourceNotification?: boolean | Prisma.TelegramDelivery$sourceNotificationArgs<ExtArgs>
 }
 
 export type $TelegramDeliveryPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1131,11 +1790,16 @@ export type $TelegramDeliveryPayload<ExtArgs extends runtime.Types.Extensions.In
   objects: {
     tenant: Prisma.$TenantPayload<ExtArgs>
     destination: Prisma.$TelegramChatPayload<ExtArgs>
+    order: Prisma.$OrderPayload<ExtArgs> | null
+    sourceNotification: Prisma.$UserNotificationPayload<ExtArgs> | null
+    items: Prisma.$TelegramDeliveryItemPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenantId: string
     destinationId: string
+    orderId: string | null
+    sourceNotificationId: string | null
     purpose: $Enums.TelegramDeliveryPurpose
     status: $Enums.TelegramDeliveryStatus
     idempotencyKey: string
@@ -1546,6 +2210,9 @@ export interface Prisma__TelegramDeliveryClient<T, Null = never, ExtArgs extends
   readonly [Symbol.toStringTag]: "PrismaPromise"
   tenant<T extends Prisma.TenantDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TenantDefaultArgs<ExtArgs>>): Prisma.Prisma__TenantClient<runtime.Types.Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   destination<T extends Prisma.TelegramChatDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TelegramChatDefaultArgs<ExtArgs>>): Prisma.Prisma__TelegramChatClient<runtime.Types.Result.GetResult<Prisma.$TelegramChatPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  order<T extends Prisma.TelegramDelivery$orderArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TelegramDelivery$orderArgs<ExtArgs>>): Prisma.Prisma__OrderClient<runtime.Types.Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  sourceNotification<T extends Prisma.TelegramDelivery$sourceNotificationArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TelegramDelivery$sourceNotificationArgs<ExtArgs>>): Prisma.Prisma__UserNotificationClient<runtime.Types.Result.GetResult<Prisma.$UserNotificationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  items<T extends Prisma.TelegramDelivery$itemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TelegramDelivery$itemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TelegramDeliveryItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1578,6 +2245,8 @@ export interface TelegramDeliveryFieldRefs {
   readonly id: Prisma.FieldRef<"TelegramDelivery", 'String'>
   readonly tenantId: Prisma.FieldRef<"TelegramDelivery", 'String'>
   readonly destinationId: Prisma.FieldRef<"TelegramDelivery", 'String'>
+  readonly orderId: Prisma.FieldRef<"TelegramDelivery", 'String'>
+  readonly sourceNotificationId: Prisma.FieldRef<"TelegramDelivery", 'String'>
   readonly purpose: Prisma.FieldRef<"TelegramDelivery", 'TelegramDeliveryPurpose'>
   readonly status: Prisma.FieldRef<"TelegramDelivery", 'TelegramDeliveryStatus'>
   readonly idempotencyKey: Prisma.FieldRef<"TelegramDelivery", 'String'>
@@ -1990,6 +2659,68 @@ export type TelegramDeliveryDeleteManyArgs<ExtArgs extends runtime.Types.Extensi
    * Limit how many TelegramDeliveries to delete.
    */
   limit?: number
+}
+
+/**
+ * TelegramDelivery.order
+ */
+export type TelegramDelivery$orderArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Order
+   */
+  select?: Prisma.OrderSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Order
+   */
+  omit?: Prisma.OrderOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OrderInclude<ExtArgs> | null
+  where?: Prisma.OrderWhereInput
+}
+
+/**
+ * TelegramDelivery.sourceNotification
+ */
+export type TelegramDelivery$sourceNotificationArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the UserNotification
+   */
+  select?: Prisma.UserNotificationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the UserNotification
+   */
+  omit?: Prisma.UserNotificationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserNotificationInclude<ExtArgs> | null
+  where?: Prisma.UserNotificationWhereInput
+}
+
+/**
+ * TelegramDelivery.items
+ */
+export type TelegramDelivery$itemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TelegramDeliveryItem
+   */
+  select?: Prisma.TelegramDeliveryItemSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the TelegramDeliveryItem
+   */
+  omit?: Prisma.TelegramDeliveryItemOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TelegramDeliveryItemInclude<ExtArgs> | null
+  where?: Prisma.TelegramDeliveryItemWhereInput
+  orderBy?: Prisma.TelegramDeliveryItemOrderByWithRelationInput | Prisma.TelegramDeliveryItemOrderByWithRelationInput[]
+  cursor?: Prisma.TelegramDeliveryItemWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TelegramDeliveryItemScalarFieldEnum | Prisma.TelegramDeliveryItemScalarFieldEnum[]
 }
 
 /**

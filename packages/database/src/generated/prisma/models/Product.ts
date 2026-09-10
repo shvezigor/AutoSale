@@ -346,6 +346,7 @@ export type ProductWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Product"> | Date | string
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
   source?: Prisma.XOR<Prisma.CatalogueSourceNullableScalarRelationFilter, Prisma.CatalogueSourceWhereInput> | null
+  reservations?: Prisma.InventoryReservationListRelationFilter
 }
 
 export type ProductOrderByWithRelationInput = {
@@ -373,10 +374,12 @@ export type ProductOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   tenant?: Prisma.TenantOrderByWithRelationInput
   source?: Prisma.CatalogueSourceOrderByWithRelationInput
+  reservations?: Prisma.InventoryReservationOrderByRelationAggregateInput
 }
 
 export type ProductWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  tenantId_id?: Prisma.ProductTenantIdIdCompoundUniqueInput
   tenantId_sku?: Prisma.ProductTenantIdSkuCompoundUniqueInput
   AND?: Prisma.ProductWhereInput | Prisma.ProductWhereInput[]
   OR?: Prisma.ProductWhereInput[]
@@ -404,7 +407,8 @@ export type ProductWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"Product"> | Date | string
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
   source?: Prisma.XOR<Prisma.CatalogueSourceNullableScalarRelationFilter, Prisma.CatalogueSourceWhereInput> | null
-}, "id" | "tenantId_sku">
+  reservations?: Prisma.InventoryReservationListRelationFilter
+}, "id" | "tenantId_id" | "tenantId_sku">
 
 export type ProductOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -487,6 +491,7 @@ export type ProductCreateInput = {
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutProductsInput
   source?: Prisma.CatalogueSourceCreateNestedOneWithoutProductsInput
+  reservations?: Prisma.InventoryReservationCreateNestedManyWithoutProductInput
 }
 
 export type ProductUncheckedCreateInput = {
@@ -512,6 +517,7 @@ export type ProductUncheckedCreateInput = {
   sourceUpdatedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  reservations?: Prisma.InventoryReservationUncheckedCreateNestedManyWithoutProductInput
 }
 
 export type ProductUpdateInput = {
@@ -537,6 +543,7 @@ export type ProductUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutProductsNestedInput
   source?: Prisma.CatalogueSourceUpdateOneWithoutProductsNestedInput
+  reservations?: Prisma.InventoryReservationUpdateManyWithoutProductNestedInput
 }
 
 export type ProductUncheckedUpdateInput = {
@@ -562,6 +569,7 @@ export type ProductUncheckedUpdateInput = {
   sourceUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reservations?: Prisma.InventoryReservationUncheckedUpdateManyWithoutProductNestedInput
 }
 
 export type ProductCreateManyInput = {
@@ -645,6 +653,11 @@ export type ProductListRelationFilter = {
 
 export type ProductOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type ProductTenantIdIdCompoundUniqueInput = {
+  tenantId: string
+  id: string
 }
 
 export type ProductTenantIdSkuCompoundUniqueInput = {
@@ -731,6 +744,11 @@ export type ProductSumOrderByAggregateInput = {
   stockQuantity?: Prisma.SortOrder
 }
 
+export type ProductScalarRelationFilter = {
+  is?: Prisma.ProductWhereInput
+  isNot?: Prisma.ProductWhereInput
+}
+
 export type ProductCreateNestedManyWithoutTenantInput = {
   create?: Prisma.XOR<Prisma.ProductCreateWithoutTenantInput, Prisma.ProductUncheckedCreateWithoutTenantInput> | Prisma.ProductCreateWithoutTenantInput[] | Prisma.ProductUncheckedCreateWithoutTenantInput[]
   connectOrCreate?: Prisma.ProductCreateOrConnectWithoutTenantInput | Prisma.ProductCreateOrConnectWithoutTenantInput[]
@@ -779,6 +797,20 @@ export type NullableDecimalFieldUpdateOperationsInput = {
   decrement?: runtime.Decimal | runtime.DecimalJsLike | number | string
   multiply?: runtime.Decimal | runtime.DecimalJsLike | number | string
   divide?: runtime.Decimal | runtime.DecimalJsLike | number | string
+}
+
+export type ProductCreateNestedOneWithoutReservationsInput = {
+  create?: Prisma.XOR<Prisma.ProductCreateWithoutReservationsInput, Prisma.ProductUncheckedCreateWithoutReservationsInput>
+  connectOrCreate?: Prisma.ProductCreateOrConnectWithoutReservationsInput
+  connect?: Prisma.ProductWhereUniqueInput
+}
+
+export type ProductUpdateOneRequiredWithoutReservationsNestedInput = {
+  create?: Prisma.XOR<Prisma.ProductCreateWithoutReservationsInput, Prisma.ProductUncheckedCreateWithoutReservationsInput>
+  connectOrCreate?: Prisma.ProductCreateOrConnectWithoutReservationsInput
+  upsert?: Prisma.ProductUpsertWithoutReservationsInput
+  connect?: Prisma.ProductWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ProductUpdateToOneWithWhereWithoutReservationsInput, Prisma.ProductUpdateWithoutReservationsInput>, Prisma.ProductUncheckedUpdateWithoutReservationsInput>
 }
 
 export type ProductCreateNestedManyWithoutSourceInput = {
@@ -845,6 +877,7 @@ export type ProductCreateWithoutTenantInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   source?: Prisma.CatalogueSourceCreateNestedOneWithoutProductsInput
+  reservations?: Prisma.InventoryReservationCreateNestedManyWithoutProductInput
 }
 
 export type ProductUncheckedCreateWithoutTenantInput = {
@@ -869,6 +902,7 @@ export type ProductUncheckedCreateWithoutTenantInput = {
   sourceUpdatedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  reservations?: Prisma.InventoryReservationUncheckedCreateNestedManyWithoutProductInput
 }
 
 export type ProductCreateOrConnectWithoutTenantInput = {
@@ -925,6 +959,122 @@ export type ProductScalarWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Product"> | Date | string
 }
 
+export type ProductCreateWithoutReservationsInput = {
+  id?: string
+  sku: string
+  name: string
+  description?: string | null
+  price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  currency?: string | null
+  stockQuantity?: number | null
+  category?: string | null
+  brand?: string | null
+  aliases: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  color?: string | null
+  size?: string | null
+  imageUrls?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  attributes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  imageUrl?: string | null
+  active?: boolean
+  sourceRowKey?: string | null
+  sourceUpdatedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tenant: Prisma.TenantCreateNestedOneWithoutProductsInput
+  source?: Prisma.CatalogueSourceCreateNestedOneWithoutProductsInput
+}
+
+export type ProductUncheckedCreateWithoutReservationsInput = {
+  id?: string
+  tenantId: string
+  sku: string
+  name: string
+  description?: string | null
+  price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  currency?: string | null
+  stockQuantity?: number | null
+  category?: string | null
+  brand?: string | null
+  aliases: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  color?: string | null
+  size?: string | null
+  imageUrls?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  attributes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  imageUrl?: string | null
+  active?: boolean
+  sourceId?: string | null
+  sourceRowKey?: string | null
+  sourceUpdatedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type ProductCreateOrConnectWithoutReservationsInput = {
+  where: Prisma.ProductWhereUniqueInput
+  create: Prisma.XOR<Prisma.ProductCreateWithoutReservationsInput, Prisma.ProductUncheckedCreateWithoutReservationsInput>
+}
+
+export type ProductUpsertWithoutReservationsInput = {
+  update: Prisma.XOR<Prisma.ProductUpdateWithoutReservationsInput, Prisma.ProductUncheckedUpdateWithoutReservationsInput>
+  create: Prisma.XOR<Prisma.ProductCreateWithoutReservationsInput, Prisma.ProductUncheckedCreateWithoutReservationsInput>
+  where?: Prisma.ProductWhereInput
+}
+
+export type ProductUpdateToOneWithWhereWithoutReservationsInput = {
+  where?: Prisma.ProductWhereInput
+  data: Prisma.XOR<Prisma.ProductUpdateWithoutReservationsInput, Prisma.ProductUncheckedUpdateWithoutReservationsInput>
+}
+
+export type ProductUpdateWithoutReservationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  sku?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  currency?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stockQuantity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aliases?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  size?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrls?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  attributes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sourceRowKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutProductsNestedInput
+  source?: Prisma.CatalogueSourceUpdateOneWithoutProductsNestedInput
+}
+
+export type ProductUncheckedUpdateWithoutReservationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  sku?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  currency?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stockQuantity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  category?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aliases?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  size?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrls?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  attributes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sourceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRowKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 export type ProductCreateWithoutSourceInput = {
   id?: string
   sku: string
@@ -947,6 +1097,7 @@ export type ProductCreateWithoutSourceInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutProductsInput
+  reservations?: Prisma.InventoryReservationCreateNestedManyWithoutProductInput
 }
 
 export type ProductUncheckedCreateWithoutSourceInput = {
@@ -970,6 +1121,7 @@ export type ProductUncheckedCreateWithoutSourceInput = {
   sourceUpdatedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  reservations?: Prisma.InventoryReservationUncheckedCreateNestedManyWithoutProductInput
 }
 
 export type ProductCreateOrConnectWithoutSourceInput = {
@@ -1044,6 +1196,7 @@ export type ProductUpdateWithoutTenantInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   source?: Prisma.CatalogueSourceUpdateOneWithoutProductsNestedInput
+  reservations?: Prisma.InventoryReservationUpdateManyWithoutProductNestedInput
 }
 
 export type ProductUncheckedUpdateWithoutTenantInput = {
@@ -1068,6 +1221,7 @@ export type ProductUncheckedUpdateWithoutTenantInput = {
   sourceUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reservations?: Prisma.InventoryReservationUncheckedUpdateManyWithoutProductNestedInput
 }
 
 export type ProductUncheckedUpdateManyWithoutTenantInput = {
@@ -1139,6 +1293,7 @@ export type ProductUpdateWithoutSourceInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutProductsNestedInput
+  reservations?: Prisma.InventoryReservationUpdateManyWithoutProductNestedInput
 }
 
 export type ProductUncheckedUpdateWithoutSourceInput = {
@@ -1162,6 +1317,7 @@ export type ProductUncheckedUpdateWithoutSourceInput = {
   sourceUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reservations?: Prisma.InventoryReservationUncheckedUpdateManyWithoutProductNestedInput
 }
 
 export type ProductUncheckedUpdateManyWithoutSourceInput = {
@@ -1187,6 +1343,35 @@ export type ProductUncheckedUpdateManyWithoutSourceInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
+
+/**
+ * Count Type ProductCountOutputType
+ */
+
+export type ProductCountOutputType = {
+  reservations: number
+}
+
+export type ProductCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  reservations?: boolean | ProductCountOutputTypeCountReservationsArgs
+}
+
+/**
+ * ProductCountOutputType without action
+ */
+export type ProductCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ProductCountOutputType
+   */
+  select?: Prisma.ProductCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * ProductCountOutputType without action
+ */
+export type ProductCountOutputTypeCountReservationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.InventoryReservationWhereInput
+}
 
 
 export type ProductSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1214,6 +1399,8 @@ export type ProductSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   updatedAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   source?: boolean | Prisma.Product$sourceArgs<ExtArgs>
+  reservations?: boolean | Prisma.Product$reservationsArgs<ExtArgs>
+  _count?: boolean | Prisma.ProductCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["product"]>
 
 export type ProductSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1299,6 +1486,8 @@ export type ProductOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
 export type ProductInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   source?: boolean | Prisma.Product$sourceArgs<ExtArgs>
+  reservations?: boolean | Prisma.Product$reservationsArgs<ExtArgs>
+  _count?: boolean | Prisma.ProductCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ProductIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
@@ -1314,6 +1503,7 @@ export type $ProductPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
   objects: {
     tenant: Prisma.$TenantPayload<ExtArgs>
     source: Prisma.$CatalogueSourcePayload<ExtArgs> | null
+    reservations: Prisma.$InventoryReservationPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1734,6 +1924,7 @@ export interface Prisma__ProductClient<T, Null = never, ExtArgs extends runtime.
   readonly [Symbol.toStringTag]: "PrismaPromise"
   tenant<T extends Prisma.TenantDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TenantDefaultArgs<ExtArgs>>): Prisma.Prisma__TenantClient<runtime.Types.Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   source<T extends Prisma.Product$sourceArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Product$sourceArgs<ExtArgs>>): Prisma.Prisma__CatalogueSourceClient<runtime.Types.Result.GetResult<Prisma.$CatalogueSourcePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  reservations<T extends Prisma.Product$reservationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Product$reservationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InventoryReservationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2202,6 +2393,30 @@ export type Product$sourceArgs<ExtArgs extends runtime.Types.Extensions.Internal
    */
   include?: Prisma.CatalogueSourceInclude<ExtArgs> | null
   where?: Prisma.CatalogueSourceWhereInput
+}
+
+/**
+ * Product.reservations
+ */
+export type Product$reservationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the InventoryReservation
+   */
+  select?: Prisma.InventoryReservationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the InventoryReservation
+   */
+  omit?: Prisma.InventoryReservationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.InventoryReservationInclude<ExtArgs> | null
+  where?: Prisma.InventoryReservationWhereInput
+  orderBy?: Prisma.InventoryReservationOrderByWithRelationInput | Prisma.InventoryReservationOrderByWithRelationInput[]
+  cursor?: Prisma.InventoryReservationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.InventoryReservationScalarFieldEnum | Prisma.InventoryReservationScalarFieldEnum[]
 }
 
 /**

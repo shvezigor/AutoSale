@@ -175,3 +175,57 @@ export const TelegramDeliveryStatus = {
 } as const
 
 export type TelegramDeliveryStatus = (typeof TelegramDeliveryStatus)[keyof typeof TelegramDeliveryStatus]
+
+
+export const ProcurementStatus = {
+  UNASSESSED: 'UNASSESSED',
+  IN_STOCK: 'IN_STOCK',
+  TO_ORDER: 'TO_ORDER',
+  SENDING: 'SENDING',
+  ORDERED: 'ORDERED',
+  SUPPLIER_CONFIRMED: 'SUPPLIER_CONFIRMED',
+  RECEIVED: 'RECEIVED',
+  UNAVAILABLE: 'UNAVAILABLE'
+} as const
+
+export type ProcurementStatus = (typeof ProcurementStatus)[keyof typeof ProcurementStatus]
+
+
+export const ProcurementDecisionSource = {
+  AUTO: 'AUTO',
+  MANUAL: 'MANUAL'
+} as const
+
+export type ProcurementDecisionSource = (typeof ProcurementDecisionSource)[keyof typeof ProcurementDecisionSource]
+
+
+export const ProcurementReason = {
+  STOCK_AVAILABLE: 'STOCK_AVAILABLE',
+  STOCK_INSUFFICIENT: 'STOCK_INSUFFICIENT',
+  STOCK_UNKNOWN: 'STOCK_UNKNOWN',
+  PRODUCT_UNMATCHED: 'PRODUCT_UNMATCHED',
+  RESERVATION_CONFLICT: 'RESERVATION_CONFLICT',
+  MANUAL_IN_STOCK: 'MANUAL_IN_STOCK',
+  MANUAL_TO_ORDER: 'MANUAL_TO_ORDER',
+  DELIVERY_FAILED: 'DELIVERY_FAILED'
+} as const
+
+export type ProcurementReason = (typeof ProcurementReason)[keyof typeof ProcurementReason]
+
+
+export const InventoryReservationStatus = {
+  ACTIVE: 'ACTIVE',
+  CONSUMED: 'CONSUMED',
+  RELEASED: 'RELEASED'
+} as const
+
+export type InventoryReservationStatus = (typeof InventoryReservationStatus)[keyof typeof InventoryReservationStatus]
+
+
+export const TelegramAlertEventType = {
+  ORDER_NEEDS_REVIEW: 'ORDER_NEEDS_REVIEW',
+  ORDER_AUTO_APPROVED: 'ORDER_AUTO_APPROVED',
+  SUPPLIER_DELIVERY_FAILED: 'SUPPLIER_DELIVERY_FAILED'
+} as const
+
+export type TelegramAlertEventType = (typeof TelegramAlertEventType)[keyof typeof TelegramAlertEventType]

@@ -433,6 +433,9 @@ export const ModelName = {
   AuditLog: 'AuditLog',
   OrderItem: 'OrderItem',
   Product: 'Product',
+  InventoryReservation: 'InventoryReservation',
+  TelegramDeliveryItem: 'TelegramDeliveryItem',
+  TelegramNotificationPreference: 'TelegramNotificationPreference',
   CatalogueSource: 'CatalogueSource',
   CatalogueMapping: 'CatalogueMapping',
   CatalogueImportRun: 'CatalogueImportRun',
@@ -452,7 +455,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "tenant" | "googleConnection" | "googleOAuthAttempt" | "googleCredentialCleanup" | "instagramConnection" | "instagramOAuthState" | "instagramCredentialCleanup" | "user" | "userNotification" | "telegramLinkAttempt" | "telegramUserBinding" | "telegramBusinessConnection" | "telegramChat" | "telegramSupplierSetting" | "telegramWebhookUpdate" | "telegramDelivery" | "googleIdentity" | "googleSignInAttempt" | "tenantMembership" | "session" | "emailVerificationToken" | "passwordResetToken" | "tenantInvitation" | "securityAuditLog" | "webhookEvent" | "conversation" | "instagramCustomerProfile" | "instagramAvatarCleanup" | "message" | "googleSheetsDestination" | "tenantSettings" | "order" | "orderExport" | "auditLog" | "orderItem" | "product" | "catalogueSource" | "catalogueMapping" | "catalogueImportRun" | "attachment"
+    modelProps: "tenant" | "googleConnection" | "googleOAuthAttempt" | "googleCredentialCleanup" | "instagramConnection" | "instagramOAuthState" | "instagramCredentialCleanup" | "user" | "userNotification" | "telegramLinkAttempt" | "telegramUserBinding" | "telegramBusinessConnection" | "telegramChat" | "telegramSupplierSetting" | "telegramWebhookUpdate" | "telegramDelivery" | "googleIdentity" | "googleSignInAttempt" | "tenantMembership" | "session" | "emailVerificationToken" | "passwordResetToken" | "tenantInvitation" | "securityAuditLog" | "webhookEvent" | "conversation" | "instagramCustomerProfile" | "instagramAvatarCleanup" | "message" | "googleSheetsDestination" | "tenantSettings" | "order" | "orderExport" | "auditLog" | "orderItem" | "product" | "inventoryReservation" | "telegramDeliveryItem" | "telegramNotificationPreference" | "catalogueSource" | "catalogueMapping" | "catalogueImportRun" | "attachment"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -3120,6 +3123,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    InventoryReservation: {
+      payload: Prisma.$InventoryReservationPayload<ExtArgs>
+      fields: Prisma.InventoryReservationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.InventoryReservationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InventoryReservationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.InventoryReservationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InventoryReservationPayload>
+        }
+        findFirst: {
+          args: Prisma.InventoryReservationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InventoryReservationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.InventoryReservationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InventoryReservationPayload>
+        }
+        findMany: {
+          args: Prisma.InventoryReservationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InventoryReservationPayload>[]
+        }
+        create: {
+          args: Prisma.InventoryReservationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InventoryReservationPayload>
+        }
+        createMany: {
+          args: Prisma.InventoryReservationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.InventoryReservationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InventoryReservationPayload>[]
+        }
+        delete: {
+          args: Prisma.InventoryReservationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InventoryReservationPayload>
+        }
+        update: {
+          args: Prisma.InventoryReservationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InventoryReservationPayload>
+        }
+        deleteMany: {
+          args: Prisma.InventoryReservationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.InventoryReservationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.InventoryReservationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InventoryReservationPayload>[]
+        }
+        upsert: {
+          args: Prisma.InventoryReservationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InventoryReservationPayload>
+        }
+        aggregate: {
+          args: Prisma.InventoryReservationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateInventoryReservation>
+        }
+        groupBy: {
+          args: Prisma.InventoryReservationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.InventoryReservationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.InventoryReservationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.InventoryReservationCountAggregateOutputType> | number
+        }
+      }
+    }
+    TelegramDeliveryItem: {
+      payload: Prisma.$TelegramDeliveryItemPayload<ExtArgs>
+      fields: Prisma.TelegramDeliveryItemFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TelegramDeliveryItemFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelegramDeliveryItemPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TelegramDeliveryItemFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelegramDeliveryItemPayload>
+        }
+        findFirst: {
+          args: Prisma.TelegramDeliveryItemFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelegramDeliveryItemPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TelegramDeliveryItemFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelegramDeliveryItemPayload>
+        }
+        findMany: {
+          args: Prisma.TelegramDeliveryItemFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelegramDeliveryItemPayload>[]
+        }
+        create: {
+          args: Prisma.TelegramDeliveryItemCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelegramDeliveryItemPayload>
+        }
+        createMany: {
+          args: Prisma.TelegramDeliveryItemCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TelegramDeliveryItemCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelegramDeliveryItemPayload>[]
+        }
+        delete: {
+          args: Prisma.TelegramDeliveryItemDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelegramDeliveryItemPayload>
+        }
+        update: {
+          args: Prisma.TelegramDeliveryItemUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelegramDeliveryItemPayload>
+        }
+        deleteMany: {
+          args: Prisma.TelegramDeliveryItemDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TelegramDeliveryItemUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TelegramDeliveryItemUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelegramDeliveryItemPayload>[]
+        }
+        upsert: {
+          args: Prisma.TelegramDeliveryItemUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelegramDeliveryItemPayload>
+        }
+        aggregate: {
+          args: Prisma.TelegramDeliveryItemAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTelegramDeliveryItem>
+        }
+        groupBy: {
+          args: Prisma.TelegramDeliveryItemGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TelegramDeliveryItemGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TelegramDeliveryItemCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TelegramDeliveryItemCountAggregateOutputType> | number
+        }
+      }
+    }
+    TelegramNotificationPreference: {
+      payload: Prisma.$TelegramNotificationPreferencePayload<ExtArgs>
+      fields: Prisma.TelegramNotificationPreferenceFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TelegramNotificationPreferenceFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelegramNotificationPreferencePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TelegramNotificationPreferenceFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelegramNotificationPreferencePayload>
+        }
+        findFirst: {
+          args: Prisma.TelegramNotificationPreferenceFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelegramNotificationPreferencePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TelegramNotificationPreferenceFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelegramNotificationPreferencePayload>
+        }
+        findMany: {
+          args: Prisma.TelegramNotificationPreferenceFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelegramNotificationPreferencePayload>[]
+        }
+        create: {
+          args: Prisma.TelegramNotificationPreferenceCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelegramNotificationPreferencePayload>
+        }
+        createMany: {
+          args: Prisma.TelegramNotificationPreferenceCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TelegramNotificationPreferenceCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelegramNotificationPreferencePayload>[]
+        }
+        delete: {
+          args: Prisma.TelegramNotificationPreferenceDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelegramNotificationPreferencePayload>
+        }
+        update: {
+          args: Prisma.TelegramNotificationPreferenceUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelegramNotificationPreferencePayload>
+        }
+        deleteMany: {
+          args: Prisma.TelegramNotificationPreferenceDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TelegramNotificationPreferenceUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TelegramNotificationPreferenceUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelegramNotificationPreferencePayload>[]
+        }
+        upsert: {
+          args: Prisma.TelegramNotificationPreferenceUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TelegramNotificationPreferencePayload>
+        }
+        aggregate: {
+          args: Prisma.TelegramNotificationPreferenceAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTelegramNotificationPreference>
+        }
+        groupBy: {
+          args: Prisma.TelegramNotificationPreferenceGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TelegramNotificationPreferenceGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TelegramNotificationPreferenceCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TelegramNotificationPreferenceCountAggregateOutputType> | number
+        }
+      }
+    }
     CatalogueSource: {
       payload: Prisma.$CatalogueSourcePayload<ExtArgs>
       fields: Prisma.CatalogueSourceFieldRefs
@@ -3607,6 +3832,7 @@ export const UserNotificationScalarFieldEnum = {
   title: 'title',
   message: 'message',
   actionUrl: 'actionUrl',
+  eventKey: 'eventKey',
   readAt: 'readAt',
   createdAt: 'createdAt'
 } as const
@@ -3702,6 +3928,8 @@ export const TelegramDeliveryScalarFieldEnum = {
   id: 'id',
   tenantId: 'tenantId',
   destinationId: 'destinationId',
+  orderId: 'orderId',
+  sourceNotificationId: 'sourceNotificationId',
   purpose: 'purpose',
   status: 'status',
   idempotencyKey: 'idempotencyKey',
@@ -3981,6 +4209,9 @@ export const OrderScalarFieldEnum = {
   outputTokens: 'outputTokens',
   approvedAt: 'approvedAt',
   approvedBy: 'approvedBy',
+  procurementHandedOffAt: 'procurementHandedOffAt',
+  procurementHandedOffBy: 'procurementHandedOffBy',
+  supplierDispatchVersion: 'supplierDispatchVersion',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -4021,6 +4252,7 @@ export type AuditLogScalarFieldEnum = (typeof AuditLogScalarFieldEnum)[keyof typ
 
 export const OrderItemScalarFieldEnum = {
   id: 'id',
+  tenantId: 'tenantId',
   orderId: 'orderId',
   catalogId: 'catalogId',
   originalText: 'originalText',
@@ -4028,6 +4260,12 @@ export const OrderItemScalarFieldEnum = {
   color: 'color',
   size: 'size',
   confidence: 'confidence',
+  procurementStatus: 'procurementStatus',
+  procurementSource: 'procurementSource',
+  procurementReason: 'procurementReason',
+  stockAtDecision: 'stockAtDecision',
+  availableAtDecision: 'availableAtDecision',
+  procurementUpdatedAt: 'procurementUpdatedAt',
   createdAt: 'createdAt'
 } as const
 
@@ -4060,6 +4298,46 @@ export const ProductScalarFieldEnum = {
 } as const
 
 export type ProductScalarFieldEnum = (typeof ProductScalarFieldEnum)[keyof typeof ProductScalarFieldEnum]
+
+
+export const InventoryReservationScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  productId: 'productId',
+  orderItemId: 'orderItemId',
+  quantity: 'quantity',
+  status: 'status',
+  consumedAt: 'consumedAt',
+  releasedAt: 'releasedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type InventoryReservationScalarFieldEnum = (typeof InventoryReservationScalarFieldEnum)[keyof typeof InventoryReservationScalarFieldEnum]
+
+
+export const TelegramDeliveryItemScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  deliveryId: 'deliveryId',
+  orderItemId: 'orderItemId',
+  createdAt: 'createdAt'
+} as const
+
+export type TelegramDeliveryItemScalarFieldEnum = (typeof TelegramDeliveryItemScalarFieldEnum)[keyof typeof TelegramDeliveryItemScalarFieldEnum]
+
+
+export const TelegramNotificationPreferenceScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  userId: 'userId',
+  eventType: 'eventType',
+  enabled: 'enabled',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TelegramNotificationPreferenceScalarFieldEnum = (typeof TelegramNotificationPreferenceScalarFieldEnum)[keyof typeof TelegramNotificationPreferenceScalarFieldEnum]
 
 
 export const CatalogueSourceScalarFieldEnum = {
@@ -4485,6 +4763,48 @@ export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaMode
 
 
 /**
+ * Reference to a field of type 'ProcurementStatus'
+ */
+export type EnumProcurementStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ProcurementStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'ProcurementStatus[]'
+ */
+export type ListEnumProcurementStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ProcurementStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'ProcurementDecisionSource'
+ */
+export type EnumProcurementDecisionSourceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ProcurementDecisionSource'>
+    
+
+
+/**
+ * Reference to a field of type 'ProcurementDecisionSource[]'
+ */
+export type ListEnumProcurementDecisionSourceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ProcurementDecisionSource[]'>
+    
+
+
+/**
+ * Reference to a field of type 'ProcurementReason'
+ */
+export type EnumProcurementReasonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ProcurementReason'>
+    
+
+
+/**
+ * Reference to a field of type 'ProcurementReason[]'
+ */
+export type ListEnumProcurementReasonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ProcurementReason[]'>
+    
+
+
+/**
  * Reference to a field of type 'Decimal'
  */
 export type DecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal'>
@@ -4495,6 +4815,34 @@ export type DecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel,
  * Reference to a field of type 'Decimal[]'
  */
 export type ListDecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal[]'>
+    
+
+
+/**
+ * Reference to a field of type 'InventoryReservationStatus'
+ */
+export type EnumInventoryReservationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'InventoryReservationStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'InventoryReservationStatus[]'
+ */
+export type ListEnumInventoryReservationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'InventoryReservationStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'TelegramAlertEventType'
+ */
+export type EnumTelegramAlertEventTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TelegramAlertEventType'>
+    
+
+
+/**
+ * Reference to a field of type 'TelegramAlertEventType[]'
+ */
+export type ListEnumTelegramAlertEventTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TelegramAlertEventType[]'>
     
 
 
@@ -4726,6 +5074,9 @@ export type GlobalOmitConfig = {
   auditLog?: Prisma.AuditLogOmit
   orderItem?: Prisma.OrderItemOmit
   product?: Prisma.ProductOmit
+  inventoryReservation?: Prisma.InventoryReservationOmit
+  telegramDeliveryItem?: Prisma.TelegramDeliveryItemOmit
+  telegramNotificationPreference?: Prisma.TelegramNotificationPreferenceOmit
   catalogueSource?: Prisma.CatalogueSourceOmit
   catalogueMapping?: Prisma.CatalogueMappingOmit
   catalogueImportRun?: Prisma.CatalogueImportRunOmit

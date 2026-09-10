@@ -33,6 +33,7 @@ export type UserNotificationMinAggregateOutputType = {
   title: string | null
   message: string | null
   actionUrl: string | null
+  eventKey: string | null
   readAt: Date | null
   createdAt: Date | null
 }
@@ -46,6 +47,7 @@ export type UserNotificationMaxAggregateOutputType = {
   title: string | null
   message: string | null
   actionUrl: string | null
+  eventKey: string | null
   readAt: Date | null
   createdAt: Date | null
 }
@@ -59,6 +61,7 @@ export type UserNotificationCountAggregateOutputType = {
   title: number
   message: number
   actionUrl: number
+  eventKey: number
   readAt: number
   createdAt: number
   _all: number
@@ -74,6 +77,7 @@ export type UserNotificationMinAggregateInputType = {
   title?: true
   message?: true
   actionUrl?: true
+  eventKey?: true
   readAt?: true
   createdAt?: true
 }
@@ -87,6 +91,7 @@ export type UserNotificationMaxAggregateInputType = {
   title?: true
   message?: true
   actionUrl?: true
+  eventKey?: true
   readAt?: true
   createdAt?: true
 }
@@ -100,6 +105,7 @@ export type UserNotificationCountAggregateInputType = {
   title?: true
   message?: true
   actionUrl?: true
+  eventKey?: true
   readAt?: true
   createdAt?: true
   _all?: true
@@ -186,6 +192,7 @@ export type UserNotificationGroupByOutputType = {
   title: string
   message: string | null
   actionUrl: string | null
+  eventKey: string | null
   readAt: Date | null
   createdAt: Date
   _count: UserNotificationCountAggregateOutputType | null
@@ -220,10 +227,12 @@ export type UserNotificationWhereInput = {
   title?: Prisma.StringFilter<"UserNotification"> | string
   message?: Prisma.StringNullableFilter<"UserNotification"> | string | null
   actionUrl?: Prisma.StringNullableFilter<"UserNotification"> | string | null
+  eventKey?: Prisma.StringNullableFilter<"UserNotification"> | string | null
   readAt?: Prisma.DateTimeNullableFilter<"UserNotification"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"UserNotification"> | Date | string
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  telegramDeliveries?: Prisma.TelegramDeliveryListRelationFilter
 }
 
 export type UserNotificationOrderByWithRelationInput = {
@@ -235,14 +244,18 @@ export type UserNotificationOrderByWithRelationInput = {
   title?: Prisma.SortOrder
   message?: Prisma.SortOrderInput | Prisma.SortOrder
   actionUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  eventKey?: Prisma.SortOrderInput | Prisma.SortOrder
   readAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   tenant?: Prisma.TenantOrderByWithRelationInput
   user?: Prisma.UserOrderByWithRelationInput
+  telegramDeliveries?: Prisma.TelegramDeliveryOrderByRelationAggregateInput
 }
 
 export type UserNotificationWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  tenantId_id?: Prisma.UserNotificationTenantIdIdCompoundUniqueInput
+  tenantId_userId_eventKey?: Prisma.UserNotificationTenantIdUserIdEventKeyCompoundUniqueInput
   AND?: Prisma.UserNotificationWhereInput | Prisma.UserNotificationWhereInput[]
   OR?: Prisma.UserNotificationWhereInput[]
   NOT?: Prisma.UserNotificationWhereInput | Prisma.UserNotificationWhereInput[]
@@ -253,11 +266,13 @@ export type UserNotificationWhereUniqueInput = Prisma.AtLeast<{
   title?: Prisma.StringFilter<"UserNotification"> | string
   message?: Prisma.StringNullableFilter<"UserNotification"> | string | null
   actionUrl?: Prisma.StringNullableFilter<"UserNotification"> | string | null
+  eventKey?: Prisma.StringNullableFilter<"UserNotification"> | string | null
   readAt?: Prisma.DateTimeNullableFilter<"UserNotification"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"UserNotification"> | Date | string
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
-}, "id">
+  telegramDeliveries?: Prisma.TelegramDeliveryListRelationFilter
+}, "id" | "tenantId_id" | "tenantId_userId_eventKey">
 
 export type UserNotificationOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -268,6 +283,7 @@ export type UserNotificationOrderByWithAggregationInput = {
   title?: Prisma.SortOrder
   message?: Prisma.SortOrderInput | Prisma.SortOrder
   actionUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  eventKey?: Prisma.SortOrderInput | Prisma.SortOrder
   readAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.UserNotificationCountOrderByAggregateInput
@@ -287,6 +303,7 @@ export type UserNotificationScalarWhereWithAggregatesInput = {
   title?: Prisma.StringWithAggregatesFilter<"UserNotification"> | string
   message?: Prisma.StringNullableWithAggregatesFilter<"UserNotification"> | string | null
   actionUrl?: Prisma.StringNullableWithAggregatesFilter<"UserNotification"> | string | null
+  eventKey?: Prisma.StringNullableWithAggregatesFilter<"UserNotification"> | string | null
   readAt?: Prisma.DateTimeNullableWithAggregatesFilter<"UserNotification"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"UserNotification"> | Date | string
 }
@@ -298,10 +315,12 @@ export type UserNotificationCreateInput = {
   title: string
   message?: string | null
   actionUrl?: string | null
+  eventKey?: string | null
   readAt?: Date | string | null
   createdAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutNotificationsInput
   user: Prisma.UserCreateNestedOneWithoutNotificationsInput
+  telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutSourceNotificationInput
 }
 
 export type UserNotificationUncheckedCreateInput = {
@@ -313,8 +332,10 @@ export type UserNotificationUncheckedCreateInput = {
   title: string
   message?: string | null
   actionUrl?: string | null
+  eventKey?: string | null
   readAt?: Date | string | null
   createdAt?: Date | string
+  telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutSourceNotificationInput
 }
 
 export type UserNotificationUpdateInput = {
@@ -324,10 +345,12 @@ export type UserNotificationUpdateInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   message?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   actionUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  eventKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   readAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutNotificationsNestedInput
   user?: Prisma.UserUpdateOneRequiredWithoutNotificationsNestedInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutSourceNotificationNestedInput
 }
 
 export type UserNotificationUncheckedUpdateInput = {
@@ -339,8 +362,10 @@ export type UserNotificationUncheckedUpdateInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   message?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   actionUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  eventKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   readAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutSourceNotificationNestedInput
 }
 
 export type UserNotificationCreateManyInput = {
@@ -352,6 +377,7 @@ export type UserNotificationCreateManyInput = {
   title: string
   message?: string | null
   actionUrl?: string | null
+  eventKey?: string | null
   readAt?: Date | string | null
   createdAt?: Date | string
 }
@@ -363,6 +389,7 @@ export type UserNotificationUpdateManyMutationInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   message?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   actionUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  eventKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   readAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -376,6 +403,7 @@ export type UserNotificationUncheckedUpdateManyInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   message?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   actionUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  eventKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   readAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -390,6 +418,17 @@ export type UserNotificationOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
+export type UserNotificationTenantIdIdCompoundUniqueInput = {
+  tenantId: string
+  id: string
+}
+
+export type UserNotificationTenantIdUserIdEventKeyCompoundUniqueInput = {
+  tenantId: string
+  userId: string
+  eventKey: string
+}
+
 export type UserNotificationCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   tenantId?: Prisma.SortOrder
@@ -399,6 +438,7 @@ export type UserNotificationCountOrderByAggregateInput = {
   title?: Prisma.SortOrder
   message?: Prisma.SortOrder
   actionUrl?: Prisma.SortOrder
+  eventKey?: Prisma.SortOrder
   readAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
@@ -412,6 +452,7 @@ export type UserNotificationMaxOrderByAggregateInput = {
   title?: Prisma.SortOrder
   message?: Prisma.SortOrder
   actionUrl?: Prisma.SortOrder
+  eventKey?: Prisma.SortOrder
   readAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
@@ -425,8 +466,14 @@ export type UserNotificationMinOrderByAggregateInput = {
   title?: Prisma.SortOrder
   message?: Prisma.SortOrder
   actionUrl?: Prisma.SortOrder
+  eventKey?: Prisma.SortOrder
   readAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+}
+
+export type UserNotificationNullableScalarRelationFilter = {
+  is?: Prisma.UserNotificationWhereInput | null
+  isNot?: Prisma.UserNotificationWhereInput | null
 }
 
 export type UserNotificationCreateNestedManyWithoutTenantInput = {
@@ -517,6 +564,22 @@ export type EnumNotificationTypeFieldUpdateOperationsInput = {
   set?: $Enums.NotificationType
 }
 
+export type UserNotificationCreateNestedOneWithoutTelegramDeliveriesInput = {
+  create?: Prisma.XOR<Prisma.UserNotificationCreateWithoutTelegramDeliveriesInput, Prisma.UserNotificationUncheckedCreateWithoutTelegramDeliveriesInput>
+  connectOrCreate?: Prisma.UserNotificationCreateOrConnectWithoutTelegramDeliveriesInput
+  connect?: Prisma.UserNotificationWhereUniqueInput
+}
+
+export type UserNotificationUpdateOneWithoutTelegramDeliveriesNestedInput = {
+  create?: Prisma.XOR<Prisma.UserNotificationCreateWithoutTelegramDeliveriesInput, Prisma.UserNotificationUncheckedCreateWithoutTelegramDeliveriesInput>
+  connectOrCreate?: Prisma.UserNotificationCreateOrConnectWithoutTelegramDeliveriesInput
+  upsert?: Prisma.UserNotificationUpsertWithoutTelegramDeliveriesInput
+  disconnect?: Prisma.UserNotificationWhereInput | boolean
+  delete?: Prisma.UserNotificationWhereInput | boolean
+  connect?: Prisma.UserNotificationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserNotificationUpdateToOneWithWhereWithoutTelegramDeliveriesInput, Prisma.UserNotificationUpdateWithoutTelegramDeliveriesInput>, Prisma.UserNotificationUncheckedUpdateWithoutTelegramDeliveriesInput>
+}
+
 export type UserNotificationCreateWithoutTenantInput = {
   id?: string
   type: $Enums.NotificationType
@@ -524,9 +587,11 @@ export type UserNotificationCreateWithoutTenantInput = {
   title: string
   message?: string | null
   actionUrl?: string | null
+  eventKey?: string | null
   readAt?: Date | string | null
   createdAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutNotificationsInput
+  telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutSourceNotificationInput
 }
 
 export type UserNotificationUncheckedCreateWithoutTenantInput = {
@@ -537,8 +602,10 @@ export type UserNotificationUncheckedCreateWithoutTenantInput = {
   title: string
   message?: string | null
   actionUrl?: string | null
+  eventKey?: string | null
   readAt?: Date | string | null
   createdAt?: Date | string
+  telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutSourceNotificationInput
 }
 
 export type UserNotificationCreateOrConnectWithoutTenantInput = {
@@ -579,6 +646,7 @@ export type UserNotificationScalarWhereInput = {
   title?: Prisma.StringFilter<"UserNotification"> | string
   message?: Prisma.StringNullableFilter<"UserNotification"> | string | null
   actionUrl?: Prisma.StringNullableFilter<"UserNotification"> | string | null
+  eventKey?: Prisma.StringNullableFilter<"UserNotification"> | string | null
   readAt?: Prisma.DateTimeNullableFilter<"UserNotification"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"UserNotification"> | Date | string
 }
@@ -590,9 +658,11 @@ export type UserNotificationCreateWithoutUserInput = {
   title: string
   message?: string | null
   actionUrl?: string | null
+  eventKey?: string | null
   readAt?: Date | string | null
   createdAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutNotificationsInput
+  telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutSourceNotificationInput
 }
 
 export type UserNotificationUncheckedCreateWithoutUserInput = {
@@ -603,8 +673,10 @@ export type UserNotificationUncheckedCreateWithoutUserInput = {
   title: string
   message?: string | null
   actionUrl?: string | null
+  eventKey?: string | null
   readAt?: Date | string | null
   createdAt?: Date | string
+  telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutSourceNotificationInput
 }
 
 export type UserNotificationCreateOrConnectWithoutUserInput = {
@@ -633,6 +705,78 @@ export type UserNotificationUpdateManyWithWhereWithoutUserInput = {
   data: Prisma.XOR<Prisma.UserNotificationUpdateManyMutationInput, Prisma.UserNotificationUncheckedUpdateManyWithoutUserInput>
 }
 
+export type UserNotificationCreateWithoutTelegramDeliveriesInput = {
+  id?: string
+  type: $Enums.NotificationType
+  category: string
+  title: string
+  message?: string | null
+  actionUrl?: string | null
+  eventKey?: string | null
+  readAt?: Date | string | null
+  createdAt?: Date | string
+  tenant: Prisma.TenantCreateNestedOneWithoutNotificationsInput
+  user: Prisma.UserCreateNestedOneWithoutNotificationsInput
+}
+
+export type UserNotificationUncheckedCreateWithoutTelegramDeliveriesInput = {
+  id?: string
+  tenantId: string
+  userId: string
+  type: $Enums.NotificationType
+  category: string
+  title: string
+  message?: string | null
+  actionUrl?: string | null
+  eventKey?: string | null
+  readAt?: Date | string | null
+  createdAt?: Date | string
+}
+
+export type UserNotificationCreateOrConnectWithoutTelegramDeliveriesInput = {
+  where: Prisma.UserNotificationWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserNotificationCreateWithoutTelegramDeliveriesInput, Prisma.UserNotificationUncheckedCreateWithoutTelegramDeliveriesInput>
+}
+
+export type UserNotificationUpsertWithoutTelegramDeliveriesInput = {
+  update: Prisma.XOR<Prisma.UserNotificationUpdateWithoutTelegramDeliveriesInput, Prisma.UserNotificationUncheckedUpdateWithoutTelegramDeliveriesInput>
+  create: Prisma.XOR<Prisma.UserNotificationCreateWithoutTelegramDeliveriesInput, Prisma.UserNotificationUncheckedCreateWithoutTelegramDeliveriesInput>
+  where?: Prisma.UserNotificationWhereInput
+}
+
+export type UserNotificationUpdateToOneWithWhereWithoutTelegramDeliveriesInput = {
+  where?: Prisma.UserNotificationWhereInput
+  data: Prisma.XOR<Prisma.UserNotificationUpdateWithoutTelegramDeliveriesInput, Prisma.UserNotificationUncheckedUpdateWithoutTelegramDeliveriesInput>
+}
+
+export type UserNotificationUpdateWithoutTelegramDeliveriesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumNotificationTypeFieldUpdateOperationsInput | $Enums.NotificationType
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  message?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actionUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  eventKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  readAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutNotificationsNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutNotificationsNestedInput
+}
+
+export type UserNotificationUncheckedUpdateWithoutTelegramDeliveriesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumNotificationTypeFieldUpdateOperationsInput | $Enums.NotificationType
+  category?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  message?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actionUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  eventKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  readAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 export type UserNotificationCreateManyTenantInput = {
   id?: string
   userId: string
@@ -641,6 +785,7 @@ export type UserNotificationCreateManyTenantInput = {
   title: string
   message?: string | null
   actionUrl?: string | null
+  eventKey?: string | null
   readAt?: Date | string | null
   createdAt?: Date | string
 }
@@ -652,9 +797,11 @@ export type UserNotificationUpdateWithoutTenantInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   message?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   actionUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  eventKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   readAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutNotificationsNestedInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutSourceNotificationNestedInput
 }
 
 export type UserNotificationUncheckedUpdateWithoutTenantInput = {
@@ -665,8 +812,10 @@ export type UserNotificationUncheckedUpdateWithoutTenantInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   message?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   actionUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  eventKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   readAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutSourceNotificationNestedInput
 }
 
 export type UserNotificationUncheckedUpdateManyWithoutTenantInput = {
@@ -677,6 +826,7 @@ export type UserNotificationUncheckedUpdateManyWithoutTenantInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   message?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   actionUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  eventKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   readAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -689,6 +839,7 @@ export type UserNotificationCreateManyUserInput = {
   title: string
   message?: string | null
   actionUrl?: string | null
+  eventKey?: string | null
   readAt?: Date | string | null
   createdAt?: Date | string
 }
@@ -700,9 +851,11 @@ export type UserNotificationUpdateWithoutUserInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   message?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   actionUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  eventKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   readAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutNotificationsNestedInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutSourceNotificationNestedInput
 }
 
 export type UserNotificationUncheckedUpdateWithoutUserInput = {
@@ -713,8 +866,10 @@ export type UserNotificationUncheckedUpdateWithoutUserInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   message?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   actionUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  eventKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   readAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutSourceNotificationNestedInput
 }
 
 export type UserNotificationUncheckedUpdateManyWithoutUserInput = {
@@ -725,10 +880,40 @@ export type UserNotificationUncheckedUpdateManyWithoutUserInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   message?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   actionUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  eventKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   readAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
+
+/**
+ * Count Type UserNotificationCountOutputType
+ */
+
+export type UserNotificationCountOutputType = {
+  telegramDeliveries: number
+}
+
+export type UserNotificationCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  telegramDeliveries?: boolean | UserNotificationCountOutputTypeCountTelegramDeliveriesArgs
+}
+
+/**
+ * UserNotificationCountOutputType without action
+ */
+export type UserNotificationCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the UserNotificationCountOutputType
+   */
+  select?: Prisma.UserNotificationCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * UserNotificationCountOutputType without action
+ */
+export type UserNotificationCountOutputTypeCountTelegramDeliveriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TelegramDeliveryWhereInput
+}
 
 
 export type UserNotificationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -740,10 +925,13 @@ export type UserNotificationSelect<ExtArgs extends runtime.Types.Extensions.Inte
   title?: boolean
   message?: boolean
   actionUrl?: boolean
+  eventKey?: boolean
   readAt?: boolean
   createdAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  telegramDeliveries?: boolean | Prisma.UserNotification$telegramDeliveriesArgs<ExtArgs>
+  _count?: boolean | Prisma.UserNotificationCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["userNotification"]>
 
 export type UserNotificationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -755,6 +943,7 @@ export type UserNotificationSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   title?: boolean
   message?: boolean
   actionUrl?: boolean
+  eventKey?: boolean
   readAt?: boolean
   createdAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
@@ -770,6 +959,7 @@ export type UserNotificationSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   title?: boolean
   message?: boolean
   actionUrl?: boolean
+  eventKey?: boolean
   readAt?: boolean
   createdAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
@@ -785,14 +975,17 @@ export type UserNotificationSelectScalar = {
   title?: boolean
   message?: boolean
   actionUrl?: boolean
+  eventKey?: boolean
   readAt?: boolean
   createdAt?: boolean
 }
 
-export type UserNotificationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "userId" | "type" | "category" | "title" | "message" | "actionUrl" | "readAt" | "createdAt", ExtArgs["result"]["userNotification"]>
+export type UserNotificationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "userId" | "type" | "category" | "title" | "message" | "actionUrl" | "eventKey" | "readAt" | "createdAt", ExtArgs["result"]["userNotification"]>
 export type UserNotificationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  telegramDeliveries?: boolean | Prisma.UserNotification$telegramDeliveriesArgs<ExtArgs>
+  _count?: boolean | Prisma.UserNotificationCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserNotificationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
@@ -808,6 +1001,7 @@ export type $UserNotificationPayload<ExtArgs extends runtime.Types.Extensions.In
   objects: {
     tenant: Prisma.$TenantPayload<ExtArgs>
     user: Prisma.$UserPayload<ExtArgs>
+    telegramDeliveries: Prisma.$TelegramDeliveryPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -818,6 +1012,7 @@ export type $UserNotificationPayload<ExtArgs extends runtime.Types.Extensions.In
     title: string
     message: string | null
     actionUrl: string | null
+    eventKey: string | null
     readAt: Date | null
     createdAt: Date
   }, ExtArgs["result"]["userNotification"]>
@@ -1216,6 +1411,7 @@ export interface Prisma__UserNotificationClient<T, Null = never, ExtArgs extends
   readonly [Symbol.toStringTag]: "PrismaPromise"
   tenant<T extends Prisma.TenantDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TenantDefaultArgs<ExtArgs>>): Prisma.Prisma__TenantClient<runtime.Types.Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  telegramDeliveries<T extends Prisma.UserNotification$telegramDeliveriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserNotification$telegramDeliveriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TelegramDeliveryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1253,6 +1449,7 @@ export interface UserNotificationFieldRefs {
   readonly title: Prisma.FieldRef<"UserNotification", 'String'>
   readonly message: Prisma.FieldRef<"UserNotification", 'String'>
   readonly actionUrl: Prisma.FieldRef<"UserNotification", 'String'>
+  readonly eventKey: Prisma.FieldRef<"UserNotification", 'String'>
   readonly readAt: Prisma.FieldRef<"UserNotification", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"UserNotification", 'DateTime'>
 }
@@ -1653,6 +1850,30 @@ export type UserNotificationDeleteManyArgs<ExtArgs extends runtime.Types.Extensi
    * Limit how many UserNotifications to delete.
    */
   limit?: number
+}
+
+/**
+ * UserNotification.telegramDeliveries
+ */
+export type UserNotification$telegramDeliveriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TelegramDelivery
+   */
+  select?: Prisma.TelegramDeliverySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the TelegramDelivery
+   */
+  omit?: Prisma.TelegramDeliveryOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TelegramDeliveryInclude<ExtArgs> | null
+  where?: Prisma.TelegramDeliveryWhereInput
+  orderBy?: Prisma.TelegramDeliveryOrderByWithRelationInput | Prisma.TelegramDeliveryOrderByWithRelationInput[]
+  cursor?: Prisma.TelegramDeliveryWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TelegramDeliveryScalarFieldEnum | Prisma.TelegramDeliveryScalarFieldEnum[]
 }
 
 /**

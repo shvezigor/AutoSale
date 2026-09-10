@@ -127,43 +127,86 @@ enum TelegramDeliveryStatus {
   FAILED
 }
 
+enum ProcurementStatus {
+  UNASSESSED
+  IN_STOCK
+  TO_ORDER
+  SENDING
+  ORDERED
+  SUPPLIER_CONFIRMED
+  RECEIVED
+  UNAVAILABLE
+}
+
+enum ProcurementDecisionSource {
+  AUTO
+  MANUAL
+}
+
+enum ProcurementReason {
+  STOCK_AVAILABLE
+  STOCK_INSUFFICIENT
+  STOCK_UNKNOWN
+  PRODUCT_UNMATCHED
+  RESERVATION_CONFLICT
+  MANUAL_IN_STOCK
+  MANUAL_TO_ORDER
+  DELIVERY_FAILED
+}
+
+enum InventoryReservationStatus {
+  ACTIVE
+  CONSUMED
+  RELEASED
+}
+
+enum TelegramAlertEventType {
+  ORDER_NEEDS_REVIEW
+  ORDER_AUTO_APPROVED
+  SUPPLIER_DELIVERY_FAILED
+}
+
 model Tenant {
-  id                             String                       @id @default(uuid()) @db.Uuid
-  key                            String                       @unique
-  name                           String
-  status                         AccessStatus                 @default(ACTIVE)
-  createdAt                      DateTime                     @default(now()) @map("created_at")
-  events                         WebhookEvent[]
-  conversations                  Conversation[]
-  messages                       Message[]
-  settings                       TenantSettings?
-  orders                         Order[]
-  products                       Product[]
-  catalogueSources               CatalogueSource[]
-  catalogueMappings              CatalogueMapping[]
-  catalogueImportRuns            CatalogueImportRun[]
-  auditLogs                      AuditLog[]
-  sheetsDestination              GoogleSheetsDestination?
-  orderExports                   OrderExport[]
-  memberships                    TenantMembership[]
-  sessions                       Session[]
-  invitations                    TenantInvitation[]
-  securityAuditLogs              SecurityAuditLog[]
-  instagramConnection            InstagramConnection?
-  instagramOAuthStates           InstagramOAuthState[]
-  instagramCredentialCleanups    InstagramCredentialCleanup[]
-  instagramCustomerProfiles      InstagramCustomerProfile[]
-  instagramOAuthCurrentAttemptId String?                      @map("instagram_oauth_current_attempt_id") @db.Uuid
-  googleConnection               GoogleConnection?
-  googleOAuthAttempts            GoogleOAuthAttempt[]
-  googleCredentialCleanups       GoogleCredentialCleanup[]
-  notifications                  UserNotification[]
-  telegramLinkAttempts           TelegramLinkAttempt[]
-  telegramUserBindings           TelegramUserBinding[]
-  telegramBusinessConnections    TelegramBusinessConnection[]
-  telegramChats                  TelegramChat[]
-  telegramDeliveries             TelegramDelivery[]
-  telegramSupplierSetting        TelegramSupplierSetting?
+  id                              String                           @id @default(uuid()) @db.Uuid
+  key                             String                           @unique
+  name                            String
+  status                          AccessStatus                     @default(ACTIVE)
+  createdAt                       DateTime                         @default(now()) @map("created_at")
+  events                          WebhookEvent[]
+  conversations                   Conversation[]
+  messages                        Message[]
+  settings                        TenantSettings?
+  orders                          Order[]
+  products                        Product[]
+  catalogueSources                CatalogueSource[]
+  catalogueMappings               CatalogueMapping[]
+  catalogueImportRuns             CatalogueImportRun[]
+  auditLogs                       AuditLog[]
+  sheetsDestination               GoogleSheetsDestination?
+  orderExports                    OrderExport[]
+  memberships                     TenantMembership[]
+  sessions                        Session[]
+  invitations                     TenantInvitation[]
+  securityAuditLogs               SecurityAuditLog[]
+  instagramConnection             InstagramConnection?
+  instagramOAuthStates            InstagramOAuthState[]
+  instagramCredentialCleanups     InstagramCredentialCleanup[]
+  instagramCustomerProfiles       InstagramCustomerProfile[]
+  instagramOAuthCurrentAttemptId  String?                          @map("instagram_oauth_current_attempt_id") @db.Uuid
+  googleConnection                GoogleConnection?
+  googleOAuthAttempts             GoogleOAuthAttempt[]
+  googleCredentialCleanups        GoogleCredentialCleanup[]
+  notifications                   UserNotification[]
+  telegramLinkAttempts            TelegramLinkAttempt[]
+  telegramUserBindings            TelegramUserBinding[]
+  telegramBusinessConnections     TelegramBusinessConnection[]
+  telegramChats                   TelegramChat[]
+  telegramDeliveries              TelegramDelivery[]
+  telegramSupplierSetting         TelegramSupplierSetting?
+  orderItems                      OrderItem[]
+  inventoryReservations           InventoryReservation[]
+  telegramDeliveryItems           TelegramDeliveryItem[]
+  telegramNotificationPreferences TelegramNotificationPreference[]
 
   @@index([status])
   @@map("tenants")
@@ -301,50 +344,56 @@ model InstagramCredentialCleanup {
 }
 
 model User {
-  id                            String                       @id @default(uuid()) @db.Uuid
-  email                         String                       @unique
-  name                          String
-  passwordHash                  String?                      @map("password_hash")
-  emailVerifiedAt               DateTime?                    @map("email_verified_at")
-  platformRole                  PlatformRole                 @default(USER) @map("platform_role")
-  status                        AccessStatus                 @default(PENDING)
-  createdAt                     DateTime                     @default(now()) @map("created_at")
-  updatedAt                     DateTime                     @updatedAt @map("updated_at")
-  memberships                   TenantMembership[]
-  sessions                      Session[]
-  emailVerificationTokens       EmailVerificationToken[]
-  passwordResetTokens           PasswordResetToken[]
-  invitationsCreated            TenantInvitation[]           @relation("InvitationCreator")
-  securityAuditLogs             SecurityAuditLog[]
-  instagramOAuthStates          InstagramOAuthState[]
-  instagramConnections          InstagramConnection[]        @relation("InstagramConnectionConnectedBy")
-  instagramMessagesSent         Message[]                    @relation("InstagramMessageSender")
-  instagramCleanupsDeadLettered InstagramCredentialCleanup[] @relation("InstagramCleanupDeadLetteredBy")
-  googleOAuthAttempts           GoogleOAuthAttempt[]
-  googleConnections             GoogleConnection[]           @relation("GoogleConnectionConnectedBy")
-  googleIdentity                GoogleIdentity?
-  notifications                 UserNotification[]
-  telegramLinkAttempts          TelegramLinkAttempt[]
-  telegramUserBindings          TelegramUserBinding[]
+  id                              String                           @id @default(uuid()) @db.Uuid
+  email                           String                           @unique
+  name                            String
+  passwordHash                    String?                          @map("password_hash")
+  emailVerifiedAt                 DateTime?                        @map("email_verified_at")
+  platformRole                    PlatformRole                     @default(USER) @map("platform_role")
+  status                          AccessStatus                     @default(PENDING)
+  createdAt                       DateTime                         @default(now()) @map("created_at")
+  updatedAt                       DateTime                         @updatedAt @map("updated_at")
+  memberships                     TenantMembership[]
+  sessions                        Session[]
+  emailVerificationTokens         EmailVerificationToken[]
+  passwordResetTokens             PasswordResetToken[]
+  invitationsCreated              TenantInvitation[]               @relation("InvitationCreator")
+  securityAuditLogs               SecurityAuditLog[]
+  instagramOAuthStates            InstagramOAuthState[]
+  instagramConnections            InstagramConnection[]            @relation("InstagramConnectionConnectedBy")
+  instagramMessagesSent           Message[]                        @relation("InstagramMessageSender")
+  instagramCleanupsDeadLettered   InstagramCredentialCleanup[]     @relation("InstagramCleanupDeadLetteredBy")
+  googleOAuthAttempts             GoogleOAuthAttempt[]
+  googleConnections               GoogleConnection[]               @relation("GoogleConnectionConnectedBy")
+  googleIdentity                  GoogleIdentity?
+  notifications                   UserNotification[]
+  telegramLinkAttempts            TelegramLinkAttempt[]
+  telegramUserBindings            TelegramUserBinding[]
+  procurementHandOffs             Order[]                          @relation("OrderProcurementHandedOffBy")
+  telegramNotificationPreferences TelegramNotificationPreference[]
 
   @@index([status])
   @@map("users")
 }
 
 model UserNotification {
-  id        String           @id @default(uuid()) @db.Uuid
-  tenantId  String           @map("tenant_id") @db.Uuid
-  userId    String           @map("user_id") @db.Uuid
-  type      NotificationType
-  category  String
-  title     String
-  message   String?
-  actionUrl String?          @map("action_url")
-  readAt    DateTime?        @map("read_at")
-  createdAt DateTime         @default(now()) @map("created_at")
-  tenant    Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                 String             @id @default(uuid()) @db.Uuid
+  tenantId           String             @map("tenant_id") @db.Uuid
+  userId             String             @map("user_id") @db.Uuid
+  type               NotificationType
+  category           String
+  title              String
+  message            String?
+  actionUrl          String?            @map("action_url")
+  eventKey           String?            @map("event_key")
+  readAt             DateTime?          @map("read_at")
+  createdAt          DateTime           @default(now()) @map("created_at")
+  tenant             Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user               User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  telegramDeliveries TelegramDelivery[] @relation("TelegramDeliverySourceNotification")
 
+  @@unique([tenantId, id])
+  @@unique([tenantId, userId, eventKey])
   @@index([tenantId, userId, createdAt(sort: Desc)])
   @@index([tenantId, userId, readAt])
   @@map("user_notifications")
@@ -406,17 +455,17 @@ model TelegramBusinessConnection {
 }
 
 model TelegramChat {
-  id                   String             @id @default(uuid()) @db.Uuid
-  tenantId             String             @map("tenant_id") @db.Uuid
-  externalChatId       String             @map("external_chat_id")
+  id                   String                   @id @default(uuid()) @db.Uuid
+  tenantId             String                   @map("tenant_id") @db.Uuid
+  externalChatId       String                   @map("external_chat_id")
   type                 String
   title                String?
   route                TelegramChatRoute
-  businessConnectionId String?            @map("business_connection_id")
-  lastObservedAt       DateTime           @map("last_observed_at")
-  createdAt            DateTime           @default(now()) @map("created_at")
-  updatedAt            DateTime           @updatedAt @map("updated_at")
-  tenant               Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  businessConnectionId String?                  @map("business_connection_id")
+  lastObservedAt       DateTime                 @map("last_observed_at")
+  createdAt            DateTime                 @default(now()) @map("created_at")
+  updatedAt            DateTime                 @updatedAt @map("updated_at")
+  tenant               Tenant                   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   deliveries           TelegramDelivery[]
   supplierSetting      TelegramSupplierSetting?
 
@@ -451,26 +500,32 @@ model TelegramWebhookUpdate {
 }
 
 model TelegramDelivery {
-  id                String                  @id @default(uuid()) @db.Uuid
-  tenantId          String                  @map("tenant_id") @db.Uuid
-  destinationId     String                  @map("destination_id") @db.Uuid
-  purpose           TelegramDeliveryPurpose
-  status            TelegramDeliveryStatus  @default(PENDING)
-  idempotencyKey    String                  @map("idempotency_key")
-  messageText       String                  @map("message_text")
-  providerMessageId String?                 @map("provider_message_id")
-  attempts          Int                     @default(0)
-  nextAttemptAt     DateTime                @default(now()) @map("next_attempt_at")
-  lastAttemptAt     DateTime?               @map("last_attempt_at")
-  leaseId           String?                 @map("lease_id") @db.Uuid
-  leaseExpiresAt    DateTime?               @map("lease_expires_at")
-  lastErrorCode     String?                 @map("last_error_code")
-  completedAt       DateTime?               @map("completed_at")
-  createdAt         DateTime                @default(now()) @map("created_at")
-  updatedAt         DateTime                @updatedAt @map("updated_at")
-  tenant            Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  destination       TelegramChat            @relation(fields: [tenantId, destinationId], references: [tenantId, id], onDelete: Restrict)
+  id                   String                  @id @default(uuid()) @db.Uuid
+  tenantId             String                  @map("tenant_id") @db.Uuid
+  destinationId        String                  @map("destination_id") @db.Uuid
+  orderId              String?                 @map("order_id") @db.Uuid
+  sourceNotificationId String?                 @map("source_notification_id") @db.Uuid
+  purpose              TelegramDeliveryPurpose
+  status               TelegramDeliveryStatus  @default(PENDING)
+  idempotencyKey       String                  @map("idempotency_key")
+  messageText          String                  @map("message_text")
+  providerMessageId    String?                 @map("provider_message_id")
+  attempts             Int                     @default(0)
+  nextAttemptAt        DateTime                @default(now()) @map("next_attempt_at")
+  lastAttemptAt        DateTime?               @map("last_attempt_at")
+  leaseId              String?                 @map("lease_id") @db.Uuid
+  leaseExpiresAt       DateTime?               @map("lease_expires_at")
+  lastErrorCode        String?                 @map("last_error_code")
+  completedAt          DateTime?               @map("completed_at")
+  createdAt            DateTime                @default(now()) @map("created_at")
+  updatedAt            DateTime                @updatedAt @map("updated_at")
+  tenant               Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  destination          TelegramChat            @relation(fields: [tenantId, destinationId], references: [tenantId, id], onDelete: Restrict)
+  order                Order?                  @relation(fields: [tenantId, orderId], references: [tenantId, id], onDelete: Restrict)
+  sourceNotification   UserNotification?       @relation("TelegramDeliverySourceNotification", fields: [tenantId, sourceNotificationId], references: [tenantId, id], onDelete: Restrict)
+  items                TelegramDeliveryItem[]
 
+  @@unique([tenantId, id])
   @@unique([tenantId, idempotencyKey])
   @@index([status, nextAttemptAt])
   @@index([leaseExpiresAt])
@@ -759,30 +814,36 @@ model TenantSettings {
 }
 
 model Order {
-  id                String        @id @default(uuid()) @db.Uuid
-  tenantId          String        @map("tenant_id") @db.Uuid
-  conversationId    String        @map("conversation_id") @db.Uuid
-  triggerMessageId  String        @unique @map("trigger_message_id") @db.Uuid
-  status            String        @default("AI_PROCESSING")
-  extraction        Json?
-  validationIssues  Json?         @map("validation_issues")
-  overallConfidence Float?        @map("overall_confidence")
-  aiResponseId      String?       @map("ai_response_id")
-  aiModel           String?       @map("ai_model")
-  promptVersion     String        @map("prompt_version")
-  inputTokens       Int?          @map("input_tokens")
-  outputTokens      Int?          @map("output_tokens")
-  approvedAt        DateTime?     @map("approved_at")
-  approvedBy        String?       @map("approved_by")
-  createdAt         DateTime      @default(now()) @map("created_at")
-  updatedAt         DateTime      @updatedAt @map("updated_at")
-  tenant            Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  conversation      Conversation  @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  triggerMessage    Message       @relation("OrderTriggerMessage", fields: [triggerMessageId], references: [id], onDelete: Restrict)
-  items             OrderItem[]
-  auditLogs         AuditLog[]
-  exports           OrderExport[]
+  id                         String             @id @default(uuid()) @db.Uuid
+  tenantId                   String             @map("tenant_id") @db.Uuid
+  conversationId             String             @map("conversation_id") @db.Uuid
+  triggerMessageId           String             @unique @map("trigger_message_id") @db.Uuid
+  status                     String             @default("AI_PROCESSING")
+  extraction                 Json?
+  validationIssues           Json?              @map("validation_issues")
+  overallConfidence          Float?             @map("overall_confidence")
+  aiResponseId               String?            @map("ai_response_id")
+  aiModel                    String?            @map("ai_model")
+  promptVersion              String             @map("prompt_version")
+  inputTokens                Int?               @map("input_tokens")
+  outputTokens               Int?               @map("output_tokens")
+  approvedAt                 DateTime?          @map("approved_at")
+  approvedBy                 String?            @map("approved_by")
+  procurementHandedOffAt     DateTime?          @map("procurement_handed_off_at")
+  procurementHandedOffBy     String?            @map("procurement_handed_off_by") @db.Uuid
+  supplierDispatchVersion    Int                @default(0) @map("supplier_dispatch_version")
+  createdAt                  DateTime           @default(now()) @map("created_at")
+  updatedAt                  DateTime           @updatedAt @map("updated_at")
+  tenant                     Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  conversation               Conversation       @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  triggerMessage             Message            @relation("OrderTriggerMessage", fields: [triggerMessageId], references: [id], onDelete: Restrict)
+  items                      OrderItem[]        @relation("TenantOrderItems")
+  auditLogs                  AuditLog[]
+  exports                    OrderExport[]
+  procurementHandedOffByUser User?              @relation("OrderProcurementHandedOffBy", fields: [procurementHandedOffBy], references: [id], onDelete: SetNull)
+  telegramDeliveries         TelegramDelivery[]
 
+  @@unique([tenantId, id])
   @@index([tenantId, status, createdAt])
   @@index([conversationId, createdAt])
   @@map("orders")
@@ -826,50 +887,113 @@ model AuditLog {
 }
 
 model OrderItem {
-  id           String   @id @default(uuid()) @db.Uuid
-  orderId      String   @map("order_id") @db.Uuid
-  catalogId    String?  @map("catalog_id")
-  originalText String   @map("original_text")
-  quantity     Int
-  color        String?
-  size         String?
-  confidence   Float
-  createdAt    DateTime @default(now()) @map("created_at")
-  order        Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  id                   String                     @id @default(uuid()) @db.Uuid
+  tenantId             String                     @map("tenant_id") @db.Uuid
+  orderId              String                     @map("order_id") @db.Uuid
+  catalogId            String?                    @map("catalog_id")
+  originalText         String                     @map("original_text")
+  quantity             Int
+  color                String?
+  size                 String?
+  confidence           Float
+  procurementStatus    ProcurementStatus          @default(UNASSESSED) @map("procurement_status")
+  procurementSource    ProcurementDecisionSource? @map("procurement_source")
+  procurementReason    ProcurementReason?         @map("procurement_reason")
+  stockAtDecision      Int?                       @map("stock_at_decision")
+  availableAtDecision  Int?                       @map("available_at_decision")
+  procurementUpdatedAt DateTime?                  @map("procurement_updated_at")
+  createdAt            DateTime                   @default(now()) @map("created_at")
+  tenant               Tenant                     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  order                Order                      @relation("TenantOrderItems", fields: [tenantId, orderId], references: [tenantId, id], onDelete: Cascade)
+  reservation          InventoryReservation?
+  deliveryItems        TelegramDeliveryItem[]
 
+  @@unique([tenantId, id])
   @@index([orderId])
   @@map("order_items")
 }
 
 model Product {
-  id              String           @id @default(uuid()) @db.Uuid
-  tenantId        String           @map("tenant_id") @db.Uuid
+  id              String                 @id @default(uuid()) @db.Uuid
+  tenantId        String                 @map("tenant_id") @db.Uuid
   sku             String
   name            String
   description     String?
-  price           Decimal?         @db.Decimal(12, 2)
-  currency        String?          @db.VarChar(3)
-  stockQuantity   Int?             @map("stock_quantity")
+  price           Decimal?               @db.Decimal(12, 2)
+  currency        String?                @db.VarChar(3)
+  stockQuantity   Int?                   @map("stock_quantity")
   category        String?
   brand           String?
   aliases         Json
   color           String?
   size            String?
-  imageUrls       Json?            @map("image_urls")
+  imageUrls       Json?                  @map("image_urls")
   attributes      Json?
-  imageUrl        String?          @map("image_url")
-  active          Boolean          @default(true)
-  sourceId        String?          @map("source_id") @db.Uuid
-  sourceRowKey    String?          @map("source_row_key")
-  sourceUpdatedAt DateTime?        @map("source_updated_at")
-  createdAt       DateTime         @default(now()) @map("created_at")
-  updatedAt       DateTime         @updatedAt @map("updated_at")
-  tenant          Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  source          CatalogueSource? @relation("ProductSource", fields: [tenantId, sourceId], references: [tenantId, id], onDelete: Restrict)
+  imageUrl        String?                @map("image_url")
+  active          Boolean                @default(true)
+  sourceId        String?                @map("source_id") @db.Uuid
+  sourceRowKey    String?                @map("source_row_key")
+  sourceUpdatedAt DateTime?              @map("source_updated_at")
+  createdAt       DateTime               @default(now()) @map("created_at")
+  updatedAt       DateTime               @updatedAt @map("updated_at")
+  tenant          Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  source          CatalogueSource?       @relation("ProductSource", fields: [tenantId, sourceId], references: [tenantId, id], onDelete: Restrict)
+  reservations    InventoryReservation[]
 
+  @@unique([tenantId, id])
   @@unique([tenantId, sku])
   @@index([tenantId, active, name])
   @@map("products")
+}
+
+model InventoryReservation {
+  id          String                     @id @default(uuid()) @db.Uuid
+  tenantId    String                     @map("tenant_id") @db.Uuid
+  productId   String                     @map("product_id") @db.Uuid
+  orderItemId String                     @map("order_item_id") @db.Uuid
+  quantity    Int
+  status      InventoryReservationStatus @default(ACTIVE)
+  consumedAt  DateTime?                  @map("consumed_at")
+  releasedAt  DateTime?                  @map("released_at")
+  createdAt   DateTime                   @default(now()) @map("created_at")
+  updatedAt   DateTime                   @updatedAt @map("updated_at")
+  tenant      Tenant                     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  product     Product                    @relation(fields: [tenantId, productId], references: [tenantId, id], onDelete: Restrict)
+  orderItem   OrderItem                  @relation(fields: [tenantId, orderItemId], references: [tenantId, id], onDelete: Cascade)
+
+  @@unique([tenantId, orderItemId])
+  @@index([tenantId, productId, status])
+  @@map("inventory_reservations")
+}
+
+model TelegramDeliveryItem {
+  id          String           @id @default(uuid()) @db.Uuid
+  tenantId    String           @map("tenant_id") @db.Uuid
+  deliveryId  String           @map("delivery_id") @db.Uuid
+  orderItemId String           @map("order_item_id") @db.Uuid
+  createdAt   DateTime         @default(now()) @map("created_at")
+  tenant      Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  delivery    TelegramDelivery @relation(fields: [tenantId, deliveryId], references: [tenantId, id], onDelete: Cascade)
+  orderItem   OrderItem        @relation(fields: [tenantId, orderItemId], references: [tenantId, id], onDelete: Restrict)
+
+  @@unique([deliveryId, orderItemId])
+  @@index([tenantId, orderItemId])
+  @@map("telegram_delivery_items")
+}
+
+model TelegramNotificationPreference {
+  id        String                 @id @default(uuid()) @db.Uuid
+  tenantId  String                 @map("tenant_id") @db.Uuid
+  userId    String                 @map("user_id") @db.Uuid
+  eventType TelegramAlertEventType @map("event_type")
+  enabled   Boolean                @default(true)
+  createdAt DateTime               @default(now()) @map("created_at")
+  updatedAt DateTime               @updatedAt @map("updated_at")
+  tenant    Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user      User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, userId, eventType])
+  @@map("telegram_notification_preferences")
 }
 
 model CatalogueSource {

@@ -1,5 +1,8 @@
 import { z } from 'zod';
 
+export type { SupplierOrderPreview, TelegramNotificationPreferences } from './procurement.js';
+export { telegramNotificationPreferencesSchema } from './procurement.js';
+
 export const telegramLinkPurposeSchema = z.enum(['PERSONAL', 'SUPPLIER_GROUP']);
 export const telegramDeliveryPurposeSchema = z.enum(['TEST', 'SUPPLIER_ORDER', 'PERSONAL_ALERT']);
 export const telegramDeliveryStatusSchema = z.enum(['PENDING', 'PROCESSING', 'SUCCEEDED', 'RETRYABLE', 'FAILED']);

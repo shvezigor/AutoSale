@@ -29,15 +29,20 @@ export type AggregateOrderItem = {
 export type OrderItemAvgAggregateOutputType = {
   quantity: number | null
   confidence: number | null
+  stockAtDecision: number | null
+  availableAtDecision: number | null
 }
 
 export type OrderItemSumAggregateOutputType = {
   quantity: number | null
   confidence: number | null
+  stockAtDecision: number | null
+  availableAtDecision: number | null
 }
 
 export type OrderItemMinAggregateOutputType = {
   id: string | null
+  tenantId: string | null
   orderId: string | null
   catalogId: string | null
   originalText: string | null
@@ -45,11 +50,18 @@ export type OrderItemMinAggregateOutputType = {
   color: string | null
   size: string | null
   confidence: number | null
+  procurementStatus: $Enums.ProcurementStatus | null
+  procurementSource: $Enums.ProcurementDecisionSource | null
+  procurementReason: $Enums.ProcurementReason | null
+  stockAtDecision: number | null
+  availableAtDecision: number | null
+  procurementUpdatedAt: Date | null
   createdAt: Date | null
 }
 
 export type OrderItemMaxAggregateOutputType = {
   id: string | null
+  tenantId: string | null
   orderId: string | null
   catalogId: string | null
   originalText: string | null
@@ -57,11 +69,18 @@ export type OrderItemMaxAggregateOutputType = {
   color: string | null
   size: string | null
   confidence: number | null
+  procurementStatus: $Enums.ProcurementStatus | null
+  procurementSource: $Enums.ProcurementDecisionSource | null
+  procurementReason: $Enums.ProcurementReason | null
+  stockAtDecision: number | null
+  availableAtDecision: number | null
+  procurementUpdatedAt: Date | null
   createdAt: Date | null
 }
 
 export type OrderItemCountAggregateOutputType = {
   id: number
+  tenantId: number
   orderId: number
   catalogId: number
   originalText: number
@@ -69,6 +88,12 @@ export type OrderItemCountAggregateOutputType = {
   color: number
   size: number
   confidence: number
+  procurementStatus: number
+  procurementSource: number
+  procurementReason: number
+  stockAtDecision: number
+  availableAtDecision: number
+  procurementUpdatedAt: number
   createdAt: number
   _all: number
 }
@@ -77,15 +102,20 @@ export type OrderItemCountAggregateOutputType = {
 export type OrderItemAvgAggregateInputType = {
   quantity?: true
   confidence?: true
+  stockAtDecision?: true
+  availableAtDecision?: true
 }
 
 export type OrderItemSumAggregateInputType = {
   quantity?: true
   confidence?: true
+  stockAtDecision?: true
+  availableAtDecision?: true
 }
 
 export type OrderItemMinAggregateInputType = {
   id?: true
+  tenantId?: true
   orderId?: true
   catalogId?: true
   originalText?: true
@@ -93,11 +123,18 @@ export type OrderItemMinAggregateInputType = {
   color?: true
   size?: true
   confidence?: true
+  procurementStatus?: true
+  procurementSource?: true
+  procurementReason?: true
+  stockAtDecision?: true
+  availableAtDecision?: true
+  procurementUpdatedAt?: true
   createdAt?: true
 }
 
 export type OrderItemMaxAggregateInputType = {
   id?: true
+  tenantId?: true
   orderId?: true
   catalogId?: true
   originalText?: true
@@ -105,11 +142,18 @@ export type OrderItemMaxAggregateInputType = {
   color?: true
   size?: true
   confidence?: true
+  procurementStatus?: true
+  procurementSource?: true
+  procurementReason?: true
+  stockAtDecision?: true
+  availableAtDecision?: true
+  procurementUpdatedAt?: true
   createdAt?: true
 }
 
 export type OrderItemCountAggregateInputType = {
   id?: true
+  tenantId?: true
   orderId?: true
   catalogId?: true
   originalText?: true
@@ -117,6 +161,12 @@ export type OrderItemCountAggregateInputType = {
   color?: true
   size?: true
   confidence?: true
+  procurementStatus?: true
+  procurementSource?: true
+  procurementReason?: true
+  stockAtDecision?: true
+  availableAtDecision?: true
+  procurementUpdatedAt?: true
   createdAt?: true
   _all?: true
 }
@@ -209,6 +259,7 @@ export type OrderItemGroupByArgs<ExtArgs extends runtime.Types.Extensions.Intern
 
 export type OrderItemGroupByOutputType = {
   id: string
+  tenantId: string
   orderId: string
   catalogId: string | null
   originalText: string
@@ -216,6 +267,12 @@ export type OrderItemGroupByOutputType = {
   color: string | null
   size: string | null
   confidence: number
+  procurementStatus: $Enums.ProcurementStatus
+  procurementSource: $Enums.ProcurementDecisionSource | null
+  procurementReason: $Enums.ProcurementReason | null
+  stockAtDecision: number | null
+  availableAtDecision: number | null
+  procurementUpdatedAt: Date | null
   createdAt: Date
   _count: OrderItemCountAggregateOutputType | null
   _avg: OrderItemAvgAggregateOutputType | null
@@ -244,6 +301,7 @@ export type OrderItemWhereInput = {
   OR?: Prisma.OrderItemWhereInput[]
   NOT?: Prisma.OrderItemWhereInput | Prisma.OrderItemWhereInput[]
   id?: Prisma.UuidFilter<"OrderItem"> | string
+  tenantId?: Prisma.UuidFilter<"OrderItem"> | string
   orderId?: Prisma.UuidFilter<"OrderItem"> | string
   catalogId?: Prisma.StringNullableFilter<"OrderItem"> | string | null
   originalText?: Prisma.StringFilter<"OrderItem"> | string
@@ -251,12 +309,22 @@ export type OrderItemWhereInput = {
   color?: Prisma.StringNullableFilter<"OrderItem"> | string | null
   size?: Prisma.StringNullableFilter<"OrderItem"> | string | null
   confidence?: Prisma.FloatFilter<"OrderItem"> | number
+  procurementStatus?: Prisma.EnumProcurementStatusFilter<"OrderItem"> | $Enums.ProcurementStatus
+  procurementSource?: Prisma.EnumProcurementDecisionSourceNullableFilter<"OrderItem"> | $Enums.ProcurementDecisionSource | null
+  procurementReason?: Prisma.EnumProcurementReasonNullableFilter<"OrderItem"> | $Enums.ProcurementReason | null
+  stockAtDecision?: Prisma.IntNullableFilter<"OrderItem"> | number | null
+  availableAtDecision?: Prisma.IntNullableFilter<"OrderItem"> | number | null
+  procurementUpdatedAt?: Prisma.DateTimeNullableFilter<"OrderItem"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"OrderItem"> | Date | string
+  tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
   order?: Prisma.XOR<Prisma.OrderScalarRelationFilter, Prisma.OrderWhereInput>
+  reservation?: Prisma.XOR<Prisma.InventoryReservationNullableScalarRelationFilter, Prisma.InventoryReservationWhereInput> | null
+  deliveryItems?: Prisma.TelegramDeliveryItemListRelationFilter
 }
 
 export type OrderItemOrderByWithRelationInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrder
   orderId?: Prisma.SortOrder
   catalogId?: Prisma.SortOrderInput | Prisma.SortOrder
   originalText?: Prisma.SortOrder
@@ -264,15 +332,26 @@ export type OrderItemOrderByWithRelationInput = {
   color?: Prisma.SortOrderInput | Prisma.SortOrder
   size?: Prisma.SortOrderInput | Prisma.SortOrder
   confidence?: Prisma.SortOrder
+  procurementStatus?: Prisma.SortOrder
+  procurementSource?: Prisma.SortOrderInput | Prisma.SortOrder
+  procurementReason?: Prisma.SortOrderInput | Prisma.SortOrder
+  stockAtDecision?: Prisma.SortOrderInput | Prisma.SortOrder
+  availableAtDecision?: Prisma.SortOrderInput | Prisma.SortOrder
+  procurementUpdatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  tenant?: Prisma.TenantOrderByWithRelationInput
   order?: Prisma.OrderOrderByWithRelationInput
+  reservation?: Prisma.InventoryReservationOrderByWithRelationInput
+  deliveryItems?: Prisma.TelegramDeliveryItemOrderByRelationAggregateInput
 }
 
 export type OrderItemWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  tenantId_id?: Prisma.OrderItemTenantIdIdCompoundUniqueInput
   AND?: Prisma.OrderItemWhereInput | Prisma.OrderItemWhereInput[]
   OR?: Prisma.OrderItemWhereInput[]
   NOT?: Prisma.OrderItemWhereInput | Prisma.OrderItemWhereInput[]
+  tenantId?: Prisma.UuidFilter<"OrderItem"> | string
   orderId?: Prisma.UuidFilter<"OrderItem"> | string
   catalogId?: Prisma.StringNullableFilter<"OrderItem"> | string | null
   originalText?: Prisma.StringFilter<"OrderItem"> | string
@@ -280,12 +359,22 @@ export type OrderItemWhereUniqueInput = Prisma.AtLeast<{
   color?: Prisma.StringNullableFilter<"OrderItem"> | string | null
   size?: Prisma.StringNullableFilter<"OrderItem"> | string | null
   confidence?: Prisma.FloatFilter<"OrderItem"> | number
+  procurementStatus?: Prisma.EnumProcurementStatusFilter<"OrderItem"> | $Enums.ProcurementStatus
+  procurementSource?: Prisma.EnumProcurementDecisionSourceNullableFilter<"OrderItem"> | $Enums.ProcurementDecisionSource | null
+  procurementReason?: Prisma.EnumProcurementReasonNullableFilter<"OrderItem"> | $Enums.ProcurementReason | null
+  stockAtDecision?: Prisma.IntNullableFilter<"OrderItem"> | number | null
+  availableAtDecision?: Prisma.IntNullableFilter<"OrderItem"> | number | null
+  procurementUpdatedAt?: Prisma.DateTimeNullableFilter<"OrderItem"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"OrderItem"> | Date | string
+  tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
   order?: Prisma.XOR<Prisma.OrderScalarRelationFilter, Prisma.OrderWhereInput>
-}, "id">
+  reservation?: Prisma.XOR<Prisma.InventoryReservationNullableScalarRelationFilter, Prisma.InventoryReservationWhereInput> | null
+  deliveryItems?: Prisma.TelegramDeliveryItemListRelationFilter
+}, "id" | "tenantId_id">
 
 export type OrderItemOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrder
   orderId?: Prisma.SortOrder
   catalogId?: Prisma.SortOrderInput | Prisma.SortOrder
   originalText?: Prisma.SortOrder
@@ -293,6 +382,12 @@ export type OrderItemOrderByWithAggregationInput = {
   color?: Prisma.SortOrderInput | Prisma.SortOrder
   size?: Prisma.SortOrderInput | Prisma.SortOrder
   confidence?: Prisma.SortOrder
+  procurementStatus?: Prisma.SortOrder
+  procurementSource?: Prisma.SortOrderInput | Prisma.SortOrder
+  procurementReason?: Prisma.SortOrderInput | Prisma.SortOrder
+  stockAtDecision?: Prisma.SortOrderInput | Prisma.SortOrder
+  availableAtDecision?: Prisma.SortOrderInput | Prisma.SortOrder
+  procurementUpdatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.OrderItemCountOrderByAggregateInput
   _avg?: Prisma.OrderItemAvgOrderByAggregateInput
@@ -306,6 +401,7 @@ export type OrderItemScalarWhereWithAggregatesInput = {
   OR?: Prisma.OrderItemScalarWhereWithAggregatesInput[]
   NOT?: Prisma.OrderItemScalarWhereWithAggregatesInput | Prisma.OrderItemScalarWhereWithAggregatesInput[]
   id?: Prisma.UuidWithAggregatesFilter<"OrderItem"> | string
+  tenantId?: Prisma.UuidWithAggregatesFilter<"OrderItem"> | string
   orderId?: Prisma.UuidWithAggregatesFilter<"OrderItem"> | string
   catalogId?: Prisma.StringNullableWithAggregatesFilter<"OrderItem"> | string | null
   originalText?: Prisma.StringWithAggregatesFilter<"OrderItem"> | string
@@ -313,6 +409,12 @@ export type OrderItemScalarWhereWithAggregatesInput = {
   color?: Prisma.StringNullableWithAggregatesFilter<"OrderItem"> | string | null
   size?: Prisma.StringNullableWithAggregatesFilter<"OrderItem"> | string | null
   confidence?: Prisma.FloatWithAggregatesFilter<"OrderItem"> | number
+  procurementStatus?: Prisma.EnumProcurementStatusWithAggregatesFilter<"OrderItem"> | $Enums.ProcurementStatus
+  procurementSource?: Prisma.EnumProcurementDecisionSourceNullableWithAggregatesFilter<"OrderItem"> | $Enums.ProcurementDecisionSource | null
+  procurementReason?: Prisma.EnumProcurementReasonNullableWithAggregatesFilter<"OrderItem"> | $Enums.ProcurementReason | null
+  stockAtDecision?: Prisma.IntNullableWithAggregatesFilter<"OrderItem"> | number | null
+  availableAtDecision?: Prisma.IntNullableWithAggregatesFilter<"OrderItem"> | number | null
+  procurementUpdatedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"OrderItem"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"OrderItem"> | Date | string
 }
 
@@ -324,12 +426,22 @@ export type OrderItemCreateInput = {
   color?: string | null
   size?: string | null
   confidence: number
+  procurementStatus?: $Enums.ProcurementStatus
+  procurementSource?: $Enums.ProcurementDecisionSource | null
+  procurementReason?: $Enums.ProcurementReason | null
+  stockAtDecision?: number | null
+  availableAtDecision?: number | null
+  procurementUpdatedAt?: Date | string | null
   createdAt?: Date | string
+  tenant: Prisma.TenantCreateNestedOneWithoutOrderItemsInput
   order: Prisma.OrderCreateNestedOneWithoutItemsInput
+  reservation?: Prisma.InventoryReservationCreateNestedOneWithoutOrderItemInput
+  deliveryItems?: Prisma.TelegramDeliveryItemCreateNestedManyWithoutOrderItemInput
 }
 
 export type OrderItemUncheckedCreateInput = {
   id?: string
+  tenantId: string
   orderId: string
   catalogId?: string | null
   originalText: string
@@ -337,7 +449,15 @@ export type OrderItemUncheckedCreateInput = {
   color?: string | null
   size?: string | null
   confidence: number
+  procurementStatus?: $Enums.ProcurementStatus
+  procurementSource?: $Enums.ProcurementDecisionSource | null
+  procurementReason?: $Enums.ProcurementReason | null
+  stockAtDecision?: number | null
+  availableAtDecision?: number | null
+  procurementUpdatedAt?: Date | string | null
   createdAt?: Date | string
+  reservation?: Prisma.InventoryReservationUncheckedCreateNestedOneWithoutOrderItemInput
+  deliveryItems?: Prisma.TelegramDeliveryItemUncheckedCreateNestedManyWithoutOrderItemInput
 }
 
 export type OrderItemUpdateInput = {
@@ -348,12 +468,22 @@ export type OrderItemUpdateInput = {
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   size?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confidence?: Prisma.FloatFieldUpdateOperationsInput | number
+  procurementStatus?: Prisma.EnumProcurementStatusFieldUpdateOperationsInput | $Enums.ProcurementStatus
+  procurementSource?: Prisma.NullableEnumProcurementDecisionSourceFieldUpdateOperationsInput | $Enums.ProcurementDecisionSource | null
+  procurementReason?: Prisma.NullableEnumProcurementReasonFieldUpdateOperationsInput | $Enums.ProcurementReason | null
+  stockAtDecision?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  availableAtDecision?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  procurementUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutOrderItemsNestedInput
   order?: Prisma.OrderUpdateOneRequiredWithoutItemsNestedInput
+  reservation?: Prisma.InventoryReservationUpdateOneWithoutOrderItemNestedInput
+  deliveryItems?: Prisma.TelegramDeliveryItemUpdateManyWithoutOrderItemNestedInput
 }
 
 export type OrderItemUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   orderId?: Prisma.StringFieldUpdateOperationsInput | string
   catalogId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalText?: Prisma.StringFieldUpdateOperationsInput | string
@@ -361,11 +491,20 @@ export type OrderItemUncheckedUpdateInput = {
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   size?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confidence?: Prisma.FloatFieldUpdateOperationsInput | number
+  procurementStatus?: Prisma.EnumProcurementStatusFieldUpdateOperationsInput | $Enums.ProcurementStatus
+  procurementSource?: Prisma.NullableEnumProcurementDecisionSourceFieldUpdateOperationsInput | $Enums.ProcurementDecisionSource | null
+  procurementReason?: Prisma.NullableEnumProcurementReasonFieldUpdateOperationsInput | $Enums.ProcurementReason | null
+  stockAtDecision?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  availableAtDecision?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  procurementUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reservation?: Prisma.InventoryReservationUncheckedUpdateOneWithoutOrderItemNestedInput
+  deliveryItems?: Prisma.TelegramDeliveryItemUncheckedUpdateManyWithoutOrderItemNestedInput
 }
 
 export type OrderItemCreateManyInput = {
   id?: string
+  tenantId: string
   orderId: string
   catalogId?: string | null
   originalText: string
@@ -373,6 +512,12 @@ export type OrderItemCreateManyInput = {
   color?: string | null
   size?: string | null
   confidence: number
+  procurementStatus?: $Enums.ProcurementStatus
+  procurementSource?: $Enums.ProcurementDecisionSource | null
+  procurementReason?: $Enums.ProcurementReason | null
+  stockAtDecision?: number | null
+  availableAtDecision?: number | null
+  procurementUpdatedAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -384,11 +529,18 @@ export type OrderItemUpdateManyMutationInput = {
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   size?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confidence?: Prisma.FloatFieldUpdateOperationsInput | number
+  procurementStatus?: Prisma.EnumProcurementStatusFieldUpdateOperationsInput | $Enums.ProcurementStatus
+  procurementSource?: Prisma.NullableEnumProcurementDecisionSourceFieldUpdateOperationsInput | $Enums.ProcurementDecisionSource | null
+  procurementReason?: Prisma.NullableEnumProcurementReasonFieldUpdateOperationsInput | $Enums.ProcurementReason | null
+  stockAtDecision?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  availableAtDecision?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  procurementUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type OrderItemUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   orderId?: Prisma.StringFieldUpdateOperationsInput | string
   catalogId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalText?: Prisma.StringFieldUpdateOperationsInput | string
@@ -396,6 +548,12 @@ export type OrderItemUncheckedUpdateManyInput = {
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   size?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confidence?: Prisma.FloatFieldUpdateOperationsInput | number
+  procurementStatus?: Prisma.EnumProcurementStatusFieldUpdateOperationsInput | $Enums.ProcurementStatus
+  procurementSource?: Prisma.NullableEnumProcurementDecisionSourceFieldUpdateOperationsInput | $Enums.ProcurementDecisionSource | null
+  procurementReason?: Prisma.NullableEnumProcurementReasonFieldUpdateOperationsInput | $Enums.ProcurementReason | null
+  stockAtDecision?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  availableAtDecision?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  procurementUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -409,8 +567,14 @@ export type OrderItemOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
+export type OrderItemTenantIdIdCompoundUniqueInput = {
+  tenantId: string
+  id: string
+}
+
 export type OrderItemCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrder
   orderId?: Prisma.SortOrder
   catalogId?: Prisma.SortOrder
   originalText?: Prisma.SortOrder
@@ -418,16 +582,25 @@ export type OrderItemCountOrderByAggregateInput = {
   color?: Prisma.SortOrder
   size?: Prisma.SortOrder
   confidence?: Prisma.SortOrder
+  procurementStatus?: Prisma.SortOrder
+  procurementSource?: Prisma.SortOrder
+  procurementReason?: Prisma.SortOrder
+  stockAtDecision?: Prisma.SortOrder
+  availableAtDecision?: Prisma.SortOrder
+  procurementUpdatedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
 export type OrderItemAvgOrderByAggregateInput = {
   quantity?: Prisma.SortOrder
   confidence?: Prisma.SortOrder
+  stockAtDecision?: Prisma.SortOrder
+  availableAtDecision?: Prisma.SortOrder
 }
 
 export type OrderItemMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrder
   orderId?: Prisma.SortOrder
   catalogId?: Prisma.SortOrder
   originalText?: Prisma.SortOrder
@@ -435,11 +608,18 @@ export type OrderItemMaxOrderByAggregateInput = {
   color?: Prisma.SortOrder
   size?: Prisma.SortOrder
   confidence?: Prisma.SortOrder
+  procurementStatus?: Prisma.SortOrder
+  procurementSource?: Prisma.SortOrder
+  procurementReason?: Prisma.SortOrder
+  stockAtDecision?: Prisma.SortOrder
+  availableAtDecision?: Prisma.SortOrder
+  procurementUpdatedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
 export type OrderItemMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrder
   orderId?: Prisma.SortOrder
   catalogId?: Prisma.SortOrder
   originalText?: Prisma.SortOrder
@@ -447,12 +627,67 @@ export type OrderItemMinOrderByAggregateInput = {
   color?: Prisma.SortOrder
   size?: Prisma.SortOrder
   confidence?: Prisma.SortOrder
+  procurementStatus?: Prisma.SortOrder
+  procurementSource?: Prisma.SortOrder
+  procurementReason?: Prisma.SortOrder
+  stockAtDecision?: Prisma.SortOrder
+  availableAtDecision?: Prisma.SortOrder
+  procurementUpdatedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
 export type OrderItemSumOrderByAggregateInput = {
   quantity?: Prisma.SortOrder
   confidence?: Prisma.SortOrder
+  stockAtDecision?: Prisma.SortOrder
+  availableAtDecision?: Prisma.SortOrder
+}
+
+export type OrderItemScalarRelationFilter = {
+  is?: Prisma.OrderItemWhereInput
+  isNot?: Prisma.OrderItemWhereInput
+}
+
+export type OrderItemCreateNestedManyWithoutTenantInput = {
+  create?: Prisma.XOR<Prisma.OrderItemCreateWithoutTenantInput, Prisma.OrderItemUncheckedCreateWithoutTenantInput> | Prisma.OrderItemCreateWithoutTenantInput[] | Prisma.OrderItemUncheckedCreateWithoutTenantInput[]
+  connectOrCreate?: Prisma.OrderItemCreateOrConnectWithoutTenantInput | Prisma.OrderItemCreateOrConnectWithoutTenantInput[]
+  createMany?: Prisma.OrderItemCreateManyTenantInputEnvelope
+  connect?: Prisma.OrderItemWhereUniqueInput | Prisma.OrderItemWhereUniqueInput[]
+}
+
+export type OrderItemUncheckedCreateNestedManyWithoutTenantInput = {
+  create?: Prisma.XOR<Prisma.OrderItemCreateWithoutTenantInput, Prisma.OrderItemUncheckedCreateWithoutTenantInput> | Prisma.OrderItemCreateWithoutTenantInput[] | Prisma.OrderItemUncheckedCreateWithoutTenantInput[]
+  connectOrCreate?: Prisma.OrderItemCreateOrConnectWithoutTenantInput | Prisma.OrderItemCreateOrConnectWithoutTenantInput[]
+  createMany?: Prisma.OrderItemCreateManyTenantInputEnvelope
+  connect?: Prisma.OrderItemWhereUniqueInput | Prisma.OrderItemWhereUniqueInput[]
+}
+
+export type OrderItemUpdateManyWithoutTenantNestedInput = {
+  create?: Prisma.XOR<Prisma.OrderItemCreateWithoutTenantInput, Prisma.OrderItemUncheckedCreateWithoutTenantInput> | Prisma.OrderItemCreateWithoutTenantInput[] | Prisma.OrderItemUncheckedCreateWithoutTenantInput[]
+  connectOrCreate?: Prisma.OrderItemCreateOrConnectWithoutTenantInput | Prisma.OrderItemCreateOrConnectWithoutTenantInput[]
+  upsert?: Prisma.OrderItemUpsertWithWhereUniqueWithoutTenantInput | Prisma.OrderItemUpsertWithWhereUniqueWithoutTenantInput[]
+  createMany?: Prisma.OrderItemCreateManyTenantInputEnvelope
+  set?: Prisma.OrderItemWhereUniqueInput | Prisma.OrderItemWhereUniqueInput[]
+  disconnect?: Prisma.OrderItemWhereUniqueInput | Prisma.OrderItemWhereUniqueInput[]
+  delete?: Prisma.OrderItemWhereUniqueInput | Prisma.OrderItemWhereUniqueInput[]
+  connect?: Prisma.OrderItemWhereUniqueInput | Prisma.OrderItemWhereUniqueInput[]
+  update?: Prisma.OrderItemUpdateWithWhereUniqueWithoutTenantInput | Prisma.OrderItemUpdateWithWhereUniqueWithoutTenantInput[]
+  updateMany?: Prisma.OrderItemUpdateManyWithWhereWithoutTenantInput | Prisma.OrderItemUpdateManyWithWhereWithoutTenantInput[]
+  deleteMany?: Prisma.OrderItemScalarWhereInput | Prisma.OrderItemScalarWhereInput[]
+}
+
+export type OrderItemUncheckedUpdateManyWithoutTenantNestedInput = {
+  create?: Prisma.XOR<Prisma.OrderItemCreateWithoutTenantInput, Prisma.OrderItemUncheckedCreateWithoutTenantInput> | Prisma.OrderItemCreateWithoutTenantInput[] | Prisma.OrderItemUncheckedCreateWithoutTenantInput[]
+  connectOrCreate?: Prisma.OrderItemCreateOrConnectWithoutTenantInput | Prisma.OrderItemCreateOrConnectWithoutTenantInput[]
+  upsert?: Prisma.OrderItemUpsertWithWhereUniqueWithoutTenantInput | Prisma.OrderItemUpsertWithWhereUniqueWithoutTenantInput[]
+  createMany?: Prisma.OrderItemCreateManyTenantInputEnvelope
+  set?: Prisma.OrderItemWhereUniqueInput | Prisma.OrderItemWhereUniqueInput[]
+  disconnect?: Prisma.OrderItemWhereUniqueInput | Prisma.OrderItemWhereUniqueInput[]
+  delete?: Prisma.OrderItemWhereUniqueInput | Prisma.OrderItemWhereUniqueInput[]
+  connect?: Prisma.OrderItemWhereUniqueInput | Prisma.OrderItemWhereUniqueInput[]
+  update?: Prisma.OrderItemUpdateWithWhereUniqueWithoutTenantInput | Prisma.OrderItemUpdateWithWhereUniqueWithoutTenantInput[]
+  updateMany?: Prisma.OrderItemUpdateManyWithWhereWithoutTenantInput | Prisma.OrderItemUpdateManyWithWhereWithoutTenantInput[]
+  deleteMany?: Prisma.OrderItemScalarWhereInput | Prisma.OrderItemScalarWhereInput[]
 }
 
 export type OrderItemCreateNestedManyWithoutOrderInput = {
@@ -497,6 +732,134 @@ export type OrderItemUncheckedUpdateManyWithoutOrderNestedInput = {
   deleteMany?: Prisma.OrderItemScalarWhereInput | Prisma.OrderItemScalarWhereInput[]
 }
 
+export type EnumProcurementStatusFieldUpdateOperationsInput = {
+  set?: $Enums.ProcurementStatus
+}
+
+export type NullableEnumProcurementDecisionSourceFieldUpdateOperationsInput = {
+  set?: $Enums.ProcurementDecisionSource | null
+}
+
+export type NullableEnumProcurementReasonFieldUpdateOperationsInput = {
+  set?: $Enums.ProcurementReason | null
+}
+
+export type OrderItemCreateNestedOneWithoutReservationInput = {
+  create?: Prisma.XOR<Prisma.OrderItemCreateWithoutReservationInput, Prisma.OrderItemUncheckedCreateWithoutReservationInput>
+  connectOrCreate?: Prisma.OrderItemCreateOrConnectWithoutReservationInput
+  connect?: Prisma.OrderItemWhereUniqueInput
+}
+
+export type OrderItemUpdateOneRequiredWithoutReservationNestedInput = {
+  create?: Prisma.XOR<Prisma.OrderItemCreateWithoutReservationInput, Prisma.OrderItemUncheckedCreateWithoutReservationInput>
+  connectOrCreate?: Prisma.OrderItemCreateOrConnectWithoutReservationInput
+  upsert?: Prisma.OrderItemUpsertWithoutReservationInput
+  connect?: Prisma.OrderItemWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrderItemUpdateToOneWithWhereWithoutReservationInput, Prisma.OrderItemUpdateWithoutReservationInput>, Prisma.OrderItemUncheckedUpdateWithoutReservationInput>
+}
+
+export type OrderItemCreateNestedOneWithoutDeliveryItemsInput = {
+  create?: Prisma.XOR<Prisma.OrderItemCreateWithoutDeliveryItemsInput, Prisma.OrderItemUncheckedCreateWithoutDeliveryItemsInput>
+  connectOrCreate?: Prisma.OrderItemCreateOrConnectWithoutDeliveryItemsInput
+  connect?: Prisma.OrderItemWhereUniqueInput
+}
+
+export type OrderItemUpdateOneRequiredWithoutDeliveryItemsNestedInput = {
+  create?: Prisma.XOR<Prisma.OrderItemCreateWithoutDeliveryItemsInput, Prisma.OrderItemUncheckedCreateWithoutDeliveryItemsInput>
+  connectOrCreate?: Prisma.OrderItemCreateOrConnectWithoutDeliveryItemsInput
+  upsert?: Prisma.OrderItemUpsertWithoutDeliveryItemsInput
+  connect?: Prisma.OrderItemWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrderItemUpdateToOneWithWhereWithoutDeliveryItemsInput, Prisma.OrderItemUpdateWithoutDeliveryItemsInput>, Prisma.OrderItemUncheckedUpdateWithoutDeliveryItemsInput>
+}
+
+export type OrderItemCreateWithoutTenantInput = {
+  id?: string
+  catalogId?: string | null
+  originalText: string
+  quantity: number
+  color?: string | null
+  size?: string | null
+  confidence: number
+  procurementStatus?: $Enums.ProcurementStatus
+  procurementSource?: $Enums.ProcurementDecisionSource | null
+  procurementReason?: $Enums.ProcurementReason | null
+  stockAtDecision?: number | null
+  availableAtDecision?: number | null
+  procurementUpdatedAt?: Date | string | null
+  createdAt?: Date | string
+  order: Prisma.OrderCreateNestedOneWithoutItemsInput
+  reservation?: Prisma.InventoryReservationCreateNestedOneWithoutOrderItemInput
+  deliveryItems?: Prisma.TelegramDeliveryItemCreateNestedManyWithoutOrderItemInput
+}
+
+export type OrderItemUncheckedCreateWithoutTenantInput = {
+  id?: string
+  orderId: string
+  catalogId?: string | null
+  originalText: string
+  quantity: number
+  color?: string | null
+  size?: string | null
+  confidence: number
+  procurementStatus?: $Enums.ProcurementStatus
+  procurementSource?: $Enums.ProcurementDecisionSource | null
+  procurementReason?: $Enums.ProcurementReason | null
+  stockAtDecision?: number | null
+  availableAtDecision?: number | null
+  procurementUpdatedAt?: Date | string | null
+  createdAt?: Date | string
+  reservation?: Prisma.InventoryReservationUncheckedCreateNestedOneWithoutOrderItemInput
+  deliveryItems?: Prisma.TelegramDeliveryItemUncheckedCreateNestedManyWithoutOrderItemInput
+}
+
+export type OrderItemCreateOrConnectWithoutTenantInput = {
+  where: Prisma.OrderItemWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrderItemCreateWithoutTenantInput, Prisma.OrderItemUncheckedCreateWithoutTenantInput>
+}
+
+export type OrderItemCreateManyTenantInputEnvelope = {
+  data: Prisma.OrderItemCreateManyTenantInput | Prisma.OrderItemCreateManyTenantInput[]
+  skipDuplicates?: boolean
+}
+
+export type OrderItemUpsertWithWhereUniqueWithoutTenantInput = {
+  where: Prisma.OrderItemWhereUniqueInput
+  update: Prisma.XOR<Prisma.OrderItemUpdateWithoutTenantInput, Prisma.OrderItemUncheckedUpdateWithoutTenantInput>
+  create: Prisma.XOR<Prisma.OrderItemCreateWithoutTenantInput, Prisma.OrderItemUncheckedCreateWithoutTenantInput>
+}
+
+export type OrderItemUpdateWithWhereUniqueWithoutTenantInput = {
+  where: Prisma.OrderItemWhereUniqueInput
+  data: Prisma.XOR<Prisma.OrderItemUpdateWithoutTenantInput, Prisma.OrderItemUncheckedUpdateWithoutTenantInput>
+}
+
+export type OrderItemUpdateManyWithWhereWithoutTenantInput = {
+  where: Prisma.OrderItemScalarWhereInput
+  data: Prisma.XOR<Prisma.OrderItemUpdateManyMutationInput, Prisma.OrderItemUncheckedUpdateManyWithoutTenantInput>
+}
+
+export type OrderItemScalarWhereInput = {
+  AND?: Prisma.OrderItemScalarWhereInput | Prisma.OrderItemScalarWhereInput[]
+  OR?: Prisma.OrderItemScalarWhereInput[]
+  NOT?: Prisma.OrderItemScalarWhereInput | Prisma.OrderItemScalarWhereInput[]
+  id?: Prisma.UuidFilter<"OrderItem"> | string
+  tenantId?: Prisma.UuidFilter<"OrderItem"> | string
+  orderId?: Prisma.UuidFilter<"OrderItem"> | string
+  catalogId?: Prisma.StringNullableFilter<"OrderItem"> | string | null
+  originalText?: Prisma.StringFilter<"OrderItem"> | string
+  quantity?: Prisma.IntFilter<"OrderItem"> | number
+  color?: Prisma.StringNullableFilter<"OrderItem"> | string | null
+  size?: Prisma.StringNullableFilter<"OrderItem"> | string | null
+  confidence?: Prisma.FloatFilter<"OrderItem"> | number
+  procurementStatus?: Prisma.EnumProcurementStatusFilter<"OrderItem"> | $Enums.ProcurementStatus
+  procurementSource?: Prisma.EnumProcurementDecisionSourceNullableFilter<"OrderItem"> | $Enums.ProcurementDecisionSource | null
+  procurementReason?: Prisma.EnumProcurementReasonNullableFilter<"OrderItem"> | $Enums.ProcurementReason | null
+  stockAtDecision?: Prisma.IntNullableFilter<"OrderItem"> | number | null
+  availableAtDecision?: Prisma.IntNullableFilter<"OrderItem"> | number | null
+  procurementUpdatedAt?: Prisma.DateTimeNullableFilter<"OrderItem"> | Date | string | null
+  createdAt?: Prisma.DateTimeFilter<"OrderItem"> | Date | string
+}
+
 export type OrderItemCreateWithoutOrderInput = {
   id?: string
   catalogId?: string | null
@@ -505,7 +868,16 @@ export type OrderItemCreateWithoutOrderInput = {
   color?: string | null
   size?: string | null
   confidence: number
+  procurementStatus?: $Enums.ProcurementStatus
+  procurementSource?: $Enums.ProcurementDecisionSource | null
+  procurementReason?: $Enums.ProcurementReason | null
+  stockAtDecision?: number | null
+  availableAtDecision?: number | null
+  procurementUpdatedAt?: Date | string | null
   createdAt?: Date | string
+  tenant: Prisma.TenantCreateNestedOneWithoutOrderItemsInput
+  reservation?: Prisma.InventoryReservationCreateNestedOneWithoutOrderItemInput
+  deliveryItems?: Prisma.TelegramDeliveryItemCreateNestedManyWithoutOrderItemInput
 }
 
 export type OrderItemUncheckedCreateWithoutOrderInput = {
@@ -516,7 +888,15 @@ export type OrderItemUncheckedCreateWithoutOrderInput = {
   color?: string | null
   size?: string | null
   confidence: number
+  procurementStatus?: $Enums.ProcurementStatus
+  procurementSource?: $Enums.ProcurementDecisionSource | null
+  procurementReason?: $Enums.ProcurementReason | null
+  stockAtDecision?: number | null
+  availableAtDecision?: number | null
+  procurementUpdatedAt?: Date | string | null
   createdAt?: Date | string
+  reservation?: Prisma.InventoryReservationUncheckedCreateNestedOneWithoutOrderItemInput
+  deliveryItems?: Prisma.TelegramDeliveryItemUncheckedCreateNestedManyWithoutOrderItemInput
 }
 
 export type OrderItemCreateOrConnectWithoutOrderInput = {
@@ -545,19 +925,272 @@ export type OrderItemUpdateManyWithWhereWithoutOrderInput = {
   data: Prisma.XOR<Prisma.OrderItemUpdateManyMutationInput, Prisma.OrderItemUncheckedUpdateManyWithoutOrderInput>
 }
 
-export type OrderItemScalarWhereInput = {
-  AND?: Prisma.OrderItemScalarWhereInput | Prisma.OrderItemScalarWhereInput[]
-  OR?: Prisma.OrderItemScalarWhereInput[]
-  NOT?: Prisma.OrderItemScalarWhereInput | Prisma.OrderItemScalarWhereInput[]
-  id?: Prisma.UuidFilter<"OrderItem"> | string
-  orderId?: Prisma.UuidFilter<"OrderItem"> | string
-  catalogId?: Prisma.StringNullableFilter<"OrderItem"> | string | null
-  originalText?: Prisma.StringFilter<"OrderItem"> | string
-  quantity?: Prisma.IntFilter<"OrderItem"> | number
-  color?: Prisma.StringNullableFilter<"OrderItem"> | string | null
-  size?: Prisma.StringNullableFilter<"OrderItem"> | string | null
-  confidence?: Prisma.FloatFilter<"OrderItem"> | number
-  createdAt?: Prisma.DateTimeFilter<"OrderItem"> | Date | string
+export type OrderItemCreateWithoutReservationInput = {
+  id?: string
+  catalogId?: string | null
+  originalText: string
+  quantity: number
+  color?: string | null
+  size?: string | null
+  confidence: number
+  procurementStatus?: $Enums.ProcurementStatus
+  procurementSource?: $Enums.ProcurementDecisionSource | null
+  procurementReason?: $Enums.ProcurementReason | null
+  stockAtDecision?: number | null
+  availableAtDecision?: number | null
+  procurementUpdatedAt?: Date | string | null
+  createdAt?: Date | string
+  tenant: Prisma.TenantCreateNestedOneWithoutOrderItemsInput
+  order: Prisma.OrderCreateNestedOneWithoutItemsInput
+  deliveryItems?: Prisma.TelegramDeliveryItemCreateNestedManyWithoutOrderItemInput
+}
+
+export type OrderItemUncheckedCreateWithoutReservationInput = {
+  id?: string
+  tenantId: string
+  orderId: string
+  catalogId?: string | null
+  originalText: string
+  quantity: number
+  color?: string | null
+  size?: string | null
+  confidence: number
+  procurementStatus?: $Enums.ProcurementStatus
+  procurementSource?: $Enums.ProcurementDecisionSource | null
+  procurementReason?: $Enums.ProcurementReason | null
+  stockAtDecision?: number | null
+  availableAtDecision?: number | null
+  procurementUpdatedAt?: Date | string | null
+  createdAt?: Date | string
+  deliveryItems?: Prisma.TelegramDeliveryItemUncheckedCreateNestedManyWithoutOrderItemInput
+}
+
+export type OrderItemCreateOrConnectWithoutReservationInput = {
+  where: Prisma.OrderItemWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrderItemCreateWithoutReservationInput, Prisma.OrderItemUncheckedCreateWithoutReservationInput>
+}
+
+export type OrderItemUpsertWithoutReservationInput = {
+  update: Prisma.XOR<Prisma.OrderItemUpdateWithoutReservationInput, Prisma.OrderItemUncheckedUpdateWithoutReservationInput>
+  create: Prisma.XOR<Prisma.OrderItemCreateWithoutReservationInput, Prisma.OrderItemUncheckedCreateWithoutReservationInput>
+  where?: Prisma.OrderItemWhereInput
+}
+
+export type OrderItemUpdateToOneWithWhereWithoutReservationInput = {
+  where?: Prisma.OrderItemWhereInput
+  data: Prisma.XOR<Prisma.OrderItemUpdateWithoutReservationInput, Prisma.OrderItemUncheckedUpdateWithoutReservationInput>
+}
+
+export type OrderItemUpdateWithoutReservationInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  catalogId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalText?: Prisma.StringFieldUpdateOperationsInput | string
+  quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  size?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confidence?: Prisma.FloatFieldUpdateOperationsInput | number
+  procurementStatus?: Prisma.EnumProcurementStatusFieldUpdateOperationsInput | $Enums.ProcurementStatus
+  procurementSource?: Prisma.NullableEnumProcurementDecisionSourceFieldUpdateOperationsInput | $Enums.ProcurementDecisionSource | null
+  procurementReason?: Prisma.NullableEnumProcurementReasonFieldUpdateOperationsInput | $Enums.ProcurementReason | null
+  stockAtDecision?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  availableAtDecision?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  procurementUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutOrderItemsNestedInput
+  order?: Prisma.OrderUpdateOneRequiredWithoutItemsNestedInput
+  deliveryItems?: Prisma.TelegramDeliveryItemUpdateManyWithoutOrderItemNestedInput
+}
+
+export type OrderItemUncheckedUpdateWithoutReservationInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  orderId?: Prisma.StringFieldUpdateOperationsInput | string
+  catalogId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalText?: Prisma.StringFieldUpdateOperationsInput | string
+  quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  size?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confidence?: Prisma.FloatFieldUpdateOperationsInput | number
+  procurementStatus?: Prisma.EnumProcurementStatusFieldUpdateOperationsInput | $Enums.ProcurementStatus
+  procurementSource?: Prisma.NullableEnumProcurementDecisionSourceFieldUpdateOperationsInput | $Enums.ProcurementDecisionSource | null
+  procurementReason?: Prisma.NullableEnumProcurementReasonFieldUpdateOperationsInput | $Enums.ProcurementReason | null
+  stockAtDecision?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  availableAtDecision?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  procurementUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deliveryItems?: Prisma.TelegramDeliveryItemUncheckedUpdateManyWithoutOrderItemNestedInput
+}
+
+export type OrderItemCreateWithoutDeliveryItemsInput = {
+  id?: string
+  catalogId?: string | null
+  originalText: string
+  quantity: number
+  color?: string | null
+  size?: string | null
+  confidence: number
+  procurementStatus?: $Enums.ProcurementStatus
+  procurementSource?: $Enums.ProcurementDecisionSource | null
+  procurementReason?: $Enums.ProcurementReason | null
+  stockAtDecision?: number | null
+  availableAtDecision?: number | null
+  procurementUpdatedAt?: Date | string | null
+  createdAt?: Date | string
+  tenant: Prisma.TenantCreateNestedOneWithoutOrderItemsInput
+  order: Prisma.OrderCreateNestedOneWithoutItemsInput
+  reservation?: Prisma.InventoryReservationCreateNestedOneWithoutOrderItemInput
+}
+
+export type OrderItemUncheckedCreateWithoutDeliveryItemsInput = {
+  id?: string
+  tenantId: string
+  orderId: string
+  catalogId?: string | null
+  originalText: string
+  quantity: number
+  color?: string | null
+  size?: string | null
+  confidence: number
+  procurementStatus?: $Enums.ProcurementStatus
+  procurementSource?: $Enums.ProcurementDecisionSource | null
+  procurementReason?: $Enums.ProcurementReason | null
+  stockAtDecision?: number | null
+  availableAtDecision?: number | null
+  procurementUpdatedAt?: Date | string | null
+  createdAt?: Date | string
+  reservation?: Prisma.InventoryReservationUncheckedCreateNestedOneWithoutOrderItemInput
+}
+
+export type OrderItemCreateOrConnectWithoutDeliveryItemsInput = {
+  where: Prisma.OrderItemWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrderItemCreateWithoutDeliveryItemsInput, Prisma.OrderItemUncheckedCreateWithoutDeliveryItemsInput>
+}
+
+export type OrderItemUpsertWithoutDeliveryItemsInput = {
+  update: Prisma.XOR<Prisma.OrderItemUpdateWithoutDeliveryItemsInput, Prisma.OrderItemUncheckedUpdateWithoutDeliveryItemsInput>
+  create: Prisma.XOR<Prisma.OrderItemCreateWithoutDeliveryItemsInput, Prisma.OrderItemUncheckedCreateWithoutDeliveryItemsInput>
+  where?: Prisma.OrderItemWhereInput
+}
+
+export type OrderItemUpdateToOneWithWhereWithoutDeliveryItemsInput = {
+  where?: Prisma.OrderItemWhereInput
+  data: Prisma.XOR<Prisma.OrderItemUpdateWithoutDeliveryItemsInput, Prisma.OrderItemUncheckedUpdateWithoutDeliveryItemsInput>
+}
+
+export type OrderItemUpdateWithoutDeliveryItemsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  catalogId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalText?: Prisma.StringFieldUpdateOperationsInput | string
+  quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  size?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confidence?: Prisma.FloatFieldUpdateOperationsInput | number
+  procurementStatus?: Prisma.EnumProcurementStatusFieldUpdateOperationsInput | $Enums.ProcurementStatus
+  procurementSource?: Prisma.NullableEnumProcurementDecisionSourceFieldUpdateOperationsInput | $Enums.ProcurementDecisionSource | null
+  procurementReason?: Prisma.NullableEnumProcurementReasonFieldUpdateOperationsInput | $Enums.ProcurementReason | null
+  stockAtDecision?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  availableAtDecision?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  procurementUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutOrderItemsNestedInput
+  order?: Prisma.OrderUpdateOneRequiredWithoutItemsNestedInput
+  reservation?: Prisma.InventoryReservationUpdateOneWithoutOrderItemNestedInput
+}
+
+export type OrderItemUncheckedUpdateWithoutDeliveryItemsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  orderId?: Prisma.StringFieldUpdateOperationsInput | string
+  catalogId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalText?: Prisma.StringFieldUpdateOperationsInput | string
+  quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  size?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confidence?: Prisma.FloatFieldUpdateOperationsInput | number
+  procurementStatus?: Prisma.EnumProcurementStatusFieldUpdateOperationsInput | $Enums.ProcurementStatus
+  procurementSource?: Prisma.NullableEnumProcurementDecisionSourceFieldUpdateOperationsInput | $Enums.ProcurementDecisionSource | null
+  procurementReason?: Prisma.NullableEnumProcurementReasonFieldUpdateOperationsInput | $Enums.ProcurementReason | null
+  stockAtDecision?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  availableAtDecision?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  procurementUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reservation?: Prisma.InventoryReservationUncheckedUpdateOneWithoutOrderItemNestedInput
+}
+
+export type OrderItemCreateManyTenantInput = {
+  id?: string
+  orderId: string
+  catalogId?: string | null
+  originalText: string
+  quantity: number
+  color?: string | null
+  size?: string | null
+  confidence: number
+  procurementStatus?: $Enums.ProcurementStatus
+  procurementSource?: $Enums.ProcurementDecisionSource | null
+  procurementReason?: $Enums.ProcurementReason | null
+  stockAtDecision?: number | null
+  availableAtDecision?: number | null
+  procurementUpdatedAt?: Date | string | null
+  createdAt?: Date | string
+}
+
+export type OrderItemUpdateWithoutTenantInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  catalogId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalText?: Prisma.StringFieldUpdateOperationsInput | string
+  quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  size?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confidence?: Prisma.FloatFieldUpdateOperationsInput | number
+  procurementStatus?: Prisma.EnumProcurementStatusFieldUpdateOperationsInput | $Enums.ProcurementStatus
+  procurementSource?: Prisma.NullableEnumProcurementDecisionSourceFieldUpdateOperationsInput | $Enums.ProcurementDecisionSource | null
+  procurementReason?: Prisma.NullableEnumProcurementReasonFieldUpdateOperationsInput | $Enums.ProcurementReason | null
+  stockAtDecision?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  availableAtDecision?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  procurementUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  order?: Prisma.OrderUpdateOneRequiredWithoutItemsNestedInput
+  reservation?: Prisma.InventoryReservationUpdateOneWithoutOrderItemNestedInput
+  deliveryItems?: Prisma.TelegramDeliveryItemUpdateManyWithoutOrderItemNestedInput
+}
+
+export type OrderItemUncheckedUpdateWithoutTenantInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  orderId?: Prisma.StringFieldUpdateOperationsInput | string
+  catalogId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalText?: Prisma.StringFieldUpdateOperationsInput | string
+  quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  size?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confidence?: Prisma.FloatFieldUpdateOperationsInput | number
+  procurementStatus?: Prisma.EnumProcurementStatusFieldUpdateOperationsInput | $Enums.ProcurementStatus
+  procurementSource?: Prisma.NullableEnumProcurementDecisionSourceFieldUpdateOperationsInput | $Enums.ProcurementDecisionSource | null
+  procurementReason?: Prisma.NullableEnumProcurementReasonFieldUpdateOperationsInput | $Enums.ProcurementReason | null
+  stockAtDecision?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  availableAtDecision?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  procurementUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reservation?: Prisma.InventoryReservationUncheckedUpdateOneWithoutOrderItemNestedInput
+  deliveryItems?: Prisma.TelegramDeliveryItemUncheckedUpdateManyWithoutOrderItemNestedInput
+}
+
+export type OrderItemUncheckedUpdateManyWithoutTenantInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  orderId?: Prisma.StringFieldUpdateOperationsInput | string
+  catalogId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalText?: Prisma.StringFieldUpdateOperationsInput | string
+  quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  size?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confidence?: Prisma.FloatFieldUpdateOperationsInput | number
+  procurementStatus?: Prisma.EnumProcurementStatusFieldUpdateOperationsInput | $Enums.ProcurementStatus
+  procurementSource?: Prisma.NullableEnumProcurementDecisionSourceFieldUpdateOperationsInput | $Enums.ProcurementDecisionSource | null
+  procurementReason?: Prisma.NullableEnumProcurementReasonFieldUpdateOperationsInput | $Enums.ProcurementReason | null
+  stockAtDecision?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  availableAtDecision?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  procurementUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type OrderItemCreateManyOrderInput = {
@@ -568,6 +1201,12 @@ export type OrderItemCreateManyOrderInput = {
   color?: string | null
   size?: string | null
   confidence: number
+  procurementStatus?: $Enums.ProcurementStatus
+  procurementSource?: $Enums.ProcurementDecisionSource | null
+  procurementReason?: $Enums.ProcurementReason | null
+  stockAtDecision?: number | null
+  availableAtDecision?: number | null
+  procurementUpdatedAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -579,7 +1218,16 @@ export type OrderItemUpdateWithoutOrderInput = {
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   size?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confidence?: Prisma.FloatFieldUpdateOperationsInput | number
+  procurementStatus?: Prisma.EnumProcurementStatusFieldUpdateOperationsInput | $Enums.ProcurementStatus
+  procurementSource?: Prisma.NullableEnumProcurementDecisionSourceFieldUpdateOperationsInput | $Enums.ProcurementDecisionSource | null
+  procurementReason?: Prisma.NullableEnumProcurementReasonFieldUpdateOperationsInput | $Enums.ProcurementReason | null
+  stockAtDecision?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  availableAtDecision?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  procurementUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutOrderItemsNestedInput
+  reservation?: Prisma.InventoryReservationUpdateOneWithoutOrderItemNestedInput
+  deliveryItems?: Prisma.TelegramDeliveryItemUpdateManyWithoutOrderItemNestedInput
 }
 
 export type OrderItemUncheckedUpdateWithoutOrderInput = {
@@ -590,7 +1238,15 @@ export type OrderItemUncheckedUpdateWithoutOrderInput = {
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   size?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confidence?: Prisma.FloatFieldUpdateOperationsInput | number
+  procurementStatus?: Prisma.EnumProcurementStatusFieldUpdateOperationsInput | $Enums.ProcurementStatus
+  procurementSource?: Prisma.NullableEnumProcurementDecisionSourceFieldUpdateOperationsInput | $Enums.ProcurementDecisionSource | null
+  procurementReason?: Prisma.NullableEnumProcurementReasonFieldUpdateOperationsInput | $Enums.ProcurementReason | null
+  stockAtDecision?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  availableAtDecision?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  procurementUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reservation?: Prisma.InventoryReservationUncheckedUpdateOneWithoutOrderItemNestedInput
+  deliveryItems?: Prisma.TelegramDeliveryItemUncheckedUpdateManyWithoutOrderItemNestedInput
 }
 
 export type OrderItemUncheckedUpdateManyWithoutOrderInput = {
@@ -601,13 +1257,49 @@ export type OrderItemUncheckedUpdateManyWithoutOrderInput = {
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   size?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confidence?: Prisma.FloatFieldUpdateOperationsInput | number
+  procurementStatus?: Prisma.EnumProcurementStatusFieldUpdateOperationsInput | $Enums.ProcurementStatus
+  procurementSource?: Prisma.NullableEnumProcurementDecisionSourceFieldUpdateOperationsInput | $Enums.ProcurementDecisionSource | null
+  procurementReason?: Prisma.NullableEnumProcurementReasonFieldUpdateOperationsInput | $Enums.ProcurementReason | null
+  stockAtDecision?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  availableAtDecision?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  procurementUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 
+/**
+ * Count Type OrderItemCountOutputType
+ */
+
+export type OrderItemCountOutputType = {
+  deliveryItems: number
+}
+
+export type OrderItemCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  deliveryItems?: boolean | OrderItemCountOutputTypeCountDeliveryItemsArgs
+}
+
+/**
+ * OrderItemCountOutputType without action
+ */
+export type OrderItemCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the OrderItemCountOutputType
+   */
+  select?: Prisma.OrderItemCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * OrderItemCountOutputType without action
+ */
+export type OrderItemCountOutputTypeCountDeliveryItemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TelegramDeliveryItemWhereInput
+}
+
 
 export type OrderItemSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  tenantId?: boolean
   orderId?: boolean
   catalogId?: boolean
   originalText?: boolean
@@ -615,12 +1307,23 @@ export type OrderItemSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   color?: boolean
   size?: boolean
   confidence?: boolean
+  procurementStatus?: boolean
+  procurementSource?: boolean
+  procurementReason?: boolean
+  stockAtDecision?: boolean
+  availableAtDecision?: boolean
+  procurementUpdatedAt?: boolean
   createdAt?: boolean
+  tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   order?: boolean | Prisma.OrderDefaultArgs<ExtArgs>
+  reservation?: boolean | Prisma.OrderItem$reservationArgs<ExtArgs>
+  deliveryItems?: boolean | Prisma.OrderItem$deliveryItemsArgs<ExtArgs>
+  _count?: boolean | Prisma.OrderItemCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["orderItem"]>
 
 export type OrderItemSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  tenantId?: boolean
   orderId?: boolean
   catalogId?: boolean
   originalText?: boolean
@@ -628,12 +1331,20 @@ export type OrderItemSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   color?: boolean
   size?: boolean
   confidence?: boolean
+  procurementStatus?: boolean
+  procurementSource?: boolean
+  procurementReason?: boolean
+  stockAtDecision?: boolean
+  availableAtDecision?: boolean
+  procurementUpdatedAt?: boolean
   createdAt?: boolean
+  tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   order?: boolean | Prisma.OrderDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["orderItem"]>
 
 export type OrderItemSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  tenantId?: boolean
   orderId?: boolean
   catalogId?: boolean
   originalText?: boolean
@@ -641,12 +1352,20 @@ export type OrderItemSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   color?: boolean
   size?: boolean
   confidence?: boolean
+  procurementStatus?: boolean
+  procurementSource?: boolean
+  procurementReason?: boolean
+  stockAtDecision?: boolean
+  availableAtDecision?: boolean
+  procurementUpdatedAt?: boolean
   createdAt?: boolean
+  tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   order?: boolean | Prisma.OrderDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["orderItem"]>
 
 export type OrderItemSelectScalar = {
   id?: boolean
+  tenantId?: boolean
   orderId?: boolean
   catalogId?: boolean
   originalText?: boolean
@@ -654,27 +1373,43 @@ export type OrderItemSelectScalar = {
   color?: boolean
   size?: boolean
   confidence?: boolean
+  procurementStatus?: boolean
+  procurementSource?: boolean
+  procurementReason?: boolean
+  stockAtDecision?: boolean
+  availableAtDecision?: boolean
+  procurementUpdatedAt?: boolean
   createdAt?: boolean
 }
 
-export type OrderItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "orderId" | "catalogId" | "originalText" | "quantity" | "color" | "size" | "confidence" | "createdAt", ExtArgs["result"]["orderItem"]>
+export type OrderItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "orderId" | "catalogId" | "originalText" | "quantity" | "color" | "size" | "confidence" | "procurementStatus" | "procurementSource" | "procurementReason" | "stockAtDecision" | "availableAtDecision" | "procurementUpdatedAt" | "createdAt", ExtArgs["result"]["orderItem"]>
 export type OrderItemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   order?: boolean | Prisma.OrderDefaultArgs<ExtArgs>
+  reservation?: boolean | Prisma.OrderItem$reservationArgs<ExtArgs>
+  deliveryItems?: boolean | Prisma.OrderItem$deliveryItemsArgs<ExtArgs>
+  _count?: boolean | Prisma.OrderItemCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type OrderItemIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   order?: boolean | Prisma.OrderDefaultArgs<ExtArgs>
 }
 export type OrderItemIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   order?: boolean | Prisma.OrderDefaultArgs<ExtArgs>
 }
 
 export type $OrderItemPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "OrderItem"
   objects: {
+    tenant: Prisma.$TenantPayload<ExtArgs>
     order: Prisma.$OrderPayload<ExtArgs>
+    reservation: Prisma.$InventoryReservationPayload<ExtArgs> | null
+    deliveryItems: Prisma.$TelegramDeliveryItemPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
+    tenantId: string
     orderId: string
     catalogId: string | null
     originalText: string
@@ -682,6 +1417,12 @@ export type $OrderItemPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     color: string | null
     size: string | null
     confidence: number
+    procurementStatus: $Enums.ProcurementStatus
+    procurementSource: $Enums.ProcurementDecisionSource | null
+    procurementReason: $Enums.ProcurementReason | null
+    stockAtDecision: number | null
+    availableAtDecision: number | null
+    procurementUpdatedAt: Date | null
     createdAt: Date
   }, ExtArgs["result"]["orderItem"]>
   composites: {}
@@ -1077,7 +1818,10 @@ readonly fields: OrderItemFieldRefs;
  */
 export interface Prisma__OrderItemClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  tenant<T extends Prisma.TenantDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TenantDefaultArgs<ExtArgs>>): Prisma.Prisma__TenantClient<runtime.Types.Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   order<T extends Prisma.OrderDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.OrderDefaultArgs<ExtArgs>>): Prisma.Prisma__OrderClient<runtime.Types.Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  reservation<T extends Prisma.OrderItem$reservationArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.OrderItem$reservationArgs<ExtArgs>>): Prisma.Prisma__InventoryReservationClient<runtime.Types.Result.GetResult<Prisma.$InventoryReservationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  deliveryItems<T extends Prisma.OrderItem$deliveryItemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.OrderItem$deliveryItemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TelegramDeliveryItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1108,6 +1852,7 @@ export interface Prisma__OrderItemClient<T, Null = never, ExtArgs extends runtim
  */
 export interface OrderItemFieldRefs {
   readonly id: Prisma.FieldRef<"OrderItem", 'String'>
+  readonly tenantId: Prisma.FieldRef<"OrderItem", 'String'>
   readonly orderId: Prisma.FieldRef<"OrderItem", 'String'>
   readonly catalogId: Prisma.FieldRef<"OrderItem", 'String'>
   readonly originalText: Prisma.FieldRef<"OrderItem", 'String'>
@@ -1115,6 +1860,12 @@ export interface OrderItemFieldRefs {
   readonly color: Prisma.FieldRef<"OrderItem", 'String'>
   readonly size: Prisma.FieldRef<"OrderItem", 'String'>
   readonly confidence: Prisma.FieldRef<"OrderItem", 'Float'>
+  readonly procurementStatus: Prisma.FieldRef<"OrderItem", 'ProcurementStatus'>
+  readonly procurementSource: Prisma.FieldRef<"OrderItem", 'ProcurementDecisionSource'>
+  readonly procurementReason: Prisma.FieldRef<"OrderItem", 'ProcurementReason'>
+  readonly stockAtDecision: Prisma.FieldRef<"OrderItem", 'Int'>
+  readonly availableAtDecision: Prisma.FieldRef<"OrderItem", 'Int'>
+  readonly procurementUpdatedAt: Prisma.FieldRef<"OrderItem", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"OrderItem", 'DateTime'>
 }
     
@@ -1514,6 +2265,49 @@ export type OrderItemDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Limit how many OrderItems to delete.
    */
   limit?: number
+}
+
+/**
+ * OrderItem.reservation
+ */
+export type OrderItem$reservationArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the InventoryReservation
+   */
+  select?: Prisma.InventoryReservationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the InventoryReservation
+   */
+  omit?: Prisma.InventoryReservationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.InventoryReservationInclude<ExtArgs> | null
+  where?: Prisma.InventoryReservationWhereInput
+}
+
+/**
+ * OrderItem.deliveryItems
+ */
+export type OrderItem$deliveryItemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TelegramDeliveryItem
+   */
+  select?: Prisma.TelegramDeliveryItemSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the TelegramDeliveryItem
+   */
+  omit?: Prisma.TelegramDeliveryItemOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TelegramDeliveryItemInclude<ExtArgs> | null
+  where?: Prisma.TelegramDeliveryItemWhereInput
+  orderBy?: Prisma.TelegramDeliveryItemOrderByWithRelationInput | Prisma.TelegramDeliveryItemOrderByWithRelationInput[]
+  cursor?: Prisma.TelegramDeliveryItemWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TelegramDeliveryItemScalarFieldEnum | Prisma.TelegramDeliveryItemScalarFieldEnum[]
 }
 
 /**

@@ -41,6 +41,14 @@
       "development": "./src/auth.ts",
       "import": "./dist/auth.js",
       "default": "./dist/auth.js"
+    },
+    "./procurement": {
+      "react-server": "./src/procurement.ts",
+      "browser": "./src/procurement.ts",
+      "types": "./src/procurement.ts",
+      "development": "./src/procurement.ts",
+      "import": "./dist/procurement.js",
+      "default": "./dist/procurement.js"
     }
   },
   "scripts": {
