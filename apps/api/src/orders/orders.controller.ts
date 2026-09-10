@@ -12,6 +12,7 @@ const actorSchema = z.object({ actor: z.string().trim().min(1).max(120) }).stric
 const listSchema = z.object({
   search: z.string().trim().min(1).max(200).optional(),
   status: z.enum(['AI_PROCESSING', 'AI_FAILED', 'NEEDS_REVIEW', 'AUTO_APPROVED', 'APPROVED', 'CANCELLED']).optional(),
+  procurementStatus: z.enum(['UNASSESSED', 'READY', 'PARTIALLY_READY', 'NEEDS_ORDER', 'SENDING', 'AWAITING_SUPPLIER', 'BLOCKED', 'HANDED_OFF']).optional(),
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(25),
 }).strict();

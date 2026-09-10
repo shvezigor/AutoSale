@@ -1,6 +1,6 @@
 import type { ManagerOrder, ManagerOrderUpdate, OrderListResponse, OrderStatus } from '@autosale/contracts/orders';
 import { procurementSummaryFor } from '@autosale/contracts/procurement';
-import type { ProcurementStatus } from '@autosale/contracts/procurement';
+import type { ProcurementStatus, ProcurementSummary } from '@autosale/contracts/procurement';
 import {
   InvalidProcurementTransitionError,
   ProcurementItemNotFoundError,
@@ -21,6 +21,7 @@ type Extraction = {
 export type OrderListQuery = {
   search?: string | undefined;
   status?: OrderStatus | undefined;
+  procurementStatus?: ProcurementSummary | undefined;
   page: number;
   pageSize: number;
 };
@@ -36,6 +37,7 @@ export class OrdersService {
     const where: Prisma.OrderWhereInput = {
       tenantId,
       ...(query.status ? { status: query.status } : {}),
+      ...(query.procurementStatus ? { AND: [procurementWhere(query.procurementStatus)] } : {}),
       ...(search ? {
         OR: [
           { conversation: { is: { displayName: { contains: search, mode: 'insensitive' } } } },
@@ -263,6 +265,78 @@ export class OrdersService {
     }
     throw error;
   }
+}
+
+function procurementWhere(summary: ProcurementSummary): Prisma.OrderWhereInput {
+  if (summary === 'HANDED_OFF') return { procurementHandedOffAt: { not: null } };
+  if (summary === 'UNASSESSED') {
+    return {
+      procurementHandedOffAt: null,
+      OR: [
+        { status: { notIn: ['APPROVED', 'AUTO_APPROVED'] } },
+        { items: { none: {} } },
+        { items: { some: { procurementStatus: 'UNASSESSED' } } },
+      ],
+    };
+  }
+
+  const approved: Prisma.OrderWhereInput = {
+    status: { in: ['APPROVED', 'AUTO_APPROVED'] },
+    procurementHandedOffAt: null,
+  };
+  if (summary === 'BLOCKED') return { ...approved, items: { some: { procurementStatus: 'UNAVAILABLE' } } };
+  if (summary === 'SENDING') {
+    return {
+      ...approved,
+      items: {
+        some: { procurementStatus: 'SENDING' },
+        none: { procurementStatus: 'UNAVAILABLE' },
+      },
+    };
+  }
+  if (summary === 'READY') {
+    return {
+      ...approved,
+      items: {
+        some: { procurementStatus: { in: ['IN_STOCK', 'RECEIVED'] } },
+        every: { procurementStatus: { in: ['IN_STOCK', 'RECEIVED'] } },
+      },
+    };
+  }
+  if (summary === 'NEEDS_ORDER') {
+    return {
+      ...approved,
+      items: {
+        some: { procurementStatus: 'TO_ORDER' },
+        every: { procurementStatus: 'TO_ORDER' },
+      },
+    };
+  }
+  if (summary === 'AWAITING_SUPPLIER') {
+    return {
+      ...approved,
+      items: {
+        some: { procurementStatus: { in: ['ORDERED', 'SUPPLIER_CONFIRMED'] } },
+        every: { procurementStatus: { in: ['ORDERED', 'SUPPLIER_CONFIRMED'] } },
+      },
+    };
+  }
+  return {
+    ...approved,
+    AND: [
+      { items: { none: { procurementStatus: { in: ['UNASSESSED', 'UNAVAILABLE', 'SENDING'] } } } },
+      { OR: [
+        { AND: [
+          { items: { some: { procurementStatus: { in: ['IN_STOCK', 'RECEIVED'] } } } },
+          { items: { some: { procurementStatus: { in: ['TO_ORDER', 'ORDERED', 'SUPPLIER_CONFIRMED'] } } } },
+        ] },
+        { AND: [
+          { items: { some: { procurementStatus: 'TO_ORDER' } } },
+          { items: { some: { procurementStatus: { in: ['ORDERED', 'SUPPLIER_CONFIRMED'] } } } },
+        ] },
+      ] },
+    ],
+  };
 }
 
 function validationIssues(extraction: Extraction, items: Array<{ catalogId: string | null; quantity: number }>): string[] {

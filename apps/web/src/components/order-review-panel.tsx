@@ -4,20 +4,23 @@ import type { ManagerOrder } from '../../../../packages/contracts/src/orders';
 import { useState } from 'react';
 import { mutatingFetch } from '../auth/csrf-fetch';
 import { LoadingButton } from './loading-button';
+import { ProcurementItemCard } from './procurement-item-card';
+import { SupplierDispatchDialog } from './supplier-dispatch-dialog';
 
 const statusLabels: Record<string, string> = { NEEDS_REVIEW: 'Потребує перевірки', APPROVED: 'Підтверджено', AUTO_APPROVED: 'Підтверджено автоматично', CANCELLED: 'Відхилено', AI_PROCESSING: 'AI обробляє', AI_FAILED: 'Помилка AI' };
 
 export function OrderReviewPanel({ initialOrder }: { initialOrder: ManagerOrder }) {
   const [order, setOrder] = useState(initialOrder);
   const [draft, setDraft] = useState(initialOrder);
-  const [pendingAction, setPendingAction] = useState<'save' | 'approve' | 'cancel' | 'sheets' | 'supplier' | null>(null);
+  const [pendingAction, setPendingAction] = useState<'save' | 'approve' | 'cancel' | 'sheets' | 'handoff' | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [sheetsExport, setSheetsExport] = useState(initialOrder.sheetsExport);
-  const [supplierMessage, setSupplierMessage] = useState<string | null>(null);
+  const [dispatchOpen, setDispatchOpen] = useState(false);
   const reviewIssues = validationHints(order.validationIssues, draft);
   const unresolved = reviewIssues.length > 0;
   const final = ['APPROVED', 'AUTO_APPROVED', 'CANCELLED'].includes(order.status);
+  const approved = order.status === 'APPROVED' || order.status === 'AUTO_APPROVED';
   const pending = pendingAction !== null;
   const hasChanges = editableOrderSnapshot(order) !== editableOrderSnapshot(draft);
 
@@ -51,15 +54,34 @@ export function OrderReviewPanel({ initialOrder }: { initialOrder: ManagerOrder 
     finally { setPendingAction(null); }
   }
 
-  async function sendToSupplier() {
-    setPendingAction('supplier'); setError(null); setSupplierMessage(null);
+  async function handOff() {
+    setPendingAction('handoff'); setError(null);
     try {
-      const response = await mutatingFetch(`/api/integrations/telegram/supplier/orders/${order.id}`, { method: 'POST' });
-      if (!response.ok) throw new Error('Спочатку виберіть чат постачальника в налаштуваннях Telegram');
-      const result = await response.json() as { status: string };
-      setSupplierMessage(result.status === 'SUCCEEDED' ? 'Замовлення вже надіслано постачальнику' : 'Замовлення поставлено в чергу постачальнику');
-    } catch (reason) { setError(reason instanceof Error ? reason.message : 'Не вдалося надіслати замовлення'); }
+      const response = await mutatingFetch(`/api/orders/${order.id}/hand-off`, { method: 'POST' });
+      if (!response.ok) throw new Error('Замовлення ще не готове до передачі');
+      applyOrder(await response.json() as ManagerOrder);
+    } catch (reason) { setError(reason instanceof Error ? reason.message : 'Не вдалося передати замовлення'); }
     finally { setPendingAction(null); }
+  }
+
+  function applyOrder(next: ManagerOrder) {
+    setOrder(next); setDraft(next); setSheetsExport(next.sheetsExport);
+  }
+
+  function dispatched(result: { deliveryId: string; status: string }) {
+    const next: ManagerOrder = {
+      ...order,
+      procurementSummary: 'SENDING',
+      supplierDispatch: {
+        deliveryId: result.deliveryId,
+        status: result.status as NonNullable<ManagerOrder['supplierDispatch']>['status'],
+        itemCount: order.items.filter((item) => item.procurementStatus === 'TO_ORDER').length,
+      },
+      items: order.items.map((item) => item.procurementStatus === 'TO_ORDER'
+        ? { ...item, procurementStatus: 'SENDING' as const }
+        : item),
+    };
+    applyOrder(next);
   }
 
   const changeDraft = (next: ManagerOrder) => { setDraft(next); setSaved(false); };
@@ -76,19 +98,20 @@ export function OrderReviewPanel({ initialOrder }: { initialOrder: ManagerOrder 
         ['Адреса доставки', draft.delivery.address, (value) => changeDraft({ ...draft, delivery: { ...draft.delivery, address: value } })],
       ]} />
     </div>
-    <section className="review-section"><h2>Товари</h2>{draft.items.map((item, index) => <article className="review-item" data-low-confidence={item.confidence < 0.9} key={item.id}><div className="review-item-head"><label><span className="sr-only">Товар {index + 1}</span><select value={item.catalogId ?? ''} onChange={(event) => changeItem(item.id, { catalogId: event.target.value || null, productName: draft.catalogueCandidates.find((candidate) => candidate.sku === event.target.value)?.name ?? null })}><option value="">Оберіть товар</option>{draft.catalogueCandidates.map((candidate) => <option key={candidate.sku} value={candidate.sku}>{candidate.sku} — {candidate.name}</option>)}</select></label><b>{Math.round(item.confidence * 100)}%</b></div><div className="item-edit-grid"><label>Розмір<input value={item.size ?? ''} onChange={(event) => changeItem(item.id, { size: event.target.value || null })} /></label><label>Колір<input value={item.color ?? ''} onChange={(event) => changeItem(item.id, { color: event.target.value || null })} /></label><label>Кількість<input min="1" type="number" value={item.quantity} onChange={(event) => changeItem(item.id, { quantity: Number(event.target.value) })} /></label></div></article>)}</section>
+    <section className="review-section"><h2>Товари</h2>{draft.items.map((item, index) => <article className="review-item" data-low-confidence={item.confidence < 0.9} key={item.id}><div className="review-item-head"><label><span className="sr-only">Товар {index + 1}</span><select value={item.catalogId ?? ''} onChange={(event) => changeItem(item.id, { catalogId: event.target.value || null, productName: draft.catalogueCandidates.find((candidate) => candidate.sku === event.target.value)?.name ?? null })}><option value="">Оберіть товар</option>{draft.catalogueCandidates.map((candidate) => <option key={candidate.sku} value={candidate.sku}>{candidate.sku} — {candidate.name}</option>)}</select></label><b>{Math.round(item.confidence * 100)}%</b></div><div className="item-edit-grid"><label>Розмір<input value={item.size ?? ''} onChange={(event) => changeItem(item.id, { size: event.target.value || null })} /></label><label>Колір<input value={item.color ?? ''} onChange={(event) => changeItem(item.id, { color: event.target.value || null })} /></label><label>Кількість<input min="1" type="number" value={item.quantity} onChange={(event) => changeItem(item.id, { quantity: Number(event.target.value) })} /></label></div>{approved && <ProcurementItemCard item={item} locked={order.procurementSummary === 'HANDED_OFF'} onOrderChange={applyOrder} orderId={order.id} />}</article>)}</section>
     {sheetsExport && <SheetsExportState value={sheetsExport} pending={pending} retry={() => void retrySheetsExport()} />}
     <div className="review-actions">
       {saved && <p className="save-success">Зміни збережено</p>}
-      {supplierMessage && <p className="save-success">{supplierMessage}</p>}
       {error && <p role="alert">{error}</p>}
       {!final && <>
         <button className="secondary" disabled={pending} onClick={() => void transition('cancel')} type="button">Відхилити</button>
         {hasChanges && <LoadingButton className="secondary" pending={pendingAction === 'save'} pendingLabel="Зберігаємо…" disabled={pending} onClick={() => void save()} type="button">Зберегти зміни</LoadingButton>}
         <LoadingButton pending={pendingAction === 'approve'} pendingLabel="Підтверджуємо…" disabled={pending || unresolved} onClick={() => void transition('approve')} type="button">Підтвердити</LoadingButton>
       </>}
-      {(order.status === 'APPROVED' || order.status === 'AUTO_APPROVED') && <LoadingButton pending={pendingAction === 'supplier'} pendingLabel="Надсилаємо…" disabled={pending} onClick={() => void sendToSupplier()} type="button">Надіслати постачальнику</LoadingButton>}
+      {approved && order.items.some((item) => item.procurementStatus === 'TO_ORDER') && <button disabled={pending} onClick={() => setDispatchOpen(true)} type="button">Надіслати постачальнику</button>}
+      {approved && order.procurementSummary === 'READY' && <LoadingButton pending={pendingAction === 'handoff'} pendingLabel="Передаємо…" disabled={pending} onClick={() => void handOff()} type="button">Передати у виконання</LoadingButton>}
     </div>
+    {dispatchOpen && <SupplierDispatchDialog onClose={() => setDispatchOpen(false)} onDispatched={dispatched} open orderId={order.id} />}
   </section>;
 }
 

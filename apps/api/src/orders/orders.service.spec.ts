@@ -41,17 +41,32 @@ describe('OrdersService Google Sheets retry', () => {
     const result = await new OrdersService(prisma as never).list('tenant-a', {
       search: 'Авангард',
       status: 'NEEDS_REVIEW',
+      procurementStatus: 'NEEDS_ORDER',
       page: 2,
       pageSize: 10,
     });
 
     expect(findMany).toHaveBeenCalledWith(expect.objectContaining({
-      where: expect.objectContaining({ tenantId: 'tenant-a', status: 'NEEDS_REVIEW' }),
+      where: expect.objectContaining({
+        tenantId: 'tenant-a',
+        status: 'NEEDS_REVIEW',
+        AND: [expect.objectContaining({ items: {
+          some: { procurementStatus: 'TO_ORDER' },
+          every: { procurementStatus: 'TO_ORDER' },
+        } })],
+      }),
       orderBy: { createdAt: 'desc' },
       skip: 10,
       take: 10,
     }));
-    expect(count).toHaveBeenCalledWith({ where: expect.objectContaining({ tenantId: 'tenant-a', status: 'NEEDS_REVIEW' }) });
+    expect(count).toHaveBeenCalledWith({ where: expect.objectContaining({
+      tenantId: 'tenant-a',
+      status: 'NEEDS_REVIEW',
+      AND: [expect.objectContaining({ items: {
+        some: { procurementStatus: 'TO_ORDER' },
+        every: { procurementStatus: 'TO_ORDER' },
+      } })],
+    }) });
     expect(result).toEqual({ items: [], page: 2, pageSize: 10, total: 0 });
   });
 

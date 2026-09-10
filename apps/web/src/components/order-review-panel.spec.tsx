@@ -1,8 +1,15 @@
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render as rtlRender, screen, waitFor } from '@testing-library/react';
+import type { ReactElement } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { ManagerOrder } from '../../../../packages/contracts/src/orders';
 
 import { OrderReviewPanel } from './order-review-panel';
+import { ActivityProvider } from './activity-provider';
+import { ToastProvider } from './toast-provider';
+
+function render(ui: ReactElement) {
+  return rtlRender(<ToastProvider><ActivityProvider>{ui}</ActivityProvider></ToastProvider>);
+}
 
 const order: ManagerOrder = {
   id: '11111111-1111-4111-8111-111111111111',
@@ -13,7 +20,10 @@ const order: ManagerOrder = {
   validationIssues: [],
   customer: { name: 'Олена', phone: '+380671234567', instagramUsername: 'olena' },
   delivery: { city: 'Київ', address: null, novaPoshtaBranch: '24' },
-  items: [{ id: 'item-1', catalogId: 'UB-038-BLK', productName: 'Кросівки Urban Black', originalText: 'чорна модель 38', quantity: 1, color: 'Чорний', size: '38', confidence: 0.82 }],
+  items: [{ id: 'item-1', catalogId: 'UB-038-BLK', productName: 'Кросівки Urban Black', originalText: 'чорна модель 38', quantity: 1, color: 'Чорний', size: '38', confidence: 0.82, procurementStatus: 'UNASSESSED', procurementSource: null, procurementReason: null, stockAtDecision: null, availableAtDecision: null, reservation: null }],
+  procurementSummary: 'UNASSESSED',
+  procurementHandedOffAt: null,
+  supplierDispatch: null,
   catalogueCandidates: [{ sku: 'UB-038-BLK', name: 'Кросівки Urban Black' }],
   createdAt: '2026-08-26T12:00:00.000Z',
   sheetsExport: null,
@@ -134,20 +144,49 @@ describe('OrderReviewPanel', () => {
     expect(fetchMock).toHaveBeenCalledWith(`/api/orders/${order.id}/sheets-export/retry`, expect.objectContaining({ method: 'POST' }));
   });
 
-  it('sends an approved order to the configured Telegram supplier with progress feedback', async () => {
+  it('previews an approved supplier order and replaces its local procurement state after dispatch', async () => {
     let finishRequest!: (value: { ok: boolean; json: () => Promise<{ deliveryId: string; status: string }> }) => void;
     const pendingRequest = new Promise<{ ok: boolean; json: () => Promise<{ deliveryId: string; status: string }> }>((resolve) => { finishRequest = resolve; });
+    const approved = {
+      ...order,
+      status: 'APPROVED' as const,
+      procurementSummary: 'NEEDS_ORDER' as const,
+      items: order.items.map((item) => ({ ...item, procurementStatus: 'TO_ORDER' as const, procurementReason: 'STOCK_UNKNOWN' as const })),
+    };
     const fetchMock = vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ orderId: order.id, companyName: 'Магазин', supplierName: 'Постачальник', items: [{ orderItemId: 'item-1', productName: 'Кросівки Urban Black', sku: 'UB-038-BLK', quantity: 1, color: 'Чорний', size: '38' }] }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ token: 'csrf-token' }) })
       .mockReturnValueOnce(pendingRequest);
     vi.stubGlobal('fetch', fetchMock);
-    render(<OrderReviewPanel initialOrder={{ ...order, status: 'APPROVED' }} />);
+    render(<OrderReviewPanel initialOrder={approved} />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Надіслати постачальнику' }));
-
-    expect(await screen.findByRole('button', { name: 'Надсилаємо…' })).toHaveAttribute('aria-busy', 'true');
+    expect(await screen.findByText('Постачальник')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Надіслати' }));
+    expect(screen.getByRole('button', { name: 'Надсилаємо…' })).toHaveAttribute('aria-busy', 'true');
     finishRequest({ ok: true, json: async () => ({ deliveryId: 'delivery-1', status: 'PENDING' }) });
-    await waitFor(() => expect(screen.getByText('Замовлення поставлено в чергу постачальнику')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getAllByText('Відправляється постачальнику').length).toBeGreaterThan(0));
+    expect(screen.queryByRole('button', { name: 'Надіслати постачальнику' })).not.toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledWith(`/api/integrations/telegram/supplier/orders/${order.id}`, expect.objectContaining({ method: 'POST' }));
+  });
+
+  it('offers hand-off only when every item is ready', async () => {
+    const ready = {
+      ...order,
+      status: 'APPROVED' as const,
+      procurementSummary: 'READY' as const,
+      items: order.items.map((item) => ({ ...item, procurementStatus: 'IN_STOCK' as const, procurementReason: 'MANUAL_IN_STOCK' as const })),
+    };
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ token: 'csrf-token' }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ ...ready, procurementSummary: 'HANDED_OFF', procurementHandedOffAt: '2026-09-10T12:00:00.000Z' }) });
+    vi.stubGlobal('fetch', fetchMock);
+    render(<OrderReviewPanel initialOrder={ready} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Передати у виконання' }));
+
+    expect(await screen.findByRole('button', { name: 'Передаємо…' })).toHaveAttribute('aria-busy', 'true');
+    await waitFor(() => expect(screen.queryByRole('button', { name: 'Передати у виконання' })).not.toBeInTheDocument());
+    expect(fetchMock).toHaveBeenCalledWith(`/api/orders/${order.id}/hand-off`, expect.objectContaining({ method: 'POST' }));
   });
 });

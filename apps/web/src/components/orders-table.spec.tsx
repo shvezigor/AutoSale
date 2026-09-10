@@ -18,7 +18,10 @@ const order: ManagerOrder = {
   validationIssues: [],
   customer: { name: 'Ігор Швець', phone: '0976536783', instagramUsername: 'davidashvets' },
   delivery: { city: 'Луцьк', address: null, novaPoshtaBranch: '22 Кравчука' },
-  items: [{ id: 'item-1', catalogId: 'VIN-1200', productName: 'Авангард VINARIT', originalText: 'двері 1200x2050', quantity: 1, color: null, size: '1200x2050', confidence: 0.95 }],
+  items: [{ id: 'item-1', catalogId: 'VIN-1200', productName: 'Авангард VINARIT', originalText: 'двері 1200x2050', quantity: 1, color: null, size: '1200x2050', confidence: 0.95, procurementStatus: 'TO_ORDER', procurementSource: 'AUTO', procurementReason: 'STOCK_UNKNOWN', stockAtDecision: null, availableAtDecision: null, reservation: null }],
+  procurementSummary: 'NEEDS_ORDER',
+  procurementHandedOffAt: null,
+  supplierDispatch: null,
   catalogueCandidates: [],
   createdAt: '2026-09-08T09:30:00.000Z',
   sheetsExport: null,
@@ -40,18 +43,21 @@ describe('OrdersTable', () => {
     expect(push).not.toHaveBeenCalled();
   });
 
-  it('keeps search, status and pagination in the URL without scrolling to the top', () => {
-    render(<OrdersTable orders={[order]} page={2} pageSize={25} total={60} search="Авангард" status="NEEDS_REVIEW" />);
+  it('keeps search, approval, procurement and pagination in the URL without scrolling to the top', () => {
+    render(<OrdersTable orders={[order]} page={2} pageSize={25} total={60} search="Авангард" status="NEEDS_REVIEW" procurementStatus="NEEDS_ORDER" />);
 
     fireEvent.change(screen.getByLabelText('Пошук замовлень'), { target: { value: 'Ігор' } });
     fireEvent.submit(screen.getByRole('search'));
-    expect(replace).toHaveBeenCalledWith('/orders?search=%D0%86%D0%B3%D0%BE%D1%80&status=NEEDS_REVIEW', { scroll: false });
+    expect(replace).toHaveBeenCalledWith('/orders?search=%D0%86%D0%B3%D0%BE%D1%80&status=NEEDS_REVIEW&procurementStatus=NEEDS_ORDER', { scroll: false });
 
     fireEvent.change(screen.getByLabelText('Статус замовлення'), { target: { value: 'APPROVED' } });
-    expect(replace).toHaveBeenCalledWith('/orders?search=%D0%86%D0%B3%D0%BE%D1%80&status=APPROVED', { scroll: false });
+    expect(replace).toHaveBeenCalledWith('/orders?search=%D0%86%D0%B3%D0%BE%D1%80&status=APPROVED&procurementStatus=NEEDS_ORDER', { scroll: false });
+
+    fireEvent.change(screen.getByLabelText('Комплектація'), { target: { value: 'READY' } });
+    expect(replace).toHaveBeenCalledWith('/orders?search=%D0%86%D0%B3%D0%BE%D1%80&status=APPROVED&procurementStatus=READY', { scroll: false });
 
     fireEvent.click(screen.getByRole('button', { name: 'Сторінка 3' }));
-    expect(replace).toHaveBeenCalledWith('/orders?search=%D0%86%D0%B3%D0%BE%D1%80&status=APPROVED&page=3', { scroll: false });
+    expect(replace).toHaveBeenCalledWith('/orders?search=%D0%86%D0%B3%D0%BE%D1%80&status=APPROVED&procurementStatus=READY&page=3', { scroll: false });
   });
 
   it('provides a compact mobile card representation and an informative filtered empty state', () => {
@@ -67,5 +73,13 @@ describe('OrdersTable', () => {
     render(<OrdersTable orders={[order]} page={1} pageSize={25} total={1} />);
 
     expect(screen.getAllByText('8 вер. 2026 р., 12:30')).toHaveLength(2);
+  });
+
+  it('shows procurement status in the desktop table and mobile card', () => {
+    render(<OrdersTable orders={[order]} page={1} pageSize={25} total={1} />);
+
+    expect(screen.getByRole('columnheader', { name: 'Комплектація' })).toBeInTheDocument();
+    expect(document.querySelectorAll('.procurement-badge')).toHaveLength(2);
+    expect([...document.querySelectorAll('.procurement-badge')].every((badge) => badge.textContent === 'Потрібно замовити')).toBe(true);
   });
 });
