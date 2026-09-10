@@ -49,7 +49,7 @@ AutoSale має відрізняти товари, які можна взяти 
 
 Кожний ручний перехід містить ідентифікатор користувача, попередній і новий статус та записується в аудит замовлення.
 
-`OrderItem` отримує `procurementStatus`, `procurementSource` (`AUTO` або `MANUAL`), код причини рішення, snapshot відомого й доступного залишку та час останньої зміни. `Order` отримує `procurementHandedOffAt`, `procurementHandedOffBy` і лічильник `supplierDispatchVersion` для повторних, але не дубльованих спроб.
+`OrderItem` отримує backfilled `tenantId`, `procurementStatus`, `procurementSource` (`AUTO` або `MANUAL`), код причини рішення, snapshot відомого й доступного залишку та час останньої зміни. `tenantId + id` стає складеним ключем зв’язків із резервами й delivery items, щоб база даних, а не лише application code, відхиляла cross-tenant посилання. `Order` отримує `procurementHandedOffAt`, `procurementHandedOffBy` і лічильник `supplierDispatchVersion` для повторних, але не дубльованих спроб.
 
 ## Загальний статус комплектації
 
@@ -149,7 +149,7 @@ Cross-tenant order, item, reservation, preference і delivery IDs поверта
 - `ORDER_AUTO_APPROVED`;
 - `SUPPLIER_DELIVERY_FAILED`.
 
-Подія спочатку створює звичайний `UserNotification`. Після цього fan-out знаходить активних членів робочого простору з персональним Telegram-зв’язком і ввімкненим типом події. Для кожного створюється `PERSONAL_ALERT` delivery з ключем `personal-alert:<notificationId>:<userId>`. Це гарантує відсутність дублів при повторній обробці.
+Подія спочатку створює звичайний `UserNotification` з optional `eventKey` і унікальністю `tenantId + userId + eventKey`. Після цього fan-out знаходить активних членів робочого простору з персональним Telegram-зв’язком і ввімкненим типом події. Для кожного створюється `PERSONAL_ALERT` delivery з ключем `personal-alert:<notificationId>`. Бізнес-подія використовує стабільний ключ `<eventType>:<eventId>`, тому повторна обробка не створює ні другий in-app notification, ні другу Telegram-доставку.
 
 Створення `UserNotification`, відповідного `PERSONAL_ALERT` і бізнес-зміни використовує одну Prisma-транзакцію або довговічний outbox-крок, який можна безпечно повторити. Втрата BullMQ wake-up не втрачає подію: чинний Telegram reconciler знаходить delivery у PostgreSQL.
 
@@ -177,7 +177,7 @@ Cross-tenant order, item, reservation, preference і delivery IDs поверта
 
 ## Міграція наявних даних
 
-- Нові поля й таблиці додаються backward-compatible міграцією без видалення або перейменування чинних даних.
+- Нові поля й таблиці додаються backward-compatible міграцією без видалення або перейменування чинних даних. `OrderItem.tenantId` спочатку nullable, заповнюється через `Order.tenantId`, перевіряється, а потім стає `NOT NULL`.
 - Наявні `OrderItem` отримують `UNASSESSED`. Після rollout фоновий reconciler оцінює підтверджені замовлення невеликими пакетами; непідтверджені залишаються `UNASSESSED`.
 - Історичні успішні Telegram-доставки без `TelegramDeliveryItem` залишаються аудитом і не змінюють нові procurement-статуси.
 - До завершення backfill UI коректно показує `Комплектація ще не оцінена`, а надсилання постачальнику для такого замовлення недоступне.
