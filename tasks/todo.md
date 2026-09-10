@@ -960,5 +960,5 @@ The approved design is in `docs/superpowers/specs/2026-09-03-google-sign-in-desi
 
 - [x] Full automated suite passes and production images build.
 - [x] Docker services remain healthy without live Telegram credentials.
-- [ ] With operator credentials, one Start action links a test user and one test notification is delivered exactly once.
-- [ ] Human review approves the platform before `supplier-dispatch` implementation starts.
+- [x] With operator credentials, one Start action links a test user and one test notification is delivered exactly once.
+- [x] Human review approves the platform before `supplier-dispatch` implementation starts.
