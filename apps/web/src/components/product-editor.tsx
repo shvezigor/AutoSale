@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 
 import { mutatingFetch } from '../auth/csrf-fetch';
 import { useActivity } from './activity-provider';
@@ -48,6 +48,13 @@ export function ProductEditor({ product, onClose }: ProductEditorProps) {
   const editing = Boolean(product?.id);
   const activity = useActivity();
   const toast = useToast();
+
+  useEffect(() => {
+    const next = { ...emptyProduct, ...product };
+    setForm(next);
+    setAliasesText((next.aliases ?? []).join(', '));
+    setState('idle');
+  }, [product]);
 
   function update<K extends keyof typeof form>(field: K, value: (typeof form)[K]) {
     setForm((current) => ({ ...current, [field]: value }));

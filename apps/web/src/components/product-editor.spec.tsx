@@ -68,6 +68,36 @@ describe('ProductEditor', () => {
     expect(refresh).toHaveBeenCalled();
   });
 
+  it('resets the form when another catalogue product is selected', async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ token: 'csrf-token' }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({}) });
+    vi.stubGlobal('fetch', fetchMock);
+    const onClose = vi.fn();
+    const firstProduct = {
+      id: 'first-product', sku: 'FIRST-01', name: 'Перший товар', stockQuantity: 2, aliases: ['перший'],
+    };
+    const secondProduct = {
+      id: 'second-product', sku: 'SECOND-02', name: 'Другий товар', stockQuantity: null, aliases: ['другий'],
+    };
+
+    const view = render(<ProductEditor onClose={onClose} product={firstProduct} />);
+    view.rerender(<ToastProvider><ActivityProvider><ProductEditor onClose={onClose} product={secondProduct} /></ActivityProvider></ToastProvider>);
+
+    expect(screen.getByLabelText('Артикул')).toHaveValue('SECOND-02');
+    expect(screen.getByLabelText('Назва товару')).toHaveValue('Другий товар');
+    expect(screen.getByLabelText('Аліаси')).toHaveValue('другий');
+    fireEvent.change(screen.getByLabelText('Залишок'), { target: { value: '8' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Зберегти зміни' }));
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledWith(
+      '/api/catalogue/second-product',
+      expect.objectContaining({ method: 'PATCH' }),
+    ));
+    const request = fetchMock.mock.calls.find(([path]) => path === '/api/catalogue/second-product')?.[1] as RequestInit;
+    expect(JSON.parse(String(request.body))).toEqual(expect.objectContaining({ sku: 'SECOND-02', stockQuantity: 8 }));
+  });
+
   it('shows a safe error message when saving fails', async () => {
     const fetchMock = vi.fn()
       .mockResolvedValueOnce({ ok: true, json: async () => ({ token: 'csrf-token' }) })
