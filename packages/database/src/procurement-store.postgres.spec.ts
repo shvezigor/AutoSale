@@ -169,6 +169,78 @@ describe('procurement persistence constraints', () => {
       where: { orderId: fixture.orderId, action: 'PROCUREMENT_RESERVATIONS_RELEASED' },
     })).toBe(1);
   });
+
+  it('applies allowed manual transitions and reservation side effects', async () => {
+    const fixture = await createApprovedOrder(prisma, { sku: 'MANUAL-STOCK', stock: 3, quantity: 2 });
+    const store = new ProcurementStore(prisma);
+    await store.assessApprovedOrder(tenantA, fixture.orderId, userA);
+
+    await store.setItemStatus(tenantA, fixture.orderId, fixture.itemId, 'TO_ORDER', userA);
+    expect(await prisma.inventoryReservation.findUniqueOrThrow({
+      where: { tenantId_orderItemId: { tenantId: tenantA, orderItemId: fixture.itemId } },
+    })).toMatchObject({ status: 'RELEASED' });
+
+    await store.setItemStatus(tenantA, fixture.orderId, fixture.itemId, 'IN_STOCK', userA);
+    expect(await prisma.inventoryReservation.findUniqueOrThrow({
+      where: { tenantId_orderItemId: { tenantId: tenantA, orderItemId: fixture.itemId } },
+    })).toMatchObject({ status: 'ACTIVE', quantity: 2 });
+    expect(await prisma.orderItem.findUniqueOrThrow({ where: { id: fixture.itemId } }))
+      .toMatchObject({ procurementStatus: 'IN_STOCK', procurementSource: 'MANUAL', procurementReason: 'MANUAL_IN_STOCK' });
+  });
+
+  it('allows supplier confirmation flow and rejects skipped states', async () => {
+    const fixture = await createApprovedOrder(prisma, { sku: 'SUPPLIER-FLOW', stock: null, quantity: 1 });
+    const store = new ProcurementStore(prisma);
+    await store.assessApprovedOrder(tenantA, fixture.orderId, userA);
+
+    await expect(store.setItemStatus(tenantA, fixture.orderId, fixture.itemId, 'RECEIVED', userA))
+      .rejects.toThrow('Invalid procurement transition');
+    await prisma.orderItem.update({ where: { id: fixture.itemId }, data: { procurementStatus: 'ORDERED' } });
+    await store.setItemStatus(tenantA, fixture.orderId, fixture.itemId, 'SUPPLIER_CONFIRMED', userA);
+    await store.setItemStatus(tenantA, fixture.orderId, fixture.itemId, 'RECEIVED', userA);
+
+    expect((await prisma.orderItem.findUniqueOrThrow({ where: { id: fixture.itemId } })).procurementStatus)
+      .toBe('RECEIVED');
+  });
+
+  it('allows an unavailable item to return to supplier ordering', async () => {
+    const fixture = await createApprovedOrder(prisma, { sku: 'UNAVAILABLE-FLOW', stock: null, quantity: 1 });
+    const store = new ProcurementStore(prisma);
+    await store.assessApprovedOrder(tenantA, fixture.orderId, userA);
+    await store.setItemStatus(tenantA, fixture.orderId, fixture.itemId, 'UNAVAILABLE', userA);
+
+    await store.setItemStatus(tenantA, fixture.orderId, fixture.itemId, 'TO_ORDER', userA);
+
+    expect((await prisma.orderItem.findUniqueOrThrow({ where: { id: fixture.itemId } })).procurementStatus)
+      .toBe('TO_ORDER');
+  });
+
+  it('rejects cross-tenant item transitions without mutation', async () => {
+    const store = new ProcurementStore(prisma);
+    await expect(store.setItemStatus(tenantA, orderB, itemB, 'TO_ORDER', userA))
+      .rejects.toThrow('Procurement item not found');
+    expect((await prisma.orderItem.findUniqueOrThrow({ where: { id: itemB } })).procurementStatus)
+      .toBe('UNASSESSED');
+  });
+
+  it('hands off a ready order once and consumes its reserved stock', async () => {
+    const fixture = await createApprovedOrder(prisma, { sku: 'HAND-OFF', stock: 5, quantity: 2 });
+    const store = new ProcurementStore(prisma);
+    await store.assessApprovedOrder(tenantA, fixture.orderId, userA);
+
+    const first = await store.handOffOrder(tenantA, fixture.orderId, userA);
+    const replay = await store.handOffOrder(tenantA, fixture.orderId, userA);
+
+    expect(first.summary).toBe('HANDED_OFF');
+    expect(replay).toEqual(first);
+    expect(await prisma.product.findFirstOrThrow({ where: { tenantId: tenantA, sku: 'HAND-OFF' } }))
+      .toMatchObject({ stockQuantity: 3 });
+    expect(await prisma.inventoryReservation.findUniqueOrThrow({
+      where: { tenantId_orderItemId: { tenantId: tenantA, orderItemId: fixture.itemId } },
+    })).toMatchObject({ status: 'CONSUMED', consumedAt: expect.any(Date) });
+    expect(await prisma.auditLog.count({ where: { orderId: fixture.orderId, action: 'ORDER_HANDED_OFF' } }))
+      .toBe(1);
+  });
 });
 
 async function createApprovedOrder(

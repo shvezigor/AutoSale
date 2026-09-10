@@ -1,6 +1,14 @@
 import type { ManagerOrder, ManagerOrderUpdate, OrderListResponse, OrderStatus } from '@autosale/contracts/orders';
 import { procurementSummaryFor } from '@autosale/contracts/procurement';
-import { ProcurementStore, Prisma, type PrismaClient } from '@autosale/database';
+import type { ProcurementStatus } from '@autosale/contracts/procurement';
+import {
+  InvalidProcurementTransitionError,
+  ProcurementItemNotFoundError,
+  ProcurementOrderNotReadyError,
+  ProcurementStore,
+  Prisma,
+  type PrismaClient,
+} from '@autosale/database';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 
 type Extraction = {
@@ -88,6 +96,30 @@ export class OrdersService {
     if (record.status !== 'FAILED') throw new BadRequestException('Only failed exports can be retried');
     const updated = await this.prisma.orderExport.update({ where: { id: record.id }, data: { status: 'PENDING', errorSummary: null } });
     return this.mapExport(updated, true);
+  }
+
+  async setItemProcurement(
+    tenantId: string,
+    orderId: string,
+    itemId: string,
+    status: ProcurementStatus,
+    actor: string,
+  ): Promise<ManagerOrder> {
+    try {
+      await this.procurement.setItemStatus(tenantId, orderId, itemId, status, actor);
+    } catch (error) {
+      this.mapProcurementError(error);
+    }
+    return this.detail(tenantId, orderId);
+  }
+
+  async handOff(tenantId: string, orderId: string, actor: string): Promise<ManagerOrder> {
+    try {
+      await this.procurement.handOffOrder(tenantId, orderId, actor);
+    } catch (error) {
+      this.mapProcurementError(error);
+    }
+    return this.detail(tenantId, orderId);
   }
 
   async update(tenantId: string, id: string, actor: string, input: ManagerOrderUpdate): Promise<ManagerOrder> {
@@ -220,6 +252,16 @@ export class OrdersService {
       lastAttemptAt: row.lastAttemptAt?.toISOString() ?? null, lastSyncedAt: row.lastSyncedAt?.toISOString() ?? null,
       errorSummary: row.errorSummary, retryAllowed: row.status === 'FAILED' && destinationActive,
     };
+  }
+
+  private mapProcurementError(error: unknown): never {
+    if (error instanceof ProcurementItemNotFoundError) {
+      throw new NotFoundException('Order item not found');
+    }
+    if (error instanceof InvalidProcurementTransitionError || error instanceof ProcurementOrderNotReadyError) {
+      throw new BadRequestException(error.message);
+    }
+    throw error;
   }
 }
 

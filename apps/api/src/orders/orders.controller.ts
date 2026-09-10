@@ -1,8 +1,9 @@
-import { BadRequestException, Body, Controller, Get, Inject, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Inject, Param, ParseUUIDPipe, Patch, Post, Put, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { z } from 'zod';
 import type { ManagerOrderUpdate } from '@autosale/contracts/orders';
 import type { AuthPrincipal } from '@autosale/contracts/auth';
+import { procurementTransitionSchema } from '@autosale/contracts/procurement';
 
 import { CurrentPrincipal, RequireMembership } from '../auth/auth.decorators.js';
 import { OrdersService } from './orders.service.js';
@@ -45,6 +46,28 @@ export class OrdersController {
 
   @Post(':id/sheets-export/retry') retrySheetsExport(@CurrentPrincipal() principal: AuthPrincipal, @Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
     return this.orders.retrySheetsExport(principal.tenantId!, id);
+  }
+
+  @Put(':orderId/items/:itemId/procurement')
+  setItemProcurement(
+    @CurrentPrincipal() principal: AuthPrincipal,
+    @Param('orderId', new ParseUUIDPipe({ version: '4' })) orderId: string,
+    @Param('itemId', new ParseUUIDPipe({ version: '4' })) itemId: string,
+    @Body() body: unknown,
+  ) {
+    const parsed = procurementTransitionSchema.safeParse(body);
+    if (!parsed.success) throw new BadRequestException('Invalid procurement transition');
+    return this.orders.setItemProcurement(
+      principal.tenantId!, orderId, itemId, parsed.data.status, principal.userId,
+    );
+  }
+
+  @Post(':id/hand-off')
+  handOff(
+    @CurrentPrincipal() principal: AuthPrincipal,
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ) {
+    return this.orders.handOff(principal.tenantId!, id, principal.userId);
   }
 
   @Patch(':id') update(@CurrentPrincipal() principal: AuthPrincipal, @Param('id', new ParseUUIDPipe({ version: '4' })) id: string, @Body() body: unknown) {
