@@ -3,6 +3,9 @@ import { randomUUID } from 'node:crypto';
 import type { TelegramDeliveryJob } from '@autosale/contracts';
 import type { PrismaClient } from '@autosale/database';
 import { TelegramBotError } from '@autosale/integrations';
+import type { Prisma } from '@autosale/database';
+
+import type { TelegramAlertEvent } from '../notifications/telegram-alert.service.js';
 
 const LEASE_MS = 60_000;
 const MAX_ATTEMPTS = 5;
@@ -22,6 +25,7 @@ export class TelegramDeliveryService {
     private readonly prisma: PrismaClient,
     private readonly telegram: TelegramTextClient,
     private readonly now: () => Date = () => new Date(),
+    private readonly alerts?: { persist(tx: Prisma.TransactionClient, event: TelegramAlertEvent): Promise<void> },
   ) {}
 
   async process(job: TelegramDeliveryJob): Promise<TelegramDeliveryResult> {
@@ -131,7 +135,7 @@ export class TelegramDeliveryService {
 
       const delivery = await transaction.telegramDelivery.findUnique({
         where: { id: deliveryId },
-        select: { tenantId: true, purpose: true },
+        select: { tenantId: true, purpose: true, orderId: true },
       });
       if (delivery?.purpose !== 'SUPPLIER_ORDER' || data.status === 'RETRYABLE') return true;
 
@@ -149,6 +153,14 @@ export class TelegramDeliveryService {
               procurementUpdatedAt: this.now(),
             },
       });
+      if (data.status === 'FAILED' && delivery.orderId) {
+        await this.alerts?.persist(transaction, {
+          eventId: deliveryId,
+          tenantId: delivery.tenantId,
+          orderId: delivery.orderId,
+          type: 'SUPPLIER_DELIVERY_FAILED',
+        });
+      }
       return true;
     });
   }

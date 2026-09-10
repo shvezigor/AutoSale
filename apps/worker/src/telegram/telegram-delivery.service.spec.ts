@@ -282,23 +282,32 @@ describe('TelegramDeliveryService', () => {
   it('keeps supplier items sending while Telegram will retry', async () => {
     const fixture = await createSupplierDelivery(prisma, { tenantId, destinationId, now });
     sendText.mockRejectedValueOnce(new TelegramBotError('RATE_LIMITED', 429, 30));
+    const alerts = { persist: vi.fn().mockResolvedValue(undefined) };
 
-    await expect(new TelegramDeliveryService(prisma, { sendText }, () => now)
+    await expect(new TelegramDeliveryService(prisma, { sendText }, () => now, alerts)
       .process({ deliveryId: fixture.deliveryId })).resolves.toBe('RETRY');
 
     await expect(prisma.orderItem.findUniqueOrThrow({ where: { id: fixture.linkedItemId } }))
       .resolves.toMatchObject({ procurementStatus: 'SENDING' });
+    expect(alerts.persist).not.toHaveBeenCalled();
   });
 
   it('returns linked supplier items to ordering after terminal failure', async () => {
     const fixture = await createSupplierDelivery(prisma, { tenantId, destinationId, now });
     sendText.mockRejectedValueOnce(new TelegramBotError('FORBIDDEN', 403));
+    const alerts = { persist: vi.fn().mockResolvedValue(undefined) };
 
-    await expect(new TelegramDeliveryService(prisma, { sendText }, () => now)
+    await expect(new TelegramDeliveryService(prisma, { sendText }, () => now, alerts)
       .process({ deliveryId: fixture.deliveryId })).resolves.toBe('FAILED');
 
     await expect(prisma.orderItem.findUniqueOrThrow({ where: { id: fixture.linkedItemId } }))
       .resolves.toMatchObject({ procurementStatus: 'TO_ORDER', procurementReason: 'DELIVERY_FAILED' });
+    expect(alerts.persist).toHaveBeenCalledWith(expect.anything(), {
+      eventId: fixture.deliveryId,
+      tenantId,
+      orderId: expect.any(String),
+      type: 'SUPPLIER_DELIVERY_FAILED',
+    });
   });
 
   it('does not transition supplier items when a stale worker loses its lease', async () => {

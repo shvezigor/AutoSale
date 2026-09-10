@@ -1,6 +1,6 @@
 'use client';
 
-import type { TelegramConnectionSummary as ContractTelegramConnectionSummary } from '../../../../packages/contracts/src/telegram';
+import type { TelegramConnectionSummary as ContractTelegramConnectionSummary, TelegramNotificationPreferences } from '../../../../packages/contracts/src/telegram';
 import { useState } from 'react';
 
 import { mutatingFetch } from '../auth/csrf-fetch';
@@ -13,12 +13,16 @@ type PendingAction = 'connect' | 'test' | 'unlink' | null;
 
 export function TelegramSettingsCard({
   initial,
+  initialPreferences,
   navigate = (url) => { window.location.href = url; },
 }: {
   initial: TelegramConnectionSummary;
+  initialPreferences: TelegramNotificationPreferences;
   navigate?: (url: string) => void;
 }) {
   const [connection, setConnection] = useState(initial);
+  const [preferences, setPreferences] = useState(initialPreferences);
+  const [pendingPreference, setPendingPreference] = useState<keyof TelegramNotificationPreferences | null>(null);
   const [pendingAction, setPendingAction] = useState<PendingAction>(null);
   const [confirmingUnlink, setConfirmingUnlink] = useState(false);
   const [message, setMessage] = useState<{ kind: 'success' | 'error'; text: string } | null>(null);
@@ -82,6 +86,25 @@ export function TelegramSettingsCard({
     }
   }
 
+  async function togglePreference(key: keyof TelegramNotificationPreferences) {
+    const next = { ...preferences, [key]: !preferences[key] };
+    setPendingPreference(key);
+    try {
+      const response = await mutatingFetch('/api/integrations/telegram/preferences', {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(next),
+      });
+      if (!response.ok) throw new Error('preferences failed');
+      setPreferences(next);
+      toast.show({ type: 'success', title: 'Налаштування сповіщень збережено' });
+    } catch {
+      toast.show({ type: 'error', title: 'Не вдалося зберегти налаштування сповіщень' });
+    } finally {
+      setPendingPreference(null);
+    }
+  }
+
   const pending = pendingAction !== null;
   const status = !connection.available ? 'Недоступно' : connected ? 'Підключено' : 'Не підключено';
 
@@ -100,6 +123,17 @@ export function TelegramSettingsCard({
         {connection.personal.displayName && connection.personal.username && <div><dt>Ім’я</dt><dd>{connection.personal.displayName}</dd></div>}
         <div><dt>Підключено</dt><dd>{formatDate(connection.personal.linkedAt)}</dd></div>
       </dl>
+      <fieldset className="telegram-alert-preferences" disabled={pendingPreference !== null} aria-busy={pendingPreference !== null || undefined}>
+        <legend>Які події надсилати</legend>
+        {([
+          ['ORDER_NEEDS_REVIEW', 'Замовлення потребує перевірки'],
+          ['ORDER_AUTO_APPROVED', 'Замовлення створено автоматично'],
+          ['SUPPLIER_DELIVERY_FAILED', 'Не вдалося надіслати постачальнику'],
+        ] as const).map(([key, label]) => <label key={key}>
+          <input type="checkbox" checked={preferences[key]} onChange={() => void togglePreference(key)} />
+          <span>{label}</span>
+        </label>)}
+      </fieldset>
       <div className="settings-actions telegram-connection-actions">
         <LoadingButton pending={pendingAction === 'test'} pendingLabel="Надсилаємо…" disabled={pending} onClick={() => void sendTest()} type="button">Надіслати тест</LoadingButton>
         {!confirmingUnlink && <button className="danger-button" disabled={pending} onClick={() => setConfirmingUnlink(true)} type="button">Відключити</button>}

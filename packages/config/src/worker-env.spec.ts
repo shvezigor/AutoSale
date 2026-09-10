@@ -8,6 +8,7 @@ const validEnv = {
   NODE_ENV: 'test',
   DATABASE_URL: 'postgresql://autosale:secret@postgres:5432/autosale',
   REDIS_URL: 'redis://redis:6379',
+  APP_PUBLIC_URL: 'https://autosale.example.com',
   S3_ENDPOINT: 'http://minio:9000',
   S3_REGION: 'us-east-1',
   S3_BUCKET: 'autosale-media',

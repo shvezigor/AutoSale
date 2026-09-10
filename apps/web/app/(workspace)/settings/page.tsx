@@ -9,7 +9,7 @@ import type { GoogleConnectionSummary } from '../../../src/components/google-con
 import { SettingsTabs, type SettingsTabId } from '../../../src/components/settings-tabs';
 import { TelegramSettingsCard, type TelegramConnectionSummary } from '../../../src/components/telegram-settings-card';
 import { TelegramSupplierSettings } from '../../../src/components/telegram-supplier-settings';
-import type { TelegramSupplierSettings as TelegramSupplierConfiguration } from '../../../../../packages/contracts/src/telegram';
+import type { TelegramNotificationPreferences, TelegramSupplierSettings as TelegramSupplierConfiguration } from '../../../../../packages/contracts/src/telegram';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,16 +22,18 @@ export default async function SettingsPage({ searchParams = Promise.resolve({}) 
   const initialTab: SettingsTabId = requestedTab === 'google' || requestedTab === 'data'
     ? 'data'
     : requestedTab === 'orders' ? 'orders' : requestedTab === 'telegram' ? 'telegram' : 'social';
-  const [instagramResponse, googleResponse, telegramResponse] = await Promise.all([
+  const [instagramResponse, googleResponse, telegramResponse, telegramPreferencesResponse] = await Promise.all([
     authenticatedApiFetch('/api/integrations/instagram'),
     authenticatedApiFetch('/api/integrations/google'),
     authenticatedApiFetch('/api/integrations/telegram'),
+    authenticatedApiFetch('/api/integrations/telegram/preferences'),
   ]);
-  if (!instagramResponse.ok || !googleResponse.ok || !telegramResponse.ok) throw new Error('Не вдалося завантажити налаштування');
+  if (!instagramResponse.ok || !googleResponse.ok || !telegramResponse.ok || !telegramPreferencesResponse.ok) throw new Error('Не вдалося завантажити налаштування');
   const instagram = (await instagramResponse.json()) as InstagramConnectionSummary;
   const google = (await googleResponse.json()) as GoogleConnectionSummary;
   const telegram = (await telegramResponse.json()) as TelegramConnectionSummary;
-  if (session.membershipRole === 'MANAGER') return <SettingsLayout google={google} instagram={instagram} telegram={telegram} initialTab={initialTab} pickerAction={pickerAction} session={session} />;
+  const telegramPreferences = (await telegramPreferencesResponse.json()) as TelegramNotificationPreferences;
+  if (session.membershipRole === 'MANAGER') return <SettingsLayout google={google} instagram={instagram} telegram={telegram} telegramPreferences={telegramPreferences} initialTab={initialTab} pickerAction={pickerAction} session={session} />;
 
   const [supplierResponse, response, sheetsResponse, catalogueSourcesResponse] = await Promise.all([
     authenticatedApiFetch('/api/integrations/telegram/supplier'),
@@ -49,13 +51,14 @@ export default async function SettingsPage({ searchParams = Promise.resolve({}) 
     if (!sourceResponse.ok) throw new Error('Не вдалося завантажити джерело каталогу');
     return await sourceResponse.json() as CatalogueSourceConfiguration;
   }));
-  return <SettingsLayout google={google} instagram={instagram} telegram={telegram} supplier={supplier} initialTab={initialTab} pickerAction={pickerAction} session={session} settings={settings} sheets={sheets} catalogueSources={catalogueSources} catalogueConfigurations={catalogueConfigurations} />;
+  return <SettingsLayout google={google} instagram={instagram} telegram={telegram} telegramPreferences={telegramPreferences} supplier={supplier} initialTab={initialTab} pickerAction={pickerAction} session={session} settings={settings} sheets={sheets} catalogueSources={catalogueSources} catalogueConfigurations={catalogueConfigurations} />;
 }
 
 function SettingsLayout({
   instagram,
   google,
   telegram,
+  telegramPreferences,
   supplier,
   initialTab,
   pickerAction,
@@ -68,6 +71,7 @@ function SettingsLayout({
   instagram: InstagramConnectionSummary;
   google: GoogleConnectionSummary;
   telegram: TelegramConnectionSummary;
+  telegramPreferences: TelegramNotificationPreferences;
   supplier?: TelegramSupplierConfiguration;
   initialTab: SettingsTabId;
   pickerAction: string;
@@ -90,7 +94,7 @@ function SettingsLayout({
       id: 'telegram' as const,
       label: 'Telegram',
       description: 'Особисті сповіщення',
-      content: <section className="settings-section"><div className="settings-section-heading"><h2>Telegram</h2><p>Підключіть особисті сповіщення та виберіть чат постачальника.</p></div><TelegramSettingsCard initial={telegram} />{supplier && <TelegramSupplierSettings initial={supplier} />}</section>,
+      content: <section className="settings-section"><div className="settings-section-heading"><h2>Telegram</h2><p>Підключіть особисті сповіщення та виберіть чат постачальника.</p></div><TelegramSettingsCard initial={telegram} initialPreferences={telegramPreferences} />{supplier && <TelegramSupplierSettings initial={supplier} />}</section>,
     },
     {
       id: 'data' as const,

@@ -116,6 +116,7 @@ describe('TriggeredOrderProcessor', () => {
       },
     });
     const telemetry = vi.fn();
+    const alerts = { persist: vi.fn().mockResolvedValue(undefined) };
     const procurement = {
       assessApprovedOrder: vi.fn().mockResolvedValue({ orderId: 'pending', summary: 'NEEDS_ORDER', items: [] }),
       releaseOrderReservations: vi.fn(),
@@ -126,6 +127,7 @@ describe('TriggeredOrderProcessor', () => {
       procurement as never,
       undefined,
       telemetry,
+      alerts,
     );
 
     const first = await processor.processIfTriggered(trigger.id);
@@ -148,6 +150,12 @@ describe('TriggeredOrderProcessor', () => {
     expect(persistedItems).toEqual([{ quantity: 1 }]);
     expect(recognize).toHaveBeenCalledTimes(1);
     expect(procurement.assessApprovedOrder).toHaveBeenCalledWith(tenant.id, first!.id, 'SYSTEM');
+    expect(alerts.persist).toHaveBeenCalledWith(expect.anything(), {
+      eventId: first!.id,
+      tenantId: tenant.id,
+      orderId: first!.id,
+      type: 'ORDER_AUTO_APPROVED',
+    });
     expect(telemetry).toHaveBeenCalledWith('ai_order_recognition_completed', expect.objectContaining({ orderId: first!.id, result: 'AUTO_APPROVED' }));
   });
 });

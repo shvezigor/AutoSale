@@ -64,4 +64,18 @@ describe('TelegramController', () => {
       .resolves.toEqual({ orderId: 'order', items: [] });
     expect(supplierOrderPreview).toHaveBeenCalledWith('tenant', '11111111-1111-4111-8111-111111111111');
   });
+
+  it('reads and updates notification preferences only for the current member', async () => {
+    const preferences = { ORDER_NEEDS_REVIEW: true, ORDER_AUTO_APPROVED: true, SUPPLIER_DELIVERY_FAILED: false };
+    const notificationPreferences = vi.fn().mockResolvedValue(preferences);
+    const saveNotificationPreferences = vi.fn().mockResolvedValue(preferences);
+    const controller = new TelegramController({ notificationPreferences, saveNotificationPreferences } as never);
+
+    await expect(controller.preferences(manager)).resolves.toEqual(preferences);
+    await expect(controller.savePreferences(manager, preferences)).resolves.toEqual(preferences);
+    expect(notificationPreferences).toHaveBeenCalledWith('tenant', 'manager');
+    expect(saveNotificationPreferences).toHaveBeenCalledWith('tenant', 'manager', preferences);
+    expect(() => controller.savePreferences(manager, { ...preferences, userId: 'another-user' }))
+      .toThrow(BadRequestException);
+  });
 });

@@ -8,7 +8,7 @@ import { ToastProvider } from './toast-provider';
 function renderCard(initial: TelegramConnectionSummary, navigate = vi.fn()) {
   return {
     navigate,
-    ...render(<ToastProvider><ActivityProvider><TelegramSettingsCard initial={initial} navigate={navigate} /></ActivityProvider></ToastProvider>),
+    ...render(<ToastProvider><ActivityProvider><TelegramSettingsCard initial={initial} initialPreferences={{ ORDER_NEEDS_REVIEW: true, ORDER_AUTO_APPROVED: true, SUPPLIER_DELIVERY_FAILED: true }} navigate={navigate} /></ActivityProvider></ToastProvider>),
   };
 }
 
@@ -84,5 +84,28 @@ describe('TelegramSettingsCard', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Так, відключити' }));
 
     await waitFor(() => expect(screen.getByRole('button', { name: 'Підключити Telegram' })).toBeInTheDocument());
+  });
+
+  it('shows checked preferences only when linked and PUTs the complete preference object', async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ token: 'csrf-token' }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({}) });
+    vi.stubGlobal('fetch', fetchMock);
+    renderCard(disconnected);
+    expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
+    cleanup();
+    render(<ToastProvider><ActivityProvider><TelegramSettingsCard
+      initial={{ ...disconnected, personal: { connected: true, displayName: 'Ihor', username: 'shvezigor', linkedAt: null } }}
+      initialPreferences={{ ORDER_NEEDS_REVIEW: true, ORDER_AUTO_APPROVED: true, SUPPLIER_DELIVERY_FAILED: true }}
+    /></ActivityProvider></ToastProvider>);
+    const checkbox = screen.getByRole('checkbox', { name: 'Замовлення потребує перевірки' });
+    expect(checkbox).toBeChecked();
+    fireEvent.click(checkbox);
+
+    await waitFor(() => expect(fetchMock).toHaveBeenLastCalledWith('/api/integrations/telegram/preferences', expect.objectContaining({
+      method: 'PUT',
+      body: JSON.stringify({ ORDER_NEEDS_REVIEW: false, ORDER_AUTO_APPROVED: true, SUPPLIER_DELIVERY_FAILED: true }),
+    })));
+    expect(screen.getByText('Налаштування сповіщень збережено')).toBeInTheDocument();
   });
 });

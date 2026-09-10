@@ -3,6 +3,7 @@ import { Prisma, type PrismaClient, type ProcurementStore } from '@autosale/data
 import type { ApprovalMode } from './approval-policy.js';
 import { isOrderTrigger } from './order-trigger.js';
 import type { OrderRecognitionService } from './order-recognition.service.js';
+import type { TelegramAlertEvent } from '../notifications/telegram-alert.service.js';
 
 export class TriggeredOrderProcessor {
   constructor(
@@ -11,6 +12,7 @@ export class TriggeredOrderProcessor {
     private readonly procurement: Pick<ProcurementStore, 'assessApprovedOrder'>,
     private readonly scheduleExport?: (orderId: string, tenantId: string) => Promise<void>,
     private readonly telemetry?: (event: string, fields: { correlationId: string; orderId: string; result: string }) => void,
+    private readonly alerts?: { persist(tx: Prisma.TransactionClient, event: TelegramAlertEvent): Promise<void> },
   ) {}
 
   async processIfTriggered(
@@ -101,6 +103,12 @@ export class TriggeredOrderProcessor {
             VALUES (gen_random_uuid(), ${trigger.tenantId}::uuid, ${order.id}::uuid, ${item.catalogId}, ${item.originalText}, ${item.quantity}, ${item.color}, ${item.size}, ${item.confidence})
           `);
         }
+        await this.alerts?.persist(transaction, {
+          eventId: order.id,
+          tenantId: trigger.tenantId,
+          orderId: order.id,
+          type: autoApproved ? 'ORDER_AUTO_APPROVED' : 'ORDER_NEEDS_REVIEW',
+        });
         return persisted;
       });
       if (autoApproved) {

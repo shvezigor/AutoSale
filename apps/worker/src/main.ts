@@ -37,6 +37,7 @@ import { GoogleCatalogueSyncProcessor } from './catalogue/google-catalogue-sync.
 import { CatalogueSyncScheduler } from './catalogue/catalogue-sync-scheduler.js';
 import { CatalogueAutoImporter } from './catalogue/catalogue-auto-importer.js';
 import { WorkerNotificationService } from './notifications/worker-notification.service.js';
+import { TelegramAlertService } from './notifications/telegram-alert.service.js';
 import { NotificationRetentionReconciler } from './notifications/notification-retention.reconciler.js';
 import { TelegramDeliveryReconciler } from './telegram/telegram-delivery-reconciler.js';
 import { TelegramDeliveryService } from './telegram/telegram-delivery.service.js';
@@ -98,6 +99,7 @@ async function bootstrap(): Promise<void> {
     })
     : undefined;
   const workerNotifications = new WorkerNotificationService(prisma as never);
+  const telegramAlerts = new TelegramAlertService(env.APP_PUBLIC_URL);
   const catalogueSyncProcessor = googleSheets || oauthSheets
     ? new GoogleCatalogueSyncProcessor(prisma, googleSheets, storage, undefined, oauthSheets, workerNotifications, env.CATALOGUE_AI_STRUCTURE_ANALYSIS ? catalogueHybrid : undefined)
     : undefined;
@@ -119,6 +121,7 @@ async function bootstrap(): Promise<void> {
       metrics.increment('autosale_operations_total', { operation: 'ai_order_recognition', result });
       if (result === 'failure') logger.warn(event, fields); else logger.info(event, fields);
     },
+    telegramAlerts,
   );
   const processor = new InstagramProcessor(
     prisma,
@@ -149,7 +152,7 @@ async function bootstrap(): Promise<void> {
     ? new TelegramBotClient({ token: env.TELEGRAM_BOT_TOKEN })
     : undefined;
   const telegramDelivery = telegramBot
-    ? new TelegramDeliveryService(prisma, telegramBot)
+    ? new TelegramDeliveryService(prisma, telegramBot, undefined, telegramAlerts)
     : undefined;
   const telegramWorker = telegramDelivery
     ? new Worker(

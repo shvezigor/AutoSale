@@ -3,6 +3,7 @@ import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import type {
   TelegramConnectionSummary, TelegramLinkPurpose, TelegramLinkResponse,
   TelegramSupplierSettings, TelegramSupplierSettingsUpdate, SupplierOrderPreview,
+  TelegramNotificationPreferences,
 } from '@autosale/contracts';
 import { Prisma, type PrismaClient } from '@autosale/database';
 import { z } from 'zod';
@@ -83,6 +84,37 @@ export class TelegramService {
       where: { tenantId, userId, revokedAt: null }, data: { revokedAt: this.now() },
     });
     return { disconnected: result.count > 0 };
+  }
+
+  async notificationPreferences(tenantId: string, userId: string): Promise<TelegramNotificationPreferences> {
+    const rows = await this.prisma.telegramNotificationPreference.findMany({
+      where: { tenantId, userId },
+      select: { eventType: true, enabled: true },
+    });
+    return rows.reduce<TelegramNotificationPreferences>(
+      (result, row) => ({ ...result, [row.eventType]: row.enabled }),
+      { ORDER_NEEDS_REVIEW: true, ORDER_AUTO_APPROVED: true, SUPPLIER_DELIVERY_FAILED: true },
+    );
+  }
+
+  async saveNotificationPreferences(
+    tenantId: string,
+    userId: string,
+    input: TelegramNotificationPreferences,
+  ): Promise<TelegramNotificationPreferences> {
+    await this.prisma.$transaction(Object.entries(input).map(([eventType, enabled]) =>
+      this.prisma.telegramNotificationPreference.upsert({
+        where: {
+          tenantId_userId_eventType: {
+            tenantId,
+            userId,
+            eventType: eventType as keyof TelegramNotificationPreferences,
+          },
+        },
+        create: { tenantId, userId, eventType: eventType as keyof TelegramNotificationPreferences, enabled },
+        update: { enabled },
+      })));
+    return this.notificationPreferences(tenantId, userId);
   }
 
   async queueTest(tenantId: string, userId: string): Promise<{ deliveryId: string; status: 'PENDING' }> {

@@ -28,6 +28,7 @@ describe('TelegramService webhook processing', () => {
 
   beforeEach(async () => {
     await prisma.telegramDelivery.deleteMany();
+    await prisma.telegramNotificationPreference.deleteMany();
     await prisma.telegramSupplierSetting.deleteMany();
     await prisma.telegramChat.deleteMany();
     await prisma.telegramBusinessConnection.deleteMany();
@@ -251,6 +252,22 @@ describe('TelegramService webhook processing', () => {
 
     await expect(new TelegramService(prisma).saveSupplierSettings(tenantId, { destinationId: foreign.id, autoDispatch: false }))
       .rejects.toThrow('Telegram supplier destination unavailable');
+  });
+
+  it('defaults all personal alerts on and persists a complete member-specific preference set', async () => {
+    const service = new TelegramService(prisma);
+    const defaults = {
+      ORDER_NEEDS_REVIEW: true,
+      ORDER_AUTO_APPROVED: true,
+      SUPPLIER_DELIVERY_FAILED: true,
+    } as const;
+    await expect(service.notificationPreferences(tenantId, userId)).resolves.toEqual(defaults);
+
+    const saved = { ...defaults, ORDER_AUTO_APPROVED: false };
+    await expect(service.saveNotificationPreferences(tenantId, userId, saved)).resolves.toEqual(saved);
+    await expect(service.notificationPreferences(tenantId, userId)).resolves.toEqual(saved);
+    await expect(prisma.telegramNotificationPreference.findMany({ where: { tenantId, userId } }))
+      .resolves.toHaveLength(3);
   });
 });
 

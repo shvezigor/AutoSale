@@ -13,6 +13,7 @@ export const workerEnvSchema = z.object({
   HEALTH_PORT: z.coerce.number().int().positive().default(3002),
   DATABASE_URL: z.string().url(),
   REDIS_URL: z.string().url(),
+  APP_PUBLIC_URL: z.string().url(),
   S3_ENDPOINT: z.string().url(),
   S3_REGION: z.string().min(1),
   S3_BUCKET: z.string().min(3),

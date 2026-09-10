@@ -1,5 +1,5 @@
 import type { AuthPrincipal } from '@autosale/contracts/auth';
-import { telegramLinkPurposeSchema, telegramSupplierSettingsUpdateSchema } from '@autosale/contracts';
+import { telegramLinkPurposeSchema, telegramNotificationPreferencesSchema, telegramSupplierSettingsUpdateSchema } from '@autosale/contracts';
 import { BadRequestException, Body, Controller, Delete, ForbiddenException, Get, Inject, Param, ParseUUIDPipe, Post, Put } from '@nestjs/common';
 import { z } from 'zod';
 
@@ -50,6 +50,20 @@ export class TelegramController {
       )) throw new BadRequestException('Telegram connection is unavailable');
       throw error;
     }
+  }
+
+  @Get('preferences')
+  @RequireMembership('MANAGER')
+  preferences(@CurrentPrincipal() principal: AuthPrincipal) {
+    return this.telegram.notificationPreferences(principal.tenantId!, principal.userId);
+  }
+
+  @Put('preferences')
+  @RequireMembership('MANAGER')
+  savePreferences(@CurrentPrincipal() principal: AuthPrincipal, @Body() body: unknown) {
+    const parsed = telegramNotificationPreferencesSchema.safeParse(body);
+    if (!parsed.success) throw new BadRequestException('Invalid Telegram notification preferences');
+    return this.telegram.saveNotificationPreferences(principal.tenantId!, principal.userId, parsed.data);
   }
 
   @Get('supplier')
