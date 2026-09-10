@@ -112,7 +112,11 @@ export class TriggeredOrderProcessor {
         return persisted;
       });
       if (autoApproved) {
-        await this.procurement.assessApprovedOrder(trigger.tenantId, order.id, 'SYSTEM');
+        const assessment = await this.procurement.assessApprovedOrder(trigger.tenantId, order.id, 'SYSTEM');
+        this.telemetry?.('procurement_assessment_completed', { correlationId, orderId: order.id, result: 'success' });
+        if (assessment.items.some((item) => item.reason === 'RESERVATION_CONFLICT')) {
+          this.telemetry?.('procurement_reservation_conflict_completed', { correlationId, orderId: order.id, result: 'conflict' });
+        }
         await this.scheduleExport?.(order.id, trigger.tenantId);
       }
       this.telemetry?.('ai_order_recognition_completed', { correlationId, orderId: order.id, result: result.status });

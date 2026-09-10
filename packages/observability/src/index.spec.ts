@@ -45,6 +45,22 @@ describe('MetricRegistry', () => {
   it('rejects unbounded labels before they create high-cardinality series', () => {
     const metrics = new MetricRegistry();
     expect(() => metrics.increment('autosale_operations_total', { orderId: 'order-1' })).toThrow('Unsupported metric label');
+    expect(() => metrics.increment('autosale_operations_total', { result: 'customer-phone' })).toThrow('Unsupported metric result');
+  });
+
+  it('supports the bounded procurement and Telegram operation metrics without personal-data labels', () => {
+    const metrics = new MetricRegistry();
+    for (const operation of [
+      'procurement_assessment',
+      'procurement_reservation_conflict',
+      'procurement_transition',
+      'telegram_supplier_delivery',
+      'telegram_personal_alert',
+    ]) metrics.increment('autosale_operations_total', { operation, result: 'success' });
+    const output = metrics.render();
+    expect(output).toContain('operation="procurement_assessment"');
+    expect(output).toContain('operation="telegram_personal_alert"');
+    expect(output).not.toMatch(/phone|address|chat/i);
   });
 
   it('replaces gauges so queue backlog reports current saturation', () => {

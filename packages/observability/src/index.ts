@@ -1,5 +1,6 @@
 const redactedKeys = /token|secret|password|authorization|cookie|phone|email|address|payload|body/i;
 const allowedMetricLabels = new Set(['operation', 'result', 'method', 'route', 'status_class', 'provider', 'queue', 'state']);
+const allowedMetricResults = new Set(['success', 'failure', 'skipped', 'conflict']);
 const buckets = [0.05, 0.1, 0.25, 0.5, 1, 2.5, 5];
 
 export class StructuredLogger {
@@ -92,6 +93,7 @@ function redact(value: unknown): unknown {
 function validate(name: string, labels: Labels): void {
   if (!/^[a-zA-Z_:][a-zA-Z0-9_:]*$/.test(name)) throw new Error('Invalid metric name');
   for (const label of Object.keys(labels)) if (!allowedMetricLabels.has(label)) throw new Error(`Unsupported metric label: ${label}`);
+  if (labels.result && !allowedMetricResults.has(labels.result)) throw new Error('Unsupported metric result');
 }
 
 function seriesKey(name: string, labels: Labels): string { return `${name}${formatLabels(labels)}`; }

@@ -10,6 +10,7 @@ import {
   type PrismaClient,
 } from '@autosale/database';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { metrics } from '@autosale/observability';
 
 type Extraction = {
   isOrder?: boolean;
@@ -109,7 +110,9 @@ export class OrdersService {
   ): Promise<ManagerOrder> {
     try {
       await this.procurement.setItemStatus(tenantId, orderId, itemId, status, actor);
+      metrics.increment('autosale_operations_total', { operation: 'procurement_transition', result: 'success' });
     } catch (error) {
+      metrics.increment('autosale_operations_total', { operation: 'procurement_transition', result: 'failure' });
       this.mapProcurementError(error);
     }
     return this.detail(tenantId, orderId);
@@ -118,7 +121,9 @@ export class OrdersService {
   async handOff(tenantId: string, orderId: string, actor: string): Promise<ManagerOrder> {
     try {
       await this.procurement.handOffOrder(tenantId, orderId, actor);
+      metrics.increment('autosale_operations_total', { operation: 'procurement_transition', result: 'success' });
     } catch (error) {
+      metrics.increment('autosale_operations_total', { operation: 'procurement_transition', result: 'failure' });
       this.mapProcurementError(error);
     }
     return this.detail(tenantId, orderId);

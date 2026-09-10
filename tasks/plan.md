@@ -327,3 +327,13 @@ Approved downstream spec: `SPEC-telegram-supplier-dispatch.md`.
 - [x] Task 50: Queue an idempotent, privacy-safe supplier message from an approved order.
 - [x] Task 51: Add supplier configuration and delivery status to Settings and order details.
 - [x] Task 52: Expand the production webhook subscriptions and validate one end-to-end Telegram Business delivery.
+
+### Комплектація замовлень і персональні Telegram-сповіщення
+
+- [x] Task 53: Контракти та additive persistence комплектації.
+- [x] Task 54: Автоматична оцінка залишків і конкурентно безпечні резерви.
+- [x] Task 55: Ручні статуси, передача замовлення та аудит.
+- [x] Task 56: Відправка постачальнику лише потрібних позицій і статуси доставки.
+- [x] Task 57: Інтерфейс комплектації в замовленні й таблиці.
+- [x] Task 58: Персональні налаштування та privacy-safe Telegram-сповіщення.
+- [x] Task 59: Пакетна обробка старих замовлень, метрики та runbook розгортання.

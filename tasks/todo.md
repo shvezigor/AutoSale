@@ -962,3 +962,13 @@ The approved design is in `docs/superpowers/specs/2026-09-03-google-sign-in-desi
 - [x] Docker services remain healthy without live Telegram credentials.
 - [x] With operator credentials, one Start action links a test user and one test notification is delivered exactly once.
 - [x] Human review approves the platform before `supplier-dispatch` implementation starts.
+
+## Checkpoint: комплектація та сповіщення
+
+- [x] Після підтвердження кожна позиція автоматично отримує рішення `IN_STOCK` або `TO_ORDER`.
+- [x] Паралельні замовлення не резервують один і той самий залишок двічі.
+- [x] Менеджер може змінити рішення, надіслати лише `TO_ORDER` постачальнику та завершити передачу.
+- [x] Статус позиції синхронізується з результатом Telegram-доставки.
+- [x] Особисті Telegram-сповіщення налаштовуються окремо для кожного користувача й не містять даних клієнта.
+- [x] Старі підтверджені замовлення обробляються фоновими пакетами без повторної оцінки завершених позицій.
+- [ ] Production rollout: повна перевірка, збірка образів, міграція, health-check і короткий live smoke test.

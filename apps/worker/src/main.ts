@@ -27,6 +27,7 @@ import { MediaCopyService } from './instagram/media-copy.service.js';
 import { createOpenAiOrderRecognizer } from './orders/openai-order-recognizer.js';
 import { OrderRecognitionService } from './orders/order-recognition.service.js';
 import { TriggeredOrderProcessor } from './orders/triggered-order.processor.js';
+import { ProcurementBackfillReconciler } from './orders/procurement-backfill.reconciler.js';
 import { GoogleSheetsSyncProcessor } from './google-sheets/google-sheets-sync.processor.js';
 import { CatalogueMappingProcessor } from './catalogue/catalogue-mapping.processor.js';
 import { createOpenAiColumnMapper } from './catalogue/openai-column-mapper.js';
@@ -100,13 +101,15 @@ async function bootstrap(): Promise<void> {
     : undefined;
   const workerNotifications = new WorkerNotificationService(prisma as never);
   const telegramAlerts = new TelegramAlertService(env.APP_PUBLIC_URL);
+  const procurementStore = new ProcurementStore(prisma);
+  const procurementBackfill = new ProcurementBackfillReconciler(prisma, procurementStore);
   const catalogueSyncProcessor = googleSheets || oauthSheets
     ? new GoogleCatalogueSyncProcessor(prisma, googleSheets, storage, undefined, oauthSheets, workerNotifications, env.CATALOGUE_AI_STRUCTURE_ANALYSIS ? catalogueHybrid : undefined)
     : undefined;
   const orderProcessor = new TriggeredOrderProcessor(
     prisma,
     new OrderRecognitionService(orderRecognizer),
-    new ProcurementStore(prisma),
+    procurementStore,
     async (orderId, tenantId) => {
       const destination = await prisma.googleSheetsDestination.findUnique({ where: { tenantId } });
       if (!destination || destination.status !== 'ACTIVE') return;
@@ -118,7 +121,8 @@ async function bootstrap(): Promise<void> {
     },
     (event, fields) => {
       const result = fields.result === 'failure' ? 'failure' : 'success';
-      metrics.increment('autosale_operations_total', { operation: 'ai_order_recognition', result });
+      const operation = event.startsWith('procurement_') ? event.replace(/_(completed|failed)$/, '') : 'ai_order_recognition';
+      metrics.increment('autosale_operations_total', { operation, result });
       if (result === 'failure') logger.warn(event, fields); else logger.info(event, fields);
     },
     telegramAlerts,
@@ -162,10 +166,19 @@ async function bootstrap(): Promise<void> {
         const parsed = telegramDeliveryJobSchema.safeParse(job.data);
         if (!parsed.success) return;
         const started = performance.now();
+        const deliveryRecord = await prisma.telegramDelivery.findUnique({
+          where: { id: parsed.data.deliveryId },
+          select: { purpose: true },
+        });
+        const telegramOperation = deliveryRecord?.purpose === 'SUPPLIER_ORDER'
+          ? 'telegram_supplier_delivery'
+          : deliveryRecord?.purpose === 'PERSONAL_ALERT'
+            ? 'telegram_personal_alert'
+            : 'telegram_delivery';
         try {
           const result = await telegramDelivery.process(parsed.data);
           metrics.increment('autosale_operations_total', {
-            operation: 'telegram_delivery',
+            operation: telegramOperation,
             result: result === 'SUCCEEDED' || result === 'IGNORED' || result === 'RETRY' ? 'success' : 'failure',
           });
           logger.info('telegram_delivery_completed', {
@@ -174,7 +187,7 @@ async function bootstrap(): Promise<void> {
             result,
           });
         } catch (error) {
-          metrics.increment('autosale_operations_total', { operation: 'telegram_delivery', result: 'failure' });
+          metrics.increment('autosale_operations_total', { operation: telegramOperation, result: 'failure' });
           logger.warn('telegram_delivery_failed', {
             correlationId: parsed.data.deliveryId,
             deliveryId: parsed.data.deliveryId,
@@ -185,7 +198,7 @@ async function bootstrap(): Promise<void> {
           metrics.observe(
             'autosale_operation_duration_seconds',
             (performance.now() - started) / 1_000,
-            { operation: 'telegram_delivery' },
+            { operation: telegramOperation },
           );
         }
       },
@@ -516,6 +529,24 @@ async function bootstrap(): Promise<void> {
   const telegramDeliveryTimer = telegramDeliveryReconciler
     ? setInterval(() => void reconcileTelegramDeliveries(), 5_000)
     : undefined;
+  let reconcilingProcurementBackfill = false;
+  const reconcileProcurementBackfill = async (): Promise<void> => {
+    if (reconcilingProcurementBackfill) return;
+    reconcilingProcurementBackfill = true;
+    try {
+      const result = await procurementBackfill.reconcile();
+      if (result.assessed > 0) metrics.increment('autosale_operations_total', { operation: 'procurement_assessment', result: 'success' }, result.assessed);
+      if (result.skipped > 0) metrics.increment('autosale_operations_total', { operation: 'procurement_assessment', result: 'skipped' }, result.skipped);
+      if (result.failed > 0) metrics.increment('autosale_operations_total', { operation: 'procurement_assessment', result: 'failure' }, result.failed);
+      if (result.attempted > 0) logger.info('procurement_backfill_completed', { correlationId: 'system:procurement-backfill', ...result });
+    } catch (error) {
+      metrics.increment('autosale_operations_total', { operation: 'procurement_assessment', result: 'failure' });
+      logger.warn('procurement_backfill_failed', { correlationId: 'system:procurement-backfill', errorCode: error instanceof Error ? error.name : 'UNKNOWN' });
+    } finally {
+      reconcilingProcurementBackfill = false;
+    }
+  };
+  const procurementBackfillTimer = setInterval(() => void reconcileProcurementBackfill(), 5_000);
   void pollExports();
   void reconcileCatalogueMappings();
   void reconcileInstagramProfiles();
@@ -523,6 +554,7 @@ async function bootstrap(): Promise<void> {
   void scheduleCatalogueSources();
   void reconcileNotificationRetention();
   void reconcileTelegramDeliveries();
+  void reconcileProcurementBackfill();
   logger.info('service_started', { correlationId: 'system:startup', healthPort: env.HEALTH_PORT });
 
   server.listen(env.HEALTH_PORT, '0.0.0.0');
@@ -535,6 +567,7 @@ async function bootstrap(): Promise<void> {
     clearInterval(catalogueScheduleTimer);
     clearInterval(notificationRetentionTimer);
     if (telegramDeliveryTimer) clearInterval(telegramDeliveryTimer);
+    clearInterval(procurementBackfillTimer);
     await telegramWorker?.close();
     await telegramQueue?.close();
     await worker.close();
