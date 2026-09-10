@@ -972,3 +972,64 @@ The approved design is in `docs/superpowers/specs/2026-09-03-google-sign-in-desi
 - [x] Особисті Telegram-сповіщення налаштовуються окремо для кожного користувача й не містять даних клієнта.
 - [x] Старі підтверджені замовлення обробляються фоновими пакетами без повторної оцінки завершених позицій.
 - [x] Production rollout: 865 тестів, typecheck, production build, Compose validation, additive migration, health-check і публічний smoke test виконано 10 вересня 2026 року; 6 історичних замовлень успішно оцінено фоновим backfill.
+
+## Наступний пріоритет: доставка перед оплатою
+
+До реалізації банківських рахунків і повного модуля оплат AutoSale має створювати та відстежувати відправлення. Перший перевізник — Нова пошта; далі окремими адаптерами додаються Meest та Укрпошта. Погоджений дизайн: `docs/superpowers/specs/2026-09-10-delivery-carriers-and-nova-poshta-design.md`.
+
+## Task 60: Add provider-neutral delivery contracts and persistence
+
+- [ ] Add carrier, connection, sender-profile, shipment, status-event and idempotency contracts.
+- [ ] Add an additive tenant-safe migration with one active shipment per order and preserved attempt history.
+- [ ] Encrypt provider credentials and keep them outside browser responses, logs and audit payloads.
+
+## Task 61: Implement the Nova Poshta API adapter
+
+- [ ] Validate credentials and expose typed sender, city, branch, parcel-locker, quote, create, status, label and cancel operations.
+- [ ] Validate every external response and map provider failures to bounded safe codes.
+- [ ] Cover authorization errors, validation errors, rate limits, malformed responses, timeouts and unknown create outcomes with fake HTTP tests.
+
+## Task 62: Connect Nova Poshta and configure sender defaults
+
+- [ ] Add `Налаштування → Доставка` with an owner-only API-key connection flow.
+- [ ] Let the owner choose sender, contact, origin, payer and default parcel parameters.
+- [ ] Let managers use the connection without exposing or changing its secret.
+
+## Task 63: Add delivery location search and caching
+
+- [ ] Search exact Nova Poshta cities, branches and parcel lockers instead of sending AI-extracted text directly.
+- [ ] Use bounded caching, debounce, keyboard-accessible results and clear stale-reference recovery.
+- [ ] Keep the public contract provider-neutral for later Meest and Ukrposhta adapters.
+
+## Task 64: Add shipment draft, quote and manager review
+
+- [ ] Pre-fill recipient and delivery hints from the approved order and tenant defaults.
+- [ ] Require an exact location, parcel data, declared value, payer and optional COD amount.
+- [ ] Calculate and show the delivery quote without creating an external document.
+- [ ] Provide a responsive review dialog/drawer with stable loading states.
+
+## Task 65: Create Nova Poshta TTNs idempotently
+
+- [ ] Persist the create intent before contacting Nova Poshta and return an asynchronous shipment summary.
+- [ ] Prevent duplicate TTNs across clicks, request retries, worker retries and restarts.
+- [ ] Reconcile timeout/unknown outcomes using a stable client reference before any retry.
+- [ ] Show the created TTN and safe recovery actions without a full page reload.
+
+## Task 66: Add labels, cancellation and shipment tracking
+
+- [ ] Download authorized labels, copy/open tracking and cancel where the provider permits it.
+- [ ] Poll active shipment statuses in the background and retain a status-event history.
+- [ ] Show delivery status in order detail, the paginated orders table and mobile cards.
+
+## Task 67: Let a manager notify the customer about the TTN
+
+- [ ] Generate an editable tenant-branded Instagram message after successful TTN creation.
+- [ ] Require an explicit manager click to send in the first version.
+- [ ] Keep Instagram delivery failures independent from the shipment and preserve copyable TTN details.
+
+## Task 68: Verify and roll out Nova Poshta delivery
+
+- [ ] Add privacy, tenant-isolation, observability, idempotency and mobile regressions.
+- [ ] Deploy behind a feature flag and complete one controlled real Nova Poshta shipment acceptance.
+- [ ] Verify duplicate prevention, quote, TTN, label, status sync, cancellation where allowed and manual customer notification.
+- [ ] After stabilization, plan Meest, Ukrposhta, bank-account filtering and payments in that order.
