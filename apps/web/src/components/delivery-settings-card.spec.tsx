@@ -42,7 +42,7 @@ describe('DeliverySettingsCard', () => {
     mutatingFetch.mockImplementation(() => new Promise<Response>((resolve) => { resolveRequest = resolve; }));
     render(<DeliverySettingsCard initial={disconnected} role="OWNER" />);
     fireEvent.change(screen.getByLabelText('API-ключ Нової Пошти'), { target: { value: 'np-live-secret-key' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Підключити вручну' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Підключити Нову Пошту' }));
 
     expect(await screen.findByRole('button', { name: 'Підключаємо…' })).toBeDisabled();
     expect(screen.getByRole('progressbar', { name: 'Підключаємо Нову Пошту' })).toBeInTheDocument();
@@ -53,37 +53,14 @@ describe('DeliverySettingsCard', () => {
     expect(JSON.stringify(active)).not.toContain('np-live-secret-key');
   });
 
-  it('opens the official cabinet and connects directly from an explicitly requested clipboard read', async () => {
-    Object.defineProperty(navigator, 'clipboard', {
-      configurable: true,
-      value: { readText: vi.fn().mockResolvedValue('np-key-from-clipboard') },
-    });
-    mutatingFetch.mockResolvedValue(new Response(JSON.stringify(active.connections[0]), { status: 200 }));
+  it('opens the official API-key settings directly', () => {
     render(<DeliverySettingsCard initial={disconnected} role="OWNER" />);
 
     const cabinet = screen.getByRole('link', { name: 'Відкрити налаштування API-ключів' });
     expect(cabinet).toHaveAttribute('href', 'https://my.novaposhta.ua/settings/index#apikeys');
     expect(cabinet).toHaveAttribute('target', '_blank');
-
-    fireEvent.click(screen.getByRole('button', { name: 'Вставити ключ і підключити' }));
-    await waitFor(() => expect(mutatingFetch).toHaveBeenCalledWith(
-      '/api/integrations/delivery/nova-poshta',
-      expect.objectContaining({ body: JSON.stringify({ apiKey: 'np-key-from-clipboard' }) }),
-    ));
-    expect(await screen.findByText('Нову Пошту підключено')).toBeInTheDocument();
-    expect(screen.queryByDisplayValue('np-key-from-clipboard')).not.toBeInTheDocument();
-  });
-
-  it('explains how to paste manually when clipboard access is unavailable', async () => {
-    Object.defineProperty(navigator, 'clipboard', {
-      configurable: true,
-      value: { readText: vi.fn().mockRejectedValue(new DOMException('Denied', 'NotAllowedError')) },
-    });
-    render(<DeliverySettingsCard initial={disconnected} role="OWNER" />);
-    fireEvent.click(screen.getByRole('button', { name: 'Вставити ключ і підключити' }));
-    expect(await screen.findByText('Не вдалося прочитати буфер обміну')).toBeInTheDocument();
-    expect(screen.getByText('Вставте ключ у поле вручну — браузер не надав доступ до буфера.')).toBeInTheDocument();
-    expect(mutatingFetch).not.toHaveBeenCalled();
+    expect(screen.queryByRole('button', { name: /Вставити ключ/ })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Підключити Нову Пошту' })).toBeInTheDocument();
   });
 
   it('shows sender, contact, origin and parcel defaults for the owner', () => {
@@ -173,7 +150,7 @@ describe('DeliverySettingsCard', () => {
     mutatingFetch.mockResolvedValue(new Response(JSON.stringify({ message: 'Invalid connection' }), { status: 400 }));
     render(<DeliverySettingsCard initial={disconnected} role="OWNER" />);
     fireEvent.change(screen.getByLabelText('API-ключ Нової Пошти'), { target: { value: 'np-live-secret-key' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Підключити вручну' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Підключити Нову Пошту' }));
     expect(await screen.findByText('Не вдалося підключити Нову Пошту')).toBeInTheDocument();
     expect(screen.queryByText(/np-live-secret-key/)).not.toBeInTheDocument();
   });

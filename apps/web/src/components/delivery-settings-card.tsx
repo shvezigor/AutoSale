@@ -14,7 +14,7 @@ export type DeliverySettingsSummary = {
   connections: DeliveryConnectionSummary[];
 };
 
-type PendingAction = 'connect-manual' | 'connect-clipboard' | 'save' | 'disconnect' | null;
+type PendingAction = 'connect' | 'save' | 'disconnect' | null;
 type SenderOption = {
   ref: string;
   label: string;
@@ -77,13 +77,13 @@ export function DeliverySettingsCard({
     if (active) void loadSenderOptions();
   }, [active, loadSenderOptions]);
 
-  async function connect(key = apiKey, source: 'manual' | 'clipboard' = 'manual') {
-    const normalizedKey = key.trim();
+  async function connect() {
+    const normalizedKey = apiKey.trim();
     if (normalizedKey.length < 8) {
       toast.show({ type: 'error', title: 'Перевірте API-ключ Нової Пошти' });
       return;
     }
-    setPending(source === 'clipboard' ? 'connect-clipboard' : 'connect-manual');
+    setPending('connect');
     try {
       const response = await activity.run('Підключаємо Нову Пошту', () => mutatingFetch('/api/integrations/delivery/nova-poshta', {
         method: 'PUT',
@@ -106,28 +106,6 @@ export function DeliverySettingsCard({
       });
     } finally {
       setPending(null);
-    }
-  }
-
-  async function pasteAndConnect() {
-    try {
-      if (!navigator.clipboard?.readText) throw new Error('clipboard unavailable');
-      const key = await navigator.clipboard.readText();
-      if (key.trim().length < 8) {
-        toast.show({
-          type: 'error',
-          title: 'У буфері немає API-ключа',
-          message: 'Скопіюйте створений ключ у кабінеті Нової Пошти та повторіть.',
-        });
-        return;
-      }
-      await connect(key, 'clipboard');
-    } catch {
-      toast.show({
-        type: 'error',
-        title: 'Не вдалося прочитати буфер обміну',
-        message: 'Вставте ключ у поле вручну — браузер не надав доступ до буфера.',
-      });
     }
   }
 
@@ -205,14 +183,9 @@ export function DeliverySettingsCard({
           <span>API-ключ Нової Пошти</span>
           <input aria-label="API-ключ Нової Пошти" autoComplete="off" type="password" value={apiKey} onChange={(event) => setApiKey(event.target.value)} placeholder={active ? 'Введіть новий ключ для заміни' : 'Вставте ключ із бізнес-кабінету'} />
         </label>
-        <div className="delivery-connect-actions">
-          <LoadingButton type="button" pending={pending === 'connect-clipboard'} pendingLabel="Підключаємо…" disabled={pending !== null} onClick={() => void pasteAndConnect()}>
-            Вставити ключ і підключити
-          </LoadingButton>
-          <LoadingButton type="button" className="secondary-button" pending={pending === 'connect-manual'} pendingLabel="Підключаємо…" disabled={pending !== null || apiKey.trim().length < 8} onClick={() => void connect()}>
-            {active ? 'Замінити ключ' : 'Підключити вручну'}
-          </LoadingButton>
-        </div>
+        <LoadingButton type="button" pending={pending === 'connect'} pendingLabel="Підключаємо…" disabled={pending !== null || apiKey.trim().length < 8} onClick={() => void connect()}>
+          {active ? 'Замінити ключ' : 'Підключити Нову Пошту'}
+        </LoadingButton>
       </div>
       <p className="delivery-key-note">AutoSale перевірить ключ і збереже його в зашифрованому вигляді. Після підключення ключ більше не відображається.</p>
 
