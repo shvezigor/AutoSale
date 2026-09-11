@@ -198,7 +198,7 @@ export function DeliverySettingsCard({
     {!owner ? <p className="delivery-readonly-note">Змінити підключення та дані відправника може лише власник робочого простору.</p> : <>
       <div className="delivery-connect-guide">
         <div><strong>{active ? 'Потрібно замінити ключ?' : 'Підключення займає близько хвилини'}</strong><span>У кабінеті відкрийте Налаштування → Безпека, створіть API-ключ і скопіюйте його.</span></div>
-        <a className="secondary-button" href="https://my.novaposhta.ua/" target="_blank" rel="noreferrer">Відкрити кабінет Нової Пошти</a>
+        <a className="secondary-button" href="https://my.novaposhta.ua/settings/index#apikeys" target="_blank" rel="noreferrer">Відкрити налаштування API-ключів</a>
       </div>
       <div className="delivery-connect-form">
         <label>

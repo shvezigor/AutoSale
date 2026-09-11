@@ -61,8 +61,8 @@ describe('DeliverySettingsCard', () => {
     mutatingFetch.mockResolvedValue(new Response(JSON.stringify(active.connections[0]), { status: 200 }));
     render(<DeliverySettingsCard initial={disconnected} role="OWNER" />);
 
-    const cabinet = screen.getByRole('link', { name: 'Відкрити кабінет Нової Пошти' });
-    expect(cabinet).toHaveAttribute('href', 'https://my.novaposhta.ua/');
+    const cabinet = screen.getByRole('link', { name: 'Відкрити налаштування API-ключів' });
+    expect(cabinet).toHaveAttribute('href', 'https://my.novaposhta.ua/settings/index#apikeys');
     expect(cabinet).toHaveAttribute('target', '_blank');
 
     fireEvent.click(screen.getByRole('button', { name: 'Вставити ключ і підключити' }));
