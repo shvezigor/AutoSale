@@ -1,7 +1,8 @@
 'use client';
 
 import type { ManagerOrder } from '../../../../packages/contracts/src/orders';
-import { useRef, useState } from 'react';
+import type { ShipmentOverview } from '../../../../packages/contracts/src/delivery';
+import { useEffect, useRef, useState } from 'react';
 
 import { ShipmentReviewDialog } from './shipment-review-dialog';
 
@@ -15,6 +16,19 @@ export function ShipmentPanel({ order }: { order: ManagerOrder }) {
   const [shipment, setShipment] = useState(order.shipment);
   const trigger = useRef<HTMLButtonElement>(null);
   const blocked = !order.canCreateShipment;
+  const creationLocked = shipment !== null && shipment.status !== 'DRAFT' && shipment.status !== 'FAILED' && shipment.status !== 'CANCELLED';
+
+  useEffect(() => {
+    if (shipment?.status !== 'CREATING') return;
+    let active = true;
+    const poll = () => void fetch(`/api/orders/${order.id}/shipments`, { credentials: 'same-origin', cache: 'no-store' })
+      .then(async (response) => response.ok ? await response.json() as ShipmentOverview : null)
+      .then((overview) => { if (active && overview?.shipment) setShipment(overview.shipment); })
+      .catch(() => undefined);
+    const timer = window.setInterval(poll, 2_000);
+    poll();
+    return () => { active = false; window.clearInterval(timer); };
+  }, [order.id, shipment?.status]);
 
   function close() {
     setOpen(false);
@@ -28,8 +42,8 @@ export function ShipmentPanel({ order }: { order: ManagerOrder }) {
       <p>{shipment ? statusLabels[shipment.status] ?? shipment.status : blocked ? blockedCopy(order) : 'Перевірте дані й розрахуйте вартість перед створенням ТТН.'}</p>
       {shipment?.trackingNumber && <strong>ТТН {shipment.trackingNumber}</strong>}
     </div>
-    <button ref={trigger} className="secondary-button" type="button" disabled={blocked} onClick={() => setOpen(true)}>
-      {shipment?.status === 'DRAFT' ? 'Продовжити оформлення' : 'Оформити доставку'}
+    <button ref={trigger} className="secondary-button" type="button" disabled={blocked || creationLocked} onClick={() => setOpen(true)}>
+      {shipment?.status === 'CREATING' ? 'Створюємо ТТН…' : shipment?.trackingNumber ? `ТТН ${shipment.trackingNumber}` : shipment?.status === 'DRAFT' ? 'Продовжити оформлення' : 'Оформити доставку'}
     </button>
     {open && <ShipmentReviewDialog orderId={order.id} onClose={close} onSaved={setShipment} />}
   </section>;

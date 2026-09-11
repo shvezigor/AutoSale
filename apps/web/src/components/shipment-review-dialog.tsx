@@ -24,7 +24,7 @@ export function ShipmentReviewDialog({ orderId, onClose, onSaved }: {
   const [location, setLocation] = useState<DeliveryLocation | null>(null);
   const [destinationType, setDestinationType] = useState<'BRANCH' | 'PARCEL_LOCKER'>('BRANCH');
   const [quote, setQuote] = useState<ShipmentQuote | null>(null);
-  const [state, setState] = useState<'loading' | 'ready' | 'saving' | 'error'>('loading');
+  const [state, setState] = useState<'loading' | 'ready' | 'saving' | 'creating' | 'error'>('loading');
   const closeButton = useRef<HTMLButtonElement>(null);
   const toast = useToast();
 
@@ -104,6 +104,26 @@ export function ShipmentReviewDialog({ orderId, onClose, onSaved }: {
     }
   }
 
+  async function create() {
+    if (!completeDraft || state === 'creating') return;
+    setState('creating');
+    try {
+      const draftResponse = await mutatingFetch(`/api/orders/${orderId}/shipments/draft`, {
+        method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(completeDraft),
+      });
+      if (!draftResponse.ok) throw new Error('save');
+      const response = await mutatingFetch(`/api/orders/${orderId}/shipments`, { method: 'POST' });
+      if (!response.ok) throw new Error('create');
+      const shipment = await response.json() as ShipmentSummary;
+      onSaved(shipment);
+      toast.show({ type: 'success', title: 'Створення ТТН розпочато' });
+      onClose();
+    } catch {
+      setState('ready');
+      toast.show({ type: 'error', title: 'Не вдалося розпочати створення ТТН' });
+    }
+  }
+
   return <div className="modal-backdrop shipment-dialog-backdrop" role="presentation">
     <section role="dialog" aria-modal="true" aria-labelledby="shipment-dialog-title" className="shipment-review-dialog">
       <header><div><span>Нова Пошта</span><h2 id="shipment-dialog-title">Оформлення доставки</h2></div><button ref={closeButton} className="icon-button" type="button" aria-label="Закрити" onClick={onClose}>×</button></header>
@@ -130,9 +150,9 @@ export function ShipmentReviewDialog({ orderId, onClose, onSaved }: {
         <div className="shipment-quote" aria-live="polite">{quote ? <><strong>{quote.cost.toLocaleString('uk-UA')} грн</strong><span>{quote.estimatedDeliveryDate ? `Орієнтовна дата: ${quote.estimatedDeliveryDate}` : 'Вартість розраховано'}</span></> : <span>{completeDraft ? 'Розраховуємо вартість…' : 'Оберіть точне місто та відділення'}</span>}</div>
       </div>}
       <footer>
-        <button type="button" className="secondary-button" onClick={onClose}>Скасувати</button>
-        <LoadingButton type="button" pending={state === 'saving'} pendingLabel="Зберігаємо…" disabled={!completeDraft || state === 'saving' || (draft?.codAmount !== null && (draft?.codAmount ?? 0) > (draft?.declaredValue ?? 0))} onClick={() => void save()}>Зберегти чернетку</LoadingButton>
-        <button type="button" disabled title="Створення ТТН буде доступне на наступному етапі">Створити ТТН</button>
+        <button type="button" className="secondary-button" disabled={state === 'creating'} onClick={onClose}>Скасувати</button>
+        <LoadingButton type="button" pending={state === 'saving'} pendingLabel="Зберігаємо…" disabled={!completeDraft || state === 'saving' || state === 'creating' || (draft?.codAmount !== null && (draft?.codAmount ?? 0) > (draft?.declaredValue ?? 0))} onClick={() => void save()}>Зберегти чернетку</LoadingButton>
+        <LoadingButton className="shipment-create-button" type="button" pending={state === 'creating'} pendingLabel="Створюємо ТТН…" disabled={!completeDraft || state === 'saving' || state === 'creating' || (draft?.codAmount !== null && (draft?.codAmount ?? 0) > (draft?.declaredValue ?? 0))} onClick={() => void create()}>Створити ТТН</LoadingButton>
       </footer>
     </section>
   </div>;

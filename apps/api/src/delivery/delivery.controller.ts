@@ -1,7 +1,7 @@
 import type { AuthPrincipal } from '@autosale/contracts/auth';
 import { deliveryConnectionInputSchema, deliveryLocationQuerySchema, deliverySenderProfileInputSchema, shipmentDraftInputSchema } from '@autosale/contracts';
 import { NovaPoshtaError } from '@autosale/integrations';
-import { BadRequestException, Body, Controller, Delete, ForbiddenException, Get, Inject, Param, ParseUUIDPipe, Post, Put, Query } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, ForbiddenException, Get, Headers, HttpCode, Inject, Param, ParseUUIDPipe, Post, Put, Query } from '@nestjs/common';
 
 import { CurrentPrincipal, RequireMembership } from '../auth/auth.decorators.js';
 import { DeliveryService } from './delivery.service.js';
@@ -98,6 +98,17 @@ export class ShipmentController {
     const parsed = shipmentDraftInputSchema.safeParse(body);
     if (!parsed.success) throw new BadRequestException('Invalid shipment draft');
     return this.delivery.quoteShipment(principal.tenantId!, orderId, parsed.data);
+  }
+
+  @Post(':orderId/shipments')
+  @HttpCode(202)
+  @RequireMembership('MANAGER')
+  create(
+    @CurrentPrincipal() principal: AuthPrincipal,
+    @Param('orderId', new ParseUUIDPipe({ version: '4' })) orderId: string,
+    @Headers('idempotency-key') idempotencyKey?: string,
+  ) {
+    return this.delivery.createShipment(principal.tenantId!, orderId, principal.userId, idempotencyKey);
   }
 }
 

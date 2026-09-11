@@ -3,7 +3,7 @@ import { createHash, randomUUID } from 'node:crypto';
 import { deliverySenderProfileInputSchema, shipmentDraftInputSchema, type DeliveryConnectionInput, type DeliveryConnectionSummary, type DeliverySenderProfileInput, type ShipmentDraftInput, type ShipmentOverview, type ShipmentQuote, type ShipmentSummary } from '@autosale/contracts';
 import type { PrismaClient } from '@autosale/database';
 import type { CredentialCipher, NovaPoshtaClient, NovaPoshtaSenderProfile } from '@autosale/integrations';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 
 type NovaPoshtaClientPort = Pick<NovaPoshtaClient, 'validateCredential' | 'listSenderProfiles' | 'searchCities' | 'searchLocations' | 'calculateShipment'>;
 export type NovaPoshtaClientFactory = (apiKey: string) => NovaPoshtaClientPort;
@@ -13,6 +13,12 @@ type DeliveryServiceOptions = {
   now?: () => Date;
 };
 
+export interface ShipmentCreateQueue {
+  add(name: 'shipment.create', data: { shipmentId: string }, options: {
+    jobId: string; attempts: 1; removeOnComplete: true; removeOnFail: true;
+  }): Promise<unknown>;
+}
+
 export class DeliveryService {
   private readonly now: () => Date;
 
@@ -21,6 +27,7 @@ export class DeliveryService {
     private readonly cipher: CredentialCipher,
     private readonly novaPoshtaClient: NovaPoshtaClientFactory,
     private readonly options: DeliveryServiceOptions,
+    private readonly shipmentQueue?: ShipmentCreateQueue,
   ) {
     this.now = options.now ?? (() => new Date());
   }
@@ -178,6 +185,70 @@ export class DeliveryService {
     if (!validSenderProfile(connection.senderProfile)) throw new BadRequestException('SENDER_PROFILE_REQUIRED');
     const client = this.novaPoshtaClient(this.cipher.decrypt(connection.encryptedCredential));
     return client.calculateShipment(providerShipmentInput(parsed.data, connection.senderProfile, `quote:${orderId}`));
+  }
+
+  async createShipment(tenantId: string, orderId: string, userId: string, explicitIdempotencyKey?: string): Promise<ShipmentSummary> {
+    this.assertEnabled();
+    const order = await this.orderForShipment(tenantId, orderId);
+    const readiness = shipmentReadiness(order);
+    if (!readiness.allowed) throw new BadRequestException(readiness.reason);
+
+    const active = await this.prisma.shipment.findFirst({
+      where: { tenantId, orderId, status: { in: ['DRAFT', 'CREATING', 'CREATED', 'ACCEPTED', 'IN_TRANSIT', 'RETURNING'] } },
+      orderBy: { createdAt: 'desc' },
+      include: { statusEvents: { orderBy: { occurredAt: 'desc' } } },
+    });
+    if (!active) throw new BadRequestException('SHIPMENT_DRAFT_REQUIRED');
+    if (active.status !== 'DRAFT') return mapShipmentSummary(active);
+
+    const version = active.version;
+    const idempotencyKey = explicitIdempotencyKey?.trim() || `shipment:create:v1:${active.id}:${version}`;
+    if (idempotencyKey.length > 200) throw new BadRequestException('INVALID_IDEMPOTENCY_KEY');
+    const conflictingAttempt = await this.prisma.shipmentAttempt.findUnique({
+      where: { tenantId_idempotencyKey: { tenantId, idempotencyKey } },
+      select: { shipmentId: true, requestHash: true },
+    });
+    if (conflictingAttempt && (conflictingAttempt.shipmentId !== active.id || conflictingAttempt.requestHash !== active.requestHash)) {
+      throw new UnprocessableEntityException('IDEMPOTENCY_KEY_REUSED');
+    }
+
+    try {
+      await this.prisma.$transaction(async (transaction) => {
+        const claimed = await transaction.shipment.updateMany({
+          where: { id: active.id, tenantId, status: 'DRAFT', version },
+          data: { status: 'CREATING', createdByUserId: userId, idempotencyKey, lastErrorCode: null },
+        });
+        if (claimed.count !== 1) return;
+        await transaction.shipmentAttempt.upsert({
+          where: { tenantId_shipmentId_operation_version: { tenantId, shipmentId: active.id, operation: 'CREATE', version } },
+          create: { tenantId, shipmentId: active.id, operation: 'CREATE', version, status: 'PENDING', idempotencyKey, requestHash: active.requestHash },
+          update: {},
+        });
+      });
+    } catch (error) {
+      if (!isUniqueConstraintError(error)) throw error;
+      const winner = await this.prisma.shipmentAttempt.findUnique({
+        where: { tenantId_idempotencyKey: { tenantId, idempotencyKey } },
+        select: { shipmentId: true, requestHash: true },
+      });
+      if (!winner) throw error;
+      if (winner.shipmentId !== active.id || winner.requestHash !== active.requestHash) {
+        throw new UnprocessableEntityException('IDEMPOTENCY_KEY_REUSED');
+      }
+    }
+
+    try {
+      await this.shipmentQueue?.add('shipment.create', { shipmentId: active.id }, {
+        jobId: `shipment:create:${active.id}:${version}`, attempts: 1, removeOnComplete: true, removeOnFail: true,
+      });
+    } catch {
+      // PostgreSQL is the source of truth. The reconciler will retry this wake-up.
+    }
+    const shipment = await this.prisma.shipment.findFirst({
+      where: { id: active.id, tenantId }, include: { statusEvents: { orderBy: { occurredAt: 'desc' } } },
+    });
+    if (!shipment) throw new NotFoundException('Shipment not found');
+    return mapShipmentSummary(shipment);
   }
 
   async disconnect(tenantId: string): Promise<DeliveryConnectionSummary> {
@@ -434,4 +505,8 @@ function senderProfileData(input: DeliverySenderProfileInput) {
 
 function validSenderProfile(profile: Parameters<typeof safeSenderProfile>[0] | null): profile is Parameters<typeof safeSenderProfile>[0] {
   return Boolean(profile && deliverySenderProfileInputSchema.safeParse(safeSenderProfile(profile)).success);
+}
+
+function isUniqueConstraintError(error: unknown): error is { code: 'P2002' } {
+  return typeof error === 'object' && error !== null && 'code' in error && error.code === 'P2002';
 }

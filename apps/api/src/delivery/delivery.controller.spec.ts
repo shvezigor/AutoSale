@@ -92,14 +92,16 @@ describe('ShipmentController', () => {
   };
 
   it('scopes overview, draft save and quote to the authenticated tenant and manager', async () => {
-    const delivery = { shipmentOverview: vi.fn().mockResolvedValue({}), saveShipmentDraft: vi.fn().mockResolvedValue({}), quoteShipment: vi.fn().mockResolvedValue({ cost: 120 }) };
+    const delivery = { shipmentOverview: vi.fn().mockResolvedValue({}), saveShipmentDraft: vi.fn().mockResolvedValue({}), quoteShipment: vi.fn().mockResolvedValue({ cost: 120 }), createShipment: vi.fn().mockResolvedValue({ status: 'CREATING' }) };
     const controller = new ShipmentController(delivery as never);
     await controller.overview(manager, 'order-id');
     await controller.saveDraft(manager, 'order-id', draft);
     await controller.quote(manager, 'order-id', draft);
+    await controller.create(manager, 'order-id', 'create-key');
     expect(delivery.shipmentOverview).toHaveBeenCalledWith('tenant', 'order-id');
     expect(delivery.saveShipmentDraft).toHaveBeenCalledWith('tenant', 'order-id', 'manager', draft);
     expect(delivery.quoteShipment).toHaveBeenCalledWith('tenant', 'order-id', draft);
+    expect(delivery.createShipment).toHaveBeenCalledWith('tenant', 'order-id', 'manager', 'create-key');
   });
 
   it('rejects an incomplete or invalid shipment draft at the boundary', () => {

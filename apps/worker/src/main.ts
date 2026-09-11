@@ -1,7 +1,7 @@
 import { Buffer } from 'node:buffer';
 
 import { parseWorkerEnv } from '@autosale/config/worker-env';
-import { telegramDeliveryJobSchema } from '@autosale/contracts';
+import { shipmentCreateJobSchema, telegramDeliveryJobSchema } from '@autosale/contracts';
 import { createPrismaClient, ProcurementStore } from '@autosale/database';
 import {
   createGoogleSheetsAdapter,
@@ -11,6 +11,7 @@ import {
   MetaInstagramClient,
   S3ObjectStorage,
   TelegramBotClient,
+  NovaPoshtaClient,
 } from '@autosale/integrations';
 import { Queue, Worker } from 'bullmq';
 import { metrics, StructuredLogger } from '@autosale/observability';
@@ -42,6 +43,8 @@ import { TelegramAlertService } from './notifications/telegram-alert.service.js'
 import { NotificationRetentionReconciler } from './notifications/notification-retention.reconciler.js';
 import { TelegramDeliveryReconciler } from './telegram/telegram-delivery-reconciler.js';
 import { TelegramDeliveryService } from './telegram/telegram-delivery.service.js';
+import { ShipmentCreateService } from './delivery/shipment-create.service.js';
+import { ShipmentReconciler } from './delivery/shipment-reconciler.js';
 
 async function bootstrap(): Promise<void> {
   const env = parseWorkerEnv(process.env);
@@ -152,6 +155,37 @@ async function bootstrap(): Promise<void> {
     password: redis.password || undefined,
     tls: redis.protocol === 'rediss:' ? {} : undefined,
   };
+  const shipmentCreate = new ShipmentCreateService(
+    prisma,
+    (apiKey) => new NovaPoshtaClient({ apiKey }),
+    (encrypted) => credentialCipher.decrypt(encrypted),
+  );
+  const deliveryQueue = new Queue('delivery', { connection: redisConnection });
+  const deliveryWorker = new Worker(
+    'delivery',
+    async (job) => {
+      if (job.name !== 'shipment.create') return;
+      const parsed = shipmentCreateJobSchema.safeParse(job.data);
+      if (!parsed.success) return;
+      const started = performance.now();
+      try {
+        const result = await shipmentCreate.process(parsed.data);
+        metrics.increment('autosale_operations_total', {
+          operation: 'shipment_create',
+          result: result === 'CREATED' || result === 'IGNORED' || result === 'RETRY' || result === 'UNKNOWN' ? 'success' : 'failure',
+        });
+        logger.info('shipment_create_completed', { correlationId: parsed.data.shipmentId, shipmentId: parsed.data.shipmentId, result });
+      } catch (error) {
+        metrics.increment('autosale_operations_total', { operation: 'shipment_create', result: 'failure' });
+        logger.warn('shipment_create_failed', { correlationId: parsed.data.shipmentId, shipmentId: parsed.data.shipmentId, errorCode: error instanceof Error ? error.name : 'UNKNOWN' });
+        throw error;
+      } finally {
+        metrics.observe('autosale_operation_duration_seconds', (performance.now() - started) / 1_000, { operation: 'shipment_create' });
+      }
+    },
+    { connection: redisConnection, concurrency: 2 },
+  );
+  const shipmentReconciler = new ShipmentReconciler(prisma, deliveryQueue);
   const telegramBot = env.TELEGRAM_BOT_TOKEN
     ? new TelegramBotClient({ token: env.TELEGRAM_BOT_TOKEN })
     : undefined;
@@ -547,6 +581,21 @@ async function bootstrap(): Promise<void> {
     }
   };
   const procurementBackfillTimer = setInterval(() => void reconcileProcurementBackfill(), 5_000);
+  let reconcilingShipments = false;
+  const reconcileShipments = async (): Promise<void> => {
+    if (reconcilingShipments) return;
+    reconcilingShipments = true;
+    try {
+      const result = await shipmentReconciler.reconcile();
+      metrics.set('autosale_queue_backlog', result.attempted, { queue: 'delivery' });
+    } catch (error) {
+      metrics.increment('autosale_operations_total', { operation: 'shipment_reconcile', result: 'failure' });
+      logger.warn('shipment_reconcile_failed', { correlationId: 'system:shipment', errorCode: error instanceof Error ? error.name : 'UNKNOWN' });
+    } finally {
+      reconcilingShipments = false;
+    }
+  };
+  const shipmentReconcileTimer = setInterval(() => void reconcileShipments(), 5_000);
   void pollExports();
   void reconcileCatalogueMappings();
   void reconcileInstagramProfiles();
@@ -555,6 +604,7 @@ async function bootstrap(): Promise<void> {
   void reconcileNotificationRetention();
   void reconcileTelegramDeliveries();
   void reconcileProcurementBackfill();
+  void reconcileShipments();
   logger.info('service_started', { correlationId: 'system:startup', healthPort: env.HEALTH_PORT });
 
   server.listen(env.HEALTH_PORT, '0.0.0.0');
@@ -568,6 +618,9 @@ async function bootstrap(): Promise<void> {
     clearInterval(notificationRetentionTimer);
     if (telegramDeliveryTimer) clearInterval(telegramDeliveryTimer);
     clearInterval(procurementBackfillTimer);
+    clearInterval(shipmentReconcileTimer);
+    await deliveryWorker.close();
+    await deliveryQueue.close();
     await telegramWorker?.close();
     await telegramQueue?.close();
     await worker.close();

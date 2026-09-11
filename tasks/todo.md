@@ -1020,10 +1020,10 @@ Status: complete on 2026-09-11. Verification: API `370/370`, web `173/173`, cont
 
 ## Task 65: Create Nova Poshta TTNs idempotently
 
-- [ ] Persist the create intent before contacting Nova Poshta and return an asynchronous shipment summary.
-- [ ] Prevent duplicate TTNs across clicks, request retries, worker retries and restarts.
-- [ ] Reconcile timeout/unknown outcomes using a stable client reference before any retry.
-- [ ] Show the created TTN and safe recovery actions without a full page reload.
+- [x] Persist the create intent before contacting Nova Poshta and return an asynchronous shipment summary.
+- [x] Prevent duplicate TTNs across clicks, request retries, worker retries and restarts.
+- [x] Reconcile timeout/unknown outcomes using a stable client reference before any retry.
+- [x] Show the created TTN and safe recovery actions without a full page reload.
 
 ## Task 66: Add labels, cancellation and shipment tracking
 

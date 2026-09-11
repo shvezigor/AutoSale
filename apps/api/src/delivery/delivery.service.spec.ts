@@ -168,12 +168,15 @@ describe('DeliveryService shipment review', () => {
       order: { findFirst: vi.fn().mockResolvedValue(approvedOrder) },
       product: { findMany: vi.fn().mockResolvedValue([{ sku: 'SKU-1', name: 'Двері Авангард', price: 2500 }]) },
       deliveryConnection: { findUnique: vi.fn().mockResolvedValue({ ...connection, senderProfile }) },
-      shipment: { findFirst: vi.fn().mockResolvedValue(null), create: vi.fn().mockImplementation(({ data }) => Promise.resolve({
+      shipment: { findFirst: vi.fn().mockResolvedValue(null), updateMany: vi.fn().mockResolvedValue({ count: 1 }), create: vi.fn().mockImplementation(({ data }) => Promise.resolve({
         id: '66666666-6666-4666-8666-666666666666', ...data, trackingNumber: null, cost: null, currency: 'UAH',
         createdAt: new Date('2026-09-11T08:00:00.000Z'), providerCreatedAt: null, acceptedAt: null, deliveredAt: null,
         cancelledAt: null, lastStatusCheckedAt: null, lastErrorCode: null, statusEvents: [],
       })), update: vi.fn() },
+      shipmentAttempt: { findUnique: vi.fn().mockResolvedValue(null), upsert: vi.fn().mockResolvedValue({ id: 'attempt-id' }) },
+      $transaction: vi.fn(),
     };
+    prisma.$transaction.mockImplementation(async (run) => run(prisma));
     const cipher = { encrypt: vi.fn(), decrypt: vi.fn().mockReturnValue('np-live-key') };
     const factory = vi.fn().mockReturnValue({
       validateCredential: vi.fn(), listSenderProfiles: vi.fn(), searchCities: vi.fn(), searchLocations: vi.fn(), calculateShipment,
@@ -235,5 +238,38 @@ describe('DeliveryService shipment review', () => {
     prisma.order.findFirst.mockResolvedValue({ ...approvedOrder, items: [{ ...approvedOrder.items[0], procurementStatus: 'TO_ORDER' }] });
     await expect(service.quoteShipment(tenantId, approvedOrder.id, {})).rejects.toThrow('PROCUREMENT_INCOMPLETE');
     expect(calculateShipment).not.toHaveBeenCalled();
+  });
+
+  it('durably transitions a draft and attempt before waking the delivery queue', async () => {
+    const { service, prisma } = shipmentFixture();
+    const active = {
+      id: '66666666-6666-4666-8666-666666666666', tenantId, orderId: approvedOrder.id, connectionId: connection.id,
+      createdByUserId: userId, provider: 'NOVA_POSHTA', status: 'DRAFT', version: 1, idempotencyKey: 'draft-key',
+      requestHash: 'a'.repeat(64), senderSnapshot: {}, recipientSnapshot: {}, destinationSnapshot: {}, parcels: [], payer: 'SENDER',
+      declaredValue: 5000, codAmount: null, description: 'Двері', trackingNumber: null, cost: null, currency: 'UAH',
+      createdAt: now, providerCreatedAt: null, acceptedAt: null, deliveredAt: null, cancelledAt: null,
+      lastStatusCheckedAt: null, lastErrorCode: null, statusEvents: [],
+    };
+    const creating = { ...active, status: 'CREATING' };
+    prisma.shipment.findFirst.mockResolvedValueOnce(active).mockResolvedValueOnce(creating);
+    const queue = { add: vi.fn().mockResolvedValue(undefined) };
+    const queuedService = new DeliveryService(prisma as never, { encrypt: vi.fn(), decrypt: vi.fn() } as never, vi.fn() as never, { enabled: true }, queue);
+
+    await expect(queuedService.createShipment(tenantId, approvedOrder.id, userId)).resolves.toMatchObject({ status: 'CREATING' });
+    expect(prisma.shipment.updateMany).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ status: 'CREATING' }) }));
+    expect(prisma.shipmentAttempt.upsert).toHaveBeenCalledWith(expect.objectContaining({ create: expect.objectContaining({ status: 'PENDING', operation: 'CREATE' }) }));
+    expect(queue.add).toHaveBeenCalledWith('shipment.create', { shipmentId: active.id }, expect.objectContaining({ jobId: `shipment:create:${active.id}:1` }));
+  });
+
+  it('rejects reuse of an explicit idempotency key for different shipment data', async () => {
+    const { service, prisma } = shipmentFixture();
+    prisma.shipment.findFirst.mockResolvedValue({
+      id: '66666666-6666-4666-8666-666666666666', tenantId, orderId: approvedOrder.id, provider: 'NOVA_POSHTA',
+      status: 'DRAFT', version: 1, requestHash: 'a'.repeat(64), statusEvents: [],
+    });
+    prisma.shipmentAttempt.findUnique.mockResolvedValue({ shipmentId: '77777777-7777-4777-8777-777777777777', requestHash: 'b'.repeat(64) });
+    await expect(service.createShipment(tenantId, approvedOrder.id, userId, 'X' /* minimum valid opaque key */))
+      .rejects.toMatchObject({ status: 422 });
+    expect(prisma.$transaction).not.toHaveBeenCalled();
   });
 });

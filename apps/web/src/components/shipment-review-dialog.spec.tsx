@@ -38,19 +38,25 @@ describe('ShipmentReviewDialog', () => {
     expect(onClose).toHaveBeenCalledOnce();
   });
 
-  it('persists a complete exact draft while keeping create disabled until the next task', async () => {
-    const shipment = { id: 'shipment-id', status: 'DRAFT' };
-    const fetchMock = vi.fn()
-      .mockResolvedValueOnce({ ok: true, json: async () => exactOverview })
-      .mockResolvedValueOnce({ ok: true, json: async () => ({ token: 'csrf-token' }) })
-      .mockResolvedValueOnce({ ok: true, json: async () => shipment });
+  it('saves the exact draft and issues one create command from a stable loading button', async () => {
+    const draftShipment = { id: 'shipment-id', status: 'DRAFT' };
+    const creatingShipment = { id: 'shipment-id', status: 'CREATING' };
+    const fetchMock = vi.fn().mockImplementation(async (path: string, init?: RequestInit) => {
+      if (path === `/api/orders/${orderId}/shipments` && init?.method === 'POST') return { ok: true, json: async () => creatingShipment };
+      if (path === `/api/orders/${orderId}/shipments`) return { ok: true, json: async () => exactOverview };
+      if (path === `/api/orders/${orderId}/shipments/draft`) return { ok: true, json: async () => draftShipment };
+      if (path === `/api/orders/${orderId}/shipments/quote`) return { ok: true, json: async () => ({ currency: 'UAH', cost: 120, estimatedDeliveryDate: null }) };
+      if (path === '/api/auth/csrf') return { ok: true, json: async () => ({ token: 'csrf-token' }) };
+      return { ok: true, json: async () => exactOverview };
+    });
     vi.stubGlobal('fetch', fetchMock);
     const { onSaved } = renderDialog();
     await screen.findByDisplayValue('Олена');
-    expect(screen.getByRole('button', { name: 'Створити ТТН' })).toBeDisabled();
-    fireEvent.click(screen.getByRole('button', { name: 'Зберегти чернетку' }));
-    await waitFor(() => expect(onSaved).toHaveBeenCalledWith(shipment));
+    fireEvent.click(screen.getByRole('button', { name: 'Створити ТТН' }));
+    expect(screen.getByRole('button', { name: 'Створюємо ТТН…' })).toBeDisabled();
+    await waitFor(() => expect(onSaved).toHaveBeenCalledWith(creatingShipment));
     expect(fetchMock).toHaveBeenCalledWith(`/api/orders/${orderId}/shipments/draft`, expect.objectContaining({ method: 'PUT' }));
+    expect(fetchMock.mock.calls.filter(([path, init]) => path === `/api/orders/${orderId}/shipments` && init?.method === 'POST')).toHaveLength(1);
   });
 
   it('blocks COD above the declared value', async () => {
