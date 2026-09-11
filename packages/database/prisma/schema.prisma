@@ -166,6 +166,57 @@ enum TelegramAlertEventType {
   SUPPLIER_DELIVERY_FAILED
 }
 
+enum DeliveryProvider {
+  NOVA_POSHTA
+  MEEST
+  UKRPOSHTA
+}
+
+enum DeliveryConnectionStatus {
+  ACTIVE
+  NEEDS_ATTENTION
+  DISCONNECTED
+}
+
+enum ShipmentStatus {
+  DRAFT
+  CREATING
+  CREATED
+  ACCEPTED
+  IN_TRANSIT
+  DELIVERED
+  RETURNING
+  RETURNED
+  CANCELLED
+  FAILED
+}
+
+enum ShipmentAttemptStatus {
+  PENDING
+  PROCESSING
+  SUCCEEDED
+  RETRYABLE
+  UNKNOWN
+  FAILED
+}
+
+enum ShipmentAttemptOperation {
+  CREATE
+  STATUS_SYNC
+  CANCEL
+}
+
+enum ShipmentDestinationType {
+  BRANCH
+  PARCEL_LOCKER
+  ADDRESS
+}
+
+enum ShipmentPayer {
+  SENDER
+  RECIPIENT
+}
+
 model Tenant {
   id                              String                           @id @default(uuid()) @db.Uuid
   key                             String                           @unique
@@ -207,6 +258,11 @@ model Tenant {
   inventoryReservations           InventoryReservation[]
   telegramDeliveryItems           TelegramDeliveryItem[]
   telegramNotificationPreferences TelegramNotificationPreference[]
+  deliveryConnections             DeliveryConnection[]
+  deliverySenderProfiles          DeliverySenderProfile[]
+  shipments                       Shipment[]
+  shipmentAttempts                ShipmentAttempt[]
+  shipmentStatusEvents            ShipmentStatusEvent[]
 
   @@index([status])
   @@map("tenants")
@@ -371,6 +427,8 @@ model User {
   telegramUserBindings            TelegramUserBinding[]
   procurementHandOffs             Order[]                          @relation("OrderProcurementHandedOffBy")
   telegramNotificationPreferences TelegramNotificationPreference[]
+  deliveryConnectionsConnected    DeliveryConnection[]             @relation("DeliveryConnectionConnectedBy")
+  shipmentsCreated                Shipment[]                       @relation("ShipmentCreatedBy")
 
   @@index([status])
   @@map("users")
@@ -842,11 +900,162 @@ model Order {
   exports                    OrderExport[]
   procurementHandedOffByUser User?              @relation("OrderProcurementHandedOffBy", fields: [procurementHandedOffBy], references: [id], onDelete: SetNull)
   telegramDeliveries         TelegramDelivery[]
+  shipments                  Shipment[]
 
   @@unique([tenantId, id])
   @@index([tenantId, status, createdAt])
   @@index([conversationId, createdAt])
   @@map("orders")
+}
+
+model DeliveryConnection {
+  id                     String                   @id @default(uuid()) @db.Uuid
+  tenantId               String                   @map("tenant_id") @db.Uuid
+  provider               DeliveryProvider
+  status                 DeliveryConnectionStatus @default(ACTIVE)
+  encryptedCredential    String                   @map("encrypted_credential")
+  credentialGenerationId String                   @unique @map("credential_generation_id") @db.Uuid
+  accountLabel           String?                  @map("account_label")
+  connectedByUserId      String?                  @map("connected_by_user_id") @db.Uuid
+  lastVerifiedAt         DateTime?                @map("last_verified_at")
+  lastErrorCode          String?                  @map("last_error_code")
+  disconnectedAt         DateTime?                @map("disconnected_at")
+  createdAt              DateTime                 @default(now()) @map("created_at")
+  updatedAt              DateTime                 @updatedAt @map("updated_at")
+  tenant                 Tenant                   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  connectedBy            User?                    @relation("DeliveryConnectionConnectedBy", fields: [connectedByUserId], references: [id], onDelete: SetNull)
+  senderProfile          DeliverySenderProfile?
+  shipments              Shipment[]
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, provider])
+  @@index([tenantId, status])
+  @@map("delivery_connections")
+}
+
+model DeliverySenderProfile {
+  id                           String                  @id @default(uuid()) @db.Uuid
+  tenantId                     String                  @map("tenant_id") @db.Uuid
+  connectionId                 String                  @map("connection_id") @db.Uuid
+  senderRef                    String                  @map("sender_ref")
+  contactRef                   String                  @map("contact_ref")
+  contactPhone                 String                  @map("contact_phone")
+  originType                   ShipmentDestinationType @map("origin_type")
+  originCityRef                String                  @map("origin_city_ref")
+  originLocationRef            String?                 @map("origin_location_ref")
+  originAddressRef             String?                 @map("origin_address_ref")
+  originBuilding               String?                 @map("origin_building")
+  originFlat                   String?                 @map("origin_flat")
+  originLabel                  String?                 @map("origin_label")
+  payer                        ShipmentPayer            @default(SENDER)
+  defaultWeightKg              Decimal                  @map("default_weight_kg") @db.Decimal(8, 3)
+  defaultLengthCm              Decimal                  @map("default_length_cm") @db.Decimal(8, 2)
+  defaultWidthCm               Decimal                  @map("default_width_cm") @db.Decimal(8, 2)
+  defaultHeightCm              Decimal                  @map("default_height_cm") @db.Decimal(8, 2)
+  suggestCustomerNotification  Boolean                  @default(true) @map("suggest_customer_notification")
+  customerNotificationTemplate String                   @map("customer_notification_template")
+  createdAt                    DateTime                 @default(now()) @map("created_at")
+  updatedAt                    DateTime                 @updatedAt @map("updated_at")
+  tenant                       Tenant                   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  connection                   DeliveryConnection       @relation(fields: [tenantId, connectionId], references: [tenantId, id], onDelete: Cascade)
+
+  @@unique([tenantId, connectionId])
+  @@index([tenantId])
+  @@map("delivery_sender_profiles")
+}
+
+model Shipment {
+  id                    String                  @id @default(uuid()) @db.Uuid
+  tenantId              String                  @map("tenant_id") @db.Uuid
+  orderId               String                  @map("order_id") @db.Uuid
+  connectionId          String                  @map("connection_id") @db.Uuid
+  createdByUserId       String?                 @map("created_by_user_id") @db.Uuid
+  provider              DeliveryProvider
+  status                ShipmentStatus          @default(DRAFT)
+  senderSnapshot        Json                    @map("sender_snapshot")
+  recipientSnapshot     Json                    @map("recipient_snapshot")
+  destinationSnapshot   Json                    @map("destination_snapshot")
+  parcels               Json
+  payer                 ShipmentPayer
+  declaredValue         Decimal                 @map("declared_value") @db.Decimal(12, 2)
+  codAmount             Decimal?                @map("cod_amount") @db.Decimal(12, 2)
+  description           String
+  providerDocumentId    String?                 @map("provider_document_id")
+  trackingNumber        String?                 @map("tracking_number")
+  cost                  Decimal?                @db.Decimal(12, 2)
+  currency              String                  @default("UAH") @db.VarChar(3)
+  version               Int                     @default(1)
+  idempotencyKey        String                  @map("idempotency_key")
+  requestHash           String                  @map("request_hash")
+  lastProviderCode      String?                 @map("last_provider_code")
+  lastErrorCode         String?                 @map("last_error_code")
+  nextStatusCheckAt     DateTime?               @map("next_status_check_at")
+  lastStatusCheckedAt   DateTime?               @map("last_status_checked_at")
+  providerCreatedAt     DateTime?               @map("provider_created_at")
+  acceptedAt            DateTime?               @map("accepted_at")
+  deliveredAt           DateTime?               @map("delivered_at")
+  cancelledAt           DateTime?               @map("cancelled_at")
+  createdAt             DateTime                @default(now()) @map("created_at")
+  updatedAt             DateTime                @updatedAt @map("updated_at")
+  tenant                Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  order                 Order                   @relation(fields: [tenantId, orderId], references: [tenantId, id], onDelete: Restrict)
+  connection            DeliveryConnection      @relation(fields: [tenantId, connectionId], references: [tenantId, id], onDelete: Restrict)
+  createdBy             User?                   @relation("ShipmentCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  attempts              ShipmentAttempt[]
+  statusEvents          ShipmentStatusEvent[]
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, idempotencyKey])
+  @@unique([tenantId, provider, providerDocumentId])
+  @@index([tenantId, orderId, createdAt(sort: Desc)])
+  @@index([status, nextStatusCheckAt])
+  @@map("shipments")
+}
+
+model ShipmentAttempt {
+  id             String                   @id @default(uuid()) @db.Uuid
+  tenantId       String                   @map("tenant_id") @db.Uuid
+  shipmentId     String                   @map("shipment_id") @db.Uuid
+  version        Int
+  operation      ShipmentAttemptOperation
+  status         ShipmentAttemptStatus    @default(PENDING)
+  idempotencyKey String                   @map("idempotency_key")
+  requestHash    String                   @map("request_hash")
+  attempts       Int                      @default(0)
+  nextAttemptAt  DateTime                 @default(now()) @map("next_attempt_at")
+  lastAttemptAt  DateTime?                @map("last_attempt_at")
+  leaseId        String?                  @map("lease_id") @db.Uuid
+  leaseExpiresAt DateTime?                @map("lease_expires_at")
+  lastErrorCode  String?                  @map("last_error_code")
+  completedAt    DateTime?                @map("completed_at")
+  createdAt      DateTime                 @default(now()) @map("created_at")
+  updatedAt      DateTime                 @updatedAt @map("updated_at")
+  tenant         Tenant                   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  shipment       Shipment                 @relation(fields: [tenantId, shipmentId], references: [tenantId, id], onDelete: Cascade)
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, idempotencyKey])
+  @@unique([tenantId, shipmentId, operation, version])
+  @@index([status, nextAttemptAt])
+  @@index([leaseExpiresAt])
+  @@map("shipment_attempts")
+}
+
+model ShipmentStatusEvent {
+  id                 String          @id @default(uuid()) @db.Uuid
+  tenantId           String          @map("tenant_id") @db.Uuid
+  shipmentId         String          @map("shipment_id") @db.Uuid
+  status             ShipmentStatus?
+  providerCode       String          @map("provider_code")
+  providerOccurredAt DateTime?       @map("provider_occurred_at")
+  occurredAt         DateTime        @map("occurred_at")
+  createdAt          DateTime        @default(now()) @map("created_at")
+  tenant             Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  shipment           Shipment        @relation(fields: [tenantId, shipmentId], references: [tenantId, id], onDelete: Cascade)
+
+  @@unique([tenantId, id])
+  @@index([tenantId, shipmentId, occurredAt(sort: Desc)])
+  @@map("shipment_status_events")
 }
 
 model OrderExport {

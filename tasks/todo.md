@@ -979,9 +979,11 @@ The approved design is in `docs/superpowers/specs/2026-09-03-google-sign-in-desi
 
 ## Task 60: Add provider-neutral delivery contracts and persistence
 
-- [ ] Add carrier, connection, sender-profile, shipment, status-event and idempotency contracts.
-- [ ] Add an additive tenant-safe migration with one active shipment per order and preserved attempt history.
-- [ ] Encrypt provider credentials and keep them outside browser responses, logs and audit payloads.
+- [x] Add carrier, connection, sender-profile, shipment, status-event and idempotency contracts.
+- [x] Add an additive tenant-safe migration with one active shipment per order and preserved attempt history.
+- [x] Store only provider credential ciphertext and keep the secret outside public contracts and browser responses.
+
+Status: complete on 2026-09-11. Verification: contracts `52/52`, database `42/42`, full workspace typecheck passed; migration `20260910180000_delivery_foundation` applies from an empty PostgreSQL database.
 
 ## Task 61: Implement the Nova Poshta API adapter
 
