@@ -287,4 +287,20 @@ describe('DeliveryService shipment review', () => {
     expect(getLabel).toHaveBeenCalledWith('document-ref');
     expect(prisma.shipment.findFirst).toHaveBeenCalledWith(expect.objectContaining({ where: expect.objectContaining({ tenantId }) }));
   });
+
+  it('persists an idempotent cancellation intent before waking the queue', async () => {
+    const { prisma } = shipmentFixture();
+    const shipment = {
+      id: '66666666-6666-4666-8666-666666666666', tenantId, status: 'CREATED', version: 3,
+      provider: 'NOVA_POSHTA', providerDocumentId: 'document-ref', trackingNumber: '20450000000000',
+      requestHash: 'a'.repeat(64), cost: 120, currency: 'UAH', createdAt: now, providerCreatedAt: now,
+      acceptedAt: null, deliveredAt: null, cancelledAt: null, lastStatusCheckedAt: null, lastErrorCode: null, statusEvents: [],
+    };
+    prisma.shipment.findFirst.mockResolvedValue(shipment);
+    const queue = { add: vi.fn().mockResolvedValue(undefined) };
+    const service = new DeliveryService(prisma as never, { encrypt: vi.fn(), decrypt: vi.fn() } as never, vi.fn() as never, { enabled: true }, queue);
+    await expect(service.cancelShipment(tenantId, shipment.id)).resolves.toMatchObject({ status: 'CREATED' });
+    expect(prisma.shipmentAttempt.upsert).toHaveBeenCalledWith(expect.objectContaining({ create: expect.objectContaining({ operation: 'CANCEL', version: 3, status: 'PENDING' }) }));
+    expect(queue.add).toHaveBeenCalledWith('shipment.cancel', { shipmentId: shipment.id }, expect.objectContaining({ jobId: `shipment:cancel:${shipment.id}:3` }));
+  });
 });

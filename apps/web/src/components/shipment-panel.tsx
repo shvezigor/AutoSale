@@ -6,6 +6,8 @@ import { useEffect, useRef, useState } from 'react';
 
 import { ShipmentReviewDialog } from './shipment-review-dialog';
 import { useToast } from './toast-provider';
+import { useConfirm } from './confirm-provider';
+import { mutatingFetch } from '../auth/csrf-fetch';
 
 const statusLabels: Record<string, string> = {
   DRAFT: 'Чернетка доставки', CREATING: 'Створюємо ТТН', CREATED: 'ТТН створено', ACCEPTED: 'Прийнято перевізником',
@@ -15,22 +17,32 @@ const statusLabels: Record<string, string> = {
 export function ShipmentPanel({ order }: { order: ManagerOrder }) {
   const [open, setOpen] = useState(false);
   const [shipment, setShipment] = useState(order.shipment);
+  const [cancelling, setCancelling] = useState(false);
   const trigger = useRef<HTMLButtonElement>(null);
   const toast = useToast();
+  const confirm = useConfirm();
   const blocked = !order.canCreateShipment;
   const creationLocked = shipment !== null && shipment.status !== 'DRAFT' && shipment.status !== 'FAILED' && shipment.status !== 'CANCELLED';
 
   useEffect(() => {
-    if (shipment?.status !== 'CREATING') return;
+    if (shipment?.status !== 'CREATING' && !cancelling) return;
     let active = true;
     const poll = () => void fetch(`/api/orders/${order.id}/shipments`, { credentials: 'same-origin', cache: 'no-store' })
       .then(async (response) => response.ok ? await response.json() as ShipmentOverview : null)
-      .then((overview) => { if (active && overview?.shipment) setShipment(overview.shipment); })
+      .then((overview) => { if (active && overview?.shipment) { setShipment(overview.shipment); if (overview.shipment.status === 'CANCELLED') setCancelling(false); } })
       .catch(() => undefined);
     const timer = window.setInterval(poll, 2_000);
     poll();
     return () => { active = false; window.clearInterval(timer); };
-  }, [order.id, shipment?.status]);
+  }, [cancelling, order.id, shipment?.status]);
+
+  async function cancelShipment() {
+    if (!shipment || !await confirm({ title: 'Скасувати ТТН?', description: 'Нова Пошта скасує це відправлення. Історія залишиться в AutoSale.', confirmLabel: 'Так, скасувати', tone: 'danger' })) return;
+    setCancelling(true);
+    const response = await mutatingFetch(`/api/shipments/${shipment.id}/cancel`, { method: 'POST' });
+    if (!response.ok) { setCancelling(false); toast.show({ type: 'error', title: 'Не вдалося скасувати ТТН' }); return; }
+    toast.show({ type: 'success', title: 'Скасування ТТН розпочато' });
+  }
 
   function close() {
     setOpen(false);
@@ -49,6 +61,7 @@ export function ShipmentPanel({ order }: { order: ManagerOrder }) {
         <button className="secondary-button" type="button" onClick={() => void navigator.clipboard.writeText(shipment.trackingNumber!).then(() => toast.show({ type: 'success', title: 'Номер ТТН скопійовано' }))}>Скопіювати ТТН</button>
         <a className="secondary-button" href={`/api/shipments/${shipment.id}/label`}>Завантажити етикетку</a>
         <a className="text-button" href={`https://tracking.novaposhta.ua/#/uk/${shipment.trackingNumber}`} rel="noreferrer" target="_blank">Відстежити</a>
+        {!['DELIVERED', 'RETURNED', 'CANCELLED'].includes(shipment.status) && <button className="danger-text-button" disabled={cancelling} type="button" onClick={() => void cancelShipment()}>{cancelling ? 'Скасовуємо…' : 'Скасувати ТТН'}</button>}
       </>}
       {!shipment?.trackingNumber && <button ref={trigger} className="secondary-button" type="button" disabled={blocked || creationLocked} onClick={() => setOpen(true)}>
         {shipment?.status === 'CREATING' ? 'Створюємо ТТН…' : shipment?.status === 'DRAFT' ? 'Продовжити оформлення' : 'Оформити доставку'}

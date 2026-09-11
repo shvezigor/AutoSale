@@ -170,17 +170,17 @@ async function bootstrap(): Promise<void> {
   const deliveryWorker = new Worker(
     'delivery',
     async (job) => {
-      if (job.name !== 'shipment.create' && job.name !== 'shipment.status.sync') return;
+      if (job.name !== 'shipment.create' && job.name !== 'shipment.status.sync' && job.name !== 'shipment.cancel') return;
       const parsed = shipmentCreateJobSchema.safeParse(job.data);
       if (!parsed.success) return;
       const started = performance.now();
       try {
         const result = job.name === 'shipment.create'
           ? await shipmentCreate.process(parsed.data)
-          : await shipmentStatus.process(parsed.data);
+          : job.name === 'shipment.cancel' ? await shipmentStatus.cancel(parsed.data) : await shipmentStatus.process(parsed.data);
         metrics.increment('autosale_operations_total', {
           operation: job.name === 'shipment.create' ? 'shipment_create' : 'shipment_status_sync',
-          result: result === 'CREATED' || result === 'UPDATED' || result === 'IGNORED' || result === 'RETRY' || result === 'UNKNOWN' ? 'success' : 'failure',
+          result: result === 'CREATED' || result === 'UPDATED' || result === 'CANCELLED' || result === 'IGNORED' || result === 'RETRY' || result === 'UNKNOWN' ? 'success' : 'failure',
         });
         logger.info('shipment_job_completed', { correlationId: parsed.data.shipmentId, shipmentId: parsed.data.shipmentId, jobName: job.name, result });
       } catch (error) {

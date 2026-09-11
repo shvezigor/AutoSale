@@ -6,7 +6,7 @@ import type {
   ProcurementSummary,
   SupplierDispatchSummary,
 } from './procurement.js';
-import type { ShipmentSummary } from './delivery.js';
+import type { ShipmentStatus, ShipmentSummary } from './delivery.js';
 
 export type OrderStatus = 'AI_PROCESSING' | 'AI_FAILED' | 'NEEDS_REVIEW' | 'AUTO_APPROVED' | 'APPROVED' | 'CANCELLED';
 
@@ -72,6 +72,7 @@ export interface OrderListQuery {
   search?: string;
   status?: OrderStatus;
   procurementStatus?: ProcurementSummary;
+  shipmentStatus?: ShipmentStatus;
   page: number;
   pageSize: number;
 }

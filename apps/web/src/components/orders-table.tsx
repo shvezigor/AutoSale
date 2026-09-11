@@ -2,13 +2,15 @@
 
 import type { ManagerOrder, OrderStatus } from '../../../../packages/contracts/src/orders';
 import type { ProcurementSummary } from '../../../../packages/contracts/src/procurement';
+import type { ShipmentStatus } from '../../../../packages/contracts/src/delivery';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { FormEvent, MouseEvent, useState } from 'react';
 
 import { TablePagination } from './table-pagination';
 
-type OrdersTableProps = { orders: ManagerOrder[]; page: number; pageSize: number; total: number; search?: string; status?: OrderStatus; procurementStatus?: ProcurementSummary };
+type OrdersTableProps = { orders: ManagerOrder[]; page: number; pageSize: number; total: number; search?: string; status?: OrderStatus; procurementStatus?: ProcurementSummary; shipmentStatus?: ShipmentStatus };
+const shipmentStatuses: Array<{ value: ShipmentStatus | ''; label: string }> = [{ value: '', label: 'Усі відправлення' }, ...Object.entries({ DRAFT: 'Чернетка', CREATING: 'Створюється', CREATED: 'ТТН створено', ACCEPTED: 'Прийнято', IN_TRANSIT: 'У дорозі', DELIVERED: 'Доставлено', RETURNING: 'Повертається', RETURNED: 'Повернено', CANCELLED: 'Скасовано', FAILED: 'Помилка' }).map(([value, label]) => ({ value: value as ShipmentStatus, label }))];
 
 const statuses: Array<{ value: OrderStatus | ''; label: string }> = [
   { value: '', label: 'Усі статуси' },
@@ -32,22 +34,24 @@ const procurementStatuses: Array<{ value: ProcurementSummary | ''; label: string
   { value: 'HANDED_OFF', label: 'Передано у виконання' },
 ];
 
-export function OrdersTable({ orders, page, pageSize, total, search = '', status, procurementStatus }: OrdersTableProps) {
+export function OrdersTable({ orders, page, pageSize, total, search = '', status, procurementStatus, shipmentStatus }: OrdersTableProps) {
   const router = useRouter();
   const [query, setQuery] = useState(search);
   const [selectedStatus, setSelectedStatus] = useState<OrderStatus | ''>(status ?? '');
   const [selectedProcurement, setSelectedProcurement] = useState<ProcurementSummary | ''>(procurementStatus ?? '');
-  const navigate = (nextPage: number, nextPageSize = pageSize, nextStatus = selectedStatus, nextProcurement = selectedProcurement) => router.replace(ordersUrl(query, nextStatus, nextProcurement, nextPage, nextPageSize), { scroll: false });
+  const [selectedShipment, setSelectedShipment] = useState<ShipmentStatus | ''>(shipmentStatus ?? '');
+  const navigate = (nextPage: number, nextPageSize = pageSize, nextStatus = selectedStatus, nextProcurement = selectedProcurement, nextShipment = selectedShipment) => router.replace(ordersUrl(query, nextStatus, nextProcurement, nextShipment, nextPage, nextPageSize), { scroll: false });
   const submitSearch = (event: FormEvent<HTMLFormElement>) => { event.preventDefault(); navigate(1); };
   const changeStatus = (value: OrderStatus | '') => { setSelectedStatus(value); navigate(1, pageSize, value); };
   const changeProcurement = (value: ProcurementSummary | '') => { setSelectedProcurement(value); navigate(1, pageSize, selectedStatus, value); };
-  const returnTo = ordersUrl(search, status ?? '', procurementStatus ?? '', page, pageSize);
+  const returnTo = ordersUrl(search, status ?? '', procurementStatus ?? '', shipmentStatus ?? '', page, pageSize);
 
   return <>
     <div className="orders-toolbar">
       <form onSubmit={submitSearch} role="search"><label className="sr-only" htmlFor="orders-search">Пошук замовлень</label><input id="orders-search" onChange={(event) => setQuery(event.target.value)} placeholder="Клієнт, товар або артикул" type="search" value={query} /><button className="secondary-button" type="submit">Знайти</button></form>
       <label className="orders-status-filter"><span className="sr-only">Статус замовлення</span><select aria-label="Статус замовлення" onChange={(event) => changeStatus(event.target.value as OrderStatus | '')} value={selectedStatus}>{statuses.map((item) => <option key={item.value || 'all'} value={item.value}>{item.label}</option>)}</select></label>
       <label className="orders-status-filter"><span className="sr-only">Комплектація</span><select aria-label="Комплектація" onChange={(event) => changeProcurement(event.target.value as ProcurementSummary | '')} value={selectedProcurement}>{procurementStatuses.map((item) => <option key={item.value || 'all'} value={item.value}>{item.label}</option>)}</select></label>
+      <label className="orders-status-filter"><span className="sr-only">Статус відправлення</span><select aria-label="Статус відправлення" onChange={(event) => { const value = event.target.value as ShipmentStatus | ''; setSelectedShipment(value); navigate(1, pageSize, selectedStatus, selectedProcurement, value); }} value={selectedShipment}>{shipmentStatuses.map((item) => <option key={item.value || 'all'} value={item.value}>{item.label}</option>)}</select></label>
     </div>
     {orders.length === 0 ? <p className="orders-empty" role="status">{search || status || procurementStatus ? 'Замовлень за цим запитом не знайдено.' : 'Замовлень поки немає.'}</p> : <>
       <div className="orders-table-wrap"><table aria-label="Замовлення" className="orders-table"><thead><tr><th scope="col">Товар</th><th scope="col">Клієнт</th><th scope="col">Доставка</th><th scope="col">Відправлення</th><th scope="col">Статус</th><th scope="col">Комплектація</th><th scope="col">Впевненість</th><th scope="col">Дата</th><th scope="col"><span className="sr-only">Дії</span></th></tr></thead><tbody>{orders.map((order) => <OrderRow href={orderDetailUrl(order.id, returnTo)} key={order.id} order={order} onOpen={(href) => router.push(href)} />)}</tbody></table></div>
@@ -79,5 +83,5 @@ function dateLabel(value: string) { return new Intl.DateTimeFormat('uk-UA', { da
 function statusLabel(status: OrderStatus) { return ({ AI_PROCESSING: 'AI обробляє', AI_FAILED: 'Помилка AI', NEEDS_REVIEW: 'Потребує перевірки', AUTO_APPROVED: 'Автопідтверджено', APPROVED: 'Підтверджено', CANCELLED: 'Скасовано' } satisfies Record<OrderStatus, string>)[status]; }
 function procurementLabel(status: ProcurementSummary) { return procurementStatuses.find((item) => item.value === status)?.label ?? status; }
 const statusLabels: Record<string, string> = { DRAFT: 'Чернетка', CREATING: 'Створюється', CREATED: 'ТТН створено', ACCEPTED: 'Прийнято', IN_TRANSIT: 'У дорозі', DELIVERED: 'Доставлено', RETURNING: 'Повертається', RETURNED: 'Повернено', CANCELLED: 'Скасовано', FAILED: 'Помилка' };
-function ordersUrl(query: string, status: OrderStatus | '', procurementStatus: ProcurementSummary | '', page: number, pageSize: number) { const params = new URLSearchParams(); if (query.trim()) params.set('search', query.trim()); if (status) params.set('status', status); if (procurementStatus) params.set('procurementStatus', procurementStatus); if (page > 1) params.set('page', String(page)); if (pageSize !== 25) params.set('pageSize', String(pageSize)); const value = params.toString(); return value ? `/orders?${value}` : '/orders'; }
+function ordersUrl(query: string, status: OrderStatus | '', procurementStatus: ProcurementSummary | '', shipmentStatus: ShipmentStatus | '', page: number, pageSize: number) { const params = new URLSearchParams(); if (query.trim()) params.set('search', query.trim()); if (status) params.set('status', status); if (procurementStatus) params.set('procurementStatus', procurementStatus); if (shipmentStatus) params.set('shipmentStatus', shipmentStatus); if (page > 1) params.set('page', String(page)); if (pageSize !== 25) params.set('pageSize', String(pageSize)); const value = params.toString(); return value ? `/orders?${value}` : '/orders'; }
 function orderDetailUrl(orderId: string, returnTo: string) { return returnTo === '/orders' ? `/orders/${orderId}` : `/orders/${orderId}?returnTo=${encodeURIComponent(returnTo)}`; }

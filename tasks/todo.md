@@ -1027,9 +1027,9 @@ Status: complete on 2026-09-11. Verification: API `370/370`, web `173/173`, cont
 
 ## Task 66: Add labels, cancellation and shipment tracking
 
-- [ ] Download authorized labels, copy/open tracking and cancel where the provider permits it.
-- [ ] Poll active shipment statuses in the background and retain a status-event history.
-- [ ] Show delivery status in order detail, the paginated orders table and mobile cards.
+- [x] Download authorized labels, copy/open tracking and cancel where the provider permits it.
+- [x] Poll active shipment statuses in the background and retain a status-event history.
+- [x] Show delivery status in order detail, the paginated orders table and mobile cards.
 
 ## Task 67: Let a manager notify the customer about the TTN
 

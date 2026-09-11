@@ -1,7 +1,7 @@
 import type { PrismaClient } from '@autosale/database';
 
 interface DeliveryQueue {
-  add(name: 'shipment.create' | 'shipment.status.sync', data: { shipmentId: string }, options: {
+  add(name: 'shipment.create' | 'shipment.status.sync' | 'shipment.cancel', data: { shipmentId: string }, options: {
     jobId: string; attempts: 1; removeOnComplete: true; removeOnFail: true;
   }): Promise<unknown>;
 }
@@ -48,6 +48,16 @@ export class ShipmentReconciler {
         queued += 1;
       } catch { /* retry on next pass */ }
     }
-    return { attempted: attempts.length + shipments.length, queued };
+    const cancellations = await this.prisma.shipmentAttempt.findMany({
+      where: { operation: 'CANCEL', OR: [{ status: { in: ['PENDING', 'RETRYABLE'] }, nextAttemptAt: { lte: now } }, { status: 'PROCESSING', leaseExpiresAt: { lte: now } }] },
+      orderBy: [{ nextAttemptAt: 'asc' }, { createdAt: 'asc' }], take: 50, select: { shipmentId: true, version: true },
+    });
+    for (const attempt of cancellations) {
+      try {
+        await this.queue.add('shipment.cancel', { shipmentId: attempt.shipmentId }, { jobId: `shipment:cancel:${attempt.shipmentId}:${attempt.version}`, attempts: 1, removeOnComplete: true, removeOnFail: true });
+        queued += 1;
+      } catch { /* retry on next pass */ }
+    }
+    return { attempted: attempts.length + shipments.length + cancellations.length, queued };
   }
 }

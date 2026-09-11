@@ -12,6 +12,7 @@ import {
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { metrics } from '@autosale/observability';
 import { mapShipmentSummary, shipmentReadiness } from '../delivery/delivery.service.js';
+import type { ShipmentStatus } from '@autosale/contracts';
 
 type Extraction = {
   isOrder?: boolean;
@@ -24,6 +25,7 @@ export type OrderListQuery = {
   search?: string | undefined;
   status?: OrderStatus | undefined;
   procurementStatus?: ProcurementSummary | undefined;
+  shipmentStatus?: ShipmentStatus | undefined;
   page: number;
   pageSize: number;
 };
@@ -40,6 +42,7 @@ export class OrdersService {
       tenantId,
       ...(query.status ? { status: query.status } : {}),
       ...(query.procurementStatus ? { AND: [procurementWhere(query.procurementStatus)] } : {}),
+      ...(query.shipmentStatus ? { shipments: { some: { status: query.shipmentStatus } } } : {}),
       ...(search ? {
         OR: [
           { conversation: { is: { displayName: { contains: search, mode: 'insensitive' } } } },

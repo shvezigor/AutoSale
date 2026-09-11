@@ -14,7 +14,7 @@ type DeliveryServiceOptions = {
 };
 
 export interface ShipmentCreateQueue {
-  add(name: 'shipment.create', data: { shipmentId: string }, options: {
+  add(name: 'shipment.create' | 'shipment.cancel', data: { shipmentId: string }, options: {
     jobId: string; attempts: 1; removeOnComplete: true; removeOnFail: true;
   }): Promise<unknown>;
 }
@@ -264,6 +264,27 @@ export class DeliveryService {
     const bytes = await client.getLabel(shipment.providerDocumentId);
     if (bytes.byteLength > 10 * 1024 * 1024) throw new BadRequestException('SHIPMENT_LABEL_TOO_LARGE');
     return { bytes, filename: `nova-poshta-${shipment.trackingNumber}.pdf` };
+  }
+
+  async cancelShipment(tenantId: string, shipmentId: string): Promise<ShipmentSummary> {
+    this.assertEnabled();
+    const shipment = await this.prisma.shipment.findFirst({
+      where: { id: shipmentId, tenantId }, include: { statusEvents: { orderBy: { occurredAt: 'desc' } } },
+    });
+    if (!shipment) throw new NotFoundException('Shipment not found');
+    if (shipment.status === 'CANCELLED') return mapShipmentSummary(shipment);
+    if (['DELIVERED', 'RETURNED'].includes(shipment.status) || !shipment.providerDocumentId) throw new BadRequestException('SHIPMENT_CANNOT_BE_CANCELLED');
+    const version = shipment.version;
+    const idempotencyKey = `shipment:cancel:v1:${shipment.id}:${version}`;
+    await this.prisma.shipmentAttempt.upsert({
+      where: { tenantId_shipmentId_operation_version: { tenantId, shipmentId, operation: 'CANCEL', version } },
+      create: { tenantId, shipmentId, operation: 'CANCEL', version, status: 'PENDING', idempotencyKey, requestHash: shipment.requestHash },
+      update: {},
+    });
+    try {
+      await this.shipmentQueue?.add('shipment.cancel', { shipmentId }, { jobId: `shipment:cancel:${shipmentId}:${version}`, attempts: 1, removeOnComplete: true, removeOnFail: true });
+    } catch { /* durable attempt is reconciled by the worker */ }
+    return mapShipmentSummary(shipment);
   }
 
   async disconnect(tenantId: string): Promise<DeliveryConnectionSummary> {

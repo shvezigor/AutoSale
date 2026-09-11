@@ -68,8 +68,11 @@ describe('OrdersTable', () => {
     fireEvent.change(screen.getByLabelText('Комплектація'), { target: { value: 'READY' } });
     expect(replace).toHaveBeenCalledWith('/orders?search=%D0%86%D0%B3%D0%BE%D1%80&status=APPROVED&procurementStatus=READY', { scroll: false });
 
+    fireEvent.change(screen.getByLabelText('Статус відправлення'), { target: { value: 'IN_TRANSIT' } });
+    expect(replace).toHaveBeenCalledWith('/orders?search=%D0%86%D0%B3%D0%BE%D1%80&status=APPROVED&procurementStatus=READY&shipmentStatus=IN_TRANSIT', { scroll: false });
+
     fireEvent.click(screen.getByRole('button', { name: 'Сторінка 3' }));
-    expect(replace).toHaveBeenCalledWith('/orders?search=%D0%86%D0%B3%D0%BE%D1%80&status=APPROVED&procurementStatus=READY&page=3', { scroll: false });
+    expect(replace).toHaveBeenCalledWith('/orders?search=%D0%86%D0%B3%D0%BE%D1%80&status=APPROVED&procurementStatus=READY&shipmentStatus=IN_TRANSIT&page=3', { scroll: false });
   });
 
   it('provides a compact mobile card representation and an informative filtered empty state', () => {

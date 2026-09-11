@@ -124,6 +124,14 @@ export class ShipmentLifecycleController {
       type: 'application/pdf', disposition: `attachment; filename="${label.filename}"`, length: label.bytes.byteLength,
     });
   }
+
+
+  @Post(':shipmentId/cancel')
+  @HttpCode(202)
+  @RequireMembership('MANAGER')
+  cancel(@CurrentPrincipal() principal: AuthPrincipal, @Param('shipmentId', new ParseUUIDPipe({ version: '4' })) shipmentId: string) {
+    return this.delivery.cancelShipment(principal.tenantId!, shipmentId);
+  }
 }
 
 function assertOwner(principal: AuthPrincipal): void {

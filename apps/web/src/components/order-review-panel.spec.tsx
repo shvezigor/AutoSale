@@ -6,9 +6,10 @@ import type { ManagerOrder } from '../../../../packages/contracts/src/orders';
 import { OrderReviewPanel } from './order-review-panel';
 import { ActivityProvider } from './activity-provider';
 import { ToastProvider } from './toast-provider';
+import { ConfirmProvider } from './confirm-provider';
 
 function render(ui: ReactElement) {
-  return rtlRender(<ToastProvider><ActivityProvider>{ui}</ActivityProvider></ToastProvider>);
+  return rtlRender(<ConfirmProvider><ToastProvider><ActivityProvider>{ui}</ActivityProvider></ToastProvider></ConfirmProvider>);
 }
 
 const order: ManagerOrder = {

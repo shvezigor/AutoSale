@@ -118,4 +118,10 @@ describe('ShipmentLifecycleController', () => {
     expect(shipmentLabel).toHaveBeenCalledWith('tenant', 'shipment-id');
     expect(result.getHeaders()).toMatchObject({ type: 'application/pdf', disposition: 'attachment; filename="nova-poshta-20450000000000.pdf"' });
   });
+
+  it('queues cancellation in the authenticated tenant scope', async () => {
+    const cancelShipment = vi.fn().mockResolvedValue({ status: 'CREATED' });
+    await new ShipmentLifecycleController({ cancelShipment } as never).cancel(manager, 'shipment-id');
+    expect(cancelShipment).toHaveBeenCalledWith('tenant', 'shipment-id');
+  });
 });
