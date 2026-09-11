@@ -14,7 +14,7 @@ export type DeliverySettingsSummary = {
   connections: DeliveryConnectionSummary[];
 };
 
-type PendingAction = 'connect' | 'save' | 'disconnect' | null;
+type PendingAction = 'connect-manual' | 'connect-clipboard' | 'save' | 'disconnect' | null;
 type SenderOption = {
   ref: string;
   label: string;
@@ -60,7 +60,12 @@ export function DeliverySettingsCard({
     try {
       const response = await fetch('/api/integrations/delivery/nova-poshta/sender-options', { credentials: 'same-origin' });
       const payload = await jsonOrNull(response);
-      if (response.ok && isSenderOptions(payload)) setSenderOptions(payload);
+      if (response.ok && isSenderOptions(payload)) {
+        setSenderOptions(payload);
+        setProfile((current) => current.senderRef || payload.length !== 1
+          ? current
+          : profileFromOnlySender(current, payload[0]!));
+      }
     } catch {
       // The saved profile remains usable when the provider directory is temporarily unavailable.
     } finally {
@@ -72,17 +77,18 @@ export function DeliverySettingsCard({
     if (active) void loadSenderOptions();
   }, [active, loadSenderOptions]);
 
-  async function connect() {
-    if (apiKey.trim().length < 8) {
+  async function connect(key = apiKey, source: 'manual' | 'clipboard' = 'manual') {
+    const normalizedKey = key.trim();
+    if (normalizedKey.length < 8) {
       toast.show({ type: 'error', title: 'Перевірте API-ключ Нової Пошти' });
       return;
     }
-    setPending('connect');
+    setPending(source === 'clipboard' ? 'connect-clipboard' : 'connect-manual');
     try {
       const response = await activity.run('Підключаємо Нову Пошту', () => mutatingFetch('/api/integrations/delivery/nova-poshta', {
         method: 'PUT',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ apiKey: apiKey.trim() }),
+        body: JSON.stringify({ apiKey: normalizedKey }),
       }));
       const payload = await jsonOrNull(response);
       if (!response.ok || !isConnectionSummary(payload)) throw new Error('connection failed');
@@ -100,6 +106,28 @@ export function DeliverySettingsCard({
       });
     } finally {
       setPending(null);
+    }
+  }
+
+  async function pasteAndConnect() {
+    try {
+      if (!navigator.clipboard?.readText) throw new Error('clipboard unavailable');
+      const key = await navigator.clipboard.readText();
+      if (key.trim().length < 8) {
+        toast.show({
+          type: 'error',
+          title: 'У буфері немає API-ключа',
+          message: 'Скопіюйте створений ключ у кабінеті Нової Пошти та повторіть.',
+        });
+        return;
+      }
+      await connect(key, 'clipboard');
+    } catch {
+      toast.show({
+        type: 'error',
+        title: 'Не вдалося прочитати буфер обміну',
+        message: 'Вставте ключ у поле вручну — браузер не надав доступ до буфера.',
+      });
     }
   }
 
@@ -168,15 +196,25 @@ export function DeliverySettingsCard({
     {connection?.accountLabel && <div className="delivery-account-summary"><span>Кабінет відправника</span><strong>{connection.accountLabel}</strong></div>}
 
     {!owner ? <p className="delivery-readonly-note">Змінити підключення та дані відправника може лише власник робочого простору.</p> : <>
+      <div className="delivery-connect-guide">
+        <div><strong>{active ? 'Потрібно замінити ключ?' : 'Підключення займає близько хвилини'}</strong><span>У кабінеті відкрийте Налаштування → Безпека, створіть API-ключ і скопіюйте його.</span></div>
+        <a className="secondary-button" href="https://my.novaposhta.ua/" target="_blank" rel="noreferrer">Відкрити кабінет Нової Пошти</a>
+      </div>
       <div className="delivery-connect-form">
         <label>
           <span>API-ключ Нової Пошти</span>
           <input aria-label="API-ключ Нової Пошти" autoComplete="off" type="password" value={apiKey} onChange={(event) => setApiKey(event.target.value)} placeholder={active ? 'Введіть новий ключ для заміни' : 'Вставте ключ із бізнес-кабінету'} />
         </label>
-        <LoadingButton type="button" pending={pending === 'connect'} pendingLabel="Підключаємо…" disabled={pending !== null || apiKey.trim().length < 8} onClick={() => void connect()}>
-          {active ? 'Замінити ключ' : 'Підключити Нову Пошту'}
-        </LoadingButton>
+        <div className="delivery-connect-actions">
+          <LoadingButton type="button" pending={pending === 'connect-clipboard'} pendingLabel="Підключаємо…" disabled={pending !== null} onClick={() => void pasteAndConnect()}>
+            Вставити ключ і підключити
+          </LoadingButton>
+          <LoadingButton type="button" className="secondary-button" pending={pending === 'connect-manual'} pendingLabel="Підключаємо…" disabled={pending !== null || apiKey.trim().length < 8} onClick={() => void connect()}>
+            {active ? 'Замінити ключ' : 'Підключити вручну'}
+          </LoadingButton>
+        </div>
       </div>
+      <p className="delivery-key-note">AutoSale перевірить ключ і збереже його в зашифрованому вигляді. Після підключення ключ більше не відображається.</p>
 
       {active && <>
         <fieldset className="delivery-sender-form" disabled={pending !== null}>
@@ -282,4 +320,18 @@ function isSenderOptions(value: unknown): value is SenderOption[] {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function profileFromOnlySender(current: DeliverySenderProfileInput, sender: SenderOption): DeliverySenderProfileInput {
+  const contact = sender.contacts[0];
+  const origin = sender.origins[0];
+  return {
+    ...current,
+    senderRef: sender.ref,
+    contactRef: contact?.ref ?? '',
+    contactPhone: contact?.phone ?? current.contactPhone,
+    origin: origin
+      ? { type: origin.type, cityRef: origin.cityRef, locationRef: origin.ref, label: origin.label }
+      : current.origin,
+  };
 }

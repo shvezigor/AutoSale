@@ -42,7 +42,7 @@ describe('DeliverySettingsCard', () => {
     mutatingFetch.mockImplementation(() => new Promise<Response>((resolve) => { resolveRequest = resolve; }));
     render(<DeliverySettingsCard initial={disconnected} role="OWNER" />);
     fireEvent.change(screen.getByLabelText('API-ключ Нової Пошти'), { target: { value: 'np-live-secret-key' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Підключити Нову Пошту' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Підключити вручну' }));
 
     expect(await screen.findByRole('button', { name: 'Підключаємо…' })).toBeDisabled();
     expect(screen.getByRole('progressbar', { name: 'Підключаємо Нову Пошту' })).toBeInTheDocument();
@@ -51,6 +51,39 @@ describe('DeliverySettingsCard', () => {
     await screen.findByText('Нову Пошту підключено');
     expect(screen.queryByDisplayValue('np-live-secret-key')).not.toBeInTheDocument();
     expect(JSON.stringify(active)).not.toContain('np-live-secret-key');
+  });
+
+  it('opens the official cabinet and connects directly from an explicitly requested clipboard read', async () => {
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { readText: vi.fn().mockResolvedValue('np-key-from-clipboard') },
+    });
+    mutatingFetch.mockResolvedValue(new Response(JSON.stringify(active.connections[0]), { status: 200 }));
+    render(<DeliverySettingsCard initial={disconnected} role="OWNER" />);
+
+    const cabinet = screen.getByRole('link', { name: 'Відкрити кабінет Нової Пошти' });
+    expect(cabinet).toHaveAttribute('href', 'https://my.novaposhta.ua/');
+    expect(cabinet).toHaveAttribute('target', '_blank');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Вставити ключ і підключити' }));
+    await waitFor(() => expect(mutatingFetch).toHaveBeenCalledWith(
+      '/api/integrations/delivery/nova-poshta',
+      expect.objectContaining({ body: JSON.stringify({ apiKey: 'np-key-from-clipboard' }) }),
+    ));
+    expect(await screen.findByText('Нову Пошту підключено')).toBeInTheDocument();
+    expect(screen.queryByDisplayValue('np-key-from-clipboard')).not.toBeInTheDocument();
+  });
+
+  it('explains how to paste manually when clipboard access is unavailable', async () => {
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { readText: vi.fn().mockRejectedValue(new DOMException('Denied', 'NotAllowedError')) },
+    });
+    render(<DeliverySettingsCard initial={disconnected} role="OWNER" />);
+    fireEvent.click(screen.getByRole('button', { name: 'Вставити ключ і підключити' }));
+    expect(await screen.findByText('Не вдалося прочитати буфер обміну')).toBeInTheDocument();
+    expect(screen.getByText('Вставте ключ у поле вручну — браузер не надав доступ до буфера.')).toBeInTheDocument();
+    expect(mutatingFetch).not.toHaveBeenCalled();
   });
 
   it('shows sender, contact, origin and parcel defaults for the owner', () => {
@@ -92,6 +125,20 @@ describe('DeliverySettingsCard', () => {
     expect(screen.getByRole('option', { name: 'Відділення №1' })).toBeInTheDocument();
   });
 
+  it('automatically selects the only sender profile returned by Nova Poshta', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify([{
+      ref: 'only-sender', label: 'Єдиний відправник', edrpou: null,
+      contacts: [{ ref: 'only-contact', label: 'Ігор Швець', phone: '+380501112233' }],
+      origins: [{ ref: 'only-branch', cityRef: 'only-city', label: 'Відділення №1', number: '1', type: 'BRANCH' }],
+    }]), { status: 200 })));
+    render(<DeliverySettingsCard initial={active} role="OWNER" />);
+
+    await waitFor(() => expect(screen.getByLabelText('Відправник')).toHaveValue('only-sender'));
+    expect(screen.getByLabelText('Контактна особа')).toHaveValue('only-contact');
+    expect(screen.getByLabelText('Точка відправлення')).toHaveValue('only-branch');
+    expect(screen.getByLabelText('Телефон відправника')).toHaveValue('+380501112233');
+  });
+
   it('saves sender defaults through the tenant endpoint', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify([{
       ref: 'sender-ref', label: 'ТОВ Приклад', edrpou: '12345678',
@@ -126,7 +173,7 @@ describe('DeliverySettingsCard', () => {
     mutatingFetch.mockResolvedValue(new Response(JSON.stringify({ message: 'Invalid connection' }), { status: 400 }));
     render(<DeliverySettingsCard initial={disconnected} role="OWNER" />);
     fireEvent.change(screen.getByLabelText('API-ключ Нової Пошти'), { target: { value: 'np-live-secret-key' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Підключити Нову Пошту' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Підключити вручну' }));
     expect(await screen.findByText('Не вдалося підключити Нову Пошту')).toBeInTheDocument();
     expect(screen.queryByText(/np-live-secret-key/)).not.toBeInTheDocument();
   });
