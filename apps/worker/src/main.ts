@@ -45,6 +45,7 @@ import { TelegramDeliveryReconciler } from './telegram/telegram-delivery-reconci
 import { TelegramDeliveryService } from './telegram/telegram-delivery.service.js';
 import { ShipmentCreateService } from './delivery/shipment-create.service.js';
 import { ShipmentReconciler } from './delivery/shipment-reconciler.js';
+import { ShipmentStatusService } from './delivery/shipment-status.service.js';
 
 async function bootstrap(): Promise<void> {
   const env = parseWorkerEnv(process.env);
@@ -160,27 +161,35 @@ async function bootstrap(): Promise<void> {
     (apiKey) => new NovaPoshtaClient({ apiKey }),
     (encrypted) => credentialCipher.decrypt(encrypted),
   );
+  const shipmentStatus = new ShipmentStatusService(
+    prisma,
+    (apiKey) => new NovaPoshtaClient({ apiKey }),
+    (encrypted) => credentialCipher.decrypt(encrypted),
+  );
   const deliveryQueue = new Queue('delivery', { connection: redisConnection });
   const deliveryWorker = new Worker(
     'delivery',
     async (job) => {
-      if (job.name !== 'shipment.create') return;
+      if (job.name !== 'shipment.create' && job.name !== 'shipment.status.sync') return;
       const parsed = shipmentCreateJobSchema.safeParse(job.data);
       if (!parsed.success) return;
       const started = performance.now();
       try {
-        const result = await shipmentCreate.process(parsed.data);
+        const result = job.name === 'shipment.create'
+          ? await shipmentCreate.process(parsed.data)
+          : await shipmentStatus.process(parsed.data);
         metrics.increment('autosale_operations_total', {
-          operation: 'shipment_create',
-          result: result === 'CREATED' || result === 'IGNORED' || result === 'RETRY' || result === 'UNKNOWN' ? 'success' : 'failure',
+          operation: job.name === 'shipment.create' ? 'shipment_create' : 'shipment_status_sync',
+          result: result === 'CREATED' || result === 'UPDATED' || result === 'IGNORED' || result === 'RETRY' || result === 'UNKNOWN' ? 'success' : 'failure',
         });
-        logger.info('shipment_create_completed', { correlationId: parsed.data.shipmentId, shipmentId: parsed.data.shipmentId, result });
+        logger.info('shipment_job_completed', { correlationId: parsed.data.shipmentId, shipmentId: parsed.data.shipmentId, jobName: job.name, result });
       } catch (error) {
-        metrics.increment('autosale_operations_total', { operation: 'shipment_create', result: 'failure' });
+        const operation = job.name === 'shipment.create' ? 'shipment_create' : 'shipment_status_sync';
+        metrics.increment('autosale_operations_total', { operation, result: 'failure' });
         logger.warn('shipment_create_failed', { correlationId: parsed.data.shipmentId, shipmentId: parsed.data.shipmentId, errorCode: error instanceof Error ? error.name : 'UNKNOWN' });
         throw error;
       } finally {
-        metrics.observe('autosale_operation_duration_seconds', (performance.now() - started) / 1_000, { operation: 'shipment_create' });
+        metrics.observe('autosale_operation_duration_seconds', (performance.now() - started) / 1_000, { operation: job.name === 'shipment.create' ? 'shipment_create' : 'shipment_status_sync' });
       }
     },
     { connection: redisConnection, concurrency: 2 },

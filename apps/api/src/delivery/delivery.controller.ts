@@ -1,7 +1,7 @@
 import type { AuthPrincipal } from '@autosale/contracts/auth';
 import { deliveryConnectionInputSchema, deliveryLocationQuerySchema, deliverySenderProfileInputSchema, shipmentDraftInputSchema } from '@autosale/contracts';
 import { NovaPoshtaError } from '@autosale/integrations';
-import { BadRequestException, Body, Controller, Delete, ForbiddenException, Get, Headers, HttpCode, Inject, Param, ParseUUIDPipe, Post, Put, Query } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, ForbiddenException, Get, Headers, HttpCode, Inject, Param, ParseUUIDPipe, Post, Put, Query, StreamableFile } from '@nestjs/common';
 
 import { CurrentPrincipal, RequireMembership } from '../auth/auth.decorators.js';
 import { DeliveryService } from './delivery.service.js';
@@ -109,6 +109,20 @@ export class ShipmentController {
     @Headers('idempotency-key') idempotencyKey?: string,
   ) {
     return this.delivery.createShipment(principal.tenantId!, orderId, principal.userId, idempotencyKey);
+  }
+}
+
+@Controller('api/shipments')
+export class ShipmentLifecycleController {
+  constructor(@Inject(DeliveryService) private readonly delivery: DeliveryService) {}
+
+  @Get(':shipmentId/label')
+  @RequireMembership('MANAGER')
+  async label(@CurrentPrincipal() principal: AuthPrincipal, @Param('shipmentId', new ParseUUIDPipe({ version: '4' })) shipmentId: string) {
+    const label = await this.delivery.shipmentLabel(principal.tenantId!, shipmentId);
+    return new StreamableFile(Buffer.from(label.bytes), {
+      type: 'application/pdf', disposition: `attachment; filename="${label.filename}"`, length: label.bytes.byteLength,
+    });
   }
 }
 

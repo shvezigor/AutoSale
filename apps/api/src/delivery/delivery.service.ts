@@ -5,7 +5,7 @@ import type { PrismaClient } from '@autosale/database';
 import type { CredentialCipher, NovaPoshtaClient, NovaPoshtaSenderProfile } from '@autosale/integrations';
 import { BadRequestException, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 
-type NovaPoshtaClientPort = Pick<NovaPoshtaClient, 'validateCredential' | 'listSenderProfiles' | 'searchCities' | 'searchLocations' | 'calculateShipment'>;
+type NovaPoshtaClientPort = Pick<NovaPoshtaClient, 'validateCredential' | 'listSenderProfiles' | 'searchCities' | 'searchLocations' | 'calculateShipment' | 'getLabel'>;
 export type NovaPoshtaClientFactory = (apiKey: string) => NovaPoshtaClientPort;
 
 type DeliveryServiceOptions = {
@@ -249,6 +249,21 @@ export class DeliveryService {
     });
     if (!shipment) throw new NotFoundException('Shipment not found');
     return mapShipmentSummary(shipment);
+  }
+
+  async shipmentLabel(tenantId: string, shipmentId: string): Promise<{ bytes: Uint8Array; filename: string }> {
+    this.assertEnabled();
+    const shipment = await this.prisma.shipment.findFirst({
+      where: { id: shipmentId, tenantId }, include: { connection: true },
+    });
+    if (!shipment) throw new NotFoundException('Shipment not found');
+    if (!shipment.providerDocumentId || !shipment.trackingNumber || !['CREATED', 'ACCEPTED', 'IN_TRANSIT', 'DELIVERED', 'RETURNING', 'RETURNED'].includes(shipment.status)) {
+      throw new BadRequestException('SHIPMENT_LABEL_UNAVAILABLE');
+    }
+    const client = this.novaPoshtaClient(this.cipher.decrypt(shipment.connection.encryptedCredential));
+    const bytes = await client.getLabel(shipment.providerDocumentId);
+    if (bytes.byteLength > 10 * 1024 * 1024) throw new BadRequestException('SHIPMENT_LABEL_TOO_LARGE');
+    return { bytes, filename: `nova-poshta-${shipment.trackingNumber}.pdf` };
   }
 
   async disconnect(tenantId: string): Promise<DeliveryConnectionSummary> {

@@ -90,7 +90,8 @@ export class ShipmentCreateService {
       if (attempt.count !== 1) return 'IGNORED';
       await tx.shipment.update({ where: { id: shipmentId }, data: {
         status: 'CREATED', providerDocumentId: result.documentRef, trackingNumber: result.trackingNumber,
-        ...(cost === null ? {} : { cost }), providerCreatedAt: completedAt, lastErrorCode: null,
+        ...(cost === null ? {} : { cost }), providerCreatedAt: completedAt,
+        nextStatusCheckAt: new Date(completedAt.getTime() + 15 * 60_000), lastErrorCode: null,
       } });
       await tx.shipmentStatusEvent.create({ data: {
         tenantId: (await tx.shipment.findUniqueOrThrow({ where: { id: shipmentId }, select: { tenantId: true } })).tenantId,

@@ -164,6 +164,7 @@ describe('DeliveryService shipment review', () => {
 
   function shipmentFixture() {
     const calculateShipment = vi.fn().mockResolvedValue({ currency: 'UAH', cost: 120, estimatedDeliveryDate: '2026-09-13' });
+    const getLabel = vi.fn().mockResolvedValue(new Uint8Array([37, 80, 68, 70]));
     const prisma = {
       order: { findFirst: vi.fn().mockResolvedValue(approvedOrder) },
       product: { findMany: vi.fn().mockResolvedValue([{ sku: 'SKU-1', name: 'Двері Авангард', price: 2500 }]) },
@@ -179,9 +180,9 @@ describe('DeliveryService shipment review', () => {
     prisma.$transaction.mockImplementation(async (run) => run(prisma));
     const cipher = { encrypt: vi.fn(), decrypt: vi.fn().mockReturnValue('np-live-key') };
     const factory = vi.fn().mockReturnValue({
-      validateCredential: vi.fn(), listSenderProfiles: vi.fn(), searchCities: vi.fn(), searchLocations: vi.fn(), calculateShipment,
+      validateCredential: vi.fn(), listSenderProfiles: vi.fn(), searchCities: vi.fn(), searchLocations: vi.fn(), calculateShipment, getLabel,
     });
-    return { service: new DeliveryService(prisma as never, cipher as never, factory, { enabled: true }), prisma, calculateShipment };
+    return { service: new DeliveryService(prisma as never, cipher as never, factory, { enabled: true }), prisma, calculateShipment, getLabel, cipher };
   }
 
   it('prefills customer hints and tenant defaults without treating AI text as exact refs', async () => {
@@ -271,5 +272,19 @@ describe('DeliveryService shipment review', () => {
     await expect(service.createShipment(tenantId, approvedOrder.id, userId, 'X' /* minimum valid opaque key */))
       .rejects.toMatchObject({ status: 422 });
     expect(prisma.$transaction).not.toHaveBeenCalled();
+  });
+
+  it('downloads a bounded label only for a tenant-owned created shipment', async () => {
+    const { service, prisma, getLabel, cipher } = shipmentFixture();
+    prisma.shipment.findFirst.mockResolvedValue({
+      id: '66666666-6666-4666-8666-666666666666', tenantId, status: 'CREATED',
+      providerDocumentId: 'document-ref', trackingNumber: '20450000000000', connection: { encryptedCredential: 'ciphertext' },
+    });
+    await expect(service.shipmentLabel(tenantId, '66666666-6666-4666-8666-666666666666')).resolves.toMatchObject({
+      filename: 'nova-poshta-20450000000000.pdf', bytes: expect.any(Uint8Array),
+    });
+    expect(cipher.decrypt).toHaveBeenCalledWith('ciphertext');
+    expect(getLabel).toHaveBeenCalledWith('document-ref');
+    expect(prisma.shipment.findFirst).toHaveBeenCalledWith(expect.objectContaining({ where: expect.objectContaining({ tenantId }) }));
   });
 });

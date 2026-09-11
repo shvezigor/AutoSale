@@ -5,6 +5,7 @@ import type { ShipmentOverview } from '../../../../packages/contracts/src/delive
 import { useEffect, useRef, useState } from 'react';
 
 import { ShipmentReviewDialog } from './shipment-review-dialog';
+import { useToast } from './toast-provider';
 
 const statusLabels: Record<string, string> = {
   DRAFT: 'Чернетка доставки', CREATING: 'Створюємо ТТН', CREATED: 'ТТН створено', ACCEPTED: 'Прийнято перевізником',
@@ -15,6 +16,7 @@ export function ShipmentPanel({ order }: { order: ManagerOrder }) {
   const [open, setOpen] = useState(false);
   const [shipment, setShipment] = useState(order.shipment);
   const trigger = useRef<HTMLButtonElement>(null);
+  const toast = useToast();
   const blocked = !order.canCreateShipment;
   const creationLocked = shipment !== null && shipment.status !== 'DRAFT' && shipment.status !== 'FAILED' && shipment.status !== 'CANCELLED';
 
@@ -42,9 +44,16 @@ export function ShipmentPanel({ order }: { order: ManagerOrder }) {
       <p>{shipment ? statusLabels[shipment.status] ?? shipment.status : blocked ? blockedCopy(order) : 'Перевірте дані й розрахуйте вартість перед створенням ТТН.'}</p>
       {shipment?.trackingNumber && <strong>ТТН {shipment.trackingNumber}</strong>}
     </div>
-    <button ref={trigger} className="secondary-button" type="button" disabled={blocked || creationLocked} onClick={() => setOpen(true)}>
-      {shipment?.status === 'CREATING' ? 'Створюємо ТТН…' : shipment?.trackingNumber ? `ТТН ${shipment.trackingNumber}` : shipment?.status === 'DRAFT' ? 'Продовжити оформлення' : 'Оформити доставку'}
-    </button>
+    <div className="shipment-panel-actions">
+      {shipment?.trackingNumber && <>
+        <button className="secondary-button" type="button" onClick={() => void navigator.clipboard.writeText(shipment.trackingNumber!).then(() => toast.show({ type: 'success', title: 'Номер ТТН скопійовано' }))}>Скопіювати ТТН</button>
+        <a className="secondary-button" href={`/api/shipments/${shipment.id}/label`}>Завантажити етикетку</a>
+        <a className="text-button" href={`https://tracking.novaposhta.ua/#/uk/${shipment.trackingNumber}`} rel="noreferrer" target="_blank">Відстежити</a>
+      </>}
+      {!shipment?.trackingNumber && <button ref={trigger} className="secondary-button" type="button" disabled={blocked || creationLocked} onClick={() => setOpen(true)}>
+        {shipment?.status === 'CREATING' ? 'Створюємо ТТН…' : shipment?.status === 'DRAFT' ? 'Продовжити оформлення' : 'Оформити доставку'}
+      </button>}
+    </div>
     {open && <ShipmentReviewDialog orderId={order.id} onClose={close} onSaved={setShipment} />}
   </section>;
 }

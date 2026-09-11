@@ -3,7 +3,7 @@ import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import { describe, expect, it, vi } from 'vitest';
 import { NovaPoshtaError } from '@autosale/integrations';
 
-import { DeliveryController, DeliveryLocationController, ShipmentController } from './delivery.controller.js';
+import { DeliveryController, DeliveryLocationController, ShipmentController, ShipmentLifecycleController } from './delivery.controller.js';
 
 const manager: AuthPrincipal = {
   userId: 'manager', email: 'manager@example.com', name: 'Manager', platformRole: 'USER',
@@ -108,5 +108,14 @@ describe('ShipmentController', () => {
     const controller = new ShipmentController({} as never);
     expect(() => controller.saveDraft(manager, 'order-id', { ...draft, codAmount: 6000 })).toThrow(BadRequestException);
     expect(() => controller.quote(manager, 'order-id', { ...draft, recipient: { name: '', phone: '123' } })).toThrow(BadRequestException);
+  });
+});
+
+describe('ShipmentLifecycleController', () => {
+  it('loads a tenant-scoped PDF label without exposing a provider URL', async () => {
+    const shipmentLabel = vi.fn().mockResolvedValue({ bytes: new Uint8Array([37, 80, 68, 70]), filename: 'nova-poshta-20450000000000.pdf' });
+    const result = await new ShipmentLifecycleController({ shipmentLabel } as never).label(manager, 'shipment-id');
+    expect(shipmentLabel).toHaveBeenCalledWith('tenant', 'shipment-id');
+    expect(result.getHeaders()).toMatchObject({ type: 'application/pdf', disposition: 'attachment; filename="nova-poshta-20450000000000.pdf"' });
   });
 });

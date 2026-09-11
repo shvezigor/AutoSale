@@ -4,7 +4,7 @@ import { CredentialCipher, NovaPoshtaClient } from '@autosale/integrations';
 import { DynamicModule, Module, type OnApplicationShutdown } from '@nestjs/common';
 import { Queue } from 'bullmq';
 
-import { DeliveryController, DeliveryLocationController, ShipmentController } from './delivery.controller.js';
+import { DeliveryController, DeliveryLocationController, ShipmentController, ShipmentLifecycleController } from './delivery.controller.js';
 import { DeliveryService } from './delivery.service.js';
 import { DeliveryLocationService } from './delivery-location.service.js';
 
@@ -24,7 +24,7 @@ export class DeliveryModule {
     const locationService = new DeliveryLocationService(service);
     return {
       module: DeliveryModule,
-      controllers: [DeliveryController, DeliveryLocationController, ShipmentController],
+      controllers: [DeliveryController, DeliveryLocationController, ShipmentController, ShipmentLifecycleController],
       providers: [
         { provide: DeliveryService, useValue: service },
         { provide: DeliveryLocationService, useValue: locationService },

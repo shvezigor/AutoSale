@@ -8,7 +8,7 @@ describe('ShipmentReconciler', () => {
     const shipmentId = '11111111-1111-4111-8111-111111111111';
     const findMany = vi.fn().mockResolvedValue([{ shipmentId, version: 2 }]);
     const add = vi.fn().mockResolvedValue(undefined);
-    await expect(new ShipmentReconciler({ shipmentAttempt: { findMany } } as never, { add }, () => now).reconcile())
+    await expect(new ShipmentReconciler({ shipmentAttempt: { findMany }, shipment: { findMany: vi.fn().mockResolvedValue([]) } } as never, { add }, () => now).reconcile())
       .resolves.toEqual({ attempted: 1, queued: 1 });
     expect(add).toHaveBeenCalledWith('shipment.create', { shipmentId }, {
       jobId: `shipment:create:${shipmentId}:2`, attempts: 1, removeOnComplete: true, removeOnFail: true,
@@ -18,7 +18,7 @@ describe('ShipmentReconciler', () => {
   it('leaves failed queue wakeups for the next reconciliation pass', async () => {
     const findMany = vi.fn().mockResolvedValue([{ shipmentId: '11111111-1111-4111-8111-111111111111', version: 1 }]);
     const add = vi.fn().mockRejectedValue(new Error('redis unavailable'));
-    await expect(new ShipmentReconciler({ shipmentAttempt: { findMany } } as never, { add }).reconcile())
+    await expect(new ShipmentReconciler({ shipmentAttempt: { findMany }, shipment: { findMany: vi.fn().mockResolvedValue([]) } } as never, { add }).reconcile())
       .resolves.toEqual({ attempted: 1, queued: 0 });
   });
 });
