@@ -147,7 +147,7 @@ describe('DeliveryService', () => {
 
 describe('DeliveryService shipment review', () => {
   const approvedOrder = {
-    id: '55555555-5555-4555-8555-555555555555', tenantId, status: 'APPROVED',
+    id: '55555555-5555-4555-8555-555555555555', tenantId, conversationId: '77777777-7777-4777-8777-777777777777', status: 'APPROVED',
     extraction: {
       customer: { name: 'Олена', phone: '+380671234567' },
       delivery: { city: 'Київ', novaPoshtaBranch: '24', address: null },
@@ -174,6 +174,8 @@ describe('DeliveryService shipment review', () => {
         createdAt: new Date('2026-09-11T08:00:00.000Z'), providerCreatedAt: null, acceptedAt: null, deliveredAt: null,
         cancelledAt: null, lastStatusCheckedAt: null, lastErrorCode: null, statusEvents: [],
       })), update: vi.fn() },
+      tenant: { findUnique: vi.fn().mockResolvedValue({ name: 'Магазин Двері' }) },
+      message: { findFirst: vi.fn().mockResolvedValue(null) },
       shipmentAttempt: { findUnique: vi.fn().mockResolvedValue(null), upsert: vi.fn().mockResolvedValue({ id: 'attempt-id' }) },
       $transaction: vi.fn(),
     };
@@ -302,5 +304,45 @@ describe('DeliveryService shipment review', () => {
     await expect(service.cancelShipment(tenantId, shipment.id)).resolves.toMatchObject({ status: 'CREATED' });
     expect(prisma.shipmentAttempt.upsert).toHaveBeenCalledWith(expect.objectContaining({ create: expect.objectContaining({ operation: 'CANCEL', version: 3, status: 'PENDING' }) }));
     expect(queue.add).toHaveBeenCalledWith('shipment.cancel', { shipmentId: shipment.id }, expect.objectContaining({ jobId: `shipment:cancel:${shipment.id}:3` }));
+  });
+
+  it('builds a tenant-branded TTN preview and queues one explicit Instagram message', async () => {
+    const { prisma, cipher } = shipmentFixture();
+    const shipment = {
+      id: '66666666-6666-4666-8666-666666666666', tenantId, status: 'CREATED', version: 2,
+      trackingNumber: '20450000000000', order: { conversationId: approvedOrder.conversationId },
+      connection: { senderProfile },
+    };
+    prisma.shipment.findFirst.mockResolvedValue(shipment);
+    const send = vi.fn().mockResolvedValue({ id: 'message-id', delivery: { status: 'PENDING' } });
+    const service = new DeliveryService(prisma as never, cipher as never, vi.fn() as never, { enabled: true }, undefined, { send } as never);
+
+    await expect(service.customerMessagePreview(tenantId, shipment.id)).resolves.toEqual({
+      text: 'Магазин Двері: 20450000000000',
+      suggested: true,
+      alreadySubmitted: false,
+      deliveryStatus: null,
+      deliveryErrorCode: null,
+    });
+    await expect(service.sendCustomerMessage(tenantId, userId, shipment.id, { text: 'Ваша ТТН 20450000000000' }))
+      .resolves.toMatchObject({ id: 'message-id' });
+    expect(send).toHaveBeenCalledWith(tenantId, userId, approvedOrder.conversationId, {
+      text: 'Ваша ТТН 20450000000000',
+      idempotencyKey: expect.stringMatching(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/),
+    });
+  });
+
+  it('rejects customer notification before a TTN exists without touching Instagram', async () => {
+    const { prisma, cipher } = shipmentFixture();
+    prisma.shipment.findFirst.mockResolvedValue({
+      id: '66666666-6666-4666-8666-666666666666', tenantId, status: 'DRAFT', version: 1,
+      trackingNumber: null, order: { conversationId: approvedOrder.conversationId }, connection: { senderProfile },
+    });
+    const send = vi.fn();
+    const service = new DeliveryService(prisma as never, cipher as never, vi.fn() as never, { enabled: true }, undefined, { send } as never);
+
+    await expect(service.sendCustomerMessage(tenantId, userId, '66666666-6666-4666-8666-666666666666', { text: 'ТТН' }))
+      .rejects.toThrow('SHIPMENT_CUSTOMER_MESSAGE_UNAVAILABLE');
+    expect(send).not.toHaveBeenCalled();
   });
 });

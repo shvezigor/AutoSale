@@ -6,6 +6,7 @@ import {
   deliveryProviderSchema,
   deliverySenderProfileInputSchema,
   shipmentCreateJobSchema,
+  shipmentCustomerMessageInputSchema,
   shipmentDraftInputSchema,
   shipmentStatusJobSchema,
   shipmentStatusSchema,
@@ -95,6 +96,14 @@ describe('delivery contracts', () => {
     expect(shipmentStatusJobSchema.parse({ shipmentId })).toEqual({ shipmentId });
     expect(() => shipmentCreateJobSchema.parse({ shipmentId: 'shipment-1' })).toThrow();
     expect(() => shipmentStatusJobSchema.parse({ shipmentId, tenantId: 'must-not-be-trusted' })).toThrow();
+  });
+
+  it('accepts only an explicit bounded customer message', () => {
+    expect(shipmentCustomerMessageInputSchema.parse({ text: '  Вашу ТТН створено  ' }))
+      .toEqual({ text: 'Вашу ТТН створено' });
+    expect(() => shipmentCustomerMessageInputSchema.parse({ text: '' })).toThrow();
+    expect(() => shipmentCustomerMessageInputSchema.parse({ text: 'x'.repeat(1_001) })).toThrow();
+    expect(() => shipmentCustomerMessageInputSchema.parse({ text: 'ТТН', autoSend: true })).toThrow();
   });
 
   it('accepts only bounded provider-neutral delivery location queries', () => {

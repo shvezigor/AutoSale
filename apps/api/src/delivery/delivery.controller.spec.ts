@@ -124,4 +124,21 @@ describe('ShipmentLifecycleController', () => {
     await new ShipmentLifecycleController({ cancelShipment } as never).cancel(manager, 'shipment-id');
     expect(cancelShipment).toHaveBeenCalledWith('tenant', 'shipment-id');
   });
+
+  it('previews and explicitly queues a tenant-scoped customer TTN message', async () => {
+    const customerMessagePreview = vi.fn().mockResolvedValue({ text: 'Ваша ТТН', alreadySubmitted: false });
+    const sendCustomerMessage = vi.fn().mockResolvedValue({ id: 'message-id' });
+    const controller = new ShipmentLifecycleController({ customerMessagePreview, sendCustomerMessage } as never);
+
+    await expect(controller.customerMessagePreview(manager, 'shipment-id')).resolves.toMatchObject({ text: 'Ваша ТТН' });
+    await expect(controller.sendCustomerMessage(manager, 'shipment-id', { text: '  Ваша ТТН  ' })).resolves.toEqual({ id: 'message-id' });
+    expect(customerMessagePreview).toHaveBeenCalledWith('tenant', 'shipment-id');
+    expect(sendCustomerMessage).toHaveBeenCalledWith('tenant', 'manager', 'shipment-id', { text: 'Ваша ТТН' });
+  });
+
+  it('rejects an empty or unexpected customer message payload', () => {
+    const controller = new ShipmentLifecycleController({} as never);
+    expect(() => controller.sendCustomerMessage(manager, 'shipment-id', { text: '' })).toThrow(BadRequestException);
+    expect(() => controller.sendCustomerMessage(manager, 'shipment-id', { text: 'ТТН', automatic: true })).toThrow(BadRequestException);
+  });
 });

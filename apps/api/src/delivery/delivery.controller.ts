@@ -1,5 +1,5 @@
 import type { AuthPrincipal } from '@autosale/contracts/auth';
-import { deliveryConnectionInputSchema, deliveryLocationQuerySchema, deliverySenderProfileInputSchema, shipmentDraftInputSchema } from '@autosale/contracts';
+import { deliveryConnectionInputSchema, deliveryLocationQuerySchema, deliverySenderProfileInputSchema, shipmentCustomerMessageInputSchema, shipmentDraftInputSchema } from '@autosale/contracts';
 import { NovaPoshtaError } from '@autosale/integrations';
 import { BadRequestException, Body, Controller, Delete, ForbiddenException, Get, Headers, HttpCode, Inject, Param, ParseUUIDPipe, Post, Put, Query, StreamableFile } from '@nestjs/common';
 
@@ -131,6 +131,20 @@ export class ShipmentLifecycleController {
   @RequireMembership('MANAGER')
   cancel(@CurrentPrincipal() principal: AuthPrincipal, @Param('shipmentId', new ParseUUIDPipe({ version: '4' })) shipmentId: string) {
     return this.delivery.cancelShipment(principal.tenantId!, shipmentId);
+  }
+
+  @Get(':shipmentId/customer-message')
+  @RequireMembership('MANAGER')
+  customerMessagePreview(@CurrentPrincipal() principal: AuthPrincipal, @Param('shipmentId', new ParseUUIDPipe({ version: '4' })) shipmentId: string) {
+    return this.delivery.customerMessagePreview(principal.tenantId!, shipmentId);
+  }
+
+  @Post(':shipmentId/customer-message')
+  @RequireMembership('MANAGER')
+  sendCustomerMessage(@CurrentPrincipal() principal: AuthPrincipal, @Param('shipmentId', new ParseUUIDPipe({ version: '4' })) shipmentId: string, @Body() body: unknown) {
+    const parsed = shipmentCustomerMessageInputSchema.safeParse(body);
+    if (!parsed.success) throw new BadRequestException('Invalid shipment customer message');
+    return this.delivery.sendCustomerMessage(principal.tenantId!, principal.userId, shipmentId, parsed.data);
   }
 }
 

@@ -62,6 +62,19 @@ describe('DeliverySettingsCard', () => {
     expect(screen.queryByLabelText('Місто відправлення')).not.toBeInTheDocument();
     expect(screen.getByLabelText('Хто оплачує доставку')).toBeInTheDocument();
     expect(screen.getByLabelText('Вага, кг')).toBeInTheDocument();
+    expect(screen.getByLabelText('Шаблон повідомлення клієнту')).toHaveValue('{company}: створено ТТН {trackingNumber}. Відстеження: {trackingUrl}');
+  });
+
+  it('saves an editable customer TTN message template', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify([]), { status: 200 })));
+    mutatingFetch.mockResolvedValue(new Response(JSON.stringify({}), { status: 200 }));
+    render(<DeliverySettingsCard initial={active} role="OWNER" />);
+    fireEvent.change(screen.getByLabelText('Шаблон повідомлення клієнту'), { target: { value: '{company}: ваша ТТН {trackingNumber}' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Зберегти дані відправника' }));
+    await waitFor(() => expect(mutatingFetch).toHaveBeenCalledWith(
+      '/api/integrations/delivery/nova-poshta/sender-profile',
+      expect.objectContaining({ body: expect.stringContaining('ваша ТТН {trackingNumber}') }),
+    ));
   });
 
   it('loads provider choices and fills contact and origin without manual refs', async () => {

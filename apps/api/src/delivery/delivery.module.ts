@@ -7,6 +7,7 @@ import { Queue } from 'bullmq';
 import { DeliveryController, DeliveryLocationController, ShipmentController, ShipmentLifecycleController } from './delivery.controller.js';
 import { DeliveryService } from './delivery.service.js';
 import { DeliveryLocationService } from './delivery-location.service.js';
+import { ConversationsService } from '../conversations/conversations.service.js';
 
 @Module({})
 export class DeliveryModule {
@@ -14,12 +15,15 @@ export class DeliveryModule {
     const prisma = createPrismaClient(env.DATABASE_URL);
     const cipher = new CredentialCipher(Buffer.from(env.INTEGRATION_ENCRYPTION_KEY, 'base64'));
     const shipmentQueue = new Queue('delivery', { connection: queueConnection(env.REDIS_URL) });
+    const instagramQueue = new Queue('instagram', { connection: queueConnection(env.REDIS_URL) });
+    const instagramOutbound = new ConversationsService(prisma, instagramQueue);
     const service = new DeliveryService(
       prisma,
       cipher,
       (apiKey) => new NovaPoshtaClient({ apiKey }),
       { enabled: env.NOVA_POSHTA_DELIVERY_ENABLED },
       shipmentQueue,
+      instagramOutbound,
     );
     const locationService = new DeliveryLocationService(service);
     return {
@@ -28,7 +32,7 @@ export class DeliveryModule {
       providers: [
         { provide: DeliveryService, useValue: service },
         { provide: DeliveryLocationService, useValue: locationService },
-        { provide: DeliveryPrismaLifecycle, useValue: new DeliveryPrismaLifecycle(prisma, shipmentQueue) },
+        { provide: DeliveryPrismaLifecycle, useValue: new DeliveryPrismaLifecycle(prisma, [shipmentQueue, instagramQueue]) },
       ],
       exports: [DeliveryService],
     };
@@ -36,9 +40,9 @@ export class DeliveryModule {
 }
 
 class DeliveryPrismaLifecycle implements OnApplicationShutdown {
-  constructor(private readonly prisma: PrismaClient, private readonly queue: Queue) {}
+  constructor(private readonly prisma: PrismaClient, private readonly queues: Queue[]) {}
   async onApplicationShutdown(): Promise<void> {
-    await this.queue.close();
+    await Promise.all(this.queues.map((queue) => queue.close()));
     await this.prisma.$disconnect();
   }
 }

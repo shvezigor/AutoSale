@@ -108,6 +108,10 @@ export const shipmentStatusJobSchema = z.object({
   shipmentId: z.string().uuid(),
 }).strict();
 
+export const shipmentCustomerMessageInputSchema = z.object({
+  text: z.string().trim().min(1).max(1_000),
+}).strict();
+
 export type DeliveryProvider = z.infer<typeof deliveryProviderSchema>;
 export type DeliveryConnectionStatus = z.infer<typeof deliveryConnectionStatusSchema>;
 export type ShipmentStatus = z.infer<typeof shipmentStatusSchema>;
@@ -121,6 +125,15 @@ export type DeliverySenderProfileInput = z.infer<typeof deliverySenderProfileInp
 export type ShipmentDraftInput = z.infer<typeof shipmentDraftInputSchema>;
 export type ShipmentCreateJob = z.infer<typeof shipmentCreateJobSchema>;
 export type ShipmentStatusJob = z.infer<typeof shipmentStatusJobSchema>;
+export type ShipmentCustomerMessageInput = z.infer<typeof shipmentCustomerMessageInputSchema>;
+
+export interface ShipmentCustomerMessagePreview {
+  text: string;
+  suggested: boolean;
+  alreadySubmitted: boolean;
+  deliveryStatus: 'PENDING' | 'SENDING' | 'SENT' | 'FAILED' | 'UNKNOWN' | null;
+  deliveryErrorCode: string | null;
+}
 
 export interface DeliveryConnectionSummary {
   provider: DeliveryProvider;

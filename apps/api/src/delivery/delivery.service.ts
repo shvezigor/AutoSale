@@ -1,6 +1,6 @@
 import { createHash, randomUUID } from 'node:crypto';
 
-import { deliverySenderProfileInputSchema, shipmentDraftInputSchema, type DeliveryConnectionInput, type DeliveryConnectionSummary, type DeliverySenderProfileInput, type ShipmentDraftInput, type ShipmentOverview, type ShipmentQuote, type ShipmentSummary } from '@autosale/contracts';
+import { deliverySenderProfileInputSchema, shipmentCustomerMessageInputSchema, shipmentDraftInputSchema, type ConversationMessage, type DeliveryConnectionInput, type DeliveryConnectionSummary, type DeliverySenderProfileInput, type OutboundMessageInput, type ShipmentCustomerMessageInput, type ShipmentCustomerMessagePreview, type ShipmentDraftInput, type ShipmentOverview, type ShipmentQuote, type ShipmentSummary } from '@autosale/contracts';
 import type { PrismaClient } from '@autosale/database';
 import type { CredentialCipher, NovaPoshtaClient, NovaPoshtaSenderProfile } from '@autosale/integrations';
 import { BadRequestException, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
@@ -19,6 +19,10 @@ export interface ShipmentCreateQueue {
   }): Promise<unknown>;
 }
 
+export interface InstagramOutboundPort {
+  send(tenantId: string, actorUserId: string, conversationId: string, input: OutboundMessageInput): Promise<ConversationMessage>;
+}
+
 export class DeliveryService {
   private readonly now: () => Date;
 
@@ -28,6 +32,7 @@ export class DeliveryService {
     private readonly novaPoshtaClient: NovaPoshtaClientFactory,
     private readonly options: DeliveryServiceOptions,
     private readonly shipmentQueue?: ShipmentCreateQueue,
+    private readonly instagramOutbound?: InstagramOutboundPort,
   ) {
     this.now = options.now ?? (() => new Date());
   }
@@ -287,6 +292,34 @@ export class DeliveryService {
     return mapShipmentSummary(shipment);
   }
 
+  async customerMessagePreview(tenantId: string, shipmentId: string): Promise<ShipmentCustomerMessagePreview> {
+    this.assertEnabled();
+    const context = await this.customerMessageContext(tenantId, shipmentId);
+    const existing = await this.prisma.message.findFirst({
+      where: { tenantId, clientIdempotencyKey: shipmentCustomerMessageKey(context.shipment.id, context.shipment.version) },
+      select: { deliveryStatus: true, deliveryErrorCode: true },
+    });
+    return {
+      text: renderCustomerMessage(context.template, context.tenantName, context.shipment.trackingNumber),
+      suggested: context.suggested,
+      alreadySubmitted: existing !== null,
+      deliveryStatus: existing?.deliveryStatus ?? null,
+      deliveryErrorCode: existing?.deliveryErrorCode ?? null,
+    };
+  }
+
+  async sendCustomerMessage(tenantId: string, actorUserId: string, shipmentId: string, input: ShipmentCustomerMessageInput): Promise<ConversationMessage> {
+    this.assertEnabled();
+    const parsed = shipmentCustomerMessageInputSchema.safeParse(input);
+    if (!parsed.success) throw new BadRequestException('INVALID_SHIPMENT_CUSTOMER_MESSAGE');
+    const context = await this.customerMessageContext(tenantId, shipmentId);
+    if (!this.instagramOutbound) throw new Error('Instagram outbound delivery is unavailable');
+    return this.instagramOutbound.send(tenantId, actorUserId, context.conversationId, {
+      text: parsed.data.text,
+      idempotencyKey: shipmentCustomerMessageKey(context.shipment.id, context.shipment.version),
+    });
+  }
+
   async disconnect(tenantId: string): Promise<DeliveryConnectionSummary> {
     this.assertEnabled();
     const disconnectedAt = this.now();
@@ -341,6 +374,30 @@ export class DeliveryService {
     return order;
   }
 
+  private async customerMessageContext(tenantId: string, shipmentId: string) {
+    const shipment = await this.prisma.shipment.findFirst({
+      where: { id: shipmentId, tenantId },
+      include: {
+        order: { select: { conversationId: true } },
+        connection: { include: { senderProfile: true } },
+      },
+    });
+    if (!shipment) throw new NotFoundException('Shipment not found');
+    if (!shipment.trackingNumber || !['CREATED', 'ACCEPTED', 'IN_TRANSIT'].includes(shipment.status)) {
+      throw new BadRequestException('SHIPMENT_CUSTOMER_MESSAGE_UNAVAILABLE');
+    }
+    const tenant = await this.prisma.tenant.findUnique({ where: { id: tenantId }, select: { name: true } });
+    if (!tenant) throw new NotFoundException('Tenant not found');
+    const senderProfile = shipment.connection.senderProfile;
+    return {
+      shipment: { id: shipment.id, version: shipment.version, trackingNumber: shipment.trackingNumber },
+      conversationId: shipment.order.conversationId,
+      tenantName: tenant.name,
+      suggested: senderProfile?.suggestCustomerNotification ?? true,
+      template: senderProfile?.customerNotificationTemplate ?? '{company}: створено ТТН {trackingNumber}. Відстеження: {trackingUrl}',
+    };
+  }
+
   private async prefill(order: Awaited<ReturnType<DeliveryService['orderForShipment']>>, sender: Parameters<typeof safeSenderProfile>[0]) {
     const extraction = (order.extraction ?? {}) as {
       customer?: { name?: string | null; phone?: string | null };
@@ -364,6 +421,25 @@ export class DeliveryService {
       description,
     };
   }
+}
+
+function shipmentCustomerMessageKey(shipmentId: string, version: number): string {
+  const hex = createHash('sha256').update(`shipment-customer-message:v1:${shipmentId}:${version}`).digest('hex').slice(0, 32).split('');
+  hex[12] = '4';
+  hex[16] = '8';
+  const value = hex.join('');
+  return `${value.slice(0, 8)}-${value.slice(8, 12)}-${value.slice(12, 16)}-${value.slice(16, 20)}-${value.slice(20)}`;
+}
+
+function renderCustomerMessage(template: string, company: string, trackingNumber: string): string {
+  const trackingUrl = `https://tracking.novaposhta.ua/#/uk/${trackingNumber}`;
+  const rendered = template
+    .replaceAll('{company}', company)
+    .replaceAll('{trackingNumber}', trackingNumber)
+    .replaceAll('{trackingUrl}', trackingUrl)
+    .trim();
+  if (rendered.length >= 1 && rendered.length <= 1_000) return rendered;
+  return `${company}: відправлення створено. Номер ТТН: ${trackingNumber}. Відстежити: ${trackingUrl}`.slice(0, 1_000);
 }
 
 function shipmentDraftData(draft: ShipmentDraftInput, sender: Parameters<typeof safeSenderProfile>[0]) {

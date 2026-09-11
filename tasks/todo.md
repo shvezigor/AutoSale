@@ -1033,9 +1033,11 @@ Status: complete on 2026-09-11. Verification: API `370/370`, web `173/173`, cont
 
 ## Task 67: Let a manager notify the customer about the TTN
 
-- [ ] Generate an editable tenant-branded Instagram message after successful TTN creation.
-- [ ] Require an explicit manager click to send in the first version.
-- [ ] Keep Instagram delivery failures independent from the shipment and preserve copyable TTN details.
+- [x] Generate an editable tenant-branded Instagram message after successful TTN creation.
+- [x] Require an explicit manager click to send in the first version.
+- [x] Keep Instagram delivery failures independent from the shipment and preserve copyable TTN details.
+
+Status: complete on 2026-09-11. The message uses the workspace name, an owner-editable template and the existing durable Instagram queue. Duplicate clicks reuse one shipment-version idempotency key; failed Instagram delivery leaves the shipment and TTN unchanged and provides a copy fallback. Verification: API `380/380`, web `179/179`, contracts `54/54`, full workspace typecheck and production build; the one transient PostgreSQL migration-test reset passed on isolated rerun.
 
 ## Task 68: Verify and roll out Nova Poshta delivery
 

@@ -32,4 +32,16 @@ describe('ShipmentPanel', () => {
     expect(screen.getByRole('dialog', { name: 'Оформлення доставки' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Закрити' })).toHaveFocus();
   });
+
+  it('offers an explicit customer message only for a created TTN', () => {
+    vi.stubGlobal('fetch', vi.fn().mockReturnValue(new Promise(() => {})));
+    render(<ConfirmProvider><ToastProvider><ShipmentPanel order={{ ...order, shipment: {
+      id: 'shipment-id', orderId: order.id, provider: 'NOVA_POSHTA', status: 'CREATED', trackingNumber: '20450000000000',
+      cost: 120, currency: 'UAH', createdAt: '2026-09-11T00:00:00.000Z', providerCreatedAt: '2026-09-11T00:01:00.000Z',
+      acceptedAt: null, deliveredAt: null, cancelledAt: null, lastStatusCheckedAt: null, lastErrorCode: null, history: [],
+    } }} /></ToastProvider></ConfirmProvider>);
+    fireEvent.click(screen.getByRole('button', { name: 'Повідомити клієнта' }));
+    expect(screen.getByRole('dialog', { name: 'Повідомити клієнта про ТТН' })).toBeInTheDocument();
+    expect(screen.getAllByText('ТТН 20450000000000')).toHaveLength(2);
+  });
 });

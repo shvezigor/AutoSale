@@ -5,6 +5,7 @@ import type { ShipmentOverview } from '../../../../packages/contracts/src/delive
 import { useEffect, useRef, useState } from 'react';
 
 import { ShipmentReviewDialog } from './shipment-review-dialog';
+import { ShipmentCustomerMessageDialog } from './shipment-customer-message-dialog';
 import { useToast } from './toast-provider';
 import { useConfirm } from './confirm-provider';
 import { mutatingFetch } from '../auth/csrf-fetch';
@@ -16,9 +17,11 @@ const statusLabels: Record<string, string> = {
 
 export function ShipmentPanel({ order }: { order: ManagerOrder }) {
   const [open, setOpen] = useState(false);
+  const [messageOpen, setMessageOpen] = useState(false);
   const [shipment, setShipment] = useState(order.shipment);
   const [cancelling, setCancelling] = useState(false);
   const trigger = useRef<HTMLButtonElement>(null);
+  const messageTrigger = useRef<HTMLButtonElement>(null);
   const toast = useToast();
   const confirm = useConfirm();
   const blocked = !order.canCreateShipment;
@@ -49,6 +52,11 @@ export function ShipmentPanel({ order }: { order: ManagerOrder }) {
     window.setTimeout(() => trigger.current?.focus(), 0);
   }
 
+  function closeMessage() {
+    setMessageOpen(false);
+    window.setTimeout(() => messageTrigger.current?.focus(), 0);
+  }
+
   return <section className="shipment-panel" aria-labelledby="shipment-panel-title">
     <div>
       <span>Доставка</span>
@@ -58,6 +66,7 @@ export function ShipmentPanel({ order }: { order: ManagerOrder }) {
     </div>
     <div className="shipment-panel-actions">
       {shipment?.trackingNumber && <>
+        {['CREATED', 'ACCEPTED', 'IN_TRANSIT'].includes(shipment.status) && <button ref={messageTrigger} className="secondary-button" type="button" onClick={() => setMessageOpen(true)}>Повідомити клієнта</button>}
         <button className="secondary-button" type="button" onClick={() => void navigator.clipboard.writeText(shipment.trackingNumber!).then(() => toast.show({ type: 'success', title: 'Номер ТТН скопійовано' }))}>Скопіювати ТТН</button>
         <a className="secondary-button" href={`/api/shipments/${shipment.id}/label`}>Завантажити етикетку</a>
         <a className="text-button" href={`https://tracking.novaposhta.ua/#/uk/${shipment.trackingNumber}`} rel="noreferrer" target="_blank">Відстежити</a>
@@ -68,6 +77,7 @@ export function ShipmentPanel({ order }: { order: ManagerOrder }) {
       </button>}
     </div>
     {open && <ShipmentReviewDialog orderId={order.id} onClose={close} onSaved={setShipment} />}
+    {messageOpen && shipment?.trackingNumber && <ShipmentCustomerMessageDialog shipmentId={shipment.id} trackingNumber={shipment.trackingNumber} onClose={closeMessage} onSubmitted={() => undefined} />}
   </section>;
 }
 

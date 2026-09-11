@@ -212,6 +212,17 @@ export function DeliverySettingsCard({
             <NumberField label="Висота, см" value={profile.defaultParcel.heightCm} onChange={(value) => setProfile({ ...profile, defaultParcel: { ...profile.defaultParcel, heightCm: value } })} />
           </div>
           <label className="delivery-notification-toggle"><input type="checkbox" checked={profile.suggestCustomerNotification} onChange={(event) => setProfile({ ...profile, suggestCustomerNotification: event.target.checked })} />Запропонувати повідомлення клієнту після створення ТТН</label>
+          <label className="delivery-notification-template">
+            <span>Шаблон повідомлення клієнту</span>
+            <textarea
+              aria-label="Шаблон повідомлення клієнту"
+              maxLength={1_000}
+              rows={4}
+              value={profile.customerNotificationTemplate}
+              onChange={(event) => setProfile({ ...profile, customerNotificationTemplate: event.target.value })}
+            />
+            <small>Доступні поля: {'{company}'}, {'{trackingNumber}'}, {'{trackingUrl}'} · {profile.customerNotificationTemplate.length} / 1000</small>
+          </label>
         </fieldset>
         <div className="settings-actions delivery-settings-actions">
           <LoadingButton type="button" pending={pending === 'save'} pendingLabel="Зберігаємо…" disabled={pending !== null} onClick={() => void saveProfile()}>Зберегти дані відправника</LoadingButton>

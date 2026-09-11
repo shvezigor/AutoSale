@@ -608,11 +608,11 @@ git commit -m "feat: track Nova Poshta shipments"
 - Produces API: `POST /api/shipments/:id/customer-message` with `{ text: string }` and existing Instagram outbound message summary.
 - Consumes the existing conversation outbound queue; it does not call Meta synchronously.
 
-- [ ] **Step 1: Write failing message-policy tests**
+- [x] **Step 1: Write failing message-policy tests**
 
 Require a `CREATED | ACCEPTED | IN_TRANSIT` shipment with TTN, an Instagram conversation belonging to the same order/tenant, manager role, 1–1,000 character text, and an explicit request. Assert duplicate submission with the same shipment/message version returns the existing outbound message.
 
-- [ ] **Step 2: Implement tenant-branded preview and queue command**
+- [x] **Step 2: Implement tenant-branded preview and queue command**
 
 Generate the default text server-side from tenant name and TTN:
 
@@ -623,15 +623,15 @@ Generate the default text server-side from tenant name and TTN:
 
 Persist through the existing Instagram outbound message path with idempotency key `shipment-customer-message:v1:<shipmentId>:<messageVersion>`. An Instagram error changes only message delivery state, never shipment state.
 
-- [ ] **Step 3: Write failing dialog tests**
+- [x] **Step 3: Write failing dialog tests**
 
 Assert the message is editable, character count is visible, send has stable spinner, success disables the already-sent version, provider-window rejection offers `Скопіювати текст`, and the TTN remains visible.
 
-- [ ] **Step 4: Implement the manual message UI**
+- [x] **Step 4: Implement the manual message UI**
 
 Show `Повідомити клієнта` only after a TTN exists. Respect the tenant setting `suggestCustomerNotification`; when disabled, keep the action available but do not emphasize it. Do not auto-open or auto-send.
 
-- [ ] **Step 5: Run tests and commit**
+- [x] **Step 5: Run tests and commit**
 
 Run: `pnpm --filter @autosale/api test -- delivery`
 
