@@ -44,3 +44,18 @@ export {
   type TelegramSendTextInput,
   type TelegramSendTextResult,
 } from './telegram-bot.js';
+export {
+  NovaPoshtaClient,
+  NovaPoshtaError,
+  type NovaPoshtaCity,
+  type NovaPoshtaClientConfig,
+  type NovaPoshtaCreatedShipment,
+  type NovaPoshtaErrorCode,
+  type NovaPoshtaLocation,
+  type NovaPoshtaLocationSearchInput,
+  type NovaPoshtaQuote,
+  type NovaPoshtaSenderProfile,
+  type NovaPoshtaShipmentInput,
+  type NovaPoshtaShipmentReference,
+  type NovaPoshtaShipmentStatus,
+} from './nova-poshta.js';

@@ -987,9 +987,11 @@ Status: complete on 2026-09-11. Verification: contracts `52/52`, database `42/42
 
 ## Task 61: Implement the Nova Poshta API adapter
 
-- [ ] Validate credentials and expose typed sender, city, branch, parcel-locker, quote, create, status, label and cancel operations.
-- [ ] Validate every external response and map provider failures to bounded safe codes.
-- [ ] Cover authorization errors, validation errors, rate limits, malformed responses, timeouts and unknown create outcomes with fake HTTP tests.
+- [x] Validate credentials and expose typed sender, city, branch, parcel-locker, quote, create, status, label and cancel operations.
+- [x] Validate every external response and map provider failures to bounded safe codes.
+- [x] Cover authorization errors, validation errors, rate limits, malformed responses, timeouts and unknown create outcomes with fake HTTP tests.
+
+Status: complete on 2026-09-11. Verification: Nova Poshta adapter covered by fake HTTP tests only; integrations `111/111` and package typecheck passed without contacting the provider.
 
 ## Task 62: Connect Nova Poshta and configure sender defaults
 
