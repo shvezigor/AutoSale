@@ -7,11 +7,13 @@ describe('StructuredLogger', () => {
   it('emits queryable JSON while redacting secrets and personal data', () => {
     const lines: string[] = [];
     const logger = new StructuredLogger('api', (line) => lines.push(line));
-    logger.info('webhook_received', { correlationId: 'corr-1', orderId: 'order-1', phone: '+380501112233', accessToken: 'secret-token' });
+    logger.info('webhook_received', { correlationId: 'corr-1', orderId: 'order-1', phone: '+380501112233', accessToken: 'secret-token', apiKey: 'provider-api-key', encryptedCredential: 'ciphertext' });
     const record = JSON.parse(lines[0]!) as Record<string, unknown>;
     expect(record).toMatchObject({ level: 'info', service: 'api', event: 'webhook_received', correlationId: 'corr-1', orderId: 'order-1', phone: '[REDACTED]', accessToken: '[REDACTED]' });
     expect(lines[0]).not.toContain('+380501112233');
     expect(lines[0]).not.toContain('secret-token');
+    expect(lines[0]).not.toContain('provider-api-key');
+    expect(lines[0]).not.toContain('ciphertext');
   });
 });
 

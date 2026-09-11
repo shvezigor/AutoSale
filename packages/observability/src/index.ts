@@ -1,4 +1,4 @@
-const redactedKeys = /token|secret|password|authorization|cookie|phone|email|address|payload|body/i;
+const redactedKeys = /token|secret|password|authorization|cookie|phone|email|address|payload|body|api.?key|credential/i;
 const allowedMetricLabels = new Set(['operation', 'result', 'method', 'route', 'status_class', 'provider', 'queue', 'state']);
 const allowedMetricResults = new Set(['success', 'failure', 'skipped', 'conflict']);
 const buckets = [0.05, 0.1, 0.25, 0.5, 1, 2.5, 5];

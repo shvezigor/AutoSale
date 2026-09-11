@@ -657,7 +657,7 @@ git commit -m "feat: send TTNs to Instagram customers"
 - Consumes every preceding task.
 - Produces repeatable automated acceptance plus a controlled manual production checklist.
 
-- [ ] **Step 1: Add privacy and contract regression scans**
+- [x] **Step 1: Add privacy and contract regression scans**
 
 Extend tests to inspect API responses, structured logs, thrown errors, audit rows, and metrics labels for absence of the literal test API key, customer phone, address, and raw provider payload. Include a cross-tenant matrix for connection, location, shipment, label, cancel, and message endpoints.
 
@@ -665,7 +665,7 @@ Extend tests to inspect API responses, structured logs, thrown errors, audit row
 
 Exercise connect → sender defaults → order draft → exact location → quote → create → background success → copy TTN → label → status update → manual customer message. Reload between command and completion to prove durable recovery. Double-click create and assert one fake-provider document.
 
-- [ ] **Step 3: Add mobile E2E at 390×844**
+- [x] **Step 3: Add mobile E2E at 390×844**
 
 Assert settings and shipment drawer have no horizontal overflow, focused fields remain above the virtual-keyboard-safe footer, actions do not jump during loading, toast stays right-aligned within the viewport, and close returns focus to `Створити відправлення`.
 
@@ -683,7 +683,7 @@ Run: `git diff --check`
 
 Expected: all commands PASS with zero skipped delivery tests.
 
-- [ ] **Step 5: Validate migration and Compose rollout locally**
+- [x] **Step 5: Validate migration and Compose rollout locally**
 
 Run: `docker compose --env-file .env config`
 

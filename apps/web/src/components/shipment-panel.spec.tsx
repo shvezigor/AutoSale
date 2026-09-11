@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom/vitest';
 
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { ManagerOrder } from '../../../../packages/contracts/src/orders';
 
@@ -43,5 +43,13 @@ describe('ShipmentPanel', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Повідомити клієнта' }));
     expect(screen.getByRole('dialog', { name: 'Повідомити клієнта про ТТН' })).toBeInTheDocument();
     expect(screen.getAllByText('ТТН 20450000000000')).toHaveLength(2);
+  });
+
+  it('returns focus to the delivery action after closing the drawer', async () => {
+    render(<ToastProvider><ConfirmProvider><ShipmentPanel order={{ ...order, shipment: null }} /></ConfirmProvider></ToastProvider>);
+    const trigger = screen.getByRole('button', { name: 'Оформити доставку' });
+    fireEvent.click(trigger);
+    fireEvent.click(screen.getByRole('button', { name: 'Закрити' }));
+    await waitFor(() => expect(trigger).toHaveFocus());
   });
 });

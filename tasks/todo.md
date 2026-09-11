@@ -1041,10 +1041,12 @@ Status: complete on 2026-09-11. The message uses the workspace name, an owner-ed
 
 ## Task 68: Verify and roll out Nova Poshta delivery
 
-- [ ] Add privacy, tenant-isolation, observability, idempotency and mobile regressions.
+- [x] Add privacy, tenant-isolation, observability, idempotency and mobile regressions.
 - [ ] Deploy behind a feature flag and complete one controlled real Nova Poshta shipment acceptance.
 - [ ] Verify duplicate prevention, quote, TTN, label, status sync, cancellation where allowed and manual customer notification.
 - [ ] After stabilization, plan Meest, Ukrposhta, bank-account filtering and payments in that order.
+
+Status: automated rollout checks in progress on 2026-09-11. The authenticated-tenant matrix covers connection, location, draft, quote, create, label, cancellation and customer message boundaries. A new regression found and fixed generic `apiKey`/credential log redaction. The 390×844 delivery drawer check covers horizontal overflow, sticky actions, stable loading width and right-aligned toast; component coverage verifies focus restoration. Production migration `20260910180000_delivery_foundation` applied successfully and API, web, worker, PostgreSQL, Redis and MinIO are healthy. Real-provider acceptance remains intentionally open until the owner connects a controlled Nova Poshta key and approves one test shipment.
 
 ## Task 69: Automate production deployment from master
 

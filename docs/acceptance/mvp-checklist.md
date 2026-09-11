@@ -22,6 +22,9 @@
 - [x] 2026-09-03: owner/manager Google settings privacy boundary, 476 tests, typecheck і production build пройшли локально.
 - [x] 2026-09-07: ручні Instagram-відповіді покриті контрактами, tenant authorization, idempotency, durable delivery, безпечними status/retry та echo reconciliation тестами.
 - [x] 2026-09-07: web-композер перевірено для Enter/Shift+Enter, optimistic pending, late echo після UNKNOWN, retry без нового bubble та недоступного підключення.
+- [x] 2026-09-11: доставка Новою Поштою покрита tenant-scope матрицею для connection, location, draft, quote, create, label, cancel і customer message; `apiKey`, credentials, телефон, адреса та raw provider payload централізовано маскуються в structured logs і заборонені як metric labels.
+- [x] 2026-09-11: mobile regression на 390×844 підтверджує відсутність горизонтального overflow, стабільну ширину кнопки під час loading, sticky actions, праве розташування toast і повернення focus після закриття drawer.
+- [x] 2026-09-11: production migration `20260910180000_delivery_foundation` застосована; API, web, worker, PostgreSQL, Redis і MinIO healthy, `https://sales-aito.com/login` повертає 200, а delivery feature flag увімкнений після health-check.
 
 ## Потребує зовнішніх тестових доступів
 
@@ -38,6 +41,8 @@
 - [ ] Видалити/перейменувати тестову вкладку, перевірити actionable error та збереження останнього валідного каталогу.
 - [ ] Зафіксувати погодження власника щодо mapping полів і manager workflow.
 - [ ] 2026-08-28: реальний Meta/ngrok OAuth callback, Meta webhook verification/subscription і одне реальне вхідне повідомлення залишаються pending — тестові Meta credentials, ngrok domain і Professional test account не надані. Live readiness не заявляється.
+- [ ] Підключити контрольований API-ключ Нової Пошти в `Налаштування → Доставка`, вибрати відправника, контакт і точку відправлення без фіксації ключа в evidence.
+- [ ] На одному погодженому тестовому замовленні перевірити quote → рівно одну ТТН → label → status sync → дозволене cancel → ручне Instagram-повідомлення; зберегти лише замаскований номер ТТН.
 
 ## Команда
 
