@@ -1,0 +1,110 @@
+name: Verify and deploy
+
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Enable pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.15.0 --activate
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Type check
+        run: pnpm typecheck
+
+      - name: Run tests
+        run: pnpm test
+
+      - name: Build production application
+        run: pnpm build
+
+      - name: Audit production dependencies
+        run: pnpm audit --prod --audit-level high
+
+  deploy:
+    name: Deploy production
+    needs: verify
+    if: >-
+      github.ref == 'refs/heads/master' &&
+      github.event_name != 'pull_request' &&
+      vars.AUTO_DEPLOY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment: production
+    concurrency:
+      group: autosale-production
+      cancel-in-progress: false
+    steps:
+      - name: Check out deployment script
+        uses: actions/checkout@v6
+
+      - name: Validate deployment configuration
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          DEPLOY_SSH_HOST_KEYS: ${{ secrets.DEPLOY_SSH_HOST_KEYS }}
+        run: |
+          test -n "$DEPLOY_HOST"
+          test -n "$DEPLOY_USER"
+          test -n "$DEPLOY_PATH"
+          test -n "$DEPLOY_SSH_PRIVATE_KEY"
+          test -n "$DEPLOY_SSH_HOST_KEYS"
+          case "$DEPLOY_PATH" in /*) ;; *) exit 1 ;; esac
+
+      - name: Configure SSH
+        env:
+          DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          DEPLOY_SSH_HOST_KEYS: ${{ secrets.DEPLOY_SSH_HOST_KEYS }}
+        run: |
+          install -d -m 700 "$HOME/.ssh"
+          printf '%s\n' "$DEPLOY_SSH_PRIVATE_KEY" > "$HOME/.ssh/autosale_deploy"
+          printf '%s\n' "$DEPLOY_SSH_HOST_KEYS" > "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/autosale_deploy" "$HOME/.ssh/known_hosts"
+
+      - name: Deploy exact master commit
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          DEPLOY_HEALTHCHECK_URL: ${{ secrets.DEPLOY_HEALTHCHECK_URL }}
+        run: |
+          port="${DEPLOY_PORT:-22}"
+          case "$port" in *[!0-9]*|'') exit 1 ;; esac
+          printf -v quoted_sha '%q' "$GITHUB_SHA"
+          printf -v quoted_path '%q' "$DEPLOY_PATH"
+          printf -v quoted_healthcheck '%q' "$DEPLOY_HEALTHCHECK_URL"
+          ssh -i "$HOME/.ssh/autosale_deploy" \
+            -p "$port" \
+            -o BatchMode=yes \
+            -o IdentitiesOnly=yes \
+            -o StrictHostKeyChecking=yes \
+            "$DEPLOY_USER@$DEPLOY_HOST" \
+            "sh -s -- $quoted_sha $quoted_path $quoted_healthcheck" \
+            < infra/scripts/deploy-commit.sh

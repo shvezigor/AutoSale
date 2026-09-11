@@ -1043,3 +1043,13 @@ Status: complete on 2026-09-11. Verification: API `370/370`, web `173/173`, cont
 - [ ] Deploy behind a feature flag and complete one controlled real Nova Poshta shipment acceptance.
 - [ ] Verify duplicate prevention, quote, TTN, label, status sync, cancellation where allowed and manual customer notification.
 - [ ] After stabilization, plan Meest, Ukrposhta, bank-account filtering and payments in that order.
+
+## Task 69: Automate production deployment from master
+
+- [x] Run type checking, tests, production build and dependency audit for every pull request and push to `master`.
+- [x] Keep production deployment disabled until the real server and GitHub Environment secrets are configured.
+- [x] Deploy the exact verified `master` commit through a pinned SSH host key and a dedicated deployment user.
+- [x] Serialize deployments, run migrations, wait for container health checks and restore the previous application commit on failure.
+- [x] Document the one-time server and GitHub setup without storing production secrets in the repository.
+
+Status: implementation complete on 2026-09-11 and intentionally inactive until a real server is configured. Verification: 954 tests, workspace typecheck, production build, production Docker image build, Compose validation, shell syntax validation, workflow YAML validation and production dependency audit passed; no high-severity audit findings remain.
