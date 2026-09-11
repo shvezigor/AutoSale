@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   deliveryConnectionInputSchema,
+  deliveryLocationQuerySchema,
   deliveryProviderSchema,
   deliverySenderProfileInputSchema,
   shipmentCreateJobSchema,
@@ -94,5 +95,17 @@ describe('delivery contracts', () => {
     expect(shipmentStatusJobSchema.parse({ shipmentId })).toEqual({ shipmentId });
     expect(() => shipmentCreateJobSchema.parse({ shipmentId: 'shipment-1' })).toThrow();
     expect(() => shipmentStatusJobSchema.parse({ shipmentId, tenantId: 'must-not-be-trusted' })).toThrow();
+  });
+
+  it('accepts only bounded provider-neutral delivery location queries', () => {
+    expect(deliveryLocationQuerySchema.parse({
+      provider: 'NOVA_POSHTA', type: 'CITY', query: 'Луцьк',
+    })).toEqual({ provider: 'NOVA_POSHTA', type: 'CITY', query: 'Луцьк' });
+    expect(deliveryLocationQuerySchema.parse({
+      provider: 'NOVA_POSHTA', type: 'BRANCH', query: '22', cityRef: 'city-ref',
+    })).toMatchObject({ type: 'BRANCH', cityRef: 'city-ref' });
+    expect(() => deliveryLocationQuerySchema.parse({ provider: 'NOVA_POSHTA', type: 'CITY', query: 'Л' })).toThrow();
+    expect(() => deliveryLocationQuerySchema.parse({ provider: 'NOVA_POSHTA', type: 'BRANCH', query: '22' })).toThrow();
+    expect(() => deliveryLocationQuerySchema.parse({ provider: 'MEEST', type: 'CITY', query: 'Луцьк' })).toThrow();
   });
 });

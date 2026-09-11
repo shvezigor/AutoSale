@@ -3,8 +3,9 @@ import { createPrismaClient, type PrismaClient } from '@autosale/database';
 import { CredentialCipher, NovaPoshtaClient } from '@autosale/integrations';
 import { DynamicModule, Module, type OnApplicationShutdown } from '@nestjs/common';
 
-import { DeliveryController } from './delivery.controller.js';
+import { DeliveryController, DeliveryLocationController } from './delivery.controller.js';
 import { DeliveryService } from './delivery.service.js';
+import { DeliveryLocationService } from './delivery-location.service.js';
 
 @Module({})
 export class DeliveryModule {
@@ -17,11 +18,13 @@ export class DeliveryModule {
       (apiKey) => new NovaPoshtaClient({ apiKey }),
       { enabled: env.NOVA_POSHTA_DELIVERY_ENABLED },
     );
+    const locationService = new DeliveryLocationService(service);
     return {
       module: DeliveryModule,
-      controllers: [DeliveryController],
+      controllers: [DeliveryController, DeliveryLocationController],
       providers: [
         { provide: DeliveryService, useValue: service },
+        { provide: DeliveryLocationService, useValue: locationService },
         { provide: DeliveryPrismaLifecycle, useValue: new DeliveryPrismaLifecycle(prisma) },
       ],
       exports: [DeliveryService],

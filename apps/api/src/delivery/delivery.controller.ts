@@ -1,10 +1,11 @@
 import type { AuthPrincipal } from '@autosale/contracts/auth';
-import { deliveryConnectionInputSchema, deliverySenderProfileInputSchema } from '@autosale/contracts';
+import { deliveryConnectionInputSchema, deliveryLocationQuerySchema, deliverySenderProfileInputSchema } from '@autosale/contracts';
 import { NovaPoshtaError } from '@autosale/integrations';
-import { BadRequestException, Body, Controller, Delete, ForbiddenException, Get, Inject, Put } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, ForbiddenException, Get, Inject, Put, Query } from '@nestjs/common';
 
 import { CurrentPrincipal, RequireMembership } from '../auth/auth.decorators.js';
 import { DeliveryService } from './delivery.service.js';
+import { DeliveryLocationService } from './delivery-location.service.js';
 
 @Controller('api/integrations/delivery')
 export class DeliveryController {
@@ -57,6 +58,19 @@ export class DeliveryController {
   senderOptions(@CurrentPrincipal() principal: AuthPrincipal) {
     assertOwner(principal);
     return this.delivery.senderOptions(principal.tenantId!);
+  }
+}
+
+@Controller('api/delivery')
+export class DeliveryLocationController {
+  constructor(@Inject(DeliveryLocationService) private readonly locationsService: DeliveryLocationService) {}
+
+  @Get('locations')
+  @RequireMembership('MANAGER')
+  locations(@CurrentPrincipal() principal: AuthPrincipal, @Query() query: unknown) {
+    const parsed = deliveryLocationQuerySchema.safeParse(query);
+    if (!parsed.success) throw new BadRequestException('Invalid delivery location search');
+    return this.locationsService.search(principal.tenantId!, parsed.data);
   }
 }
 

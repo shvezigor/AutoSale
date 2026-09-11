@@ -49,7 +49,9 @@ function fixture(overrides: Record<string, unknown> = {}) {
   };
   const validateCredential = vi.fn().mockResolvedValue({ valid: true });
   const listSenderProfiles = vi.fn().mockResolvedValue([{ ref: 'sender-ref', label: 'ТОВ Приклад', edrpou: '12345678' }]);
-  const factory = vi.fn().mockReturnValue({ validateCredential, listSenderProfiles });
+  const searchCities = vi.fn().mockResolvedValue([]);
+  const searchLocations = vi.fn().mockResolvedValue([]);
+  const factory = vi.fn().mockReturnValue({ validateCredential, listSenderProfiles, searchCities, searchLocations });
   const service = new DeliveryService(prisma as never, cipher as never, factory, { enabled: true, now: () => now, ...overrides });
   return { service, prisma, cipher, factory, validateCredential, listSenderProfiles };
 }
@@ -109,7 +111,7 @@ describe('DeliveryService', () => {
     const options = await service.senderOptions(tenantId);
     expect(prisma.deliveryConnection.findUnique).toHaveBeenCalledWith(expect.objectContaining({
       where: { tenantId_provider: { tenantId, provider: 'NOVA_POSHTA' } },
-      select: { status: true, encryptedCredential: true },
+      select: { status: true, encryptedCredential: true, credentialGenerationId: true },
     }));
     expect(cipher.decrypt).toHaveBeenCalledWith('ciphertext');
     expect(factory).toHaveBeenCalledWith('np-live-key');

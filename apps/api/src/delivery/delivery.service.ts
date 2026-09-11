@@ -4,7 +4,7 @@ import type { DeliveryConnectionInput, DeliveryConnectionSummary, DeliverySender
 import type { PrismaClient } from '@autosale/database';
 import type { CredentialCipher, NovaPoshtaClient, NovaPoshtaSenderProfile } from '@autosale/integrations';
 
-type NovaPoshtaClientPort = Pick<NovaPoshtaClient, 'validateCredential' | 'listSenderProfiles'>;
+type NovaPoshtaClientPort = Pick<NovaPoshtaClient, 'validateCredential' | 'listSenderProfiles' | 'searchCities' | 'searchLocations'>;
 export type NovaPoshtaClientFactory = (apiKey: string) => NovaPoshtaClientPort;
 
 type DeliveryServiceOptions = {
@@ -128,13 +128,20 @@ export class DeliveryService {
   }
 
   async clientForTenant(tenantId: string): Promise<NovaPoshtaClientPort> {
+    return (await this.clientContextForTenant(tenantId)).client;
+  }
+
+  async clientContextForTenant(tenantId: string): Promise<{ client: NovaPoshtaClientPort; credentialGenerationId: string }> {
     this.assertEnabled();
     const connection = await this.prisma.deliveryConnection.findUnique({
       where: { tenantId_provider: { tenantId, provider: 'NOVA_POSHTA' } },
-      select: { status: true, encryptedCredential: true },
+      select: { status: true, encryptedCredential: true, credentialGenerationId: true },
     });
     if (!connection || connection.status !== 'ACTIVE') throw new Error('Active Nova Poshta connection required');
-    return this.novaPoshtaClient(this.cipher.decrypt(connection.encryptedCredential));
+    return {
+      client: this.novaPoshtaClient(this.cipher.decrypt(connection.encryptedCredential)),
+      credentialGenerationId: connection.credentialGenerationId,
+    };
   }
 
   private assertEnabled(): void {

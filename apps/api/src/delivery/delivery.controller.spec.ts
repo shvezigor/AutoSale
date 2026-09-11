@@ -3,7 +3,7 @@ import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import { describe, expect, it, vi } from 'vitest';
 import { NovaPoshtaError } from '@autosale/integrations';
 
-import { DeliveryController } from './delivery.controller.js';
+import { DeliveryController, DeliveryLocationController } from './delivery.controller.js';
 
 const manager: AuthPrincipal = {
   userId: 'manager', email: 'manager@example.com', name: 'Manager', platformRole: 'USER',
@@ -68,5 +68,17 @@ describe('DeliveryController', () => {
     expect(() => controller.senderOptions(manager)).toThrow(ForbiddenException);
     await expect(controller.senderOptions(owner)).resolves.toEqual([]);
     expect(senderOptions).toHaveBeenCalledWith('tenant');
+  });
+});
+
+describe('DeliveryLocationController', () => {
+  it('validates location search before using the authenticated tenant', async () => {
+    const search = vi.fn().mockResolvedValue([]);
+    const controller = new DeliveryLocationController({ search } as never);
+    await expect(controller.locations(manager, {
+      provider: 'NOVA_POSHTA', type: 'CITY', query: 'Луцьк',
+    })).resolves.toEqual([]);
+    expect(search).toHaveBeenCalledWith('tenant', { provider: 'NOVA_POSHTA', type: 'CITY', query: 'Луцьк' });
+    expect(() => controller.locations(manager, { provider: 'NOVA_POSHTA', type: 'BRANCH', query: '22' })).toThrow(BadRequestException);
   });
 });

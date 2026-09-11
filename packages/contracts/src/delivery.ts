@@ -20,6 +20,7 @@ export const shipmentStatusSchema = z.enum([
 ]);
 export const shipmentPayerSchema = z.enum(['SENDER', 'RECIPIENT']);
 export const shipmentDestinationTypeSchema = z.enum(['BRANCH', 'PARCEL_LOCKER', 'ADDRESS']);
+export const deliveryLocationTypeSchema = z.enum(['CITY', 'BRANCH', 'PARCEL_LOCKER']);
 
 const phoneSchema = z.string().regex(/^\+380\d{9}$/);
 const positiveMoneySchema = z.number().finite().positive().max(10_000_000);
@@ -54,6 +55,17 @@ export const shipmentDestinationSchema = z.discriminatedUnion('type', [
 export const deliveryConnectionInputSchema = z.object({
   apiKey: z.string().trim().min(8).max(512),
 }).strict();
+
+export const deliveryLocationQuerySchema = z.object({
+  provider: z.literal('NOVA_POSHTA'),
+  type: deliveryLocationTypeSchema,
+  query: z.string().trim().min(2).max(120),
+  cityRef: z.string().trim().min(1).max(128).optional(),
+}).strict().superRefine((input, context) => {
+  if (input.type !== 'CITY' && !input.cityRef) {
+    context.addIssue({ code: 'custom', path: ['cityRef'], message: 'City reference is required' });
+  }
+});
 
 export const deliverySenderProfileInputSchema = z.object({
   senderRef: z.string().trim().min(1).max(128),
@@ -101,6 +113,8 @@ export type DeliveryConnectionStatus = z.infer<typeof deliveryConnectionStatusSc
 export type ShipmentStatus = z.infer<typeof shipmentStatusSchema>;
 export type ShipmentPayer = z.infer<typeof shipmentPayerSchema>;
 export type ShipmentDestinationType = z.infer<typeof shipmentDestinationTypeSchema>;
+export type DeliveryLocationType = z.infer<typeof deliveryLocationTypeSchema>;
+export type DeliveryLocationQuery = z.infer<typeof deliveryLocationQuerySchema>;
 export type ShipmentDestination = z.infer<typeof shipmentDestinationSchema>;
 export type DeliveryConnectionInput = z.infer<typeof deliveryConnectionInputSchema>;
 export type DeliverySenderProfileInput = z.infer<typeof deliverySenderProfileInputSchema>;
@@ -115,6 +129,15 @@ export interface DeliveryConnectionSummary {
   lastVerifiedAt: string | null;
   lastErrorCode: string | null;
   senderProfile: DeliverySenderProfileInput | null;
+}
+
+export interface DeliveryLocation {
+  ref: string;
+  provider: DeliveryProvider;
+  type: DeliveryLocationType;
+  label: string;
+  cityRef?: string;
+  number?: string;
 }
 
 export interface ShipmentQuote {

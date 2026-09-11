@@ -1003,9 +1003,11 @@ Status: complete on 2026-09-11. Verification: delivery API/controller `13/13`, N
 
 ## Task 63: Add delivery location search and caching
 
-- [ ] Search exact Nova Poshta cities, branches and parcel lockers instead of sending AI-extracted text directly.
-- [ ] Use bounded caching, debounce, keyboard-accessible results and clear stale-reference recovery.
-- [ ] Keep the public contract provider-neutral for later Meest and Ukrposhta adapters.
+- [x] Search exact Nova Poshta cities, branches and parcel lockers instead of sending AI-extracted text directly.
+- [x] Use bounded caching, debounce, keyboard-accessible results and clear stale-reference recovery.
+- [x] Keep the public contract provider-neutral for later Meest and Ukrposhta adapters.
+
+Status: complete on 2026-09-11. Verification: contracts `53/53`, API `363/363`, web `167/167`, full workspace typecheck passed. Search is tenant-scoped, credential-generation-aware, capped at 50 results and cached for five minutes without caching rejected calls.
 
 ## Task 64: Add shipment draft, quote and manager review
 
