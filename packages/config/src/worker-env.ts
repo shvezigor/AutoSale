@@ -3,6 +3,10 @@ import { Buffer } from 'node:buffer';
 import { z } from 'zod';
 
 const optionalNonEmptyString = z.preprocess((value) => value === '' ? undefined : value, z.string().min(1).optional());
+const optionalBoolean = z.preprocess(
+  (value) => value === undefined || value === '' ? undefined : value === true || value === 'true',
+  z.boolean().default(false),
+);
 const canonicalEncryptionKey = z.string().refine((value) => {
   const decoded = Buffer.from(value, 'base64');
   return decoded.length === 32 && decoded.toString('base64') === value;
@@ -22,6 +26,7 @@ export const workerEnvSchema = z.object({
   OPENAI_API_KEY: z.string().min(20),
   OPENAI_MODEL: z.string().min(1).default('gpt-5.4-mini'),
   CATALOGUE_AI_STRUCTURE_ANALYSIS: z.enum(['true', 'false']).default('true').transform((value) => value === 'true'),
+  NOVA_POSHTA_DELIVERY_ENABLED: optionalBoolean,
   META_APP_ID: z.string().regex(/^\d{5,32}$/),
   META_APP_SECRET: z.string().min(16),
   META_GRAPH_API_VERSION: z.string().regex(/^v\d+\.\d+$/),

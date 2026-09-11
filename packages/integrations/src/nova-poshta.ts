@@ -17,6 +17,8 @@ export interface NovaPoshtaSenderProfile {
   ref: string;
   label: string;
   edrpou: string | null;
+  contacts: Array<{ ref: string; label: string; phone: string }>;
+  origins: NovaPoshtaLocation[];
 }
 
 export interface NovaPoshtaCity {
@@ -127,10 +129,29 @@ export class NovaPoshtaClient {
       Page: '1',
       Limit: '100',
     });
-    return rows.map((row) => ({
-      ref: requiredString(row.Ref),
-      label: requiredString(row.Description),
-      edrpou: optionalString(row.EDRPOU),
+    return Promise.all(rows.map(async (row) => {
+      const ref = requiredString(row.Ref);
+      const [contacts, origins] = await Promise.all([
+        this.request('Counterparty', 'getCounterpartyContactPersons', { Ref: ref }),
+        this.request('Counterparty', 'getCounterpartyAddresses', { Ref: ref, CounterpartyProperty: 'Sender' }),
+      ]);
+      return {
+        ref,
+        label: requiredString(row.Description),
+        edrpou: optionalString(row.EDRPOU),
+        contacts: contacts.map((contact) => ({
+          ref: requiredString(contact.Ref),
+          label: requiredString(contact.Description),
+          phone: providerPhone(contact.Phones ?? contact.Phone),
+        })),
+        origins: origins.map((origin) => ({
+          ref: requiredString(origin.Ref),
+          cityRef: requiredString(origin.CityRef),
+          label: requiredString(origin.Description),
+          number: optionalString(origin.Number) ?? '',
+          type: warehouseType(origin),
+        })),
+      };
     }));
   }
 
@@ -413,6 +434,13 @@ function optionalProviderDate(value: unknown): string | null {
 function wirePhone(value: string): string {
   if (!/^\+380\d{9}$/.test(value)) throw new Error('Invalid Nova Poshta phone');
   return value.slice(1);
+}
+
+function providerPhone(value: unknown): string {
+  const normalized = requiredString(value).replace(/[\s()-]/g, '');
+  const international = normalized.startsWith('+') ? normalized : `+${normalized}`;
+  if (!/^\+380\d{9}$/.test(international)) throw new NovaPoshtaError('INVALID_RESPONSE', 200);
+  return international;
 }
 
 function positive(value: number, max: number): number {

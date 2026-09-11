@@ -55,14 +55,26 @@ describe('NovaPoshtaClient', () => {
   it('validates the credential and maps sender profiles without exposing the key', async () => {
     const fetchFn = vi.fn()
       .mockResolvedValueOnce(ok([{ Ref: 'sender-ref' }]))
-      .mockResolvedValueOnce(ok([{ Ref: 'sender-ref', Description: 'ТОВ Приклад', EDRPOU: '12345678' }]));
+      .mockResolvedValueOnce(ok([{ Ref: 'sender-ref', Description: 'ТОВ Приклад', EDRPOU: '12345678' }]))
+      .mockResolvedValueOnce(ok([{ Ref: 'contact-ref', Description: 'Ігор Швець', Phones: '380501112233' }]))
+      .mockResolvedValueOnce(ok([{ Ref: 'branch-ref', CityRef: 'city-ref', Description: 'Відділення №1', Number: '1', CategoryOfWarehouse: 'Branch' }]));
     const client = new NovaPoshtaClient({ apiKey: 'secret-key', fetch: fetchFn });
 
     await expect(client.validateCredential()).resolves.toEqual({ valid: true });
     const profiles = await client.listSenderProfiles();
     expect(profiles).toEqual([
-      { ref: 'sender-ref', label: 'ТОВ Приклад', edrpou: '12345678' },
+      {
+        ref: 'sender-ref', label: 'ТОВ Приклад', edrpou: '12345678',
+        contacts: [{ ref: 'contact-ref', label: 'Ігор Швець', phone: '+380501112233' }],
+        origins: [{ ref: 'branch-ref', cityRef: 'city-ref', label: 'Відділення №1', number: '1', type: 'BRANCH' }],
+      },
     ]);
+    expect(JSON.parse(String(fetchFn.mock.calls[2]?.[1]?.body))).toMatchObject({
+      modelName: 'Counterparty', calledMethod: 'getCounterpartyContactPersons', methodProperties: { Ref: 'sender-ref' },
+    });
+    expect(JSON.parse(String(fetchFn.mock.calls[3]?.[1]?.body))).toMatchObject({
+      modelName: 'Counterparty', calledMethod: 'getCounterpartyAddresses', methodProperties: { Ref: 'sender-ref', CounterpartyProperty: 'Sender' },
+    });
     expect(JSON.stringify(profiles)).not.toContain('secret-key');
   });
 

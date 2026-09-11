@@ -26,7 +26,11 @@ const validEnv = {
 
 describe('parseWorkerEnv', () => {
   it('accepts a complete worker environment', () => {
-    expect(parseWorkerEnv(validEnv)).toEqual({ ...validEnv, HEALTH_PORT: 3002, CATALOGUE_AI_STRUCTURE_ANALYSIS: true });
+    expect(parseWorkerEnv(validEnv)).toEqual({ ...validEnv, HEALTH_PORT: 3002, CATALOGUE_AI_STRUCTURE_ANALYSIS: true, NOVA_POSHTA_DELIVERY_ENABLED: false });
+  });
+
+  it('accepts an explicit Nova Poshta delivery feature flag', () => {
+    expect(parseWorkerEnv({ ...validEnv, NOVA_POSHTA_DELIVERY_ENABLED: 'true' }).NOVA_POSHTA_DELIVERY_ENABLED).toBe(true);
   });
 
   it('enables hybrid catalogue analysis by default and accepts an explicit rollback', () => {

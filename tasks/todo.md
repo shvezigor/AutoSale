@@ -995,9 +995,11 @@ Status: complete on 2026-09-11. Verification: Nova Poshta adapter covered by fak
 
 ## Task 62: Connect Nova Poshta and configure sender defaults
 
-- [ ] Add `Налаштування → Доставка` with an owner-only API-key connection flow.
-- [ ] Let the owner choose sender, contact, origin, payer and default parcel parameters.
-- [ ] Let managers use the connection without exposing or changing its secret.
+- [x] Add `Налаштування → Доставка` with an owner-only API-key connection flow.
+- [x] Let the owner choose sender, contact, origin, payer and default parcel parameters.
+- [x] Let managers use the connection without exposing or changing its secret.
+
+Status: complete on 2026-09-11. Verification: delivery API/controller `13/13`, Nova Poshta adapter `11/11`, web delivery/settings `9/9`, config `26/26`, package and full workspace typechecks passed. Credentials remain encrypted server-side; browser responses and manager UI never contain the API key.
 
 ## Task 63: Add delivery location search and caching
 

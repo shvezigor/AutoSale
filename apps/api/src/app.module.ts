@@ -18,6 +18,7 @@ import { CatalogueSourcesModule } from './catalogue-sources/catalogue-sources.mo
 import { GoogleOAuthModule } from './integrations/google-oauth.module.js';
 import { NotificationsModule } from './notifications/notifications.module.js';
 import { TelegramModule } from './integrations/telegram.module.js';
+import { DeliveryModule } from './delivery/delivery.module.js';
 
 @Module({
   controllers: [HealthController],
@@ -43,6 +44,7 @@ export class AppModule {
         CatalogueModule.register(env),
         CatalogueImportModule.register(env),
         CatalogueSourcesModule.register(env),
+        DeliveryModule.register(env),
       ],
     };
   }
