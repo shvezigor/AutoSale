@@ -3,7 +3,7 @@ import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import { describe, expect, it, vi } from 'vitest';
 import { NovaPoshtaError } from '@autosale/integrations';
 
-import { DeliveryController, DeliveryLocationController } from './delivery.controller.js';
+import { DeliveryController, DeliveryLocationController, ShipmentController } from './delivery.controller.js';
 
 const manager: AuthPrincipal = {
   userId: 'manager', email: 'manager@example.com', name: 'Manager', platformRole: 'USER',
@@ -80,5 +80,31 @@ describe('DeliveryLocationController', () => {
     })).resolves.toEqual([]);
     expect(search).toHaveBeenCalledWith('tenant', { provider: 'NOVA_POSHTA', type: 'CITY', query: 'Луцьк' });
     expect(() => controller.locations(manager, { provider: 'NOVA_POSHTA', type: 'BRANCH', query: '22' })).toThrow(BadRequestException);
+  });
+});
+
+describe('ShipmentController', () => {
+  const draft = {
+    provider: 'NOVA_POSHTA' as const, recipient: { name: 'Олена', phone: '+380671234567' },
+    destination: { type: 'BRANCH' as const, cityRef: 'city-ref', locationRef: 'branch-ref', label: 'Відділення №24' },
+    parcels: [{ weightKg: 2, lengthCm: 80, widthCm: 20, heightCm: 205 }], payer: 'RECIPIENT' as const,
+    declaredValue: 5000, codAmount: null, description: 'Двері',
+  };
+
+  it('scopes overview, draft save and quote to the authenticated tenant and manager', async () => {
+    const delivery = { shipmentOverview: vi.fn().mockResolvedValue({}), saveShipmentDraft: vi.fn().mockResolvedValue({}), quoteShipment: vi.fn().mockResolvedValue({ cost: 120 }) };
+    const controller = new ShipmentController(delivery as never);
+    await controller.overview(manager, 'order-id');
+    await controller.saveDraft(manager, 'order-id', draft);
+    await controller.quote(manager, 'order-id', draft);
+    expect(delivery.shipmentOverview).toHaveBeenCalledWith('tenant', 'order-id');
+    expect(delivery.saveShipmentDraft).toHaveBeenCalledWith('tenant', 'order-id', 'manager', draft);
+    expect(delivery.quoteShipment).toHaveBeenCalledWith('tenant', 'order-id', draft);
+  });
+
+  it('rejects an incomplete or invalid shipment draft at the boundary', () => {
+    const controller = new ShipmentController({} as never);
+    expect(() => controller.saveDraft(manager, 'order-id', { ...draft, codAmount: 6000 })).toThrow(BadRequestException);
+    expect(() => controller.quote(manager, 'order-id', { ...draft, recipient: { name: '', phone: '123' } })).toThrow(BadRequestException);
   });
 });

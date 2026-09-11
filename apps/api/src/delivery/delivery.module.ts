@@ -3,7 +3,7 @@ import { createPrismaClient, type PrismaClient } from '@autosale/database';
 import { CredentialCipher, NovaPoshtaClient } from '@autosale/integrations';
 import { DynamicModule, Module, type OnApplicationShutdown } from '@nestjs/common';
 
-import { DeliveryController, DeliveryLocationController } from './delivery.controller.js';
+import { DeliveryController, DeliveryLocationController, ShipmentController } from './delivery.controller.js';
 import { DeliveryService } from './delivery.service.js';
 import { DeliveryLocationService } from './delivery-location.service.js';
 
@@ -21,7 +21,7 @@ export class DeliveryModule {
     const locationService = new DeliveryLocationService(service);
     return {
       module: DeliveryModule,
-      controllers: [DeliveryController, DeliveryLocationController],
+      controllers: [DeliveryController, DeliveryLocationController, ShipmentController],
       providers: [
         { provide: DeliveryService, useValue: service },
         { provide: DeliveryLocationService, useValue: locationService },

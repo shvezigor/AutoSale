@@ -7,6 +7,7 @@ import { mutatingFetch } from '../auth/csrf-fetch';
 import { LoadingButton } from './loading-button';
 import { ProcurementItemCard } from './procurement-item-card';
 import { SupplierDispatchDialog } from './supplier-dispatch-dialog';
+import { ShipmentPanel } from './shipment-panel';
 
 const statusLabels: Record<string, string> = { NEEDS_REVIEW: 'Потребує перевірки', APPROVED: 'Підтверджено', AUTO_APPROVED: 'Підтверджено автоматично', CANCELLED: 'Відхилено', AI_PROCESSING: 'AI обробляє', AI_FAILED: 'Помилка AI' };
 
@@ -102,6 +103,7 @@ export function OrderReviewPanel({ initialOrder, backHref = '/orders' }: { initi
     </div>
     <section className="review-section"><h2>Товари</h2>{draft.items.map((item, index) => <article className="review-item" data-low-confidence={item.confidence < 0.9} key={item.id}><div className="review-item-head"><label><span className="sr-only">Товар {index + 1}</span><select value={item.catalogId ?? ''} onChange={(event) => changeItem(item.id, { catalogId: event.target.value || null, productName: draft.catalogueCandidates.find((candidate) => candidate.sku === event.target.value)?.name ?? null })}><option value="">Оберіть товар</option>{draft.catalogueCandidates.map((candidate) => <option key={candidate.sku} value={candidate.sku}>{candidate.sku} — {candidate.name}</option>)}</select></label><b>{Math.round(item.confidence * 100)}%</b></div><div className="item-edit-grid"><label>Розмір<input value={item.size ?? ''} onChange={(event) => changeItem(item.id, { size: event.target.value || null })} /></label><label>Колір<input value={item.color ?? ''} onChange={(event) => changeItem(item.id, { color: event.target.value || null })} /></label><label>Кількість<input min="1" type="number" value={item.quantity} onChange={(event) => changeItem(item.id, { quantity: Number(event.target.value) })} /></label></div>{approved && <ProcurementItemCard item={item} locked={order.procurementSummary === 'HANDED_OFF'} onOrderChange={applyOrder} orderId={order.id} />}</article>)}</section>
     {sheetsExport && <SheetsExportState value={sheetsExport} pending={pending} retry={() => void retrySheetsExport()} />}
+    <ShipmentPanel order={order} />
     <div className="review-actions">
       {saved && <p className="save-success">Зміни збережено</p>}
       {error && <p role="alert">{error}</p>}

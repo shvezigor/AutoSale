@@ -1,10 +1,11 @@
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 
-import type { DeliveryConnectionInput, DeliveryConnectionSummary, DeliverySenderProfileInput } from '@autosale/contracts';
+import { deliverySenderProfileInputSchema, shipmentDraftInputSchema, type DeliveryConnectionInput, type DeliveryConnectionSummary, type DeliverySenderProfileInput, type ShipmentDraftInput, type ShipmentOverview, type ShipmentQuote, type ShipmentSummary } from '@autosale/contracts';
 import type { PrismaClient } from '@autosale/database';
 import type { CredentialCipher, NovaPoshtaClient, NovaPoshtaSenderProfile } from '@autosale/integrations';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 
-type NovaPoshtaClientPort = Pick<NovaPoshtaClient, 'validateCredential' | 'listSenderProfiles' | 'searchCities' | 'searchLocations'>;
+type NovaPoshtaClientPort = Pick<NovaPoshtaClient, 'validateCredential' | 'listSenderProfiles' | 'searchCities' | 'searchLocations' | 'calculateShipment'>;
 export type NovaPoshtaClientFactory = (apiKey: string) => NovaPoshtaClientPort;
 
 type DeliveryServiceOptions = {
@@ -103,6 +104,82 @@ export class DeliveryService {
     return client.listSenderProfiles();
   }
 
+  async shipmentOverview(tenantId: string, orderId: string): Promise<ShipmentOverview> {
+    this.assertEnabled();
+    const order = await this.orderForShipment(tenantId, orderId);
+    const readiness = shipmentReadiness(order);
+    const shipment = await this.prisma.shipment.findFirst({
+      where: { tenantId, orderId },
+      orderBy: { createdAt: 'desc' },
+      include: { statusEvents: { orderBy: { occurredAt: 'desc' } } },
+    });
+    const connection = await this.prisma.deliveryConnection.findUnique({
+      where: { tenantId_provider: { tenantId, provider: 'NOVA_POSHTA' } },
+      include: { senderProfile: true },
+    });
+    const blockedReason = !readiness.allowed
+      ? readiness.reason
+      : !connection || connection.status !== 'ACTIVE'
+        ? 'CONNECTION_REQUIRED'
+        : !connection.senderProfile ? 'SENDER_PROFILE_REQUIRED' : null;
+    return {
+      shipment: shipment ? mapShipmentSummary(shipment) : null,
+      canCreateShipment: blockedReason === null,
+      blockedReason,
+      draft: blockedReason === null
+        ? shipment?.status === 'DRAFT' ? draftFromShipment(shipment) : await this.prefill(order, connection!.senderProfile!)
+        : null,
+    };
+  }
+
+  async saveShipmentDraft(tenantId: string, orderId: string, userId: string, input: ShipmentDraftInput): Promise<ShipmentSummary> {
+    this.assertEnabled();
+    const order = await this.orderForShipment(tenantId, orderId);
+    const readiness = shipmentReadiness(order);
+    if (!readiness.allowed) throw new BadRequestException(readiness.reason);
+    const parsed = shipmentDraftInputSchema.safeParse(input);
+    if (!parsed.success) throw new BadRequestException('INVALID_SHIPMENT_DRAFT');
+    const connection = await this.prisma.deliveryConnection.findUnique({
+      where: { tenantId_provider: { tenantId, provider: 'NOVA_POSHTA' } },
+      include: { senderProfile: true },
+    });
+    if (!connection || connection.status !== 'ACTIVE') throw new BadRequestException('CONNECTION_REQUIRED');
+    if (!validSenderProfile(connection.senderProfile)) throw new BadRequestException('SENDER_PROFILE_REQUIRED');
+    const data = shipmentDraftData(parsed.data, connection.senderProfile);
+    const existing = await this.prisma.shipment.findFirst({
+      where: { tenantId, orderId, status: { in: ['DRAFT', 'CREATING', 'CREATED', 'ACCEPTED', 'IN_TRANSIT', 'RETURNING'] } },
+      orderBy: { createdAt: 'desc' },
+    });
+    if (existing && existing.status !== 'DRAFT') throw new BadRequestException('SHIPMENT_ALREADY_CREATED');
+    const shipment = existing
+      ? await this.prisma.shipment.update({ where: { id: existing.id }, data, include: { statusEvents: { orderBy: { occurredAt: 'desc' } } } })
+      : await this.prisma.shipment.create({
+          data: {
+            tenantId, orderId, connectionId: connection.id, createdByUserId: userId, provider: 'NOVA_POSHTA', status: 'DRAFT',
+            ...data, idempotencyKey: `shipment:draft:v1:${orderId}`,
+          },
+          include: { statusEvents: { orderBy: { occurredAt: 'desc' } } },
+        });
+    return mapShipmentSummary(shipment);
+  }
+
+  async quoteShipment(tenantId: string, orderId: string, input: unknown): Promise<ShipmentQuote> {
+    this.assertEnabled();
+    const order = await this.orderForShipment(tenantId, orderId);
+    const readiness = shipmentReadiness(order);
+    if (!readiness.allowed) throw new BadRequestException(readiness.reason);
+    const parsed = shipmentDraftInputSchema.safeParse(input);
+    if (!parsed.success) throw new BadRequestException('INVALID_SHIPMENT_DRAFT');
+    const connection = await this.prisma.deliveryConnection.findUnique({
+      where: { tenantId_provider: { tenantId, provider: 'NOVA_POSHTA' } },
+      include: { senderProfile: true },
+    });
+    if (!connection || connection.status !== 'ACTIVE') throw new BadRequestException('CONNECTION_REQUIRED');
+    if (!validSenderProfile(connection.senderProfile)) throw new BadRequestException('SENDER_PROFILE_REQUIRED');
+    const client = this.novaPoshtaClient(this.cipher.decrypt(connection.encryptedCredential));
+    return client.calculateShipment(providerShipmentInput(parsed.data, connection.senderProfile, `quote:${orderId}`));
+  }
+
   async disconnect(tenantId: string): Promise<DeliveryConnectionSummary> {
     this.assertEnabled();
     const disconnectedAt = this.now();
@@ -147,6 +224,122 @@ export class DeliveryService {
   private assertEnabled(): void {
     if (!this.options.enabled) throw new Error('Nova Poshta delivery is disabled');
   }
+
+  private async orderForShipment(tenantId: string, orderId: string) {
+    const order = await this.prisma.order.findFirst({
+      where: { id: orderId, tenantId },
+      include: { items: true },
+    });
+    if (!order) throw new NotFoundException('Order not found');
+    return order;
+  }
+
+  private async prefill(order: Awaited<ReturnType<DeliveryService['orderForShipment']>>, sender: Parameters<typeof safeSenderProfile>[0]) {
+    const extraction = (order.extraction ?? {}) as {
+      customer?: { name?: string | null; phone?: string | null };
+      delivery?: { city?: string | null; novaPoshtaBranch?: string | null; address?: string | null };
+    };
+    const skus = order.items.map((item) => item.catalogId).filter((value): value is string => Boolean(value));
+    const products = await this.prisma.product.findMany({ where: { tenantId: order.tenantId, sku: { in: skus } }, select: { sku: true, name: true, price: true } });
+    const bySku = new Map(products.map((product) => [product.sku, product]));
+    const declaredValue = order.items.reduce((sum, item) => sum + Number(bySku.get(item.catalogId ?? '')?.price ?? 0) * item.quantity, 0);
+    const description = order.items.map((item) => bySku.get(item.catalogId ?? '')?.name ?? item.originalText).filter(Boolean).join(', ').slice(0, 100) || 'Товари';
+    const profile = safeSenderProfile(sender);
+    return {
+      provider: 'NOVA_POSHTA' as const,
+      recipient: { name: extraction.customer?.name ?? null, phone: extraction.customer?.phone ?? null },
+      cityHint: extraction.delivery?.city ?? null,
+      locationHint: extraction.delivery?.novaPoshtaBranch ?? extraction.delivery?.address ?? null,
+      parcels: [profile.defaultParcel],
+      payer: profile.payer,
+      declaredValue: declaredValue > 0 ? declaredValue : 1,
+      codAmount: null,
+      description,
+    };
+  }
+}
+
+function shipmentDraftData(draft: ShipmentDraftInput, sender: Parameters<typeof safeSenderProfile>[0]) {
+  const requestHash = createHash('sha256').update(JSON.stringify(draft)).digest('hex');
+  return {
+    senderSnapshot: JSON.parse(JSON.stringify(safeSenderProfile(sender))),
+    recipientSnapshot: draft.recipient,
+    destinationSnapshot: draft.destination,
+    parcels: draft.parcels,
+    payer: draft.payer,
+    declaredValue: draft.declaredValue,
+    codAmount: draft.codAmount,
+    description: draft.description,
+    requestHash,
+  };
+}
+
+function draftFromShipment(shipment: {
+  provider: 'NOVA_POSHTA' | 'MEEST' | 'UKRPOSHTA'; recipientSnapshot: unknown; destinationSnapshot: unknown;
+  parcels: unknown; payer: 'SENDER' | 'RECIPIENT'; declaredValue: unknown; codAmount: unknown; description: string;
+}): ShipmentDraftInput | null {
+  const parsed = shipmentDraftInputSchema.safeParse({
+    provider: shipment.provider,
+    recipient: shipment.recipientSnapshot,
+    destination: shipment.destinationSnapshot,
+    parcels: shipment.parcels,
+    payer: shipment.payer,
+    declaredValue: Number(shipment.declaredValue),
+    codAmount: shipment.codAmount === null ? null : Number(shipment.codAmount),
+    description: shipment.description,
+  });
+  return parsed.success ? parsed.data : null;
+}
+
+export function shipmentReadiness(order: {
+  status: string;
+  items: Array<{ procurementStatus: string }>;
+}): { allowed: true } | { allowed: false; reason: 'ORDER_NOT_APPROVED' | 'PROCUREMENT_INCOMPLETE' } {
+  if (!['APPROVED', 'AUTO_APPROVED'].includes(order.status)) return { allowed: false, reason: 'ORDER_NOT_APPROVED' };
+  return order.items.every((item) => ['IN_STOCK', 'RECEIVED'].includes(item.procurementStatus))
+    ? { allowed: true }
+    : { allowed: false, reason: 'PROCUREMENT_INCOMPLETE' };
+}
+
+function providerShipmentInput(draft: ShipmentDraftInput, sender: Parameters<typeof safeSenderProfile>[0], clientRef: string) {
+  const profile = safeSenderProfile(sender);
+  if (profile.origin.type === 'ADDRESS' || draft.destination.type === 'ADDRESS') throw new BadRequestException('ADDRESS_DELIVERY_NOT_SUPPORTED');
+  return {
+    sender: {
+      cityRef: profile.origin.cityRef,
+      locationRef: profile.origin.locationRef,
+      counterpartyRef: profile.senderRef,
+      contactRef: profile.contactRef,
+      phone: profile.contactPhone,
+    },
+    recipient: {
+      name: draft.recipient.name,
+      phone: draft.recipient.phone,
+      cityRef: draft.destination.cityRef,
+      cityLabel: draft.destination.label,
+      locationRef: draft.destination.locationRef,
+      locationNumber: draft.destination.label.match(/\d+/)?.[0] ?? '1',
+    },
+    parcel: draft.parcels[0]!, payer: draft.payer, declaredValue: draft.declaredValue,
+    codAmount: draft.codAmount, description: draft.description, clientRef,
+  };
+}
+
+export function mapShipmentSummary(shipment: {
+  id: string; orderId: string; provider: 'NOVA_POSHTA' | 'MEEST' | 'UKRPOSHTA'; status: ShipmentSummary['status'];
+  trackingNumber: string | null; cost: unknown; currency: string; createdAt: Date; providerCreatedAt: Date | null;
+  acceptedAt: Date | null; deliveredAt: Date | null; cancelledAt: Date | null; lastStatusCheckedAt: Date | null;
+  lastErrorCode: string | null; statusEvents: Array<{ status: ShipmentSummary['status'] | null; providerCode: string; occurredAt: Date }>;
+}): ShipmentSummary {
+  return {
+    id: shipment.id, orderId: shipment.orderId, provider: shipment.provider, status: shipment.status,
+    trackingNumber: shipment.trackingNumber, cost: shipment.cost === null ? null : Number(shipment.cost), currency: 'UAH',
+    createdAt: shipment.createdAt.toISOString(), providerCreatedAt: shipment.providerCreatedAt?.toISOString() ?? null,
+    acceptedAt: shipment.acceptedAt?.toISOString() ?? null, deliveredAt: shipment.deliveredAt?.toISOString() ?? null,
+    cancelledAt: shipment.cancelledAt?.toISOString() ?? null, lastStatusCheckedAt: shipment.lastStatusCheckedAt?.toISOString() ?? null,
+    lastErrorCode: shipment.lastErrorCode,
+    history: shipment.statusEvents.map((event) => ({ status: event.status, providerCode: event.providerCode, occurredAt: event.occurredAt.toISOString() })),
+  };
 }
 
 function safeConnection(connection: {
@@ -237,4 +430,8 @@ function senderProfileData(input: DeliverySenderProfileInput) {
     suggestCustomerNotification: input.suggestCustomerNotification,
     customerNotificationTemplate: input.customerNotificationTemplate,
   };
+}
+
+function validSenderProfile(profile: Parameters<typeof safeSenderProfile>[0] | null): profile is Parameters<typeof safeSenderProfile>[0] {
+  return Boolean(profile && deliverySenderProfileInputSchema.safeParse(safeSenderProfile(profile)).success);
 }

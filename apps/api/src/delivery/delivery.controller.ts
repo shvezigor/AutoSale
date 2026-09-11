@@ -1,7 +1,7 @@
 import type { AuthPrincipal } from '@autosale/contracts/auth';
-import { deliveryConnectionInputSchema, deliveryLocationQuerySchema, deliverySenderProfileInputSchema } from '@autosale/contracts';
+import { deliveryConnectionInputSchema, deliveryLocationQuerySchema, deliverySenderProfileInputSchema, shipmentDraftInputSchema } from '@autosale/contracts';
 import { NovaPoshtaError } from '@autosale/integrations';
-import { BadRequestException, Body, Controller, Delete, ForbiddenException, Get, Inject, Put, Query } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, ForbiddenException, Get, Inject, Param, ParseUUIDPipe, Post, Put, Query } from '@nestjs/common';
 
 import { CurrentPrincipal, RequireMembership } from '../auth/auth.decorators.js';
 import { DeliveryService } from './delivery.service.js';
@@ -71,6 +71,33 @@ export class DeliveryLocationController {
     const parsed = deliveryLocationQuerySchema.safeParse(query);
     if (!parsed.success) throw new BadRequestException('Invalid delivery location search');
     return this.locationsService.search(principal.tenantId!, parsed.data);
+  }
+}
+
+@Controller('api/orders')
+export class ShipmentController {
+  constructor(@Inject(DeliveryService) private readonly delivery: DeliveryService) {}
+
+  @Get(':orderId/shipments')
+  @RequireMembership('MANAGER')
+  overview(@CurrentPrincipal() principal: AuthPrincipal, @Param('orderId', new ParseUUIDPipe({ version: '4' })) orderId: string) {
+    return this.delivery.shipmentOverview(principal.tenantId!, orderId);
+  }
+
+  @Put(':orderId/shipments/draft')
+  @RequireMembership('MANAGER')
+  saveDraft(@CurrentPrincipal() principal: AuthPrincipal, @Param('orderId', new ParseUUIDPipe({ version: '4' })) orderId: string, @Body() body: unknown) {
+    const parsed = shipmentDraftInputSchema.safeParse(body);
+    if (!parsed.success) throw new BadRequestException('Invalid shipment draft');
+    return this.delivery.saveShipmentDraft(principal.tenantId!, orderId, principal.userId, parsed.data);
+  }
+
+  @Post(':orderId/shipments/quote')
+  @RequireMembership('MANAGER')
+  quote(@CurrentPrincipal() principal: AuthPrincipal, @Param('orderId', new ParseUUIDPipe({ version: '4' })) orderId: string, @Body() body: unknown) {
+    const parsed = shipmentDraftInputSchema.safeParse(body);
+    if (!parsed.success) throw new BadRequestException('Invalid shipment draft');
+    return this.delivery.quoteShipment(principal.tenantId!, orderId, parsed.data);
   }
 }
 

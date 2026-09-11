@@ -6,6 +6,7 @@ import type {
   ProcurementSummary,
   SupplierDispatchSummary,
 } from './procurement.js';
+import type { ShipmentSummary } from './delivery.js';
 
 export type OrderStatus = 'AI_PROCESSING' | 'AI_FAILED' | 'NEEDS_REVIEW' | 'AUTO_APPROVED' | 'APPROVED' | 'CANCELLED';
 
@@ -39,6 +40,8 @@ export interface ManagerOrder {
   procurementSummary: ProcurementSummary;
   procurementHandedOffAt: string | null;
   supplierDispatch: SupplierDispatchSummary | null;
+  shipment: ShipmentSummary | null;
+  canCreateShipment: boolean;
   catalogueCandidates: Array<{ sku: string; name: string }>;
   createdAt: string;
   sheetsExport: {

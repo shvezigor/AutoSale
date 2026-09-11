@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { DeliveryService } from './delivery.service.js';
+import { DeliveryService, shipmentReadiness } from './delivery.service.js';
 
 const tenantId = '11111111-1111-4111-8111-111111111111';
 const userId = '22222222-2222-4222-8222-222222222222';
@@ -57,6 +57,12 @@ function fixture(overrides: Record<string, unknown> = {}) {
 }
 
 describe('DeliveryService', () => {
+  it('allows shipment work only for approved orders whose procurement is complete', () => {
+    expect(shipmentReadiness({ status: 'APPROVED', items: [{ procurementStatus: 'IN_STOCK' }, { procurementStatus: 'RECEIVED' }] })).toEqual({ allowed: true });
+    expect(shipmentReadiness({ status: 'NEEDS_REVIEW', items: [{ procurementStatus: 'IN_STOCK' }] })).toEqual({ allowed: false, reason: 'ORDER_NOT_APPROVED' });
+    expect(shipmentReadiness({ status: 'AUTO_APPROVED', items: [{ procurementStatus: 'TO_ORDER' }] })).toEqual({ allowed: false, reason: 'PROCUREMENT_INCOMPLETE' });
+  });
+
   it('returns only a tenant-scoped safe connection summary', async () => {
     const { service, prisma } = fixture();
     const summary = await service.summary(tenantId);
@@ -136,5 +142,98 @@ describe('DeliveryService', () => {
     await expect(service.summary(tenantId)).resolves.toEqual({ enabled: false, connections: [] });
     await expect(service.connect(tenantId, userId, { apiKey: 'np-live-key' })).rejects.toThrow('disabled');
     expect(prisma.deliveryConnection.findUnique).not.toHaveBeenCalled();
+  });
+});
+
+describe('DeliveryService shipment review', () => {
+  const approvedOrder = {
+    id: '55555555-5555-4555-8555-555555555555', tenantId, status: 'APPROVED',
+    extraction: {
+      customer: { name: 'Олена', phone: '+380671234567' },
+      delivery: { city: 'Київ', novaPoshtaBranch: '24', address: null },
+    },
+    items: [{ catalogId: 'SKU-1', quantity: 2, procurementStatus: 'IN_STOCK', originalText: 'Двері Авангард' }],
+  };
+  const senderProfile = {
+    senderRef: 'sender-ref', contactRef: 'contact-ref', contactPhone: '+380501112233',
+    originType: 'BRANCH', originCityRef: 'sender-city', originLocationRef: 'sender-branch', originAddressRef: null,
+    originBuilding: null, originFlat: null, originLabel: 'Відділення №1', payer: 'SENDER',
+    defaultWeightKg: 2, defaultLengthCm: 80, defaultWidthCm: 20, defaultHeightCm: 205,
+    suggestCustomerNotification: true, customerNotificationTemplate: '{company}: {trackingNumber}',
+  };
+
+  function shipmentFixture() {
+    const calculateShipment = vi.fn().mockResolvedValue({ currency: 'UAH', cost: 120, estimatedDeliveryDate: '2026-09-13' });
+    const prisma = {
+      order: { findFirst: vi.fn().mockResolvedValue(approvedOrder) },
+      product: { findMany: vi.fn().mockResolvedValue([{ sku: 'SKU-1', name: 'Двері Авангард', price: 2500 }]) },
+      deliveryConnection: { findUnique: vi.fn().mockResolvedValue({ ...connection, senderProfile }) },
+      shipment: { findFirst: vi.fn().mockResolvedValue(null), create: vi.fn().mockImplementation(({ data }) => Promise.resolve({
+        id: '66666666-6666-4666-8666-666666666666', ...data, trackingNumber: null, cost: null, currency: 'UAH',
+        createdAt: new Date('2026-09-11T08:00:00.000Z'), providerCreatedAt: null, acceptedAt: null, deliveredAt: null,
+        cancelledAt: null, lastStatusCheckedAt: null, lastErrorCode: null, statusEvents: [],
+      })), update: vi.fn() },
+    };
+    const cipher = { encrypt: vi.fn(), decrypt: vi.fn().mockReturnValue('np-live-key') };
+    const factory = vi.fn().mockReturnValue({
+      validateCredential: vi.fn(), listSenderProfiles: vi.fn(), searchCities: vi.fn(), searchLocations: vi.fn(), calculateShipment,
+    });
+    return { service: new DeliveryService(prisma as never, cipher as never, factory, { enabled: true }), prisma, calculateShipment };
+  }
+
+  it('prefills customer hints and tenant defaults without treating AI text as exact refs', async () => {
+    const { service } = shipmentFixture();
+    await expect(service.shipmentOverview(tenantId, approvedOrder.id)).resolves.toMatchObject({
+      canCreateShipment: true,
+      blockedReason: null,
+      shipment: null,
+      draft: {
+        recipient: { name: 'Олена', phone: '+380671234567' },
+        cityHint: 'Київ', locationHint: '24', payer: 'SENDER', declaredValue: 5000,
+        parcels: [{ weightKg: 2, lengthCm: 80, widthCm: 20, heightCm: 205 }],
+      },
+    });
+  });
+
+  it('quotes a complete exact draft without creating or advancing a shipment', async () => {
+    const { service, prisma, calculateShipment } = shipmentFixture();
+    const draft = {
+      provider: 'NOVA_POSHTA' as const,
+      recipient: { name: 'Олена', phone: '+380671234567' },
+      destination: { type: 'BRANCH' as const, cityRef: 'recipient-city', locationRef: 'recipient-branch', label: 'Відділення №24' },
+      parcels: [{ weightKg: 2, lengthCm: 80, widthCm: 20, heightCm: 205 }],
+      payer: 'RECIPIENT' as const, declaredValue: 5000, codAmount: 5000, description: 'Двері Авангард',
+    };
+    await expect(service.quoteShipment(tenantId, approvedOrder.id, draft)).resolves.toEqual({ currency: 'UAH', cost: 120, estimatedDeliveryDate: '2026-09-13' });
+    expect(calculateShipment).toHaveBeenCalledWith(expect.objectContaining({
+      sender: expect.objectContaining({ counterpartyRef: 'sender-ref', locationRef: 'sender-branch' }),
+      recipient: expect.objectContaining({ cityRef: 'recipient-city', locationRef: 'recipient-branch' }),
+    }));
+    expect(prisma.shipment.create).not.toHaveBeenCalled();
+    expect(prisma.shipment.update).not.toHaveBeenCalled();
+  });
+
+  it('persists an exact draft snapshot without contacting Nova Poshta', async () => {
+    const { service, prisma, calculateShipment } = shipmentFixture();
+    const draft = {
+      provider: 'NOVA_POSHTA' as const,
+      recipient: { name: 'Олена', phone: '+380671234567' },
+      destination: { type: 'BRANCH' as const, cityRef: 'recipient-city', locationRef: 'recipient-branch', label: 'Відділення №24' },
+      parcels: [{ weightKg: 2, lengthCm: 80, widthCm: 20, heightCm: 205 }], payer: 'RECIPIENT' as const,
+      declaredValue: 5000, codAmount: null, description: 'Двері Авангард',
+    };
+    await expect(service.saveShipmentDraft(tenantId, approvedOrder.id, userId, draft)).resolves.toMatchObject({ status: 'DRAFT', orderId: approvedOrder.id });
+    expect(prisma.shipment.create).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({
+      tenantId, orderId: approvedOrder.id, createdByUserId: userId, recipientSnapshot: draft.recipient,
+      destinationSnapshot: draft.destination, status: 'DRAFT', requestHash: expect.stringMatching(/^[a-f0-9]{64}$/),
+    }) }));
+    expect(calculateShipment).not.toHaveBeenCalled();
+  });
+
+  it('rejects incomplete procurement before quoting', async () => {
+    const { service, prisma, calculateShipment } = shipmentFixture();
+    prisma.order.findFirst.mockResolvedValue({ ...approvedOrder, items: [{ ...approvedOrder.items[0], procurementStatus: 'TO_ORDER' }] });
+    await expect(service.quoteShipment(tenantId, approvedOrder.id, {})).rejects.toThrow('PROCUREMENT_INCOMPLETE');
+    expect(calculateShipment).not.toHaveBeenCalled();
   });
 });

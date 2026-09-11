@@ -169,3 +169,24 @@ export interface ShipmentSummary {
   lastErrorCode: string | null;
   history: ShipmentStatusEventSummary[];
 }
+
+export type ShipmentBlockedReason = 'ORDER_NOT_APPROVED' | 'PROCUREMENT_INCOMPLETE' | 'CONNECTION_REQUIRED' | 'SENDER_PROFILE_REQUIRED';
+
+export interface ShipmentDraftPrefill {
+  provider: 'NOVA_POSHTA';
+  recipient: { name: string | null; phone: string | null };
+  cityHint: string | null;
+  locationHint: string | null;
+  parcels: Array<{ weightKg: number; lengthCm: number; widthCm: number; heightCm: number }>;
+  payer: ShipmentPayer;
+  declaredValue: number;
+  codAmount: number | null;
+  description: string;
+}
+
+export interface ShipmentOverview {
+  shipment: ShipmentSummary | null;
+  canCreateShipment: boolean;
+  blockedReason: ShipmentBlockedReason | null;
+  draft: ShipmentDraftPrefill | ShipmentDraftInput | null;
+}

@@ -11,6 +11,7 @@ import {
 } from '@autosale/database';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { metrics } from '@autosale/observability';
+import { mapShipmentSummary, shipmentReadiness } from '../delivery/delivery.service.js';
 
 type Extraction = {
   isOrder?: boolean;
@@ -196,6 +197,11 @@ export class OrdersService {
       take: 1,
       include: { _count: { select: { items: true } } },
     },
+    shipments: {
+      orderBy: { createdAt: 'desc' as const },
+      take: 1,
+      include: { statusEvents: { orderBy: { occurredAt: 'desc' as const } } },
+    },
   };
 
   private async productNames(tenantId: string): Promise<Map<string, string>> {
@@ -212,6 +218,7 @@ export class OrdersService {
     };
     const procurementStatuses = row.items.map((item) => item.procurementStatus ?? 'UNASSESSED');
     const latestSupplierDelivery = row.telegramDeliveries?.[0];
+    const readiness = shipmentReadiness(row);
     return {
       id: row.id,
       status: row.status as OrderStatus,
@@ -247,6 +254,8 @@ export class OrdersService {
         status: latestSupplierDelivery.status,
         itemCount: latestSupplierDelivery._count.items,
       } : null,
+      shipment: row.shipments?.[0] ? mapShipmentSummary(row.shipments[0]) : null,
+      canCreateShipment: readiness.allowed,
       catalogueCandidates: [...products].map(([sku, name]) => ({ sku, name })),
       createdAt: row.createdAt.toISOString(),
       sheetsExport: row.exports[0] ? this.mapExport(row.exports[0], row.exports[0].destination.status === 'ACTIVE') : null,

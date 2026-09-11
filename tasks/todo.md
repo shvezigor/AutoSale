@@ -1011,10 +1011,12 @@ Status: complete on 2026-09-11. Verification: contracts `53/53`, API `363/363`, 
 
 ## Task 64: Add shipment draft, quote and manager review
 
-- [ ] Pre-fill recipient and delivery hints from the approved order and tenant defaults.
-- [ ] Require an exact location, parcel data, declared value, payer and optional COD amount.
-- [ ] Calculate and show the delivery quote without creating an external document.
-- [ ] Provide a responsive review dialog/drawer with stable loading states.
+- [x] Pre-fill recipient and delivery hints from the approved order and tenant defaults.
+- [x] Require an exact location, parcel data, declared value, payer and optional COD amount.
+- [x] Calculate and show the delivery quote without creating an external document.
+- [x] Provide a responsive review dialog/drawer with stable loading states.
+
+Status: complete on 2026-09-11. Verification: API `370/370`, web `173/173`, contracts `53/53`, and full workspace typecheck passed. Chat-extracted city/branch values remain search hints only; the persisted draft contains exact provider references and quote calls do not create a TTN.
 
 ## Task 65: Create Nova Poshta TTNs idempotently
 

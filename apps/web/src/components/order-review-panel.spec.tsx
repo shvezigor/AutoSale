@@ -24,6 +24,8 @@ const order: ManagerOrder = {
   procurementSummary: 'UNASSESSED',
   procurementHandedOffAt: null,
   supplierDispatch: null,
+  shipment: null,
+  canCreateShipment: false,
   catalogueCandidates: [{ sku: 'UB-038-BLK', name: 'Кросівки Urban Black' }],
   createdAt: '2026-08-26T12:00:00.000Z',
   sheetsExport: null,

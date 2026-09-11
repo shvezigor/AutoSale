@@ -10,6 +10,7 @@ export function DeliveryLocationPicker({
   label,
   type,
   cityRef,
+  initialQuery = '',
   value,
   onSelect,
   search = searchDeliveryLocations,
@@ -17,13 +18,14 @@ export function DeliveryLocationPicker({
   label: string;
   type: DeliveryLocationType;
   cityRef?: string;
+  initialQuery?: string;
   value: DeliveryLocation | null;
   onSelect(value: DeliveryLocation | null): void;
   search?: SearchFunction;
 }) {
   const listId = useId();
   const previousCityRef = useRef(cityRef);
-  const [query, setQuery] = useState(value?.label ?? '');
+  const [query, setQuery] = useState(value?.label ?? initialQuery);
   const [options, setOptions] = useState<DeliveryLocation[]>([]);
   const [activeIndex, setActiveIndex] = useState(-1);
   const [open, setOpen] = useState(false);
@@ -33,11 +35,11 @@ export function DeliveryLocationPicker({
   useEffect(() => {
     if (type === 'CITY' || previousCityRef.current === cityRef) return;
     previousCityRef.current = cityRef;
-    setQuery('');
+    setQuery(initialQuery);
     setOptions([]);
     setOpen(false);
     onSelect(null);
-  }, [cityRef, onSelect, type]);
+  }, [cityRef, initialQuery, onSelect, type]);
 
   useEffect(() => {
     const normalized = query.trim();

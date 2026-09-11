@@ -22,6 +22,8 @@ const order: ManagerOrder = {
   procurementSummary: 'NEEDS_ORDER',
   procurementHandedOffAt: null,
   supplierDispatch: null,
+  shipment: null,
+  canCreateShipment: false,
   catalogueCandidates: [],
   createdAt: '2026-09-08T09:30:00.000Z',
   sheetsExport: null,
