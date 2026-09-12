@@ -110,6 +110,20 @@ describe('UkrposhtaSettingsCard', () => {
     expect(save).toBeDisabled();
   });
 
+  it('invalidates a persisted branch when the owner edits its saved city field', async () => {
+    render(<UkrposhtaSettingsCard initial={configured} role="OWNER" />);
+    const cityInput = screen.getByLabelText('Місто відправлення Укрпошти');
+    const branchInput = screen.getByLabelText('Відділення відправлення Укрпошти');
+    const save = screen.getByRole('button', { name: 'Зберегти відправника Укрпошти' });
+
+    expect(branchInput).toHaveValue('43000 · Луцьк 1');
+    expect(save).toBeEnabled();
+    fireEvent.change(cityInput, { target: { value: 'Лу' } });
+
+    await waitFor(() => expect(branchInput).toHaveValue(''));
+    expect(save).toBeDisabled();
+  });
+
   it('lets an owner choose production with an inline warning and submit one complete credential bundle', async () => {
     mutatingFetch.mockResolvedValue(new Response(JSON.stringify({ ...active.connection, environment: 'PRODUCTION' }), { status: 200 }));
     render(<UkrposhtaSettingsCard initial={disconnected} role="OWNER" />);

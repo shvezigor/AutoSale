@@ -31,7 +31,7 @@ export function UkrposhtaSettingsCard({ initial, role }: { initial: UkrposhtaSet
   const [trackingBearer, setTrackingBearer] = useState('');
   const [counterpartyUuid, setCounterpartyUuid] = useState('');
   const [profile, setProfile] = useState<UkrposhtaSenderProfileInput>(initial.connection?.senderProfile ?? emptyProfile);
-  const [city, setCity] = useState<DeliveryLocation | null>(null);
+  const [city, setCity] = useState<DeliveryLocation | null>(() => citySelectionFromProfile(initial.connection?.senderProfile));
   const [pending, setPending] = useState<'connect' | 'disconnect' | 'profile' | null>(null);
   const activity = useActivity();
   const confirm = useConfirm();
@@ -59,6 +59,7 @@ export function UkrposhtaSettingsCard({ initial, role }: { initial: UkrposhtaSet
       setConnection(payload);
       setEnvironment(payload.environment ?? 'SANDBOX');
       setProfile(payload.senderProfile ?? emptyProfile);
+      setCity(citySelectionFromProfile(payload.senderProfile));
       toast.show({ type: 'success', title: 'Укрпошту підключено' });
     } catch {
       toast.show({ type: 'error', title: 'Не вдалося підключити Укрпошту', message: 'Перевірте реквізити з договору Укрпошти.' });
@@ -258,6 +259,11 @@ function validProfile(profile: UkrposhtaSenderProfileInput): boolean {
 function parcelSummary(profile: UkrposhtaSenderProfileInput): string {
   const parcel = profile.defaultParcel;
   return `${parcel.weightKg} кг · ${parcel.lengthCm} × ${parcel.widthCm} × ${parcel.heightCm} см`;
+}
+
+function citySelectionFromProfile(profile: UkrposhtaSenderProfileInput | null | undefined): DeliveryLocation | null {
+  if (!profile?.origin.cityRef) return null;
+  return { ref: profile.origin.cityRef, provider: 'UKRPOSHTA', type: 'CITY', label: '' };
 }
 
 function NumberField({ label, value, max, onChange }: { label: string; value: number; max: number; onChange(value: number): void }) {

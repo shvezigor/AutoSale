@@ -77,3 +77,18 @@ Verification commands and results:
 | `pnpm --filter @autosale/web test` | 57 files, 195 tests passed |
 | `pnpm --filter @autosale/integrations typecheck` | passed |
 | `pnpm --filter @autosale/web typecheck` | passed |
+
+## Fix round 2/5 — persisted sender city invalidation
+
+- Initialized the city picker from a persisted sender profile with a safe Ukrposhta `CITY` selection carrying the saved city reference, without exposing an opaque reference as the input label.
+- Synchronized the same city selection after a successful connection response.
+- Ensured the first edit or clear of a persisted city invalidates the saved branch, removes its stale label/reference, and disables sender-profile save until a new exact branch is selected.
+- Added a focused populated-profile regression. It was observed failing before the production change because the old branch remained selected, then passing after the fix.
+
+Verification commands and results:
+
+| Command | Result |
+| --- | --- |
+| `pnpm exec vitest run src/components/ukrposhta-settings-card.spec.tsx` (web) | 1 file, 6 tests passed |
+| `pnpm --filter @autosale/web test` | 57 files, 196 tests passed |
+| `pnpm --filter @autosale/web typecheck` | passed |
