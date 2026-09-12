@@ -62,6 +62,14 @@ export const meestConnectionInputSchema = z.object({
   clientUid: z.string().uuid(),
 }).strict();
 
+export const ukrposhtaConnectionInputSchema = z.object({
+  environment: z.enum(['SANDBOX', 'PRODUCTION']),
+  ecomBearer: z.string().trim().min(8).max(2_048),
+  counterpartyToken: z.string().trim().min(8).max(2_048),
+  trackingBearer: z.string().trim().min(8).max(2_048),
+  counterpartyUuid: z.string().uuid(),
+}).strict();
+
 export const meestSenderProfileInputSchema = z.object({
   senderName: z.string().trim().min(2).max(120),
   senderPhone: phoneSchema,
@@ -138,6 +146,7 @@ export type DeliveryLocationQuery = z.infer<typeof deliveryLocationQuerySchema>;
 export type ShipmentDestination = z.infer<typeof shipmentDestinationSchema>;
 export type DeliveryConnectionInput = z.infer<typeof deliveryConnectionInputSchema>;
 export type MeestConnectionInput = z.infer<typeof meestConnectionInputSchema>;
+export type UkrposhtaConnectionInput = z.infer<typeof ukrposhtaConnectionInputSchema>;
 export type MeestSenderProfileInput = z.infer<typeof meestSenderProfileInputSchema>;
 export type DeliverySenderProfileInput = z.infer<typeof deliverySenderProfileInputSchema>;
 export type ShipmentDraftInput = z.infer<typeof shipmentDraftInputSchema>;

@@ -100,6 +100,23 @@ describe('delivery contracts', () => {
     expect(() => meestConnectionInputSchema.parse({ ...input, apiKey: 'unexpected' })).toThrow();
   });
 
+  it('accepts one complete environment-scoped Ukrposhta credential bundle', () => {
+    const schema = (deliveryContracts as unknown as Record<string, { parse(value: unknown): unknown }>).ukrposhtaConnectionInputSchema;
+    expect(schema).toBeDefined();
+    if (!schema) throw new Error('Ukrposhta connection schema is missing');
+    const input = {
+      environment: 'SANDBOX',
+      ecomBearer: 'ecom-bearer-secret',
+      counterpartyToken: 'counterparty-token-secret',
+      trackingBearer: 'tracking-bearer-secret',
+      counterpartyUuid: '8458f0b0-930f-11e2-a91e-003048d2b473',
+    };
+    expect(schema.parse(input)).toEqual(input);
+    expect(() => schema.parse({ ...input, trackingBearer: '' })).toThrow();
+    expect(() => schema.parse({ ...input, environment: 'STAGING' })).toThrow();
+    expect(() => schema.parse({ ...input, productionBearer: 'must-not-be-accepted' })).toThrow();
+  });
+
   it('accepts a branch-based Meest sender profile without exposing provider credentials', () => {
     const schema = (deliveryContracts as unknown as Record<string, { parse(value: unknown): unknown }>).meestSenderProfileInputSchema;
     expect(schema).toBeDefined();

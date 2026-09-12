@@ -68,3 +68,10 @@ export {
   type MeestLocation,
   type MeestLocationSearchInput,
 } from './meest.js';
+export {
+  UkrposhtaClient,
+  UkrposhtaError,
+  type UkrposhtaClientConfig,
+  type UkrposhtaEnvironment,
+  type UkrposhtaErrorCode,
+} from './ukrposhta.js';
