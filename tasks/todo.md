@@ -1039,7 +1039,7 @@ Status: complete on 2026-09-11. Verification: API `370/370`, web `173/173`, cont
 
 Status: complete on 2026-09-11. The message uses the workspace name, an owner-editable template and the existing durable Instagram queue. Duplicate clicks reuse one shipment-version idempotency key; failed Instagram delivery leaves the shipment and TTN unchanged and provides a copy fallback. Verification: API `380/380`, web `179/179`, contracts `54/54`, full workspace typecheck and production build; the one transient PostgreSQL migration-test reset passed on isolated rerun.
 
-## Task 68: Verify and roll out Nova Poshta delivery
+## Task 68: Verify and roll out Nova Poshta delivery — BACKLOG ACCEPTANCE
 
 - [x] Add privacy, tenant-isolation, observability, idempotency and mobile regressions.
 - [x] Let an owner choose a sender city and branch/parcel locker in AutoSale when Nova Poshta returns no saved sender addresses.
@@ -1047,7 +1047,7 @@ Status: complete on 2026-09-11. The message uses the workspace name, an owner-ed
 - [ ] Verify duplicate prevention, quote, TTN, label, status sync, cancellation where allowed and manual customer notification during that acceptance.
 - [ ] After stabilization, plan Meest, Ukrposhta, bank-account filtering and payments in that order.
 
-Status: automated rollout checks in progress on 2026-09-12. The authenticated-tenant matrix covers connection, location, draft, quote, create, label, cancellation and customer message boundaries. A new regression found and fixed generic `apiKey`/credential log redaction. The 390×844 delivery drawer check covers horizontal overflow, sticky actions, stable loading width and right-aligned toast; component coverage verifies focus restoration. Owner onboarding opens the Nova Poshta API-key settings directly, uses one manual-paste field with one connection action and preselects the only available sender profile. Accounts without a Nova Poshta-saved sender origin can now search and persist an exact city plus branch or parcel-locker reference directly in AutoSale. Production migration `20260910180000_delivery_foundation` applied successfully and API, web, worker, PostgreSQL, Redis and MinIO are healthy. At the owner's request, real-provider acceptance is deferred until the actual sender city and branch/parcel locker are selected; this remains a required pre-rollout check and does not block work on the next carrier.
+Status: automated rollout checks are complete. The authenticated-tenant matrix covers connection, location, draft, quote, create, label, cancellation and customer message boundaries. A regression found and fixed generic `apiKey`/credential log redaction. The 390×844 delivery drawer check covers horizontal overflow, sticky actions, stable loading width and right-aligned toast; component coverage verifies focus restoration. Owner onboarding opens the Nova Poshta API-key settings directly, uses one manual-paste field with one connection action and preselects the only available sender profile. Accounts without a Nova Poshta-saved sender origin can search and persist an exact city plus branch or parcel-locker reference directly in AutoSale. Production migration `20260910180000_delivery_foundation` is applied and the production stack is healthy. Per the owner's decision on 2026-09-12, the controlled real-provider acceptance is in the backlog until delivery integrations are tested together; it remains required before broader rollout.
 
 ## Task 69: Automate production deployment from master
 
@@ -1059,7 +1059,7 @@ Status: automated rollout checks in progress on 2026-09-12. The authenticated-te
 
 Status: implementation complete on 2026-09-11 and intentionally inactive until a real server is configured. Verification: 954 tests, workspace typecheck, production build, production Docker image build, Compose validation, shell syntax validation, workflow YAML validation and production dependency audit passed; no high-severity audit findings remain.
 
-## Task 70: Add Meest connection and directories
+## Task 70: Add Meest connection and directories — BACKLOG ACCEPTANCE
 
 - [x] Verify the current official API authentication, sandbox, HTTPS endpoints and provider error model.
 - [x] Add a credential-safe XML query adapter with signed requests, city/branch mapping and contract tests.
@@ -1069,14 +1069,16 @@ Status: implementation complete on 2026-09-11 and intentionally inactive until a
 - [x] Add provider-aware city/branch search and persist the Meest sender name, phone, exact origin and parcel defaults in Delivery settings.
 - [ ] Verify the official sandbox and document any contract-only production prerequisites.
 
-Status: implementation started on 2026-09-12. Official Meest documentation confirms that production login/password are supplied after signing a contract, while test client parameters and browser sandboxes are available. The adapter uses the working HTTPS endpoints even though some documentation examples still show HTTP, signs requests with the documented MD5 envelope, disables XML entity processing, validates response structure and exposes only safe error codes. Provider-aware directory search now resolves credentials per tenant and carrier and isolates cached results by provider and credential generation; the remaining settings step is to persist Meest sender identity and its selected origin.
+Status: connection, encrypted credentials, directories and the sender-profile UI are implemented and deployed. Official Meest documentation confirms that production login/password are supplied after signing a contract, while test client parameters and browser sandboxes are available. The adapter uses HTTPS, signed XML requests, disabled entity processing and safe provider errors. Provider-aware directory search resolves credentials per tenant and carrier and isolates cached results by provider and credential generation. Per the owner's decision on 2026-09-12, sandbox and live acceptance are moved to the backlog for a later combined delivery-integration test cycle.
 
-## Task 71: Create and track Meest shipments
+## Task 71: Create and track Meest shipments — BACKLOG
 
 - [ ] Extend provider-neutral shipment drafts so the manager explicitly chooses an active carrier.
 - [ ] Implement Meest quote, idempotent create, lookup/reconciliation, label, tracking and allowed cancellation.
 - [ ] Map Meest statuses into the existing shipment lifecycle without provider-specific UI leakage.
 - [ ] Complete sandbox acceptance before enabling production shipment creation.
+
+Status: deferred by the owner on 2026-09-12. Resume with sandbox credentials, then implement and verify quote, draft, create, reconciliation, label, tracking and cancellation as one controlled carrier lifecycle. Do not enable production Meest shipment creation before acceptance passes.
 
 ## Task 72: Add Ukrposhta delivery
 
