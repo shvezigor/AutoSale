@@ -1,9 +1,9 @@
 import type { AuthPrincipal } from '@autosale/contracts/auth';
 import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import { describe, expect, it, vi } from 'vitest';
-import { NovaPoshtaError } from '@autosale/integrations';
+import { MeestError, NovaPoshtaError } from '@autosale/integrations';
 
-import { DeliveryController, DeliveryLocationController, ShipmentController, ShipmentLifecycleController } from './delivery.controller.js';
+import { DeliveryController, DeliveryLocationController, MeestConnectionController, ShipmentController, ShipmentLifecycleController } from './delivery.controller.js';
 
 const manager: AuthPrincipal = {
   userId: 'manager', email: 'manager@example.com', name: 'Manager', platformRole: 'USER',
@@ -68,6 +68,31 @@ describe('DeliveryController', () => {
     expect(() => controller.senderOptions(manager)).toThrow(ForbiddenException);
     await expect(controller.senderOptions(owner)).resolves.toEqual([]);
     expect(senderOptions).toHaveBeenCalledWith('tenant');
+  });
+});
+
+describe('MeestConnectionController', () => {
+  const input = { login: 'merchant', password: 'secret-password', clientUid: '8458f0b0-930f-11e2-a91e-003048d2b473' };
+
+  it('lets managers read state but reserves connection changes for owners', async () => {
+    const summary = vi.fn().mockResolvedValue({ enabled: true, connection: null });
+    const connect = vi.fn().mockResolvedValue({ provider: 'MEEST', status: 'ACTIVE' });
+    const disconnect = vi.fn().mockResolvedValue({ provider: 'MEEST', status: 'DISCONNECTED' });
+    const controller = new MeestConnectionController({ summary, connect, disconnect } as never);
+    await expect(controller.summary(manager)).resolves.toEqual({ enabled: true, connection: null });
+    await expect(controller.connect(manager, input)).rejects.toBeInstanceOf(ForbiddenException);
+    expect(() => controller.disconnect(manager)).toThrow(ForbiddenException);
+    await controller.connect(owner, input);
+    await controller.disconnect(owner);
+    expect(connect).toHaveBeenCalledWith('tenant', 'owner', input);
+    expect(disconnect).toHaveBeenCalledWith('tenant');
+  });
+
+  it('rejects malformed and provider-rejected credentials safely', async () => {
+    const connect = vi.fn().mockRejectedValue(new MeestError('UNAUTHORIZED', 200));
+    const controller = new MeestConnectionController({ connect } as never);
+    await expect(controller.connect(owner, { ...input, clientUid: 'bad' })).rejects.toBeInstanceOf(BadRequestException);
+    await expect(controller.connect(owner, input)).rejects.toBeInstanceOf(BadRequestException);
   });
 });
 

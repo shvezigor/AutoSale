@@ -5,6 +5,7 @@ import {
   deliveryLocationQuerySchema,
   deliveryProviderSchema,
   deliverySenderProfileInputSchema,
+  meestConnectionInputSchema,
   shipmentCreateJobSchema,
   shipmentCustomerMessageInputSchema,
   shipmentDraftInputSchema,
@@ -88,6 +89,14 @@ describe('delivery contracts', () => {
       suggestCustomerNotification: true,
       customerNotificationTemplate: '{company}: ТТН {trackingNumber}',
     })).toMatchObject({ senderRef: 'sender-ref', payer: 'SENDER' });
+  });
+
+  it('accepts only complete bounded Meest contract credentials', () => {
+    const input = { login: 'merchant', password: 'secret-password', clientUid: '8458f0b0-930f-11e2-a91e-003048d2b473' };
+    expect(meestConnectionInputSchema.parse(input)).toEqual(input);
+    expect(() => meestConnectionInputSchema.parse({ ...input, password: '' })).toThrow();
+    expect(() => meestConnectionInputSchema.parse({ ...input, clientUid: 'client-ref' })).toThrow();
+    expect(() => meestConnectionInputSchema.parse({ ...input, apiKey: 'unexpected' })).toThrow();
   });
 
   it('accepts only UUID-backed delivery worker jobs', () => {

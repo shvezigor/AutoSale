@@ -59,3 +59,12 @@ export {
   type NovaPoshtaShipmentReference,
   type NovaPoshtaShipmentStatus,
 } from './nova-poshta.js';
+export {
+  MeestClient,
+  MeestError,
+  type MeestCity,
+  type MeestClientConfig,
+  type MeestErrorCode,
+  type MeestLocation,
+  type MeestLocationSearchInput,
+} from './meest.js';

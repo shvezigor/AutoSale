@@ -1,11 +1,12 @@
 import type { AuthPrincipal } from '@autosale/contracts/auth';
-import { deliveryConnectionInputSchema, deliveryLocationQuerySchema, deliverySenderProfileInputSchema, shipmentCustomerMessageInputSchema, shipmentDraftInputSchema } from '@autosale/contracts';
-import { NovaPoshtaError } from '@autosale/integrations';
+import { deliveryConnectionInputSchema, deliveryLocationQuerySchema, deliverySenderProfileInputSchema, meestConnectionInputSchema, shipmentCustomerMessageInputSchema, shipmentDraftInputSchema } from '@autosale/contracts';
+import { MeestError, NovaPoshtaError } from '@autosale/integrations';
 import { BadRequestException, Body, Controller, Delete, ForbiddenException, Get, Headers, HttpCode, Inject, Param, ParseUUIDPipe, Post, Put, Query, StreamableFile } from '@nestjs/common';
 
 import { CurrentPrincipal, RequireMembership } from '../auth/auth.decorators.js';
 import { DeliveryService } from './delivery.service.js';
 import { DeliveryLocationService } from './delivery-location.service.js';
+import { MeestConnectionService } from './meest-connection.service.js';
 
 @Controller('api/integrations/delivery')
 export class DeliveryController {
@@ -58,6 +59,38 @@ export class DeliveryController {
   senderOptions(@CurrentPrincipal() principal: AuthPrincipal) {
     assertOwner(principal);
     return this.delivery.senderOptions(principal.tenantId!);
+  }
+}
+
+@Controller('api/integrations/delivery/meest')
+export class MeestConnectionController {
+  constructor(@Inject(MeestConnectionService) private readonly meest: MeestConnectionService) {}
+
+  @Get()
+  @RequireMembership('MANAGER')
+  summary(@CurrentPrincipal() principal: AuthPrincipal) {
+    return this.meest.summary(principal.tenantId!);
+  }
+
+  @Put()
+  @RequireMembership('OWNER')
+  async connect(@CurrentPrincipal() principal: AuthPrincipal, @Body() body: unknown) {
+    assertOwner(principal);
+    const parsed = meestConnectionInputSchema.safeParse(body);
+    if (!parsed.success) throw new BadRequestException('Invalid Meest connection');
+    try {
+      return await this.meest.connect(principal.tenantId!, principal.userId, parsed.data);
+    } catch (error) {
+      if (error instanceof MeestError) throw new BadRequestException('Meest rejected the connection');
+      throw error;
+    }
+  }
+
+  @Delete()
+  @RequireMembership('OWNER')
+  disconnect(@CurrentPrincipal() principal: AuthPrincipal) {
+    assertOwner(principal);
+    return this.meest.disconnect(principal.tenantId!);
   }
 }
 

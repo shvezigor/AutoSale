@@ -11,6 +11,7 @@ import { TelegramSettingsCard, type TelegramConnectionSummary } from '../../../s
 import { TelegramSupplierSettings } from '../../../src/components/telegram-supplier-settings';
 import type { TelegramNotificationPreferences, TelegramSupplierSettings as TelegramSupplierConfiguration } from '../../../../../packages/contracts/src/telegram';
 import { DeliverySettingsCard, type DeliverySettingsSummary } from '../../../src/components/delivery-settings-card';
+import { MeestSettingsCard, type MeestSettingsSummary } from '../../../src/components/meest-settings-card';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,20 +24,22 @@ export default async function SettingsPage({ searchParams = Promise.resolve({}) 
   const initialTab: SettingsTabId = requestedTab === 'google' || requestedTab === 'data'
     ? 'data'
     : requestedTab === 'orders' ? 'orders' : requestedTab === 'telegram' ? 'telegram' : requestedTab === 'delivery' ? 'delivery' : 'social';
-  const [instagramResponse, googleResponse, telegramResponse, telegramPreferencesResponse, deliveryResponse] = await Promise.all([
+  const [instagramResponse, googleResponse, telegramResponse, telegramPreferencesResponse, deliveryResponse, meestResponse] = await Promise.all([
     authenticatedApiFetch('/api/integrations/instagram'),
     authenticatedApiFetch('/api/integrations/google'),
     authenticatedApiFetch('/api/integrations/telegram'),
     authenticatedApiFetch('/api/integrations/telegram/preferences'),
     authenticatedApiFetch('/api/integrations/delivery'),
+    authenticatedApiFetch('/api/integrations/delivery/meest'),
   ]);
-  if (!instagramResponse.ok || !googleResponse.ok || !telegramResponse.ok || !telegramPreferencesResponse.ok || !deliveryResponse.ok) throw new Error('Не вдалося завантажити налаштування');
+  if (!instagramResponse.ok || !googleResponse.ok || !telegramResponse.ok || !telegramPreferencesResponse.ok || !deliveryResponse.ok || !meestResponse.ok) throw new Error('Не вдалося завантажити налаштування');
   const instagram = (await instagramResponse.json()) as InstagramConnectionSummary;
   const google = (await googleResponse.json()) as GoogleConnectionSummary;
   const telegram = (await telegramResponse.json()) as TelegramConnectionSummary;
   const telegramPreferences = (await telegramPreferencesResponse.json()) as TelegramNotificationPreferences;
   const delivery = (await deliveryResponse.json()) as DeliverySettingsSummary;
-  if (session.membershipRole === 'MANAGER') return <SettingsLayout google={google} instagram={instagram} telegram={telegram} telegramPreferences={telegramPreferences} delivery={delivery} initialTab={initialTab} pickerAction={pickerAction} session={session} />;
+  const meest = (await meestResponse.json()) as MeestSettingsSummary;
+  if (session.membershipRole === 'MANAGER') return <SettingsLayout google={google} instagram={instagram} telegram={telegram} telegramPreferences={telegramPreferences} delivery={delivery} meest={meest} initialTab={initialTab} pickerAction={pickerAction} session={session} />;
 
   const [supplierResponse, response, sheetsResponse, catalogueSourcesResponse] = await Promise.all([
     authenticatedApiFetch('/api/integrations/telegram/supplier'),
@@ -54,7 +57,7 @@ export default async function SettingsPage({ searchParams = Promise.resolve({}) 
     if (!sourceResponse.ok) throw new Error('Не вдалося завантажити джерело каталогу');
     return await sourceResponse.json() as CatalogueSourceConfiguration;
   }));
-  return <SettingsLayout google={google} instagram={instagram} telegram={telegram} telegramPreferences={telegramPreferences} delivery={delivery} supplier={supplier} initialTab={initialTab} pickerAction={pickerAction} session={session} settings={settings} sheets={sheets} catalogueSources={catalogueSources} catalogueConfigurations={catalogueConfigurations} />;
+  return <SettingsLayout google={google} instagram={instagram} telegram={telegram} telegramPreferences={telegramPreferences} delivery={delivery} meest={meest} supplier={supplier} initialTab={initialTab} pickerAction={pickerAction} session={session} settings={settings} sheets={sheets} catalogueSources={catalogueSources} catalogueConfigurations={catalogueConfigurations} />;
 }
 
 function SettingsLayout({
@@ -63,6 +66,7 @@ function SettingsLayout({
   telegram,
   telegramPreferences,
   delivery,
+  meest,
   supplier,
   initialTab,
   pickerAction,
@@ -77,6 +81,7 @@ function SettingsLayout({
   telegram: TelegramConnectionSummary;
   telegramPreferences: TelegramNotificationPreferences;
   delivery: DeliverySettingsSummary;
+  meest: MeestSettingsSummary;
   supplier?: TelegramSupplierConfiguration;
   initialTab: SettingsTabId;
   pickerAction: string;
@@ -104,8 +109,8 @@ function SettingsLayout({
     {
       id: 'delivery' as const,
       label: 'Доставка',
-      description: 'Нова Пошта',
-      content: <section className="settings-section"><div className="settings-section-heading"><h2>Доставка</h2><p>Підключіть перевізника та один раз задайте дані відправника.</p></div><DeliverySettingsCard initial={delivery} role={session.membershipRole!} /></section>,
+      description: 'Нова Пошта і Meest',
+      content: <section className="settings-section"><div className="settings-section-heading"><h2>Доставка</h2><p>Підключіть перевізників та один раз задайте дані відправника.</p></div><DeliverySettingsCard initial={delivery} role={session.membershipRole!} /><MeestSettingsCard initial={meest} role={session.membershipRole!} /></section>,
     },
     {
       id: 'data' as const,

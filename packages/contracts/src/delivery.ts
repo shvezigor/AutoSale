@@ -56,6 +56,12 @@ export const deliveryConnectionInputSchema = z.object({
   apiKey: z.string().trim().min(8).max(512),
 }).strict();
 
+export const meestConnectionInputSchema = z.object({
+  login: z.string().trim().min(1).max(128),
+  password: z.string().min(1).max(256),
+  clientUid: z.string().uuid(),
+}).strict();
+
 export const deliveryLocationQuerySchema = z.object({
   provider: z.literal('NOVA_POSHTA'),
   type: deliveryLocationTypeSchema,
@@ -121,6 +127,7 @@ export type DeliveryLocationType = z.infer<typeof deliveryLocationTypeSchema>;
 export type DeliveryLocationQuery = z.infer<typeof deliveryLocationQuerySchema>;
 export type ShipmentDestination = z.infer<typeof shipmentDestinationSchema>;
 export type DeliveryConnectionInput = z.infer<typeof deliveryConnectionInputSchema>;
+export type MeestConnectionInput = z.infer<typeof meestConnectionInputSchema>;
 export type DeliverySenderProfileInput = z.infer<typeof deliverySenderProfileInputSchema>;
 export type ShipmentDraftInput = z.infer<typeof shipmentDraftInputSchema>;
 export type ShipmentCreateJob = z.infer<typeof shipmentCreateJobSchema>;

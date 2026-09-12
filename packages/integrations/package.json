@@ -19,6 +19,7 @@
   "dependencies": {
     "@autosale/contracts": "workspace:*",
     "@aws-sdk/client-s3": "3.1118.0",
+    "fast-xml-parser": "5.11.1",
     "google-auth-library": "^11.0.2"
   },
   "devDependencies": {

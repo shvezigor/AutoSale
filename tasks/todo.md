@@ -1043,11 +1043,11 @@ Status: complete on 2026-09-11. The message uses the workspace name, an owner-ed
 
 - [x] Add privacy, tenant-isolation, observability, idempotency and mobile regressions.
 - [x] Let an owner choose a sender city and branch/parcel locker in AutoSale when Nova Poshta returns no saved sender addresses.
-- [ ] Deploy behind a feature flag and complete one controlled real Nova Poshta shipment acceptance.
-- [ ] Verify duplicate prevention, quote, TTN, label, status sync, cancellation where allowed and manual customer notification.
+- [ ] Complete one controlled real Nova Poshta shipment acceptance after the owner selects the actual sender city and branch/parcel locker.
+- [ ] Verify duplicate prevention, quote, TTN, label, status sync, cancellation where allowed and manual customer notification during that acceptance.
 - [ ] After stabilization, plan Meest, Ukrposhta, bank-account filtering and payments in that order.
 
-Status: automated rollout checks in progress on 2026-09-12. The authenticated-tenant matrix covers connection, location, draft, quote, create, label, cancellation and customer message boundaries. A new regression found and fixed generic `apiKey`/credential log redaction. The 390×844 delivery drawer check covers horizontal overflow, sticky actions, stable loading width and right-aligned toast; component coverage verifies focus restoration. Owner onboarding opens the Nova Poshta API-key settings directly, uses one manual-paste field with one connection action and preselects the only available sender profile. Accounts without a Nova Poshta-saved sender origin can now search and persist an exact city plus branch or parcel-locker reference directly in AutoSale. Production migration `20260910180000_delivery_foundation` applied successfully and API, web, worker, PostgreSQL, Redis and MinIO are healthy. Real-provider acceptance remains intentionally open until the owner selects the actual sender origin and one controlled Nova Poshta shipment is approved and completed.
+Status: automated rollout checks in progress on 2026-09-12. The authenticated-tenant matrix covers connection, location, draft, quote, create, label, cancellation and customer message boundaries. A new regression found and fixed generic `apiKey`/credential log redaction. The 390×844 delivery drawer check covers horizontal overflow, sticky actions, stable loading width and right-aligned toast; component coverage verifies focus restoration. Owner onboarding opens the Nova Poshta API-key settings directly, uses one manual-paste field with one connection action and preselects the only available sender profile. Accounts without a Nova Poshta-saved sender origin can now search and persist an exact city plus branch or parcel-locker reference directly in AutoSale. Production migration `20260910180000_delivery_foundation` applied successfully and API, web, worker, PostgreSQL, Redis and MinIO are healthy. At the owner's request, real-provider acceptance is deferred until the actual sender city and branch/parcel locker are selected; this remains a required pre-rollout check and does not block work on the next carrier.
 
 ## Task 69: Automate production deployment from master
 
@@ -1058,3 +1058,32 @@ Status: automated rollout checks in progress on 2026-09-12. The authenticated-te
 - [x] Document the one-time server and GitHub setup without storing production secrets in the repository.
 
 Status: implementation complete on 2026-09-11 and intentionally inactive until a real server is configured. Verification: 954 tests, workspace typecheck, production build, production Docker image build, Compose validation, shell syntax validation, workflow YAML validation and production dependency audit passed; no high-severity audit findings remain.
+
+## Task 70: Add Meest connection and directories
+
+- [x] Verify the current official API authentication, sandbox, HTTPS endpoints and provider error model.
+- [x] Add a credential-safe XML query adapter with signed requests, city/branch mapping and contract tests.
+- [x] Add encrypted tenant credentials for Meest (`login`, `password`, `ClientUID`) without returning secrets to the browser.
+- [x] Add owner connection UI in Delivery settings.
+- [ ] Add provider-aware city/branch search in Delivery settings.
+- [ ] Verify the official sandbox and document any contract-only production prerequisites.
+
+Status: implementation started on 2026-09-12. Official Meest documentation confirms that production login/password are supplied after signing a contract, while test client parameters and browser sandboxes are available. The first adapter slice uses the working HTTPS endpoints even though some documentation examples still show HTTP, signs requests with the documented MD5 envelope, disables XML entity processing, validates response structure and exposes only safe error codes.
+
+## Task 71: Create and track Meest shipments
+
+- [ ] Extend provider-neutral shipment drafts so the manager explicitly chooses an active carrier.
+- [ ] Implement Meest quote, idempotent create, lookup/reconciliation, label, tracking and allowed cancellation.
+- [ ] Map Meest statuses into the existing shipment lifecycle without provider-specific UI leakage.
+- [ ] Complete sandbox acceptance before enabling production shipment creation.
+
+## Task 72: Add Ukrposhta delivery
+
+- [ ] Confirm current official API onboarding, test environment and credential model.
+- [ ] Implement the same connection, directory, shipment and acceptance slices through a separate adapter.
+
+## Task 73: Add bank accounts and payments
+
+- [ ] Model tenant legal entities, currencies, bank accounts and payment state after delivery adapters stabilize.
+- [ ] Filter selectable accounts by the order's legal entity and payment currency and show only active accounts.
+- [ ] Add payment recording and reconciliation as a separate audited lifecycle.

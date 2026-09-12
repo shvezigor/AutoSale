@@ -39,6 +39,7 @@ describe('SettingsPage', () => {
       .mockResolvedValueOnce({ ok: true, json: async () => ({ available: true, botUsername: 'AutoSaleBot', personal: { connected: false, displayName: null, username: null, linkedAt: null } }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ ORDER_NEEDS_REVIEW: true, ORDER_AUTO_APPROVED: true, SUPPLIER_DELIVERY_FAILED: true }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ enabled: true, connections: [] }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ enabled: true, connection: null }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ businessConnected: true, selectedDestinationId: null, autoDispatch: false, destinations: [] }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ approvalMode: 'REVIEW', minimumConfidence: 0.8, promptVersion: 'v1' }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ spreadsheetId: null, sheetName: 'Orders', status: 'NOT_CONFIGURED', requiredHeaders: ['order_id'], lastValidatedAt: null, errorSummary: null }) })
@@ -98,16 +99,18 @@ describe('SettingsPage', () => {
         json: async () => ({ available: true, botUsername: 'AutoSaleBot', personal: { connected: true, displayName: 'Іван', username: 'ivan_manager', linkedAt: '2026-09-01T08:00:00.000Z' } }),
       })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ ORDER_NEEDS_REVIEW: true, ORDER_AUTO_APPROVED: true, SUPPLIER_DELIVERY_FAILED: true }) })
-      .mockResolvedValueOnce({ ok: true, json: async () => ({ enabled: true, connections: [{ provider: 'NOVA_POSHTA', status: 'ACTIVE', accountLabel: 'ТОВ Приклад', lastVerifiedAt: null, lastErrorCode: null, senderProfile: null }] }) });
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ enabled: true, connections: [{ provider: 'NOVA_POSHTA', status: 'ACTIVE', accountLabel: 'ТОВ Приклад', lastVerifiedAt: null, lastErrorCode: null, senderProfile: null }] }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ enabled: true, connection: null }) });
 
     render(await WorkspaceLayout({ children: await SettingsPage() }));
 
-    expect(authenticatedApiFetch).toHaveBeenCalledTimes(5);
+    expect(authenticatedApiFetch).toHaveBeenCalledTimes(6);
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/integrations/instagram');
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/integrations/google');
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/integrations/telegram');
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/integrations/telegram/preferences');
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/integrations/delivery');
+    expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/integrations/delivery/meest');
     expect(screen.getByText('@autosale_store')).toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Підтвердження замовлень' })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('tab', { name: /Дані/ }));
