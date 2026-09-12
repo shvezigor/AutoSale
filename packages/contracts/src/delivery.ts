@@ -70,6 +70,16 @@ export const ukrposhtaConnectionInputSchema = z.object({
   counterpartyUuid: z.string().uuid(),
 }).strict();
 
+export const ukrposhtaSenderProfileInputSchema = z.object({
+  senderName: z.string().trim().min(2).max(120),
+  senderPhone: phoneSchema,
+  origin: pickupDestinationSchema.extend({ type: z.literal('BRANCH') }),
+  payer: shipmentPayerSchema,
+  defaultParcel: parcelSchema,
+  suggestCustomerNotification: z.boolean(),
+  customerNotificationTemplate: z.string().trim().min(1).max(1_000),
+}).strict();
+
 export const ukrposhtaConnectionSummarySchema = z.object({
   provider: z.literal('UKRPOSHTA'),
   status: deliveryConnectionStatusSchema,
@@ -77,6 +87,7 @@ export const ukrposhtaConnectionSummarySchema = z.object({
   lastVerifiedAt: z.string().datetime().nullable(),
   lastErrorCode: z.string().trim().min(1).max(120).nullable(),
   environment: z.enum(['SANDBOX', 'PRODUCTION']).nullable(),
+  senderProfile: ukrposhtaSenderProfileInputSchema.nullable(),
 }).strict();
 
 export const meestSenderProfileInputSchema = z.object({
@@ -90,11 +101,14 @@ export const meestSenderProfileInputSchema = z.object({
 }).strict();
 
 export const deliveryLocationQuerySchema = z.object({
-  provider: z.enum(['NOVA_POSHTA', 'MEEST']),
+  provider: deliveryProviderSchema,
   type: deliveryLocationTypeSchema,
   query: z.string().trim().min(2).max(120),
   cityRef: z.string().trim().min(1).max(128).optional(),
 }).strict().superRefine((input, context) => {
+  if (input.provider === 'UKRPOSHTA' && input.type === 'PARCEL_LOCKER') {
+    context.addIssue({ code: 'custom', path: ['type'], message: 'Ukrposhta supports branches only' });
+  }
   if (input.type !== 'CITY' && !input.cityRef) {
     context.addIssue({ code: 'custom', path: ['cityRef'], message: 'City reference is required' });
   }
@@ -156,6 +170,7 @@ export type ShipmentDestination = z.infer<typeof shipmentDestinationSchema>;
 export type DeliveryConnectionInput = z.infer<typeof deliveryConnectionInputSchema>;
 export type MeestConnectionInput = z.infer<typeof meestConnectionInputSchema>;
 export type UkrposhtaConnectionInput = z.infer<typeof ukrposhtaConnectionInputSchema>;
+export type UkrposhtaSenderProfileInput = z.infer<typeof ukrposhtaSenderProfileInputSchema>;
 export type MeestSenderProfileInput = z.infer<typeof meestSenderProfileInputSchema>;
 export type DeliverySenderProfileInput = z.infer<typeof deliverySenderProfileInputSchema>;
 export type ShipmentDraftInput = z.infer<typeof shipmentDraftInputSchema>;
@@ -192,6 +207,7 @@ export interface UkrposhtaConnectionSummary {
   lastVerifiedAt: string | null;
   lastErrorCode: string | null;
   environment: 'SANDBOX' | 'PRODUCTION' | null;
+  senderProfile: UkrposhtaSenderProfileInput | null;
 }
 
 export interface DeliveryLocation {

@@ -50,6 +50,16 @@ describe('DeliveryLocationPicker', () => {
     ));
   });
 
+  it('searches the explicitly selected Ukrposhta directory', async () => {
+    vi.useFakeTimers();
+    const search = vi.fn().mockResolvedValue([]);
+    render(<DeliveryLocationPicker provider="UKRPOSHTA" label="Місто Укрпошти" type="CITY" value={null} onSelect={vi.fn()} search={search} />);
+    fireEvent.change(screen.getByLabelText('Місто Укрпошти'), { target: { value: 'Луцьк' } });
+    await vi.advanceTimersByTimeAsync(300);
+    expect(search).toHaveBeenCalledWith({ provider: 'UKRPOSHTA', type: 'CITY', query: 'Луцьк', cityRef: undefined }, expect.any(AbortSignal));
+    vi.useRealTimers();
+  });
+
   it('shows stable loading, empty and error states and closes with Escape', async () => {
     vi.useFakeTimers();
     let reject!: (error: Error) => void;

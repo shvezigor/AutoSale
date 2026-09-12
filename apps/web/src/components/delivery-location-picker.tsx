@@ -17,7 +17,7 @@ export function DeliveryLocationPicker({
   search = searchDeliveryLocations,
 }: {
   label: string;
-  provider?: Extract<DeliveryProvider, 'NOVA_POSHTA' | 'MEEST'>;
+  provider?: Extract<DeliveryProvider, 'NOVA_POSHTA' | 'MEEST' | 'UKRPOSHTA'>;
   type: DeliveryLocationType;
   cityRef?: string;
   initialQuery?: string;
@@ -161,7 +161,7 @@ async function searchDeliveryLocations(input: SearchInput, signal: AbortSignal):
 function isDeliveryLocation(value: unknown): value is DeliveryLocation {
   return typeof value === 'object' && value !== null
     && typeof (value as DeliveryLocation).ref === 'string'
-    && ['NOVA_POSHTA', 'MEEST'].includes((value as DeliveryLocation).provider)
+    && ['NOVA_POSHTA', 'MEEST', 'UKRPOSHTA'].includes((value as DeliveryLocation).provider)
     && ['CITY', 'BRANCH', 'PARCEL_LOCKER'].includes((value as DeliveryLocation).type)
     && typeof (value as DeliveryLocation).label === 'string';
 }

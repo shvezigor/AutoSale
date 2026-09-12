@@ -20,12 +20,17 @@ function fixture() {
     credentialGenerationId: 'meest-generation-1',
     client: { searchCities, searchLocations },
   });
+  const ukrposhtaClientContextForTenant = vi.fn().mockResolvedValue({
+    credentialGenerationId: 'ukrposhta-generation-1',
+    client: { searchCities, searchLocations },
+  });
   const service = new DeliveryLocationService(
     { clientContextForTenant } as never,
     { clientContextForTenant: meestClientContextForTenant } as never,
+    { clientContextForTenant: ukrposhtaClientContextForTenant } as never,
     { now: () => currentTime, maxEntries: 2, ttlMs: 300_000 },
   );
-  return { service, searchCities, searchLocations, clientContextForTenant, meestClientContextForTenant, advance: (ms: number) => { currentTime += ms; } };
+  return { service, searchCities, searchLocations, clientContextForTenant, meestClientContextForTenant, ukrposhtaClientContextForTenant, advance: (ms: number) => { currentTime += ms; } };
 }
 
 describe('DeliveryLocationService', () => {
@@ -89,5 +94,23 @@ describe('DeliveryLocationService', () => {
     expect(meestClientContextForTenant).toHaveBeenCalledWith(tenantId);
     expect(clientContextForTenant).not.toHaveBeenCalled();
     expect(result).toEqual([{ ref: 'city-ref', provider: 'MEEST', type: 'CITY', label: 'Луцьк' }]);
+  });
+
+  it('uses the tenant Ukrposhta connection and isolates its credential generation cache', async () => {
+    const { service, searchCities, searchLocations, clientContextForTenant, meestClientContextForTenant, ukrposhtaClientContextForTenant } = fixture();
+    const input = { provider: 'UKRPOSHTA' as const, type: 'CITY' as const, query: 'Луцьк' };
+
+    await expect(service.search(tenantId, input)).resolves.toEqual([
+      { ref: 'city-ref', provider: 'UKRPOSHTA', type: 'CITY', label: 'Луцьк' },
+    ]);
+    ukrposhtaClientContextForTenant.mockResolvedValue({
+      credentialGenerationId: 'ukrposhta-generation-2', client: { searchCities, searchLocations },
+    });
+    await service.search(tenantId, input);
+
+    expect(ukrposhtaClientContextForTenant).toHaveBeenCalledWith(tenantId);
+    expect(searchCities).toHaveBeenCalledTimes(2);
+    expect(clientContextForTenant).not.toHaveBeenCalled();
+    expect(meestClientContextForTenant).not.toHaveBeenCalled();
   });
 });

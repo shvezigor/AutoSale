@@ -74,4 +74,6 @@ export {
   type UkrposhtaClientConfig,
   type UkrposhtaEnvironment,
   type UkrposhtaErrorCode,
+  type UkrposhtaCity,
+  type UkrposhtaLocation,
 } from './ukrposhta.js';

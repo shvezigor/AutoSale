@@ -126,6 +126,7 @@ describe('delivery contracts', () => {
       lastVerifiedAt: '2026-09-12T08:00:00.000Z',
       lastErrorCode: null,
       environment: 'SANDBOX' as const,
+      senderProfile: null,
     };
     expect(ukrposhtaConnectionSummarySchema.parse(summary)).toEqual(summary);
     expect(() => ukrposhtaConnectionSummarySchema.parse({
@@ -175,6 +176,6 @@ describe('delivery contracts', () => {
     expect(() => deliveryLocationQuerySchema.parse({ provider: 'NOVA_POSHTA', type: 'BRANCH', query: '22' })).toThrow();
     expect(deliveryLocationQuerySchema.parse({ provider: 'MEEST', type: 'CITY', query: 'Луцьк' }))
       .toEqual({ provider: 'MEEST', type: 'CITY', query: 'Луцьк' });
-    expect(() => deliveryLocationQuerySchema.parse({ provider: 'UKRPOSHTA', type: 'CITY', query: 'Луцьк' })).toThrow();
+    expect(deliveryLocationQuerySchema.parse({ provider: 'UKRPOSHTA', type: 'CITY', query: 'Луцьк' })).toMatchObject({ provider: 'UKRPOSHTA' });
   });
 });

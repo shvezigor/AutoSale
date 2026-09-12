@@ -19,7 +19,19 @@ const active: UkrposhtaSettingsSummary = {
   enabled: true,
   connection: {
     provider: 'UKRPOSHTA', status: 'ACTIVE', accountLabel: 'ТОВ Приклад · тестове середовище',
-    lastVerifiedAt: '2026-09-12T08:00:00.000Z', lastErrorCode: null, environment: 'SANDBOX',
+    lastVerifiedAt: '2026-09-12T08:00:00.000Z', lastErrorCode: null, environment: 'SANDBOX', senderProfile: null,
+  },
+};
+const configured: UkrposhtaSettingsSummary = {
+  enabled: true,
+  connection: {
+    ...active.connection!,
+    senderProfile: {
+      senderName: 'ТОВ Приклад', senderPhone: '+380501112233',
+      origin: { type: 'BRANCH', cityRef: '263:297', locationRef: '1', label: '43000 · Луцьк 1' },
+      payer: 'SENDER', defaultParcel: { weightKg: 1, lengthCm: 30, widthCm: 20, heightCm: 10 },
+      suggestCustomerNotification: true, customerNotificationTemplate: '{company}: ТТН {trackingNumber}',
+    },
   },
 };
 
@@ -30,11 +42,43 @@ afterEach(() => {
 
 describe('UkrposhtaSettingsCard', () => {
   it('shows managers only the safe connection state', () => {
-    render(<UkrposhtaSettingsCard initial={active} role="MANAGER" />);
+    render(<UkrposhtaSettingsCard initial={configured} role="MANAGER" />);
     expect(screen.getByText('ТОВ Приклад · тестове середовище')).toBeInTheDocument();
     expect(screen.getByText('Тестове середовище')).toBeInTheDocument();
+    expect(screen.getByText('ТОВ Приклад', { selector: 'strong' })).toBeInTheDocument();
+    expect(screen.getByText('+380501112233')).toBeInTheDocument();
+    expect(screen.getByText('43000 · Луцьк 1')).toBeInTheDocument();
+    expect(screen.getByText('Відправник', { selector: 'strong' })).toBeInTheDocument();
+    expect(screen.getByText('1 кг · 30 × 20 × 10 см')).toBeInTheDocument();
+    expect(screen.getByText('Так', { selector: 'strong' })).toBeInTheDocument();
+    expect(screen.getByText('{company}: ТТН {trackingNumber}')).toBeInTheDocument();
     expect(screen.queryByLabelText('eCom bearer')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Назва відправника Укрпошти')).not.toBeInTheDocument();
     expect(screen.queryByText(/Особистому кабінеті/)).not.toBeInTheDocument();
+  });
+
+  it('lets an owner choose an exact branch and exposes the complete sender form', () => {
+    render(<UkrposhtaSettingsCard initial={active} role="OWNER" />);
+    expect(screen.getByLabelText('Назва відправника Укрпошти')).toBeInTheDocument();
+    expect(screen.getByLabelText('Телефон відправника Укрпошти')).toBeInTheDocument();
+    expect(screen.getByLabelText('Місто відправлення Укрпошти')).toBeInTheDocument();
+    expect(screen.getByLabelText('Відділення відправлення Укрпошти')).toBeInTheDocument();
+    expect(screen.getByLabelText('Хто оплачує доставку Укрпошти')).toBeInTheDocument();
+    expect(screen.getByLabelText('Шаблон повідомлення Укрпошти')).toBeInTheDocument();
+  });
+
+  it('saves only the safe complete Ukrposhta sender profile', async () => {
+    mutatingFetch.mockResolvedValue(new Response(JSON.stringify(configured.connection!.senderProfile), { status: 200 }));
+    render(<UkrposhtaSettingsCard initial={configured} role="OWNER" />);
+    fireEvent.click(screen.getByRole('button', { name: 'Зберегти відправника Укрпошти' }));
+
+    await waitFor(() => expect(mutatingFetch).toHaveBeenCalledWith(
+      '/api/integrations/delivery/ukrposhta/sender-profile', expect.objectContaining({ method: 'PUT' }),
+    ));
+    const body = JSON.parse(String(mutatingFetch.mock.calls[0]?.[1]?.body));
+    expect(body).toMatchObject({ senderName: 'ТОВ Приклад', origin: { cityRef: '263:297', locationRef: '1' } });
+    expect(body).not.toHaveProperty('ecomBearer');
+    expect(body).not.toHaveProperty('counterpartyUuid');
   });
 
   it('lets an owner choose production with an inline warning and submit one complete credential bundle', async () => {

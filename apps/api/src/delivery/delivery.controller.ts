@@ -1,5 +1,5 @@
 import type { AuthPrincipal } from '@autosale/contracts/auth';
-import { deliveryConnectionInputSchema, deliveryLocationQuerySchema, deliverySenderProfileInputSchema, meestConnectionInputSchema, meestSenderProfileInputSchema, shipmentCustomerMessageInputSchema, shipmentDraftInputSchema, ukrposhtaConnectionInputSchema } from '@autosale/contracts';
+import { deliveryConnectionInputSchema, deliveryLocationQuerySchema, deliverySenderProfileInputSchema, meestConnectionInputSchema, meestSenderProfileInputSchema, shipmentCustomerMessageInputSchema, shipmentDraftInputSchema, ukrposhtaConnectionInputSchema, ukrposhtaSenderProfileInputSchema } from '@autosale/contracts';
 import { MeestError, NovaPoshtaError, UkrposhtaError } from '@autosale/integrations';
 import { BadRequestException, Body, Controller, Delete, ForbiddenException, Get, Headers, HttpCode, Inject, Param, ParseUUIDPipe, Post, Put, Query, StreamableFile } from '@nestjs/common';
 
@@ -133,6 +133,15 @@ export class UkrposhtaConnectionController {
   disconnect(@CurrentPrincipal() principal: AuthPrincipal) {
     assertOwner(principal);
     return this.ukrposhta.disconnect(principal.tenantId!);
+  }
+
+  @Put('sender-profile')
+  @RequireMembership('OWNER')
+  saveSenderProfile(@CurrentPrincipal() principal: AuthPrincipal, @Body() body: unknown) {
+    assertOwner(principal);
+    const parsed = ukrposhtaSenderProfileInputSchema.safeParse(body);
+    if (!parsed.success) throw new BadRequestException('Invalid Ukrposhta sender profile');
+    return this.ukrposhta.saveSenderProfile(principal.tenantId!, parsed.data);
   }
 }
 

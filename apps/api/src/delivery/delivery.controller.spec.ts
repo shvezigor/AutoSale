@@ -141,6 +141,22 @@ describe('UkrposhtaConnectionController', () => {
     await expect(controller.connect(owner, { ...input, trackingBearer: '' })).rejects.toBeInstanceOf(BadRequestException);
     await expect(controller.connect(owner, input)).rejects.toMatchObject({ message: 'Ukrposhta rejected the connection' });
   });
+
+  it('lets only the owner persist a strict Ukrposhta sender profile', async () => {
+    const saveSenderProfile = vi.fn().mockResolvedValue({ senderName: 'ТОВ Приклад' });
+    const controller = new UkrposhtaConnectionController({ saveSenderProfile } as never);
+    const profile = {
+      senderName: 'ТОВ Приклад', senderPhone: '+380501112233',
+      origin: { type: 'BRANCH', cityRef: '263:297', locationRef: '1', label: '43000 · Луцьк 1' },
+      payer: 'SENDER', defaultParcel: { weightKg: 1, lengthCm: 30, widthCm: 20, heightCm: 10 },
+      suggestCustomerNotification: true, customerNotificationTemplate: '{company}: ТТН {trackingNumber}',
+    };
+
+    expect(() => controller.saveSenderProfile(manager, profile)).toThrow(ForbiddenException);
+    expect(() => controller.saveSenderProfile(owner, { ...profile, counterpartyUuid: input.counterpartyUuid })).toThrow(BadRequestException);
+    await controller.saveSenderProfile(owner, profile);
+    expect(saveSenderProfile).toHaveBeenCalledWith('tenant', profile);
+  });
 });
 
 describe('DeliveryLocationController', () => {

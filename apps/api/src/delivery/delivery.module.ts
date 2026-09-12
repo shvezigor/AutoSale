@@ -39,7 +39,7 @@ export class DeliveryModule {
       (credentials) => new UkrposhtaClient(credentials),
       { enabled: env.NOVA_POSHTA_DELIVERY_ENABLED },
     );
-    const locationService = new DeliveryLocationService(service, meestService);
+    const locationService = new DeliveryLocationService(service, meestService, ukrposhtaService);
     return {
       module: DeliveryModule,
       controllers: [DeliveryController, MeestConnectionController, UkrposhtaConnectionController, DeliveryLocationController, ShipmentController, ShipmentLifecycleController],
