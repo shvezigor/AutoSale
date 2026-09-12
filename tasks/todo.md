@@ -1085,7 +1085,7 @@ Status: deferred by the owner on 2026-09-12. Resume with sandbox credentials, th
 - [x] Confirm current official API onboarding, test environment and credential model.
 - [x] Add a strict credential contract and safe official-host eCom adapter.
 - [x] Add encrypted tenant connection and owner-only Delivery settings UI with an explicit sandbox/production mode.
-- [ ] Add cached classifier search, active post-office filtering and sender defaults.
+- [x] Add cached classifier search, active post-office filtering and sender defaults.
 - [ ] Add idempotent client/shipment provisioning, PDF label proxy and lifecycle operations.
 - [ ] Add delayed tracking with a separate bearer and batch size up to 50.
 - [ ] Complete sandbox and controlled production acceptance in the combined carrier test cycle.
