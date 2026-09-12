@@ -116,6 +116,42 @@ describe('DeliverySettingsCard', () => {
     expect(screen.getByLabelText('Телефон відправника')).toHaveValue('+380501112233');
   });
 
+  it('lets the owner search and save an origin when Nova Pos returns no saved addresses', async () => {
+    vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes('/sender-options')) return new Response(JSON.stringify([{
+        ref: 'sender-ref', label: 'Приватна особа', edrpou: null,
+        contacts: [{ ref: 'contact-ref', label: 'Ігор Швець', phone: '+380501112233' }],
+        origins: [],
+      }]), { status: 200 });
+      if (url.includes('type=CITY')) return new Response(JSON.stringify([
+        { ref: 'city-ref', provider: 'NOVA_POSHTA', type: 'CITY', label: 'Луцьк' },
+      ]), { status: 200 });
+      if (url.includes('type=BRANCH')) return new Response(JSON.stringify([
+        { ref: 'branch-ref', cityRef: 'city-ref', provider: 'NOVA_POSHTA', type: 'BRANCH', label: 'Відділення №1' },
+      ]), { status: 200 });
+      return new Response(JSON.stringify([]), { status: 200 });
+    }));
+    mutatingFetch.mockResolvedValue(new Response(JSON.stringify({}), { status: 200 }));
+    render(<DeliverySettingsCard initial={active} role="OWNER" />);
+
+    await waitFor(() => expect(screen.getByLabelText('Відправник')).toHaveValue('sender-ref'));
+    fireEvent.change(screen.getByRole('combobox', { name: 'Місто відправлення' }), { target: { value: 'Луцьк' } });
+    fireEvent.click(await screen.findByRole('option', { name: 'Луцьк' }, { timeout: 2_000 }));
+    fireEvent.change(screen.getByRole('combobox', { name: 'Точка відправлення' }), { target: { value: '№1' } });
+    fireEvent.click(await screen.findByRole('option', { name: 'Відділення №1' }, { timeout: 2_000 }));
+    fireEvent.click(screen.getByRole('button', { name: 'Зберегти дані відправника' }));
+
+    await waitFor(() => expect(mutatingFetch).toHaveBeenCalledWith(
+      '/api/integrations/delivery/nova-poshta/sender-profile',
+      expect.objectContaining({
+        method: 'PUT',
+        body: expect.stringContaining('"locationRef":"branch-ref"'),
+      }),
+    ));
+    expect(String(mutatingFetch.mock.calls.at(-1)?.[1]?.body)).toContain('"cityRef":"city-ref"');
+  });
+
   it('saves sender defaults through the tenant endpoint', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify([{
       ref: 'sender-ref', label: 'ТОВ Приклад', edrpou: '12345678',

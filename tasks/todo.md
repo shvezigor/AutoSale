@@ -1042,11 +1042,12 @@ Status: complete on 2026-09-11. The message uses the workspace name, an owner-ed
 ## Task 68: Verify and roll out Nova Poshta delivery
 
 - [x] Add privacy, tenant-isolation, observability, idempotency and mobile regressions.
+- [x] Let an owner choose a sender city and branch/parcel locker in AutoSale when Nova Poshta returns no saved sender addresses.
 - [ ] Deploy behind a feature flag and complete one controlled real Nova Poshta shipment acceptance.
 - [ ] Verify duplicate prevention, quote, TTN, label, status sync, cancellation where allowed and manual customer notification.
 - [ ] After stabilization, plan Meest, Ukrposhta, bank-account filtering and payments in that order.
 
-Status: automated rollout checks in progress on 2026-09-11. The authenticated-tenant matrix covers connection, location, draft, quote, create, label, cancellation and customer message boundaries. A new regression found and fixed generic `apiKey`/credential log redaction. The 390×844 delivery drawer check covers horizontal overflow, sticky actions, stable loading width and right-aligned toast; component coverage verifies focus restoration. Owner onboarding opens the Nova Poshta API-key settings directly, uses one manual-paste field with one connection action and preselects the only available sender profile. Production migration `20260910180000_delivery_foundation` applied successfully and API, web, worker, PostgreSQL, Redis and MinIO are healthy. Real-provider acceptance remains intentionally open until one controlled Nova Poshta shipment is approved and completed.
+Status: automated rollout checks in progress on 2026-09-12. The authenticated-tenant matrix covers connection, location, draft, quote, create, label, cancellation and customer message boundaries. A new regression found and fixed generic `apiKey`/credential log redaction. The 390×844 delivery drawer check covers horizontal overflow, sticky actions, stable loading width and right-aligned toast; component coverage verifies focus restoration. Owner onboarding opens the Nova Poshta API-key settings directly, uses one manual-paste field with one connection action and preselects the only available sender profile. Accounts without a Nova Poshta-saved sender origin can now search and persist an exact city plus branch or parcel-locker reference directly in AutoSale. Production migration `20260910180000_delivery_foundation` applied successfully and API, web, worker, PostgreSQL, Redis and MinIO are healthy. Real-provider acceptance remains intentionally open until the owner selects the actual sender origin and one controlled Nova Poshta shipment is approved and completed.
 
 ## Task 69: Automate production deployment from master
 

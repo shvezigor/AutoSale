@@ -1,11 +1,12 @@
 'use client';
 
-import type { DeliveryConnectionSummary, DeliverySenderProfileInput } from '../../../../packages/contracts/src/delivery';
+import type { DeliveryConnectionSummary, DeliveryLocation, DeliverySenderProfileInput } from '../../../../packages/contracts/src/delivery';
 import { useCallback, useEffect, useState } from 'react';
 
 import { mutatingFetch } from '../auth/csrf-fetch';
 import { useActivity } from './activity-provider';
 import { useConfirm } from './confirm-provider';
+import { DeliveryLocationPicker } from './delivery-location-picker';
 import { LoadingButton } from './loading-button';
 import { useToast } from './toast-provider';
 
@@ -46,6 +47,7 @@ export function DeliverySettingsCard({
   const [apiKey, setApiKey] = useState('');
   const [pending, setPending] = useState<PendingAction>(null);
   const [senderOptions, setSenderOptions] = useState<SenderOption[]>([]);
+  const [originCity, setOriginCity] = useState<DeliveryLocation | null>(null);
   const [loadingOptions, setLoadingOptions] = useState(false);
   const activity = useActivity();
   const confirm = useConfirm();
@@ -148,6 +150,7 @@ export function DeliverySettingsCard({
       if (!response.ok) throw new Error('disconnect failed');
       setConnection(null);
       setProfile(emptyProfile);
+      setOriginCity(null);
       toast.show({ type: 'success', title: 'Нову Пошту відключено' });
     } catch {
       toast.show({ type: 'error', title: 'Не вдалося відключити Нову Пошту' });
@@ -197,6 +200,7 @@ export function DeliverySettingsCard({
               const sender = senderOptions.find((option) => option.ref === value);
               const contact = sender?.contacts[0];
               const origin = sender?.origins[0];
+              setOriginCity(null);
               setProfile({
                 ...profile,
                 senderRef: value,
@@ -210,10 +214,52 @@ export function DeliverySettingsCard({
               setProfile({ ...profile, contactRef: value, contactPhone: contact?.phone ?? profile.contactPhone });
             }} />
             <TextField label="Телефон відправника" value={profile.contactPhone} onChange={(value) => setProfile({ ...profile, contactPhone: value })} />
-            <SelectField label="Точка відправлення" value={profile.origin.type === 'ADDRESS' ? '' : profile.origin.locationRef} loading={loadingOptions} options={(selectedSender?.origins ?? []).map((origin) => ({ value: origin.ref, label: origin.label }))} onChange={(value) => {
-              const origin = selectedSender?.origins.find((option) => option.ref === value);
-              if (origin) setProfile({ ...profile, origin: { type: origin.type, cityRef: origin.cityRef, locationRef: origin.ref, label: origin.label } });
-            }} />
+            {selectedSender && selectedSender.origins.length === 0
+              ? profile.origin.type !== 'ADDRESS' && profile.origin.locationRef && profile.origin.label
+                ? <div className="delivery-origin-summary">
+                    <span>Точка відправлення</span>
+                    <strong>{profile.origin.label}</strong>
+                    <button type="button" className="text-button" onClick={() => {
+                      setOriginCity(null);
+                      setProfile({ ...profile, origin: { type: 'BRANCH', cityRef: '', locationRef: '', label: '' } });
+                    }}>Змінити точку</button>
+                  </div>
+                : <>
+                    <DeliveryLocationPicker
+                      label="Місто відправлення"
+                      type="CITY"
+                      value={originCity}
+                      onSelect={(city) => {
+                        setOriginCity(city);
+                        setProfile({ ...profile, origin: { type: profile.origin.type === 'PARCEL_LOCKER' ? 'PARCEL_LOCKER' : 'BRANCH', cityRef: city?.ref ?? '', locationRef: '', label: '' } });
+                      }}
+                    />
+                    <label>
+                      <span>Тип точки</span>
+                      <select aria-label="Тип точки відправлення" value={profile.origin.type === 'PARCEL_LOCKER' ? 'PARCEL_LOCKER' : 'BRANCH'} onChange={(event) => setProfile({
+                        ...profile,
+                        origin: { type: event.target.value as 'BRANCH' | 'PARCEL_LOCKER', cityRef: originCity?.ref ?? '', locationRef: '', label: '' },
+                      })}>
+                        <option value="BRANCH">Відділення</option>
+                        <option value="PARCEL_LOCKER">Поштомат</option>
+                      </select>
+                    </label>
+                    <DeliveryLocationPicker
+                      label="Точка відправлення"
+                      type={profile.origin.type === 'PARCEL_LOCKER' ? 'PARCEL_LOCKER' : 'BRANCH'}
+                      cityRef={originCity?.ref ?? ''}
+                      value={null}
+                      onSelect={(origin) => {
+                        if (origin && (origin.type === 'BRANCH' || origin.type === 'PARCEL_LOCKER')) {
+                          setProfile({ ...profile, origin: { type: origin.type, cityRef: origin.cityRef ?? originCity?.ref ?? '', locationRef: origin.ref, label: origin.label } });
+                        }
+                      }}
+                    />
+                  </>
+              : <SelectField label="Точка відправлення" value={profile.origin.type === 'ADDRESS' ? '' : profile.origin.locationRef} loading={loadingOptions} options={(selectedSender?.origins ?? []).map((origin) => ({ value: origin.ref, label: origin.label }))} onChange={(value) => {
+                  const origin = selectedSender?.origins.find((option) => option.ref === value);
+                  if (origin) setProfile({ ...profile, origin: { type: origin.type, cityRef: origin.cityRef, locationRef: origin.ref, label: origin.label } });
+                }} />}
             <label><span>Хто оплачує доставку</span><select aria-label="Хто оплачує доставку" value={profile.payer} onChange={(event) => setProfile({ ...profile, payer: event.target.value as 'SENDER' | 'RECIPIENT' })}><option value="SENDER">Відправник</option><option value="RECIPIENT">Отримувач</option></select></label>
           </div>
           <div className="delivery-parcel-grid">
