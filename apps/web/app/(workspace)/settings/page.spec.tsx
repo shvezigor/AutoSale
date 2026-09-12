@@ -40,6 +40,7 @@ describe('SettingsPage', () => {
       .mockResolvedValueOnce({ ok: true, json: async () => ({ ORDER_NEEDS_REVIEW: true, ORDER_AUTO_APPROVED: true, SUPPLIER_DELIVERY_FAILED: true }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ enabled: true, connections: [] }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ enabled: true, connection: null }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ enabled: true, connection: null }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ businessConnected: true, selectedDestinationId: null, autoDispatch: false, destinations: [] }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ approvalMode: 'REVIEW', minimumConfidence: 0.8, promptVersion: 'v1' }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ spreadsheetId: null, sheetName: 'Orders', status: 'NOT_CONFIGURED', requiredHeaders: ['order_id'], lastValidatedAt: null, errorSummary: null }) })
@@ -100,17 +101,19 @@ describe('SettingsPage', () => {
       })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ ORDER_NEEDS_REVIEW: true, ORDER_AUTO_APPROVED: true, SUPPLIER_DELIVERY_FAILED: true }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ enabled: true, connections: [{ provider: 'NOVA_POSHTA', status: 'ACTIVE', accountLabel: 'ТОВ Приклад', lastVerifiedAt: null, lastErrorCode: null, senderProfile: null }] }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ enabled: true, connection: null }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ enabled: true, connection: null }) });
 
     render(await WorkspaceLayout({ children: await SettingsPage() }));
 
-    expect(authenticatedApiFetch).toHaveBeenCalledTimes(6);
+    expect(authenticatedApiFetch).toHaveBeenCalledTimes(7);
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/integrations/instagram');
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/integrations/google');
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/integrations/telegram');
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/integrations/telegram/preferences');
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/integrations/delivery');
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/integrations/delivery/meest');
+    expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/integrations/delivery/ukrposhta');
     expect(screen.getByText('@autosale_store')).toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Підтвердження замовлень' })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('tab', { name: /Дані/ }));
@@ -120,6 +123,7 @@ describe('SettingsPage', () => {
     expect(screen.getByText('@ivan_manager')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('tab', { name: /Доставка/ }));
     expect(screen.getByText('ТОВ Приклад')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Укрпошта' })).toBeInTheDocument();
     expect(screen.queryByLabelText('API-ключ Нової Пошти')).not.toBeInTheDocument();
   });
 });

@@ -1,12 +1,13 @@
 import type { AuthPrincipal } from '@autosale/contracts/auth';
-import { deliveryConnectionInputSchema, deliveryLocationQuerySchema, deliverySenderProfileInputSchema, meestConnectionInputSchema, meestSenderProfileInputSchema, shipmentCustomerMessageInputSchema, shipmentDraftInputSchema } from '@autosale/contracts';
-import { MeestError, NovaPoshtaError } from '@autosale/integrations';
+import { deliveryConnectionInputSchema, deliveryLocationQuerySchema, deliverySenderProfileInputSchema, meestConnectionInputSchema, meestSenderProfileInputSchema, shipmentCustomerMessageInputSchema, shipmentDraftInputSchema, ukrposhtaConnectionInputSchema } from '@autosale/contracts';
+import { MeestError, NovaPoshtaError, UkrposhtaError } from '@autosale/integrations';
 import { BadRequestException, Body, Controller, Delete, ForbiddenException, Get, Headers, HttpCode, Inject, Param, ParseUUIDPipe, Post, Put, Query, StreamableFile } from '@nestjs/common';
 
 import { CurrentPrincipal, RequireMembership } from '../auth/auth.decorators.js';
 import { DeliveryService } from './delivery.service.js';
 import { DeliveryLocationService } from './delivery-location.service.js';
 import { MeestConnectionService } from './meest-connection.service.js';
+import { UkrposhtaConnectionService } from './ukrposhta-connection.service.js';
 
 @Controller('api/integrations/delivery')
 export class DeliveryController {
@@ -100,6 +101,38 @@ export class MeestConnectionController {
     const parsed = meestSenderProfileInputSchema.safeParse(body);
     if (!parsed.success) throw new BadRequestException('Invalid Meest sender profile');
     return this.meest.saveSenderProfile(principal.tenantId!, parsed.data);
+  }
+}
+
+@Controller('api/integrations/delivery/ukrposhta')
+export class UkrposhtaConnectionController {
+  constructor(@Inject(UkrposhtaConnectionService) private readonly ukrposhta: UkrposhtaConnectionService) {}
+
+  @Get()
+  @RequireMembership('MANAGER')
+  summary(@CurrentPrincipal() principal: AuthPrincipal) {
+    return this.ukrposhta.summary(principal.tenantId!);
+  }
+
+  @Put()
+  @RequireMembership('OWNER')
+  async connect(@CurrentPrincipal() principal: AuthPrincipal, @Body() body: unknown) {
+    assertOwner(principal);
+    const parsed = ukrposhtaConnectionInputSchema.safeParse(body);
+    if (!parsed.success) throw new BadRequestException('Invalid Ukrposhta connection');
+    try {
+      return await this.ukrposhta.connect(principal.tenantId!, principal.userId, parsed.data);
+    } catch (error) {
+      if (error instanceof UkrposhtaError) throw new BadRequestException('Ukrposhta rejected the connection');
+      throw error;
+    }
+  }
+
+  @Delete()
+  @RequireMembership('OWNER')
+  disconnect(@CurrentPrincipal() principal: AuthPrincipal) {
+    assertOwner(principal);
+    return this.ukrposhta.disconnect(principal.tenantId!);
   }
 }
 

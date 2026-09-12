@@ -1,9 +1,9 @@
 import type { AuthPrincipal } from '@autosale/contracts/auth';
 import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import { describe, expect, it, vi } from 'vitest';
-import { MeestError, NovaPoshtaError } from '@autosale/integrations';
+import { MeestError, NovaPoshtaError, UkrposhtaError } from '@autosale/integrations';
 
-import { DeliveryController, DeliveryLocationController, MeestConnectionController, ShipmentController, ShipmentLifecycleController } from './delivery.controller.js';
+import { DeliveryController, DeliveryLocationController, MeestConnectionController, ShipmentController, ShipmentLifecycleController, UkrposhtaConnectionController } from './delivery.controller.js';
 
 const manager: AuthPrincipal = {
   userId: 'manager', email: 'manager@example.com', name: 'Manager', platformRole: 'USER',
@@ -109,6 +109,37 @@ describe('MeestConnectionController', () => {
     expect(() => save!.call(controller, manager, profile)).toThrow(ForbiddenException);
     await save!.call(controller, owner, profile);
     expect(saveSenderProfile).toHaveBeenCalledWith('tenant', profile);
+  });
+});
+
+describe('UkrposhtaConnectionController', () => {
+  const input = {
+    environment: 'SANDBOX',
+    ecomBearer: 'ecom-bearer-secret',
+    counterpartyToken: 'counterparty-token-secret',
+    trackingBearer: 'tracking-bearer-secret',
+    counterpartyUuid: '8458f0b0-930f-11e2-a91e-003048d2b473',
+  };
+
+  it('lets managers read safe state but reserves credential changes for owners', async () => {
+    const summary = vi.fn().mockResolvedValue({ enabled: true, connection: null });
+    const connect = vi.fn().mockResolvedValue({ provider: 'UKRPOSHTA', status: 'ACTIVE', environment: 'SANDBOX' });
+    const disconnect = vi.fn().mockResolvedValue({ provider: 'UKRPOSHTA', status: 'DISCONNECTED', environment: null });
+    const controller = new UkrposhtaConnectionController({ summary, connect, disconnect } as never);
+    await expect(controller.summary(manager)).resolves.toEqual({ enabled: true, connection: null });
+    await expect(controller.connect(manager, input)).rejects.toBeInstanceOf(ForbiddenException);
+    expect(() => controller.disconnect(manager)).toThrow(ForbiddenException);
+    await controller.connect(owner, input);
+    await controller.disconnect(owner);
+    expect(connect).toHaveBeenCalledWith('tenant', 'owner', input);
+    expect(disconnect).toHaveBeenCalledWith('tenant');
+  });
+
+  it('rejects malformed and provider-rejected credentials without passing provider detail to the browser', async () => {
+    const connect = vi.fn().mockRejectedValue(new UkrposhtaError('UNAUTHORIZED', 401));
+    const controller = new UkrposhtaConnectionController({ connect } as never);
+    await expect(controller.connect(owner, { ...input, trackingBearer: '' })).rejects.toBeInstanceOf(BadRequestException);
+    await expect(controller.connect(owner, input)).rejects.toMatchObject({ message: 'Ukrposhta rejected the connection' });
   });
 });
 

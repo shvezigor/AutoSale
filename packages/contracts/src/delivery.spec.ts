@@ -11,6 +11,7 @@ import {
   shipmentDraftInputSchema,
   shipmentStatusJobSchema,
   shipmentStatusSchema,
+  ukrposhtaConnectionSummarySchema,
 } from './delivery.js';
 import * as deliveryContracts from './delivery.js';
 
@@ -115,6 +116,22 @@ describe('delivery contracts', () => {
     expect(() => schema.parse({ ...input, trackingBearer: '' })).toThrow();
     expect(() => schema.parse({ ...input, environment: 'STAGING' })).toThrow();
     expect(() => schema.parse({ ...input, productionBearer: 'must-not-be-accepted' })).toThrow();
+  });
+
+  it('exposes only a safe environment-scoped Ukrposhta connection summary', () => {
+    const summary = {
+      provider: 'UKRPOSHTA' as const,
+      status: 'ACTIVE' as const,
+      accountLabel: 'Counterparty • 11111111',
+      lastVerifiedAt: '2026-09-12T08:00:00.000Z',
+      lastErrorCode: null,
+      environment: 'SANDBOX' as const,
+    };
+    expect(ukrposhtaConnectionSummarySchema.parse(summary)).toEqual(summary);
+    expect(() => ukrposhtaConnectionSummarySchema.parse({
+      ...summary,
+      ecomBearer: 'must-never-reach-the-browser',
+    })).toThrow();
   });
 
   it('accepts a branch-based Meest sender profile without exposing provider credentials', () => {

@@ -70,6 +70,15 @@ export const ukrposhtaConnectionInputSchema = z.object({
   counterpartyUuid: z.string().uuid(),
 }).strict();
 
+export const ukrposhtaConnectionSummarySchema = z.object({
+  provider: z.literal('UKRPOSHTA'),
+  status: deliveryConnectionStatusSchema,
+  accountLabel: z.string().trim().min(1).max(240).nullable(),
+  lastVerifiedAt: z.string().datetime().nullable(),
+  lastErrorCode: z.string().trim().min(1).max(120).nullable(),
+  environment: z.enum(['SANDBOX', 'PRODUCTION']).nullable(),
+}).strict();
+
 export const meestSenderProfileInputSchema = z.object({
   senderName: z.string().trim().min(2).max(120),
   senderPhone: phoneSchema,
@@ -174,6 +183,15 @@ export interface DeliveryConnectionSummary {
 export interface MeestConnectionSummary extends Omit<DeliveryConnectionSummary, 'provider' | 'senderProfile'> {
   provider: 'MEEST';
   senderProfile: MeestSenderProfileInput | null;
+}
+
+export interface UkrposhtaConnectionSummary {
+  provider: 'UKRPOSHTA';
+  status: DeliveryConnectionStatus;
+  accountLabel: string | null;
+  lastVerifiedAt: string | null;
+  lastErrorCode: string | null;
+  environment: 'SANDBOX' | 'PRODUCTION' | null;
 }
 
 export interface DeliveryLocation {
