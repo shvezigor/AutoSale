@@ -1,10 +1,10 @@
 import { randomUUID } from 'node:crypto';
 
-import type { DeliveryConnectionSummary, MeestConnectionInput } from '@autosale/contracts';
+import { meestConnectionInputSchema, type DeliveryConnectionSummary, type MeestConnectionInput } from '@autosale/contracts';
 import type { PrismaClient } from '@autosale/database';
 import type { CredentialCipher, MeestClient } from '@autosale/integrations';
 
-type MeestClientPort = Pick<MeestClient, 'validateCredential'>;
+type MeestClientPort = Pick<MeestClient, 'validateCredential' | 'searchCities' | 'searchLocations'>;
 export type MeestClientFactory = (input: MeestConnectionInput) => MeestClientPort;
 
 type MeestConnectionServiceOptions = {
@@ -71,8 +71,30 @@ export class MeestConnectionService {
     };
   }
 
+  async clientContextForTenant(tenantId: string): Promise<{ client: MeestClientPort; credentialGenerationId: string }> {
+    this.assertEnabled();
+    const connection = await this.prisma.deliveryConnection.findUnique({
+      where: { tenantId_provider: { tenantId, provider: 'MEEST' } },
+      select: { status: true, encryptedCredential: true, credentialGenerationId: true },
+    });
+    if (!connection || connection.status !== 'ACTIVE') throw new Error('Active Meest connection required');
+    const credentials = parseStoredCredentials(this.cipher.decrypt(connection.encryptedCredential));
+    return {
+      client: this.clientFactory(credentials),
+      credentialGenerationId: connection.credentialGenerationId,
+    };
+  }
+
   private assertEnabled(): void {
     if (!this.options.enabled) throw new Error('Meest delivery is disabled');
+  }
+}
+
+function parseStoredCredentials(value: string): MeestConnectionInput {
+  try {
+    return meestConnectionInputSchema.parse(JSON.parse(value));
+  } catch {
+    throw new Error('Stored Meest credentials are invalid');
   }
 }
 

@@ -32,7 +32,7 @@ export class DeliveryModule {
       (credentials) => new MeestClient(credentials),
       { enabled: env.NOVA_POSHTA_DELIVERY_ENABLED },
     );
-    const locationService = new DeliveryLocationService(service);
+    const locationService = new DeliveryLocationService(service, meestService);
     return {
       module: DeliveryModule,
       controllers: [DeliveryController, MeestConnectionController, DeliveryLocationController, ShipmentController, ShipmentLifecycleController],

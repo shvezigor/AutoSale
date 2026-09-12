@@ -1,7 +1,8 @@
 import type { DeliveryLocation, DeliveryLocationQuery } from '@autosale/contracts';
-import type { NovaPoshtaCity, NovaPoshtaLocation } from '@autosale/integrations';
+import type { MeestCity, MeestLocation, NovaPoshtaCity, NovaPoshtaLocation } from '@autosale/integrations';
 
 import type { DeliveryService } from './delivery.service.js';
+import type { MeestConnectionService } from './meest-connection.service.js';
 
 type CacheEntry = { expiresAt: number; values: DeliveryLocation[] };
 
@@ -19,6 +20,7 @@ export class DeliveryLocationService {
 
   constructor(
     private readonly delivery: Pick<DeliveryService, 'clientContextForTenant'>,
+    private readonly meest: Pick<MeestConnectionService, 'clientContextForTenant'>,
     options: LocationServiceOptions = {},
   ) {
     this.now = options.now ?? Date.now;
@@ -28,15 +30,17 @@ export class DeliveryLocationService {
 
   async search(tenantId: string, input: DeliveryLocationQuery): Promise<DeliveryLocation[]> {
     const query = normalizeQuery(input.query);
-    const context = await this.delivery.clientContextForTenant(tenantId);
+    const context = input.provider === 'MEEST'
+      ? await this.meest.clientContextForTenant(tenantId)
+      : await this.delivery.clientContextForTenant(tenantId);
     const key = [tenantId, context.credentialGenerationId, input.provider, input.type, input.cityRef ?? '', query.toLocaleLowerCase('uk-UA')].join(':');
     const cached = this.cache.get(key);
     if (cached && cached.expiresAt > this.now()) return cloneLocations(cached.values);
     if (cached) this.cache.delete(key);
 
     const values = input.type === 'CITY'
-      ? (await context.client.searchCities(query)).slice(0, 50).map(cityLocation)
-      : (await context.client.searchLocations({ cityRef: input.cityRef!, type: input.type, query })).slice(0, 50).map(providerLocation);
+      ? (await context.client.searchCities(query)).slice(0, 50).map((city) => cityLocation(input.provider, city))
+      : (await context.client.searchLocations({ cityRef: input.cityRef!, type: input.type, query })).slice(0, 50).map((location) => providerLocation(input.provider, location));
 
     this.remember(key, values);
     return cloneLocations(values);
@@ -56,14 +60,14 @@ function normalizeQuery(value: string): string {
   return value.trim().replace(/\s+/g, ' ');
 }
 
-function cityLocation(city: NovaPoshtaCity): DeliveryLocation {
-  return { ref: city.ref, provider: 'NOVA_POSHTA', type: 'CITY', label: city.label };
+function cityLocation(provider: 'NOVA_POSHTA' | 'MEEST', city: NovaPoshtaCity | MeestCity): DeliveryLocation {
+  return { ref: city.ref, provider, type: 'CITY', label: city.label };
 }
 
-function providerLocation(location: NovaPoshtaLocation): DeliveryLocation {
+function providerLocation(provider: 'NOVA_POSHTA' | 'MEEST', location: NovaPoshtaLocation | MeestLocation): DeliveryLocation {
   return {
     ref: location.ref,
-    provider: 'NOVA_POSHTA',
+    provider,
     type: location.type,
     label: location.label,
     cityRef: location.cityRef,

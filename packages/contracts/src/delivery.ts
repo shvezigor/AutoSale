@@ -63,7 +63,7 @@ export const meestConnectionInputSchema = z.object({
 }).strict();
 
 export const deliveryLocationQuerySchema = z.object({
-  provider: z.literal('NOVA_POSHTA'),
+  provider: z.enum(['NOVA_POSHTA', 'MEEST']),
   type: deliveryLocationTypeSchema,
   query: z.string().trim().min(2).max(120),
   cityRef: z.string().trim().min(1).max(128).optional(),

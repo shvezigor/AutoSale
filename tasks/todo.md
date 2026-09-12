@@ -1065,10 +1065,11 @@ Status: implementation complete on 2026-09-11 and intentionally inactive until a
 - [x] Add a credential-safe XML query adapter with signed requests, city/branch mapping and contract tests.
 - [x] Add encrypted tenant credentials for Meest (`login`, `password`, `ClientUID`) without returning secrets to the browser.
 - [x] Add owner connection UI in Delivery settings.
+- [x] Make the shared location API and picker provider-aware for Meest city, branch and parcel-locker directories.
 - [ ] Add provider-aware city/branch search in Delivery settings.
 - [ ] Verify the official sandbox and document any contract-only production prerequisites.
 
-Status: implementation started on 2026-09-12. Official Meest documentation confirms that production login/password are supplied after signing a contract, while test client parameters and browser sandboxes are available. The first adapter slice uses the working HTTPS endpoints even though some documentation examples still show HTTP, signs requests with the documented MD5 envelope, disables XML entity processing, validates response structure and exposes only safe error codes.
+Status: implementation started on 2026-09-12. Official Meest documentation confirms that production login/password are supplied after signing a contract, while test client parameters and browser sandboxes are available. The adapter uses the working HTTPS endpoints even though some documentation examples still show HTTP, signs requests with the documented MD5 envelope, disables XML entity processing, validates response structure and exposes only safe error codes. Provider-aware directory search now resolves credentials per tenant and carrier and isolates cached results by provider and credential generation; the remaining settings step is to persist Meest sender identity and its selected origin.
 
 ## Task 71: Create and track Meest shipments
 

@@ -124,6 +124,8 @@ describe('delivery contracts', () => {
     })).toMatchObject({ type: 'BRANCH', cityRef: 'city-ref' });
     expect(() => deliveryLocationQuerySchema.parse({ provider: 'NOVA_POSHTA', type: 'CITY', query: 'Л' })).toThrow();
     expect(() => deliveryLocationQuerySchema.parse({ provider: 'NOVA_POSHTA', type: 'BRANCH', query: '22' })).toThrow();
-    expect(() => deliveryLocationQuerySchema.parse({ provider: 'MEEST', type: 'CITY', query: 'Луцьк' })).toThrow();
+    expect(deliveryLocationQuerySchema.parse({ provider: 'MEEST', type: 'CITY', query: 'Луцьк' }))
+      .toEqual({ provider: 'MEEST', type: 'CITY', query: 'Луцьк' });
+    expect(() => deliveryLocationQuerySchema.parse({ provider: 'UKRPOSHTA', type: 'CITY', query: 'Луцьк' })).toThrow();
   });
 });

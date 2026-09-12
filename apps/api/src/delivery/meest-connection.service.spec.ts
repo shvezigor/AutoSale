@@ -19,7 +19,7 @@ function fixture() {
     upsert: vi.fn().mockResolvedValue(connection),
     updateMany: vi.fn().mockResolvedValue({ count: 1 }),
   } };
-  const cipher = { encrypt: vi.fn().mockReturnValue('ciphertext') };
+  const cipher = { encrypt: vi.fn().mockReturnValue('ciphertext'), decrypt: vi.fn().mockReturnValue(JSON.stringify(input)) };
   const validateCredential = vi.fn().mockResolvedValue({ valid: true, accountLabel: 'merchant' });
   const factory = vi.fn().mockReturnValue({ validateCredential });
   const service = new MeestConnectionService(prisma as never, cipher as never, factory, { enabled: true, now: () => now });
@@ -67,5 +67,18 @@ describe('MeestConnectionService', () => {
       where: { tenantId, provider: 'MEEST' },
       data: expect.objectContaining({ status: 'DISCONNECTED' }),
     }));
+  });
+
+  it('builds a tenant-scoped directory client from decrypted validated credentials', async () => {
+    const { service, prisma, cipher, factory } = fixture();
+    const context = await service.clientContextForTenant(tenantId);
+
+    expect(prisma.deliveryConnection.findUnique).toHaveBeenCalledWith({
+      where: { tenantId_provider: { tenantId, provider: 'MEEST' } },
+      select: { status: true, encryptedCredential: true, credentialGenerationId: true },
+    });
+    expect(cipher.decrypt).toHaveBeenCalledWith('ciphertext');
+    expect(factory).toHaveBeenCalledWith(input);
+    expect(context.credentialGenerationId).toBe('44444444-4444-4444-8444-444444444444');
   });
 });

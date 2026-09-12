@@ -1,6 +1,6 @@
 'use client';
 
-import type { DeliveryLocation, DeliveryLocationQuery, DeliveryLocationType } from '../../../../packages/contracts/src/delivery';
+import type { DeliveryLocation, DeliveryLocationQuery, DeliveryLocationType, DeliveryProvider } from '../../../../packages/contracts/src/delivery';
 import { useEffect, useId, useRef, useState } from 'react';
 
 type SearchInput = DeliveryLocationQuery;
@@ -8,6 +8,7 @@ type SearchFunction = (input: SearchInput, signal: AbortSignal) => Promise<Deliv
 
 export function DeliveryLocationPicker({
   label,
+  provider = 'NOVA_POSHTA',
   type,
   cityRef,
   initialQuery = '',
@@ -16,6 +17,7 @@ export function DeliveryLocationPicker({
   search = searchDeliveryLocations,
 }: {
   label: string;
+  provider?: Extract<DeliveryProvider, 'NOVA_POSHTA' | 'MEEST'>;
   type: DeliveryLocationType;
   cityRef?: string;
   initialQuery?: string;
@@ -52,7 +54,7 @@ export function DeliveryLocationPicker({
     const timer = window.setTimeout(() => {
       setLoading(true);
       setError(false);
-      void search({ provider: 'NOVA_POSHTA', type, query: normalized, cityRef }, controller.signal)
+      void search({ provider, type, query: normalized, cityRef }, controller.signal)
         .then((results) => {
           if (controller.signal.aborted) return;
           setOptions(results);
@@ -73,7 +75,7 @@ export function DeliveryLocationPicker({
       window.clearTimeout(timer);
       controller.abort();
     };
-  }, [cityRef, query, search, type, value?.label]);
+  }, [cityRef, provider, query, search, type, value?.label]);
 
   function select(location: DeliveryLocation): void {
     setQuery(location.label);
@@ -159,7 +161,7 @@ async function searchDeliveryLocations(input: SearchInput, signal: AbortSignal):
 function isDeliveryLocation(value: unknown): value is DeliveryLocation {
   return typeof value === 'object' && value !== null
     && typeof (value as DeliveryLocation).ref === 'string'
-    && (value as DeliveryLocation).provider === 'NOVA_POSHTA'
+    && ['NOVA_POSHTA', 'MEEST'].includes((value as DeliveryLocation).provider)
     && ['CITY', 'BRANCH', 'PARCEL_LOCKER'].includes((value as DeliveryLocation).type)
     && typeof (value as DeliveryLocation).label === 'string';
 }

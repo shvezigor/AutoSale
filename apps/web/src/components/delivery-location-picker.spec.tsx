@@ -37,6 +37,19 @@ describe('DeliveryLocationPicker', () => {
     await waitFor(() => expect(onSelect).toHaveBeenCalledWith(null));
   });
 
+  it('searches the explicitly selected Meest directory', async () => {
+    const search = vi.fn().mockResolvedValue([
+      { ref: 'meest-city', provider: 'MEEST', type: 'CITY', label: 'Луцьк' },
+    ]);
+    render(<DeliveryLocationPicker provider="MEEST" label="Місто Meest" type="CITY" value={null} onSelect={vi.fn()} search={search} />);
+    fireEvent.change(screen.getByLabelText('Місто Meest'), { target: { value: 'Луцьк' } });
+
+    await waitFor(() => expect(search).toHaveBeenCalledWith(
+      { provider: 'MEEST', type: 'CITY', query: 'Луцьк', cityRef: undefined },
+      expect.any(AbortSignal),
+    ));
+  });
+
   it('shows stable loading, empty and error states and closes with Escape', async () => {
     vi.useFakeTimers();
     let reject!: (error: Error) => void;

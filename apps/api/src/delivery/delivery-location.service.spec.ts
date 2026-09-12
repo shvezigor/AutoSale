@@ -16,11 +16,16 @@ function fixture() {
     credentialGenerationId: 'generation-1',
     client: { searchCities, searchLocations },
   });
+  const meestClientContextForTenant = vi.fn().mockResolvedValue({
+    credentialGenerationId: 'meest-generation-1',
+    client: { searchCities, searchLocations },
+  });
   const service = new DeliveryLocationService(
     { clientContextForTenant } as never,
+    { clientContextForTenant: meestClientContextForTenant } as never,
     { now: () => currentTime, maxEntries: 2, ttlMs: 300_000 },
   );
-  return { service, searchCities, searchLocations, clientContextForTenant, advance: (ms: number) => { currentTime += ms; } };
+  return { service, searchCities, searchLocations, clientContextForTenant, meestClientContextForTenant, advance: (ms: number) => { currentTime += ms; } };
 }
 
 describe('DeliveryLocationService', () => {
@@ -75,5 +80,14 @@ describe('DeliveryLocationService', () => {
     });
     expect(searchLocations).toHaveBeenCalledWith({ cityRef: 'city-ref', type: 'BRANCH', query: '22' });
     expect(result).toEqual([{ ref: 'branch-ref', provider: 'NOVA_POSHTA', type: 'BRANCH', label: 'Відділення №22', cityRef: 'city-ref', number: '22' }]);
+  });
+
+  it('uses the Meest connection and maps provider-neutral Meest locations', async () => {
+    const { service, clientContextForTenant, meestClientContextForTenant } = fixture();
+    const result = await service.search(tenantId, { provider: 'MEEST', type: 'CITY', query: 'Луцьк' });
+
+    expect(meestClientContextForTenant).toHaveBeenCalledWith(tenantId);
+    expect(clientContextForTenant).not.toHaveBeenCalled();
+    expect(result).toEqual([{ ref: 'city-ref', provider: 'MEEST', type: 'CITY', label: 'Луцьк' }]);
   });
 });
