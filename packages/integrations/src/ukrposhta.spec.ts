@@ -57,6 +57,24 @@ describe('UkrposhtaClient', () => {
     expect(sleep).not.toHaveBeenCalled();
   });
 
+  it.each([
+    ['aborted body', new DOMException('secret', 'AbortError'), 'TIMEOUT'],
+    ['timed-out body', new DOMException('secret', 'TimeoutError'), 'TIMEOUT'],
+    ['network body', new TypeError('secret'), 'NETWORK'],
+  ] as const)('retries %s failures raised while reading the classifier body', async (_label, bodyError, code) => {
+    const fetchFn = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: vi.fn().mockRejectedValue(bodyError),
+    } as unknown as Response);
+    const sleep = vi.fn().mockResolvedValue(undefined);
+    const client = new integrations.UkrposhtaClient({ ...credentials, fetch: fetchFn, sleep });
+
+    await expect(client.searchCities('Луцьк')).rejects.toMatchObject({ code });
+    expect(fetchFn).toHaveBeenCalledTimes(3);
+    expect(sleep.mock.calls.map(([ms]) => ms)).toEqual([200, 400]);
+  });
+
   it('times out abortable attempts and rejects invalid directory input before fetch', async () => {
     const fetchFn = vi.fn().mockImplementation((_url, init) => new Promise((_resolve, reject) => init.signal.addEventListener('abort', () => reject(new DOMException('secret', 'AbortError')))));
     const client = new integrations.UkrposhtaClient({ ...credentials, fetch: fetchFn, timeoutMs: 5, sleep: async () => {} });

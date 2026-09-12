@@ -59,3 +59,21 @@ All provider calls in tests use fake `fetch`; no live Ukrposhta endpoint was con
 
 - Per task constraints, the official 2026 classifier contract is covered by fixtures only; a controlled sandbox contract check remains a later rollout activity.
 - The existing shared delivery feature flag still gates Ukrposhta, matching Task 1 and avoiding a production-configuration change in this slice.
+
+## Fix round 1/5 — response-body transport errors and dependent origin reset
+
+- Preserved `TIMEOUT` for `AbortError`/`TimeoutError` and `NETWORK` for `TypeError` raised while reading a successful classifier response body, so the existing transient retry policy applies for at most three attempts.
+- Kept malformed JSON classified as non-retryable `INVALID_RESPONSE`.
+- Cleared the full dependent branch origin (`cityRef`, `locationRef`, and label) when an owner edits, clears, or replaces the selected city; the sender-profile save action disables immediately.
+- Added focused fake-fetch and real picker/card regressions. Both test groups were observed failing before the fixes and passing afterward.
+
+Verification commands and results:
+
+| Command | Result |
+| --- | --- |
+| `pnpm exec vitest run src/ukrposhta.spec.ts` (integrations) | 1 file, 19 tests passed |
+| `pnpm exec vitest run src/components/ukrposhta-settings-card.spec.tsx` (web) | 1 file, 5 tests passed |
+| `pnpm --filter @autosale/integrations test` | 10 files, 138 tests passed |
+| `pnpm --filter @autosale/web test` | 57 files, 195 tests passed |
+| `pnpm --filter @autosale/integrations typecheck` | passed |
+| `pnpm --filter @autosale/web typecheck` | passed |

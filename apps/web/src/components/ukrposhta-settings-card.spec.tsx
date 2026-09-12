@@ -38,6 +38,7 @@ const configured: UkrposhtaSettingsSummary = {
 afterEach(() => {
   cleanup();
   mutatingFetch.mockReset();
+  vi.unstubAllGlobals();
 });
 
 describe('UkrposhtaSettingsCard', () => {
@@ -79,6 +80,34 @@ describe('UkrposhtaSettingsCard', () => {
     expect(body).toMatchObject({ senderName: 'ТОВ Приклад', origin: { cityRef: '263:297', locationRef: '1' } });
     expect(body).not.toHaveProperty('ecomBearer');
     expect(body).not.toHaveProperty('counterpartyUuid');
+  });
+
+  it('clears the selected branch and disables save when the selected city is edited', async () => {
+    const fetchFn = vi.fn().mockImplementation(async (request: string) => {
+      const url = new URL(request, 'http://localhost');
+      const payload = url.searchParams.get('type') === 'CITY'
+        ? [{ ref: '263:297', provider: 'UKRPOSHTA', type: 'CITY', label: 'Луцьк, Волинська' }]
+        : [{ ref: '1', provider: 'UKRPOSHTA', type: 'BRANCH', cityRef: '263:297', label: '43000 · Луцьк 1' }];
+      return new Response(JSON.stringify(payload), { status: 200 });
+    });
+    vi.stubGlobal('fetch', fetchFn);
+    render(<UkrposhtaSettingsCard initial={active} role="OWNER" />);
+
+    fireEvent.change(screen.getByLabelText('Назва відправника Укрпошти'), { target: { value: 'ТОВ Приклад' } });
+    fireEvent.change(screen.getByLabelText('Телефон відправника Укрпошти'), { target: { value: '+380501112233' } });
+    const cityInput = screen.getByLabelText('Місто відправлення Укрпошти');
+    fireEvent.change(cityInput, { target: { value: 'Луцьк' } });
+    fireEvent.click(await screen.findByRole('option', { name: 'Луцьк, Волинська' }));
+    const branchInput = screen.getByLabelText('Відділення відправлення Укрпошти');
+    fireEvent.change(branchInput, { target: { value: '43000' } });
+    fireEvent.click(await screen.findByRole('option', { name: '43000 · Луцьк 1' }));
+
+    const save = screen.getByRole('button', { name: 'Зберегти відправника Укрпошти' });
+    expect(save).toBeEnabled();
+    fireEvent.change(cityInput, { target: { value: 'Лу' } });
+
+    await waitFor(() => expect(branchInput).toHaveValue(''));
+    expect(save).toBeDisabled();
   });
 
   it('lets an owner choose production with an inline warning and submit one complete credential bundle', async () => {

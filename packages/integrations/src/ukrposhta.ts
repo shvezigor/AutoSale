@@ -163,7 +163,14 @@ function httpError(status: number): UkrposhtaError {
 async function safeJson(response: Response): Promise<unknown> {
   try {
     return await response.json();
-  } catch {
+  } catch (error) {
+    const name = error instanceof Error ? error.name : '';
+    if (name === 'AbortError' || name === 'TimeoutError') {
+      throw new UkrposhtaError('TIMEOUT', response.status);
+    }
+    if (error instanceof TypeError) {
+      throw new UkrposhtaError('NETWORK', response.status);
+    }
     throw new UkrposhtaError('INVALID_RESPONSE', response.status);
   }
 }

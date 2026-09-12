@@ -156,7 +156,21 @@ export function UkrposhtaSettingsCard({ initial, role }: { initial: UkrposhtaSet
               <label><span>Телефон відправника Укрпошти</span><input aria-label="Телефон відправника Укрпошти" inputMode="tel" placeholder="+380501112233" value={profile.senderPhone} onChange={(event) => setProfile((current) => ({ ...current, senderPhone: event.target.value }))} /></label>
             </div>
             <div className="delivery-origin-grid">
-              <DeliveryLocationPicker provider="UKRPOSHTA" label="Місто відправлення Укрпошти" type="CITY" value={city} onSelect={setCity} />
+              <DeliveryLocationPicker
+                provider="UKRPOSHTA"
+                label="Місто відправлення Укрпошти"
+                type="CITY"
+                value={city}
+                onSelect={(value) => {
+                  setCity(value);
+                  setProfile((current) => value?.ref === current.origin.cityRef
+                    ? current
+                    : {
+                        ...current,
+                        origin: { type: 'BRANCH', cityRef: value?.ref ?? '', locationRef: '', label: '' },
+                      });
+                }}
+              />
               <DeliveryLocationPicker
                 provider="UKRPOSHTA"
                 label="Відділення відправлення Укрпошти"
