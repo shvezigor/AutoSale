@@ -35,4 +35,17 @@ describe('UkrposhtaClient', () => {
       signal: expect.any(AbortSignal),
     }));
   });
+
+  it('accepts a version-7 counterparty UUID already accepted by the connection contract', async () => {
+    const Client = (integrations as unknown as { UkrposhtaClient?: new (config: unknown) => { validateCredential(): Promise<unknown> } }).UkrposhtaClient;
+    expect(Client).toBeDefined();
+    if (!Client) throw new Error('UkrposhtaClient is missing');
+    const counterpartyUuid = '8458f0b0-930f-71e2-a91e-003048d2b473';
+    const fetchFn = vi.fn().mockResolvedValue(new Response(JSON.stringify({ uuid: counterpartyUuid, name: 'ТОВ Приклад' }), { status: 200 }));
+
+    const client = new Client({ ...credentials, counterpartyUuid, fetch: fetchFn });
+
+    await expect(client.validateCredential()).resolves.toMatchObject({ valid: true, environment: 'SANDBOX' });
+    expect(fetchFn).toHaveBeenCalledOnce();
+  });
 });

@@ -32,3 +32,14 @@
 - No Ukrposhta network request was made.
 - No production configuration was changed, and nothing was pushed or deployed.
 - Nova Poshta and Meest behavior were left intact.
+
+## Fix round 1/5 — UUID version alignment
+
+- Fixed `UkrposhtaClient` counterparty UUID validation to accept UUID versions 1–8, matching the strict connection contract and settings form.
+- Added a version-7 UUID regression test. Before the fix, it failed at the client constructor with `Invalid Ukrposhta counterparty UUID`; after the fix, it validates through the mocked official endpoint.
+
+### Verification
+
+- `pnpm --filter @autosale/integrations exec vitest run src/ukrposhta.spec.ts` — 2 passed.
+- `pnpm --filter @autosale/integrations typecheck` — passed.
+- `pnpm --filter @autosale/contracts exec vitest run src/delivery.spec.ts` — 17 passed.
