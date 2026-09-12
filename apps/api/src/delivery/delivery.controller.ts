@@ -1,5 +1,5 @@
 import type { AuthPrincipal } from '@autosale/contracts/auth';
-import { deliveryConnectionInputSchema, deliveryLocationQuerySchema, deliverySenderProfileInputSchema, meestConnectionInputSchema, shipmentCustomerMessageInputSchema, shipmentDraftInputSchema } from '@autosale/contracts';
+import { deliveryConnectionInputSchema, deliveryLocationQuerySchema, deliverySenderProfileInputSchema, meestConnectionInputSchema, meestSenderProfileInputSchema, shipmentCustomerMessageInputSchema, shipmentDraftInputSchema } from '@autosale/contracts';
 import { MeestError, NovaPoshtaError } from '@autosale/integrations';
 import { BadRequestException, Body, Controller, Delete, ForbiddenException, Get, Headers, HttpCode, Inject, Param, ParseUUIDPipe, Post, Put, Query, StreamableFile } from '@nestjs/common';
 
@@ -91,6 +91,15 @@ export class MeestConnectionController {
   disconnect(@CurrentPrincipal() principal: AuthPrincipal) {
     assertOwner(principal);
     return this.meest.disconnect(principal.tenantId!);
+  }
+
+  @Put('sender-profile')
+  @RequireMembership('OWNER')
+  saveSenderProfile(@CurrentPrincipal() principal: AuthPrincipal, @Body() body: unknown) {
+    assertOwner(principal);
+    const parsed = meestSenderProfileInputSchema.safeParse(body);
+    if (!parsed.success) throw new BadRequestException('Invalid Meest sender profile');
+    return this.meest.saveSenderProfile(principal.tenantId!, parsed.data);
   }
 }
 

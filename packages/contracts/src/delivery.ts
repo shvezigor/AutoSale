@@ -62,6 +62,16 @@ export const meestConnectionInputSchema = z.object({
   clientUid: z.string().uuid(),
 }).strict();
 
+export const meestSenderProfileInputSchema = z.object({
+  senderName: z.string().trim().min(2).max(120),
+  senderPhone: phoneSchema,
+  origin: pickupDestinationSchema,
+  payer: shipmentPayerSchema,
+  defaultParcel: parcelSchema,
+  suggestCustomerNotification: z.boolean(),
+  customerNotificationTemplate: z.string().trim().min(1).max(1_000),
+}).strict();
+
 export const deliveryLocationQuerySchema = z.object({
   provider: z.enum(['NOVA_POSHTA', 'MEEST']),
   type: deliveryLocationTypeSchema,
@@ -128,6 +138,7 @@ export type DeliveryLocationQuery = z.infer<typeof deliveryLocationQuerySchema>;
 export type ShipmentDestination = z.infer<typeof shipmentDestinationSchema>;
 export type DeliveryConnectionInput = z.infer<typeof deliveryConnectionInputSchema>;
 export type MeestConnectionInput = z.infer<typeof meestConnectionInputSchema>;
+export type MeestSenderProfileInput = z.infer<typeof meestSenderProfileInputSchema>;
 export type DeliverySenderProfileInput = z.infer<typeof deliverySenderProfileInputSchema>;
 export type ShipmentDraftInput = z.infer<typeof shipmentDraftInputSchema>;
 export type ShipmentCreateJob = z.infer<typeof shipmentCreateJobSchema>;
@@ -149,6 +160,11 @@ export interface DeliveryConnectionSummary {
   lastVerifiedAt: string | null;
   lastErrorCode: string | null;
   senderProfile: DeliverySenderProfileInput | null;
+}
+
+export interface MeestConnectionSummary extends Omit<DeliveryConnectionSummary, 'provider' | 'senderProfile'> {
+  provider: 'MEEST';
+  senderProfile: MeestSenderProfileInput | null;
 }
 
 export interface DeliveryLocation {

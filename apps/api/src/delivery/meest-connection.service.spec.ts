@@ -18,6 +18,9 @@ function fixture() {
     findUnique: vi.fn().mockResolvedValue(connection),
     upsert: vi.fn().mockResolvedValue(connection),
     updateMany: vi.fn().mockResolvedValue({ count: 1 }),
+  }, deliverySenderProfile: {
+    upsert: vi.fn().mockResolvedValue({}),
+    findUnique: vi.fn().mockResolvedValue(null),
   } };
   const cipher = { encrypt: vi.fn().mockReturnValue('ciphertext'), decrypt: vi.fn().mockReturnValue(JSON.stringify(input)) };
   const validateCredential = vi.fn().mockResolvedValue({ valid: true, accountLabel: 'merchant' });
@@ -80,5 +83,39 @@ describe('MeestConnectionService', () => {
     expect(cipher.decrypt).toHaveBeenCalledWith('ciphertext');
     expect(factory).toHaveBeenCalledWith(input);
     expect(context.credentialGenerationId).toBe('44444444-4444-4444-8444-444444444444');
+  });
+
+  it('persists and returns Meest sender defaults without returning credentials', async () => {
+    const { service, prisma } = fixture();
+    const profile = {
+      senderName: 'ТОВ Приклад', senderPhone: '+380501112233',
+      origin: { type: 'BRANCH' as const, cityRef: 'city-ref', locationRef: 'branch-ref', label: 'Відділення Meest №1' },
+      payer: 'SENDER' as const, defaultParcel: { weightKg: 1, lengthCm: 30, widthCm: 20, heightCm: 10 },
+      suggestCustomerNotification: true, customerNotificationTemplate: '{company}: ТТН {trackingNumber}',
+    };
+    await expect(service.saveSenderProfile(tenantId, profile)).resolves.toEqual(profile);
+    expect(prisma.deliverySenderProfile.upsert).toHaveBeenCalledWith(expect.objectContaining({
+      where: { tenantId_connectionId: { tenantId, connectionId: '33333333-3333-4333-8333-333333333333' } },
+      create: expect.objectContaining({ senderRef: 'ТОВ Приклад', contactPhone: '+380501112233', originLocationRef: 'branch-ref' }),
+    }));
+  });
+
+  it('maps a stored Meest sender profile into the safe connection summary', async () => {
+    const { service, prisma } = fixture();
+    prisma.deliveryConnection.findUnique.mockResolvedValue({
+      id: '33333333-3333-4333-8333-333333333333', tenantId, provider: 'MEEST', status: 'ACTIVE',
+      encryptedCredential: 'ciphertext', credentialGenerationId: 'generation', accountLabel: 'merchant',
+      connectedByUserId: userId, lastVerifiedAt: now, lastErrorCode: null, disconnectedAt: null, createdAt: now, updatedAt: now,
+      senderProfile: {
+        senderRef: 'ТОВ Приклад', contactPhone: '+380501112233', originType: 'BRANCH',
+        originCityRef: 'city-ref', originLocationRef: 'branch-ref', originLabel: 'Відділення Meest №1',
+        payer: 'SENDER', defaultWeightKg: 1, defaultLengthCm: 30, defaultWidthCm: 20, defaultHeightCm: 10,
+        suggestCustomerNotification: true, customerNotificationTemplate: '{company}: ТТН {trackingNumber}',
+      },
+    });
+
+    await expect(service.summary(tenantId)).resolves.toMatchObject({
+      connection: { senderProfile: { senderName: 'ТОВ Приклад', origin: { locationRef: 'branch-ref' } } },
+    });
   });
 });

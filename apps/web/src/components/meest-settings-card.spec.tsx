@@ -18,6 +18,18 @@ const active: MeestSettingsSummary = {
   enabled: true,
   connection: { provider: 'MEEST', status: 'ACTIVE', accountLabel: 'merchant', lastVerifiedAt: '2026-09-12T08:00:00.000Z', lastErrorCode: null, senderProfile: null },
 };
+const configured: MeestSettingsSummary = {
+  enabled: true,
+  connection: {
+    ...active.connection!,
+    senderProfile: {
+      senderName: 'ТОВ Приклад', senderPhone: '+380501112233',
+      origin: { type: 'BRANCH', cityRef: 'city-ref', locationRef: 'branch-ref', label: 'Відділення Meest №1' },
+      payer: 'SENDER', defaultParcel: { weightKg: 1, lengthCm: 30, widthCm: 20, heightCm: 10 },
+      suggestCustomerNotification: true, customerNotificationTemplate: '{company}: ТТН {trackingNumber}',
+    },
+  },
+};
 
 afterEach(() => {
   cleanup();
@@ -46,5 +58,28 @@ describe('MeestSettingsCard', () => {
     });
     await waitFor(() => expect(screen.getByLabelText('Пароль Meest API')).toHaveValue(''));
     expect(screen.queryByDisplayValue('secret-password')).not.toBeInTheDocument();
+  });
+
+  it('lets an owner choose an exact Meest origin and save sender defaults', async () => {
+    render(<MeestSettingsCard initial={active} role="OWNER" />);
+    expect(screen.getByLabelText('Назва відправника Meest')).toBeInTheDocument();
+    expect(screen.getByLabelText('Телефон відправника Meest')).toBeInTheDocument();
+    expect(screen.getByLabelText('Місто відправлення Meest')).toBeInTheDocument();
+    expect(screen.getByLabelText('Відділення відправлення Meest')).toBeInTheDocument();
+  });
+
+  it('saves a complete sender profile without exposing connection credentials', async () => {
+    mutatingFetch.mockResolvedValue(new Response(JSON.stringify(configured.connection!.senderProfile), { status: 200 }));
+    render(<MeestSettingsCard initial={configured} role="OWNER" />);
+    fireEvent.click(screen.getByRole('button', { name: 'Зберегти відправника' }));
+
+    await waitFor(() => expect(mutatingFetch).toHaveBeenCalledWith(
+      '/api/integrations/delivery/meest/sender-profile',
+      expect.objectContaining({ method: 'PUT' }),
+    ));
+    const body = JSON.parse(String(mutatingFetch.mock.calls[0]?.[1]?.body));
+    expect(body).toMatchObject({ senderName: 'ТОВ Приклад', origin: { locationRef: 'branch-ref' } });
+    expect(body).not.toHaveProperty('password');
+    expect(body).not.toHaveProperty('clientUid');
   });
 });

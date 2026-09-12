@@ -13,8 +13,9 @@
 1. Add a credential-safe query client and map cities and branches into the existing provider-neutral location types.
 2. Store encrypted `login`, `password` and `ClientUID` per tenant, expose only status/account label, and add owner-only connection controls.
 3. Make location search provider-aware while preserving cache isolation by tenant, provider and credential generation.
-4. Add quote and draft support, then create/delete/register with durable idempotency and unknown-outcome reconciliation.
-5. Add label and tracking mappings, then run sandbox acceptance before exposing Meest in the shipment dialog.
+4. Persist the Meest sender name, phone, exact origin branch and parcel defaults before enabling shipment actions.
+5. Add quote and draft support, then create/delete/register with durable idempotency and unknown-outcome reconciliation.
+6. Add label and tracking mappings, then run sandbox acceptance before exposing Meest in the shipment dialog.
 
 ## Security and compatibility
 

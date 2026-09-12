@@ -12,6 +12,7 @@ import {
   shipmentStatusJobSchema,
   shipmentStatusSchema,
 } from './delivery.js';
+import * as deliveryContracts from './delivery.js';
 
 const validDraft = {
   provider: 'NOVA_POSHTA' as const,
@@ -97,6 +98,20 @@ describe('delivery contracts', () => {
     expect(() => meestConnectionInputSchema.parse({ ...input, password: '' })).toThrow();
     expect(() => meestConnectionInputSchema.parse({ ...input, clientUid: 'client-ref' })).toThrow();
     expect(() => meestConnectionInputSchema.parse({ ...input, apiKey: 'unexpected' })).toThrow();
+  });
+
+  it('accepts a branch-based Meest sender profile without exposing provider credentials', () => {
+    const schema = (deliveryContracts as unknown as Record<string, { parse(value: unknown): unknown }>).meestSenderProfileInputSchema;
+    expect(schema).toBeDefined();
+    if (!schema) throw new Error('Meest sender profile schema is missing');
+    const profile = {
+      senderName: 'ТОВ Приклад', senderPhone: '+380501112233',
+      origin: { type: 'BRANCH', cityRef: 'city-ref', locationRef: 'branch-ref', label: 'Відділення Meest №1' },
+      payer: 'SENDER', defaultParcel: { weightKg: 1, lengthCm: 30, widthCm: 20, heightCm: 10 },
+      suggestCustomerNotification: true, customerNotificationTemplate: '{company}: ТТН {trackingNumber}',
+    };
+    expect(schema.parse(profile)).toEqual(profile);
+    expect(() => schema.parse({ ...profile, clientUid: 'must-stay-server-side' })).toThrow();
   });
 
   it('accepts only UUID-backed delivery worker jobs', () => {

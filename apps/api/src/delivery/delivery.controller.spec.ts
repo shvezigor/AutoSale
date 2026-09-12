@@ -94,6 +94,22 @@ describe('MeestConnectionController', () => {
     await expect(controller.connect(owner, { ...input, clientUid: 'bad' })).rejects.toBeInstanceOf(BadRequestException);
     await expect(controller.connect(owner, input)).rejects.toBeInstanceOf(BadRequestException);
   });
+
+  it('lets only the owner persist validated Meest sender defaults', async () => {
+    const saveSenderProfile = vi.fn().mockResolvedValue({ senderName: 'ТОВ Приклад' });
+    const controller = new MeestConnectionController({ saveSenderProfile } as never);
+    const save = (controller as unknown as { saveSenderProfile?: (principal: typeof owner, body: unknown) => Promise<unknown> }).saveSenderProfile;
+    expect(save).toBeTypeOf('function');
+    const profile = {
+      senderName: 'ТОВ Приклад', senderPhone: '+380501112233',
+      origin: { type: 'BRANCH', cityRef: 'city-ref', locationRef: 'branch-ref', label: 'Відділення Meest №1' },
+      payer: 'SENDER', defaultParcel: { weightKg: 1, lengthCm: 30, widthCm: 20, heightCm: 10 },
+      suggestCustomerNotification: true, customerNotificationTemplate: '{company}: ТТН {trackingNumber}',
+    };
+    expect(() => save!.call(controller, manager, profile)).toThrow(ForbiddenException);
+    await save!.call(controller, owner, profile);
+    expect(saveSenderProfile).toHaveBeenCalledWith('tenant', profile);
+  });
 });
 
 describe('DeliveryLocationController', () => {
