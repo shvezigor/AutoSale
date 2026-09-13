@@ -27,8 +27,8 @@ const configured: UkrposhtaSettingsSummary = {
   connection: {
     ...active.connection!,
     senderProfile: {
-      senderName: 'ТОВ Приклад', senderPhone: '+380501112233',
-      origin: { type: 'BRANCH', cityRef: '263:297', locationRef: '1', label: '43000 · Луцьк 1' },
+      senderName: 'Петренко Іван', senderPhone: '+380501112233',
+      origin: { type: 'BRANCH', cityRef: '263:297', locationRef: 'up:1:43000', label: '43000 · Луцьк 1' },
       payer: 'SENDER', defaultParcel: { weightKg: 1, lengthCm: 30, widthCm: 20, heightCm: 10 },
       suggestCustomerNotification: true, customerNotificationTemplate: '{company}: ТТН {trackingNumber}',
     },
@@ -46,7 +46,7 @@ describe('UkrposhtaSettingsCard', () => {
     render(<UkrposhtaSettingsCard initial={configured} role="MANAGER" />);
     expect(screen.getByText('ТОВ Приклад · тестове середовище')).toBeInTheDocument();
     expect(screen.getByText('Тестове середовище')).toBeInTheDocument();
-    expect(screen.getByText('ТОВ Приклад', { selector: 'strong' })).toBeInTheDocument();
+    expect(screen.getByText('Петренко Іван', { selector: 'strong' })).toBeInTheDocument();
     expect(screen.getByText('+380501112233')).toBeInTheDocument();
     expect(screen.getByText('43000 · Луцьк 1')).toBeInTheDocument();
     expect(screen.getByText('Відправник', { selector: 'strong' })).toBeInTheDocument();
@@ -78,7 +78,7 @@ describe('UkrposhtaSettingsCard', () => {
       '/api/integrations/delivery/ukrposhta/sender-profile', expect.objectContaining({ method: 'PUT' }),
     ));
     const body = JSON.parse(String(mutatingFetch.mock.calls[0]?.[1]?.body));
-    expect(body).toMatchObject({ senderName: 'ТОВ Приклад', origin: { cityRef: '263:297', locationRef: '1' } });
+    expect(body).toMatchObject({ senderName: 'Петренко Іван', origin: { cityRef: '263:297', locationRef: 'up:1:43000' } });
     expect(body).not.toHaveProperty('ecomBearer');
     expect(body).not.toHaveProperty('counterpartyUuid');
   });
@@ -88,13 +88,13 @@ describe('UkrposhtaSettingsCard', () => {
       const url = new URL(request, 'http://localhost');
       const payload = url.searchParams.get('type') === 'CITY'
         ? [{ ref: '263:297', provider: 'UKRPOSHTA', type: 'CITY', label: 'Луцьк, Волинська' }]
-        : [{ ref: '1', provider: 'UKRPOSHTA', type: 'BRANCH', cityRef: '263:297', label: '43000 · Луцьк 1' }];
+        : [{ ref: 'up:1:43000', provider: 'UKRPOSHTA', type: 'BRANCH', cityRef: '263:297', label: '43000 · Луцьк 1' }];
       return new Response(JSON.stringify(payload), { status: 200 });
     });
     vi.stubGlobal('fetch', fetchFn);
     render(<UkrposhtaSettingsCard initial={active} role="OWNER" />);
 
-    fireEvent.change(screen.getByLabelText('Назва відправника Укрпошти'), { target: { value: 'ТОВ Приклад' } });
+    fireEvent.change(screen.getByLabelText('Назва відправника Укрпошти'), { target: { value: 'Петренко Іван' } });
     fireEvent.change(screen.getByLabelText('Телефон відправника Укрпошти'), { target: { value: '+380501112233' } });
     const cityInput = screen.getByLabelText('Місто відправлення Укрпошти');
     fireEvent.change(cityInput, { target: { value: 'Луцьк' } });

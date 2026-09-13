@@ -9,7 +9,10 @@ const credentials = { environment: 'SANDBOX', ecomBearer: 'bearer-secret', count
 const profile = { senderRef: 'Петренко Іван Іванович', contactRef: 'UKRPOSHTA_SENDER', contactPhone: '+380501112233', originType: 'BRANCH', originCityRef: '1:2', originLocationRef: 'up:12:01001', originLabel: 'Назва без індексу', originAddressRef: null, originBuilding: null, originFlat: null, payer: 'SENDER', defaultWeightKg: 1, defaultLengthCm: 30, defaultWidthCm: 20, defaultHeightCm: 10, suggestCustomerNotification: false, customerNotificationTemplate: '{company}: {trackingNumber} {trackingUrl}' };
 const connection = { id, tenantId, provider: 'UKRPOSHTA', status: 'ACTIVE', encryptedCredential: 'cipher', credentialGenerationId: id, senderProfile: profile };
 const draft = { provider: 'UKRPOSHTA' as const, recipient: { name: 'Шевченко Олена', phone: '+380671234567' }, destination: { type: 'BRANCH' as const, cityRef: '263:297', locationRef: 'up:1:43000', label: 'Довільна назва' }, parcels: [{ weightKg: 1, lengthCm: 30, widthCm: 20, heightCm: 10 }], payer: 'RECIPIENT' as const, declaredValue: 500, codAmount: null, description: 'Запчастини' };
-const stored = { id, tenantId, orderId, provider: 'UKRPOSHTA', status: 'DRAFT', connectionId: id, version: 1, requestHash: 'hash', trackingNumber: null, cost: null, createdAt: now, providerCreatedAt: null, acceptedAt: null, deliveredAt: null, cancelledAt: null, lastStatusCheckedAt: null, lastErrorCode: null, statusEvents: [], providerMetadata: { environment: 'SANDBOX', credentialGenerationId: id }, connection };
+const stored = { id, tenantId, orderId, provider: 'UKRPOSHTA', status: 'DRAFT', connectionId: id, version: 1, requestHash: 'hash', trackingNumber: null, cost: null, createdAt: now, providerCreatedAt: null, acceptedAt: null, deliveredAt: null, cancelledAt: null, lastStatusCheckedAt: null, lastErrorCode: null, statusEvents: [], providerMetadata: { environment: 'SANDBOX', credentialGenerationId: id }, connection,
+  senderSnapshot: { senderRef: profile.senderRef, contactRef: profile.contactRef, contactPhone: profile.contactPhone, origin: { type: 'BRANCH', cityRef: profile.originCityRef, locationRef: profile.originLocationRef, label: profile.originLabel }, payer: profile.payer, defaultParcel: { weightKg: 1, lengthCm: 30, widthCm: 20, heightCm: 10 }, suggestCustomerNotification: false, customerNotificationTemplate: profile.customerNotificationTemplate },
+  recipientSnapshot: draft.recipient, destinationSnapshot: draft.destination, parcels: draft.parcels, payer: draft.payer, declaredValue: draft.declaredValue, codAmount: draft.codAmount, description: draft.description,
+};
 
 function fixture(enabled = false) {
   const prisma = {
@@ -67,6 +70,12 @@ describe('Ukrposhta shipment API service', () => {
     await expect(service.quoteShipment(tenantId, orderId, draft)).resolves.toMatchObject({ cost: 90 });
     expect(client.calculateShipment).toHaveBeenCalledWith(expect.objectContaining({ senderPostcode: '01001', recipientPostcode: '43000' }));
   });
+  it('rejects a COD draft synchronously when the individual sender has no patronymic', async () => {
+    const { service, prisma, client } = fixture();
+    prisma.deliveryConnection.findUnique.mockResolvedValue({ ...connection, senderProfile: { ...profile, senderRef: 'Петренко Іван' } });
+    await expect(service.quoteShipment(tenantId, orderId, { ...draft, codAmount: 100 })).rejects.toThrow('UKRPOSHTA_PERSON_NAME_REQUIRED');
+    expect(client.calculateShipment).not.toHaveBeenCalled();
+  });
   it('rejects a disabled create before persisting or enqueueing provider work', async () => {
     const { service, prisma, queue } = fixture();
     prisma.shipment.findFirst.mockResolvedValue(stored);
@@ -90,6 +99,14 @@ describe('Ukrposhta shipment API service', () => {
     prisma.shipment.findFirst.mockResolvedValue({ ...stored, status: 'CREATED', providerDocumentId: id });
     client.getLifecycle.mockResolvedValue({ status: 'REGISTERED', statusDate: '2026-09-13T09:00:00' });
     await expect(service.cancelShipment(tenantId, id)).rejects.toThrow('SHIPMENT_CANNOT_BE_CANCELLED');
+    expect(queue.add).not.toHaveBeenCalled();
+  });
+  it('blocks a repeated cancellation after its durable attempt failed terminally', async () => {
+    const { service, prisma, queue } = fixture();
+    prisma.shipment.findFirst.mockResolvedValue({ ...stored, status: 'CREATED', providerDocumentId: id });
+    prisma.shipmentAttempt.findUnique.mockResolvedValue({ status: 'FAILED' });
+    await expect(service.cancelShipment(tenantId, id)).rejects.toThrow('SHIPMENT_CANCELLATION_FAILED');
+    expect(prisma.shipmentAttempt.upsert).not.toHaveBeenCalled();
     expect(queue.add).not.toHaveBeenCalled();
   });
   it('builds a manual tenant-branded Ukrposhta tracking preview without sending it', async () => {

@@ -60,3 +60,11 @@ Total: 438 tests across the listed suites. This is focused/affected validation, 
 Apply the additive migration and generated client together during a later authorized deployment. Keep the sandbox flags false except during explicitly approved combined carrier acceptance; production creation stays blocked in code. Acceptance must verify actual STANDARD/W2W payloads, sender/COD contract permissions, estimate/final costs, PDF readability and controlled lifecycle/deletion. Legal-entity sender support, audited unknown-outcome tooling and StatusTracking are not silently supplied by this slice.
 
 No push, deployment, real shipment, production API call or secret change was performed. Unrelated untracked orchestration briefs/progress files remain untouched.
+
+## Independent review and fix round
+
+A fresh review found no Critical issues and four Important gaps: definitive HTTP create rejections could be misclassified as ambiguous, sender office refs were not enforced at the persistence boundary, name rules differed between synchronous and worker validation, and terminal cancellation failures appeared retryable while the durable attempt could not run again. It also identified safe API error mapping and keyboard focus containment as Moderate issues.
+
+All findings were addressed and the scoped re-review reported no remaining Critical or Important issues. A shared Ukrposhta person-name rule is now reused by contracts, API, worker and both sender/recipient forms. Failed cancellation is explicitly blocked rather than acknowledged as a no-op. Provider errors return bounded safe responses and the delivery dialog traps keyboard focus.
+
+Final root verification after the fix round: 1,132 repository tests passed, all workspace typechecks passed, the production build passed, and `git diff --check` was clean.

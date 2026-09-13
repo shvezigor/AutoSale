@@ -1,6 +1,6 @@
 import { createHash, randomUUID } from 'node:crypto';
 
-import { deliverySenderProfileInputSchema, shipmentCustomerMessageInputSchema, shipmentDraftInputSchema, type ConversationMessage, type DeliveryConnectionInput, type DeliveryConnectionSummary, type DeliverySenderProfileInput, type OutboundMessageInput, type ShipmentCustomerMessageInput, type ShipmentCustomerMessagePreview, type ShipmentDraftInput, type ShipmentOverview, type ShipmentQuote, type ShipmentSummary } from '@autosale/contracts';
+import { deliverySenderProfileInputSchema, isUkrposhtaPersonName, shipmentCustomerMessageInputSchema, shipmentDraftInputSchema, type ConversationMessage, type DeliveryConnectionInput, type DeliveryConnectionSummary, type DeliverySenderProfileInput, type OutboundMessageInput, type ShipmentCustomerMessageInput, type ShipmentCustomerMessagePreview, type ShipmentDraftInput, type ShipmentOverview, type ShipmentQuote, type ShipmentSummary } from '@autosale/contracts';
 import type { PrismaClient } from '@autosale/database';
 import { parseUkrposhtaLocationRef, type CredentialCipher, type NovaPoshtaClient, type NovaPoshtaSenderProfile, type UkrposhtaClient } from '@autosale/integrations';
 import { ukrposhtaConnectionInputSchema, type UkrposhtaConnectionInput } from '@autosale/contracts';
@@ -138,7 +138,7 @@ export class DeliveryService {
       ? readiness.reason
       : !connection || connection.status !== 'ACTIVE'
         ? 'CONNECTION_REQUIRED'
-        : !connection.senderProfile || provider === 'UKRPOSHTA' && !validUkrposhtaOrigin(connection.senderProfile.originLocationRef) ? 'SENDER_PROFILE_REQUIRED' : null;
+        : !connection.senderProfile || provider === 'UKRPOSHTA' && (!validUkrposhtaOrigin(connection.senderProfile.originLocationRef) || !validUkrposhtaSenderName(connection.senderProfile.senderRef)) ? 'SENDER_PROFILE_REQUIRED' : null;
     return {
       ...(this.ukrposhtaClient ? { availableProviders: available.map((c) => c.provider as 'NOVA_POSHTA' | 'UKRPOSHTA'), creationEnabled: provider !== 'UKRPOSHTA' || Boolean(connection && this.ukrposhtaCreationEnabled(connection.encryptedCredential)) } : {}),
       shipment: shipment ? mapShipmentSummary(shipment) : null,
@@ -163,6 +163,7 @@ export class DeliveryService {
     });
     if (!connection || connection.status !== 'ACTIVE') throw new BadRequestException('CONNECTION_REQUIRED');
     if (!validSenderProfile(connection.senderProfile)) throw new BadRequestException('SENDER_PROFILE_REQUIRED');
+    if (parsed.data.provider === 'UKRPOSHTA') assertUkrposhtaPeople(parsed.data, safeSenderProfile(connection.senderProfile));
     const data = shipmentDraftData(parsed.data, connection.senderProfile);
     if (parsed.data.provider === 'UKRPOSHTA') parseUkrposhtaLocationRef(connection.senderProfile.originLocationRef ?? '');
     const providerData = {
@@ -200,6 +201,7 @@ export class DeliveryService {
     if (!connection || connection.status !== 'ACTIVE') throw new BadRequestException('CONNECTION_REQUIRED');
     if (!validSenderProfile(connection.senderProfile)) throw new BadRequestException('SENDER_PROFILE_REQUIRED');
     if (parsed.data.provider === 'UKRPOSHTA') {
+      assertUkrposhtaPeople(parsed.data, safeSenderProfile(connection.senderProfile));
       if (parsed.data.destination.type !== 'BRANCH') throw new BadRequestException('INVALID_SHIPMENT_DRAFT');
       return this.ukrposhtaForConnection(connection.encryptedCredential).calculateShipment({
         senderPostcode: parseUkrposhtaLocationRef(connection.senderProfile.originLocationRef ?? '').postcode,
@@ -230,6 +232,10 @@ export class DeliveryService {
       if (!this.ukrposhtaCreationEnabled(connection.encryptedCredential)) throw new BadRequestException('UKRPOSHTA_CREATION_DISABLED');
       const metadata = active.providerMetadata as { credentialGenerationId?: string } | null;
       if (metadata?.credentialGenerationId !== connection.credentialGenerationId) throw new BadRequestException('SHIPMENT_CONNECTION_CHANGED');
+      const storedDraft = draftFromShipment(active);
+      const storedSender = deliverySenderProfileInputSchema.safeParse(active.senderSnapshot);
+      if (!storedDraft || !storedSender.success) throw new BadRequestException('INVALID_SHIPMENT_DRAFT');
+      assertUkrposhtaPeople(storedDraft, storedSender.data);
     }
 
     const version = active.version;
@@ -311,6 +317,11 @@ export class DeliveryService {
     if (shipment.provider === 'UKRPOSHTA' && (shipment.status !== 'CREATED' || (await this.ukrposhtaForConnection(shipment.connection.encryptedCredential).getLifecycle(shipment.providerDocumentId)).status !== 'CREATED')) throw new BadRequestException('SHIPMENT_CANNOT_BE_CANCELLED');
     const version = shipment.version;
     const idempotencyKey = `shipment:cancel:v1:${shipment.id}:${version}`;
+    const existingAttempt = await this.prisma.shipmentAttempt.findUnique({
+      where: { tenantId_shipmentId_operation_version: { tenantId, shipmentId, operation: 'CANCEL', version } },
+      select: { status: true },
+    });
+    if (existingAttempt?.status === 'FAILED') throw new BadRequestException('SHIPMENT_CANCELLATION_FAILED');
     await this.prisma.shipmentAttempt.upsert({
       where: { tenantId_shipmentId_operation_version: { tenantId, shipmentId, operation: 'CANCEL', version } },
       create: { tenantId, shipmentId, operation: 'CANCEL', version, status: 'PENDING', idempotencyKey, requestHash: shipment.requestHash },
@@ -671,6 +682,16 @@ function validSenderProfile(profile: Parameters<typeof safeSenderProfile>[0] | n
 
 function validUkrposhtaOrigin(ref: string | null): boolean {
   try { parseUkrposhtaLocationRef(ref ?? ''); return true; } catch { return false; }
+}
+
+function validUkrposhtaSenderName(name: string): boolean {
+  return isUkrposhtaPersonName(name);
+}
+
+function assertUkrposhtaPeople(draft: ShipmentDraftInput, sender: DeliverySenderProfileInput): void {
+  if (!isUkrposhtaPersonName(draft.recipient.name) || !isUkrposhtaPersonName(sender.senderRef, draft.codAmount !== null && draft.codAmount > 0)) {
+    throw new BadRequestException('UKRPOSHTA_PERSON_NAME_REQUIRED');
+  }
 }
 
 function isUniqueConstraintError(error: unknown): error is { code: 'P2002' } {

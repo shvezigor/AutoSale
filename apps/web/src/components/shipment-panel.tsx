@@ -73,7 +73,7 @@ export function ShipmentPanel({ order }: { order: ManagerOrder }) {
         <button className="secondary-button" type="button" onClick={() => void navigator.clipboard.writeText(shipment.trackingNumber!).then(() => toast.show({ type: 'success', title: 'Номер ТТН скопійовано' }))}>Скопіювати ТТН</button>
         <a className="secondary-button" href={`/api/shipments/${shipment.id}/label`}>Завантажити етикетку</a>
         <a className="text-button" href={shipment.provider === 'UKRPOSHTA' ? `https://track.ukrposhta.ua/tracking_UA.html?barcode=${encodeURIComponent(shipment.trackingNumber)}` : `https://tracking.novaposhta.ua/#/uk/${shipment.trackingNumber}`} rel="noreferrer" target="_blank">Відстежити</a>
-        {(shipment.provider === 'UKRPOSHTA' ? shipment.status === 'CREATED' : !['DELIVERED', 'RETURNED', 'CANCELLED'].includes(shipment.status)) && <button className="danger-text-button" disabled={cancelling} type="button" onClick={() => void cancelShipment()}>{cancelling ? 'Скасовуємо…' : 'Скасувати ТТН'}</button>}
+        {(shipment.provider === 'UKRPOSHTA' ? shipment.status === 'CREATED' && !shipment.lastErrorCode : !['DELIVERED', 'RETURNED', 'CANCELLED'].includes(shipment.status)) && <button className="danger-text-button" disabled={cancelling} type="button" onClick={() => void cancelShipment()}>{cancelling ? 'Скасовуємо…' : 'Скасувати ТТН'}</button>}
       </>}
       {!shipment?.trackingNumber && <button ref={trigger} className="secondary-button" type="button" disabled={blocked || creationLocked} onClick={() => setOpen(true)}>
         {shipment?.status === 'CREATING' ? 'Створюємо ТТН…' : shipment?.status === 'DRAFT' ? 'Продовжити оформлення' : 'Оформити доставку'}

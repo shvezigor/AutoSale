@@ -40,6 +40,15 @@ function fixture(options: { enabled?: boolean; metadata?: object; status?: strin
 }
 
 describe('durable Ukrposhta shipment jobs', () => {
+  it.each([[400, 'VALIDATION'], [401, 'UNAUTHORIZED'], [404, 'NOT_FOUND'], [429, 'RATE_LIMITED']] as const)('records definitive create HTTP %s as failed without retrying POST', async (status, code) => {
+    const { service, shipment, attempt, client } = fixture();
+    client.createShipment.mockRejectedValue(new UkrposhtaError(code, status));
+    await expect(service.process({ shipmentId: id })).resolves.toBe('FAILED');
+    expect(shipment).toMatchObject({ status: 'FAILED', lastErrorCode: `UKRPOSHTA_${code}` });
+    expect(attempt.status).toBe('FAILED');
+    await expect(service.process({ shipmentId: id })).resolves.toBe('IGNORED');
+    expect(client.createShipment).toHaveBeenCalledOnce();
+  });
   it('does not steal an expired candidate whose owner has renewed its lease', async () => {
     const { service, prisma, client, attempt } = fixture({ status: 'PROCESSING' });
     prisma.shipmentAttempt.findFirst.mockImplementationOnce(async () => {

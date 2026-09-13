@@ -1086,11 +1086,11 @@ Status: deferred by the owner on 2026-09-12. Resume with sandbox credentials, th
 - [x] Add a strict credential contract and safe official-host eCom adapter.
 - [x] Add encrypted tenant connection and owner-only Delivery settings UI with an explicit sandbox/production mode.
 - [x] Add cached classifier search, active post-office filtering and sender defaults.
-- [ ] Add idempotent client/shipment provisioning, PDF label proxy and lifecycle operations.
+- [x] Add idempotent client/shipment provisioning, PDF label proxy and lifecycle operations.
 - [ ] Add delayed tracking with a separate bearer and batch size up to 50.
 - [ ] Complete sandbox and controlled production acceptance in the combined carrier test cycle.
 
-Status: official research and the first contract/adapter slice were completed on 2026-09-12. Ukrposhta requires a business contract and separate eCom, counterparty and tracking credentials; API shipments are not synchronized with the Personal Account. The adapter validates the selected environment through its fixed official HTTPS eCom host and returns only a safe account label. Implementation follows `docs/superpowers/plans/2026-09-12-ukrposhta-delivery-implementation.md`. Production shipment creation remains disabled until combined carrier acceptance.
+Status: official research, secure connection, directories/sender defaults, and the gated shipment lifecycle were completed by 2026-09-13. The manager flow now supports Ukrposhta quote, durable idempotent creation, CREATED-only cancellation, PDF labels and explicit customer-message previews. Ukrposhta requires a business contract and separate eCom, counterparty and tracking credentials; API shipments are not synchronized with the Personal Account. Implementation follows `docs/superpowers/plans/2026-09-12-ukrposhta-delivery-implementation.md`. Production shipment creation remains disabled until combined carrier acceptance; delayed StatusTracking is the next slice.
 
 ## Task 73: Add bank accounts and payments
 

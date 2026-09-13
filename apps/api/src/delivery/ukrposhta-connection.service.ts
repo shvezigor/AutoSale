@@ -84,18 +84,19 @@ export class UkrposhtaConnectionService {
 
   async saveSenderProfile(tenantId: string, input: UkrposhtaSenderProfileInput): Promise<UkrposhtaSenderProfileInput> {
     this.assertEnabled();
+    const parsed = ukrposhtaSenderProfileInputSchema.parse(input);
     const connection = await this.prisma.deliveryConnection.findUnique({
       where: { tenantId_provider: { tenantId, provider: 'UKRPOSHTA' } },
       select: { id: true, status: true },
     });
     if (!connection || connection.status !== 'ACTIVE') throw new Error('Active Ukrposhta connection required');
-    const data = ukrposhtaSenderProfileData(input);
+    const data = ukrposhtaSenderProfileData(parsed);
     await this.prisma.deliverySenderProfile.upsert({
       where: { tenantId_connectionId: { tenantId, connectionId: connection.id } },
       create: { tenantId, connectionId: connection.id, ...data },
       update: data,
     });
-    return input;
+    return parsed;
   }
 
   private assertEnabled(): void {
@@ -139,8 +140,8 @@ type StoredSenderProfile = {
   customerNotificationTemplate: string;
 };
 
-function safeUkrposhtaSenderProfile(profile: StoredSenderProfile): UkrposhtaSenderProfileInput {
-  return ukrposhtaSenderProfileInputSchema.parse({
+function safeUkrposhtaSenderProfile(profile: StoredSenderProfile): UkrposhtaSenderProfileInput | null {
+  const parsed = ukrposhtaSenderProfileInputSchema.safeParse({
     senderName: profile.senderRef,
     senderPhone: profile.contactPhone,
     origin: {
@@ -157,6 +158,7 @@ function safeUkrposhtaSenderProfile(profile: StoredSenderProfile): UkrposhtaSend
     suggestCustomerNotification: profile.suggestCustomerNotification,
     customerNotificationTemplate: profile.customerNotificationTemplate,
   });
+  return parsed.success ? parsed.data : null;
 }
 
 function ukrposhtaSenderProfileData(input: UkrposhtaSenderProfileInput) {

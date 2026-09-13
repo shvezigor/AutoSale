@@ -1,7 +1,7 @@
 import type { AuthPrincipal } from '@autosale/contracts/auth';
 import { deliveryConnectionInputSchema, deliveryLocationQuerySchema, deliverySenderProfileInputSchema, meestConnectionInputSchema, meestSenderProfileInputSchema, shipmentCustomerMessageInputSchema, shipmentDraftInputSchema, ukrposhtaConnectionInputSchema, ukrposhtaSenderProfileInputSchema } from '@autosale/contracts';
 import { MeestError, NovaPoshtaError, UkrposhtaError } from '@autosale/integrations';
-import { BadRequestException, Body, Controller, Delete, ForbiddenException, Get, Headers, HttpCode, Inject, Param, ParseUUIDPipe, Post, Put, Query, StreamableFile } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, ForbiddenException, Get, Headers, HttpCode, Inject, Param, ParseUUIDPipe, Post, Put, Query, ServiceUnavailableException, StreamableFile } from '@nestjs/common';
 
 import { CurrentPrincipal, RequireMembership } from '../auth/auth.decorators.js';
 import { DeliveryService } from './delivery.service.js';
@@ -179,10 +179,11 @@ export class ShipmentController {
 
   @Post(':orderId/shipments/quote')
   @RequireMembership('MANAGER')
-  quote(@CurrentPrincipal() principal: AuthPrincipal, @Param('orderId', new ParseUUIDPipe({ version: '4' })) orderId: string, @Body() body: unknown) {
+  async quote(@CurrentPrincipal() principal: AuthPrincipal, @Param('orderId', new ParseUUIDPipe({ version: '4' })) orderId: string, @Body() body: unknown) {
     const parsed = shipmentDraftInputSchema.safeParse(body);
     if (!parsed.success) throw new BadRequestException('Invalid shipment draft');
-    return this.delivery.quoteShipment(principal.tenantId!, orderId, parsed.data);
+    try { return await this.delivery.quoteShipment(principal.tenantId!, orderId, parsed.data); }
+    catch (error) { rethrowUkrposhtaError(error); }
   }
 
   @Post(':orderId/shipments')
@@ -204,7 +205,9 @@ export class ShipmentLifecycleController {
   @Get(':shipmentId/label')
   @RequireMembership('MANAGER')
   async label(@CurrentPrincipal() principal: AuthPrincipal, @Param('shipmentId', new ParseUUIDPipe({ version: '4' })) shipmentId: string) {
-    const label = await this.delivery.shipmentLabel(principal.tenantId!, shipmentId);
+    let label;
+    try { label = await this.delivery.shipmentLabel(principal.tenantId!, shipmentId); }
+    catch (error) { rethrowUkrposhtaError(error); }
     return new StreamableFile(Buffer.from(label.bytes), {
       type: 'application/pdf', disposition: `attachment; filename="${label.filename}"`, length: label.bytes.byteLength,
     });
@@ -214,8 +217,9 @@ export class ShipmentLifecycleController {
   @Post(':shipmentId/cancel')
   @HttpCode(202)
   @RequireMembership('MANAGER')
-  cancel(@CurrentPrincipal() principal: AuthPrincipal, @Param('shipmentId', new ParseUUIDPipe({ version: '4' })) shipmentId: string) {
-    return this.delivery.cancelShipment(principal.tenantId!, shipmentId);
+  async cancel(@CurrentPrincipal() principal: AuthPrincipal, @Param('shipmentId', new ParseUUIDPipe({ version: '4' })) shipmentId: string) {
+    try { return await this.delivery.cancelShipment(principal.tenantId!, shipmentId); }
+    catch (error) { rethrowUkrposhtaError(error); }
   }
 
   @Get(':shipmentId/customer-message')
@@ -235,4 +239,11 @@ export class ShipmentLifecycleController {
 
 function assertOwner(principal: AuthPrincipal): void {
   if (principal.membershipRole !== 'OWNER') throw new ForbiddenException('Only workspace owners can configure delivery');
+}
+
+function rethrowUkrposhtaError(error: unknown): never {
+  if (!(error instanceof UkrposhtaError)) throw error;
+  const code = `UKRPOSHTA_${error.code}`;
+  if (['TIMEOUT', 'NETWORK', 'PROVIDER_ERROR', 'RATE_LIMITED'].includes(error.code)) throw new ServiceUnavailableException(code);
+  throw new BadRequestException(code);
 }

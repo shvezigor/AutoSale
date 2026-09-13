@@ -25,6 +25,14 @@ export const deliveryLocationTypeSchema = z.enum(['CITY', 'BRANCH', 'PARCEL_LOCK
 const phoneSchema = z.string().regex(/^\+380\d{9}$/);
 const positiveMoneySchema = z.number().finite().positive().max(10_000_000);
 const nullableCodSchema = z.number().finite().nonnegative().max(10_000_000).nullable();
+export const ukrposhtaLocationRefSchema = z.string().trim().regex(/^up:\d{1,20}:\d{5}$/);
+export function isUkrposhtaPersonName(value: string, middleRequired = false): boolean {
+  const parts = value.trim().split(/\s+/).filter(Boolean);
+  return parts.length >= (middleRequired ? 3 : 2)
+    && (parts[0]?.length ?? 0) >= 2
+    && (parts[1]?.length ?? 0) >= 2
+    && !/^(ТОВ|ФОП|ПП|АТ)$/i.test(parts[0] ?? '');
+}
 const parcelSchema = z.object({
   weightKg: z.number().finite().positive().max(1_000),
   lengthCm: z.number().finite().positive().max(300),
@@ -73,12 +81,16 @@ export const ukrposhtaConnectionInputSchema = z.object({
 export const ukrposhtaSenderProfileInputSchema = z.object({
   senderName: z.string().trim().min(2).max(120),
   senderPhone: phoneSchema,
-  origin: pickupDestinationSchema.extend({ type: z.literal('BRANCH') }),
+  origin: pickupDestinationSchema.extend({ type: z.literal('BRANCH'), locationRef: ukrposhtaLocationRefSchema }),
   payer: shipmentPayerSchema,
   defaultParcel: parcelSchema,
   suggestCustomerNotification: z.boolean(),
   customerNotificationTemplate: z.string().trim().min(1).max(1_000),
-}).strict();
+}).strict().superRefine((profile, context) => {
+  if (!isUkrposhtaPersonName(profile.senderName)) {
+    context.addIssue({ code: 'custom', path: ['senderName'], message: 'Enter an individual surname and given name' });
+  }
+});
 
 export const ukrposhtaConnectionSummarySchema = z.object({
   provider: z.literal('UKRPOSHTA'),
@@ -140,6 +152,9 @@ export const shipmentDraftInputSchema = z.object({
 }).strict().superRefine((draft, context) => {
   if (draft.provider === 'UKRPOSHTA' && (draft.destination.type !== 'BRANCH' || !/^up:\d{1,20}:\d{5}$/.test(draft.destination.locationRef))) {
     context.addIssue({ code: 'custom', path: ['destination'], message: 'Select an exact Ukrposhta branch with postcode' });
+  }
+  if (draft.provider === 'UKRPOSHTA' && !isUkrposhtaPersonName(draft.recipient.name)) {
+    context.addIssue({ code: 'custom', path: ['recipient', 'name'], message: 'Enter recipient surname and given name' });
   }
   if (draft.codAmount !== null && draft.codAmount > draft.declaredValue) {
     context.addIssue({

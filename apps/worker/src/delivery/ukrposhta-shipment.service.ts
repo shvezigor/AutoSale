@@ -1,5 +1,5 @@
 import { createHash, randomUUID } from 'node:crypto';
-import { deliverySenderProfileInputSchema, shipmentDraftInputSchema, ukrposhtaConnectionInputSchema, type ShipmentCreateJob, type ShipmentStatus, type UkrposhtaConnectionInput } from '@autosale/contracts';
+import { deliverySenderProfileInputSchema, isUkrposhtaPersonName, shipmentDraftInputSchema, ukrposhtaConnectionInputSchema, type ShipmentCreateJob, type ShipmentStatus, type UkrposhtaConnectionInput } from '@autosale/contracts';
 import type { Prisma, PrismaClient } from '@autosale/database';
 import { parseUkrposhtaLocationRef, UkrposhtaError, type UkrposhtaClient, type UkrposhtaLifecycle, type UkrposhtaShipment } from '@autosale/integrations';
 
@@ -77,7 +77,17 @@ export class UkrposhtaShipmentService {
       // Commit this marker BEFORE POST. No retry path can cross it a second time.
       metadata.createDispatched = true;
       await this.checkpoint(candidate, leaseId, metadata);
-      const result = await client.createShipment({ senderUuid: metadata.senderUuid!, recipientUuid: metadata.recipientUuid!, senderAddressId: metadata.senderAddressId!, recipientAddressId: metadata.recipientAddressId!, senderPostcode, recipientPostcode, parcel: draft.parcels[0]!, payer: draft.payer, declaredValue: draft.declaredValue, codAmount: draft.codAmount, description: draft.description, clientRef: candidate.shipmentId });
+      let result: UkrposhtaShipment;
+      try {
+        result = await client.createShipment({ senderUuid: metadata.senderUuid!, recipientUuid: metadata.recipientUuid!, senderAddressId: metadata.senderAddressId!, recipientAddressId: metadata.recipientAddressId!, senderPostcode, recipientPostcode, parcel: draft.parcels[0]!, payer: draft.payer, declaredValue: draft.declaredValue, codAmount: draft.codAmount, description: draft.description, clientRef: candidate.shipmentId });
+      } catch (error) {
+        // A definitive rejection is not an ambiguous delivery outcome. Keep this attempt terminal,
+        // including 429: a manager can start a new reviewed intent, never replay this POST.
+        if (error instanceof UkrposhtaError && ['VALIDATION', 'UNAUTHORIZED', 'NOT_FOUND', 'RATE_LIMITED', 'CREATION_DISABLED'].includes(error.code)) {
+          return await this.finish(candidate, leaseId, 'FAILED', `UKRPOSHTA_${error.code}`);
+        }
+        throw error;
+      }
       metadata.shipmentUuid = result.uuid; metadata.barcode = result.barcode;
       await this.checkpoint(candidate, leaseId, metadata);
       return await this.succeed(candidate, leaseId, metadata, result);
@@ -183,8 +193,8 @@ export class UkrposhtaShipmentService {
 
 function individualName(name: string, middleRequired: boolean) {
   const [lastName, firstName, ...middle] = name.trim().split(/\s+/);
-  if (!lastName || lastName.length < 2 || !firstName || firstName.length < 2 || middleRequired && !middle.length || /^(ТОВ|ФОП|ПП|АТ)$/i.test(lastName)) throw new UkrposhtaError('VALIDATION', null);
-  return { lastName, firstName, ...(middle.length ? { middleName: middle.join(' ') } : {}) };
+  if (!isUkrposhtaPersonName(name, middleRequired)) throw new UkrposhtaError('VALIDATION', null);
+  return { lastName: lastName!, firstName: firstName!, ...(middle.length ? { middleName: middle.join(' ') } : {}) };
 }
 function mapLifecycle(status: UkrposhtaLifecycle['status']): ShipmentStatus {
   switch (status) {

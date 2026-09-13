@@ -16,6 +16,8 @@ describe('Ukrposhta shipment draft', () => {
     { provider: 'MEEST' }, { destination: { ...draft.destination, type: 'PARCEL_LOCKER' } },
     { destination: { ...draft.destination, locationRef: '1' } },
     { destination: { ...draft.destination, locationRef: 'up:1:4300' } },
+    { recipient: { ...draft.recipient, name: 'Олена' } },
+    { recipient: { ...draft.recipient, name: 'І Я' } },
     { codAmount: 501 }, { recipient: { ...draft.recipient, phone: 'secret' } },
     { parcels: [{ ...draft.parcels[0], weightKg: 0 }] }, { bearer: 'secret' },
   ])('rejects invalid draft %j', (patch) => {

@@ -97,8 +97,8 @@ describe('UkrposhtaConnectionService', () => {
   it('persists validated sender defaults against the active tenant connection', async () => {
     const { service, prisma } = fixture();
     const profile = {
-      senderName: 'ТОВ Приклад', senderPhone: '+380501112233',
-      origin: { type: 'BRANCH' as const, cityRef: '263:297', locationRef: '1', label: '43000 · Луцьк 1' },
+      senderName: 'Петренко Іван', senderPhone: '+380501112233',
+      origin: { type: 'BRANCH' as const, cityRef: '263:297', locationRef: 'up:1:43000', label: '43000 · Луцьк 1' },
       payer: 'SENDER' as const, defaultParcel: { weightKg: 1, lengthCm: 30, widthCm: 20, heightCm: 10 },
       suggestCustomerNotification: true, customerNotificationTemplate: '{company}: ТТН {trackingNumber}',
     };
@@ -107,8 +107,8 @@ describe('UkrposhtaConnectionService', () => {
     expect(prisma.deliverySenderProfile.upsert).toHaveBeenCalledWith(expect.objectContaining({
       where: { tenantId_connectionId: { tenantId, connectionId: '33333333-3333-4333-8333-333333333333' } },
       create: expect.objectContaining({
-        tenantId, connectionId: '33333333-3333-4333-8333-333333333333', senderRef: 'ТОВ Приклад',
-        contactPhone: '+380501112233', originCityRef: '263:297', originLocationRef: '1', contactRef: 'UKRPOSHTA_SENDER',
+        tenantId, connectionId: '33333333-3333-4333-8333-333333333333', senderRef: 'Петренко Іван',
+        contactPhone: '+380501112233', originCityRef: '263:297', originLocationRef: 'up:1:43000', contactRef: 'UKRPOSHTA_SENDER',
       }),
     }));
   });
@@ -117,11 +117,23 @@ describe('UkrposhtaConnectionService', () => {
     const { service, prisma } = fixture();
     prisma.deliveryConnection.findUnique.mockResolvedValue(null);
     await expect(service.saveSenderProfile(tenantId, {
-      senderName: 'ТОВ Приклад', senderPhone: '+380501112233',
-      origin: { type: 'BRANCH', cityRef: '263:297', locationRef: '1', label: '43000 · Луцьк 1' },
+      senderName: 'Петренко Іван', senderPhone: '+380501112233',
+      origin: { type: 'BRANCH', cityRef: '263:297', locationRef: 'up:1:43000', label: '43000 · Луцьк 1' },
       payer: 'SENDER', defaultParcel: { weightKg: 1, lengthCm: 30, widthCm: 20, heightCm: 10 },
       suggestCustomerNotification: true, customerNotificationTemplate: '{company}: ТТН {trackingNumber}',
     })).rejects.toThrow('Active Ukrposhta connection required');
+    expect(prisma.deliverySenderProfile.upsert).not.toHaveBeenCalled();
+  });
+
+  it('rejects a free-text branch reference and company name at the persistence boundary', async () => {
+    const { service, prisma } = fixture();
+    const invalid = {
+      senderName: 'ТОВ Приклад', senderPhone: '+380501112233',
+      origin: { type: 'BRANCH' as const, cityRef: '263:297', locationRef: '1', label: '43000 · Луцьк 1' },
+      payer: 'SENDER' as const, defaultParcel: { weightKg: 1, lengthCm: 30, widthCm: 20, heightCm: 10 },
+      suggestCustomerNotification: true, customerNotificationTemplate: '{company}: ТТН {trackingNumber}',
+    };
+    await expect(service.saveSenderProfile(tenantId, invalid)).rejects.toThrow();
     expect(prisma.deliverySenderProfile.upsert).not.toHaveBeenCalled();
   });
 
@@ -132,15 +144,15 @@ describe('UkrposhtaConnectionService', () => {
       encryptedCredential: 'ciphertext', credentialGenerationId: 'generation', accountLabel: 'Counterparty • 8458f0b0',
       connectedByUserId: userId, lastVerifiedAt: now, lastErrorCode: null, disconnectedAt: null, createdAt: now, updatedAt: now,
       senderProfile: {
-        senderRef: 'ТОВ Приклад', contactPhone: '+380501112233', originType: 'BRANCH',
-        originCityRef: '263:297', originLocationRef: '1', originLabel: '43000 · Луцьк 1', payer: 'SENDER',
+        senderRef: 'Петренко Іван', contactPhone: '+380501112233', originType: 'BRANCH',
+        originCityRef: '263:297', originLocationRef: 'up:1:43000', originLabel: '43000 · Луцьк 1', payer: 'SENDER',
         defaultWeightKg: 1, defaultLengthCm: 30, defaultWidthCm: 20, defaultHeightCm: 10,
         suggestCustomerNotification: true, customerNotificationTemplate: '{company}: ТТН {trackingNumber}',
       },
     });
 
     const result = await service.summary(tenantId);
-    expect(result.connection?.senderProfile).toMatchObject({ senderName: 'ТОВ Приклад', origin: { locationRef: '1' } });
+    expect(result.connection?.senderProfile).toMatchObject({ senderName: 'Петренко Іван', origin: { locationRef: 'up:1:43000' } });
     expect(JSON.stringify(result)).not.toMatch(/ciphertext|counterpartyUuid|ecomBearer/i);
   });
 });

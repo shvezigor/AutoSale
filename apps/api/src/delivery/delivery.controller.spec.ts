@@ -150,11 +150,11 @@ describe('UkrposhtaConnectionController', () => {
   });
 
   it('lets only the owner persist a strict Ukrposhta sender profile', async () => {
-    const saveSenderProfile = vi.fn().mockResolvedValue({ senderName: 'ТОВ Приклад' });
+    const saveSenderProfile = vi.fn().mockResolvedValue({ senderName: 'Петренко Іван' });
     const controller = new UkrposhtaConnectionController({ saveSenderProfile } as never);
     const profile = {
-      senderName: 'ТОВ Приклад', senderPhone: '+380501112233',
-      origin: { type: 'BRANCH', cityRef: '263:297', locationRef: '1', label: '43000 · Луцьк 1' },
+      senderName: 'Петренко Іван', senderPhone: '+380501112233',
+      origin: { type: 'BRANCH', cityRef: '263:297', locationRef: 'up:1:43000', label: '43000 · Луцьк 1' },
       payer: 'SENDER', defaultParcel: { weightKg: 1, lengthCm: 30, widthCm: 20, heightCm: 10 },
       suggestCustomerNotification: true, customerNotificationTemplate: '{company}: ТТН {trackingNumber}',
     };
@@ -199,10 +199,17 @@ describe('ShipmentController', () => {
     expect(delivery.createShipment).toHaveBeenCalledWith('tenant', 'order-id', 'manager', 'create-key');
   });
 
-  it('rejects an incomplete or invalid shipment draft at the boundary', () => {
+  it('rejects an incomplete or invalid shipment draft at the boundary', async () => {
     const controller = new ShipmentController({} as never);
     expect(() => controller.saveDraft(manager, 'order-id', { ...draft, codAmount: 6000 })).toThrow(BadRequestException);
-    expect(() => controller.quote(manager, 'order-id', { ...draft, recipient: { name: '', phone: '123' } })).toThrow(BadRequestException);
+    await expect(controller.quote(manager, 'order-id', { ...draft, recipient: { name: '', phone: '123' } })).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('maps Ukrposhta quote failures to safe client responses', async () => {
+    const transient = new ShipmentController({ quoteShipment: vi.fn().mockRejectedValue(new UkrposhtaError('TIMEOUT', null)) } as never);
+    await expect(transient.quote(manager, 'order-id', draft)).rejects.toMatchObject({ status: 503, message: 'UKRPOSHTA_TIMEOUT' });
+    const rejected = new ShipmentController({ quoteShipment: vi.fn().mockRejectedValue(new UkrposhtaError('VALIDATION', 400)) } as never);
+    await expect(rejected.quote(manager, 'order-id', draft)).rejects.toMatchObject({ status: 400, message: 'UKRPOSHTA_VALIDATION' });
   });
 });
 
@@ -218,6 +225,13 @@ describe('ShipmentLifecycleController', () => {
     const cancelShipment = vi.fn().mockResolvedValue({ status: 'CREATED' });
     await new ShipmentLifecycleController({ cancelShipment } as never).cancel(manager, 'shipment-id');
     expect(cancelShipment).toHaveBeenCalledWith('tenant', 'shipment-id');
+  });
+
+  it('maps Ukrposhta label and cancellation provider failures without leaking details', async () => {
+    const label = new ShipmentLifecycleController({ shipmentLabel: vi.fn().mockRejectedValue(new UkrposhtaError('UNAUTHORIZED', 401)) } as never);
+    await expect(label.label(manager, 'shipment-id')).rejects.toMatchObject({ status: 400, message: 'UKRPOSHTA_UNAUTHORIZED' });
+    const cancel = new ShipmentLifecycleController({ cancelShipment: vi.fn().mockRejectedValue(new UkrposhtaError('PROVIDER_ERROR', 500)) } as never);
+    await expect(cancel.cancel(manager, 'shipment-id')).rejects.toMatchObject({ status: 503, message: 'UKRPOSHTA_PROVIDER_ERROR' });
   });
 
   it('previews and explicitly queues a tenant-scoped customer TTN message', async () => {

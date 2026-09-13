@@ -1,6 +1,6 @@
 'use client';
 
-import type { DeliveryLocation, UkrposhtaConnectionSummary, UkrposhtaSenderProfileInput } from '../../../../packages/contracts/src/delivery';
+import { isUkrposhtaPersonName, type DeliveryLocation, type UkrposhtaConnectionSummary, type UkrposhtaSenderProfileInput } from '../../../../packages/contracts/src/delivery';
 import { useState } from 'react';
 
 import { mutatingFetch } from '../auth/csrf-fetch';
@@ -248,9 +248,9 @@ function isUkrposhtaSenderProfile(value: unknown): value is UkrposhtaSenderProfi
 }
 
 function validProfile(profile: UkrposhtaSenderProfileInput): boolean {
-  return profile.senderName.trim().length >= 2 && profile.senderName.trim().length <= 120
+  return isUkrposhtaPersonName(profile.senderName) && profile.senderName.trim().length <= 120
     && /^\+380\d{9}$/.test(profile.senderPhone)
-    && Boolean(profile.origin.cityRef && profile.origin.locationRef && profile.origin.label)
+    && Boolean(profile.origin.cityRef && /^up:\d{1,20}:\d{5}$/.test(profile.origin.locationRef) && profile.origin.label)
     && profile.defaultParcel.weightKg > 0 && profile.defaultParcel.weightKg <= 1_000
     && [profile.defaultParcel.lengthCm, profile.defaultParcel.widthCm, profile.defaultParcel.heightCm]
       .every((value) => Number.isFinite(value) && value > 0 && value <= 300)

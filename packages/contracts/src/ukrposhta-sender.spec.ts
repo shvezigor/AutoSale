@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 import * as contracts from './delivery.js';
 
 const profile = {
-  senderName: 'ТОВ Приклад', senderPhone: '+380501112233',
-  origin: { type: 'BRANCH', cityRef: '263:297', locationRef: '1', label: '43000 · Луцьк 1' },
+  senderName: 'Петренко Іван', senderPhone: '+380501112233',
+  origin: { type: 'BRANCH', cityRef: '263:297', locationRef: 'up:1:43000', label: '43000 · Луцьк 1' },
   payer: 'SENDER', defaultParcel: { weightKg: 1, lengthCm: 30, widthCm: 20, heightCm: 10 },
   suggestCustomerNotification: true, customerNotificationTemplate: '{company}: ТТН {trackingNumber}',
 };
@@ -23,6 +23,7 @@ describe('Ukrposhta directory and sender contracts', () => {
     for (const invalid of [
       { ecomBearer: 'secret' }, { counterpartyUuid: '8458f0b0-930f-11e2-a91e-003048d2b473' }, { senderPhone: '0501112233' },
       { origin: { ...profile.origin, type: 'PARCEL_LOCKER' } }, { origin: { ...profile.origin, locationRef: '' } },
+      { origin: { ...profile.origin, locationRef: '1' } }, { senderName: 'ТОВ Приклад' }, { senderName: 'Петренко' }, { senderName: 'І Петренко' },
       { defaultParcel: { ...profile.defaultParcel, weightKg: 0 } }, { defaultParcel: { ...profile.defaultParcel, lengthCm: 301 } },
       { customerNotificationTemplate: '' },
     ]) expect(schema.safeParse({ ...profile, ...invalid }).success).toBe(false);

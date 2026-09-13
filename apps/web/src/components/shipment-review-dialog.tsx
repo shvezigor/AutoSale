@@ -1,6 +1,6 @@
 'use client';
 
-import type { DeliveryLocation, ShipmentDraftInput, ShipmentDraftPrefill, ShipmentOverview, ShipmentQuote, ShipmentSummary } from '../../../../packages/contracts/src/delivery';
+import { isUkrposhtaPersonName, type DeliveryLocation, type ShipmentDraftInput, type ShipmentDraftPrefill, type ShipmentOverview, type ShipmentQuote, type ShipmentSummary } from '../../../../packages/contracts/src/delivery';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { mutatingFetch } from '../auth/csrf-fetch';
@@ -28,13 +28,23 @@ export function ShipmentReviewDialog({ orderId, onClose, onSaved }: {
   const [quoteFailed, setQuoteFailed] = useState(false);
   const [state, setState] = useState<'loading' | 'ready' | 'saving' | 'creating' | 'error'>('loading');
   const closeButton = useRef<HTMLButtonElement>(null);
+  const dialog = useRef<HTMLElement>(null);
   const toast = useToast();
 
   useEffect(() => {
     const previous = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     closeButton.current?.focus();
-    const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') onClose(); };
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') { onClose(); return; }
+      if (event.key !== 'Tab') return;
+      const focusable = Array.from(dialog.current?.querySelectorAll<HTMLElement>('button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])') ?? []);
+      if (focusable.length === 0) { event.preventDefault(); return; }
+      const first = focusable[0]!;
+      const last = focusable[focusable.length - 1]!;
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    };
     window.addEventListener('keydown', onKey);
     return () => { document.body.style.overflow = previous; window.removeEventListener('keydown', onKey); };
   }, [onClose]);
@@ -66,6 +76,7 @@ export function ShipmentReviewDialog({ orderId, onClose, onSaved }: {
 
   const completeDraft = useMemo(() => {
     if (!draft || !city || !location || !draft.recipient.name || !draft.recipient.phone) return null;
+    if (draft.provider === 'UKRPOSHTA' && !isUkrposhtaPersonName(draft.recipient.name)) return null;
     return {
       ...draft,
       recipient: { name: draft.recipient.name, phone: draft.recipient.phone },
@@ -128,7 +139,7 @@ export function ShipmentReviewDialog({ orderId, onClose, onSaved }: {
   }
 
   return <div className="modal-backdrop shipment-dialog-backdrop" role="presentation">
-    <section role="dialog" aria-modal="true" aria-labelledby="shipment-dialog-title" className="shipment-review-dialog">
+    <section ref={dialog} role="dialog" aria-modal="true" aria-labelledby="shipment-dialog-title" className="shipment-review-dialog">
       <header><div><span>{draft?.provider === 'UKRPOSHTA' ? 'Укрпошта' : 'Нова Пошта'}</span><h2 id="shipment-dialog-title">Оформлення доставки</h2></div><button ref={closeButton} className="icon-button" type="button" aria-label="Закрити" onClick={onClose}>×</button></header>
       {overview?.availableProviders && overview.availableProviders.length > 0 && <label><span>Перевізник</span><select aria-label="Перевізник" disabled={state !== 'ready'} value={provider ?? draft?.provider ?? 'NOVA_POSHTA'} onChange={(event) => { setProvider(event.target.value as 'NOVA_POSHTA' | 'UKRPOSHTA'); setDraft(null); setCity(null); setLocation(null); setDestinationType('BRANCH'); setQuote(null); setState('loading'); }}>
         {overview.availableProviders.map((value) => <option key={value} value={value}>{value === 'UKRPOSHTA' ? 'Укрпошта' : 'Нова Пошта'}</option>)}

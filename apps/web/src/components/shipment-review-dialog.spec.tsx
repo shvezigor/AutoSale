@@ -66,6 +66,14 @@ describe('ShipmentReviewDialog', () => {
     const body = JSON.parse(fetchMock.mock.calls.find(([path]) => path.endsWith('/draft'))![1]!.body as string);
     expect(body).toMatchObject({ provider: 'UKRPOSHTA', payer: 'SENDER', description: 'Двері', destination: { locationRef: 'up:1:43000' } });
   });
+  it('blocks an Ukrposhta recipient with one-letter name tokens before save or enqueue', async () => {
+    const overview = { ...exactOverview, availableProviders: ['UKRPOSHTA'], creationEnabled: true, draft: { ...exactOverview.draft, provider: 'UKRPOSHTA', recipient: { name: 'І Я', phone: '+380671234567' }, destination: { type: 'BRANCH', cityRef: '263:297', locationRef: 'up:1:43000', label: 'Луцьк' } } };
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => overview }));
+    renderDialog();
+    await screen.findByDisplayValue('І Я');
+    expect(screen.getByRole('button', { name: 'Зберегти чернетку' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Створити ТТН' })).toBeDisabled();
+  });
   it('loads prefilled fields, locks background scroll and closes on Escape', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => exactOverview }));
     const { onClose } = renderDialog();
@@ -74,6 +82,18 @@ describe('ShipmentReviewDialog', () => {
     expect(screen.getByDisplayValue('Відділення №24')).toBeInTheDocument();
     fireEvent.keyDown(window, { key: 'Escape' });
     expect(onClose).toHaveBeenCalledOnce();
+  });
+
+  it('traps keyboard focus inside the dialog', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => exactOverview }));
+    renderDialog();
+    const close = screen.getByRole('button', { name: 'Закрити' });
+    const create = await screen.findByRole('button', { name: 'Створити ТТН' });
+    create.focus();
+    fireEvent.keyDown(window, { key: 'Tab' });
+    expect(close).toHaveFocus();
+    fireEvent.keyDown(window, { key: 'Tab', shiftKey: true });
+    expect(create).toHaveFocus();
   });
 
   it('saves the exact draft and issues one create command from a stable loading button', async () => {

@@ -26,7 +26,7 @@ describe('ShipmentPanel', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Скасувати ТТН' }));
     fireEvent.click(await screen.findByRole('button', { name: 'Так, скасувати' }));
     expect(await screen.findByText(/Не вдалося завершити дію з відправленням/)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Скасувати ТТН' })).toBeEnabled();
+    expect(screen.queryByRole('button', { name: 'Скасувати ТТН' })).not.toBeInTheDocument();
   });
   it('shows Ukrposhta tracking, final cost and labels, and hides cancellation after acceptance', () => {
     render(<ConfirmProvider><ToastProvider><ShipmentPanel order={{ ...order, shipment: {
