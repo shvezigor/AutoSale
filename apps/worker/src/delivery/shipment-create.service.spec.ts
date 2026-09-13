@@ -41,6 +41,15 @@ function fixture(attempt = candidate()) {
 }
 
 describe('ShipmentCreateService', () => {
+  it('routes an Ukrposhta job to its durable provider flow without constructing a Nova Poshta client', async () => {
+    const attempt = { ...candidate(), shipment: { ...candidate().shipment, provider: 'UKRPOSHTA' } };
+    const { prisma } = fixture(attempt);
+    const np = vi.fn(); const ukrposhta = { process: vi.fn().mockResolvedValue('CREATED') };
+    const service = new ShipmentCreateService(prisma as never, np, () => 'secret', () => now, ukrposhta);
+    await expect(service.process({ shipmentId })).resolves.toBe('CREATED');
+    expect(np).not.toHaveBeenCalled();
+    expect(ukrposhta.process).toHaveBeenCalledWith({ shipmentId });
+  });
   it('claims one lease and stores the created TTN only while that lease is current', async () => {
     const { service, prisma, client } = fixture();
     await expect(service.process({ shipmentId })).resolves.toBe('CREATED');

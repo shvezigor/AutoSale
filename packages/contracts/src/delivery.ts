@@ -267,6 +267,8 @@ export interface ShipmentDraftPrefill {
 }
 
 export interface ShipmentOverview {
+  availableProviders?: Array<'NOVA_POSHTA' | 'UKRPOSHTA'>;
+  creationEnabled?: boolean;
   shipment: ShipmentSummary | null;
   canCreateShipment: boolean;
   blockedReason: ShipmentBlockedReason | null;

@@ -12,6 +12,13 @@ const manager: AuthPrincipal = {
 const owner: AuthPrincipal = { ...manager, userId: 'owner', membershipRole: 'OWNER' };
 
 describe('DeliveryController', () => {
+  it('validates manager-selected shipment carriers at the overview boundary', async () => {
+    const shipmentOverview = vi.fn().mockResolvedValue({ draft: { provider: 'UKRPOSHTA' } });
+    const controller = new ShipmentController({ shipmentOverview } as never);
+    await expect(controller.overview(manager, 'order-id', 'UKRPOSHTA')).resolves.toMatchObject({ draft: { provider: 'UKRPOSHTA' } });
+    expect(shipmentOverview).toHaveBeenCalledWith('tenant', 'order-id', 'UKRPOSHTA');
+    expect(() => controller.overview(manager, 'order-id', 'MEEST')).toThrow(BadRequestException);
+  });
   it('allows managers to read a masked summary', async () => {
     const summary = vi.fn().mockResolvedValue({ enabled: true, connections: [] });
     const controller = new DeliveryController({ summary } as never);

@@ -23,9 +23,10 @@ export class DeliveryModule {
       prisma,
       cipher,
       (apiKey) => new NovaPoshtaClient({ apiKey }),
-      { enabled: env.NOVA_POSHTA_DELIVERY_ENABLED },
+      { enabled: env.NOVA_POSHTA_DELIVERY_ENABLED, ukrposhtaSandboxShipmentsEnabled: env.UKRPOSHTA_SANDBOX_SHIPMENTS_ENABLED },
       shipmentQueue,
       instagramOutbound,
+      (credentials) => new UkrposhtaClient({ ...credentials, sandboxShipmentsEnabled: env.UKRPOSHTA_SANDBOX_SHIPMENTS_ENABLED }),
     );
     const meestService = new MeestConnectionService(
       prisma,

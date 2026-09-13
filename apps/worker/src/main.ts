@@ -44,6 +44,8 @@ import { NotificationRetentionReconciler } from './notifications/notification-re
 import { TelegramDeliveryReconciler } from './telegram/telegram-delivery-reconciler.js';
 import { TelegramDeliveryService } from './telegram/telegram-delivery.service.js';
 import { ShipmentCreateService } from './delivery/shipment-create.service.js';
+import { UkrposhtaShipmentService } from './delivery/ukrposhta-shipment.service.js';
+import { UkrposhtaClient } from '@autosale/integrations';
 import { ShipmentReconciler } from './delivery/shipment-reconciler.js';
 import { ShipmentStatusService } from './delivery/shipment-status.service.js';
 
@@ -156,15 +158,22 @@ async function bootstrap(): Promise<void> {
     password: redis.password || undefined,
     tls: redis.protocol === 'rediss:' ? {} : undefined,
   };
+  const ukrposhtaShipment = new UkrposhtaShipmentService(prisma,
+    (credentials) => new UkrposhtaClient({ ...credentials, sandboxShipmentsEnabled: env.UKRPOSHTA_SANDBOX_SHIPMENTS_ENABLED }),
+    (encrypted) => credentialCipher.decrypt(encrypted), { enabled: env.UKRPOSHTA_SANDBOX_SHIPMENTS_ENABLED });
   const shipmentCreate = new ShipmentCreateService(
     prisma,
     (apiKey) => new NovaPoshtaClient({ apiKey }),
     (encrypted) => credentialCipher.decrypt(encrypted),
+    undefined,
+    ukrposhtaShipment,
   );
   const shipmentStatus = new ShipmentStatusService(
     prisma,
     (apiKey) => new NovaPoshtaClient({ apiKey }),
     (encrypted) => credentialCipher.decrypt(encrypted),
+    undefined,
+    ukrposhtaShipment,
   );
   const deliveryQueue = new Queue('delivery', { connection: redisConnection });
   const deliveryWorker = new Worker(

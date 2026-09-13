@@ -11,6 +11,12 @@ const credentials = {
 };
 
 describe('UkrposhtaClient', () => {
+  it('validates the returned counterparty identity and refuses credential-check redirects', async () => {
+    const fetchFn = vi.fn().mockResolvedValue(new Response(JSON.stringify({ uuid: 'unrelated', name: 'private' })));
+    const client = new integrations.UkrposhtaClient({ ...credentials, fetch: fetchFn });
+    await expect(client.validateCredential()).rejects.toMatchObject({ code: 'INVALID_RESPONSE' });
+    expect(fetchFn.mock.calls[0]![1].redirect).toBe('error');
+  });
   it('searches Ukrainian cities using the fixed classifier host and eCom bearer', async () => {
     const fetchFn = vi.fn().mockResolvedValue(new Response(JSON.stringify({ Entries: { Entry: { CITY_ID: 297, REGION_ID: '263', CITY_UA: 'Луцьк', REGION_UA: 'Волинська' } } })));
     const client = new integrations.UkrposhtaClient({ ...credentials, fetch: fetchFn });

@@ -20,6 +20,7 @@ export class ShipmentCreateService {
     private readonly clientFactory: (encryptedCredential: string) => ShipmentClient,
     private readonly decrypt: (encryptedCredential: string) => string,
     private readonly now: () => Date = () => new Date(),
+    private readonly ukrposhta?: { process(job: ShipmentCreateJob): Promise<ShipmentCreateResult> },
   ) {}
 
   async process(job: ShipmentCreateJob): Promise<ShipmentCreateResult> {
@@ -38,6 +39,7 @@ export class ShipmentCreateService {
       include: { shipment: { include: { connection: true } } },
     });
     if (!candidate || candidate.shipment.status !== 'CREATING') return 'IGNORED';
+    if (candidate.shipment.provider === 'UKRPOSHTA') return this.ukrposhta ? this.ukrposhta.process(job) : 'IGNORED';
 
     const claimed = await this.prisma.shipmentAttempt.updateMany({
       where: {

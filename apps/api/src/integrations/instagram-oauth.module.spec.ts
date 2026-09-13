@@ -31,6 +31,7 @@ const env = {
   APP_PUBLIC_URL: 'https://demo.ngrok-free.app',
   GOOGLE_SIGN_IN_ENABLED: false,
   NOVA_POSHTA_DELIVERY_ENABLED: false,
+  UKRPOSHTA_SANDBOX_SHIPMENTS_ENABLED: false,
   CATALOGUE_AI_STRUCTURE_ANALYSIS: true,
   SMTP_PORT: 587,
 } satisfies ApiEnv;

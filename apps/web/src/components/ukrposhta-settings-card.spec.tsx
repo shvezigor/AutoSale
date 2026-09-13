@@ -61,6 +61,7 @@ describe('UkrposhtaSettingsCard', () => {
   it('lets an owner choose an exact branch and exposes the complete sender form', () => {
     render(<UkrposhtaSettingsCard initial={active} role="OWNER" />);
     expect(screen.getByLabelText('Назва відправника Укрпошти')).toBeInTheDocument();
+    expect(screen.getByText(/На цьому етапі відправник — фізична особа/)).toBeInTheDocument();
     expect(screen.getByLabelText('Телефон відправника Укрпошти')).toBeInTheDocument();
     expect(screen.getByLabelText('Місто відправлення Укрпошти')).toBeInTheDocument();
     expect(screen.getByLabelText('Відділення відправлення Укрпошти')).toBeInTheDocument();

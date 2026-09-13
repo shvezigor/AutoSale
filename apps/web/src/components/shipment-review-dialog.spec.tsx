@@ -28,6 +28,44 @@ function renderDialog(props: Partial<Parameters<typeof ShipmentReviewDialog>[0]>
 }
 
 describe('ShipmentReviewDialog', () => {
+  it('shows a recoverable quote error instead of an endless loader', async () => {
+    const fetchMock = vi.fn().mockImplementation(async (path: string) => ({ ok: !path.includes('quote'), json: async () => path.includes('csrf') ? { token: 'csrf-token' } : exactOverview }));
+    vi.stubGlobal('fetch', fetchMock);
+    renderDialog();
+    expect(await screen.findByText(/Не вдалося розрахувати вартість/)).toBeInTheDocument();
+    expect(screen.queryByText('Розраховуємо вартість…')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Зберегти чернетку' })).toBeEnabled();
+  });
+  it('switches to an active Ukrposhta connection, limits destination to branches and respects create gate', async () => {
+    const ukrposhta = { ...exactOverview, availableProviders: ['NOVA_POSHTA', 'UKRPOSHTA'], creationEnabled: false, draft: { ...exactOverview.draft, provider: 'UKRPOSHTA', recipient: { name: 'Петренко Олена', phone: '+380671234567' }, destination: { type: 'BRANCH', cityRef: '263:297', locationRef: 'up:1:43000', label: 'Луцьк' } } };
+    const fetchMock = vi.fn().mockImplementation(async (path: string) => ({ ok: true, json: async () => path.includes('provider=UKRPOSHTA') ? ukrposhta : path.includes('quote') ? { currency: 'UAH', cost: 90, estimatedDeliveryDate: null } : path.includes('csrf') ? { token: 'csrf-token' } : { ...exactOverview, availableProviders: ['NOVA_POSHTA', 'UKRPOSHTA'] } }));
+    vi.stubGlobal('fetch', fetchMock);
+    renderDialog();
+    fireEvent.change(await screen.findByLabelText('Перевізник'), { target: { value: 'UKRPOSHTA' } });
+    await screen.findByDisplayValue('Петренко Олена');
+    expect(screen.queryByRole('option', { name: 'Поштомат' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Створити ТТН' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Зберегти чернетку' })).toBeEnabled();
+    expect(await screen.findByText('90 грн')).toBeInTheDocument();
+    expect(screen.getByText(/Створення відправлень Укрпошти ще не увімкнено/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Зберегти чернетку' }));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledWith(`/api/orders/${orderId}/shipments/draft`, expect.objectContaining({ body: expect.stringContaining('"locationRef":"up:1:43000"') })));
+  });
+
+  it('creates an enabled Ukrposhta draft with selected payer and description after quote review', async () => {
+    const overview = { ...exactOverview, availableProviders: ['UKRPOSHTA'], creationEnabled: true, draft: { ...exactOverview.draft, provider: 'UKRPOSHTA', recipient: { name: 'Петренко Олена', phone: '+380671234567' }, destination: { type: 'BRANCH', cityRef: '263:297', locationRef: 'up:1:43000', label: 'Луцьк' } } };
+    const fetchMock = vi.fn().mockImplementation(async (path: string, init?: RequestInit) => ({ ok: true, json: async () => path.includes('csrf') ? { token: 'csrf-token' } : path.includes('quote') ? { currency: 'UAH', cost: 90, estimatedDeliveryDate: null } : init?.method === 'POST' ? { id: 'shipment-id', provider: 'UKRPOSHTA', status: 'CREATING' } : overview }));
+    vi.stubGlobal('fetch', fetchMock);
+    const { onSaved } = renderDialog();
+    await screen.findByText('90 грн');
+    fireEvent.change(screen.getByLabelText('Платник доставки'), { target: { value: 'SENDER' } });
+    fireEvent.change(screen.getByLabelText('Опис відправлення'), { target: { value: 'Двері' } });
+    await screen.findByText('90 грн');
+    fireEvent.click(screen.getByRole('button', { name: 'Створити ТТН' }));
+    await waitFor(() => expect(onSaved).toHaveBeenCalledWith(expect.objectContaining({ provider: 'UKRPOSHTA', status: 'CREATING' })));
+    const body = JSON.parse(fetchMock.mock.calls.find(([path]) => path.endsWith('/draft'))![1]!.body as string);
+    expect(body).toMatchObject({ provider: 'UKRPOSHTA', payer: 'SENDER', description: 'Двері', destination: { locationRef: 'up:1:43000' } });
+  });
   it('loads prefilled fields, locks background scroll and closes on Escape', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => exactOverview }));
     const { onClose } = renderDialog();

@@ -164,8 +164,9 @@ export class ShipmentController {
 
   @Get(':orderId/shipments')
   @RequireMembership('MANAGER')
-  overview(@CurrentPrincipal() principal: AuthPrincipal, @Param('orderId', new ParseUUIDPipe({ version: '4' })) orderId: string) {
-    return this.delivery.shipmentOverview(principal.tenantId!, orderId);
+  overview(@CurrentPrincipal() principal: AuthPrincipal, @Param('orderId', new ParseUUIDPipe({ version: '4' })) orderId: string, @Query('provider') provider?: string) {
+    if (provider !== undefined && provider !== 'NOVA_POSHTA' && provider !== 'UKRPOSHTA') throw new BadRequestException('INVALID_SHIPMENT_PROVIDER');
+    return provider === undefined ? this.delivery.shipmentOverview(principal.tenantId!, orderId) : this.delivery.shipmentOverview(principal.tenantId!, orderId, provider);
   }
 
   @Put(':orderId/shipments/draft')

@@ -17,6 +17,29 @@ function fixture(responses: Response[], enabled = true, environment: 'SANDBOX' |
 }
 
 describe('Ukrposhta eCom boundary', () => {
+  it('rejects unrelated address or client records instead of provisioning against a wrong object', async () => {
+    const { client } = fixture([json({ id: 11, postcode: '01001' }), json({ id: 10, postcode: '43000' }), json({ uuid, addressId: 10, externalId: 'wrong' })]);
+    await expect(client.getAddress(10)).rejects.toMatchObject({ code: 'INVALID_RESPONSE' });
+    await expect(client.createAddress('01001')).rejects.toMatchObject({ code: 'INVALID_RESPONSE' });
+    await expect(client.findClientByExternalId('right')).rejects.toMatchObject({ code: 'INVALID_RESPONSE' });
+  });
+
+  it('bounds a streaming PDF without relying on Content-Length and cancels the stream', async () => {
+    const cancel = vi.fn();
+    const stream = new ReadableStream({ start(controller) { controller.enqueue(new Uint8Array(10 * 1024 * 1024 + 1)); }, cancel });
+    const { client } = fixture([new Response(stream, { headers: { 'content-type': 'application/pdf' } })]);
+    await expect(client.getLabel(uuid)).rejects.toMatchObject({ code: 'INVALID_RESPONSE' });
+    expect(cancel).toHaveBeenCalledOnce();
+  });
+
+  it('rejects invalid input before network and reports safe read timeouts', async () => {
+    const fetchFn = vi.fn().mockRejectedValue(new DOMException('token-secret', 'TimeoutError'));
+    const client = new up.UkrposhtaClient({ ...credentials, fetch: fetchFn });
+    await expect(client.getShipment('../secret')).rejects.toMatchObject({ code: 'VALIDATION' });
+    await expect(client.createAddress('name-01001')).rejects.toMatchObject({ code: 'VALIDATION' });
+    expect(fetchFn).not.toHaveBeenCalled();
+    await expect(client.getShipment(uuid)).rejects.toMatchObject({ code: 'TIMEOUT' });
+  });
   it('decodes stable office identity and postcode and rejects labels and path injection', () => {
     expect(typeof up.parseUkrposhtaLocationRef).toBe('function');
     expect(up.parseUkrposhtaLocationRef('up:123:01001')).toEqual({ officeId: '123', postcode: '01001' });

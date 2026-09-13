@@ -720,6 +720,7 @@ export const ShipmentScalarFieldEnum = {
   codAmount: 'codAmount',
   description: 'description',
   providerDocumentId: 'providerDocumentId',
+  providerMetadata: 'providerMetadata',
   trackingNumber: 'trackingNumber',
   cost: 'cost',
   currency: 'currency',
@@ -1040,4 +1041,3 @@ export const JsonNullValueFilter = {
 } as const
 
 export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
-

@@ -32,7 +32,7 @@ export function ShipmentPanel({ order }: { order: ManagerOrder }) {
     let active = true;
     const poll = () => void fetch(`/api/orders/${order.id}/shipments`, { credentials: 'same-origin', cache: 'no-store' })
       .then(async (response) => response.ok ? await response.json() as ShipmentOverview : null)
-      .then((overview) => { if (active && overview?.shipment) { setShipment(overview.shipment); if (overview.shipment.status === 'CANCELLED') setCancelling(false); } })
+      .then((overview) => { if (active && overview?.shipment) { setShipment(overview.shipment); if (overview.shipment.status === 'CANCELLED' || overview.shipment.provider === 'UKRPOSHTA' && overview.shipment.lastErrorCode) setCancelling(false); } })
       .catch(() => undefined);
     const timer = window.setInterval(poll, 2_000);
     poll();
@@ -40,7 +40,7 @@ export function ShipmentPanel({ order }: { order: ManagerOrder }) {
   }, [cancelling, order.id, shipment?.status]);
 
   async function cancelShipment() {
-    if (!shipment || !await confirm({ title: 'Скасувати ТТН?', description: 'Нова Пошта скасує це відправлення. Історія залишиться в AutoSale.', confirmLabel: 'Так, скасувати', tone: 'danger' })) return;
+    if (!shipment || !await confirm({ title: 'Скасувати ТТН?', description: 'Перевізник скасує це відправлення. Історія залишиться в AutoSale.', confirmLabel: 'Так, скасувати', tone: 'danger' })) return;
     setCancelling(true);
     const response = await mutatingFetch(`/api/shipments/${shipment.id}/cancel`, { method: 'POST' });
     if (!response.ok) { setCancelling(false); toast.show({ type: 'error', title: 'Не вдалося скасувати ТТН' }); return; }
@@ -60,17 +60,20 @@ export function ShipmentPanel({ order }: { order: ManagerOrder }) {
   return <section className="shipment-panel" aria-labelledby="shipment-panel-title">
     <div>
       <span>Доставка</span>
-      <h2 id="shipment-panel-title">Нова Пошта</h2>
+      <h2 id="shipment-panel-title">{shipment?.provider === 'UKRPOSHTA' ? 'Укрпошта' : shipment ? 'Нова Пошта' : 'Оформлення доставки'}</h2>
       <p>{shipment ? statusLabels[shipment.status] ?? shipment.status : blocked ? blockedCopy(order) : 'Перевірте дані й розрахуйте вартість перед створенням ТТН.'}</p>
       {shipment?.trackingNumber && <strong>ТТН {shipment.trackingNumber}</strong>}
+      {shipment?.cost != null && <span>{shipment.cost.toLocaleString('uk-UA')} грн</span>}
+      {shipment?.lastErrorCode === 'UKRPOSHTA_OUTCOME_UNKNOWN' && <p role="status">Укрпошта ще не підтвердила результат. Потрібна перевірка відправлення; повторне створення заблоковано.</p>}
+      {shipment?.provider === 'UKRPOSHTA' && shipment.lastErrorCode && shipment.lastErrorCode !== 'UKRPOSHTA_OUTCOME_UNKNOWN' && <p role="alert">Не вдалося завершити дію з відправленням. Перевірте дані та підключення Укрпошти.</p>}
     </div>
     <div className="shipment-panel-actions">
       {shipment?.trackingNumber && <>
         {['CREATED', 'ACCEPTED', 'IN_TRANSIT'].includes(shipment.status) && <button ref={messageTrigger} className="secondary-button" type="button" onClick={() => setMessageOpen(true)}>Повідомити клієнта</button>}
         <button className="secondary-button" type="button" onClick={() => void navigator.clipboard.writeText(shipment.trackingNumber!).then(() => toast.show({ type: 'success', title: 'Номер ТТН скопійовано' }))}>Скопіювати ТТН</button>
         <a className="secondary-button" href={`/api/shipments/${shipment.id}/label`}>Завантажити етикетку</a>
-        <a className="text-button" href={`https://tracking.novaposhta.ua/#/uk/${shipment.trackingNumber}`} rel="noreferrer" target="_blank">Відстежити</a>
-        {!['DELIVERED', 'RETURNED', 'CANCELLED'].includes(shipment.status) && <button className="danger-text-button" disabled={cancelling} type="button" onClick={() => void cancelShipment()}>{cancelling ? 'Скасовуємо…' : 'Скасувати ТТН'}</button>}
+        <a className="text-button" href={shipment.provider === 'UKRPOSHTA' ? `https://track.ukrposhta.ua/tracking_UA.html?barcode=${encodeURIComponent(shipment.trackingNumber)}` : `https://tracking.novaposhta.ua/#/uk/${shipment.trackingNumber}`} rel="noreferrer" target="_blank">Відстежити</a>
+        {(shipment.provider === 'UKRPOSHTA' ? shipment.status === 'CREATED' : !['DELIVERED', 'RETURNED', 'CANCELLED'].includes(shipment.status)) && <button className="danger-text-button" disabled={cancelling} type="button" onClick={() => void cancelShipment()}>{cancelling ? 'Скасовуємо…' : 'Скасувати ТТН'}</button>}
       </>}
       {!shipment?.trackingNumber && <button ref={trigger} className="secondary-button" type="button" disabled={blocked || creationLocked} onClick={() => setOpen(true)}>
         {shipment?.status === 'CREATING' ? 'Створюємо ТТН…' : shipment?.status === 'DRAFT' ? 'Продовжити оформлення' : 'Оформити доставку'}

@@ -119,6 +119,7 @@ export type ShipmentCountAggregateOutputType = {
   codAmount: number
   description: number
   providerDocumentId: number
+  providerMetadata: number
   trackingNumber: number
   cost: number
   currency: number
@@ -232,6 +233,7 @@ export type ShipmentCountAggregateInputType = {
   codAmount?: true
   description?: true
   providerDocumentId?: true
+  providerMetadata?: true
   trackingNumber?: true
   cost?: true
   currency?: true
@@ -354,6 +356,7 @@ export type ShipmentGroupByOutputType = {
   codAmount: runtime.Decimal | null
   description: string
   providerDocumentId: string | null
+  providerMetadata: runtime.JsonValue | null
   trackingNumber: string | null
   cost: runtime.Decimal | null
   currency: string
@@ -412,6 +415,7 @@ export type ShipmentWhereInput = {
   codAmount?: Prisma.DecimalNullableFilter<"Shipment"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: Prisma.StringFilter<"Shipment"> | string
   providerDocumentId?: Prisma.StringNullableFilter<"Shipment"> | string | null
+  providerMetadata?: Prisma.JsonNullableFilter<"Shipment">
   trackingNumber?: Prisma.StringNullableFilter<"Shipment"> | string | null
   cost?: Prisma.DecimalNullableFilter<"Shipment"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   currency?: Prisma.StringFilter<"Shipment"> | string
@@ -453,6 +457,7 @@ export type ShipmentOrderByWithRelationInput = {
   codAmount?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrder
   providerDocumentId?: Prisma.SortOrderInput | Prisma.SortOrder
+  providerMetadata?: Prisma.SortOrderInput | Prisma.SortOrder
   trackingNumber?: Prisma.SortOrderInput | Prisma.SortOrder
   cost?: Prisma.SortOrderInput | Prisma.SortOrder
   currency?: Prisma.SortOrder
@@ -500,6 +505,7 @@ export type ShipmentWhereUniqueInput = Prisma.AtLeast<{
   codAmount?: Prisma.DecimalNullableFilter<"Shipment"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: Prisma.StringFilter<"Shipment"> | string
   providerDocumentId?: Prisma.StringNullableFilter<"Shipment"> | string | null
+  providerMetadata?: Prisma.JsonNullableFilter<"Shipment">
   trackingNumber?: Prisma.StringNullableFilter<"Shipment"> | string | null
   cost?: Prisma.DecimalNullableFilter<"Shipment"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   currency?: Prisma.StringFilter<"Shipment"> | string
@@ -541,6 +547,7 @@ export type ShipmentOrderByWithAggregationInput = {
   codAmount?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrder
   providerDocumentId?: Prisma.SortOrderInput | Prisma.SortOrder
+  providerMetadata?: Prisma.SortOrderInput | Prisma.SortOrder
   trackingNumber?: Prisma.SortOrderInput | Prisma.SortOrder
   cost?: Prisma.SortOrderInput | Prisma.SortOrder
   currency?: Prisma.SortOrder
@@ -584,6 +591,7 @@ export type ShipmentScalarWhereWithAggregatesInput = {
   codAmount?: Prisma.DecimalNullableWithAggregatesFilter<"Shipment"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: Prisma.StringWithAggregatesFilter<"Shipment"> | string
   providerDocumentId?: Prisma.StringNullableWithAggregatesFilter<"Shipment"> | string | null
+  providerMetadata?: Prisma.JsonNullableWithAggregatesFilter<"Shipment">
   trackingNumber?: Prisma.StringNullableWithAggregatesFilter<"Shipment"> | string | null
   cost?: Prisma.DecimalNullableWithAggregatesFilter<"Shipment"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   currency?: Prisma.StringWithAggregatesFilter<"Shipment"> | string
@@ -615,6 +623,7 @@ export type ShipmentCreateInput = {
   codAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description: string
   providerDocumentId?: string | null
+  providerMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   trackingNumber?: string | null
   cost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   currency?: string
@@ -656,6 +665,7 @@ export type ShipmentUncheckedCreateInput = {
   codAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description: string
   providerDocumentId?: string | null
+  providerMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   trackingNumber?: string | null
   cost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   currency?: string
@@ -689,6 +699,7 @@ export type ShipmentUpdateInput = {
   codAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: Prisma.StringFieldUpdateOperationsInput | string
   providerDocumentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   trackingNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
@@ -730,6 +741,7 @@ export type ShipmentUncheckedUpdateInput = {
   codAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: Prisma.StringFieldUpdateOperationsInput | string
   providerDocumentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   trackingNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
@@ -767,6 +779,7 @@ export type ShipmentCreateManyInput = {
   codAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description: string
   providerDocumentId?: string | null
+  providerMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   trackingNumber?: string | null
   cost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   currency?: string
@@ -798,6 +811,7 @@ export type ShipmentUpdateManyMutationInput = {
   codAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: Prisma.StringFieldUpdateOperationsInput | string
   providerDocumentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   trackingNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
@@ -833,6 +847,7 @@ export type ShipmentUncheckedUpdateManyInput = {
   codAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: Prisma.StringFieldUpdateOperationsInput | string
   providerDocumentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   trackingNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
@@ -894,6 +909,7 @@ export type ShipmentCountOrderByAggregateInput = {
   codAmount?: Prisma.SortOrder
   description?: Prisma.SortOrder
   providerDocumentId?: Prisma.SortOrder
+  providerMetadata?: Prisma.SortOrder
   trackingNumber?: Prisma.SortOrder
   cost?: Prisma.SortOrder
   currency?: Prisma.SortOrder
@@ -1214,6 +1230,7 @@ export type ShipmentCreateWithoutTenantInput = {
   codAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description: string
   providerDocumentId?: string | null
+  providerMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   trackingNumber?: string | null
   cost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   currency?: string
@@ -1253,6 +1270,7 @@ export type ShipmentUncheckedCreateWithoutTenantInput = {
   codAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description: string
   providerDocumentId?: string | null
+  providerMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   trackingNumber?: string | null
   cost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   currency?: string
@@ -1319,6 +1337,7 @@ export type ShipmentScalarWhereInput = {
   codAmount?: Prisma.DecimalNullableFilter<"Shipment"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: Prisma.StringFilter<"Shipment"> | string
   providerDocumentId?: Prisma.StringNullableFilter<"Shipment"> | string | null
+  providerMetadata?: Prisma.JsonNullableFilter<"Shipment">
   trackingNumber?: Prisma.StringNullableFilter<"Shipment"> | string | null
   cost?: Prisma.DecimalNullableFilter<"Shipment"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   currency?: Prisma.StringFilter<"Shipment"> | string
@@ -1350,6 +1369,7 @@ export type ShipmentCreateWithoutCreatedByInput = {
   codAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description: string
   providerDocumentId?: string | null
+  providerMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   trackingNumber?: string | null
   cost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   currency?: string
@@ -1389,6 +1409,7 @@ export type ShipmentUncheckedCreateWithoutCreatedByInput = {
   codAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description: string
   providerDocumentId?: string | null
+  providerMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   trackingNumber?: string | null
   cost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   currency?: string
@@ -1448,6 +1469,7 @@ export type ShipmentCreateWithoutOrderInput = {
   codAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description: string
   providerDocumentId?: string | null
+  providerMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   trackingNumber?: string | null
   cost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   currency?: string
@@ -1486,6 +1508,7 @@ export type ShipmentUncheckedCreateWithoutOrderInput = {
   codAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description: string
   providerDocumentId?: string | null
+  providerMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   trackingNumber?: string | null
   cost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   currency?: string
@@ -1545,6 +1568,7 @@ export type ShipmentCreateWithoutConnectionInput = {
   codAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description: string
   providerDocumentId?: string | null
+  providerMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   trackingNumber?: string | null
   cost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   currency?: string
@@ -1583,6 +1607,7 @@ export type ShipmentUncheckedCreateWithoutConnectionInput = {
   codAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description: string
   providerDocumentId?: string | null
+  providerMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   trackingNumber?: string | null
   cost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   currency?: string
@@ -1642,6 +1667,7 @@ export type ShipmentCreateWithoutAttemptsInput = {
   codAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description: string
   providerDocumentId?: string | null
+  providerMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   trackingNumber?: string | null
   cost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   currency?: string
@@ -1682,6 +1708,7 @@ export type ShipmentUncheckedCreateWithoutAttemptsInput = {
   codAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description: string
   providerDocumentId?: string | null
+  providerMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   trackingNumber?: string | null
   cost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   currency?: string
@@ -1730,6 +1757,7 @@ export type ShipmentUpdateWithoutAttemptsInput = {
   codAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: Prisma.StringFieldUpdateOperationsInput | string
   providerDocumentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   trackingNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1770,6 +1798,7 @@ export type ShipmentUncheckedUpdateWithoutAttemptsInput = {
   codAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: Prisma.StringFieldUpdateOperationsInput | string
   providerDocumentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   trackingNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1802,6 +1831,7 @@ export type ShipmentCreateWithoutStatusEventsInput = {
   codAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description: string
   providerDocumentId?: string | null
+  providerMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   trackingNumber?: string | null
   cost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   currency?: string
@@ -1842,6 +1872,7 @@ export type ShipmentUncheckedCreateWithoutStatusEventsInput = {
   codAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description: string
   providerDocumentId?: string | null
+  providerMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   trackingNumber?: string | null
   cost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   currency?: string
@@ -1890,6 +1921,7 @@ export type ShipmentUpdateWithoutStatusEventsInput = {
   codAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: Prisma.StringFieldUpdateOperationsInput | string
   providerDocumentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   trackingNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1930,6 +1962,7 @@ export type ShipmentUncheckedUpdateWithoutStatusEventsInput = {
   codAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: Prisma.StringFieldUpdateOperationsInput | string
   providerDocumentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   trackingNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1965,6 +1998,7 @@ export type ShipmentCreateManyTenantInput = {
   codAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description: string
   providerDocumentId?: string | null
+  providerMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   trackingNumber?: string | null
   cost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   currency?: string
@@ -1996,6 +2030,7 @@ export type ShipmentUpdateWithoutTenantInput = {
   codAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: Prisma.StringFieldUpdateOperationsInput | string
   providerDocumentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   trackingNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2035,6 +2070,7 @@ export type ShipmentUncheckedUpdateWithoutTenantInput = {
   codAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: Prisma.StringFieldUpdateOperationsInput | string
   providerDocumentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   trackingNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2071,6 +2107,7 @@ export type ShipmentUncheckedUpdateManyWithoutTenantInput = {
   codAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: Prisma.StringFieldUpdateOperationsInput | string
   providerDocumentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   trackingNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2105,6 +2142,7 @@ export type ShipmentCreateManyCreatedByInput = {
   codAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description: string
   providerDocumentId?: string | null
+  providerMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   trackingNumber?: string | null
   cost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   currency?: string
@@ -2136,6 +2174,7 @@ export type ShipmentUpdateWithoutCreatedByInput = {
   codAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: Prisma.StringFieldUpdateOperationsInput | string
   providerDocumentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   trackingNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2175,6 +2214,7 @@ export type ShipmentUncheckedUpdateWithoutCreatedByInput = {
   codAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: Prisma.StringFieldUpdateOperationsInput | string
   providerDocumentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   trackingNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2211,6 +2251,7 @@ export type ShipmentUncheckedUpdateManyWithoutCreatedByInput = {
   codAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: Prisma.StringFieldUpdateOperationsInput | string
   providerDocumentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   trackingNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2244,6 +2285,7 @@ export type ShipmentCreateManyOrderInput = {
   codAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description: string
   providerDocumentId?: string | null
+  providerMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   trackingNumber?: string | null
   cost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   currency?: string
@@ -2275,6 +2317,7 @@ export type ShipmentUpdateWithoutOrderInput = {
   codAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: Prisma.StringFieldUpdateOperationsInput | string
   providerDocumentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   trackingNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2313,6 +2356,7 @@ export type ShipmentUncheckedUpdateWithoutOrderInput = {
   codAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: Prisma.StringFieldUpdateOperationsInput | string
   providerDocumentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   trackingNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2348,6 +2392,7 @@ export type ShipmentUncheckedUpdateManyWithoutOrderInput = {
   codAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: Prisma.StringFieldUpdateOperationsInput | string
   providerDocumentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   trackingNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2381,6 +2426,7 @@ export type ShipmentCreateManyConnectionInput = {
   codAmount?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description: string
   providerDocumentId?: string | null
+  providerMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   trackingNumber?: string | null
   cost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   currency?: string
@@ -2412,6 +2458,7 @@ export type ShipmentUpdateWithoutConnectionInput = {
   codAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: Prisma.StringFieldUpdateOperationsInput | string
   providerDocumentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   trackingNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2450,6 +2497,7 @@ export type ShipmentUncheckedUpdateWithoutConnectionInput = {
   codAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: Prisma.StringFieldUpdateOperationsInput | string
   providerDocumentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   trackingNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2485,6 +2533,7 @@ export type ShipmentUncheckedUpdateManyWithoutConnectionInput = {
   codAmount?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: Prisma.StringFieldUpdateOperationsInput | string
   providerDocumentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerMetadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   trackingNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   currency?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2560,6 +2609,7 @@ export type ShipmentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   codAmount?: boolean
   description?: boolean
   providerDocumentId?: boolean
+  providerMetadata?: boolean
   trackingNumber?: boolean
   cost?: boolean
   currency?: boolean
@@ -2602,6 +2652,7 @@ export type ShipmentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   codAmount?: boolean
   description?: boolean
   providerDocumentId?: boolean
+  providerMetadata?: boolean
   trackingNumber?: boolean
   cost?: boolean
   currency?: boolean
@@ -2641,6 +2692,7 @@ export type ShipmentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   codAmount?: boolean
   description?: boolean
   providerDocumentId?: boolean
+  providerMetadata?: boolean
   trackingNumber?: boolean
   cost?: boolean
   currency?: boolean
@@ -2680,6 +2732,7 @@ export type ShipmentSelectScalar = {
   codAmount?: boolean
   description?: boolean
   providerDocumentId?: boolean
+  providerMetadata?: boolean
   trackingNumber?: boolean
   cost?: boolean
   currency?: boolean
@@ -2698,7 +2751,7 @@ export type ShipmentSelectScalar = {
   updatedAt?: boolean
 }
 
-export type ShipmentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "orderId" | "connectionId" | "createdByUserId" | "provider" | "status" | "senderSnapshot" | "recipientSnapshot" | "destinationSnapshot" | "parcels" | "payer" | "declaredValue" | "codAmount" | "description" | "providerDocumentId" | "trackingNumber" | "cost" | "currency" | "version" | "idempotencyKey" | "requestHash" | "lastProviderCode" | "lastErrorCode" | "nextStatusCheckAt" | "lastStatusCheckedAt" | "providerCreatedAt" | "acceptedAt" | "deliveredAt" | "cancelledAt" | "createdAt" | "updatedAt", ExtArgs["result"]["shipment"]>
+export type ShipmentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "orderId" | "connectionId" | "createdByUserId" | "provider" | "status" | "senderSnapshot" | "recipientSnapshot" | "destinationSnapshot" | "parcels" | "payer" | "declaredValue" | "codAmount" | "description" | "providerDocumentId" | "providerMetadata" | "trackingNumber" | "cost" | "currency" | "version" | "idempotencyKey" | "requestHash" | "lastProviderCode" | "lastErrorCode" | "nextStatusCheckAt" | "lastStatusCheckedAt" | "providerCreatedAt" | "acceptedAt" | "deliveredAt" | "cancelledAt" | "createdAt" | "updatedAt", ExtArgs["result"]["shipment"]>
 export type ShipmentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   order?: boolean | Prisma.OrderDefaultArgs<ExtArgs>
@@ -2748,6 +2801,7 @@ export type $ShipmentPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     codAmount: runtime.Decimal | null
     description: string
     providerDocumentId: string | null
+    providerMetadata: runtime.JsonValue | null
     trackingNumber: string | null
     cost: runtime.Decimal | null
     currency: string
@@ -3209,6 +3263,7 @@ export interface ShipmentFieldRefs {
   readonly codAmount: Prisma.FieldRef<"Shipment", 'Decimal'>
   readonly description: Prisma.FieldRef<"Shipment", 'String'>
   readonly providerDocumentId: Prisma.FieldRef<"Shipment", 'String'>
+  readonly providerMetadata: Prisma.FieldRef<"Shipment", 'Json'>
   readonly trackingNumber: Prisma.FieldRef<"Shipment", 'String'>
   readonly cost: Prisma.FieldRef<"Shipment", 'Decimal'>
   readonly currency: Prisma.FieldRef<"Shipment", 'String'>

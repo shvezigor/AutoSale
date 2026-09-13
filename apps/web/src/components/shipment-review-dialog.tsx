@@ -19,11 +19,13 @@ export function ShipmentReviewDialog({ orderId, onClose, onSaved }: {
   onSaved(shipment: ShipmentSummary): void;
 }) {
   const [overview, setOverview] = useState<ShipmentOverview | null>(null);
+  const [provider, setProvider] = useState<'NOVA_POSHTA' | 'UKRPOSHTA' | null>(null);
   const [draft, setDraft] = useState<FormDraft | null>(null);
   const [city, setCity] = useState<DeliveryLocation | null>(null);
   const [location, setLocation] = useState<DeliveryLocation | null>(null);
   const [destinationType, setDestinationType] = useState<'BRANCH' | 'PARCEL_LOCKER'>('BRANCH');
   const [quote, setQuote] = useState<ShipmentQuote | null>(null);
+  const [quoteFailed, setQuoteFailed] = useState(false);
   const [state, setState] = useState<'loading' | 'ready' | 'saving' | 'creating' | 'error'>('loading');
   const closeButton = useRef<HTMLButtonElement>(null);
   const toast = useToast();
@@ -39,7 +41,7 @@ export function ShipmentReviewDialog({ orderId, onClose, onSaved }: {
 
   useEffect(() => {
     let active = true;
-    void fetch(`/api/orders/${orderId}/shipments`, { credentials: 'same-origin', cache: 'no-store' })
+    void fetch(`/api/orders/${orderId}/shipments${provider ? `?provider=${provider}` : ''}`, { credentials: 'same-origin', cache: 'no-store' })
       .then(async (response) => {
         if (!response.ok) throw new Error('load');
         return await response.json() as ShipmentOverview;
@@ -50,17 +52,17 @@ export function ShipmentReviewDialog({ orderId, onClose, onSaved }: {
         setDraft(value.draft ? formDraft(value.draft) : null);
         if (value.draft && 'destination' in value.draft) {
           const destination = value.draft.destination;
-          setCity({ ref: destination.cityRef, provider: 'NOVA_POSHTA', type: 'CITY', label: destination.cityRef });
+          setCity({ ref: destination.cityRef, provider: value.draft.provider, type: 'CITY', label: destination.cityRef });
           if (destination.type !== 'ADDRESS') {
             setDestinationType(destination.type);
-            setLocation({ ref: destination.locationRef, provider: 'NOVA_POSHTA', type: destination.type, label: destination.label, cityRef: destination.cityRef });
+            setLocation({ ref: destination.locationRef, provider: value.draft.provider, type: destination.type, label: destination.label, cityRef: destination.cityRef });
           }
         }
         setState('ready');
       })
       .catch(() => { if (active) setState('error'); });
     return () => { active = false; };
-  }, [orderId]);
+  }, [orderId, provider]);
 
   const completeDraft = useMemo(() => {
     if (!draft || !city || !location || !draft.recipient.name || !draft.recipient.phone) return null;
@@ -73,6 +75,7 @@ export function ShipmentReviewDialog({ orderId, onClose, onSaved }: {
 
   useEffect(() => {
     setQuote(null);
+    setQuoteFailed(false);
     if (!completeDraft) return;
     const controller = new AbortController();
     const timer = window.setTimeout(() => {
@@ -81,7 +84,7 @@ export function ShipmentReviewDialog({ orderId, onClose, onSaved }: {
       }).then(async (response) => {
         if (!response.ok) throw new Error('quote');
         return await response.json() as ShipmentQuote;
-      }).then(setQuote).catch(() => { if (!controller.signal.aborted) setQuote(null); });
+      }).then((value) => { if (!controller.signal.aborted) setQuote(value); }).catch(() => { if (!controller.signal.aborted) { setQuote(null); setQuoteFailed(true); } });
     }, 350);
     return () => { window.clearTimeout(timer); controller.abort(); };
   }, [completeDraft, orderId]);
@@ -105,7 +108,7 @@ export function ShipmentReviewDialog({ orderId, onClose, onSaved }: {
   }
 
   async function create() {
-    if (!completeDraft || state === 'creating') return;
+    if (!completeDraft || state === 'creating' || overview?.creationEnabled === false || draft?.provider === 'UKRPOSHTA' && !quote) return;
     setState('creating');
     try {
       const draftResponse = await mutatingFetch(`/api/orders/${orderId}/shipments/draft`, {
@@ -126,17 +129,24 @@ export function ShipmentReviewDialog({ orderId, onClose, onSaved }: {
 
   return <div className="modal-backdrop shipment-dialog-backdrop" role="presentation">
     <section role="dialog" aria-modal="true" aria-labelledby="shipment-dialog-title" className="shipment-review-dialog">
-      <header><div><span>Нова Пошта</span><h2 id="shipment-dialog-title">Оформлення доставки</h2></div><button ref={closeButton} className="icon-button" type="button" aria-label="Закрити" onClick={onClose}>×</button></header>
+      <header><div><span>{draft?.provider === 'UKRPOSHTA' ? 'Укрпошта' : 'Нова Пошта'}</span><h2 id="shipment-dialog-title">Оформлення доставки</h2></div><button ref={closeButton} className="icon-button" type="button" aria-label="Закрити" onClick={onClose}>×</button></header>
+      {overview?.availableProviders && overview.availableProviders.length > 0 && <label><span>Перевізник</span><select aria-label="Перевізник" disabled={state !== 'ready'} value={provider ?? draft?.provider ?? 'NOVA_POSHTA'} onChange={(event) => { setProvider(event.target.value as 'NOVA_POSHTA' | 'UKRPOSHTA'); setDraft(null); setCity(null); setLocation(null); setDestinationType('BRANCH'); setQuote(null); setState('loading'); }}>
+        {overview.availableProviders.map((value) => <option key={value} value={value}>{value === 'UKRPOSHTA' ? 'Укрпошта' : 'Нова Пошта'}</option>)}
+      </select></label>}
+      {overview?.creationEnabled === false && <p className="delivery-readonly-note">Створення відправлень Укрпошти ще не увімкнено. Можна перевірити вартість і зберегти чернетку.</p>}
       {state === 'loading' && <div className="dialog-loading"><span className="button-spinner" aria-hidden="true" /> Завантажуємо дані доставки…</div>}
       {state === 'error' && <p className="dialog-error" role="alert">Не вдалося завантажити налаштування доставки.</p>}
       {overview && !overview.canCreateShipment && <p className="dialog-error">{blockedReasonLabel(overview.blockedReason)}</p>}
       {draft && overview?.canCreateShipment && <div className="shipment-form">
         <div className="shipment-form-grid">
           <Field label="Ім’я отримувача" value={draft.recipient.name ?? ''} onChange={(value) => setDraft({ ...draft, recipient: { ...draft.recipient, name: value } })} />
+          {draft.provider === 'UKRPOSHTA' && <p>Вкажіть прізвище та ім’я отримувача, по батькові — за наявності.</p>}
           <Field label="Телефон отримувача" value={draft.recipient.phone ?? ''} onChange={(value) => setDraft({ ...draft, recipient: { ...draft.recipient, phone: value } })} />
-          <DeliveryLocationPicker label="Місто" type="CITY" initialQuery={'cityHint' in overview.draft! ? overview.draft.cityHint ?? '' : ''} value={city} onSelect={(value) => { setCity(value); setLocation(null); }} />
-          <label><span>Тип отримання</span><select aria-label="Тип отримання" value={destinationType} onChange={(event) => { setDestinationType(event.target.value as 'BRANCH' | 'PARCEL_LOCKER'); setLocation(null); }}><option value="BRANCH">Відділення</option><option value="PARCEL_LOCKER">Поштомат</option></select></label>
-          <DeliveryLocationPicker label="Відділення або поштомат" type={destinationType} {...(city ? { cityRef: city.ref } : {})} initialQuery={'locationHint' in overview.draft! ? overview.draft.locationHint ?? '' : ''} value={location} onSelect={setLocation} />
+          <DeliveryLocationPicker key={`${draft.provider}-city`} provider={draft.provider} label="Місто" type="CITY" initialQuery={'cityHint' in overview.draft! ? overview.draft.cityHint ?? '' : ''} value={city} onSelect={(value) => { setCity(value); setLocation(null); }} />
+          <label><span>Тип отримання</span><select aria-label="Тип отримання" value={destinationType} onChange={(event) => { setDestinationType(event.target.value as 'BRANCH' | 'PARCEL_LOCKER'); setLocation(null); }}><option value="BRANCH">Відділення</option>{draft.provider !== 'UKRPOSHTA' && <option value="PARCEL_LOCKER">Поштомат</option>}</select></label>
+          <DeliveryLocationPicker key={`${draft.provider}-${destinationType}`} provider={draft.provider} label="Відділення або поштомат" type={destinationType} {...(city ? { cityRef: city.ref } : {})} initialQuery={'locationHint' in overview.draft! ? overview.draft.locationHint ?? '' : ''} value={location} onSelect={setLocation} />
+          <label><span>Платник доставки</span><select aria-label="Платник доставки" value={draft.payer} onChange={(event) => setDraft({ ...draft, payer: event.target.value as 'SENDER' | 'RECIPIENT' })}><option value="SENDER">Відправник</option><option value="RECIPIENT">Отримувач</option></select></label>
+          <Field label="Опис відправлення" value={draft.description} onChange={(description) => setDraft({ ...draft, description })} />
         </div>
         <div className="shipment-parcel-grid">
           <NumberField label="Вага, кг" value={draft.parcels[0]!.weightKg} onChange={(value) => setDraft(withParcel(draft, 'weightKg', value))} />
@@ -147,12 +157,12 @@ export function ShipmentReviewDialog({ orderId, onClose, onSaved }: {
           <NumberField label="Післяплата, грн" value={draft.codAmount ?? 0} onChange={(value) => setDraft({ ...draft, codAmount: value > 0 ? value : null })} />
         </div>
         {draft.codAmount !== null && draft.codAmount > draft.declaredValue && <p className="shipment-validation" role="alert">Післяплата не може перевищувати оголошену вартість.</p>}
-        <div className="shipment-quote" aria-live="polite">{quote ? <><strong>{quote.cost.toLocaleString('uk-UA')} грн</strong><span>{quote.estimatedDeliveryDate ? `Орієнтовна дата: ${quote.estimatedDeliveryDate}` : 'Вартість розраховано'}</span></> : <span>{completeDraft ? 'Розраховуємо вартість…' : 'Оберіть точне місто та відділення'}</span>}</div>
+        <div className="shipment-quote" aria-live="polite">{quote ? <><strong>{quote.cost.toLocaleString('uk-UA')} грн</strong><span>{draft.provider === 'UKRPOSHTA' ? 'Орієнтовна вартість. Остаточна — після створення.' : quote.estimatedDeliveryDate ? `Орієнтовна дата: ${quote.estimatedDeliveryDate}` : 'Вартість розраховано'}</span></> : <span>{quoteFailed ? 'Не вдалося розрахувати вартість. Перевірте дані або відкрийте чернетку пізніше.' : completeDraft ? 'Розраховуємо вартість…' : 'Оберіть точне місто та відділення'}</span>}</div>
       </div>}
       <footer>
         <button type="button" className="secondary-button" disabled={state === 'creating'} onClick={onClose}>Скасувати</button>
         <LoadingButton type="button" pending={state === 'saving'} pendingLabel="Зберігаємо…" disabled={!completeDraft || state === 'saving' || state === 'creating' || (draft?.codAmount !== null && (draft?.codAmount ?? 0) > (draft?.declaredValue ?? 0))} onClick={() => void save()}>Зберегти чернетку</LoadingButton>
-        <LoadingButton className="shipment-create-button" type="button" pending={state === 'creating'} pendingLabel="Створюємо ТТН…" disabled={!completeDraft || state === 'saving' || state === 'creating' || (draft?.codAmount !== null && (draft?.codAmount ?? 0) > (draft?.declaredValue ?? 0))} onClick={() => void create()}>Створити ТТН</LoadingButton>
+        <LoadingButton className="shipment-create-button" type="button" pending={state === 'creating'} pendingLabel="Створюємо ТТН…" disabled={!completeDraft || overview?.creationEnabled === false || draft?.provider === 'UKRPOSHTA' && !quote || state === 'saving' || state === 'creating' || (draft?.codAmount !== null && (draft?.codAmount ?? 0) > (draft?.declaredValue ?? 0))} onClick={() => void create()}>Створити ТТН</LoadingButton>
       </footer>
     </section>
   </div>;
@@ -175,6 +185,6 @@ function withParcel(draft: FormDraft, key: keyof ShipmentDraftInput['parcels'][n
 function blockedReasonLabel(reason: ShipmentOverview['blockedReason']): string {
   if (reason === 'ORDER_NOT_APPROVED') return 'Спочатку підтвердьте замовлення.';
   if (reason === 'PROCUREMENT_INCOMPLETE') return 'Дочекайтеся, поки всі товари будуть готові до відправлення.';
-  if (reason === 'CONNECTION_REQUIRED') return 'Підключіть Нову Пошту в налаштуваннях.';
+  if (reason === 'CONNECTION_REQUIRED') return 'Підключіть перевізника в налаштуваннях.';
   return 'Заповніть дані відправника в налаштуваннях доставки.';
 }

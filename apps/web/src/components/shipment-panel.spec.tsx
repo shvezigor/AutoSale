@@ -19,6 +19,25 @@ const order = {
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
 describe('ShipmentPanel', () => {
+  it('stops the cancellation loader and explains a terminal Ukrposhta failure', async () => {
+    const shipment = { id: 'shipment-id', orderId: order.id, provider: 'UKRPOSHTA' as const, status: 'CREATED' as const, trackingNumber: '0500113014256', cost: 90, currency: 'UAH' as const, createdAt: '2026-09-13T00:00:00Z', providerCreatedAt: null, acceptedAt: null, deliveredAt: null, cancelledAt: null, lastStatusCheckedAt: null, lastErrorCode: null, history: [] };
+    vi.stubGlobal('fetch', vi.fn().mockImplementation(async (path: string) => ({ ok: true, json: async () => path.includes('csrf') ? { token: 'csrf-token' } : { shipment: { ...shipment, lastErrorCode: 'UKRPOSHTA_UNAUTHORIZED' } } })));
+    render(<ConfirmProvider><ToastProvider><ShipmentPanel order={{ ...order, shipment }} /></ToastProvider></ConfirmProvider>);
+    fireEvent.click(screen.getByRole('button', { name: 'Скасувати ТТН' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Так, скасувати' }));
+    expect(await screen.findByText(/Не вдалося завершити дію з відправленням/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Скасувати ТТН' })).toBeEnabled();
+  });
+  it('shows Ukrposhta tracking, final cost and labels, and hides cancellation after acceptance', () => {
+    render(<ConfirmProvider><ToastProvider><ShipmentPanel order={{ ...order, shipment: {
+      id: 'shipment-id', orderId: order.id, provider: 'UKRPOSHTA', status: 'ACCEPTED', trackingNumber: '0500113014256', cost: 90, currency: 'UAH', createdAt: '2026-09-13T00:00:00Z', providerCreatedAt: null, acceptedAt: null, deliveredAt: null, cancelledAt: null, lastStatusCheckedAt: null, lastErrorCode: null, history: [],
+    } }} /></ToastProvider></ConfirmProvider>);
+    expect(screen.getByRole('heading', { name: 'Укрпошта' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Відстежити' })).toHaveAttribute('href', 'https://track.ukrposhta.ua/tracking_UA.html?barcode=0500113014256');
+    expect(screen.getByRole('link', { name: 'Завантажити етикетку' })).toHaveAttribute('href', '/api/shipments/shipment-id/label');
+    expect(screen.queryByRole('button', { name: 'Скасувати ТТН' })).not.toBeInTheDocument();
+    expect(screen.getByText('90 грн')).toBeInTheDocument();
+  });
   it('shows a clear disabled reason until procurement is complete', () => {
     render(<ConfirmProvider><ToastProvider><ShipmentPanel order={{ ...order, canCreateShipment: false, procurementSummary: 'NEEDS_ORDER' }} /></ToastProvider></ConfirmProvider>);
     expect(screen.getByRole('button', { name: 'Оформити доставку' })).toBeDisabled();

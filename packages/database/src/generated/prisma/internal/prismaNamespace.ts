@@ -4658,6 +4658,7 @@ export const ShipmentScalarFieldEnum = {
   codAmount: 'codAmount',
   description: 'description',
   providerDocumentId: 'providerDocumentId',
+  providerMetadata: 'providerMetadata',
   trackingNumber: 'trackingNumber',
   cost: 'cost',
   currency: 'currency',
@@ -5743,4 +5744,3 @@ export type PrismaAction =
  * `PrismaClient` proxy available in interactive transactions.
  */
 export type TransactionClient = Omit<DefaultPrismaClient, runtime.ITXClientDenyList>
-

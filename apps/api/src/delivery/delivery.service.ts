@@ -2,7 +2,8 @@ import { createHash, randomUUID } from 'node:crypto';
 
 import { deliverySenderProfileInputSchema, shipmentCustomerMessageInputSchema, shipmentDraftInputSchema, type ConversationMessage, type DeliveryConnectionInput, type DeliveryConnectionSummary, type DeliverySenderProfileInput, type OutboundMessageInput, type ShipmentCustomerMessageInput, type ShipmentCustomerMessagePreview, type ShipmentDraftInput, type ShipmentOverview, type ShipmentQuote, type ShipmentSummary } from '@autosale/contracts';
 import type { PrismaClient } from '@autosale/database';
-import type { CredentialCipher, NovaPoshtaClient, NovaPoshtaSenderProfile } from '@autosale/integrations';
+import { parseUkrposhtaLocationRef, type CredentialCipher, type NovaPoshtaClient, type NovaPoshtaSenderProfile, type UkrposhtaClient } from '@autosale/integrations';
+import { ukrposhtaConnectionInputSchema, type UkrposhtaConnectionInput } from '@autosale/contracts';
 import { BadRequestException, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 
 type NovaPoshtaClientPort = Pick<NovaPoshtaClient, 'validateCredential' | 'listSenderProfiles' | 'searchCities' | 'searchLocations' | 'calculateShipment' | 'getLabel'>;
@@ -11,6 +12,7 @@ export type NovaPoshtaClientFactory = (apiKey: string) => NovaPoshtaClientPort;
 type DeliveryServiceOptions = {
   enabled: boolean;
   now?: () => Date;
+  ukrposhtaSandboxShipmentsEnabled?: boolean;
 };
 
 export interface ShipmentCreateQueue {
@@ -33,6 +35,7 @@ export class DeliveryService {
     private readonly options: DeliveryServiceOptions,
     private readonly shipmentQueue?: ShipmentCreateQueue,
     private readonly instagramOutbound?: InstagramOutboundPort,
+    private readonly ukrposhtaClient?: (credentials: UkrposhtaConnectionInput) => Pick<UkrposhtaClient, 'calculateShipment' | 'getLabel' | 'getLifecycle'>,
   ) {
     this.now = options.now ?? (() => new Date());
   }
@@ -116,7 +119,7 @@ export class DeliveryService {
     return client.listSenderProfiles();
   }
 
-  async shipmentOverview(tenantId: string, orderId: string): Promise<ShipmentOverview> {
+  async shipmentOverview(tenantId: string, orderId: string, requestedProvider?: 'NOVA_POSHTA' | 'UKRPOSHTA'): Promise<ShipmentOverview> {
     this.assertEnabled();
     const order = await this.orderForShipment(tenantId, orderId);
     const readiness = shipmentReadiness(order);
@@ -125,21 +128,24 @@ export class DeliveryService {
       orderBy: { createdAt: 'desc' },
       include: { statusEvents: { orderBy: { occurredAt: 'desc' } } },
     });
+    const available = this.ukrposhtaClient ? await this.prisma.deliveryConnection.findMany({ where: { tenantId, status: 'ACTIVE', provider: { in: ['NOVA_POSHTA', 'UKRPOSHTA'] } }, select: { provider: true } }) : [];
+    const provider = requestedProvider ?? (shipment?.provider === 'UKRPOSHTA' ? 'UKRPOSHTA' : available.length === 1 && available[0]?.provider === 'UKRPOSHTA' ? 'UKRPOSHTA' : 'NOVA_POSHTA');
     const connection = await this.prisma.deliveryConnection.findUnique({
-      where: { tenantId_provider: { tenantId, provider: 'NOVA_POSHTA' } },
+      where: { tenantId_provider: { tenantId, provider } },
       include: { senderProfile: true },
     });
     const blockedReason = !readiness.allowed
       ? readiness.reason
       : !connection || connection.status !== 'ACTIVE'
         ? 'CONNECTION_REQUIRED'
-        : !connection.senderProfile ? 'SENDER_PROFILE_REQUIRED' : null;
+        : !connection.senderProfile || provider === 'UKRPOSHTA' && !validUkrposhtaOrigin(connection.senderProfile.originLocationRef) ? 'SENDER_PROFILE_REQUIRED' : null;
     return {
+      ...(this.ukrposhtaClient ? { availableProviders: available.map((c) => c.provider as 'NOVA_POSHTA' | 'UKRPOSHTA'), creationEnabled: provider !== 'UKRPOSHTA' || Boolean(connection && this.ukrposhtaCreationEnabled(connection.encryptedCredential)) } : {}),
       shipment: shipment ? mapShipmentSummary(shipment) : null,
       canCreateShipment: blockedReason === null,
       blockedReason,
       draft: blockedReason === null
-        ? shipment?.status === 'DRAFT' ? draftFromShipment(shipment) : await this.prefill(order, connection!.senderProfile!)
+        ? shipment?.status === 'DRAFT' && shipment.provider === provider ? draftFromShipment(shipment) : { ...await this.prefill(order, connection!.senderProfile!), provider }
         : null,
     };
   }
@@ -152,23 +158,28 @@ export class DeliveryService {
     const parsed = shipmentDraftInputSchema.safeParse(input);
     if (!parsed.success) throw new BadRequestException('INVALID_SHIPMENT_DRAFT');
     const connection = await this.prisma.deliveryConnection.findUnique({
-      where: { tenantId_provider: { tenantId, provider: 'NOVA_POSHTA' } },
+      where: { tenantId_provider: { tenantId, provider: parsed.data.provider } },
       include: { senderProfile: true },
     });
     if (!connection || connection.status !== 'ACTIVE') throw new BadRequestException('CONNECTION_REQUIRED');
     if (!validSenderProfile(connection.senderProfile)) throw new BadRequestException('SENDER_PROFILE_REQUIRED');
     const data = shipmentDraftData(parsed.data, connection.senderProfile);
+    if (parsed.data.provider === 'UKRPOSHTA') parseUkrposhtaLocationRef(connection.senderProfile.originLocationRef ?? '');
+    const providerData = {
+      provider: parsed.data.provider, connectionId: connection.id,
+      ...(parsed.data.provider === 'UKRPOSHTA' ? { providerMetadata: { environment: this.ukrposhtaCredentials(connection.encryptedCredential).environment, credentialGenerationId: connection.credentialGenerationId } } : {}),
+    };
     const existing = await this.prisma.shipment.findFirst({
       where: { tenantId, orderId, status: { in: ['DRAFT', 'CREATING', 'CREATED', 'ACCEPTED', 'IN_TRANSIT', 'RETURNING'] } },
       orderBy: { createdAt: 'desc' },
     });
     if (existing && existing.status !== 'DRAFT') throw new BadRequestException('SHIPMENT_ALREADY_CREATED');
     const shipment = existing
-      ? await this.prisma.shipment.update({ where: { id: existing.id }, data, include: { statusEvents: { orderBy: { occurredAt: 'desc' } } } })
+      ? await this.prisma.shipment.update({ where: { id: existing.id, tenantId, status: 'DRAFT' }, data: { ...data, ...providerData }, include: { statusEvents: { orderBy: { occurredAt: 'desc' } } } })
       : await this.prisma.shipment.create({
           data: {
-            tenantId, orderId, connectionId: connection.id, createdByUserId: userId, provider: 'NOVA_POSHTA', status: 'DRAFT',
-            ...data, idempotencyKey: `shipment:draft:v1:${orderId}`,
+            tenantId, orderId, createdByUserId: userId, status: 'DRAFT',
+            ...data, ...providerData, idempotencyKey: `shipment:draft:v1:${orderId}:${randomUUID()}`,
           },
           include: { statusEvents: { orderBy: { occurredAt: 'desc' } } },
         });
@@ -183,11 +194,19 @@ export class DeliveryService {
     const parsed = shipmentDraftInputSchema.safeParse(input);
     if (!parsed.success) throw new BadRequestException('INVALID_SHIPMENT_DRAFT');
     const connection = await this.prisma.deliveryConnection.findUnique({
-      where: { tenantId_provider: { tenantId, provider: 'NOVA_POSHTA' } },
+      where: { tenantId_provider: { tenantId, provider: parsed.data.provider } },
       include: { senderProfile: true },
     });
     if (!connection || connection.status !== 'ACTIVE') throw new BadRequestException('CONNECTION_REQUIRED');
     if (!validSenderProfile(connection.senderProfile)) throw new BadRequestException('SENDER_PROFILE_REQUIRED');
+    if (parsed.data.provider === 'UKRPOSHTA') {
+      if (parsed.data.destination.type !== 'BRANCH') throw new BadRequestException('INVALID_SHIPMENT_DRAFT');
+      return this.ukrposhtaForConnection(connection.encryptedCredential).calculateShipment({
+        senderPostcode: parseUkrposhtaLocationRef(connection.senderProfile.originLocationRef ?? '').postcode,
+        recipientPostcode: parseUkrposhtaLocationRef(parsed.data.destination.locationRef).postcode,
+        parcel: parsed.data.parcels[0]!, declaredValue: parsed.data.declaredValue, codAmount: parsed.data.codAmount,
+      });
+    }
     const client = this.novaPoshtaClient(this.cipher.decrypt(connection.encryptedCredential));
     return client.calculateShipment(providerShipmentInput(parsed.data, connection.senderProfile, `quote:${orderId}`));
   }
@@ -205,6 +224,13 @@ export class DeliveryService {
     });
     if (!active) throw new BadRequestException('SHIPMENT_DRAFT_REQUIRED');
     if (active.status !== 'DRAFT') return mapShipmentSummary(active);
+    if (active.provider === 'UKRPOSHTA') {
+      const connection = await this.prisma.deliveryConnection.findUnique({ where: { tenantId_provider: { tenantId, provider: 'UKRPOSHTA' } } });
+      if (!connection || connection.status !== 'ACTIVE' || connection.id !== active.connectionId) throw new BadRequestException('CONNECTION_REQUIRED');
+      if (!this.ukrposhtaCreationEnabled(connection.encryptedCredential)) throw new BadRequestException('UKRPOSHTA_CREATION_DISABLED');
+      const metadata = active.providerMetadata as { credentialGenerationId?: string } | null;
+      if (metadata?.credentialGenerationId !== connection.credentialGenerationId) throw new BadRequestException('SHIPMENT_CONNECTION_CHANGED');
+    }
 
     const version = active.version;
     const idempotencyKey = explicitIdempotencyKey?.trim() || `shipment:create:v1:${active.id}:${version}`;
@@ -265,20 +291,24 @@ export class DeliveryService {
     if (!shipment.providerDocumentId || !shipment.trackingNumber || !['CREATED', 'ACCEPTED', 'IN_TRANSIT', 'DELIVERED', 'RETURNING', 'RETURNED'].includes(shipment.status)) {
       throw new BadRequestException('SHIPMENT_LABEL_UNAVAILABLE');
     }
-    const client = this.novaPoshtaClient(this.cipher.decrypt(shipment.connection.encryptedCredential));
+    if (shipment.provider === 'UKRPOSHTA') this.assertShipmentConnection(shipment);
+    const client = shipment.provider === 'UKRPOSHTA' ? this.ukrposhtaForConnection(shipment.connection.encryptedCredential) : this.novaPoshtaClient(this.cipher.decrypt(shipment.connection.encryptedCredential));
     const bytes = await client.getLabel(shipment.providerDocumentId);
     if (bytes.byteLength > 10 * 1024 * 1024) throw new BadRequestException('SHIPMENT_LABEL_TOO_LARGE');
-    return { bytes, filename: `nova-poshta-${shipment.trackingNumber}.pdf` };
+    const filename = `${shipment.provider === 'UKRPOSHTA' ? 'ukrposhta' : 'nova-poshta'}-${shipment.trackingNumber.replace(/[^A-Za-z0-9_-]/g, '').slice(0, 32)}.pdf`;
+    return { bytes, filename };
   }
 
   async cancelShipment(tenantId: string, shipmentId: string): Promise<ShipmentSummary> {
     this.assertEnabled();
     const shipment = await this.prisma.shipment.findFirst({
-      where: { id: shipmentId, tenantId }, include: { statusEvents: { orderBy: { occurredAt: 'desc' } } },
+      where: { id: shipmentId, tenantId }, include: { connection: true, statusEvents: { orderBy: { occurredAt: 'desc' } } },
     });
     if (!shipment) throw new NotFoundException('Shipment not found');
     if (shipment.status === 'CANCELLED') return mapShipmentSummary(shipment);
     if (['DELIVERED', 'RETURNED'].includes(shipment.status) || !shipment.providerDocumentId) throw new BadRequestException('SHIPMENT_CANNOT_BE_CANCELLED');
+    if (shipment.provider === 'UKRPOSHTA') this.assertShipmentConnection(shipment);
+    if (shipment.provider === 'UKRPOSHTA' && (shipment.status !== 'CREATED' || (await this.ukrposhtaForConnection(shipment.connection.encryptedCredential).getLifecycle(shipment.providerDocumentId)).status !== 'CREATED')) throw new BadRequestException('SHIPMENT_CANNOT_BE_CANCELLED');
     const version = shipment.version;
     const idempotencyKey = `shipment:cancel:v1:${shipment.id}:${version}`;
     await this.prisma.shipmentAttempt.upsert({
@@ -300,7 +330,7 @@ export class DeliveryService {
       select: { deliveryStatus: true, deliveryErrorCode: true },
     });
     return {
-      text: renderCustomerMessage(context.template, context.tenantName, context.shipment.trackingNumber),
+      text: renderCustomerMessage(context.template, context.tenantName, context.shipment.trackingNumber, context.shipment.provider),
       suggested: context.suggested,
       alreadySubmitted: existing !== null,
       deliveryStatus: existing?.deliveryStatus ?? null,
@@ -365,6 +395,26 @@ export class DeliveryService {
     if (!this.options.enabled) throw new Error('Nova Poshta delivery is disabled');
   }
 
+  private ukrposhtaCredentials(encrypted: string): UkrposhtaConnectionInput {
+    try { return ukrposhtaConnectionInputSchema.parse(JSON.parse(this.cipher.decrypt(encrypted))); }
+    catch { throw new BadRequestException('UKRPOSHTA_CREDENTIALS_INVALID'); }
+  }
+
+  private ukrposhtaCreationEnabled(encrypted: string): boolean {
+    return this.options.ukrposhtaSandboxShipmentsEnabled === true && this.ukrposhtaCredentials(encrypted).environment === 'SANDBOX';
+  }
+
+  private ukrposhtaForConnection(encrypted: string) {
+    if (!this.ukrposhtaClient) throw new BadRequestException('UKRPOSHTA_UNAVAILABLE');
+    return this.ukrposhtaClient(this.ukrposhtaCredentials(encrypted));
+  }
+
+  private assertShipmentConnection(shipment: { providerMetadata: unknown; connection: { encryptedCredential: string; credentialGenerationId: string; status: string } }): void {
+    const metadata = shipment.providerMetadata as { environment?: string; credentialGenerationId?: string } | null;
+    const credentials = this.ukrposhtaCredentials(shipment.connection.encryptedCredential);
+    if (shipment.connection.status !== 'ACTIVE' || metadata?.environment !== credentials.environment || metadata?.credentialGenerationId !== shipment.connection.credentialGenerationId) throw new BadRequestException('SHIPMENT_CONNECTION_CHANGED');
+  }
+
   private async orderForShipment(tenantId: string, orderId: string) {
     const order = await this.prisma.order.findFirst({
       where: { id: orderId, tenantId },
@@ -390,7 +440,7 @@ export class DeliveryService {
     if (!tenant) throw new NotFoundException('Tenant not found');
     const senderProfile = shipment.connection.senderProfile;
     return {
-      shipment: { id: shipment.id, version: shipment.version, trackingNumber: shipment.trackingNumber },
+      shipment: { id: shipment.id, version: shipment.version, trackingNumber: shipment.trackingNumber, provider: shipment.provider },
       conversationId: shipment.order.conversationId,
       tenantName: tenant.name,
       suggested: senderProfile?.suggestCustomerNotification ?? true,
@@ -431,8 +481,8 @@ function shipmentCustomerMessageKey(shipmentId: string, version: number): string
   return `${value.slice(0, 8)}-${value.slice(8, 12)}-${value.slice(12, 16)}-${value.slice(16, 20)}-${value.slice(20)}`;
 }
 
-function renderCustomerMessage(template: string, company: string, trackingNumber: string): string {
-  const trackingUrl = `https://tracking.novaposhta.ua/#/uk/${trackingNumber}`;
+function renderCustomerMessage(template: string, company: string, trackingNumber: string, provider?: string): string {
+  const trackingUrl = provider === 'UKRPOSHTA' ? `https://track.ukrposhta.ua/tracking_UA.html?barcode=${encodeURIComponent(trackingNumber)}` : `https://tracking.novaposhta.ua/#/uk/${trackingNumber}`;
   const rendered = template
     .replaceAll('{company}', company)
     .replaceAll('{trackingNumber}', trackingNumber)
@@ -617,6 +667,10 @@ function senderProfileData(input: DeliverySenderProfileInput) {
 
 function validSenderProfile(profile: Parameters<typeof safeSenderProfile>[0] | null): profile is Parameters<typeof safeSenderProfile>[0] {
   return Boolean(profile && deliverySenderProfileInputSchema.safeParse(safeSenderProfile(profile)).success);
+}
+
+function validUkrposhtaOrigin(ref: string | null): boolean {
+  try { parseUkrposhtaLocationRef(ref ?? ''); return true; } catch { return false; }
 }
 
 function isUniqueConstraintError(error: unknown): error is { code: 'P2002' } {

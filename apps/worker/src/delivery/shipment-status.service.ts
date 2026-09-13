@@ -23,6 +23,7 @@ export class ShipmentStatusService {
     private readonly clientFactory: (apiKey: string) => StatusClient,
     private readonly decrypt: (encrypted: string) => string,
     private readonly now: () => Date = () => new Date(),
+    private readonly ukrposhta?: { cancel(job: ShipmentStatusJob): Promise<'CANCELLED' | 'RETRY' | 'IGNORED'> },
   ) {}
 
   async process(job: ShipmentStatusJob): Promise<'UPDATED' | 'RETRY' | 'IGNORED'> {
@@ -33,6 +34,7 @@ export class ShipmentStatusService {
       orderBy: { version: 'desc' }, include: { shipment: { include: { connection: true } } },
     });
     if (!attempt?.shipment.trackingNumber || terminal(attempt.shipment.status)) return 'IGNORED';
+    if (attempt.shipment.provider === 'UKRPOSHTA') return 'IGNORED';
     const claimed = await this.prisma.shipmentAttempt.updateMany({
       where: { id: attempt.id, status: attempt.status, leaseId: null },
       data: { status: 'PROCESSING', leaseId, leaseExpiresAt: new Date(now.getTime() + LEASE_MS), attempts: { increment: 1 }, lastAttemptAt: now },
@@ -73,6 +75,7 @@ export class ShipmentStatusService {
       orderBy: { version: 'desc' }, include: { shipment: { include: { connection: true } } },
     });
     if (!attempt?.shipment.providerDocumentId || attempt.shipment.status === 'CANCELLED') return 'IGNORED';
+    if (attempt.shipment.provider === 'UKRPOSHTA') return this.ukrposhta ? this.ukrposhta.cancel(job) : 'IGNORED';
     const claimed = await this.prisma.shipmentAttempt.updateMany({ where: { id: attempt.id, status: attempt.status, leaseId: null }, data: { status: 'PROCESSING', leaseId, leaseExpiresAt: new Date(now.getTime() + LEASE_MS), attempts: { increment: 1 }, lastAttemptAt: now } });
     if (claimed.count !== 1) return 'IGNORED';
     try {

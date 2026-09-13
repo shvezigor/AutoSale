@@ -154,6 +154,7 @@ export function UkrposhtaSettingsCard({ initial, role }: { initial: UkrposhtaSet
             <legend>Відправник і точне відділення</legend>
             <div className="ukrposhta-connect-grid">
               <label><span>Назва відправника Укрпошти</span><input aria-label="Назва відправника Укрпошти" value={profile.senderName} onChange={(event) => setProfile((current) => ({ ...current, senderName: event.target.value }))} /></label>
+              <p>На цьому етапі відправник — фізична особа: вкажіть прізвище та ім’я, для післяплати також по батькові. Перед першим оформленням повторно оберіть точне відділення, щоб зберегти його індекс.</p>
               <label><span>Телефон відправника Укрпошти</span><input aria-label="Телефон відправника Укрпошти" inputMode="tel" placeholder="+380501112233" value={profile.senderPhone} onChange={(event) => setProfile((current) => ({ ...current, senderPhone: event.target.value }))} /></label>
             </div>
             <div className="delivery-origin-grid">

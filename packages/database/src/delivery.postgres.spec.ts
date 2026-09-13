@@ -52,6 +52,15 @@ describe('delivery persistence', () => {
       .rejects.toMatchObject({ code: '23505' });
   });
 
+  it('persists provider checkpoints in tenant-owned shipment metadata while retaining active intent uniqueness', async () => {
+    const id = await insertShipment(pool, { tenantId: tenantA, orderId: ordersA[4]!, connectionId: connectionA, status: 'FAILED', idempotencyKey: 'metadata-test' });
+    const metadata = { environment: 'SANDBOX', senderAddressId: 12, senderUuid: userA, createDispatched: true, lifecycle: { status: 'CREATED', statusDate: '2026-09-12T10:00:00' } };
+    await pool.query('UPDATE shipments SET provider_metadata = $1 WHERE tenant_id = $2 AND id = $3', [metadata, tenantA, id]);
+    expect((await pool.query('SELECT provider_metadata FROM shipments WHERE tenant_id = $1 AND id = $2', [tenantA, id])).rows[0].provider_metadata).toEqual(metadata);
+    expect((await pool.query('UPDATE shipments SET provider_metadata = $1 WHERE tenant_id = $2 AND id = $3', [{}, tenantB, id])).rowCount).toBe(0);
+    await pool.query('DELETE FROM shipments WHERE tenant_id = $1 AND id = $2', [tenantA, id]);
+  });
+
   it('prevents a sender profile from referencing another tenant connection', async () => {
     await expect(pool.query(`INSERT INTO delivery_sender_profiles
       (tenant_id, connection_id, sender_ref, contact_ref, contact_phone,

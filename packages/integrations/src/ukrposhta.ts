@@ -87,12 +87,16 @@ export class UkrposhtaClient {
 
   async createAddress(postcode: string): Promise<{ id: number; postcode: string }> {
     checkPostcode(postcode);
-    return addressResponse(await this.jsonRequest('addresses', 'POST', { postcode }, false));
+    const result = addressResponse(await this.jsonRequest('addresses', 'POST', { postcode }, false));
+    if (result.postcode !== postcode) throw new UkrposhtaError('INVALID_RESPONSE', null);
+    return result;
   }
 
   async getAddress(id: number): Promise<{ id: number; postcode: string }> {
     checkId(id);
-    return addressResponse(await this.jsonRequest(`addresses/${id}`, 'GET', undefined, false));
+    const result = addressResponse(await this.jsonRequest(`addresses/${id}`, 'GET', undefined, false));
+    if (result.id !== id) throw new UkrposhtaError('INVALID_RESPONSE', null);
+    return result;
   }
 
   async createClient(input: UkrposhtaClientInput): Promise<UkrposhtaRemoteClient> {
@@ -109,7 +113,11 @@ export class UkrposhtaClient {
 
   async findClientByExternalId(externalId: string): Promise<UkrposhtaRemoteClient | null> {
     checkExternalId(externalId);
-    try { return clientResponse(await this.jsonRequest(`clients/external-id/${externalId}`)); }
+    try {
+      const result = clientResponse(await this.jsonRequest(`clients/external-id/${externalId}`));
+      if (result.externalId !== externalId) throw new UkrposhtaError('INVALID_RESPONSE', null);
+      return result;
+    }
     catch (error) { if (error instanceof UkrposhtaError && error.code === 'NOT_FOUND') return null; throw error; }
   }
 
@@ -283,6 +291,7 @@ export class UkrposhtaClient {
     try {
       response = await this.fetchFn(url.toString(), {
         method: 'GET',
+        redirect: 'error',
         headers: { authorization: `Bearer ${this.config.ecomBearer}`, accept: 'application/json' },
         signal: AbortSignal.timeout(this.timeoutMs),
       });
@@ -292,7 +301,7 @@ export class UkrposhtaClient {
     }
     if (!response.ok) throw httpError(response.status);
     const payload = await safeJson(response);
-    if (!isRecord(payload) || typeof payload.uuid !== 'string') {
+    if (!isRecord(payload) || payload.uuid !== this.config.counterpartyUuid) {
       throw new UkrposhtaError('INVALID_RESPONSE', response.status);
     }
     const name = typeof payload.name === 'string' && payload.name.trim() ? payload.name.trim() : 'Контрагент Укрпошти';
