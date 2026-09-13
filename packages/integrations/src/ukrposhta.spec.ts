@@ -31,7 +31,7 @@ describe('UkrposhtaClient', () => {
     ] } })));
     const client = new integrations.UkrposhtaClient({ ...credentials, fetch: fetchFn });
     expect(typeof client.searchLocations).toBe('function');
-    await expect(client.searchLocations({ cityRef: '263:297', type: 'BRANCH', query: '430' })).resolves.toEqual([{ ref: '1', cityRef: '263:297', type: 'BRANCH', label: '43000 · Луцьк 1 · вул. Кривий Вал, 19', number: '43000' }]);
+    await expect(client.searchLocations({ cityRef: '263:297', type: 'BRANCH', query: '430' })).resolves.toEqual([{ ref: 'up:1:43000', cityRef: '263:297', type: 'BRANCH', label: '43000 · Луцьк 1 · вул. Кривий Вал, 19', number: '43000' }]);
     expect(new URL(fetchFn.mock.calls[0]![0]).searchParams.get('city_id')).toBe('297');
     expect(new URL(fetchFn.mock.calls[0]![0]).searchParams.get('region_id')).toBe('263');
   });

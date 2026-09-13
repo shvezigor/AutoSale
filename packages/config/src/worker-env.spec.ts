@@ -25,8 +25,12 @@ const validEnv = {
 };
 
 describe('parseWorkerEnv', () => {
+  it('requires explicit sandbox shipment enablement independently of directory access', () => {
+    expect(parseWorkerEnv({ ...validEnv, NOVA_POSHTA_DELIVERY_ENABLED: 'true' }).UKRPOSHTA_SANDBOX_SHIPMENTS_ENABLED).toBe(false);
+    expect(parseWorkerEnv({ ...validEnv, UKRPOSHTA_SANDBOX_SHIPMENTS_ENABLED: 'true' }).UKRPOSHTA_SANDBOX_SHIPMENTS_ENABLED).toBe(true);
+  });
   it('accepts a complete worker environment', () => {
-    expect(parseWorkerEnv(validEnv)).toEqual({ ...validEnv, HEALTH_PORT: 3002, CATALOGUE_AI_STRUCTURE_ANALYSIS: true, NOVA_POSHTA_DELIVERY_ENABLED: false });
+    expect(parseWorkerEnv(validEnv)).toEqual({ ...validEnv, HEALTH_PORT: 3002, CATALOGUE_AI_STRUCTURE_ANALYSIS: true, NOVA_POSHTA_DELIVERY_ENABLED: false, UKRPOSHTA_SANDBOX_SHIPMENTS_ENABLED: false });
   });
 
   it('accepts an explicit Nova Poshta delivery feature flag', () => {

@@ -71,6 +71,13 @@ export {
 export {
   UkrposhtaClient,
   UkrposhtaError,
+  parseUkrposhtaLocationRef,
+  type UkrposhtaShipment,
+  type UkrposhtaShipmentInput,
+  type UkrposhtaQuoteInput,
+  type UkrposhtaRemoteClient,
+  type UkrposhtaClientInput,
+  type UkrposhtaLifecycle,
   type UkrposhtaClientConfig,
   type UkrposhtaEnvironment,
   type UkrposhtaErrorCode,

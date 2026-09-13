@@ -27,6 +27,7 @@ export const workerEnvSchema = z.object({
   OPENAI_MODEL: z.string().min(1).default('gpt-5.4-mini'),
   CATALOGUE_AI_STRUCTURE_ANALYSIS: z.enum(['true', 'false']).default('true').transform((value) => value === 'true'),
   NOVA_POSHTA_DELIVERY_ENABLED: optionalBoolean,
+  UKRPOSHTA_SANDBOX_SHIPMENTS_ENABLED: optionalBoolean,
   META_APP_ID: z.string().regex(/^\d{5,32}$/),
   META_APP_SECRET: z.string().min(16),
   META_GRAPH_API_VERSION: z.string().regex(/^v\d+\.\d+$/),

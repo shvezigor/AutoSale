@@ -126,7 +126,7 @@ export const deliverySenderProfileInputSchema = z.object({
 }).strict();
 
 export const shipmentDraftInputSchema = z.object({
-  provider: z.literal('NOVA_POSHTA'),
+  provider: z.enum(['NOVA_POSHTA', 'UKRPOSHTA']),
   recipient: z.object({
     name: z.string().trim().min(2).max(120),
     phone: phoneSchema,
@@ -138,6 +138,9 @@ export const shipmentDraftInputSchema = z.object({
   codAmount: nullableCodSchema,
   description: z.string().trim().min(1).max(100),
 }).strict().superRefine((draft, context) => {
+  if (draft.provider === 'UKRPOSHTA' && (draft.destination.type !== 'BRANCH' || !/^up:\d{1,20}:\d{5}$/.test(draft.destination.locationRef))) {
+    context.addIssue({ code: 'custom', path: ['destination'], message: 'Select an exact Ukrposhta branch with postcode' });
+  }
   if (draft.codAmount !== null && draft.codAmount > draft.declaredValue) {
     context.addIssue({
       code: 'custom',
@@ -252,7 +255,7 @@ export interface ShipmentSummary {
 export type ShipmentBlockedReason = 'ORDER_NOT_APPROVED' | 'PROCUREMENT_INCOMPLETE' | 'CONNECTION_REQUIRED' | 'SENDER_PROFILE_REQUIRED';
 
 export interface ShipmentDraftPrefill {
-  provider: 'NOVA_POSHTA';
+  provider: 'NOVA_POSHTA' | 'UKRPOSHTA';
   recipient: { name: string | null; phone: string | null };
   cityHint: string | null;
   locationHint: string | null;
