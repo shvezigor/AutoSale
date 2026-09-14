@@ -54,7 +54,9 @@ describe('SettingsPage', () => {
     expect(screen.getByRole('tab', { name: /Сповіщення/ })).toHaveAttribute('aria-selected', 'true');
     expect(screen.getByRole('tab', { name: /Постачальники/ })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /Доставка/ })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Telegram' })).toBeInTheDocument();
+    const telegramChannel = screen.getByRole('button', { name: /Telegram.*Особисті сповіщення/i });
+    expect(telegramChannel).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.queryByRole('heading', { name: 'Telegram' })).not.toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Постачальник' })).not.toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Google Sheets' })).not.toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Підтвердження замовлень' })).not.toBeInTheDocument();
@@ -67,7 +69,8 @@ describe('SettingsPage', () => {
     expect(screen.queryByRole('heading', { name: 'Підключення каналів' })).not.toBeInTheDocument();
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/catalogue/sources/44444444-4444-4444-8444-444444444444');
     fireEvent.click(screen.getByRole('tab', { name: /Сповіщення/ }));
-    expect(screen.getByRole('heading', { name: 'Telegram' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /Telegram.*Особисті сповіщення/i }));
+    expect(screen.getByRole('region', { name: 'Telegram' })).toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Постачальник' })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('tab', { name: /Постачальники/ }));
     expect(screen.getByRole('heading', { name: 'Постачальник' })).toBeInTheDocument();
@@ -130,6 +133,7 @@ describe('SettingsPage', () => {
     expect(screen.queryByRole('button', { name: /Instagram/ })).not.toBeInTheDocument();
     expect(screen.queryByRole('tab', { name: /Постачальники/ })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('tab', { name: /Сповіщення/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Telegram.*Особисті сповіщення/i }));
     expect(screen.getByText('@ivan_manager')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('tab', { name: /Доставка/ }));
     expect(screen.getByRole('button', { name: /Нова Пошта/ })).toHaveAttribute('aria-expanded', 'false');

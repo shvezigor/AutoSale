@@ -14,10 +14,14 @@ type PendingAction = 'connect' | 'test' | 'unlink' | null;
 export function TelegramSettingsCard({
   initial,
   initialPreferences,
+  embedded = false,
+  onConnectionChange,
   navigate = (url) => { window.location.href = url; },
 }: {
   initial: TelegramConnectionSummary;
   initialPreferences: TelegramNotificationPreferences;
+  embedded?: boolean;
+  onConnectionChange?: (connection: TelegramConnectionSummary) => void;
   navigate?: (url: string) => void;
 }) {
   const [connection, setConnection] = useState(initial);
@@ -74,7 +78,9 @@ export function TelegramSettingsCard({
       const response = await activity.run('Відключаємо Telegram', () => mutatingFetch('/api/integrations/telegram/link', { method: 'DELETE' }));
       const payload = await jsonOrNull(response);
       if (!response.ok || !isUnlinkResponse(payload)) throw new Error('unlink failed');
-      setConnection({ ...connection, personal: { connected: false, displayName: null, username: null, linkedAt: null } });
+      const next = { ...connection, personal: { connected: false, displayName: null, username: null, linkedAt: null } };
+      setConnection(next);
+      onConnectionChange?.(next);
       setConfirmingUnlink(false);
       setMessage({ kind: 'success', text: 'Telegram відключено' });
       toast.show({ type: 'success', title: 'Telegram відключено' });
@@ -108,14 +114,14 @@ export function TelegramSettingsCard({
   const pending = pendingAction !== null;
   const status = !connection.available ? 'Недоступно' : connected ? 'Підключено' : 'Не підключено';
 
-  return <section className="settings-card telegram-connection-card" aria-label="Telegram" aria-busy={pending || undefined}>
-    <div className="settings-card-heading">
+  return <section className={`settings-card telegram-connection-card ${embedded ? 'is-embedded' : ''}`} aria-label="Telegram" aria-busy={pending || undefined}>
+    {!embedded && <div className="settings-card-heading">
       <div>
         <h2>Telegram</h2>
         <p>Отримуйте особисті сповіщення AutoSale у Telegram.</p>
       </div>
       <span className={`connection-status ${connected ? 'status-active' : 'status-not_connected'}`}>{status}</span>
-    </div>
+    </div>}
 
     {!connection.available ? <p className="telegram-connection-copy">Telegram ще не активовано для AutoSale. Зверніться до адміністратора сервісу.</p> : connected ? <>
       <dl className="telegram-connection-details">

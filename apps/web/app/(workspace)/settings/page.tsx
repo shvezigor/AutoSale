@@ -7,7 +7,7 @@ import { DemoScenarioCard } from '../../../src/components/demo-scenario-card';
 import { CatalogueSourceSettings, type CatalogueSourceConfiguration, type CatalogueSourceHealth } from '../../../src/components/catalogue-source-settings';
 import type { GoogleConnectionSummary } from '../../../src/components/google-connection-settings';
 import { SettingsTabs, type SettingsTabId } from '../../../src/components/settings-tabs';
-import { TelegramSettingsCard, type TelegramConnectionSummary } from '../../../src/components/telegram-settings-card';
+import type { TelegramConnectionSummary } from '../../../src/components/telegram-settings-card';
 import { TelegramSupplierSettings } from '../../../src/components/telegram-supplier-settings';
 import type { TelegramNotificationPreferences, TelegramSupplierSettings as TelegramSupplierConfiguration } from '../../../../../packages/contracts/src/telegram';
 import type { DeliverySettingsSummary } from '../../../src/components/delivery-settings-card';
@@ -15,6 +15,7 @@ import type { MeestSettingsSummary } from '../../../src/components/meest-setting
 import type { UkrposhtaSettingsSummary } from '../../../src/components/ukrposhta-settings-card';
 import { DeliveryCarrierHub } from '../../../src/components/delivery-carrier-hub';
 import { SocialChannelHub } from '../../../src/components/social-channel-hub';
+import { NotificationChannelHub } from '../../../src/components/notification-channel-hub';
 
 export const dynamic = 'force-dynamic';
 
@@ -117,7 +118,7 @@ function SettingsLayout({
       id: 'notifications' as const,
       label: 'Сповіщення',
       description: 'Telegram та інші канали',
-      content: <section className="settings-section"><div className="settings-section-heading"><h2>Сповіщення</h2><p>Оберіть канали, через які отримуватимете важливі події AutoSale.</p></div><TelegramSettingsCard initial={telegram} initialPreferences={telegramPreferences} /></section>,
+      content: <section className="settings-section"><div className="settings-section-heading"><h2>Сповіщення</h2><p>Оберіть канали, через які отримуватимете важливі події AutoSale.</p></div><NotificationChannelHub telegram={telegram} telegramPreferences={telegramPreferences} /></section>,
     },
     ...(supplier ? [{
       id: 'suppliers' as const,
