@@ -7,11 +7,11 @@ import { MediaService } from './media.service.js';
 
 @ApiTags('media')
 @Controller('api/media')
-@RequireMembership('MANAGER')
 export class MediaController {
   constructor(@Inject(MediaService) private readonly media: MediaService) {}
 
   @Get('instagram-profiles/:id/avatar')
+  @RequireMembership('MANAGER')
   @Header('Cache-Control', 'private, max-age=3600')
   @Header('X-Content-Type-Options', 'nosniff')
   @ApiOperation({ summary: 'Read a cached Instagram customer avatar' })
@@ -24,7 +24,18 @@ export class MediaController {
     return new StreamableFile(avatar.body, { type: avatar.contentType, disposition: 'inline' });
   }
 
+  @Get('profile/avatar')
+  @Header('Cache-Control', 'private, max-age=3600')
+  @Header('X-Content-Type-Options', 'nosniff')
+  @ApiOperation({ summary: 'Read the current user profile avatar' })
+  @ApiOkResponse({ description: 'Controlled user avatar bytes' })
+  async userAvatar(@CurrentPrincipal() principal: AuthPrincipal): Promise<StreamableFile> {
+    const avatar = await this.media.loadUserAvatar(principal.userId);
+    return new StreamableFile(avatar.body, { type: avatar.contentType, disposition: 'inline' });
+  }
+
   @Get(':id')
+  @RequireMembership('MANAGER')
   @ApiOperation({ summary: 'Read a copied conversation attachment' })
   @ApiOkResponse({ description: 'Controlled attachment bytes' })
   async get(@CurrentPrincipal() principal: AuthPrincipal, @Param('id', new ParseUUIDPipe({ version: '4' })) id: string): Promise<StreamableFile> {

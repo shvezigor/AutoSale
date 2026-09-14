@@ -40,4 +40,34 @@ describe('MediaService', () => {
       select: { avatarStorageKey: true },
     });
   });
+
+  it('loads only the current user controlled WebP avatar', async () => {
+    let query: unknown;
+    const prisma = { user: { findUnique: async (input: unknown) => {
+      query = input;
+      return { avatarStorageKey: 'users/user-a/avatars/avatar.webp' };
+    } } };
+    const storage = { get: async () => ({ body: Uint8Array.from([82, 73, 70, 70]), contentType: 'image/webp' }) };
+    const service = new MediaService(prisma as never, storage as never);
+
+    await expect(service.loadUserAvatar('user-a')).resolves.toMatchObject({ contentType: 'image/webp' });
+    expect(query).toEqual({
+      where: { id: 'user-a' },
+      select: { avatarStorageKey: true },
+    });
+  });
+
+  it('does not serve a missing or unexpectedly typed user avatar', async () => {
+    const missing = new MediaService(
+      { user: { findUnique: async () => ({ avatarStorageKey: null }) } } as never,
+      { get: async () => ({ body: new Uint8Array(), contentType: 'image/webp' }) } as never,
+    );
+    await expect(missing.loadUserAvatar('user-a')).rejects.toBeInstanceOf(NotFoundException);
+
+    const unexpectedType = new MediaService(
+      { user: { findUnique: async () => ({ avatarStorageKey: 'users/user-a/avatars/avatar.webp' }) } } as never,
+      { get: async () => ({ body: new Uint8Array(), contentType: 'text/html' }) } as never,
+    );
+    await expect(unexpectedType.loadUserAvatar('user-a')).rejects.toBeInstanceOf(NotFoundException);
+  });
 });

@@ -36,4 +36,15 @@ export class MediaService {
     if (!profile?.avatarStorageKey) throw new NotFoundException('Profile avatar not found');
     return this.storage.get(profile.avatarStorageKey);
   }
+
+  async loadUserAvatar(userId: string): Promise<{ body: Uint8Array; contentType: string }> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { avatarStorageKey: true },
+    });
+    if (!user?.avatarStorageKey) throw new NotFoundException('User avatar not found');
+    const avatar = await this.storage.get(user.avatarStorageKey);
+    if (avatar.contentType !== 'image/webp') throw new NotFoundException('User avatar not found');
+    return avatar;
+  }
 }

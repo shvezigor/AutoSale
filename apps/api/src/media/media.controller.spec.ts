@@ -3,6 +3,7 @@ import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { AUTH_ACCESS_KEY } from '../auth/auth.decorators.js';
 import { MediaController } from './media.controller.js';
 import { MediaService } from './media.service.js';
 
@@ -13,6 +14,7 @@ describe('MediaController', () => {
   let app: INestApplication | undefined;
   const load = vi.fn();
   const loadProfileAvatar = vi.fn();
+  const loadUserAvatar = vi.fn();
 
   beforeEach(async () => {
     load.mockReset().mockResolvedValue({
@@ -23,9 +25,13 @@ describe('MediaController', () => {
       body: Uint8Array.from([255, 216, 255]),
       contentType: 'image/jpeg',
     });
+    loadUserAvatar.mockReset().mockResolvedValue({
+      body: Uint8Array.from([82, 73, 70, 70]),
+      contentType: 'image/webp',
+    });
     const moduleRef = await Test.createTestingModule({
       controllers: [MediaController],
-      providers: [{ provide: MediaService, useValue: { load, loadProfileAvatar } }],
+      providers: [{ provide: MediaService, useValue: { load, loadProfileAvatar, loadUserAvatar } }],
     }).compile();
     app = moduleRef.createNestApplication();
     app.use((request: { principal?: unknown }, _response: unknown, next: () => void) => {
@@ -55,5 +61,19 @@ describe('MediaController', () => {
       .expect('Cache-Control', /private/);
 
     expect(loadProfileAvatar).toHaveBeenCalledWith(tenantId, attachmentId);
+  });
+
+  it('serves the current user avatar without requiring tenant membership', async () => {
+    await request(app!.getHttpServer())
+      .get('/api/media/profile/avatar?v=checksum')
+      .expect(200)
+      .expect('Content-Type', /image\/webp/)
+      .expect('Cache-Control', /private/)
+      .expect('X-Content-Type-Options', 'nosniff');
+
+    expect(loadUserAvatar).toHaveBeenCalledWith('user');
+    expect(Reflect.getMetadata(AUTH_ACCESS_KEY, MediaController)).toBeUndefined();
+    expect(Reflect.getMetadata(AUTH_ACCESS_KEY, MediaController.prototype.profileAvatar)).toBe('TENANT_MANAGER');
+    expect(Reflect.getMetadata(AUTH_ACCESS_KEY, MediaController.prototype.get)).toBe('TENANT_MANAGER');
   });
 });

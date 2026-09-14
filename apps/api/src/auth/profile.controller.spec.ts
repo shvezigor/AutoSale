@@ -92,4 +92,46 @@ describe('ProfileController', () => {
     expect(consume).not.toHaveBeenCalled();
     expect(changePassword).not.toHaveBeenCalled();
   });
+
+  it('rate limits and delegates one avatar upload for the current user', async () => {
+    const replaceAvatar = vi.fn(async () => ({ userId: principal.userId }));
+    const consume = vi.fn(async () => undefined);
+    const controller = new ProfileController({ replaceAvatar } as never, { consume } as never);
+    const file = {
+      buffer: Buffer.from([137, 80, 78, 71]),
+      mimetype: 'image/png',
+      originalname: 'avatar.png',
+      size: 4,
+    };
+
+    await controller.replaceAvatar(principal, file, { ip: '127.0.0.1', headers: {}, socket: {} } as never);
+
+    expect(consume).toHaveBeenCalledWith('profile-avatar', '127.0.0.1', principal.email, 20, 3600);
+    expect(replaceAvatar).toHaveBeenCalledWith(principal, file);
+  });
+
+  it('rejects a missing avatar before storage delegation', async () => {
+    const replaceAvatar = vi.fn();
+    const consume = vi.fn();
+    const controller = new ProfileController({ replaceAvatar } as never, { consume } as never);
+
+    await expect(controller.replaceAvatar(
+      principal,
+      undefined,
+      { ip: '127.0.0.1', headers: {}, socket: {} } as never,
+    )).rejects.toThrow('PROFILE_AVATAR_REQUIRED');
+    expect(consume).not.toHaveBeenCalled();
+    expect(replaceAvatar).not.toHaveBeenCalled();
+  });
+
+  it('rate limits avatar removal and delegates to the current user scope', async () => {
+    const removeAvatar = vi.fn(async () => ({ userId: principal.userId }));
+    const consume = vi.fn(async () => undefined);
+    const controller = new ProfileController({ removeAvatar } as never, { consume } as never);
+
+    await controller.removeAvatar(principal, { ip: '127.0.0.1', headers: {}, socket: {} } as never);
+
+    expect(consume).toHaveBeenCalledWith('profile-avatar', '127.0.0.1', principal.email, 20, 3600);
+    expect(removeAvatar).toHaveBeenCalledWith(principal);
+  });
 });
