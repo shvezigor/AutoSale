@@ -6,7 +6,7 @@ import { TelegramController } from './telegram.controller.js';
 
 const manager: AuthPrincipal = {
   userId: 'manager', email: 'manager@example.com', name: 'Manager', platformRole: 'USER',
-  tenantId: 'tenant', membershipRole: 'MANAGER', sessionId: 'session',
+  tenantId: 'tenant', membershipRole: 'MANAGER', locale: 'uk', avatarUrl: null, sessionId: 'session',
 };
 const owner: AuthPrincipal = { ...manager, userId: 'owner', membershipRole: 'OWNER' };
 

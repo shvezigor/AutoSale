@@ -22,6 +22,8 @@ describe('InstagramOAuthController', () => {
     platformRole: 'USER',
     tenantId: 'tenant-a',
     membershipRole: 'OWNER',
+    locale: 'uk',
+    avatarUrl: null,
     sessionId: 'session-owner',
   };
   const manager: AuthPrincipal = { ...owner, userId: 'manager-a', membershipRole: 'MANAGER', sessionId: 'session-manager' };

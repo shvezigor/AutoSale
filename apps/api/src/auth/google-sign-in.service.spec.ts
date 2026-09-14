@@ -11,6 +11,7 @@ const identity = { subject: 'google-subject', email: 'owner@example.com', name: 
 const user = {
   id: '10000000-0000-4000-8000-000000000001', email: identity.email, name: identity.name,
   platformRole: 'USER' as const, status: 'ACTIVE', emailVerifiedAt: now,
+  locale: 'en', avatarStorageKey: 'users/google-avatar.webp', avatarChecksum: 'google-avatar-v1',
   memberships: [{ tenantId: '20000000-0000-4000-8000-000000000001', role: 'OWNER' as const, status: 'ACTIVE' }],
 };
 
@@ -19,7 +20,7 @@ function setup(overrides: Record<string, unknown> = {}) {
     googleIdentity: {
       findUnique: vi.fn(async () => null), create: vi.fn(async () => ({})), update: vi.fn(async () => ({})),
     },
-    user: { findUnique: vi.fn(async () => null), create: vi.fn(async () => user) },
+    user: { findUnique: vi.fn(async () => null), create: vi.fn(async () => user), update: vi.fn(async () => user) },
     tenant: { create: vi.fn(async () => ({ id: user.memberships[0]!.tenantId })) },
     tenantMembership: { create: vi.fn(async () => user.memberships[0]) },
     securityAuditLog: { create: vi.fn(async () => ({})) },
@@ -51,7 +52,11 @@ describe('GoogleSignInService', () => {
 
     expect(result).toMatchObject({ kind: 'SESSION', returnPath: '/catalogue', sessionResult: { rawToken: 'session-token' } });
     expect(fixture.prisma.googleIdentity.update).toHaveBeenCalledWith({ where: { googleSubject: identity.subject }, data: { lastUsedAt: now } });
+    expect(fixture.prisma.user.update).toHaveBeenCalledWith({ where: { id: user.id }, data: { lastLoginAt: now } });
     expect(fixture.sessions.create).toHaveBeenCalledWith(user.id, user.memberships[0]!.tenantId, {});
+    expect(result).toMatchObject({ sessionResult: { session: {
+      locale: 'en', avatarUrl: '/api/media/profile/avatar?v=google-avatar-v1',
+    } } });
   });
 
   it('auto-links a new subject only to an active matching verified email and audits it', async () => {
@@ -120,6 +125,7 @@ describe('GoogleSignInService', () => {
     await expect(disabledService.start()).rejects.toThrow('Google Sign-In is unavailable');
     await expect(disabled.service.completeCallback({ state: 'state', denied: true }, {})).rejects.toThrow('Google Sign-In was cancelled');
     expect(disabled.prisma.user.create).not.toHaveBeenCalled();
+    expect(disabled.prisma.user.update).not.toHaveBeenCalled();
     expect(disabled.provider.exchangeAndVerify).not.toHaveBeenCalled();
   });
 });

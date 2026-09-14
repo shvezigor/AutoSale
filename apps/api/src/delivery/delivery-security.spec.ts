@@ -10,7 +10,7 @@ const orderId = '33333333-3333-4333-8333-333333333333';
 const shipmentId = '44444444-4444-4444-8444-444444444444';
 const principalB: AuthPrincipal = {
   userId: '55555555-5555-4555-8555-555555555555', email: 'manager-b@example.com', name: 'Manager B',
-  platformRole: 'USER', tenantId: tenantB, membershipRole: 'MANAGER', sessionId: 'session-b',
+  platformRole: 'USER', tenantId: tenantB, membershipRole: 'MANAGER', locale: 'uk', avatarUrl: null, sessionId: 'session-b',
 };
 const draft = {
   provider: 'NOVA_POSHTA' as const,

@@ -25,7 +25,7 @@ const messageId = '33333333-3333-4333-8333-333333333333';
 const tenantId = '22222222-2222-4222-8222-222222222222';
 const owner: AuthPrincipal = {
   userId: 'owner-user', email: 'owner@example.com', name: 'Owner', platformRole: 'USER',
-  tenantId, membershipRole: 'OWNER', sessionId: 'owner-session',
+  tenantId, membershipRole: 'OWNER', locale: 'uk', avatarUrl: null, sessionId: 'owner-session',
 };
 const manager: AuthPrincipal = {
   ...owner, userId: 'manager-user', email: 'manager@example.com', name: 'Manager',

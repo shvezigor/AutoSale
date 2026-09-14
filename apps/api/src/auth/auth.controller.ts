@@ -84,6 +84,7 @@ export class AuthController {
     return {
       userId: principal.userId, email: principal.email, name: principal.name, platformRole: principal.platformRole,
       tenantId: principal.tenantId, membershipRole: principal.membershipRole,
+      locale: principal.locale, avatarUrl: principal.avatarUrl,
     };
   }
 

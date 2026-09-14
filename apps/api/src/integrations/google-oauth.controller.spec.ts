@@ -14,7 +14,7 @@ import { GoogleOAuthService } from './google-oauth.service.js';
 import { GoogleCredentialCleanupService } from './google-credential-cleanup.service.js';
 
 describe('GoogleOAuthController', () => {
-  const owner: AuthPrincipal = { userId: 'owner', email: 'o@example.com', name: 'Owner', platformRole: 'USER', tenantId: 'tenant', membershipRole: 'OWNER', sessionId: 'owner-session' };
+  const owner: AuthPrincipal = { userId: 'owner', email: 'o@example.com', name: 'Owner', platformRole: 'USER', tenantId: 'tenant', membershipRole: 'OWNER', locale: 'uk', avatarUrl: null, sessionId: 'owner-session' };
   const manager: AuthPrincipal = { ...owner, userId: 'manager', membershipRole: 'MANAGER', sessionId: 'manager-session' };
   const csrf = new CsrfService('p'.repeat(32));
   const start = vi.fn();

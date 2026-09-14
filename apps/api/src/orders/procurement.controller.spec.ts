@@ -19,6 +19,8 @@ const manager: AuthPrincipal = {
   platformRole: 'USER',
   tenantId,
   membershipRole: 'MANAGER',
+  locale: 'uk',
+  avatarUrl: null,
   sessionId: 'manager-session',
 };
 const outsider: AuthPrincipal = {

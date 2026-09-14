@@ -37,10 +37,11 @@ describe('AuthService', () => {
   });
 
   it('rejects password login for a Google-only account without attempting password verification', async () => {
+    const update = vi.fn();
     const prisma = { user: { findUnique: vi.fn(async () => ({
       id: '10000000-0000-4000-8000-000000000002', email: 'owner@example.com', name: 'Owner',
       passwordHash: null, status: 'ACTIVE', emailVerifiedAt: new Date(), platformRole: 'USER', memberships: [],
-    })) } } as unknown as PrismaClient;
+    })), update } } as unknown as PrismaClient;
     const crypto = new CryptoService();
     const verifyPassword = vi.spyOn(crypto, 'verifyPassword');
     const email: EmailDelivery = { sendVerification: vi.fn(), sendPasswordReset: vi.fn(), sendInvitation: vi.fn() };
@@ -49,5 +50,48 @@ describe('AuthService', () => {
     await expect(auth.login({ email: 'owner@example.com', password: 'correct horse battery' }, {}))
       .rejects.toThrow('Invalid credentials');
     expect(verifyPassword).not.toHaveBeenCalled();
+    expect(update).not.toHaveBeenCalled();
+  });
+
+  it('records a successful password login and returns profile session fields', async () => {
+    const loggedInAt = new Date('2026-09-14T15:00:00.000Z');
+    const user = {
+      id: '10000000-0000-4000-8000-000000000002',
+      email: 'owner@example.com',
+      name: 'Owner',
+      passwordHash: 'stored-hash',
+      status: 'ACTIVE',
+      emailVerifiedAt: new Date('2026-09-01T00:00:00.000Z'),
+      platformRole: 'USER',
+      locale: 'en',
+      avatarStorageKey: 'users/avatar.webp',
+      avatarChecksum: 'avatar-v2',
+      memberships: [{ tenantId: 'tenant-1', role: 'OWNER', status: 'ACTIVE' }],
+    } as const;
+    const update = vi.fn(async () => user);
+    const prisma = { user: { findUnique: vi.fn(async () => user), update } } as unknown as PrismaClient;
+    const crypto = { verifyPassword: vi.fn(async () => true) };
+    const sessions = { create: vi.fn(async () => ({
+      rawToken: 'raw-session',
+      expiresAt: new Date('2026-10-14T15:00:00.000Z'),
+    })) };
+    const email: EmailDelivery = { sendVerification: vi.fn(), sendPasswordReset: vi.fn(), sendInvitation: vi.fn() };
+    const auth = new AuthService(
+      prisma,
+      crypto as never,
+      sessions as never,
+      email,
+      't'.repeat(32),
+      'http://localhost',
+      () => loggedInAt,
+    );
+
+    const result = await auth.login({ email: user.email, password: 'correct horse battery' }, {});
+
+    expect(update).toHaveBeenCalledWith({ where: { id: user.id }, data: { lastLoginAt: loggedInAt } });
+    expect(result.session).toMatchObject({
+      locale: 'en',
+      avatarUrl: '/api/media/profile/avatar?v=avatar-v2',
+    });
   });
 });

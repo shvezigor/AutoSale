@@ -1,6 +1,6 @@
 import type { ApiEnv } from '@autosale/config/api-env';
 import { createPrismaClient } from '@autosale/database';
-import { GoogleSignInClient } from '@autosale/integrations';
+import { GoogleSignInClient, S3ObjectStorage } from '@autosale/integrations';
 import { DynamicModule, Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import Redis from 'ioredis';
@@ -15,6 +15,8 @@ import { GoogleSignInController, GOOGLE_SIGN_IN_HTTP_CONFIG } from './google-sig
 import { GoogleSignInService } from './google-sign-in.service.js';
 import { GoogleSignInStateService } from './google-sign-in-state.service.js';
 import { RateLimitService, RedisRateLimitStore } from './rate-limit.service.js';
+import { ProfileController } from './profile.controller.js';
+import { ProfileService } from './profile.service.js';
 import { SessionService } from './session.service.js';
 
 @Module({})
@@ -37,15 +39,25 @@ export class AuthModule {
     const googleSignIn = new GoogleSignInService(
       prisma, googleSignInClient, googleSignInState, sessions, env.GOOGLE_SIGN_IN_ENABLED,
     );
+    const storage = new S3ObjectStorage({
+      endpoint: env.S3_ENDPOINT,
+      region: env.S3_REGION,
+      bucket: env.S3_BUCKET,
+      accessKeyId: env.S3_ACCESS_KEY_ID,
+      secretAccessKey: env.S3_SECRET_ACCESS_KEY,
+      forcePathStyle: true,
+    });
+    const profiles = new ProfileService(prisma, crypto, sessions, storage);
     return {
       module: AuthModule,
-      controllers: [AuthController, GoogleSignInController],
+      controllers: [AuthController, GoogleSignInController, ProfileController],
       providers: [
         { provide: AuthService, useValue: auth },
         { provide: GoogleSignInService, useValue: googleSignIn },
         { provide: SessionService, useValue: sessions },
         { provide: CsrfService, useValue: csrf },
         { provide: RateLimitService, useValue: rateLimit },
+        { provide: ProfileService, useValue: profiles },
         AuthGuard,
         { provide: APP_GUARD, useExisting: AuthGuard },
         { provide: AUTH_HTTP_CONFIG, useValue: { cookieName: env.SESSION_COOKIE_NAME, production: env.NODE_ENV === 'production' } },

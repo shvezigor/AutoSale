@@ -61,6 +61,10 @@ export class SessionService {
       platformRole: session.user.platformRole,
       tenantId: session.tenantId,
       membershipRole: membership?.role ?? null,
+      locale: session.user.locale === 'en' ? 'en' : 'uk',
+      avatarUrl: session.user.avatarStorageKey
+        ? `/api/media/profile/avatar?v=${encodeURIComponent(session.user.avatarChecksum ?? '1')}`
+        : null,
       sessionId: session.id,
     };
   }
@@ -72,6 +76,14 @@ export class SessionService {
   async revokeAllForUser(userId: string): Promise<number> {
     const result = await this.prisma.session.updateMany({
       where: { userId, revokedAt: null },
+      data: { revokedAt: this.now() },
+    });
+    return result.count;
+  }
+
+  async revokeOthersForUser(userId: string, currentSessionId: string): Promise<number> {
+    const result = await this.prisma.session.updateMany({
+      where: { userId, id: { not: currentSessionId }, revokedAt: null },
       data: { revokedAt: this.now() },
     });
     return result.count;

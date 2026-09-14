@@ -143,11 +143,16 @@ export class GoogleSignInService {
   private async createSessionResult(user: SessionUser, metadata: SessionMetadata): Promise<SessionResult> {
     const membership = activeMembership(user);
     const issued = await this.sessions.create(user.id, membership?.tenantId ?? null, metadata);
+    await this.prisma.user.update({ where: { id: user.id }, data: { lastLoginAt: this.now() } });
     return {
       rawToken: issued.rawToken, expiresAt: issued.expiresAt,
       session: {
         userId: user.id, email: user.email, name: user.name, platformRole: user.platformRole,
         tenantId: membership?.tenantId ?? null, membershipRole: membership?.role ?? null,
+        locale: user.locale === 'en' ? 'en' : 'uk',
+        avatarUrl: user.avatarStorageKey
+          ? `/api/media/profile/avatar?v=${encodeURIComponent(user.avatarChecksum ?? '1')}`
+          : null,
       },
     };
   }
@@ -158,6 +163,9 @@ type SessionUser = {
   email: string;
   name: string;
   platformRole: 'USER' | 'PLATFORM_ADMIN';
+  locale: string;
+  avatarStorageKey: string | null;
+  avatarChecksum: string | null;
   memberships: Array<{ tenantId: string; role: 'OWNER' | 'MANAGER'; status: string }>;
 };
 
