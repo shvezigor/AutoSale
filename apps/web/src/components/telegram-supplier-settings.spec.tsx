@@ -36,4 +36,21 @@ describe('TelegramSupplierSettings', () => {
     expect(screen.getByText('Telegram Business')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Додати резервну групу' })).toBeInTheDocument();
   });
+
+  it('returns to the supplier tab after opening a reserve group', async () => {
+    const navigate = vi.fn();
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ token: 'csrf-token' }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ url: 'https://t.me/SalesAitoBot?startgroup=safe_token' }) });
+    vi.stubGlobal('fetch', fetchMock);
+    render(<ToastProvider><ActivityProvider><TelegramSupplierSettings initial={initial} navigate={navigate} /></ActivityProvider></ToastProvider>);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Додати резервну групу' }));
+
+    await waitFor(() => expect(navigate).toHaveBeenCalledWith('https://t.me/SalesAitoBot?startgroup=safe_token'));
+    expect(fetchMock).toHaveBeenLastCalledWith('/api/integrations/telegram/link', expect.objectContaining({
+      method: 'POST',
+      body: JSON.stringify({ purpose: 'SUPPLIER_GROUP', returnPath: '/settings?tab=suppliers' }),
+    }));
+  });
 });

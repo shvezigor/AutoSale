@@ -26,7 +26,13 @@ export default async function SettingsPage({ searchParams = Promise.resolve({}) 
   const pickerAction = textParam(query.action);
   const initialTab: SettingsTabId = requestedTab === 'google' || requestedTab === 'data'
     ? 'data'
-    : requestedTab === 'orders' ? 'orders' : requestedTab === 'telegram' ? 'telegram' : requestedTab === 'delivery' ? 'delivery' : 'social';
+    : requestedTab === 'orders'
+      ? 'orders'
+      : requestedTab === 'telegram' || requestedTab === 'notifications'
+        ? 'notifications'
+        : requestedTab === 'suppliers'
+          ? 'suppliers'
+          : requestedTab === 'delivery' ? 'delivery' : 'social';
   const [instagramResponse, googleResponse, telegramResponse, telegramPreferencesResponse, deliveryResponse, meestResponse, ukrposhtaResponse] = await Promise.all([
     authenticatedApiFetch('/api/integrations/instagram'),
     authenticatedApiFetch('/api/integrations/google'),
@@ -103,16 +109,22 @@ function SettingsLayout({
   const tabs = [
     {
       id: 'social' as const,
-      label: 'Соцмережі',
-      description: 'Instagram',
+      label: 'Соцмережі / клієнти',
+      description: 'Instagram та інші канали',
       content: <section className="settings-section"><div className="settings-section-heading"><h2>Підключення каналів</h2><p>Керуйте каналами, з яких AutoSale отримує діалоги та замовлення.</p></div><SocialChannelHub instagram={instagram} membershipRole={session.membershipRole} /></section>,
     },
     {
-      id: 'telegram' as const,
-      label: 'Telegram',
-      description: 'Особисті сповіщення',
-      content: <section className="settings-section"><div className="settings-section-heading"><h2>Telegram</h2><p>Підключіть особисті сповіщення та виберіть чат постачальника.</p></div><TelegramSettingsCard initial={telegram} initialPreferences={telegramPreferences} />{supplier && <TelegramSupplierSettings initial={supplier} />}</section>,
+      id: 'notifications' as const,
+      label: 'Сповіщення',
+      description: 'Telegram та інші канали',
+      content: <section className="settings-section"><div className="settings-section-heading"><h2>Сповіщення</h2><p>Оберіть канали, через які отримуватимете важливі події AutoSale.</p></div><TelegramSettingsCard initial={telegram} initialPreferences={telegramPreferences} /></section>,
     },
+    ...(supplier ? [{
+      id: 'suppliers' as const,
+      label: 'Постачальники',
+      description: 'Замовлення та канали зв’язку',
+      content: <section className="settings-section"><div className="settings-section-heading"><h2>Робота з постачальниками</h2><p>Налаштуйте канали, через які передаватимете постачальникам підтверджені замовлення.</p></div><TelegramSupplierSettings initial={supplier} /></section>,
+    }] : []),
     {
       id: 'delivery' as const,
       label: 'Доставка',

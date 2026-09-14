@@ -37,7 +37,7 @@ export function TelegramSettingsCard({
       const response = await activity.run('Відкриваємо Telegram', () => mutatingFetch('/api/integrations/telegram/link', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ purpose: 'PERSONAL', returnPath: '/settings?tab=telegram' }),
+        body: JSON.stringify({ purpose: 'PERSONAL', returnPath: '/settings?tab=notifications' }),
       }));
       const payload = await jsonOrNull(response);
       if (!response.ok || !isTelegramLink(payload)) throw new Error('link failed');

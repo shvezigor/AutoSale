@@ -45,7 +45,7 @@ describe('TelegramSettingsCard', () => {
     await waitFor(() => expect(navigate).toHaveBeenCalledWith('https://t.me/AutoSaleBot?start=safe_token'));
     expect(fetchMock).toHaveBeenLastCalledWith('/api/integrations/telegram/link', expect.objectContaining({
       method: 'POST',
-      body: JSON.stringify({ purpose: 'PERSONAL', returnPath: '/settings?tab=telegram' }),
+      body: JSON.stringify({ purpose: 'PERSONAL', returnPath: '/settings?tab=notifications' }),
       headers: expect.objectContaining({ 'x-csrf-token': 'csrf-token' }),
     }));
   });

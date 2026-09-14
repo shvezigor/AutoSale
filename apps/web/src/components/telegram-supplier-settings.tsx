@@ -45,7 +45,7 @@ export function TelegramSupplierSettings({
     try {
       const response = await activity.run('Відкриваємо Telegram', () => mutatingFetch('/api/integrations/telegram/link', {
         method: 'POST', headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ purpose: 'SUPPLIER_GROUP', returnPath: '/settings?tab=telegram' }),
+        body: JSON.stringify({ purpose: 'SUPPLIER_GROUP', returnPath: '/settings?tab=suppliers' }),
       }));
       const payload = await response.json() as { url?: string };
       if (!response.ok || !payload.url) throw new Error('group link failed');

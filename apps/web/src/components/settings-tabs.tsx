@@ -2,7 +2,7 @@
 
 import { type KeyboardEvent, type ReactNode, useEffect, useRef, useState } from 'react';
 
-export type SettingsTabId = 'social' | 'telegram' | 'delivery' | 'data' | 'orders';
+export type SettingsTabId = 'social' | 'notifications' | 'suppliers' | 'delivery' | 'data' | 'orders';
 
 type SettingsTab = {
   id: SettingsTabId;
@@ -17,8 +17,9 @@ export function SettingsTabs({ initialTab = 'social', tabs }: { initialTab?: Set
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
   useEffect(() => {
-    const legacyHash = window.location.hash.slice(1) as SettingsTabId;
-    if (tabs.some((tab) => tab.id === legacyHash)) setActiveTab(legacyHash);
+    const hash = window.location.hash.slice(1);
+    const requestedTab = hash === 'telegram' ? 'notifications' : hash as SettingsTabId;
+    if (tabs.some((tab) => tab.id === requestedTab)) setActiveTab(requestedTab);
   }, [tabs]);
 
   function selectTab(id: SettingsTabId) {

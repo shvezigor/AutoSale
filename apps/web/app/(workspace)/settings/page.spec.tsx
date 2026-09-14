@@ -47,12 +47,15 @@ describe('SettingsPage', () => {
       .mockResolvedValueOnce({ ok: true, json: async () => ([{ id: '44444444-4444-4444-8444-444444444444', type: 'GOOGLE_SHEETS', displayName: 'Каталог Google Sheets', status: 'PENDING', lastSyncedAt: null, lastErrorSummary: null, updatedAt: '2026-09-01T08:00:00.000Z' }]) })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ id: '44444444-4444-4444-8444-444444444444', type: 'GOOGLE_SHEETS', displayName: 'Каталог Google Sheets', status: 'PENDING', lastSyncedAt: null, lastErrorSummary: null, updatedAt: '2026-09-01T08:00:00.000Z', spreadsheetId: 'sheet-id', sheetName: 'Товари', syncSchedule: 'DAILY', serviceAccountEmail: 'autosale@example.iam.gserviceaccount.com', authorizationAction: 'SHARE_SPREADSHEET' }) });
 
-    render(await WorkspaceLayout({ children: await SettingsPage() }));
+    render(await WorkspaceLayout({ children: await SettingsPage({ searchParams: Promise.resolve({ tab: 'telegram' }) }) }));
 
     expect(screen.getByRole('tablist', { name: 'Розділи налаштувань' })).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: /Соцмережі/ })).toHaveAttribute('aria-selected', 'true');
-    expect(screen.getByRole('tab', { name: /Telegram/ })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /Соцмережі \/ клієнти/ })).toHaveAttribute('aria-selected', 'false');
+    expect(screen.getByRole('tab', { name: /Сповіщення/ })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByRole('tab', { name: /Постачальники/ })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /Доставка/ })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Telegram' })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Постачальник' })).not.toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Google Sheets' })).not.toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Підтвердження замовлень' })).not.toBeInTheDocument();
 
@@ -63,7 +66,10 @@ describe('SettingsPage', () => {
     expect(screen.queryByRole('heading', { name: 'Google-акаунт' })).not.toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Підключення каналів' })).not.toBeInTheDocument();
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/catalogue/sources/44444444-4444-4444-8444-444444444444');
-    fireEvent.click(screen.getByRole('tab', { name: /Telegram/ }));
+    fireEvent.click(screen.getByRole('tab', { name: /Сповіщення/ }));
+    expect(screen.getByRole('heading', { name: 'Telegram' })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Постачальник' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('tab', { name: /Постачальники/ }));
     expect(screen.getByRole('heading', { name: 'Постачальник' })).toBeInTheDocument();
   });
 
@@ -122,7 +128,8 @@ describe('SettingsPage', () => {
     fireEvent.click(screen.getByRole('tab', { name: /Дані/ }));
     expect(screen.getByRole('heading', { name: 'Дані та синхронізація' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /Instagram/ })).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole('tab', { name: /Telegram/ }));
+    expect(screen.queryByRole('tab', { name: /Постачальники/ })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('tab', { name: /Сповіщення/ }));
     expect(screen.getByText('@ivan_manager')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('tab', { name: /Доставка/ }));
     expect(screen.getByRole('button', { name: /Нова Пошта/ })).toHaveAttribute('aria-expanded', 'false');
