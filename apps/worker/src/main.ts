@@ -50,6 +50,7 @@ import { UkrposhtaClient } from '@autosale/integrations';
 import { ShipmentReconciler } from './delivery/shipment-reconciler.js';
 import { ShipmentStatusService } from './delivery/shipment-status.service.js';
 import { UkrposhtaTrackingService } from './delivery/ukrposhta-tracking.service.js';
+import { UserAvatarCleanupReconciler } from './profile/user-avatar-cleanup.reconciler.js';
 
 async function bootstrap(): Promise<void> {
   const env = parseWorkerEnv(process.env);
@@ -471,6 +472,7 @@ async function bootstrap(): Promise<void> {
   const catalogueScheduler = new CatalogueSyncScheduler(prisma, catalogueQueue);
   const sheetsProcessor = googleSheets || oauthSheets ? new GoogleSheetsSyncProcessor(prisma, googleSheets, oauthSheets, workerNotifications) : undefined;
   const notificationRetention = new NotificationRetentionReconciler(prisma as never);
+  const userAvatarCleanup = new UserAvatarCleanupReconciler(prisma, storage);
   let polling = false;
   const pollExports = async (): Promise<void> => {
     if (polling) return;
@@ -588,6 +590,39 @@ async function bootstrap(): Promise<void> {
     }
   };
   const notificationRetentionTimer = setInterval(() => void reconcileNotificationRetention(), 24 * 60 * 60_000);
+  let reconcilingUserAvatars = false;
+  const reconcileUserAvatars = async (): Promise<void> => {
+    if (reconcilingUserAvatars) return;
+    reconcilingUserAvatars = true;
+    try {
+      const result = await userAvatarCleanup.runOnce();
+      metrics.set('autosale_queue_backlog', result.retried, { queue: 'user_avatar_cleanup' });
+      if (result.deleted > 0 || result.deadLettered > 0) {
+        logger.info('user_avatar_cleanup_completed', {
+          correlationId: 'system:user-avatar-cleanup',
+          ...result,
+        });
+      }
+      if (result.deadLettered > 0) {
+        metrics.increment('autosale_operations_total', {
+          operation: 'user_avatar_cleanup',
+          result: 'failure',
+        }, result.deadLettered);
+      }
+    } catch (error) {
+      metrics.increment('autosale_operations_total', {
+        operation: 'user_avatar_cleanup',
+        result: 'failure',
+      });
+      logger.warn('user_avatar_cleanup_failed', {
+        correlationId: 'system:user-avatar-cleanup',
+        errorCode: error instanceof Error ? error.name : 'UNKNOWN',
+      });
+    } finally {
+      reconcilingUserAvatars = false;
+    }
+  };
+  const userAvatarCleanupTimer = setInterval(() => void reconcileUserAvatars(), 60_000);
   let reconcilingTelegramDeliveries = false;
   const reconcileTelegramDeliveries = async (): Promise<void> => {
     if (!telegramDeliveryReconciler || reconcilingTelegramDeliveries) return;
@@ -647,6 +682,7 @@ async function bootstrap(): Promise<void> {
   void reconcileInstagramMessages();
   void scheduleCatalogueSources();
   void reconcileNotificationRetention();
+  void reconcileUserAvatars();
   void reconcileTelegramDeliveries();
   void reconcileProcurementBackfill();
   void reconcileShipments();
@@ -661,6 +697,7 @@ async function bootstrap(): Promise<void> {
     clearInterval(instagramMessageReconcileTimer);
     clearInterval(catalogueScheduleTimer);
     clearInterval(notificationRetentionTimer);
+    clearInterval(userAvatarCleanupTimer);
     if (telegramDeliveryTimer) clearInterval(telegramDeliveryTimer);
     clearInterval(procurementBackfillTimer);
     clearInterval(shipmentReconcileTimer);
