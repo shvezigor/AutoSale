@@ -50,6 +50,9 @@ describe('SettingsPage', () => {
     render(await WorkspaceLayout({ children: await SettingsPage({ searchParams: Promise.resolve({ tab: 'telegram' }) }) }));
 
     expect(screen.getByRole('tablist', { name: 'Розділи налаштувань' })).toBeInTheDocument();
+    expect(screen.getAllByRole('tab').map((tab) => tab.querySelector('span')?.textContent)).toEqual([
+      'Дані', 'Соцмережі / клієнти', 'Замовлення', 'Постачальники', 'Доставка', 'Сповіщення',
+    ]);
     expect(screen.getByRole('tab', { name: /Соцмережі \/ клієнти/ })).toHaveAttribute('aria-selected', 'false');
     expect(screen.getByRole('tab', { name: /Сповіщення/ })).toHaveAttribute('aria-selected', 'true');
     expect(screen.getByRole('tab', { name: /Постачальники/ })).toBeInTheDocument();
@@ -130,6 +133,7 @@ describe('SettingsPage', () => {
     render(await WorkspaceLayout({ children: await SettingsPage() }));
 
     expect(authenticatedApiFetch).toHaveBeenCalledTimes(7);
+    expect(screen.getByRole('tab', { name: /Дані/ })).toHaveAttribute('aria-selected', 'true');
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/integrations/instagram');
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/integrations/google');
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/integrations/telegram');
@@ -137,6 +141,7 @@ describe('SettingsPage', () => {
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/integrations/delivery');
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/integrations/delivery/meest');
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/integrations/delivery/ukrposhta');
+    fireEvent.click(screen.getByRole('tab', { name: /Соцмережі \/ клієнти/ }));
     expect(screen.getByRole('button', { name: /Instagram.*Активне/ })).toHaveAttribute('aria-expanded', 'false');
     expect(screen.queryByText('@autosale_store')).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /Instagram.*Активне/ }));

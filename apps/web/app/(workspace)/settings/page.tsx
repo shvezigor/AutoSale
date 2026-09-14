@@ -28,13 +28,15 @@ export default async function SettingsPage({ searchParams = Promise.resolve({}) 
   const pickerAction = textParam(query.action);
   const initialTab: SettingsTabId = requestedTab === 'google' || requestedTab === 'data'
     ? 'data'
-    : requestedTab === 'orders'
-      ? 'orders'
-      : requestedTab === 'telegram' || requestedTab === 'notifications'
-        ? 'notifications'
-        : requestedTab === 'suppliers'
-          ? 'suppliers'
-          : requestedTab === 'delivery' ? 'delivery' : 'social';
+    : requestedTab === 'social'
+      ? 'social'
+      : requestedTab === 'orders'
+        ? 'orders'
+        : requestedTab === 'telegram' || requestedTab === 'notifications'
+          ? 'notifications'
+          : requestedTab === 'suppliers'
+            ? 'suppliers'
+            : requestedTab === 'delivery' ? 'delivery' : 'data';
   const [instagramResponse, googleResponse, telegramResponse, telegramPreferencesResponse, deliveryResponse, meestResponse, ukrposhtaResponse] = await Promise.all([
     authenticatedApiFetch('/api/integrations/instagram'),
     authenticatedApiFetch('/api/integrations/google'),
@@ -110,17 +112,23 @@ function SettingsLayout({
   const googleConnected = google.status === 'ACTIVE';
   const tabs = [
     {
+      id: 'data' as const,
+      label: 'Дані',
+      description: 'Товари й експорт',
+      content: <section className="settings-section data-workspace"><div className="settings-section-heading"><h2>Дані та синхронізація</h2><p>{isManager ? 'Стан підключень без доступу до таблиць і даних клієнтів.' : 'Оберіть, звідки брати товари та куди записувати підтверджені замовлення.'}</p>{!isManager && <span className={`data-account-state status-${google.status.toLowerCase()}`}>{googleConnected && google.email ? `Google: ${google.email}` : 'Google попросить доступ під час вибору таблиці'}</span>}</div>{settings ? <DataIntegrationHub sources={catalogueSources} configurations={catalogueConfigurations} sheets={sheets!} googleConnected={googleConnected} autoOpenCatalogue={pickerAction === 'pick-catalogue'} autoOpenOrders={pickerAction === 'pick-orders'} /> : <div className="settings-card"><p>Власник керує джерелами даних. Менеджерам доступний лише стан інтеграцій.</p></div>}</section>,
+    },
+    {
       id: 'social' as const,
       label: 'Соцмережі / клієнти',
       description: 'Instagram та інші канали',
       content: <section className="settings-section"><div className="settings-section-heading"><h2>Підключення каналів</h2><p>Керуйте каналами, з яких AutoSale отримує діалоги та замовлення.</p></div><SocialChannelHub instagram={instagram} membershipRole={session.membershipRole} /></section>,
     },
-    {
-      id: 'notifications' as const,
-      label: 'Сповіщення',
-      description: 'Telegram та інші канали',
-      content: <section className="settings-section"><div className="settings-section-heading"><h2>Сповіщення</h2><p>Оберіть канали, через які отримуватимете важливі події AutoSale.</p></div><NotificationChannelHub telegram={telegram} telegramPreferences={telegramPreferences} /></section>,
-    },
+    ...(settings ? [{
+      id: 'orders' as const,
+      label: 'Замовлення',
+      description: 'Правила обробки',
+      content: <section className="settings-section"><div className="settings-section-heading"><h2>Правила обробки</h2><p>Визначте, коли менеджер має перевірити замовлення, яке розпізнав AI.</p></div><OrderSettingsForm initial={settings} /><DemoScenarioCard /></section>,
+    }] : []),
     ...(supplier ? [{
       id: 'suppliers' as const,
       label: 'Постачальники',
@@ -134,17 +142,11 @@ function SettingsLayout({
       content: <section className="settings-section delivery-settings-section"><div className="settings-section-heading"><h2>Доставка</h2><p>Підключіть перевізників та один раз задайте дані відправника.</p></div><DeliveryCarrierHub delivery={delivery} meest={meest} ukrposhta={ukrposhta} role={session.membershipRole!} /></section>,
     },
     {
-      id: 'data' as const,
-      label: 'Дані',
-      description: 'Товари й експорт',
-      content: <section className="settings-section data-workspace"><div className="settings-section-heading"><h2>Дані та синхронізація</h2><p>{isManager ? 'Стан підключень без доступу до таблиць і даних клієнтів.' : 'Оберіть, звідки брати товари та куди записувати підтверджені замовлення.'}</p>{!isManager && <span className={`data-account-state status-${google.status.toLowerCase()}`}>{googleConnected && google.email ? `Google: ${google.email}` : 'Google попросить доступ під час вибору таблиці'}</span>}</div>{settings ? <DataIntegrationHub sources={catalogueSources} configurations={catalogueConfigurations} sheets={sheets!} googleConnected={googleConnected} autoOpenCatalogue={pickerAction === 'pick-catalogue'} autoOpenOrders={pickerAction === 'pick-orders'} /> : <div className="settings-card"><p>Власник керує джерелами даних. Менеджерам доступний лише стан інтеграцій.</p></div>}</section>,
+      id: 'notifications' as const,
+      label: 'Сповіщення',
+      description: 'Telegram та інші канали',
+      content: <section className="settings-section"><div className="settings-section-heading"><h2>Сповіщення</h2><p>Оберіть канали, через які отримуватимете важливі події AutoSale.</p></div><NotificationChannelHub telegram={telegram} telegramPreferences={telegramPreferences} /></section>,
     },
-    ...(settings ? [{
-      id: 'orders' as const,
-      label: 'Замовлення',
-      description: 'Правила обробки',
-      content: <section className="settings-section"><div className="settings-section-heading"><h2>Правила обробки</h2><p>Визначте, коли менеджер має перевірити замовлення, яке розпізнав AI.</p></div><OrderSettingsForm initial={settings} /><DemoScenarioCard /></section>,
-    }] : []),
   ];
   return <main className="settings-layout-content"><section className="settings-content"><header className="settings-header"><h1>Налаштування</h1><p>{isManager ? 'Переглядайте стан підключень.' : 'Керуйте підключеннями та автоматичною обробкою замовлень.'}</p></header><SettingsTabs initialTab={initialTab} tabs={tabs} /></section></main>;
 }
