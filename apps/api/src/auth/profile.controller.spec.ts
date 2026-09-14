@@ -19,7 +19,7 @@ const principal: AuthPrincipal = {
 describe('ProfileController', () => {
   it('lets a manager read their own profile without changing principal scope', async () => {
     const get = vi.fn(async () => ({ userId: principal.userId }));
-    const controller = new ProfileController({ get } as never);
+    const controller = new ProfileController({ get } as never, {} as never);
 
     await controller.get(principal);
 
@@ -28,7 +28,7 @@ describe('ProfileController', () => {
 
   it('parses editable fields and delegates with the current principal', async () => {
     const update = vi.fn(async () => ({ userId: principal.userId }));
-    const controller = new ProfileController({ update } as never);
+    const controller = new ProfileController({ update } as never, {} as never);
 
     await controller.update(principal, {
       name: '  Нове ім’я  ',
@@ -45,7 +45,7 @@ describe('ProfileController', () => {
 
   it('rejects unknown profile fields before calling the service', async () => {
     const update = vi.fn();
-    const controller = new ProfileController({ update } as never);
+    const controller = new ProfileController({ update } as never, {} as never);
 
     expect(() => controller.update(principal, {
       name: 'Менеджер',
@@ -54,5 +54,42 @@ describe('ProfileController', () => {
       email: 'other@example.com',
     })).toThrow(BadRequestException);
     expect(update).not.toHaveBeenCalled();
+  });
+
+  it('rate limits password changes by request IP and normalized authenticated email', async () => {
+    const changePassword = vi.fn(async () => ({ changed: true, revokedSessions: 1 }));
+    const consume = vi.fn(async () => undefined);
+    const controller = new ProfileController({ changePassword } as never, { consume } as never);
+
+    await controller.changePassword(
+      { ...principal, email: ' Manager@Example.COM ' },
+      {
+        currentPassword: 'old password value',
+        newPassword: 'new password value',
+        confirmation: 'new password value',
+      },
+      { ip: '127.0.0.1', headers: {}, socket: {} } as never,
+    );
+
+    expect(consume).toHaveBeenCalledWith('profile-password', '127.0.0.1', 'manager@example.com', 5, 900);
+    expect(changePassword).toHaveBeenCalledWith(expect.objectContaining({ userId: principal.userId }), {
+      currentPassword: 'old password value',
+      newPassword: 'new password value',
+      confirmation: 'new password value',
+    });
+  });
+
+  it('rejects an invalid password request before delegation', async () => {
+    const changePassword = vi.fn();
+    const consume = vi.fn();
+    const controller = new ProfileController({ changePassword } as never, { consume } as never);
+
+    await expect(controller.changePassword(
+      principal,
+      { currentPassword: 'old password value', newPassword: 'new password value', confirmation: 'different value' },
+      { ip: '127.0.0.1', headers: {}, socket: {} } as never,
+    )).rejects.toThrow(BadRequestException);
+    expect(consume).not.toHaveBeenCalled();
+    expect(changePassword).not.toHaveBeenCalled();
   });
 });

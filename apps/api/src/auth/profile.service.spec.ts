@@ -108,4 +108,76 @@ describe('ProfileService', () => {
     expect(JSON.stringify(auditCall)).not.toContain('Ігор Новий');
     expect(JSON.stringify(auditCall)).not.toContain('+380');
   });
+
+  const passwordInput = {
+    currentPassword: 'old password value',
+    newPassword: 'new password value',
+    confirmation: 'new password value',
+  };
+
+  it('rejects password changes for a Google-only user', async () => {
+    const fixture = createFixture();
+    fixture.prisma.user.findUnique.mockResolvedValue({ passwordHash: null } as never);
+
+    await expect(fixture.service.changePassword(principal, passwordInput))
+      .rejects.toThrow('PROFILE_PASSWORD_UNAVAILABLE');
+
+    expect(fixture.crypto.hashPassword).not.toHaveBeenCalled();
+    expect(fixture.prisma.user.update).not.toHaveBeenCalled();
+    expect(fixture.sessions.revokeOthersForUser).not.toHaveBeenCalled();
+    expect(fixture.prisma.securityAuditLog.create).toHaveBeenCalledWith({ data: expect.objectContaining({
+      action: 'PROFILE_PASSWORD_CHANGE_REJECTED',
+      result: 'FAILURE',
+      metadata: { reason: 'NO_LOCAL_PASSWORD' },
+    }) });
+    expect(JSON.stringify(fixture.prisma.securityAuditLog.create.mock.calls)).not.toContain(passwordInput.currentPassword);
+  });
+
+  it('rejects an incorrect current password without changing sessions', async () => {
+    const fixture = createFixture();
+    fixture.prisma.user.findUnique.mockResolvedValue({ passwordHash: 'stored-hash' } as never);
+    fixture.crypto.verifyPassword.mockResolvedValue(false);
+
+    await expect(fixture.service.changePassword(principal, passwordInput))
+      .rejects.toThrow('PROFILE_CURRENT_PASSWORD_INVALID');
+
+    expect(fixture.crypto.hashPassword).not.toHaveBeenCalled();
+    expect(fixture.sessions.revokeOthersForUser).not.toHaveBeenCalled();
+    expect(fixture.prisma.securityAuditLog.create).toHaveBeenCalledWith({ data: expect.objectContaining({
+      metadata: { reason: 'CURRENT_PASSWORD_INVALID' },
+    }) });
+  });
+
+  it('changes a local password and revokes only other sessions', async () => {
+    const fixture = createFixture();
+    fixture.prisma.user.findUnique.mockResolvedValue({ passwordHash: 'stored-hash' } as never);
+    fixture.crypto.verifyPassword.mockResolvedValue(true);
+    fixture.crypto.hashPassword.mockResolvedValue('replacement-hash');
+    fixture.sessions.revokeOthersForUser.mockResolvedValue(2);
+
+    await expect(fixture.service.changePassword(principal, passwordInput))
+      .resolves.toEqual({ changed: true, revokedSessions: 2 });
+
+    expect(fixture.prisma.user.update).toHaveBeenCalledWith({
+      where: { id: principal.userId },
+      data: { passwordHash: 'replacement-hash' },
+    });
+    expect(fixture.sessions.revokeOthersForUser).toHaveBeenCalledWith(principal.userId, principal.sessionId);
+    expect(fixture.prisma.securityAuditLog.create).toHaveBeenCalledWith({ data: expect.objectContaining({
+      action: 'PROFILE_PASSWORD_CHANGED',
+      result: 'SUCCESS',
+      metadata: { revokedSessions: 2 },
+    }) });
+  });
+
+  it('does not revoke sessions when the password update fails', async () => {
+    const fixture = createFixture();
+    fixture.prisma.user.findUnique.mockResolvedValue({ passwordHash: 'stored-hash' } as never);
+    fixture.crypto.verifyPassword.mockResolvedValue(true);
+    fixture.crypto.hashPassword.mockResolvedValue('replacement-hash');
+    fixture.prisma.user.update.mockRejectedValue(new Error('database unavailable'));
+
+    await expect(fixture.service.changePassword(principal, passwordInput)).rejects.toThrow('database unavailable');
+    expect(fixture.sessions.revokeOthersForUser).not.toHaveBeenCalled();
+  });
 });

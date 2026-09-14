@@ -1,8 +1,8 @@
 import type { AuthPrincipal } from '@autosale/contracts/auth';
-import type { ProfileResponse, UpdateProfileRequest } from '@autosale/contracts/profile';
+import type { ChangePasswordRequest, ProfileResponse, UpdateProfileRequest } from '@autosale/contracts/profile';
 import type { PrismaClient } from '@autosale/database';
 import type { ObjectStorage } from '@autosale/integrations';
-import { NotFoundException } from '@nestjs/common';
+import { BadRequestException, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 
 import { CryptoService } from './crypto.service.js';
 import { SessionService } from './session.service.js';
@@ -44,14 +44,14 @@ const profileSelect = {
 } as const;
 
 export class ProfileService {
+  private readonly logger = new Logger(ProfileService.name);
+
   constructor(
     private readonly prisma: PrismaClient,
     private readonly crypto: CryptoService,
     private readonly sessions: SessionService,
     private readonly storage: ObjectStorage,
   ) {
-    void this.crypto;
-    void this.sessions;
     void this.storage;
   }
 
@@ -86,6 +86,30 @@ export class ProfileService {
     return this.response(user, principal.tenantId);
   }
 
+  async changePassword(
+    principal: AuthPrincipal,
+    input: ChangePasswordRequest,
+  ): Promise<{ changed: true; revokedSessions: number }> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: principal.userId },
+      select: { passwordHash: true },
+    });
+    if (!user?.passwordHash) {
+      await this.audit(principal, 'PROFILE_PASSWORD_CHANGE_REJECTED', 'FAILURE', { reason: 'NO_LOCAL_PASSWORD' });
+      throw new BadRequestException('PROFILE_PASSWORD_UNAVAILABLE');
+    }
+    if (!await this.crypto.verifyPassword(user.passwordHash, input.currentPassword)) {
+      await this.audit(principal, 'PROFILE_PASSWORD_CHANGE_REJECTED', 'FAILURE', { reason: 'CURRENT_PASSWORD_INVALID' });
+      throw new UnauthorizedException('PROFILE_CURRENT_PASSWORD_INVALID');
+    }
+
+    const passwordHash = await this.crypto.hashPassword(input.newPassword);
+    await this.prisma.user.update({ where: { id: principal.userId }, data: { passwordHash } });
+    const revokedSessions = await this.sessions.revokeOthersForUser(principal.userId, principal.sessionId);
+    await this.audit(principal, 'PROFILE_PASSWORD_CHANGED', 'SUCCESS', { revokedSessions });
+    return { changed: true, revokedSessions };
+  }
+
   private response(user: ProfileUser, tenantId: string | null): ProfileResponse {
     const membership = tenantId
       ? user.memberships.find((item) => item.tenantId === tenantId && item.status === 'ACTIVE')
@@ -106,6 +130,33 @@ export class ProfileService {
       createdAt: user.createdAt.toISOString(),
       lastLoginAt: user.lastLoginAt?.toISOString() ?? null,
     };
+  }
+
+  private async audit(
+    principal: AuthPrincipal,
+    action: string,
+    result: string,
+    metadata: Record<string, string | number>,
+  ): Promise<void> {
+    try {
+      await this.prisma.securityAuditLog.create({
+        data: {
+          userId: principal.userId,
+          tenantId: principal.tenantId,
+          actor: 'USER',
+          action,
+          result,
+          metadata,
+        },
+      });
+    } catch (error) {
+      this.logger.warn({
+        event: 'profile_security_audit_failed',
+        userId: principal.userId,
+        action,
+        errorCode: error instanceof Error ? error.name : 'UNKNOWN',
+      });
+    }
   }
 }
 
