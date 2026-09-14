@@ -14,6 +14,8 @@ const ownerSession = {
   email: 'owner@example.com',
   platformRole: 'USER' as const,
   membershipRole: 'OWNER' as const,
+  locale: 'uk' as const,
+  avatarUrl: null,
 };
 
 afterEach(() => {
