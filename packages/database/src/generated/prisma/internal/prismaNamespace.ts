@@ -405,6 +405,7 @@ export const ModelName = {
   InstagramOAuthState: 'InstagramOAuthState',
   InstagramCredentialCleanup: 'InstagramCredentialCleanup',
   User: 'User',
+  UserAvatarCleanup: 'UserAvatarCleanup',
   UserNotification: 'UserNotification',
   TelegramLinkAttempt: 'TelegramLinkAttempt',
   TelegramUserBinding: 'TelegramUserBinding',
@@ -460,7 +461,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "tenant" | "googleConnection" | "googleOAuthAttempt" | "googleCredentialCleanup" | "instagramConnection" | "instagramOAuthState" | "instagramCredentialCleanup" | "user" | "userNotification" | "telegramLinkAttempt" | "telegramUserBinding" | "telegramBusinessConnection" | "telegramChat" | "telegramSupplierSetting" | "telegramWebhookUpdate" | "telegramDelivery" | "googleIdentity" | "googleSignInAttempt" | "tenantMembership" | "session" | "emailVerificationToken" | "passwordResetToken" | "tenantInvitation" | "securityAuditLog" | "webhookEvent" | "conversation" | "instagramCustomerProfile" | "instagramAvatarCleanup" | "message" | "googleSheetsDestination" | "tenantSettings" | "order" | "deliveryConnection" | "deliverySenderProfile" | "shipment" | "shipmentAttempt" | "shipmentStatusEvent" | "orderExport" | "auditLog" | "orderItem" | "product" | "inventoryReservation" | "telegramDeliveryItem" | "telegramNotificationPreference" | "catalogueSource" | "catalogueMapping" | "catalogueImportRun" | "attachment"
+    modelProps: "tenant" | "googleConnection" | "googleOAuthAttempt" | "googleCredentialCleanup" | "instagramConnection" | "instagramOAuthState" | "instagramCredentialCleanup" | "user" | "userAvatarCleanup" | "userNotification" | "telegramLinkAttempt" | "telegramUserBinding" | "telegramBusinessConnection" | "telegramChat" | "telegramSupplierSetting" | "telegramWebhookUpdate" | "telegramDelivery" | "googleIdentity" | "googleSignInAttempt" | "tenantMembership" | "session" | "emailVerificationToken" | "passwordResetToken" | "tenantInvitation" | "securityAuditLog" | "webhookEvent" | "conversation" | "instagramCustomerProfile" | "instagramAvatarCleanup" | "message" | "googleSheetsDestination" | "tenantSettings" | "order" | "deliveryConnection" | "deliverySenderProfile" | "shipment" | "shipmentAttempt" | "shipmentStatusEvent" | "orderExport" | "auditLog" | "orderItem" | "product" | "inventoryReservation" | "telegramDeliveryItem" | "telegramNotificationPreference" | "catalogueSource" | "catalogueMapping" | "catalogueImportRun" | "attachment"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1053,6 +1054,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.UserCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.UserCountAggregateOutputType> | number
+        }
+      }
+    }
+    UserAvatarCleanup: {
+      payload: Prisma.$UserAvatarCleanupPayload<ExtArgs>
+      fields: Prisma.UserAvatarCleanupFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.UserAvatarCleanupFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserAvatarCleanupPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.UserAvatarCleanupFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserAvatarCleanupPayload>
+        }
+        findFirst: {
+          args: Prisma.UserAvatarCleanupFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserAvatarCleanupPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.UserAvatarCleanupFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserAvatarCleanupPayload>
+        }
+        findMany: {
+          args: Prisma.UserAvatarCleanupFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserAvatarCleanupPayload>[]
+        }
+        create: {
+          args: Prisma.UserAvatarCleanupCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserAvatarCleanupPayload>
+        }
+        createMany: {
+          args: Prisma.UserAvatarCleanupCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.UserAvatarCleanupCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserAvatarCleanupPayload>[]
+        }
+        delete: {
+          args: Prisma.UserAvatarCleanupDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserAvatarCleanupPayload>
+        }
+        update: {
+          args: Prisma.UserAvatarCleanupUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserAvatarCleanupPayload>
+        }
+        deleteMany: {
+          args: Prisma.UserAvatarCleanupDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.UserAvatarCleanupUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.UserAvatarCleanupUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserAvatarCleanupPayload>[]
+        }
+        upsert: {
+          args: Prisma.UserAvatarCleanupUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserAvatarCleanupPayload>
+        }
+        aggregate: {
+          args: Prisma.UserAvatarCleanupAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateUserAvatarCleanup>
+        }
+        groupBy: {
+          args: Prisma.UserAvatarCleanupGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UserAvatarCleanupGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.UserAvatarCleanupCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UserAvatarCleanupCountAggregateOutputType> | number
         }
       }
     }
@@ -4187,8 +4262,14 @@ export const UserScalarFieldEnum = {
   id: 'id',
   email: 'email',
   name: 'name',
+  phone: 'phone',
+  locale: 'locale',
   passwordHash: 'passwordHash',
   emailVerifiedAt: 'emailVerifiedAt',
+  avatarStorageKey: 'avatarStorageKey',
+  avatarChecksum: 'avatarChecksum',
+  avatarContentType: 'avatarContentType',
+  lastLoginAt: 'lastLoginAt',
   platformRole: 'platformRole',
   status: 'status',
   createdAt: 'createdAt',
@@ -4196,6 +4277,22 @@ export const UserScalarFieldEnum = {
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
+
+
+export const UserAvatarCleanupScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  storageKey: 'storageKey',
+  status: 'status',
+  attempts: 'attempts',
+  nextAttemptAt: 'nextAttemptAt',
+  leaseUntil: 'leaseUntil',
+  lastErrorCode: 'lastErrorCode',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type UserAvatarCleanupScalarFieldEnum = (typeof UserAvatarCleanupScalarFieldEnum)[keyof typeof UserAvatarCleanupScalarFieldEnum]
 
 
 export const UserNotificationScalarFieldEnum = {
@@ -5645,6 +5742,7 @@ export type GlobalOmitConfig = {
   instagramOAuthState?: Prisma.InstagramOAuthStateOmit
   instagramCredentialCleanup?: Prisma.InstagramCredentialCleanupOmit
   user?: Prisma.UserOmit
+  userAvatarCleanup?: Prisma.UserAvatarCleanupOmit
   userNotification?: Prisma.UserNotificationOmit
   telegramLinkAttempt?: Prisma.TelegramLinkAttemptOmit
   telegramUserBinding?: Prisma.TelegramUserBindingOmit
@@ -5747,3 +5845,4 @@ export type PrismaAction =
  * `PrismaClient` proxy available in interactive transactions.
  */
 export type TransactionClient = Omit<DefaultPrismaClient, runtime.ITXClientDenyList>
+

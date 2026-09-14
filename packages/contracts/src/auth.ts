@@ -45,6 +45,8 @@ export const publicSessionSchema = z.object({
   platformRole: z.enum(['USER', 'PLATFORM_ADMIN']),
   tenantId: z.string().uuid().nullable(),
   membershipRole: z.enum(['OWNER', 'MANAGER']).nullable(),
+  locale: z.enum(['uk', 'en']),
+  avatarUrl: z.string().nullable(),
 }).strict();
 
 export interface AuthPrincipal {
@@ -54,6 +56,8 @@ export interface AuthPrincipal {
   platformRole: 'USER' | 'PLATFORM_ADMIN';
   tenantId: string | null;
   membershipRole: 'OWNER' | 'MANAGER' | null;
+  locale: 'uk' | 'en';
+  avatarUrl: string | null;
   sessionId: string;
 }
 

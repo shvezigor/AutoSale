@@ -42,6 +42,14 @@
       "import": "./dist/auth.js",
       "default": "./dist/auth.js"
     },
+    "./profile": {
+      "react-server": "./src/profile.ts",
+      "browser": "./src/profile.ts",
+      "types": "./src/profile.ts",
+      "development": "./src/profile.ts",
+      "import": "./dist/profile.js",
+      "default": "./dist/profile.js"
+    },
     "./procurement": {
       "react-server": "./src/procurement.ts",
       "browser": "./src/procurement.ts",

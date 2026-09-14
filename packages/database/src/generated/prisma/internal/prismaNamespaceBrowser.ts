@@ -59,6 +59,7 @@ export const ModelName = {
   InstagramOAuthState: 'InstagramOAuthState',
   InstagramCredentialCleanup: 'InstagramCredentialCleanup',
   User: 'User',
+  UserAvatarCleanup: 'UserAvatarCleanup',
   UserNotification: 'UserNotification',
   TelegramLinkAttempt: 'TelegramLinkAttempt',
   TelegramUserBinding: 'TelegramUserBinding',
@@ -249,8 +250,14 @@ export const UserScalarFieldEnum = {
   id: 'id',
   email: 'email',
   name: 'name',
+  phone: 'phone',
+  locale: 'locale',
   passwordHash: 'passwordHash',
   emailVerifiedAt: 'emailVerifiedAt',
+  avatarStorageKey: 'avatarStorageKey',
+  avatarChecksum: 'avatarChecksum',
+  avatarContentType: 'avatarContentType',
+  lastLoginAt: 'lastLoginAt',
   platformRole: 'platformRole',
   status: 'status',
   createdAt: 'createdAt',
@@ -258,6 +265,22 @@ export const UserScalarFieldEnum = {
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
+
+
+export const UserAvatarCleanupScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  storageKey: 'storageKey',
+  status: 'status',
+  attempts: 'attempts',
+  nextAttemptAt: 'nextAttemptAt',
+  leaseUntil: 'leaseUntil',
+  lastErrorCode: 'lastErrorCode',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type UserAvatarCleanupScalarFieldEnum = (typeof UserAvatarCleanupScalarFieldEnum)[keyof typeof UserAvatarCleanupScalarFieldEnum]
 
 
 export const UserNotificationScalarFieldEnum = {
@@ -1044,3 +1067,4 @@ export const JsonNullValueFilter = {
 } as const
 
 export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
+

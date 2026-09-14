@@ -28,8 +28,14 @@ export type UserMinAggregateOutputType = {
   id: string | null
   email: string | null
   name: string | null
+  phone: string | null
+  locale: string | null
   passwordHash: string | null
   emailVerifiedAt: Date | null
+  avatarStorageKey: string | null
+  avatarChecksum: string | null
+  avatarContentType: string | null
+  lastLoginAt: Date | null
   platformRole: $Enums.PlatformRole | null
   status: $Enums.AccessStatus | null
   createdAt: Date | null
@@ -40,8 +46,14 @@ export type UserMaxAggregateOutputType = {
   id: string | null
   email: string | null
   name: string | null
+  phone: string | null
+  locale: string | null
   passwordHash: string | null
   emailVerifiedAt: Date | null
+  avatarStorageKey: string | null
+  avatarChecksum: string | null
+  avatarContentType: string | null
+  lastLoginAt: Date | null
   platformRole: $Enums.PlatformRole | null
   status: $Enums.AccessStatus | null
   createdAt: Date | null
@@ -52,8 +64,14 @@ export type UserCountAggregateOutputType = {
   id: number
   email: number
   name: number
+  phone: number
+  locale: number
   passwordHash: number
   emailVerifiedAt: number
+  avatarStorageKey: number
+  avatarChecksum: number
+  avatarContentType: number
+  lastLoginAt: number
   platformRole: number
   status: number
   createdAt: number
@@ -66,8 +84,14 @@ export type UserMinAggregateInputType = {
   id?: true
   email?: true
   name?: true
+  phone?: true
+  locale?: true
   passwordHash?: true
   emailVerifiedAt?: true
+  avatarStorageKey?: true
+  avatarChecksum?: true
+  avatarContentType?: true
+  lastLoginAt?: true
   platformRole?: true
   status?: true
   createdAt?: true
@@ -78,8 +102,14 @@ export type UserMaxAggregateInputType = {
   id?: true
   email?: true
   name?: true
+  phone?: true
+  locale?: true
   passwordHash?: true
   emailVerifiedAt?: true
+  avatarStorageKey?: true
+  avatarChecksum?: true
+  avatarContentType?: true
+  lastLoginAt?: true
   platformRole?: true
   status?: true
   createdAt?: true
@@ -90,8 +120,14 @@ export type UserCountAggregateInputType = {
   id?: true
   email?: true
   name?: true
+  phone?: true
+  locale?: true
   passwordHash?: true
   emailVerifiedAt?: true
+  avatarStorageKey?: true
+  avatarChecksum?: true
+  avatarContentType?: true
+  lastLoginAt?: true
   platformRole?: true
   status?: true
   createdAt?: true
@@ -175,8 +211,14 @@ export type UserGroupByOutputType = {
   id: string
   email: string
   name: string
+  phone: string | null
+  locale: string
   passwordHash: string | null
   emailVerifiedAt: Date | null
+  avatarStorageKey: string | null
+  avatarChecksum: string | null
+  avatarContentType: string | null
+  lastLoginAt: Date | null
   platformRole: $Enums.PlatformRole
   status: $Enums.AccessStatus
   createdAt: Date
@@ -208,8 +250,14 @@ export type UserWhereInput = {
   id?: Prisma.UuidFilter<"User"> | string
   email?: Prisma.StringFilter<"User"> | string
   name?: Prisma.StringFilter<"User"> | string
+  phone?: Prisma.StringNullableFilter<"User"> | string | null
+  locale?: Prisma.StringFilter<"User"> | string
   passwordHash?: Prisma.StringNullableFilter<"User"> | string | null
   emailVerifiedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
+  avatarStorageKey?: Prisma.StringNullableFilter<"User"> | string | null
+  avatarChecksum?: Prisma.StringNullableFilter<"User"> | string | null
+  avatarContentType?: Prisma.StringNullableFilter<"User"> | string | null
+  lastLoginAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   platformRole?: Prisma.EnumPlatformRoleFilter<"User"> | $Enums.PlatformRole
   status?: Prisma.EnumAccessStatusFilter<"User"> | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
@@ -234,14 +282,21 @@ export type UserWhereInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceListRelationFilter
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionListRelationFilter
   shipmentsCreated?: Prisma.ShipmentListRelationFilter
+  avatarCleanups?: Prisma.UserAvatarCleanupListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   email?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  phone?: Prisma.SortOrderInput | Prisma.SortOrder
+  locale?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrderInput | Prisma.SortOrder
   emailVerifiedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  avatarStorageKey?: Prisma.SortOrderInput | Prisma.SortOrder
+  avatarChecksum?: Prisma.SortOrderInput | Prisma.SortOrder
+  avatarContentType?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastLoginAt?: Prisma.SortOrderInput | Prisma.SortOrder
   platformRole?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -266,6 +321,7 @@ export type UserOrderByWithRelationInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceOrderByRelationAggregateInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionOrderByRelationAggregateInput
   shipmentsCreated?: Prisma.ShipmentOrderByRelationAggregateInput
+  avatarCleanups?: Prisma.UserAvatarCleanupOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -275,8 +331,14 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.UserWhereInput[]
   NOT?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
   name?: Prisma.StringFilter<"User"> | string
+  phone?: Prisma.StringNullableFilter<"User"> | string | null
+  locale?: Prisma.StringFilter<"User"> | string
   passwordHash?: Prisma.StringNullableFilter<"User"> | string | null
   emailVerifiedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
+  avatarStorageKey?: Prisma.StringNullableFilter<"User"> | string | null
+  avatarChecksum?: Prisma.StringNullableFilter<"User"> | string | null
+  avatarContentType?: Prisma.StringNullableFilter<"User"> | string | null
+  lastLoginAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   platformRole?: Prisma.EnumPlatformRoleFilter<"User"> | $Enums.PlatformRole
   status?: Prisma.EnumAccessStatusFilter<"User"> | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
@@ -301,14 +363,21 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceListRelationFilter
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionListRelationFilter
   shipmentsCreated?: Prisma.ShipmentListRelationFilter
+  avatarCleanups?: Prisma.UserAvatarCleanupListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   email?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  phone?: Prisma.SortOrderInput | Prisma.SortOrder
+  locale?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrderInput | Prisma.SortOrder
   emailVerifiedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  avatarStorageKey?: Prisma.SortOrderInput | Prisma.SortOrder
+  avatarChecksum?: Prisma.SortOrderInput | Prisma.SortOrder
+  avatarContentType?: Prisma.SortOrderInput | Prisma.SortOrder
+  lastLoginAt?: Prisma.SortOrderInput | Prisma.SortOrder
   platformRole?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -325,8 +394,14 @@ export type UserScalarWhereWithAggregatesInput = {
   id?: Prisma.UuidWithAggregatesFilter<"User"> | string
   email?: Prisma.StringWithAggregatesFilter<"User"> | string
   name?: Prisma.StringWithAggregatesFilter<"User"> | string
+  phone?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  locale?: Prisma.StringWithAggregatesFilter<"User"> | string
   passwordHash?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   emailVerifiedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
+  avatarStorageKey?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  avatarChecksum?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  avatarContentType?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  lastLoginAt?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
   platformRole?: Prisma.EnumPlatformRoleWithAggregatesFilter<"User"> | $Enums.PlatformRole
   status?: Prisma.EnumAccessStatusWithAggregatesFilter<"User"> | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
@@ -337,8 +412,14 @@ export type UserCreateInput = {
   id?: string
   email: string
   name: string
+  phone?: string | null
+  locale?: string
   passwordHash?: string | null
   emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
   platformRole?: $Enums.PlatformRole
   status?: $Enums.AccessStatus
   createdAt?: Date | string
@@ -363,14 +444,21 @@ export type UserCreateInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutUserInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
   id?: string
   email: string
   name: string
+  phone?: string | null
+  locale?: string
   passwordHash?: string | null
   emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
   platformRole?: $Enums.PlatformRole
   status?: $Enums.AccessStatus
   createdAt?: Date | string
@@ -395,14 +483,21 @@ export type UserUncheckedCreateInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentUncheckedCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -427,14 +522,21 @@ export type UserUpdateInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutUserNestedInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -459,14 +561,21 @@ export type UserUncheckedUpdateInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUncheckedUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
   id?: string
   email: string
   name: string
+  phone?: string | null
+  locale?: string
   passwordHash?: string | null
   emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
   platformRole?: $Enums.PlatformRole
   status?: $Enums.AccessStatus
   createdAt?: Date | string
@@ -477,8 +586,14 @@ export type UserUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -489,8 +604,14 @@ export type UserUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -511,8 +632,14 @@ export type UserCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   email?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  phone?: Prisma.SortOrder
+  locale?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
   emailVerifiedAt?: Prisma.SortOrder
+  avatarStorageKey?: Prisma.SortOrder
+  avatarChecksum?: Prisma.SortOrder
+  avatarContentType?: Prisma.SortOrder
+  lastLoginAt?: Prisma.SortOrder
   platformRole?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -523,8 +650,14 @@ export type UserMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   email?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  phone?: Prisma.SortOrder
+  locale?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
   emailVerifiedAt?: Prisma.SortOrder
+  avatarStorageKey?: Prisma.SortOrder
+  avatarChecksum?: Prisma.SortOrder
+  avatarContentType?: Prisma.SortOrder
+  lastLoginAt?: Prisma.SortOrder
   platformRole?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -535,8 +668,14 @@ export type UserMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   email?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  phone?: Prisma.SortOrder
+  locale?: Prisma.SortOrder
   passwordHash?: Prisma.SortOrder
   emailVerifiedAt?: Prisma.SortOrder
+  avatarStorageKey?: Prisma.SortOrder
+  avatarChecksum?: Prisma.SortOrder
+  avatarContentType?: Prisma.SortOrder
+  lastLoginAt?: Prisma.SortOrder
   platformRole?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -621,6 +760,20 @@ export type UserUpdateOneWithoutInstagramCleanupsDeadLetteredNestedInput = {
 
 export type EnumPlatformRoleFieldUpdateOperationsInput = {
   set?: $Enums.PlatformRole
+}
+
+export type UserCreateNestedOneWithoutAvatarCleanupsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAvatarCleanupsInput, Prisma.UserUncheckedCreateWithoutAvatarCleanupsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAvatarCleanupsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutAvatarCleanupsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAvatarCleanupsInput, Prisma.UserUncheckedCreateWithoutAvatarCleanupsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAvatarCleanupsInput
+  upsert?: Prisma.UserUpsertWithoutAvatarCleanupsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAvatarCleanupsInput, Prisma.UserUpdateWithoutAvatarCleanupsInput>, Prisma.UserUncheckedUpdateWithoutAvatarCleanupsInput>
 }
 
 export type UserCreateNestedOneWithoutNotificationsInput = {
@@ -847,8 +1000,14 @@ export type UserCreateWithoutGoogleConnectionsInput = {
   id?: string
   email: string
   name: string
+  phone?: string | null
+  locale?: string
   passwordHash?: string | null
   emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
   platformRole?: $Enums.PlatformRole
   status?: $Enums.AccessStatus
   createdAt?: Date | string
@@ -872,14 +1031,21 @@ export type UserCreateWithoutGoogleConnectionsInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutUserInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutGoogleConnectionsInput = {
   id?: string
   email: string
   name: string
+  phone?: string | null
+  locale?: string
   passwordHash?: string | null
   emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
   platformRole?: $Enums.PlatformRole
   status?: $Enums.AccessStatus
   createdAt?: Date | string
@@ -903,6 +1069,7 @@ export type UserUncheckedCreateWithoutGoogleConnectionsInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentUncheckedCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutGoogleConnectionsInput = {
@@ -925,8 +1092,14 @@ export type UserUpdateWithoutGoogleConnectionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -950,14 +1123,21 @@ export type UserUpdateWithoutGoogleConnectionsInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutUserNestedInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutGoogleConnectionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -981,14 +1161,21 @@ export type UserUncheckedUpdateWithoutGoogleConnectionsInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUncheckedUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutGoogleOAuthAttemptsInput = {
   id?: string
   email: string
   name: string
+  phone?: string | null
+  locale?: string
   passwordHash?: string | null
   emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
   platformRole?: $Enums.PlatformRole
   status?: $Enums.AccessStatus
   createdAt?: Date | string
@@ -1012,14 +1199,21 @@ export type UserCreateWithoutGoogleOAuthAttemptsInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutUserInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutGoogleOAuthAttemptsInput = {
   id?: string
   email: string
   name: string
+  phone?: string | null
+  locale?: string
   passwordHash?: string | null
   emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
   platformRole?: $Enums.PlatformRole
   status?: $Enums.AccessStatus
   createdAt?: Date | string
@@ -1043,6 +1237,7 @@ export type UserUncheckedCreateWithoutGoogleOAuthAttemptsInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentUncheckedCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutGoogleOAuthAttemptsInput = {
@@ -1065,8 +1260,14 @@ export type UserUpdateWithoutGoogleOAuthAttemptsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1090,14 +1291,21 @@ export type UserUpdateWithoutGoogleOAuthAttemptsInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutUserNestedInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutGoogleOAuthAttemptsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1121,14 +1329,21 @@ export type UserUncheckedUpdateWithoutGoogleOAuthAttemptsInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUncheckedUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutInstagramConnectionsInput = {
   id?: string
   email: string
   name: string
+  phone?: string | null
+  locale?: string
   passwordHash?: string | null
   emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
   platformRole?: $Enums.PlatformRole
   status?: $Enums.AccessStatus
   createdAt?: Date | string
@@ -1152,14 +1367,21 @@ export type UserCreateWithoutInstagramConnectionsInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutUserInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutInstagramConnectionsInput = {
   id?: string
   email: string
   name: string
+  phone?: string | null
+  locale?: string
   passwordHash?: string | null
   emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
   platformRole?: $Enums.PlatformRole
   status?: $Enums.AccessStatus
   createdAt?: Date | string
@@ -1183,6 +1405,7 @@ export type UserUncheckedCreateWithoutInstagramConnectionsInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentUncheckedCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutInstagramConnectionsInput = {
@@ -1205,8 +1428,14 @@ export type UserUpdateWithoutInstagramConnectionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1230,14 +1459,21 @@ export type UserUpdateWithoutInstagramConnectionsInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutUserNestedInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutInstagramConnectionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1261,14 +1497,21 @@ export type UserUncheckedUpdateWithoutInstagramConnectionsInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUncheckedUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutInstagramOAuthStatesInput = {
   id?: string
   email: string
   name: string
+  phone?: string | null
+  locale?: string
   passwordHash?: string | null
   emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
   platformRole?: $Enums.PlatformRole
   status?: $Enums.AccessStatus
   createdAt?: Date | string
@@ -1292,14 +1535,21 @@ export type UserCreateWithoutInstagramOAuthStatesInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutUserInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutInstagramOAuthStatesInput = {
   id?: string
   email: string
   name: string
+  phone?: string | null
+  locale?: string
   passwordHash?: string | null
   emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
   platformRole?: $Enums.PlatformRole
   status?: $Enums.AccessStatus
   createdAt?: Date | string
@@ -1323,6 +1573,7 @@ export type UserUncheckedCreateWithoutInstagramOAuthStatesInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentUncheckedCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutInstagramOAuthStatesInput = {
@@ -1345,8 +1596,14 @@ export type UserUpdateWithoutInstagramOAuthStatesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1370,14 +1627,21 @@ export type UserUpdateWithoutInstagramOAuthStatesInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutUserNestedInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutInstagramOAuthStatesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1401,14 +1665,21 @@ export type UserUncheckedUpdateWithoutInstagramOAuthStatesInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUncheckedUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutInstagramCleanupsDeadLetteredInput = {
   id?: string
   email: string
   name: string
+  phone?: string | null
+  locale?: string
   passwordHash?: string | null
   emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
   platformRole?: $Enums.PlatformRole
   status?: $Enums.AccessStatus
   createdAt?: Date | string
@@ -1432,14 +1703,21 @@ export type UserCreateWithoutInstagramCleanupsDeadLetteredInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutUserInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutInstagramCleanupsDeadLetteredInput = {
   id?: string
   email: string
   name: string
+  phone?: string | null
+  locale?: string
   passwordHash?: string | null
   emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
   platformRole?: $Enums.PlatformRole
   status?: $Enums.AccessStatus
   createdAt?: Date | string
@@ -1463,6 +1741,7 @@ export type UserUncheckedCreateWithoutInstagramCleanupsDeadLetteredInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentUncheckedCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutInstagramCleanupsDeadLetteredInput = {
@@ -1485,8 +1764,14 @@ export type UserUpdateWithoutInstagramCleanupsDeadLetteredInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1510,14 +1795,21 @@ export type UserUpdateWithoutInstagramCleanupsDeadLetteredInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutUserNestedInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutInstagramCleanupsDeadLetteredInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1541,14 +1833,189 @@ export type UserUncheckedUpdateWithoutInstagramCleanupsDeadLetteredInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUncheckedUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutAvatarCleanupsInput = {
+  id?: string
+  email: string
+  name: string
+  phone?: string | null
+  locale?: string
+  passwordHash?: string | null
+  emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
+  platformRole?: $Enums.PlatformRole
+  status?: $Enums.AccessStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+  invitationsCreated?: Prisma.TenantInvitationCreateNestedManyWithoutInvitedByInput
+  securityAuditLogs?: Prisma.SecurityAuditLogCreateNestedManyWithoutUserInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutUserInput
+  instagramConnections?: Prisma.InstagramConnectionCreateNestedManyWithoutConnectedByInput
+  instagramMessagesSent?: Prisma.MessageCreateNestedManyWithoutSentByInput
+  instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutUserInput
+  googleConnections?: Prisma.GoogleConnectionCreateNestedManyWithoutConnectedByInput
+  googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
+  notifications?: Prisma.UserNotificationCreateNestedManyWithoutUserInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptCreateNestedManyWithoutUserInput
+  telegramUserBindings?: Prisma.TelegramUserBindingCreateNestedManyWithoutUserInput
+  procurementHandOffs?: Prisma.OrderCreateNestedManyWithoutProcurementHandedOffByUserInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutUserInput
+  deliveryConnectionsConnected?: Prisma.DeliveryConnectionCreateNestedManyWithoutConnectedByInput
+  shipmentsCreated?: Prisma.ShipmentCreateNestedManyWithoutCreatedByInput
+}
+
+export type UserUncheckedCreateWithoutAvatarCleanupsInput = {
+  id?: string
+  email: string
+  name: string
+  phone?: string | null
+  locale?: string
+  passwordHash?: string | null
+  emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
+  platformRole?: $Enums.PlatformRole
+  status?: $Enums.AccessStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  invitationsCreated?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUncheckedCreateNestedManyWithoutUserInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutUserInput
+  instagramConnections?: Prisma.InstagramConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  instagramMessagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSentByInput
+  instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
+  googleConnections?: Prisma.GoogleConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
+  notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutUserInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedCreateNestedManyWithoutUserInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUncheckedCreateNestedManyWithoutUserInput
+  procurementHandOffs?: Prisma.OrderUncheckedCreateNestedManyWithoutProcurementHandedOffByUserInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
+  deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  shipmentsCreated?: Prisma.ShipmentUncheckedCreateNestedManyWithoutCreatedByInput
+}
+
+export type UserCreateOrConnectWithoutAvatarCleanupsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutAvatarCleanupsInput, Prisma.UserUncheckedCreateWithoutAvatarCleanupsInput>
+}
+
+export type UserUpsertWithoutAvatarCleanupsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutAvatarCleanupsInput, Prisma.UserUncheckedUpdateWithoutAvatarCleanupsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutAvatarCleanupsInput, Prisma.UserUncheckedCreateWithoutAvatarCleanupsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutAvatarCleanupsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutAvatarCleanupsInput, Prisma.UserUncheckedUpdateWithoutAvatarCleanupsInput>
+}
+
+export type UserUpdateWithoutAvatarCleanupsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+  invitationsCreated?: Prisma.TenantInvitationUpdateManyWithoutInvitedByNestedInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUpdateManyWithoutUserNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutUserNestedInput
+  instagramConnections?: Prisma.InstagramConnectionUpdateManyWithoutConnectedByNestedInput
+  instagramMessagesSent?: Prisma.MessageUpdateManyWithoutSentByNestedInput
+  instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutUserNestedInput
+  googleConnections?: Prisma.GoogleConnectionUpdateManyWithoutConnectedByNestedInput
+  googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
+  notifications?: Prisma.UserNotificationUpdateManyWithoutUserNestedInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUpdateManyWithoutUserNestedInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUpdateManyWithoutUserNestedInput
+  procurementHandOffs?: Prisma.OrderUpdateManyWithoutProcurementHandedOffByUserNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutUserNestedInput
+  deliveryConnectionsConnected?: Prisma.DeliveryConnectionUpdateManyWithoutConnectedByNestedInput
+  shipmentsCreated?: Prisma.ShipmentUpdateManyWithoutCreatedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutAvatarCleanupsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+  invitationsCreated?: Prisma.TenantInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUncheckedUpdateManyWithoutUserNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutUserNestedInput
+  instagramConnections?: Prisma.InstagramConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  instagramMessagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSentByNestedInput
+  instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
+  googleConnections?: Prisma.GoogleConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutUserNestedInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedUpdateManyWithoutUserNestedInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUncheckedUpdateManyWithoutUserNestedInput
+  procurementHandOffs?: Prisma.OrderUncheckedUpdateManyWithoutProcurementHandedOffByUserNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
+  deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  shipmentsCreated?: Prisma.ShipmentUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserCreateWithoutNotificationsInput = {
   id?: string
   email: string
   name: string
+  phone?: string | null
+  locale?: string
   passwordHash?: string | null
   emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
   platformRole?: $Enums.PlatformRole
   status?: $Enums.AccessStatus
   createdAt?: Date | string
@@ -1572,14 +2039,21 @@ export type UserCreateWithoutNotificationsInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutUserInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutNotificationsInput = {
   id?: string
   email: string
   name: string
+  phone?: string | null
+  locale?: string
   passwordHash?: string | null
   emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
   platformRole?: $Enums.PlatformRole
   status?: $Enums.AccessStatus
   createdAt?: Date | string
@@ -1603,6 +2077,7 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentUncheckedCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutNotificationsInput = {
@@ -1625,8 +2100,14 @@ export type UserUpdateWithoutNotificationsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1650,14 +2131,21 @@ export type UserUpdateWithoutNotificationsInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutUserNestedInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutNotificationsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1681,14 +2169,21 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUncheckedUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutTelegramLinkAttemptsInput = {
   id?: string
   email: string
   name: string
+  phone?: string | null
+  locale?: string
   passwordHash?: string | null
   emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
   platformRole?: $Enums.PlatformRole
   status?: $Enums.AccessStatus
   createdAt?: Date | string
@@ -1712,14 +2207,21 @@ export type UserCreateWithoutTelegramLinkAttemptsInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutUserInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutTelegramLinkAttemptsInput = {
   id?: string
   email: string
   name: string
+  phone?: string | null
+  locale?: string
   passwordHash?: string | null
   emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
   platformRole?: $Enums.PlatformRole
   status?: $Enums.AccessStatus
   createdAt?: Date | string
@@ -1743,6 +2245,7 @@ export type UserUncheckedCreateWithoutTelegramLinkAttemptsInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentUncheckedCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutTelegramLinkAttemptsInput = {
@@ -1765,8 +2268,14 @@ export type UserUpdateWithoutTelegramLinkAttemptsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1790,14 +2299,21 @@ export type UserUpdateWithoutTelegramLinkAttemptsInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutUserNestedInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTelegramLinkAttemptsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1821,14 +2337,21 @@ export type UserUncheckedUpdateWithoutTelegramLinkAttemptsInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUncheckedUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutTelegramUserBindingsInput = {
   id?: string
   email: string
   name: string
+  phone?: string | null
+  locale?: string
   passwordHash?: string | null
   emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
   platformRole?: $Enums.PlatformRole
   status?: $Enums.AccessStatus
   createdAt?: Date | string
@@ -1852,14 +2375,21 @@ export type UserCreateWithoutTelegramUserBindingsInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutUserInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutTelegramUserBindingsInput = {
   id?: string
   email: string
   name: string
+  phone?: string | null
+  locale?: string
   passwordHash?: string | null
   emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
   platformRole?: $Enums.PlatformRole
   status?: $Enums.AccessStatus
   createdAt?: Date | string
@@ -1883,6 +2413,7 @@ export type UserUncheckedCreateWithoutTelegramUserBindingsInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentUncheckedCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutTelegramUserBindingsInput = {
@@ -1905,8 +2436,14 @@ export type UserUpdateWithoutTelegramUserBindingsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1930,14 +2467,21 @@ export type UserUpdateWithoutTelegramUserBindingsInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutUserNestedInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTelegramUserBindingsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1961,14 +2505,21 @@ export type UserUncheckedUpdateWithoutTelegramUserBindingsInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUncheckedUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutGoogleIdentityInput = {
   id?: string
   email: string
   name: string
+  phone?: string | null
+  locale?: string
   passwordHash?: string | null
   emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
   platformRole?: $Enums.PlatformRole
   status?: $Enums.AccessStatus
   createdAt?: Date | string
@@ -1992,14 +2543,21 @@ export type UserCreateWithoutGoogleIdentityInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutUserInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutGoogleIdentityInput = {
   id?: string
   email: string
   name: string
+  phone?: string | null
+  locale?: string
   passwordHash?: string | null
   emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
   platformRole?: $Enums.PlatformRole
   status?: $Enums.AccessStatus
   createdAt?: Date | string
@@ -2023,6 +2581,7 @@ export type UserUncheckedCreateWithoutGoogleIdentityInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentUncheckedCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutGoogleIdentityInput = {
@@ -2045,8 +2604,14 @@ export type UserUpdateWithoutGoogleIdentityInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2070,14 +2635,21 @@ export type UserUpdateWithoutGoogleIdentityInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutUserNestedInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutGoogleIdentityInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2101,14 +2673,21 @@ export type UserUncheckedUpdateWithoutGoogleIdentityInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUncheckedUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutMembershipsInput = {
   id?: string
   email: string
   name: string
+  phone?: string | null
+  locale?: string
   passwordHash?: string | null
   emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
   platformRole?: $Enums.PlatformRole
   status?: $Enums.AccessStatus
   createdAt?: Date | string
@@ -2132,14 +2711,21 @@ export type UserCreateWithoutMembershipsInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutUserInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutMembershipsInput = {
   id?: string
   email: string
   name: string
+  phone?: string | null
+  locale?: string
   passwordHash?: string | null
   emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
   platformRole?: $Enums.PlatformRole
   status?: $Enums.AccessStatus
   createdAt?: Date | string
@@ -2163,6 +2749,7 @@ export type UserUncheckedCreateWithoutMembershipsInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentUncheckedCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutMembershipsInput = {
@@ -2185,8 +2772,14 @@ export type UserUpdateWithoutMembershipsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2210,14 +2803,21 @@ export type UserUpdateWithoutMembershipsInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutUserNestedInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMembershipsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2241,14 +2841,21 @@ export type UserUncheckedUpdateWithoutMembershipsInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUncheckedUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSessionsInput = {
   id?: string
   email: string
   name: string
+  phone?: string | null
+  locale?: string
   passwordHash?: string | null
   emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
   platformRole?: $Enums.PlatformRole
   status?: $Enums.AccessStatus
   createdAt?: Date | string
@@ -2272,14 +2879,21 @@ export type UserCreateWithoutSessionsInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutUserInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSessionsInput = {
   id?: string
   email: string
   name: string
+  phone?: string | null
+  locale?: string
   passwordHash?: string | null
   emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
   platformRole?: $Enums.PlatformRole
   status?: $Enums.AccessStatus
   createdAt?: Date | string
@@ -2303,6 +2917,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentUncheckedCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSessionsInput = {
@@ -2325,8 +2940,14 @@ export type UserUpdateWithoutSessionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2350,14 +2971,21 @@ export type UserUpdateWithoutSessionsInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutUserNestedInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSessionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2381,14 +3009,21 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUncheckedUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutEmailVerificationTokensInput = {
   id?: string
   email: string
   name: string
+  phone?: string | null
+  locale?: string
   passwordHash?: string | null
   emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
   platformRole?: $Enums.PlatformRole
   status?: $Enums.AccessStatus
   createdAt?: Date | string
@@ -2412,14 +3047,21 @@ export type UserCreateWithoutEmailVerificationTokensInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutUserInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutEmailVerificationTokensInput = {
   id?: string
   email: string
   name: string
+  phone?: string | null
+  locale?: string
   passwordHash?: string | null
   emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
   platformRole?: $Enums.PlatformRole
   status?: $Enums.AccessStatus
   createdAt?: Date | string
@@ -2443,6 +3085,7 @@ export type UserUncheckedCreateWithoutEmailVerificationTokensInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentUncheckedCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutEmailVerificationTokensInput = {
@@ -2465,8 +3108,14 @@ export type UserUpdateWithoutEmailVerificationTokensInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2490,14 +3139,21 @@ export type UserUpdateWithoutEmailVerificationTokensInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutUserNestedInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutEmailVerificationTokensInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2521,14 +3177,21 @@ export type UserUncheckedUpdateWithoutEmailVerificationTokensInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUncheckedUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutPasswordResetTokensInput = {
   id?: string
   email: string
   name: string
+  phone?: string | null
+  locale?: string
   passwordHash?: string | null
   emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
   platformRole?: $Enums.PlatformRole
   status?: $Enums.AccessStatus
   createdAt?: Date | string
@@ -2552,14 +3215,21 @@ export type UserCreateWithoutPasswordResetTokensInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutUserInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
   id?: string
   email: string
   name: string
+  phone?: string | null
+  locale?: string
   passwordHash?: string | null
   emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
   platformRole?: $Enums.PlatformRole
   status?: $Enums.AccessStatus
   createdAt?: Date | string
@@ -2583,6 +3253,7 @@ export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentUncheckedCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPasswordResetTokensInput = {
@@ -2605,8 +3276,14 @@ export type UserUpdateWithoutPasswordResetTokensInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2630,14 +3307,21 @@ export type UserUpdateWithoutPasswordResetTokensInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutUserNestedInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2661,14 +3345,21 @@ export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUncheckedUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutInvitationsCreatedInput = {
   id?: string
   email: string
   name: string
+  phone?: string | null
+  locale?: string
   passwordHash?: string | null
   emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
   platformRole?: $Enums.PlatformRole
   status?: $Enums.AccessStatus
   createdAt?: Date | string
@@ -2692,14 +3383,21 @@ export type UserCreateWithoutInvitationsCreatedInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutUserInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutInvitationsCreatedInput = {
   id?: string
   email: string
   name: string
+  phone?: string | null
+  locale?: string
   passwordHash?: string | null
   emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
   platformRole?: $Enums.PlatformRole
   status?: $Enums.AccessStatus
   createdAt?: Date | string
@@ -2723,6 +3421,7 @@ export type UserUncheckedCreateWithoutInvitationsCreatedInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentUncheckedCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutInvitationsCreatedInput = {
@@ -2745,8 +3444,14 @@ export type UserUpdateWithoutInvitationsCreatedInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2770,14 +3475,21 @@ export type UserUpdateWithoutInvitationsCreatedInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutUserNestedInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutInvitationsCreatedInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2801,14 +3513,21 @@ export type UserUncheckedUpdateWithoutInvitationsCreatedInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUncheckedUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSecurityAuditLogsInput = {
   id?: string
   email: string
   name: string
+  phone?: string | null
+  locale?: string
   passwordHash?: string | null
   emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
   platformRole?: $Enums.PlatformRole
   status?: $Enums.AccessStatus
   createdAt?: Date | string
@@ -2832,14 +3551,21 @@ export type UserCreateWithoutSecurityAuditLogsInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutUserInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSecurityAuditLogsInput = {
   id?: string
   email: string
   name: string
+  phone?: string | null
+  locale?: string
   passwordHash?: string | null
   emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
   platformRole?: $Enums.PlatformRole
   status?: $Enums.AccessStatus
   createdAt?: Date | string
@@ -2863,6 +3589,7 @@ export type UserUncheckedCreateWithoutSecurityAuditLogsInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentUncheckedCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSecurityAuditLogsInput = {
@@ -2885,8 +3612,14 @@ export type UserUpdateWithoutSecurityAuditLogsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2910,14 +3643,21 @@ export type UserUpdateWithoutSecurityAuditLogsInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutUserNestedInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSecurityAuditLogsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2941,14 +3681,21 @@ export type UserUncheckedUpdateWithoutSecurityAuditLogsInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUncheckedUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutInstagramMessagesSentInput = {
   id?: string
   email: string
   name: string
+  phone?: string | null
+  locale?: string
   passwordHash?: string | null
   emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
   platformRole?: $Enums.PlatformRole
   status?: $Enums.AccessStatus
   createdAt?: Date | string
@@ -2972,14 +3719,21 @@ export type UserCreateWithoutInstagramMessagesSentInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutUserInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutInstagramMessagesSentInput = {
   id?: string
   email: string
   name: string
+  phone?: string | null
+  locale?: string
   passwordHash?: string | null
   emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
   platformRole?: $Enums.PlatformRole
   status?: $Enums.AccessStatus
   createdAt?: Date | string
@@ -3003,6 +3757,7 @@ export type UserUncheckedCreateWithoutInstagramMessagesSentInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentUncheckedCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutInstagramMessagesSentInput = {
@@ -3025,8 +3780,14 @@ export type UserUpdateWithoutInstagramMessagesSentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3050,14 +3811,21 @@ export type UserUpdateWithoutInstagramMessagesSentInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutUserNestedInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutInstagramMessagesSentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3081,14 +3849,21 @@ export type UserUncheckedUpdateWithoutInstagramMessagesSentInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUncheckedUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutProcurementHandOffsInput = {
   id?: string
   email: string
   name: string
+  phone?: string | null
+  locale?: string
   passwordHash?: string | null
   emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
   platformRole?: $Enums.PlatformRole
   status?: $Enums.AccessStatus
   createdAt?: Date | string
@@ -3112,14 +3887,21 @@ export type UserCreateWithoutProcurementHandOffsInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutUserInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutProcurementHandOffsInput = {
   id?: string
   email: string
   name: string
+  phone?: string | null
+  locale?: string
   passwordHash?: string | null
   emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
   platformRole?: $Enums.PlatformRole
   status?: $Enums.AccessStatus
   createdAt?: Date | string
@@ -3143,6 +3925,7 @@ export type UserUncheckedCreateWithoutProcurementHandOffsInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentUncheckedCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutProcurementHandOffsInput = {
@@ -3165,8 +3948,14 @@ export type UserUpdateWithoutProcurementHandOffsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3190,14 +3979,21 @@ export type UserUpdateWithoutProcurementHandOffsInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutUserNestedInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutProcurementHandOffsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3221,14 +4017,21 @@ export type UserUncheckedUpdateWithoutProcurementHandOffsInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUncheckedUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutDeliveryConnectionsConnectedInput = {
   id?: string
   email: string
   name: string
+  phone?: string | null
+  locale?: string
   passwordHash?: string | null
   emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
   platformRole?: $Enums.PlatformRole
   status?: $Enums.AccessStatus
   createdAt?: Date | string
@@ -3252,14 +4055,21 @@ export type UserCreateWithoutDeliveryConnectionsConnectedInput = {
   procurementHandOffs?: Prisma.OrderCreateNestedManyWithoutProcurementHandedOffByUserInput
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutUserInput
   shipmentsCreated?: Prisma.ShipmentCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutDeliveryConnectionsConnectedInput = {
   id?: string
   email: string
   name: string
+  phone?: string | null
+  locale?: string
   passwordHash?: string | null
   emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
   platformRole?: $Enums.PlatformRole
   status?: $Enums.AccessStatus
   createdAt?: Date | string
@@ -3283,6 +4093,7 @@ export type UserUncheckedCreateWithoutDeliveryConnectionsConnectedInput = {
   procurementHandOffs?: Prisma.OrderUncheckedCreateNestedManyWithoutProcurementHandedOffByUserInput
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
   shipmentsCreated?: Prisma.ShipmentUncheckedCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutDeliveryConnectionsConnectedInput = {
@@ -3305,8 +4116,14 @@ export type UserUpdateWithoutDeliveryConnectionsConnectedInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3330,14 +4147,21 @@ export type UserUpdateWithoutDeliveryConnectionsConnectedInput = {
   procurementHandOffs?: Prisma.OrderUpdateManyWithoutProcurementHandedOffByUserNestedInput
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutUserNestedInput
   shipmentsCreated?: Prisma.ShipmentUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutDeliveryConnectionsConnectedInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3361,14 +4185,21 @@ export type UserUncheckedUpdateWithoutDeliveryConnectionsConnectedInput = {
   procurementHandOffs?: Prisma.OrderUncheckedUpdateManyWithoutProcurementHandedOffByUserNestedInput
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
   shipmentsCreated?: Prisma.ShipmentUncheckedUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutShipmentsCreatedInput = {
   id?: string
   email: string
   name: string
+  phone?: string | null
+  locale?: string
   passwordHash?: string | null
   emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
   platformRole?: $Enums.PlatformRole
   status?: $Enums.AccessStatus
   createdAt?: Date | string
@@ -3392,14 +4223,21 @@ export type UserCreateWithoutShipmentsCreatedInput = {
   procurementHandOffs?: Prisma.OrderCreateNestedManyWithoutProcurementHandedOffByUserInput
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutUserInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionCreateNestedManyWithoutConnectedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutShipmentsCreatedInput = {
   id?: string
   email: string
   name: string
+  phone?: string | null
+  locale?: string
   passwordHash?: string | null
   emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
   platformRole?: $Enums.PlatformRole
   status?: $Enums.AccessStatus
   createdAt?: Date | string
@@ -3423,6 +4261,7 @@ export type UserUncheckedCreateWithoutShipmentsCreatedInput = {
   procurementHandOffs?: Prisma.OrderUncheckedCreateNestedManyWithoutProcurementHandedOffByUserInput
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutShipmentsCreatedInput = {
@@ -3445,8 +4284,14 @@ export type UserUpdateWithoutShipmentsCreatedInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3470,14 +4315,21 @@ export type UserUpdateWithoutShipmentsCreatedInput = {
   procurementHandOffs?: Prisma.OrderUpdateManyWithoutProcurementHandedOffByUserNestedInput
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutUserNestedInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUpdateManyWithoutConnectedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutShipmentsCreatedInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3501,14 +4353,21 @@ export type UserUncheckedUpdateWithoutShipmentsCreatedInput = {
   procurementHandOffs?: Prisma.OrderUncheckedUpdateManyWithoutProcurementHandedOffByUserNestedInput
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutTelegramNotificationPreferencesInput = {
   id?: string
   email: string
   name: string
+  phone?: string | null
+  locale?: string
   passwordHash?: string | null
   emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
   platformRole?: $Enums.PlatformRole
   status?: $Enums.AccessStatus
   createdAt?: Date | string
@@ -3532,14 +4391,21 @@ export type UserCreateWithoutTelegramNotificationPreferencesInput = {
   procurementHandOffs?: Prisma.OrderCreateNestedManyWithoutProcurementHandedOffByUserInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutTelegramNotificationPreferencesInput = {
   id?: string
   email: string
   name: string
+  phone?: string | null
+  locale?: string
   passwordHash?: string | null
   emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
   platformRole?: $Enums.PlatformRole
   status?: $Enums.AccessStatus
   createdAt?: Date | string
@@ -3563,6 +4429,7 @@ export type UserUncheckedCreateWithoutTelegramNotificationPreferencesInput = {
   procurementHandOffs?: Prisma.OrderUncheckedCreateNestedManyWithoutProcurementHandedOffByUserInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentUncheckedCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutTelegramNotificationPreferencesInput = {
@@ -3585,8 +4452,14 @@ export type UserUpdateWithoutTelegramNotificationPreferencesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3610,14 +4483,21 @@ export type UserUpdateWithoutTelegramNotificationPreferencesInput = {
   procurementHandOffs?: Prisma.OrderUpdateManyWithoutProcurementHandedOffByUserNestedInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTelegramNotificationPreferencesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3641,6 +4521,7 @@ export type UserUncheckedUpdateWithoutTelegramNotificationPreferencesInput = {
   procurementHandOffs?: Prisma.OrderUncheckedUpdateManyWithoutProcurementHandedOffByUserNestedInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUncheckedUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -3668,6 +4549,7 @@ export type UserCountOutputType = {
   telegramNotificationPreferences: number
   deliveryConnectionsConnected: number
   shipmentsCreated: number
+  avatarCleanups: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -3690,6 +4572,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   telegramNotificationPreferences?: boolean | UserCountOutputTypeCountTelegramNotificationPreferencesArgs
   deliveryConnectionsConnected?: boolean | UserCountOutputTypeCountDeliveryConnectionsConnectedArgs
   shipmentsCreated?: boolean | UserCountOutputTypeCountShipmentsCreatedArgs
+  avatarCleanups?: boolean | UserCountOutputTypeCountAvatarCleanupsArgs
 }
 
 /**
@@ -3835,13 +4718,26 @@ export type UserCountOutputTypeCountShipmentsCreatedArgs<ExtArgs extends runtime
   where?: Prisma.ShipmentWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountAvatarCleanupsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.UserAvatarCleanupWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   email?: boolean
   name?: boolean
+  phone?: boolean
+  locale?: boolean
   passwordHash?: boolean
   emailVerifiedAt?: boolean
+  avatarStorageKey?: boolean
+  avatarChecksum?: boolean
+  avatarContentType?: boolean
+  lastLoginAt?: boolean
   platformRole?: boolean
   status?: boolean
   createdAt?: boolean
@@ -3866,6 +4762,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   telegramNotificationPreferences?: boolean | Prisma.User$telegramNotificationPreferencesArgs<ExtArgs>
   deliveryConnectionsConnected?: boolean | Prisma.User$deliveryConnectionsConnectedArgs<ExtArgs>
   shipmentsCreated?: boolean | Prisma.User$shipmentsCreatedArgs<ExtArgs>
+  avatarCleanups?: boolean | Prisma.User$avatarCleanupsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -3873,8 +4770,14 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   id?: boolean
   email?: boolean
   name?: boolean
+  phone?: boolean
+  locale?: boolean
   passwordHash?: boolean
   emailVerifiedAt?: boolean
+  avatarStorageKey?: boolean
+  avatarChecksum?: boolean
+  avatarContentType?: boolean
+  lastLoginAt?: boolean
   platformRole?: boolean
   status?: boolean
   createdAt?: boolean
@@ -3885,8 +4788,14 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   id?: boolean
   email?: boolean
   name?: boolean
+  phone?: boolean
+  locale?: boolean
   passwordHash?: boolean
   emailVerifiedAt?: boolean
+  avatarStorageKey?: boolean
+  avatarChecksum?: boolean
+  avatarContentType?: boolean
+  lastLoginAt?: boolean
   platformRole?: boolean
   status?: boolean
   createdAt?: boolean
@@ -3897,15 +4806,21 @@ export type UserSelectScalar = {
   id?: boolean
   email?: boolean
   name?: boolean
+  phone?: boolean
+  locale?: boolean
   passwordHash?: boolean
   emailVerifiedAt?: boolean
+  avatarStorageKey?: boolean
+  avatarChecksum?: boolean
+  avatarContentType?: boolean
+  lastLoginAt?: boolean
   platformRole?: boolean
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "name" | "passwordHash" | "emailVerifiedAt" | "platformRole" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "name" | "phone" | "locale" | "passwordHash" | "emailVerifiedAt" | "avatarStorageKey" | "avatarChecksum" | "avatarContentType" | "lastLoginAt" | "platformRole" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   memberships?: boolean | Prisma.User$membershipsArgs<ExtArgs>
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
@@ -3927,6 +4842,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   telegramNotificationPreferences?: boolean | Prisma.User$telegramNotificationPreferencesArgs<ExtArgs>
   deliveryConnectionsConnected?: boolean | Prisma.User$deliveryConnectionsConnectedArgs<ExtArgs>
   shipmentsCreated?: boolean | Prisma.User$shipmentsCreatedArgs<ExtArgs>
+  avatarCleanups?: boolean | Prisma.User$avatarCleanupsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -3955,13 +4871,20 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     telegramNotificationPreferences: Prisma.$TelegramNotificationPreferencePayload<ExtArgs>[]
     deliveryConnectionsConnected: Prisma.$DeliveryConnectionPayload<ExtArgs>[]
     shipmentsCreated: Prisma.$ShipmentPayload<ExtArgs>[]
+    avatarCleanups: Prisma.$UserAvatarCleanupPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     email: string
     name: string
+    phone: string | null
+    locale: string
     passwordHash: string | null
     emailVerifiedAt: Date | null
+    avatarStorageKey: string | null
+    avatarChecksum: string | null
+    avatarContentType: string | null
+    lastLoginAt: Date | null
     platformRole: $Enums.PlatformRole
     status: $Enums.AccessStatus
     createdAt: Date
@@ -4380,6 +5303,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   telegramNotificationPreferences<T extends Prisma.User$telegramNotificationPreferencesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$telegramNotificationPreferencesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TelegramNotificationPreferencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   deliveryConnectionsConnected<T extends Prisma.User$deliveryConnectionsConnectedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$deliveryConnectionsConnectedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DeliveryConnectionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   shipmentsCreated<T extends Prisma.User$shipmentsCreatedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$shipmentsCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ShipmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  avatarCleanups<T extends Prisma.User$avatarCleanupsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$avatarCleanupsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserAvatarCleanupPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4412,8 +5336,14 @@ export interface UserFieldRefs {
   readonly id: Prisma.FieldRef<"User", 'String'>
   readonly email: Prisma.FieldRef<"User", 'String'>
   readonly name: Prisma.FieldRef<"User", 'String'>
+  readonly phone: Prisma.FieldRef<"User", 'String'>
+  readonly locale: Prisma.FieldRef<"User", 'String'>
   readonly passwordHash: Prisma.FieldRef<"User", 'String'>
   readonly emailVerifiedAt: Prisma.FieldRef<"User", 'DateTime'>
+  readonly avatarStorageKey: Prisma.FieldRef<"User", 'String'>
+  readonly avatarChecksum: Prisma.FieldRef<"User", 'String'>
+  readonly avatarContentType: Prisma.FieldRef<"User", 'String'>
+  readonly lastLoginAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly platformRole: Prisma.FieldRef<"User", 'PlatformRole'>
   readonly status: Prisma.FieldRef<"User", 'AccessStatus'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
@@ -5283,6 +6213,30 @@ export type User$shipmentsCreatedArgs<ExtArgs extends runtime.Types.Extensions.I
   take?: number
   skip?: number
   distinct?: Prisma.ShipmentScalarFieldEnum | Prisma.ShipmentScalarFieldEnum[]
+}
+
+/**
+ * User.avatarCleanups
+ */
+export type User$avatarCleanupsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the UserAvatarCleanup
+   */
+  select?: Prisma.UserAvatarCleanupSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the UserAvatarCleanup
+   */
+  omit?: Prisma.UserAvatarCleanupOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserAvatarCleanupInclude<ExtArgs> | null
+  where?: Prisma.UserAvatarCleanupWhereInput
+  orderBy?: Prisma.UserAvatarCleanupOrderByWithRelationInput | Prisma.UserAvatarCleanupOrderByWithRelationInput[]
+  cursor?: Prisma.UserAvatarCleanupWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.UserAvatarCleanupScalarFieldEnum | Prisma.UserAvatarCleanupScalarFieldEnum[]
 }
 
 /**

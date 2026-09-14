@@ -403,8 +403,14 @@ model User {
   id                              String                           @id @default(uuid()) @db.Uuid
   email                           String                           @unique
   name                            String
+  phone                           String?
+  locale                          String                           @default("uk")
   passwordHash                    String?                          @map("password_hash")
   emailVerifiedAt                 DateTime?                        @map("email_verified_at")
+  avatarStorageKey                String?                          @map("avatar_storage_key")
+  avatarChecksum                  String?                          @map("avatar_checksum")
+  avatarContentType               String?                          @map("avatar_content_type")
+  lastLoginAt                     DateTime?                        @map("last_login_at")
   platformRole                    PlatformRole                     @default(USER) @map("platform_role")
   status                          AccessStatus                     @default(PENDING)
   createdAt                       DateTime                         @default(now()) @map("created_at")
@@ -429,9 +435,27 @@ model User {
   telegramNotificationPreferences TelegramNotificationPreference[]
   deliveryConnectionsConnected    DeliveryConnection[]             @relation("DeliveryConnectionConnectedBy")
   shipmentsCreated                Shipment[]                       @relation("ShipmentCreatedBy")
+  avatarCleanups                  UserAvatarCleanup[]
 
   @@index([status])
   @@map("users")
+}
+
+model UserAvatarCleanup {
+  id            String    @id @default(uuid()) @db.Uuid
+  userId        String    @map("user_id") @db.Uuid
+  storageKey    String    @unique @map("storage_key")
+  status        String    @default("PENDING")
+  attempts      Int       @default(0)
+  nextAttemptAt DateTime  @default(now()) @map("next_attempt_at")
+  leaseUntil    DateTime? @map("lease_until")
+  lastErrorCode String?   @map("last_error_code")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([status, nextAttemptAt])
+  @@map("user_avatar_cleanups")
 }
 
 model UserNotification {
