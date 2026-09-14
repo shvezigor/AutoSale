@@ -63,8 +63,22 @@ describe('SettingsPage', () => {
 
     fireEvent.click(screen.getByRole('tab', { name: /Дані/ }));
 
-    expect(screen.getByRole('heading', { name: 'Товари' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Експорт замовлень' })).toBeInTheDocument();
+    const catalogueIntegration = screen.getByRole('button', { name: /Товари.*Каталог/i });
+    const ordersIntegration = screen.getByRole('button', { name: /Експорт замовлень.*таблицю/i });
+    expect(catalogueIntegration).toHaveAttribute('aria-expanded', 'false');
+    expect(ordersIntegration).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.queryByRole('button', { name: 'Обрати Google-таблицю' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Обрати таблицю для замовлень' })).not.toBeInTheDocument();
+
+    fireEvent.click(catalogueIntegration);
+    expect(catalogueIntegration).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByRole('button', { name: 'Обрати Google-таблицю' })).toBeInTheDocument();
+
+    fireEvent.click(ordersIntegration);
+    expect(catalogueIntegration).toHaveAttribute('aria-expanded', 'false');
+    expect(ordersIntegration).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.queryByRole('button', { name: 'Обрати Google-таблицю' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Обрати таблицю для замовлень' })).toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Google-акаунт' })).not.toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Підключення каналів' })).not.toBeInTheDocument();
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/catalogue/sources/44444444-4444-4444-8444-444444444444');

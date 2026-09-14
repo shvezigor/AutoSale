@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { mutatingFetch } from '../auth/csrf-fetch';
 import { useActivity } from './activity-provider';
 import { GooglePickerButton, type GooglePickerSelection } from './google-picker-button';
@@ -16,7 +16,7 @@ export interface GoogleSheetsSettings {
   errorSummary: string | null;
 }
 
-export function GoogleSheetsSettingsForm({ initial, googleConnected = true, autoOpenPicker = false }: { initial: GoogleSheetsSettings; googleConnected?: boolean; autoOpenPicker?: boolean }) {
+export function GoogleSheetsSettingsForm({ initial, googleConnected = true, autoOpenPicker = false, embedded = false, onSettingsChange }: { initial: GoogleSheetsSettings; googleConnected?: boolean; autoOpenPicker?: boolean; embedded?: boolean; onSettingsChange?: (settings: GoogleSheetsSettings) => void }) {
   const [settings, setSettings] = useState(initial);
   const [spreadsheetId, setSpreadsheetId] = useState(initial.spreadsheetId ?? '');
   const [sheetName, setSheetName] = useState(initial.sheetName);
@@ -26,6 +26,8 @@ export function GoogleSheetsSettingsForm({ initial, googleConnected = true, auto
   const [tabs, setTabs] = useState<Array<{ sheetId: number; title: string }>>([]);
   const activity = useActivity();
   const toast = useToast();
+
+  useEffect(() => { onSettingsChange?.(settings); }, [settings, onSettingsChange]);
 
   async function selectSpreadsheet(selection: GooglePickerSelection) {
     setPending(true); setMessage(null); setError(null);
@@ -75,8 +77,8 @@ export function GoogleSheetsSettingsForm({ initial, googleConnected = true, auto
     else await operation();
   }
 
-  return <section className="settings-card sheets-card data-task-card" aria-labelledby="sheets-title">
-    <div className="settings-card-heading"><div><h2 id="sheets-title">Експорт замовлень</h2><p>Підтверджені замовлення автоматично записуватимуться у вибрану таблицю.</p></div><span className={`connection-status status-${settings.status.toLowerCase()}`}>{statusLabel(settings.status)}</span></div>
+  return <section className={`settings-card sheets-card data-task-card ${embedded ? 'is-embedded' : ''}`} {...(embedded ? { 'aria-label': 'Експорт замовлень' } : { 'aria-labelledby': 'sheets-title' })}>
+    {!embedded && <div className="settings-card-heading"><div><h2 id="sheets-title">Експорт замовлень</h2><p>Підтверджені замовлення автоматично записуватимуться у вибрану таблицю.</p></div><span className={`connection-status status-${settings.status.toLowerCase()}`}>{statusLabel(settings.status)}</span></div>}
     {!googleConnected && <p className="settings-step-notice">Під час вибору Google один раз попросить доступ до обраної таблиці.</p>}
     <GooglePickerButton label="Обрати таблицю для замовлень" connected={googleConnected} intent="orders" autoOpen={autoOpenPicker} disabled={pending} onSelected={(selection) => void selectSpreadsheet(selection)} />
     {spreadsheetId && <div className="data-selection-summary"><span>Таблицю обрано</span><strong>{sheetName || 'Оберіть вкладку'}</strong></div>}

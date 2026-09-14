@@ -250,6 +250,8 @@ button:disabled { opacity: .72; cursor: not-allowed; }
 .delivery-carrier-mark.carrier-ukrposhta { background: #fff7d8; color: #2c568b; }
 .delivery-carrier-mark.channel-instagram { background: #fff0f5; color: #c52f69; }
 .delivery-carrier-mark.channel-telegram { background: #eaf6ff; color: #1688c9; }
+.delivery-carrier-mark.data-catalogue { background: #edf7f1; color: #237349; }
+.delivery-carrier-mark.data-orders-export { background: #eef3ff; color: #315fb5; }
 .delivery-carrier-copy { display: grid; min-width: 0; gap: 4px; }
 .delivery-carrier-copy strong { font-size: 14px; }
 .delivery-carrier-copy small { overflow: hidden; color: var(--muted); font-size: 12px; line-height: 1.35; text-overflow: ellipsis; white-space: nowrap; }
@@ -260,6 +262,7 @@ button:disabled { opacity: .72; cursor: not-allowed; }
 .settings-section .delivery-carrier-panel .delivery-settings-card.is-embedded { max-width: none; min-width: 0; margin: 0; border: 0; border-radius: 0; padding: 20px 0 0; box-shadow: none; }
 .settings-section .delivery-carrier-panel .instagram-connection-card.is-embedded { max-width: none; min-width: 0; margin: 0; border: 0; border-radius: 0; padding: 20px 0 0; box-shadow: none; }
 .settings-section .delivery-carrier-panel .telegram-connection-card.is-embedded { max-width: none; min-width: 0; margin: 0; border: 0; border-radius: 0; padding: 20px 0 0; box-shadow: none; }
+.settings-section .delivery-carrier-panel .data-task-card.is-embedded { max-width: none; min-width: 0; min-height: 0; margin: 0 !important; border: 0; border-radius: 0; padding: 20px 0 0; box-shadow: none; }
 .delivery-panel-section-heading { display: grid; gap: 4px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
 .delivery-panel-section-heading span { color: var(--ink); font-size: 14px; font-weight: 750; }
 .delivery-panel-section-heading p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.45; }

@@ -1,10 +1,10 @@
 import { authenticatedApiFetch, getServerSession } from '../../../src/auth/session';
 import type { PublicSession } from '../../../../../packages/contracts/src/auth';
-import { GoogleSheetsSettingsForm, type GoogleSheetsSettings } from '../../../src/components/google-sheets-settings-form';
+import type { GoogleSheetsSettings } from '../../../src/components/google-sheets-settings-form';
 import { OrderSettingsForm, type OrderSettings } from '../../../src/components/order-settings-form';
 import type { InstagramConnectionSummary } from '../../../src/components/instagram-settings-form';
 import { DemoScenarioCard } from '../../../src/components/demo-scenario-card';
-import { CatalogueSourceSettings, type CatalogueSourceConfiguration, type CatalogueSourceHealth } from '../../../src/components/catalogue-source-settings';
+import type { CatalogueSourceConfiguration, CatalogueSourceHealth } from '../../../src/components/catalogue-source-settings';
 import type { GoogleConnectionSummary } from '../../../src/components/google-connection-settings';
 import { SettingsTabs, type SettingsTabId } from '../../../src/components/settings-tabs';
 import type { TelegramConnectionSummary } from '../../../src/components/telegram-settings-card';
@@ -16,6 +16,7 @@ import type { UkrposhtaSettingsSummary } from '../../../src/components/ukrposhta
 import { DeliveryCarrierHub } from '../../../src/components/delivery-carrier-hub';
 import { SocialChannelHub } from '../../../src/components/social-channel-hub';
 import { NotificationChannelHub } from '../../../src/components/notification-channel-hub';
+import { DataIntegrationHub } from '../../../src/components/data-integration-hub';
 
 export const dynamic = 'force-dynamic';
 
@@ -136,7 +137,7 @@ function SettingsLayout({
       id: 'data' as const,
       label: 'Дані',
       description: 'Товари й експорт',
-      content: <section className="settings-section data-workspace"><div className="settings-section-heading"><h2>Дані та синхронізація</h2><p>{isManager ? 'Стан підключень без доступу до таблиць і даних клієнтів.' : 'Оберіть, звідки брати товари та куди записувати підтверджені замовлення.'}</p>{!isManager && <span className={`data-account-state status-${google.status.toLowerCase()}`}>{googleConnected && google.email ? `Google: ${google.email}` : 'Google попросить доступ під час вибору таблиці'}</span>}</div>{settings ? <div className="data-workspace-grid"><CatalogueSourceSettings role={session.membershipRole!} sources={catalogueSources} configurations={catalogueConfigurations} googleConnected={googleConnected} autoOpenPicker={pickerAction === 'pick-catalogue'} /><GoogleSheetsSettingsForm initial={sheets!} googleConnected={googleConnected} autoOpenPicker={pickerAction === 'pick-orders'} /></div> : <div className="settings-card"><p>Власник керує джерелами даних. Менеджерам доступний лише стан інтеграцій.</p></div>}</section>,
+      content: <section className="settings-section data-workspace"><div className="settings-section-heading"><h2>Дані та синхронізація</h2><p>{isManager ? 'Стан підключень без доступу до таблиць і даних клієнтів.' : 'Оберіть, звідки брати товари та куди записувати підтверджені замовлення.'}</p>{!isManager && <span className={`data-account-state status-${google.status.toLowerCase()}`}>{googleConnected && google.email ? `Google: ${google.email}` : 'Google попросить доступ під час вибору таблиці'}</span>}</div>{settings ? <DataIntegrationHub sources={catalogueSources} configurations={catalogueConfigurations} sheets={sheets!} googleConnected={googleConnected} autoOpenCatalogue={pickerAction === 'pick-catalogue'} autoOpenOrders={pickerAction === 'pick-orders'} /> : <div className="settings-card"><p>Власник керує джерелами даних. Менеджерам доступний лише стан інтеграцій.</p></div>}</section>,
     },
     ...(settings ? [{
       id: 'orders' as const,

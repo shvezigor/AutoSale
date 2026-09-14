@@ -24,12 +24,16 @@ export function CatalogueSourceSettings({
   configurations,
   googleConnected = true,
   autoOpenPicker = false,
+  embedded = false,
+  onConfigurationChange,
 }: {
   role: 'OWNER' | 'MANAGER';
   sources: CatalogueSourceHealth[];
   configurations: CatalogueSourceConfiguration[];
   googleConnected?: boolean;
   autoOpenPicker?: boolean;
+  embedded?: boolean;
+  onConfigurationChange?: (configuration: CatalogueSourceConfiguration | null) => void;
 }) {
   const [current, setCurrent] = useState(configurations[0] ?? null);
   const [displayName, setDisplayName] = useState(current?.displayName ?? 'Каталог Google Sheets');
@@ -44,6 +48,8 @@ export function CatalogueSourceSettings({
   const fileInput = useRef<HTMLInputElement>(null);
   const activity = useActivity();
   const toast = useToast();
+
+  useEffect(() => { onConfigurationChange?.(current); }, [current, onConfigurationChange]);
 
   useEffect(() => {
     if (!tracking) return;
@@ -161,8 +167,8 @@ export function CatalogueSourceSettings({
     if (result) select(null);
   }
 
-  return <section className="catalogue-source-settings data-task-card" aria-labelledby="catalogue-source-title">
-    <div className="catalogue-source-heading"><div><h2 id="catalogue-source-title">Товари</h2><p>Оберіть таблицю або файл — AutoSale сам розпізнає колонки та підготує каталог.</p></div>{current && <span className={`catalogue-status ${current.status === 'ACTIVE' ? 'is-active' : ''}`}>{statusLabel(current.status)}</span>}</div>
+  return <section className={`catalogue-source-settings data-task-card ${embedded ? 'is-embedded' : ''}`} {...(embedded ? { 'aria-label': 'Товари' } : { 'aria-labelledby': 'catalogue-source-title' })}>
+    {!embedded && <div className="catalogue-source-heading"><div><h2 id="catalogue-source-title">Товари</h2><p>Оберіть таблицю або файл — AutoSale сам розпізнає колонки та підготує каталог.</p></div>{current && <span className={`catalogue-status ${current.status === 'ACTIVE' ? 'is-active' : ''}`}>{statusLabel(current.status)}</span>}</div>}
     {!googleConnected && <p className="settings-step-notice">Під час вибору таблиці Google один раз попросить доступ до неї.</p>}
     <div className="data-source-actions"><GooglePickerButton label="Обрати Google-таблицю" connected={googleConnected} intent="catalogue" autoOpen={autoOpenPicker} disabled={pending} onSelected={(selection) => void selectSpreadsheet(selection)} /><span>або</span><button className="secondary-button" disabled={pending} type="button" onClick={() => fileInput.current?.click()}>Завантажити CSV або Excel</button><input ref={fileInput} className="sr-only" type="file" accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onChange={(event) => void uploadFile(event.target.files?.[0])} /></div>
     {spreadsheet && <div className="data-selection-summary"><span>Джерело товарів</span><strong>{displayName}</strong></div>}
