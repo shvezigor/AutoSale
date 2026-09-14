@@ -26,13 +26,13 @@ const ukrposhta: UkrposhtaSettingsSummary = { enabled: true, connection: null };
 afterEach(cleanup);
 
 describe('DeliveryCarrierHub', () => {
-  it('opens one carrier at a time and keeps every carrier status visible', () => {
+  it('starts with every carrier closed, then opens one carrier at a time', () => {
     render(<DeliveryCarrierHub delivery={nova} meest={meest} ukrposhta={ukrposhta} role="OWNER" />);
 
-    expect(screen.getByRole('button', { name: /Нова Пошта/ })).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByRole('button', { name: /Нова Пошта/ })).toHaveAttribute('aria-expanded', 'false');
     expect(screen.getByRole('button', { name: /Meest/ })).toHaveAttribute('aria-expanded', 'false');
     expect(screen.getByRole('button', { name: /Укрпошта/ })).toHaveAttribute('aria-expanded', 'false');
-    expect(screen.getByText('Налаштування Нової пошти в панелі')).toBeInTheDocument();
+    expect(screen.queryByText('Налаштування Нової пошти в панелі')).not.toBeInTheDocument();
     expect(screen.queryByText('Налаштування Meest в панелі')).not.toBeInTheDocument();
     expect(screen.getByText('Активне')).toBeInTheDocument();
     expect(screen.getAllByText('Не підключено')).toHaveLength(2);
@@ -49,6 +49,6 @@ describe('DeliveryCarrierHub', () => {
     render(<DeliveryCarrierHub delivery={{ enabled: false, connections: [] }} meest={meest} ukrposhta={ukrposhta} role="MANAGER" />);
 
     expect(screen.queryByRole('button', { name: /Нова Пошта/ })).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Meest/ })).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByRole('button', { name: /Meest/ })).toHaveAttribute('aria-expanded', 'false');
   });
 });

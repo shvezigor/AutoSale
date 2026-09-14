@@ -1,7 +1,7 @@
 'use client';
 
 import type { DeliveryConnectionSummary, MeestConnectionSummary, UkrposhtaConnectionSummary } from '../../../../packages/contracts/src/delivery';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 
 import { DeliverySettingsCard, type DeliverySettingsSummary } from './delivery-settings-card';
 import { MeestSettingsCard, type MeestSettingsSummary } from './meest-settings-card';
@@ -18,12 +18,7 @@ export function DeliveryCarrierHub({ delivery, meest, ukrposhta, role }: {
   const [novaConnection, setNovaConnection] = useState<DeliveryConnectionSummary | null>(delivery.connections.find((item) => item.provider === 'NOVA_POSHTA') ?? null);
   const [meestConnection, setMeestConnection] = useState<MeestConnectionSummary | null>(meest.connection);
   const [ukrposhtaConnection, setUkrposhtaConnection] = useState<UkrposhtaConnectionSummary | null>(ukrposhta.connection);
-  const available = useMemo(() => [
-    ...(delivery.enabled ? [{ id: 'nova-poshta' as const, active: novaConnection?.status === 'ACTIVE' }] : []),
-    ...(meest.enabled ? [{ id: 'meest' as const, active: meestConnection?.status === 'ACTIVE' }] : []),
-    ...(ukrposhta.enabled ? [{ id: 'ukrposhta' as const, active: ukrposhtaConnection?.status === 'ACTIVE' }] : []),
-  ], [delivery.enabled, meest.enabled, novaConnection?.status, meestConnection?.status, ukrposhta.enabled, ukrposhtaConnection?.status]);
-  const [open, setOpen] = useState<CarrierId | null>(() => available.find((item) => item.active)?.id ?? available[0]?.id ?? null);
+  const [open, setOpen] = useState<CarrierId | null>(null);
 
   const carriers = [
     delivery.enabled ? {

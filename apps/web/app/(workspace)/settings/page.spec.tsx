@@ -122,8 +122,11 @@ describe('SettingsPage', () => {
     fireEvent.click(screen.getByRole('tab', { name: /Telegram/ }));
     expect(screen.getByText('@ivan_manager')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('tab', { name: /Доставка/ }));
-    expect(screen.getByText('ТОВ Приклад')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Нова Пошта/ })).toHaveAttribute('aria-expanded', 'false');
     expect(screen.getByRole('button', { name: /Укрпошта/ })).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.queryByText('ТОВ Приклад')).not.toBeInTheDocument();
     expect(screen.queryByLabelText('API-ключ Нової Пошти')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /Нова Пошта/ }));
+    expect(screen.getByText('ТОВ Приклад')).toBeInTheDocument();
   });
 });
