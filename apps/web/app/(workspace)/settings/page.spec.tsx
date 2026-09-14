@@ -114,6 +114,9 @@ describe('SettingsPage', () => {
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/integrations/delivery');
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/integrations/delivery/meest');
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/integrations/delivery/ukrposhta');
+    expect(screen.getByRole('button', { name: /Instagram.*Активне/ })).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.queryByText('@autosale_store')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /Instagram.*Активне/ }));
     expect(screen.getByText('@autosale_store')).toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Підтвердження замовлень' })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('tab', { name: /Дані/ }));

@@ -27,9 +27,13 @@ const CONNECTION_STATUSES = new Set<InstagramConnectionSummary['status']>([
 export function InstagramSettingsForm({
   initial,
   membershipRole,
+  embedded = false,
+  onConnectionChange,
 }: {
   initial: InstagramConnectionSummary;
   membershipRole: MembershipRole;
+  embedded?: boolean;
+  onConnectionChange?: (connection: InstagramConnectionSummary) => void;
 }) {
   const [connection, setConnection] = useState(initial);
   const [message, setMessage] = useState<Message>(null);
@@ -46,6 +50,11 @@ export function InstagramSettingsForm({
   const visibleErrorCode = connection.cleanupErrorCode ?? connection.lastErrorCode;
   const activity = useActivity();
   const toast = useToast();
+
+  function updateConnection(next: InstagramConnectionSummary) {
+    setConnection(next);
+    onConnectionChange?.(next);
+  }
 
   async function connect() {
     setPendingAction('connect');
@@ -77,7 +86,7 @@ export function InstagramSettingsForm({
       const response = await activity.run('Відключаємо Instagram', () => mutatingFetch('/api/integrations/instagram/disconnect', { method: 'POST' }));
       const payload = await jsonOrNull(response);
       if (!response.ok || !isInstagramConnectionSummary(payload)) throw new Error('disconnect failed');
-      setConnection(payload);
+      updateConnection(payload);
       setConfirmingDisconnect(false);
       setConfirmingDeadLetter(false);
       setMessage({ kind: 'success', text: 'Instagram відключено' });
@@ -97,7 +106,7 @@ export function InstagramSettingsForm({
       const response = await activity.run('Очищаємо підключення Instagram', () => mutatingFetch('/api/integrations/instagram/cleanup', { method: 'POST' }));
       const payload = await jsonOrNull(response);
       if (!response.ok || !isInstagramConnectionSummary(payload)) throw new Error('cleanup failed');
-      setConnection(payload);
+      updateConnection(payload);
       if (isCleanupPending(payload)) throw new Error('cleanup failed');
       setMessage({ kind: 'success', text: 'Очищення Instagram завершено' });
       toast.show({ type: 'success', title: 'Очищення Instagram завершено' });
@@ -120,7 +129,7 @@ export function InstagramSettingsForm({
       }));
       const payload = await jsonOrNull(response);
       if (!response.ok || !isInstagramConnectionSummary(payload) || isCleanupPending(payload)) throw new Error('dead letter failed');
-      setConnection(payload);
+      updateConnection(payload);
       setConfirmingDeadLetter(false);
       setMessage({ kind: 'success', text: 'Підключення Instagram розблоковано' });
       toast.show({ type: 'success', title: 'Instagram розблоковано' });
@@ -132,10 +141,10 @@ export function InstagramSettingsForm({
     }
   }
 
-  const visibleStatus = pendingAction === 'connect' ? 'Підключення…' : statusLabel(connection.status);
+  const visibleStatus = pendingAction === 'connect' ? 'Підключення…' : instagramConnectionStatusLabel(connection.status);
 
-  return <section className="settings-card instagram-connection-card" aria-busy={pending || undefined} aria-labelledby="instagram-connection-title">
-    <div className="settings-card-heading">
+  return <section className={`settings-card instagram-connection-card ${embedded ? 'is-embedded' : ''}`} aria-busy={pending || undefined} {...(embedded ? { 'aria-label': 'Instagram' } : { 'aria-labelledby': 'instagram-connection-title' })}>
+    {!embedded && <div className="settings-card-heading">
       <div>
         <h2 id="instagram-connection-title">Instagram</h2>
         <p>Підключіть професійний Instagram-акаунт через Meta, щоб отримувати повідомлення та замовлення.</p>
@@ -143,7 +152,8 @@ export function InstagramSettingsForm({
       <span className={`connection-status status-${connection.status.toLowerCase()}`} aria-label={`Статус підключення: ${visibleStatus}`} role={pendingAction === 'connect' ? 'status' : undefined}>
         {visibleStatus}
       </span>
-    </div>
+    </div>}
+    {embedded && <div className="delivery-panel-section-heading"><span>Підключення</span><p>Акаунт, стан інтеграції та керування доступом через Meta.</p></div>}
 
     <dl className="instagram-connection-details">
       <div><dt>Акаунт</dt><dd>{connection.username ? `@${connection.username}` : 'Ще не підключено'}</dd></div>
@@ -240,7 +250,7 @@ function canDisconnect(status: InstagramConnectionSummary['status']): boolean {
   return status === 'ACTIVE' || status === 'LEGACY' || status === 'REAUTH_REQUIRED' || status === 'ERROR';
 }
 
-function statusLabel(status: InstagramConnectionSummary['status']): string {
+export function instagramConnectionStatusLabel(status: InstagramConnectionSummary['status']): string {
   return {
     NOT_CONNECTED: 'Не підключено',
     LEGACY: 'Потрібне перепідключення',

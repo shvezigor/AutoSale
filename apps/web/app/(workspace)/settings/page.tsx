@@ -2,7 +2,7 @@ import { authenticatedApiFetch, getServerSession } from '../../../src/auth/sessi
 import type { PublicSession } from '../../../../../packages/contracts/src/auth';
 import { GoogleSheetsSettingsForm, type GoogleSheetsSettings } from '../../../src/components/google-sheets-settings-form';
 import { OrderSettingsForm, type OrderSettings } from '../../../src/components/order-settings-form';
-import { InstagramSettingsForm, type InstagramConnectionSummary } from '../../../src/components/instagram-settings-form';
+import type { InstagramConnectionSummary } from '../../../src/components/instagram-settings-form';
 import { DemoScenarioCard } from '../../../src/components/demo-scenario-card';
 import { CatalogueSourceSettings, type CatalogueSourceConfiguration, type CatalogueSourceHealth } from '../../../src/components/catalogue-source-settings';
 import type { GoogleConnectionSummary } from '../../../src/components/google-connection-settings';
@@ -14,6 +14,7 @@ import type { DeliverySettingsSummary } from '../../../src/components/delivery-s
 import type { MeestSettingsSummary } from '../../../src/components/meest-settings-card';
 import type { UkrposhtaSettingsSummary } from '../../../src/components/ukrposhta-settings-card';
 import { DeliveryCarrierHub } from '../../../src/components/delivery-carrier-hub';
+import { SocialChannelHub } from '../../../src/components/social-channel-hub';
 
 export const dynamic = 'force-dynamic';
 
@@ -104,7 +105,7 @@ function SettingsLayout({
       id: 'social' as const,
       label: 'Соцмережі',
       description: 'Instagram',
-      content: <section className="settings-section"><div className="settings-section-heading"><h2>Підключення каналів</h2><p>Керуйте каналами, з яких AutoSale отримує діалоги та замовлення.</p></div><InstagramSettingsForm initial={instagram} membershipRole={session.membershipRole} /></section>,
+      content: <section className="settings-section"><div className="settings-section-heading"><h2>Підключення каналів</h2><p>Керуйте каналами, з яких AutoSale отримує діалоги та замовлення.</p></div><SocialChannelHub instagram={instagram} membershipRole={session.membershipRole} /></section>,
     },
     {
       id: 'telegram' as const,
