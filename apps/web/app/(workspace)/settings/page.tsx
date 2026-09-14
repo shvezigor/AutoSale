@@ -10,9 +10,10 @@ import { SettingsTabs, type SettingsTabId } from '../../../src/components/settin
 import { TelegramSettingsCard, type TelegramConnectionSummary } from '../../../src/components/telegram-settings-card';
 import { TelegramSupplierSettings } from '../../../src/components/telegram-supplier-settings';
 import type { TelegramNotificationPreferences, TelegramSupplierSettings as TelegramSupplierConfiguration } from '../../../../../packages/contracts/src/telegram';
-import { DeliverySettingsCard, type DeliverySettingsSummary } from '../../../src/components/delivery-settings-card';
-import { MeestSettingsCard, type MeestSettingsSummary } from '../../../src/components/meest-settings-card';
-import { UkrposhtaSettingsCard, type UkrposhtaSettingsSummary } from '../../../src/components/ukrposhta-settings-card';
+import type { DeliverySettingsSummary } from '../../../src/components/delivery-settings-card';
+import type { MeestSettingsSummary } from '../../../src/components/meest-settings-card';
+import type { UkrposhtaSettingsSummary } from '../../../src/components/ukrposhta-settings-card';
+import { DeliveryCarrierHub } from '../../../src/components/delivery-carrier-hub';
 
 export const dynamic = 'force-dynamic';
 
@@ -115,7 +116,7 @@ function SettingsLayout({
       id: 'delivery' as const,
       label: 'Доставка',
       description: 'Нова Пошта, Meest і Укрпошта',
-      content: <section className="settings-section"><div className="settings-section-heading"><h2>Доставка</h2><p>Підключіть перевізників та один раз задайте дані відправника.</p></div><DeliverySettingsCard initial={delivery} role={session.membershipRole!} /><MeestSettingsCard initial={meest} role={session.membershipRole!} /><UkrposhtaSettingsCard initial={ukrposhta} role={session.membershipRole!} /></section>,
+      content: <section className="settings-section delivery-settings-section"><div className="settings-section-heading"><h2>Доставка</h2><p>Підключіть перевізників та один раз задайте дані відправника.</p></div><DeliveryCarrierHub delivery={delivery} meest={meest} ukrposhta={ukrposhta} role={session.membershipRole!} /></section>,
     },
     {
       id: 'data' as const,

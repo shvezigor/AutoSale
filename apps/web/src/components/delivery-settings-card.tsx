@@ -38,9 +38,13 @@ const emptyProfile: DeliverySenderProfileInput = {
 export function DeliverySettingsCard({
   initial,
   role,
+  embedded = false,
+  onConnectionChange,
 }: {
   initial: DeliverySettingsSummary;
   role: 'OWNER' | 'MANAGER';
+  embedded?: boolean;
+  onConnectionChange?(connection: DeliveryConnectionSummary | null): void;
 }) {
   const [connection, setConnection] = useState<DeliveryConnectionSummary | null>(initial.connections[0] ?? null);
   const [profile, setProfile] = useState<DeliverySenderProfileInput>(initial.connections[0]?.senderProfile ?? emptyProfile);
@@ -95,6 +99,7 @@ export function DeliverySettingsCard({
       const payload = await jsonOrNull(response);
       if (!response.ok || !isConnectionSummary(payload)) throw new Error('connection failed');
       setConnection(payload);
+      onConnectionChange?.(payload);
       setProfile(payload.senderProfile ?? emptyProfile);
       setApiKey('');
       toast.show({ type: 'success', title: 'Нову Пошту підключено' });
@@ -123,7 +128,9 @@ export function DeliverySettingsCard({
         },
       ));
       if (!response.ok) throw new Error('save failed');
-      setConnection((current) => current ? { ...current, senderProfile: profile } : current);
+      const next = connection ? { ...connection, senderProfile: profile } : null;
+      setConnection(next);
+      onConnectionChange?.(next);
       toast.show({ type: 'success', title: 'Дані відправника збережено' });
     } catch {
       toast.show({
@@ -149,6 +156,7 @@ export function DeliverySettingsCard({
       const response = await activity.run('Відключаємо Нову Пошту', () => mutatingFetch('/api/integrations/delivery/nova-poshta', { method: 'DELETE' }));
       if (!response.ok) throw new Error('disconnect failed');
       setConnection(null);
+      onConnectionChange?.(null);
       setProfile(emptyProfile);
       setOriginCity(null);
       toast.show({ type: 'success', title: 'Нову Пошту відключено' });
@@ -163,8 +171,8 @@ export function DeliverySettingsCard({
     <div className="settings-card-heading"><div><h2>Нова Пошта</h2><p>Інтеграція доставки ще не активована для AutoSale.</p></div><span className="connection-status status-not_connected">Недоступно</span></div>
   </section>;
 
-  return <section className="settings-card delivery-settings-card" aria-labelledby="delivery-settings-title" aria-busy={pending !== null || undefined}>
-    <div className="settings-card-heading">
+  return <section className={`settings-card delivery-settings-card ${embedded ? 'is-embedded' : ''}`} {...(embedded ? { 'aria-label': 'Нова Пошта' } : { 'aria-labelledby': 'delivery-settings-title' })} aria-busy={pending !== null || undefined}>
+    {!embedded && <div className="settings-card-heading">
       <div>
         <h2 id="delivery-settings-title">Нова Пошта</h2>
         <p>Створюйте ТТН та відстежуйте доставку без повторного введення даних.</p>
@@ -172,7 +180,9 @@ export function DeliverySettingsCard({
       <span className={`connection-status status-${(connection?.status ?? 'NOT_CONNECTED').toLowerCase()}`}>
         {statusLabel(connection?.status)}
       </span>
-    </div>
+    </div>}
+
+    {embedded && <div className="delivery-panel-section-heading"><span>Підключення</span><p>Доступ до кабінету перевізника та стан інтеграції.</p></div>}
 
     {connection?.accountLabel && <div className="delivery-account-summary"><span>Кабінет відправника</span><strong>{connection.accountLabel}</strong></div>}
 

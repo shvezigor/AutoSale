@@ -23,7 +23,7 @@ const emptyProfile: UkrposhtaSenderProfileInput = {
   customerNotificationTemplate: '{company}: відправлення створено. ТТН {trackingNumber}',
 };
 
-export function UkrposhtaSettingsCard({ initial, role }: { initial: UkrposhtaSettingsSummary; role: 'OWNER' | 'MANAGER' }) {
+export function UkrposhtaSettingsCard({ initial, role, embedded = false, onConnectionChange }: { initial: UkrposhtaSettingsSummary; role: 'OWNER' | 'MANAGER'; embedded?: boolean; onConnectionChange?(connection: UkrposhtaConnectionSummary | null): void }) {
   const [connection, setConnection] = useState(initial.connection);
   const [environment, setEnvironment] = useState<'SANDBOX' | 'PRODUCTION'>(initial.connection?.environment ?? 'SANDBOX');
   const [ecomBearer, setEcomBearer] = useState('');
@@ -57,6 +57,7 @@ export function UkrposhtaSettingsCard({ initial, role }: { initial: UkrposhtaSet
       const payload = await jsonOrNull(response);
       if (!response.ok || !isUkrposhtaConnection(payload)) throw new Error('connection failed');
       setConnection(payload);
+      onConnectionChange?.(payload);
       setEnvironment(payload.environment ?? 'SANDBOX');
       setProfile(payload.senderProfile ?? emptyProfile);
       setCity(citySelectionFromProfile(payload.senderProfile));
@@ -78,7 +79,9 @@ export function UkrposhtaSettingsCard({ initial, role }: { initial: UkrposhtaSet
       const payload = await jsonOrNull(response);
       if (!response.ok || !isUkrposhtaSenderProfile(payload)) throw new Error('profile failed');
       setProfile(payload);
-      setConnection((current) => current ? { ...current, senderProfile: payload } : current);
+      const next = connection ? { ...connection, senderProfile: payload } : null;
+      setConnection(next);
+      onConnectionChange?.(next);
       toast.show({ type: 'success', title: 'Відправника Укрпошти збережено' });
     } catch {
       toast.show({ type: 'error', title: 'Не вдалося зберегти відправника Укрпошти' });
@@ -100,6 +103,7 @@ export function UkrposhtaSettingsCard({ initial, role }: { initial: UkrposhtaSet
       const response = await activity.run('Відключаємо Укрпошту', () => mutatingFetch('/api/integrations/delivery/ukrposhta', { method: 'DELETE' }));
       if (!response.ok) throw new Error('disconnect failed');
       setConnection(null);
+      onConnectionChange?.(null);
       setProfile(emptyProfile);
       setCity(null);
       toast.show({ type: 'success', title: 'Укрпошту відключено' });
@@ -112,11 +116,12 @@ export function UkrposhtaSettingsCard({ initial, role }: { initial: UkrposhtaSet
 
   if (!initial.enabled) return null;
 
-  return <section className="settings-card delivery-settings-card" aria-labelledby="ukrposhta-settings-title" aria-busy={pending !== null || undefined}>
-    <div className="settings-card-heading">
+  return <section className={`settings-card delivery-settings-card ${embedded ? 'is-embedded' : ''}`} {...(embedded ? { 'aria-label': 'Укрпошта' } : { 'aria-labelledby': 'ukrposhta-settings-title' })} aria-busy={pending !== null || undefined}>
+    {!embedded && <div className="settings-card-heading">
       <div><h2 id="ukrposhta-settings-title">Укрпошта</h2><p>Підключення для бізнес-відправлень через API.</p></div>
       <span className={`connection-status status-${(connection?.status ?? 'NOT_CONNECTED').toLowerCase()}`}>{statusLabel(connection?.status)}</span>
-    </div>
+    </div>}
+    {embedded && <div className="delivery-panel-section-heading"><span>Підключення</span><p>Доступ до кабінету перевізника та стан інтеграції.</p></div>}
     {connection?.accountLabel && <div className="delivery-account-summary"><span>Обліковий запис</span><strong>{connection.accountLabel}</strong></div>}
     {connection?.environment && <div className="delivery-account-summary"><span>Середовище</span><strong>{environmentLabel(connection.environment)}</strong></div>}
     {!owner

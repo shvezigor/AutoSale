@@ -23,7 +23,7 @@ const emptyProfile: MeestSenderProfileInput = {
   customerNotificationTemplate: '{company}: відправлення створено. ТТН {trackingNumber}',
 };
 
-export function MeestSettingsCard({ initial, role }: { initial: MeestSettingsSummary; role: 'OWNER' | 'MANAGER' }) {
+export function MeestSettingsCard({ initial, role, embedded = false, onConnectionChange }: { initial: MeestSettingsSummary; role: 'OWNER' | 'MANAGER'; embedded?: boolean; onConnectionChange?(connection: MeestConnectionSummary | null): void }) {
   const [connection, setConnection] = useState(initial.connection);
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
@@ -48,6 +48,7 @@ export function MeestSettingsCard({ initial, role }: { initial: MeestSettingsSum
       const payload = await jsonOrNull(response);
       if (!response.ok || !isMeestConnection(payload)) throw new Error('connection failed');
       setConnection(payload);
+      onConnectionChange?.(payload);
       setProfile(payload.senderProfile ?? emptyProfile);
       setLogin('');
       setPassword('');
@@ -70,7 +71,9 @@ export function MeestSettingsCard({ initial, role }: { initial: MeestSettingsSum
       const payload = await jsonOrNull(response);
       if (!response.ok || !isMeestSenderProfile(payload)) throw new Error('profile failed');
       setProfile(payload);
-      setConnection((current) => current ? { ...current, senderProfile: payload } : current);
+      const next = connection ? { ...connection, senderProfile: payload } : null;
+      setConnection(next);
+      onConnectionChange?.(next);
       toast.show({ type: 'success', title: 'Відправника Meest збережено' });
     } catch {
       toast.show({ type: 'error', title: 'Не вдалося зберегти відправника Meest' });
@@ -92,6 +95,7 @@ export function MeestSettingsCard({ initial, role }: { initial: MeestSettingsSum
       const response = await activity.run('Відключаємо Meest', () => mutatingFetch('/api/integrations/delivery/meest', { method: 'DELETE' }));
       if (!response.ok) throw new Error('disconnect failed');
       setConnection(null);
+      onConnectionChange?.(null);
       toast.show({ type: 'success', title: 'Meest відключено' });
     } catch {
       toast.show({ type: 'error', title: 'Не вдалося відключити Meest' });
@@ -102,11 +106,12 @@ export function MeestSettingsCard({ initial, role }: { initial: MeestSettingsSum
 
   if (!initial.enabled) return null;
 
-  return <section className="settings-card delivery-settings-card" aria-labelledby="meest-settings-title" aria-busy={pending !== null || undefined}>
-    <div className="settings-card-heading">
+  return <section className={`settings-card delivery-settings-card ${embedded ? 'is-embedded' : ''}`} {...(embedded ? { 'aria-label': 'Meest' } : { 'aria-labelledby': 'meest-settings-title' })} aria-busy={pending !== null || undefined}>
+    {!embedded && <div className="settings-card-heading">
       <div><h2 id="meest-settings-title">Meest</h2><p>Другий перевізник для доставки замовлень із AutoSale.</p></div>
       <span className={`connection-status status-${(connection?.status ?? 'NOT_CONNECTED').toLowerCase()}`}>{statusLabel(connection?.status)}</span>
-    </div>
+    </div>}
+    {embedded && <div className="delivery-panel-section-heading"><span>Підключення</span><p>Доступ до кабінету перевізника та стан інтеграції.</p></div>}
     {connection?.accountLabel && <div className="delivery-account-summary"><span>Обліковий запис</span><strong>{connection.accountLabel}</strong></div>}
     {!owner
       ? <p className="delivery-readonly-note">Підключенням перевізника керує власник робочого простору.</p>
