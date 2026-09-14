@@ -50,21 +50,22 @@ export function CatalogueTable({ session, products, page, pageSize, total, searc
     {editing === 'new' && isOwner && <ProductEditor onClose={() => setEditing(null)} />}
     {editing !== null && editing !== 'new' && isOwner && <ProductEditor onClose={() => setEditing(null)} product={editing} />}
     {products.length === 0 ? <p className="catalogue-empty" role="status">{search ? 'Товарів за цим запитом не знайдено.' : 'У каталозі ще немає товарів.'}</p> : <>
-      <div className="catalogue-table-wrap"><table className="catalogue-table"><caption className="sr-only">Товари каталогу</caption><thead><tr><th scope="col">Товар</th><th scope="col">Артикул</th><th scope="col">Ціна</th><th scope="col">Залишок</th><th scope="col">Статус</th>{isOwner && <th scope="col"><span className="sr-only">Дії</span></th>}</tr></thead><tbody>{products.map((product) => <CatalogueRow isOwner={isOwner} key={product.id ?? product.sku} onEdit={() => setEditing(product)} product={product} />)}</tbody></table></div>
-      <div className="catalogue-cards">{products.map((product) => <CatalogueCard isOwner={isOwner} key={product.id ?? product.sku} onEdit={() => setEditing(product)} product={product} />)}</div>
+      <div className="catalogue-table-wrap"><table className="catalogue-table"><caption className="sr-only">Товари каталогу</caption><thead><tr><th className="table-row-index" scope="col">№</th><th scope="col">Артикул</th><th scope="col">Назва</th><th scope="col">Ціна</th><th scope="col">Залишок</th><th scope="col">Статус</th>{isOwner && <th scope="col"><span className="sr-only">Дії</span></th>}</tr></thead><tbody>{products.map((product, index) => <CatalogueRow isOwner={isOwner} key={product.id ?? product.sku} onEdit={() => setEditing(product)} product={product} rowNumber={rowNumber(page, pageSize, index)} />)}</tbody></table></div>
+      <div className="catalogue-cards">{products.map((product, index) => <CatalogueCard isOwner={isOwner} key={product.id ?? product.sku} onEdit={() => setEditing(product)} product={product} rowNumber={rowNumber(page, pageSize, index)} />)}</div>
     </>}
     {total > 0 && <TablePagination ariaLabel="Сторінки каталогу" onPageChange={changePage} onPageSizeChange={changePageSize} page={page} pageSize={pageSize} total={total} />}
   </>;
 }
 
-function CatalogueRow({ product, isOwner, onEdit }: { product: EditableProduct; isOwner: boolean; onEdit: () => void }) {
-  return <tr><td><strong>{product.name}</strong>{product.aliases?.length ? <small>{product.aliases.join(', ')}</small> : null}</td><td>{product.sku}</td><td>{priceLabel(product)}</td><td>{product.stockQuantity ?? '—'}</td><td><Status active={product.active ?? true} /></td>{isOwner && <td><button className="text-button" onClick={onEdit} type="button">Редагувати</button></td>}</tr>;
+function CatalogueRow({ product, isOwner, onEdit, rowNumber }: { product: EditableProduct; isOwner: boolean; onEdit: () => void; rowNumber: number }) {
+  return <tr><td className="table-row-index">{rowNumber}</td><td>{product.sku}</td><td><strong>{product.name}</strong>{product.aliases?.length ? <small>{product.aliases.join(', ')}</small> : null}</td><td>{priceLabel(product)}</td><td>{product.stockQuantity ?? '—'}</td><td><Status active={product.active ?? true} /></td>{isOwner && <td><button className="text-button" onClick={onEdit} type="button">Редагувати</button></td>}</tr>;
 }
 
-function CatalogueCard({ product, isOwner, onEdit }: { product: EditableProduct; isOwner: boolean; onEdit: () => void }) {
-  return <article className="catalogue-card"><div><strong>{product.name}</strong><small>Артикул: {product.sku}</small></div><dl><div><dt>Ціна</dt><dd>{priceLabel(product)}</dd></div><div><dt>Залишок</dt><dd>{product.stockQuantity ?? '—'}</dd></div></dl><div className="catalogue-card-actions"><Status active={product.active ?? true} />{isOwner && <button className="text-button" onClick={onEdit} type="button">Редагувати</button>}</div></article>;
+function CatalogueCard({ product, isOwner, onEdit, rowNumber }: { product: EditableProduct; isOwner: boolean; onEdit: () => void; rowNumber: number }) {
+  return <article className="catalogue-card"><span className="catalogue-card-index">№ {rowNumber}</span><div><strong>{product.name}</strong><small>Артикул: {product.sku}</small></div><dl><div><dt>Ціна</dt><dd>{priceLabel(product)}</dd></div><div><dt>Залишок</dt><dd>{product.stockQuantity ?? '—'}</dd></div></dl><div className="catalogue-card-actions"><Status active={product.active ?? true} />{isOwner && <button className="text-button" onClick={onEdit} type="button">Редагувати</button>}</div></article>;
 }
 
 function Status({ active }: { active: boolean }) { return <span className={`catalogue-status${active ? ' is-active' : ''}`}>{active ? 'Активний' : 'Неактивний'}</span>; }
 function priceLabel(product: EditableProduct) { return product.price === null || product.price === undefined ? '—' : new Intl.NumberFormat('uk-UA', { maximumFractionDigits: 2 }).format(product.price) + (product.currency ? ` ${product.currency}` : ''); }
+function rowNumber(page: number, pageSize: number, index: number) { return (Math.max(1, page) - 1) * pageSize + index + 1; }
 function catalogueUrl(query: string, page: number, pageSize: number) { const params = new URLSearchParams(); if (query.trim()) params.set('search', query.trim()); if (page > 1) params.set('page', String(page)); if (pageSize !== 25) params.set('pageSize', String(pageSize)); const serialized = params.toString(); return serialized ? `/catalogue?${serialized}` : '/catalogue'; }

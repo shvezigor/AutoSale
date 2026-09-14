@@ -87,7 +87,15 @@ describe('OrdersTable', () => {
   it('renders order dates in the workspace timezone', () => {
     render(<OrdersTable orders={[order]} page={1} pageSize={25} total={1} />);
 
-    expect(screen.getAllByText('8 вер. 2026 р., 12:30')).toHaveLength(2);
+    expect(screen.getAllByText('08.09.2026, 12:30')).toHaveLength(2);
+  });
+
+  it('keeps order row numbers continuous across paginated desktop and mobile views', () => {
+    render(<OrdersTable orders={[order]} page={2} pageSize={25} total={26} />);
+
+    expect(screen.getByRole('columnheader', { name: '№' })).toBeInTheDocument();
+    expect(screen.getByRole('cell', { name: '26' })).toBeInTheDocument();
+    expect(document.querySelector('.orders-card-index')).toHaveTextContent('№ 26');
   });
 
   it('shows procurement status in the desktop table and mobile card', () => {

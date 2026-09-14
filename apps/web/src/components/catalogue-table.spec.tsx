@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render as rtlRender, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render as rtlRender, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const { mutatingFetch } = vi.hoisted(() => ({ mutatingFetch: vi.fn() }));
@@ -35,6 +35,15 @@ vi.mock('next/navigation', () => ({ useRouter: () => ({ replace }) }));
 afterEach(() => { cleanup(); replace.mockReset(); mutatingFetch.mockReset(); });
 
 describe('CatalogueTable', () => {
+  it('orders catalogue columns as number, SKU, name, price, stock and status and keeps numbering across pages', () => {
+    render(<CatalogueTable session={{ membershipRole: 'OWNER' }} products={[product]} page={2} pageSize={25} total={26} />);
+
+    const table = screen.getByRole('table', { name: 'Товари каталогу' });
+    expect(within(table).getAllByRole('columnheader').map((header) => header.textContent)).toEqual(['№', 'Артикул', 'Назва', 'Ціна', 'Залишок', 'Статус', 'Дії']);
+    expect(within(table).getByRole('cell', { name: '26' })).toBeInTheDocument();
+    expect(document.querySelector('.catalogue-card-index')).toHaveTextContent('№ 26');
+  });
+
   it('shows catalogue rows but no editing controls to a manager', () => {
     render(<CatalogueTable session={{ membershipRole: 'MANAGER' }} products={[product]} page={1} pageSize={25} total={1} />);
 
