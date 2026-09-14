@@ -1,10 +1,22 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { DeliveryService, shipmentReadiness } from './delivery.service.js';
+import { DeliveryService, mapShipmentSummary, shipmentReadiness } from './delivery.service.js';
 
 const tenantId = '11111111-1111-4111-8111-111111111111';
 const userId = '22222222-2222-4222-8222-222222222222';
 const now = new Date('2026-09-11T08:00:00.000Z');
+
+it('uses the provider occurrence time in shipment history when available', () => {
+  const providerOccurredAt = new Date('2026-09-11T07:45:00.000Z');
+  const summary = mapShipmentSummary({
+    id: tenantId, orderId: userId, provider: 'UKRPOSHTA', status: 'ACCEPTED', trackingNumber: '0500100031143',
+    cost: 80, currency: 'UAH', createdAt: now, providerCreatedAt: now, acceptedAt: providerOccurredAt,
+    deliveredAt: null, cancelledAt: null, lastStatusCheckedAt: now, lastErrorCode: null,
+    statusEvents: [{ status: 'ACCEPTED', providerCode: '10100', providerOccurredAt, occurredAt: now }],
+  });
+
+  expect(summary.history).toEqual([{ status: 'ACCEPTED', providerCode: '10100', occurredAt: providerOccurredAt.toISOString() }]);
+});
 
 const connection = {
   id: '33333333-3333-4333-8333-333333333333',

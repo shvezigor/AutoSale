@@ -167,7 +167,7 @@ export class UkrposhtaShipmentService {
       const owned = await tx.shipmentAttempt.updateMany({ where: { id: candidate.id, tenantId: candidate.tenantId, status: 'PROCESSING', leaseId }, data: { status: 'SUCCEEDED', completedAt: at, leaseId: null, leaseExpiresAt: null, lastErrorCode: null } });
       if (owned.count !== 1) return 'IGNORED';
       const status = mapLifecycle(result.lifecycle.status);
-      await tx.shipment.update({ where: { id: candidate.shipmentId, tenantId: candidate.tenantId }, data: { status, providerDocumentId: result.uuid, trackingNumber: result.barcode, cost: result.deliveryPrice, providerCreatedAt: at, nextStatusCheckAt: null, lastProviderCode: result.lifecycle.status, lastStatusCheckedAt: at, lastErrorCode: null, providerMetadata: JSON.parse(JSON.stringify({ ...metadata, shipmentUuid: result.uuid, barcode: result.barcode, parcels: result.parcels, lifecycle: result.lifecycle })) } });
+      await tx.shipment.update({ where: { id: candidate.shipmentId, tenantId: candidate.tenantId }, data: { status, providerDocumentId: result.uuid, trackingNumber: result.barcode, cost: result.deliveryPrice, providerCreatedAt: at, nextStatusCheckAt: terminal(status) ? null : new Date(at.getTime() + 15 * 60_000), lastProviderCode: result.lifecycle.status, lastStatusCheckedAt: at, lastErrorCode: null, providerMetadata: JSON.parse(JSON.stringify({ ...metadata, shipmentUuid: result.uuid, barcode: result.barcode, parcels: result.parcels, lifecycle: result.lifecycle })) } });
       await tx.shipmentStatusEvent.create({ data: { tenantId: candidate.tenantId, shipmentId: candidate.shipmentId, status, providerCode: result.lifecycle.status, occurredAt: at } });
       return 'CREATED';
     });
@@ -202,6 +202,9 @@ function mapLifecycle(status: UkrposhtaLifecycle['status']): ShipmentStatus {
     case 'DELIVERED': return 'DELIVERED'; case 'RETURNING': return 'RETURNING'; case 'RETURNED': return 'RETURNED';
     case 'DELETED': case 'CANCELED': return 'CANCELLED'; default: return 'IN_TRANSIT';
   }
+}
+function terminal(status: ShipmentStatus): boolean {
+  return ['DELIVERED', 'RETURNED', 'CANCELLED', 'FAILED'].includes(status);
 }
 class LostLease extends Error {}
 class ConnectionChanged extends Error {}

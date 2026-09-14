@@ -771,7 +771,10 @@ export const ShipmentStatusEventScalarFieldEnum = {
   shipmentId: 'shipmentId',
   status: 'status',
   providerCode: 'providerCode',
+  providerEventKey: 'providerEventKey',
   providerOccurredAt: 'providerOccurredAt',
+  rawSnapshot: 'rawSnapshot',
+  mappingVersion: 'mappingVersion',
   occurredAt: 'occurredAt',
   createdAt: 'createdAt'
 } as const

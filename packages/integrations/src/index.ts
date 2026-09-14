@@ -84,3 +84,11 @@ export {
   type UkrposhtaCity,
   type UkrposhtaLocation,
 } from './ukrposhta.js';
+export {
+  UkrposhtaStatusTrackingClient,
+  UkrposhtaTrackingError,
+  type UkrposhtaTrackingBatchResult,
+  type UkrposhtaTrackingClientConfig,
+  type UkrposhtaTrackingErrorCode,
+  type UkrposhtaTrackingEvent,
+} from './ukrposhta-tracking.js';

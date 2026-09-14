@@ -173,6 +173,12 @@ export const shipmentStatusJobSchema = z.object({
   shipmentId: z.string().uuid(),
 }).strict();
 
+export const ukrposhtaTrackingBatchJobSchema = z.object({
+  shipmentIds: z.array(z.string().uuid()).min(1).max(50),
+}).strict().refine(({ shipmentIds }) => new Set(shipmentIds).size === shipmentIds.length, {
+  path: ['shipmentIds'], message: 'Shipment ids must be unique',
+});
+
 export const shipmentCustomerMessageInputSchema = z.object({
   text: z.string().trim().min(1).max(1_000),
 }).strict();
@@ -193,6 +199,7 @@ export type MeestSenderProfileInput = z.infer<typeof meestSenderProfileInputSche
 export type DeliverySenderProfileInput = z.infer<typeof deliverySenderProfileInputSchema>;
 export type ShipmentDraftInput = z.infer<typeof shipmentDraftInputSchema>;
 export type ShipmentCreateJob = z.infer<typeof shipmentCreateJobSchema>;
+export type UkrposhtaTrackingBatchJob = z.infer<typeof ukrposhtaTrackingBatchJobSchema>;
 export type ShipmentStatusJob = z.infer<typeof shipmentStatusJobSchema>;
 export type ShipmentCustomerMessageInput = z.infer<typeof shipmentCustomerMessageInputSchema>;
 

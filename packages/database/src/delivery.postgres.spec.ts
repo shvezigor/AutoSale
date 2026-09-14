@@ -165,6 +165,32 @@ describe('delivery persistence', () => {
     expect(events.rowCount).toBe(0);
     expect(await pool.query('SELECT id FROM orders WHERE id = $1', [ordersA[4]])).toMatchObject({ rowCount: 1 });
   });
+
+  it('stores bounded provider snapshots with a versioned unique provider event identity', async () => {
+    const shipmentId = await insertShipment(pool, {
+      tenantId: tenantA, orderId: ordersA[4]!, connectionId: connectionA,
+      status: 'FAILED', idempotencyKey: 'shipment:event:snapshot',
+    });
+    const raw = { barcode: '0500100031143', step: 1, event: 10100 };
+    await pool.query(`INSERT INTO shipment_status_events
+      (tenant_id, shipment_id, status, provider_code, provider_event_key,
+       provider_occurred_at, raw_snapshot, mapping_version, occurred_at)
+      VALUES ($1, $2, 'ACCEPTED', '10100', '0500100031143:1:10100',
+              '2026-09-13T10:00:00Z', $3, 1, NOW())`, [tenantA, shipmentId, raw]);
+
+    await expect(pool.query(`INSERT INTO shipment_status_events
+      (tenant_id, shipment_id, status, provider_code, provider_event_key,
+       provider_occurred_at, raw_snapshot, mapping_version, occurred_at)
+      VALUES ($1, $2, 'ACCEPTED', '10100', '0500100031143:1:10100',
+              '2026-09-13T10:00:00Z', $3, 1, NOW())`, [tenantA, shipmentId, raw]))
+      .rejects.toMatchObject({ code: '23505' });
+    const event = (await pool.query(`SELECT raw_snapshot, mapping_version, provider_occurred_at::text AS provider_occurred_at
+      FROM shipment_status_events WHERE tenant_id = $1 AND shipment_id = $2`, [tenantA, shipmentId])).rows[0];
+    expect(event.raw_snapshot).toEqual(raw);
+    expect(event.mapping_version).toBe(1);
+    expect(event.provider_occurred_at).toBe('2026-09-13 10:00:00');
+    await pool.query('DELETE FROM shipments WHERE tenant_id = $1 AND id = $2', [tenantA, shipmentId]);
+  });
 });
 
 async function insertShipment(pool: pg.Pool, input: {

@@ -10,6 +10,7 @@ import {
   shipmentCustomerMessageInputSchema,
   shipmentDraftInputSchema,
   shipmentStatusJobSchema,
+  ukrposhtaTrackingBatchJobSchema,
   shipmentStatusSchema,
   ukrposhtaConnectionSummarySchema,
 } from './delivery.js';
@@ -155,6 +156,14 @@ describe('delivery contracts', () => {
     expect(shipmentStatusJobSchema.parse({ shipmentId })).toEqual({ shipmentId });
     expect(() => shipmentCreateJobSchema.parse({ shipmentId: 'shipment-1' })).toThrow();
     expect(() => shipmentStatusJobSchema.parse({ shipmentId, tenantId: 'must-not-be-trusted' })).toThrow();
+  });
+
+  it('bounds Ukrposhta tracking batches to 50 server-owned shipment ids', () => {
+    const shipmentIds = Array.from({ length: 50 }, (_, index) => `00000000-0000-4000-8000-${String(index + 1).padStart(12, '0')}`);
+    expect(ukrposhtaTrackingBatchJobSchema.parse({ shipmentIds })).toEqual({ shipmentIds });
+    expect(() => ukrposhtaTrackingBatchJobSchema.parse({ shipmentIds: [...shipmentIds, '00000000-0000-4000-8000-000000000051'] })).toThrow();
+    expect(() => ukrposhtaTrackingBatchJobSchema.parse({ shipmentIds: [shipmentIds[0], shipmentIds[0]] })).toThrow();
+    expect(() => ukrposhtaTrackingBatchJobSchema.parse({ shipmentIds: [shipmentIds[0]], tenantId: 'must-not-be-trusted' })).toThrow();
   });
 
   it('accepts only an explicit bounded customer message', () => {

@@ -573,7 +573,7 @@ export function mapShipmentSummary(shipment: {
   id: string; orderId: string; provider: 'NOVA_POSHTA' | 'MEEST' | 'UKRPOSHTA'; status: ShipmentSummary['status'];
   trackingNumber: string | null; cost: unknown; currency: string; createdAt: Date; providerCreatedAt: Date | null;
   acceptedAt: Date | null; deliveredAt: Date | null; cancelledAt: Date | null; lastStatusCheckedAt: Date | null;
-  lastErrorCode: string | null; statusEvents: Array<{ status: ShipmentSummary['status'] | null; providerCode: string; occurredAt: Date }>;
+  lastErrorCode: string | null; statusEvents: Array<{ status: ShipmentSummary['status'] | null; providerCode: string; providerOccurredAt: Date | null; occurredAt: Date }>;
 }): ShipmentSummary {
   return {
     id: shipment.id, orderId: shipment.orderId, provider: shipment.provider, status: shipment.status,
@@ -582,7 +582,7 @@ export function mapShipmentSummary(shipment: {
     acceptedAt: shipment.acceptedAt?.toISOString() ?? null, deliveredAt: shipment.deliveredAt?.toISOString() ?? null,
     cancelledAt: shipment.cancelledAt?.toISOString() ?? null, lastStatusCheckedAt: shipment.lastStatusCheckedAt?.toISOString() ?? null,
     lastErrorCode: shipment.lastErrorCode,
-    history: shipment.statusEvents.map((event) => ({ status: event.status, providerCode: event.providerCode, occurredAt: event.occurredAt.toISOString() })),
+    history: shipment.statusEvents.map((event) => ({ status: event.status, providerCode: event.providerCode, occurredAt: (event.providerOccurredAt ?? event.occurredAt).toISOString() })),
   };
 }
 

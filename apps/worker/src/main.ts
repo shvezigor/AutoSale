@@ -1,7 +1,7 @@
 import { Buffer } from 'node:buffer';
 
 import { parseWorkerEnv } from '@autosale/config/worker-env';
-import { shipmentCreateJobSchema, telegramDeliveryJobSchema } from '@autosale/contracts';
+import { shipmentCreateJobSchema, telegramDeliveryJobSchema, ukrposhtaTrackingBatchJobSchema } from '@autosale/contracts';
 import { createPrismaClient, ProcurementStore } from '@autosale/database';
 import {
   createGoogleSheetsAdapter,
@@ -12,6 +12,7 @@ import {
   S3ObjectStorage,
   TelegramBotClient,
   NovaPoshtaClient,
+  UkrposhtaStatusTrackingClient,
 } from '@autosale/integrations';
 import { Queue, Worker } from 'bullmq';
 import { metrics, StructuredLogger } from '@autosale/observability';
@@ -48,6 +49,7 @@ import { UkrposhtaShipmentService } from './delivery/ukrposhta-shipment.service.
 import { UkrposhtaClient } from '@autosale/integrations';
 import { ShipmentReconciler } from './delivery/shipment-reconciler.js';
 import { ShipmentStatusService } from './delivery/shipment-status.service.js';
+import { UkrposhtaTrackingService } from './delivery/ukrposhta-tracking.service.js';
 
 async function bootstrap(): Promise<void> {
   const env = parseWorkerEnv(process.env);
@@ -175,10 +177,35 @@ async function bootstrap(): Promise<void> {
     undefined,
     ukrposhtaShipment,
   );
+  const ukrposhtaTracking = new UkrposhtaTrackingService(
+    prisma,
+    (credentials) => ({
+      lifecycle: new UkrposhtaClient({ ...credentials, sandboxShipmentsEnabled: env.UKRPOSHTA_SANDBOX_SHIPMENTS_ENABLED }),
+      tracking: new UkrposhtaStatusTrackingClient({ trackingBearer: credentials.trackingBearer }),
+    }),
+    (encrypted) => credentialCipher.decrypt(encrypted),
+  );
   const deliveryQueue = new Queue('delivery', { connection: redisConnection });
   const deliveryWorker = new Worker(
     'delivery',
     async (job) => {
+      if (job.name === 'shipment.status.sync.ukrposhta') {
+        const parsedBatch = ukrposhtaTrackingBatchJobSchema.safeParse(job.data);
+        if (!parsedBatch.success) return;
+        const started = performance.now();
+        try {
+          const result = await ukrposhtaTracking.processBatch(parsedBatch.data);
+          metrics.increment('autosale_operations_total', { operation: 'shipment_status_sync', result: 'success' });
+          logger.info('shipment_job_completed', { correlationId: parsedBatch.data.shipmentIds[0]!, shipmentIds: parsedBatch.data.shipmentIds, jobName: job.name, result });
+        } catch (error) {
+          metrics.increment('autosale_operations_total', { operation: 'shipment_status_sync', result: 'failure' });
+          logger.warn('shipment_status_sync_failed', { correlationId: parsedBatch.data.shipmentIds[0]!, errorCode: error instanceof Error ? error.name : 'UNKNOWN' });
+          throw error;
+        } finally {
+          metrics.observe('autosale_operation_duration_seconds', (performance.now() - started) / 1_000, { operation: 'shipment_status_sync' });
+        }
+        return;
+      }
       if (job.name !== 'shipment.create' && job.name !== 'shipment.status.sync' && job.name !== 'shipment.cancel') return;
       const parsed = shipmentCreateJobSchema.safeParse(job.data);
       if (!parsed.success) return;

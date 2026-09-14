@@ -95,9 +95,17 @@ describe('durable Ukrposhta shipment jobs', () => {
   it('checkpoints provisioning and dispatch before create, stores metadata and never repeats a successful job', async () => {
     const { service, shipment, client } = fixture();
     await expect(service.process({ shipmentId: id })).resolves.toBe('CREATED');
-    expect(shipment).toMatchObject({ status: 'CREATED', providerDocumentId: remoteId, trackingNumber: '0500113014256', cost: 80, nextStatusCheckAt: null, providerMetadata: { senderAddressId: 10, recipientAddressId: 11, senderUuid: remoteId, recipientUuid: remoteId, createDispatched: true, parcels: remote.parcels, lifecycle: remote.lifecycle } });
+    expect(shipment).toMatchObject({ status: 'CREATED', providerDocumentId: remoteId, trackingNumber: '0500113014256', cost: 80, nextStatusCheckAt: new Date('2026-09-13T09:15:00.000Z'), providerMetadata: { senderAddressId: 10, recipientAddressId: 11, senderUuid: remoteId, recipientUuid: remoteId, createDispatched: true, parcels: remote.parcels, lifecycle: remote.lifecycle } });
     await expect(service.process({ shipmentId: id })).resolves.toBe('IGNORED');
     expect(client.createShipment).toHaveBeenCalledOnce();
+  });
+
+  it('schedules tracking when create already reports physical registration', async () => {
+    const { service, shipment, client } = fixture();
+    client.createShipment.mockResolvedValueOnce({ ...remote, lifecycle: { status: 'REGISTERED', statusDate: '2026-09-13T12:00:00' } });
+
+    await expect(service.process({ shipmentId: id })).resolves.toBe('CREATED');
+    expect(shipment).toMatchObject({ status: 'ACCEPTED', nextStatusCheckAt: new Date('2026-09-13T09:15:00.000Z') });
   });
   it.each(['UNKNOWN', 'PROCESSING'])('never resends a dispatched shipment after %s without remote identity', async (status) => {
     const { service, shipment, client } = fixture({ status, metadata: { createDispatched: true } });

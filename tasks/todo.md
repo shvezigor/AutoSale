@@ -1087,10 +1087,10 @@ Status: deferred by the owner on 2026-09-12. Resume with sandbox credentials, th
 - [x] Add encrypted tenant connection and owner-only Delivery settings UI with an explicit sandbox/production mode.
 - [x] Add cached classifier search, active post-office filtering and sender defaults.
 - [x] Add idempotent client/shipment provisioning, PDF label proxy and lifecycle operations.
-- [ ] Add delayed tracking with a separate bearer and batch size up to 50.
+- [x] Add delayed tracking with a separate bearer and batch size up to 50.
 - [ ] Complete sandbox and controlled production acceptance in the combined carrier test cycle.
 
-Status: official research, secure connection, directories/sender defaults, and the gated shipment lifecycle were completed by 2026-09-13. The manager flow now supports Ukrposhta quote, durable idempotent creation, CREATED-only cancellation, PDF labels and explicit customer-message previews. Ukrposhta requires a business contract and separate eCom, counterparty and tracking credentials; API shipments are not synchronized with the Personal Account. Implementation follows `docs/superpowers/plans/2026-09-12-ukrposhta-delivery-implementation.md`. Production shipment creation remains disabled until combined carrier acceptance; delayed StatusTracking is the next slice.
+Status: official research, secure connection, directories/sender defaults, the gated shipment lifecycle, and delayed StatusTracking were completed by 2026-09-14. Tracking uses the separate bearer, isolates tenant/environment/credential generations, checks physical registration before StatusTracking, batches at most 50 barcodes, stores bounded versioned provider events, and never sends customer messages automatically. The manager flow supports Ukrposhta quote, durable idempotent creation, CREATED-only cancellation, PDF labels and explicit customer-message previews. Ukrposhta requires a business contract and separate eCom, counterparty and tracking credentials; API shipments are not synchronized with the Personal Account. Implementation follows `docs/superpowers/plans/2026-09-12-ukrposhta-delivery-implementation.md`. Production shipment creation remains disabled until combined carrier acceptance; sandbox and controlled production acceptance remain in the backlog.
 
 ## Task 73: Add bank accounts and payments
 

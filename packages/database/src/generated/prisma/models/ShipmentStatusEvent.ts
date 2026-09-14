@@ -20,8 +20,18 @@ export type ShipmentStatusEventModel = runtime.Types.Result.DefaultSelection<Pri
 
 export type AggregateShipmentStatusEvent = {
   _count: ShipmentStatusEventCountAggregateOutputType | null
+  _avg: ShipmentStatusEventAvgAggregateOutputType | null
+  _sum: ShipmentStatusEventSumAggregateOutputType | null
   _min: ShipmentStatusEventMinAggregateOutputType | null
   _max: ShipmentStatusEventMaxAggregateOutputType | null
+}
+
+export type ShipmentStatusEventAvgAggregateOutputType = {
+  mappingVersion: number | null
+}
+
+export type ShipmentStatusEventSumAggregateOutputType = {
+  mappingVersion: number | null
 }
 
 export type ShipmentStatusEventMinAggregateOutputType = {
@@ -30,7 +40,9 @@ export type ShipmentStatusEventMinAggregateOutputType = {
   shipmentId: string | null
   status: $Enums.ShipmentStatus | null
   providerCode: string | null
+  providerEventKey: string | null
   providerOccurredAt: Date | null
+  mappingVersion: number | null
   occurredAt: Date | null
   createdAt: Date | null
 }
@@ -41,7 +53,9 @@ export type ShipmentStatusEventMaxAggregateOutputType = {
   shipmentId: string | null
   status: $Enums.ShipmentStatus | null
   providerCode: string | null
+  providerEventKey: string | null
   providerOccurredAt: Date | null
+  mappingVersion: number | null
   occurredAt: Date | null
   createdAt: Date | null
 }
@@ -52,12 +66,23 @@ export type ShipmentStatusEventCountAggregateOutputType = {
   shipmentId: number
   status: number
   providerCode: number
+  providerEventKey: number
   providerOccurredAt: number
+  rawSnapshot: number
+  mappingVersion: number
   occurredAt: number
   createdAt: number
   _all: number
 }
 
+
+export type ShipmentStatusEventAvgAggregateInputType = {
+  mappingVersion?: true
+}
+
+export type ShipmentStatusEventSumAggregateInputType = {
+  mappingVersion?: true
+}
 
 export type ShipmentStatusEventMinAggregateInputType = {
   id?: true
@@ -65,7 +90,9 @@ export type ShipmentStatusEventMinAggregateInputType = {
   shipmentId?: true
   status?: true
   providerCode?: true
+  providerEventKey?: true
   providerOccurredAt?: true
+  mappingVersion?: true
   occurredAt?: true
   createdAt?: true
 }
@@ -76,7 +103,9 @@ export type ShipmentStatusEventMaxAggregateInputType = {
   shipmentId?: true
   status?: true
   providerCode?: true
+  providerEventKey?: true
   providerOccurredAt?: true
+  mappingVersion?: true
   occurredAt?: true
   createdAt?: true
 }
@@ -87,7 +116,10 @@ export type ShipmentStatusEventCountAggregateInputType = {
   shipmentId?: true
   status?: true
   providerCode?: true
+  providerEventKey?: true
   providerOccurredAt?: true
+  rawSnapshot?: true
+  mappingVersion?: true
   occurredAt?: true
   createdAt?: true
   _all?: true
@@ -131,6 +163,18 @@ export type ShipmentStatusEventAggregateArgs<ExtArgs extends runtime.Types.Exten
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    *
+   * Select which fields to average
+  **/
+  _avg?: ShipmentStatusEventAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   *
+   * Select which fields to sum
+  **/
+  _sum?: ShipmentStatusEventSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   *
    * Select which fields to find the minimum value
   **/
   _min?: ShipmentStatusEventMinAggregateInputType
@@ -161,6 +205,8 @@ export type ShipmentStatusEventGroupByArgs<ExtArgs extends runtime.Types.Extensi
   take?: number
   skip?: number
   _count?: ShipmentStatusEventCountAggregateInputType | true
+  _avg?: ShipmentStatusEventAvgAggregateInputType
+  _sum?: ShipmentStatusEventSumAggregateInputType
   _min?: ShipmentStatusEventMinAggregateInputType
   _max?: ShipmentStatusEventMaxAggregateInputType
 }
@@ -171,10 +217,15 @@ export type ShipmentStatusEventGroupByOutputType = {
   shipmentId: string
   status: $Enums.ShipmentStatus | null
   providerCode: string
+  providerEventKey: string | null
   providerOccurredAt: Date | null
+  rawSnapshot: runtime.JsonValue | null
+  mappingVersion: number
   occurredAt: Date
   createdAt: Date
   _count: ShipmentStatusEventCountAggregateOutputType | null
+  _avg: ShipmentStatusEventAvgAggregateOutputType | null
+  _sum: ShipmentStatusEventSumAggregateOutputType | null
   _min: ShipmentStatusEventMinAggregateOutputType | null
   _max: ShipmentStatusEventMaxAggregateOutputType | null
 }
@@ -203,7 +254,10 @@ export type ShipmentStatusEventWhereInput = {
   shipmentId?: Prisma.UuidFilter<"ShipmentStatusEvent"> | string
   status?: Prisma.EnumShipmentStatusNullableFilter<"ShipmentStatusEvent"> | $Enums.ShipmentStatus | null
   providerCode?: Prisma.StringFilter<"ShipmentStatusEvent"> | string
+  providerEventKey?: Prisma.StringNullableFilter<"ShipmentStatusEvent"> | string | null
   providerOccurredAt?: Prisma.DateTimeNullableFilter<"ShipmentStatusEvent"> | Date | string | null
+  rawSnapshot?: Prisma.JsonNullableFilter<"ShipmentStatusEvent">
+  mappingVersion?: Prisma.IntFilter<"ShipmentStatusEvent"> | number
   occurredAt?: Prisma.DateTimeFilter<"ShipmentStatusEvent"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"ShipmentStatusEvent"> | Date | string
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
@@ -216,7 +270,10 @@ export type ShipmentStatusEventOrderByWithRelationInput = {
   shipmentId?: Prisma.SortOrder
   status?: Prisma.SortOrderInput | Prisma.SortOrder
   providerCode?: Prisma.SortOrder
+  providerEventKey?: Prisma.SortOrderInput | Prisma.SortOrder
   providerOccurredAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  rawSnapshot?: Prisma.SortOrderInput | Prisma.SortOrder
+  mappingVersion?: Prisma.SortOrder
   occurredAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   tenant?: Prisma.TenantOrderByWithRelationInput
@@ -226,6 +283,7 @@ export type ShipmentStatusEventOrderByWithRelationInput = {
 export type ShipmentStatusEventWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   tenantId_id?: Prisma.ShipmentStatusEventTenantIdIdCompoundUniqueInput
+  tenantId_shipmentId_providerEventKey?: Prisma.ShipmentStatusEventTenantIdShipmentIdProviderEventKeyCompoundUniqueInput
   AND?: Prisma.ShipmentStatusEventWhereInput | Prisma.ShipmentStatusEventWhereInput[]
   OR?: Prisma.ShipmentStatusEventWhereInput[]
   NOT?: Prisma.ShipmentStatusEventWhereInput | Prisma.ShipmentStatusEventWhereInput[]
@@ -233,12 +291,15 @@ export type ShipmentStatusEventWhereUniqueInput = Prisma.AtLeast<{
   shipmentId?: Prisma.UuidFilter<"ShipmentStatusEvent"> | string
   status?: Prisma.EnumShipmentStatusNullableFilter<"ShipmentStatusEvent"> | $Enums.ShipmentStatus | null
   providerCode?: Prisma.StringFilter<"ShipmentStatusEvent"> | string
+  providerEventKey?: Prisma.StringNullableFilter<"ShipmentStatusEvent"> | string | null
   providerOccurredAt?: Prisma.DateTimeNullableFilter<"ShipmentStatusEvent"> | Date | string | null
+  rawSnapshot?: Prisma.JsonNullableFilter<"ShipmentStatusEvent">
+  mappingVersion?: Prisma.IntFilter<"ShipmentStatusEvent"> | number
   occurredAt?: Prisma.DateTimeFilter<"ShipmentStatusEvent"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"ShipmentStatusEvent"> | Date | string
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
   shipment?: Prisma.XOR<Prisma.ShipmentScalarRelationFilter, Prisma.ShipmentWhereInput>
-}, "id" | "tenantId_id">
+}, "id" | "tenantId_id" | "tenantId_shipmentId_providerEventKey">
 
 export type ShipmentStatusEventOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -246,12 +307,17 @@ export type ShipmentStatusEventOrderByWithAggregationInput = {
   shipmentId?: Prisma.SortOrder
   status?: Prisma.SortOrderInput | Prisma.SortOrder
   providerCode?: Prisma.SortOrder
+  providerEventKey?: Prisma.SortOrderInput | Prisma.SortOrder
   providerOccurredAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  rawSnapshot?: Prisma.SortOrderInput | Prisma.SortOrder
+  mappingVersion?: Prisma.SortOrder
   occurredAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.ShipmentStatusEventCountOrderByAggregateInput
+  _avg?: Prisma.ShipmentStatusEventAvgOrderByAggregateInput
   _max?: Prisma.ShipmentStatusEventMaxOrderByAggregateInput
   _min?: Prisma.ShipmentStatusEventMinOrderByAggregateInput
+  _sum?: Prisma.ShipmentStatusEventSumOrderByAggregateInput
 }
 
 export type ShipmentStatusEventScalarWhereWithAggregatesInput = {
@@ -263,7 +329,10 @@ export type ShipmentStatusEventScalarWhereWithAggregatesInput = {
   shipmentId?: Prisma.UuidWithAggregatesFilter<"ShipmentStatusEvent"> | string
   status?: Prisma.EnumShipmentStatusNullableWithAggregatesFilter<"ShipmentStatusEvent"> | $Enums.ShipmentStatus | null
   providerCode?: Prisma.StringWithAggregatesFilter<"ShipmentStatusEvent"> | string
+  providerEventKey?: Prisma.StringNullableWithAggregatesFilter<"ShipmentStatusEvent"> | string | null
   providerOccurredAt?: Prisma.DateTimeNullableWithAggregatesFilter<"ShipmentStatusEvent"> | Date | string | null
+  rawSnapshot?: Prisma.JsonNullableWithAggregatesFilter<"ShipmentStatusEvent">
+  mappingVersion?: Prisma.IntWithAggregatesFilter<"ShipmentStatusEvent"> | number
   occurredAt?: Prisma.DateTimeWithAggregatesFilter<"ShipmentStatusEvent"> | Date | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ShipmentStatusEvent"> | Date | string
 }
@@ -272,7 +341,10 @@ export type ShipmentStatusEventCreateInput = {
   id?: string
   status?: $Enums.ShipmentStatus | null
   providerCode: string
+  providerEventKey?: string | null
   providerOccurredAt?: Date | string | null
+  rawSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mappingVersion?: number
   occurredAt: Date | string
   createdAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutShipmentStatusEventsInput
@@ -285,7 +357,10 @@ export type ShipmentStatusEventUncheckedCreateInput = {
   shipmentId: string
   status?: $Enums.ShipmentStatus | null
   providerCode: string
+  providerEventKey?: string | null
   providerOccurredAt?: Date | string | null
+  rawSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mappingVersion?: number
   occurredAt: Date | string
   createdAt?: Date | string
 }
@@ -294,7 +369,10 @@ export type ShipmentStatusEventUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.NullableEnumShipmentStatusFieldUpdateOperationsInput | $Enums.ShipmentStatus | null
   providerCode?: Prisma.StringFieldUpdateOperationsInput | string
+  providerEventKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   providerOccurredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  rawSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mappingVersion?: Prisma.IntFieldUpdateOperationsInput | number
   occurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutShipmentStatusEventsNestedInput
@@ -307,7 +385,10 @@ export type ShipmentStatusEventUncheckedUpdateInput = {
   shipmentId?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.NullableEnumShipmentStatusFieldUpdateOperationsInput | $Enums.ShipmentStatus | null
   providerCode?: Prisma.StringFieldUpdateOperationsInput | string
+  providerEventKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   providerOccurredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  rawSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mappingVersion?: Prisma.IntFieldUpdateOperationsInput | number
   occurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -318,7 +399,10 @@ export type ShipmentStatusEventCreateManyInput = {
   shipmentId: string
   status?: $Enums.ShipmentStatus | null
   providerCode: string
+  providerEventKey?: string | null
   providerOccurredAt?: Date | string | null
+  rawSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mappingVersion?: number
   occurredAt: Date | string
   createdAt?: Date | string
 }
@@ -327,7 +411,10 @@ export type ShipmentStatusEventUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.NullableEnumShipmentStatusFieldUpdateOperationsInput | $Enums.ShipmentStatus | null
   providerCode?: Prisma.StringFieldUpdateOperationsInput | string
+  providerEventKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   providerOccurredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  rawSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mappingVersion?: Prisma.IntFieldUpdateOperationsInput | number
   occurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -338,7 +425,10 @@ export type ShipmentStatusEventUncheckedUpdateManyInput = {
   shipmentId?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.NullableEnumShipmentStatusFieldUpdateOperationsInput | $Enums.ShipmentStatus | null
   providerCode?: Prisma.StringFieldUpdateOperationsInput | string
+  providerEventKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   providerOccurredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  rawSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mappingVersion?: Prisma.IntFieldUpdateOperationsInput | number
   occurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -358,15 +448,28 @@ export type ShipmentStatusEventTenantIdIdCompoundUniqueInput = {
   id: string
 }
 
+export type ShipmentStatusEventTenantIdShipmentIdProviderEventKeyCompoundUniqueInput = {
+  tenantId: string
+  shipmentId: string
+  providerEventKey: string
+}
+
 export type ShipmentStatusEventCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   tenantId?: Prisma.SortOrder
   shipmentId?: Prisma.SortOrder
   status?: Prisma.SortOrder
   providerCode?: Prisma.SortOrder
+  providerEventKey?: Prisma.SortOrder
   providerOccurredAt?: Prisma.SortOrder
+  rawSnapshot?: Prisma.SortOrder
+  mappingVersion?: Prisma.SortOrder
   occurredAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+}
+
+export type ShipmentStatusEventAvgOrderByAggregateInput = {
+  mappingVersion?: Prisma.SortOrder
 }
 
 export type ShipmentStatusEventMaxOrderByAggregateInput = {
@@ -375,7 +478,9 @@ export type ShipmentStatusEventMaxOrderByAggregateInput = {
   shipmentId?: Prisma.SortOrder
   status?: Prisma.SortOrder
   providerCode?: Prisma.SortOrder
+  providerEventKey?: Prisma.SortOrder
   providerOccurredAt?: Prisma.SortOrder
+  mappingVersion?: Prisma.SortOrder
   occurredAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
@@ -386,9 +491,15 @@ export type ShipmentStatusEventMinOrderByAggregateInput = {
   shipmentId?: Prisma.SortOrder
   status?: Prisma.SortOrder
   providerCode?: Prisma.SortOrder
+  providerEventKey?: Prisma.SortOrder
   providerOccurredAt?: Prisma.SortOrder
+  mappingVersion?: Prisma.SortOrder
   occurredAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+}
+
+export type ShipmentStatusEventSumOrderByAggregateInput = {
+  mappingVersion?: Prisma.SortOrder
 }
 
 export type ShipmentStatusEventCreateNestedManyWithoutTenantInput = {
@@ -483,7 +594,10 @@ export type ShipmentStatusEventCreateWithoutTenantInput = {
   id?: string
   status?: $Enums.ShipmentStatus | null
   providerCode: string
+  providerEventKey?: string | null
   providerOccurredAt?: Date | string | null
+  rawSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mappingVersion?: number
   occurredAt: Date | string
   createdAt?: Date | string
   shipment: Prisma.ShipmentCreateNestedOneWithoutStatusEventsInput
@@ -494,7 +608,10 @@ export type ShipmentStatusEventUncheckedCreateWithoutTenantInput = {
   shipmentId: string
   status?: $Enums.ShipmentStatus | null
   providerCode: string
+  providerEventKey?: string | null
   providerOccurredAt?: Date | string | null
+  rawSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mappingVersion?: number
   occurredAt: Date | string
   createdAt?: Date | string
 }
@@ -534,7 +651,10 @@ export type ShipmentStatusEventScalarWhereInput = {
   shipmentId?: Prisma.UuidFilter<"ShipmentStatusEvent"> | string
   status?: Prisma.EnumShipmentStatusNullableFilter<"ShipmentStatusEvent"> | $Enums.ShipmentStatus | null
   providerCode?: Prisma.StringFilter<"ShipmentStatusEvent"> | string
+  providerEventKey?: Prisma.StringNullableFilter<"ShipmentStatusEvent"> | string | null
   providerOccurredAt?: Prisma.DateTimeNullableFilter<"ShipmentStatusEvent"> | Date | string | null
+  rawSnapshot?: Prisma.JsonNullableFilter<"ShipmentStatusEvent">
+  mappingVersion?: Prisma.IntFilter<"ShipmentStatusEvent"> | number
   occurredAt?: Prisma.DateTimeFilter<"ShipmentStatusEvent"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"ShipmentStatusEvent"> | Date | string
 }
@@ -543,7 +663,10 @@ export type ShipmentStatusEventCreateWithoutShipmentInput = {
   id?: string
   status?: $Enums.ShipmentStatus | null
   providerCode: string
+  providerEventKey?: string | null
   providerOccurredAt?: Date | string | null
+  rawSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mappingVersion?: number
   occurredAt: Date | string
   createdAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutShipmentStatusEventsInput
@@ -553,7 +676,10 @@ export type ShipmentStatusEventUncheckedCreateWithoutShipmentInput = {
   id?: string
   status?: $Enums.ShipmentStatus | null
   providerCode: string
+  providerEventKey?: string | null
   providerOccurredAt?: Date | string | null
+  rawSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mappingVersion?: number
   occurredAt: Date | string
   createdAt?: Date | string
 }
@@ -589,7 +715,10 @@ export type ShipmentStatusEventCreateManyTenantInput = {
   shipmentId: string
   status?: $Enums.ShipmentStatus | null
   providerCode: string
+  providerEventKey?: string | null
   providerOccurredAt?: Date | string | null
+  rawSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mappingVersion?: number
   occurredAt: Date | string
   createdAt?: Date | string
 }
@@ -598,7 +727,10 @@ export type ShipmentStatusEventUpdateWithoutTenantInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.NullableEnumShipmentStatusFieldUpdateOperationsInput | $Enums.ShipmentStatus | null
   providerCode?: Prisma.StringFieldUpdateOperationsInput | string
+  providerEventKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   providerOccurredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  rawSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mappingVersion?: Prisma.IntFieldUpdateOperationsInput | number
   occurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   shipment?: Prisma.ShipmentUpdateOneRequiredWithoutStatusEventsNestedInput
@@ -609,7 +741,10 @@ export type ShipmentStatusEventUncheckedUpdateWithoutTenantInput = {
   shipmentId?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.NullableEnumShipmentStatusFieldUpdateOperationsInput | $Enums.ShipmentStatus | null
   providerCode?: Prisma.StringFieldUpdateOperationsInput | string
+  providerEventKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   providerOccurredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  rawSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mappingVersion?: Prisma.IntFieldUpdateOperationsInput | number
   occurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -619,7 +754,10 @@ export type ShipmentStatusEventUncheckedUpdateManyWithoutTenantInput = {
   shipmentId?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.NullableEnumShipmentStatusFieldUpdateOperationsInput | $Enums.ShipmentStatus | null
   providerCode?: Prisma.StringFieldUpdateOperationsInput | string
+  providerEventKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   providerOccurredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  rawSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mappingVersion?: Prisma.IntFieldUpdateOperationsInput | number
   occurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -628,7 +766,10 @@ export type ShipmentStatusEventCreateManyShipmentInput = {
   id?: string
   status?: $Enums.ShipmentStatus | null
   providerCode: string
+  providerEventKey?: string | null
   providerOccurredAt?: Date | string | null
+  rawSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mappingVersion?: number
   occurredAt: Date | string
   createdAt?: Date | string
 }
@@ -637,7 +778,10 @@ export type ShipmentStatusEventUpdateWithoutShipmentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.NullableEnumShipmentStatusFieldUpdateOperationsInput | $Enums.ShipmentStatus | null
   providerCode?: Prisma.StringFieldUpdateOperationsInput | string
+  providerEventKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   providerOccurredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  rawSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mappingVersion?: Prisma.IntFieldUpdateOperationsInput | number
   occurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutShipmentStatusEventsNestedInput
@@ -647,7 +791,10 @@ export type ShipmentStatusEventUncheckedUpdateWithoutShipmentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.NullableEnumShipmentStatusFieldUpdateOperationsInput | $Enums.ShipmentStatus | null
   providerCode?: Prisma.StringFieldUpdateOperationsInput | string
+  providerEventKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   providerOccurredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  rawSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mappingVersion?: Prisma.IntFieldUpdateOperationsInput | number
   occurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -656,7 +803,10 @@ export type ShipmentStatusEventUncheckedUpdateManyWithoutShipmentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.NullableEnumShipmentStatusFieldUpdateOperationsInput | $Enums.ShipmentStatus | null
   providerCode?: Prisma.StringFieldUpdateOperationsInput | string
+  providerEventKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   providerOccurredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  rawSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  mappingVersion?: Prisma.IntFieldUpdateOperationsInput | number
   occurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -669,7 +819,10 @@ export type ShipmentStatusEventSelect<ExtArgs extends runtime.Types.Extensions.I
   shipmentId?: boolean
   status?: boolean
   providerCode?: boolean
+  providerEventKey?: boolean
   providerOccurredAt?: boolean
+  rawSnapshot?: boolean
+  mappingVersion?: boolean
   occurredAt?: boolean
   createdAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
@@ -682,7 +835,10 @@ export type ShipmentStatusEventSelectCreateManyAndReturn<ExtArgs extends runtime
   shipmentId?: boolean
   status?: boolean
   providerCode?: boolean
+  providerEventKey?: boolean
   providerOccurredAt?: boolean
+  rawSnapshot?: boolean
+  mappingVersion?: boolean
   occurredAt?: boolean
   createdAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
@@ -695,7 +851,10 @@ export type ShipmentStatusEventSelectUpdateManyAndReturn<ExtArgs extends runtime
   shipmentId?: boolean
   status?: boolean
   providerCode?: boolean
+  providerEventKey?: boolean
   providerOccurredAt?: boolean
+  rawSnapshot?: boolean
+  mappingVersion?: boolean
   occurredAt?: boolean
   createdAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
@@ -708,12 +867,15 @@ export type ShipmentStatusEventSelectScalar = {
   shipmentId?: boolean
   status?: boolean
   providerCode?: boolean
+  providerEventKey?: boolean
   providerOccurredAt?: boolean
+  rawSnapshot?: boolean
+  mappingVersion?: boolean
   occurredAt?: boolean
   createdAt?: boolean
 }
 
-export type ShipmentStatusEventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "shipmentId" | "status" | "providerCode" | "providerOccurredAt" | "occurredAt" | "createdAt", ExtArgs["result"]["shipmentStatusEvent"]>
+export type ShipmentStatusEventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "shipmentId" | "status" | "providerCode" | "providerEventKey" | "providerOccurredAt" | "rawSnapshot" | "mappingVersion" | "occurredAt" | "createdAt", ExtArgs["result"]["shipmentStatusEvent"]>
 export type ShipmentStatusEventInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   shipment?: boolean | Prisma.ShipmentDefaultArgs<ExtArgs>
@@ -739,7 +901,10 @@ export type $ShipmentStatusEventPayload<ExtArgs extends runtime.Types.Extensions
     shipmentId: string
     status: $Enums.ShipmentStatus | null
     providerCode: string
+    providerEventKey: string | null
     providerOccurredAt: Date | null
+    rawSnapshot: runtime.JsonValue | null
+    mappingVersion: number
     occurredAt: Date
     createdAt: Date
   }, ExtArgs["result"]["shipmentStatusEvent"]>
@@ -1172,7 +1337,10 @@ export interface ShipmentStatusEventFieldRefs {
   readonly shipmentId: Prisma.FieldRef<"ShipmentStatusEvent", 'String'>
   readonly status: Prisma.FieldRef<"ShipmentStatusEvent", 'ShipmentStatus'>
   readonly providerCode: Prisma.FieldRef<"ShipmentStatusEvent", 'String'>
+  readonly providerEventKey: Prisma.FieldRef<"ShipmentStatusEvent", 'String'>
   readonly providerOccurredAt: Prisma.FieldRef<"ShipmentStatusEvent", 'DateTime'>
+  readonly rawSnapshot: Prisma.FieldRef<"ShipmentStatusEvent", 'Json'>
+  readonly mappingVersion: Prisma.FieldRef<"ShipmentStatusEvent", 'Int'>
   readonly occurredAt: Prisma.FieldRef<"ShipmentStatusEvent", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"ShipmentStatusEvent", 'DateTime'>
 }

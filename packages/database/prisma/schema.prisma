@@ -1048,13 +1048,17 @@ model ShipmentStatusEvent {
   shipmentId         String          @map("shipment_id") @db.Uuid
   status             ShipmentStatus?
   providerCode       String          @map("provider_code")
+  providerEventKey   String?         @map("provider_event_key")
   providerOccurredAt DateTime?       @map("provider_occurred_at")
+  rawSnapshot        Json?           @map("raw_snapshot")
+  mappingVersion     Int             @default(1) @map("mapping_version")
   occurredAt         DateTime        @map("occurred_at")
   createdAt          DateTime        @default(now()) @map("created_at")
   tenant             Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   shipment           Shipment        @relation(fields: [tenantId, shipmentId], references: [tenantId, id], onDelete: Cascade)
 
   @@unique([tenantId, id])
+  @@unique([tenantId, shipmentId, providerEventKey])
   @@index([tenantId, shipmentId, occurredAt(sort: Desc)])
   @@map("shipment_status_events")
 }
