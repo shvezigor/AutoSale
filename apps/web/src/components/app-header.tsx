@@ -8,7 +8,7 @@ import { type RefObject, useCallback, useEffect, useRef, useState } from 'react'
 import { getNotifications, markAllNotificationsRead, markNotificationRead, type NotificationItem } from '../api/notifications';
 import { mutatingFetch } from '../auth/csrf-fetch';
 
-type HeaderSession = Pick<PublicSession, 'name' | 'email' | 'membershipRole'>;
+type HeaderSession = Pick<PublicSession, 'name' | 'email' | 'membershipRole' | 'avatarUrl'>;
 
 export function AppHeader({ session, menuOpen = false, menuTriggerRef, onMenuToggle }: { session: HeaderSession; menuOpen?: boolean; menuTriggerRef?: RefObject<HTMLButtonElement | null>; onMenuToggle?: () => void }) {
   const [open, setOpen] = useState<'notifications' | 'profile' | null>(null);
@@ -87,11 +87,14 @@ function ProfileMenu({ session, open, onToggle, onClose }: { session: HeaderSess
   }
   return <div className="header-popover-root" ref={root}>
     <button ref={trigger} className="profile-trigger" type="button" aria-label="Меню профілю" aria-expanded={open} aria-controls="profile-popover" onClick={onToggle}>
-      <span className="manager-avatar">{session.name.slice(0, 1).toUpperCase()}</span><span className="profile-trigger-copy"><strong>{session.name}</strong><small>{session.membershipRole === 'OWNER' ? 'Власник' : 'Менеджер'}</small></span><span aria-hidden="true">⌄</span>
+      {session.avatarUrl
+        ? <img className="manager-avatar" src={session.avatarUrl} alt={`Фото профілю ${session.name}`} />
+        : <span className="manager-avatar" aria-label={`Ініціал ${session.name.slice(0, 1).toUpperCase()}`}>{session.name.slice(0, 1).toUpperCase()}</span>}
+      <span className="profile-trigger-copy"><strong>{session.name}</strong><small>{session.membershipRole === 'OWNER' ? 'Власник' : 'Менеджер'}</small></span><span aria-hidden="true">⌄</span>
     </button>
     {open && <div id="profile-popover" className="header-popover profile-popover" role="menu">
       <div className="profile-summary"><strong>{session.name}</strong><small>{session.email}</small></div>
-      <Link role="menuitem" href="/settings" onClick={onClose}>Налаштування</Link>
+      <Link role="menuitem" href="/profile" onClick={onClose}>Мій профіль</Link>
       {session.membershipRole === 'OWNER' && <Link role="menuitem" href="/team" onClick={onClose}>Команда</Link>}
       <button role="menuitem" type="button" disabled={loggingOut} onClick={() => void logout()}>{loggingOut ? 'Виходимо…' : 'Вийти'}</button>
     </div>}

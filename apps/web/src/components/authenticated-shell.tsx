@@ -12,7 +12,7 @@ import { ConfirmProvider } from './confirm-provider';
 import { SIDEBAR_STORAGE_KEY } from './sidebar-preference';
 import { useModalFocus } from './use-modal-focus';
 
-type ShellSession = Pick<PublicSession, 'name' | 'email' | 'membershipRole'>;
+type ShellSession = Pick<PublicSession, 'name' | 'email' | 'membershipRole' | 'avatarUrl'>;
 
 export function AuthenticatedShell({ session, children }: { session: ShellSession; children: ReactNode }) {
   const pathname = usePathname();

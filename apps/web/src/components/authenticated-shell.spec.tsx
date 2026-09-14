@@ -5,7 +5,7 @@ import { AuthenticatedShell } from './authenticated-shell';
 
 vi.mock('next/navigation', () => ({ usePathname: () => '/orders', useRouter: () => ({ refresh: vi.fn() }) }));
 
-const ownerSession = { name: 'Ігор', email: 'owner@example.com', membershipRole: 'OWNER' as const };
+const ownerSession = { name: 'Ігор', email: 'owner@example.com', membershipRole: 'OWNER' as const, avatarUrl: null };
 
 beforeEach(() => {
   localStorage.clear();

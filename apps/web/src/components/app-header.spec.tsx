@@ -17,20 +17,24 @@ afterEach(() => { cleanup(); vi.unstubAllGlobals(); refresh.mockClear(); });
 
 describe('AppHeader', () => {
   it('shows unread notifications and owner profile actions', async () => {
-    render(<AppHeader session={{ name: 'Ігор', email: 'owner@example.com', membershipRole: 'OWNER' }} />);
+    render(<AppHeader session={{ name: 'Ігор Швець', email: 'owner@example.com', membershipRole: 'OWNER', avatarUrl: '/api/media/profile/avatar?v=abc' }} />);
     const bell = await screen.findByRole('button', { name: 'Сповіщення: 1 непрочитаних' });
     fireEvent.click(bell);
     expect(screen.getByText('Каталог готовий')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Меню профілю' }));
+    expect(screen.getByRole('menuitem', { name: 'Мій профіль' })).toHaveAttribute('href', '/profile');
+    expect(screen.queryByRole('menuitem', { name: 'Налаштування' })).not.toBeInTheDocument();
     expect(screen.getByRole('menuitem', { name: 'Команда' })).toHaveAttribute('href', '/team');
+    expect(screen.getByRole('img', { name: 'Фото профілю Ігор Швець' })).toHaveAttribute('src', '/api/media/profile/avatar?v=abc');
   });
 
   it('hides team from managers and closes with Escape', async () => {
-    render(<AppHeader session={{ name: 'Олена', email: 'manager@example.com', membershipRole: 'MANAGER' }} />);
+    render(<AppHeader session={{ name: 'Олена', email: 'manager@example.com', membershipRole: 'MANAGER', avatarUrl: null }} />);
     await waitFor(() => expect(screen.getByRole('button', { name: /Сповіщення/ })).toBeInTheDocument());
     const profile = screen.getByRole('button', { name: 'Меню профілю' });
     fireEvent.click(profile);
     expect(screen.queryByRole('menuitem', { name: 'Команда' })).not.toBeInTheDocument();
+    expect(screen.getByLabelText('Ініціал О')).toHaveTextContent('О');
     fireEvent.keyDown(document, { key: 'Escape' });
     expect(screen.queryByRole('menu')).not.toBeInTheDocument();
     expect(profile).toHaveFocus();

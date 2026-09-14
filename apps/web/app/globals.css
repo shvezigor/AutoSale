@@ -99,7 +99,7 @@ html[data-sidebar-state="collapsed"] .authenticated-shell > .primary-nav .nav-it
 .nav-item svg { flex: 0 0 auto; }
 .manager { display: flex; gap: 9px; align-items: center; padding: 12px 6px 0; border-top: 1px solid var(--border); font-size: 13px; font-weight: 650; }
 .manager small { display: block; color: var(--muted); font-weight: 450; margin-top: 2px; }
-.manager-avatar { display: grid; place-items: center; width: 34px; height: 34px; background: #182237; color: white; border-radius: 50%; }
+.manager-avatar { display: grid; width: 34px; height: 34px; overflow: hidden; place-items: center; border-radius: 50%; background: #182237; color: white; object-fit: cover; }
 .inbox-sidebar { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; min-width: 0; min-height: 0; height: 100%; overflow: hidden; border-right: 1px solid var(--border); background: #fff; }
 .inbox-heading { padding: 25px 20px 18px; border-bottom: 1px solid var(--border); }
 .inbox-heading h1 { margin: 0 0 18px; font-size: 24px; letter-spacing: -.5px; }
