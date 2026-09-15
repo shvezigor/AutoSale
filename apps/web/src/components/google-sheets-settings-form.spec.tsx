@@ -9,12 +9,21 @@ vi.mock('./google-picker-button', () => ({
 import { GoogleSheetsSettingsForm } from './google-sheets-settings-form';
 import { ActivityProvider } from './activity-provider';
 import { ToastProvider } from './toast-provider';
+import { I18nProvider } from '../i18n/i18n-provider';
+
+vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
 
 function renderForm(ui: React.ReactElement) { return render(<ToastProvider><ActivityProvider>{ui}</ActivityProvider></ToastProvider>); }
 
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
 describe('GoogleSheetsSettingsForm', () => {
+  it('translates export controls while preserving the selected sheet name', () => {
+    renderForm(<I18nProvider locale="en" authenticated={false}><GoogleSheetsSettingsForm initial={{ spreadsheetId: 'sheet-id', sheetName: 'Продажі', status: 'ACTIVE', requiredHeaders: ['order_id'], lastValidatedAt: null, errorSummary: null }} /></I18nProvider>);
+    expect(screen.getByRole('heading', { name: 'Order export' })).toBeInTheDocument();
+    expect(screen.getByText('Продажі')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Check' })).toBeInTheDocument();
+  });
   it('uses a business-facing order export card without spreadsheet id input', () => {
     renderForm(<GoogleSheetsSettingsForm initial={{ spreadsheetId: null, sheetName: 'Orders', status: 'NOT_CONFIGURED', requiredHeaders: ['order_id'], lastValidatedAt: null, errorSummary: null }} />);
 

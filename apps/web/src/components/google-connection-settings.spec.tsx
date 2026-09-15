@@ -4,6 +4,9 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { GoogleConnectionSettings } from './google-connection-settings';
 import { ActivityProvider } from './activity-provider';
 import { ToastProvider } from './toast-provider';
+import { I18nProvider } from '../i18n/i18n-provider';
+
+vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
 
 function renderConnection(ui: React.ReactElement) { return render(<ToastProvider><ActivityProvider>{ui}</ActivityProvider></ToastProvider>); }
 
@@ -15,6 +18,12 @@ const active = {
 };
 
 describe('GoogleConnectionSettings', () => {
+  it('translates controls while preserving the connected account', () => {
+    renderConnection(<I18nProvider locale="en" authenticated={false}><GoogleConnectionSettings initial={active} role="OWNER" /></I18nProvider>);
+    expect(screen.getByRole('heading', { name: 'Google account' })).toBeInTheDocument();
+    expect(screen.getByText('owner@gmail.com')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Disconnect Google' })).toBeInTheDocument();
+  });
   it('shows account details and disconnect controls only to the owner', () => {
     renderConnection(<GoogleConnectionSettings initial={active} role="OWNER" />);
     expect(screen.getByText('owner@gmail.com')).toBeInTheDocument();
