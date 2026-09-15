@@ -3,8 +3,10 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const { mutatingFetch } = vi.hoisted(() => ({ mutatingFetch: vi.fn() }));
 vi.mock('../auth/csrf-fetch', () => ({ mutatingFetch }));
+vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
 
 import { CatalogueImportWizard } from './catalogue-import-wizard';
+import { I18nProvider } from '../i18n/i18n-provider';
 
 const runId = '11111111-1111-4111-8111-111111111111';
 const upload = { id: runId, sourceId: '22222222-2222-4222-8222-222222222222', status: 'UPLOADED', totalRows: 2, validRows: 0, createdRows: 0, updatedRows: 0, skippedRows: 0, failedRows: 0, startedAt: null, completedAt: null, headers: ['sku', 'name', 'note'] };
@@ -14,6 +16,22 @@ const preview = { rows: [], totals: { created: 1, updated: 1, skipped: 0, failed
 afterEach(() => { cleanup(); mutatingFetch.mockReset(); vi.unstubAllGlobals(); vi.useRealTimers(); });
 
 describe('CatalogueImportWizard', () => {
+  it('translates the wizard chrome while preserving the customer source name', () => {
+    render(
+      <I18nProvider locale="en" authenticated={false}>
+        <CatalogueImportWizard
+          session={{ membershipRole: 'OWNER' }}
+          reviewRuns={[{ id: runId, sourceName: 'Прайс постачальника', headers: ['Назва', 'Ціна'] }]}
+        />
+      </I18nProvider>,
+    );
+
+    expect(screen.getByRole('region', { name: 'Catalogue import' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Choose a source' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Review Прайс постачальника' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Choose file' })).toBeInTheDocument();
+  });
+
   it('shows structural details only for a review that needs attention', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(response({
       ...proposal,
