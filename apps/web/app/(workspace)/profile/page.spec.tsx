@@ -12,6 +12,7 @@ vi.mock('next/navigation', () => ({
 }));
 
 import WorkspaceLayout from '../layout';
+import { I18nProvider } from '../../../src/i18n/i18n-provider';
 import ProfilePage from './page';
 
 const profile = {
@@ -46,7 +47,7 @@ describe('ProfilePage', () => {
     });
     authenticatedApiFetch.mockResolvedValue({ ok: true, json: async () => profile });
 
-    render(await WorkspaceLayout({ children: await ProfilePage() }));
+    render(<I18nProvider locale="uk" authenticated>{await WorkspaceLayout({ children: await ProfilePage() })}</I18nProvider>);
 
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/profile');
     expect(screen.getByRole('heading', { name: 'Мій профіль' })).toBeInTheDocument();

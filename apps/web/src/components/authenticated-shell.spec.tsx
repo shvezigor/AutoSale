@@ -1,11 +1,16 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { I18nProvider } from '../i18n/i18n-provider';
 import { AuthenticatedShell } from './authenticated-shell';
 
 vi.mock('next/navigation', () => ({ usePathname: () => '/orders', useRouter: () => ({ refresh: vi.fn() }) }));
 
 const ownerSession = { name: 'Ігор', email: 'owner@example.com', membershipRole: 'OWNER' as const, avatarUrl: null };
+
+function renderShell() {
+  return render(<I18nProvider locale="uk" authenticated><AuthenticatedShell session={ownerSession}><h1>Замовлення</h1></AuthenticatedShell></I18nProvider>);
+}
 
 beforeEach(() => {
   localStorage.clear();
@@ -16,14 +21,14 @@ afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
 describe('AuthenticatedShell', () => {
   it('renders navigation, header, and content once', () => {
-    render(<AuthenticatedShell session={ownerSession}><h1>Замовлення</h1></AuthenticatedShell>);
+    renderShell();
     expect(screen.getByRole('link', { name: 'AutoSale' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Меню профілю' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Замовлення' })).toBeInTheDocument();
   });
 
   it('opens and closes an accessible mobile navigation drawer', () => {
-    render(<AuthenticatedShell session={ownerSession}><h1>Замовлення</h1></AuthenticatedShell>);
+    renderShell();
     const trigger = screen.getByRole('button', { name: 'Відкрити меню' });
     fireEvent.click(trigger);
     expect(screen.getByRole('navigation', { name: 'Мобільна навігація' })).toBeInTheDocument();
@@ -33,7 +38,7 @@ describe('AuthenticatedShell', () => {
   });
 
   it('starts expanded and persists a desktop collapse preference', () => {
-    render(<AuthenticatedShell session={ownerSession}><h1>Замовлення</h1></AuthenticatedShell>);
+    renderShell();
 
     const toggle = screen.getByRole('button', { name: 'Згорнути меню' });
     expect(toggle).toHaveAttribute('aria-expanded', 'true');
@@ -48,7 +53,7 @@ describe('AuthenticatedShell', () => {
     localStorage.setItem('autosale.sidebar', 'collapsed');
     document.documentElement.dataset.sidebarState = 'collapsed';
 
-    render(<AuthenticatedShell session={ownerSession}><h1>Замовлення</h1></AuthenticatedShell>);
+    renderShell();
 
     expect(screen.getByRole('button', { name: 'Розгорнути меню' })).toHaveAttribute('aria-expanded', 'false');
   });

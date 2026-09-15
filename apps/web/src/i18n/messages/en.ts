@@ -5,6 +5,15 @@ export const enMessages = {
     greeting: 'Hello, {name}',
     save: 'Save',
   },
+  language: {
+    label: 'Interface language',
+    ukrainian: 'Українська',
+    english: 'English',
+    updating: 'Changing language…',
+    updateSuccess: 'Interface language changed',
+    updateError: 'Could not change language',
+    updateErrorHint: 'Please try again.',
+  },
   navigation: {
     conversations: 'Conversations',
     orders: 'Orders',
