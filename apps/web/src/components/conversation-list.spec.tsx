@@ -1,6 +1,6 @@
 import type { ConversationListResponse } from '../../../../packages/contracts/src/conversations';
-import { render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { cleanup, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
 import { I18nProvider } from '../i18n/i18n-provider';
@@ -15,6 +15,8 @@ const fixtureSummary: ConversationListResponse['items'][number] = {
   lastMessagePreview: 'Хочу чорну модель 38 розміру',
   lastMessageAt: '2026-08-26T08:00:00.123Z',
 };
+
+afterEach(cleanup);
 
 describe('ConversationList', () => {
   it('links each named customer to the conversation detail', () => {

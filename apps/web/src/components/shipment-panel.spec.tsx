@@ -7,6 +7,9 @@ import type { ManagerOrder } from '../../../../packages/contracts/src/orders';
 import { ShipmentPanel } from './shipment-panel';
 import { ToastProvider } from './toast-provider';
 import { ConfirmProvider } from './confirm-provider';
+import { I18nProvider } from '../i18n/i18n-provider';
+
+vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
 
 const order = {
   id: '11111111-1111-4111-8111-111111111111', status: 'APPROVED', participantName: 'Олена', channel: 'INSTAGRAM',
@@ -19,6 +22,17 @@ const order = {
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
 describe('ShipmentPanel', () => {
+  it('translates shipment controls while preserving shipment data', () => {
+    render(<I18nProvider locale="en" authenticated={false}><ConfirmProvider><ToastProvider><ShipmentPanel order={{ ...order, shipment: {
+      id: 'shipment-id', orderId: order.id, provider: 'NOVA_POSHTA', status: 'CREATED', trackingNumber: '20450000000000',
+      cost: 120, currency: 'UAH', createdAt: '2026-09-11T00:00:00.000Z', providerCreatedAt: null,
+      acceptedAt: null, deliveredAt: null, cancelledAt: null, lastStatusCheckedAt: null, lastErrorCode: null, history: [],
+    } }} /></ToastProvider></ConfirmProvider></I18nProvider>);
+    expect(screen.getByText('Shipment created')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Notify customer' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Track shipment' })).toBeInTheDocument();
+    expect(screen.getByText('TTN 20450000000000')).toBeInTheDocument();
+  });
   it('stops the cancellation loader and explains a terminal Ukrposhta failure', async () => {
     const shipment = { id: 'shipment-id', orderId: order.id, provider: 'UKRPOSHTA' as const, status: 'CREATED' as const, trackingNumber: '0500113014256', cost: 90, currency: 'UAH' as const, createdAt: '2026-09-13T00:00:00Z', providerCreatedAt: null, acceptedAt: null, deliveredAt: null, cancelledAt: null, lastStatusCheckedAt: null, lastErrorCode: null, history: [] };
     vi.stubGlobal('fetch', vi.fn().mockImplementation(async (path: string) => ({ ok: true, json: async () => path.includes('csrf') ? { token: 'csrf-token' } : { shipment: { ...shipment, lastErrorCode: 'UKRPOSHTA_UNAUTHORIZED' } } })));

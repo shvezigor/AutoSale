@@ -2,6 +2,7 @@
 
 import type { DeliveryLocation, DeliveryLocationQuery, DeliveryLocationType, DeliveryProvider } from '../../../../packages/contracts/src/delivery';
 import { useEffect, useId, useRef, useState } from 'react';
+import { useI18n } from '../i18n/i18n-provider';
 
 type SearchInput = DeliveryLocationQuery;
 type SearchFunction = (input: SearchInput, signal: AbortSignal) => Promise<DeliveryLocation[]>;
@@ -25,6 +26,7 @@ export function DeliveryLocationPicker({
   onSelect(value: DeliveryLocation | null): void;
   search?: SearchFunction;
 }) {
+  const { t } = useI18n();
   const listId = useId();
   const previousCityRef = useRef(cityRef);
   const [query, setQuery] = useState(value?.label ?? initialQuery);
@@ -128,12 +130,12 @@ export function DeliveryLocationPicker({
         onFocus={() => { if (options.length > 0 || error) setOpen(true); }}
         onKeyDown={handleKeyDown}
       />
-      <span className="delivery-location-progress" aria-live="polite">{loading ? 'Шукаємо…' : ''}</span>
+      <span className="delivery-location-progress" aria-live="polite">{loading ? t('orders.searchingLocations') : ''}</span>
     </div>
     <div className="delivery-location-results-wrap">
       {open && <ul id={listId} role="listbox" className="delivery-location-results">
-        {error && <li role="alert" className="delivery-location-state">Не вдалося завантажити варіанти. Спробуйте ще раз.</li>}
-        {!error && !loading && options.length === 0 && <li className="delivery-location-state">Нічого не знайдено</li>}
+        {error && <li role="alert" className="delivery-location-state">{t('orders.locationsFailed')}</li>}
+        {!error && !loading && options.length === 0 && <li className="delivery-location-state">{t('orders.locationsEmpty')}</li>}
         {!error && options.map((option, index) => <li
           id={`${listId}-${index}`}
           key={option.ref}

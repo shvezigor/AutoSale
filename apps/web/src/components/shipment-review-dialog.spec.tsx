@@ -5,6 +5,9 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { ShipmentOverview } from '../../../../packages/contracts/src/delivery';
 
 import { ShipmentReviewDialog } from './shipment-review-dialog';
+import { I18nProvider } from '../i18n/i18n-provider';
+
+vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
 import { ToastProvider } from './toast-provider';
 
 const orderId = '11111111-1111-4111-8111-111111111111';
@@ -28,6 +31,17 @@ function renderDialog(props: Partial<Parameters<typeof ShipmentReviewDialog>[0]>
 }
 
 describe('ShipmentReviewDialog', () => {
+  it('translates the form while preserving recipient and location values', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockImplementation(async (path: string) => ({
+      ok: true,
+      json: async () => path.includes('csrf') ? { token: 'csrf-token' } : path.includes('quote') ? { cost: 120, estimatedDeliveryDate: null } : exactOverview,
+    })));
+    render(<I18nProvider locale="en" authenticated={false}><ToastProvider><ShipmentReviewDialog orderId="order-id" onClose={vi.fn()} onSaved={vi.fn()} /></ToastProvider></I18nProvider>);
+    expect(await screen.findByRole('dialog', { name: 'Set up shipment' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Recipient name')).toHaveValue('Олена');
+    expect(screen.getByDisplayValue('Відділення №24')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Create TTN' })).toBeInTheDocument();
+  });
   it('shows a recoverable quote error instead of an endless loader', async () => {
     const fetchMock = vi.fn().mockImplementation(async (path: string) => ({ ok: !path.includes('quote'), json: async () => path.includes('csrf') ? { token: 'csrf-token' } : exactOverview }));
     vi.stubGlobal('fetch', fetchMock);

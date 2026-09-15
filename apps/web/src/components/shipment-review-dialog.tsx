@@ -7,6 +7,7 @@ import { mutatingFetch } from '../auth/csrf-fetch';
 import { DeliveryLocationPicker } from './delivery-location-picker';
 import { LoadingButton } from './loading-button';
 import { useToast } from './toast-provider';
+import { useI18n } from '../i18n/i18n-provider';
 
 type FormDraft = Omit<ShipmentDraftInput, 'recipient' | 'destination'> & {
   recipient: { name: string | null; phone: string | null };
@@ -30,6 +31,7 @@ export function ShipmentReviewDialog({ orderId, onClose, onSaved }: {
   const closeButton = useRef<HTMLButtonElement>(null);
   const dialog = useRef<HTMLElement>(null);
   const toast = useToast();
+  const { t, formatNumber } = useI18n();
 
   useEffect(() => {
     const previous = document.body.style.overflow;
@@ -110,11 +112,11 @@ export function ShipmentReviewDialog({ orderId, onClose, onSaved }: {
       if (!response.ok) throw new Error('save');
       const shipment = await response.json() as ShipmentSummary;
       onSaved(shipment);
-      toast.show({ type: 'success', title: 'Чернетку доставки збережено' });
+      toast.show({ type: 'success', title: t('orders.shipmentDraftSaved') });
       onClose();
     } catch {
       setState('ready');
-      toast.show({ type: 'error', title: 'Не вдалося зберегти доставку' });
+      toast.show({ type: 'error', title: t('orders.shipmentSaveFailed') });
     }
   }
 
@@ -130,50 +132,50 @@ export function ShipmentReviewDialog({ orderId, onClose, onSaved }: {
       if (!response.ok) throw new Error('create');
       const shipment = await response.json() as ShipmentSummary;
       onSaved(shipment);
-      toast.show({ type: 'success', title: 'Створення ТТН розпочато' });
+      toast.show({ type: 'success', title: t('orders.ttnCreationStarted') });
       onClose();
     } catch {
       setState('ready');
-      toast.show({ type: 'error', title: 'Не вдалося розпочати створення ТТН' });
+      toast.show({ type: 'error', title: t('orders.ttnCreationFailed') });
     }
   }
 
   return <div className="modal-backdrop shipment-dialog-backdrop" role="presentation">
     <section ref={dialog} role="dialog" aria-modal="true" aria-labelledby="shipment-dialog-title" className="shipment-review-dialog">
-      <header><div><span>{draft?.provider === 'UKRPOSHTA' ? 'Укрпошта' : 'Нова Пошта'}</span><h2 id="shipment-dialog-title">Оформлення доставки</h2></div><button ref={closeButton} className="icon-button" type="button" aria-label="Закрити" onClick={onClose}>×</button></header>
-      {overview?.availableProviders && overview.availableProviders.length > 0 && <label><span>Перевізник</span><select aria-label="Перевізник" disabled={state !== 'ready'} value={provider ?? draft?.provider ?? 'NOVA_POSHTA'} onChange={(event) => { setProvider(event.target.value as 'NOVA_POSHTA' | 'UKRPOSHTA'); setDraft(null); setCity(null); setLocation(null); setDestinationType('BRANCH'); setQuote(null); setState('loading'); }}>
-        {overview.availableProviders.map((value) => <option key={value} value={value}>{value === 'UKRPOSHTA' ? 'Укрпошта' : 'Нова Пошта'}</option>)}
+      <header><div><span>{draft?.provider === 'UKRPOSHTA' ? t('orders.ukrposhta') : t('orders.novaPoshta')}</span><h2 id="shipment-dialog-title">{t('orders.shipmentSetup')}</h2></div><button ref={closeButton} className="icon-button" type="button" aria-label={t('orders.close')} onClick={onClose}>×</button></header>
+      {overview?.availableProviders && overview.availableProviders.length > 0 && <label><span>{t('orders.carrier')}</span><select aria-label={t('orders.carrier')} disabled={state !== 'ready'} value={provider ?? draft?.provider ?? 'NOVA_POSHTA'} onChange={(event) => { setProvider(event.target.value as 'NOVA_POSHTA' | 'UKRPOSHTA'); setDraft(null); setCity(null); setLocation(null); setDestinationType('BRANCH'); setQuote(null); setState('loading'); }}>
+        {overview.availableProviders.map((value) => <option key={value} value={value}>{value === 'UKRPOSHTA' ? t('orders.ukrposhta') : t('orders.novaPoshta')}</option>)}
       </select></label>}
-      {overview?.creationEnabled === false && <p className="delivery-readonly-note">Створення відправлень Укрпошти ще не увімкнено. Можна перевірити вартість і зберегти чернетку.</p>}
-      {state === 'loading' && <div className="dialog-loading"><span className="button-spinner" aria-hidden="true" /> Завантажуємо дані доставки…</div>}
-      {state === 'error' && <p className="dialog-error" role="alert">Не вдалося завантажити налаштування доставки.</p>}
-      {overview && !overview.canCreateShipment && <p className="dialog-error">{blockedReasonLabel(overview.blockedReason)}</p>}
+      {overview?.creationEnabled === false && <p className="delivery-readonly-note">{t('orders.ukrposhtaReadonly')}</p>}
+      {state === 'loading' && <div className="dialog-loading"><span className="button-spinner" aria-hidden="true" /> {t('orders.loadingShipment')}</div>}
+      {state === 'error' && <p className="dialog-error" role="alert">{t('orders.shipmentSettingsFailed')}</p>}
+      {overview && !overview.canCreateShipment && <p className="dialog-error">{blockedReasonLabel(overview.blockedReason, t)}</p>}
       {draft && overview?.canCreateShipment && <div className="shipment-form">
         <div className="shipment-form-grid">
-          <Field label="Ім’я отримувача" value={draft.recipient.name ?? ''} onChange={(value) => setDraft({ ...draft, recipient: { ...draft.recipient, name: value } })} />
-          {draft.provider === 'UKRPOSHTA' && <p>Вкажіть прізвище та ім’я отримувача, по батькові — за наявності.</p>}
-          <Field label="Телефон отримувача" value={draft.recipient.phone ?? ''} onChange={(value) => setDraft({ ...draft, recipient: { ...draft.recipient, phone: value } })} />
-          <DeliveryLocationPicker key={`${draft.provider}-city`} provider={draft.provider} label="Місто" type="CITY" initialQuery={'cityHint' in overview.draft! ? overview.draft.cityHint ?? '' : ''} value={city} onSelect={(value) => { setCity(value); setLocation(null); }} />
-          <label><span>Тип отримання</span><select aria-label="Тип отримання" value={destinationType} onChange={(event) => { setDestinationType(event.target.value as 'BRANCH' | 'PARCEL_LOCKER'); setLocation(null); }}><option value="BRANCH">Відділення</option>{draft.provider !== 'UKRPOSHTA' && <option value="PARCEL_LOCKER">Поштомат</option>}</select></label>
-          <DeliveryLocationPicker key={`${draft.provider}-${destinationType}`} provider={draft.provider} label="Відділення або поштомат" type={destinationType} {...(city ? { cityRef: city.ref } : {})} initialQuery={'locationHint' in overview.draft! ? overview.draft.locationHint ?? '' : ''} value={location} onSelect={setLocation} />
-          <label><span>Платник доставки</span><select aria-label="Платник доставки" value={draft.payer} onChange={(event) => setDraft({ ...draft, payer: event.target.value as 'SENDER' | 'RECIPIENT' })}><option value="SENDER">Відправник</option><option value="RECIPIENT">Отримувач</option></select></label>
-          <Field label="Опис відправлення" value={draft.description} onChange={(description) => setDraft({ ...draft, description })} />
+          <Field label={t('orders.recipientName')} value={draft.recipient.name ?? ''} onChange={(value) => setDraft({ ...draft, recipient: { ...draft.recipient, name: value } })} />
+          {draft.provider === 'UKRPOSHTA' && <p>{t('orders.ukrposhtaNameHint')}</p>}
+          <Field label={t('orders.recipientPhone')} value={draft.recipient.phone ?? ''} onChange={(value) => setDraft({ ...draft, recipient: { ...draft.recipient, phone: value } })} />
+          <DeliveryLocationPicker key={`${draft.provider}-city`} provider={draft.provider} label={t('orders.city')} type="CITY" initialQuery={'cityHint' in overview.draft! ? overview.draft.cityHint ?? '' : ''} value={city} onSelect={(value) => { setCity(value); setLocation(null); }} />
+          <label><span>{t('orders.destinationType')}</span><select aria-label={t('orders.destinationType')} value={destinationType} onChange={(event) => { setDestinationType(event.target.value as 'BRANCH' | 'PARCEL_LOCKER'); setLocation(null); }}><option value="BRANCH">{t('orders.branch')}</option>{draft.provider !== 'UKRPOSHTA' && <option value="PARCEL_LOCKER">{t('orders.parcelLocker')}</option>}</select></label>
+          <DeliveryLocationPicker key={`${draft.provider}-${destinationType}`} provider={draft.provider} label={t('orders.branchOrLocker')} type={destinationType} {...(city ? { cityRef: city.ref } : {})} initialQuery={'locationHint' in overview.draft! ? overview.draft.locationHint ?? '' : ''} value={location} onSelect={setLocation} />
+          <label><span>{t('orders.shipmentPayer')}</span><select aria-label={t('orders.shipmentPayer')} value={draft.payer} onChange={(event) => setDraft({ ...draft, payer: event.target.value as 'SENDER' | 'RECIPIENT' })}><option value="SENDER">{t('orders.sender')}</option><option value="RECIPIENT">{t('orders.recipient')}</option></select></label>
+          <Field label={t('orders.shipmentDescription')} value={draft.description} onChange={(description) => setDraft({ ...draft, description })} />
         </div>
         <div className="shipment-parcel-grid">
-          <NumberField label="Вага, кг" value={draft.parcels[0]!.weightKg} onChange={(value) => setDraft(withParcel(draft, 'weightKg', value))} />
-          <NumberField label="Довжина, см" value={draft.parcels[0]!.lengthCm} onChange={(value) => setDraft(withParcel(draft, 'lengthCm', value))} />
-          <NumberField label="Ширина, см" value={draft.parcels[0]!.widthCm} onChange={(value) => setDraft(withParcel(draft, 'widthCm', value))} />
-          <NumberField label="Висота, см" value={draft.parcels[0]!.heightCm} onChange={(value) => setDraft(withParcel(draft, 'heightCm', value))} />
-          <NumberField label="Оголошена вартість, грн" value={draft.declaredValue} onChange={(value) => setDraft({ ...draft, declaredValue: value })} />
-          <NumberField label="Післяплата, грн" value={draft.codAmount ?? 0} onChange={(value) => setDraft({ ...draft, codAmount: value > 0 ? value : null })} />
+          <NumberField label={t('orders.weightKg')} value={draft.parcels[0]!.weightKg} onChange={(value) => setDraft(withParcel(draft, 'weightKg', value))} />
+          <NumberField label={t('orders.lengthCm')} value={draft.parcels[0]!.lengthCm} onChange={(value) => setDraft(withParcel(draft, 'lengthCm', value))} />
+          <NumberField label={t('orders.widthCm')} value={draft.parcels[0]!.widthCm} onChange={(value) => setDraft(withParcel(draft, 'widthCm', value))} />
+          <NumberField label={t('orders.heightCm')} value={draft.parcels[0]!.heightCm} onChange={(value) => setDraft(withParcel(draft, 'heightCm', value))} />
+          <NumberField label={t('orders.declaredValueUah')} value={draft.declaredValue} onChange={(value) => setDraft({ ...draft, declaredValue: value })} />
+          <NumberField label={t('orders.codAmountUah')} value={draft.codAmount ?? 0} onChange={(value) => setDraft({ ...draft, codAmount: value > 0 ? value : null })} />
         </div>
-        {draft.codAmount !== null && draft.codAmount > draft.declaredValue && <p className="shipment-validation" role="alert">Післяплата не може перевищувати оголошену вартість.</p>}
-        <div className="shipment-quote" aria-live="polite">{quote ? <><strong>{quote.cost.toLocaleString('uk-UA')} грн</strong><span>{draft.provider === 'UKRPOSHTA' ? 'Орієнтовна вартість. Остаточна — після створення.' : quote.estimatedDeliveryDate ? `Орієнтовна дата: ${quote.estimatedDeliveryDate}` : 'Вартість розраховано'}</span></> : <span>{quoteFailed ? 'Не вдалося розрахувати вартість. Перевірте дані або відкрийте чернетку пізніше.' : completeDraft ? 'Розраховуємо вартість…' : 'Оберіть точне місто та відділення'}</span>}</div>
+        {draft.codAmount !== null && draft.codAmount > draft.declaredValue && <p className="shipment-validation" role="alert">{t('orders.codTooHigh')}</p>}
+        <div className="shipment-quote" aria-live="polite">{quote ? <><strong>{t('orders.amountUah', { amount: formatNumber(quote.cost) })}</strong><span>{draft.provider === 'UKRPOSHTA' ? t('orders.estimatedCostFinalLater') : quote.estimatedDeliveryDate ? t('orders.estimatedDate', { date: quote.estimatedDeliveryDate }) : t('orders.costCalculated')}</span></> : <span>{quoteFailed ? t('orders.quoteFailed') : completeDraft ? t('orders.calculatingCost') : t('orders.selectExactDestination')}</span>}</div>
       </div>}
       <footer>
-        <button type="button" className="secondary-button" disabled={state === 'creating'} onClick={onClose}>Скасувати</button>
-        <LoadingButton type="button" pending={state === 'saving'} pendingLabel="Зберігаємо…" disabled={!completeDraft || state === 'saving' || state === 'creating' || (draft?.codAmount !== null && (draft?.codAmount ?? 0) > (draft?.declaredValue ?? 0))} onClick={() => void save()}>Зберегти чернетку</LoadingButton>
-        <LoadingButton className="shipment-create-button" type="button" pending={state === 'creating'} pendingLabel="Створюємо ТТН…" disabled={!completeDraft || overview?.creationEnabled === false || draft?.provider === 'UKRPOSHTA' && !quote || state === 'saving' || state === 'creating' || (draft?.codAmount !== null && (draft?.codAmount ?? 0) > (draft?.declaredValue ?? 0))} onClick={() => void create()}>Створити ТТН</LoadingButton>
+        <button type="button" className="secondary-button" disabled={state === 'creating'} onClick={onClose}>{t('orders.cancel')}</button>
+        <LoadingButton type="button" pending={state === 'saving'} pendingLabel={t('orders.savingShipmentDraft')} disabled={!completeDraft || state === 'saving' || state === 'creating' || (draft?.codAmount !== null && (draft?.codAmount ?? 0) > (draft?.declaredValue ?? 0))} onClick={() => void save()}>{t('orders.saveShipmentDraft')}</LoadingButton>
+        <LoadingButton className="shipment-create-button" type="button" pending={state === 'creating'} pendingLabel={t('orders.creatingTtn')} disabled={!completeDraft || overview?.creationEnabled === false || draft?.provider === 'UKRPOSHTA' && !quote || state === 'saving' || state === 'creating' || (draft?.codAmount !== null && (draft?.codAmount ?? 0) > (draft?.declaredValue ?? 0))} onClick={() => void create()}>{t('orders.createTtn')}</LoadingButton>
       </footer>
     </section>
   </div>;
@@ -193,9 +195,9 @@ function NumberField({ label, value, onChange }: { label: string; value: number;
 function withParcel(draft: FormDraft, key: keyof ShipmentDraftInput['parcels'][number], value: number): FormDraft {
   return { ...draft, parcels: [{ ...draft.parcels[0]!, [key]: value }] };
 }
-function blockedReasonLabel(reason: ShipmentOverview['blockedReason']): string {
-  if (reason === 'ORDER_NOT_APPROVED') return 'Спочатку підтвердьте замовлення.';
-  if (reason === 'PROCUREMENT_INCOMPLETE') return 'Дочекайтеся, поки всі товари будуть готові до відправлення.';
-  if (reason === 'CONNECTION_REQUIRED') return 'Підключіть перевізника в налаштуваннях.';
-  return 'Заповніть дані відправника в налаштуваннях доставки.';
+function blockedReasonLabel(reason: ShipmentOverview['blockedReason'], t: ReturnType<typeof useI18n>['t']): string {
+  if (reason === 'ORDER_NOT_APPROVED') return t('orders.shipmentOrderNotApproved');
+  if (reason === 'PROCUREMENT_INCOMPLETE') return t('orders.shipmentItemsNotReady');
+  if (reason === 'CONNECTION_REQUIRED') return t('orders.shipmentConnectionRequired');
+  return t('orders.shipmentSenderRequired');
 }

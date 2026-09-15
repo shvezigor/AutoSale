@@ -9,11 +9,7 @@ import { ShipmentCustomerMessageDialog } from './shipment-customer-message-dialo
 import { useToast } from './toast-provider';
 import { useConfirm } from './confirm-provider';
 import { mutatingFetch } from '../auth/csrf-fetch';
-
-const statusLabels: Record<string, string> = {
-  DRAFT: 'Чернетка доставки', CREATING: 'Створюємо ТТН', CREATED: 'ТТН створено', ACCEPTED: 'Прийнято перевізником',
-  IN_TRANSIT: 'У дорозі', DELIVERED: 'Доставлено', RETURNING: 'Повертається', RETURNED: 'Повернено', CANCELLED: 'Скасовано', FAILED: 'Помилка доставки',
-};
+import { useI18n } from '../i18n/i18n-provider';
 
 export function ShipmentPanel({ order }: { order: ManagerOrder }) {
   const [open, setOpen] = useState(false);
@@ -24,6 +20,11 @@ export function ShipmentPanel({ order }: { order: ManagerOrder }) {
   const messageTrigger = useRef<HTMLButtonElement>(null);
   const toast = useToast();
   const confirm = useConfirm();
+  const { t, formatNumber } = useI18n();
+  const statusLabels: Record<string, string> = {
+    DRAFT: t('orders.shipmentDraft'), CREATING: t('orders.shipmentCreating'), CREATED: t('orders.shipmentCreated'), ACCEPTED: t('orders.shipmentAccepted'),
+    IN_TRANSIT: t('orders.shipmentInTransit'), DELIVERED: t('orders.shipmentDelivered'), RETURNING: t('orders.shipmentReturning'), RETURNED: t('orders.shipmentReturned'), CANCELLED: t('orders.shipmentCancelled'), FAILED: t('orders.shipmentFailed'),
+  };
   const blocked = !order.canCreateShipment;
   const creationLocked = shipment !== null && shipment.status !== 'DRAFT' && shipment.status !== 'FAILED' && shipment.status !== 'CANCELLED';
 
@@ -40,11 +41,11 @@ export function ShipmentPanel({ order }: { order: ManagerOrder }) {
   }, [cancelling, order.id, shipment?.status]);
 
   async function cancelShipment() {
-    if (!shipment || !await confirm({ title: 'Скасувати ТТН?', description: 'Перевізник скасує це відправлення. Історія залишиться в AutoSale.', confirmLabel: 'Так, скасувати', tone: 'danger' })) return;
+    if (!shipment || !await confirm({ title: t('orders.cancelTtnTitle'), description: t('orders.cancelTtnDescription'), confirmLabel: t('orders.cancelTtnConfirm'), tone: 'danger' })) return;
     setCancelling(true);
     const response = await mutatingFetch(`/api/shipments/${shipment.id}/cancel`, { method: 'POST' });
-    if (!response.ok) { setCancelling(false); toast.show({ type: 'error', title: 'Не вдалося скасувати ТТН' }); return; }
-    toast.show({ type: 'success', title: 'Скасування ТТН розпочато' });
+    if (!response.ok) { setCancelling(false); toast.show({ type: 'error', title: t('orders.cancelTtnFailed') }); return; }
+    toast.show({ type: 'success', title: t('orders.cancelTtnStarted') });
   }
 
   function close() {
@@ -59,24 +60,24 @@ export function ShipmentPanel({ order }: { order: ManagerOrder }) {
 
   return <section className="shipment-panel" aria-labelledby="shipment-panel-title">
     <div>
-      <span>Доставка</span>
-      <h2 id="shipment-panel-title">{shipment?.provider === 'UKRPOSHTA' ? 'Укрпошта' : shipment ? 'Нова Пошта' : 'Оформлення доставки'}</h2>
-      <p>{shipment ? statusLabels[shipment.status] ?? shipment.status : blocked ? blockedCopy(order) : 'Перевірте дані й розрахуйте вартість перед створенням ТТН.'}</p>
-      {shipment?.trackingNumber && <strong>ТТН {shipment.trackingNumber}</strong>}
-      {shipment?.cost != null && <span>{shipment.cost.toLocaleString('uk-UA')} грн</span>}
-      {shipment?.lastErrorCode === 'UKRPOSHTA_OUTCOME_UNKNOWN' && <p role="status">Укрпошта ще не підтвердила результат. Потрібна перевірка відправлення; повторне створення заблоковано.</p>}
-      {shipment?.provider === 'UKRPOSHTA' && shipment.lastErrorCode && shipment.lastErrorCode !== 'UKRPOSHTA_OUTCOME_UNKNOWN' && <p role="alert">Не вдалося завершити дію з відправленням. Перевірте дані та підключення Укрпошти.</p>}
+      <span>{t('orders.shipmentSection')}</span>
+      <h2 id="shipment-panel-title">{shipment?.provider === 'UKRPOSHTA' ? t('orders.ukrposhta') : shipment ? t('orders.novaPoshta') : t('orders.shipmentSetup')}</h2>
+      <p>{shipment ? statusLabels[shipment.status] ?? shipment.status : blocked ? blockedCopy(order, t) : t('orders.shipmentReviewHint')}</p>
+      {shipment?.trackingNumber && <strong>{t('orders.ttnNumber', { number: shipment.trackingNumber })}</strong>}
+      {shipment?.cost != null && <span>{t('orders.amountUah', { amount: formatNumber(shipment.cost) })}</span>}
+      {shipment?.lastErrorCode === 'UKRPOSHTA_OUTCOME_UNKNOWN' && <p role="status">{t('orders.ukrposhtaOutcomeUnknown')}</p>}
+      {shipment?.provider === 'UKRPOSHTA' && shipment.lastErrorCode && shipment.lastErrorCode !== 'UKRPOSHTA_OUTCOME_UNKNOWN' && <p role="alert">{t('orders.ukrposhtaActionFailed')}</p>}
     </div>
     <div className="shipment-panel-actions">
       {shipment?.trackingNumber && <>
-        {['CREATED', 'ACCEPTED', 'IN_TRANSIT'].includes(shipment.status) && <button ref={messageTrigger} className="secondary-button" type="button" onClick={() => setMessageOpen(true)}>Повідомити клієнта</button>}
-        <button className="secondary-button" type="button" onClick={() => void navigator.clipboard.writeText(shipment.trackingNumber!).then(() => toast.show({ type: 'success', title: 'Номер ТТН скопійовано' }))}>Скопіювати ТТН</button>
-        <a className="secondary-button" href={`/api/shipments/${shipment.id}/label`}>Завантажити етикетку</a>
-        <a className="text-button" href={shipment.provider === 'UKRPOSHTA' ? `https://track.ukrposhta.ua/tracking_UA.html?barcode=${encodeURIComponent(shipment.trackingNumber)}` : `https://tracking.novaposhta.ua/#/uk/${shipment.trackingNumber}`} rel="noreferrer" target="_blank">Відстежити</a>
-        {(shipment.provider === 'UKRPOSHTA' ? shipment.status === 'CREATED' && !shipment.lastErrorCode : !['DELIVERED', 'RETURNED', 'CANCELLED'].includes(shipment.status)) && <button className="danger-text-button" disabled={cancelling} type="button" onClick={() => void cancelShipment()}>{cancelling ? 'Скасовуємо…' : 'Скасувати ТТН'}</button>}
+        {['CREATED', 'ACCEPTED', 'IN_TRANSIT'].includes(shipment.status) && <button ref={messageTrigger} className="secondary-button" type="button" onClick={() => setMessageOpen(true)}>{t('orders.notifyCustomer')}</button>}
+        <button className="secondary-button" type="button" onClick={() => void navigator.clipboard.writeText(shipment.trackingNumber!).then(() => toast.show({ type: 'success', title: t('orders.ttnCopied') }))}>{t('orders.copyTtn')}</button>
+        <a className="secondary-button" href={`/api/shipments/${shipment.id}/label`}>{t('orders.downloadLabel')}</a>
+        <a className="text-button" href={shipment.provider === 'UKRPOSHTA' ? `https://track.ukrposhta.ua/tracking_UA.html?barcode=${encodeURIComponent(shipment.trackingNumber)}` : `https://tracking.novaposhta.ua/#/uk/${shipment.trackingNumber}`} rel="noreferrer" target="_blank">{t('orders.trackShipment')}</a>
+        {(shipment.provider === 'UKRPOSHTA' ? shipment.status === 'CREATED' && !shipment.lastErrorCode : !['DELIVERED', 'RETURNED', 'CANCELLED'].includes(shipment.status)) && <button className="danger-text-button" disabled={cancelling} type="button" onClick={() => void cancelShipment()}>{cancelling ? t('orders.cancellingTtn') : t('orders.cancelTtn')}</button>}
       </>}
       {!shipment?.trackingNumber && <button ref={trigger} className="secondary-button" type="button" disabled={blocked || creationLocked} onClick={() => setOpen(true)}>
-        {shipment?.status === 'CREATING' ? 'Створюємо ТТН…' : shipment?.status === 'DRAFT' ? 'Продовжити оформлення' : 'Оформити доставку'}
+        {shipment?.status === 'CREATING' ? t('orders.creatingTtn') : shipment?.status === 'DRAFT' ? t('orders.continueShipment') : t('orders.createShipment')}
       </button>}
     </div>
     {open && <ShipmentReviewDialog orderId={order.id} onClose={close} onSaved={setShipment} />}
@@ -84,7 +85,7 @@ export function ShipmentPanel({ order }: { order: ManagerOrder }) {
   </section>;
 }
 
-function blockedCopy(order: ManagerOrder): string {
-  if (!['APPROVED', 'AUTO_APPROVED'].includes(order.status)) return 'Спочатку підтвердьте замовлення.';
-  return 'Доставка стане доступною, коли всі товари будуть на складі або отримані від постачальника.';
+function blockedCopy(order: ManagerOrder, t: ReturnType<typeof useI18n>['t']): string {
+  if (!['APPROVED', 'AUTO_APPROVED'].includes(order.status)) return t('orders.shipmentOrderNotApproved');
+  return t('orders.shipmentProcurementIncomplete');
 }

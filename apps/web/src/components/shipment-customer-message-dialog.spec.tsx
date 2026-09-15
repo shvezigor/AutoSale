@@ -5,6 +5,9 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { ShipmentCustomerMessageDialog } from './shipment-customer-message-dialog';
 import { ToastProvider } from './toast-provider';
+import { I18nProvider } from '../i18n/i18n-provider';
+
+vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
 
 const preview = {
   text: 'Магазин Двері: створено ТТН 20450000000000.',
@@ -17,6 +20,13 @@ const preview = {
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
 describe('ShipmentCustomerMessageDialog', () => {
+  it('translates the dialog without translating the prepared customer message', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => preview }));
+    render(<I18nProvider locale="en" authenticated={false}><ToastProvider><ShipmentCustomerMessageDialog shipmentId="shipment-id" trackingNumber="20450000000000" onClose={vi.fn()} onSubmitted={vi.fn()} /></ToastProvider></I18nProvider>);
+    expect(await screen.findByRole('dialog', { name: 'Notify customer about the TTN' })).toBeInTheDocument();
+    expect(screen.getByRole('textbox', { name: 'Message to customer' })).toHaveValue(preview.text);
+    expect(screen.getByRole('button', { name: 'Send to customer' })).toBeInTheDocument();
+  });
   it('loads an editable preview and queues the manager-confirmed text once', async () => {
     let finish!: (response: { ok: boolean; json: () => Promise<unknown> }) => void;
     const pending = new Promise<{ ok: boolean; json: () => Promise<unknown> }>((resolve) => { finish = resolve; });
