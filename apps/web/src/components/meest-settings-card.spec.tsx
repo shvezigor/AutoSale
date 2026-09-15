@@ -3,14 +3,16 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const { mutatingFetch } = vi.hoisted(() => ({ mutatingFetch: vi.fn() }));
 vi.mock('../auth/csrf-fetch', () => ({ mutatingFetch }));
+vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
 
 import { ActivityProvider } from './activity-provider';
 import { ConfirmProvider } from './confirm-provider';
 import { MeestSettingsCard, type MeestSettingsSummary } from './meest-settings-card';
 import { ToastProvider } from './toast-provider';
+import { I18nProvider } from '../i18n/i18n-provider';
 
-function render(ui: React.ReactElement) {
-  return rtlRender(<ToastProvider><ActivityProvider><ConfirmProvider>{ui}</ConfirmProvider></ActivityProvider></ToastProvider>);
+function render(ui: React.ReactElement, locale: 'uk' | 'en' = 'uk') {
+  return rtlRender(<I18nProvider locale={locale} authenticated={false}><ToastProvider><ActivityProvider><ConfirmProvider>{ui}</ConfirmProvider></ActivityProvider></ToastProvider></I18nProvider>);
 }
 
 const disconnected: MeestSettingsSummary = { enabled: true, connection: null };
@@ -37,6 +39,13 @@ afterEach(() => {
 });
 
 describe('MeestSettingsCard', () => {
+  it('renders English controls while preserving the Meest account label', () => {
+    render(<MeestSettingsCard initial={active} role="OWNER" />, 'en');
+    expect(screen.getByText('merchant')).toBeInTheDocument();
+    expect(screen.getByText('Active')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Disconnect Meest' })).toBeInTheDocument();
+  });
+
   it('shows only safe connection state to managers', () => {
     render(<MeestSettingsCard initial={active} role="MANAGER" />);
     expect(screen.getByText('merchant')).toBeInTheDocument();

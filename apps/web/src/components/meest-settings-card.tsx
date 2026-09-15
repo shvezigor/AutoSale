@@ -4,6 +4,8 @@ import type { DeliveryLocation, MeestConnectionSummary, MeestSenderProfileInput 
 import { useState } from 'react';
 
 import { mutatingFetch } from '../auth/csrf-fetch';
+import { useI18n } from '../i18n/i18n-provider';
+import type { Translator } from '../i18n/translator';
 import { useActivity } from './activity-provider';
 import { useConfirm } from './confirm-provider';
 import { DeliveryLocationPicker } from './delivery-location-picker';
@@ -15,15 +17,16 @@ export type MeestSettingsSummary = {
   connection: MeestConnectionSummary | null;
 };
 
-const emptyProfile: MeestSenderProfileInput = {
+const emptyProfileBase: Omit<MeestSenderProfileInput, 'customerNotificationTemplate'> = {
   senderName: '', senderPhone: '',
   origin: { type: 'BRANCH', cityRef: '', locationRef: '', label: '' },
   payer: 'SENDER', defaultParcel: { weightKg: 1, lengthCm: 30, widthCm: 20, heightCm: 10 },
   suggestCustomerNotification: true,
-  customerNotificationTemplate: '{company}: відправлення створено. ТТН {trackingNumber}',
 };
 
 export function MeestSettingsCard({ initial, role, embedded = false, onConnectionChange }: { initial: MeestSettingsSummary; role: 'OWNER' | 'MANAGER'; embedded?: boolean; onConnectionChange?(connection: MeestConnectionSummary | null): void }) {
+  const { t } = useI18n();
+  const emptyProfile: MeestSenderProfileInput = { ...emptyProfileBase, customerNotificationTemplate: t('meestSettings.defaultTemplate') };
   const [connection, setConnection] = useState(initial.connection);
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
@@ -40,7 +43,7 @@ export function MeestSettingsCard({ initial, role, embedded = false, onConnectio
   async function connect(): Promise<void> {
     setPending('connect');
     try {
-      const response = await activity.run('Підключаємо Meest', () => mutatingFetch('/api/integrations/delivery/meest', {
+      const response = await activity.run(t('meestSettings.connectingActivity'), () => mutatingFetch('/api/integrations/delivery/meest', {
         method: 'PUT',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ login: login.trim(), password, clientUid: clientUid.trim() }),
@@ -53,10 +56,10 @@ export function MeestSettingsCard({ initial, role, embedded = false, onConnectio
       setLogin('');
       setPassword('');
       setClientUid('');
-      toast.show({ type: 'success', title: 'Meest підключено' });
+      toast.show({ type: 'success', title: t('meestSettings.connected') });
     } catch {
       setPassword('');
-      toast.show({ type: 'error', title: 'Не вдалося підключити Meest', message: 'Перевірте логін, пароль і ClientUID з договору Meest.' });
+      toast.show({ type: 'error', title: t('meestSettings.connectFailed'), message: t('meestSettings.connectFailedHint') });
     } finally {
       setPending(null);
     }
@@ -65,7 +68,7 @@ export function MeestSettingsCard({ initial, role, embedded = false, onConnectio
   async function saveProfile(): Promise<void> {
     setPending('profile');
     try {
-      const response = await activity.run('Зберігаємо відправника Meest', () => mutatingFetch('/api/integrations/delivery/meest/sender-profile', {
+      const response = await activity.run(t('meestSettings.savingSender'), () => mutatingFetch('/api/integrations/delivery/meest/sender-profile', {
         method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(profile),
       }));
       const payload = await jsonOrNull(response);
@@ -74,9 +77,9 @@ export function MeestSettingsCard({ initial, role, embedded = false, onConnectio
       const next = connection ? { ...connection, senderProfile: payload } : null;
       setConnection(next);
       onConnectionChange?.(next);
-      toast.show({ type: 'success', title: 'Відправника Meest збережено' });
+      toast.show({ type: 'success', title: t('meestSettings.senderSaved') });
     } catch {
-      toast.show({ type: 'error', title: 'Не вдалося зберегти відправника Meest' });
+      toast.show({ type: 'error', title: t('meestSettings.senderSaveFailed') });
     } finally {
       setPending(null);
     }
@@ -84,21 +87,19 @@ export function MeestSettingsCard({ initial, role, embedded = false, onConnectio
 
   async function disconnect(): Promise<void> {
     const approved = await confirm({
-      title: 'Відключити Meest?',
-      description: 'Нові відправлення Meest не створюватимуться, а історія залишиться в AutoSale.',
-      confirmLabel: 'Так, відключити',
+      title: t('meestSettings.disconnectTitle'), description: t('meestSettings.disconnectDescription'), confirmLabel: t('meestSettings.confirmDisconnect'),
       tone: 'danger',
     });
     if (!approved) return;
     setPending('disconnect');
     try {
-      const response = await activity.run('Відключаємо Meest', () => mutatingFetch('/api/integrations/delivery/meest', { method: 'DELETE' }));
+      const response = await activity.run(t('meestSettings.disconnectingActivity'), () => mutatingFetch('/api/integrations/delivery/meest', { method: 'DELETE' }));
       if (!response.ok) throw new Error('disconnect failed');
       setConnection(null);
       onConnectionChange?.(null);
-      toast.show({ type: 'success', title: 'Meest відключено' });
+      toast.show({ type: 'success', title: t('meestSettings.disconnected') });
     } catch {
-      toast.show({ type: 'error', title: 'Не вдалося відключити Meest' });
+      toast.show({ type: 'error', title: t('meestSettings.disconnectFailed') });
     } finally {
       setPending(null);
     }
@@ -108,39 +109,39 @@ export function MeestSettingsCard({ initial, role, embedded = false, onConnectio
 
   return <section className={`settings-card delivery-settings-card ${embedded ? 'is-embedded' : ''}`} {...(embedded ? { 'aria-label': 'Meest' } : { 'aria-labelledby': 'meest-settings-title' })} aria-busy={pending !== null || undefined}>
     {!embedded && <div className="settings-card-heading">
-      <div><h2 id="meest-settings-title">Meest</h2><p>Другий перевізник для доставки замовлень із AutoSale.</p></div>
-      <span className={`connection-status status-${(connection?.status ?? 'NOT_CONNECTED').toLowerCase()}`}>{statusLabel(connection?.status)}</span>
+      <div><h2 id="meest-settings-title">Meest</h2><p>{t('meestSettings.description')}</p></div>
+      <span className={`connection-status status-${(connection?.status ?? 'NOT_CONNECTED').toLowerCase()}`}>{statusLabel(t, connection?.status)}</span>
     </div>}
-    {embedded && <div className="delivery-panel-section-heading"><span>Підключення</span><p>Доступ до кабінету перевізника та стан інтеграції.</p></div>}
-    {connection?.accountLabel && <div className="delivery-account-summary"><span>Обліковий запис</span><strong>{connection.accountLabel}</strong></div>}
+    {embedded && <div className="delivery-panel-section-heading"><span>{t('novaPoshtaSettings.connection')}</span><p>{t('novaPoshtaSettings.connectionDescription')}</p></div>}
+    {connection?.accountLabel && <div className="delivery-account-summary"><span>{t('meestSettings.account')}</span><strong>{connection.accountLabel}</strong></div>}
     {!owner
-      ? <p className="delivery-readonly-note">Підключенням перевізника керує власник робочого простору.</p>
+      ? <p className="delivery-readonly-note">{t('meestSettings.ownerOnly')}</p>
       : <>
           <div className="delivery-connect-guide">
-            <div><strong>{active ? 'Потрібно замінити доступ?' : 'Потрібен договір із Meest'}</strong><span>Meest надає логін, пароль і ClientUID після оформлення договору.</span></div>
-            <a className="secondary-button" href="https://wiki.meest-group.com/uk/api/api-eng" target="_blank" rel="noreferrer">Документація Meest API</a>
+            <div><strong>{active ? t('meestSettings.replaceAccessQuestion') : t('meestSettings.agreementRequired')}</strong><span>{t('meestSettings.accessHint')}</span></div>
+            <a className="secondary-button" href="https://wiki.meest-group.com/uk/api/api-eng" target="_blank" rel="noreferrer">{t('meestSettings.docs')}</a>
           </div>
           <div className="meest-connect-grid">
-            <label><span>Логін Meest API</span><input aria-label="Логін Meest API" autoComplete="off" value={login} onChange={(event) => setLogin(event.target.value)} /></label>
-            <label><span>Пароль Meest API</span><input aria-label="Пароль Meest API" autoComplete="new-password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} /></label>
+            <label><span>{t('meestSettings.login')}</span><input aria-label={t('meestSettings.login')} autoComplete="off" value={login} onChange={(event) => setLogin(event.target.value)} /></label>
+            <label><span>{t('meestSettings.password')}</span><input aria-label={t('meestSettings.password')} autoComplete="new-password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} /></label>
             <label><span>ClientUID</span><input aria-label="ClientUID" autoComplete="off" value={clientUid} onChange={(event) => setClientUid(event.target.value)} placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" /></label>
           </div>
-          <p className="delivery-key-note">Дані перевіряються через HTTPS і зберігаються лише в зашифрованому вигляді.</p>
+          <p className="delivery-key-note">{t('meestSettings.security')}</p>
           <div className="settings-actions delivery-settings-actions">
-            <LoadingButton type="button" pending={pending === 'connect'} pendingLabel="Підключаємо…" disabled={pending !== null || !login.trim() || !password || !isUuid(clientUid.trim())} onClick={() => void connect()}>{active ? 'Замінити доступ' : 'Підключити Meest'}</LoadingButton>
-            {active && <LoadingButton type="button" className="danger-button" pending={pending === 'disconnect'} pendingLabel="Відключаємо…" disabled={pending !== null} onClick={() => void disconnect()}>Відключити Meest</LoadingButton>}
+            <LoadingButton type="button" pending={pending === 'connect'} pendingLabel={t('meestSettings.connecting')} disabled={pending !== null || !login.trim() || !password || !isUuid(clientUid.trim())} onClick={() => void connect()}>{active ? t('meestSettings.replaceAccess') : t('meestSettings.connect')}</LoadingButton>
+            {active && <LoadingButton type="button" className="danger-button" pending={pending === 'disconnect'} pendingLabel={t('meestSettings.disconnecting')} disabled={pending !== null} onClick={() => void disconnect()}>{t('meestSettings.disconnect')}</LoadingButton>}
           </div>
           {active && <fieldset className="delivery-sender-form" disabled={pending !== null}>
-            <legend>Відправник і точка відправлення</legend>
+            <legend>{t('meestSettings.senderLegend')}</legend>
             <div className="meest-connect-grid">
-              <label><span>Назва відправника Meest</span><input aria-label="Назва відправника Meest" value={profile.senderName} onChange={(event) => setProfile((current) => ({ ...current, senderName: event.target.value }))} /></label>
-              <label><span>Телефон відправника Meest</span><input aria-label="Телефон відправника Meest" inputMode="tel" placeholder="+380501112233" value={profile.senderPhone} onChange={(event) => setProfile((current) => ({ ...current, senderPhone: event.target.value }))} /></label>
+              <label><span>{t('meestSettings.senderName')}</span><input aria-label={t('meestSettings.senderName')} value={profile.senderName} onChange={(event) => setProfile((current) => ({ ...current, senderName: event.target.value }))} /></label>
+              <label><span>{t('meestSettings.senderPhone')}</span><input aria-label={t('meestSettings.senderPhone')} inputMode="tel" placeholder="+380501112233" value={profile.senderPhone} onChange={(event) => setProfile((current) => ({ ...current, senderPhone: event.target.value }))} /></label>
             </div>
             <div className="delivery-origin-grid">
-              <DeliveryLocationPicker provider="MEEST" label="Місто відправлення Meest" type="CITY" value={city} onSelect={(value) => setCity(value)} />
+              <DeliveryLocationPicker provider="MEEST" label={t('meestSettings.city')} type="CITY" value={city} onSelect={(value) => setCity(value)} />
               <DeliveryLocationPicker
                 provider="MEEST"
-                label="Відділення відправлення Meest"
+                label={t('meestSettings.branch')}
                 type="BRANCH"
                 {...(city?.ref || profile.origin.cityRef ? { cityRef: city?.ref ?? profile.origin.cityRef } : {})}
                 value={profile.origin.locationRef ? { ref: profile.origin.locationRef, provider: 'MEEST', type: profile.origin.type, label: profile.origin.label, cityRef: profile.origin.cityRef } : null}
@@ -151,23 +152,23 @@ export function MeestSettingsCard({ initial, role, embedded = false, onConnectio
               />
             </div>
             <div className="delivery-parcel-grid">
-              <NumberField label="Вага, кг" value={profile.defaultParcel.weightKg} onChange={(value) => setProfile((current) => ({ ...current, defaultParcel: { ...current.defaultParcel, weightKg: value } }))} />
-              <NumberField label="Довжина, см" value={profile.defaultParcel.lengthCm} onChange={(value) => setProfile((current) => ({ ...current, defaultParcel: { ...current.defaultParcel, lengthCm: value } }))} />
-              <NumberField label="Ширина, см" value={profile.defaultParcel.widthCm} onChange={(value) => setProfile((current) => ({ ...current, defaultParcel: { ...current.defaultParcel, widthCm: value } }))} />
-              <NumberField label="Висота, см" value={profile.defaultParcel.heightCm} onChange={(value) => setProfile((current) => ({ ...current, defaultParcel: { ...current.defaultParcel, heightCm: value } }))} />
+              <NumberField label={t('novaPoshtaSettings.weight')} value={profile.defaultParcel.weightKg} onChange={(value) => setProfile((current) => ({ ...current, defaultParcel: { ...current.defaultParcel, weightKg: value } }))} />
+              <NumberField label={t('novaPoshtaSettings.length')} value={profile.defaultParcel.lengthCm} onChange={(value) => setProfile((current) => ({ ...current, defaultParcel: { ...current.defaultParcel, lengthCm: value } }))} />
+              <NumberField label={t('novaPoshtaSettings.width')} value={profile.defaultParcel.widthCm} onChange={(value) => setProfile((current) => ({ ...current, defaultParcel: { ...current.defaultParcel, widthCm: value } }))} />
+              <NumberField label={t('novaPoshtaSettings.height')} value={profile.defaultParcel.heightCm} onChange={(value) => setProfile((current) => ({ ...current, defaultParcel: { ...current.defaultParcel, heightCm: value } }))} />
             </div>
-            <label><span>Хто оплачує доставку</span><select value={profile.payer} onChange={(event) => setProfile((current) => ({ ...current, payer: event.target.value as MeestSenderProfileInput['payer'] }))}><option value="SENDER">Відправник</option><option value="RECIPIENT">Одержувач</option></select></label>
-            <label className="delivery-checkbox"><input type="checkbox" checked={profile.suggestCustomerNotification} onChange={(event) => setProfile((current) => ({ ...current, suggestCustomerNotification: event.target.checked }))} /><span>Пропонувати повідомлення клієнту після створення ТТН</span></label>
-            <label><span>Шаблон повідомлення</span><textarea value={profile.customerNotificationTemplate} onChange={(event) => setProfile((current) => ({ ...current, customerNotificationTemplate: event.target.value }))} /></label>
-            <div className="settings-actions delivery-settings-actions"><LoadingButton type="button" pending={pending === 'profile'} pendingLabel="Зберігаємо…" disabled={pending !== null || !validProfile(profile)} onClick={() => void saveProfile()}>Зберегти відправника</LoadingButton></div>
+            <label><span>{t('meestSettings.payer')}</span><select value={profile.payer} onChange={(event) => setProfile((current) => ({ ...current, payer: event.target.value as MeestSenderProfileInput['payer'] }))}><option value="SENDER">{t('meestSettings.sender')}</option><option value="RECIPIENT">{t('meestSettings.recipient')}</option></select></label>
+            <label className="delivery-checkbox"><input type="checkbox" checked={profile.suggestCustomerNotification} onChange={(event) => setProfile((current) => ({ ...current, suggestCustomerNotification: event.target.checked }))} /><span>{t('meestSettings.suggestNotification')}</span></label>
+            <label><span>{t('meestSettings.template')}</span><textarea value={profile.customerNotificationTemplate} onChange={(event) => setProfile((current) => ({ ...current, customerNotificationTemplate: event.target.value }))} /></label>
+            <div className="settings-actions delivery-settings-actions"><LoadingButton type="button" pending={pending === 'profile'} pendingLabel={t('meestSettings.saving')} disabled={pending !== null || !validProfile(profile)} onClick={() => void saveProfile()}>{t('meestSettings.saveSender')}</LoadingButton></div>
           </fieldset>}
         </>}
   </section>;
 }
 
-function statusLabel(status: MeestConnectionSummary['status'] | undefined): string {
-  if (!status) return 'Не підключено';
-  return ({ ACTIVE: 'Активне', NEEDS_ATTENTION: 'Потрібна увага', DISCONNECTED: 'Відключено' } as const)[status];
+function statusLabel(t: Translator, status: MeestConnectionSummary['status'] | undefined): string {
+  if (!status) return t('meestSettings.statusNotConnected');
+  return ({ ACTIVE: t('meestSettings.statusActive'), NEEDS_ATTENTION: t('meestSettings.statusNeedsAttention'), DISCONNECTED: t('meestSettings.statusDisconnected') } as const)[status];
 }
 
 function isUuid(value: string): boolean {
