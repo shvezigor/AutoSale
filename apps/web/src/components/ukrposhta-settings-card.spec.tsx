@@ -4,14 +4,16 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const { mutatingFetch } = vi.hoisted(() => ({ mutatingFetch: vi.fn() }));
 vi.mock('../auth/csrf-fetch', () => ({ mutatingFetch }));
+vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
 
 import { ActivityProvider } from './activity-provider';
 import { ConfirmProvider } from './confirm-provider';
 import { ToastProvider } from './toast-provider';
 import { UkrposhtaSettingsCard, type UkrposhtaSettingsSummary } from './ukrposhta-settings-card';
+import { I18nProvider } from '../i18n/i18n-provider';
 
-function render(ui: React.ReactElement) {
-  return rtlRender(<ToastProvider><ActivityProvider><ConfirmProvider>{ui}</ConfirmProvider></ActivityProvider></ToastProvider>);
+function render(ui: React.ReactElement, locale: 'uk' | 'en' = 'uk') {
+  return rtlRender(<I18nProvider locale={locale} authenticated={false}><ToastProvider><ActivityProvider><ConfirmProvider>{ui}</ConfirmProvider></ActivityProvider></ToastProvider></I18nProvider>);
 }
 
 const disconnected: UkrposhtaSettingsSummary = { enabled: true, connection: null };
@@ -42,6 +44,13 @@ afterEach(() => {
 });
 
 describe('UkrposhtaSettingsCard', () => {
+  it('renders English controls while preserving the Ukrposhta account label', () => {
+    render(<UkrposhtaSettingsCard initial={active} role="OWNER" />, 'en');
+    expect(screen.getByText('ТОВ Приклад · тестове середовище')).toBeInTheDocument();
+    expect(screen.getByText('Active')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Disconnect Ukrposhta' })).toBeInTheDocument();
+  });
+
   it('shows managers only the safe connection state', () => {
     render(<UkrposhtaSettingsCard initial={configured} role="MANAGER" />);
     expect(screen.getByText('ТОВ Приклад · тестове середовище')).toBeInTheDocument();

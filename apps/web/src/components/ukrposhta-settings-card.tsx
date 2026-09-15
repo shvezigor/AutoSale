@@ -4,6 +4,8 @@ import { isUkrposhtaPersonName, type DeliveryLocation, type UkrposhtaConnectionS
 import { useState } from 'react';
 
 import { mutatingFetch } from '../auth/csrf-fetch';
+import { useI18n } from '../i18n/i18n-provider';
+import type { Translator } from '../i18n/translator';
 import { useActivity } from './activity-provider';
 import { useConfirm } from './confirm-provider';
 import { DeliveryLocationPicker } from './delivery-location-picker';
@@ -15,15 +17,16 @@ export type UkrposhtaSettingsSummary = {
   connection: UkrposhtaConnectionSummary | null;
 };
 
-const emptyProfile: UkrposhtaSenderProfileInput = {
+const emptyProfileBase: Omit<UkrposhtaSenderProfileInput, 'customerNotificationTemplate'> = {
   senderName: '', senderPhone: '',
   origin: { type: 'BRANCH', cityRef: '', locationRef: '', label: '' },
   payer: 'SENDER', defaultParcel: { weightKg: 1, lengthCm: 30, widthCm: 20, heightCm: 10 },
   suggestCustomerNotification: true,
-  customerNotificationTemplate: '{company}: відправлення створено. ТТН {trackingNumber}',
 };
 
 export function UkrposhtaSettingsCard({ initial, role, embedded = false, onConnectionChange }: { initial: UkrposhtaSettingsSummary; role: 'OWNER' | 'MANAGER'; embedded?: boolean; onConnectionChange?(connection: UkrposhtaConnectionSummary | null): void }) {
+  const { t, formatNumber } = useI18n();
+  const emptyProfile: UkrposhtaSenderProfileInput = { ...emptyProfileBase, customerNotificationTemplate: t('ukrposhtaSettings.defaultTemplate') };
   const [connection, setConnection] = useState(initial.connection);
   const [environment, setEnvironment] = useState<'SANDBOX' | 'PRODUCTION'>(initial.connection?.environment ?? 'SANDBOX');
   const [ecomBearer, setEcomBearer] = useState('');
@@ -49,7 +52,7 @@ export function UkrposhtaSettingsCard({ initial, role, embedded = false, onConne
   async function connect(): Promise<void> {
     setPending('connect');
     try {
-      const response = await activity.run('Підключаємо Укрпошту', () => mutatingFetch('/api/integrations/delivery/ukrposhta', {
+      const response = await activity.run(t('ukrposhtaSettings.connectingActivity'), () => mutatingFetch('/api/integrations/delivery/ukrposhta', {
         method: 'PUT',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ environment, ecomBearer: ecomBearer.trim(), counterpartyToken: counterpartyToken.trim(), trackingBearer: trackingBearer.trim(), counterpartyUuid: counterpartyUuid.trim() }),
@@ -61,9 +64,9 @@ export function UkrposhtaSettingsCard({ initial, role, embedded = false, onConne
       setEnvironment(payload.environment ?? 'SANDBOX');
       setProfile(payload.senderProfile ?? emptyProfile);
       setCity(citySelectionFromProfile(payload.senderProfile));
-      toast.show({ type: 'success', title: 'Укрпошту підключено' });
+      toast.show({ type: 'success', title: t('ukrposhtaSettings.connected') });
     } catch {
-      toast.show({ type: 'error', title: 'Не вдалося підключити Укрпошту', message: 'Перевірте реквізити з договору Укрпошти.' });
+      toast.show({ type: 'error', title: t('ukrposhtaSettings.connectFailed'), message: t('ukrposhtaSettings.connectFailedHint') });
     } finally {
       clearSecrets();
       setPending(null);
@@ -73,7 +76,7 @@ export function UkrposhtaSettingsCard({ initial, role, embedded = false, onConne
   async function saveProfile(): Promise<void> {
     setPending('profile');
     try {
-      const response = await activity.run('Зберігаємо відправника Укрпошти', () => mutatingFetch('/api/integrations/delivery/ukrposhta/sender-profile', {
+      const response = await activity.run(t('ukrposhtaSettings.savingSender'), () => mutatingFetch('/api/integrations/delivery/ukrposhta/sender-profile', {
         method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(profile),
       }));
       const payload = await jsonOrNull(response);
@@ -82,9 +85,9 @@ export function UkrposhtaSettingsCard({ initial, role, embedded = false, onConne
       const next = connection ? { ...connection, senderProfile: payload } : null;
       setConnection(next);
       onConnectionChange?.(next);
-      toast.show({ type: 'success', title: 'Відправника Укрпошти збережено' });
+      toast.show({ type: 'success', title: t('ukrposhtaSettings.senderSaved') });
     } catch {
-      toast.show({ type: 'error', title: 'Не вдалося зберегти відправника Укрпошти' });
+      toast.show({ type: 'error', title: t('ukrposhtaSettings.senderSaveFailed') });
     } finally {
       setPending(null);
     }
@@ -92,23 +95,21 @@ export function UkrposhtaSettingsCard({ initial, role, embedded = false, onConne
 
   async function disconnect(): Promise<void> {
     const approved = await confirm({
-      title: 'Відключити Укрпошту?',
-      description: 'Нові відправлення Укрпошти не створюватимуться, а історія залишиться в AutoSale.',
-      confirmLabel: 'Так, відключити',
+      title: t('ukrposhtaSettings.disconnectTitle'), description: t('ukrposhtaSettings.disconnectDescription'), confirmLabel: t('ukrposhtaSettings.confirmDisconnect'),
       tone: 'danger',
     });
     if (!approved) return;
     setPending('disconnect');
     try {
-      const response = await activity.run('Відключаємо Укрпошту', () => mutatingFetch('/api/integrations/delivery/ukrposhta', { method: 'DELETE' }));
+      const response = await activity.run(t('ukrposhtaSettings.disconnectingActivity'), () => mutatingFetch('/api/integrations/delivery/ukrposhta', { method: 'DELETE' }));
       if (!response.ok) throw new Error('disconnect failed');
       setConnection(null);
       onConnectionChange?.(null);
       setProfile(emptyProfile);
       setCity(null);
-      toast.show({ type: 'success', title: 'Укрпошту відключено' });
+      toast.show({ type: 'success', title: t('ukrposhtaSettings.disconnected') });
     } catch {
-      toast.show({ type: 'error', title: 'Не вдалося відключити Укрпошту' });
+      toast.show({ type: 'error', title: t('ukrposhtaSettings.disconnectFailed') });
     } finally {
       setPending(null);
     }
@@ -116,56 +117,56 @@ export function UkrposhtaSettingsCard({ initial, role, embedded = false, onConne
 
   if (!initial.enabled) return null;
 
-  return <section className={`settings-card delivery-settings-card ${embedded ? 'is-embedded' : ''}`} {...(embedded ? { 'aria-label': 'Укрпошта' } : { 'aria-labelledby': 'ukrposhta-settings-title' })} aria-busy={pending !== null || undefined}>
+  return <section className={`settings-card delivery-settings-card ${embedded ? 'is-embedded' : ''}`} {...(embedded ? { 'aria-label': t('ukrposhtaSettings.provider') } : { 'aria-labelledby': 'ukrposhta-settings-title' })} aria-busy={pending !== null || undefined}>
     {!embedded && <div className="settings-card-heading">
-      <div><h2 id="ukrposhta-settings-title">Укрпошта</h2><p>Підключення для бізнес-відправлень через API.</p></div>
-      <span className={`connection-status status-${(connection?.status ?? 'NOT_CONNECTED').toLowerCase()}`}>{statusLabel(connection?.status)}</span>
+      <div><h2 id="ukrposhta-settings-title">{t('ukrposhtaSettings.provider')}</h2><p>{t('ukrposhtaSettings.description')}</p></div>
+      <span className={`connection-status status-${(connection?.status ?? 'NOT_CONNECTED').toLowerCase()}`}>{statusLabel(t, connection?.status)}</span>
     </div>}
-    {embedded && <div className="delivery-panel-section-heading"><span>Підключення</span><p>Доступ до кабінету перевізника та стан інтеграції.</p></div>}
-    {connection?.accountLabel && <div className="delivery-account-summary"><span>Обліковий запис</span><strong>{connection.accountLabel}</strong></div>}
-    {connection?.environment && <div className="delivery-account-summary"><span>Середовище</span><strong>{environmentLabel(connection.environment)}</strong></div>}
+    {embedded && <div className="delivery-panel-section-heading"><span>{t('novaPoshtaSettings.connection')}</span><p>{t('novaPoshtaSettings.connectionDescription')}</p></div>}
+    {connection?.accountLabel && <div className="delivery-account-summary"><span>{t('ukrposhtaSettings.account')}</span><strong>{connection.accountLabel}</strong></div>}
+    {connection?.environment && <div className="delivery-account-summary"><span>{t('ukrposhtaSettings.environment')}</span><strong>{environmentLabel(t, connection.environment)}</strong></div>}
     {!owner
       ? <>
-          {connection?.senderProfile && <div aria-label="Збережений відправник Укрпошти">
-            <div className="delivery-account-summary"><span>Відправник</span><strong>{connection.senderProfile.senderName}</strong></div>
-            <div className="delivery-account-summary"><span>Телефон</span><strong>{connection.senderProfile.senderPhone}</strong></div>
-            <div className="delivery-account-summary"><span>Відділення</span><strong>{connection.senderProfile.origin.label}</strong></div>
-            <div className="delivery-account-summary"><span>Платник доставки</span><strong>{connection.senderProfile.payer === 'SENDER' ? 'Відправник' : 'Одержувач'}</strong></div>
-            <div className="delivery-account-summary"><span>Посилка за замовчуванням</span><strong>{parcelSummary(connection.senderProfile)}</strong></div>
-            <div className="delivery-account-summary"><span>Пропонувати сповіщення</span><strong>{connection.senderProfile.suggestCustomerNotification ? 'Так' : 'Ні'}</strong></div>
-            <div className="delivery-account-summary"><span>Шаблон повідомлення</span><strong>{connection.senderProfile.customerNotificationTemplate}</strong></div>
+          {connection?.senderProfile && <div aria-label={t('ukrposhtaSettings.savedSender')}>
+            <div className="delivery-account-summary"><span>{t('ukrposhtaSettings.sender')}</span><strong>{connection.senderProfile.senderName}</strong></div>
+            <div className="delivery-account-summary"><span>{t('ukrposhtaSettings.phone')}</span><strong>{connection.senderProfile.senderPhone}</strong></div>
+            <div className="delivery-account-summary"><span>{t('ukrposhtaSettings.branch')}</span><strong>{connection.senderProfile.origin.label}</strong></div>
+            <div className="delivery-account-summary"><span>{t('ukrposhtaSettings.payer')}</span><strong>{connection.senderProfile.payer === 'SENDER' ? t('ukrposhtaSettings.sender') : t('ukrposhtaSettings.recipient')}</strong></div>
+            <div className="delivery-account-summary"><span>{t('ukrposhtaSettings.defaultParcel')}</span><strong>{parcelSummary(t, formatNumber, connection.senderProfile)}</strong></div>
+            <div className="delivery-account-summary"><span>{t('ukrposhtaSettings.suggestNotifications')}</span><strong>{connection.senderProfile.suggestCustomerNotification ? t('ukrposhtaSettings.yes') : t('ukrposhtaSettings.no')}</strong></div>
+            <div className="delivery-account-summary"><span>{t('ukrposhtaSettings.template')}</span><strong>{connection.senderProfile.customerNotificationTemplate}</strong></div>
           </div>}
-          <p className="delivery-readonly-note">Підключенням перевізника та даними відправника керує власник робочого простору.</p>
+          <p className="delivery-readonly-note">{t('ukrposhtaSettings.ownerOnly')}</p>
         </>
       : <>
           <div className="delivery-connect-guide">
-            <div><strong>{active ? 'Потрібно замінити доступ?' : 'Потрібен договір з Укрпоштою'}</strong><span>Реквізити eCom, контрагента та StatusTracking Укрпошта надає для бізнес-відправлень за договором.</span></div>
-            <a className="secondary-button" href="https://dev.ukrposhta.ua/" target="_blank" rel="noreferrer">Документація API</a>
+            <div><strong>{active ? t('ukrposhtaSettings.replaceAccessQuestion') : t('ukrposhtaSettings.agreementRequired')}</strong><span>{t('ukrposhtaSettings.accessHint')}</span></div>
+            <a className="secondary-button" href="https://dev.ukrposhta.ua/" target="_blank" rel="noreferrer">{t('ukrposhtaSettings.apiDocs')}</a>
           </div>
           <div className="ukrposhta-connect-grid">
-            <label><span>Середовище Укрпошти</span><select aria-label="Середовище Укрпошти" value={environment} onChange={(event) => setEnvironment(event.target.value as 'SANDBOX' | 'PRODUCTION')}><option value="SANDBOX">Тестове середовище</option><option value="PRODUCTION">Бойове середовище</option></select></label>
+            <label><span>{t('ukrposhtaSettings.environmentField')}</span><select aria-label={t('ukrposhtaSettings.environmentField')} value={environment} onChange={(event) => setEnvironment(event.target.value as 'SANDBOX' | 'PRODUCTION')}><option value="SANDBOX">{t('ukrposhtaSettings.sandbox')}</option><option value="PRODUCTION">{t('ukrposhtaSettings.production')}</option></select></label>
             <label><span>eCom bearer</span><input aria-label="eCom bearer" autoComplete="new-password" type="password" value={ecomBearer} onChange={(event) => setEcomBearer(event.target.value)} /></label>
-            <label><span>Токен контрагента</span><input aria-label="Токен контрагента" autoComplete="new-password" type="password" value={counterpartyToken} onChange={(event) => setCounterpartyToken(event.target.value)} /></label>
+            <label><span>{t('ukrposhtaSettings.counterpartyToken')}</span><input aria-label={t('ukrposhtaSettings.counterpartyToken')} autoComplete="new-password" type="password" value={counterpartyToken} onChange={(event) => setCounterpartyToken(event.target.value)} /></label>
             <label><span>StatusTracking bearer</span><input aria-label="StatusTracking bearer" autoComplete="new-password" type="password" value={trackingBearer} onChange={(event) => setTrackingBearer(event.target.value)} /></label>
-            <label><span>UUID контрагента</span><input aria-label="UUID контрагента" autoComplete="off" value={counterpartyUuid} onChange={(event) => setCounterpartyUuid(event.target.value)} placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" /></label>
+            <label><span>{t('ukrposhtaSettings.counterpartyUuid')}</span><input aria-label={t('ukrposhtaSettings.counterpartyUuid')} autoComplete="off" value={counterpartyUuid} onChange={(event) => setCounterpartyUuid(event.target.value)} placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" /></label>
           </div>
-          {environment === 'PRODUCTION' && <p className="ukrposhta-production-warning"><strong>Бойове середовище</strong> Використовуйте лише бойові реквізити Укрпошти. Тестові UUID і ключі тут не працюватимуть.</p>}
-          <p className="delivery-key-note">API-відправлення не з’являються в Особистому кабінеті Укрпошти. AutoSale перевіряє реквізити через HTTPS і зберігає їх лише зашифрованими.</p>
+          {environment === 'PRODUCTION' && <p className="ukrposhta-production-warning"><strong>{t('ukrposhtaSettings.production')}</strong> {t('ukrposhtaSettings.productionWarning')}</p>}
+          <p className="delivery-key-note">{t('ukrposhtaSettings.securityHint')}</p>
           <div className="settings-actions delivery-settings-actions">
-            <LoadingButton type="button" pending={pending === 'connect'} pendingLabel="Підключаємо…" disabled={pending !== null || !ready(ecomBearer, counterpartyToken, trackingBearer, counterpartyUuid)} onClick={() => void connect()}>{active ? 'Замінити доступ' : 'Підключити Укрпошту'}</LoadingButton>
-            {active && <LoadingButton type="button" className="danger-button" pending={pending === 'disconnect'} pendingLabel="Відключаємо…" disabled={pending !== null} onClick={() => void disconnect()}>Відключити Укрпошту</LoadingButton>}
+            <LoadingButton type="button" pending={pending === 'connect'} pendingLabel={t('ukrposhtaSettings.connecting')} disabled={pending !== null || !ready(ecomBearer, counterpartyToken, trackingBearer, counterpartyUuid)} onClick={() => void connect()}>{active ? t('ukrposhtaSettings.replaceAccess') : t('ukrposhtaSettings.connect')}</LoadingButton>
+            {active && <LoadingButton type="button" className="danger-button" pending={pending === 'disconnect'} pendingLabel={t('ukrposhtaSettings.disconnecting')} disabled={pending !== null} onClick={() => void disconnect()}>{t('ukrposhtaSettings.disconnect')}</LoadingButton>}
           </div>
           {active && <fieldset className="delivery-sender-form" disabled={pending !== null}>
-            <legend>Відправник і точне відділення</legend>
+            <legend>{t('ukrposhtaSettings.senderLegend')}</legend>
             <div className="ukrposhta-connect-grid">
-              <label><span>Назва відправника Укрпошти</span><input aria-label="Назва відправника Укрпошти" value={profile.senderName} onChange={(event) => setProfile((current) => ({ ...current, senderName: event.target.value }))} /></label>
-              <p>На цьому етапі відправник — фізична особа: вкажіть прізвище та ім’я, для післяплати також по батькові. Перед першим оформленням повторно оберіть точне відділення, щоб зберегти його індекс.</p>
-              <label><span>Телефон відправника Укрпошти</span><input aria-label="Телефон відправника Укрпошти" inputMode="tel" placeholder="+380501112233" value={profile.senderPhone} onChange={(event) => setProfile((current) => ({ ...current, senderPhone: event.target.value }))} /></label>
+              <label><span>{t('ukrposhtaSettings.senderName')}</span><input aria-label={t('ukrposhtaSettings.senderName')} value={profile.senderName} onChange={(event) => setProfile((current) => ({ ...current, senderName: event.target.value }))} /></label>
+              <p>{t('ukrposhtaSettings.personHint')}</p>
+              <label><span>{t('ukrposhtaSettings.senderPhone')}</span><input aria-label={t('ukrposhtaSettings.senderPhone')} inputMode="tel" placeholder="+380501112233" value={profile.senderPhone} onChange={(event) => setProfile((current) => ({ ...current, senderPhone: event.target.value }))} /></label>
             </div>
             <div className="delivery-origin-grid">
               <DeliveryLocationPicker
                 provider="UKRPOSHTA"
-                label="Місто відправлення Укрпошти"
+                label={t('ukrposhtaSettings.city')}
                 type="CITY"
                 value={city}
                 onSelect={(value) => {
@@ -180,7 +181,7 @@ export function UkrposhtaSettingsCard({ initial, role, embedded = false, onConne
               />
               <DeliveryLocationPicker
                 provider="UKRPOSHTA"
-                label="Відділення відправлення Укрпошти"
+                label={t('ukrposhtaSettings.originBranch')}
                 type="BRANCH"
                 {...(city?.ref || profile.origin.cityRef ? { cityRef: city?.ref ?? profile.origin.cityRef } : {})}
                 value={profile.origin.locationRef ? { ref: profile.origin.locationRef, provider: 'UKRPOSHTA', type: 'BRANCH', label: profile.origin.label, cityRef: profile.origin.cityRef } : null}
@@ -193,15 +194,15 @@ export function UkrposhtaSettingsCard({ initial, role, embedded = false, onConne
               />
             </div>
             <div className="delivery-parcel-grid">
-              <NumberField label="Вага Укрпошти, кг" value={profile.defaultParcel.weightKg} max={1_000} onChange={(value) => setProfile((current) => ({ ...current, defaultParcel: { ...current.defaultParcel, weightKg: value } }))} />
-              <NumberField label="Довжина Укрпошти, см" value={profile.defaultParcel.lengthCm} max={300} onChange={(value) => setProfile((current) => ({ ...current, defaultParcel: { ...current.defaultParcel, lengthCm: value } }))} />
-              <NumberField label="Ширина Укрпошти, см" value={profile.defaultParcel.widthCm} max={300} onChange={(value) => setProfile((current) => ({ ...current, defaultParcel: { ...current.defaultParcel, widthCm: value } }))} />
-              <NumberField label="Висота Укрпошти, см" value={profile.defaultParcel.heightCm} max={300} onChange={(value) => setProfile((current) => ({ ...current, defaultParcel: { ...current.defaultParcel, heightCm: value } }))} />
+              <NumberField label={t('ukrposhtaSettings.weight')} value={profile.defaultParcel.weightKg} max={1_000} onChange={(value) => setProfile((current) => ({ ...current, defaultParcel: { ...current.defaultParcel, weightKg: value } }))} />
+              <NumberField label={t('ukrposhtaSettings.length')} value={profile.defaultParcel.lengthCm} max={300} onChange={(value) => setProfile((current) => ({ ...current, defaultParcel: { ...current.defaultParcel, lengthCm: value } }))} />
+              <NumberField label={t('ukrposhtaSettings.width')} value={profile.defaultParcel.widthCm} max={300} onChange={(value) => setProfile((current) => ({ ...current, defaultParcel: { ...current.defaultParcel, widthCm: value } }))} />
+              <NumberField label={t('ukrposhtaSettings.height')} value={profile.defaultParcel.heightCm} max={300} onChange={(value) => setProfile((current) => ({ ...current, defaultParcel: { ...current.defaultParcel, heightCm: value } }))} />
             </div>
-            <label><span>Хто оплачує доставку Укрпошти</span><select aria-label="Хто оплачує доставку Укрпошти" value={profile.payer} onChange={(event) => setProfile((current) => ({ ...current, payer: event.target.value as UkrposhtaSenderProfileInput['payer'] }))}><option value="SENDER">Відправник</option><option value="RECIPIENT">Одержувач</option></select></label>
-            <label className="delivery-checkbox"><input type="checkbox" checked={profile.suggestCustomerNotification} onChange={(event) => setProfile((current) => ({ ...current, suggestCustomerNotification: event.target.checked }))} /><span>Пропонувати повідомлення клієнту після створення ТТН</span></label>
-            <label><span>Шаблон повідомлення Укрпошти</span><textarea aria-label="Шаблон повідомлення Укрпошти" value={profile.customerNotificationTemplate} onChange={(event) => setProfile((current) => ({ ...current, customerNotificationTemplate: event.target.value }))} /></label>
-            <div className="settings-actions delivery-settings-actions"><LoadingButton type="button" pending={pending === 'profile'} pendingLabel="Зберігаємо…" disabled={pending !== null || !validProfile(profile)} onClick={() => void saveProfile()}>Зберегти відправника Укрпошти</LoadingButton></div>
+            <label><span>{t('ukrposhtaSettings.deliveryPayer')}</span><select aria-label={t('ukrposhtaSettings.deliveryPayer')} value={profile.payer} onChange={(event) => setProfile((current) => ({ ...current, payer: event.target.value as UkrposhtaSenderProfileInput['payer'] }))}><option value="SENDER">{t('ukrposhtaSettings.sender')}</option><option value="RECIPIENT">{t('ukrposhtaSettings.recipient')}</option></select></label>
+            <label className="delivery-checkbox"><input type="checkbox" checked={profile.suggestCustomerNotification} onChange={(event) => setProfile((current) => ({ ...current, suggestCustomerNotification: event.target.checked }))} /><span>{t('ukrposhtaSettings.suggestMessage')}</span></label>
+            <label><span>{t('ukrposhtaSettings.messageTemplate')}</span><textarea aria-label={t('ukrposhtaSettings.messageTemplate')} value={profile.customerNotificationTemplate} onChange={(event) => setProfile((current) => ({ ...current, customerNotificationTemplate: event.target.value }))} /></label>
+            <div className="settings-actions delivery-settings-actions"><LoadingButton type="button" pending={pending === 'profile'} pendingLabel={t('ukrposhtaSettings.saving')} disabled={pending !== null || !validProfile(profile)} onClick={() => void saveProfile()}>{t('ukrposhtaSettings.saveSender')}</LoadingButton></div>
           </fieldset>}
         </>}
   </section>;
@@ -215,13 +216,13 @@ function isUuid(value: string): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }
 
-function statusLabel(status: UkrposhtaConnectionSummary['status'] | undefined): string {
-  if (!status) return 'Не підключено';
-  return ({ ACTIVE: 'Активне', NEEDS_ATTENTION: 'Потрібна увага', DISCONNECTED: 'Відключено' } as const)[status];
+function statusLabel(t: Translator, status: UkrposhtaConnectionSummary['status'] | undefined): string {
+  if (!status) return t('ukrposhtaSettings.statusNotConnected');
+  return ({ ACTIVE: t('ukrposhtaSettings.statusActive'), NEEDS_ATTENTION: t('ukrposhtaSettings.statusNeedsAttention'), DISCONNECTED: t('ukrposhtaSettings.statusDisconnected') } as const)[status];
 }
 
-function environmentLabel(environment: NonNullable<UkrposhtaConnectionSummary['environment']>): string {
-  return environment === 'SANDBOX' ? 'Тестове середовище' : 'Бойове середовище';
+function environmentLabel(t: Translator, environment: NonNullable<UkrposhtaConnectionSummary['environment']>): string {
+  return environment === 'SANDBOX' ? t('ukrposhtaSettings.sandbox') : t('ukrposhtaSettings.production');
 }
 
 async function jsonOrNull(response: Response): Promise<unknown> {
@@ -262,9 +263,9 @@ function validProfile(profile: UkrposhtaSenderProfileInput): boolean {
     && Boolean(profile.customerNotificationTemplate.trim()) && profile.customerNotificationTemplate.trim().length <= 1_000;
 }
 
-function parcelSummary(profile: UkrposhtaSenderProfileInput): string {
+function parcelSummary(t: Translator, formatNumber: ReturnType<typeof useI18n>['formatNumber'], profile: UkrposhtaSenderProfileInput): string {
   const parcel = profile.defaultParcel;
-  return `${parcel.weightKg} кг · ${parcel.lengthCm} × ${parcel.widthCm} × ${parcel.heightCm} см`;
+  return t('ukrposhtaSettings.parcelSummary', { weight: formatNumber(parcel.weightKg), length: formatNumber(parcel.lengthCm), width: formatNumber(parcel.widthCm), height: formatNumber(parcel.heightCm) });
 }
 
 function citySelectionFromProfile(profile: UkrposhtaSenderProfileInput | null | undefined): DeliveryLocation | null {
