@@ -156,7 +156,7 @@ function validationHints(issues: string[], draft: ManagerOrder, t: Translator, f
 function SheetsExportState({ value, pending, retry }: { value: NonNullable<ManagerOrder['sheetsExport']>; pending: boolean; retry: () => void }) {
   const { t, formatNumber } = useI18n();
   const title = value.status === 'SUCCEEDED' ? t('orders.sheetsSucceeded') : value.status === 'FAILED' ? t('orders.sheetsFailed') : value.status === 'PROCESSING' ? t('orders.sheetsProcessing') : t('orders.sheetsPending');
-  return <section className={`sheets-export-state export-${value.status.toLowerCase()}`} aria-live="polite"><div><h2>{title}</h2>{value.rowNumber && <span>{t('orders.sheetRow', { number: formatNumber(value.rowNumber) })}</span>}{value.errorSummary && <p>{value.errorSummary}</p>}</div>{value.retryAllowed && <button className="secondary" disabled={pending} onClick={retry} type="button">{t('orders.retrySync')}</button>}</section>;
+  return <section className={`sheets-export-state export-${value.status.toLowerCase()}`} aria-live="polite"><div><h2>{title}</h2>{value.rowNumber && <span>{t('orders.sheetRow', { number: formatNumber(value.rowNumber) })}</span>}{value.errorSummary && <p>{t('orders.syncErrorHint')}</p>}</div>{value.retryAllowed && <button className="secondary" disabled={pending} onClick={retry} type="button">{t('orders.retrySync')}</button>}</section>;
 }
 
 function reviewStatusLabel(status: ManagerOrder['status'], t: Translator) {

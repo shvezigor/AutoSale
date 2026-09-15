@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { mutatingFetch } from '../auth/csrf-fetch';
 import { useI18n } from '../i18n/i18n-provider';
+import { localizeApiError } from '../i18n/error-message';
 
 export type GooglePickerSelection = { fileId: string; name: string };
 export type GooglePickerLauncher = () => Promise<GooglePickerSelection | null>;
@@ -15,7 +16,7 @@ export function GooglePickerButton({
   autoOpen = false,
   disabled = false,
   onSelected,
-  pickerLauncher = openGooglePicker,
+  pickerLauncher,
 }: {
   label?: string;
   connected?: boolean;
@@ -48,18 +49,18 @@ export function GooglePickerButton({
           method: 'POST', headers: { 'content-type': 'application/json' },
           body: JSON.stringify({ returnPath: `/settings?tab=data&action=pick-${intent}` }),
         });
-        const body = await response.json() as { authorizationUrl?: string; message?: string };
-        if (!response.ok || !body.authorizationUrl) throw new Error(body.message ?? 'Google authorization failed');
+        const body = await response.json() as { authorizationUrl?: string; message?: string; code?: string };
+        if (!response.ok || !body.authorizationUrl) throw body;
         navigate(body.authorizationUrl);
         return;
       }
-      const selection = await pickerLauncher();
+      const selection = await (pickerLauncher ?? (() => openGooglePicker(t('googlePicker.defaultSheetName'))))();
       if (selection) {
         setSelectedName(selection.name);
         onSelected(selection);
       }
-    } catch {
-      setError(t('googlePicker.openFailed'));
+    } catch (reason) {
+      setError(pickerLauncher ? t('googlePicker.openFailed') : localizeApiError(reason, t));
     } finally {
       setPending(false);
     }
@@ -76,7 +77,7 @@ export function GooglePickerButton({
 
 let pickerScriptPromise: Promise<void> | null = null;
 
-async function openGooglePicker(): Promise<GooglePickerSelection | null> {
+async function openGooglePicker(defaultSheetName: string): Promise<GooglePickerSelection | null> {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_PICKER_API_KEY;
   const clientId = process.env.NEXT_PUBLIC_GOOGLE_OAUTH_CLIENT_ID;
   if (!apiKey || !clientId) throw new Error('Google Picker is not configured');
@@ -87,7 +88,7 @@ async function openGooglePicker(): Promise<GooglePickerSelection | null> {
   if (typeof tokenBody.accessToken !== 'string') throw new Error('Google access token invalid');
 
   await loadPickerScript();
-  return await buildPicker(tokenBody.accessToken, apiKey, clientId.split('-')[0] ?? '');
+  return await buildPicker(tokenBody.accessToken, apiKey, clientId.split('-')[0] ?? '', defaultSheetName);
 }
 
 function loadPickerScript(): Promise<void> {
@@ -115,7 +116,7 @@ function loadPickerScript(): Promise<void> {
   return promise;
 }
 
-function buildPicker(accessToken: string, apiKey: string, appId: string): Promise<GooglePickerSelection | null> {
+function buildPicker(accessToken: string, apiKey: string, appId: string, defaultSheetName: string): Promise<GooglePickerSelection | null> {
   return new Promise((resolve) => {
     const view = new window.google.picker.DocsView()
       .setMimeTypes('application/vnd.google-apps.spreadsheet')
@@ -128,7 +129,7 @@ function buildPicker(accessToken: string, apiKey: string, appId: string): Promis
         if (data.action === window.google.picker.Action.PICKED) {
           const document = data.docs?.[0];
           resolve(document && typeof document.id === 'string'
-            ? { fileId: document.id, name: typeof document.name === 'string' ? document.name : 'Google spreadsheet' }
+            ? { fileId: document.id, name: typeof document.name === 'string' ? document.name : defaultSheetName }
             : null);
         } else if (data.action === window.google.picker.Action.CANCEL) resolve(null);
       });

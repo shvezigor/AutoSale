@@ -7,6 +7,7 @@ import { GooglePickerButton, type GooglePickerSelection } from './google-picker-
 import { LoadingButton } from './loading-button';
 import { useToast } from './toast-provider';
 import { useI18n } from '../i18n/i18n-provider';
+import { localizeApiError } from '../i18n/error-message';
 
 export interface GoogleSheetsSettings {
   spreadsheetId: string | null;
@@ -18,16 +19,16 @@ export interface GoogleSheetsSettings {
 }
 
 export function GoogleSheetsSettingsForm({ initial, googleConnected = true, autoOpenPicker = false, embedded = false, onSettingsChange }: { initial: GoogleSheetsSettings; googleConnected?: boolean; autoOpenPicker?: boolean; embedded?: boolean; onSettingsChange?: (settings: GoogleSheetsSettings) => void }) {
+  const { t } = useI18n();
   const [settings, setSettings] = useState(initial);
   const [spreadsheetId, setSpreadsheetId] = useState(initial.spreadsheetId ?? '');
   const [sheetName, setSheetName] = useState(initial.sheetName);
   const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(initial.errorSummary);
+  const [error, setError] = useState<string | null>(initial.errorSummary ? t('errors.generic') : null);
   const [pending, setPending] = useState(false);
   const [tabs, setTabs] = useState<Array<{ sheetId: number; title: string }>>([]);
   const activity = useActivity();
   const toast = useToast();
-  const { t } = useI18n();
 
   useEffect(() => { onSettingsChange?.(settings); }, [settings, onSettingsChange]);
 
@@ -35,9 +36,9 @@ export function GoogleSheetsSettingsForm({ initial, googleConnected = true, auto
     setPending(true); setMessage(null); setError(null);
     await activity.run(t('googleSettings.checkingSheet'), async () => { try {
       const response = await fetch(`/api/integrations/google/files/${encodeURIComponent(selection.fileId)}/tabs`, { cache: 'no-store' });
-      const body = await response.json() as { spreadsheetId?: string; tabs?: Array<{ sheetId: number; title: string }>; message?: string };
+      const body = await response.json() as { spreadsheetId?: string; tabs?: Array<{ sheetId: number; title: string }>; message?: string; code?: string };
       if (!response.ok || body.spreadsheetId !== selection.fileId || !Array.isArray(body.tabs) || body.tabs.length === 0) {
-        throw new Error(body.message ?? t('googleSettings.checkSheetFailed'));
+        throw body;
       }
       setSpreadsheetId(body.spreadsheetId);
       setTabs(body.tabs);
@@ -47,7 +48,7 @@ export function GoogleSheetsSettingsForm({ initial, googleConnected = true, auto
       } else {
         setMessage(t('googleSettings.selectDestinationHint'));
       }
-    } catch (reason) { const text = reason instanceof Error ? reason.message : t('googleSettings.genericError'); setError(text); toast.show({ type: 'error', title: t('googleSettings.sheetSelectionFailed'), message: text }); }
+    } catch (reason) { const text = localizeApiError(reason, t); setError(text); toast.show({ type: 'error', title: t('googleSettings.sheetSelectionFailed'), message: text }); }
     finally { setPending(false); } });
   }
 
@@ -60,7 +61,7 @@ export function GoogleSheetsSettingsForm({ initial, googleConnected = true, auto
       setSettings(savedSettings);
       if (validateAfterSave) await validateDestination(savedSettings, false);
       else { setMessage(t('googleSettings.configurationSaved')); toast.show({ type: 'success', title: t('googleSettings.connectionSaved') }); }
-    } catch (reason) { const text = reason instanceof Error ? reason.message : t('googleSettings.genericError'); setError(text); toast.show({ type: 'error', title: t('googleSettings.connectionSaveFailed'), message: text }); }
+    } catch (reason) { const text = localizeApiError(reason, t); setError(text); toast.show({ type: 'error', title: t('googleSettings.connectionSaveFailed'), message: text }); }
     finally { setPending(false); } });
   }
 
@@ -68,12 +69,17 @@ export function GoogleSheetsSettingsForm({ initial, googleConnected = true, auto
     setPending(true); setMessage(null); setError(null);
     const operation = async () => { try {
       const response = await mutatingFetch('/api/settings/google-sheets/validate', { method: 'POST' });
-      const body = await response.json() as { valid?: boolean; missingHeaders?: string[]; initialized?: boolean; message?: string };
-      if (!response.ok) throw new Error(body.message ?? t('googleSettings.accessCheckFailed'));
-      if (!body.valid) throw new Error(t('googleSettings.missingHeaders', { headers: body.missingHeaders?.join(', ') ?? '' }));
+      const body = await response.json() as { valid?: boolean; missingHeaders?: string[]; initialized?: boolean; message?: string; code?: string };
+      if (!response.ok) throw body;
+      if (!body.valid) {
+        const text = t('googleSettings.missingHeaders', { headers: body.missingHeaders?.join(', ') ?? '' });
+        setError(text);
+        toast.show({ type: 'error', title: t('googleSettings.exportCheckFailed'), message: text });
+        return;
+      }
       const success = body.initialized ? t('googleSettings.templateCreatedExportActive') : t('googleSettings.connectionActive');
       setSettings({ ...currentSettings, status: 'ACTIVE' }); setMessage(success); toast.show({ type: 'success', title: body.initialized ? t('googleSettings.templateCreated') : t('googleSettings.exportActive') });
-    } catch (reason) { const text = reason instanceof Error ? reason.message : t('googleSettings.genericError'); setError(text); toast.show({ type: 'error', title: t('googleSettings.exportCheckFailed'), message: text }); }
+    } catch (reason) { const text = localizeApiError(reason, t); setError(text); toast.show({ type: 'error', title: t('googleSettings.exportCheckFailed'), message: text }); }
     finally { setPending(false); } };
     if (trackActivity) await activity.run(t('googleSettings.checkingExport'), operation);
     else await operation();

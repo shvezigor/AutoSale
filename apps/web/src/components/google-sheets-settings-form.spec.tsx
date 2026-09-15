@@ -18,6 +18,12 @@ function renderForm(ui: React.ReactElement) { return render(<ToastProvider><Acti
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
 describe('GoogleSheetsSettingsForm', () => {
+  it('does not expose a raw provider error summary', () => {
+    renderForm(<I18nProvider locale="en" authenticated={false}><GoogleSheetsSettingsForm initial={{ spreadsheetId: 'sheet-id', sheetName: 'Orders', status: 'ERROR', requiredHeaders: ['order_id'], lastValidatedAt: null, errorSummary: 'Google API stack trace' }} /></I18nProvider>);
+    expect(screen.getByRole('alert')).toHaveTextContent('Something went wrong');
+    expect(screen.queryByText('Google API stack trace')).not.toBeInTheDocument();
+  });
+
   it('translates export controls while preserving the selected sheet name', () => {
     renderForm(<I18nProvider locale="en" authenticated={false}><GoogleSheetsSettingsForm initial={{ spreadsheetId: 'sheet-id', sheetName: 'Продажі', status: 'ACTIVE', requiredHeaders: ['order_id'], lastValidatedAt: null, errorSummary: null }} /></I18nProvider>);
     expect(screen.getByRole('heading', { name: 'Order export' })).toBeInTheDocument();

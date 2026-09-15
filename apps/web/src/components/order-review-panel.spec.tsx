@@ -155,6 +155,9 @@ describe('OrderReviewPanel', () => {
     vi.stubGlobal('fetch', fetchMock);
     render(<OrderReviewPanel initialOrder={{ ...order, status: 'APPROVED', sheetsExport: { status: 'FAILED', attempts: 1, rowNumber: null, lastAttemptAt: '2026-08-27T08:00:00.000Z', lastSyncedAt: null, errorSummary: 'Google Sheets API returned HTTP 503', retryAllowed: true } }} />);
 
+    expect(screen.getByText('Не вдалося синхронізувати замовлення. Спробуйте ще раз.')).toBeInTheDocument();
+    expect(screen.queryByText('Google Sheets API returned HTTP 503')).not.toBeInTheDocument();
+
     fireEvent.click(screen.getByRole('button', { name: 'Повторити синхронізацію' }));
 
     await waitFor(() => expect(screen.getByText('Очікує синхронізації')).toBeInTheDocument());

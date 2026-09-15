@@ -11,6 +11,7 @@ import { useConfirm } from './confirm-provider';
 import { LoadingButton } from './loading-button';
 import { useToast } from './toast-provider';
 import { useI18n } from '../i18n/i18n-provider';
+import { localizeApiError } from '../i18n/error-message';
 
 const AVATAR_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
 const MAX_AVATAR_BYTES = 5 * 1024 * 1024;
@@ -88,15 +89,15 @@ export function ProfileEditor({ initial }: { initial: ProfileResponse }) {
     setPending('avatar');
     try {
       const response = await activity.run(t('profile.uploading'), () => mutatingFetch('/api/profile/avatar', { method: 'POST', body }));
-      if (!response.ok) throw new Error('AVATAR_UPLOAD_FAILED');
+      if (!response.ok) throw await jsonOrNull(response);
       const updated = await response.json() as ProfileResponse;
       setProfile(updated);
       setAvatarFile(null);
       if (avatarInput.current) avatarInput.current.value = '';
       toast.show({ type: 'success', title: t('profile.photoUpdated') });
       router.refresh();
-    } catch {
-      toast.show({ type: 'error', title: t('profile.photoUpdateFailed'), message: t('profile.useAnotherPhoto') });
+    } catch (reason) {
+      toast.show({ type: 'error', title: t('profile.photoUpdateFailed'), message: localizeApiError(reason, t) });
     } finally {
       setPending(null);
     }
@@ -138,13 +139,13 @@ export function ProfileEditor({ initial }: { initial: ProfileResponse }) {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ currentPassword, newPassword, confirmation }),
       }));
-      if (!response.ok) throw new Error('PASSWORD_CHANGE_FAILED');
+      if (!response.ok) throw await jsonOrNull(response);
       setCurrentPassword('');
       setNewPassword('');
       setConfirmation('');
       toast.show({ type: 'success', title: t('profile.passwordChanged') });
-    } catch {
-      toast.show({ type: 'error', title: t('profile.passwordChangeFailed'), message: t('profile.passwordRetry') });
+    } catch (reason) {
+      toast.show({ type: 'error', title: t('profile.passwordChangeFailed'), message: localizeApiError(reason, t) });
     } finally {
       setPending(null);
     }
@@ -220,4 +221,9 @@ export function ProfileEditor({ initial }: { initial: ProfileResponse }) {
       </div>
     </section>
   </div>;
+}
+
+async function jsonOrNull(response: Response): Promise<unknown> {
+  try { return await response.json(); }
+  catch { return null; }
 }

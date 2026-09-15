@@ -146,6 +146,18 @@ describe('ProfileEditor', () => {
     await waitFor(() => expect(refresh).toHaveBeenCalledOnce());
   });
 
+  it('localizes a stable invalid-current-password response without exposing server text', async () => {
+    mutatingFetch.mockResolvedValue(new Response(JSON.stringify({ message: 'PROFILE_CURRENT_PASSWORD_INVALID' }), { status: 401 }));
+    render(baseProfile, 'en');
+    fireEvent.change(screen.getByLabelText('Current password'), { target: { value: 'wrong-password' } });
+    fireEvent.change(screen.getByLabelText('New password'), { target: { value: 'new-password-123' } });
+    fireEvent.change(screen.getByLabelText('Repeat new password'), { target: { value: 'new-password-123' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Change password' }));
+
+    expect(await screen.findByText('The current password is incorrect')).toBeInTheDocument();
+    expect(screen.queryByText('PROFILE_CURRENT_PASSWORD_INVALID')).not.toBeInTheDocument();
+  });
+
   it('renders profile controls and account facts in English', () => {
     render(baseProfile, 'en');
     expect(screen.getByRole('heading', { name: 'Personal information' })).toBeInTheDocument();

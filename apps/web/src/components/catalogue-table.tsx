@@ -10,6 +10,7 @@ import { ProductEditor, type EditableProduct } from './product-editor';
 import { TablePagination } from './table-pagination';
 import { useToast } from './toast-provider';
 import { useI18n } from '../i18n/i18n-provider';
+import { localizeApiError } from '../i18n/error-message';
 
 type CatalogueSession = { membershipRole: 'OWNER' | 'MANAGER' | null };
 type CatalogueTableProps = { session: CatalogueSession; products: EditableProduct[]; page: number; pageSize: number; total: number; search?: string };
@@ -33,14 +34,14 @@ export function CatalogueTable({ session, products, page, pageSize, total, searc
     setClearing(true);
     try {
       const response = await activity.run(t('catalogue.clearing'), () => mutatingFetch('/api/catalogue', { method: 'DELETE' }));
-      const body = await response.json() as { deleted?: number; message?: string };
-      if (!response.ok) throw new Error(body.message ?? t('catalogue.clearFailed'));
+      const body = await response.json() as { deleted?: number; message?: string; code?: string };
+      if (!response.ok) throw body;
       toast.show({ type: 'success', title: t('catalogue.cleared'), message: t('catalogue.deletedCount', { count: formatNumber(body.deleted ?? 0) }) });
       setEditing(null);
       router.replace('/catalogue');
       router.refresh?.();
     } catch (reason) {
-      toast.show({ type: 'error', title: t('catalogue.clearFailed'), message: reason instanceof Error ? reason.message : t('catalogue.tryAgain') });
+      toast.show({ type: 'error', title: t('catalogue.clearFailed'), message: localizeApiError(reason, t) });
     } finally { setClearing(false); }
   }
 

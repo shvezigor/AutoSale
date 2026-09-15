@@ -7,6 +7,7 @@ import { useActivity } from './activity-provider';
 import { LoadingButton } from './loading-button';
 import { useToast } from './toast-provider';
 import { useI18n } from '../i18n/i18n-provider';
+import { localizeApiError } from '../i18n/error-message';
 
 export type GoogleConnectionSummary = {
   status: string;
@@ -40,11 +41,11 @@ export function GoogleConnectionSettings({
       const response = await activity.run(t('googleSettings.connectingActivity'), () => mutatingFetch('/api/integrations/google/connect', {
         method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ returnPath: '/settings?tab=google' }),
       }));
-      const body = await response.json() as { authorizationUrl?: string; message?: string };
-      if (!response.ok || !body.authorizationUrl) throw new Error(body.message ?? t('googleSettings.connectStartFailed'));
+      const body = await response.json() as { authorizationUrl?: string; message?: string; code?: string };
+      if (!response.ok || !body.authorizationUrl) throw body;
       navigate(body.authorizationUrl);
     } catch (reason) {
-      const text = reason instanceof Error ? reason.message : t('googleSettings.connectFailed'); setError(text); toast.show({ type: 'error', title: t('googleSettings.connectFailed'), message: text });
+      const text = localizeApiError(reason, t); setError(text); toast.show({ type: 'error', title: t('googleSettings.connectFailed'), message: text });
       setPending(false);
     }
   }
@@ -53,12 +54,12 @@ export function GoogleConnectionSettings({
     setPending(true); setError(null);
     try {
       const response = await activity.run(t('googleSettings.disconnectingActivity'), () => mutatingFetch('/api/integrations/google/disconnect', { method: 'POST' }));
-      const body = await response.json() as { status?: string; message?: string };
-      if (!response.ok) throw new Error(body.message ?? t('googleSettings.disconnectFailed'));
+      const body = await response.json() as { status?: string; message?: string; code?: string };
+      if (!response.ok) throw body;
       setConnection({ ...connection, status: body.status ?? 'DISCONNECTING', email: null, grantedScopes: [] });
       toast.show({ type: 'success', title: t('googleSettings.disconnectingToast') });
     } catch (reason) {
-      const text = reason instanceof Error ? reason.message : t('googleSettings.disconnectFailed'); setError(text); toast.show({ type: 'error', title: t('googleSettings.disconnectFailed'), message: text });
+      const text = localizeApiError(reason, t); setError(text); toast.show({ type: 'error', title: t('googleSettings.disconnectFailed'), message: text });
     } finally {
       setPending(false);
     }

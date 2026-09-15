@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { mutatingFetch } from '../auth/csrf-fetch';
 import { useI18n } from '../i18n/i18n-provider';
 import type { Translator } from '../i18n/translator';
+import { localizeApiError } from '../i18n/error-message';
 import { useActivity } from './activity-provider';
 import { GooglePickerButton, type GooglePickerSelection } from './google-picker-button';
 import { LoadingButton } from './loading-button';
@@ -110,13 +111,13 @@ export function CatalogueSourceSettings({
     setPending(true); setMessage(null); setError(null);
     try {
       const response = await activity.run(success, () => mutatingFetch(path, init));
-      const body = await response.json().catch(() => ({})) as CatalogueSourceConfiguration & { message?: string };
-      if (!response.ok) throw new Error(body.message ?? t('catalogueSource.operationFailed'));
+      const body = await response.json().catch(() => ({})) as CatalogueSourceConfiguration & { message?: string; code?: string };
+      if (!response.ok) throw body;
       setMessage(success);
       toast.show({ type: 'success', title: success });
       return body;
     } catch (reason) {
-      const text = reason instanceof Error ? reason.message : t('catalogueSource.operationFailed'); setError(text); toast.show({ type: 'error', title: t('catalogueSource.operationFailed'), message: text });
+      const text = localizeApiError(reason, t); setError(text); toast.show({ type: 'error', title: t('catalogueSource.operationFailed'), message: text });
       return null;
     } finally {
       setPending(false);
@@ -139,14 +140,14 @@ export function CatalogueSourceSettings({
     setPending(true); setMessage(null); setError(null); setTabs([]);
     try {
       const response = await activity.run(t('catalogueSource.checkingSheet'), () => fetch(`/api/integrations/google/files/${encodeURIComponent(selection.fileId)}/tabs`, { cache: 'no-store' }));
-      const body = await response.json() as { spreadsheetId?: string; tabs?: Array<{ sheetId: number; title: string }>; message?: string };
-      if (!response.ok || body.spreadsheetId !== selection.fileId || !body.tabs?.length) throw new Error(body.message ?? t('catalogueSource.sheetCheckFailed'));
+      const body = await response.json() as { spreadsheetId?: string; tabs?: Array<{ sheetId: number; title: string }>; message?: string; code?: string };
+      if (!response.ok || body.spreadsheetId !== selection.fileId || !body.tabs?.length) throw body;
       setSpreadsheet(body.spreadsheetId);
       setTabs(body.tabs);
       setSheetName(body.tabs[0]!.title);
       setDisplayName(selection.name);
       setMessage(body.tabs.length === 1 ? t('catalogueSource.sheetRecognized') : t('catalogueSource.chooseProductTab'));
-    } catch (reason) { const text = reason instanceof Error ? reason.message : t('catalogueSource.sheetCheckFailed'); setError(text); toast.show({ type: 'error', title: t('catalogueSource.sheetCheckFailed'), message: text }); }
+    } catch (reason) { const text = localizeApiError(reason, t); setError(text); toast.show({ type: 'error', title: t('catalogueSource.sheetCheckFailed'), message: text }); }
     finally { setPending(false); }
   }
 
@@ -157,10 +158,10 @@ export function CatalogueSourceSettings({
       const form = new FormData();
       form.set('file', file);
       const response = await activity.run(t('catalogueSource.uploadingCatalogue'), () => mutatingFetch('/api/catalogue/imports/upload', { method: 'POST', body: form }));
-      const body = await response.json() as { status?: string; message?: string };
-      if (!response.ok) throw new Error(body.message ?? t('catalogueSource.fileUploadFailed'));
+      const body = await response.json() as { status?: string; message?: string; code?: string };
+      if (!response.ok) throw body;
       const success = body.status === 'COMPLETED' ? t('catalogueSource.uploadComplete') : t('catalogueSource.fileAccepted'); setMessage(success); toast.show({ type: 'success', title: t('catalogueSource.catalogueQueued'), message: success });
-    } catch (reason) { const text = reason instanceof Error ? reason.message : t('catalogueSource.fileUploadFailed'); setError(text); toast.show({ type: 'error', title: t('catalogueSource.fileUploadFailed'), message: text }); }
+    } catch (reason) { const text = localizeApiError(reason, t); setError(text); toast.show({ type: 'error', title: t('catalogueSource.fileUploadFailed'), message: text }); }
     finally { setPending(false); if (fileInput.current) fileInput.current.value = ''; }
   }
 
