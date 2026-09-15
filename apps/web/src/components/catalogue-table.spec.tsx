@@ -8,8 +8,10 @@ import { CatalogueTable } from './catalogue-table';
 import { ActivityProvider } from './activity-provider';
 import { ToastProvider } from './toast-provider';
 import { ConfirmProvider } from './confirm-provider';
+import { I18nProvider } from '../i18n/i18n-provider';
 
 function render(ui: React.ReactElement) { return rtlRender(<ToastProvider><ActivityProvider><ConfirmProvider>{ui}</ConfirmProvider></ActivityProvider></ToastProvider>); }
+function renderEnglish(ui: React.ReactElement) { return rtlRender(<I18nProvider locale="en" authenticated><ToastProvider><ActivityProvider><ConfirmProvider>{ui}</ConfirmProvider></ActivityProvider></ToastProvider></I18nProvider>); }
 
 const product = {
   id: 'b6c1a440-a39d-41d1-b9c2-ebdac84d4c48',
@@ -88,5 +90,17 @@ describe('CatalogueTable', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Так, очистити' }));
     await screen.findByText('Каталог очищено');
     expect(mutatingFetch).toHaveBeenCalledWith('/api/catalogue', { method: 'DELETE' });
+  });
+
+  it('translates catalogue controls while preserving product data', () => {
+    renderEnglish(<CatalogueTable session={{ membershipRole: 'OWNER' }} products={[product]} page={2} pageSize={25} total={60} />);
+
+    expect(screen.getByRole('table', { name: 'Catalogue products' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Add product' })).toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: 'Edit' })).toHaveLength(2);
+    expect(screen.getAllByText('Сукня Luna')).toHaveLength(2);
+    expect(screen.getByText('LUNA-01')).toBeInTheDocument();
+    expect(screen.getByText('26–50 of 60')).toBeInTheDocument();
+    expect(screen.getByLabelText('Rows per page')).toBeInTheDocument();
   });
 });

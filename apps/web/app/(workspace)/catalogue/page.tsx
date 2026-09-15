@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { authenticatedApiFetch, getServerSession } from '../../../src/auth/session';
 import { CatalogueTable } from '../../../src/components/catalogue-table';
 import { CatalogueImportWizard } from '../../../src/components/catalogue-import-wizard';
+import { createTranslator } from '../../../src/i18n/translator';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,7 +14,8 @@ type CatalogueResponse = { items: CatalogueProduct[]; page: number; pageSize: nu
 export default async function CataloguePage({ searchParams }: CataloguePageProps) {
   const session = await getServerSession();
   if (!session) return null;
-  if (!session.membershipRole) return <main className="route-state"><h1>Каталог недоступний</h1><p>Виберіть організацію, щоб переглядати її каталог.</p></main>;
+  const t = createTranslator(session.locale ?? 'uk');
+  if (!session.membershipRole) return <main className="route-state"><h1>{t('catalogue.unavailable')}</h1><p>{t('catalogue.selectOrganization')}</p></main>;
 
   const params = await searchParams;
   const page = positiveInteger(params.page) ?? 1;
@@ -22,7 +24,7 @@ export default async function CataloguePage({ searchParams }: CataloguePageProps
   const query = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
   if (search) query.set('search', search);
   const response = await authenticatedApiFetch(`/api/catalogue?${query.toString()}`);
-  if (!response.ok) throw new Error('Не вдалося завантажити каталог');
+  if (!response.ok) throw new Error(t('catalogue.loadError'));
   const catalogue = await response.json() as CatalogueResponse;
   const reviewId = uuidParam(params.review);
   let review: { id: string; headers: string[] } | undefined;
@@ -34,7 +36,7 @@ export default async function CataloguePage({ searchParams }: CataloguePageProps
     }
   }
 
-  return <main className="catalogue-layout catalogue-layout-content"><section className="catalogue-content"><header className="catalogue-header"><h1>Каталог товарів</h1><p>{session.membershipRole === 'OWNER' ? 'Додавайте та оновлюйте товари, які AI використовує для розпізнавання замовлень.' : 'Переглядайте товари, які AI використовує для розпізнавання замовлень.'}</p></header><p className="catalogue-settings-link">Джерела каталогу налаштовуються в розділі <Link href="/settings?tab=data">Налаштування → Дані</Link>.</p>{review ? <CatalogueImportWizard session={session} initialReview={review} /> : null}<CatalogueTable page={catalogue.page} pageSize={catalogue.pageSize} products={catalogue.items} search={search} session={session} total={catalogue.total} /></section></main>;
+  return <main className="catalogue-layout catalogue-layout-content"><section className="catalogue-content"><header className="catalogue-header"><h1>{t('catalogue.title')}</h1><p>{session.membershipRole === 'OWNER' ? t('catalogue.ownerDescription') : t('catalogue.managerDescription')}</p></header><p className="catalogue-settings-link">{t('catalogue.sourcesPrefix')} <Link href="/settings?tab=data">{t('catalogue.settingsData')}</Link>.</p>{review ? <CatalogueImportWizard session={session} initialReview={review} /> : null}<CatalogueTable page={catalogue.page} pageSize={catalogue.pageSize} products={catalogue.items} search={search} session={session} total={catalogue.total} /></section></main>;
 }
 
 function positiveInteger(value: string | string[] | undefined) { const parsed = Number(Array.isArray(value) ? value[0] : value); return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : null; }

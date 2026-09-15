@@ -6,6 +6,7 @@ import { FormEvent, useEffect, useState } from 'react';
 import { mutatingFetch } from '../auth/csrf-fetch';
 import { useActivity } from './activity-provider';
 import { useToast } from './toast-provider';
+import { useI18n } from '../i18n/i18n-provider';
 
 export type EditableProduct = {
   id?: string | undefined;
@@ -48,6 +49,7 @@ export function ProductEditor({ product, onClose }: ProductEditorProps) {
   const editing = Boolean(product?.id);
   const activity = useActivity();
   const toast = useToast();
+  const { t } = useI18n();
 
   useEffect(() => {
     const next = { ...emptyProduct, ...product };
@@ -67,44 +69,44 @@ export function ProductEditor({ product, onClose }: ProductEditorProps) {
     if (new Set(aliases).size !== aliases.length) { setState('validation-error'); return; }
     setState('saving');
     try {
-      const response = await activity.run('Зберігаємо товар', () => mutatingFetch(editing ? `/api/catalogue/${product!.id}` : '/api/catalogue', {
+      const response = await activity.run(t('catalogue.savingProduct'), () => mutatingFetch(editing ? `/api/catalogue/${product!.id}` : '/api/catalogue', {
         method: editing ? 'PATCH' : 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify(buildPayload(form, aliases)),
       }));
       if (!response.ok) {
         setState('error');
-        toast.show({ type: 'error', title: 'Не вдалося зберегти товар' });
+        toast.show({ type: 'error', title: t('catalogue.saveFailed') });
         return;
       }
 
       setState('saved');
-      toast.show({ type: 'success', title: editing ? 'Зміни товару збережено' : 'Товар додано' });
+      toast.show({ type: 'success', title: editing ? t('catalogue.changesSavedToast') : t('catalogue.addedToast') });
       router.refresh();
     } catch {
       setState('error');
-      toast.show({ type: 'error', title: 'Не вдалося зберегти товар' });
+      toast.show({ type: 'error', title: t('catalogue.saveFailed') });
     }
   }
 
   return <section className="product-editor" aria-labelledby="product-editor-title">
-    <div className="product-editor-heading"><div><h2 id="product-editor-title">{editing ? 'Редагувати товар' : 'Новий товар'}</h2><p>Поля з позначкою * обов’язкові.</p></div><button className="text-button" onClick={onClose} type="button">Закрити</button></div>
+    <div className="product-editor-heading"><div><h2 id="product-editor-title">{editing ? t('catalogue.editTitle') : t('catalogue.newTitle')}</h2><p>{t('catalogue.requiredHint')}</p></div><button className="text-button" onClick={onClose} type="button">{t('catalogue.close')}</button></div>
     <form aria-busy={state === 'saving'} className="product-form" onSubmit={(event) => void save(event)}>
       <div className="product-form-grid">
-        <label>Артикул *<input aria-label="Артикул" autoComplete="off" maxLength={120} onChange={(event) => update('sku', event.target.value)} required value={form.sku} /></label>
-        <label>Назва товару *<input aria-label="Назва товару" maxLength={500} onChange={(event) => update('name', event.target.value)} required value={form.name} /></label>
-        <label>Ціна<input inputMode="decimal" min="0" onChange={(event) => update('price', numberOrNull(event.target.value))} step="0.01" type="number" value={form.price ?? ''} /></label>
-        <label>Валюта<input maxLength={3} onChange={(event) => update('currency', event.target.value)} value={form.currency ?? ''} /></label>
-        <label>Залишок<input min="0" onChange={(event) => update('stockQuantity', integerOrNull(event.target.value))} step="1" type="number" value={form.stockQuantity ?? ''} /></label>
-        <label>Категорія<input onChange={(event) => update('category', event.target.value)} value={form.category ?? ''} /></label>
-        <label>Бренд<input onChange={(event) => update('brand', event.target.value)} value={form.brand ?? ''} /></label>
-        <label>Колір<input onChange={(event) => update('color', event.target.value)} value={form.color ?? ''} /></label>
-        <label>Розмір<input onChange={(event) => update('size', event.target.value)} value={form.size ?? ''} /></label>
-        <label className="product-form-wide">Аліаси<input aria-describedby="aliases-hint" aria-label="Аліаси" onChange={(event) => { setAliasesText(event.target.value); setState('idle'); }} value={aliasesText} /><small id="aliases-hint">Відокремлюйте назви комами.</small></label>
-        <label className="product-form-wide">Опис<textarea onChange={(event) => update('description', event.target.value)} value={form.description ?? ''} /></label>
+        <label>{t('catalogue.sku')} *<input aria-label={t('catalogue.sku')} autoComplete="off" maxLength={120} onChange={(event) => update('sku', event.target.value)} required value={form.sku} /></label>
+        <label>{t('catalogue.productName')} *<input aria-label={t('catalogue.productName')} maxLength={500} onChange={(event) => update('name', event.target.value)} required value={form.name} /></label>
+        <label>{t('catalogue.price')}<input inputMode="decimal" min="0" onChange={(event) => update('price', numberOrNull(event.target.value))} step="0.01" type="number" value={form.price ?? ''} /></label>
+        <label>{t('catalogue.currency')}<input maxLength={3} onChange={(event) => update('currency', event.target.value)} value={form.currency ?? ''} /></label>
+        <label>{t('catalogue.stock')}<input min="0" onChange={(event) => update('stockQuantity', integerOrNull(event.target.value))} step="1" type="number" value={form.stockQuantity ?? ''} /></label>
+        <label>{t('catalogue.category')}<input onChange={(event) => update('category', event.target.value)} value={form.category ?? ''} /></label>
+        <label>{t('catalogue.brand')}<input onChange={(event) => update('brand', event.target.value)} value={form.brand ?? ''} /></label>
+        <label>{t('catalogue.color')}<input onChange={(event) => update('color', event.target.value)} value={form.color ?? ''} /></label>
+        <label>{t('catalogue.size')}<input onChange={(event) => update('size', event.target.value)} value={form.size ?? ''} /></label>
+        <label className="product-form-wide">{t('catalogue.aliases')}<input aria-describedby="aliases-hint" aria-label={t('catalogue.aliases')} onChange={(event) => { setAliasesText(event.target.value); setState('idle'); }} value={aliasesText} /><small id="aliases-hint">{t('catalogue.aliasesHint')}</small></label>
+        <label className="product-form-wide">{t('catalogue.description')}<textarea onChange={(event) => update('description', event.target.value)} value={form.description ?? ''} /></label>
       </div>
-      <label className="active-field"><input checked={form.active ?? true} onChange={(event) => update('active', event.target.checked)} type="checkbox" /> Товар активний</label>
-      <div className="product-editor-actions"><button className="primary-button" disabled={state === 'saving'} type="submit">{state === 'saving' ? 'Збереження…' : editing ? 'Зберегти зміни' : 'Додати товар'}</button><div aria-atomic="true" aria-live="polite">{state === 'saved' && <p className="save-success" role="status">{editing ? 'Зміни збережено' : 'Товар додано'}</p>}{state === 'error' && <p className="save-error" role="status">Не вдалося зберегти товар. Спробуйте ще раз.</p>}{state === 'validation-error' && <p className="save-error" role="status">Аліаси не мають повторюватися.</p>}</div></div>
+      <label className="active-field"><input checked={form.active ?? true} onChange={(event) => update('active', event.target.checked)} type="checkbox" /> {t('catalogue.productActive')}</label>
+      <div className="product-editor-actions"><button className="primary-button" disabled={state === 'saving'} type="submit">{state === 'saving' ? t('catalogue.saving') : editing ? t('catalogue.saveChanges') : t('catalogue.add')}</button><div aria-atomic="true" aria-live="polite">{state === 'saved' && <p className="save-success" role="status">{editing ? t('catalogue.changesSaved') : t('catalogue.added')}</p>}{state === 'error' && <p className="save-error" role="status">{t('catalogue.saveError')}</p>}{state === 'validation-error' && <p className="save-error" role="status">{t('catalogue.duplicateAliases')}</p>}</div></div>
     </form>
   </section>;
 }

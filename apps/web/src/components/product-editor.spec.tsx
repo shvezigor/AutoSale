@@ -4,8 +4,10 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ProductEditor } from './product-editor';
 import { ActivityProvider } from './activity-provider';
 import { ToastProvider } from './toast-provider';
+import { I18nProvider } from '../i18n/i18n-provider';
 
 function render(ui: React.ReactElement) { return rtlRender(<ToastProvider><ActivityProvider>{ui}</ActivityProvider></ToastProvider>); }
+function renderEnglish(ui: React.ReactElement) { return rtlRender(<I18nProvider locale="en" authenticated><ToastProvider><ActivityProvider>{ui}</ActivityProvider></ToastProvider></I18nProvider>); }
 
 const refresh = vi.fn();
 vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh }) }));
@@ -121,5 +123,14 @@ describe('ProductEditor', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Додати товар' }));
 
     await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('Не вдалося зберегти товар. Спробуйте ще раз.'));
+  });
+
+  it('translates the editor without changing product values', () => {
+    renderEnglish(<ProductEditor product={{ id: 'product-1', sku: 'LUNA-01', name: 'Сукня Luna', stockQuantity: 7 }} onClose={vi.fn()} />);
+
+    expect(screen.getByRole('heading', { name: 'Edit product' })).toBeInTheDocument();
+    expect(screen.getByLabelText('SKU')).toHaveValue('LUNA-01');
+    expect(screen.getByLabelText('Product name')).toHaveValue('Сукня Luna');
+    expect(screen.getByRole('button', { name: 'Save changes' })).toBeInTheDocument();
   });
 });

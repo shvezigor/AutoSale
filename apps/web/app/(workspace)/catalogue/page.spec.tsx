@@ -7,6 +7,7 @@ vi.mock('next/navigation', () => ({ usePathname: () => '/catalogue', useRouter: 
 
 import CataloguePage from './page';
 import WorkspaceLayout from '../layout';
+import { I18nProvider } from '../../../src/i18n/i18n-provider';
 
 beforeEach(() => { vi.stubGlobal('fetch', vi.fn(() => new Promise(() => undefined))); });
 afterEach(() => { cleanup(); authenticatedApiFetch.mockReset(); getServerSession.mockReset(); vi.unstubAllGlobals(); });
@@ -53,5 +54,16 @@ describe('CataloguePage', () => {
     render(await WorkspaceLayout({ children: await CataloguePage({ searchParams: Promise.resolve({ review: id }) }) }));
     expect(authenticatedApiFetch).toHaveBeenCalledWith(`/api/catalogue/imports/${id}`);
     expect(screen.getByRole('heading', { name: 'Читаємо таблицю' })).toBeInTheDocument();
+  });
+
+  it('renders English page chrome while preserving catalogue search data', async () => {
+    getServerSession.mockResolvedValue({ name: 'Ivan', email: 'manager@example.com', membershipRole: 'MANAGER', locale: 'en' });
+    authenticatedApiFetch.mockResolvedValueOnce({ ok: true, json: async () => ({ items: [], page: 1, pageSize: 25, total: 0 }) });
+
+    render(<I18nProvider locale="en" authenticated>{await WorkspaceLayout({ children: await CataloguePage({ searchParams: Promise.resolve({ search: 'Сукня' }) }) })}</I18nProvider>);
+
+    expect(screen.getByRole('heading', { name: 'Product catalogue' })).toBeInTheDocument();
+    expect(screen.getByText('No products match this search.')).toBeInTheDocument();
+    expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/catalogue?page=1&pageSize=25&search=%D0%A1%D1%83%D0%BA%D0%BD%D1%8F');
   });
 });

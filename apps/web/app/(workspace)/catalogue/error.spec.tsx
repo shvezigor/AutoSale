@@ -1,7 +1,10 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
+
 import CatalogueError from './error';
+import { I18nProvider } from '../../../src/i18n/i18n-provider';
 
 afterEach(cleanup);
 
@@ -17,5 +20,13 @@ describe('CatalogueError', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Повторити' }));
     expect(reset).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows English recovery copy when English is selected', () => {
+    render(<I18nProvider locale="en" authenticated><CatalogueError error={new Error('private upstream detail')} reset={vi.fn()} /></I18nProvider>);
+
+    expect(screen.getByRole('heading', { name: 'Could not load catalogue' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Try again' })).toBeInTheDocument();
+    expect(screen.queryByText(/private upstream detail/i)).not.toBeInTheDocument();
   });
 });
