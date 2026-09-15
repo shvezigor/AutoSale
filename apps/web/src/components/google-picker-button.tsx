@@ -2,12 +2,13 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { mutatingFetch } from '../auth/csrf-fetch';
+import { useI18n } from '../i18n/i18n-provider';
 
 export type GooglePickerSelection = { fileId: string; name: string };
 export type GooglePickerLauncher = () => Promise<GooglePickerSelection | null>;
 
 export function GooglePickerButton({
-  label = 'Обрати Google-таблицю',
+  label,
   connected = true,
   intent = 'catalogue',
   navigate = (url) => window.location.assign(url),
@@ -25,6 +26,8 @@ export function GooglePickerButton({
   onSelected: (selection: GooglePickerSelection) => void;
   pickerLauncher?: GooglePickerLauncher;
 }) {
+  const { t } = useI18n();
+  const buttonLabel = label ?? t('googlePicker.choose');
   const [pending, setPending] = useState(false);
   const [selectedName, setSelectedName] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -56,7 +59,7 @@ export function GooglePickerButton({
         onSelected(selection);
       }
     } catch {
-      setError('Не вдалося відкрити Google Picker');
+      setError(t('googlePicker.openFailed'));
     } finally {
       setPending(false);
     }
@@ -64,9 +67,9 @@ export function GooglePickerButton({
 
   return <div className="google-picker-control">
     <button type="button" className="secondary-button" disabled={disabled || pending} onClick={() => void choose()}>
-      {pending ? 'Відкриваємо Google…' : label}
+      {pending ? t('googlePicker.opening') : buttonLabel}
     </button>
-    {selectedName && <span className="save-success">Обрано: {selectedName}</span>}
+    {selectedName && <span className="save-success">{t('googlePicker.selected', { name: selectedName })}</span>}
     {error && <span className="save-error" role="alert">{error}</span>}
   </div>;
 }
@@ -125,7 +128,7 @@ function buildPicker(accessToken: string, apiKey: string, appId: string): Promis
         if (data.action === window.google.picker.Action.PICKED) {
           const document = data.docs?.[0];
           resolve(document && typeof document.id === 'string'
-            ? { fileId: document.id, name: typeof document.name === 'string' ? document.name : 'Google таблиця' }
+            ? { fileId: document.id, name: typeof document.name === 'string' ? document.name : 'Google spreadsheet' }
             : null);
         } else if (data.action === window.google.picker.Action.CANCEL) resolve(null);
       });
