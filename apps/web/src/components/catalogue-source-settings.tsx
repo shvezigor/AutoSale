@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { mutatingFetch } from '../auth/csrf-fetch';
+import { useI18n } from '../i18n/i18n-provider';
+import type { Translator } from '../i18n/translator';
 import { useActivity } from './activity-provider';
 import { GooglePickerButton, type GooglePickerSelection } from './google-picker-button';
 import { LoadingButton } from './loading-button';
@@ -35,10 +37,11 @@ export function CatalogueSourceSettings({
   embedded?: boolean;
   onConfigurationChange?: (configuration: CatalogueSourceConfiguration | null) => void;
 }) {
+  const { t, formatDate, formatNumber } = useI18n();
   const [current, setCurrent] = useState(configurations[0] ?? null);
-  const [displayName, setDisplayName] = useState(current?.displayName ?? 'Каталог Google Sheets');
+  const [displayName, setDisplayName] = useState(current?.displayName ?? t('catalogueSource.defaultName'));
   const [spreadsheet, setSpreadsheet] = useState(current?.spreadsheetId ?? '');
-  const [sheetName, setSheetName] = useState(current?.sheetName ?? 'Товари');
+  const [sheetName, setSheetName] = useState(current?.sheetName ?? t('catalogueSource.defaultSheet'));
   const [schedule, setSchedule] = useState<'MANUAL' | 'HOURLY' | 'DAILY'>(current?.syncSchedule ?? 'MANUAL');
   const [pending, setPending] = useState(false);
   const [tracking, setTracking] = useState<{ id: string; previousRun: string | undefined; updatedAt: string; started: number } | null>(null);
@@ -53,8 +56,8 @@ export function CatalogueSourceSettings({
 
   useEffect(() => {
     if (!tracking) return;
-    return activity.begin('Розпізнаємо й завантажуємо товари');
-  }, [activity.begin, tracking?.id]);
+    return activity.begin(t('catalogueSource.processingActivity'));
+  }, [activity.begin, t, tracking?.id]);
 
   useEffect(() => {
     if (!tracking) return;
@@ -63,7 +66,7 @@ export function CatalogueSourceSettings({
     async function poll() {
       try {
         const response = await fetch(`/api/catalogue/sources/${tracking!.id}`, { cache: 'no-store', signal: controller.signal });
-        if (!response.ok) throw new Error('Не вдалося перевірити стан імпорту');
+        if (!response.ok) throw new Error(t('catalogueSource.pollFailed'));
         const next = await response.json() as CatalogueSourceConfiguration;
         if (controller.signal.aborted) return;
         const changed = next.updatedAt !== tracking!.updatedAt;
@@ -72,10 +75,10 @@ export function CatalogueSourceSettings({
         if (changed && ((!retryPending && next.lastErrorSummary) || (terminal && (next.latestRun?.id !== tracking!.previousRun || next.status === 'ACTIVE')))) {
           setCurrent(next); setTracking(null); setMessage(null);
           toast.show(next.lastErrorSummary || next.latestRun?.status === 'FAILED'
-            ? { type: 'error', title: 'Не вдалося завантажити товари', message: 'Причину показано в картці джерела.' }
+            ? { type: 'error', title: t('catalogueSource.loadFailedTitle'), message: t('catalogueSource.loadFailedHint') }
             : next.latestRun?.status === 'COMPLETED'
-              ? { type: 'success', title: 'Товари завантажено', message: `Додано: ${next.latestRun.createdRows} · оновлено: ${next.latestRun.updatedRows}` }
-              : { type: 'warning', title: 'Потрібна перевірка колонок' });
+              ? { type: 'success', title: t('catalogueSource.loadedTitle'), message: t('catalogueSource.loadedSummary', { created: formatNumber(next.latestRun.createdRows), updated: formatNumber(next.latestRun.updatedRows) }) }
+              : { type: 'warning', title: t('catalogueSource.reviewRequired') });
           return;
         }
         if (changed && next.latestRun?.id !== tracking!.previousRun) setCurrent(next);
@@ -83,21 +86,21 @@ export function CatalogueSourceSettings({
         if (controller.signal.aborted) return;
       }
       if (Date.now() - tracking!.started > 10 * 60_000) {
-        setTracking(null); setMessage('Обробка триває довше очікуваного. Результат буде в центрі сповіщень.'); return;
+        setTracking(null); setMessage(t('catalogueSource.takingLong')); return;
       }
       timer = setTimeout(() => void poll(), 2000);
     }
     timer = setTimeout(() => void poll(), 2000);
     return () => { controller.abort(); clearTimeout(timer); };
-  }, [tracking, toast]);
+  }, [formatNumber, t, tracking, toast]);
 
   if (role === 'MANAGER') return <HealthList sources={sources} />;
 
   function select(configuration: CatalogueSourceConfiguration | null) {
     setCurrent(configuration);
-    setDisplayName(configuration?.displayName ?? 'Каталог Google Sheets');
+    setDisplayName(configuration?.displayName ?? t('catalogueSource.defaultName'));
     setSpreadsheet(configuration?.spreadsheetId ?? '');
-    setSheetName(configuration?.sheetName ?? 'Товари');
+    setSheetName(configuration?.sheetName ?? t('catalogueSource.defaultSheet'));
     setSchedule(configuration?.syncSchedule ?? 'MANUAL');
     setTabs([]);
     setMessage(null); setError(null);
@@ -108,12 +111,12 @@ export function CatalogueSourceSettings({
     try {
       const response = await activity.run(success, () => mutatingFetch(path, init));
       const body = await response.json().catch(() => ({})) as CatalogueSourceConfiguration & { message?: string };
-      if (!response.ok) throw new Error(body.message ?? 'Операцію не виконано');
+      if (!response.ok) throw new Error(body.message ?? t('catalogueSource.operationFailed'));
       setMessage(success);
       toast.show({ type: 'success', title: success });
       return body;
     } catch (reason) {
-      const text = reason instanceof Error ? reason.message : 'Операцію не виконано'; setError(text); toast.show({ type: 'error', title: 'Операцію не виконано', message: text });
+      const text = reason instanceof Error ? reason.message : t('catalogueSource.operationFailed'); setError(text); toast.show({ type: 'error', title: t('catalogueSource.operationFailed'), message: text });
       return null;
     } finally {
       setPending(false);
@@ -124,10 +127,10 @@ export function CatalogueSourceSettings({
     const body = JSON.stringify({ displayName, spreadsheet, sheetName, syncSchedule: schedule });
     const result = await mutate(current ? `/api/catalogue/sources/${current.id}` : '/api/catalogue/sources', {
       method: current ? 'PATCH' : 'POST', headers: { 'content-type': 'application/json' }, body,
-    }, 'Джерело збережено');
+    }, t('catalogueSource.sourceSaved'));
     if (result) {
       setCurrent(result);
-      const queued = await mutate(`/api/catalogue/sources/${result.id}/sync`, { method: 'POST' }, 'Таблицю підключено. Розпізнаємо й завантажуємо товари.');
+      const queued = await mutate(`/api/catalogue/sources/${result.id}/sync`, { method: 'POST' }, t('catalogueSource.sourceConnected'));
       if (queued) setTracking({ id: result.id, previousRun: result.latestRun?.id, updatedAt: result.updatedAt, started: Date.now() });
     }
   }
@@ -135,15 +138,15 @@ export function CatalogueSourceSettings({
   async function selectSpreadsheet(selection: GooglePickerSelection) {
     setPending(true); setMessage(null); setError(null); setTabs([]);
     try {
-      const response = await activity.run('Перевіряємо таблицю товарів', () => fetch(`/api/integrations/google/files/${encodeURIComponent(selection.fileId)}/tabs`, { cache: 'no-store' }));
+      const response = await activity.run(t('catalogueSource.checkingSheet'), () => fetch(`/api/integrations/google/files/${encodeURIComponent(selection.fileId)}/tabs`, { cache: 'no-store' }));
       const body = await response.json() as { spreadsheetId?: string; tabs?: Array<{ sheetId: number; title: string }>; message?: string };
-      if (!response.ok || body.spreadsheetId !== selection.fileId || !body.tabs?.length) throw new Error(body.message ?? 'Не вдалося перевірити таблицю');
+      if (!response.ok || body.spreadsheetId !== selection.fileId || !body.tabs?.length) throw new Error(body.message ?? t('catalogueSource.sheetCheckFailed'));
       setSpreadsheet(body.spreadsheetId);
       setTabs(body.tabs);
       setSheetName(body.tabs[0]!.title);
       setDisplayName(selection.name);
-      setMessage(body.tabs.length === 1 ? 'Таблицю розпізнано. Натисніть «Завантажити товари».' : 'Оберіть вкладку з товарами.');
-    } catch (reason) { const text = reason instanceof Error ? reason.message : 'Не вдалося перевірити таблицю'; setError(text); toast.show({ type: 'error', title: 'Не вдалося перевірити таблицю', message: text }); }
+      setMessage(body.tabs.length === 1 ? t('catalogueSource.sheetRecognized') : t('catalogueSource.chooseProductTab'));
+    } catch (reason) { const text = reason instanceof Error ? reason.message : t('catalogueSource.sheetCheckFailed'); setError(text); toast.show({ type: 'error', title: t('catalogueSource.sheetCheckFailed'), message: text }); }
     finally { setPending(false); }
   }
 
@@ -153,58 +156,60 @@ export function CatalogueSourceSettings({
     try {
       const form = new FormData();
       form.set('file', file);
-      const response = await activity.run('Завантажуємо каталог', () => mutatingFetch('/api/catalogue/imports/upload', { method: 'POST', body: form }));
+      const response = await activity.run(t('catalogueSource.uploadingCatalogue'), () => mutatingFetch('/api/catalogue/imports/upload', { method: 'POST', body: form }));
       const body = await response.json() as { status?: string; message?: string };
-      if (!response.ok) throw new Error(body.message ?? 'Не вдалося завантажити файл');
-      const success = body.status === 'COMPLETED' ? 'Готово — товари завантажено.' : 'Файл прийнято. AutoSale розпізнає колонки й завантажить товари.'; setMessage(success); toast.show({ type: 'success', title: 'Каталог прийнято в обробку', message: success });
-    } catch (reason) { const text = reason instanceof Error ? reason.message : 'Не вдалося завантажити файл'; setError(text); toast.show({ type: 'error', title: 'Не вдалося завантажити файл', message: text }); }
+      if (!response.ok) throw new Error(body.message ?? t('catalogueSource.fileUploadFailed'));
+      const success = body.status === 'COMPLETED' ? t('catalogueSource.uploadComplete') : t('catalogueSource.fileAccepted'); setMessage(success); toast.show({ type: 'success', title: t('catalogueSource.catalogueQueued'), message: success });
+    } catch (reason) { const text = reason instanceof Error ? reason.message : t('catalogueSource.fileUploadFailed'); setError(text); toast.show({ type: 'error', title: t('catalogueSource.fileUploadFailed'), message: text }); }
     finally { setPending(false); if (fileInput.current) fileInput.current.value = ''; }
   }
 
   async function remove() {
     if (!current) return;
-    const result = await mutate(`/api/catalogue/sources/${current.id}`, { method: 'DELETE' }, 'Джерело видалено');
+    const result = await mutate(`/api/catalogue/sources/${current.id}`, { method: 'DELETE' }, t('catalogueSource.sourceRemoved'));
     if (result) select(null);
   }
 
-  return <section className={`catalogue-source-settings data-task-card ${embedded ? 'is-embedded' : ''}`} {...(embedded ? { 'aria-label': 'Товари' } : { 'aria-labelledby': 'catalogue-source-title' })}>
-    {!embedded && <div className="catalogue-source-heading"><div><h2 id="catalogue-source-title">Товари</h2><p>Оберіть таблицю або файл — AutoSale сам розпізнає колонки та підготує каталог.</p></div>{current && <span className={`catalogue-status ${current.status === 'ACTIVE' ? 'is-active' : ''}`}>{statusLabel(current.status)}</span>}</div>}
-    {!googleConnected && <p className="settings-step-notice">Під час вибору таблиці Google один раз попросить доступ до неї.</p>}
-    <div className="data-source-actions"><GooglePickerButton label="Обрати Google-таблицю" connected={googleConnected} intent="catalogue" autoOpen={autoOpenPicker} disabled={pending} onSelected={(selection) => void selectSpreadsheet(selection)} /><span>або</span><button className="secondary-button" disabled={pending} type="button" onClick={() => fileInput.current?.click()}>Завантажити CSV або Excel</button><input ref={fileInput} className="sr-only" type="file" accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onChange={(event) => void uploadFile(event.target.files?.[0])} /></div>
-    {spreadsheet && <div className="data-selection-summary"><span>Джерело товарів</span><strong>{displayName}</strong></div>}
-    {tabs.length > 1 && <label className="data-tab-choice"><span>Вкладка з товарами</span><select aria-label="Вкладка Google таблиці" value={sheetName} onChange={(event) => setSheetName(event.target.value)}>{tabs.map((tab) => <option key={tab.sheetId} value={tab.title}>{tab.title}</option>)}</select></label>}
-    {spreadsheet && <div className="data-import-status-slot">{tracking ? <div className="data-import-result is-working" role="status" aria-busy="true"><strong>{sourceAnalysisStage(current?.latestRun?.status)}</strong><span>Результат з’явиться тут автоматично.</span></div> : current?.spreadsheetId === spreadsheet && current?.sheetName === sheetName && current.lastErrorSummary ? <SourceErrorState code={current.lastErrorSummary} /> : current?.spreadsheetId === spreadsheet && current?.sheetName === sheetName && current.latestRun ? <ImportRunState run={current.latestRun} /> : null}</div>}
+  return <section className={`catalogue-source-settings data-task-card ${embedded ? 'is-embedded' : ''}`} {...(embedded ? { 'aria-label': t('catalogueSource.title') } : { 'aria-labelledby': 'catalogue-source-title' })}>
+    {!embedded && <div className="catalogue-source-heading"><div><h2 id="catalogue-source-title">{t('catalogueSource.title')}</h2><p>{t('catalogueSource.description')}</p></div>{current && <span className={`catalogue-status ${current.status === 'ACTIVE' ? 'is-active' : ''}`}>{statusLabel(t, current.status)}</span>}</div>}
+    {!googleConnected && <p className="settings-step-notice">{t('catalogueSource.googleAccess')}</p>}
+    <div className="data-source-actions"><GooglePickerButton label={t('catalogueSource.chooseGoogle')} connected={googleConnected} intent="catalogue" autoOpen={autoOpenPicker} disabled={pending} onSelected={(selection) => void selectSpreadsheet(selection)} /><span>{t('catalogueSource.or')}</span><button className="secondary-button" disabled={pending} type="button" onClick={() => fileInput.current?.click()}>{t('catalogueSource.uploadFile')}</button><input ref={fileInput} className="sr-only" type="file" accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onChange={(event) => void uploadFile(event.target.files?.[0])} /></div>
+    {spreadsheet && <div className="data-selection-summary"><span>{t('catalogueSource.productSource')}</span><strong>{displayName}</strong></div>}
+    {tabs.length > 1 && <label className="data-tab-choice"><span>{t('catalogueSource.productTab')}</span><select aria-label={t('catalogueSource.googleTab')} value={sheetName} onChange={(event) => setSheetName(event.target.value)}>{tabs.map((tab) => <option key={tab.sheetId} value={tab.title}>{tab.title}</option>)}</select></label>}
+    {spreadsheet && <div className="data-import-status-slot">{tracking ? <div className="data-import-result is-working" role="status" aria-busy="true"><strong>{sourceAnalysisStage(t, current?.latestRun?.status)}</strong><span>{t('catalogueSource.resultAutomatic')}</span></div> : current?.spreadsheetId === spreadsheet && current?.sheetName === sheetName && current.lastErrorSummary ? <SourceErrorState code={current.lastErrorSummary} /> : current?.spreadsheetId === spreadsheet && current?.sheetName === sheetName && current.latestRun ? <ImportRunState run={current.latestRun} /> : null}</div>}
     <div className="catalogue-source-actions">
-      {spreadsheet && <LoadingButton pending={pending} pendingLabel="Завантажуємо…" disabled={!displayName.trim() || !sheetName.trim()} onClick={() => void save()} type="button">Завантажити товари</LoadingButton>}
-      {current && <LoadingButton className="text-button" pending={pending} pendingLabel="Замінюємо…" onClick={() => void remove()} type="button">Замінити джерело</LoadingButton>}
+      {spreadsheet && <LoadingButton pending={pending} pendingLabel={t('catalogueSource.loading')} disabled={!displayName.trim() || !sheetName.trim()} onClick={() => void save()} type="button">{t('catalogueSource.uploadProducts')}</LoadingButton>}
+      {current && <LoadingButton className="text-button" pending={pending} pendingLabel={t('catalogueSource.replacing')} onClick={() => void remove()} type="button">{t('catalogueSource.replaceSource')}</LoadingButton>}
     </div>
     {message && <p className="save-success">{message}</p>}{error && <p className="save-error" role="alert">{error}</p>}
   </section>;
 }
 
 function SourceErrorState({ code }: { code: string }) {
-  if (code === 'TABLE_HEADER_INVALID') return <div className="data-import-result is-error" role="alert"><strong>Аркуш порожній або не має заголовків</strong><span>Оберіть аркуш із таблицею товарів, де перший змістовний рядок містить назви колонок.</span></div>;
-  if (code === 'TABLE_CELL_LIMIT') return <div className="data-import-result is-error" role="alert"><strong>Завеликий текст у комірці</strong><span>Опис або інша комірка перевищує допустимий розмір. Скоротіть довгий текст і повторіть імпорт.</span></div>;
-  if (code === 'TABLE_COLUMN_LIMIT') return <div className="data-import-result is-error" role="alert"><strong>Забагато колонок у таблиці</strong><span>Підтримуємо до 500 колонок. Повторіть завантаження; якщо помилка залишиться, оберіть вужчу таблицю.</span></div>;
-  return <div className="data-import-result is-error" role="alert"><strong>Не вдалося завантажити товари</strong><span>Перевірте доступ і структуру таблиці або оберіть інше джерело.</span></div>;
+  const { t } = useI18n();
+  if (code === 'TABLE_HEADER_INVALID') return <div className="data-import-result is-error" role="alert"><strong>{t('catalogueSource.emptySheetTitle')}</strong><span>{t('catalogueSource.emptySheetHint')}</span></div>;
+  if (code === 'TABLE_CELL_LIMIT') return <div className="data-import-result is-error" role="alert"><strong>{t('catalogueSource.cellLimitTitle')}</strong><span>{t('catalogueSource.cellLimitHint')}</span></div>;
+  if (code === 'TABLE_COLUMN_LIMIT') return <div className="data-import-result is-error" role="alert"><strong>{t('catalogueSource.columnLimitTitle')}</strong><span>{t('catalogueSource.columnLimitHint')}</span></div>;
+  return <div className="data-import-result is-error" role="alert"><strong>{t('catalogueSource.genericSourceError')}</strong><span>{t('catalogueSource.genericSourceErrorHint')}</span></div>;
 }
 
 function ImportRunState({ run }: { run: NonNullable<CatalogueSourceConfiguration['latestRun']> }) {
-  if (run.status === 'COMPLETED') return <div className="data-import-result is-ready"><strong>Готово</strong><span>Додано: {run.createdRows} · оновлено: {run.updatedRows} · пропущено: {run.skippedRows}</span></div>;
-  if (run.status === 'MAPPING_REVIEW' || run.status === 'PREVIEW_READY') return <div className="data-import-result is-review"><strong>Потрібна перевірка</strong><span>AutoSale не впевнений у відповідності колонок.</span><a href={`/catalogue?review=${encodeURIComponent(run.id)}`}>Перевірити сумнівні поля</a></div>;
-  if (run.status === 'FAILED') return <div className="data-import-result is-error"><strong>Не вдалося завантажити</strong><span>Перевірте файл або спробуйте ще раз.</span></div>;
-  return <div className="data-import-result is-working" aria-live="polite"><strong>Розпізнаємо товари</strong><span>Обрано → аналізуємо → завантажуємо</span></div>;
+  const { t, formatNumber } = useI18n();
+  if (run.status === 'COMPLETED') return <div className="data-import-result is-ready"><strong>{t('catalogueSource.ready')}</strong><span>{t('catalogueSource.runSummary', { created: formatNumber(run.createdRows), updated: formatNumber(run.updatedRows), skipped: formatNumber(run.skippedRows) })}</span></div>;
+  if (run.status === 'MAPPING_REVIEW' || run.status === 'PREVIEW_READY') return <div className="data-import-result is-review"><strong>{t('catalogueSource.review')}</strong><span>{t('catalogueSource.uncertainColumns')}</span><a href={`/catalogue?review=${encodeURIComponent(run.id)}`}>{t('catalogueSource.reviewFields')}</a></div>;
+  if (run.status === 'FAILED') return <div className="data-import-result is-error"><strong>{t('catalogueSource.runFailed')}</strong><span>{t('catalogueSource.runFailedHint')}</span></div>;
+  return <div className="data-import-result is-working" aria-live="polite"><strong>{t('catalogueSource.recognizing')}</strong><span>{t('catalogueSource.recognizingSteps')}</span></div>;
 }
 
 function HealthList({ sources }: { sources: CatalogueSourceHealth[] }) {
-  return <section className="catalogue-source-settings" aria-labelledby="catalogue-source-health-title"><h2 id="catalogue-source-health-title">Стан джерела каталогу</h2>{sources.length === 0 ? <p>Джерело не налаштовано.</p> : sources.map((source) => <div className="catalogue-source-health" key={source.id}><div><strong>{source.displayName}</strong><small>Остання синхронізація: {source.lastSyncedAt ? formatDate(source.lastSyncedAt) : 'ще не була'}</small></div><span className={`catalogue-status ${source.status === 'ACTIVE' ? 'is-active' : ''}`}>{statusLabel(source.status)}</span></div>)}</section>;
+  const { t, formatDate } = useI18n();
+  return <section className="catalogue-source-settings" aria-labelledby="catalogue-source-health-title"><h2 id="catalogue-source-health-title">{t('catalogueSource.healthTitle')}</h2>{sources.length === 0 ? <p>{t('catalogueSource.notConfigured')}</p> : sources.map((source) => <div className="catalogue-source-health" key={source.id}><div><strong>{source.displayName}</strong><small>{t('catalogueSource.lastSync', { date: source.lastSyncedAt ? formatDate(source.lastSyncedAt, { year: 'numeric', month: '2-digit', day: '2-digit' }) : t('catalogueSource.neverSynced') })}</small></div><span className={`catalogue-status ${source.status === 'ACTIVE' ? 'is-active' : ''}`}>{statusLabel(t, source.status)}</span></div>)}</section>;
 }
 
-function formatDate(value: string) { return new Intl.DateTimeFormat('uk-UA', { year: 'numeric', month: '2-digit', day: '2-digit', timeZone: 'Europe/Kyiv' }).format(new Date(value)); }
-function statusLabel(status: string) { return ({ ACTIVE: 'Активне', PENDING: 'Очікує', PAUSED: 'Призупинено', ERROR: 'Помилка', DISCONNECTED: 'Немає доступу' } as Record<string, string>)[status] ?? status; }
-function sourceAnalysisStage(status?: string) {
-  if (status === 'MAPPING') return 'Розпізнаємо структуру таблиці';
-  if (status === 'PREVIEW_READY') return 'Перевіряємо товарні рядки';
-  if (status === 'PROCESSING') return 'Завантажуємо товари';
-  return 'Читаємо таблицю';
+function statusLabel(t: Translator, status: string) { return ({ ACTIVE: t('catalogueSource.statusActive'), PENDING: t('catalogueSource.statusPending'), PAUSED: t('catalogueSource.statusPaused'), ERROR: t('catalogueSource.statusError'), DISCONNECTED: t('catalogueSource.statusDisconnected') } as Record<string, string>)[status] ?? status; }
+function sourceAnalysisStage(t: Translator, status?: string) {
+  if (status === 'MAPPING') return t('catalogueSource.analysisMapping');
+  if (status === 'PREVIEW_READY') return t('catalogueSource.analysisRows');
+  if (status === 'PROCESSING') return t('catalogueSource.analysisImporting');
+  return t('catalogueSource.analysisReading');
 }

@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const { mutatingFetch } = vi.hoisted(() => ({ mutatingFetch: vi.fn() }));
 vi.mock('../auth/csrf-fetch', () => ({ mutatingFetch }));
+vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
 vi.mock('./google-picker-button', () => ({
   GooglePickerButton: ({ label = 'Обрати Google-таблицю', onSelected }: { label?: string; onSelected: (selection: { fileId: string; name: string }) => void }) =>
     <button type="button" onClick={() => onSelected({ fileId: 'sheet-new', name: 'Мої товари' })}>{label}</button>,
@@ -11,8 +12,9 @@ vi.mock('./google-picker-button', () => ({
 import { CatalogueSourceSettings } from './catalogue-source-settings';
 import { ActivityProvider } from './activity-provider';
 import { ToastProvider } from './toast-provider';
+import { I18nProvider } from '../i18n/i18n-provider';
 
-function render(ui: React.ReactElement) { return rtlRender(<ToastProvider><ActivityProvider>{ui}</ActivityProvider></ToastProvider>); }
+function render(ui: React.ReactElement, locale: 'uk' | 'en' = 'uk') { return rtlRender(<I18nProvider locale={locale} authenticated={false}><ToastProvider><ActivityProvider>{ui}</ActivityProvider></ToastProvider></I18nProvider>); }
 
 const source = {
   id: '44444444-4444-4444-8444-444444444444', type: 'GOOGLE_SHEETS', displayName: 'Каталог', status: 'ACTIVE',
@@ -26,6 +28,15 @@ const configuration = {
 afterEach(() => { cleanup(); mutatingFetch.mockReset(); vi.unstubAllGlobals(); });
 
 describe('CatalogueSourceSettings', () => {
+  it('renders English controls without translating the configured source name', () => {
+    render(<CatalogueSourceSettings role="OWNER" sources={[source]} configurations={[configuration]} />, 'en');
+
+    expect(screen.getByRole('heading', { name: 'Products' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Choose Google spreadsheet' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Upload products' })).toBeInTheDocument();
+    expect(screen.getByText('Каталог')).toBeInTheDocument();
+  });
+
   it('presents Google Sheets and local file as the two product source actions', () => {
     render(<CatalogueSourceSettings role="OWNER" sources={[]} configurations={[]} />);
     expect(screen.getByRole('heading', { name: 'Товари' })).toBeInTheDocument();
