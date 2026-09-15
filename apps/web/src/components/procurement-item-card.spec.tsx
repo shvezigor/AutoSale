@@ -5,6 +5,9 @@ import type { ManagerOrder } from '../../../../packages/contracts/src/orders';
 import { ActivityProvider } from './activity-provider';
 import { ProcurementItemCard } from './procurement-item-card';
 import { ToastProvider } from './toast-provider';
+import { I18nProvider } from '../i18n/i18n-provider';
+
+vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
 
 const item: ManagerOrder['items'][number] = {
   id: '22222222-2222-4222-8222-222222222222',
@@ -82,5 +85,18 @@ describe('ProcurementItemCard', () => {
     renderCard({ procurementStatus: 'SENDING' });
     expect(screen.getByText('Відправляється постачальнику')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Є на складі' })).not.toBeInTheDocument();
+  });
+
+  it('translates procurement guidance while preserving inventory values', () => {
+    render(<I18nProvider locale="en" authenticated><ToastProvider><ActivityProvider><ProcurementItemCard
+      item={item}
+      orderId="11111111-1111-4111-8111-111111111111"
+      onOrderChange={vi.fn()}
+    /></ActivityProvider></ToastProvider></I18nProvider>);
+
+    expect(screen.getByRole('region', { name: 'Product fulfilment' })).toBeInTheDocument();
+    expect(screen.getByText('In stock')).toBeInTheDocument();
+    expect(screen.getByText('6 of 8 units available · 1 reserved')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Order from supplier' })).toBeInTheDocument();
   });
 });

@@ -7,6 +7,7 @@ import { mutatingFetch } from '../auth/csrf-fetch';
 import { useActivity } from './activity-provider';
 import { LoadingButton } from './loading-button';
 import { useToast } from './toast-provider';
+import { useI18n } from '../i18n/i18n-provider';
 
 type DeliveryResult = { deliveryId: string; status: string };
 
@@ -27,6 +28,7 @@ export function SupplierDispatchDialog({
   const [error, setError] = useState<string | null>(null);
   const activity = useActivity();
   const toast = useToast();
+  const { t, formatNumber } = useI18n();
 
   useEffect(() => {
     if (!open) return;
@@ -39,11 +41,11 @@ export function SupplierDispatchDialog({
         if (active) setPreview(value);
       })
       .catch(() => {
-        if (active) setError('Не вдалося підготувати замовлення. Перевірте чат постачальника в налаштуваннях.');
+        if (active) setError(t('orders.supplierPreviewFailed'));
       })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
-  }, [open, orderId]);
+  }, [open, orderId, t]);
 
   useEffect(() => {
     if (!open) return;
@@ -58,18 +60,18 @@ export function SupplierDispatchDialog({
     if (!preview || sending) return;
     setSending(true); setError(null);
     try {
-      const response = await activity.run('Надсилаємо замовлення постачальнику', () => mutatingFetch(
+      const response = await activity.run(t('orders.sendingOrder'), () => mutatingFetch(
         `/api/integrations/telegram/supplier/orders/${orderId}`,
         { method: 'POST' },
       ));
       if (!response.ok) throw new Error('dispatch failed');
       const result = await response.json() as DeliveryResult;
       onDispatched(result);
-      toast.show({ type: 'success', title: 'Замовлення передається постачальнику' });
+      toast.show({ type: 'success', title: t('orders.supplierQueued') });
       onClose();
     } catch {
-      setError('Не вдалося надіслати замовлення. Спробуйте ще раз.');
-      toast.show({ type: 'error', title: 'Замовлення не надіслано' });
+      setError(t('orders.supplierSendFailed'));
+      toast.show({ type: 'error', title: t('orders.supplierNotSent') });
     } finally {
       setSending(false);
     }
@@ -80,27 +82,27 @@ export function SupplierDispatchDialog({
   }}>
     <section aria-labelledby="supplier-dispatch-title" aria-modal="true" className="supplier-dispatch-dialog" role="dialog">
       <header>
-        <div><span>Перевірка перед відправленням</span><h2 id="supplier-dispatch-title">Надіслати замовлення постачальнику</h2></div>
-        <button aria-label="Закрити" className="icon-button" disabled={sending} onClick={onClose} type="button">×</button>
+        <div><span>{t('orders.supplierPreflight')}</span><h2 id="supplier-dispatch-title">{t('orders.supplierDialogTitle')}</h2></div>
+        <button aria-label={t('orders.close')} className="icon-button" disabled={sending} onClick={onClose} type="button">×</button>
       </header>
-      {loading && <div className="dialog-loading" role="status"><span className="button-spinner" aria-hidden="true" /> Готуємо замовлення…</div>}
+      {loading && <div className="dialog-loading" role="status"><span className="button-spinner" aria-hidden="true" /> {t('orders.preparingSupplierOrder')}</div>}
       {error && <p className="dialog-error" role="alert">{error}</p>}
       {preview && <>
         <dl className="supplier-dispatch-meta">
-          <div><dt>Від компанії</dt><dd>{preview.companyName}</dd></div>
-          <div><dt>Кому</dt><dd>{preview.supplierName}</dd></div>
+          <div><dt>{t('orders.fromCompany')}</dt><dd>{preview.companyName}</dd></div>
+          <div><dt>{t('orders.toSupplier')}</dt><dd>{preview.supplierName}</dd></div>
         </dl>
         <div className="supplier-dispatch-items">
-          <strong>Товари до замовлення · {preview.items.length}</strong>
+          <strong>{t('orders.supplierItems', { count: formatNumber(preview.items.length) })}</strong>
           <ul>{preview.items.map((item) => <li key={item.orderItemId}>
             <div><strong>{item.productName}</strong><span>{[item.sku, item.size, item.color].filter(Boolean).join(' · ')}</span></div>
-            <b>{item.quantity} шт.</b>
+            <b>{t('orders.unitsShort', { count: formatNumber(item.quantity) })}</b>
           </li>)}</ul>
         </div>
       </>}
       <footer>
-        <button className="secondary-button" disabled={sending} onClick={onClose} type="button">Скасувати</button>
-        <LoadingButton disabled={!preview || loading || sending} onClick={() => void confirm()} pending={sending} pendingLabel="Надсилаємо…" type="button">Надіслати</LoadingButton>
+        <button className="secondary-button" disabled={sending} onClick={onClose} type="button">{t('orders.cancel')}</button>
+        <LoadingButton disabled={!preview || loading || sending} onClick={() => void confirm()} pending={sending} pendingLabel={t('orders.sendingButton')} type="button">{t('orders.send')}</LoadingButton>
       </footer>
     </section>
   </div>;

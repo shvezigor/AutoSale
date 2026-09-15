@@ -8,29 +8,11 @@ import { mutatingFetch } from '../auth/csrf-fetch';
 import { useActivity } from './activity-provider';
 import { LoadingButton } from './loading-button';
 import { useToast } from './toast-provider';
+import { useI18n } from '../i18n/i18n-provider';
+import type { Translator } from '../i18n/translator';
 
 type Item = ManagerOrder['items'][number];
 type ManualStatus = 'IN_STOCK' | 'TO_ORDER' | 'SUPPLIER_CONFIRMED' | 'RECEIVED' | 'UNAVAILABLE';
-
-const statusLabels: Record<ProcurementStatus, string> = {
-  UNASSESSED: 'Ще не перевірено',
-  IN_STOCK: 'Є на складі',
-  TO_ORDER: 'Потрібно замовити',
-  SENDING: 'Відправляється постачальнику',
-  ORDERED: 'Замовлено у постачальника',
-  SUPPLIER_CONFIRMED: 'Постачальник підтвердив',
-  RECEIVED: 'Отримано від постачальника',
-  UNAVAILABLE: 'Недоступно',
-};
-
-const actions: Partial<Record<ProcurementStatus, Array<{ label: string; status: ManualStatus }>>> = {
-  UNASSESSED: [{ label: 'Є на складі', status: 'IN_STOCK' }, { label: 'Замовити у постачальника', status: 'TO_ORDER' }],
-  IN_STOCK: [{ label: 'Замовити у постачальника', status: 'TO_ORDER' }],
-  TO_ORDER: [{ label: 'Позначити на складі', status: 'IN_STOCK' }],
-  ORDERED: [{ label: 'Постачальник підтвердив', status: 'SUPPLIER_CONFIRMED' }, { label: 'Товар отримано', status: 'RECEIVED' }],
-  SUPPLIER_CONFIRMED: [{ label: 'Товар отримано', status: 'RECEIVED' }],
-  UNAVAILABLE: [{ label: 'Позначити на складі', status: 'IN_STOCK' }, { label: 'Замовити у постачальника', status: 'TO_ORDER' }],
-};
 
 export function ProcurementItemCard({
   item,
@@ -46,13 +28,22 @@ export function ProcurementItemCard({
   const [pendingStatus, setPendingStatus] = useState<ManualStatus | null>(null);
   const activity = useActivity();
   const toast = useToast();
+  const { t, formatNumber } = useI18n();
+  const actions: Partial<Record<ProcurementStatus, Array<{ label: string; status: ManualStatus }>>> = {
+    UNASSESSED: [{ label: t('orders.inStock'), status: 'IN_STOCK' }, { label: t('orders.orderSupplier'), status: 'TO_ORDER' }],
+    IN_STOCK: [{ label: t('orders.orderSupplier'), status: 'TO_ORDER' }],
+    TO_ORDER: [{ label: t('orders.markInStock'), status: 'IN_STOCK' }],
+    ORDERED: [{ label: t('orders.supplierConfirmed'), status: 'SUPPLIER_CONFIRMED' }, { label: t('orders.productReceived'), status: 'RECEIVED' }],
+    SUPPLIER_CONFIRMED: [{ label: t('orders.productReceived'), status: 'RECEIVED' }],
+    UNAVAILABLE: [{ label: t('orders.markInStock'), status: 'IN_STOCK' }, { label: t('orders.orderSupplier'), status: 'TO_ORDER' }],
+  };
   const itemActions = actions[item.procurementStatus] ?? [];
   const disabled = locked || item.procurementStatus === 'SENDING' || pendingStatus !== null;
 
   async function changeStatus(status: ManualStatus) {
     setPendingStatus(status);
     try {
-      const response = await activity.run('Оновлюємо комплектацію', () => mutatingFetch(
+      const response = await activity.run(t('orders.updatingProcurement'), () => mutatingFetch(
         `/api/orders/${orderId}/items/${item.id}/procurement`,
         {
           method: 'PUT',
@@ -62,20 +53,20 @@ export function ProcurementItemCard({
       ));
       if (!response.ok) throw new Error('procurement update failed');
       onOrderChange(await response.json() as ManagerOrder);
-      toast.show({ type: 'success', title: 'Статус товару оновлено' });
+      toast.show({ type: 'success', title: t('orders.procurementUpdated') });
     } catch {
-      toast.show({ type: 'error', title: 'Не вдалося оновити комплектацію', message: 'Спробуйте ще раз.' });
+      toast.show({ type: 'error', title: t('orders.procurementUpdateFailed'), message: t('catalogue.tryAgain') });
     } finally {
       setPendingStatus(null);
     }
   }
 
-  return <section className="procurement-item-card" aria-label="Комплектація товару">
+  return <section className="procurement-item-card" aria-label={t('orders.procurementRegion')}>
     <div className="procurement-item-state">
-      <strong>Комплектація</strong>
-      <span className={`procurement-badge procurement-${item.procurementStatus.toLowerCase()}`}>{statusLabels[item.procurementStatus]}</span>
+      <strong>{t('orders.procurementTitle')}</strong>
+      <span className={`procurement-badge procurement-${item.procurementStatus.toLowerCase()}`}>{procurementStatusLabel(item.procurementStatus, t)}</span>
     </div>
-    <p>{reasonText(item)}</p>
+    <p>{reasonText(item, t, formatNumber)}</p>
     {itemActions.length > 0 && !locked && <div className="procurement-item-actions">
       {itemActions.map((action) => <LoadingButton
         className="secondary procurement-action"
@@ -83,25 +74,29 @@ export function ProcurementItemCard({
         key={action.status}
         onClick={() => void changeStatus(action.status)}
         pending={pendingStatus === action.status}
-        pendingLabel="Змінюємо…"
+        pendingLabel={t('orders.changing')}
         type="button"
       >{action.label}</LoadingButton>)}
     </div>}
   </section>;
 }
 
-function reasonText(item: Item): string {
+function reasonText(item: Item, t: Translator, formatNumber: (value: number) => string): string {
   if (item.procurementReason === 'STOCK_AVAILABLE' && item.stockAtDecision !== null) {
-    return `Доступно ${item.availableAtDecision ?? item.stockAtDecision} із ${item.stockAtDecision} од. · зарезервовано ${item.reservation?.quantity ?? item.quantity}`;
+    return t('orders.stockAvailable', { available: formatNumber(item.availableAtDecision ?? item.stockAtDecision), stock: formatNumber(item.stockAtDecision), reserved: formatNumber(item.reservation?.quantity ?? item.quantity) });
   }
   const descriptions: Partial<Record<NonNullable<Item['procurementReason']>, string>> = {
-    STOCK_INSUFFICIENT: 'Залишку недостатньо для цього замовлення',
-    STOCK_UNKNOWN: 'Залишок товару не вказано',
-    PRODUCT_UNMATCHED: 'Товар не зіставлено з каталогом',
-    RESERVATION_CONFLICT: 'Товар одночасно зарезервували в іншому замовленні',
-    MANUAL_IN_STOCK: 'Менеджер підтвердив наявність',
-    MANUAL_TO_ORDER: 'Менеджер вирішив замовити у постачальника',
-    DELIVERY_FAILED: 'Не вдалося передати постачальнику — можна повторити',
+    STOCK_INSUFFICIENT: t('orders.stockInsufficient'),
+    STOCK_UNKNOWN: t('orders.stockUnknown'),
+    PRODUCT_UNMATCHED: t('orders.productUnmatched'),
+    RESERVATION_CONFLICT: t('orders.reservationConflict'),
+    MANUAL_IN_STOCK: t('orders.manualInStock'),
+    MANUAL_TO_ORDER: t('orders.manualToOrder'),
+    DELIVERY_FAILED: t('orders.supplierDeliveryFailed'),
   };
-  return descriptions[item.procurementReason ?? 'STOCK_UNKNOWN'] ?? 'Статус комплектації визначено';
+  return descriptions[item.procurementReason ?? 'STOCK_UNKNOWN'] ?? t('orders.procurementDetermined');
+}
+
+function procurementStatusLabel(status: ProcurementStatus, t: Translator): string {
+  return ({ UNASSESSED: t('orders.procurementUnassessed'), IN_STOCK: t('orders.inStock'), TO_ORDER: t('orders.toOrder'), SENDING: t('orders.sendingSupplier'), ORDERED: t('orders.orderedSupplier'), SUPPLIER_CONFIRMED: t('orders.supplierConfirmed'), RECEIVED: t('orders.receivedSupplier'), UNAVAILABLE: t('orders.unavailable') } satisfies Record<ProcurementStatus, string>)[status];
 }

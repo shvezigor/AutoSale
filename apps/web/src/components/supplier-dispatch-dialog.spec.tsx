@@ -4,6 +4,9 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ActivityProvider } from './activity-provider';
 import { SupplierDispatchDialog } from './supplier-dispatch-dialog';
 import { ToastProvider } from './toast-provider';
+import { I18nProvider } from '../i18n/i18n-provider';
+
+vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
 
 const preview = {
   orderId: '11111111-1111-4111-8111-111111111111',
@@ -64,5 +67,22 @@ describe('SupplierDispatchDialog', () => {
       `/api/integrations/telegram/supplier/orders/${preview.orderId}`,
       expect.objectContaining({ method: 'POST' }),
     );
+  });
+
+  it('translates dialog controls while preserving company, supplier, and product data', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValueOnce({ ok: true, json: async () => preview }));
+
+    render(<I18nProvider locale="en" authenticated><ToastProvider><ActivityProvider><SupplierDispatchDialog
+      onClose={vi.fn()}
+      onDispatched={vi.fn()}
+      open
+      orderId={preview.orderId}
+    /></ActivityProvider></ToastProvider></I18nProvider>);
+
+    expect(await screen.findByRole('dialog', { name: 'Send order to supplier' })).toBeInTheDocument();
+    expect(screen.getByText('Магазин Двері')).toBeInTheDocument();
+    expect(screen.getByText('Основний постачальник')).toBeInTheDocument();
+    expect(screen.getByText('Двері Авангард')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Send' })).toBeInTheDocument();
   });
 });
