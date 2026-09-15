@@ -45,6 +45,8 @@ const listSchema = z.object({
   search: z.string().trim().min(1).max(200).optional(),
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(25),
+  sort: z.enum(['sku', 'name', 'price', 'stock', 'status']).default('name'),
+  direction: z.enum(['asc', 'desc']).default('asc'),
 }).strict();
 
 @ApiTags('catalogue')

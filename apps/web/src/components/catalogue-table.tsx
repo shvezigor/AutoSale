@@ -13,9 +13,11 @@ import { useI18n } from '../i18n/i18n-provider';
 import { localizeApiError } from '../i18n/error-message';
 
 type CatalogueSession = { membershipRole: 'OWNER' | 'MANAGER' | null };
-type CatalogueTableProps = { session: CatalogueSession; products: EditableProduct[]; page: number; pageSize: number; total: number; search?: string };
+type CatalogueSort = 'sku' | 'name' | 'price' | 'stock' | 'status';
+type SortDirection = 'asc' | 'desc';
+type CatalogueTableProps = { session: CatalogueSession; products: EditableProduct[]; page: number; pageSize: number; total: number; search?: string; sort?: CatalogueSort; direction?: SortDirection };
 
-export function CatalogueTable({ session, products, page, pageSize, total, search = '' }: CatalogueTableProps) {
+export function CatalogueTable({ session, products, page, pageSize, total, search = '', sort = 'name', direction = 'asc' }: CatalogueTableProps) {
   const router = useRouter();
   const [query, setQuery] = useState(search);
   const [editing, setEditing] = useState<EditableProduct | 'new' | null>(null);
@@ -26,9 +28,11 @@ export function CatalogueTable({ session, products, page, pageSize, total, searc
   const { t, formatNumber } = useI18n();
   const isOwner = session.membershipRole === 'OWNER';
 
-  function changePage(nextPage: number) { router.replace(catalogueUrl(query, nextPage, pageSize)); }
-  function changePageSize(nextPageSize: number) { router.replace(catalogueUrl(query, 1, nextPageSize)); }
-  function submitSearch(event: FormEvent<HTMLFormElement>) { event.preventDefault(); router.replace(catalogueUrl(query, 1, pageSize)); }
+  function navigate(nextPage: number, nextPageSize = pageSize, nextSort = sort, nextDirection = direction) { router.replace(catalogueUrl(query, nextPage, nextPageSize, nextSort, nextDirection)); }
+  function changePage(nextPage: number) { navigate(nextPage); }
+  function changePageSize(nextPageSize: number) { navigate(1, nextPageSize); }
+  function submitSearch(event: FormEvent<HTMLFormElement>) { event.preventDefault(); navigate(1); }
+  function changeSort(nextSort: CatalogueSort) { navigate(1, pageSize, nextSort, nextSort === sort ? (direction === 'asc' ? 'desc' : 'asc') : naturalDirection(nextSort)); }
   async function clearCatalogue() {
     if (!await confirm({ title: t('catalogue.clearConfirmTitle'), description: t('catalogue.clearConfirmDescription'), confirmLabel: t('catalogue.clearConfirm'), tone: 'danger' })) return;
     setClearing(true);
@@ -52,8 +56,9 @@ export function CatalogueTable({ session, products, page, pageSize, total, searc
     </div>
     {editing === 'new' && isOwner && <ProductEditor onClose={() => setEditing(null)} />}
     {editing !== null && editing !== 'new' && isOwner && <ProductEditor onClose={() => setEditing(null)} product={editing} />}
+    <div className="mobile-sort-control"><label>{t('catalogue.sortBy')}<select value={sort} onChange={(event) => changeSort(event.target.value as CatalogueSort)}><option value="sku">{t('catalogue.sku')}</option><option value="name">{t('catalogue.name')}</option><option value="price">{t('catalogue.price')}</option><option value="stock">{t('catalogue.stock')}</option><option value="status">{t('catalogue.status')}</option></select></label><button aria-label={direction === 'asc' ? t('catalogue.ascending') : t('catalogue.descending')} className="secondary-button" onClick={() => changeSort(sort)} type="button">{direction === 'asc' ? '↑' : '↓'}</button></div>
     {products.length === 0 ? <p className="catalogue-empty" role="status">{search ? t('catalogue.noResults') : t('catalogue.empty')}</p> : <>
-      <div className="catalogue-table-wrap"><table className="catalogue-table"><caption className="sr-only">{t('catalogue.tableCaption')}</caption><thead><tr><th className="table-row-index" scope="col">{t('catalogue.number')}</th><th scope="col">{t('catalogue.sku')}</th><th scope="col">{t('catalogue.name')}</th><th scope="col">{t('catalogue.price')}</th><th scope="col">{t('catalogue.stock')}</th><th scope="col">{t('catalogue.status')}</th>{isOwner && <th scope="col"><span className="sr-only">{t('catalogue.actions')}</span></th>}</tr></thead><tbody>{products.map((product, index) => <CatalogueRow isOwner={isOwner} key={product.id ?? product.sku} onEdit={() => setEditing(product)} product={product} rowNumber={rowNumber(page, pageSize, index)} />)}</tbody></table></div>
+      <div className="catalogue-table-wrap"><table className="catalogue-table"><caption className="sr-only">{t('catalogue.tableCaption')}</caption><thead><tr><th className="table-row-index" scope="col">{t('catalogue.number')}</th><SortableHeader active={sort === 'sku'} direction={direction} label={t('catalogue.sku')} onClick={() => changeSort('sku')} /><SortableHeader active={sort === 'name'} direction={direction} label={t('catalogue.name')} onClick={() => changeSort('name')} /><SortableHeader active={sort === 'price'} direction={direction} label={t('catalogue.price')} onClick={() => changeSort('price')} /><SortableHeader active={sort === 'stock'} direction={direction} label={t('catalogue.stock')} onClick={() => changeSort('stock')} /><SortableHeader active={sort === 'status'} direction={direction} label={t('catalogue.status')} onClick={() => changeSort('status')} />{isOwner && <th scope="col"><span className="sr-only">{t('catalogue.actions')}</span></th>}</tr></thead><tbody>{products.map((product, index) => <CatalogueRow isOwner={isOwner} key={product.id ?? product.sku} onEdit={() => setEditing(product)} product={product} rowNumber={rowNumber(page, pageSize, index)} />)}</tbody></table></div>
       <div className="catalogue-cards">{products.map((product, index) => <CatalogueCard isOwner={isOwner} key={product.id ?? product.sku} onEdit={() => setEditing(product)} product={product} rowNumber={rowNumber(page, pageSize, index)} />)}</div>
     </>}
     {total > 0 && <TablePagination ariaLabel={t('catalogue.pages')} onPageChange={changePage} onPageSizeChange={changePageSize} page={page} pageSize={pageSize} total={total} />}
@@ -73,4 +78,6 @@ function CatalogueCard({ product, isOwner, onEdit, rowNumber }: { product: Edita
 function Status({ active }: { active: boolean }) { const { t } = useI18n(); return <span className={`catalogue-status${active ? ' is-active' : ''}`}>{active ? t('catalogue.active') : t('catalogue.inactive')}</span>; }
 function PriceLabel({ product }: { product: EditableProduct }) { const { formatNumber } = useI18n(); return product.price === null || product.price === undefined ? '—' : <>{formatNumber(product.price, { maximumFractionDigits: 2 })}{product.currency ? ` ${product.currency}` : ''}</>; }
 function rowNumber(page: number, pageSize: number, index: number) { return (Math.max(1, page) - 1) * pageSize + index + 1; }
-function catalogueUrl(query: string, page: number, pageSize: number) { const params = new URLSearchParams(); if (query.trim()) params.set('search', query.trim()); if (page > 1) params.set('page', String(page)); if (pageSize !== 25) params.set('pageSize', String(pageSize)); const serialized = params.toString(); return serialized ? `/catalogue?${serialized}` : '/catalogue'; }
+function SortableHeader({ active, direction, label, onClick }: { active: boolean; direction: SortDirection; label: string; onClick: () => void }) { return <th aria-sort={active ? (direction === 'asc' ? 'ascending' : 'descending') : 'none'} scope="col"><button className="table-sort-button" onClick={onClick} type="button">{label}<span aria-hidden="true">{active ? direction === 'asc' ? '↑' : '↓' : '↕'}</span></button></th>; }
+function naturalDirection(sort: CatalogueSort): SortDirection { return sort === 'price' || sort === 'stock' ? 'desc' : 'asc'; }
+function catalogueUrl(query: string, page: number, pageSize: number, sort: CatalogueSort, direction: SortDirection) { const params = new URLSearchParams(); if (query.trim()) params.set('search', query.trim()); if (sort !== 'name') params.set('sort', sort); if (direction !== 'asc') params.set('direction', direction); if (page > 1) params.set('page', String(page)); if (pageSize !== 25) params.set('pageSize', String(pageSize)); const serialized = params.toString(); return serialized ? `/catalogue?${serialized}` : '/catalogue'; }

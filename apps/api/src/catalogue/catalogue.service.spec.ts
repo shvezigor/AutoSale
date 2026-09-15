@@ -39,6 +39,15 @@ describe('CatalogueService', () => {
     }));
   });
 
+  it('sorts nullable stock server-side with a stable product id tie-breaker', async () => {
+    const findMany = vi.fn().mockResolvedValue([]);
+    const service = new CatalogueService({ product: { findMany, count: vi.fn().mockResolvedValue(0) } } as never);
+    await service.list('tenant-a', { page: 1, pageSize: 25, sort: 'stock', direction: 'desc' });
+    expect(findMany).toHaveBeenCalledWith(expect.objectContaining({
+      orderBy: [{ stockQuantity: { sort: 'desc', nulls: 'last' } }, { id: 'asc' }],
+    }));
+  });
+
   it('normalizes a SKU before creating a product', async () => {
     const create = vi.fn().mockResolvedValue(product);
     const service = new CatalogueService({ product: { create } } as never);

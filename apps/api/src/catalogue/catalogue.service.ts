@@ -6,6 +6,8 @@ export type CatalogueListQuery = {
   search?: string | undefined;
   page: number;
   pageSize: number;
+  sort?: 'sku' | 'name' | 'price' | 'stock' | 'status';
+  direction?: 'asc' | 'desc';
 };
 
 export type CatalogueProductCreate = {
@@ -45,7 +47,7 @@ export class CatalogueService {
     const [rows, total] = await Promise.all([
       this.prisma.product.findMany({
         where,
-        orderBy: [{ name: 'asc' }, { sku: 'asc' }],
+        orderBy: catalogueOrderBy(query.sort ?? 'name', query.direction ?? 'asc'),
         skip: (query.page - 1) * query.pageSize,
         take: query.pageSize,
         select: productSelect,
@@ -101,6 +103,17 @@ export class CatalogueService {
     if (!row) throw new NotFoundException('Catalogue product not found');
     return mapProduct(row);
   }
+}
+
+function catalogueOrderBy(sort: NonNullable<CatalogueListQuery['sort']>, direction: NonNullable<CatalogueListQuery['direction']>): Prisma.ProductOrderByWithRelationInput[] {
+  const primary: Prisma.ProductOrderByWithRelationInput = sort === 'stock'
+    ? { stockQuantity: { sort: direction, nulls: 'last' } }
+    : sort === 'status'
+      ? { active: direction }
+      : sort === 'price'
+        ? { price: { sort: direction, nulls: 'last' } }
+        : { [sort]: direction };
+  return [primary, { id: 'asc' }];
 }
 
 const productSelect = {

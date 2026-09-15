@@ -41,7 +41,7 @@ describe('CatalogueTable', () => {
     render(<CatalogueTable session={{ membershipRole: 'OWNER' }} products={[product]} page={2} pageSize={25} total={26} />);
 
     const table = screen.getByRole('table', { name: 'Товари каталогу' });
-    expect(within(table).getAllByRole('columnheader').map((header) => header.textContent)).toEqual(['№', 'Артикул', 'Назва', 'Ціна', 'Залишок', 'Статус', 'Дії']);
+    expect(within(table).getAllByRole('columnheader').map((header) => header.textContent?.replace(/[↑↓↕]/g, ''))).toEqual(['№', 'Артикул', 'Назва', 'Ціна', 'Залишок', 'Статус', 'Дії']);
     expect(within(table).getByRole('cell', { name: '26' })).toBeInTheDocument();
     expect(document.querySelector('.catalogue-card-index')).toHaveTextContent('№ 26');
   });
@@ -90,6 +90,13 @@ describe('CatalogueTable', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Так, очистити' }));
     await screen.findByText('Каталог очищено');
     expect(mutatingFetch).toHaveBeenCalledWith('/api/catalogue', { method: 'DELETE' });
+  });
+
+  it('keeps server sorting in the URL and resets pagination', () => {
+    render(<CatalogueTable session={{ membershipRole: 'MANAGER' }} products={[product]} page={3} pageSize={25} total={80} search="Luna" sort="name" direction="asc" />);
+    expect(screen.getByRole('columnheader', { name: /Назва/ })).toHaveAttribute('aria-sort', 'ascending');
+    fireEvent.click(screen.getByRole('button', { name: 'Ціна' }));
+    expect(replace).toHaveBeenCalledWith('/catalogue?search=Luna&sort=price&direction=desc');
   });
 
   it('translates catalogue controls while preserving product data', () => {

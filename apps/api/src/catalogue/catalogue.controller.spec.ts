@@ -60,7 +60,13 @@ describe('CatalogueController', () => {
   it('allows a manager to list tenant catalogue products', async () => {
     await request(app.getHttpServer()).get('/api/catalogue?search=Luna&page=1&pageSize=25').set('Cookie', 'session=manager').expect(200, { items: [product], page: 1, pageSize: 25, total: 1 });
 
-    expect(list).toHaveBeenCalledWith(tenantId, { search: 'Luna', page: 1, pageSize: 25 });
+    expect(list).toHaveBeenCalledWith(tenantId, { search: 'Luna', page: 1, pageSize: 25, sort: 'name', direction: 'asc' });
+  });
+
+  it('accepts allowlisted sorting and rejects unsupported fields', async () => {
+    await request(app.getHttpServer()).get('/api/catalogue?sort=stock&direction=desc').set('Cookie', 'session=manager').expect(200);
+    expect(list).toHaveBeenCalledWith(tenantId, expect.objectContaining({ sort: 'stock', direction: 'desc' }));
+    await request(app.getHttpServer()).get('/api/catalogue?sort=tenantId&direction=asc').set('Cookie', 'session=manager').expect(400);
   });
 
   it('allows an owner to create a product', async () => {
