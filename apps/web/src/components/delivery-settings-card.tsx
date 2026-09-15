@@ -4,6 +4,8 @@ import type { DeliveryConnectionSummary, DeliveryLocation, DeliverySenderProfile
 import { useCallback, useEffect, useState } from 'react';
 
 import { mutatingFetch } from '../auth/csrf-fetch';
+import { useI18n } from '../i18n/i18n-provider';
+import type { Translator } from '../i18n/translator';
 import { useActivity } from './activity-provider';
 import { useConfirm } from './confirm-provider';
 import { DeliveryLocationPicker } from './delivery-location-picker';
@@ -24,7 +26,7 @@ type SenderOption = {
   origins: Array<{ ref: string; cityRef: string; label: string; number: string; type: 'BRANCH' | 'PARCEL_LOCKER' }>;
 };
 
-const emptyProfile: DeliverySenderProfileInput = {
+const emptyProfileBase: Omit<DeliverySenderProfileInput, 'customerNotificationTemplate'> = {
   senderRef: '',
   contactRef: '',
   contactPhone: '+380',
@@ -32,7 +34,6 @@ const emptyProfile: DeliverySenderProfileInput = {
   payer: 'SENDER',
   defaultParcel: { weightKg: 1, lengthCm: 20, widthCm: 20, heightCm: 20 },
   suggestCustomerNotification: true,
-  customerNotificationTemplate: '{company}: створено ТТН {trackingNumber}. Відстеження: {trackingUrl}',
 };
 
 export function DeliverySettingsCard({
@@ -46,6 +47,8 @@ export function DeliverySettingsCard({
   embedded?: boolean;
   onConnectionChange?(connection: DeliveryConnectionSummary | null): void;
 }) {
+  const { t } = useI18n();
+  const emptyProfile: DeliverySenderProfileInput = { ...emptyProfileBase, customerNotificationTemplate: t('novaPoshtaSettings.defaultTemplate') };
   const [connection, setConnection] = useState<DeliveryConnectionSummary | null>(initial.connections[0] ?? null);
   const [profile, setProfile] = useState<DeliverySenderProfileInput>(initial.connections[0]?.senderProfile ?? emptyProfile);
   const [apiKey, setApiKey] = useState('');
@@ -86,12 +89,12 @@ export function DeliverySettingsCard({
   async function connect() {
     const normalizedKey = apiKey.trim();
     if (normalizedKey.length < 8) {
-      toast.show({ type: 'error', title: 'Перевірте API-ключ Нової Пошти' });
+      toast.show({ type: 'error', title: t('novaPoshtaSettings.invalidKey') });
       return;
     }
     setPending('connect');
     try {
-      const response = await activity.run('Підключаємо Нову Пошту', () => mutatingFetch('/api/integrations/delivery/nova-poshta', {
+      const response = await activity.run(t('novaPoshtaSettings.connectingActivity'), () => mutatingFetch('/api/integrations/delivery/nova-poshta', {
         method: 'PUT',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ apiKey: normalizedKey }),
@@ -102,14 +105,14 @@ export function DeliverySettingsCard({
       onConnectionChange?.(payload);
       setProfile(payload.senderProfile ?? emptyProfile);
       setApiKey('');
-      toast.show({ type: 'success', title: 'Нову Пошту підключено' });
+      toast.show({ type: 'success', title: t('novaPoshtaSettings.connected') });
       void loadSenderOptions();
     } catch {
       setApiKey('');
       toast.show({
         type: 'error',
-        title: 'Не вдалося підключити Нову Пошту',
-        message: 'Перевірте ключ у бізнес-кабінеті Нової Пошти та спробуйте ще раз.',
+        title: t('novaPoshtaSettings.connectFailed'),
+        message: t('novaPoshtaSettings.connectFailedHint'),
       });
     } finally {
       setPending(null);
@@ -119,7 +122,7 @@ export function DeliverySettingsCard({
   async function saveProfile() {
     setPending('save');
     try {
-      const response = await activity.run('Зберігаємо дані відправника', () => mutatingFetch(
+      const response = await activity.run(t('novaPoshtaSettings.savingSender'), () => mutatingFetch(
         '/api/integrations/delivery/nova-poshta/sender-profile',
         {
           method: 'PUT',
@@ -131,12 +134,12 @@ export function DeliverySettingsCard({
       const next = connection ? { ...connection, senderProfile: profile } : null;
       setConnection(next);
       onConnectionChange?.(next);
-      toast.show({ type: 'success', title: 'Дані відправника збережено' });
+      toast.show({ type: 'success', title: t('novaPoshtaSettings.senderSaved') });
     } catch {
       toast.show({
         type: 'error',
-        title: 'Не вдалося зберегти дані відправника',
-        message: 'Перевірте обов’язкові поля та повторіть спробу.',
+        title: t('novaPoshtaSettings.senderSaveFailed'),
+        message: t('novaPoshtaSettings.senderSaveFailedHint'),
       });
     } finally {
       setPending(null);
@@ -145,68 +148,68 @@ export function DeliverySettingsCard({
 
   async function disconnect() {
     const approved = await confirm({
-      title: 'Відключити Нову Пошту?',
-      description: 'Нові ТТН не створюватимуться. Уже створені відправлення та їхня історія залишаться в AutoSale.',
-      confirmLabel: 'Так, відключити',
+      title: t('novaPoshtaSettings.disconnectTitle'),
+      description: t('novaPoshtaSettings.disconnectDescription'),
+      confirmLabel: t('novaPoshtaSettings.confirmDisconnect'),
       tone: 'danger',
     });
     if (!approved) return;
     setPending('disconnect');
     try {
-      const response = await activity.run('Відключаємо Нову Пошту', () => mutatingFetch('/api/integrations/delivery/nova-poshta', { method: 'DELETE' }));
+      const response = await activity.run(t('novaPoshtaSettings.disconnectingActivity'), () => mutatingFetch('/api/integrations/delivery/nova-poshta', { method: 'DELETE' }));
       if (!response.ok) throw new Error('disconnect failed');
       setConnection(null);
       onConnectionChange?.(null);
       setProfile(emptyProfile);
       setOriginCity(null);
-      toast.show({ type: 'success', title: 'Нову Пошту відключено' });
+      toast.show({ type: 'success', title: t('novaPoshtaSettings.disconnected') });
     } catch {
-      toast.show({ type: 'error', title: 'Не вдалося відключити Нову Пошту' });
+      toast.show({ type: 'error', title: t('novaPoshtaSettings.disconnectFailed') });
     } finally {
       setPending(null);
     }
   }
 
   if (!initial.enabled) return <section className="settings-card delivery-settings-card">
-    <div className="settings-card-heading"><div><h2>Нова Пошта</h2><p>Інтеграція доставки ще не активована для AutoSale.</p></div><span className="connection-status status-not_connected">Недоступно</span></div>
+    <div className="settings-card-heading"><div><h2>{t('novaPoshtaSettings.provider')}</h2><p>{t('novaPoshtaSettings.unavailableDescription')}</p></div><span className="connection-status status-not_connected">{t('novaPoshtaSettings.unavailable')}</span></div>
   </section>;
 
-  return <section className={`settings-card delivery-settings-card ${embedded ? 'is-embedded' : ''}`} {...(embedded ? { 'aria-label': 'Нова Пошта' } : { 'aria-labelledby': 'delivery-settings-title' })} aria-busy={pending !== null || undefined}>
+  return <section className={`settings-card delivery-settings-card ${embedded ? 'is-embedded' : ''}`} {...(embedded ? { 'aria-label': t('novaPoshtaSettings.provider') } : { 'aria-labelledby': 'delivery-settings-title' })} aria-busy={pending !== null || undefined}>
     {!embedded && <div className="settings-card-heading">
       <div>
-        <h2 id="delivery-settings-title">Нова Пошта</h2>
-        <p>Створюйте ТТН та відстежуйте доставку без повторного введення даних.</p>
+        <h2 id="delivery-settings-title">{t('novaPoshtaSettings.provider')}</h2>
+        <p>{t('novaPoshtaSettings.description')}</p>
       </div>
       <span className={`connection-status status-${(connection?.status ?? 'NOT_CONNECTED').toLowerCase()}`}>
-        {statusLabel(connection?.status)}
+        {statusLabel(t, connection?.status)}
       </span>
     </div>}
 
-    {embedded && <div className="delivery-panel-section-heading"><span>Підключення</span><p>Доступ до кабінету перевізника та стан інтеграції.</p></div>}
+    {embedded && <div className="delivery-panel-section-heading"><span>{t('novaPoshtaSettings.connection')}</span><p>{t('novaPoshtaSettings.connectionDescription')}</p></div>}
 
-    {connection?.accountLabel && <div className="delivery-account-summary"><span>Кабінет відправника</span><strong>{connection.accountLabel}</strong></div>}
+    {connection?.accountLabel && <div className="delivery-account-summary"><span>{t('novaPoshtaSettings.senderCabinet')}</span><strong>{connection.accountLabel}</strong></div>}
 
-    {!owner ? <p className="delivery-readonly-note">Змінити підключення та дані відправника може лише власник робочого простору.</p> : <>
+    {!owner ? <p className="delivery-readonly-note">{t('novaPoshtaSettings.ownerOnly')}</p> : <>
       <div className="delivery-connect-guide">
-        <div><strong>{active ? 'Потрібно замінити ключ?' : 'Підключення займає близько хвилини'}</strong><span>У кабінеті відкрийте Налаштування → Безпека, створіть API-ключ і скопіюйте його.</span></div>
-        <a className="secondary-button" href="https://my.novaposhta.ua/settings/index#apikeys" target="_blank" rel="noreferrer">Відкрити налаштування API-ключів</a>
+        <div><strong>{active ? t('novaPoshtaSettings.replaceKeyQuestion') : t('novaPoshtaSettings.quickSetup')}</strong><span>{t('novaPoshtaSettings.keyInstructions')}</span></div>
+        <a className="secondary-button" href="https://my.novaposhta.ua/settings/index#apikeys" target="_blank" rel="noreferrer">{t('novaPoshtaSettings.openKeySettings')}</a>
       </div>
       <div className="delivery-connect-form">
         <label>
-          <span>API-ключ Нової Пошти</span>
-          <input aria-label="API-ключ Нової Пошти" autoComplete="off" type="password" value={apiKey} onChange={(event) => setApiKey(event.target.value)} placeholder={active ? 'Введіть новий ключ для заміни' : 'Вставте ключ із бізнес-кабінету'} />
+          <span>{t('novaPoshtaSettings.apiKey')}</span>
+          <input aria-label={t('novaPoshtaSettings.apiKey')} autoComplete="off" type="password" value={apiKey} onChange={(event) => setApiKey(event.target.value)} placeholder={active ? t('novaPoshtaSettings.replaceKeyPlaceholder') : t('novaPoshtaSettings.keyPlaceholder')} />
         </label>
-        <LoadingButton type="button" pending={pending === 'connect'} pendingLabel="Підключаємо…" disabled={pending !== null || apiKey.trim().length < 8} onClick={() => void connect()}>
-          {active ? 'Замінити ключ' : 'Підключити Нову Пошту'}
+        <LoadingButton type="button" pending={pending === 'connect'} pendingLabel={t('novaPoshtaSettings.connecting')} disabled={pending !== null || apiKey.trim().length < 8} onClick={() => void connect()}>
+          {active ? t('novaPoshtaSettings.replaceKey') : t('novaPoshtaSettings.connect')}
         </LoadingButton>
       </div>
-      <p className="delivery-key-note">AutoSale перевірить ключ і збереже його в зашифрованому вигляді. Після підключення ключ більше не відображається.</p>
+      <p className="delivery-key-note">{t('novaPoshtaSettings.keySecurity')}</p>
 
       {active && <>
         <fieldset className="delivery-sender-form" disabled={pending !== null}>
-          <legend>Дані відправника</legend>
+          <legend>{t('novaPoshtaSettings.senderData')}</legend>
           <div className="delivery-form-grid">
-            <SelectField label="Відправник" value={profile.senderRef} loading={loadingOptions} options={senderOptions.map((sender) => ({ value: sender.ref, label: sender.label }))} onChange={(value) => {
+            <SelectField label={t('novaPoshtaSettings.sender')} value={profile.senderRef} loading={loadingOptions} options={senderOptions.map((sender) => ({ value: sender.ref, label: sender.label }))} onChange={(value) => {
               const sender = senderOptions.find((option) => option.ref === value);
               const contact = sender?.contacts[0];
               const origin = sender?.origins[0];
@@ -219,24 +222,24 @@ export function DeliverySettingsCard({
                 origin: origin ? { type: origin.type, cityRef: origin.cityRef, locationRef: origin.ref, label: origin.label } : emptyProfile.origin,
               });
             }} />
-            <SelectField label="Контактна особа" value={profile.contactRef} loading={loadingOptions} options={(selectedSender?.contacts ?? []).map((contact) => ({ value: contact.ref, label: contact.label }))} onChange={(value) => {
+            <SelectField label={t('novaPoshtaSettings.contact')} value={profile.contactRef} loading={loadingOptions} options={(selectedSender?.contacts ?? []).map((contact) => ({ value: contact.ref, label: contact.label }))} onChange={(value) => {
               const contact = selectedSender?.contacts.find((option) => option.ref === value);
               setProfile({ ...profile, contactRef: value, contactPhone: contact?.phone ?? profile.contactPhone });
             }} />
-            <TextField label="Телефон відправника" value={profile.contactPhone} onChange={(value) => setProfile({ ...profile, contactPhone: value })} />
+            <TextField label={t('novaPoshtaSettings.senderPhone')} value={profile.contactPhone} onChange={(value) => setProfile({ ...profile, contactPhone: value })} />
             {selectedSender && selectedSender.origins.length === 0
               ? profile.origin.type !== 'ADDRESS' && profile.origin.locationRef && profile.origin.label
                 ? <div className="delivery-origin-summary">
-                    <span>Точка відправлення</span>
+                    <span>{t('novaPoshtaSettings.origin')}</span>
                     <strong>{profile.origin.label}</strong>
                     <button type="button" className="text-button" onClick={() => {
                       setOriginCity(null);
                       setProfile({ ...profile, origin: { type: 'BRANCH', cityRef: '', locationRef: '', label: '' } });
-                    }}>Змінити точку</button>
+                    }}>{t('novaPoshtaSettings.changeOrigin')}</button>
                   </div>
                 : <>
                     <DeliveryLocationPicker
-                      label="Місто відправлення"
+                      label={t('novaPoshtaSettings.originCity')}
                       type="CITY"
                       value={originCity}
                       onSelect={(city) => {
@@ -245,17 +248,17 @@ export function DeliverySettingsCard({
                       }}
                     />
                     <label>
-                      <span>Тип точки</span>
-                      <select aria-label="Тип точки відправлення" value={profile.origin.type === 'PARCEL_LOCKER' ? 'PARCEL_LOCKER' : 'BRANCH'} onChange={(event) => setProfile({
+                      <span>{t('novaPoshtaSettings.pointType')}</span>
+                      <select aria-label={t('novaPoshtaSettings.originType')} value={profile.origin.type === 'PARCEL_LOCKER' ? 'PARCEL_LOCKER' : 'BRANCH'} onChange={(event) => setProfile({
                         ...profile,
                         origin: { type: event.target.value as 'BRANCH' | 'PARCEL_LOCKER', cityRef: originCity?.ref ?? '', locationRef: '', label: '' },
                       })}>
-                        <option value="BRANCH">Відділення</option>
-                        <option value="PARCEL_LOCKER">Поштомат</option>
+                        <option value="BRANCH">{t('novaPoshtaSettings.branch')}</option>
+                        <option value="PARCEL_LOCKER">{t('novaPoshtaSettings.parcelLocker')}</option>
                       </select>
                     </label>
                     <DeliveryLocationPicker
-                      label="Точка відправлення"
+                      label={t('novaPoshtaSettings.origin')}
                       type={profile.origin.type === 'PARCEL_LOCKER' ? 'PARCEL_LOCKER' : 'BRANCH'}
                       cityRef={originCity?.ref ?? ''}
                       value={null}
@@ -266,34 +269,34 @@ export function DeliverySettingsCard({
                       }}
                     />
                   </>
-              : <SelectField label="Точка відправлення" value={profile.origin.type === 'ADDRESS' ? '' : profile.origin.locationRef} loading={loadingOptions} options={(selectedSender?.origins ?? []).map((origin) => ({ value: origin.ref, label: origin.label }))} onChange={(value) => {
+              : <SelectField label={t('novaPoshtaSettings.origin')} value={profile.origin.type === 'ADDRESS' ? '' : profile.origin.locationRef} loading={loadingOptions} options={(selectedSender?.origins ?? []).map((origin) => ({ value: origin.ref, label: origin.label }))} onChange={(value) => {
                   const origin = selectedSender?.origins.find((option) => option.ref === value);
                   if (origin) setProfile({ ...profile, origin: { type: origin.type, cityRef: origin.cityRef, locationRef: origin.ref, label: origin.label } });
                 }} />}
-            <label><span>Хто оплачує доставку</span><select aria-label="Хто оплачує доставку" value={profile.payer} onChange={(event) => setProfile({ ...profile, payer: event.target.value as 'SENDER' | 'RECIPIENT' })}><option value="SENDER">Відправник</option><option value="RECIPIENT">Отримувач</option></select></label>
+            <label><span>{t('novaPoshtaSettings.deliveryPayer')}</span><select aria-label={t('novaPoshtaSettings.deliveryPayer')} value={profile.payer} onChange={(event) => setProfile({ ...profile, payer: event.target.value as 'SENDER' | 'RECIPIENT' })}><option value="SENDER">{t('novaPoshtaSettings.sender')}</option><option value="RECIPIENT">{t('novaPoshtaSettings.recipient')}</option></select></label>
           </div>
           <div className="delivery-parcel-grid">
-            <NumberField label="Вага, кг" value={profile.defaultParcel.weightKg} onChange={(value) => setProfile({ ...profile, defaultParcel: { ...profile.defaultParcel, weightKg: value } })} />
-            <NumberField label="Довжина, см" value={profile.defaultParcel.lengthCm} onChange={(value) => setProfile({ ...profile, defaultParcel: { ...profile.defaultParcel, lengthCm: value } })} />
-            <NumberField label="Ширина, см" value={profile.defaultParcel.widthCm} onChange={(value) => setProfile({ ...profile, defaultParcel: { ...profile.defaultParcel, widthCm: value } })} />
-            <NumberField label="Висота, см" value={profile.defaultParcel.heightCm} onChange={(value) => setProfile({ ...profile, defaultParcel: { ...profile.defaultParcel, heightCm: value } })} />
+            <NumberField label={t('novaPoshtaSettings.weight')} value={profile.defaultParcel.weightKg} onChange={(value) => setProfile({ ...profile, defaultParcel: { ...profile.defaultParcel, weightKg: value } })} />
+            <NumberField label={t('novaPoshtaSettings.length')} value={profile.defaultParcel.lengthCm} onChange={(value) => setProfile({ ...profile, defaultParcel: { ...profile.defaultParcel, lengthCm: value } })} />
+            <NumberField label={t('novaPoshtaSettings.width')} value={profile.defaultParcel.widthCm} onChange={(value) => setProfile({ ...profile, defaultParcel: { ...profile.defaultParcel, widthCm: value } })} />
+            <NumberField label={t('novaPoshtaSettings.height')} value={profile.defaultParcel.heightCm} onChange={(value) => setProfile({ ...profile, defaultParcel: { ...profile.defaultParcel, heightCm: value } })} />
           </div>
-          <label className="delivery-notification-toggle"><input type="checkbox" checked={profile.suggestCustomerNotification} onChange={(event) => setProfile({ ...profile, suggestCustomerNotification: event.target.checked })} />Запропонувати повідомлення клієнту після створення ТТН</label>
+          <label className="delivery-notification-toggle"><input type="checkbox" checked={profile.suggestCustomerNotification} onChange={(event) => setProfile({ ...profile, suggestCustomerNotification: event.target.checked })} />{t('novaPoshtaSettings.suggestNotification')}</label>
           <label className="delivery-notification-template">
-            <span>Шаблон повідомлення клієнту</span>
+            <span>{t('novaPoshtaSettings.notificationTemplate')}</span>
             <textarea
-              aria-label="Шаблон повідомлення клієнту"
+              aria-label={t('novaPoshtaSettings.notificationTemplate')}
               maxLength={1_000}
               rows={4}
               value={profile.customerNotificationTemplate}
               onChange={(event) => setProfile({ ...profile, customerNotificationTemplate: event.target.value })}
             />
-            <small>Доступні поля: {'{company}'}, {'{trackingNumber}'}, {'{trackingUrl}'} · {profile.customerNotificationTemplate.length} / 1000</small>
+            <small>{t('novaPoshtaSettings.availableFields', { fields: '{company}, {trackingNumber}, {trackingUrl}', length: profile.customerNotificationTemplate.length })}</small>
           </label>
         </fieldset>
         <div className="settings-actions delivery-settings-actions">
-          <LoadingButton type="button" pending={pending === 'save'} pendingLabel="Зберігаємо…" disabled={pending !== null} onClick={() => void saveProfile()}>Зберегти дані відправника</LoadingButton>
-          <LoadingButton type="button" className="danger-button" pending={pending === 'disconnect'} pendingLabel="Відключаємо…" disabled={pending !== null} onClick={() => void disconnect()}>Відключити Нову Пошту</LoadingButton>
+          <LoadingButton type="button" pending={pending === 'save'} pendingLabel={t('novaPoshtaSettings.saving')} disabled={pending !== null} onClick={() => void saveProfile()}>{t('novaPoshtaSettings.saveSender')}</LoadingButton>
+          <LoadingButton type="button" className="danger-button" pending={pending === 'disconnect'} pendingLabel={t('novaPoshtaSettings.disconnecting')} disabled={pending !== null} onClick={() => void disconnect()}>{t('novaPoshtaSettings.disconnect')}</LoadingButton>
         </div>
       </>}
     </>}
@@ -305,9 +308,10 @@ function TextField({ label, value, onChange }: { label: string; value: string; o
 }
 
 function SelectField({ label, value, options, loading, onChange }: { label: string; value: string; options: Array<{ value: string; label: string }>; loading: boolean; onChange(value: string): void }) {
+  const { t } = useI18n();
   const includesCurrent = options.some((option) => option.value === value);
   return <label><span>{label}</span><select aria-label={label} value={value} onChange={(event) => onChange(event.target.value)} disabled={loading}>
-    <option value="">{loading ? 'Завантажуємо…' : 'Оберіть зі списку'}</option>
+    <option value="">{loading ? t('novaPoshtaSettings.loading') : t('novaPoshtaSettings.chooseFromList')}</option>
     {!includesCurrent && value && <option value={value}>{value}</option>}
     {options.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
   </select></label>;
@@ -317,9 +321,9 @@ function NumberField({ label, value, onChange }: { label: string; value: number;
   return <label><span>{label}</span><input aria-label={label} type="number" min="0.01" step="0.01" value={value} onChange={(event) => onChange(Number(event.target.value))} /></label>;
 }
 
-function statusLabel(status: DeliveryConnectionSummary['status'] | undefined): string {
-  if (!status) return 'Не підключено';
-  return ({ ACTIVE: 'Активне', NEEDS_ATTENTION: 'Потрібна увага', DISCONNECTED: 'Відключено' } as const)[status];
+function statusLabel(t: Translator, status: DeliveryConnectionSummary['status'] | undefined): string {
+  if (!status) return t('novaPoshtaSettings.statusNotConnected');
+  return ({ ACTIVE: t('novaPoshtaSettings.statusActive'), NEEDS_ATTENTION: t('novaPoshtaSettings.statusNeedsAttention'), DISCONNECTED: t('novaPoshtaSettings.statusDisconnected') } as const)[status];
 }
 
 async function jsonOrNull(response: Response): Promise<unknown> {

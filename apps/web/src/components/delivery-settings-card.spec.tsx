@@ -3,14 +3,16 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const { mutatingFetch } = vi.hoisted(() => ({ mutatingFetch: vi.fn() }));
 vi.mock('../auth/csrf-fetch', () => ({ mutatingFetch }));
+vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
 
 import { ActivityProvider } from './activity-provider';
 import { ConfirmProvider } from './confirm-provider';
 import { DeliverySettingsCard, type DeliverySettingsSummary } from './delivery-settings-card';
 import { ToastProvider } from './toast-provider';
+import { I18nProvider } from '../i18n/i18n-provider';
 
-function render(ui: React.ReactElement) {
-  return rtlRender(<ToastProvider><ActivityProvider><ConfirmProvider>{ui}</ConfirmProvider></ActivityProvider></ToastProvider>);
+function render(ui: React.ReactElement, locale: 'uk' | 'en' = 'uk') {
+  return rtlRender(<I18nProvider locale={locale} authenticated={false}><ToastProvider><ActivityProvider><ConfirmProvider>{ui}</ConfirmProvider></ActivityProvider></ToastProvider></I18nProvider>);
 }
 
 const disconnected: DeliverySettingsSummary = { enabled: true, connections: [] };
@@ -29,6 +31,13 @@ afterEach(() => {
 });
 
 describe('DeliverySettingsCard', () => {
+  it('renders English controls while preserving the Nova Poshta account label', () => {
+    render(<DeliverySettingsCard initial={active} role="OWNER" />, 'en');
+    expect(screen.getByText('ТОВ Приклад')).toBeInTheDocument();
+    expect(screen.getByText('Active')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Disconnect Nova Poshta' })).toBeInTheDocument();
+  });
+
   it('shows a masked read-only state to managers', () => {
     render(<DeliverySettingsCard initial={active} role="MANAGER" />);
     expect(screen.getByText('ТОВ Приклад')).toBeInTheDocument();
