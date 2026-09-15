@@ -3,9 +3,12 @@ import { afterEach, expect, it, vi } from 'vitest';
 
 const { getOrders } = vi.hoisted(() => ({ getOrders: vi.fn() }));
 vi.mock('../../../src/api/orders', () => ({ getOrders }));
+const { getServerSession } = vi.hoisted(() => ({ getServerSession: vi.fn() }));
+vi.mock('../../../src/auth/session', () => ({ getServerSession }));
 vi.mock('next/navigation', () => ({ useRouter: () => ({ push: vi.fn(), replace: vi.fn() }) }));
 
 import OrdersPage from './page';
+import { I18nProvider } from '../../../src/i18n/i18n-provider';
 
 const order = {
   id: '11111111-1111-4111-8111-111111111111',
@@ -25,10 +28,11 @@ const order = {
   sheetsExport: null,
 };
 
-afterEach(() => { cleanup(); getOrders.mockReset(); });
+afterEach(() => { cleanup(); getOrders.mockReset(); getServerSession.mockReset(); });
 
 it('presents orders as a data table with a clear view action', async () => {
   getOrders.mockResolvedValue({ items: [order], page: 1, pageSize: 25, total: 1 });
+  getServerSession.mockResolvedValue({ locale: 'uk' });
 
   render(await OrdersPage({ searchParams: Promise.resolve({}) }));
 
@@ -37,4 +41,15 @@ it('presents orders as a data table with a clear view action', async () => {
   expect(screen.getByRole('columnheader', { name: 'Клієнт' })).toBeInTheDocument();
   expect(screen.getByRole('columnheader', { name: 'Доставка' })).toBeInTheDocument();
   expect(screen.getAllByRole('link', { name: 'Переглянути замовлення Davida Shvets: Авангард VINARIT' })[0]).toHaveAttribute('href', `/orders/${order.id}`);
+});
+
+it('renders English page chrome when English is selected', async () => {
+  getOrders.mockResolvedValue({ items: [], page: 1, pageSize: 25, total: 0 });
+  getServerSession.mockResolvedValue({ locale: 'en' });
+
+  render(<I18nProvider locale="en" authenticated>{await OrdersPage({ searchParams: Promise.resolve({}) })}</I18nProvider>);
+
+  expect(screen.getByRole('heading', { name: 'Orders' })).toBeInTheDocument();
+  expect(screen.getByText('Review orders created by AI.')).toBeInTheDocument();
+  expect(screen.getByText('No orders yet.')).toBeInTheDocument();
 });

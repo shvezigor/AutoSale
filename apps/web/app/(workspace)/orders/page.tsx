@@ -3,12 +3,16 @@ import { OrdersTable } from '../../../src/components/orders-table';
 import type { OrderStatus } from '../../../../../packages/contracts/src/orders';
 import type { ProcurementSummary } from '../../../../../packages/contracts/src/procurement';
 import type { ShipmentStatus } from '../../../../../packages/contracts/src/delivery';
+import { getServerSession } from '../../../src/auth/session';
+import { createTranslator } from '../../../src/i18n/translator';
 
 export const dynamic = 'force-dynamic';
 
 type OrdersPageProps = { searchParams: Promise<{ page?: string | string[]; pageSize?: string | string[]; search?: string | string[]; status?: string | string[]; procurementStatus?: string | string[]; shipmentStatus?: string | string[] }> };
 
 export default async function OrdersPage({ searchParams }: OrdersPageProps) {
+  const session = await getServerSession();
+  const t = createTranslator(session?.locale ?? 'uk');
   const params = await searchParams;
   const page = positiveInteger(params.page) ?? 1;
   const pageSize = allowedPageSize(params.pageSize);
@@ -17,7 +21,7 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
   const procurementStatus = procurementStatusParam(params.procurementStatus);
   const shipmentStatus = shipmentStatusParam(params.shipmentStatus);
   const orders = await getOrders({ page, pageSize, ...(search ? { search } : {}), ...(status ? { status } : {}), ...(procurementStatus ? { procurementStatus } : {}), ...(shipmentStatus ? { shipmentStatus } : {}) });
-  return <main className="orders-layout orders-layout-content"><section className="orders-content"><header className="orders-header"><h1>Замовлення</h1><p>Перевіряйте замовлення, які сформував AI.</p></header><OrdersTable orders={orders.items} page={orders.page} pageSize={orders.pageSize} search={search} {...(status ? { status } : {})} {...(procurementStatus ? { procurementStatus } : {})} {...(shipmentStatus ? { shipmentStatus } : {})} total={orders.total} /></section></main>;
+  return <main className="orders-layout orders-layout-content"><section className="orders-content"><header className="orders-header"><h1>{t('orders.title')}</h1><p>{t('orders.description')}</p></header><OrdersTable orders={orders.items} page={orders.page} pageSize={orders.pageSize} search={search} {...(status ? { status } : {})} {...(procurementStatus ? { procurementStatus } : {})} {...(shipmentStatus ? { shipmentStatus } : {})} total={orders.total} /></section></main>;
 }
 
 function positiveInteger(value: string | string[] | undefined) { const parsed = Number(Array.isArray(value) ? value[0] : value); return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : null; }

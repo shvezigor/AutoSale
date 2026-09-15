@@ -8,6 +8,7 @@ const replace = vi.fn();
 vi.mock('next/navigation', () => ({ useRouter: () => ({ push, replace }) }));
 
 import { OrdersTable } from './orders-table';
+import { I18nProvider } from '../i18n/i18n-provider';
 
 const order: ManagerOrder = {
   id: '11111111-1111-4111-8111-111111111111',
@@ -104,5 +105,17 @@ describe('OrdersTable', () => {
     expect(screen.getByRole('columnheader', { name: 'Комплектація' })).toBeInTheDocument();
     expect(document.querySelectorAll('.procurement-badge')).toHaveLength(2);
     expect([...document.querySelectorAll('.procurement-badge')].every((badge) => badge.textContent === 'Потрібно замовити')).toBe(true);
+  });
+
+  it('translates table controls and system values while preserving customer and product data', () => {
+    render(<I18nProvider locale="en" authenticated><OrdersTable orders={[order]} page={1} pageSize={25} total={1} /></I18nProvider>);
+
+    expect(screen.getByRole('table', { name: 'Orders' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Order status')).toHaveDisplayValue('All statuses');
+    expect(screen.getAllByText('Needs review')).toHaveLength(3);
+    expect(screen.getAllByText('Needs ordering')).toHaveLength(3);
+    expect(screen.getAllByText('09/08/2026, 12:30 PM')).toHaveLength(2);
+    expect(screen.getAllByText('Ігор Швець')).toHaveLength(2);
+    expect(screen.getAllByText('Авангард VINARIT')).toHaveLength(2);
   });
 });
