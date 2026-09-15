@@ -17,8 +17,8 @@ beforeEach(() => {
 });
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); refresh.mockClear(); });
 
-function renderHeader(session: Parameters<typeof AppHeader>[0]['session']) {
-  return render(<I18nProvider locale="uk" authenticated><ToastProvider><AppHeader session={session} /></ToastProvider></I18nProvider>);
+function renderHeader(session: Parameters<typeof AppHeader>[0]['session'], locale: 'uk' | 'en' = 'uk') {
+  return render(<I18nProvider locale={locale} authenticated><ToastProvider><AppHeader session={session} /></ToastProvider></I18nProvider>);
 }
 
 describe('AppHeader', () => {
@@ -44,5 +44,13 @@ describe('AppHeader', () => {
     fireEvent.keyDown(document, { key: 'Escape' });
     expect(screen.queryByRole('menu')).not.toBeInTheDocument();
     expect(profile).toHaveFocus();
+  });
+
+  it('renders workspace and profile actions in English', async () => {
+    renderHeader({ name: 'Ihor', email: 'owner@example.com', membershipRole: 'OWNER', avatarUrl: null }, 'en');
+    expect(screen.getByText('Workspace')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Profile menu' }));
+    expect(screen.getByRole('menuitem', { name: 'My profile' })).toBeInTheDocument();
+    expect(screen.getByRole('menuitem', { name: 'Sign out' })).toBeInTheDocument();
   });
 });

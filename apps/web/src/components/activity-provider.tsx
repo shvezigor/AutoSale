@@ -1,6 +1,8 @@
 'use client';
 
 import { createContext, type ReactNode, useCallback, useContext, useMemo, useState } from 'react';
+import { useOptionalI18n } from '../i18n/i18n-provider';
+import { createTranslator } from '../i18n/translator';
 
 type ActivityContextValue = {
   activeCount: number;
@@ -11,8 +13,9 @@ type ActivityContextValue = {
 const ActivityContext = createContext<ActivityContextValue | null>(null);
 
 export function ActivityProvider({ children }: { children: ReactNode }) {
+  const t = useOptionalI18n()?.t ?? createTranslator('uk');
   const [activeCount, setActiveCount] = useState(0);
-  const [latestLabel, setLatestLabel] = useState('Виконується фонова операція');
+  const [latestLabel, setLatestLabel] = useState(t('activity.defaultLabel'));
   const begin = useCallback((label: string) => {
     let finished = false;
     setLatestLabel(label);
@@ -29,7 +32,7 @@ export function ActivityProvider({ children }: { children: ReactNode }) {
     finally { finish(); }
   }, [begin]);
   const value = useMemo(() => ({ activeCount, begin, run }), [activeCount, begin, run]);
-  const valueText = activeCount === 1 ? '1 активна операція' : `${activeCount} активні операції`;
+  const valueText = activeCount === 1 ? t('activity.oneActive') : t('activity.manyActive', { count: activeCount });
 
   return <ActivityContext.Provider value={value}>
     {activeCount > 0 && <>
@@ -37,7 +40,7 @@ export function ActivityProvider({ children }: { children: ReactNode }) {
         <div className="activity-overlay-card">
           <span className="activity-spinner" role="progressbar" aria-label={latestLabel} aria-valuetext={valueText} />
           <strong>{latestLabel}</strong>
-          <span>Будь ласка, зачекайте — не закривайте сторінку.</span>
+          <span>{t('activity.wait')}</span>
         </div>
       </div>
     </>}

@@ -1,7 +1,10 @@
 import Link from 'next/link';
 import { AuthFrame } from '../../../src/components/auth-form';
+import { resolveServerLocale } from '../../../src/i18n/server';
+import { createTranslator } from '../../../src/i18n/translator';
 
 export default async function VerifyEmailPage({ searchParams }: { searchParams: Promise<{ token?: string }> }) {
+  const t = createTranslator(await resolveServerLocale());
   const token = (await searchParams).token;
   let verified = false;
   if (token) {
@@ -10,5 +13,5 @@ export default async function VerifyEmailPage({ searchParams }: { searchParams: 
       verified = response.ok;
     } catch { verified = false; }
   }
-  return <AuthFrame title={verified ? 'Email підтверджено' : 'Не вдалося підтвердити email'} description={verified ? 'Ваш робочий простір активовано.' : 'Посилання недійсне або протерміноване.'}><Link className="primary-button button-link" href="/login">Перейти до входу</Link></AuthFrame>;
+  return <AuthFrame title={verified ? t('authentication.emailVerified') : t('authentication.emailVerificationFailed')} description={verified ? t('authentication.workspaceActivated') : t('authentication.resetInvalid')}><Link className="primary-button button-link" href="/login">{t('authentication.goToLogin')}</Link></AuthFrame>;
 }

@@ -2,11 +2,18 @@
 
 import Link from 'next/link';
 import { type FormEvent, type ReactNode, useState } from 'react';
+import { useI18n } from '../i18n/i18n-provider';
 import { GoogleSignInButton } from './google-sign-in-button';
 
 type SubmitResult = { ok: boolean; previewUrl?: string };
 
+export function AuthLoadingState() {
+  const { t } = useI18n();
+  return <main className="route-state">{t('common.loading')}</main>;
+}
+
 export function LoginForm({ submit, googleReturnPath }: { submit: (input: { email: string; password: string }) => Promise<SubmitResult>; googleReturnPath?: string }) {
+  const { t } = useI18n();
   const [state, setState] = useState<'idle' | 'submitting' | 'error'>('idle');
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setState('submitting');
@@ -14,20 +21,21 @@ export function LoginForm({ submit, googleReturnPath }: { submit: (input: { emai
     const result = await submit({ email: String(data.get('email')), password: String(data.get('password')) });
     setState(result.ok ? 'idle' : 'error');
   }
-  return <AuthFrame title="Вхід в AutoSale" description="Продовжуйте роботу із замовленнями та діалогами.">
+  return <AuthFrame title={t('authentication.loginTitle')} description={t('authentication.loginDescription')}>
     <GoogleSignInButton returnPath={googleReturnPath} />
     <form className="auth-form" onSubmit={(event) => void onSubmit(event)}>
-      <Field label="Email" name="email" type="email" autoComplete="email" />
-      <Field label="Пароль" name="password" type="password" autoComplete="current-password" />
-      {state === 'error' && <p className="auth-error" role="alert">Не вдалося увійти. Перевірте email і пароль.</p>}
-      <button className="primary-button" disabled={state === 'submitting'} type="submit">{state === 'submitting' ? 'Входимо…' : 'Увійти'}</button>
-      <Link className="auth-link" href="/forgot-password">Забули пароль?</Link>
+      <Field label={t('authentication.email')} name="email" type="email" autoComplete="email" />
+      <Field label={t('authentication.password')} name="password" type="password" autoComplete="current-password" />
+      {state === 'error' && <p className="auth-error" role="alert">{t('authentication.loginError')}</p>}
+      <button className="primary-button" disabled={state === 'submitting'} type="submit">{state === 'submitting' ? t('authentication.loggingIn') : t('authentication.login')}</button>
+      <Link className="auth-link" href="/forgot-password">{t('authentication.forgotPassword')}</Link>
     </form>
-    <p className="auth-switch">Ще немає акаунта? <Link href="/register">Зареєструватися</Link></p>
+    <p className="auth-switch">{t('authentication.noAccount')} <Link href="/register">{t('authentication.register')}</Link></p>
   </AuthFrame>;
 }
 
 export function RegisterForm({ submit }: { submit: (input: { name: string; tenantName: string; email: string; password: string }) => Promise<SubmitResult> }) {
+  const { t } = useI18n();
   const [state, setState] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
   const [previewUrl, setPreviewUrl] = useState<string | undefined>();
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
@@ -37,43 +45,47 @@ export function RegisterForm({ submit }: { submit: (input: { name: string; tenan
     setPreviewUrl(result.previewUrl);
     setState(result.ok ? 'success' : 'error');
   }
-  if (state === 'success') return <AuthFrame title="Перевірте вашу електронну пошту" description="Ми надіслали посилання для активації акаунта.">{previewUrl && <Link className="primary-button button-link" data-testid="dev-verification-link" href={previewUrl}>Активувати тестовий акаунт</Link>}<Link className="auth-link" href="/login">Перейти до входу</Link></AuthFrame>;
-  return <AuthFrame title="Створіть робочий простір" description="Зареєструйте власника та організацію AutoSale.">
+  if (state === 'success') return <AuthFrame title={t('authentication.verifyEmailTitle')} description={t('authentication.verifyEmailDescription')}>{previewUrl && <Link className="primary-button button-link" data-testid="dev-verification-link" href={previewUrl}>{t('authentication.activateTest')}</Link>}<Link className="auth-link" href="/login">{t('authentication.goToLogin')}</Link></AuthFrame>;
+  return <AuthFrame title={t('authentication.registerTitle')} description={t('authentication.registerDescription')}>
     <GoogleSignInButton />
     <form className="auth-form" onSubmit={(event) => void onSubmit(event)}>
-      <Field label="Ім’я" name="name" autoComplete="name" />
-      <Field label="Назва організації" name="tenantName" autoComplete="organization" />
-      <Field label="Email" name="email" type="email" autoComplete="email" />
-      <Field label="Пароль" name="password" type="password" autoComplete="new-password" minLength={12} hint="Щонайменше 12 символів" />
-      {state === 'error' && <p className="auth-error" role="alert">Не вдалося створити акаунт.</p>}
-      <button className="primary-button" disabled={state === 'submitting'} type="submit">{state === 'submitting' ? 'Створюємо…' : 'Зареєструватися'}</button>
+      <Field label={t('authentication.name')} name="name" autoComplete="name" />
+      <Field label={t('authentication.organization')} name="tenantName" autoComplete="organization" />
+      <Field label={t('authentication.email')} name="email" type="email" autoComplete="email" />
+      <Field label={t('authentication.password')} name="password" type="password" autoComplete="new-password" minLength={12} hint={t('authentication.passwordHint')} />
+      {state === 'error' && <p className="auth-error" role="alert">{t('authentication.registerError')}</p>}
+      <button className="primary-button" disabled={state === 'submitting'} type="submit">{state === 'submitting' ? t('authentication.creating') : t('authentication.register')}</button>
     </form>
-    <p className="auth-switch">Вже маєте акаунт? <Link href="/login">Увійти</Link></p>
+    <p className="auth-switch">{t('authentication.hasAccount')} <Link href="/login">{t('authentication.login')}</Link></p>
   </AuthFrame>;
 }
 
 export function ForgotPasswordForm({ submit }: { submit: (input: { email: string }) => Promise<SubmitResult> }) {
+  const { t } = useI18n();
   const [sent, setSent] = useState(false);
   async function onSubmit(event: FormEvent<HTMLFormElement>) { event.preventDefault(); const data = new FormData(event.currentTarget); await submit({ email: String(data.get('email')) }); setSent(true); }
-  return <AuthFrame title="Відновлення пароля" description="Вкажіть email власника або менеджера.">{sent ? <><p className="auth-success">Якщо акаунт існує, лист уже надіслано.</p><Link className="auth-link" href="/login">Повернутися до входу</Link></> : <form className="auth-form" onSubmit={(event) => void onSubmit(event)}><Field label="Email" name="email" type="email" autoComplete="email" /><button className="primary-button" type="submit">Надіслати посилання</button></form>}</AuthFrame>;
+  return <AuthFrame title={t('authentication.recoveryTitle')} description={t('authentication.recoveryDescription')}>{sent ? <><p className="auth-success">{t('authentication.recoverySent')}</p><Link className="auth-link" href="/login">{t('authentication.backToLogin')}</Link></> : <form className="auth-form" onSubmit={(event) => void onSubmit(event)}><Field label={t('authentication.email')} name="email" type="email" autoComplete="email" /><button className="primary-button" type="submit">{t('authentication.sendLink')}</button></form>}</AuthFrame>;
 }
 
 export function ResetPasswordForm({ token, submit }: { token: string; submit: (input: { token: string; password: string }) => Promise<SubmitResult> }) {
+  const { t } = useI18n();
   const [state, setState] = useState<'idle' | 'success' | 'error'>('idle');
   async function onSubmit(event: FormEvent<HTMLFormElement>) { event.preventDefault(); const data = new FormData(event.currentTarget); const result = await submit({ token, password: String(data.get('password')) }); setState(result.ok ? 'success' : 'error'); }
-  if (state === 'success') return <AuthFrame title="Пароль оновлено" description="Тепер можна увійти з новим паролем."><Link className="primary-button button-link" href="/login">Увійти</Link></AuthFrame>;
-  return <AuthFrame title="Новий пароль" description="Створіть новий пароль щонайменше з 12 символів."><form className="auth-form" onSubmit={(event) => void onSubmit(event)}><Field label="Новий пароль" name="password" type="password" autoComplete="new-password" minLength={12} />{state === 'error' && <p className="auth-error" role="alert">Посилання недійсне або протерміноване.</p>}<button className="primary-button" type="submit">Зберегти пароль</button></form></AuthFrame>;
+  if (state === 'success') return <AuthFrame title={t('authentication.passwordUpdated')} description={t('authentication.passwordUpdatedDescription')}><Link className="primary-button button-link" href="/login">{t('authentication.login')}</Link></AuthFrame>;
+  return <AuthFrame title={t('authentication.newPassword')} description={t('authentication.newPasswordDescription')}><form className="auth-form" onSubmit={(event) => void onSubmit(event)}><Field label={t('authentication.newPassword')} name="password" type="password" autoComplete="new-password" minLength={12} />{state === 'error' && <p className="auth-error" role="alert">{t('authentication.resetInvalid')}</p>}<button className="primary-button" type="submit">{t('authentication.savePassword')}</button></form></AuthFrame>;
 }
 
 export function InviteAcceptForm({ token, submit }: { token: string; submit: (input: { token: string; name: string; password: string }) => Promise<SubmitResult> }) {
+  const { t } = useI18n();
   const [state, setState] = useState<'idle' | 'success' | 'error'>('idle');
   async function onSubmit(event: FormEvent<HTMLFormElement>) { event.preventDefault(); const data = new FormData(event.currentTarget); const result = await submit({ token, name: String(data.get('name')), password: String(data.get('password')) }); setState(result.ok ? 'success' : 'error'); }
-  if (state === 'success') return <AuthFrame title="Запрошення прийнято" description="Ваш доступ менеджера активовано."><Link className="primary-button button-link" href="/login">Увійти</Link></AuthFrame>;
-  return <AuthFrame title="Приєднатися до команди" description="Створіть профіль менеджера для роботи в AutoSale."><form className="auth-form" onSubmit={(event) => void onSubmit(event)}><Field label="Ім’я" name="name" autoComplete="name" /><Field label="Пароль" name="password" type="password" autoComplete="new-password" minLength={12} />{state === 'error' && <p className="auth-error" role="alert">Запрошення недійсне або протерміноване.</p>}<button className="primary-button" type="submit">Приєднатися</button></form></AuthFrame>;
+  if (state === 'success') return <AuthFrame title={t('authentication.inviteAccepted')} description={t('authentication.inviteAcceptedDescription')}><Link className="primary-button button-link" href="/login">{t('authentication.login')}</Link></AuthFrame>;
+  return <AuthFrame title={t('authentication.joinTitle')} description={t('authentication.joinDescription')}><form className="auth-form" onSubmit={(event) => void onSubmit(event)}><Field label={t('authentication.name')} name="name" autoComplete="name" /><Field label={t('authentication.password')} name="password" type="password" autoComplete="new-password" minLength={12} />{state === 'error' && <p className="auth-error" role="alert">{t('authentication.inviteInvalid')}</p>}<button className="primary-button" type="submit">{t('authentication.join')}</button></form></AuthFrame>;
 }
 
 export function AuthFrame({ title, description, children }: { title: string; description: string; children: ReactNode }) {
-  return <main className="auth-layout"><section className="auth-brand-panel"><Link className="brand" href="/">AutoSale</Link><div><h1>Замовлення з чатів — у зрозумілому робочому процесі.</h1><p>AI розпізнає дані, менеджер контролює результат, а команда працює в одному просторі.</p></div></section><section className="auth-content"><div className="auth-card"><header><h2>{title}</h2><p>{description}</p></header>{children}</div></section></main>;
+  const { t } = useI18n();
+  return <main className="auth-layout"><section className="auth-brand-panel"><Link className="brand" href="/">AutoSale</Link><div><h1>{t('authentication.brandTitle')}</h1><p>{t('authentication.brandDescription')}</p></div></section><section className="auth-content"><div className="auth-card"><header><h2>{title}</h2><p>{description}</p></header>{children}</div></section></main>;
 }
 
 function Field({ label, hint, ...input }: { label: string; hint?: string; name: string; type?: string; autoComplete?: string; minLength?: number }) {

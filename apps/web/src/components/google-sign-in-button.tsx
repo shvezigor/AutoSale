@@ -1,8 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import { useI18n } from '../i18n/i18n-provider';
 
 export function GoogleSignInButton({ returnPath }: { returnPath?: string | undefined }) {
+  const { t } = useI18n();
   const [state, setState] = useState<'idle' | 'loading' | 'error'>('idle');
 
   async function start() {
@@ -26,9 +28,9 @@ export function GoogleSignInButton({ returnPath }: { returnPath?: string | undef
   return <div className="google-sign-in">
     <button className="google-button" disabled={state === 'loading'} onClick={() => void start()} type="button">
       <span aria-hidden="true" className="google-mark">G</span>
-      {state === 'loading' ? 'Переходимо до Google…' : 'Продовжити з Google'}
+      {state === 'loading' ? t('authentication.googleLoading') : t('authentication.googleContinue')}
     </button>
-    {state === 'error' && <p className="auth-error" role="alert">Не вдалося розпочати вхід через Google. Спробуйте ще раз.</p>}
-    <div className="auth-separator"><span>або</span></div>
+    {state === 'error' && <p className="auth-error" role="alert">{t('authentication.googleError')}</p>}
+    <div className="auth-separator"><span>{t('authentication.or')}</span></div>
   </div>;
 }

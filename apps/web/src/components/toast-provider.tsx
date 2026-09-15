@@ -1,6 +1,8 @@
 'use client';
 
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useOptionalI18n } from '../i18n/i18n-provider';
+import { createTranslator } from '../i18n/translator';
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
 export type ToastInput = { type: ToastType; title: string; message?: string };
@@ -10,6 +12,7 @@ type ToastContextValue = { show(input: ToastInput): string; dismiss(id: string):
 const ToastContext = createContext<ToastContextValue | null>(null);
 
 export function ToastProvider({ children }: { children: ReactNode }) {
+  const t = useOptionalI18n()?.t ?? createTranslator('uk');
   const [items, setItems] = useState<ToastItem[]>([]);
   const sequence = useRef(0);
   const dismiss = useCallback((id: string) => setItems((current) => current.filter((item) => item.id !== id)), []);
@@ -22,7 +25,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
   return <ToastContext.Provider value={value}>
     {children}
-    <div className="toast-viewport" aria-label="Сповіщення">
+    <div className="toast-viewport" aria-label={t('toast.viewport')}>
       {items.map((item) => <Toast key={item.id} item={item} dismiss={dismiss} />)}
     </div>
   </ToastContext.Provider>;
@@ -35,6 +38,7 @@ export function useToast(): ToastContextValue {
 }
 
 function Toast({ item, dismiss }: { item: ToastItem; dismiss(id: string): void }) {
+  const t = useOptionalI18n()?.t ?? createTranslator('uk');
   const [paused, setPaused] = useState(false);
   const duration = item.type === 'success' || item.type === 'info' ? 5_000 : item.type === 'warning' ? 8_000 : null;
   useEffect(() => {
@@ -52,7 +56,7 @@ function Toast({ item, dismiss }: { item: ToastItem; dismiss(id: string): void }
   >
     <span className="toast-icon" aria-hidden="true">{toastIcon(item.type)}</span>
     <div className="toast-copy"><strong>{item.title}</strong>{item.message && <p>{item.message}</p>}</div>
-    <button type="button" aria-label="Закрити сповіщення" onClick={() => dismiss(item.id)}>×</button>
+    <button type="button" aria-label={t('toast.close')} onClick={() => dismiss(item.id)}>×</button>
   </article>;
 }
 

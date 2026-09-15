@@ -2,6 +2,8 @@
 
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useModalFocus } from './use-modal-focus';
+import { useOptionalI18n } from '../i18n/i18n-provider';
+import { createTranslator } from '../i18n/translator';
 
 type ConfirmInput = { title: string; description: string; confirmLabel?: string; cancelLabel?: string; tone?: 'default' | 'danger' };
 type PendingConfirmation = ConfirmInput & { resolve(value: boolean): void };
@@ -10,6 +12,7 @@ type ConfirmContextValue = (input: ConfirmInput) => Promise<boolean>;
 const ConfirmContext = createContext<ConfirmContextValue | null>(null);
 
 export function ConfirmProvider({ children }: { children: ReactNode }) {
+  const t = useOptionalI18n()?.t ?? createTranslator('uk');
   const [pending, setPending] = useState<PendingConfirmation | null>(null);
   const dialog = useRef<HTMLElement>(null);
   const resolver = useRef<((value: boolean) => void) | null>(null);
@@ -33,8 +36,8 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
         <h2 id="confirm-title">{pending.title}</h2>
         <p id="confirm-description">{pending.description}</p>
         <div className="confirm-actions">
-          <button className="secondary-button" type="button" onClick={() => settle(false)}>{pending.cancelLabel ?? 'Скасувати'}</button>
-          <button className={pending.tone === 'danger' ? 'danger-button' : 'primary-button'} type="button" onClick={() => settle(true)}>{pending.confirmLabel ?? 'Підтвердити'}</button>
+          <button className="secondary-button" type="button" onClick={() => settle(false)}>{pending.cancelLabel ?? t('common.cancel')}</button>
+          <button className={pending.tone === 'danger' ? 'danger-button' : 'primary-button'} type="button" onClick={() => settle(true)}>{pending.confirmLabel ?? t('common.confirm')}</button>
         </div>
       </section>
     </div>}

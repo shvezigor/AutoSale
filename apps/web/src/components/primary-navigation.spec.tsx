@@ -1,20 +1,25 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { I18nProvider } from '../i18n/i18n-provider';
 import { PrimaryNavigation } from './primary-navigation';
 
 const { usePathname } = vi.hoisted(() => ({ usePathname: vi.fn() }));
-vi.mock('next/navigation', () => ({ usePathname }));
+vi.mock('next/navigation', () => ({ usePathname, useRouter: () => ({ refresh: vi.fn() }) }));
 
 const managerSession = { name: 'Іван', email: 'manager@example.com', membershipRole: 'MANAGER' as const };
 const ownerSession = { name: 'Олена', email: 'owner@example.com', membershipRole: 'OWNER' as const };
 
 afterEach(() => { cleanup(); usePathname.mockReset(); });
 
+function renderNavigation(session: Parameters<typeof PrimaryNavigation>[0]['session'] = ownerSession, locale: 'uk' | 'en' = 'uk', props: Partial<Parameters<typeof PrimaryNavigation>[0]> = {}) {
+  return render(<I18nProvider locale={locale} authenticated><PrimaryNavigation session={session} {...props} /></I18nProvider>);
+}
+
 describe('PrimaryNavigation', () => {
   it('shows settings but hides team management from managers', () => {
     usePathname.mockReturnValue('/orders');
-    render(<PrimaryNavigation session={managerSession} />);
+    renderNavigation(managerSession);
     expect(screen.queryByRole('link', { name: 'Команда' })).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Налаштування' })).toHaveAttribute('href', '/settings');
     expect(screen.getByRole('link', { name: 'Каталог' })).toHaveAttribute('href', '/catalogue');
@@ -22,7 +27,7 @@ describe('PrimaryNavigation', () => {
 
   it('leaves profile actions to the application header', () => {
     usePathname.mockReturnValue('/conversations');
-    render(<PrimaryNavigation session={ownerSession} />);
+    renderNavigation();
     expect(screen.queryByRole('button', { name: 'Вийти' })).not.toBeInTheDocument();
     expect(screen.queryByText('Власник')).not.toBeInTheDocument();
   });
@@ -34,16 +39,24 @@ describe('PrimaryNavigation', () => {
     ['/conversations/456', 'Діалоги'],
   ])('marks %s as the current section', (pathname, label) => {
     usePathname.mockReturnValue(pathname);
-    render(<PrimaryNavigation session={ownerSession} />);
+    renderNavigation();
 
     expect(screen.getByRole('link', { name: label })).toHaveAttribute('aria-current', 'page');
   });
 
   it('keeps every destination named when the navigation is collapsed', () => {
     usePathname.mockReturnValue('/settings');
-    render(<PrimaryNavigation session={ownerSession} collapsed />);
+    renderNavigation(ownerSession, 'uk', { collapsed: true });
 
     expect(screen.getByRole('link', { name: 'Замовлення' })).toHaveAttribute('aria-label', 'Замовлення');
     expect(screen.getByRole('link', { name: 'Налаштування' })).toHaveAttribute('aria-current', 'page');
+  });
+
+  it('renders destinations and collapse actions in English', () => {
+    usePathname.mockReturnValue('/orders');
+    renderNavigation(ownerSession, 'en', { onToggleCollapse: vi.fn() });
+    expect(screen.getByRole('link', { name: 'Conversations' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Orders' })).toHaveAttribute('aria-current', 'page');
+    expect(screen.getByRole('button', { name: 'Collapse menu' })).toBeInTheDocument();
   });
 });

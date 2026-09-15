@@ -1,14 +1,21 @@
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
+
+import { I18nProvider } from '../i18n/i18n-provider';
 import { ForgotPasswordForm, LoginForm, RegisterForm } from './auth-form';
+
+function renderAuth(node: React.ReactNode, locale: 'uk' | 'en' = 'uk') {
+  return render(<I18nProvider locale={locale} authenticated={false}>{node}</I18nProvider>);
+}
 
 afterEach(cleanup);
 
 describe('authentication forms', () => {
   it('submits login credentials and shows a safe error', async () => {
     const submit = vi.fn().mockResolvedValue({ ok: false });
-    render(<LoginForm submit={submit} />);
+    renderAuth(<LoginForm submit={submit} />);
 
     expect(screen.getByRole('button', { name: 'Продовжити з Google' })).toBeInTheDocument();
 
@@ -22,7 +29,7 @@ describe('authentication forms', () => {
 
   it('collects all required owner registration fields', async () => {
     const submit = vi.fn().mockResolvedValue({ ok: true });
-    render(<RegisterForm submit={submit} />);
+    renderAuth(<RegisterForm submit={submit} />);
 
     expect(screen.getByRole('button', { name: 'Продовжити з Google' })).toBeInTheDocument();
 
@@ -37,7 +44,7 @@ describe('authentication forms', () => {
   });
 
   it('shows the development verification link returned by the API', async () => {
-    render(<RegisterForm submit={vi.fn().mockResolvedValue({ ok: true, previewUrl: 'http://localhost/verify-email?token=test-token' })} />);
+    renderAuth(<RegisterForm submit={vi.fn().mockResolvedValue({ ok: true, previewUrl: 'http://localhost/verify-email?token=test-token' })} />);
     fireEvent.change(screen.getByLabelText('Ім’я'), { target: { value: 'Олена' } });
     fireEvent.change(screen.getByLabelText('Назва організації'), { target: { value: 'Крамниця' } });
     fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'owner@example.com' } });
@@ -47,9 +54,17 @@ describe('authentication forms', () => {
   });
 
   it('uses a neutral success message for password recovery', async () => {
-    render(<ForgotPasswordForm submit={vi.fn().mockResolvedValue({ ok: true })} />);
+    renderAuth(<ForgotPasswordForm submit={vi.fn().mockResolvedValue({ ok: true })} />);
     fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'owner@example.com' } });
     fireEvent.click(screen.getByRole('button', { name: 'Надіслати посилання' }));
     expect(await screen.findByText('Якщо акаунт існує, лист уже надіслано.')).toBeInTheDocument();
+  });
+
+  it('renders the login journey in English', () => {
+    renderAuth(<LoginForm submit={vi.fn()} />, 'en');
+    expect(screen.getByRole('heading', { name: 'Sign in to AutoSale' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Password')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Continue with Google' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Sign in' })).toBeInTheDocument();
   });
 });

@@ -4,24 +4,25 @@ import type { PublicSession } from '../../../../packages/contracts/src/auth';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { ComponentType, SVGProps } from 'react';
+import { useI18n } from '../i18n/i18n-provider';
 
 type NavigationSession = Pick<PublicSession, 'name' | 'email' | 'membershipRole'>;
 type NavigationIcon = ComponentType<SVGProps<SVGSVGElement>>;
 
 type NavigationItem = {
   href: string;
-  label: string;
+  labelKey: 'navigation.conversations' | 'navigation.orders' | 'navigation.catalogue' | 'navigation.team' | 'navigation.settings';
   icon: NavigationIcon;
   ownerOnly?: boolean;
   requiresMembership?: boolean;
 };
 
 const navigationItems: NavigationItem[] = [
-  { href: '/conversations', label: 'Діалоги', icon: ConversationIcon },
-  { href: '/orders', label: 'Замовлення', icon: OrdersIcon },
-  { href: '/catalogue', label: 'Каталог', icon: CatalogueIcon, requiresMembership: true },
-  { href: '/team', label: 'Команда', icon: TeamIcon, ownerOnly: true },
-  { href: '/settings', label: 'Налаштування', icon: SettingsIcon, requiresMembership: true },
+  { href: '/conversations', labelKey: 'navigation.conversations', icon: ConversationIcon },
+  { href: '/orders', labelKey: 'navigation.orders', icon: OrdersIcon },
+  { href: '/catalogue', labelKey: 'navigation.catalogue', icon: CatalogueIcon, requiresMembership: true },
+  { href: '/team', labelKey: 'navigation.team', icon: TeamIcon, ownerOnly: true },
+  { href: '/settings', labelKey: 'navigation.settings', icon: SettingsIcon, requiresMembership: true },
 ];
 
 export function isNavigationItemActive(pathname: string, href: string) {
@@ -30,7 +31,7 @@ export function isNavigationItemActive(pathname: string, href: string) {
 
 export function PrimaryNavigation({
   session,
-  ariaLabel = 'Головна навігація',
+  ariaLabel,
   className = '',
   navId,
   onNavigate,
@@ -46,6 +47,7 @@ export function PrimaryNavigation({
   onToggleCollapse?: () => void;
 }) {
   const pathname = usePathname();
+  const { t } = useI18n();
   const navigationHandler = onNavigate ? { onClick: onNavigate } : {};
   const visibleItems = navigationItems.filter((item) => {
     if (item.ownerOnly) return session.membershipRole === 'OWNER';
@@ -56,16 +58,17 @@ export function PrimaryNavigation({
   return <aside className={`primary-nav ${className}`.trim()}>
     <div className="primary-nav-brand-row">
       <Link className="brand" href="/conversations" aria-label="AutoSale" {...navigationHandler}><span className="brand-mark" aria-hidden="true">A</span><span className="brand-label">AutoSale</span></Link>
-      {onToggleCollapse && <button className="sidebar-toggle" type="button" aria-label={collapsed ? 'Розгорнути меню' : 'Згорнути меню'} aria-expanded={!collapsed} onClick={onToggleCollapse}><CollapseIcon data-collapsed={collapsed} /></button>}
+      {onToggleCollapse && <button className="sidebar-toggle" type="button" aria-label={collapsed ? t('navigation.expand') : t('navigation.collapse')} aria-expanded={!collapsed} onClick={onToggleCollapse}><CollapseIcon data-collapsed={collapsed} /></button>}
     </div>
-    <nav aria-label={ariaLabel} id={navId}>
+    <nav aria-label={ariaLabel ?? t('navigation.mainLabel')} id={navId}>
       {visibleItems.map((item) => {
         const Icon = item.icon;
         const active = isNavigationItemActive(pathname, item.href);
-        return <Link className={`nav-item${active ? ' active' : ''}`} href={item.href} aria-label={collapsed ? item.label : undefined} aria-current={active ? 'page' : undefined} {...navigationHandler} key={item.href}>
+        const label = t(item.labelKey);
+        return <Link className={`nav-item${active ? ' active' : ''}`} href={item.href} aria-label={collapsed ? label : undefined} aria-current={active ? 'page' : undefined} {...navigationHandler} key={item.href}>
           <Icon className="nav-icon" aria-hidden="true" />
-          <span className="nav-label">{item.label}</span>
-          <span className="nav-tooltip" aria-hidden="true">{item.label}</span>
+          <span className="nav-label">{label}</span>
+          <span className="nav-tooltip" aria-hidden="true">{label}</span>
         </Link>;
       })}
     </nav>

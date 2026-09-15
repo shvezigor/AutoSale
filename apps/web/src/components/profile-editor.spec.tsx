@@ -10,6 +10,7 @@ import { ActivityProvider } from './activity-provider';
 import { ConfirmProvider } from './confirm-provider';
 import { ProfileEditor } from './profile-editor';
 import { ToastProvider } from './toast-provider';
+import { I18nProvider } from '../i18n/i18n-provider';
 
 const baseProfile: ProfileResponse = {
   userId: '11111111-1111-4111-8111-111111111111',
@@ -25,11 +26,11 @@ const baseProfile: ProfileResponse = {
   lastLoginAt: '2026-09-14T11:00:00.000Z',
 };
 
-function render(initial: ProfileResponse = baseProfile) {
+function render(initial: ProfileResponse = baseProfile, locale: 'uk' | 'en' = 'uk') {
   return rtlRender(
-    <ToastProvider><ActivityProvider><ConfirmProvider>
+    <I18nProvider locale={locale} authenticated><ToastProvider><ActivityProvider><ConfirmProvider>
       <ProfileEditor initial={initial} />
-    </ConfirmProvider></ActivityProvider></ToastProvider>,
+    </ConfirmProvider></ActivityProvider></ToastProvider></I18nProvider>,
   );
 }
 
@@ -143,5 +144,13 @@ describe('ProfileEditor', () => {
     expect(refresh).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole('button', { name: 'Вийти з акаунта' }));
     await waitFor(() => expect(refresh).toHaveBeenCalledOnce());
+  });
+
+  it('renders profile controls and account facts in English', () => {
+    render(baseProfile, 'en');
+    expect(screen.getByRole('heading', { name: 'Personal information' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Name')).toHaveValue('Ігор Швець');
+    expect(screen.getByRole('button', { name: 'Save changes' })).toBeInTheDocument();
+    expect(within(screen.getByRole('region', { name: 'Account' })).getByText('Owner')).toBeInTheDocument();
   });
 });

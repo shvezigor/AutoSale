@@ -11,11 +11,13 @@ import { ToastProvider } from './toast-provider';
 import { ConfirmProvider } from './confirm-provider';
 import { SIDEBAR_STORAGE_KEY } from './sidebar-preference';
 import { useModalFocus } from './use-modal-focus';
+import { useI18n } from '../i18n/i18n-provider';
 
 type ShellSession = Pick<PublicSession, 'name' | 'email' | 'membershipRole' | 'avatarUrl'>;
 
 export function AuthenticatedShell({ session, children }: { session: ShellSession; children: ReactNode }) {
   const pathname = usePathname();
+  const { t } = useI18n();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const menuTrigger = useRef<HTMLButtonElement>(null);
@@ -38,6 +40,6 @@ export function AuthenticatedShell({ session, children }: { session: ShellSessio
   return <ToastProvider><ActivityProvider><ConfirmProvider><div className="authenticated-shell">
     <PrimaryNavigation collapsed={collapsed} onToggleCollapse={toggleSidebar} session={session} />
     <div className="authenticated-workspace" inert={mobileOpen}><AppHeader menuOpen={mobileOpen} menuTriggerRef={menuTrigger} onMenuToggle={() => { menuTrigger.current?.focus(); setMobileOpen(true); }} session={session} />{children}</div>
-    {mobileOpen && <div ref={drawer} className="mobile-nav-backdrop" role="dialog" aria-modal="true" aria-label="Меню розділів" onMouseDown={(event) => { if (event.target === event.currentTarget) closeMobile(); }}><div className="mobile-nav-drawer"><button className="secondary-button" type="button" onClick={closeMobile}>Закрити меню</button><PrimaryNavigation ariaLabel="Мобільна навігація" navId="mobile-navigation" onNavigate={closeMobile} session={session} /></div></div>}
+    {mobileOpen && <div ref={drawer} className="mobile-nav-backdrop" role="dialog" aria-modal="true" aria-label={t('header.sectionsMenu')} onMouseDown={(event) => { if (event.target === event.currentTarget) closeMobile(); }}><div className="mobile-nav-drawer"><button className="secondary-button" type="button" onClick={closeMobile}>{t('header.closeMenu')}</button><PrimaryNavigation ariaLabel={t('navigation.mobileLabel')} navId="mobile-navigation" onNavigate={closeMobile} session={session} /></div></div>}
   </div></ConfirmProvider></ActivityProvider></ToastProvider>;
 }

@@ -18,6 +18,13 @@ type I18nContextValue = {
 };
 
 const I18nContext = createContext<I18nContextValue | null>(null);
+const fallbackI18n: I18nContextValue = {
+  locale: 'uk',
+  t: createTranslator('uk'),
+  formatDate: (input, options) => new Intl.DateTimeFormat('uk-UA', { timeZone: 'Europe/Kyiv', ...options }).format(input instanceof Date ? input : new Date(input)),
+  formatNumber: (input, options) => new Intl.NumberFormat('uk-UA', options).format(input),
+  setLocale: async () => undefined,
+};
 
 function persistLocaleCookie(locale: AppLocale) {
   const secure = window.location.protocol === 'https:' ? '; Secure' : '';
@@ -82,7 +89,9 @@ export function I18nProvider({
 }
 
 export function useI18n(): I18nContextValue {
-  const context = useContext(I18nContext);
-  if (!context) throw new Error('useI18n must be used within I18nProvider');
-  return context;
+  return useContext(I18nContext) ?? fallbackI18n;
+}
+
+export function useOptionalI18n(): I18nContextValue | null {
+  return useContext(I18nContext);
 }

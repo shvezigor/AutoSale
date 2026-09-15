@@ -10,6 +10,7 @@ import { useActivity } from './activity-provider';
 import { useConfirm } from './confirm-provider';
 import { LoadingButton } from './loading-button';
 import { useToast } from './toast-provider';
+import { useI18n } from '../i18n/i18n-provider';
 
 const AVATAR_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
 const MAX_AVATAR_BYTES = 5 * 1024 * 1024;
@@ -34,18 +35,19 @@ export function ProfileEditor({ initial }: { initial: ProfileResponse }) {
   const confirm = useConfirm();
   const toast = useToast();
   const router = useRouter();
+  const { formatDate, t } = useI18n();
 
   async function saveDetails(event: FormEvent) {
     event.preventDefault();
     const normalizedPhone = phone.replace(/[\s()-]/g, '');
     if (normalizedPhone && !E164_PHONE.test(normalizedPhone)) {
-      setPhoneError('Вкажіть номер у міжнародному форматі, наприклад +380501112233.');
+      setPhoneError(t('profile.phoneInvalid'));
       return;
     }
     setPhoneError('');
     setPending('details');
     try {
-      const response = await activity.run('Зберігаємо профіль', () => mutatingFetch('/api/profile', {
+      const response = await activity.run(t('profile.saving'), () => mutatingFetch('/api/profile', {
         method: 'PATCH',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ name: name.trim(), phone: normalizedPhone || null, locale: profile.locale }),
@@ -55,10 +57,10 @@ export function ProfileEditor({ initial }: { initial: ProfileResponse }) {
       setProfile(updated);
       setName(updated.name);
       setPhone(updated.phone ?? '');
-      toast.show({ type: 'success', title: 'Профіль оновлено' });
+      toast.show({ type: 'success', title: t('profile.updated') });
       router.refresh();
     } catch {
-      toast.show({ type: 'error', title: 'Не вдалося оновити профіль', message: 'Перевірте дані та спробуйте ще раз.' });
+      toast.show({ type: 'error', title: t('profile.updateFailed'), message: t('profile.checkAndRetry') });
     } finally {
       setPending(null);
     }
@@ -69,11 +71,11 @@ export function ProfileEditor({ initial }: { initial: ProfileResponse }) {
     setAvatarError('');
     if (!file) return;
     if (!AVATAR_TYPES.has(file.type)) {
-      setAvatarError('Оберіть зображення JPEG, PNG або WebP.');
+      setAvatarError(t('profile.photoTypeInvalid'));
       return;
     }
     if (file.size > MAX_AVATAR_BYTES) {
-      setAvatarError('Розмір фото має бути не більше 5 МБ.');
+      setAvatarError(t('profile.photoSizeInvalid'));
       return;
     }
     setAvatarFile(file);
@@ -85,16 +87,16 @@ export function ProfileEditor({ initial }: { initial: ProfileResponse }) {
     body.append('file', avatarFile);
     setPending('avatar');
     try {
-      const response = await activity.run('Завантажуємо фото профілю', () => mutatingFetch('/api/profile/avatar', { method: 'POST', body }));
+      const response = await activity.run(t('profile.uploading'), () => mutatingFetch('/api/profile/avatar', { method: 'POST', body }));
       if (!response.ok) throw new Error('AVATAR_UPLOAD_FAILED');
       const updated = await response.json() as ProfileResponse;
       setProfile(updated);
       setAvatarFile(null);
       if (avatarInput.current) avatarInput.current.value = '';
-      toast.show({ type: 'success', title: 'Фото профілю оновлено' });
+      toast.show({ type: 'success', title: t('profile.photoUpdated') });
       router.refresh();
     } catch {
-      toast.show({ type: 'error', title: 'Не вдалося завантажити фото', message: 'Спробуйте інше зображення.' });
+      toast.show({ type: 'error', title: t('profile.photoUpdateFailed'), message: t('profile.useAnotherPhoto') });
     } finally {
       setPending(null);
     }
@@ -102,21 +104,21 @@ export function ProfileEditor({ initial }: { initial: ProfileResponse }) {
 
   async function deleteAvatar() {
     if (!await confirm({
-      title: 'Видалити фото профілю?',
-      description: 'Замість фото буде показано ініціал вашого імені.',
-      confirmLabel: 'Так, видалити',
+      title: t('profile.deleteConfirmTitle'),
+      description: t('profile.deleteConfirmDescription'),
+      confirmLabel: t('profile.deleteConfirm'),
       tone: 'danger',
     })) return;
     setPending('avatar-delete');
     try {
-      const response = await activity.run('Видаляємо фото профілю', () => mutatingFetch('/api/profile/avatar', { method: 'DELETE' }));
+      const response = await activity.run(t('profile.deleting'), () => mutatingFetch('/api/profile/avatar', { method: 'DELETE' }));
       if (!response.ok) throw new Error('AVATAR_DELETE_FAILED');
       const updated = await response.json() as ProfileResponse;
       setProfile(updated);
-      toast.show({ type: 'success', title: 'Фото профілю видалено' });
+      toast.show({ type: 'success', title: t('profile.photoDeleted') });
       router.refresh();
     } catch {
-      toast.show({ type: 'error', title: 'Не вдалося видалити фото' });
+      toast.show({ type: 'error', title: t('profile.photoDeleteFailed') });
     } finally {
       setPending(null);
     }
@@ -125,13 +127,13 @@ export function ProfileEditor({ initial }: { initial: ProfileResponse }) {
   async function changePassword(event: FormEvent) {
     event.preventDefault();
     if (newPassword !== confirmation) {
-      setPasswordError('Новий пароль і підтвердження не збігаються.');
+      setPasswordError(t('profile.passwordsMismatch'));
       return;
     }
     setPasswordError('');
     setPending('password');
     try {
-      const response = await activity.run('Змінюємо пароль', () => mutatingFetch('/api/profile/password', {
+      const response = await activity.run(t('profile.changing'), () => mutatingFetch('/api/profile/password', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ currentPassword, newPassword, confirmation }),
@@ -140,9 +142,9 @@ export function ProfileEditor({ initial }: { initial: ProfileResponse }) {
       setCurrentPassword('');
       setNewPassword('');
       setConfirmation('');
-      toast.show({ type: 'success', title: 'Пароль змінено' });
+      toast.show({ type: 'success', title: t('profile.passwordChanged') });
     } catch {
-      toast.show({ type: 'error', title: 'Не вдалося змінити пароль', message: 'Перевірте поточний пароль і спробуйте ще раз.' });
+      toast.show({ type: 'error', title: t('profile.passwordChangeFailed'), message: t('profile.passwordRetry') });
     } finally {
       setPending(null);
     }
@@ -151,11 +153,11 @@ export function ProfileEditor({ initial }: { initial: ProfileResponse }) {
   async function logout() {
     setPending('logout');
     try {
-      const response = await activity.run('Виходимо з акаунта', () => mutatingFetch('/api/auth/logout', { method: 'POST' }));
+      const response = await activity.run(t('header.signingOut'), () => mutatingFetch('/api/auth/logout', { method: 'POST' }));
       if (!response.ok) throw new Error('LOGOUT_FAILED');
       router.refresh();
     } catch {
-      toast.show({ type: 'error', title: 'Не вдалося вийти з акаунта' });
+      toast.show({ type: 'error', title: t('profile.signOutFailed') });
     } finally {
       setPending(null);
     }
@@ -166,71 +168,56 @@ export function ProfileEditor({ initial }: { initial: ProfileResponse }) {
   return <div className="profile-sections">
     <section className="profile-card profile-personal-card" aria-labelledby="profile-personal-heading">
       <div className="profile-card-heading">
-        <div><h2 id="profile-personal-heading">Особиста інформація</h2><p>Ці дані бачить ваша команда в AutoSale.</p></div>
+        <div><h2 id="profile-personal-heading">{t('profile.personalTitle')}</h2><p>{t('profile.personalDescription')}</p></div>
       </div>
       <div className="profile-personal-grid">
         <div className="profile-avatar-panel">
           {profile.avatarUrl
-            ? <img className="profile-avatar" src={profile.avatarUrl} alt={`Фото профілю ${profile.name}`} />
-            : <span className="profile-avatar profile-avatar-fallback" aria-label={`Ініціал ${displayInitial}`}>{displayInitial}</span>}
+            ? <img className="profile-avatar" src={profile.avatarUrl} alt={t('header.profilePhoto', { name: profile.name })} />
+            : <span className="profile-avatar profile-avatar-fallback" aria-label={t('header.initial', { initial: displayInitial })}>{displayInitial}</span>}
           <div className="profile-avatar-controls">
-            <label className="profile-file-field">Нове фото профілю<input ref={avatarInput} type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => chooseAvatar(event.target.files?.[0] ?? null)} /></label>
-            <small>JPEG, PNG або WebP, до 5 МБ.</small>
+            <label className="profile-file-field">{t('profile.newPhoto')}<input ref={avatarInput} type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => chooseAvatar(event.target.files?.[0] ?? null)} /></label>
+            <small>{t('profile.photoHint')}</small>
             {avatarError && <p className="profile-field-error" role="alert">{avatarError}</p>}
             <div className="profile-inline-actions">
-              <LoadingButton className="primary-button" type="button" pending={pending === 'avatar'} pendingLabel="Завантажуємо…" disabled={!avatarFile || pending !== null} onClick={() => void uploadAvatar()}>Завантажити фото</LoadingButton>
-              {profile.avatarUrl && <LoadingButton className="danger-button" type="button" pending={pending === 'avatar-delete'} pendingLabel="Видаляємо…" disabled={pending !== null} onClick={() => void deleteAvatar()}>Видалити фото</LoadingButton>}
+              <LoadingButton className="primary-button" type="button" pending={pending === 'avatar'} pendingLabel={t('profile.uploading')} disabled={!avatarFile || pending !== null} onClick={() => void uploadAvatar()}>{t('profile.uploadPhoto')}</LoadingButton>
+              {profile.avatarUrl && <LoadingButton className="danger-button" type="button" pending={pending === 'avatar-delete'} pendingLabel={t('profile.deleting')} disabled={pending !== null} onClick={() => void deleteAvatar()}>{t('profile.deletePhoto')}</LoadingButton>}
             </div>
           </div>
         </div>
         <form className="profile-form" onSubmit={(event) => void saveDetails(event)}>
-          <label>Ім’я<input value={name} maxLength={120} onChange={(event) => setName(event.target.value)} /></label>
-          <label>Телефон<input value={phone} inputMode="tel" placeholder="+380501112233" aria-invalid={Boolean(phoneError)} onChange={(event) => { setPhone(event.target.value); setPhoneError(''); }} /></label>
+          <label>{t('profile.name')}<input value={name} maxLength={120} onChange={(event) => setName(event.target.value)} /></label>
+          <label>{t('profile.phone')}<input value={phone} inputMode="tel" placeholder="+380501112233" aria-invalid={Boolean(phoneError)} onChange={(event) => { setPhone(event.target.value); setPhoneError(''); }} /></label>
           {phoneError && <p className="profile-field-error" role="alert">{phoneError}</p>}
-          <LoadingButton className="primary-button" pending={pending === 'details'} pendingLabel="Зберігаємо…" disabled={!name.trim() || pending !== null}>Зберегти зміни</LoadingButton>
+          <LoadingButton className="primary-button" pending={pending === 'details'} pendingLabel={t('profile.saving')} disabled={!name.trim() || pending !== null}>{t('profile.saveChanges')}</LoadingButton>
         </form>
       </div>
     </section>
 
     <section className="profile-card" aria-labelledby="profile-security-heading">
-      <div className="profile-card-heading"><div><h2 id="profile-security-heading">Безпека</h2><p>Керуйте способом входу до свого акаунта.</p></div></div>
+      <div className="profile-card-heading"><div><h2 id="profile-security-heading">{t('profile.securityTitle')}</h2><p>{t('profile.securityDescription')}</p></div></div>
       {profile.canChangePassword
         ? <form className="profile-form profile-password-form" onSubmit={(event) => void changePassword(event)}>
-          <label>Поточний пароль<input type="password" autoComplete="current-password" value={currentPassword} onChange={(event) => setCurrentPassword(event.target.value)} /></label>
-          <label>Новий пароль<input type="password" autoComplete="new-password" value={newPassword} onChange={(event) => setNewPassword(event.target.value)} /></label>
-          <label>Повторіть новий пароль<input type="password" autoComplete="new-password" value={confirmation} onChange={(event) => setConfirmation(event.target.value)} /></label>
+          <label>{t('profile.currentPassword')}<input type="password" autoComplete="current-password" value={currentPassword} onChange={(event) => setCurrentPassword(event.target.value)} /></label>
+          <label>{t('profile.newPassword')}<input type="password" autoComplete="new-password" value={newPassword} onChange={(event) => setNewPassword(event.target.value)} /></label>
+          <label>{t('profile.repeatPassword')}<input type="password" autoComplete="new-password" value={confirmation} onChange={(event) => setConfirmation(event.target.value)} /></label>
           {passwordError && <p className="profile-field-error" role="alert">{passwordError}</p>}
-          <LoadingButton className="primary-button" pending={pending === 'password'} pendingLabel="Змінюємо…" disabled={!currentPassword || !newPassword || !confirmation || pending !== null}>Змінити пароль</LoadingButton>
+          <LoadingButton className="primary-button" pending={pending === 'password'} pendingLabel={t('profile.changing')} disabled={!currentPassword || !newPassword || !confirmation || pending !== null}>{t('profile.changePassword')}</LoadingButton>
         </form>
-        : <div className="profile-signin-method"><span className="google-mark" aria-hidden="true">G</span><div><strong>Вхід через Google</strong><p>Пароль для цього акаунта не зберігається в AutoSale.</p></div></div>}
+        : <div className="profile-signin-method"><span className="google-mark" aria-hidden="true">G</span><div><strong>{t('profile.googleSignIn')}</strong><p>{t('profile.googlePasswordDescription')}</p></div></div>}
     </section>
 
-    <section className="profile-card" aria-labelledby="profile-account-heading" aria-label="Акаунт">
-      <div className="profile-card-heading"><div><h2 id="profile-account-heading">Акаунт</h2><p>Системна інформація та поточний доступ.</p></div></div>
+    <section className="profile-card" aria-labelledby="profile-account-heading" aria-label={t('profile.accountTitle')}>
+      <div className="profile-card-heading"><div><h2 id="profile-account-heading">{t('profile.accountTitle')}</h2><p>{t('profile.accountDescription')}</p></div></div>
       <dl className="profile-facts">
         <div><dt>Email</dt><dd>{profile.email}</dd></div>
-        <div><dt>Роль</dt><dd>{membershipLabel(profile.membershipRole)}</dd></div>
-        <div><dt>Створено</dt><dd><ProfileTime value={profile.createdAt} /></dd></div>
-        <div><dt>Останній вхід</dt><dd>{profile.lastLoginAt ? <ProfileTime value={profile.lastLoginAt} /> : 'Ще не входили'}</dd></div>
+        <div><dt>{t('profile.role')}</dt><dd>{profile.membershipRole === 'OWNER' ? t('header.owner') : profile.membershipRole === 'MANAGER' ? t('header.manager') : t('profile.noTeam')}</dd></div>
+        <div><dt>{t('profile.created')}</dt><dd><time dateTime={profile.createdAt}>{formatDate(profile.createdAt, { dateStyle: 'medium', timeStyle: 'short' })}</time></dd></div>
+        <div><dt>{t('profile.lastLogin')}</dt><dd>{profile.lastLoginAt ? <time dateTime={profile.lastLoginAt}>{formatDate(profile.lastLoginAt, { dateStyle: 'medium', timeStyle: 'short' })}</time> : t('profile.neverLoggedIn')}</dd></div>
       </dl>
       <div className="profile-account-actions">
-        <LoadingButton className="secondary-button" type="button" pending={pending === 'logout'} pendingLabel="Виходимо…" disabled={pending !== null} onClick={() => void logout()}>Вийти з акаунта</LoadingButton>
+        <LoadingButton className="secondary-button" type="button" pending={pending === 'logout'} pendingLabel={t('header.signingOut')} disabled={pending !== null} onClick={() => void logout()}>{t('profile.signOutAccount')}</LoadingButton>
       </div>
     </section>
   </div>;
-}
-
-function ProfileTime({ value }: { value: string }) {
-  const formatted = new Intl.DateTimeFormat('uk-UA', {
-    timeZone: 'Europe/Kyiv',
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  }).format(new Date(value));
-  return <time dateTime={value}>{formatted}</time>;
-}
-
-function membershipLabel(role: ProfileResponse['membershipRole']) {
-  if (role === 'OWNER') return 'Власник';
-  if (role === 'MANAGER') return 'Менеджер';
-  return 'Без команди';
 }
