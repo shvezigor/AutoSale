@@ -1,6 +1,7 @@
 'use client';
 
 import { type KeyboardEvent, type ReactNode, useEffect, useRef, useState } from 'react';
+import { useI18n } from '../i18n/i18n-provider';
 
 export type SettingsTabId = 'social' | 'notifications' | 'suppliers' | 'delivery' | 'data' | 'orders';
 
@@ -12,6 +13,7 @@ type SettingsTab = {
 };
 
 export function SettingsTabs({ initialTab = 'social', tabs }: { initialTab?: SettingsTabId; tabs: SettingsTab[] }) {
+  const { t } = useI18n();
   const available = tabs.some((tab) => tab.id === initialTab) ? initialTab : tabs[0]?.id ?? 'social';
   const [activeTab, setActiveTab] = useState<SettingsTabId>(available);
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
@@ -45,7 +47,7 @@ export function SettingsTabs({ initialTab = 'social', tabs }: { initialTab?: Set
   if (!active) return null;
 
   return <>
-    <div className="settings-tabs" role="tablist" aria-label="Розділи налаштувань">
+    <div className="settings-tabs" role="tablist" aria-label={t('settings.sections')}>
       {tabs.map((tab, index) => <button
         key={tab.id}
         ref={(node) => { tabRefs.current[index] = node; }}

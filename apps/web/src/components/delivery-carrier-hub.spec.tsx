@@ -15,6 +15,9 @@ import { DeliveryCarrierHub } from './delivery-carrier-hub';
 import type { DeliverySettingsSummary } from './delivery-settings-card';
 import type { MeestSettingsSummary } from './meest-settings-card';
 import type { UkrposhtaSettingsSummary } from './ukrposhta-settings-card';
+import { I18nProvider } from '../i18n/i18n-provider';
+
+vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
 
 const nova: DeliverySettingsSummary = {
   enabled: true,
@@ -26,6 +29,13 @@ const ukrposhta: UkrposhtaSettingsSummary = { enabled: true, connection: null };
 afterEach(cleanup);
 
 describe('DeliveryCarrierHub', () => {
+  it('translates the carrier hub while keeping provider brands intact', () => {
+    render(<I18nProvider locale="en" authenticated={false}><DeliveryCarrierHub delivery={nova} meest={meest} ukrposhta={ukrposhta} role="OWNER" /></I18nProvider>);
+    expect(screen.getByLabelText('Carriers')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Nova Poshta.*TTNs/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Meest.*Cities/ })).toBeInTheDocument();
+    expect(screen.getAllByText('Not connected')).toHaveLength(2);
+  });
   it('starts with every carrier closed, then opens one carrier at a time', () => {
     render(<DeliveryCarrierHub delivery={nova} meest={meest} ukrposhta={ukrposhta} role="OWNER" />);
 

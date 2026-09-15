@@ -4,6 +4,7 @@ import { useState } from 'react';
 
 import { CatalogueSourceSettings, type CatalogueSourceConfiguration, type CatalogueSourceHealth } from './catalogue-source-settings';
 import { GoogleSheetsSettingsForm, type GoogleSheetsSettings } from './google-sheets-settings-form';
+import { useI18n } from '../i18n/i18n-provider';
 
 type DataIntegrationId = 'catalogue' | 'orders-export';
 
@@ -22,32 +23,31 @@ export function DataIntegrationHub({
   autoOpenCatalogue?: boolean;
   autoOpenOrders?: boolean;
 }) {
+  const { t } = useI18n();
   const [catalogue, setCatalogue] = useState<CatalogueSourceConfiguration | null>(configurations[0] ?? null);
   const [orders, setOrders] = useState(sheets);
   const [open, setOpen] = useState<DataIntegrationId | null>(autoOpenCatalogue ? 'catalogue' : autoOpenOrders ? 'orders-export' : null);
   const integrations = [
     {
       id: 'catalogue' as const,
-      name: 'Товари',
-      description: 'Каталог для розпізнавання замовлень',
+      name: t('settings.catalogueIntegration'), description: t('settings.catalogueIntegrationDescription'),
       status: catalogue?.status ?? 'NOT_CONFIGURED',
       content: <CatalogueSourceSettings embedded role="OWNER" sources={sources} configurations={configurations} googleConnected={googleConnected} autoOpenPicker={autoOpenCatalogue} onConfigurationChange={setCatalogue} />,
     },
     {
       id: 'orders-export' as const,
-      name: 'Експорт замовлень',
-      description: 'Запис підтверджених замовлень у таблицю',
+      name: t('settings.ordersExport'), description: t('settings.ordersExportDescription'),
       status: orders.status,
       content: <GoogleSheetsSettingsForm embedded initial={sheets} googleConnected={googleConnected} autoOpenPicker={autoOpenOrders} onSettingsChange={setOrders} />,
     },
   ];
   const connectedCount = integrations.filter((integration) => integration.status === 'ACTIVE').length;
 
-  return <div className="delivery-carrier-hub data-integration-hub" aria-label="Джерела та інтеграції">
+  return <div className="delivery-carrier-hub data-integration-hub" aria-label={t('settings.integrationsLabel')}>
     <div className="delivery-hub-summary">
-      <span>Підключено</span>
-      <strong>{connectedCount} із {integrations.length}</strong>
-      <p>Відкрийте інтеграцію, щоб переглянути або змінити її налаштування.</p>
+      <span>{t('settings.connected')}</span>
+      <strong>{t('settings.connectedCount', { connected: connectedCount, total: integrations.length })}</strong>
+      <p>{t('settings.openIntegration')}</p>
     </div>
     <div className="delivery-carrier-list">
       {integrations.map((integration) => {
@@ -58,7 +58,7 @@ export function DataIntegrationHub({
           <button id={buttonId} className="delivery-carrier-trigger" type="button" aria-expanded={expanded} aria-controls={panelId} onClick={() => setOpen(expanded ? null : integration.id)}>
             <span className={`delivery-carrier-mark data-${integration.id}`} aria-hidden="true">{integration.id === 'catalogue' ? 'ТВ' : 'ЕК'}</span>
             <span className="delivery-carrier-copy"><strong>{integration.name}</strong><small>{integration.description}</small></span>
-            <span className={`connection-status ${statusClass(integration.status)}`}>{statusLabel(integration.status)}</span>
+            <span className={`connection-status ${statusClass(integration.status)}`}>{statusLabel(integration.status, t)}</span>
             <svg className="delivery-carrier-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m6 8 4 4 4-4" /></svg>
           </button>
           {expanded && <div id={panelId} className="delivery-carrier-panel" role="region" aria-labelledby={buttonId}>{integration.content}</div>}
@@ -68,10 +68,10 @@ export function DataIntegrationHub({
   </div>;
 }
 
-function statusLabel(status: string): string {
+function statusLabel(status: string, t: ReturnType<typeof useI18n>['t']): string {
   return ({
-    ACTIVE: 'Активне', PENDING: 'Очікує перевірки', PAUSED: 'Призупинено', ERROR: 'Помилка',
-    INVALID_HEADERS: 'Потрібні колонки', DISCONNECTED: 'Немає доступу', NOT_CONFIGURED: 'Не налаштовано',
+    ACTIVE: t('settings.active'), PENDING: t('settings.pending'), PAUSED: t('settings.paused'), ERROR: t('settings.error'),
+    INVALID_HEADERS: t('settings.invalidHeaders'), DISCONNECTED: t('settings.disconnected'), NOT_CONFIGURED: t('settings.notConfigured'),
   } as Record<string, string>)[status] ?? status;
 }
 

@@ -17,12 +17,14 @@ import { DeliveryCarrierHub } from '../../../src/components/delivery-carrier-hub
 import { SocialChannelHub } from '../../../src/components/social-channel-hub';
 import { NotificationChannelHub } from '../../../src/components/notification-channel-hub';
 import { DataIntegrationHub } from '../../../src/components/data-integration-hub';
+import { createTranslator, type Translator } from '../../../src/i18n/translator';
 
 export const dynamic = 'force-dynamic';
 
 export default async function SettingsPage({ searchParams = Promise.resolve({}) }: { searchParams?: Promise<{ tab?: string | string[]; action?: string | string[] }> } = {}) {
   const session = await getServerSession();
   if (!session) return null;
+  const t = createTranslator(session.locale ?? 'uk');
   const query = await searchParams;
   const requestedTab = textParam(query.tab);
   const pickerAction = textParam(query.action);
@@ -54,7 +56,7 @@ export default async function SettingsPage({ searchParams = Promise.resolve({}) 
   const delivery = (await deliveryResponse.json()) as DeliverySettingsSummary;
   const meest = (await meestResponse.json()) as MeestSettingsSummary;
   const ukrposhta = (await ukrposhtaResponse.json()) as UkrposhtaSettingsSummary;
-  if (session.membershipRole === 'MANAGER') return <SettingsLayout google={google} instagram={instagram} telegram={telegram} telegramPreferences={telegramPreferences} delivery={delivery} meest={meest} ukrposhta={ukrposhta} initialTab={initialTab} pickerAction={pickerAction} session={session} />;
+  if (session.membershipRole === 'MANAGER') return <SettingsLayout t={t} google={google} instagram={instagram} telegram={telegram} telegramPreferences={telegramPreferences} delivery={delivery} meest={meest} ukrposhta={ukrposhta} initialTab={initialTab} pickerAction={pickerAction} session={session} />;
 
   const [supplierResponse, response, sheetsResponse, catalogueSourcesResponse] = await Promise.all([
     authenticatedApiFetch('/api/integrations/telegram/supplier'),
@@ -72,10 +74,11 @@ export default async function SettingsPage({ searchParams = Promise.resolve({}) 
     if (!sourceResponse.ok) throw new Error('Не вдалося завантажити джерело каталогу');
     return await sourceResponse.json() as CatalogueSourceConfiguration;
   }));
-  return <SettingsLayout google={google} instagram={instagram} telegram={telegram} telegramPreferences={telegramPreferences} delivery={delivery} meest={meest} ukrposhta={ukrposhta} supplier={supplier} initialTab={initialTab} pickerAction={pickerAction} session={session} settings={settings} sheets={sheets} catalogueSources={catalogueSources} catalogueConfigurations={catalogueConfigurations} />;
+  return <SettingsLayout t={t} google={google} instagram={instagram} telegram={telegram} telegramPreferences={telegramPreferences} delivery={delivery} meest={meest} ukrposhta={ukrposhta} supplier={supplier} initialTab={initialTab} pickerAction={pickerAction} session={session} settings={settings} sheets={sheets} catalogueSources={catalogueSources} catalogueConfigurations={catalogueConfigurations} />;
 }
 
 function SettingsLayout({
+  t,
   instagram,
   google,
   telegram,
@@ -92,6 +95,7 @@ function SettingsLayout({
   catalogueSources = [],
   catalogueConfigurations = [],
 }: {
+  t: Translator;
   instagram: InstagramConnectionSummary;
   google: GoogleConnectionSummary;
   telegram: TelegramConnectionSummary;
@@ -113,42 +117,37 @@ function SettingsLayout({
   const tabs = [
     {
       id: 'data' as const,
-      label: 'Дані',
-      description: 'Товари й експорт',
-      content: <section className="settings-section data-workspace"><div className="settings-section-heading"><h2>Дані та синхронізація</h2><p>{isManager ? 'Стан підключень без доступу до таблиць і даних клієнтів.' : 'Оберіть, звідки брати товари та куди записувати підтверджені замовлення.'}</p>{!isManager && <span className={`data-account-state status-${google.status.toLowerCase()}`}>{googleConnected && google.email ? `Google: ${google.email}` : 'Google попросить доступ під час вибору таблиці'}</span>}</div>{settings ? <DataIntegrationHub sources={catalogueSources} configurations={catalogueConfigurations} sheets={sheets!} googleConnected={googleConnected} autoOpenCatalogue={pickerAction === 'pick-catalogue'} autoOpenOrders={pickerAction === 'pick-orders'} /> : <div className="settings-card"><p>Власник керує джерелами даних. Менеджерам доступний лише стан інтеграцій.</p></div>}</section>,
+      label: t('settings.dataTab'),
+      description: t('settings.dataTabDescription'),
+      content: <section className="settings-section data-workspace"><div className="settings-section-heading"><h2>{t('settings.dataTitle')}</h2><p>{isManager ? t('settings.dataManagerDescription') : t('settings.dataOwnerDescription')}</p>{!isManager && <span className={`data-account-state status-${google.status.toLowerCase()}`}>{googleConnected && google.email ? t('settings.googleAccount', { email: google.email }) : t('settings.googlePickerAccess')}</span>}</div>{settings ? <DataIntegrationHub sources={catalogueSources} configurations={catalogueConfigurations} sheets={sheets!} googleConnected={googleConnected} autoOpenCatalogue={pickerAction === 'pick-catalogue'} autoOpenOrders={pickerAction === 'pick-orders'} /> : <div className="settings-card"><p>{t('settings.ownerManagesData')}</p></div>}</section>,
     },
     {
       id: 'social' as const,
-      label: 'Соцмережі / клієнти',
-      description: 'Instagram та інші канали',
-      content: <section className="settings-section"><div className="settings-section-heading"><h2>Підключення каналів</h2><p>Керуйте каналами, з яких AutoSale отримує діалоги та замовлення.</p></div><SocialChannelHub instagram={instagram} membershipRole={session.membershipRole} /></section>,
+      label: t('settings.socialTab'), description: t('settings.socialTabDescription'),
+      content: <section className="settings-section"><div className="settings-section-heading"><h2>{t('settings.socialTitle')}</h2><p>{t('settings.socialDescription')}</p></div><SocialChannelHub instagram={instagram} membershipRole={session.membershipRole} /></section>,
     },
     ...(settings ? [{
       id: 'orders' as const,
-      label: 'Замовлення',
-      description: 'Правила обробки',
-      content: <section className="settings-section"><div className="settings-section-heading"><h2>Правила обробки</h2><p>Визначте, коли менеджер має перевірити замовлення, яке розпізнав AI.</p></div><OrderSettingsForm initial={settings} /><DemoScenarioCard /></section>,
+      label: t('settings.ordersTab'), description: t('settings.ordersTabDescription'),
+      content: <section className="settings-section"><div className="settings-section-heading"><h2>{t('settings.ordersTitle')}</h2><p>{t('settings.ordersDescription')}</p></div><OrderSettingsForm initial={settings} /><DemoScenarioCard /></section>,
     }] : []),
     ...(supplier ? [{
       id: 'suppliers' as const,
-      label: 'Постачальники',
-      description: 'Замовлення та канали зв’язку',
-      content: <section className="settings-section"><div className="settings-section-heading"><h2>Робота з постачальниками</h2><p>Налаштуйте канали, через які передаватимете постачальникам підтверджені замовлення.</p></div><TelegramSupplierSettings initial={supplier} /></section>,
+      label: t('settings.suppliersTab'), description: t('settings.suppliersTabDescription'),
+      content: <section className="settings-section"><div className="settings-section-heading"><h2>{t('settings.suppliersTitle')}</h2><p>{t('settings.suppliersDescription')}</p></div><TelegramSupplierSettings initial={supplier} /></section>,
     }] : []),
     {
       id: 'delivery' as const,
-      label: 'Доставка',
-      description: 'Нова Пошта, Meest і Укрпошта',
-      content: <section className="settings-section delivery-settings-section"><div className="settings-section-heading"><h2>Доставка</h2><p>Підключіть перевізників та один раз задайте дані відправника.</p></div><DeliveryCarrierHub delivery={delivery} meest={meest} ukrposhta={ukrposhta} role={session.membershipRole!} /></section>,
+      label: t('settings.deliveryTab'), description: t('settings.deliveryTabDescription'),
+      content: <section className="settings-section delivery-settings-section"><div className="settings-section-heading"><h2>{t('settings.deliveryTitle')}</h2><p>{t('settings.deliveryDescription')}</p></div><DeliveryCarrierHub delivery={delivery} meest={meest} ukrposhta={ukrposhta} role={session.membershipRole!} /></section>,
     },
     {
       id: 'notifications' as const,
-      label: 'Сповіщення',
-      description: 'Telegram та інші канали',
-      content: <section className="settings-section"><div className="settings-section-heading"><h2>Сповіщення</h2><p>Оберіть канали, через які отримуватимете важливі події AutoSale.</p></div><NotificationChannelHub telegram={telegram} telegramPreferences={telegramPreferences} /></section>,
+      label: t('settings.notificationsTab'), description: t('settings.notificationsTabDescription'),
+      content: <section className="settings-section"><div className="settings-section-heading"><h2>{t('settings.notificationsTitle')}</h2><p>{t('settings.notificationsDescription')}</p></div><NotificationChannelHub telegram={telegram} telegramPreferences={telegramPreferences} /></section>,
     },
   ];
-  return <main className="settings-layout-content"><section className="settings-content"><header className="settings-header"><h1>Налаштування</h1><p>{isManager ? 'Переглядайте стан підключень.' : 'Керуйте підключеннями та автоматичною обробкою замовлень.'}</p></header><SettingsTabs initialTab={initialTab} tabs={tabs} /></section></main>;
+  return <main className="settings-layout-content"><section className="settings-content"><header className="settings-header"><h1>{t('settings.title')}</h1><p>{isManager ? t('settings.managerDescription') : t('settings.ownerDescription')}</p></header><SettingsTabs initialTab={initialTab} tabs={tabs} /></section></main>;
 }
 
 function textParam(value: string | string[] | undefined) { return (Array.isArray(value) ? value[0] : value)?.trim().toLowerCase() ?? ''; }
