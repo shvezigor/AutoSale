@@ -1,5 +1,6 @@
 import { cleanup, fireEvent, render as rtlRender, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
 
 import {
   InstagramSettingsForm,
@@ -8,8 +9,9 @@ import {
 } from './instagram-settings-form';
 import { ActivityProvider } from './activity-provider';
 import { ToastProvider } from './toast-provider';
+import { I18nProvider } from '../i18n/i18n-provider';
 
-function render(ui: React.ReactElement) { return rtlRender(<ToastProvider><ActivityProvider>{ui}</ActivityProvider></ToastProvider>); }
+function render(ui: React.ReactElement, locale: 'uk' | 'en' = 'uk') { return rtlRender(<I18nProvider locale={locale} authenticated={false}><ToastProvider><ActivityProvider>{ui}</ActivityProvider></ToastProvider></I18nProvider>); }
 
 const initial = (overrides: Partial<InstagramConnectionSummary> = {}): InstagramConnectionSummary => ({
   status: 'NOT_CONNECTED',
@@ -36,6 +38,14 @@ afterEach(() => {
 });
 
 describe('InstagramSettingsForm', () => {
+  it('renders English connection controls while preserving the Instagram username', () => {
+    render(<InstagramSettingsForm initial={initial({ status: 'ACTIVE', username: 'autosale_store' })} membershipRole="OWNER" />, 'en');
+
+    expect(screen.getByText('@autosale_store')).toBeInTheDocument();
+    expect(screen.getByLabelText('Connection status: Active')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Disconnect Instagram' })).toBeInTheDocument();
+  });
+
   it('guides an owner through preparation before starting Meta authorization', () => {
     const fetchMock = vi.fn();
     vi.stubGlobal('fetch', fetchMock);

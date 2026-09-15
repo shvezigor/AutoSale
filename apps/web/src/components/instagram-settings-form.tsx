@@ -4,6 +4,8 @@ import type { InstagramConnectionSummary as ContractInstagramConnectionSummary }
 import { useState } from 'react';
 
 import { mutatingFetch } from '../auth/csrf-fetch';
+import { useI18n } from '../i18n/i18n-provider';
+import type { Translator } from '../i18n/translator';
 import { useActivity } from './activity-provider';
 import { useToast } from './toast-provider';
 
@@ -35,6 +37,7 @@ export function InstagramSettingsForm({
   embedded?: boolean;
   onConnectionChange?: (connection: InstagramConnectionSummary) => void;
 }) {
+  const { t, formatDate } = useI18n();
   const [connection, setConnection] = useState(initial);
   const [message, setMessage] = useState<Message>(null);
   const [pendingAction, setPendingAction] = useState<PendingAction>(null);
@@ -46,7 +49,7 @@ export function InstagramSettingsForm({
   const cleanupPending = isCleanupPending(connection);
   const cleanupCanBeAbandoned = connection.cleanupStatus === 'FAILED' &&
     (isPermanentCleanupFailure(connection) || connection.cleanupAbandonEligible);
-  const actionLabel = connectionActionLabel(connection.status);
+  const actionLabel = connectionActionLabel(t, connection.status);
   const visibleErrorCode = connection.cleanupErrorCode ?? connection.lastErrorCode;
   const activity = useActivity();
   const toast = useToast();
@@ -60,7 +63,7 @@ export function InstagramSettingsForm({
     setPendingAction('connect');
     setMessage(null);
     try {
-      const response = await activity.run('Підключаємо Instagram', () => mutatingFetch('/api/integrations/instagram/connect', {
+      const response = await activity.run(t('instagramSettings.connectingActivity'), () => mutatingFetch('/api/integrations/instagram/connect', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ returnPath: '/settings' }),
@@ -72,8 +75,8 @@ export function InstagramSettingsForm({
       }
       window.location.href = authorizationUrl;
     } catch {
-      setMessage({ kind: 'error', text: 'Не вдалося розпочати підключення Instagram' });
-      toast.show({ type: 'error', title: 'Не вдалося підключити Instagram' });
+      setMessage({ kind: 'error', text: t('instagramSettings.connectStartFailed') });
+      toast.show({ type: 'error', title: t('instagramSettings.connectFailed') });
     } finally {
       setPendingAction(null);
     }
@@ -83,17 +86,17 @@ export function InstagramSettingsForm({
     setPendingAction('disconnect');
     setMessage(null);
     try {
-      const response = await activity.run('Відключаємо Instagram', () => mutatingFetch('/api/integrations/instagram/disconnect', { method: 'POST' }));
+      const response = await activity.run(t('instagramSettings.disconnectingActivity'), () => mutatingFetch('/api/integrations/instagram/disconnect', { method: 'POST' }));
       const payload = await jsonOrNull(response);
       if (!response.ok || !isInstagramConnectionSummary(payload)) throw new Error('disconnect failed');
       updateConnection(payload);
       setConfirmingDisconnect(false);
       setConfirmingDeadLetter(false);
-      setMessage({ kind: 'success', text: 'Instagram відключено' });
-      toast.show({ type: 'success', title: 'Instagram відключено' });
+      setMessage({ kind: 'success', text: t('instagramSettings.disconnected') });
+      toast.show({ type: 'success', title: t('instagramSettings.disconnected') });
     } catch {
-      setMessage({ kind: 'error', text: 'Не вдалося відключити Instagram' });
-      toast.show({ type: 'error', title: 'Не вдалося відключити Instagram' });
+      setMessage({ kind: 'error', text: t('instagramSettings.disconnectFailed') });
+      toast.show({ type: 'error', title: t('instagramSettings.disconnectFailed') });
     } finally {
       setPendingAction(null);
     }
@@ -103,16 +106,16 @@ export function InstagramSettingsForm({
     setPendingAction('cleanup');
     setMessage(null);
     try {
-      const response = await activity.run('Очищаємо підключення Instagram', () => mutatingFetch('/api/integrations/instagram/cleanup', { method: 'POST' }));
+      const response = await activity.run(t('instagramSettings.cleaningActivity'), () => mutatingFetch('/api/integrations/instagram/cleanup', { method: 'POST' }));
       const payload = await jsonOrNull(response);
       if (!response.ok || !isInstagramConnectionSummary(payload)) throw new Error('cleanup failed');
       updateConnection(payload);
       if (isCleanupPending(payload)) throw new Error('cleanup failed');
-      setMessage({ kind: 'success', text: 'Очищення Instagram завершено' });
-      toast.show({ type: 'success', title: 'Очищення Instagram завершено' });
+      setMessage({ kind: 'success', text: t('instagramSettings.cleanupComplete') });
+      toast.show({ type: 'success', title: t('instagramSettings.cleanupComplete') });
     } catch {
-      setMessage({ kind: 'error', text: 'Не вдалося очистити підключення Instagram' });
-      toast.show({ type: 'error', title: 'Не вдалося очистити Instagram' });
+      setMessage({ kind: 'error', text: t('instagramSettings.cleanupFailed') });
+      toast.show({ type: 'error', title: t('instagramSettings.cleanupFailedShort') });
     } finally {
       setPendingAction(null);
     }
@@ -122,7 +125,7 @@ export function InstagramSettingsForm({
     setPendingAction('deadLetter');
     setMessage(null);
     try {
-      const response = await activity.run('Розблоковуємо Instagram', () => mutatingFetch('/api/integrations/instagram/cleanup/dead-letter', {
+      const response = await activity.run(t('instagramSettings.unlockingActivity'), () => mutatingFetch('/api/integrations/instagram/cleanup/dead-letter', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ confirmation: 'ABANDON_REMOTE_CLEANUP' }),
@@ -131,45 +134,45 @@ export function InstagramSettingsForm({
       if (!response.ok || !isInstagramConnectionSummary(payload) || isCleanupPending(payload)) throw new Error('dead letter failed');
       updateConnection(payload);
       setConfirmingDeadLetter(false);
-      setMessage({ kind: 'success', text: 'Підключення Instagram розблоковано' });
-      toast.show({ type: 'success', title: 'Instagram розблоковано' });
+      setMessage({ kind: 'success', text: t('instagramSettings.unlocked') });
+      toast.show({ type: 'success', title: t('instagramSettings.unlockedShort') });
     } catch {
-      setMessage({ kind: 'error', text: 'Не вдалося розблокувати підключення Instagram' });
-      toast.show({ type: 'error', title: 'Не вдалося розблокувати Instagram' });
+      setMessage({ kind: 'error', text: t('instagramSettings.unlockFailed') });
+      toast.show({ type: 'error', title: t('instagramSettings.unlockFailedShort') });
     } finally {
       setPendingAction(null);
     }
   }
 
-  const visibleStatus = pendingAction === 'connect' ? 'Підключення…' : instagramConnectionStatusLabel(connection.status);
+  const visibleStatus = pendingAction === 'connect' ? t('instagramSettings.connecting') : instagramConnectionStatusLabel(t, connection.status);
 
   return <section className={`settings-card instagram-connection-card ${embedded ? 'is-embedded' : ''}`} aria-busy={pending || undefined} {...(embedded ? { 'aria-label': 'Instagram' } : { 'aria-labelledby': 'instagram-connection-title' })}>
     {!embedded && <div className="settings-card-heading">
       <div>
         <h2 id="instagram-connection-title">Instagram</h2>
-        <p>Підключіть професійний Instagram-акаунт через Meta, щоб отримувати повідомлення та замовлення.</p>
+        <p>{t('instagramSettings.description')}</p>
       </div>
-      <span className={`connection-status status-${connection.status.toLowerCase()}`} aria-label={`Статус підключення: ${visibleStatus}`} role={pendingAction === 'connect' ? 'status' : undefined}>
+      <span className={`connection-status status-${connection.status.toLowerCase()}`} aria-label={t('instagramSettings.statusLabel', { status: visibleStatus })} role={pendingAction === 'connect' ? 'status' : undefined}>
         {visibleStatus}
       </span>
     </div>}
-    {embedded && <div className="delivery-panel-section-heading"><span>Підключення</span><p>Акаунт, стан інтеграції та керування доступом через Meta.</p></div>}
+    {embedded && <div className="delivery-panel-section-heading"><span>{t('instagramSettings.connectionSection')}</span><p>{t('instagramSettings.connectionSectionDescription')}</p></div>}
 
     <dl className="instagram-connection-details">
-      <div><dt>Акаунт</dt><dd>{connection.username ? `@${connection.username}` : 'Ще не підключено'}</dd></div>
-      <div><dt>Остання перевірка</dt><dd>{formatVerificationDate(connection.lastVerifiedAt)}</dd></div>
-      {visibleErrorCode && <div><dt>Стан</dt><dd>{safeErrorCode(visibleErrorCode)}</dd></div>}
+      <div><dt>{t('instagramSettings.account')}</dt><dd>{connection.username ? `@${connection.username}` : t('instagramSettings.notConnectedYet')}</dd></div>
+      <div><dt>{t('instagramSettings.lastCheck')}</dt><dd>{formatVerificationDate(t, formatDate, connection.lastVerifiedAt)}</dd></div>
+      {visibleErrorCode && <div><dt>{t('instagramSettings.state')}</dt><dd>{safeErrorCode(t, visibleErrorCode)}</dd></div>}
     </dl>
 
-    {membershipRole === 'MANAGER' && <p className="sheets-hint">Перегляд доступний. Змінювати підключення може власник організації.</p>}
+    {membershipRole === 'MANAGER' && <p className="sheets-hint">{t('instagramSettings.managerReadonly')}</p>}
 
     {isOwner && <div className="settings-actions instagram-connection-actions">
       {actionLabel && !cleanupPending && wizardStep === null && <button disabled={pending} onClick={() => setWizardStep('prepare')} type="button">{actionLabel}</button>}
-      {cleanupPending && <button disabled={pending} onClick={() => void retryCleanup()} type="button">Повторити очищення</button>}
-      {cleanupCanBeAbandoned && !confirmingDeadLetter && <button className="secondary-button" disabled={pending} onClick={() => { setConfirmingDisconnect(false); setConfirmingDeadLetter(true); }} type="button">Розблокувати підключення</button>}
-      {canDisconnect(connection.status) && !confirmingDisconnect && <button className="danger-button" disabled={pending} onClick={() => setConfirmingDisconnect(true)} type="button">Відключити Instagram</button>}
+      {cleanupPending && <button disabled={pending} onClick={() => void retryCleanup()} type="button">{t('instagramSettings.retryCleanup')}</button>}
+      {cleanupCanBeAbandoned && !confirmingDeadLetter && <button className="secondary-button" disabled={pending} onClick={() => { setConfirmingDisconnect(false); setConfirmingDeadLetter(true); }} type="button">{t('instagramSettings.unlockConnection')}</button>}
+      {canDisconnect(connection.status) && !confirmingDisconnect && <button className="danger-button" disabled={pending} onClick={() => setConfirmingDisconnect(true)} type="button">{t('instagramSettings.disconnect')}</button>}
       {wizardStep && <div className="instagram-connect-wizard" role="dialog" aria-labelledby="instagram-wizard-title">
-        <div className="instagram-wizard-progress" aria-label="Прогрес підключення">
+        <div className="instagram-wizard-progress" aria-label={t('instagramSettings.wizardProgress')}>
           <span className={wizardStep === 'prepare' ? 'is-current' : 'is-complete'}>1</span>
           <i />
           <span className={wizardStep === 'authorize' ? 'is-current' : ''}>2</span>
@@ -178,44 +181,44 @@ export function InstagramSettingsForm({
         </div>
         {wizardStep === 'prepare' ? <>
           <div className="instagram-wizard-copy">
-            <small>Крок 1 із 3</small>
-            <h3 id="instagram-wizard-title">Підключення Instagram</h3>
-            <p>Перед початком переконайтеся, що акаунт готовий. Жодні ключі або токени вводити вручну не потрібно.</p>
+            <small>{t('instagramSettings.stepOne')}</small>
+            <h3 id="instagram-wizard-title">{t('instagramSettings.connectTitle')}</h3>
+            <p>{t('instagramSettings.prepareDescription')}</p>
           </div>
           <ul className="instagram-wizard-checklist">
-            <li><strong>Професійний акаунт</strong><span>Instagram Business або Creator.</span></li>
-            <li><strong>Доступ власника</strong><span>Увійдіть у Meta під користувачем, який керує цим акаунтом.</span></li>
-            <li><strong>Безпечний вхід через Meta</strong><span>Пароль передається тільки Meta та не потрапляє в AutoSale.</span></li>
+            <li><strong>{t('instagramSettings.professionalAccount')}</strong><span>{t('instagramSettings.professionalAccountHint')}</span></li>
+            <li><strong>{t('instagramSettings.ownerAccess')}</strong><span>{t('instagramSettings.ownerAccessHint')}</span></li>
+            <li><strong>{t('instagramSettings.secureMetaLogin')}</strong><span>{t('instagramSettings.secureMetaLoginHint')}</span></li>
           </ul>
           <div className="instagram-wizard-actions">
-            <button className="secondary-button" onClick={() => setWizardStep(null)} type="button">Скасувати</button>
-            <button onClick={() => setWizardStep('authorize')} type="button">Продовжити</button>
+            <button className="secondary-button" onClick={() => setWizardStep(null)} type="button">{t('instagramSettings.cancel')}</button>
+            <button onClick={() => setWizardStep('authorize')} type="button">{t('instagramSettings.continue')}</button>
           </div>
         </> : <>
           <div className="instagram-wizard-copy">
-            <small>Крок 2 із 3</small>
-            <h3 id="instagram-wizard-title">Дозволи та вибір акаунта</h3>
-            <p>Meta відкриється в захищеному вікні. Виберіть потрібний Instagram-акаунт і дозвольте отримання повідомлень. Після повернення AutoSale автоматично перевірить та збереже підключення.</p>
+            <small>{t('instagramSettings.stepTwo')}</small>
+            <h3 id="instagram-wizard-title">{t('instagramSettings.permissionsTitle')}</h3>
+            <p>{t('instagramSettings.permissionsDescription')}</p>
           </div>
-          <div className="instagram-wizard-note"><strong>Що буде збережено</strong><span>Ідентифікатор акаунта, дозволи та зашифрований токен доступу лише для вашої організації.</span></div>
+          <div className="instagram-wizard-note"><strong>{t('instagramSettings.savedData')}</strong><span>{t('instagramSettings.savedDataDescription')}</span></div>
           <div className="instagram-wizard-actions">
-            <button className="secondary-button" disabled={pending} onClick={() => setWizardStep('prepare')} type="button">Назад</button>
-            <button disabled={pending} onClick={() => void connect()} type="button">Підключити через Meta</button>
+            <button className="secondary-button" disabled={pending} onClick={() => setWizardStep('prepare')} type="button">{t('instagramSettings.back')}</button>
+            <button disabled={pending} onClick={() => void connect()} type="button">{t('instagramSettings.connectMeta')}</button>
           </div>
         </>}
       </div>}
       {confirmingDisconnect && <div className="instagram-disconnect-confirmation" role="alert">
-        <span>Відключити Instagram? Повторне підключення знадобиться для нових повідомлень.</span>
+        <span>{t('instagramSettings.disconnectConfirm')}</span>
         <div>
-          <button className="secondary-button" disabled={pending} onClick={() => setConfirmingDisconnect(false)} type="button">Скасувати</button>
-          <button className="danger-button" disabled={pending} onClick={() => void disconnect()} type="button">Так, відключити</button>
+          <button className="secondary-button" disabled={pending} onClick={() => setConfirmingDisconnect(false)} type="button">{t('instagramSettings.cancel')}</button>
+          <button className="danger-button" disabled={pending} onClick={() => void disconnect()} type="button">{t('instagramSettings.confirmDisconnect')}</button>
         </div>
       </div>}
       {confirmingDeadLetter && <div className="instagram-disconnect-confirmation" role="alert">
-        <span>Розблокувати Instagram? Віддалене очищення не підтверджене. Автоматичні повтори для цього облікового запису буде припинено, і залишковий стан у Meta може зберегтися. Після цього можна підключити акаунт повторно.</span>
+        <span>{t('instagramSettings.unlockConfirm')}</span>
         <div>
-          <button className="secondary-button" disabled={pending} onClick={() => setConfirmingDeadLetter(false)} type="button">Скасувати</button>
-          <button className="danger-button" disabled={pending} onClick={() => void deadLetterCleanup()} type="button">Так, розблокувати</button>
+          <button className="secondary-button" disabled={pending} onClick={() => setConfirmingDeadLetter(false)} type="button">{t('instagramSettings.cancel')}</button>
+          <button className="danger-button" disabled={pending} onClick={() => void deadLetterCleanup()} type="button">{t('instagramSettings.confirmUnlock')}</button>
         </div>
       </div>}
       {message && <span className={message.kind === 'error' ? 'save-error' : 'save-success'} role={message.kind === 'error' ? 'alert' : 'status'}>{message.text}</span>}
@@ -232,9 +235,9 @@ export function isTrustedMetaAuthorizationUrl(value: string): boolean {
   }
 }
 
-function connectionActionLabel(status: InstagramConnectionSummary['status']): string | null {
-  if (status === 'NOT_CONNECTED' || status === 'DISCONNECTED') return 'Підключити Instagram';
-  if (status === 'LEGACY' || status === 'REAUTH_REQUIRED' || status === 'ERROR') return 'Перепідключити Instagram';
+function connectionActionLabel(t: Translator, status: InstagramConnectionSummary['status']): string | null {
+  if (status === 'NOT_CONNECTED' || status === 'DISCONNECTED') return t('instagramSettings.connect');
+  if (status === 'LEGACY' || status === 'REAUTH_REQUIRED' || status === 'ERROR') return t('instagramSettings.reconnect');
   return null;
 }
 
@@ -250,26 +253,26 @@ function canDisconnect(status: InstagramConnectionSummary['status']): boolean {
   return status === 'ACTIVE' || status === 'LEGACY' || status === 'REAUTH_REQUIRED' || status === 'ERROR';
 }
 
-export function instagramConnectionStatusLabel(status: InstagramConnectionSummary['status']): string {
+export function instagramConnectionStatusLabel(t: Translator, status: InstagramConnectionSummary['status']): string {
   return {
-    NOT_CONNECTED: 'Не підключено',
-    LEGACY: 'Потрібне перепідключення',
-    ACTIVE: 'Активне',
-    REAUTH_REQUIRED: 'Потрібне перепідключення',
-    ERROR: 'Помилка підключення',
-    DISCONNECTED: 'Відключено',
+    NOT_CONNECTED: t('instagramSettings.statusNotConnected'),
+    LEGACY: t('instagramSettings.statusReauth'),
+    ACTIVE: t('instagramSettings.statusActive'),
+    REAUTH_REQUIRED: t('instagramSettings.statusReauth'),
+    ERROR: t('instagramSettings.statusError'),
+    DISCONNECTED: t('instagramSettings.statusDisconnected'),
   }[status];
 }
 
-function formatVerificationDate(value: string | null): string {
-  if (!value) return 'Ще не перевірялося';
+function formatVerificationDate(t: Translator, formatDate: ReturnType<typeof useI18n>['formatDate'], value: string | null): string {
+  if (!value) return t('instagramSettings.neverChecked');
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return 'Ще не перевірялося';
-  return new Intl.DateTimeFormat('uk-UA', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'UTC' }).format(date);
+  if (Number.isNaN(date.getTime())) return t('instagramSettings.neverChecked');
+  return formatDate(date, { dateStyle: 'medium', timeStyle: 'short' });
 }
 
-function safeErrorCode(value: string): string {
-  return /^[A-Z][A-Z0-9_]{0,63}$/.test(value) ? `Код помилки: ${value}` : 'Потрібна перевірка підключення';
+function safeErrorCode(t: Translator, value: string): string {
+  return /^[A-Z][A-Z0-9_]{0,63}$/.test(value) ? t('instagramSettings.errorCode', { code: value }) : t('instagramSettings.connectionNeedsReview');
 }
 
 async function jsonOrNull(response: Response): Promise<unknown> {
