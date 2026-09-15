@@ -4,6 +4,9 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ActivityProvider } from './activity-provider';
 import { TelegramSupplierSettings } from './telegram-supplier-settings';
 import { ToastProvider } from './toast-provider';
+import { I18nProvider } from '../i18n/i18n-provider';
+
+vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
 
 const initial = {
   businessConnected: true,
@@ -19,6 +22,12 @@ const destinationId = '11111111-1111-4111-8111-111111111111';
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
 describe('TelegramSupplierSettings', () => {
+  it('translates controls while preserving the supplier chat title', () => {
+    render(<I18nProvider locale="en" authenticated={false}><ToastProvider><ActivityProvider><TelegramSupplierSettings initial={initial} /></ActivityProvider></ToastProvider></I18nProvider>);
+    expect(screen.getByRole('heading', { name: 'Supplier' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Supplier chat')).toHaveTextContent('Постачальник');
+    expect(screen.getByRole('button', { name: 'Add backup group' })).toBeInTheDocument();
+  });
   it('lets the owner select and save an observed supplier chat', async () => {
     const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ ...initial, selectedDestinationId: destinationId }) });
     vi.stubGlobal('fetch', fetchMock);

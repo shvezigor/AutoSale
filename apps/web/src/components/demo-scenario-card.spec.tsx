@@ -2,6 +2,9 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { DemoScenarioCard } from './demo-scenario-card';
+import { I18nProvider } from '../i18n/i18n-provider';
+
+vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
 
 describe('DemoScenarioCard', () => {
   afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
@@ -33,3 +36,9 @@ describe('DemoScenarioCard', () => {
     expect(await screen.findByText('Демосценарій уже був створений')).toBeInTheDocument();
   });
 });
+  it('renders the demo controls in English', () => {
+    render(<I18nProvider locale="en" authenticated={false}><DemoScenarioCard /></I18nProvider>);
+    expect(screen.getByRole('heading', { name: 'Demo scenario' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Run demo scenario' })).toBeInTheDocument();
+    expect(screen.getByText(/Instagram/)).toBeInTheDocument();
+  });

@@ -4,6 +4,9 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ActivityProvider } from './activity-provider';
 import { TelegramSettingsCard, type TelegramConnectionSummary } from './telegram-settings-card';
 import { ToastProvider } from './toast-provider';
+import { I18nProvider } from '../i18n/i18n-provider';
+
+vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
 
 function renderCard(initial: TelegramConnectionSummary, navigate = vi.fn()) {
   return {
@@ -24,6 +27,13 @@ afterEach(() => {
 });
 
 describe('TelegramSettingsCard', () => {
+  it('translates notification controls while preserving the Telegram identity', () => {
+    render(<I18nProvider locale="en" authenticated={false}><ToastProvider><ActivityProvider><TelegramSettingsCard initial={{ ...disconnected, personal: { connected: true, displayName: 'Ігор', username: 'shvezigor', linkedAt: null } }} initialPreferences={{ ORDER_NEEDS_REVIEW: true, ORDER_AUTO_APPROVED: true, SUPPLIER_DELIVERY_FAILED: true }} /></ActivityProvider></ToastProvider></I18nProvider>);
+    expect(screen.getByText('@shvezigor')).toBeInTheDocument();
+    expect(screen.getByText('Ігор')).toBeInTheDocument();
+    expect(screen.getByRole('checkbox', { name: 'Order needs review' })).toBeChecked();
+    expect(screen.getByRole('button', { name: 'Send test' })).toBeInTheDocument();
+  });
   it('explains the one-click shared bot connection without asking for a token', () => {
     renderCard(disconnected);
 
