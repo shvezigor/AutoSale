@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import { refreshConversationList } from '../api/conversation-replies';
 import { ConversationList } from './conversation-list';
+import { useI18n } from '../i18n/i18n-provider';
 
 const POLL_INTERVAL_MS = 3_000;
 
@@ -15,6 +16,7 @@ export function LiveConversationList({
   conversations: ConversationListResponse['items'];
 }) {
   const pathname = usePathname();
+  const { t } = useI18n();
   const [conversations, setConversations] = useState(initialConversations);
   const refreshInFlight = useRef(false);
 
@@ -42,7 +44,7 @@ export function LiveConversationList({
   return (
     <>
       <ConversationList conversations={conversations} selectedId={selectedConversationId(pathname)} />
-      <footer className="dialog-count">Усього діалогів: {conversations.length}</footer>
+      <footer className="dialog-count">{t('conversations.total', { count: conversations.length })}</footer>
     </>
   );
 }

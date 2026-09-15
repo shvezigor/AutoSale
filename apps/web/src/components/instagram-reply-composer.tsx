@@ -14,6 +14,7 @@ import {
 } from '../api/conversation-replies';
 import { MessageThread } from './message-thread';
 import { useToast } from './toast-provider';
+import { useI18n } from '../i18n/i18n-provider';
 
 const MAX_MESSAGE_LENGTH = 1_000;
 const POLL_INTERVAL_MS = 2_000;
@@ -37,6 +38,7 @@ export function InstagramReplyComposer({
     initialConversation.messages.map((message) => [message.id, message.delivery?.status ?? null]),
   ));
   const toast = useToast();
+  const { t } = useI18n();
 
   const trimmedText = text.trim();
   const canSubmit = conversation.replyCapability.enabled
@@ -70,8 +72,8 @@ export function InstagramReplyComposer({
     } catch {
       toast.show({
         type: 'error',
-        title: 'Не вдалося надіслати повідомлення',
-        message: 'Спробуйте ще раз. Текст повідомлення збережено.',
+        title: t('conversations.messageSendFailed'),
+        message: t('conversations.messagePreserved'),
       });
     } finally {
       setSubmitting(false);
@@ -92,8 +94,8 @@ export function InstagramReplyComposer({
     } catch {
       toast.show({
         type: 'error',
-        title: 'Не вдалося повторити надсилання',
-        message: 'Повідомлення не дубльовано. Спробуйте пізніше.',
+        title: t('conversations.retryFailed'),
+        message: t('conversations.notDuplicated'),
       });
     } finally {
       setRetryingMessageId(null);
@@ -113,13 +115,13 @@ export function InstagramReplyComposer({
           const previous = deliveryStatuses.current.get(message.id);
           const next = message.delivery?.status ?? null;
           if (previous && previous !== next && next === 'SENT') {
-            toast.show({ type: 'success', title: 'Повідомлення надіслано' });
+            toast.show({ type: 'success', title: t('conversations.messageSent') });
           }
           if (previous && previous !== next && next === 'FAILED') {
             toast.show({
               type: 'error',
-              title: 'Не вдалося надіслати повідомлення',
-              message: deliveryErrorText(message),
+              title: t('conversations.messageSendFailed'),
+              message: deliveryErrorText(message, t),
             });
           }
           deliveryStatuses.current.set(message.id, next);
@@ -137,7 +139,7 @@ export function InstagramReplyComposer({
       cancelled = true;
       window.clearInterval(timer);
     };
-  }, [conversation.id, toast]);
+  }, [conversation.id, t, toast]);
 
   useEffect(() => {
     if (!keepThreadAtBottom.current) return;
@@ -147,13 +149,13 @@ export function InstagramReplyComposer({
   }, [conversation.messages.length]);
 
   const disabledReason = !conversation.replyCapability.enabled
-    ? replyDisabledText(conversation.replyCapability.reason)
+    ? replyDisabledText(conversation.replyCapability.reason, t)
     : null;
 
   return (
     <>
       <div
-        aria-label="Повідомлення"
+        aria-label={t('conversations.messagesRegion')}
         className="thread-scroll"
         onScroll={(event) => {
           const thread = event.currentTarget;
@@ -162,7 +164,7 @@ export function InstagramReplyComposer({
         ref={threadRef}
         role="region"
       >
-        <p className="day-label">Сьогодні</p>
+        <p className="day-label">{t('conversations.today')}</p>
         <MessageThread
           conversation={conversation}
           onRetry={(messageId) => void retry(messageId)}
@@ -173,28 +175,28 @@ export function InstagramReplyComposer({
         {disabledReason ? (
           <div className="reply-guidance" role="status">
             <span>{disabledReason}</span>
-            {canManageSettings ? <Link href="/settings?tab=social">Налаштувати Instagram</Link> : null}
+            {canManageSettings ? <Link href="/settings?tab=social">{t('conversations.configureInstagram')}</Link> : null}
           </div>
         ) : null}
         <form className="instagram-reply-composer" onSubmit={(event) => void submit(event)}>
-          <label className="sr-only" htmlFor="instagram-reply">Відповідь</label>
+          <label className="sr-only" htmlFor="instagram-reply">{t('conversations.reply')}</label>
           <textarea
             aria-describedby="instagram-reply-hint"
-            aria-label="Відповідь"
+            aria-label={t('conversations.reply')}
             disabled={!conversation.replyCapability.enabled}
             id="instagram-reply"
             onChange={(event) => setText(event.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Напишіть повідомлення…"
+            placeholder={t('conversations.placeholder')}
             ref={textareaRef}
             rows={2}
             value={text}
           />
           <div className="reply-composer-actions">
             <small id="instagram-reply-hint">
-              {text.length >= 900 ? `${text.length}/${MAX_MESSAGE_LENGTH}` : 'Shift + Enter — новий рядок'}
+              {text.length >= 900 ? `${text.length}/${MAX_MESSAGE_LENGTH}` : t('conversations.newLineHint')}
             </small>
-            <button disabled={!canSubmit} type="submit">{submitting ? 'Надсилаємо…' : 'Надіслати'}</button>
+            <button disabled={!canSubmit} type="submit">{submitting ? t('conversations.sending') : t('conversations.send')}</button>
           </div>
         </form>
       </div>
@@ -202,14 +204,14 @@ export function InstagramReplyComposer({
   );
 }
 
-function replyDisabledText(reason: ConversationDetailResponse['replyCapability']['reason']) {
+function replyDisabledText(reason: ConversationDetailResponse['replyCapability']['reason'], t: ReturnType<typeof useI18n>['t']) {
   return reason === 'RECONNECT_REQUIRED'
-    ? 'Щоб відповідати, перепідключіть Instagram.'
-    : 'Щоб відповідати, спочатку підключіть Instagram.';
+    ? t('conversations.reconnectToReply')
+    : t('conversations.connectToReply');
 }
 
-function deliveryErrorText(message: ConversationMessage) {
-  if (message.delivery?.errorCode === 'INSTAGRAM_RECONNECT_REQUIRED') return 'Перепідключіть Instagram у налаштуваннях.';
-  if (message.delivery?.errorCode === 'INSTAGRAM_RATE_LIMITED') return 'Instagram тимчасово обмежив надсилання.';
-  return 'Спробуйте повторити надсилання пізніше.';
+function deliveryErrorText(message: ConversationMessage, t: ReturnType<typeof useI18n>['t']) {
+  if (message.delivery?.errorCode === 'INSTAGRAM_RECONNECT_REQUIRED') return t('conversations.reconnectInSettings');
+  if (message.delivery?.errorCode === 'INSTAGRAM_RATE_LIMITED') return t('conversations.rateLimited');
+  return t('conversations.retryLater');
 }

@@ -1,7 +1,10 @@
+'use client';
+
 import type { ConversationListResponse } from '../../../../packages/contracts/src/conversations';
 import type { ReactNode } from 'react';
 
 import { LiveConversationList } from './live-conversation-list';
+import { useI18n } from '../i18n/i18n-provider';
 
 export function InboxShell({
   conversations,
@@ -10,16 +13,17 @@ export function InboxShell({
   conversations: ConversationListResponse['items'];
   children: ReactNode;
 }) {
+  const { t } = useI18n();
   return (
     <main className="app-shell app-shell-content">
       <section className="inbox-sidebar">
         <header className="inbox-heading">
-          <h1>Діалоги</h1>
+          <h1>{t('conversations.title')}</h1>
           <div className="channel-select"><InstagramIcon /> Instagram</div>
           <label className="search-field">
-            <span className="sr-only">Пошук у діалогах</span>
+            <span className="sr-only">{t('conversations.search')}</span>
             <SearchIcon />
-            <input placeholder="Пошук у діалогах" type="search" />
+            <input placeholder={t('conversations.search')} type="search" />
           </label>
         </header>
         <LiveConversationList conversations={conversations} />

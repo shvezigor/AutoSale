@@ -1,7 +1,9 @@
 import type { ConversationDetailResponse } from '../../../../packages/contracts/src/conversations';
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
+vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
+import { I18nProvider } from '../i18n/i18n-provider';
 import { MessageThread } from './message-thread';
 
 const detail: ConversationDetailResponse = {
@@ -56,5 +58,13 @@ describe('MessageThread', () => {
     expect(screen.getByText(/11:00/)).toBeVisible();
     expect(screen.getByRole('img', { name: /вкладення з Instagram/i })).toBeVisible();
     expect(screen.getByText('Не вдалося завантажити вкладення')).toBeVisible();
+  });
+
+  it('translates message metadata but preserves message text', () => {
+    render(<I18nProvider locale="en" authenticated><MessageThread conversation={detail} /></I18nProvider>);
+    expect(screen.getByText('Incoming')).toBeVisible();
+    expect(screen.getByText('Outgoing')).toBeVisible();
+    expect(screen.getByText('Sent')).toBeVisible();
+    expect(screen.getAllByText('Хочу чорну модель 38 розміру').at(-1)).toBeVisible();
   });
 });

@@ -1,7 +1,9 @@
 import type { ConversationListResponse } from '../../../../packages/contracts/src/conversations';
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
+vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
+import { I18nProvider } from '../i18n/i18n-provider';
 import { ConversationList } from './conversation-list';
 
 const fixtureSummary: ConversationListResponse['items'][number] = {
@@ -57,5 +59,12 @@ describe('ConversationList', () => {
     render(<ConversationList conversations={[]} />);
 
     expect(screen.getByText('Діалогів поки немає')).toBeVisible();
+  });
+
+  it('translates interface copy without changing the customer message', () => {
+    render(<I18nProvider locale="en" authenticated><ConversationList conversations={[fixtureSummary]} /></I18nProvider>);
+    expect(screen.getByRole('navigation', { name: 'Conversation list' })).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'Олена profile photo' })).toBeInTheDocument();
+    expect(screen.getAllByText('Хочу чорну модель 38 розміру').at(-1)).toBeVisible();
   });
 });
