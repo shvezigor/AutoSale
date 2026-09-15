@@ -3,13 +3,20 @@ import type { ReactElement } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { ManagerOrder } from '../../../../packages/contracts/src/orders';
 
+vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
+
 import { OrderReviewPanel } from './order-review-panel';
 import { ActivityProvider } from './activity-provider';
 import { ToastProvider } from './toast-provider';
 import { ConfirmProvider } from './confirm-provider';
+import { I18nProvider } from '../i18n/i18n-provider';
 
 function render(ui: ReactElement) {
   return rtlRender(<ConfirmProvider><ToastProvider><ActivityProvider>{ui}</ActivityProvider></ToastProvider></ConfirmProvider>);
+}
+
+function renderEnglish(ui: ReactElement) {
+  return rtlRender(<I18nProvider locale="en" authenticated><ConfirmProvider><ToastProvider><ActivityProvider>{ui}</ActivityProvider></ToastProvider></ConfirmProvider></I18nProvider>);
 }
 
 const order: ManagerOrder = {
@@ -198,5 +205,15 @@ describe('OrderReviewPanel', () => {
     expect(await screen.findByRole('button', { name: 'Передаємо…' })).toHaveAttribute('aria-busy', 'true');
     await waitFor(() => expect(screen.queryByRole('button', { name: 'Передати у виконання' })).not.toBeInTheDocument());
     expect(fetchMock).toHaveBeenCalledWith(`/api/orders/${order.id}/hand-off`, expect.objectContaining({ method: 'POST' }));
+  });
+
+  it('translates review controls while preserving customer and product values', () => {
+    renderEnglish(<OrderReviewPanel initialOrder={order} />);
+
+    expect(screen.getByRole('link', { name: 'Back to orders table' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Order' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Name')).toHaveValue('Олена');
+    expect(screen.getByLabelText('Product 1')).toHaveDisplayValue('UB-038-BLK — Кросівки Urban Black');
+    expect(screen.getByRole('button', { name: 'Approve' })).toBeInTheDocument();
   });
 });
