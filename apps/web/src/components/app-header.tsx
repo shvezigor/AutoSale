@@ -97,7 +97,7 @@ function ProfileMenu({ session, open, onToggle, onClose }: { session: HeaderSess
       {session.avatarUrl
         ? <img className="manager-avatar" src={session.avatarUrl} alt={t('header.profilePhoto', { name: session.name })} />
         : <span className="manager-avatar" aria-label={t('header.initial', { initial: session.name.slice(0, 1).toUpperCase() })}>{session.name.slice(0, 1).toUpperCase()}</span>}
-      <span className="profile-trigger-copy"><strong>{session.name}</strong><small>{session.membershipRole === 'OWNER' ? t('header.owner') : t('header.manager')}</small></span><span aria-hidden="true">⌄</span>
+      <span className="profile-trigger-copy"><strong>{session.name}</strong><small>{session.email}</small></span>
     </button>
     {open && <div id="profile-popover" className="header-popover profile-popover" role="menu">
       <div className="profile-summary"><strong>{session.name}</strong><small>{session.email}</small></div>
@@ -126,5 +126,5 @@ function relativeTime(value: string, t: ReturnType<typeof useI18n>['t']) {
   return hours < 24 ? t('header.hoursAgo', { count: hours }) : t('header.daysAgo', { count: Math.floor(hours / 24) });
 }
 
-function BellIcon() { return <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" /></svg>; }
+function BellIcon() { return <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" /><path d="M10.5 21a2 2 0 0 0 3 0" /></svg>; }
 function SearchIcon() { return <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5" /><path d="m15.5 15.5 4 4" /></svg>; }

@@ -65,6 +65,25 @@ describe('PrimaryNavigation', () => {
     expect(screen.getByRole('link', { name: 'Налаштування' })).toHaveAttribute('aria-current', 'page');
   });
 
+  it('keeps the reference line icon mapped to every destination', () => {
+    usePathname.mockReturnValue('/dashboard');
+    renderNavigation();
+
+    const expectedIcons = [
+      ['Дашборд', 'dashboard'],
+      ['Діалоги', 'conversations'],
+      ['Замовлення', 'orders'],
+      ['Каталог', 'catalogue'],
+      ['Команда', 'team'],
+      ['Налаштування', 'settings'],
+      ['Онбординг', 'onboarding'],
+    ] as const;
+
+    for (const [label, icon] of expectedIcons) {
+      expect(screen.getByRole('link', { name: label }).querySelector('svg')).toHaveAttribute('data-icon', icon);
+    }
+  });
+
   it('renders destinations and collapse actions in English', () => {
     usePathname.mockReturnValue('/orders');
     renderNavigation(ownerSession, 'en', { onToggleCollapse: vi.fn() });

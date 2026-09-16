@@ -68,7 +68,7 @@ export function PrimaryNavigation({
         const active = isNavigationItemActive(pathname, item.href);
         const label = t(item.labelKey);
         return <Link className={`nav-item${active ? ' active' : ''}`} href={item.href} aria-label={collapsed ? label : undefined} aria-current={active ? 'page' : undefined} {...navigationHandler} key={item.href}>
-          <Icon className="nav-icon" aria-hidden="true" />
+          <span className="nav-icon-frame" aria-hidden="true"><Icon className="nav-icon" /></span>
           <span className="nav-label">{label}</span>
           <span className="nav-tooltip" aria-hidden="true">{label}</span>
         </Link>;
@@ -77,11 +77,11 @@ export function PrimaryNavigation({
   </aside>;
 }
 
-function DashboardIcon(props: SVGProps<SVGSVGElement>) { return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></svg>; }
-function ConversationIcon(props: SVGProps<SVGSVGElement>) { return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}><path d="M5 5h14v10H9l-4 4V5Z" /><path d="M8 9h8M8 12h5" /></svg>; }
-function OrdersIcon(props: SVGProps<SVGSVGElement>) { return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}><path d="M6 7h12l-1 13H7L6 7Z" /><path d="M9 9V5a3 3 0 0 1 6 0v4" /></svg>; }
-function CatalogueIcon(props: SVGProps<SVGSVGElement>) { return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}><path d="M4 5.5 12 2l8 3.5v13L12 22l-8-3.5v-13Z" /><path d="m4 5.5 8 3.5 8-3.5M12 9v13" /></svg>; }
-function TeamIcon(props: SVGProps<SVGSVGElement>) { return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}><circle cx="9" cy="8" r="3" /><path d="M3.5 19c.4-4 2.2-6 5.5-6s5.1 2 5.5 6M16 5.5a3 3 0 0 1 0 5.5M16 13c2.8.3 4.3 2.3 4.5 6" /></svg>; }
-function SettingsIcon(props: SVGProps<SVGSVGElement>) { return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}><circle cx="12" cy="12" r="3" /><path d="M19 13.5v-3l-2.2-.7-.7-1.6 1-2-2.2-2.1-2 1-1.7-.7L10.5 2h-3l-.7 2.4-1.6.7-2-1L1.1 6.2l1 2-.7 1.6-2.4.7v3l2.4.7.7 1.6-1 2 2.1 2.1 2-1 1.6.7.7 2.4h3l.7-2.4 1.7-.7 2 1 2.2-2.1-1-2 .7-1.6 2.2-.7Z" transform="translate(2) scale(.83 1)" /></svg>; }
-function OnboardingIcon(props: SVGProps<SVGSVGElement>) { return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}><path d="M12 3v12M8 7l4-4 4 4M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6" /></svg>; }
+function DashboardIcon(props: SVGProps<SVGSVGElement>) { return <svg data-icon="dashboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}><rect x="3" y="3" width="7" height="7" rx="2" /><rect x="14" y="3" width="7" height="7" rx="2" /><rect x="3" y="14" width="7" height="7" rx="2" /><rect x="14" y="14" width="7" height="7" rx="2" /></svg>; }
+function ConversationIcon(props: SVGProps<SVGSVGElement>) { return <svg data-icon="conversations" viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}><path d="M20 15a3 3 0 0 1-3 3H8l-4 3V6a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3Z" /><path d="M9 10h.01M12.5 10h.01M16 10h.01" /></svg>; }
+function OrdersIcon(props: SVGProps<SVGSVGElement>) { return <svg data-icon="orders" viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}><path d="M6 2h12l1 4H5Z" /><path d="M5 6h14l-1.2 14.2a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8Z" /><path d="M9.5 11a2.5 2.5 0 0 0 5 0" /></svg>; }
+function CatalogueIcon(props: SVGProps<SVGSVGElement>) { return <svg data-icon="catalogue" viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}><path d="m21 8-9-5-9 5 9 5Z" /><path d="M3 8v8l9 5 9-5V8" /><path d="M12 13v8" /></svg>; }
+function TeamIcon(props: SVGProps<SVGSVGElement>) { return <svg data-icon="team" viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}><circle cx="9" cy="8" r="3.4" /><path d="M2.5 20a6.5 6.5 0 0 1 13 0" /><path d="M16 5.2a3.4 3.4 0 0 1 0 5.6M18 20a6.6 6.6 0 0 0-2.4-5.1" /></svg>; }
+function SettingsIcon(props: SVGProps<SVGSVGElement>) { return <svg data-icon="settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5v.1a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1A2 2 0 1 1 4.1 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14h-.1a2 2 0 1 1 0-4H3a1.7 1.7 0 0 0 1.5-1.1A1.7 1.7 0 0 0 4.2 7l-.1-.1A2 2 0 1 1 6.9 4l.1.1a1.7 1.7 0 0 0 1.9.3H9A1.7 1.7 0 0 0 10 3v-.1a2 2 0 1 1 4 0V3a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1A2 2 0 1 1 19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9v.1a1.7 1.7 0 0 0 1.5 1h.1a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z" /></svg>; }
+function OnboardingIcon(props: SVGProps<SVGSVGElement>) { return <svg data-icon="onboarding" viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}><path d="M9 2v6M15 2v6" /><path d="M6 8h12v4a6 6 0 0 1-6 6 6 6 0 0 1-6-6Z" /><path d="M12 18v4" /></svg>; }
 function CollapseIcon({ 'data-collapsed': collapsed }: { 'data-collapsed': boolean }) { return <svg aria-hidden="true" viewBox="0 0 24 24"><path d={collapsed ? 'm9 6 6 6-6 6' : 'm15 6-6 6 6 6'} /></svg>; }
