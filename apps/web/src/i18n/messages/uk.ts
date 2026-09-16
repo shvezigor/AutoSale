@@ -66,7 +66,7 @@ export const ukMessages = {
     pageTitle: 'Мій профіль', pageDescription: 'Керуйте особистими даними, фото та безпекою свого акаунта.',
     languageDescription: 'Оберіть мову меню, сторінок і системних повідомлень.',
     personalTitle: 'Особиста інформація', personalDescription: 'Ці дані бачить ваша команда в AutoSale.',
-    newPhoto: 'Нове фото профілю', photoHint: 'JPEG, PNG або WebP, до 5 МБ.', uploadPhoto: 'Завантажити фото', uploading: 'Завантажуємо…', deletePhoto: 'Видалити фото', deleting: 'Видаляємо…',
+    newPhoto: 'Нове фото профілю', choosePhoto: 'Оберіть фото профілю', changePhoto: 'Змінити фото профілю', photoClickHint: 'Натисніть на фото, щоб вибрати нове.', photoHint: 'JPEG, PNG або WebP, до 5 МБ.', uploadPhoto: 'Завантажити фото', uploading: 'Завантажуємо…', uploadingPhoto: 'Завантажуємо фото…', deletePhoto: 'Видалити фото', deleting: 'Видаляємо…', preferencesTitle: 'Налаштування профілю',
     name: 'Ім’я', phone: 'Телефон', saveChanges: 'Зберегти зміни', saving: 'Зберігаємо…',
     phoneInvalid: 'Вкажіть номер у міжнародному форматі, наприклад +380501112233.', photoTypeInvalid: 'Оберіть зображення JPEG, PNG або WebP.', photoSizeInvalid: 'Розмір фото має бути не більше 5 МБ.',
     updated: 'Профіль оновлено', updateFailed: 'Не вдалося оновити профіль', checkAndRetry: 'Перевірте дані та спробуйте ще раз.',

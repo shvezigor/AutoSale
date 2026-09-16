@@ -66,25 +66,36 @@ describe('ProfileEditor', () => {
     expect(mutatingFetch).not.toHaveBeenCalled();
   });
 
-  it('uploads one valid avatar file with stable progress', async () => {
+  it('opens the avatar picker from the photo control', () => {
+    render();
+    const input = screen.getByLabelText('Оберіть фото профілю');
+    const click = vi.spyOn(input, 'click');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Змінити фото профілю' }));
+
+    expect(click).toHaveBeenCalledOnce();
+    expect(screen.queryByRole('button', { name: 'Завантажити фото' })).not.toBeInTheDocument();
+  });
+
+  it('uploads one valid avatar immediately with the API field name and stable progress', async () => {
     let resolveRequest!: (value: Response) => void;
     mutatingFetch.mockImplementation(() => new Promise<Response>((resolve) => { resolveRequest = resolve; }));
     render();
     const file = new File(['avatar'], 'avatar.png', { type: 'image/png' });
-    fireEvent.change(screen.getByLabelText('Нове фото профілю'), { target: { files: [file] } });
-    fireEvent.click(screen.getByRole('button', { name: 'Завантажити фото' }));
+    fireEvent.change(screen.getByLabelText('Оберіть фото профілю'), { target: { files: [file] } });
 
-    expect(await screen.findByRole('button', { name: 'Завантажуємо…' })).toBeDisabled();
+    expect(await screen.findByRole('button', { name: 'Завантажуємо фото…' })).toBeDisabled();
     const body = mutatingFetch.mock.calls[0]?.[1]?.body as FormData;
     expect(mutatingFetch).toHaveBeenCalledWith('/api/profile/avatar', expect.objectContaining({ method: 'POST', body }));
-    expect(body.getAll('file')).toEqual([file]);
+    expect(body.getAll('avatar')).toEqual([file]);
+    expect(body.getAll('file')).toEqual([]);
     resolveRequest(new Response(JSON.stringify({ ...baseProfile, avatarUrl: '/api/media/profile/avatar?v=def' }), { status: 200 }));
     expect(await screen.findByText('Фото профілю оновлено')).toBeInTheDocument();
   });
 
   it('rejects unsupported and oversized avatars before a request', () => {
     render();
-    const input = screen.getByLabelText('Нове фото профілю');
+    const input = screen.getByLabelText('Оберіть фото профілю');
     fireEvent.change(input, { target: { files: [new File(['x'], 'avatar.gif', { type: 'image/gif' })] } });
     expect(screen.getByRole('alert')).toHaveTextContent('JPEG, PNG або WebP');
     fireEvent.change(input, { target: { files: [new File([new Uint8Array(5 * 1024 * 1024 + 1)], 'large.png', { type: 'image/png' })] } });

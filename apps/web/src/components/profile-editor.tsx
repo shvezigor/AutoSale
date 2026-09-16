@@ -9,6 +9,7 @@ import { mutatingFetch } from '../auth/csrf-fetch';
 import { useActivity } from './activity-provider';
 import { useConfirm } from './confirm-provider';
 import { LoadingButton } from './loading-button';
+import { LocaleSwitcher } from './locale-switcher';
 import { useToast } from './toast-provider';
 import { useI18n } from '../i18n/i18n-provider';
 import { localizeApiError } from '../i18n/error-message';
@@ -24,7 +25,6 @@ export function ProfileEditor({ initial }: { initial: ProfileResponse }) {
   const [name, setName] = useState(initial.name);
   const [phone, setPhone] = useState(initial.phone ?? '');
   const [phoneError, setPhoneError] = useState('');
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarError, setAvatarError] = useState('');
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -68,7 +68,6 @@ export function ProfileEditor({ initial }: { initial: ProfileResponse }) {
   }
 
   function chooseAvatar(file: File | null) {
-    setAvatarFile(null);
     setAvatarError('');
     if (!file) return;
     if (!AVATAR_TYPES.has(file.type)) {
@@ -79,26 +78,24 @@ export function ProfileEditor({ initial }: { initial: ProfileResponse }) {
       setAvatarError(t('profile.photoSizeInvalid'));
       return;
     }
-    setAvatarFile(file);
+    void uploadAvatar(file);
   }
 
-  async function uploadAvatar() {
-    if (!avatarFile) return;
+  async function uploadAvatar(file: File) {
     const body = new FormData();
-    body.append('file', avatarFile);
+    body.append('avatar', file);
     setPending('avatar');
     try {
       const response = await activity.run(t('profile.uploading'), () => mutatingFetch('/api/profile/avatar', { method: 'POST', body }));
       if (!response.ok) throw await jsonOrNull(response);
       const updated = await response.json() as ProfileResponse;
       setProfile(updated);
-      setAvatarFile(null);
-      if (avatarInput.current) avatarInput.current.value = '';
       toast.show({ type: 'success', title: t('profile.photoUpdated') });
       router.refresh();
     } catch (reason) {
       toast.show({ type: 'error', title: t('profile.photoUpdateFailed'), message: localizeApiError(reason, t) });
     } finally {
+      if (avatarInput.current) avatarInput.current.value = '';
       setPending(null);
     }
   }
@@ -166,24 +163,46 @@ export function ProfileEditor({ initial }: { initial: ProfileResponse }) {
 
   const displayInitial = profile.name.trim().charAt(0).toUpperCase() || 'U';
 
-  return <div className="profile-sections">
-    <section className="profile-card profile-personal-card" aria-labelledby="profile-personal-heading">
+  return <div className="profile-dashboard">
+    <div className="profile-main-column">
+      <section className="profile-card profile-personal-card" aria-labelledby="profile-personal-heading">
       <div className="profile-card-heading">
         <div><h2 id="profile-personal-heading">{t('profile.personalTitle')}</h2><p>{t('profile.personalDescription')}</p></div>
       </div>
       <div className="profile-personal-grid">
         <div className="profile-avatar-panel">
-          {profile.avatarUrl
-            ? <img className="profile-avatar" src={profile.avatarUrl} alt={t('header.profilePhoto', { name: profile.name })} />
-            : <span className="profile-avatar profile-avatar-fallback" aria-label={t('header.initial', { initial: displayInitial })}>{displayInitial}</span>}
+          <button
+            className="profile-avatar-trigger"
+            type="button"
+            aria-label={pending === 'avatar' ? t('profile.uploadingPhoto') : t('profile.changePhoto')}
+            disabled={pending !== null}
+            onClick={() => avatarInput.current?.click()}
+          >
+            {profile.avatarUrl
+              ? <img className="profile-avatar" src={profile.avatarUrl} alt="" />
+              : <span className="profile-avatar profile-avatar-fallback" aria-hidden="true">{displayInitial}</span>}
+            <span className="profile-avatar-overlay" aria-hidden="true">
+              {pending === 'avatar'
+                ? <span className="button-spinner" />
+                : <svg viewBox="0 0 24 24" width="20" height="20"><path d="M9 5.5 10.2 4h3.6L15 5.5h2.5A2.5 2.5 0 0 1 20 8v8.5a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5V8a2.5 2.5 0 0 1 2.5-2.5H9Zm3 10.25A3.75 3.75 0 1 0 12 8.25a3.75 3.75 0 0 0 0 7.5Zm0-1.5a2.25 2.25 0 1 1 0-4.5 2.25 2.25 0 0 1 0 4.5Z" fill="currentColor" /></svg>}
+            </span>
+          </button>
+          <input
+            ref={avatarInput}
+            className="sr-only"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            aria-label={t('profile.choosePhoto')}
+            tabIndex={-1}
+            disabled={pending !== null}
+            onChange={(event) => chooseAvatar(event.target.files?.[0] ?? null)}
+          />
           <div className="profile-avatar-controls">
-            <label className="profile-file-field">{t('profile.newPhoto')}<input ref={avatarInput} type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => chooseAvatar(event.target.files?.[0] ?? null)} /></label>
+            <strong>{t('profile.changePhoto')}</strong>
+            <span>{t('profile.photoClickHint')}</span>
             <small>{t('profile.photoHint')}</small>
             {avatarError && <p className="profile-field-error" role="alert">{avatarError}</p>}
-            <div className="profile-inline-actions">
-              <LoadingButton className="primary-button" type="button" pending={pending === 'avatar'} pendingLabel={t('profile.uploading')} disabled={!avatarFile || pending !== null} onClick={() => void uploadAvatar()}>{t('profile.uploadPhoto')}</LoadingButton>
-              {profile.avatarUrl && <LoadingButton className="danger-button" type="button" pending={pending === 'avatar-delete'} pendingLabel={t('profile.deleting')} disabled={pending !== null} onClick={() => void deleteAvatar()}>{t('profile.deletePhoto')}</LoadingButton>}
-            </div>
+            {profile.avatarUrl && <LoadingButton className="profile-avatar-remove" type="button" pending={pending === 'avatar-delete'} pendingLabel={t('profile.deleting')} disabled={pending !== null} onClick={() => void deleteAvatar()}>{t('profile.deletePhoto')}</LoadingButton>}
           </div>
         </div>
         <form className="profile-form" onSubmit={(event) => void saveDetails(event)}>
@@ -193,9 +212,9 @@ export function ProfileEditor({ initial }: { initial: ProfileResponse }) {
           <LoadingButton className="primary-button" pending={pending === 'details'} pendingLabel={t('profile.saving')} disabled={!name.trim() || pending !== null}>{t('profile.saveChanges')}</LoadingButton>
         </form>
       </div>
-    </section>
+      </section>
 
-    <section className="profile-card" aria-labelledby="profile-security-heading">
+      <section className="profile-card" aria-labelledby="profile-security-heading">
       <div className="profile-card-heading"><div><h2 id="profile-security-heading">{t('profile.securityTitle')}</h2><p>{t('profile.securityDescription')}</p></div></div>
       {profile.canChangePassword
         ? <form className="profile-form profile-password-form" onSubmit={(event) => void changePassword(event)}>
@@ -206,20 +225,28 @@ export function ProfileEditor({ initial }: { initial: ProfileResponse }) {
           <LoadingButton className="primary-button" pending={pending === 'password'} pendingLabel={t('profile.changing')} disabled={!currentPassword || !newPassword || !confirmation || pending !== null}>{t('profile.changePassword')}</LoadingButton>
         </form>
         : <div className="profile-signin-method"><span className="google-mark" aria-hidden="true">G</span><div><strong>{t('profile.googleSignIn')}</strong><p>{t('profile.googlePasswordDescription')}</p></div></div>}
-    </section>
+      </section>
+    </div>
 
-    <section className="profile-card" aria-labelledby="profile-account-heading" aria-label={t('profile.accountTitle')}>
-      <div className="profile-card-heading"><div><h2 id="profile-account-heading">{t('profile.accountTitle')}</h2><p>{t('profile.accountDescription')}</p></div></div>
-      <dl className="profile-facts">
-        <div><dt>Email</dt><dd>{profile.email}</dd></div>
-        <div><dt>{t('profile.role')}</dt><dd>{profile.membershipRole === 'OWNER' ? t('header.owner') : profile.membershipRole === 'MANAGER' ? t('header.manager') : t('profile.noTeam')}</dd></div>
-        <div><dt>{t('profile.created')}</dt><dd><time dateTime={profile.createdAt}>{formatDate(profile.createdAt, { dateStyle: 'medium', timeStyle: 'short' })}</time></dd></div>
-        <div><dt>{t('profile.lastLogin')}</dt><dd>{profile.lastLoginAt ? <time dateTime={profile.lastLoginAt}>{formatDate(profile.lastLoginAt, { dateStyle: 'medium', timeStyle: 'short' })}</time> : t('profile.neverLoggedIn')}</dd></div>
-      </dl>
-      <div className="profile-account-actions">
-        <LoadingButton className="secondary-button" type="button" pending={pending === 'logout'} pendingLabel={t('header.signingOut')} disabled={pending !== null} onClick={() => void logout()}>{t('profile.signOutAccount')}</LoadingButton>
-      </div>
-    </section>
+    <aside className="profile-side-column" aria-label={t('profile.preferencesTitle')}>
+      <section className="profile-card profile-language-card" aria-labelledby="profile-language-heading">
+        <div><h2 id="profile-language-heading">{t('language.label')}</h2><p>{t('profile.languageDescription')}</p></div>
+        <LocaleSwitcher variant="profile" />
+      </section>
+
+      <section className="profile-card" aria-labelledby="profile-account-heading" aria-label={t('profile.accountTitle')}>
+        <div className="profile-card-heading"><div><h2 id="profile-account-heading">{t('profile.accountTitle')}</h2><p>{t('profile.accountDescription')}</p></div></div>
+        <dl className="profile-facts">
+          <div><dt>Email</dt><dd>{profile.email}</dd></div>
+          <div><dt>{t('profile.role')}</dt><dd>{profile.membershipRole === 'OWNER' ? t('header.owner') : profile.membershipRole === 'MANAGER' ? t('header.manager') : t('profile.noTeam')}</dd></div>
+          <div><dt>{t('profile.created')}</dt><dd><time dateTime={profile.createdAt}>{formatDate(profile.createdAt, { dateStyle: 'medium', timeStyle: 'short' })}</time></dd></div>
+          <div><dt>{t('profile.lastLogin')}</dt><dd>{profile.lastLoginAt ? <time dateTime={profile.lastLoginAt}>{formatDate(profile.lastLoginAt, { dateStyle: 'medium', timeStyle: 'short' })}</time> : t('profile.neverLoggedIn')}</dd></div>
+        </dl>
+        <div className="profile-account-actions">
+          <LoadingButton className="secondary-button" type="button" pending={pending === 'logout'} pendingLabel={t('header.signingOut')} disabled={pending !== null} onClick={() => void logout()}>{t('profile.signOutAccount')}</LoadingButton>
+        </div>
+      </section>
+    </aside>
   </div>;
 }
 
