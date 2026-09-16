@@ -11,18 +11,20 @@ type NavigationIcon = ComponentType<SVGProps<SVGSVGElement>>;
 
 type NavigationItem = {
   href: string;
-  labelKey: 'navigation.conversations' | 'navigation.orders' | 'navigation.catalogue' | 'navigation.team' | 'navigation.settings';
+  labelKey: 'navigation.dashboard' | 'navigation.conversations' | 'navigation.orders' | 'navigation.catalogue' | 'navigation.team' | 'navigation.settings' | 'navigation.onboarding';
   icon: NavigationIcon;
   ownerOnly?: boolean;
   requiresMembership?: boolean;
 };
 
 const navigationItems: NavigationItem[] = [
+  { href: '/dashboard', labelKey: 'navigation.dashboard', icon: DashboardIcon },
   { href: '/conversations', labelKey: 'navigation.conversations', icon: ConversationIcon },
   { href: '/orders', labelKey: 'navigation.orders', icon: OrdersIcon },
   { href: '/catalogue', labelKey: 'navigation.catalogue', icon: CatalogueIcon, requiresMembership: true },
   { href: '/team', labelKey: 'navigation.team', icon: TeamIcon, ownerOnly: true },
   { href: '/settings', labelKey: 'navigation.settings', icon: SettingsIcon, requiresMembership: true },
+  { href: '/onboarding', labelKey: 'navigation.onboarding', icon: OnboardingIcon, requiresMembership: true },
 ];
 
 export function isNavigationItemActive(pathname: string, href: string) {
@@ -57,7 +59,7 @@ export function PrimaryNavigation({
 
   return <aside className={`primary-nav ${className}`.trim()}>
     <div className="primary-nav-brand-row">
-      <Link className="brand" href="/conversations" aria-label="AutoSale" {...navigationHandler}><span className="brand-mark" aria-hidden="true">A</span><span className="brand-label">AutoSale</span></Link>
+      <Link className="brand" href="/dashboard" aria-label="AutoSale" {...navigationHandler}><span className="brand-mark" aria-hidden="true">A</span><span className="brand-label">AutoSale</span></Link>
       {onToggleCollapse && <button className="sidebar-toggle" type="button" aria-label={collapsed ? t('navigation.expand') : t('navigation.collapse')} aria-expanded={!collapsed} onClick={onToggleCollapse}><CollapseIcon data-collapsed={collapsed} /></button>}
     </div>
     <nav aria-label={ariaLabel ?? t('navigation.mainLabel')} id={navId}>
@@ -75,9 +77,11 @@ export function PrimaryNavigation({
   </aside>;
 }
 
+function DashboardIcon(props: SVGProps<SVGSVGElement>) { return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></svg>; }
 function ConversationIcon(props: SVGProps<SVGSVGElement>) { return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}><path d="M5 5h14v10H9l-4 4V5Z" /><path d="M8 9h8M8 12h5" /></svg>; }
 function OrdersIcon(props: SVGProps<SVGSVGElement>) { return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}><path d="M6 7h12l-1 13H7L6 7Z" /><path d="M9 9V5a3 3 0 0 1 6 0v4" /></svg>; }
 function CatalogueIcon(props: SVGProps<SVGSVGElement>) { return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}><path d="M4 5.5 12 2l8 3.5v13L12 22l-8-3.5v-13Z" /><path d="m4 5.5 8 3.5 8-3.5M12 9v13" /></svg>; }
 function TeamIcon(props: SVGProps<SVGSVGElement>) { return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}><circle cx="9" cy="8" r="3" /><path d="M3.5 19c.4-4 2.2-6 5.5-6s5.1 2 5.5 6M16 5.5a3 3 0 0 1 0 5.5M16 13c2.8.3 4.3 2.3 4.5 6" /></svg>; }
 function SettingsIcon(props: SVGProps<SVGSVGElement>) { return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}><circle cx="12" cy="12" r="3" /><path d="M19 13.5v-3l-2.2-.7-.7-1.6 1-2-2.2-2.1-2 1-1.7-.7L10.5 2h-3l-.7 2.4-1.6.7-2-1L1.1 6.2l1 2-.7 1.6-2.4.7v3l2.4.7.7 1.6-1 2 2.1 2.1 2-1 1.6.7.7 2.4h3l.7-2.4 1.7-.7 2 1 2.2-2.1-1-2 .7-1.6 2.2-.7Z" transform="translate(2) scale(.83 1)" /></svg>; }
+function OnboardingIcon(props: SVGProps<SVGSVGElement>) { return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}><path d="M12 3v12M8 7l4-4 4 4M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6" /></svg>; }
 function CollapseIcon({ 'data-collapsed': collapsed }: { 'data-collapsed': boolean }) { return <svg aria-hidden="true" viewBox="0 0 24 24"><path d={collapsed ? 'm9 6 6 6-6 6' : 'm15 6-6 6 6 6'} /></svg>; }

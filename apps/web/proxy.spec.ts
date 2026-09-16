@@ -6,6 +6,17 @@ import { proxy } from './proxy';
 afterEach(() => vi.unstubAllGlobals());
 
 describe('proxy', () => {
+  it('sends an authenticated tenant user from sign-in to the dashboard', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ platformRole: 'USER', membershipRole: 'OWNER' }),
+    }));
+
+    const response = await proxy(new NextRequest('http://autosale.local/login'));
+
+    expect(response.headers.get('location')).toBe('http://autosale.local/dashboard');
+  });
+
   it.each(['/privacy', '/privacy/data-deletion', '/terms'])(
     'allows unauthenticated access to public legal page %s',
     async (pathname) => {
