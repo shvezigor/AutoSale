@@ -37,7 +37,7 @@ export const ukMessages = {
     aiTitle: 'Обробіть 2 замовлення з діалогів', aiDescription: 'Телефон і товар уже розпізнано. Перевірте дані — далі ТТН створиться автоматично.', openQueue: 'Відкрити чергу',
     metrics: { revenue: 'Виторг за 7 днів', orders: 'Замовлення', dialogs: 'Нові діалоги', average: 'Середній чек' }, trendLabel: 'Динаміка показника',
     revenueTitle: 'Виторг по місяцях', month: 'Місяць', months: 'Січ,Лют,Бер,Кві,Тра,Чер,Лип,Сер,Вер,Жов,Лис,Гру', revenueChartLabel: 'Діаграма виторгу за місяцями',
-    sourcesTitle: 'Джерела замовлень', sourcesChartLabel: 'Розподіл джерел замовлень', queueTitle: 'Черга на перевірку', queueDescription: 'Замовлення, де AI вже зібрав основні дані.', allOrders: 'Усі замовлення', review: 'Перевірити',
+    sourcesTitle: 'Джерела замовлень', sourcesChartLabel: 'Розподіл джерел замовлень', queueTitle: 'Черга на перевірку', queueDescription: 'Замовлення, де AI вже зібрав основні дані.', allOrders: 'Усі замовлення', review: 'Перевірити', open: 'Відкрити', queueActions: { review: 'Перевірити', data: 'Дані', reply: 'Відповісти' },
   },
   onboarding: {
     status: 'Розділ у розробці', title: 'Налаштуйте AutoSale', description: 'Згодом тут буде покрокове підключення каналів, каталогу та доставки. Наявні інтеграції вже доступні в налаштуваннях.', settings: 'Перейти до налаштувань',
@@ -69,7 +69,8 @@ export const ukMessages = {
     emailVerified: 'Email підтверджено', emailVerificationFailed: 'Не вдалося підтвердити email', workspaceActivated: 'Ваш робочий простір активовано.',
   },
   header: {
-    workspace: 'Робочий простір', openMenu: 'Відкрити меню', closeMenu: 'Закрити меню', sectionsMenu: 'Меню розділів', notifications: 'Сповіщення',
+    skipToContent: 'Перейти до вмісту',
+    workspace: 'Робочий простір', searchPlaceholder: 'Пошук клієнта, товару, №', searchUnavailable: 'Глобальний пошук буде доступний у наступному етапі', openMenu: 'Відкрити меню', closeMenu: 'Закрити меню', sectionsMenu: 'Меню розділів', notifications: 'Сповіщення',
     unreadLabel: 'Сповіщення: {count} непрочитаних', center: 'Центр сповіщень', unreadCount: '{count} непрочитаних', allViewed: 'Усе переглянуто',
     readAll: 'Прочитати всі', loading: 'Завантажуємо…', loadError: 'Не вдалося завантажити.', retry: 'Повторити', empty: 'Нових подій поки немає.',
     profileMenu: 'Меню профілю', owner: 'Власник', manager: 'Менеджер', team: 'Команда', signOut: 'Вийти', signingOut: 'Виходимо…',

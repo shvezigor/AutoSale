@@ -53,4 +53,10 @@ describe('AppHeader', () => {
     expect(screen.getByRole('menuitem', { name: 'My profile' })).toBeInTheDocument();
     expect(screen.getByRole('menuitem', { name: 'Sign out' })).toBeInTheDocument();
   });
+
+  it('shows the reference search shell without pretending global search is active', () => {
+    renderHeader({ name: 'Ігор', email: 'owner@example.com', membershipRole: 'OWNER', avatarUrl: null });
+    expect(screen.getByText('Пошук клієнта, товару, №')).toBeInTheDocument();
+    expect(screen.getByLabelText('Глобальний пошук буде доступний у наступному етапі')).toHaveAttribute('aria-disabled', 'true');
+  });
 });

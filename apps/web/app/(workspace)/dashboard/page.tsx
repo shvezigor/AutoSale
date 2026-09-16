@@ -80,7 +80,7 @@ export default async function DashboardPage() {
           {dashboardQueue.map((item) => (
             <article key={item.product}>
               <div><strong>{item.product}</strong><span>{item.customer} · {item.confidence}</span></div>
-              <Link href="/orders?status=NEEDS_REVIEW">{t('dashboard.review')}</Link>
+              <div className="dashboard-queue-actions"><span>{t(`dashboard.queueActions.${item.action}`)}</span><Link href="/orders?status=NEEDS_REVIEW">{t('dashboard.open')}</Link></div>
             </article>
           ))}
         </div>

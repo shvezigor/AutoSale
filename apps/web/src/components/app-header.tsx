@@ -16,7 +16,7 @@ export function AppHeader({ session, menuOpen = false, menuTriggerRef, onMenuTog
   const { t } = useI18n();
   const [open, setOpen] = useState<'notifications' | 'profile' | null>(null);
   return <header className="app-header">
-    <div className="app-header-leading">{onMenuToggle && <button ref={menuTriggerRef} className="mobile-menu-trigger" type="button" aria-label={menuOpen ? t('header.closeMenu') : t('header.openMenu')} aria-expanded={menuOpen} aria-controls="mobile-navigation" onClick={onMenuToggle}><span /><span /><span /></button>}<span className="app-header-context">{t('header.workspace')}</span></div>
+    <div className="app-header-leading">{onMenuToggle && <button ref={menuTriggerRef} className="mobile-menu-trigger" type="button" aria-label={menuOpen ? t('header.closeMenu') : t('header.openMenu')} aria-expanded={menuOpen} aria-controls="mobile-navigation" onClick={onMenuToggle}><span /><span /><span /></button>}<span className="app-header-context sr-only">{t('header.workspace')}</span><div className="app-header-search" aria-label={t('header.searchUnavailable')} aria-disabled="true"><SearchIcon /><span>{t('header.searchPlaceholder')}</span><kbd>⌘ K</kbd></div></div>
     <div className="app-header-actions">
       <LocaleSwitcher />
       <NotificationCenter open={open === 'notifications'} onToggle={() => setOpen((value) => value === 'notifications' ? null : 'notifications')} onClose={() => setOpen(null)} />
@@ -127,3 +127,4 @@ function relativeTime(value: string, t: ReturnType<typeof useI18n>['t']) {
 }
 
 function BellIcon() { return <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" /></svg>; }
+function SearchIcon() { return <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5" /><path d="m15.5 15.5 4 4" /></svg>; }

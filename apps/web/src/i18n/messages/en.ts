@@ -39,7 +39,7 @@ export const enMessages = {
     aiTitle: 'Review 2 orders from conversations', aiDescription: 'The phone number and product are already recognized. Check the details — the shipment will be created automatically.', openQueue: 'Open queue',
     metrics: { revenue: 'Revenue for 7 days', orders: 'Orders', dialogs: 'New conversations', average: 'Average order' }, trendLabel: 'Metric trend',
     revenueTitle: 'Monthly revenue', month: 'Month', months: 'Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec', revenueChartLabel: 'Monthly revenue chart',
-    sourcesTitle: 'Order sources', sourcesChartLabel: 'Order source distribution', queueTitle: 'Review queue', queueDescription: 'Orders where AI has already collected the core details.', allOrders: 'All orders', review: 'Review',
+    sourcesTitle: 'Order sources', sourcesChartLabel: 'Order source distribution', queueTitle: 'Review queue', queueDescription: 'Orders where AI has already collected the core details.', allOrders: 'All orders', review: 'Review', open: 'Open', queueActions: { review: 'Review', data: 'Details', reply: 'Reply' },
   },
   onboarding: {
     status: 'Section in development', title: 'Set up AutoSale', description: 'This page will guide you through connecting channels, catalogue, and delivery. Existing integrations are already available in Settings.', settings: 'Open settings',
@@ -59,7 +59,8 @@ export const enMessages = {
     emailVerified: 'Email verified', emailVerificationFailed: 'Could not verify email', workspaceActivated: 'Your workspace is now active.',
   },
   header: {
-    workspace: 'Workspace', openMenu: 'Open menu', closeMenu: 'Close menu', sectionsMenu: 'Section menu', notifications: 'Notifications', unreadLabel: 'Notifications: {count} unread', center: 'Notification center', unreadCount: '{count} unread', allViewed: 'All caught up', readAll: 'Mark all as read', loading: 'Loading…', loadError: 'Could not load notifications.', retry: 'Try again', empty: 'No new events yet.', profileMenu: 'Profile menu', owner: 'Owner', manager: 'Manager', team: 'Team', signOut: 'Sign out', signingOut: 'Signing out…', profilePhoto: '{name} profile photo', initial: '{initial} initial', justNow: 'just now', minutesAgo: '{count} min ago', hoursAgo: '{count} hr ago', daysAgo: '{count} d ago',
+    skipToContent: 'Skip to content',
+    workspace: 'Workspace', searchPlaceholder: 'Search client, product, no.', searchUnavailable: 'Global search will be available in the next stage', openMenu: 'Open menu', closeMenu: 'Close menu', sectionsMenu: 'Section menu', notifications: 'Notifications', unreadLabel: 'Notifications: {count} unread', center: 'Notification center', unreadCount: '{count} unread', allViewed: 'All caught up', readAll: 'Mark all as read', loading: 'Loading…', loadError: 'Could not load notifications.', retry: 'Try again', empty: 'No new events yet.', profileMenu: 'Profile menu', owner: 'Owner', manager: 'Manager', team: 'Team', signOut: 'Sign out', signingOut: 'Signing out…', profilePhoto: '{name} profile photo', initial: '{initial} initial', justNow: 'just now', minutesAgo: '{count} min ago', hoursAgo: '{count} hr ago', daysAgo: '{count} d ago',
   },
   profile: {
     pageTitle: 'My profile', pageDescription: 'Manage your personal details, photo, and account security.', languageDescription: 'Choose the language for menus, pages, and system messages.',

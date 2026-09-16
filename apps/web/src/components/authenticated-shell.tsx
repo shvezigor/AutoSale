@@ -38,8 +38,9 @@ export function AuthenticatedShell({ session, children }: { session: ShellSessio
   }
 
   return <ToastProvider><ActivityProvider><ConfirmProvider><div className="authenticated-shell">
+    <a className="skip-link" href="#main-content">{t('header.skipToContent')}</a>
     <PrimaryNavigation collapsed={collapsed} onToggleCollapse={toggleSidebar} session={session} />
-    <div className="authenticated-workspace" inert={mobileOpen}><AppHeader menuOpen={mobileOpen} menuTriggerRef={menuTrigger} onMenuToggle={() => { menuTrigger.current?.focus(); setMobileOpen(true); }} session={session} />{children}</div>
+    <div className="authenticated-workspace" inert={mobileOpen}><AppHeader menuOpen={mobileOpen} menuTriggerRef={menuTrigger} onMenuToggle={() => { menuTrigger.current?.focus(); setMobileOpen(true); }} session={session} /><div id="main-content" tabIndex={-1}>{children}</div></div>
     {mobileOpen && <div ref={drawer} className="mobile-nav-backdrop" role="dialog" aria-modal="true" aria-label={t('header.sectionsMenu')} onMouseDown={(event) => { if (event.target === event.currentTarget) closeMobile(); }}><div className="mobile-nav-drawer"><button className="secondary-button" type="button" onClick={closeMobile}>{t('header.closeMenu')}</button><PrimaryNavigation ariaLabel={t('navigation.mobileLabel')} navId="mobile-navigation" onNavigate={closeMobile} session={session} /></div></div>}
   </div></ConfirmProvider></ActivityProvider></ToastProvider>;
 }

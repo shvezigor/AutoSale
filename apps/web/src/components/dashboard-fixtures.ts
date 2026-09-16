@@ -15,8 +15,10 @@ export const dashboardSources = [
 ] as const;
 
 export const dashboardQueue = [
-  { product: 'Труси, розмір M', customer: 'Instagram · 18:53', confidence: 'Телефон розпізнано' },
-  { product: 'Футболка Base, чорна', customer: 'Instagram · 18:41', confidence: 'Потрібно уточнити розмір' },
+  { product: 'Труси, розмір M', customer: 'Клієнт Instagram · 18:53', confidence: 'телефон розпізнано', action: 'review' },
+  { product: '860×2050 Регіон (плівка мат)', customer: 'Клієнт Instagram · 17:01', confidence: 'немає адреси', action: 'data' },
+  { product: '960×2050 Стандарт VINARIT', customer: 'Клієнт Instagram · 12:21', confidence: 'вкладення', action: 'review' },
+  { product: 'Уточнення розміру', customer: 'Клієнт Instagram · 20:33', confidence: 'без товару', action: 'reply' },
 ] as const;
 
 export type DashboardMetricKey = typeof dashboardMetrics[number]['key'];

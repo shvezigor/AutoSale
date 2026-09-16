@@ -11,7 +11,6 @@ import './globals.css';
 const jakarta = Plus_Jakarta_Sans({
   subsets: ['latin', 'cyrillic-ext'],
   display: 'swap',
-  variable: '--font-jakarta',
 });
 
 export const metadata: Metadata = {
@@ -26,7 +25,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   return (
     <html lang={locale} suppressHydrationWarning>
       <head><script dangerouslySetInnerHTML={{ __html: SIDEBAR_PREFERENCE_SCRIPT }} /></head>
-      <body className={jakarta.variable}><I18nProvider locale={locale} authenticated={Boolean(session)}>{children}</I18nProvider></body>
+      <body className={jakarta.className}><I18nProvider locale={locale} authenticated={Boolean(session)}>{children}</I18nProvider></body>
     </html>
   );
 }
