@@ -215,12 +215,9 @@ export class MetaInstagramClient {
     await this.requestVoid(this.graphUrl('me/subscribed_apps'), { ...this.authorized(accessToken), method: 'DELETE' });
   }
 
-  async revoke(accessToken: string): Promise<void> {
-    await this.requestVoid(
-      this.graphUrl('me/permissions'),
-      { ...this.authorized(accessToken), method: 'DELETE' },
-      true,
-    );
+  async revoke(_accessToken: string): Promise<void> {
+    // Instagram Login does not expose the Facebook Graph permissions edge.
+    // Disconnect is completed by unsubscribing webhooks and deleting local access.
   }
 
   private graphUrl(path: string): URL {
@@ -240,11 +237,7 @@ export class MetaInstagramClient {
     }
   }
 
-  private async requestVoid(
-    url: URL | string,
-    init: RequestInit,
-    acceptsBooleanSuccess = false,
-  ): Promise<void> {
+  private async requestVoid(url: URL | string, init: RequestInit): Promise<void> {
     const response = await this.request(url, init);
     let payload: unknown;
     try {
@@ -252,7 +245,7 @@ export class MetaInstagramClient {
     } catch {
       throw new MetaInstagramError(response.status, null);
     }
-    if (!(acceptsBooleanSuccess && payload === true) && (!isRecord(payload) || payload.success !== true)) {
+    if (!isRecord(payload) || payload.success !== true) {
       throw new MetaInstagramError(response.status, null);
     }
   }

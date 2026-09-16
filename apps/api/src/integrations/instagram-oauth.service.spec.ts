@@ -861,7 +861,10 @@ describe('InstagramOAuthService', () => {
         userId: 'user-a',
         action: 'INSTAGRAM_CREDENTIAL_CLEANUP_FAILED',
         result: 'FAILURE',
-        metadata: { errorCode: 'META_DISCONNECT_CLEANUP_FAILED' },
+        metadata: {
+          errorCode: 'META_DISCONNECT_CLEANUP_FAILED',
+          operation: 'UNSUBSCRIBE',
+        },
       }),
     });
     expect(JSON.stringify(auditCreate.mock.calls)).not.toMatch(/remote-token|encryptedAccessToken|app-secret|provider unavailable/);
@@ -906,6 +909,39 @@ describe('InstagramOAuthService', () => {
       lastErrorCode: null,
     });
     expect(cleanupRows[0]?.terminalAt).toBeInstanceOf(Date);
+  });
+
+  it('records sanitized Meta diagnostics when permission revoke cleanup fails', async () => {
+    const mocks = setup();
+    const { service, findUnique, meta, auditCreate } = mocks;
+    const cipher = new CredentialCipher(Buffer.alloc(32, 7));
+    installCleanupStore(mocks, [{
+      encryptedAccessToken: cipher.encrypt('remote-token'),
+      unsubscribeStatus: 'SUCCEEDED',
+      unsubscribeSucceededAt: now,
+    }]);
+    findUnique.mockResolvedValue(connection({ status: 'DISCONNECTED', encryptedAccessToken: null, disconnectedAt: now }));
+    meta.revoke.mockRejectedValue(new MetaInstagramError(400, 100, false, 33));
+
+    await service.retryCleanup('tenant-a', 'user-a');
+
+    expect(auditCreate).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        tenantId: 'tenant-a',
+        userId: 'user-a',
+        action: 'INSTAGRAM_CREDENTIAL_CLEANUP_FAILED',
+        result: 'FAILURE',
+        metadata: {
+          errorCode: 'META_DISCONNECT_CLEANUP_FAILED',
+          operation: 'REVOKE',
+          providerStatus: '400',
+          providerCode: '100',
+          providerSubcode: '33',
+          providerTransient: 'false',
+        },
+      }),
+    });
+    expect(JSON.stringify(auditCreate.mock.calls)).not.toMatch(/remote-token|encryptedAccessToken/);
   });
 
   it('preserves partial cleanup progress when disconnect reclaims the same generation', async () => {
@@ -1261,7 +1297,7 @@ describe('InstagramOAuthService', () => {
         metadata: { errorCode: 'META_DISCONNECT_CLEANUP_FAILED' },
       }),
     });
-    expect(JSON.stringify(auditCreate.mock.calls)).not.toMatch(/remote-token|2207051|provider/);
+    expect(JSON.stringify(auditCreate.mock.calls)).not.toMatch(/remote-token|new-remote-token|Meta Instagram API request failed/);
   });
 
   it('does not permit abandoning a retryable cleanup while a lease is active', async () => {

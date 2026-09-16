@@ -382,28 +382,15 @@ describe('MetaInstagramClient', () => {
     expect(fetchFn.mock.calls.every(([, init]) => init?.method === 'DELETE')).toBe(true);
   });
 
-  it('revokes the current account token', async () => {
-    const fetchFn = vi.fn<typeof fetch>().mockResolvedValue(response({ success: true }));
+  it('does not call the unsupported permissions endpoint when disconnecting Instagram Login', async () => {
+    const fetchFn = vi.fn<typeof fetch>();
     const client = new MetaInstagramClient({ ...config, fetch: fetchFn });
 
     await expect(client.revoke('access-token')).resolves.toBeUndefined();
-
-    const [requestUrl, init] = fetchFn.mock.calls[0] ?? [];
-    expect(String(requestUrl)).toBe('https://graph.instagram.com/v24.0/me/permissions');
-    expect(init?.method).toBe('DELETE');
-    expect(init?.headers).toEqual({ authorization: 'Bearer access-token' });
+    expect(fetchFn).not.toHaveBeenCalled();
   });
 
-  it('accepts the boolean success response returned when Meta revokes permissions', async () => {
-    const client = new MetaInstagramClient({
-      ...config,
-      fetch: vi.fn<typeof fetch>().mockResolvedValue(response(true)),
-    });
-
-    await expect(client.revoke('access-token')).resolves.toBeUndefined();
-  });
-
-  it.each(['subscribe', 'unsubscribe', 'revoke'] as const)('requires Meta success=true for %s side effects', async (operation) => {
+  it.each(['subscribe', 'unsubscribe'] as const)('requires Meta success=true for %s side effects', async (operation) => {
     const client = new MetaInstagramClient({
       ...config,
       fetch: vi.fn<typeof fetch>().mockResolvedValue(response({ success: false })),
@@ -411,19 +398,6 @@ describe('MetaInstagramClient', () => {
 
     await expect(client[operation]('access-token')).rejects.toEqual(expect.objectContaining({
       name: 'MetaInstagramError', status: 200, providerCode: null,
-    }));
-  });
-
-  it('preserves the documented invalid-token code for cleanup replay normalization', async () => {
-    const client = new MetaInstagramClient({
-      ...config,
-      fetch: vi.fn<typeof fetch>().mockResolvedValue(response({
-        error: { code: 190, message: 'Invalid OAuth access token' },
-      }, 400)),
-    });
-
-    await expect(client.revoke('revoked-token')).rejects.toEqual(expect.objectContaining({
-      name: 'MetaInstagramError', status: 400, providerCode: 190, isTransient: null, errorSubcode: null,
     }));
   });
 

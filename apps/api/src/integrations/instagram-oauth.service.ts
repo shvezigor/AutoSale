@@ -846,8 +846,8 @@ export class InstagramOAuthService {
     let accessToken: string;
     try {
       accessToken = this.cipher.decrypt(cleanup.encryptedAccessToken);
-    } catch {
-      await this.markCleanupFailed(cleanup, operation, userId, false);
+    } catch (error) {
+      await this.markCleanupFailed(cleanup, operation, userId, false, error);
       return;
     }
 
@@ -861,7 +861,7 @@ export class InstagramOAuthService {
       } catch (error) {
         const resolution = classifyCleanupFailure('UNSUBSCRIBE', error);
         if (resolution !== 'SUCCEEDED') {
-          await this.markCleanupFailed(current, 'UNSUBSCRIBE', userId, resolution === 'PERMANENT');
+          await this.markCleanupFailed(current, 'UNSUBSCRIBE', userId, resolution === 'PERMANENT', error);
           return;
         }
       }
@@ -885,7 +885,7 @@ export class InstagramOAuthService {
       } catch (error) {
         const resolution = classifyCleanupFailure('REVOKE', error);
         if (resolution !== 'SUCCEEDED') {
-          await this.markCleanupFailed(current, 'REVOKE', userId, resolution === 'PERMANENT');
+          await this.markCleanupFailed(current, 'REVOKE', userId, resolution === 'PERMANENT', error);
           return;
         }
       }
@@ -930,6 +930,7 @@ export class InstagramOAuthService {
     operation: CleanupOperation,
     userId: string,
     permanent: boolean,
+    error: unknown,
   ): Promise<void> {
     const failedAt = this.now();
     const failed = await this.updateLeasedCleanup(cleanup, {
@@ -946,7 +947,10 @@ export class InstagramOAuthService {
       { tenantId: cleanup.tenantId, userId },
       'INSTAGRAM_CREDENTIAL_CLEANUP_FAILED',
       'FAILURE',
-      { errorCode: permanent ? CLEANUP_PERMANENT_FAILURE_CODE : CLEANUP_FAILED_CODE },
+      {
+        errorCode: permanent ? CLEANUP_PERMANENT_FAILURE_CODE : CLEANUP_FAILED_CODE,
+        ...safeCleanupDiagnostics(error, operation),
+      },
     );
   }
 
@@ -1284,6 +1288,21 @@ function safeProviderDiagnostics(
   providerPhase: 'TOKEN_EXCHANGE' | 'IDENTITY',
 ): Record<string, string> {
   const diagnostics: Record<string, string> = { providerPhase };
+  if (!(error instanceof MetaInstagramError)) return diagnostics;
+  if (error.status !== null) diagnostics.providerStatus = String(error.status);
+  if (error.providerCode !== null) diagnostics.providerCode = String(error.providerCode);
+  if (error.errorSubcode !== null) diagnostics.providerSubcode = String(error.errorSubcode);
+  if (error.isTransient !== null) diagnostics.providerTransient = String(error.isTransient);
+  if (error.responseStage !== null) diagnostics.providerResponseStage = error.responseStage;
+  if (error.responseShape !== null) diagnostics.providerResponseShape = error.responseShape;
+  return diagnostics;
+}
+
+function safeCleanupDiagnostics(
+  error: unknown,
+  operation: CleanupOperation,
+): Record<string, string> {
+  const diagnostics: Record<string, string> = { operation };
   if (!(error instanceof MetaInstagramError)) return diagnostics;
   if (error.status !== null) diagnostics.providerStatus = String(error.status);
   if (error.providerCode !== null) diagnostics.providerCode = String(error.providerCode);
