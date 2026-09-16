@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { authenticatedApiFetch, getServerSession } = vi.hoisted(() => ({
@@ -65,6 +65,12 @@ describe('SettingsPage', () => {
     expect(screen.queryByRole('heading', { name: 'Підтвердження замовлень' })).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('tab', { name: /Дані/ }));
+
+    const synchronizationStatus = screen.getByRole('complementary', { name: 'Стан синхронізації' });
+    expect(within(synchronizationStatus).getByText('0 із 2')).toBeInTheDocument();
+    expect(within(synchronizationStatus).getByText('owner@gmail.com')).toBeInTheDocument();
+    expect(within(synchronizationStatus).getByText('Товари')).toBeInTheDocument();
+    expect(within(synchronizationStatus).getByText('Експорт замовлень')).toBeInTheDocument();
 
     const catalogueIntegration = screen.getByRole('button', { name: /Товари.*Каталог/i });
     const ordersIntegration = screen.getByRole('button', { name: /Експорт замовлень.*таблицю/i });

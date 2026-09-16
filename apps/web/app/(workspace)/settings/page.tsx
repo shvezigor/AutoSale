@@ -119,7 +119,7 @@ function SettingsLayout({
       id: 'data' as const,
       label: t('settings.dataTab'),
       description: t('settings.dataTabDescription'),
-      content: <section className="settings-section data-workspace"><div className="settings-section-heading"><h2>{t('settings.dataTitle')}</h2><p>{isManager ? t('settings.dataManagerDescription') : t('settings.dataOwnerDescription')}</p>{!isManager && <span className={`data-account-state status-${google.status.toLowerCase()}`}>{googleConnected && google.email ? t('settings.googleAccount', { email: google.email }) : t('settings.googlePickerAccess')}</span>}</div>{settings ? <DataIntegrationHub sources={catalogueSources} configurations={catalogueConfigurations} sheets={sheets!} googleConnected={googleConnected} autoOpenCatalogue={pickerAction === 'pick-catalogue'} autoOpenOrders={pickerAction === 'pick-orders'} /> : <div className="settings-card"><p>{t('settings.ownerManagesData')}</p></div>}</section>,
+      content: <section className="settings-section data-workspace"><div className="settings-section-heading"><h2>{t('settings.dataTitle')}</h2><p>{isManager ? t('settings.dataManagerDescription') : t('settings.dataOwnerDescription')}</p></div>{settings ? <DataIntegrationHub sources={catalogueSources} configurations={catalogueConfigurations} sheets={sheets!} googleConnected={googleConnected} googleAccountEmail={google.email} autoOpenCatalogue={pickerAction === 'pick-catalogue'} autoOpenOrders={pickerAction === 'pick-orders'} /> : <div className="settings-card"><p>{t('settings.ownerManagesData')}</p></div>}</section>,
     },
     {
       id: 'social' as const,
