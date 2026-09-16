@@ -57,7 +57,7 @@ describe('OrdersController', () => {
     const response = await request(app.getHttpServer()).get('/api/orders').expect(200);
     expect(response.body).toEqual({ items: [order], page: 1, pageSize: 25, total: 1 });
     await request(app.getHttpServer()).get(`/api/orders/${orderId}`).expect(200, order);
-    expect(list).toHaveBeenCalledWith(tenantId, { page: 1, pageSize: 25 });
+    expect(list).toHaveBeenCalledWith(tenantId, { page: 1, pageSize: 25, sort: 'date', direction: 'desc' });
     expect(detail).toHaveBeenCalledWith(tenantId, orderId);
   });
 
@@ -65,9 +65,15 @@ describe('OrdersController', () => {
     await request(app.getHttpServer())
       .get('/api/orders?search=%D0%90%D0%B2%D0%B0%D0%BD%D0%B3%D0%B0%D1%80%D0%B4&status=NEEDS_REVIEW&page=2&pageSize=10')
       .expect(200);
-    expect(list).toHaveBeenCalledWith(tenantId, { search: 'Авангард', status: 'NEEDS_REVIEW', page: 2, pageSize: 10 });
+    expect(list).toHaveBeenCalledWith(tenantId, { search: 'Авангард', status: 'NEEDS_REVIEW', page: 2, pageSize: 10, sort: 'date', direction: 'desc' });
 
     await request(app.getHttpServer()).get('/api/orders?status=UNKNOWN').expect(400);
+  });
+
+  it('accepts allowlisted order sorting and rejects unsupported fields', async () => {
+    await request(app.getHttpServer()).get('/api/orders?sort=confidence&direction=asc').expect(200);
+    expect(list).toHaveBeenCalledWith(tenantId, expect.objectContaining({ sort: 'confidence', direction: 'asc' }));
+    await request(app.getHttpServer()).get('/api/orders?sort=tenantId').expect(400);
   });
 
   it('approves a valid order with the manager actor', async () => {

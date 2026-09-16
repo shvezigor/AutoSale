@@ -55,7 +55,7 @@ describe('OrdersService Google Sheets retry', () => {
           every: { procurementStatus: 'TO_ORDER' },
         } })],
       }),
-      orderBy: { createdAt: 'desc' },
+      orderBy: [{ createdAt: 'desc' }, { id: 'asc' }],
       skip: 10,
       take: 10,
     }));
@@ -68,6 +68,16 @@ describe('OrdersService Google Sheets retry', () => {
       } })],
     }) });
     expect(result).toEqual({ items: [], page: 2, pageSize: 10, total: 0 });
+  });
+
+  it('sorts projected customer names and nullable confidence in the database', async () => {
+    const findMany = vi.fn().mockResolvedValue([]);
+    const prisma = { order: { findMany, count: vi.fn().mockResolvedValue(0) }, product: { findMany: vi.fn().mockResolvedValue([]) } };
+    const service = new OrdersService(prisma as never);
+    await service.list('tenant-a', { page: 1, pageSize: 25, sort: 'customer', direction: 'asc' });
+    expect(findMany).toHaveBeenLastCalledWith(expect.objectContaining({ orderBy: [{ sortCustomer: 'asc' }, { id: 'asc' }] }));
+    await service.list('tenant-a', { page: 1, pageSize: 25, sort: 'confidence', direction: 'desc' });
+    expect(findMany).toHaveBeenLastCalledWith(expect.objectContaining({ orderBy: [{ overallConfidence: { sort: 'desc', nulls: 'last' } }, { id: 'asc' }] }));
   });
 
   it('returns the pending Sheets export immediately after approval', async () => {

@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
 import type { TelegramDeliveryJob } from '@autosale/contracts';
+import { procurementSummaryFor } from '@autosale/contracts/procurement';
 import type { PrismaClient } from '@autosale/database';
 import { TelegramBotError } from '@autosale/integrations';
 import type { Prisma } from '@autosale/database';
@@ -153,6 +154,26 @@ export class TelegramDeliveryService {
               procurementUpdatedAt: this.now(),
             },
       });
+      if (delivery.orderId) {
+        const order = await transaction.order.findUnique({
+          where: { tenantId_id: { tenantId: delivery.tenantId, id: delivery.orderId } },
+          select: {
+            procurementHandedOffAt: true,
+            items: { select: { procurementStatus: true } },
+          },
+        });
+        if (order) {
+          await transaction.order.update({
+            where: { tenantId_id: { tenantId: delivery.tenantId, id: delivery.orderId } },
+            data: {
+              sortProcurement: procurementSummaryFor(
+                order.items.map((item) => item.procurementStatus),
+                Boolean(order.procurementHandedOffAt),
+              ),
+            },
+          });
+        }
+      }
       if (data.status === 'FAILED' && delivery.orderId) {
         await this.alerts?.persist(transaction, {
           eventId: deliveryId,

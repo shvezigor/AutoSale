@@ -28,6 +28,8 @@ export type OrderListQuery = {
   shipmentStatus?: ShipmentStatus | undefined;
   page: number;
   pageSize: number;
+  sort?: 'product' | 'customer' | 'status' | 'procurement' | 'confidence' | 'date';
+  direction?: 'asc' | 'desc';
 };
 
 export class OrdersService {
@@ -56,7 +58,7 @@ export class OrdersService {
     const [rows, total, products] = await Promise.all([
       this.prisma.order.findMany({
         where,
-        orderBy: { createdAt: 'desc' },
+        orderBy: orderListOrderBy(query.sort ?? 'date', query.direction ?? 'desc'),
         skip: (query.page - 1) * query.pageSize,
         take: query.pageSize,
         include: this.include,
@@ -150,9 +152,29 @@ export class OrdersService {
       for (const item of input.items ?? []) {
         await tx.orderItem.update({ where: { id: item.id }, data: { catalogId: item.catalogId, quantity: item.quantity, color: item.color, size: item.size } });
       }
-      const rows = input.items ?? current.items;
+      const rows = current.items.map((existing) => ({
+        ...existing,
+        ...(input.items?.find((item) => item.id === existing.id) ?? {}),
+      }));
       const issues = validationIssues(nextExtraction, rows);
-      const order = await tx.order.update({ where: { id, tenantId }, data: { extraction: nextExtraction as Prisma.InputJsonObject, validationIssues: issues, status: 'NEEDS_REVIEW' }, include: this.include });
+      const order = await tx.order.update({
+        where: { id, tenantId },
+        data: {
+          extraction: nextExtraction as Prisma.InputJsonObject,
+          validationIssues: issues,
+          status: 'NEEDS_REVIEW',
+          sortCustomer: normalizeSortValue(
+            nextExtraction.customer?.name
+              ?? current.conversation.profile?.displayName
+              ?? current.conversation.displayName
+              ?? current.conversation.profile?.username
+              ?? '',
+          ),
+          sortProduct: productSortValue(rows, products),
+          sortProcurement: 'UNASSESSED',
+        },
+        include: this.include,
+      });
       await tx.auditLog.create({ data: { tenantId, orderId: id, actor, action: 'ORDER_CORRECTED', changes: JSON.parse(JSON.stringify(input)) as Prisma.InputJsonValue } });
       return order;
     });
@@ -168,7 +190,12 @@ export class OrdersService {
     const updated = await this.prisma.$transaction(async (tx) => {
       const order = await tx.order.update({
         where: { id, tenantId },
-        data: { status, approvedAt: status === 'APPROVED' ? new Date() : null, approvedBy: status === 'APPROVED' ? actor : null },
+        data: {
+          status,
+          approvedAt: status === 'APPROVED' ? new Date() : null,
+          approvedBy: status === 'APPROVED' ? actor : null,
+          ...(!['APPROVED', 'AUTO_APPROVED'].includes(status) ? { sortProcurement: 'UNASSESSED' } : {}),
+        },
         include: this.include,
       });
       await tx.auditLog.create({ data: { tenantId, orderId: id, actor, action, changes: { status: { from: current.status, to: status } } } });
@@ -284,6 +311,14 @@ export class OrdersService {
   }
 }
 
+function orderListOrderBy(sort: NonNullable<OrderListQuery['sort']>, direction: NonNullable<OrderListQuery['direction']>): Prisma.OrderOrderByWithRelationInput[] {
+  const field = ({ product: 'sortProduct', customer: 'sortCustomer', status: 'status', procurement: 'sortProcurement', confidence: 'overallConfidence', date: 'createdAt' } as const)[sort];
+  const primary: Prisma.OrderOrderByWithRelationInput = field === 'overallConfidence'
+    ? { overallConfidence: { sort: direction, nulls: 'last' } }
+    : { [field]: direction };
+  return [primary, { id: 'asc' }];
+}
+
 function procurementWhere(summary: ProcurementSummary): Prisma.OrderWhereInput {
   if (summary === 'HANDED_OFF') return { procurementHandedOffAt: { not: null } };
   if (summary === 'UNASSESSED') {
@@ -354,6 +389,17 @@ function procurementWhere(summary: ProcurementSummary): Prisma.OrderWhereInput {
       ] },
     ],
   };
+}
+
+function normalizeSortValue(value: string): string {
+  return value.trim().toLocaleLowerCase('uk-UA');
+}
+
+function productSortValue(
+  items: Array<{ catalogId: string | null; originalText: string }>,
+  products: Map<string, string>,
+): string {
+  return normalizeSortValue(items.map((item) => item.catalogId ? products.get(item.catalogId) ?? item.originalText : item.originalText).filter(Boolean).join(', '));
 }
 
 function validationIssues(extraction: Extraction, items: Array<{ catalogId: string | null; quantity: number }>): string[] {

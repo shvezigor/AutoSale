@@ -47,7 +47,7 @@ export class TriggeredOrderProcessor {
     if (order.status !== 'AI_PROCESSING') return order;
 
     try {
-      const [recentMessages, products] = await Promise.all([
+      const [recentMessages, products, conversation] = await Promise.all([
         this.prisma.message.findMany({
           where: {
             conversationId: trigger.conversationId,
@@ -59,6 +59,10 @@ export class TriggeredOrderProcessor {
         this.prisma.product.findMany({
           where: { tenantId: trigger.tenantId, active: true },
           orderBy: { name: 'asc' },
+        }),
+        this.prisma.conversation.findUnique({
+          where: { id: trigger.conversationId },
+          select: { displayName: true, profile: { select: { displayName: true, username: true } } },
         }),
       ]);
       const result = await this.recognition.recognize(
@@ -95,6 +99,14 @@ export class TriggeredOrderProcessor {
           outputTokens: result.metadata.outputTokens,
           approvedAt: autoApproved ? new Date() : null,
           approvedBy: autoApproved ? 'SYSTEM' : null,
+          sortCustomer: normalizeSortValue(
+            result.order.customer?.name
+              ?? conversation?.profile?.displayName
+              ?? conversation?.displayName
+              ?? conversation?.profile?.username
+              ?? '',
+          ),
+          sortProduct: productSortValue(result.order.items, new Map(products.map((product) => [product.sku, product.name]))),
           },
         });
         for (const item of result.order.items) {
@@ -149,4 +161,15 @@ export class TriggeredOrderProcessor {
 
 function stringArray(value: Prisma.JsonValue): string[] {
   return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
+}
+
+function normalizeSortValue(value: string): string {
+  return value.trim().toLocaleLowerCase('uk-UA');
+}
+
+function productSortValue(
+  items: Array<{ catalogId: string | null; originalText: string }>,
+  products: Map<string, string>,
+): string {
+  return normalizeSortValue(items.map((item) => item.catalogId ? products.get(item.catalogId) ?? item.originalText : item.originalText).filter(Boolean).join(', '));
 }

@@ -36,11 +36,21 @@ it('presents orders as a data table with a clear view action', async () => {
 
   render(await OrdersPage({ searchParams: Promise.resolve({}) }));
 
+  expect(getOrders).toHaveBeenCalledWith({ page: 1, pageSize: 25, sort: 'date', direction: 'desc' });
   expect(screen.getByRole('table', { name: 'Замовлення' })).toBeInTheDocument();
   expect(screen.getByRole('columnheader', { name: 'Товар' })).toBeInTheDocument();
   expect(screen.getByRole('columnheader', { name: 'Клієнт' })).toBeInTheDocument();
   expect(screen.getByRole('columnheader', { name: 'Доставка' })).toBeInTheDocument();
   expect(screen.getAllByRole('link', { name: 'Переглянути замовлення Davida Shvets: Авангард VINARIT' })[0]).toHaveAttribute('href', `/orders/${order.id}`);
+});
+
+it('passes validated sorting and filters to the orders API', async () => {
+  getOrders.mockResolvedValue({ items: [], page: 1, pageSize: 50, total: 0 });
+  getServerSession.mockResolvedValue({ locale: 'uk' });
+
+  render(await OrdersPage({ searchParams: Promise.resolve({ search: 'двері', status: 'APPROVED', sort: 'customer', direction: 'asc', pageSize: '50' }) }));
+
+  expect(getOrders).toHaveBeenCalledWith({ page: 1, pageSize: 50, search: 'двері', status: 'APPROVED', sort: 'customer', direction: 'asc' });
 });
 
 it('renders English page chrome when English is selected', async () => {

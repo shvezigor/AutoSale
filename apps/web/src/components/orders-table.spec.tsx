@@ -107,6 +107,17 @@ describe('OrdersTable', () => {
     expect([...document.querySelectorAll('.procurement-badge')].every((badge) => badge.textContent === 'Потрібно замовити')).toBe(true);
   });
 
+  it('sorts from desktop headers and mobile controls while preserving filters', () => {
+    render(<OrdersTable orders={[order]} page={2} pageSize={50} total={80} search="Ігор" status="APPROVED" procurementStatus="NEEDS_ORDER" shipmentStatus="IN_TRANSIT" sort="date" direction="desc" />);
+
+    expect(screen.getByRole('columnheader', { name: /Дата/ })).toHaveAttribute('aria-sort', 'descending');
+    fireEvent.click(screen.getByRole('button', { name: /Клієнт/ }));
+    expect(replace).toHaveBeenCalledWith('/orders?search=%D0%86%D0%B3%D0%BE%D1%80&status=APPROVED&procurementStatus=NEEDS_ORDER&shipmentStatus=IN_TRANSIT&sort=customer&pageSize=50', { scroll: false });
+
+    fireEvent.change(screen.getByLabelText('Сортувати за'), { target: { value: 'confidence' } });
+    expect(replace).toHaveBeenCalledWith('/orders?search=%D0%86%D0%B3%D0%BE%D1%80&status=APPROVED&procurementStatus=NEEDS_ORDER&shipmentStatus=IN_TRANSIT&sort=confidence&pageSize=50', { scroll: false });
+  });
+
   it('translates table controls and system values while preserving customer and product data', () => {
     render(<I18nProvider locale="en" authenticated><OrdersTable orders={[order]} page={1} pageSize={25} total={1} /></I18nProvider>);
 

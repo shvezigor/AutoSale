@@ -324,6 +324,10 @@ export class TelegramService {
         data: { procurementStatus: 'SENDING', procurementUpdatedAt: this.now() },
       });
       if (updated.count !== items.length) throw new Error('Supplier order changed during dispatch');
+      await transaction.order.update({
+        where: { tenantId_id: { tenantId, id: orderId } },
+        data: { sortProcurement: 'SENDING' },
+      });
       return created;
     });
     if (delivery.status === 'PENDING' || delivery.status === 'RETRYABLE') {

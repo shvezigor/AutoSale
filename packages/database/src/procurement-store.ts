@@ -173,6 +173,10 @@ export class ProcurementStore {
       }
 
       const summary = procurementSummaryFor(assessedItems.map((item) => item.status), false);
+      await transaction.order.update({
+        where: { tenantId_id: { tenantId, id: orderId } },
+        data: { sortProcurement: summary },
+      });
       await transaction.auditLog.create({
         data: {
           tenantId,
@@ -324,13 +328,15 @@ export class ProcurementStore {
           items: { select: { procurementStatus: true } },
         },
       });
-      return {
-        orderId,
-        summary: procurementSummaryFor(
-          orderState.items.map((row) => row.procurementStatus),
-          Boolean(orderState.procurementHandedOffAt),
-        ),
-      };
+      const summary = procurementSummaryFor(
+        orderState.items.map((row) => row.procurementStatus),
+        Boolean(orderState.procurementHandedOffAt),
+      );
+      await transaction.order.update({
+        where: { tenantId_id: { tenantId, id: orderId } },
+        data: { sortProcurement: summary },
+      });
+      return { orderId, summary };
     });
   }
 
@@ -384,7 +390,7 @@ export class ProcurementStore {
       }
       await transaction.order.update({
         where: { tenantId_id: { tenantId, id: orderId } },
-        data: { procurementHandedOffAt: handedOffAt, procurementHandedOffBy: actor },
+        data: { procurementHandedOffAt: handedOffAt, procurementHandedOffBy: actor, sortProcurement: 'HANDED_OFF' },
       });
       await transaction.auditLog.create({
         data: {

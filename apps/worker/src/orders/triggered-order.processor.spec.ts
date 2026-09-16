@@ -142,6 +142,8 @@ describe('TriggeredOrderProcessor', () => {
       status: 'AUTO_APPROVED',
       approvedBy: 'SYSTEM',
       aiResponseId: 'resp-order',
+      sortCustomer: 'іван',
+      sortProduct: 'костюм classic',
       items: [{ catalogId: 'SKU-1', size: 'M' }],
     });
     const persistedItems = await prisma.$queryRaw<Array<{ quantity: number }>>(

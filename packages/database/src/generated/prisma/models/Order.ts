@@ -47,6 +47,9 @@ export type OrderMinAggregateOutputType = {
   triggerMessageId: string | null
   status: string | null
   overallConfidence: number | null
+  sortProduct: string | null
+  sortCustomer: string | null
+  sortProcurement: string | null
   aiResponseId: string | null
   aiModel: string | null
   promptVersion: string | null
@@ -68,6 +71,9 @@ export type OrderMaxAggregateOutputType = {
   triggerMessageId: string | null
   status: string | null
   overallConfidence: number | null
+  sortProduct: string | null
+  sortCustomer: string | null
+  sortProcurement: string | null
   aiResponseId: string | null
   aiModel: string | null
   promptVersion: string | null
@@ -91,6 +97,9 @@ export type OrderCountAggregateOutputType = {
   extraction: number
   validationIssues: number
   overallConfidence: number
+  sortProduct: number
+  sortCustomer: number
+  sortProcurement: number
   aiResponseId: number
   aiModel: number
   promptVersion: number
@@ -128,6 +137,9 @@ export type OrderMinAggregateInputType = {
   triggerMessageId?: true
   status?: true
   overallConfidence?: true
+  sortProduct?: true
+  sortCustomer?: true
+  sortProcurement?: true
   aiResponseId?: true
   aiModel?: true
   promptVersion?: true
@@ -149,6 +161,9 @@ export type OrderMaxAggregateInputType = {
   triggerMessageId?: true
   status?: true
   overallConfidence?: true
+  sortProduct?: true
+  sortCustomer?: true
+  sortProcurement?: true
   aiResponseId?: true
   aiModel?: true
   promptVersion?: true
@@ -172,6 +187,9 @@ export type OrderCountAggregateInputType = {
   extraction?: true
   validationIssues?: true
   overallConfidence?: true
+  sortProduct?: true
+  sortCustomer?: true
+  sortProcurement?: true
   aiResponseId?: true
   aiModel?: true
   promptVersion?: true
@@ -282,6 +300,9 @@ export type OrderGroupByOutputType = {
   extraction: runtime.JsonValue | null
   validationIssues: runtime.JsonValue | null
   overallConfidence: number | null
+  sortProduct: string
+  sortCustomer: string
+  sortProcurement: string
   aiResponseId: string | null
   aiModel: string | null
   promptVersion: string
@@ -328,6 +349,9 @@ export type OrderWhereInput = {
   extraction?: Prisma.JsonNullableFilter<"Order">
   validationIssues?: Prisma.JsonNullableFilter<"Order">
   overallConfidence?: Prisma.FloatNullableFilter<"Order"> | number | null
+  sortProduct?: Prisma.StringFilter<"Order"> | string
+  sortCustomer?: Prisma.StringFilter<"Order"> | string
+  sortProcurement?: Prisma.StringFilter<"Order"> | string
   aiResponseId?: Prisma.StringNullableFilter<"Order"> | string | null
   aiModel?: Prisma.StringNullableFilter<"Order"> | string | null
   promptVersion?: Prisma.StringFilter<"Order"> | string
@@ -360,6 +384,9 @@ export type OrderOrderByWithRelationInput = {
   extraction?: Prisma.SortOrderInput | Prisma.SortOrder
   validationIssues?: Prisma.SortOrderInput | Prisma.SortOrder
   overallConfidence?: Prisma.SortOrderInput | Prisma.SortOrder
+  sortProduct?: Prisma.SortOrder
+  sortCustomer?: Prisma.SortOrder
+  sortProcurement?: Prisma.SortOrder
   aiResponseId?: Prisma.SortOrderInput | Prisma.SortOrder
   aiModel?: Prisma.SortOrderInput | Prisma.SortOrder
   promptVersion?: Prisma.SortOrder
@@ -396,6 +423,9 @@ export type OrderWhereUniqueInput = Prisma.AtLeast<{
   extraction?: Prisma.JsonNullableFilter<"Order">
   validationIssues?: Prisma.JsonNullableFilter<"Order">
   overallConfidence?: Prisma.FloatNullableFilter<"Order"> | number | null
+  sortProduct?: Prisma.StringFilter<"Order"> | string
+  sortCustomer?: Prisma.StringFilter<"Order"> | string
+  sortProcurement?: Prisma.StringFilter<"Order"> | string
   aiResponseId?: Prisma.StringNullableFilter<"Order"> | string | null
   aiModel?: Prisma.StringNullableFilter<"Order"> | string | null
   promptVersion?: Prisma.StringFilter<"Order"> | string
@@ -428,6 +458,9 @@ export type OrderOrderByWithAggregationInput = {
   extraction?: Prisma.SortOrderInput | Prisma.SortOrder
   validationIssues?: Prisma.SortOrderInput | Prisma.SortOrder
   overallConfidence?: Prisma.SortOrderInput | Prisma.SortOrder
+  sortProduct?: Prisma.SortOrder
+  sortCustomer?: Prisma.SortOrder
+  sortProcurement?: Prisma.SortOrder
   aiResponseId?: Prisma.SortOrderInput | Prisma.SortOrder
   aiModel?: Prisma.SortOrderInput | Prisma.SortOrder
   promptVersion?: Prisma.SortOrder
@@ -459,6 +492,9 @@ export type OrderScalarWhereWithAggregatesInput = {
   extraction?: Prisma.JsonNullableWithAggregatesFilter<"Order">
   validationIssues?: Prisma.JsonNullableWithAggregatesFilter<"Order">
   overallConfidence?: Prisma.FloatNullableWithAggregatesFilter<"Order"> | number | null
+  sortProduct?: Prisma.StringWithAggregatesFilter<"Order"> | string
+  sortCustomer?: Prisma.StringWithAggregatesFilter<"Order"> | string
+  sortProcurement?: Prisma.StringWithAggregatesFilter<"Order"> | string
   aiResponseId?: Prisma.StringNullableWithAggregatesFilter<"Order"> | string | null
   aiModel?: Prisma.StringNullableWithAggregatesFilter<"Order"> | string | null
   promptVersion?: Prisma.StringWithAggregatesFilter<"Order"> | string
@@ -479,6 +515,9 @@ export type OrderCreateInput = {
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: number | null
+  sortProduct?: string
+  sortCustomer?: string
+  sortProcurement?: string
   aiResponseId?: string | null
   aiModel?: string | null
   promptVersion: string
@@ -510,6 +549,9 @@ export type OrderUncheckedCreateInput = {
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: number | null
+  sortProduct?: string
+  sortCustomer?: string
+  sortProcurement?: string
   aiResponseId?: string | null
   aiModel?: string | null
   promptVersion: string
@@ -535,6 +577,9 @@ export type OrderUpdateInput = {
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  sortProduct?: Prisma.StringFieldUpdateOperationsInput | string
+  sortCustomer?: Prisma.StringFieldUpdateOperationsInput | string
+  sortProcurement?: Prisma.StringFieldUpdateOperationsInput | string
   aiResponseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aiModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   promptVersion?: Prisma.StringFieldUpdateOperationsInput | string
@@ -566,6 +611,9 @@ export type OrderUncheckedUpdateInput = {
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  sortProduct?: Prisma.StringFieldUpdateOperationsInput | string
+  sortCustomer?: Prisma.StringFieldUpdateOperationsInput | string
+  sortProcurement?: Prisma.StringFieldUpdateOperationsInput | string
   aiResponseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aiModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   promptVersion?: Prisma.StringFieldUpdateOperationsInput | string
@@ -594,6 +642,9 @@ export type OrderCreateManyInput = {
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: number | null
+  sortProduct?: string
+  sortCustomer?: string
+  sortProcurement?: string
   aiResponseId?: string | null
   aiModel?: string | null
   promptVersion: string
@@ -614,6 +665,9 @@ export type OrderUpdateManyMutationInput = {
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  sortProduct?: Prisma.StringFieldUpdateOperationsInput | string
+  sortCustomer?: Prisma.StringFieldUpdateOperationsInput | string
+  sortProcurement?: Prisma.StringFieldUpdateOperationsInput | string
   aiResponseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aiModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   promptVersion?: Prisma.StringFieldUpdateOperationsInput | string
@@ -636,6 +690,9 @@ export type OrderUncheckedUpdateManyInput = {
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  sortProduct?: Prisma.StringFieldUpdateOperationsInput | string
+  sortCustomer?: Prisma.StringFieldUpdateOperationsInput | string
+  sortProcurement?: Prisma.StringFieldUpdateOperationsInput | string
   aiResponseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aiModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   promptVersion?: Prisma.StringFieldUpdateOperationsInput | string
@@ -679,6 +736,9 @@ export type OrderCountOrderByAggregateInput = {
   extraction?: Prisma.SortOrder
   validationIssues?: Prisma.SortOrder
   overallConfidence?: Prisma.SortOrder
+  sortProduct?: Prisma.SortOrder
+  sortCustomer?: Prisma.SortOrder
+  sortProcurement?: Prisma.SortOrder
   aiResponseId?: Prisma.SortOrder
   aiModel?: Prisma.SortOrder
   promptVersion?: Prisma.SortOrder
@@ -707,6 +767,9 @@ export type OrderMaxOrderByAggregateInput = {
   triggerMessageId?: Prisma.SortOrder
   status?: Prisma.SortOrder
   overallConfidence?: Prisma.SortOrder
+  sortProduct?: Prisma.SortOrder
+  sortCustomer?: Prisma.SortOrder
+  sortProcurement?: Prisma.SortOrder
   aiResponseId?: Prisma.SortOrder
   aiModel?: Prisma.SortOrder
   promptVersion?: Prisma.SortOrder
@@ -728,6 +791,9 @@ export type OrderMinOrderByAggregateInput = {
   triggerMessageId?: Prisma.SortOrder
   status?: Prisma.SortOrder
   overallConfidence?: Prisma.SortOrder
+  sortProduct?: Prisma.SortOrder
+  sortCustomer?: Prisma.SortOrder
+  sortProcurement?: Prisma.SortOrder
   aiResponseId?: Prisma.SortOrder
   aiModel?: Prisma.SortOrder
   promptVersion?: Prisma.SortOrder
@@ -1016,6 +1082,9 @@ export type OrderCreateWithoutTenantInput = {
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: number | null
+  sortProduct?: string
+  sortCustomer?: string
+  sortProcurement?: string
   aiResponseId?: string | null
   aiModel?: string | null
   promptVersion: string
@@ -1045,6 +1114,9 @@ export type OrderUncheckedCreateWithoutTenantInput = {
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: number | null
+  sortProduct?: string
+  sortCustomer?: string
+  sortProcurement?: string
   aiResponseId?: string | null
   aiModel?: string | null
   promptVersion: string
@@ -1102,6 +1174,9 @@ export type OrderScalarWhereInput = {
   extraction?: Prisma.JsonNullableFilter<"Order">
   validationIssues?: Prisma.JsonNullableFilter<"Order">
   overallConfidence?: Prisma.FloatNullableFilter<"Order"> | number | null
+  sortProduct?: Prisma.StringFilter<"Order"> | string
+  sortCustomer?: Prisma.StringFilter<"Order"> | string
+  sortProcurement?: Prisma.StringFilter<"Order"> | string
   aiResponseId?: Prisma.StringNullableFilter<"Order"> | string | null
   aiModel?: Prisma.StringNullableFilter<"Order"> | string | null
   promptVersion?: Prisma.StringFilter<"Order"> | string
@@ -1122,6 +1197,9 @@ export type OrderCreateWithoutProcurementHandedOffByUserInput = {
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: number | null
+  sortProduct?: string
+  sortCustomer?: string
+  sortProcurement?: string
   aiResponseId?: string | null
   aiModel?: string | null
   promptVersion: string
@@ -1152,6 +1230,9 @@ export type OrderUncheckedCreateWithoutProcurementHandedOffByUserInput = {
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: number | null
+  sortProduct?: string
+  sortCustomer?: string
+  sortProcurement?: string
   aiResponseId?: string | null
   aiModel?: string | null
   promptVersion: string
@@ -1202,6 +1283,9 @@ export type OrderCreateWithoutTelegramDeliveriesInput = {
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: number | null
+  sortProduct?: string
+  sortCustomer?: string
+  sortProcurement?: string
   aiResponseId?: string | null
   aiModel?: string | null
   promptVersion: string
@@ -1232,6 +1316,9 @@ export type OrderUncheckedCreateWithoutTelegramDeliveriesInput = {
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: number | null
+  sortProduct?: string
+  sortCustomer?: string
+  sortProcurement?: string
   aiResponseId?: string | null
   aiModel?: string | null
   promptVersion: string
@@ -1272,6 +1359,9 @@ export type OrderUpdateWithoutTelegramDeliveriesInput = {
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  sortProduct?: Prisma.StringFieldUpdateOperationsInput | string
+  sortCustomer?: Prisma.StringFieldUpdateOperationsInput | string
+  sortProcurement?: Prisma.StringFieldUpdateOperationsInput | string
   aiResponseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aiModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   promptVersion?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1302,6 +1392,9 @@ export type OrderUncheckedUpdateWithoutTelegramDeliveriesInput = {
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  sortProduct?: Prisma.StringFieldUpdateOperationsInput | string
+  sortCustomer?: Prisma.StringFieldUpdateOperationsInput | string
+  sortProcurement?: Prisma.StringFieldUpdateOperationsInput | string
   aiResponseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aiModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   promptVersion?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1326,6 +1419,9 @@ export type OrderCreateWithoutConversationInput = {
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: number | null
+  sortProduct?: string
+  sortCustomer?: string
+  sortProcurement?: string
   aiResponseId?: string | null
   aiModel?: string | null
   promptVersion: string
@@ -1355,6 +1451,9 @@ export type OrderUncheckedCreateWithoutConversationInput = {
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: number | null
+  sortProduct?: string
+  sortCustomer?: string
+  sortProcurement?: string
   aiResponseId?: string | null
   aiModel?: string | null
   promptVersion: string
@@ -1406,6 +1505,9 @@ export type OrderCreateWithoutTriggerMessageInput = {
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: number | null
+  sortProduct?: string
+  sortCustomer?: string
+  sortProcurement?: string
   aiResponseId?: string | null
   aiModel?: string | null
   promptVersion: string
@@ -1435,6 +1537,9 @@ export type OrderUncheckedCreateWithoutTriggerMessageInput = {
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: number | null
+  sortProduct?: string
+  sortCustomer?: string
+  sortProcurement?: string
   aiResponseId?: string | null
   aiModel?: string | null
   promptVersion: string
@@ -1486,6 +1591,9 @@ export type OrderCreateWithoutShipmentsInput = {
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: number | null
+  sortProduct?: string
+  sortCustomer?: string
+  sortProcurement?: string
   aiResponseId?: string | null
   aiModel?: string | null
   promptVersion: string
@@ -1516,6 +1624,9 @@ export type OrderUncheckedCreateWithoutShipmentsInput = {
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: number | null
+  sortProduct?: string
+  sortCustomer?: string
+  sortProcurement?: string
   aiResponseId?: string | null
   aiModel?: string | null
   promptVersion: string
@@ -1556,6 +1667,9 @@ export type OrderUpdateWithoutShipmentsInput = {
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  sortProduct?: Prisma.StringFieldUpdateOperationsInput | string
+  sortCustomer?: Prisma.StringFieldUpdateOperationsInput | string
+  sortProcurement?: Prisma.StringFieldUpdateOperationsInput | string
   aiResponseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aiModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   promptVersion?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1586,6 +1700,9 @@ export type OrderUncheckedUpdateWithoutShipmentsInput = {
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  sortProduct?: Prisma.StringFieldUpdateOperationsInput | string
+  sortCustomer?: Prisma.StringFieldUpdateOperationsInput | string
+  sortProcurement?: Prisma.StringFieldUpdateOperationsInput | string
   aiResponseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aiModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   promptVersion?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1610,6 +1727,9 @@ export type OrderCreateWithoutExportsInput = {
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: number | null
+  sortProduct?: string
+  sortCustomer?: string
+  sortProcurement?: string
   aiResponseId?: string | null
   aiModel?: string | null
   promptVersion: string
@@ -1640,6 +1760,9 @@ export type OrderUncheckedCreateWithoutExportsInput = {
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: number | null
+  sortProduct?: string
+  sortCustomer?: string
+  sortProcurement?: string
   aiResponseId?: string | null
   aiModel?: string | null
   promptVersion: string
@@ -1680,6 +1803,9 @@ export type OrderUpdateWithoutExportsInput = {
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  sortProduct?: Prisma.StringFieldUpdateOperationsInput | string
+  sortCustomer?: Prisma.StringFieldUpdateOperationsInput | string
+  sortProcurement?: Prisma.StringFieldUpdateOperationsInput | string
   aiResponseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aiModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   promptVersion?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1710,6 +1836,9 @@ export type OrderUncheckedUpdateWithoutExportsInput = {
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  sortProduct?: Prisma.StringFieldUpdateOperationsInput | string
+  sortCustomer?: Prisma.StringFieldUpdateOperationsInput | string
+  sortProcurement?: Prisma.StringFieldUpdateOperationsInput | string
   aiResponseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aiModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   promptVersion?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1734,6 +1863,9 @@ export type OrderCreateWithoutAuditLogsInput = {
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: number | null
+  sortProduct?: string
+  sortCustomer?: string
+  sortProcurement?: string
   aiResponseId?: string | null
   aiModel?: string | null
   promptVersion: string
@@ -1764,6 +1896,9 @@ export type OrderUncheckedCreateWithoutAuditLogsInput = {
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: number | null
+  sortProduct?: string
+  sortCustomer?: string
+  sortProcurement?: string
   aiResponseId?: string | null
   aiModel?: string | null
   promptVersion: string
@@ -1804,6 +1939,9 @@ export type OrderUpdateWithoutAuditLogsInput = {
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  sortProduct?: Prisma.StringFieldUpdateOperationsInput | string
+  sortCustomer?: Prisma.StringFieldUpdateOperationsInput | string
+  sortProcurement?: Prisma.StringFieldUpdateOperationsInput | string
   aiResponseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aiModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   promptVersion?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1834,6 +1972,9 @@ export type OrderUncheckedUpdateWithoutAuditLogsInput = {
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  sortProduct?: Prisma.StringFieldUpdateOperationsInput | string
+  sortCustomer?: Prisma.StringFieldUpdateOperationsInput | string
+  sortProcurement?: Prisma.StringFieldUpdateOperationsInput | string
   aiResponseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aiModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   promptVersion?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1858,6 +1999,9 @@ export type OrderCreateWithoutItemsInput = {
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: number | null
+  sortProduct?: string
+  sortCustomer?: string
+  sortProcurement?: string
   aiResponseId?: string | null
   aiModel?: string | null
   promptVersion: string
@@ -1888,6 +2032,9 @@ export type OrderUncheckedCreateWithoutItemsInput = {
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: number | null
+  sortProduct?: string
+  sortCustomer?: string
+  sortProcurement?: string
   aiResponseId?: string | null
   aiModel?: string | null
   promptVersion: string
@@ -1928,6 +2075,9 @@ export type OrderUpdateWithoutItemsInput = {
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  sortProduct?: Prisma.StringFieldUpdateOperationsInput | string
+  sortCustomer?: Prisma.StringFieldUpdateOperationsInput | string
+  sortProcurement?: Prisma.StringFieldUpdateOperationsInput | string
   aiResponseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aiModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   promptVersion?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1958,6 +2108,9 @@ export type OrderUncheckedUpdateWithoutItemsInput = {
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  sortProduct?: Prisma.StringFieldUpdateOperationsInput | string
+  sortCustomer?: Prisma.StringFieldUpdateOperationsInput | string
+  sortProcurement?: Prisma.StringFieldUpdateOperationsInput | string
   aiResponseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aiModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   promptVersion?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1984,6 +2137,9 @@ export type OrderCreateManyTenantInput = {
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: number | null
+  sortProduct?: string
+  sortCustomer?: string
+  sortProcurement?: string
   aiResponseId?: string | null
   aiModel?: string | null
   promptVersion: string
@@ -2004,6 +2160,9 @@ export type OrderUpdateWithoutTenantInput = {
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  sortProduct?: Prisma.StringFieldUpdateOperationsInput | string
+  sortCustomer?: Prisma.StringFieldUpdateOperationsInput | string
+  sortProcurement?: Prisma.StringFieldUpdateOperationsInput | string
   aiResponseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aiModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   promptVersion?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2033,6 +2192,9 @@ export type OrderUncheckedUpdateWithoutTenantInput = {
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  sortProduct?: Prisma.StringFieldUpdateOperationsInput | string
+  sortCustomer?: Prisma.StringFieldUpdateOperationsInput | string
+  sortProcurement?: Prisma.StringFieldUpdateOperationsInput | string
   aiResponseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aiModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   promptVersion?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2060,6 +2222,9 @@ export type OrderUncheckedUpdateManyWithoutTenantInput = {
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  sortProduct?: Prisma.StringFieldUpdateOperationsInput | string
+  sortCustomer?: Prisma.StringFieldUpdateOperationsInput | string
+  sortProcurement?: Prisma.StringFieldUpdateOperationsInput | string
   aiResponseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aiModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   promptVersion?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2083,6 +2248,9 @@ export type OrderCreateManyProcurementHandedOffByUserInput = {
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: number | null
+  sortProduct?: string
+  sortCustomer?: string
+  sortProcurement?: string
   aiResponseId?: string | null
   aiModel?: string | null
   promptVersion: string
@@ -2102,6 +2270,9 @@ export type OrderUpdateWithoutProcurementHandedOffByUserInput = {
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  sortProduct?: Prisma.StringFieldUpdateOperationsInput | string
+  sortCustomer?: Prisma.StringFieldUpdateOperationsInput | string
+  sortProcurement?: Prisma.StringFieldUpdateOperationsInput | string
   aiResponseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aiModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   promptVersion?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2132,6 +2303,9 @@ export type OrderUncheckedUpdateWithoutProcurementHandedOffByUserInput = {
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  sortProduct?: Prisma.StringFieldUpdateOperationsInput | string
+  sortCustomer?: Prisma.StringFieldUpdateOperationsInput | string
+  sortProcurement?: Prisma.StringFieldUpdateOperationsInput | string
   aiResponseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aiModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   promptVersion?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2159,6 +2333,9 @@ export type OrderUncheckedUpdateManyWithoutProcurementHandedOffByUserInput = {
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  sortProduct?: Prisma.StringFieldUpdateOperationsInput | string
+  sortCustomer?: Prisma.StringFieldUpdateOperationsInput | string
+  sortProcurement?: Prisma.StringFieldUpdateOperationsInput | string
   aiResponseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aiModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   promptVersion?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2180,6 +2357,9 @@ export type OrderCreateManyConversationInput = {
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: number | null
+  sortProduct?: string
+  sortCustomer?: string
+  sortProcurement?: string
   aiResponseId?: string | null
   aiModel?: string | null
   promptVersion: string
@@ -2200,6 +2380,9 @@ export type OrderUpdateWithoutConversationInput = {
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  sortProduct?: Prisma.StringFieldUpdateOperationsInput | string
+  sortCustomer?: Prisma.StringFieldUpdateOperationsInput | string
+  sortProcurement?: Prisma.StringFieldUpdateOperationsInput | string
   aiResponseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aiModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   promptVersion?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2229,6 +2412,9 @@ export type OrderUncheckedUpdateWithoutConversationInput = {
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  sortProduct?: Prisma.StringFieldUpdateOperationsInput | string
+  sortCustomer?: Prisma.StringFieldUpdateOperationsInput | string
+  sortProcurement?: Prisma.StringFieldUpdateOperationsInput | string
   aiResponseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aiModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   promptVersion?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2256,6 +2442,9 @@ export type OrderUncheckedUpdateManyWithoutConversationInput = {
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  sortProduct?: Prisma.StringFieldUpdateOperationsInput | string
+  sortCustomer?: Prisma.StringFieldUpdateOperationsInput | string
+  sortProcurement?: Prisma.StringFieldUpdateOperationsInput | string
   aiResponseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aiModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   promptVersion?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2278,6 +2467,9 @@ export type OrderCreateManyTriggerMessageInput = {
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: number | null
+  sortProduct?: string
+  sortCustomer?: string
+  sortProcurement?: string
   aiResponseId?: string | null
   aiModel?: string | null
   promptVersion: string
@@ -2298,6 +2490,9 @@ export type OrderUpdateWithoutTriggerMessageInput = {
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  sortProduct?: Prisma.StringFieldUpdateOperationsInput | string
+  sortCustomer?: Prisma.StringFieldUpdateOperationsInput | string
+  sortProcurement?: Prisma.StringFieldUpdateOperationsInput | string
   aiResponseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aiModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   promptVersion?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2327,6 +2522,9 @@ export type OrderUncheckedUpdateWithoutTriggerMessageInput = {
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  sortProduct?: Prisma.StringFieldUpdateOperationsInput | string
+  sortCustomer?: Prisma.StringFieldUpdateOperationsInput | string
+  sortProcurement?: Prisma.StringFieldUpdateOperationsInput | string
   aiResponseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aiModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   promptVersion?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2354,6 +2552,9 @@ export type OrderUncheckedUpdateManyWithoutTriggerMessageInput = {
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   overallConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  sortProduct?: Prisma.StringFieldUpdateOperationsInput | string
+  sortCustomer?: Prisma.StringFieldUpdateOperationsInput | string
+  sortProcurement?: Prisma.StringFieldUpdateOperationsInput | string
   aiResponseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aiModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   promptVersion?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2444,6 +2645,9 @@ export type OrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   extraction?: boolean
   validationIssues?: boolean
   overallConfidence?: boolean
+  sortProduct?: boolean
+  sortCustomer?: boolean
+  sortProcurement?: boolean
   aiResponseId?: boolean
   aiModel?: boolean
   promptVersion?: boolean
@@ -2477,6 +2681,9 @@ export type OrderSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   extraction?: boolean
   validationIssues?: boolean
   overallConfidence?: boolean
+  sortProduct?: boolean
+  sortCustomer?: boolean
+  sortProcurement?: boolean
   aiResponseId?: boolean
   aiModel?: boolean
   promptVersion?: boolean
@@ -2504,6 +2711,9 @@ export type OrderSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   extraction?: boolean
   validationIssues?: boolean
   overallConfidence?: boolean
+  sortProduct?: boolean
+  sortCustomer?: boolean
+  sortProcurement?: boolean
   aiResponseId?: boolean
   aiModel?: boolean
   promptVersion?: boolean
@@ -2531,6 +2741,9 @@ export type OrderSelectScalar = {
   extraction?: boolean
   validationIssues?: boolean
   overallConfidence?: boolean
+  sortProduct?: boolean
+  sortCustomer?: boolean
+  sortProcurement?: boolean
   aiResponseId?: boolean
   aiModel?: boolean
   promptVersion?: boolean
@@ -2545,7 +2758,7 @@ export type OrderSelectScalar = {
   updatedAt?: boolean
 }
 
-export type OrderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "conversationId" | "triggerMessageId" | "status" | "extraction" | "validationIssues" | "overallConfidence" | "aiResponseId" | "aiModel" | "promptVersion" | "inputTokens" | "outputTokens" | "approvedAt" | "approvedBy" | "procurementHandedOffAt" | "procurementHandedOffBy" | "supplierDispatchVersion" | "createdAt" | "updatedAt", ExtArgs["result"]["order"]>
+export type OrderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "conversationId" | "triggerMessageId" | "status" | "extraction" | "validationIssues" | "overallConfidence" | "sortProduct" | "sortCustomer" | "sortProcurement" | "aiResponseId" | "aiModel" | "promptVersion" | "inputTokens" | "outputTokens" | "approvedAt" | "approvedBy" | "procurementHandedOffAt" | "procurementHandedOffBy" | "supplierDispatchVersion" | "createdAt" | "updatedAt", ExtArgs["result"]["order"]>
 export type OrderInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
@@ -2593,6 +2806,9 @@ export type $OrderPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     extraction: runtime.JsonValue | null
     validationIssues: runtime.JsonValue | null
     overallConfidence: number | null
+    sortProduct: string
+    sortCustomer: string
+    sortProcurement: string
     aiResponseId: string | null
     aiModel: string | null
     promptVersion: string
@@ -3045,6 +3261,9 @@ export interface OrderFieldRefs {
   readonly extraction: Prisma.FieldRef<"Order", 'Json'>
   readonly validationIssues: Prisma.FieldRef<"Order", 'Json'>
   readonly overallConfidence: Prisma.FieldRef<"Order", 'Float'>
+  readonly sortProduct: Prisma.FieldRef<"Order", 'String'>
+  readonly sortCustomer: Prisma.FieldRef<"Order", 'String'>
+  readonly sortProcurement: Prisma.FieldRef<"Order", 'String'>
   readonly aiResponseId: Prisma.FieldRef<"Order", 'String'>
   readonly aiModel: Prisma.FieldRef<"Order", 'String'>
   readonly promptVersion: Prisma.FieldRef<"Order", 'String'>

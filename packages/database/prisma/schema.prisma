@@ -904,6 +904,9 @@ model Order {
   extraction                 Json?
   validationIssues           Json?              @map("validation_issues")
   overallConfidence          Float?             @map("overall_confidence")
+  sortProduct                String             @default("") @map("sort_product")
+  sortCustomer               String             @default("") @map("sort_customer")
+  sortProcurement            String             @default("UNASSESSED") @map("sort_procurement")
   aiResponseId               String?            @map("ai_response_id")
   aiModel                    String?            @map("ai_model")
   promptVersion              String             @map("prompt_version")
@@ -928,6 +931,9 @@ model Order {
 
   @@unique([tenantId, id])
   @@index([tenantId, status, createdAt])
+  @@index([tenantId, sortProduct, id])
+  @@index([tenantId, sortCustomer, id])
+  @@index([tenantId, sortProcurement, id])
   @@index([conversationId, createdAt])
   @@map("orders")
 }

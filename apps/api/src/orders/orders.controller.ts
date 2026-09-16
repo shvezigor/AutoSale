@@ -16,6 +16,8 @@ const listSchema = z.object({
   shipmentStatus: z.enum(['DRAFT', 'CREATING', 'CREATED', 'ACCEPTED', 'IN_TRANSIT', 'DELIVERED', 'RETURNING', 'RETURNED', 'CANCELLED', 'FAILED']).optional(),
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(25),
+  sort: z.enum(['product', 'customer', 'status', 'procurement', 'confidence', 'date']).default('date'),
+  direction: z.enum(['asc', 'desc']).default('desc'),
 }).strict();
 const updateSchema = z.object({
   actor: z.string().trim().min(1).max(120),

@@ -75,4 +75,6 @@ export interface OrderListQuery {
   shipmentStatus?: ShipmentStatus;
   page: number;
   pageSize: number;
+  sort?: 'product' | 'customer' | 'status' | 'procurement' | 'confidence' | 'date';
+  direction?: 'asc' | 'desc';
 }
