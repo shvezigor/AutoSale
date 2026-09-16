@@ -216,7 +216,11 @@ export class MetaInstagramClient {
   }
 
   async revoke(accessToken: string): Promise<void> {
-    await this.requestVoid(this.graphUrl('me/permissions'), { ...this.authorized(accessToken), method: 'DELETE' });
+    await this.requestVoid(
+      this.graphUrl('me/permissions'),
+      { ...this.authorized(accessToken), method: 'DELETE' },
+      true,
+    );
   }
 
   private graphUrl(path: string): URL {
@@ -236,7 +240,11 @@ export class MetaInstagramClient {
     }
   }
 
-  private async requestVoid(url: URL | string, init: RequestInit): Promise<void> {
+  private async requestVoid(
+    url: URL | string,
+    init: RequestInit,
+    acceptsBooleanSuccess = false,
+  ): Promise<void> {
     const response = await this.request(url, init);
     let payload: unknown;
     try {
@@ -244,7 +252,7 @@ export class MetaInstagramClient {
     } catch {
       throw new MetaInstagramError(response.status, null);
     }
-    if (!isRecord(payload) || payload.success !== true) {
+    if (!(acceptsBooleanSuccess && payload === true) && (!isRecord(payload) || payload.success !== true)) {
       throw new MetaInstagramError(response.status, null);
     }
   }

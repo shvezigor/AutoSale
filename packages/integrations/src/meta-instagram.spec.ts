@@ -394,6 +394,15 @@ describe('MetaInstagramClient', () => {
     expect(init?.headers).toEqual({ authorization: 'Bearer access-token' });
   });
 
+  it('accepts the boolean success response returned when Meta revokes permissions', async () => {
+    const client = new MetaInstagramClient({
+      ...config,
+      fetch: vi.fn<typeof fetch>().mockResolvedValue(response(true)),
+    });
+
+    await expect(client.revoke('access-token')).resolves.toBeUndefined();
+  });
+
   it.each(['subscribe', 'unsubscribe', 'revoke'] as const)('requires Meta success=true for %s side effects', async (operation) => {
     const client = new MetaInstagramClient({
       ...config,
