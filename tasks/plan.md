@@ -412,7 +412,7 @@ Task 78: KPI/attention  Task 79: charts   Task 80: actions/health
 
 ### Phase 3: Resilience and acceptance
 
-- [ ] Task 81: Add loading, error, empty, keyboard, and responsive states.
+- [x] Task 81: Add loading, error, empty, keyboard, and responsive states.
 - [ ] Task 82: Remove fixture remnants and complete browser acceptance.
 
 #### Checkpoint: Complete

@@ -37,7 +37,7 @@ export function DashboardCharts({ dailyOrders, funnel, locale, t }: Props) {
           <div className="dashboard-chart-empty"><span aria-hidden="true">↗</span><p>{t('dashboard.chart.empty')}</p></div>
         ) : (
           <>
-            <div className="dashboard-stacked-chart">
+            <div className={`dashboard-stacked-chart${dailyOrders.length > 31 ? ' is-dense' : ''}`}>
               {dailyOrders.map((day) => {
                 const label = date.format(parseDate(day.date));
                 return (

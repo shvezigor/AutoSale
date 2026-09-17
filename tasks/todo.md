@@ -1281,14 +1281,14 @@ Status: official research, secure connection, directories/sender defaults, the g
 **Description:** Complete dashboard loading, error, empty, focus, reduced-motion, and narrow-layout behavior while retaining the established AutoSale design system.
 
 **Acceptance criteria:**
-- [ ] Loading/error/empty states preserve page structure, explain the state, and provide an appropriate retry or next action without fake numbers.
-- [ ] The page is keyboard navigable with visible focus, semantic regions/headings, accessible chart alternatives, and reduced-motion styles.
-- [ ] At 375 px and common desktop widths the page has no horizontal overflow, clipped actions, or unreadable chart labels.
+- [x] Loading/error/empty states preserve page structure, explain the state, and provide an appropriate retry or next action without fake numbers.
+- [x] The page is keyboard navigable with visible focus, semantic regions/headings, accessible chart alternatives, and reduced-motion styles.
+- [x] At 375 px and common desktop widths the page has no horizontal overflow, clipped actions, or unreadable chart labels.
 
 **Verification:**
-- [ ] Tests pass: `pnpm --filter @autosale/web test -- dashboard`.
-- [ ] Tests pass: `pnpm --filter @autosale/web test -- completeness.spec.ts`.
-- [ ] Build succeeds: `pnpm --filter @autosale/web build`.
+- [x] Tests pass: `pnpm --filter @autosale/web exec vitest run dashboard`.
+- [x] Tests pass: `pnpm --filter @autosale/web exec vitest run src/i18n/completeness.spec.ts`.
+- [x] Build succeeds: `pnpm --filter @autosale/web build`.
 
 **Dependencies:** Tasks 78–80
 
