@@ -1332,3 +1332,35 @@ Status: official research, secure connection, directories/sender defaults, the g
 - [x] Data provenance, tenant isolation, accessibility, responsive behavior, and truthful navigation have review evidence.
 - [x] Code-quality review reports no unresolved blocking findings.
 - [x] Production deployment verification is complete before claiming the live dashboard is ready.
+## Shared Product Backlog
+
+### Backlog: Implement billing and subscription enforcement
+
+**Description:** Convert the approved Sales AITO pricing hypothesis into production billing after the marketing-site pricing experiment validates demand. Add a payment-provider boundary, recurring subscriptions, plan entitlements, trial enforcement, a tenant usage ledger, invoices, taxes, payment failures, cancellation, and audited operator overrides.
+
+**Prerequisites:**
+- [ ] Validate willingness to pay for Start 599 UAH, Growth 1,999 UAH, and Scale 2,999 UAH.
+- [ ] Measure direct AI and infrastructure cost per processed order.
+- [ ] Select a payment provider and confirm support for Ukrainian businesses, recurring payments, refunds, invoices, taxes, and webhook verification.
+- [ ] Approve the legal and accounting treatment of displayed prices and billing documents.
+
+**Acceptance criteria:**
+- [ ] One idempotent subscription state exists per tenant and cannot be changed by client-supplied plan claims.
+- [ ] The 30-day trial starts only after the approved activation event and cannot be reset by re-registration.
+- [ ] Usage counts canonical orders once and ignores retries, duplicate webhooks, edits, and export attempts.
+- [ ] Upgrade, downgrade, cancellation, failed payment, expiry, and operator-extension transitions are explicit and audited.
+- [ ] Existing business data remains readable after expiry or downgrade; restricted actions explain how to recover access.
+- [ ] Payment webhooks are signature-verified, idempotent, replay-safe, and do not expose secrets or payment data in logs.
+- [ ] Invoices, taxes, refunds, and customer notices follow the approved legal/accounting rules.
+
+**Verification:**
+- [ ] Database and service tests cover transition races, webhook replay, usage boundaries, and tenant isolation.
+- [ ] Payment-provider sandbox tests cover purchase, renewal, failure, retry, upgrade, downgrade, cancellation, and refund.
+- [ ] Browser tests cover trial status, plan selection, checkout return, usage warnings, and read-only expiry behavior.
+- [ ] Finance and product owners approve the sandbox evidence before production enablement.
+
+**Dependencies:** Approved pricing validation and a separate billing architecture/specification.
+
+**Reference:** `docs/product/2026-09-17-sales-aito-monetization.md`
+
+**Estimated scope:** Large
