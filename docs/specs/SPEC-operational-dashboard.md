@@ -1,6 +1,6 @@
 # Spec: Operational Dashboard
 
-Status: proposed  
+Status: proposed
 Module id: `operational-dashboard`
 
 ## Objective

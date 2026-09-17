@@ -37,6 +37,11 @@ describe('DashboardCharts', () => {
     expect(screen.getByRole('link', { name: 'Налаштувати експорт' })).toHaveAttribute('href', '/settings?tab=data');
     expect(screen.getByText('За цей період замовлень ще немає.')).toBeInTheDocument();
   });
+
+  it('uses the dense layout for a 90-day period', () => {
+    const { container } = render(<DashboardCharts dailyOrders={Array.from({ length: 90 }, (_, index) => ({ ...dailyOrders[0]!, date: new Date(Date.UTC(2026, 5, index + 1)).toISOString().slice(0, 10) }))} funnel={configuredFunnel} locale="uk" t={createTranslator('uk')} />);
+    expect(container.querySelector('.dashboard-stacked-chart')).toHaveClass('is-dense');
+  });
 });
 
 const dailyOrders: DashboardResponse['dailyOrders'] = [

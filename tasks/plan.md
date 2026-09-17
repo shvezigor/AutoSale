@@ -405,23 +405,23 @@ Task 78: KPI/attention  Task 79: charts   Task 80: actions/health
 
 #### Checkpoint: End-to-end dashboard
 
-- [ ] Every visible value comes from the API response.
-- [ ] 7/30/90-day URLs produce the matching view.
-- [ ] Supported action links open truthful filtered destinations.
-- [ ] Web tests, locale completeness, typecheck, and production build pass.
+- [x] Every visible value comes from the API response.
+- [x] 7/30/90-day URLs produce the matching view.
+- [x] Supported action links open truthful filtered destinations.
+- [x] Web tests, locale completeness, typecheck, and production build pass.
 
 ### Phase 3: Resilience and acceptance
 
 - [x] Task 81: Add loading, error, empty, keyboard, and responsive states.
-- [ ] Task 82: Remove fixture remnants and complete browser acceptance.
+- [x] Task 82: Remove fixture remnants and complete browser acceptance.
 
 #### Checkpoint: Complete
 
-- [ ] No demo values or fixture imports remain in the dashboard route.
-- [ ] 375 px and desktop layouts have no page-level horizontal overflow.
-- [ ] Keyboard navigation, tooltips, reduced motion, and accessible data equivalents work.
-- [ ] Focused and repository-wide tests, typechecks, production build, and browser acceptance pass.
-- [ ] The implementation is ready for code-quality review and production deployment verification.
+- [x] No demo values or fixture imports remain in the dashboard route.
+- [x] 375 px and desktop layouts have no page-level horizontal overflow.
+- [x] Keyboard navigation, tooltips, reduced motion, and accessible data equivalents work.
+- [x] Focused and repository-wide tests, typechecks, production build, and browser acceptance pass.
+- [x] The implementation is ready for code-quality review and production deployment verification.
 
 ### Sequential versus parallel work
 

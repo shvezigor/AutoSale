@@ -1271,10 +1271,10 @@ Status: official research, secure connection, directories/sender defaults, the g
 
 ## Checkpoint: Complete dashboard flow
 
-- [ ] Tasks 77–80 acceptance criteria pass.
-- [ ] Every displayed number is sourced from `DashboardResponse`.
-- [ ] Period selector and supported problem links navigate correctly.
-- [ ] Web tests, locale completeness, typecheck, and production build are green.
+- [x] Tasks 77–80 acceptance criteria pass.
+- [x] Every displayed number is sourced from `DashboardResponse`.
+- [x] Period selector and supported problem links navigate correctly.
+- [x] Web tests, locale completeness, typecheck, and production build are green.
 
 ## Task 81: Add resilient, accessible, and responsive states
 
@@ -1306,15 +1306,15 @@ Status: official research, secure connection, directories/sender defaults, the g
 **Description:** Delete obsolete dashboard fixtures, add end-to-end regressions for the final route, and run the full Definition of Done from the approved spec.
 
 **Acceptance criteria:**
-- [ ] No dashboard route imports or renders demo revenue, average-check, source-attribution, or random/fixture values.
-- [ ] Playwright verifies period URL state, real-response rendering, truthful actions, keyboard focus, and 375 px/desktop overflow behavior.
-- [ ] Focused and repository-wide tests, typechecks, build, and browser acceptance pass; any unrelated pre-existing failure is documented separately.
+- [x] No dashboard route imports or renders demo revenue, average-check, source-attribution, or random/fixture values.
+- [x] Playwright verifies period URL state, real-response rendering, truthful actions, keyboard focus, and 375 px/desktop overflow behavior.
+- [x] Focused and repository-wide tests, typechecks, build, and browser acceptance pass; any unrelated pre-existing failure is documented separately.
 
 **Verification:**
-- [ ] Tests pass: `pnpm test`.
-- [ ] Typecheck passes: `pnpm typecheck`.
-- [ ] Build succeeds: `pnpm build`.
-- [ ] Browser acceptance passes: `pnpm test:e2e -- tests/e2e/dashboard.spec.ts`.
+- [x] Tests pass: `pnpm test`.
+- [x] Typecheck passes: `pnpm typecheck`.
+- [x] Build succeeds: `pnpm build`.
+- [x] Browser acceptance passes: `pnpm exec playwright test tests/e2e/dashboard.spec.ts --workers=1`.
 
 **Dependencies:** Task 81
 
@@ -1328,7 +1328,7 @@ Status: official research, secure connection, directories/sender defaults, the g
 
 ## Checkpoint: Operational Dashboard v1 complete
 
-- [ ] Tasks 74–82 and all spec success criteria are satisfied.
-- [ ] Data provenance, tenant isolation, accessibility, responsive behavior, and truthful navigation have review evidence.
-- [ ] Code-quality review reports no unresolved blocking findings.
-- [ ] Production deployment verification is complete before claiming the live dashboard is ready.
+- [x] Tasks 74–82 and all spec success criteria are satisfied.
+- [x] Data provenance, tenant isolation, accessibility, responsive behavior, and truthful navigation have review evidence.
+- [x] Code-quality review reports no unresolved blocking findings.
+- [x] Production deployment verification is complete before claiming the live dashboard is ready.
