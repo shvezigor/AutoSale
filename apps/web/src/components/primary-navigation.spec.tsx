@@ -17,12 +17,25 @@ function renderNavigation(session: Parameters<typeof PrimaryNavigation>[0]['sess
 }
 
 describe('PrimaryNavigation', () => {
+  it('exposes the dashboard as the first workspace destination', () => {
+    usePathname.mockReturnValue('/dashboard');
+    renderNavigation();
+
+    const links = screen.getAllByRole('link');
+    expect(screen.getByRole('link', { name: 'Дашборд' })).toHaveAttribute('href', '/dashboard');
+    expect(screen.getByRole('link', { name: 'Дашборд' })).toHaveAttribute('aria-current', 'page');
+    expect(links.indexOf(screen.getByRole('link', { name: 'Дашборд' }))).toBeLessThan(
+      links.indexOf(screen.getByRole('link', { name: 'Діалоги' })),
+    );
+  });
+
   it('shows settings but hides team management from managers', () => {
     usePathname.mockReturnValue('/orders');
     renderNavigation(managerSession);
     expect(screen.queryByRole('link', { name: 'Команда' })).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Налаштування' })).toHaveAttribute('href', '/settings');
     expect(screen.getByRole('link', { name: 'Каталог' })).toHaveAttribute('href', '/catalogue');
+    expect(screen.getByRole('link', { name: 'Онбординг' })).toHaveAttribute('href', '/onboarding');
   });
 
   it('leaves profile actions to the application header', () => {
@@ -52,9 +65,29 @@ describe('PrimaryNavigation', () => {
     expect(screen.getByRole('link', { name: 'Налаштування' })).toHaveAttribute('aria-current', 'page');
   });
 
+  it('keeps the reference line icon mapped to every destination', () => {
+    usePathname.mockReturnValue('/dashboard');
+    renderNavigation();
+
+    const expectedIcons = [
+      ['Дашборд', 'dashboard'],
+      ['Діалоги', 'conversations'],
+      ['Замовлення', 'orders'],
+      ['Каталог', 'catalogue'],
+      ['Команда', 'team'],
+      ['Налаштування', 'settings'],
+      ['Онбординг', 'onboarding'],
+    ] as const;
+
+    for (const [label, icon] of expectedIcons) {
+      expect(screen.getByRole('link', { name: label }).querySelector('svg')).toHaveAttribute('data-icon', icon);
+    }
+  });
+
   it('renders destinations and collapse actions in English', () => {
     usePathname.mockReturnValue('/orders');
     renderNavigation(ownerSession, 'en', { onToggleCollapse: vi.fn() });
+    expect(screen.getByRole('link', { name: 'Dashboard' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Conversations' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Orders' })).toHaveAttribute('aria-current', 'page');
     expect(screen.getByRole('button', { name: 'Collapse menu' })).toBeInTheDocument();

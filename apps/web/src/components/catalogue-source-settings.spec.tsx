@@ -41,8 +41,19 @@ describe('CatalogueSourceSettings', () => {
     render(<CatalogueSourceSettings role="OWNER" sources={[]} configurations={[]} />);
     expect(screen.getByRole('heading', { name: 'Товари' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Обрати Google-таблицю' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Завантажити CSV або Excel' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Завантажити CSV або Excel' }))
+      .toHaveClass('settings-control', 'settings-control-secondary');
     expect(screen.queryByLabelText('Google таблиця')).not.toBeInTheDocument();
+    const fileInput = document.querySelector('input[type="file"]');
+    expect(fileInput).toHaveAttribute('aria-hidden', 'true');
+    expect(fileInput).toHaveAttribute('tabindex', '-1');
+  });
+
+  it('uses the shared primary control style for catalogue import', () => {
+    render(<CatalogueSourceSettings role="OWNER" sources={[source]} configurations={[configuration]} />);
+
+    expect(screen.getByRole('button', { name: 'Завантажити товари' }))
+      .toHaveClass('settings-control', 'settings-control-primary');
   });
 
   it('uploads a local catalogue into the existing import pipeline', async () => {

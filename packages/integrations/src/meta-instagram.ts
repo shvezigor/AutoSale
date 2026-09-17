@@ -215,8 +215,9 @@ export class MetaInstagramClient {
     await this.requestVoid(this.graphUrl('me/subscribed_apps'), { ...this.authorized(accessToken), method: 'DELETE' });
   }
 
-  async revoke(accessToken: string): Promise<void> {
-    await this.requestVoid(this.graphUrl('me/permissions'), { ...this.authorized(accessToken), method: 'DELETE' });
+  async revoke(_accessToken: string): Promise<void> {
+    // Instagram Login does not expose the Facebook Graph permissions edge.
+    // Disconnect is completed by unsubscribing webhooks and deleting local access.
   }
 
   private graphUrl(path: string): URL {

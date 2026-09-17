@@ -122,9 +122,9 @@ export function MeestSettingsCard({ initial, role, embedded = false, onConnectio
             <a className="secondary-button" href="https://wiki.meest-group.com/uk/api/api-eng" target="_blank" rel="noreferrer">{t('meestSettings.docs')}</a>
           </div>
           <div className="meest-connect-grid">
-            <label><span>{t('meestSettings.login')}</span><input aria-label={t('meestSettings.login')} autoComplete="off" value={login} onChange={(event) => setLogin(event.target.value)} /></label>
-            <label><span>{t('meestSettings.password')}</span><input aria-label={t('meestSettings.password')} autoComplete="new-password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} /></label>
-            <label><span>ClientUID</span><input aria-label="ClientUID" autoComplete="off" value={clientUid} onChange={(event) => setClientUid(event.target.value)} placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" /></label>
+            <label className="settings-field"><span>{t('meestSettings.login')}</span><input aria-label={t('meestSettings.login')} autoComplete="off" value={login} onChange={(event) => setLogin(event.target.value)} /></label>
+            <label className="settings-field"><span>{t('meestSettings.password')}</span><input aria-label={t('meestSettings.password')} autoComplete="new-password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} /></label>
+            <label className="settings-field"><span>ClientUID</span><input aria-label="ClientUID" autoComplete="off" value={clientUid} onChange={(event) => setClientUid(event.target.value)} placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" /></label>
           </div>
           <p className="delivery-key-note">{t('meestSettings.security')}</p>
           <div className="settings-actions delivery-settings-actions">

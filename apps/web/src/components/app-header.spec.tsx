@@ -34,6 +34,16 @@ describe('AppHeader', () => {
     expect(screen.getByRole('img', { name: 'Фото профілю Ігор Швець' })).toHaveAttribute('src', '/api/media/profile/avatar?v=abc');
   });
 
+  it('shows the account email in the compact profile card', async () => {
+    renderHeader({ name: 'Ігор Швець', email: 'owner@example.com', membershipRole: 'OWNER', avatarUrl: null });
+    await screen.findByRole('button', { name: 'Сповіщення: 1 непрочитаних' });
+
+    const profile = screen.getByRole('button', { name: 'Меню профілю' });
+    expect(profile).toHaveTextContent('Ігор Швець');
+    expect(profile).toHaveTextContent('owner@example.com');
+    expect(profile).not.toHaveTextContent('Власник');
+  });
+
   it('hides team from managers and closes with Escape', async () => {
     renderHeader({ name: 'Олена', email: 'manager@example.com', membershipRole: 'MANAGER', avatarUrl: null });
     await waitFor(() => expect(screen.getByRole('button', { name: /Сповіщення/ })).toBeInTheDocument());
@@ -52,5 +62,11 @@ describe('AppHeader', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Profile menu' }));
     expect(screen.getByRole('menuitem', { name: 'My profile' })).toBeInTheDocument();
     expect(screen.getByRole('menuitem', { name: 'Sign out' })).toBeInTheDocument();
+  });
+
+  it('shows the reference search shell without pretending global search is active', () => {
+    renderHeader({ name: 'Ігор', email: 'owner@example.com', membershipRole: 'OWNER', avatarUrl: null });
+    expect(screen.getByText('Пошук клієнта, товару, №')).toBeInTheDocument();
+    expect(screen.getByLabelText('Глобальний пошук буде доступний у наступному етапі')).toHaveAttribute('aria-disabled', 'true');
   });
 });

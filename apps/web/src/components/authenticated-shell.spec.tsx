@@ -25,6 +25,8 @@ describe('AuthenticatedShell', () => {
     expect(screen.getByRole('link', { name: 'AutoSale' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Меню профілю' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Замовлення' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Перейти до вмісту' })).toHaveAttribute('href', '#main-content');
+    expect(document.getElementById('main-content')).toHaveAttribute('tabindex', '-1');
   });
 
   it('opens and closes an accessible mobile navigation drawer', () => {

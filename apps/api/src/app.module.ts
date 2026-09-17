@@ -19,6 +19,7 @@ import { GoogleOAuthModule } from './integrations/google-oauth.module.js';
 import { NotificationsModule } from './notifications/notifications.module.js';
 import { TelegramModule } from './integrations/telegram.module.js';
 import { DeliveryModule } from './delivery/delivery.module.js';
+import { DashboardModule } from './dashboard/dashboard.module.js';
 
 @Module({
   controllers: [HealthController],
@@ -45,6 +46,7 @@ export class AppModule {
         CatalogueImportModule.register(env),
         CatalogueSourcesModule.register(env),
         DeliveryModule.register(env),
+        DashboardModule.register(env),
       ],
     };
   }

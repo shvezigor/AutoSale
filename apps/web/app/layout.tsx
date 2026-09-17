@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Plus_Jakarta_Sans } from 'next/font/google';
 import type { ReactNode } from 'react';
 
 import { getServerSession } from '../src/auth/session';
@@ -6,6 +7,11 @@ import { SIDEBAR_PREFERENCE_SCRIPT } from '../src/components/sidebar-preference'
 import { I18nProvider } from '../src/i18n/i18n-provider';
 import { resolveServerLocale } from '../src/i18n/server';
 import './globals.css';
+
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ['latin', 'cyrillic-ext'],
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: 'AutoSale',
@@ -19,7 +25,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   return (
     <html lang={locale} suppressHydrationWarning>
       <head><script dangerouslySetInnerHTML={{ __html: SIDEBAR_PREFERENCE_SCRIPT }} /></head>
-      <body><I18nProvider locale={locale} authenticated={Boolean(session)}>{children}</I18nProvider></body>
+      <body className={jakarta.className}><I18nProvider locale={locale} authenticated={Boolean(session)}>{children}</I18nProvider></body>
     </html>
   );
 }

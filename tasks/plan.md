@@ -337,3 +337,110 @@ Approved downstream spec: `SPEC-telegram-supplier-dispatch.md`.
 - [x] Task 57: Інтерфейс комплектації в замовленні й таблиці.
 - [x] Task 58: Персональні налаштування та privacy-safe Telegram-сповіщення.
 - [x] Task 59: Пакетна обробка старих замовлень, метрики та runbook розгортання.
+
+## Operational Dashboard v1 (Tasks 74–82)
+
+Approved source spec: `docs/specs/SPEC-operational-dashboard.md`.
+
+### Overview
+
+Replace the demonstration dashboard with a tenant-scoped operational control center backed by PostgreSQL. The first version provides period KPIs, daily order dynamics, an operational funnel, an actionable review queue, failure counts, and integration health without adding a database migration or charting dependency.
+
+### Architecture decisions
+
+- **One snapshot endpoint:** `GET /api/dashboard?period=7d|30d|90d` returns one internally consistent dashboard response and prevents the web page from coordinating many independent requests.
+- **Contracts first:** the Zod response contract is shared by API and web and represents unavailable comparisons/stages explicitly.
+- **Tenant boundary at entry:** the controller supplies `principal.tenantId`; the client never sends a tenant id and every aggregate, count, and queue query includes it.
+- **Database-side aggregation:** parameterized PostgreSQL aggregation handles timezone-aware daily buckets, unique funnel stages, and the confirmation median. Prisma queries handle bounded queue and integration summaries. Fixed period enums map to server-owned durations; no user input enters SQL fragments.
+- **Current backlog versus period cohort:** period selection changes cohort KPIs, the chart, and funnel. Needs-attention backlog, failures, and integration health remain current operational state and are labelled accordingly.
+- **Server-rendered shell:** the Next.js page reads and validates `searchParams.period`, fetches through the authenticated server API helper, and renders a shareable view. Small client/SVG components provide focus/hover tooltips without moving metric semantics into the browser.
+- **Native visual layer:** reuse AutoSale tokens and implement accessible CSS/SVG charts. No chart/date dependency and no Prisma migration are introduced.
+- **Progressive failure semantics:** missing integrations and empty metric samples render as explicit unavailable/empty states; fabricated fallback numbers are forbidden.
+
+### Dependency graph
+
+```text
+Task 74: dashboard contract
+       |
+       v
+Task 75: tenant-safe aggregation service
+       |
+       v
+Task 76: authenticated API endpoint
+       |
+       v
+Task 77: server page and period routing
+       |
+       +-------------------+------------------+
+       v                   v                  v
+Task 78: KPI/attention  Task 79: charts   Task 80: actions/health
+       \                   |                  /
+        +------------------+-----------------+
+                           v
+                  Task 81: states/a11y polish
+                           |
+                           v
+                  Task 82: browser acceptance
+```
+
+### Phase 1: Trustworthy data foundation
+
+- [x] Task 74: Define and verify the dashboard contract.
+- [x] Task 75: Build tenant-safe operational aggregates.
+- [x] Task 76: Expose the authenticated dashboard endpoint.
+
+#### Checkpoint: Backend snapshot
+
+- [x] Contract, service, and controller tests pass.
+- [x] Empty tenants and DST boundaries return valid responses.
+- [x] Cross-tenant records cannot affect any returned value.
+- [x] API typecheck and build pass.
+
+### Phase 2: Useful dashboard slices
+
+- [x] Task 77: Connect the server-rendered page and period selector.
+- [x] Task 78: Render attention guidance and KPI cards.
+- [x] Task 79: Render accessible order dynamics and operational funnel.
+- [x] Task 80: Render queue, failures, and integration health.
+
+#### Checkpoint: End-to-end dashboard
+
+- [x] Every visible value comes from the API response.
+- [x] 7/30/90-day URLs produce the matching view.
+- [x] Supported action links open truthful filtered destinations.
+- [x] Web tests, locale completeness, typecheck, and production build pass.
+
+### Phase 3: Resilience and acceptance
+
+- [x] Task 81: Add loading, error, empty, keyboard, and responsive states.
+- [x] Task 82: Remove fixture remnants and complete browser acceptance.
+
+#### Checkpoint: Complete
+
+- [x] No demo values or fixture imports remain in the dashboard route.
+- [x] 375 px and desktop layouts have no page-level horizontal overflow.
+- [x] Keyboard navigation, tooltips, reduced motion, and accessible data equivalents work.
+- [x] Focused and repository-wide tests, typechecks, production build, and browser acceptance pass.
+- [x] The implementation is ready for code-quality review and production deployment verification.
+
+### Sequential versus parallel work
+
+- Tasks 74–77 are sequential because each establishes the contract consumed by the next layer.
+- Tasks 78–80 are logically independent after Task 77, but will be implemented sequentially in this worktree to avoid collisions in the dashboard page and global stylesheet.
+- Tasks 81–82 follow feature completion so browser assertions validate the final responsive composition rather than transient layouts.
+
+### Risks and mitigations
+
+| Risk | Impact | Mitigation |
+|---|---|---|
+| A metric looks plausible but uses the wrong cohort or denominator | High | Encode definitions in contract/service tests, return denominators/sample sizes, and centralize calculations in the API. |
+| Tenant data leaks through an aggregate or relation | High | Require `tenantId` in every query, add mixed-tenant fixtures, and never accept tenant identity from the request. |
+| Timezone or DST shifts create missing/double daily buckets | Medium | Generate calendar boundaries in `Europe/Kyiv`, test DST fixtures, and return a complete zero-filled bucket series. |
+| Median or chart queries scan too many application rows | Medium | Aggregate in PostgreSQL, use existing tenant/status/date indexes, cap the queue at five, and inspect query shape before release. |
+| Optional integrations make the funnel misleading | Medium | Return `exportConfigured` and nullable exported count; display unavailable rather than zero when export is not configured. |
+| A dense desktop dashboard becomes unusable on mobile | Medium | Stack sections at narrow widths, keep chart data in an accessible list/table, and add a 375 px Playwright regression. |
+| Existing cumulative plan/task files are mistaken for a fresh project tracker | Low | Continue the repository's established numbering with Tasks 74–82 and link this section to the approved spec. |
+
+### Open questions
+
+None. Financial metrics, source attribution, configurable timezone, arbitrary date ranges, and historical SLA snapshots remain explicitly deferred by the approved spec.

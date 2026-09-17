@@ -34,6 +34,14 @@
       "import": "./dist/orders.js",
       "default": "./dist/orders.js"
     },
+    "./dashboard": {
+      "react-server": "./src/dashboard.ts",
+      "browser": "./src/dashboard.ts",
+      "types": "./src/dashboard.ts",
+      "development": "./src/dashboard.ts",
+      "import": "./dist/dashboard.js",
+      "default": "./dist/dashboard.js"
+    },
     "./auth": {
       "react-server": "./src/auth.ts",
       "browser": "./src/auth.ts",

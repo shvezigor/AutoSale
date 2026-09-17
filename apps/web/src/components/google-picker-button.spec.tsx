@@ -29,6 +29,13 @@ describe('GooglePickerButton', () => {
     expect(navigate).toHaveBeenCalledWith('https://accounts.google.com/o/oauth2/auth');
   });
 
+  it('uses the shared settings secondary control style', () => {
+    render(<GooglePickerButton onSelected={vi.fn()} pickerLauncher={vi.fn()} />);
+
+    expect(screen.getByRole('button', { name: 'Обрати Google-таблицю' }))
+      .toHaveClass('settings-control', 'settings-control-secondary');
+  });
+
   it('shows loading and returns a selected file without a refresh token', async () => {
     let resolveSelection!: (selection: GooglePickerSelection) => void;
     const pickerLauncher = vi.fn(() => new Promise<GooglePickerSelection | null>((resolve) => { resolveSelection = resolve; }));

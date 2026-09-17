@@ -69,6 +69,14 @@ describe('MeestSettingsCard', () => {
     expect(screen.queryByDisplayValue('secret-password')).not.toBeInTheDocument();
   });
 
+  it('uses the shared settings field layout for connection credentials', () => {
+    render(<MeestSettingsCard initial={disconnected} role="OWNER" />);
+
+    for (const label of ['Логін Meest API', 'Пароль Meest API', 'ClientUID']) {
+      expect(screen.getByLabelText(label).closest('label')).toHaveClass('settings-field');
+    }
+  });
+
   it('lets an owner choose an exact Meest origin and save sender defaults', async () => {
     render(<MeestSettingsCard initial={active} role="OWNER" />);
     expect(screen.getByLabelText('Назва відправника Meest')).toBeInTheDocument();

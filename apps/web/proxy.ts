@@ -11,10 +11,10 @@ export async function proxy(request: NextRequest) {
   if (!session && !isAuthPath && !isPublicPath) {
     const login = new URL('/login', request.url); login.searchParams.set('next', `${request.nextUrl.pathname}${request.nextUrl.search}`); return NextResponse.redirect(login);
   }
-  if (session && isAuthPath) return NextResponse.redirect(new URL(session.platformRole === 'PLATFORM_ADMIN' ? '/admin' : '/conversations', request.url));
+  if (session && isAuthPath) return NextResponse.redirect(new URL(session.platformRole === 'PLATFORM_ADMIN' ? '/admin' : '/dashboard', request.url));
   if (session?.platformRole === 'PLATFORM_ADMIN' && !request.nextUrl.pathname.startsWith('/admin')) return NextResponse.redirect(new URL('/admin', request.url));
-  if (session?.platformRole !== 'PLATFORM_ADMIN' && request.nextUrl.pathname.startsWith('/admin')) return NextResponse.redirect(new URL('/conversations', request.url));
-  if (session?.membershipRole === 'MANAGER' && request.nextUrl.pathname.startsWith('/team')) return NextResponse.redirect(new URL('/conversations', request.url));
+  if (session?.platformRole !== 'PLATFORM_ADMIN' && request.nextUrl.pathname.startsWith('/admin')) return NextResponse.redirect(new URL('/dashboard', request.url));
+  if (session?.membershipRole === 'MANAGER' && request.nextUrl.pathname.startsWith('/team')) return NextResponse.redirect(new URL('/dashboard', request.url));
   return NextResponse.next();
 }
 

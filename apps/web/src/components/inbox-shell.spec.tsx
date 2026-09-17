@@ -10,6 +10,7 @@ describe('InboxShell', () => {
     render(<InboxShell conversations={[]}><div>Порожній діалог</div></InboxShell>);
 
     expect(screen.getByRole('heading', { name: 'Діалоги' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Усього діалогів: 0')).toHaveTextContent('0');
     expect(screen.getByText('Порожній діалог')).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'AutoSale' })).not.toBeInTheDocument();
   });

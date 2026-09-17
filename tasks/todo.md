@@ -1097,3 +1097,238 @@ Status: official research, secure connection, directories/sender defaults, the g
 - [ ] Model tenant legal entities, currencies, bank accounts and payment state after delivery adapters stabilize.
 - [ ] Filter selectable accounts by the order's legal entity and payment currency and show only active accounts.
 - [ ] Add payment recording and reconciliation as a separate audited lifecycle.
+
+## Task 74: Define and verify the dashboard contract
+
+**Description:** Add the shared Zod query/response schemas and exported TypeScript types for the complete operational dashboard snapshot.
+
+**Acceptance criteria:**
+- [x] The contract represents 7/30/90-day periods, nullable comparisons, raw denominator/sample counts, daily buckets, funnel availability, queue rows, issue counts, and sanitized integration states.
+- [x] Valid populated, zero-data, and unavailable-export responses parse; malformed dates, negative counts, invalid states, and incomplete buckets fail.
+- [x] The package exposes `@autosale/contracts/dashboard` to API and web consumers.
+
+**Verification:**
+- [x] Tests pass: `pnpm --filter @autosale/contracts test -- dashboard.spec.ts`.
+- [x] Typecheck passes: `pnpm --filter @autosale/contracts typecheck`.
+
+**Dependencies:** None
+
+**Files likely touched:**
+- `packages/contracts/src/dashboard.ts`
+- `packages/contracts/src/dashboard.spec.ts`
+- `packages/contracts/src/index.ts`
+- `packages/contracts/package.json`
+
+**Estimated scope:** Medium
+
+## Task 75: Build tenant-safe operational aggregates
+
+**Description:** Implement the dashboard service that derives period boundaries, KPI comparisons, daily status buckets, funnel stages, bounded queue entries, failures, and integration summaries from PostgreSQL.
+
+**Acceptance criteria:**
+- [x] Every aggregate and relation query is scoped by the supplied tenant id and mixed-tenant tests prove isolation.
+- [x] KPI formulas, latest-export semantics, unique funnel counts, oldest-first five-row queue, zero filling, and unavailable states match the approved spec.
+- [x] `Europe/Kyiv` boundaries and previous-period comparisons are correct across normal and daylight-saving dates without loading unbounded rows into application memory.
+
+**Verification:**
+- [x] Tests pass: `pnpm --filter @autosale/api exec vitest run src/dashboard/dashboard-period.spec.ts src/dashboard/dashboard.service.spec.ts`.
+- [x] Typecheck passes: `pnpm --filter @autosale/api typecheck`.
+- [x] Review parameterized query shapes and confirm all SQL/Prisma predicates include tenant scope.
+
+**Dependencies:** Task 74
+
+**Files likely touched:**
+- `apps/api/src/dashboard/dashboard.service.ts`
+- `apps/api/src/dashboard/dashboard.service.spec.ts`
+- `apps/api/src/dashboard/dashboard-period.ts`
+- `apps/api/src/dashboard/dashboard-period.spec.ts`
+
+**Estimated scope:** Medium
+
+## Task 76: Expose the authenticated dashboard endpoint
+
+**Description:** Register a NestJS dashboard module and controller that validates the period query and supplies the authenticated membership tenant to the aggregation service.
+
+**Acceptance criteria:**
+- [x] `GET /api/dashboard` defaults to `30d`; valid periods are forwarded and unknown values or fields return `400`.
+- [x] `MANAGER` or higher membership is required, and request input cannot override tenant identity.
+- [x] The response is returned through the shared dashboard contract without provider secrets or raw errors.
+
+**Verification:**
+- [x] Tests pass: `pnpm --filter @autosale/api exec vitest run src/dashboard/dashboard.controller.spec.ts`.
+- [x] Tests pass: `pnpm --filter @autosale/api test` (469/469).
+- [x] Build succeeds: `pnpm --filter @autosale/api build`.
+
+**Dependencies:** Tasks 74–75
+
+**Files likely touched:**
+- `apps/api/src/dashboard/dashboard.controller.ts`
+- `apps/api/src/dashboard/dashboard.controller.spec.ts`
+- `apps/api/src/dashboard/dashboard.module.ts`
+- `apps/api/src/app.module.ts`
+
+**Estimated scope:** Medium
+
+## Checkpoint: Backend dashboard snapshot
+
+- [x] Tasks 74–76 acceptance criteria pass.
+- [x] Contracts and API tests/typechecks/build are green.
+- [x] Empty, populated, DST, and mixed-tenant fixtures are covered.
+- [x] No schema migration or new runtime dependency was introduced.
+
+## Task 77: Connect the server page and period selector
+
+**Description:** Replace dashboard fixture loading with the authenticated API client and a server-rendered, shareable 7/30/90-day route shell.
+
+**Acceptance criteria:**
+- [x] `/dashboard` loads `30d`; allowlisted `?period=` values load their matching snapshot and invalid values safely fall back to `30d`.
+- [x] The selected period is represented by accessible links and the page displays the API generation time without exposing demo labels.
+- [x] API failure throws into the workspace error boundary instead of substituting fixture values.
+
+**Verification:**
+- [x] Tests pass: `pnpm --filter @autosale/web exec vitest run 'app/(workspace)/dashboard/page.spec.tsx' 'src/i18n/completeness.spec.ts'`.
+- [x] Typecheck passes: `pnpm --filter @autosale/web typecheck`.
+
+**Dependencies:** Task 76
+
+**Files likely touched:**
+- `apps/web/src/api/dashboard.ts`
+- `apps/web/app/(workspace)/dashboard/page.tsx`
+- `apps/web/app/(workspace)/dashboard/page.spec.tsx`
+- `apps/web/src/i18n/messages/uk.ts`
+- `apps/web/src/i18n/messages/en.ts`
+
+**Estimated scope:** Medium
+
+## Task 78: Render attention guidance and KPI cards
+
+**Description:** Deliver the first complete visible slice: prioritized attention guidance plus four factual KPI cards with valid comparison and unavailable semantics.
+
+**Acceptance criteria:**
+- [x] Attention guidance is based on current review/AI-failed backlog and is omitted when no action is needed.
+- [x] KPI cards display new orders, current attention/overdue counts, confirmation rate, and median confirmation time using Ukrainian/English formatting.
+- [x] Positive/negative comparison direction is metric-aware, zero denominators show `—`, and truthful queue links are keyboard accessible.
+
+**Verification:**
+- [x] Tests pass: `pnpm --filter @autosale/web exec vitest run src/components/dashboard/dashboard-overview.spec.tsx app/(workspace)/dashboard/page.spec.tsx src/i18n/completeness.spec.ts`.
+- [x] Manual check: populated and empty KPI samples preserve the approved visual hierarchy.
+
+**Dependencies:** Task 77
+
+**Files likely touched:**
+- `apps/web/src/components/dashboard/dashboard-overview.tsx`
+- `apps/web/src/components/dashboard/dashboard-overview.spec.tsx`
+- `apps/web/app/(workspace)/dashboard/page.tsx`
+- `apps/web/app/globals.css`
+
+**Estimated scope:** Medium
+
+## Task 79: Render accessible order dynamics and funnel
+
+**Description:** Add the interactive daily status visualization and period-cohort operational funnel without a charting dependency.
+
+**Acceptance criteria:**
+- [x] Daily buckets render as a responsive stacked visualization with hover/focus tooltips and the same values in an accessible non-visual representation.
+- [x] Funnel counts and percentages use the server response, preserve stage order, and mark export unavailable when Google Sheets is not configured.
+- [x] Chart-level and supported stage actions link only to filters/routes that already work.
+
+**Verification:**
+- [x] Tests pass: `pnpm --filter @autosale/web exec vitest run src/components/dashboard/dashboard-charts.spec.tsx app/(workspace)/dashboard/page.spec.tsx src/i18n/completeness.spec.ts`.
+- [x] Manual keyboard check: every interactive datum exposes its date, status, and count.
+
+**Dependencies:** Task 77
+
+**Files likely touched:**
+- `apps/web/src/components/dashboard/dashboard-charts.tsx`
+- `apps/web/src/components/dashboard/dashboard-charts.spec.tsx`
+- `apps/web/app/(workspace)/dashboard/page.tsx`
+- `apps/web/app/globals.css`
+
+**Estimated scope:** Medium
+
+## Task 80: Render queue, failures, and integration health
+
+**Description:** Add the actionable lower dashboard area for oldest problem orders, failed downstream operations, and current connection health.
+
+**Acceptance criteria:**
+- [x] Up to five queue entries show only operationally necessary labels, age, confidence/status, and a direct tenant-authorized order link.
+- [x] Export/shipment issue cards expose safe counts and supported recovery destinations without customer PII or raw provider errors.
+- [x] Instagram, Google Sheets, and carrier states distinguish active, attention, and not configured with links to the correct settings section.
+
+**Verification:**
+- [x] Tests pass: `pnpm --filter @autosale/web exec vitest run src/components/dashboard/dashboard-actions.spec.tsx app/(workspace)/dashboard/page.spec.tsx src/i18n/completeness.spec.ts`.
+- [x] Manual check: long participant/product labels and all integration states remain readable.
+
+**Dependencies:** Task 77
+
+**Files likely touched:**
+- `apps/web/src/components/dashboard/dashboard-actions.tsx`
+- `apps/web/src/components/dashboard/dashboard-actions.spec.tsx`
+- `apps/web/app/(workspace)/dashboard/page.tsx`
+- `apps/web/app/globals.css`
+
+**Estimated scope:** Medium
+
+## Checkpoint: Complete dashboard flow
+
+- [x] Tasks 77–80 acceptance criteria pass.
+- [x] Every displayed number is sourced from `DashboardResponse`.
+- [x] Period selector and supported problem links navigate correctly.
+- [x] Web tests, locale completeness, typecheck, and production build are green.
+
+## Task 81: Add resilient, accessible, and responsive states
+
+**Description:** Complete dashboard loading, error, empty, focus, reduced-motion, and narrow-layout behavior while retaining the established AutoSale design system.
+
+**Acceptance criteria:**
+- [x] Loading/error/empty states preserve page structure, explain the state, and provide an appropriate retry or next action without fake numbers.
+- [x] The page is keyboard navigable with visible focus, semantic regions/headings, accessible chart alternatives, and reduced-motion styles.
+- [x] At 375 px and common desktop widths the page has no horizontal overflow, clipped actions, or unreadable chart labels.
+
+**Verification:**
+- [x] Tests pass: `pnpm --filter @autosale/web exec vitest run dashboard`.
+- [x] Tests pass: `pnpm --filter @autosale/web exec vitest run src/i18n/completeness.spec.ts`.
+- [x] Build succeeds: `pnpm --filter @autosale/web build`.
+
+**Dependencies:** Tasks 78–80
+
+**Files likely touched:**
+- `apps/web/app/(workspace)/dashboard/loading.tsx`
+- `apps/web/app/(workspace)/dashboard/error.tsx`
+- `apps/web/app/(workspace)/dashboard/error.spec.tsx`
+- `apps/web/app/globals.css`
+- `apps/web/app/(workspace)/dashboard/page.spec.tsx`
+
+**Estimated scope:** Medium
+
+## Task 82: Remove fixture remnants and complete browser acceptance
+
+**Description:** Delete obsolete dashboard fixtures, add end-to-end regressions for the final route, and run the full Definition of Done from the approved spec.
+
+**Acceptance criteria:**
+- [x] No dashboard route imports or renders demo revenue, average-check, source-attribution, or random/fixture values.
+- [x] Playwright verifies period URL state, real-response rendering, truthful actions, keyboard focus, and 375 px/desktop overflow behavior.
+- [x] Focused and repository-wide tests, typechecks, build, and browser acceptance pass; any unrelated pre-existing failure is documented separately.
+
+**Verification:**
+- [x] Tests pass: `pnpm test`.
+- [x] Typecheck passes: `pnpm typecheck`.
+- [x] Build succeeds: `pnpm build`.
+- [x] Browser acceptance passes: `pnpm exec playwright test tests/e2e/dashboard.spec.ts --workers=1`.
+
+**Dependencies:** Task 81
+
+**Files likely touched:**
+- `apps/web/src/components/dashboard-fixtures.ts`
+- `apps/web/src/components/dashboard-fixtures.spec.ts`
+- `tests/e2e/dashboard.spec.ts`
+- `apps/web/app/(workspace)/dashboard/page.spec.tsx`
+
+**Estimated scope:** Medium
+
+## Checkpoint: Operational Dashboard v1 complete
+
+- [x] Tasks 74–82 and all spec success criteria are satisfied.
+- [x] Data provenance, tenant isolation, accessibility, responsive behavior, and truthful navigation have review evidence.
+- [x] Code-quality review reports no unresolved blocking findings.
+- [x] Production deployment verification is complete before claiming the live dashboard is ready.

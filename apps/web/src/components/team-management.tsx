@@ -31,10 +31,18 @@ export function TeamManagement({ initial }: { initial: TeamData }) {
   }
   async function mutate(path: string) { setPending(true); const response = await activity.run(t('team.accessActivity'), () => mutatingFetch(path, { method: 'POST' })); toast.show(response.ok ? { type: 'success', title: t('team.accessUpdated') } : { type: 'error', title: t('team.accessFailed') }); setPending(false); if (response.ok) router.refresh(); }
   return <section className="management-content">
-    <header className="settings-header"><h1>{t('team.title')}</h1><p>{t('team.description')}</p></header>
-    <form className="invite-form" onSubmit={invite}><label>{t('team.managerEmail')}<input required type="email" value={email} onChange={(event) => setEmail(event.target.value)} /></label><LoadingButton className="primary-button" pending={pending} pendingLabel={t('team.inviting')} type="submit">{t('team.invite')}</LoadingButton></form>
-    {message && <p role="status">{message}</p>}
-    <div className="management-card"><h2>{t('team.users')}</h2>{initial.members.map((member) => <div className="management-row" key={member.id}><span><strong>{member.name}</strong><small>{member.email} · {member.role === 'OWNER' ? t('team.owner') : t('team.manager')}</small></span><span className={`access-badge status-${member.status.toLowerCase()}`}>{member.status === 'ACTIVE' ? t('team.active') : t('team.blocked')}</span>{member.role === 'MANAGER' && member.status === 'ACTIVE' && <button className="danger-button" onClick={() => window.confirm(t('team.blockConfirm', { email: member.email })) && mutate(`/api/team/members/${member.id}/block`)} type="button">{t('team.block')}</button>}</div>)}</div>
-    <div className="management-card"><h2>{t('team.pending')}</h2>{initial.invitations.length === 0 ? <p className="orders-empty">{t('team.noInvitations')}</p> : initial.invitations.map((invite) => <div className="management-row" key={invite.id}><span><strong>{invite.email}</strong><small>{t('team.validUntil', { date: formatDate(invite.expiresAt) })}</small></span><button className="secondary-button" onClick={() => mutate(`/api/team/invitations/${invite.id}/revoke`)} type="button">{t('team.revoke')}</button></div>)}</div>
+    <header className="settings-header management-header"><h1>{t('team.title')}</h1><p>{t('team.description')}</p></header>
+    <div className="team-grid">
+      <section className="team-invite-card">
+        <h2>{t('team.inviteTitle')}</h2>
+        <form className="invite-form" onSubmit={invite}><label>{t('team.managerEmail')}<input required type="email" value={email} onChange={(event) => setEmail(event.target.value)} /></label><LoadingButton className="primary-button" pending={pending} pendingLabel={t('team.inviting')} type="submit">{t('team.invite')}</LoadingButton></form>
+        {message && <p role="status">{message}</p>}
+      </section>
+      <section className="management-card team-members-card"><h2>{t('team.users')}</h2>{initial.members.map((member) => <div className="management-row" key={member.id}><span className="team-avatar" aria-hidden="true">{initials(member.name)}</span><span><strong>{member.name}</strong><small>{member.email} · {member.role === 'OWNER' ? t('team.owner') : t('team.manager')}</small></span><span className={`access-badge status-${member.status.toLowerCase()}`}>{member.status === 'ACTIVE' ? t('team.active') : t('team.blocked')}</span>{member.role === 'MANAGER' && member.status === 'ACTIVE' && <button className="danger-button" onClick={() => window.confirm(t('team.blockConfirm', { email: member.email })) && mutate(`/api/team/members/${member.id}/block`)} type="button">{t('team.block')}</button>}</div>)}
+        <h3>{t('team.pending')}</h3>{initial.invitations.length === 0 ? <p className="team-empty">{t('team.noInvitations')}</p> : initial.invitations.map((invitation) => <div className="management-row" key={invitation.id}><span className="team-avatar" aria-hidden="true">{initials(invitation.email)}</span><span><strong>{invitation.email}</strong><small>{t('team.validUntil', { date: formatDate(invitation.expiresAt) })}</small></span><button className="secondary-button" onClick={() => mutate(`/api/team/invitations/${invitation.id}/revoke`)} type="button">{t('team.revoke')}</button></div>)}
+      </section>
+    </div>
   </section>;
 }
+
+function initials(value: string) { return value.trim().split(/\s+/).slice(0, 2).map((part) => part[0]?.toUpperCase()).join(''); }

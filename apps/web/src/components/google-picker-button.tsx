@@ -67,7 +67,7 @@ export function GooglePickerButton({
   }
 
   return <div className="google-picker-control">
-    <button type="button" className="secondary-button" disabled={disabled || pending} onClick={() => void choose()}>
+    <button type="button" className="secondary-button settings-control settings-control-secondary" disabled={disabled || pending} onClick={() => void choose()}>
       {pending ? t('googlePicker.opening') : buttonLabel}
     </button>
     {selectedName && <span className="save-success">{t('googlePicker.selected', { name: selectedName })}</span>}
