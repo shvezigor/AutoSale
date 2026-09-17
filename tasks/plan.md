@@ -1,4 +1,167 @@
-# Implementation Plan: Instagram Order Capture MVP
+# Current Implementation Plan: Sales AITO Marketing Website
+
+## Overview
+
+Build and release the bilingual Sales AITO public website at `https://sales-aito.com/` inside the existing Next.js application. The work delivers the Autonomous Command visual foundation, Ukrainian and English conversion pages, technical SEO, durable demo-lead capture, approved pricing communication, and production search/accessibility/performance evidence without changing existing workspace behavior or implementing payment processing.
+
+Source artifacts:
+
+- `CAPABILITY-MAP-sales-aito-marketing.md`
+- `SPEC-marketing-foundation.md`
+- `SPEC-localized-content-seo.md`
+- `SPEC-demo-leads.md`
+- `SPEC-pricing-conversion.md`
+- `SPEC-release-validation.md`
+- `docs/product/2026-09-17-sales-aito-monetization.md`
+- `docs/superpowers/specs/2026-09-17-sales-aito-marketing-site-design.md`
+
+Tasks are tracked in the current-initiative section of `tasks/todo.md` using ids `M1`–`M18`. The shared billing backlog remains in that file but is outside this implementation.
+
+## Architecture Decisions
+
+- Keep one Next.js application and preserve existing public/auth/workspace URLs.
+- Use locale-prefixed marketing routes (`/uk`, `/en`) with typed locale dictionaries and crawlable language links.
+- Use a thin request-path locale boundary to render the correct document language without moving every existing workspace route.
+- Render marketing content and SEO metadata on the server; client JavaScript is limited to navigation, forms, and purposeful interaction.
+- Keep content in type-checked repository modules for the first release; preserve an interface for a later CMS.
+- Store integration availability in one registry and present `available`, `in-development`, and `roadmap` as distinct semantic states.
+- Save demo leads in PostgreSQL before queuing notification; notifications are retryable and idempotent.
+- Treat public pricing as a conversion hypothesis, not an entitlement or authorization source.
+- Keep PostgreSQL as the source of truth and preserve all current tenant, role, AI-validation, Google, and Meta boundaries.
+- Do not add a UI library, i18n framework, CMS, analytics SaaS, or heavy animation library unless implementation evidence forces a revised approved plan.
+
+## Dependency Graph
+
+```text
+M1 baseline and route safety
+  -> M2 locale/metadata boundary
+      -> M3 Autonomous Command tokens and primitives
+          -> M4 Ukrainian home vertical slice
+              -> M5 English content contract
+                  -> M6 platform and AI pages
+                  -> M7 integrations, solutions, and about pages
+                      -> M8 canonical, hreflang, and JSON-LD
+                          -> M9 sitemap, robots, OG, and indexing guards
+                              -> M10 blog foundation and first article pair
+
+M3 -> M11 demo-lead contract and schema -> M12 API persistence
+                                           -> M13 retryable notification
+                                           -> M14 localized demo form
+
+M5 + M8 -> M15 pricing registry and page -> M16 conversion events
+
+M4 + M10 + M14 + M16 -> M17 browser/E2E/accessibility verification
+                         -> M18 production, search, and performance release
+```
+
+## Task List
+
+### Phase 1: Public foundation
+
+- [ ] M1: Lock the existing route and metadata baseline.
+- [ ] M2: Add locale resolution and public/private indexability boundaries.
+- [ ] M3: Create Autonomous Command tokens and reusable marketing primitives.
+- [ ] M4: Ship the complete Ukrainian home-page vertical slice.
+
+### Checkpoint: Public foundation
+
+- [ ] Existing application routes still pass regression tests.
+- [ ] `/uk` renders correct server HTML and marketing navigation.
+- [ ] Web tests, typecheck, and production build pass.
+- [ ] Human visual review confirms the approved Autonomous Command direction.
+
+### Phase 2: Localized content and search
+
+- [ ] M5: Add the English content contract and locale-equivalence validation.
+- [ ] M6: Build localized Platform and AI Operator pages.
+- [ ] M7: Build localized Integrations, Solutions, and About pages.
+- [ ] M8: Generate canonical, `hreflang`, metadata, breadcrumbs, and safe JSON-LD.
+- [ ] M9: Generate sitemap, robots, OG images, and private-route indexing guards.
+- [ ] M10: Add the blog foundation and one evidence-backed article pair.
+
+### Checkpoint: Search-ready content
+
+- [ ] Every published localized route has meaningful server HTML and unique metadata.
+- [ ] Sitemap, robots, canonicals, alternates, JSON-LD, and internal links pass automated checks.
+- [ ] No workspace, auth, admin, preview, or unpublished route is in the sitemap.
+- [ ] Web tests, typecheck, production build, and crawler smoke checks pass.
+
+### Phase 3: Demo conversion
+
+- [ ] M11: Define the demo-lead contract and PostgreSQL state.
+- [ ] M12: Persist idempotent public demo submissions.
+- [ ] M13: Deliver retryable demo-lead notifications.
+- [ ] M14: Build the accessible localized demo form.
+
+### Checkpoint: Demo conversion
+
+- [ ] One valid submission produces one durable lead and one notification chain.
+- [ ] Invalid, duplicate, abusive, and provider-failure cases are safe and observable.
+- [ ] Contract, database, API, worker, web, typecheck, build, and focused E2E tests pass.
+
+### Phase 4: Pricing conversion
+
+- [ ] M15: Build the approved pricing registry and localized pricing experience.
+- [ ] M16: Record privacy-safe pricing and trial-intent events.
+
+### Checkpoint: Pricing conversion
+
+- [ ] Trial and plan values exactly match the approved monetization artifact.
+- [ ] Monthly/annual display, current/roadmap separation, and CTAs pass tests in both locales.
+- [ ] Public pricing data grants no entitlement and no payment capability is implied.
+
+### Phase 5: Release evidence
+
+- [ ] M17: Complete responsive, browser, accessibility, and end-to-end acceptance.
+- [ ] M18: Complete production domain, performance, and search-engine readiness.
+
+### Checkpoint: Complete
+
+- [ ] Full tests, typecheck, build, Playwright, Compose build/config, and diff checks pass.
+- [ ] `sales-aito.com` serves the localized public site over HTTPS and links safely into auth/workspace.
+- [ ] Search Console and Bing can fetch representative URLs and the sitemap.
+- [ ] IndexNow is verified or explicitly deferred.
+- [ ] Known limitations and external launch prerequisites are documented.
+
+## Vertical Slices
+
+1. **Ukrainian visitor can understand and enter the product:** foundation through M4.
+2. **Crawler can discover and understand both languages:** M5 through M10.
+3. **Prospect can request a demo without losing data:** M11 through M14.
+4. **Prospect can select a plan and express intent:** M15 through M16.
+5. **Operator can prove production readiness:** M17 through M18.
+
+Each slice ends in a deployable state. No later phase is required to keep earlier routes working.
+
+## Parallelization Opportunities
+
+- After M3, demo contract/schema work (M11) can proceed independently from localized content work (M5–M7).
+- After M5, page content (M6–M7) can be prepared independently, but both must consume the same approved content types.
+- M13 and M14 begin only after M12 fixes the submission contract.
+- M15 can begin after the locale/content contract is stable; M16 follows the final CTA/event vocabulary.
+- M17 and M18 are sequential because release evidence must inspect the integrated production output.
+
+## Risks and Mitigations
+
+| Risk | Impact | Mitigation |
+|---|---|---|
+| Public routing breaks auth or workspace URLs | High | M1 locks route behavior before locale changes; retain regression tests through every checkpoint |
+| Incorrect locale handling weakens indexing | High | Direct `/uk` and `/en` URLs, correct server `lang`, crawlable links, reciprocal alternates, raw-HTML tests |
+| Production and checkout differ | High | Compare deployed route inventory before release and avoid unrelated workspace redesign |
+| Marketing claims outrun the product | High | Central integration registry with reviewed availability states and no roadmap offer markup |
+| Demo form collects PII unsafely | High | Minimal fields, consent, durable storage, redacted logs, rate limiting, retention rules, audited access |
+| Notification outage loses leads | High | Commit database record before an idempotent retryable job |
+| Low Scale price becomes unprofitable | Medium | No paid enforcement yet; collect plan intent and direct cost per processed order before billing build |
+| Added visual effects hurt Core Web Vitals | Medium | Server-first content, no heavy animation library, explicit image/font/JS budgets, early production profiling |
+| Search launch is technically correct but not indexed | Medium | Search Console/Bing verification, sitemap submission, URL Inspection, internal links, and post-launch monitoring |
+
+## Open Questions
+
+No implementation-blocking product questions remain. Production Search Console/Bing ownership, email recipient configuration, and deployment access are external prerequisites for M18 and will be reported rather than guessed.
+
+---
+
+## Existing Plan: Instagram Order Capture MVP
 
 ## Overview
 

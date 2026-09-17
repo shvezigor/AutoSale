@@ -1,4 +1,491 @@
-# Instagram Order Capture MVP — Task Checklist
+# Sales AITO — Shared Task Checklist
+
+## Current Initiative: Public Marketing Website
+
+### M1: Lock the existing route and metadata baseline
+
+**Description:** Add regression coverage for the current public, auth, legal, and workspace route behavior before introducing locale-aware marketing routes.
+
+**Acceptance criteria:**
+- [ ] Tests record the current destinations and access behavior for `/`, `/login`, `/register`, legal pages, and representative workspace routes.
+- [ ] Existing API, health, webhook, and auth URLs remain outside the marketing route namespace.
+- [ ] The baseline fails if a later route change introduces an accidental redirect loop or public workspace content.
+
+**Verification:**
+- [ ] Tests pass: `pnpm --filter @autosale/web test`
+- [ ] E2E smoke passes: `pnpm test:e2e --grep "auth|marketing route baseline"`
+- [ ] Build succeeds: `pnpm --filter @autosale/web build`
+
+**Dependencies:** None
+
+**Files likely touched:**
+- `apps/web/app/page.spec.tsx`
+- `apps/web/src/auth/paths.spec.ts`
+- `tests/e2e/auth.spec.ts`
+- `tests/e2e/marketing-site.spec.ts`
+
+**Estimated scope:** Medium
+
+### M2: Add locale resolution and public/private indexability boundaries
+
+**Description:** Resolve `/uk` and `/en`, render the correct document language, preserve direct crawlable locale URLs, and centralize index/no-index decisions without changing existing auth or workspace URLs.
+
+**Acceptance criteria:**
+- [ ] `/` safely selects Ukrainian by default while `/uk` and `/en` remain directly accessible.
+- [ ] Initial server HTML has the correct `lang` and public/private robots metadata for the requested path.
+- [ ] Invalid locale values return a localized-safe 404 and cannot become arbitrary route input.
+
+**Verification:**
+- [ ] Tests pass: `pnpm --filter @autosale/web test -- locale`
+- [ ] Typecheck passes: `pnpm --filter @autosale/web typecheck`
+- [ ] Manual check: inspect raw HTML for `/uk`, `/en`, `/login`, and `/conversations`.
+
+**Dependencies:** M1
+
+**Files likely touched:**
+- `apps/web/proxy.ts`
+- `apps/web/app/layout.tsx`
+- `apps/web/app/page.tsx`
+- `apps/web/src/marketing/routing/locales.ts`
+- `apps/web/src/marketing/routing/locales.spec.ts`
+
+**Estimated scope:** Medium
+
+### M3: Create Autonomous Command tokens and marketing primitives
+
+**Description:** Implement the approved dark/light brand foundation, typography, focus, spacing, buttons, badges, section containers, and reduced-motion behavior without changing workspace styling.
+
+**Acceptance criteria:**
+- [ ] Semantic tokens cover dark AI sections, light reading sections, lime actions, violet accents, status states, and accessible focus.
+- [ ] Reusable primitives contain no page-specific content or business logic.
+- [ ] Contrast, reduced motion, touch targets, and 200% zoom meet the approved accessibility boundary.
+
+**Verification:**
+- [ ] Component tests pass: `pnpm --filter @autosale/web test -- marketing-ui`
+- [ ] Typecheck passes: `pnpm --filter @autosale/web typecheck`
+- [ ] Manual check: review primitive states at 375 and 1440 pixels.
+
+**Dependencies:** M2
+
+**Files likely touched:**
+- `apps/web/app/styles/marketing/tokens.css`
+- `apps/web/app/styles/marketing/foundation.css`
+- `apps/web/src/marketing/components/marketing-cta.tsx`
+- `apps/web/src/marketing/components/status-badge.tsx`
+- `apps/web/src/marketing/components/marketing-ui.spec.tsx`
+
+**Estimated scope:** Medium
+
+### M4: Ship the Ukrainian home-page vertical slice
+
+**Description:** Deliver the complete approved Ukrainian homepage narrative with marketing header/footer, current product proof, AI workflow, honest integration status, pricing preview, FAQ, and conversion CTAs.
+
+**Acceptance criteria:**
+- [ ] `/uk` renders the approved section order and meaningful content in initial server HTML.
+- [ ] Header, mobile navigation, locale link, sign-in, registration, and demo CTAs are functional and accessible.
+- [ ] Current and planned integrations are visually and textually distinct.
+
+**Verification:**
+- [ ] Tests pass: `pnpm --filter @autosale/web test -- marketing-home`
+- [ ] Build succeeds: `pnpm --filter @autosale/web build`
+- [ ] Browser check: 375, 768, 1440, keyboard, reduced motion, and no console errors.
+
+**Dependencies:** M3
+
+**Files likely touched:**
+- `apps/web/app/(marketing)/[locale]/page.tsx`
+- `apps/web/src/marketing/components/marketing-header.tsx`
+- `apps/web/src/marketing/components/marketing-footer.tsx`
+- `apps/web/src/marketing/components/home-page.tsx`
+- `apps/web/src/marketing/components/home-page.spec.tsx`
+
+**Estimated scope:** Medium
+
+## Checkpoint: Public foundation
+
+- [ ] M1–M4 acceptance criteria are complete.
+- [ ] Existing route regressions, web tests, typecheck, and build pass.
+- [ ] `/uk` works as a complete registration/demo entry point.
+- [ ] Human visual review approves the implemented Autonomous Command direction.
+
+### M5: Add the English content contract and locale-equivalence validation
+
+**Description:** Create typed Ukrainian/English content modules and build-time validation so new languages can be added without scattered JSX translations or mixed-language pages.
+
+**Acceptance criteria:**
+- [ ] Core content types require equivalent navigation, CTAs, accessibility labels, metadata fields, and home sections in both locales.
+- [ ] `/en` contains substantive English body content rather than translated chrome around Ukrainian content.
+- [ ] Missing or duplicate core translations fail tests or build validation.
+
+**Verification:**
+- [ ] Tests pass: `pnpm --filter @autosale/web test -- marketing-content`
+- [ ] Typecheck passes: `pnpm --filter @autosale/web typecheck`
+- [ ] Manual check: switch `/uk` ↔ `/en` while preserving page intent.
+
+**Dependencies:** M4
+
+**Files likely touched:**
+- `apps/web/src/marketing/content/types.ts`
+- `apps/web/src/marketing/content/uk.ts`
+- `apps/web/src/marketing/content/en.ts`
+- `apps/web/src/marketing/content/content-validation.spec.ts`
+- `apps/web/src/marketing/components/locale-switcher.tsx`
+
+**Estimated scope:** Medium
+
+### M6: Build localized Platform and AI Operator pages
+
+**Description:** Add indexable product pages that explain the order lifecycle, control model, AI validation, current capabilities, and future autonomous actions without overstating availability.
+
+**Acceptance criteria:**
+- [ ] Platform and AI Operator routes render unique Ukrainian and English content, one H1, contextual links, and visible capability status.
+- [ ] AI copy explains human approval and trusted-data boundaries.
+- [ ] Both templates remain usable with long English text and mobile layouts.
+
+**Verification:**
+- [ ] Tests pass: `pnpm --filter @autosale/web test -- "platform|ai-operator"`
+- [ ] Build succeeds: `pnpm --filter @autosale/web build`
+- [ ] Manual check: raw HTML and responsive browser review for all four locale-route combinations.
+
+**Dependencies:** M5
+
+**Files likely touched:**
+- `apps/web/app/(marketing)/[locale]/platform/page.tsx`
+- `apps/web/app/(marketing)/[locale]/features/ai-sales-operator/page.tsx`
+- `apps/web/src/marketing/components/platform-page.tsx`
+- `apps/web/src/marketing/components/ai-operator-page.tsx`
+- `apps/web/src/marketing/components/product-pages.spec.tsx`
+
+**Estimated scope:** Medium
+
+### M7: Build localized Integrations, Solutions, and About pages
+
+**Description:** Add three conversion/search page families backed by a central integration registry and focused initial audience segments.
+
+**Acceptance criteria:**
+- [ ] Integrations expose one authoritative `available`, `in-development`, or `roadmap` state with last-review metadata.
+- [ ] Solutions address social shops and growing commerce teams without thin programmatic pages.
+- [ ] About communicates the autonomous-operator vision without fabricated company or customer claims.
+
+**Verification:**
+- [ ] Tests pass: `pnpm --filter @autosale/web test -- "integrations|solutions|about"`
+- [ ] Typecheck passes: `pnpm --filter @autosale/web typecheck`
+- [ ] Manual check: crawlable links and status labels in Ukrainian and English.
+
+**Dependencies:** M5
+
+**Files likely touched:**
+- `apps/web/app/(marketing)/[locale]/integrations/page.tsx`
+- `apps/web/app/(marketing)/[locale]/solutions/page.tsx`
+- `apps/web/app/(marketing)/[locale]/about/page.tsx`
+- `apps/web/src/marketing/content/integration-registry.ts`
+- `apps/web/src/marketing/components/company-pages.spec.tsx`
+
+**Estimated scope:** Medium
+
+### M8: Generate canonical, hreflang, metadata, breadcrumbs, and safe JSON-LD
+
+**Description:** Centralize page SEO generation so every published route has consistent absolute URLs, reciprocal locale alternates, visible breadcrumbs, and schema that matches visible content.
+
+**Acceptance criteria:**
+- [ ] Each indexable page has unique title, description, self-canonical, reciprocal alternates, one H1, and crawlable breadcrumbs where nested.
+- [ ] JSON-LD is safely serialized and emitted only when required visible fields exist.
+- [ ] Tests reject conflicting canonical, duplicate intent, missing locale equivalent, and unsupported schema claims.
+
+**Verification:**
+- [ ] Tests pass: `pnpm --filter @autosale/web test -- marketing-seo`
+- [ ] Build succeeds: `pnpm --filter @autosale/web build`
+- [ ] Manual check: inspect raw HTML for home, AI, integrations, and about in both locales.
+
+**Dependencies:** M6, M7
+
+**Files likely touched:**
+- `apps/web/src/marketing/seo/metadata.ts`
+- `apps/web/src/marketing/seo/alternates.ts`
+- `apps/web/src/marketing/seo/json-ld.ts`
+- `apps/web/src/marketing/components/breadcrumbs.tsx`
+- `apps/web/src/marketing/seo/seo.spec.ts`
+
+**Estimated scope:** Medium
+
+### M9: Generate sitemap, robots, Open Graph images, and indexing guards
+
+**Description:** Publish crawler entry points and ensure public canonical pages are discoverable while auth, workspace, admin, preview, and user-specific routes remain absent and no-index.
+
+**Acceptance criteria:**
+- [ ] Sitemap contains only absolute, canonical, published URLs with valid locale alternates.
+- [ ] Robots references the sitemap and does not block required public assets or canonical pages.
+- [ ] Private routes are absent from sitemap, emit no-index, and remain protected independently of crawler directives.
+
+**Verification:**
+- [ ] Tests pass: `pnpm --filter @autosale/web test -- "sitemap|robots|indexability"`
+- [ ] Build succeeds: `pnpm --filter @autosale/web build`
+- [ ] Manual check: open generated sitemap, robots, OG image, and raw private-route metadata.
+
+**Dependencies:** M8
+
+**Files likely touched:**
+- `apps/web/app/sitemap.ts`
+- `apps/web/app/robots.ts`
+- `apps/web/app/opengraph-image.tsx`
+- `apps/web/src/marketing/seo/indexability.ts`
+- `apps/web/src/marketing/seo/indexability.spec.ts`
+
+**Estimated scope:** Medium
+
+### M10: Add the blog foundation and first evidence-backed article pair
+
+**Description:** Create localized article registry, blog index/detail templates, and one useful Ukrainian article with an English equivalent grounded in current product and official integration facts.
+
+**Acceptance criteria:**
+- [ ] Blog index and article routes expose publication state, dates, author identity, alternates, canonical, Article schema, and related internal links.
+- [ ] Unpublished or missing translations are absent from sitemap and do not create false locale equivalents.
+- [ ] The first article answers a real social-commerce automation question without keyword stuffing or unavailable-feature claims.
+
+**Verification:**
+- [ ] Tests pass: `pnpm --filter @autosale/web test -- marketing-blog`
+- [ ] Build succeeds: `pnpm --filter @autosale/web build`
+- [ ] Manual check: article raw HTML, schema, locale switching, and mobile reading experience.
+
+**Dependencies:** M9
+
+**Files likely touched:**
+- `apps/web/app/(marketing)/[locale]/blog/page.tsx`
+- `apps/web/app/(marketing)/[locale]/blog/[slug]/page.tsx`
+- `apps/web/src/marketing/content/article-registry.ts`
+- `apps/web/src/marketing/content/articles/first-automation-guide.ts`
+- `apps/web/src/marketing/content/blog.spec.ts`
+
+**Estimated scope:** Medium
+
+## Checkpoint: Search-ready content
+
+- [ ] M5–M10 acceptance criteria are complete.
+- [ ] All published routes have server HTML, metadata, canonical, alternates, internal links, and explicit indexability.
+- [ ] Sitemap, robots, JSON-LD, OG, and link-crawl tests pass.
+- [ ] No private route or roadmap-only page is accidentally indexable as a current offer.
+
+### M11: Define the demo-lead contract and PostgreSQL state
+
+**Description:** Add the validated public input contract and durable platform-level lead/notification state without creating tenant access.
+
+**Acceptance criteria:**
+- [ ] Contract requires consent and at least one valid contact method with bounded localized fields.
+- [ ] Database state supports lead lifecycle, idempotency, notification attempts, retry timing, and audited timestamps.
+- [ ] Migration preserves existing data and generated database client compiles.
+
+**Verification:**
+- [ ] Tests pass: `pnpm --filter @autosale/contracts test && pnpm --filter @autosale/database test`
+- [ ] Generate succeeds: `pnpm --filter @autosale/database generate`
+- [ ] Typecheck passes: `pnpm --filter @autosale/database typecheck`
+
+**Dependencies:** M3
+
+**Files likely touched:**
+- `packages/contracts/src/demo-leads.ts`
+- `packages/contracts/src/demo-leads.spec.ts`
+- `packages/contracts/src/index.ts`
+- `packages/database/prisma/schema.prisma`
+- `packages/database/prisma/migrations/*_demo_leads/migration.sql`
+
+**Estimated scope:** Medium
+
+### M12: Persist idempotent public demo submissions
+
+**Description:** Add a public API endpoint that validates, rate-limits, and commits one durable lead before queuing notification.
+
+**Acceptance criteria:**
+- [ ] Valid input commits a lead and queues notification atomically or leaves an observable retryable state.
+- [ ] Browser retry, double click, and repeated idempotency key create one logical submission.
+- [ ] Errors reveal no existing-contact state and logs contain no form PII.
+
+**Verification:**
+- [ ] Tests pass: `pnpm --filter @autosale/api test -- demo-leads`
+- [ ] Typecheck passes: `pnpm --filter @autosale/api typecheck`
+- [ ] Manual check: valid, invalid, duplicate, oversized, and rate-limited requests.
+
+**Dependencies:** M11
+
+**Files likely touched:**
+- `apps/api/src/demo-leads/demo-leads.module.ts`
+- `apps/api/src/demo-leads/demo-leads.controller.ts`
+- `apps/api/src/demo-leads/demo-leads.service.ts`
+- `apps/api/src/demo-leads/demo-leads.service.spec.ts`
+- `apps/api/src/app.module.ts`
+
+**Estimated scope:** Medium
+
+### M13: Deliver retryable demo-lead notifications
+
+**Description:** Notify the configured administrator from the durable lead record through an idempotent BullMQ worker with bounded retry and safe operational state.
+
+**Acceptance criteria:**
+- [ ] Success records one logical notification delivery without exposing lead data in logs.
+- [ ] Temporary failures retry with backoff; permanent/exhausted failures remain operator-visible without losing the lead.
+- [ ] Worker replay cannot send duplicate logical notifications after success.
+
+**Verification:**
+- [ ] Tests pass: `pnpm --filter @autosale/worker test -- demo-lead-notification`
+- [ ] Typecheck passes: `pnpm --filter @autosale/worker typecheck`
+- [ ] Manual check: simulated success, temporary failure, permanent failure, and replay.
+
+**Dependencies:** M12
+
+**Files likely touched:**
+- `apps/worker/src/demo-leads/demo-lead-notification.processor.ts`
+- `apps/worker/src/demo-leads/demo-lead-notification.processor.spec.ts`
+- `apps/worker/src/main.ts`
+- `apps/api/src/demo-leads/demo-lead-notification.service.ts`
+
+**Estimated scope:** Medium
+
+### M14: Build the accessible localized demo form
+
+**Description:** Deliver Ukrainian and English demo pages with accessible validation, pending/success/retry states, safe value preservation, and the approved qualification fields.
+
+**Acceptance criteria:**
+- [ ] Form collects name, company, email or phone, order-volume range, optional note, locale, and consent.
+- [ ] Field and server errors are localized, focused appropriately, and do not erase safe input.
+- [ ] Successful submission shows a clear next step and cannot be repeated accidentally.
+
+**Verification:**
+- [ ] Tests pass: `pnpm --filter @autosale/web test -- demo-form`
+- [ ] E2E passes: `pnpm test:e2e --grep "demo request"`
+- [ ] Manual check: keyboard, screen reader labels, mobile, offline/server error, and retry.
+
+**Dependencies:** M12, M13
+
+**Files likely touched:**
+- `apps/web/app/(marketing)/[locale]/demo/page.tsx`
+- `apps/web/src/marketing/components/demo-form.tsx`
+- `apps/web/src/marketing/components/demo-form.spec.tsx`
+- `apps/web/src/marketing/api/demo-leads.ts`
+- `tests/e2e/demo-lead.spec.ts`
+
+**Estimated scope:** Medium
+
+## Checkpoint: Demo conversion
+
+- [ ] M11–M14 acceptance criteria are complete.
+- [ ] One valid request creates one durable lead and one notification chain.
+- [ ] Privacy, rate-limit, retry, idempotency, accessibility, and failure tests pass.
+- [ ] Contracts, database, API, worker, web, typecheck, build, and focused E2E pass.
+
+### M15: Build the approved pricing registry and localized pricing experience
+
+**Description:** Add a single typed source for the 30-day trial and approved Start/Growth/Scale values, then render localized pricing, comparison, roadmap separation, FAQ, and conversion CTAs.
+
+**Acceptance criteria:**
+- [ ] Trial and monthly prices are exactly 30 days, 599 UAH, 1,999 UAH, and 2,999 UAH with approved limits.
+- [ ] Annual display derives the 20% discount and states total/effective monthly amounts clearly.
+- [ ] Available and roadmap features are separate, and plan CTAs preserve locale and destination intent.
+
+**Verification:**
+- [ ] Tests pass: `pnpm --filter @autosale/web test -- pricing`
+- [ ] Build succeeds: `pnpm --filter @autosale/web build`
+- [ ] Manual check: Ukrainian/English, monthly/annual, mobile comparison, and CTA destinations.
+
+**Dependencies:** M5, M8
+
+**Files likely touched:**
+- `apps/web/app/(marketing)/[locale]/pricing/page.tsx`
+- `apps/web/src/marketing/content/pricing.ts`
+- `apps/web/src/marketing/components/pricing-grid.tsx`
+- `apps/web/src/marketing/components/pricing-comparison.tsx`
+- `apps/web/src/marketing/components/pricing.spec.tsx`
+
+**Estimated scope:** Medium
+
+### M16: Record privacy-safe pricing and trial-intent events
+
+**Description:** Add a minimal first-party event boundary for pricing views, plan-interest clicks, registration arrival, demo intent, and later trial activation without storing customer conversation content or granting entitlements.
+
+**Acceptance criteria:**
+- [ ] Event contracts allow only approved event names and non-PII dimensions such as locale, plan id, and source route.
+- [ ] Duplicate browser delivery is idempotent and does not block navigation or registration.
+- [ ] Public pricing data and event payloads cannot change tenant plan or access.
+
+**Verification:**
+- [ ] Tests pass: `pnpm --filter @autosale/api test -- marketing-events && pnpm --filter @autosale/web test -- conversion-events`
+- [ ] Typecheck passes: `pnpm typecheck`
+- [ ] Manual check: one deliberate CTA produces one logical event and no contact/message data.
+
+**Dependencies:** M15
+
+**Files likely touched:**
+- `packages/contracts/src/marketing-events.ts`
+- `apps/api/src/marketing-events/marketing-events.controller.ts`
+- `apps/api/src/marketing-events/marketing-events.service.ts`
+- `apps/web/src/marketing/analytics/conversion-events.ts`
+- `apps/web/src/marketing/analytics/conversion-events.spec.ts`
+
+**Estimated scope:** Medium
+
+## Checkpoint: Pricing conversion
+
+- [ ] M15–M16 acceptance criteria are complete.
+- [ ] Pricing values and limits match the approved product artifact.
+- [ ] Current/roadmap separation, locale formatting, CTAs, and privacy-safe events pass tests.
+- [ ] No checkout, entitlement, or payment capability is implied or introduced.
+
+### M17: Complete responsive, browser, accessibility, and end-to-end acceptance
+
+**Description:** Test the integrated site across target viewports, keyboard/screen-reader flows, both languages, conversion paths, error states, and existing workspace handoff.
+
+**Acceptance criteria:**
+- [ ] Home → pricing → registration, home → demo, locale switching, 404, and sign-in → workspace flows pass.
+- [ ] 375/768/1024/1440/1920 layouts, keyboard, focus, contrast, reduced motion, 200% zoom, and long content pass.
+- [ ] Browser console/network contain no relevant errors, hydration mismatches, broken links, or failed first-party assets.
+
+**Verification:**
+- [ ] Full E2E passes: `pnpm test:e2e`
+- [ ] Web suite passes: `pnpm --filter @autosale/web test && pnpm --filter @autosale/web build`
+- [ ] Manual browser accessibility and responsive checklist is recorded.
+
+**Dependencies:** M10, M14, M16
+
+**Files likely touched:**
+- `tests/e2e/marketing-site.spec.ts`
+- `tests/e2e/marketing-seo.spec.ts`
+- `tests/e2e/marketing-auth-handoff.spec.ts`
+- `docs/acceptance/marketing-site-checklist.md`
+
+**Estimated scope:** Medium
+
+### M18: Complete production domain, performance, and search-engine readiness
+
+**Description:** Verify the production build and `sales-aito.com` boundary, crawler artifacts, performance budgets, search-service ownership/submission, and operational launch documentation.
+
+**Acceptance criteria:**
+- [ ] Production HTTPS, locale routes, auth handoff, API/webhook/health paths, sitemap, robots, canonicals, alternates, and JSON-LD return expected results.
+- [ ] Key pages target p75 LCP <2.5s, INP <200ms, and CLS <0.1 or document an approved external blocker.
+- [ ] Search Console and Bing can fetch representative URLs and sitemap; IndexNow is verified or explicitly deferred.
+
+**Verification:**
+- [ ] Full checks pass: `pnpm test && pnpm typecheck && pnpm build && pnpm test:e2e`
+- [ ] Container checks pass: `docker compose build && docker compose config`
+- [ ] Production curl, raw-HTML crawl, Rich Results, Search Console, Bing, and performance evidence are recorded.
+
+**Dependencies:** M17
+
+**Files likely touched:**
+- `Caddyfile`
+- `docs/operations/search-indexing.md`
+- `docs/operations/marketing-release.md`
+- `docs/acceptance/marketing-site-checklist.md`
+
+**Estimated scope:** Medium
+
+## Checkpoint: Marketing website complete
+
+- [ ] M1–M18 and all checkpoints are complete.
+- [ ] Full test, typecheck, build, E2E, Compose, diff, accessibility, performance, and search checks pass.
+- [ ] `https://sales-aito.com/` serves the public website and sign-in reaches the protected workspace.
+- [ ] External launch prerequisites and any approved limitations are documented.
+
+---
+
+## Existing Initiative: Instagram Order Capture MVP
 
 ## Task 1: Verify Meta and Google access prerequisites
 
