@@ -1181,13 +1181,13 @@ Status: official research, secure connection, directories/sender defaults, the g
 **Description:** Replace dashboard fixture loading with the authenticated API client and a server-rendered, shareable 7/30/90-day route shell.
 
 **Acceptance criteria:**
-- [ ] `/dashboard` loads `30d`; allowlisted `?period=` values load their matching snapshot and invalid values safely fall back to `30d`.
-- [ ] The selected period is represented by accessible links and the page displays the API generation time without exposing demo labels.
-- [ ] API failure throws into the workspace error boundary instead of substituting fixture values.
+- [x] `/dashboard` loads `30d`; allowlisted `?period=` values load their matching snapshot and invalid values safely fall back to `30d`.
+- [x] The selected period is represented by accessible links and the page displays the API generation time without exposing demo labels.
+- [x] API failure throws into the workspace error boundary instead of substituting fixture values.
 
 **Verification:**
-- [ ] Tests pass: `pnpm --filter @autosale/web test -- dashboard/page.spec.tsx`.
-- [ ] Typecheck passes: `pnpm --filter @autosale/web typecheck`.
+- [x] Tests pass: `pnpm --filter @autosale/web exec vitest run 'app/(workspace)/dashboard/page.spec.tsx' 'src/i18n/completeness.spec.ts'`.
+- [x] Typecheck passes: `pnpm --filter @autosale/web typecheck`.
 
 **Dependencies:** Task 76
 

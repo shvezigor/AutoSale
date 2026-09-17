@@ -35,11 +35,7 @@ export const enMessages = {
     collapse: 'Collapse menu',
   },
   dashboard: {
-    demo: 'Demo data', title: 'Work overview', description: 'Key metrics and orders that need your attention.', summaryLabel: 'Summary',
-    aiTitle: 'Review 2 orders from conversations', aiDescription: 'The phone number and product are already recognized. Check the details — the shipment will be created automatically.', openQueue: 'Open queue',
-    metrics: { revenue: 'Revenue for 7 days', orders: 'Orders', dialogs: 'New conversations', average: 'Average order' }, trendLabel: 'Metric trend',
-    revenueTitle: 'Monthly revenue', month: 'Month', months: 'Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec', revenueChartLabel: 'Monthly revenue chart',
-    sourcesTitle: 'Order sources', sourcesChartLabel: 'Order source distribution', queueTitle: 'Review queue', queueDescription: 'Orders where AI has already collected the core details.', allOrders: 'All orders', review: 'Review', open: 'Open', queueActions: { review: 'Review', data: 'Details', reply: 'Reply' },
+    title: 'Operational overview', description: 'Monitor orders, the review queue, and integration health.', summaryLabel: 'Operational metrics', updated: 'Updated {date}', periodLabel: 'Dashboard period', periods: { '7d': '7 days', '30d': '30 days', '90d': '90 days' },
   },
   onboarding: {
     status: 'Section in development', title: 'Set up AutoSale', description: 'This page will guide you through connecting channels, catalogue, and delivery. Existing integrations are already available in Settings.', settings: 'Open settings',
