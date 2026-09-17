@@ -1,7 +1,7 @@
 # Sales AITO Marketing Site Design
 
 Date: 2026-09-17
-Status: approved in conversation; pending written-spec review
+Status: approved
 
 ## 1. Objective
 
@@ -65,12 +65,12 @@ The approved home-page sequence is:
 5. **AITO at work** — show that AI performs controlled business actions rather than only generating text.
 6. **Integration status** — clearly separate available, in-development, and roadmap integrations.
 7. **Use cases and trust** — explain fit for social shops and growing sales teams, supported by verifiable product evidence.
-8. **Pricing preview** — introduce the approved plans and trial after the monetization model is validated.
+8. **Pricing preview** — introduce the approved Start, Growth, and Scale plans and 30-day trial.
 9. **FAQ** — answer adoption, control, integration, data, and availability questions.
 10. **Final CTA** — start free or book a demo.
 11. **Footer** — product, resources, company, legal, language, and sign-in links.
 
-Exact prices and usage limits are not invented in this design. They will be defined and approved in the monetization phase before the pricing page is implemented. Until that approval, production content must not display placeholder amounts.
+The approved starting hypothesis is a 30-day trial, Start at 599 UAH/month, Growth at 1,999 UAH/month, and Scale at 2,999 UAH/month. Exact order, channel, user, and catalogue limits come from `docs/product/2026-09-17-sales-aito-monetization.md`. These are validation prices; changes require updating the monetization artifact and pricing specification before implementation.
 
 ## 6. Information Architecture
 
@@ -347,4 +347,3 @@ The marketing site may describe the product direction, but unavailable functiona
 10. The marketing experience is usable with keyboard navigation, reduced motion, 200% zoom, and mobile screens from 375 pixels wide.
 11. Existing authenticated workflows, APIs, roles, integrations, privacy routes, and webhook behavior remain functional.
 12. Tests, type checking, production build, SEO checks, and browser verification pass before completion.
-
