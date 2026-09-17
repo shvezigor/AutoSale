@@ -9,3 +9,4 @@ export * from './procurement.js';
 export * from './delivery.js';
 export * from './profile.js';
 export * from './dashboard.js';
+export * from './demo-leads.js';

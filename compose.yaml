@@ -90,6 +90,7 @@ services:
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
       TELEGRAM_BOT_USERNAME: ${TELEGRAM_BOT_USERNAME:-}
       TELEGRAM_WEBHOOK_SECRET: ${TELEGRAM_WEBHOOK_SECRET:-}
+      DEMO_LEAD_EMAIL: ${DEMO_LEAD_EMAIL:-}
     depends_on:
       migrate:
         condition: service_completed_successfully

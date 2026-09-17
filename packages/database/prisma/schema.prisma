@@ -217,6 +217,19 @@ enum ShipmentPayer {
   RECIPIENT
 }
 
+enum DemoLeadLifecycleStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  CLOSED
+}
+
+enum DemoLeadNotificationStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
 model Tenant {
   id                              String                           @id @default(uuid()) @db.Uuid
   key                             String                           @unique
@@ -1351,4 +1364,29 @@ model Attachment {
   @@index([copyStatus, createdAt])
   @@index([checksum])
   @@map("attachments")
+}
+
+model DemoLead {
+  id                   String                     @id @default(uuid()) @db.Uuid
+  idempotencyKey       String                     @unique @map("idempotency_key")
+  name                 String
+  company              String
+  email                String?
+  phone                String?
+  orderVolume          String                     @map("order_volume")
+  note                 String?
+  locale               String
+  consentVersion       String                     @default("2026-09-17") @map("consent_version")
+  consentedAt          DateTime                   @default(now()) @map("consented_at")
+  lifecycleStatus      DemoLeadLifecycleStatus    @default(NEW) @map("lifecycle_status")
+  notificationStatus   DemoLeadNotificationStatus @default(PENDING) @map("notification_status")
+  notificationAttempts Int                        @default(0) @map("notification_attempts")
+  notifiedAt           DateTime?                  @map("notified_at")
+  lastNotificationError String?                   @map("last_notification_error")
+  createdAt            DateTime                   @default(now()) @map("created_at")
+  updatedAt            DateTime                   @updatedAt @map("updated_at")
+
+  @@index([lifecycleStatus, createdAt])
+  @@index([notificationStatus, createdAt])
+  @@map("demo_leads")
 }

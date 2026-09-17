@@ -1,0 +1,4 @@
+import type { Metadata } from 'next'; import { notFound } from 'next/navigation';
+import { ContentPage } from '../../../src/marketing/components/content-page'; import { contentPages } from '../../../src/marketing/content/pages'; import { isLocale } from '../../../src/marketing/routing/locales'; import { marketingMetadata } from '../../../src/marketing/seo/metadata';
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> { const { locale } = await params; if (!isLocale(locale)) return {}; const c = contentPages.platform[locale]; return marketingMetadata(locale, '/platform', c.title, c.description); }
+export default async function Page({ params }: { params: Promise<{ locale: string }> }) { const { locale } = await params; if (!isLocale(locale)) notFound(); return <ContentPage content={contentPages.platform[locale]} />; }

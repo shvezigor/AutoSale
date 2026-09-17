@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 const authPaths = ['/login', '/register', '/verify-email', '/forgot-password', '/reset-password', '/invite', '/onboarding/google'];
-const publicPaths = ['/privacy', '/terms'];
+const publicPaths = ['/privacy', '/terms', '/uk', '/en', '/images', '/robots.txt', '/sitemap.xml'];
 
 export async function proxy(request: NextRequest) {
+  const isMarketingPath = request.nextUrl.pathname === '/' || publicPaths.some((path) => request.nextUrl.pathname === path || request.nextUrl.pathname.startsWith(`${path}/`));
   const isAuthPath = authPaths.some((path) => request.nextUrl.pathname === path || request.nextUrl.pathname.startsWith(`${path}/`));
-  const isPublicPath = publicPaths.some((path) => request.nextUrl.pathname === path || request.nextUrl.pathname.startsWith(`${path}/`));
+  const isPublicPath = isMarketingPath;
   const session = await resolveSession(request);
   
   if (!session && !isAuthPath && !isPublicPath) {
@@ -15,7 +16,9 @@ export async function proxy(request: NextRequest) {
   if (session?.platformRole === 'PLATFORM_ADMIN' && !request.nextUrl.pathname.startsWith('/admin')) return NextResponse.redirect(new URL('/admin', request.url));
   if (session?.platformRole !== 'PLATFORM_ADMIN' && request.nextUrl.pathname.startsWith('/admin')) return NextResponse.redirect(new URL('/dashboard', request.url));
   if (session?.membershipRole === 'MANAGER' && request.nextUrl.pathname.startsWith('/team')) return NextResponse.redirect(new URL('/dashboard', request.url));
-  return NextResponse.next();
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set('x-sales-aito-locale', request.nextUrl.pathname === '/en' || request.nextUrl.pathname.startsWith('/en/') ? 'en' : 'uk');
+  return NextResponse.next({ request: { headers: requestHeaders } });
 }
 
 async function resolveSession(request: NextRequest): Promise<{ platformRole: string; membershipRole: string | null } | null> {

@@ -20,6 +20,7 @@ import { NotificationsModule } from './notifications/notifications.module.js';
 import { TelegramModule } from './integrations/telegram.module.js';
 import { DeliveryModule } from './delivery/delivery.module.js';
 import { DashboardModule } from './dashboard/dashboard.module.js';
+import { DemoLeadsModule } from './demo-leads/demo-leads.module.js';
 
 @Module({
   controllers: [HealthController],
@@ -47,6 +48,7 @@ export class AppModule {
         CatalogueSourcesModule.register(env),
         DeliveryModule.register(env),
         DashboardModule.register(env),
+        DemoLeadsModule.register(env),
       ],
     };
   }

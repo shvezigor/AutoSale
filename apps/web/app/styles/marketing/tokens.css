@@ -1,0 +1,20 @@
+.marketing {
+  --m-canvas: #0b0d17;
+  --m-surface: #131727;
+  --m-surface-raised: #1b2033;
+  --m-text: #f7f8fc;
+  --m-muted: #aeb7cc;
+  --m-border: #30374e;
+  --m-action: #b7ff5a;
+  --m-action-ink: #101410;
+  --m-ai: #7c6dff;
+  --m-light: #f5f7fb;
+  --m-light-surface: #ffffff;
+  --m-light-text: #171a2b;
+  --m-light-muted: #5e667c;
+  --m-danger: #ff9d9d;
+  --m-radius-sm: 8px;
+  --m-radius-md: 16px;
+  --m-radius-lg: 28px;
+  --m-shadow: 0 24px 80px rgba(0, 0, 0, .28);
+}

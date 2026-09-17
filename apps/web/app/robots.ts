@@ -1,0 +1,2 @@
+import type { MetadataRoute } from 'next';
+export default function robots(): MetadataRoute.Robots { return { rules: { userAgent: '*', allow: ['/', '/uk/', '/en/', '/images/'], disallow: ['/admin', '/catalogue', '/conversations', '/orders', '/settings', '/team', '/login', '/register', '/verify-email', '/forgot-password', '/reset-password', '/invite'] }, sitemap: 'https://sales-aito.com/sitemap.xml', host: 'https://sales-aito.com' }; }

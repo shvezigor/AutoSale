@@ -1,5 +1,17 @@
 # Sales AITO — Shared Task Checklist
 
+## Marketing implementation status, 2026-09-17
+
+- [x] Bilingual public marketing routes and Autonomous Command design foundation implemented.
+- [x] Ukrainian and English home, platform, AI operator, integrations, solutions, about, pricing, demo, blog, and article pages implemented.
+- [x] Canonical, reciprocal `hreflang`, sitemap, robots, JSON-LD, Open Graph, private-route noindex, and server-rendered core content implemented.
+- [x] Approved 30-day trial and Start 599 / Growth 1,999 / Scale 2,999 UAH pricing implemented with a 20% annual display calculation.
+- [x] Demo leads validate, persist before notification, use an idempotency key, and retain failed notification state.
+- [x] Production build, unit/API tests, raw-HTML checks, and responsive browser E2E pass locally.
+- [ ] Production deployment, migration, SMTP recipient configuration, Search Console/Bing submission, and production Core Web Vitals remain launch operations.
+- [ ] Distributed demo notification retry worker and operator lead-management UI remain follow-up product work.
+- [ ] First-party conversion analytics remain deferred until the event storage and privacy policy are approved.
+
 ## Current Initiative: Public Marketing Website
 
 ### M1: Lock the existing route and metadata baseline
@@ -1820,6 +1832,26 @@ Status: official research, secure connection, directories/sender defaults, the g
 - [x] Code-quality review reports no unresolved blocking findings.
 - [x] Production deployment verification is complete before claiming the live dashboard is ready.
 ## Shared Product Backlog
+
+### Backlog: Complete demo lead operations
+
+- [ ] Add bounded BullMQ retry with backoff for `FAILED` demo notifications.
+- [ ] Add distributed public rate limiting and abuse protection for demo submissions.
+- [ ] Add a privacy-safe platform-admin lead queue with lifecycle transitions and audit history.
+- [ ] Define retention, deletion, and export procedures for demo contact data.
+
+### Backlog: Add first-party conversion analytics
+
+- [ ] Approve event names and privacy policy for pricing views, plan interest, registration arrival, trial activation, and demo intent.
+- [ ] Persist events without customer message content or cross-site identifiers.
+- [ ] Add reporting for registration-to-activation and activation-to-plan-intent conversion.
+
+### Backlog: Complete external search launch
+
+- [ ] Verify `sales-aito.com` in Google Search Console and Bing Webmaster Tools.
+- [ ] Submit the sitemap and inspect representative Ukrainian and English URLs.
+- [ ] Capture production Core Web Vitals and resolve any release-environment regressions.
+- [ ] Reconsider IndexNow after a deployment-owned key and publication hook are approved.
 
 ### Backlog: Implement billing and subscription enforcement
 

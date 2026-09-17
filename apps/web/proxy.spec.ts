@@ -29,6 +29,16 @@ describe('proxy', () => {
     },
   );
 
+  it.each(['/', '/uk', '/en/pricing', '/images/sales-aito-ai-operator-hero.png'])(
+    'allows unauthenticated access to public marketing resource %s',
+    async (pathname) => {
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false }));
+      const response = await proxy(new NextRequest(`http://autosale.local${pathname}`));
+      expect(response.headers.get('x-middleware-next')).toBe('1');
+      expect(response.headers.get('location')).toBeNull();
+    },
+  );
+
   it('allows an authenticated tenant manager to reach settings', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
       ok: true,

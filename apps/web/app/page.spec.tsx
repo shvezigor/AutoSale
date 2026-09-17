@@ -1,15 +1,13 @@
-import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import HomePage from './page';
 
-describe('HomePage', () => {
-  it('links the manager to the conversation inbox', () => {
-    render(<HomePage />);
+const redirect = vi.hoisted(() => vi.fn(() => { throw new Error('NEXT_REDIRECT'); }));
+vi.mock('next/navigation', () => ({ redirect }));
 
-    expect(screen.getByRole('link', { name: 'Відкрити діалоги' })).toHaveAttribute(
-      'href',
-      '/conversations',
-    );
+describe('HomePage', () => {
+  it('redirects the public root to the Ukrainian marketing page', () => {
+    expect(() => HomePage()).toThrow('NEXT_REDIRECT');
+    expect(redirect).toHaveBeenCalledWith('/uk');
   });
 });
