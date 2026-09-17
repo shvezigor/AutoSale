@@ -38,6 +38,28 @@ for (const viewport of viewports) {
   });
 }
 
+test('desktop sidebar stays pinned while the dashboard scrolls', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 800 });
+  const styles = await readFile('apps/web/app/globals.css', 'utf8');
+
+  await page.setContent(`<!doctype html><meta name="viewport" content="width=device-width,initial-scale=1"><style>${styles}</style>
+    <div class="authenticated-shell">
+      <aside class="primary-nav" data-testid="desktop-sidebar"><div class="primary-nav-brand-row"><span class="brand">AutoSale</span></div><nav><a class="nav-item active" href="#">Дашборд</a></nav></aside>
+      <div class="authenticated-workspace"><header class="app-header">Header</header><main class="dashboard-page" style="min-height:2400px">Dashboard</main></div>
+    </div>`);
+
+  const sidebar = page.getByTestId('desktop-sidebar');
+  await expect(sidebar).toBeVisible();
+  await expect(sidebar).toHaveCSS('position', 'fixed');
+  const before = await sidebar.evaluate((element) => element.getBoundingClientRect().top);
+  await page.evaluate(() => window.scrollTo(0, 900));
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
+  const after = await sidebar.evaluate((element) => element.getBoundingClientRect().top);
+
+  expect(before).toBe(0);
+  expect(after).toBe(0);
+});
+
 test('authenticated dashboard renders the API snapshot and shareable period state', async ({ context, page }) => {
   const sessionToken = process.env.E2E_SESSION_TOKEN;
   test.skip(!sessionToken, 'An isolated dashboard session was not provided');

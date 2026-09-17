@@ -45,8 +45,8 @@ html, body { margin: 0; min-height: 100%; }
 body { min-height: 100vh; background: var(--canvas); }
 .authenticated-shell { --sidebar-width: 218px; display: grid; grid-template-columns: var(--sidebar-width) minmax(0, 1fr); min-height: 100dvh; background: var(--canvas); transition: grid-template-columns 180ms cubic-bezier(.2,.8,.2,1); }
 html[data-sidebar-state="collapsed"] .authenticated-shell { --sidebar-width: 72px; }
-.authenticated-shell > .primary-nav { position: sticky; top: 0; z-index: 25; grid-row: 1; width: var(--sidebar-width); height: 100dvh; transition: width 180ms cubic-bezier(.2,.8,.2,1); }
-.authenticated-workspace { min-width: 0; }
+.authenticated-shell > .primary-nav { position: fixed; inset: 0 auto 0 0; z-index: 25; width: var(--sidebar-width); height: 100dvh; transition: width 180ms cubic-bezier(.2,.8,.2,1); }
+.authenticated-workspace { grid-column: 2; min-width: 0; }
 .workspace-route-transition { min-width: 0; min-height: calc(100vh - 72px); animation: workspace-enter 170ms ease-out both; }
 @keyframes workspace-enter { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 .app-header { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; justify-content: space-between; min-height: 72px; padding: 9px clamp(16px, 3vw, 32px); border-bottom: 1px solid rgba(228,228,238,.8); background: rgba(246,247,251,.94); backdrop-filter: blur(14px); }
