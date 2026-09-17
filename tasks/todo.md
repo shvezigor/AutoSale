@@ -8,7 +8,8 @@
 - [x] Approved 30-day trial and Start 599 / Growth 1,999 / Scale 2,999 UAH pricing implemented with a 20% annual display calculation.
 - [x] Demo leads validate, persist before notification, use an idempotency key, and retain failed notification state.
 - [x] Production build, unit/API tests, raw-HTML checks, and responsive browser E2E pass locally.
-- [ ] Production deployment, migration, SMTP recipient configuration, Search Console/Bing submission, and production Core Web Vitals remain launch operations.
+- [x] Production deployment, demo-lead migration, public route checks, and container health verification completed on `sales-aito.com`.
+- [ ] SMTP recipient configuration, a real internal demo notification, Search Console/Bing submission, and production Core Web Vitals remain launch operations.
 - [ ] Distributed demo notification retry worker and operator lead-management UI remain follow-up product work.
 - [ ] First-party conversion analytics remain deferred until the event storage and privacy policy are approved.
 

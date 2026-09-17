@@ -29,3 +29,15 @@ CLOUDFLARE_TUNNEL_TOKEN=...
 ## Rollback
 
 Roll back application containers first. The demo lead table is additive and can remain in place during an application rollback. Do not drop it while leads may contain unresolved business contacts.
+
+## Deployment record
+
+### 2026-09-17
+
+- Deployed application commit `4204556` with container asset fix `8cd536d`.
+- Created the pre-deployment PostgreSQL backup under `backups/20260917T185528Z` with its SHA-256 recorded in the local manifest.
+- Applied migration `20260917150000_demo_leads` successfully.
+- Confirmed healthy API, worker, and web containers.
+- Confirmed HTTPS 200 responses for the localized home pages, pricing, demo, login, health endpoint, robots, sitemap, original hero asset, and optimized hero asset.
+- Confirmed canonical URL, reciprocal English alternate, JSON-LD, public indexing directive, and private login noindex directive in production HTML.
+- SMTP delivery and search-console submission remain pending external configuration.
