@@ -3,6 +3,7 @@ import Link from 'next/link';
 
 import { getDashboard } from '../../../src/api/dashboard';
 import { getServerSession } from '../../../src/auth/session';
+import { DashboardOverview } from '../../../src/components/dashboard/dashboard-overview';
 import { createTranslator } from '../../../src/i18n/translator';
 
 export const dynamic = 'force-dynamic';
@@ -46,7 +47,9 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
           ))}
         </nav>
       </header>
-      <section className="dashboard-live-content" aria-label={t('dashboard.summaryLabel')} data-period={dashboard.period.key} />
+      <section className="dashboard-live-content" aria-label={t('dashboard.summaryLabel')} data-period={dashboard.period.key}>
+        <DashboardOverview locale={session?.locale ?? 'uk'} metrics={dashboard.metrics} t={t} />
+      </section>
     </main>
   );
 }

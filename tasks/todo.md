@@ -1205,13 +1205,13 @@ Status: official research, secure connection, directories/sender defaults, the g
 **Description:** Deliver the first complete visible slice: prioritized attention guidance plus four factual KPI cards with valid comparison and unavailable semantics.
 
 **Acceptance criteria:**
-- [ ] Attention guidance is based on current review/AI-failed backlog and is omitted when no action is needed.
-- [ ] KPI cards display new orders, current attention/overdue counts, confirmation rate, and median confirmation time using Ukrainian/English formatting.
-- [ ] Positive/negative comparison direction is metric-aware, zero denominators show `—`, and truthful queue links are keyboard accessible.
+- [x] Attention guidance is based on current review/AI-failed backlog and is omitted when no action is needed.
+- [x] KPI cards display new orders, current attention/overdue counts, confirmation rate, and median confirmation time using Ukrainian/English formatting.
+- [x] Positive/negative comparison direction is metric-aware, zero denominators show `—`, and truthful queue links are keyboard accessible.
 
 **Verification:**
-- [ ] Tests pass: `pnpm --filter @autosale/web test -- dashboard-overview.spec.tsx`.
-- [ ] Manual check: populated and empty KPI samples preserve the approved visual hierarchy.
+- [x] Tests pass: `pnpm --filter @autosale/web exec vitest run src/components/dashboard/dashboard-overview.spec.tsx app/(workspace)/dashboard/page.spec.tsx src/i18n/completeness.spec.ts`.
+- [x] Manual check: populated and empty KPI samples preserve the approved visual hierarchy.
 
 **Dependencies:** Task 77
 

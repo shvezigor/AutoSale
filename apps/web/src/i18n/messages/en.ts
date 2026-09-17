@@ -36,6 +36,9 @@ export const enMessages = {
   },
   dashboard: {
     title: 'Operational overview', description: 'Monitor orders, the review queue, and integration health.', summaryLabel: 'Operational metrics', updated: 'Updated {date}', periodLabel: 'Dashboard period', periods: { '7d': '7 days', '30d': '30 days', '90d': '90 days' },
+    attention: { eyebrow: 'Needs attention', title: 'Orders to review: {count}', description: 'The oldest order is waiting for a manager action. Start with the queue to keep processing moving.', openQueue: 'Open queue', aiFailed: 'AI failures: {count}' },
+    metrics: { newOrders: 'New orders', needsAttention: 'Needs attention', confirmationRate: 'Confirmed', confirmationTime: 'Time to confirmation', currentState: 'Current state', overdue: 'Over 24 hours: {count}', comparedWithPrevious: 'Versus previous period', noComparison: 'Not enough data to compare', samples: 'Based on {count} orders' },
+    unavailable: '—', minutes: '{count} min', hours: '{count} hr',
   },
   onboarding: {
     status: 'Section in development', title: 'Set up AutoSale', description: 'This page will guide you through connecting channels, catalogue, and delivery. Existing integrations are already available in Settings.', settings: 'Open settings',

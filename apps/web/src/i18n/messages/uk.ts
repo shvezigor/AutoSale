@@ -34,6 +34,9 @@ export const ukMessages = {
   },
   dashboard: {
     title: 'Операційний огляд', description: 'Контролюйте замовлення, чергу перевірки та стан інтеграцій.', summaryLabel: 'Операційні показники', updated: 'Оновлено {date}', periodLabel: 'Період дашборду', periods: { '7d': '7 днів', '30d': '30 днів', '90d': '90 днів' },
+    attention: { eyebrow: 'Потребує уваги', title: 'У черзі на перевірку: {count}', description: 'Найстаріше замовлення очікує дії менеджера. Почніть із черги, щоб не затримувати обробку.', openQueue: 'Відкрити чергу', aiFailed: 'Помилки AI: {count}' },
+    metrics: { newOrders: 'Нові замовлення', needsAttention: 'Потребують уваги', confirmationRate: 'Підтверджено', confirmationTime: 'Час до підтвердження', currentState: 'Поточний стан', overdue: 'Прострочено понад 24 год: {count}', comparedWithPrevious: 'До попереднього періоду', noComparison: 'Недостатньо даних для порівняння', samples: 'На основі {count} замовлень' },
+    unavailable: '—', minutes: '{count} хв', hours: '{count} год',
   },
   onboarding: {
     status: 'Розділ у розробці', title: 'Налаштуйте AutoSale', description: 'Згодом тут буде покрокове підключення каналів, каталогу та доставки. Наявні інтеграції вже доступні в налаштуваннях.', settings: 'Перейти до налаштувань',
