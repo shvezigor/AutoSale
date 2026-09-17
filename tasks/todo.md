@@ -1228,13 +1228,13 @@ Status: official research, secure connection, directories/sender defaults, the g
 **Description:** Add the interactive daily status visualization and period-cohort operational funnel without a charting dependency.
 
 **Acceptance criteria:**
-- [ ] Daily buckets render as a responsive stacked visualization with hover/focus tooltips and the same values in an accessible non-visual representation.
-- [ ] Funnel counts and percentages use the server response, preserve stage order, and mark export unavailable when Google Sheets is not configured.
-- [ ] Chart-level and supported stage actions link only to filters/routes that already work.
+- [x] Daily buckets render as a responsive stacked visualization with hover/focus tooltips and the same values in an accessible non-visual representation.
+- [x] Funnel counts and percentages use the server response, preserve stage order, and mark export unavailable when Google Sheets is not configured.
+- [x] Chart-level and supported stage actions link only to filters/routes that already work.
 
 **Verification:**
-- [ ] Tests pass: `pnpm --filter @autosale/web test -- dashboard-charts.spec.tsx`.
-- [ ] Manual keyboard check: every interactive datum exposes its date, status, and count.
+- [x] Tests pass: `pnpm --filter @autosale/web exec vitest run src/components/dashboard/dashboard-charts.spec.tsx app/(workspace)/dashboard/page.spec.tsx src/i18n/completeness.spec.ts`.
+- [x] Manual keyboard check: every interactive datum exposes its date, status, and count.
 
 **Dependencies:** Task 77
 

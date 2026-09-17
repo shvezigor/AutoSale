@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { getDashboard } from '../../../src/api/dashboard';
 import { getServerSession } from '../../../src/auth/session';
 import { DashboardOverview } from '../../../src/components/dashboard/dashboard-overview';
+import { DashboardCharts } from '../../../src/components/dashboard/dashboard-charts';
 import { createTranslator } from '../../../src/i18n/translator';
 
 export const dynamic = 'force-dynamic';
@@ -49,6 +50,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       </header>
       <section className="dashboard-live-content" aria-label={t('dashboard.summaryLabel')} data-period={dashboard.period.key}>
         <DashboardOverview locale={session?.locale ?? 'uk'} metrics={dashboard.metrics} t={t} />
+        <DashboardCharts dailyOrders={dashboard.dailyOrders} funnel={dashboard.funnel} locale={session?.locale ?? 'uk'} t={t} />
       </section>
     </main>
   );

@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { authenticatedApiFetch } = vi.hoisted(() => ({ authenticatedApiFetch: vi.fn() }));
@@ -40,8 +40,9 @@ describe('DashboardPage', () => {
     expect(screen.getByRole('link', { name: '7 днів' })).toHaveAttribute('href', '/dashboard?period=7d');
     expect(screen.getByRole('link', { name: '30 днів' })).toHaveAttribute('aria-current', 'page');
     expect(screen.getByRole('link', { name: '90 днів' })).toHaveAttribute('href', '/dashboard?period=90d');
-    expect(screen.getByRole('heading', { name: 'Нові замовлення' })).toBeInTheDocument();
-    expect(screen.getByText('18')).toBeInTheDocument();
+    const newOrders = screen.getByRole('heading', { name: 'Нові замовлення' }).closest('article');
+    expect(newOrders).not.toBeNull();
+    expect(within(newOrders!).getByText('18')).toBeInTheDocument();
   });
 
   it('loads an allowlisted selected period and falls back from invalid input', async () => {
