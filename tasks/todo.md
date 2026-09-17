@@ -1251,13 +1251,13 @@ Status: official research, secure connection, directories/sender defaults, the g
 **Description:** Add the actionable lower dashboard area for oldest problem orders, failed downstream operations, and current connection health.
 
 **Acceptance criteria:**
-- [ ] Up to five queue entries show only operationally necessary labels, age, confidence/status, and a direct tenant-authorized order link.
-- [ ] Export/shipment issue cards expose safe counts and supported recovery destinations without customer PII or raw provider errors.
-- [ ] Instagram, Google Sheets, and carrier states distinguish active, attention, and not configured with links to the correct settings section.
+- [x] Up to five queue entries show only operationally necessary labels, age, confidence/status, and a direct tenant-authorized order link.
+- [x] Export/shipment issue cards expose safe counts and supported recovery destinations without customer PII or raw provider errors.
+- [x] Instagram, Google Sheets, and carrier states distinguish active, attention, and not configured with links to the correct settings section.
 
 **Verification:**
-- [ ] Tests pass: `pnpm --filter @autosale/web test -- dashboard-actions.spec.tsx`.
-- [ ] Manual check: long participant/product labels and all integration states remain readable.
+- [x] Tests pass: `pnpm --filter @autosale/web exec vitest run src/components/dashboard/dashboard-actions.spec.tsx app/(workspace)/dashboard/page.spec.tsx src/i18n/completeness.spec.ts`.
+- [x] Manual check: long participant/product labels and all integration states remain readable.
 
 **Dependencies:** Task 77
 

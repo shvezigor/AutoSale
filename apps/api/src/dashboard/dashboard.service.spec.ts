@@ -32,11 +32,11 @@ describe('DashboardService', () => {
     expect(result.dailyOrders.at(-1)).toEqual({ date: '2026-09-17', confirmed: 3, needsReview: 1, processingOrFailed: 0, cancelled: 0 });
     expect(result.queue[0]).toMatchObject({ id: '11111111-1111-4111-8111-111111111111', participantName: 'Олена', productLabel: 'Сукня', status: 'NEEDS_REVIEW' });
     expect(result.integrations).toEqual([
-      { key: 'instagram', state: 'active', label: 'Instagram', detail: '@shop', href: '/settings?section=social' },
-      { key: 'google-sheets', state: 'active', label: 'Google Sheets', detail: 'Orders', href: '/settings?section=data' },
-      { key: 'nova-poshta', state: 'active', label: 'Нова Пошта', detail: 'Main', href: '/settings?section=delivery' },
-      { key: 'meest', state: 'attention', label: 'Meest', detail: null, href: '/settings?section=delivery' },
-      { key: 'ukrposhta', state: 'not-configured', label: 'Укрпошта', detail: null, href: '/settings?section=delivery' },
+      { key: 'instagram', state: 'active', label: 'Instagram', detail: '@shop', href: '/settings?tab=social' },
+      { key: 'google-sheets', state: 'active', label: 'Google Sheets', detail: 'Orders', href: '/settings?tab=data' },
+      { key: 'nova-poshta', state: 'active', label: 'Нова Пошта', detail: 'Main', href: '/settings?tab=delivery' },
+      { key: 'meest', state: 'attention', label: 'Meest', detail: null, href: '/settings?tab=delivery' },
+      { key: 'ukrposhta', state: 'not-configured', label: 'Укрпошта', detail: null, href: '/settings?tab=delivery' },
     ]);
 
     for (const [query] of prisma.$queryRaw.mock.calls) expect(query.values).toContain('tenant-a');

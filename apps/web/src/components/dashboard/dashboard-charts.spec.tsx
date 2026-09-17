@@ -34,7 +34,7 @@ describe('DashboardCharts', () => {
     render(<DashboardCharts dailyOrders={[]} funnel={{ ...configuredFunnel, exported: null, exportConfigured: false }} locale="uk" t={createTranslator('uk')} />);
 
     expect(screen.getByText('Експорт не налаштовано')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Налаштувати експорт' })).toHaveAttribute('href', '/settings?section=data');
+    expect(screen.getByRole('link', { name: 'Налаштувати експорт' })).toHaveAttribute('href', '/settings?tab=data');
     expect(screen.getByText('За цей період замовлень ще немає.')).toBeInTheDocument();
   });
 });

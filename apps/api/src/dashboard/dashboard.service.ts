@@ -151,14 +151,14 @@ export class DashboardService {
           state: connectionState(instagram?.status),
           label: 'Instagram',
           detail: instagram?.displayName ?? null,
-          href: '/settings?section=social',
+          href: '/settings?tab=social',
         },
         {
           key: 'google-sheets',
           state: connectionState(sheets?.status),
           label: 'Google Sheets',
           detail: sheets?.sheetName ?? null,
-          href: '/settings?section=data',
+          href: '/settings?tab=data',
         },
         ...(['NOVA_POSHTA', 'MEEST', 'UKRPOSHTA'] as const).map((provider) => {
           const connection = deliveryByProvider.get(provider);
@@ -167,7 +167,7 @@ export class DashboardService {
             state: connectionState(connection?.status),
             label: providerPresentation[provider].label,
             detail: connection?.accountLabel ?? null,
-            href: '/settings?section=delivery',
+            href: '/settings?tab=delivery',
           };
         }),
       ],

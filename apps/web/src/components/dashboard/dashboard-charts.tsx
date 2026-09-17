@@ -81,7 +81,7 @@ export function DashboardCharts({ dailyOrders, funnel, locale, t }: Props) {
               <li data-stage={stage} data-testid="funnel-stage" key={stage}>
                 <div className="dashboard-funnel-label"><span><i>{index + 1}</i>{t(`dashboard.funnel.stages.${stage}`)}</span>{unavailable ? <em>{t('dashboard.funnel.notConfigured')}</em> : <><strong data-funnel-value>{number.format(value ?? 0)}</strong><small data-funnel-rate>{rate}%</small></>}</div>
                 <div className={`dashboard-funnel-track${unavailable ? ' is-unavailable' : ''}`}><span style={{ width: `${width}%` }} /></div>
-                {unavailable ? <Link href="/settings?section=data">{t('dashboard.funnel.configureExport')}</Link> : null}
+                {unavailable ? <Link href="/settings?tab=data">{t('dashboard.funnel.configureExport')}</Link> : null}
               </li>
             );
           })}

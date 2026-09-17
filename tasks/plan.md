@@ -401,7 +401,7 @@ Task 78: KPI/attention  Task 79: charts   Task 80: actions/health
 - [x] Task 77: Connect the server-rendered page and period selector.
 - [x] Task 78: Render attention guidance and KPI cards.
 - [x] Task 79: Render accessible order dynamics and operational funnel.
-- [ ] Task 80: Render queue, failures, and integration health.
+- [x] Task 80: Render queue, failures, and integration health.
 
 #### Checkpoint: End-to-end dashboard
 
