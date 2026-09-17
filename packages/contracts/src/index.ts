@@ -8,3 +8,4 @@ export * from './telegram.js';
 export * from './procurement.js';
 export * from './delivery.js';
 export * from './profile.js';
+export * from './dashboard.js';

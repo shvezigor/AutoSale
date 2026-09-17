@@ -1103,13 +1103,13 @@ Status: official research, secure connection, directories/sender defaults, the g
 **Description:** Add the shared Zod query/response schemas and exported TypeScript types for the complete operational dashboard snapshot.
 
 **Acceptance criteria:**
-- [ ] The contract represents 7/30/90-day periods, nullable comparisons, raw denominator/sample counts, daily buckets, funnel availability, queue rows, issue counts, and sanitized integration states.
-- [ ] Valid populated, zero-data, and unavailable-export responses parse; malformed dates, negative counts, invalid states, and incomplete buckets fail.
-- [ ] The package exposes `@autosale/contracts/dashboard` to API and web consumers.
+- [x] The contract represents 7/30/90-day periods, nullable comparisons, raw denominator/sample counts, daily buckets, funnel availability, queue rows, issue counts, and sanitized integration states.
+- [x] Valid populated, zero-data, and unavailable-export responses parse; malformed dates, negative counts, invalid states, and incomplete buckets fail.
+- [x] The package exposes `@autosale/contracts/dashboard` to API and web consumers.
 
 **Verification:**
-- [ ] Tests pass: `pnpm --filter @autosale/contracts test -- dashboard.spec.ts`.
-- [ ] Typecheck passes: `pnpm --filter @autosale/contracts typecheck`.
+- [x] Tests pass: `pnpm --filter @autosale/contracts test -- dashboard.spec.ts`.
+- [x] Typecheck passes: `pnpm --filter @autosale/contracts typecheck`.
 
 **Dependencies:** None
 
