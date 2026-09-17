@@ -386,7 +386,7 @@ Task 78: KPI/attention  Task 79: charts   Task 80: actions/health
 ### Phase 1: Trustworthy data foundation
 
 - [x] Task 74: Define and verify the dashboard contract.
-- [ ] Task 75: Build tenant-safe operational aggregates.
+- [x] Task 75: Build tenant-safe operational aggregates.
 - [ ] Task 76: Expose the authenticated dashboard endpoint.
 
 #### Checkpoint: Backend snapshot

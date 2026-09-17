@@ -1126,14 +1126,14 @@ Status: official research, secure connection, directories/sender defaults, the g
 **Description:** Implement the dashboard service that derives period boundaries, KPI comparisons, daily status buckets, funnel stages, bounded queue entries, failures, and integration summaries from PostgreSQL.
 
 **Acceptance criteria:**
-- [ ] Every aggregate and relation query is scoped by the supplied tenant id and mixed-tenant tests prove isolation.
-- [ ] KPI formulas, latest-export semantics, unique funnel counts, oldest-first five-row queue, zero filling, and unavailable states match the approved spec.
-- [ ] `Europe/Kyiv` boundaries and previous-period comparisons are correct across normal and daylight-saving dates without loading unbounded rows into application memory.
+- [x] Every aggregate and relation query is scoped by the supplied tenant id and mixed-tenant tests prove isolation.
+- [x] KPI formulas, latest-export semantics, unique funnel counts, oldest-first five-row queue, zero filling, and unavailable states match the approved spec.
+- [x] `Europe/Kyiv` boundaries and previous-period comparisons are correct across normal and daylight-saving dates without loading unbounded rows into application memory.
 
 **Verification:**
-- [ ] Tests pass: `pnpm --filter @autosale/api test -- dashboard.service.spec.ts`.
-- [ ] Typecheck passes: `pnpm --filter @autosale/api typecheck`.
-- [ ] Review parameterized query shapes and confirm all SQL/Prisma predicates include tenant scope.
+- [x] Tests pass: `pnpm --filter @autosale/api exec vitest run src/dashboard/dashboard-period.spec.ts src/dashboard/dashboard.service.spec.ts`.
+- [x] Typecheck passes: `pnpm --filter @autosale/api typecheck`.
+- [x] Review parameterized query shapes and confirm all SQL/Prisma predicates include tenant scope.
 
 **Dependencies:** Task 74
 
