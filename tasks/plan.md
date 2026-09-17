@@ -387,14 +387,14 @@ Task 78: KPI/attention  Task 79: charts   Task 80: actions/health
 
 - [x] Task 74: Define and verify the dashboard contract.
 - [x] Task 75: Build tenant-safe operational aggregates.
-- [ ] Task 76: Expose the authenticated dashboard endpoint.
+- [x] Task 76: Expose the authenticated dashboard endpoint.
 
 #### Checkpoint: Backend snapshot
 
-- [ ] Contract, service, and controller tests pass.
-- [ ] Empty tenants and DST boundaries return valid responses.
-- [ ] Cross-tenant records cannot affect any returned value.
-- [ ] API typecheck and build pass.
+- [x] Contract, service, and controller tests pass.
+- [x] Empty tenants and DST boundaries return valid responses.
+- [x] Cross-tenant records cannot affect any returned value.
+- [x] API typecheck and build pass.
 
 ### Phase 2: Useful dashboard slices
 

@@ -1150,14 +1150,14 @@ Status: official research, secure connection, directories/sender defaults, the g
 **Description:** Register a NestJS dashboard module and controller that validates the period query and supplies the authenticated membership tenant to the aggregation service.
 
 **Acceptance criteria:**
-- [ ] `GET /api/dashboard` defaults to `30d`; valid periods are forwarded and unknown values or fields return `400`.
-- [ ] `MANAGER` or higher membership is required, and request input cannot override tenant identity.
-- [ ] The response is returned through the shared dashboard contract without provider secrets or raw errors.
+- [x] `GET /api/dashboard` defaults to `30d`; valid periods are forwarded and unknown values or fields return `400`.
+- [x] `MANAGER` or higher membership is required, and request input cannot override tenant identity.
+- [x] The response is returned through the shared dashboard contract without provider secrets or raw errors.
 
 **Verification:**
-- [ ] Tests pass: `pnpm --filter @autosale/api test -- dashboard.controller.spec.ts`.
-- [ ] Tests pass: `pnpm --filter @autosale/api test`.
-- [ ] Build succeeds: `pnpm --filter @autosale/api build`.
+- [x] Tests pass: `pnpm --filter @autosale/api exec vitest run src/dashboard/dashboard.controller.spec.ts`.
+- [x] Tests pass: `pnpm --filter @autosale/api test` (469/469).
+- [x] Build succeeds: `pnpm --filter @autosale/api build`.
 
 **Dependencies:** Tasks 74–75
 
@@ -1171,10 +1171,10 @@ Status: official research, secure connection, directories/sender defaults, the g
 
 ## Checkpoint: Backend dashboard snapshot
 
-- [ ] Tasks 74–76 acceptance criteria pass.
-- [ ] Contracts and API tests/typechecks/build are green.
-- [ ] Empty, populated, DST, and mixed-tenant fixtures are covered.
-- [ ] No schema migration or new runtime dependency was introduced.
+- [x] Tasks 74–76 acceptance criteria pass.
+- [x] Contracts and API tests/typechecks/build are green.
+- [x] Empty, populated, DST, and mixed-tenant fixtures are covered.
+- [x] No schema migration or new runtime dependency was introduced.
 
 ## Task 77: Connect the server page and period selector
 
