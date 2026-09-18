@@ -34,10 +34,19 @@ Roll back application containers first. The demo lead table is additive and can 
 
 ### 2026-09-17
 
-- Deployed application commit `4204556` with container asset fix `8cd536d`.
+- Initially deployed the standalone marketing implementation from commit `4204556`. This release was rolled back after verification showed that its application base did not contain the latest workspace functionality from `master`.
 - Created the pre-deployment PostgreSQL backup under `backups/20260917T185528Z` with its SHA-256 recorded in the local manifest.
 - Applied migration `20260917150000_demo_leads` successfully.
+- Restored the application containers from `master` commit `f5db5fd` before preparing the corrected integration release.
+
+### 2026-09-18
+
+- Integrated the bilingual marketing website onto `master` commit `f5db5fd` in branch `codex/marketing-master-integration`.
+- Preserved the current dashboard, profile, settings, onboarding, Google OAuth, notifications, Telegram, delivery, worker, and API functionality while adding the public marketing routes and demo-lead flow.
+- Deployed the corrected application from integration commits `80746a4`, `80fa368`, and `0705722`.
+- Confirmed that all 1,340 automated tests pass, the monorepo typecheck passes, and the production build contains both public marketing routes and private workspace routes.
 - Confirmed healthy API, worker, and web containers.
-- Confirmed HTTPS 200 responses for the localized home pages, pricing, demo, login, health endpoint, robots, sitemap, original hero asset, and optimized hero asset.
+- Confirmed HTTPS 200 responses for the localized home pages, pricing, demo, login, health endpoint, robots, sitemap, and hero asset.
+- Confirmed that unauthenticated dashboard and profile requests redirect to login and that the current workspace login interface is served after the deployment.
 - Confirmed canonical URL, reciprocal English alternate, JSON-LD, public indexing directive, and private login noindex directive in production HTML.
 - SMTP delivery and search-console submission remain pending external configuration.
