@@ -199,6 +199,12 @@ Matching occurs in this order:
 5. Optional image/reference similarity.
 6. Optional AI ranking of the retrieved candidate set only.
 
+Any catalogue ID returned by the model is untrusted unless it exists in the
+tenant's active candidate set. An unknown ID is discarded and the extracted
+product text is passed through the deterministic normalized matcher. AutoSale
+may substitute a SKU only when that matcher finds exactly one candidate;
+otherwise the item remains unresolved and requires manager review.
+
 The matcher stores candidates, evidence, score components, algorithm version, and final confidence. Thresholds are configurable and calibrated against an anonymized evaluation set.
 
 - High-confidence and complete: `READY`.

@@ -35,7 +35,10 @@ describe('OrderRecognitionService', () => {
 
   it('requires review when the model selects a product outside the supplied catalogue', async () => {
     const recognize = vi.fn().mockResolvedValue({
-      order: { ...completeOrder, items: [{ ...completeOrder.items[0], catalogId: 'FAKE-SKU' }] },
+      order: {
+        ...completeOrder,
+        items: [{ ...completeOrder.items[0], catalogId: 'FAKE-SKU', originalText: 'Сукня' }],
+      },
       metadata: {},
     });
     const service = new OrderRecognitionService({ recognize });
@@ -47,6 +50,36 @@ describe('OrderRecognitionService', () => {
 
     expect(result.status).toBe('NEEDS_REVIEW');
     expect(result.validationIssues).toContain('items.0.catalogId');
+  });
+
+  it('replaces a model-invented catalogue id when the product text has one normalized match', async () => {
+    const recognize = vi.fn().mockResolvedValue({
+      order: {
+        ...completeOrder,
+        items: [{
+          ...completeOrder.items[0],
+          catalogId: 'AUTO-90A0',
+          originalText: 'Хочу замовити 860х2050 Регіон (плівка мат), 1 штуку',
+        }],
+      },
+      metadata: {},
+    });
+    const service = new OrderRecognitionService({ recognize });
+
+    const result = await service.recognize(
+      {
+        messages: [],
+        products: [
+          { id: 'AUTO-3D4BAFDE3B26', name: '860х2050 Регіон (плівка мат)', aliases: [] },
+          { id: 'AUTO-4956535657C9', name: '860х2050 Регіон VINARIT Вологостійка МДФ', aliases: [] },
+        ],
+      },
+      { approvalMode: 'NEVER', autoApprovalThreshold: 0.9 },
+    );
+
+    expect(result.order.items[0]?.catalogId).toBe('AUTO-3D4BAFDE3B26');
+    expect(result.validationIssues).not.toContain('items.0.catalogId');
+    expect(result.status).toBe('AUTO_APPROVED');
   });
 
   it('derives required fields from extracted data instead of trusting contradictory model paths', async () => {

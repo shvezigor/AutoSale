@@ -25,9 +25,9 @@ export class OrderRecognitionService {
       ...result.order,
       items: result.order.items.map((item) => ({
         ...item,
-        catalogId: item.catalogId === null
-          ? findUnambiguousCatalogueId(item.originalText, input.products)
-          : item.catalogId,
+        catalogId: item.catalogId !== null && productIds.has(item.catalogId)
+          ? item.catalogId
+          : findUnambiguousCatalogueId(item.originalText, input.products),
       })),
     };
     const validationIssues: string[] = [];
