@@ -19,6 +19,7 @@ export const INSTAGRAM_ORDER_PROMPT_VERSION = 'instagram-order-v2' as const;
 
 export interface ManagerOrder {
   id: string;
+  publicNumber: string;
   status: OrderStatus;
   participantName: string | null;
   channel: 'INSTAGRAM';

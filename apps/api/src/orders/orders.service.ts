@@ -47,6 +47,7 @@ export class OrdersService {
       ...(query.shipmentStatus ? { shipments: { some: { status: query.shipmentStatus } } } : {}),
       ...(search ? {
         OR: [
+          { publicNumber: { contains: search, mode: 'insensitive' } },
           { conversation: { is: { displayName: { contains: search, mode: 'insensitive' } } } },
           { conversation: { is: { profile: { is: { displayName: { contains: search, mode: 'insensitive' } } } } } },
           { conversation: { is: { profile: { is: { username: { contains: search, mode: 'insensitive' } } } } } },
@@ -137,6 +138,9 @@ export class OrdersService {
 
   async update(tenantId: string, id: string, actor: string, input: ManagerOrderUpdate): Promise<ManagerOrder> {
     const current = await this.find(tenantId, id);
+    if (current.procurementHandedOffAt || current.telegramDeliveries.length > 0 || current.shipments.length > 0) {
+      throw new BadRequestException('Order cannot be corrected after external fulfillment has started');
+    }
     const products = await this.productNames(tenantId);
     for (const item of input.items ?? []) {
       if (item.catalogId !== null && !products.has(item.catalogId)) throw new BadRequestException('Unknown catalogue SKU');
@@ -150,7 +154,33 @@ export class OrdersService {
     };
     const updated = await this.prisma.$transaction(async (tx) => {
       for (const item of input.items ?? []) {
-        await tx.orderItem.update({ where: { id: item.id }, data: { catalogId: item.catalogId, quantity: item.quantity, color: item.color, size: item.size } });
+        await tx.orderItem.update({
+          where: { id: item.id },
+          data: {
+            catalogId: item.catalogId,
+            quantity: item.quantity,
+            color: item.color,
+            size: item.size,
+          },
+        });
+      }
+      const itemIds = current.items.map((item) => item.id);
+      if (itemIds.length > 0) {
+        await tx.orderItem.updateMany({
+          where: { tenantId, id: { in: itemIds } },
+          data: {
+            procurementStatus: 'UNASSESSED',
+            procurementSource: null,
+            procurementReason: null,
+            stockAtDecision: null,
+            availableAtDecision: null,
+            procurementUpdatedAt: null,
+          },
+        });
+        await tx.inventoryReservation.updateMany({
+          where: { tenantId, orderItemId: { in: itemIds }, status: 'ACTIVE' },
+          data: { status: 'RELEASED', releasedAt: new Date(), consumedAt: null },
+        });
       }
       const rows = current.items.map((existing) => ({
         ...existing,
@@ -252,6 +282,7 @@ export class OrdersService {
     const readiness = shipmentReadiness(row);
     return {
       id: row.id,
+      publicNumber: row.publicNumber,
       status: row.status as OrderStatus,
       participantName: row.conversation.profile?.displayName ?? row.conversation.displayName ??
         (row.conversation.profile?.username ? `@${row.conversation.profile.username}` : null),

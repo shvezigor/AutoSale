@@ -12,7 +12,7 @@ import { I18nProvider } from '../i18n/i18n-provider';
 vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
 
 const order = {
-  id: '11111111-1111-4111-8111-111111111111', status: 'APPROVED', participantName: 'Олена', channel: 'INSTAGRAM',
+  id: '11111111-1111-4111-8111-111111111111', publicNumber: 'AS-260918', status: 'APPROVED', participantName: 'Олена', channel: 'INSTAGRAM',
   overallConfidence: 1, validationIssues: [], customer: { name: 'Олена', phone: '+380671234567', instagramUsername: 'olena' },
   delivery: { city: 'Київ', address: null, novaPoshtaBranch: '24' }, items: [], procurementSummary: 'READY',
   procurementHandedOffAt: null, supplierDispatch: null, shipment: null, canCreateShipment: true,

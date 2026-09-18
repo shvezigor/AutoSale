@@ -159,14 +159,15 @@ export class GoogleSheetsAdapter {
     return true;
   }
 
-  async upsertRow(input: { spreadsheetId: string; sheetName: string; orderId: string; values: Array<string | number | null> }): Promise<GoogleSheetsUpsertResult> {
+  async upsertRow(input: { spreadsheetId: string; sheetName: string; orderId: string; legacyOrderIds?: string[]; values: Array<string | number | null> }): Promise<GoogleSheetsUpsertResult> {
     const token = await this.auth.getAccessToken();
     const base = `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(input.spreadsheetId)}/values/`;
     const quotedSheet = `'${input.sheetName.replaceAll("'", "''")}'`;
     const idsResponse = await this.fetchFn(`${base}${encodeURIComponent(`${quotedSheet}!A:A`)}`, { headers: { authorization: `Bearer ${token}` } });
     if (!idsResponse.ok) throw new Error(`Google Sheets API returned HTTP ${idsResponse.status}`);
     const idsBody = await idsResponse.json() as { values?: unknown[][] };
-    const rowIndex = idsBody.values?.findIndex((row) => String(row[0] ?? '') === input.orderId) ?? -1;
+    const acceptedOrderIds = new Set([input.orderId, ...(input.legacyOrderIds ?? [])]);
+    const rowIndex = idsBody.values?.findIndex((row) => acceptedOrderIds.has(String(row[0] ?? ''))) ?? -1;
     const headers = { authorization: `Bearer ${token}`, 'content-type': 'application/json' };
     const body = JSON.stringify({ values: [input.values] });
     const lastColumn = columnName(input.values.length);

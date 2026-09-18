@@ -19,7 +19,7 @@ The MVP succeeds when:
 2. A configured confirmation phrase starts order extraction using the relevant conversation context.
 3. AI returns a schema-valid draft and can select only products present in the catalogue.
 4. A manager can correct and approve uncertain or incomplete data.
-5. An approved order creates or updates exactly one Google Sheets row identified by the internal `order_id`.
+5. An approved order creates or updates exactly one Google Sheets row identified by its short public order number.
 6. Restarts, duplicate webhooks, and transient external failures do not lose or duplicate orders.
 7. The documented backup can restore the service on another Linux Docker host.
 
@@ -134,6 +134,8 @@ All business records carry `tenant_id`, even though the MVP configures one tenan
 - `ExportAttempt`: destination, idempotency key, row identity, status, and error.
 - `AuditEvent`: actor, action, old/new values, and correlation identity.
 
+Every order keeps an internal UUID for relations and API routing and an immutable public number for managers and external projections. The public format is `<company-prefix>-<six-digit-sequence>` (for example `AS-260918`). The prefix is derived from the first two useful company initials or letters and falls back to `AS`; the globally allocated numeric suffix prevents collisions between tenants while keeping the identifier compact.
+
 ## 9. Order Lifecycle
 
 ```text
@@ -228,6 +230,8 @@ The first frontend contains:
 
 Approval is blocked until required customer fields, at least one valid SKU, and positive quantities are present. Every correction and status change produces an audit event.
 
+An approved or automatically approved order may still be corrected until external fulfillment begins. Saving such a correction releases active stock reservations, clears the previous procurement decision, moves the order back to `NEEDS_REVIEW`, and requires approval again. Corrections are blocked after supplier handoff/dispatch or shipment creation. Reapproval updates the existing Google Sheets row rather than appending another order.
+
 ## 14. Google Sheets Integration
 
 PostgreSQL is the system of record. Google Sheets is an operational projection for the sales team.
@@ -242,13 +246,13 @@ The adapter boundary supports replacing service-account authentication with per-
 
 - Configuration stores spreadsheet ID, tab name, and field mapping.
 - Required headers are validated before activation and before writes when configuration changes.
-- `order_id` is the stable external key.
+- `order_id` contains the immutable short public order number and is the stable external key; the internal UUID remains an accepted legacy lookup alias during migration.
 - First synchronization appends a row and records its identity.
 - Later synchronization updates the same order row.
 - After an ambiguous timeout, the worker reconciles by `order_id` before writing again.
 - Queue retries use exponential backoff and eventually enter a visible failed state.
 
-Initial fields are `order_id`, timestamps, status, channel, conversation ID, customer name/phone, SKU, product name, quantity, delivery city/branch, manager note, and confidence. Client-specific columns are handled by configuration, not by the order domain.
+Initial fields are `order_id`, timestamps, status, channel, conversation ID, customer name/phone, SKU, product name, quantity, delivery city/branch, manager note, and confidence. User-facing timestamps are written as `DD.MM.YYYY, HH:mm` in the `Europe/Kyiv` timezone. Client-specific columns are handled by configuration, not by the order domain.
 
 ## 15. API Boundaries
 

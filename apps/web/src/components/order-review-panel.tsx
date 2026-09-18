@@ -24,6 +24,7 @@ export function OrderReviewPanel({ initialOrder, backHref = '/orders' }: { initi
   const unresolved = reviewIssues.length > 0;
   const final = ['APPROVED', 'AUTO_APPROVED', 'CANCELLED'].includes(order.status);
   const approved = order.status === 'APPROVED' || order.status === 'AUTO_APPROVED';
+  const correctionAllowed = order.status !== 'CANCELLED' && !order.procurementHandedOffAt && !order.supplierDispatch && !order.shipment;
   const pending = pendingAction !== null;
   const hasChanges = editableOrderSnapshot(order) !== editableOrderSnapshot(draft);
 
@@ -92,28 +93,26 @@ export function OrderReviewPanel({ initialOrder, backHref = '/orders' }: { initi
 
   return <section className="review-panel" aria-labelledby="order-heading">
     <Link className="order-back-link" href={backHref}><span aria-hidden="true">←</span> {t('orders.backToTable')}</Link>
-    <header className="review-heading"><div><h1 id="order-heading">{t('orders.orderTitle')}</h1><span className={`order-status status-${order.status.toLowerCase()}`}>{reviewStatusLabel(order.status, t)}</span></div><strong>{formatNumber(Math.round((order.overallConfidence ?? 0) * 100))}%<small>{t('orders.confidenceLabel')}</small></strong></header>
+    <header className="review-heading"><div><h1 id="order-heading">{t('orders.orderTitle')} {order.publicNumber}</h1><span className={`order-status status-${order.status.toLowerCase()}`}>{reviewStatusLabel(order.status, t)}</span></div><strong>{formatNumber(Math.round((order.overallConfidence ?? 0) * 100))}%<small>{t('orders.confidenceLabel')}</small></strong></header>
     {order.intentDetection && <p className="order-intent-notice" role="status">{intentDetectionExplanation(order.intentDetection.reason, t)}</p>}
     {unresolved && <section className="validation-warning" aria-labelledby="validation-heading"><strong id="validation-heading">{t('orders.reviewWarning')}</strong><ul>{reviewIssues.map((issue) => <li key={issue}>{issue}</li>)}</ul></section>}
     <div className="review-fields-grid">
-      <EditableFields title={t('orders.customerSection')} rows={[[t('orders.nameField'), draft.customer.name, (value) => changeDraft({ ...draft, customer: { ...draft.customer, name: value } })], [t('orders.phoneField'), draft.customer.phone, (value) => changeDraft({ ...draft, customer: { ...draft.customer, phone: value } })]]} />
-      <EditableFields title={t('orders.deliverySection')} rows={[
+      <EditableFields disabled={!correctionAllowed} title={t('orders.customerSection')} rows={[[t('orders.nameField'), draft.customer.name, (value) => changeDraft({ ...draft, customer: { ...draft.customer, name: value } })], [t('orders.phoneField'), draft.customer.phone, (value) => changeDraft({ ...draft, customer: { ...draft.customer, phone: value } })]]} />
+      <EditableFields disabled={!correctionAllowed} title={t('orders.deliverySection')} rows={[
         [t('orders.cityField'), draft.delivery.city, (value) => changeDraft({ ...draft, delivery: { ...draft.delivery, city: value } })],
         [t('orders.novaPoshtaBranch'), draft.delivery.novaPoshtaBranch, (value) => changeDraft({ ...draft, delivery: { ...draft.delivery, novaPoshtaBranch: value } })],
         [t('orders.addressField'), draft.delivery.address, (value) => changeDraft({ ...draft, delivery: { ...draft.delivery, address: value } })],
       ]} />
     </div>
-    <section className="review-section"><h2>{t('orders.productsSection')}</h2>{draft.items.map((item, index) => <article className="review-item" data-low-confidence={item.confidence < 0.9} key={item.id}><div className="review-item-head"><label><span className="sr-only">{t('orders.productField', { number: formatNumber(index + 1) })}</span><select value={item.catalogId ?? ''} onChange={(event) => changeItem(item.id, { catalogId: event.target.value || null, productName: draft.catalogueCandidates.find((candidate) => candidate.sku === event.target.value)?.name ?? null })}><option value="">{t('orders.selectProduct')}</option>{draft.catalogueCandidates.map((candidate) => <option key={candidate.sku} value={candidate.sku}>{candidate.sku} — {candidate.name}</option>)}</select></label><b>{formatNumber(Math.round(item.confidence * 100))}%</b></div><div className="item-edit-grid"><label>{t('orders.sizeField')}<input value={item.size ?? ''} onChange={(event) => changeItem(item.id, { size: event.target.value || null })} /></label><label>{t('orders.colorField')}<input value={item.color ?? ''} onChange={(event) => changeItem(item.id, { color: event.target.value || null })} /></label><label>{t('orders.quantityField')}<input min="1" type="number" value={item.quantity} onChange={(event) => changeItem(item.id, { quantity: Number(event.target.value) })} /></label></div>{approved && <ProcurementItemCard item={item} locked={order.procurementSummary === 'HANDED_OFF'} onOrderChange={applyOrder} orderId={order.id} />}</article>)}</section>
+    <section className="review-section"><h2>{t('orders.productsSection')}</h2>{draft.items.map((item, index) => <article className="review-item" data-low-confidence={item.confidence < 0.9} key={item.id}><div className="review-item-head"><label><span className="sr-only">{t('orders.productField', { number: formatNumber(index + 1) })}</span><select disabled={!correctionAllowed} value={item.catalogId ?? ''} onChange={(event) => changeItem(item.id, { catalogId: event.target.value || null, productName: draft.catalogueCandidates.find((candidate) => candidate.sku === event.target.value)?.name ?? null })}><option value="">{t('orders.selectProduct')}</option>{draft.catalogueCandidates.map((candidate) => <option key={candidate.sku} value={candidate.sku}>{candidate.sku} — {candidate.name}</option>)}</select></label><b>{formatNumber(Math.round(item.confidence * 100))}%</b></div><div className="item-edit-grid"><label>{t('orders.sizeField')}<input disabled={!correctionAllowed} value={item.size ?? ''} onChange={(event) => changeItem(item.id, { size: event.target.value || null })} /></label><label>{t('orders.colorField')}<input disabled={!correctionAllowed} value={item.color ?? ''} onChange={(event) => changeItem(item.id, { color: event.target.value || null })} /></label><label>{t('orders.quantityField')}<input disabled={!correctionAllowed} min="1" type="number" value={item.quantity} onChange={(event) => changeItem(item.id, { quantity: Number(event.target.value) })} /></label></div>{approved && <ProcurementItemCard item={item} locked={order.procurementSummary === 'HANDED_OFF'} onOrderChange={applyOrder} orderId={order.id} />}</article>)}</section>
     {sheetsExport && <SheetsExportState value={sheetsExport} pending={pending} retry={() => void retrySheetsExport()} />}
     <ShipmentPanel order={order} />
     <div className="review-actions">
       {saved && <p className="save-success">{t('orders.changesSaved')}</p>}
       {error && <p role="alert">{error}</p>}
-      {!final && <>
-        <button className="secondary" disabled={pending} onClick={() => void transition('cancel')} type="button">{t('orders.reject')}</button>
-        {hasChanges && <LoadingButton className="secondary" pending={pendingAction === 'save'} pendingLabel={t('orders.saving')} disabled={pending} onClick={() => void save()} type="button">{t('orders.saveChanges')}</LoadingButton>}
-        <LoadingButton pending={pendingAction === 'approve'} pendingLabel={t('orders.approving')} disabled={pending || unresolved} onClick={() => void transition('approve')} type="button">{t('orders.approve')}</LoadingButton>
-      </>}
+      {!final && <button className="secondary" disabled={pending} onClick={() => void transition('cancel')} type="button">{t('orders.reject')}</button>}
+      {correctionAllowed && hasChanges && <LoadingButton className="secondary" pending={pendingAction === 'save'} pendingLabel={t('orders.saving')} disabled={pending} onClick={() => void save()} type="button">{t('orders.saveChanges')}</LoadingButton>}
+      {!final && <LoadingButton pending={pendingAction === 'approve'} pendingLabel={t('orders.approving')} disabled={pending || unresolved} onClick={() => void transition('approve')} type="button">{t('orders.approve')}</LoadingButton>}
       {approved && order.items.some((item) => item.procurementStatus === 'TO_ORDER') && <button disabled={pending} onClick={() => setDispatchOpen(true)} type="button">{t('orders.sendSupplier')}</button>}
       {approved && order.procurementSummary === 'READY' && <LoadingButton pending={pendingAction === 'handoff'} pendingLabel={t('orders.handingOff')} disabled={pending} onClick={() => void handOff()} type="button">{t('orders.handOff')}</LoadingButton>}
     </div>
@@ -173,6 +172,6 @@ function intentDetectionExplanation(reason: NonNullable<ManagerOrder['intentDete
   } satisfies Record<NonNullable<ManagerOrder['intentDetection']>['reason'], string>)[reason];
 }
 
-function EditableFields({ title, rows }: { title: string; rows: Array<[string, string | null, (value: string | null) => void]> }) {
-  return <section className="review-section"><h2>{title}</h2><div className="editable-fields">{rows.map(([label, value, change]) => <label key={label}><span>{label}</span><input aria-label={label} value={value ?? ''} onChange={(event) => change(event.target.value || null)} /></label>)}</div></section>;
+function EditableFields({ title, rows, disabled = false }: { title: string; rows: Array<[string, string | null, (value: string | null) => void]>; disabled?: boolean }) {
+  return <section className="review-section"><h2>{title}</h2><div className="editable-fields">{rows.map(([label, value, change]) => <label key={label}><span>{label}</span><input aria-label={label} disabled={disabled} value={value ?? ''} onChange={(event) => change(event.target.value || null)} /></label>)}</div></section>;
 }

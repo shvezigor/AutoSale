@@ -91,7 +91,7 @@ After confirmation, **Synchronize now** and the configured schedule use the encr
 
 ## Order Destination Flow
 
-For an order destination, AutoSale verifies or creates the required header contract only after explicit owner confirmation. An approved order is exported idempotently by `order_id`: an existing row is updated and a missing row is appended. Catalogue synchronization never writes order rows, and order export never modifies catalogue products.
+For an order destination, AutoSale verifies or creates the required header contract only after explicit owner confirmation. An approved order is exported idempotently by `order_id`: an existing row is updated and a missing row is appended. `order_id` is the immutable short public order number (`<company-prefix>-<six-digit-sequence>`); during migration the adapter also recognizes the internal UUID previously written to the first column and updates that row in place. Exported timestamps use the owner-facing `DD.MM.YYYY, HH:mm` representation in `Europe/Kyiv`. Catalogue synchronization never writes order rows, and order export never modifies catalogue products.
 
 The owner may later configure destination column mapping, but the first release retains the current canonical required headers to limit scope.
 

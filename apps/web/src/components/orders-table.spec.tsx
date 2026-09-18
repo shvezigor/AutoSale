@@ -12,6 +12,7 @@ import { I18nProvider } from '../i18n/i18n-provider';
 
 const order: ManagerOrder = {
   id: '11111111-1111-4111-8111-111111111111',
+  publicNumber: 'AS-260918',
   status: 'NEEDS_REVIEW',
   participantName: 'Davida Shvets',
   channel: 'INSTAGRAM',
@@ -97,6 +98,14 @@ describe('OrdersTable', () => {
     expect(screen.getByRole('columnheader', { name: '№' })).toBeInTheDocument();
     expect(screen.getByRole('cell', { name: '26' })).toBeInTheDocument();
     expect(document.querySelector('.orders-card-index')).toHaveTextContent('№ 26');
+  });
+
+  it('shows the readable order number in desktop and mobile layouts', () => {
+    render(<OrdersTable orders={[order]} page={1} pageSize={25} total={1} />);
+
+    expect(screen.getByRole('columnheader', { name: 'Замовлення' })).toBeInTheDocument();
+    expect(screen.getByRole('cell', { name: 'AS-260918' })).toBeInTheDocument();
+    expect(document.querySelector('.orders-card-index')).toHaveTextContent('AS-260918');
   });
 
   it('shows procurement status in the desktop table and mobile card', () => {

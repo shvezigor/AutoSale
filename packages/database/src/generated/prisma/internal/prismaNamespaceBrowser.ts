@@ -658,6 +658,7 @@ export type TenantSettingsScalarFieldEnum = (typeof TenantSettingsScalarFieldEnu
 
 export const OrderScalarFieldEnum = {
   id: 'id',
+  publicNumber: 'publicNumber',
   tenantId: 'tenantId',
   conversationId: 'conversationId',
   triggerMessageId: 'triggerMessageId',

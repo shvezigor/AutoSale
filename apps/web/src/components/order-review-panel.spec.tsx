@@ -21,6 +21,7 @@ function renderEnglish(ui: ReactElement) {
 
 const order: ManagerOrder = {
   id: '11111111-1111-4111-8111-111111111111',
+  publicNumber: 'AS-260918',
   status: 'NEEDS_REVIEW',
   participantName: 'Олена',
   channel: 'INSTAGRAM',
@@ -151,6 +152,22 @@ describe('OrderReviewPanel', () => {
     expect(fetchMock).toHaveBeenCalledWith(`/api/orders/${order.id}`, expect.objectContaining({ method: 'PATCH' }));
   });
 
+  it('lets a manager correct an auto-approved order before fulfillment', async () => {
+    const autoApproved = { ...order, status: 'AUTO_APPROVED' as const };
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ token: 'csrf-token' }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ ...autoApproved, status: 'NEEDS_REVIEW', items: [{ ...order.items[0]!, quantity: 2 }] }) });
+    vi.stubGlobal('fetch', fetchMock);
+    render(<OrderReviewPanel initialOrder={autoApproved} />);
+
+    fireEvent.change(screen.getByLabelText('Кількість'), { target: { value: '2' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Зберегти зміни' }));
+
+    await waitFor(() => expect(screen.getByText('Потребує перевірки')).toBeInTheDocument());
+    expect(screen.getByRole('button', { name: 'Підтвердити' })).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledWith(`/api/orders/${order.id}`, expect.objectContaining({ method: 'PATCH' }));
+  });
+
   it('shows a successful Google Sheets synchronization with its row number', () => {
     render(<OrderReviewPanel initialOrder={{ ...order, status: 'APPROVED', sheetsExport: { status: 'SUCCEEDED', attempts: 1, rowNumber: 8, lastAttemptAt: '2026-08-27T08:00:00.000Z', lastSyncedAt: '2026-08-27T08:00:01.000Z', errorSummary: null, retryAllowed: false } }} />);
     expect(screen.getByText('Синхронізовано з Google Sheets')).toBeInTheDocument();
@@ -223,7 +240,7 @@ describe('OrderReviewPanel', () => {
     renderEnglish(<OrderReviewPanel initialOrder={order} />);
 
     expect(screen.getByRole('link', { name: 'Back to orders table' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Order' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Order AS-260918' })).toBeInTheDocument();
     expect(screen.getByLabelText('Name')).toHaveValue('Олена');
     expect(screen.getByLabelText('Product 1')).toHaveDisplayValue('UB-038-BLK — Кросівки Urban Black');
     expect(screen.getByRole('button', { name: 'Approve' })).toBeInTheDocument();

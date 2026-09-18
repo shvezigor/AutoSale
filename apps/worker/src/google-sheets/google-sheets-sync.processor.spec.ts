@@ -8,17 +8,21 @@ describe('GoogleSheetsSyncProcessor', () => {
     const prisma = {
       orderExport: { findUniqueOrThrow: vi.fn().mockResolvedValue({ id: 'export-1', orderId: 'order-42' }), update },
       order: { findUniqueOrThrow: vi.fn().mockResolvedValue({
-        id: 'order-42', status: 'APPROVED', approvedAt: new Date('2026-08-27T08:00:00Z'),
+        id: 'order-42', publicNumber: 'AS-260918', status: 'APPROVED',
+        createdAt: new Date('2026-09-18T19:10:54.817Z'), approvedAt: new Date('2026-09-18T19:15:00Z'),
         extraction: { customer: { name: 'Олена', phone: '+380501112233', instagramUsername: 'olena' }, delivery: { city: 'Львів', novaPoshtaBranch: '12' } },
         items: [{ catalogId: 'SKU-7', quantity: 2, color: 'білий', size: null }],
       }) },
-      googleSheetsDestination: { findUniqueOrThrow: vi.fn().mockResolvedValue({ spreadsheetId: 'sheet-id', sheetName: 'Orders', requiredHeaders: ['order_id', 'customer_name', 'phone', 'items'] }) },
+      googleSheetsDestination: { findUniqueOrThrow: vi.fn().mockResolvedValue({ spreadsheetId: 'sheet-id', sheetName: 'Orders', requiredHeaders: ['order_id', 'created_at', 'customer_name', 'phone', 'items'] }) },
     };
     const sheets = { upsertRow: vi.fn().mockResolvedValue({ action: 'appended', rowNumber: 5 }) };
 
     await new GoogleSheetsSyncProcessor(prisma as never, sheets as never).process('export-1');
 
-    expect(sheets.upsertRow).toHaveBeenCalledWith({ spreadsheetId: 'sheet-id', sheetName: 'Orders', orderId: 'order-42', values: ['order-42', 'Олена', '+380501112233', 'SKU-7 × 2, білий'] });
+    expect(sheets.upsertRow).toHaveBeenCalledWith({
+      spreadsheetId: 'sheet-id', sheetName: 'Orders', orderId: 'AS-260918', legacyOrderIds: ['order-42'],
+      values: ['AS-260918', '18.09.2026, 22:10', 'Олена', '+380501112233', 'SKU-7 × 2, білий'],
+    });
     expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ where: { id: 'export-1' }, data: expect.objectContaining({ status: 'SUCCEEDED', rowNumber: 5, errorSummary: null }) }));
   });
 

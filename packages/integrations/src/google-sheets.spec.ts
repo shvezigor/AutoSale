@@ -285,4 +285,22 @@ describe('GoogleSheetsAdapter', () => {
     expect(fetchFn.mock.calls[1]?.[0]).toContain("values/'Orders'!A2%3AC2?valueInputOption=RAW");
     expect(fetchFn.mock.calls[1]?.[1]).toMatchObject({ method: 'PUT' });
   });
+
+  it('updates a legacy UUID row while replacing it with the readable order number', async () => {
+    const fetchFn = vi.fn()
+      .mockResolvedValueOnce({ ok: true, status: 200, json: async () => ({ values: [['order_id'], ['order-42']] }) })
+      .mockResolvedValueOnce({ ok: true, status: 200, json: async () => ({ updatedRange: "'Orders'!A2:C2" }) });
+    const adapter = new GoogleSheetsAdapter({ getAccessToken: async () => 'token' }, fetchFn);
+
+    await expect(adapter.upsertRow({
+      spreadsheetId: 'sheet-id', sheetName: 'Orders', orderId: 'AS-260918', legacyOrderIds: ['order-42'],
+      values: ['AS-260918', 'APPROVED', 'SKU-7'],
+    })).resolves.toEqual({ action: 'updated', rowNumber: 2 });
+
+    expect(fetchFn.mock.calls[1]?.[0]).toContain("values/'Orders'!A2%3AC2?valueInputOption=RAW");
+    expect(fetchFn.mock.calls[1]?.[1]).toMatchObject({
+      method: 'PUT',
+      body: JSON.stringify({ values: [['AS-260918', 'APPROVED', 'SKU-7']] }),
+    });
+  });
 });

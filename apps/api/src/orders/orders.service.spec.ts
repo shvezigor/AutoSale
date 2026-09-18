@@ -6,7 +6,7 @@ import { OrdersService } from './orders.service.js';
 describe('OrdersService Google Sheets retry', () => {
   it('uses the current Instagram profile in order summaries and customer data', async () => {
     const row = {
-      id: 'order-1', tenantId: 'tenant-1', status: 'NEEDS_REVIEW', extraction: {
+      id: 'order-1', publicNumber: 'AS-260918', tenantId: 'tenant-1', status: 'NEEDS_REVIEW', extraction: {
         customer: { name: 'Ігор', phone: '+380976536783', instagramUsername: null },
       }, validationIssues: [], overallConfidence: 0.8,
       createdAt: new Date('2026-09-07T10:00:00.000Z'),
@@ -25,11 +25,47 @@ describe('OrdersService Google Sheets retry', () => {
     const result = await new OrdersService(prisma as never).list('tenant-1', { page: 1, pageSize: 25 });
 
     expect(result.items[0]).toMatchObject({
+      publicNumber: 'AS-260918',
       participantName: 'Davida Shvets',
       customer: { name: 'Ігор', phone: '+380976536783', instagramUsername: 'davidashvets' },
       intentDetection: { mode: 'AI_SUGGESTION', reason: 'MANAGER_REVIEW_MODE' },
     });
     expect(result).toMatchObject({ page: 1, pageSize: 25, total: 1 });
+  });
+
+  it('reopens an auto-approved order for review and releases its stock reservation after correction', async () => {
+    const current = {
+      id: 'order-1', publicNumber: 'AS-260918', tenantId: 'tenant-1', status: 'AUTO_APPROVED', extraction: {
+        isOrder: true,
+        customer: { name: 'Олена', phone: '+380671234567', instagramUsername: 'olena' },
+        delivery: { city: 'Київ', address: null, novaPoshtaBranch: '24' },
+      },
+      validationIssues: [], overallConfidence: 1, createdAt: new Date('2026-09-18T19:10:00.000Z'),
+      conversation: { displayName: 'Олена', channel: 'INSTAGRAM', profile: null },
+      items: [{ id: 'item-1', catalogId: 'SKU-1', originalText: 'Товар', quantity: 1, color: null, size: null, confidence: 1, reservation: { id: 'reservation-1', quantity: 1, status: 'ACTIVE' } }],
+      exports: [], procurementHandedOffAt: null, telegramDeliveries: [], shipments: [], intentEvaluation: null,
+    };
+    const reopened = { ...current, status: 'NEEDS_REVIEW', items: [{ ...current.items[0], quantity: 2, reservation: null }] };
+    const prisma = {
+      order: { findFirst: vi.fn().mockResolvedValue(current) },
+      product: { findMany: vi.fn().mockResolvedValue([{ sku: 'SKU-1', name: 'Товар' }]) },
+      $transaction: vi.fn(async (callback: (tx: unknown) => unknown) => callback({
+        orderItem: { update: vi.fn().mockResolvedValue({}), updateMany: vi.fn().mockResolvedValue({ count: 1 }) },
+        inventoryReservation: { updateMany: vi.fn().mockResolvedValue({ count: 1 }) },
+        order: { update: vi.fn().mockResolvedValue(reopened) },
+        auditLog: { create: vi.fn().mockResolvedValue({}) },
+      })),
+    };
+    const procurement = {
+      assessApprovedOrder: vi.fn(),
+      releaseOrderReservations: vi.fn().mockResolvedValue(undefined),
+    };
+
+    const result = await new OrdersService(prisma as never, procurement as never).update('tenant-1', 'order-1', 'manager-1', {
+      items: [{ id: 'item-1', catalogId: 'SKU-1', quantity: 2, color: null, size: null }],
+    });
+
+    expect(result).toMatchObject({ status: 'NEEDS_REVIEW', items: [{ quantity: 2 }] });
   });
 
   it('paginates and filters orders inside the authenticated tenant', async () => {

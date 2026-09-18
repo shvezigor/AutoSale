@@ -28,7 +28,13 @@ export class GoogleSheetsSyncProcessor {
       const headers = stringArray(destination.requiredHeaders);
       const products = headers.includes('product_name') ? await this.prisma.product.findMany({ where: { tenantId: order.tenantId, sku: { in: order.items.flatMap((item) => item.catalogId ? [item.catalogId] : []) } }, select: { sku: true, name: true } }) : [];
       const values = mapRow(headers, order, new Map(products.map((product) => [product.sku, product.name])));
-      const result = await sheets.upsertRow({ spreadsheetId: destination.spreadsheetId, sheetName: destination.sheetName, orderId: order.id, values });
+      const result = await sheets.upsertRow({
+        spreadsheetId: destination.spreadsheetId,
+        sheetName: destination.sheetName,
+        orderId: order.publicNumber,
+        legacyOrderIds: [order.id],
+        values,
+      });
       await this.prisma.orderExport.update({ where: { id: exportId }, data: { status: 'SUCCEEDED', rowNumber: result.rowNumber, lastSyncedAt: new Date(), errorSummary: null } });
     } catch (error) {
       const summary = error instanceof Error ? error.message.slice(0, 500) : 'Unknown Google Sheets synchronization error';
@@ -39,12 +45,12 @@ export class GoogleSheetsSyncProcessor {
   }
 }
 
-function mapRow(headers: string[], order: { id: string; status: string; conversationId?: string; createdAt?: Date; updatedAt?: Date; approvedAt?: Date | null; overallConfidence?: number | null; extraction: unknown; items: Array<{ catalogId: string | null; quantity: number; color: string | null; size: string | null }> }, productNames: Map<string, string>): Array<string | number | null> {
+function mapRow(headers: string[], order: { id: string; publicNumber: string; status: string; conversationId?: string; createdAt?: Date; updatedAt?: Date; approvedAt?: Date | null; overallConfidence?: number | null; extraction: unknown; items: Array<{ catalogId: string | null; quantity: number; color: string | null; size: string | null }> }, productNames: Map<string, string>): Array<string | number | null> {
   const extraction = (order.extraction ?? {}) as Extraction;
   const items = order.items.map((item) => `${item.catalogId ?? ''} × ${item.quantity}${[item.color, item.size].filter(Boolean).map((value) => `, ${value}`).join('')}`).join('; ');
   const fields: Record<string, string | number | null> = {
-    order_id: order.id, status: order.status, customer_name: extraction.customer?.name ?? null,
-    created_at: order.createdAt?.toISOString() ?? null, updated_at: order.updatedAt?.toISOString() ?? null,
+    order_id: order.publicNumber, status: order.status, customer_name: extraction.customer?.name ?? null,
+    created_at: formatWorkspaceDate(order.createdAt), updated_at: formatWorkspaceDate(order.updatedAt),
     channel: 'INSTAGRAM', conversation_id: order.conversationId ?? null,
     phone: extraction.customer?.phone ?? null, customer_phone: extraction.customer?.phone ?? null, instagram_username: extraction.customer?.instagramUsername ?? null,
     city: extraction.delivery?.city ?? null, delivery_city: extraction.delivery?.city ?? null, address: extraction.delivery?.address ?? null,
@@ -53,9 +59,18 @@ function mapRow(headers: string[], order: { id: string; status: string; conversa
     product_name: order.items.map((item) => item.catalogId ? productNames.get(item.catalogId) ?? '' : '').filter(Boolean).join('; '),
     quantity: order.items.map((item) => item.quantity).join('; '), items, manager_note: null,
     confidence: order.overallConfidence ?? null,
-    approved_at: order.approvedAt?.toISOString() ?? null,
+    approved_at: formatWorkspaceDate(order.approvedAt),
   };
   return headers.map((header) => fields[header] ?? null);
+}
+
+function formatWorkspaceDate(value: Date | null | undefined): string | null {
+  if (!value) return null;
+  const parts = new Intl.DateTimeFormat('uk-UA', {
+    timeZone: 'Europe/Kyiv', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+  }).formatToParts(value);
+  const part = (type: Intl.DateTimeFormatPartTypes) => parts.find((candidate) => candidate.type === type)?.value ?? '';
+  return `${part('day')}.${part('month')}.${part('year')}, ${part('hour')}:${part('minute')}`;
 }
 
 function stringArray(value: unknown): string[] {

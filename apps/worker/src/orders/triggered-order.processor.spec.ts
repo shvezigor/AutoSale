@@ -33,6 +33,14 @@ describe('TriggeredOrderProcessor', () => {
     await container?.stop();
   });
 
+  it('derives a compact two-letter public-number prefix from the company name', async () => {
+    const [result] = await prisma.$queryRaw<Array<{ prefix: string }>>(
+      Prisma.sql`SELECT "autosale_order_prefix"('AutoSale') AS "prefix"`,
+    );
+
+    expect(result?.prefix).toBe('AS');
+  });
+
   it('persists one auto-approved order for a trigger message', async () => {
     const tenant = await prisma.tenant.create({ data: { key: 'orders', name: 'Orders' } });
     await prisma.tenantSettings.create({
@@ -139,6 +147,7 @@ describe('TriggeredOrderProcessor', () => {
       where: { id: first!.id },
       include: { items: true },
     })).toMatchObject({
+      publicNumber: expect.stringMatching(/^OR-\d{6}$/),
       status: 'AUTO_APPROVED',
       approvedBy: 'SYSTEM',
       aiResponseId: 'resp-order',
