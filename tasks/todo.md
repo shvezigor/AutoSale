@@ -1299,16 +1299,18 @@ The approved design is in `docs/superpowers/specs/2026-09-03-google-sign-in-desi
 
 ## Task 40: Optional conversational AI order-intent detection
 
-**Status:** Planned.
+**Status:** Complete on 2026-09-18. The feature is owner opt-in and defaults to phrase-only mode.
 
 **Description:** Add an owner-controlled mode that can recognize a completed sales agreement from the conversation without requiring one exact manager phrase. Keep the deterministic trigger phrase and manual action available.
 
-- [ ] Add modes: trigger phrase only, AI suggestion, and high-confidence AI automation.
-- [ ] Evaluate only new relevant conversation revisions and prevent duplicate orders idempotently.
-- [ ] Require explicit purchase intent plus usable customer, delivery, and product data for automatic creation.
-- [ ] Send uncertain cases to the manager as a proposed order instead of silently creating one.
-- [ ] Show why AI proposed or created the order without exposing internal schema paths.
-- [ ] Track cost, latency, false positives, and manager corrections before enabling automatic mode by default.
+- [x] Add modes: trigger phrase only, AI suggestion, and high-confidence AI automation.
+- [x] Evaluate only new relevant conversation revisions and prevent duplicate orders idempotently.
+- [x] Require explicit purchase intent plus usable customer, delivery, and product data for automatic creation.
+- [x] Send uncertain cases to the manager as a proposed order instead of silently creating one.
+- [x] Show why AI proposed or created the order without exposing internal schema paths.
+- [x] Track cost, latency, false positives, and manager corrections before enabling automatic mode by default.
+
+Implementation evidence: one durable evaluation per inbound anchor message, bounded replay leases, stored model/token/latency metadata, linked order audit history, safe localized reasons, and phrase-only as the database default. Canonical behavior: [`Conversational order-intent detection`](../docs/superpowers/specs/2026-09-18-conversational-order-intent-detection-design.md).
 
 **Dependencies:** Tasks 18, 38–39. **Estimated scope:** Medium
 

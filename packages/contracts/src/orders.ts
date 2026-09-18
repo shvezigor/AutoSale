@@ -10,6 +10,11 @@ import type { ShipmentStatus, ShipmentSummary } from './delivery.js';
 
 export type OrderStatus = 'AI_PROCESSING' | 'AI_FAILED' | 'NEEDS_REVIEW' | 'AUTO_APPROVED' | 'APPROVED' | 'CANCELLED';
 
+export type OrderIntentDetection = {
+  mode: 'AI_SUGGESTION' | 'AI_AUTOMATION';
+  reason: 'MANAGER_REVIEW_MODE' | 'INCOMPLETE_ORDER' | 'LOW_CONFIDENCE' | 'COMPLETE_HIGH_CONFIDENCE';
+};
+
 export const INSTAGRAM_ORDER_PROMPT_VERSION = 'instagram-order-v2' as const;
 
 export interface ManagerOrder {
@@ -19,6 +24,7 @@ export interface ManagerOrder {
   channel: 'INSTAGRAM';
   overallConfidence: number | null;
   validationIssues: string[];
+  intentDetection?: OrderIntentDetection | null;
   customer: { name: string | null; phone: string | null; instagramUsername: string | null };
   delivery: { city: string | null; address: string | null; novaPoshtaBranch: string | null };
   items: Array<{

@@ -350,6 +350,7 @@ export type MessageWhereInput = {
   sentBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   attachments?: Prisma.AttachmentListRelationFilter
   triggeredOrders?: Prisma.OrderListRelationFilter
+  orderIntentEvaluation?: Prisma.XOR<Prisma.OrderIntentEvaluationNullableScalarRelationFilter, Prisma.OrderIntentEvaluationWhereInput> | null
 }
 
 export type MessageOrderByWithRelationInput = {
@@ -380,6 +381,7 @@ export type MessageOrderByWithRelationInput = {
   sentBy?: Prisma.UserOrderByWithRelationInput
   attachments?: Prisma.AttachmentOrderByRelationAggregateInput
   triggeredOrders?: Prisma.OrderOrderByRelationAggregateInput
+  orderIntentEvaluation?: Prisma.OrderIntentEvaluationOrderByWithRelationInput
 }
 
 export type MessageWhereUniqueInput = Prisma.AtLeast<{
@@ -414,6 +416,7 @@ export type MessageWhereUniqueInput = Prisma.AtLeast<{
   sentBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   attachments?: Prisma.AttachmentListRelationFilter
   triggeredOrders?: Prisma.OrderListRelationFilter
+  orderIntentEvaluation?: Prisma.XOR<Prisma.OrderIntentEvaluationNullableScalarRelationFilter, Prisma.OrderIntentEvaluationWhereInput> | null
 }, "id" | "tenantId_channel_externalMessageId">
 
 export type MessageOrderByWithAggregationInput = {
@@ -496,6 +499,7 @@ export type MessageCreateInput = {
   sentBy?: Prisma.UserCreateNestedOneWithoutInstagramMessagesSentInput
   attachments?: Prisma.AttachmentCreateNestedManyWithoutMessageInput
   triggeredOrders?: Prisma.OrderCreateNestedManyWithoutTriggerMessageInput
+  orderIntentEvaluation?: Prisma.OrderIntentEvaluationCreateNestedOneWithoutAnchorMessageInput
 }
 
 export type MessageUncheckedCreateInput = {
@@ -522,6 +526,7 @@ export type MessageUncheckedCreateInput = {
   createdAt?: Date | string
   attachments?: Prisma.AttachmentUncheckedCreateNestedManyWithoutMessageInput
   triggeredOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutTriggerMessageInput
+  orderIntentEvaluation?: Prisma.OrderIntentEvaluationUncheckedCreateNestedOneWithoutAnchorMessageInput
 }
 
 export type MessageUpdateInput = {
@@ -548,6 +553,7 @@ export type MessageUpdateInput = {
   sentBy?: Prisma.UserUpdateOneWithoutInstagramMessagesSentNestedInput
   attachments?: Prisma.AttachmentUpdateManyWithoutMessageNestedInput
   triggeredOrders?: Prisma.OrderUpdateManyWithoutTriggerMessageNestedInput
+  orderIntentEvaluation?: Prisma.OrderIntentEvaluationUpdateOneWithoutAnchorMessageNestedInput
 }
 
 export type MessageUncheckedUpdateInput = {
@@ -574,6 +580,7 @@ export type MessageUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   attachments?: Prisma.AttachmentUncheckedUpdateManyWithoutMessageNestedInput
   triggeredOrders?: Prisma.OrderUncheckedUpdateManyWithoutTriggerMessageNestedInput
+  orderIntentEvaluation?: Prisma.OrderIntentEvaluationUncheckedUpdateOneWithoutAnchorMessageNestedInput
 }
 
 export type MessageCreateManyInput = {
@@ -931,6 +938,20 @@ export type MessageUpdateOneRequiredWithoutTriggeredOrdersNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.MessageUpdateToOneWithWhereWithoutTriggeredOrdersInput, Prisma.MessageUpdateWithoutTriggeredOrdersInput>, Prisma.MessageUncheckedUpdateWithoutTriggeredOrdersInput>
 }
 
+export type MessageCreateNestedOneWithoutOrderIntentEvaluationInput = {
+  create?: Prisma.XOR<Prisma.MessageCreateWithoutOrderIntentEvaluationInput, Prisma.MessageUncheckedCreateWithoutOrderIntentEvaluationInput>
+  connectOrCreate?: Prisma.MessageCreateOrConnectWithoutOrderIntentEvaluationInput
+  connect?: Prisma.MessageWhereUniqueInput
+}
+
+export type MessageUpdateOneRequiredWithoutOrderIntentEvaluationNestedInput = {
+  create?: Prisma.XOR<Prisma.MessageCreateWithoutOrderIntentEvaluationInput, Prisma.MessageUncheckedCreateWithoutOrderIntentEvaluationInput>
+  connectOrCreate?: Prisma.MessageCreateOrConnectWithoutOrderIntentEvaluationInput
+  upsert?: Prisma.MessageUpsertWithoutOrderIntentEvaluationInput
+  connect?: Prisma.MessageWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MessageUpdateToOneWithWhereWithoutOrderIntentEvaluationInput, Prisma.MessageUpdateWithoutOrderIntentEvaluationInput>, Prisma.MessageUncheckedUpdateWithoutOrderIntentEvaluationInput>
+}
+
 export type MessageCreateNestedOneWithoutAttachmentsInput = {
   create?: Prisma.XOR<Prisma.MessageCreateWithoutAttachmentsInput, Prisma.MessageUncheckedCreateWithoutAttachmentsInput>
   connectOrCreate?: Prisma.MessageCreateOrConnectWithoutAttachmentsInput
@@ -968,6 +989,7 @@ export type MessageCreateWithoutTenantInput = {
   sentBy?: Prisma.UserCreateNestedOneWithoutInstagramMessagesSentInput
   attachments?: Prisma.AttachmentCreateNestedManyWithoutMessageInput
   triggeredOrders?: Prisma.OrderCreateNestedManyWithoutTriggerMessageInput
+  orderIntentEvaluation?: Prisma.OrderIntentEvaluationCreateNestedOneWithoutAnchorMessageInput
 }
 
 export type MessageUncheckedCreateWithoutTenantInput = {
@@ -993,6 +1015,7 @@ export type MessageUncheckedCreateWithoutTenantInput = {
   createdAt?: Date | string
   attachments?: Prisma.AttachmentUncheckedCreateNestedManyWithoutMessageInput
   triggeredOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutTriggerMessageInput
+  orderIntentEvaluation?: Prisma.OrderIntentEvaluationUncheckedCreateNestedOneWithoutAnchorMessageInput
 }
 
 export type MessageCreateOrConnectWithoutTenantInput = {
@@ -1071,6 +1094,7 @@ export type MessageCreateWithoutSentByInput = {
   rawEvent?: Prisma.WebhookEventCreateNestedOneWithoutMessagesInput
   attachments?: Prisma.AttachmentCreateNestedManyWithoutMessageInput
   triggeredOrders?: Prisma.OrderCreateNestedManyWithoutTriggerMessageInput
+  orderIntentEvaluation?: Prisma.OrderIntentEvaluationCreateNestedOneWithoutAnchorMessageInput
 }
 
 export type MessageUncheckedCreateWithoutSentByInput = {
@@ -1096,6 +1120,7 @@ export type MessageUncheckedCreateWithoutSentByInput = {
   createdAt?: Date | string
   attachments?: Prisma.AttachmentUncheckedCreateNestedManyWithoutMessageInput
   triggeredOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutTriggerMessageInput
+  orderIntentEvaluation?: Prisma.OrderIntentEvaluationUncheckedCreateNestedOneWithoutAnchorMessageInput
 }
 
 export type MessageCreateOrConnectWithoutSentByInput = {
@@ -1147,6 +1172,7 @@ export type MessageCreateWithoutRawEventInput = {
   sentBy?: Prisma.UserCreateNestedOneWithoutInstagramMessagesSentInput
   attachments?: Prisma.AttachmentCreateNestedManyWithoutMessageInput
   triggeredOrders?: Prisma.OrderCreateNestedManyWithoutTriggerMessageInput
+  orderIntentEvaluation?: Prisma.OrderIntentEvaluationCreateNestedOneWithoutAnchorMessageInput
 }
 
 export type MessageUncheckedCreateWithoutRawEventInput = {
@@ -1172,6 +1198,7 @@ export type MessageUncheckedCreateWithoutRawEventInput = {
   createdAt?: Date | string
   attachments?: Prisma.AttachmentUncheckedCreateNestedManyWithoutMessageInput
   triggeredOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutTriggerMessageInput
+  orderIntentEvaluation?: Prisma.OrderIntentEvaluationUncheckedCreateNestedOneWithoutAnchorMessageInput
 }
 
 export type MessageCreateOrConnectWithoutRawEventInput = {
@@ -1223,6 +1250,7 @@ export type MessageCreateWithoutConversationInput = {
   sentBy?: Prisma.UserCreateNestedOneWithoutInstagramMessagesSentInput
   attachments?: Prisma.AttachmentCreateNestedManyWithoutMessageInput
   triggeredOrders?: Prisma.OrderCreateNestedManyWithoutTriggerMessageInput
+  orderIntentEvaluation?: Prisma.OrderIntentEvaluationCreateNestedOneWithoutAnchorMessageInput
 }
 
 export type MessageUncheckedCreateWithoutConversationInput = {
@@ -1248,6 +1276,7 @@ export type MessageUncheckedCreateWithoutConversationInput = {
   createdAt?: Date | string
   attachments?: Prisma.AttachmentUncheckedCreateNestedManyWithoutMessageInput
   triggeredOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutTriggerMessageInput
+  orderIntentEvaluation?: Prisma.OrderIntentEvaluationUncheckedCreateNestedOneWithoutAnchorMessageInput
 }
 
 export type MessageCreateOrConnectWithoutConversationInput = {
@@ -1299,6 +1328,7 @@ export type MessageCreateWithoutTriggeredOrdersInput = {
   rawEvent?: Prisma.WebhookEventCreateNestedOneWithoutMessagesInput
   sentBy?: Prisma.UserCreateNestedOneWithoutInstagramMessagesSentInput
   attachments?: Prisma.AttachmentCreateNestedManyWithoutMessageInput
+  orderIntentEvaluation?: Prisma.OrderIntentEvaluationCreateNestedOneWithoutAnchorMessageInput
 }
 
 export type MessageUncheckedCreateWithoutTriggeredOrdersInput = {
@@ -1324,6 +1354,7 @@ export type MessageUncheckedCreateWithoutTriggeredOrdersInput = {
   deliveryErrorCode?: string | null
   createdAt?: Date | string
   attachments?: Prisma.AttachmentUncheckedCreateNestedManyWithoutMessageInput
+  orderIntentEvaluation?: Prisma.OrderIntentEvaluationUncheckedCreateNestedOneWithoutAnchorMessageInput
 }
 
 export type MessageCreateOrConnectWithoutTriggeredOrdersInput = {
@@ -1365,6 +1396,7 @@ export type MessageUpdateWithoutTriggeredOrdersInput = {
   rawEvent?: Prisma.WebhookEventUpdateOneWithoutMessagesNestedInput
   sentBy?: Prisma.UserUpdateOneWithoutInstagramMessagesSentNestedInput
   attachments?: Prisma.AttachmentUpdateManyWithoutMessageNestedInput
+  orderIntentEvaluation?: Prisma.OrderIntentEvaluationUpdateOneWithoutAnchorMessageNestedInput
 }
 
 export type MessageUncheckedUpdateWithoutTriggeredOrdersInput = {
@@ -1390,6 +1422,127 @@ export type MessageUncheckedUpdateWithoutTriggeredOrdersInput = {
   deliveryErrorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   attachments?: Prisma.AttachmentUncheckedUpdateManyWithoutMessageNestedInput
+  orderIntentEvaluation?: Prisma.OrderIntentEvaluationUncheckedUpdateOneWithoutAnchorMessageNestedInput
+}
+
+export type MessageCreateWithoutOrderIntentEvaluationInput = {
+  id?: string
+  channel: string
+  externalMessageId: string
+  direction: string
+  senderId: string
+  text?: string | null
+  sourceTimestamp: Date | string
+  clientIdempotencyKey?: string | null
+  providerMessageId?: string | null
+  deliveryStatus?: $Enums.OutboundDeliveryStatus | null
+  deliveryAttempts?: number
+  deliveryLeaseId?: string | null
+  deliveryLeaseExpiresAt?: Date | string | null
+  nextDeliveryAttemptAt?: Date | string | null
+  lastDeliveryAttemptAt?: Date | string | null
+  deliveryErrorCode?: string | null
+  createdAt?: Date | string
+  tenant: Prisma.TenantCreateNestedOneWithoutMessagesInput
+  conversation: Prisma.ConversationCreateNestedOneWithoutMessagesInput
+  rawEvent?: Prisma.WebhookEventCreateNestedOneWithoutMessagesInput
+  sentBy?: Prisma.UserCreateNestedOneWithoutInstagramMessagesSentInput
+  attachments?: Prisma.AttachmentCreateNestedManyWithoutMessageInput
+  triggeredOrders?: Prisma.OrderCreateNestedManyWithoutTriggerMessageInput
+}
+
+export type MessageUncheckedCreateWithoutOrderIntentEvaluationInput = {
+  id?: string
+  tenantId: string
+  conversationId: string
+  rawEventId?: string | null
+  channel: string
+  externalMessageId: string
+  direction: string
+  senderId: string
+  text?: string | null
+  sourceTimestamp: Date | string
+  clientIdempotencyKey?: string | null
+  sentByUserId?: string | null
+  providerMessageId?: string | null
+  deliveryStatus?: $Enums.OutboundDeliveryStatus | null
+  deliveryAttempts?: number
+  deliveryLeaseId?: string | null
+  deliveryLeaseExpiresAt?: Date | string | null
+  nextDeliveryAttemptAt?: Date | string | null
+  lastDeliveryAttemptAt?: Date | string | null
+  deliveryErrorCode?: string | null
+  createdAt?: Date | string
+  attachments?: Prisma.AttachmentUncheckedCreateNestedManyWithoutMessageInput
+  triggeredOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutTriggerMessageInput
+}
+
+export type MessageCreateOrConnectWithoutOrderIntentEvaluationInput = {
+  where: Prisma.MessageWhereUniqueInput
+  create: Prisma.XOR<Prisma.MessageCreateWithoutOrderIntentEvaluationInput, Prisma.MessageUncheckedCreateWithoutOrderIntentEvaluationInput>
+}
+
+export type MessageUpsertWithoutOrderIntentEvaluationInput = {
+  update: Prisma.XOR<Prisma.MessageUpdateWithoutOrderIntentEvaluationInput, Prisma.MessageUncheckedUpdateWithoutOrderIntentEvaluationInput>
+  create: Prisma.XOR<Prisma.MessageCreateWithoutOrderIntentEvaluationInput, Prisma.MessageUncheckedCreateWithoutOrderIntentEvaluationInput>
+  where?: Prisma.MessageWhereInput
+}
+
+export type MessageUpdateToOneWithWhereWithoutOrderIntentEvaluationInput = {
+  where?: Prisma.MessageWhereInput
+  data: Prisma.XOR<Prisma.MessageUpdateWithoutOrderIntentEvaluationInput, Prisma.MessageUncheckedUpdateWithoutOrderIntentEvaluationInput>
+}
+
+export type MessageUpdateWithoutOrderIntentEvaluationInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  channel?: Prisma.StringFieldUpdateOperationsInput | string
+  externalMessageId?: Prisma.StringFieldUpdateOperationsInput | string
+  direction?: Prisma.StringFieldUpdateOperationsInput | string
+  senderId?: Prisma.StringFieldUpdateOperationsInput | string
+  text?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceTimestamp?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  clientIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryStatus?: Prisma.NullableEnumOutboundDeliveryStatusFieldUpdateOperationsInput | $Enums.OutboundDeliveryStatus | null
+  deliveryAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  deliveryLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  nextDeliveryAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastDeliveryAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deliveryErrorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutMessagesNestedInput
+  conversation?: Prisma.ConversationUpdateOneRequiredWithoutMessagesNestedInput
+  rawEvent?: Prisma.WebhookEventUpdateOneWithoutMessagesNestedInput
+  sentBy?: Prisma.UserUpdateOneWithoutInstagramMessagesSentNestedInput
+  attachments?: Prisma.AttachmentUpdateManyWithoutMessageNestedInput
+  triggeredOrders?: Prisma.OrderUpdateManyWithoutTriggerMessageNestedInput
+}
+
+export type MessageUncheckedUpdateWithoutOrderIntentEvaluationInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  conversationId?: Prisma.StringFieldUpdateOperationsInput | string
+  rawEventId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  channel?: Prisma.StringFieldUpdateOperationsInput | string
+  externalMessageId?: Prisma.StringFieldUpdateOperationsInput | string
+  direction?: Prisma.StringFieldUpdateOperationsInput | string
+  senderId?: Prisma.StringFieldUpdateOperationsInput | string
+  text?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceTimestamp?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  clientIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sentByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  providerMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryStatus?: Prisma.NullableEnumOutboundDeliveryStatusFieldUpdateOperationsInput | $Enums.OutboundDeliveryStatus | null
+  deliveryAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  deliveryLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  nextDeliveryAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastDeliveryAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deliveryErrorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  attachments?: Prisma.AttachmentUncheckedUpdateManyWithoutMessageNestedInput
+  triggeredOrders?: Prisma.OrderUncheckedUpdateManyWithoutTriggerMessageNestedInput
 }
 
 export type MessageCreateWithoutAttachmentsInput = {
@@ -1415,6 +1568,7 @@ export type MessageCreateWithoutAttachmentsInput = {
   rawEvent?: Prisma.WebhookEventCreateNestedOneWithoutMessagesInput
   sentBy?: Prisma.UserCreateNestedOneWithoutInstagramMessagesSentInput
   triggeredOrders?: Prisma.OrderCreateNestedManyWithoutTriggerMessageInput
+  orderIntentEvaluation?: Prisma.OrderIntentEvaluationCreateNestedOneWithoutAnchorMessageInput
 }
 
 export type MessageUncheckedCreateWithoutAttachmentsInput = {
@@ -1440,6 +1594,7 @@ export type MessageUncheckedCreateWithoutAttachmentsInput = {
   deliveryErrorCode?: string | null
   createdAt?: Date | string
   triggeredOrders?: Prisma.OrderUncheckedCreateNestedManyWithoutTriggerMessageInput
+  orderIntentEvaluation?: Prisma.OrderIntentEvaluationUncheckedCreateNestedOneWithoutAnchorMessageInput
 }
 
 export type MessageCreateOrConnectWithoutAttachmentsInput = {
@@ -1481,6 +1636,7 @@ export type MessageUpdateWithoutAttachmentsInput = {
   rawEvent?: Prisma.WebhookEventUpdateOneWithoutMessagesNestedInput
   sentBy?: Prisma.UserUpdateOneWithoutInstagramMessagesSentNestedInput
   triggeredOrders?: Prisma.OrderUpdateManyWithoutTriggerMessageNestedInput
+  orderIntentEvaluation?: Prisma.OrderIntentEvaluationUpdateOneWithoutAnchorMessageNestedInput
 }
 
 export type MessageUncheckedUpdateWithoutAttachmentsInput = {
@@ -1506,6 +1662,7 @@ export type MessageUncheckedUpdateWithoutAttachmentsInput = {
   deliveryErrorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   triggeredOrders?: Prisma.OrderUncheckedUpdateManyWithoutTriggerMessageNestedInput
+  orderIntentEvaluation?: Prisma.OrderIntentEvaluationUncheckedUpdateOneWithoutAnchorMessageNestedInput
 }
 
 export type MessageCreateManyTenantInput = {
@@ -1554,6 +1711,7 @@ export type MessageUpdateWithoutTenantInput = {
   sentBy?: Prisma.UserUpdateOneWithoutInstagramMessagesSentNestedInput
   attachments?: Prisma.AttachmentUpdateManyWithoutMessageNestedInput
   triggeredOrders?: Prisma.OrderUpdateManyWithoutTriggerMessageNestedInput
+  orderIntentEvaluation?: Prisma.OrderIntentEvaluationUpdateOneWithoutAnchorMessageNestedInput
 }
 
 export type MessageUncheckedUpdateWithoutTenantInput = {
@@ -1579,6 +1737,7 @@ export type MessageUncheckedUpdateWithoutTenantInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   attachments?: Prisma.AttachmentUncheckedUpdateManyWithoutMessageNestedInput
   triggeredOrders?: Prisma.OrderUncheckedUpdateManyWithoutTriggerMessageNestedInput
+  orderIntentEvaluation?: Prisma.OrderIntentEvaluationUncheckedUpdateOneWithoutAnchorMessageNestedInput
 }
 
 export type MessageUncheckedUpdateManyWithoutTenantInput = {
@@ -1650,6 +1809,7 @@ export type MessageUpdateWithoutSentByInput = {
   rawEvent?: Prisma.WebhookEventUpdateOneWithoutMessagesNestedInput
   attachments?: Prisma.AttachmentUpdateManyWithoutMessageNestedInput
   triggeredOrders?: Prisma.OrderUpdateManyWithoutTriggerMessageNestedInput
+  orderIntentEvaluation?: Prisma.OrderIntentEvaluationUpdateOneWithoutAnchorMessageNestedInput
 }
 
 export type MessageUncheckedUpdateWithoutSentByInput = {
@@ -1675,6 +1835,7 @@ export type MessageUncheckedUpdateWithoutSentByInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   attachments?: Prisma.AttachmentUncheckedUpdateManyWithoutMessageNestedInput
   triggeredOrders?: Prisma.OrderUncheckedUpdateManyWithoutTriggerMessageNestedInput
+  orderIntentEvaluation?: Prisma.OrderIntentEvaluationUncheckedUpdateOneWithoutAnchorMessageNestedInput
 }
 
 export type MessageUncheckedUpdateManyWithoutSentByInput = {
@@ -1746,6 +1907,7 @@ export type MessageUpdateWithoutRawEventInput = {
   sentBy?: Prisma.UserUpdateOneWithoutInstagramMessagesSentNestedInput
   attachments?: Prisma.AttachmentUpdateManyWithoutMessageNestedInput
   triggeredOrders?: Prisma.OrderUpdateManyWithoutTriggerMessageNestedInput
+  orderIntentEvaluation?: Prisma.OrderIntentEvaluationUpdateOneWithoutAnchorMessageNestedInput
 }
 
 export type MessageUncheckedUpdateWithoutRawEventInput = {
@@ -1771,6 +1933,7 @@ export type MessageUncheckedUpdateWithoutRawEventInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   attachments?: Prisma.AttachmentUncheckedUpdateManyWithoutMessageNestedInput
   triggeredOrders?: Prisma.OrderUncheckedUpdateManyWithoutTriggerMessageNestedInput
+  orderIntentEvaluation?: Prisma.OrderIntentEvaluationUncheckedUpdateOneWithoutAnchorMessageNestedInput
 }
 
 export type MessageUncheckedUpdateManyWithoutRawEventInput = {
@@ -1842,6 +2005,7 @@ export type MessageUpdateWithoutConversationInput = {
   sentBy?: Prisma.UserUpdateOneWithoutInstagramMessagesSentNestedInput
   attachments?: Prisma.AttachmentUpdateManyWithoutMessageNestedInput
   triggeredOrders?: Prisma.OrderUpdateManyWithoutTriggerMessageNestedInput
+  orderIntentEvaluation?: Prisma.OrderIntentEvaluationUpdateOneWithoutAnchorMessageNestedInput
 }
 
 export type MessageUncheckedUpdateWithoutConversationInput = {
@@ -1867,6 +2031,7 @@ export type MessageUncheckedUpdateWithoutConversationInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   attachments?: Prisma.AttachmentUncheckedUpdateManyWithoutMessageNestedInput
   triggeredOrders?: Prisma.OrderUncheckedUpdateManyWithoutTriggerMessageNestedInput
+  orderIntentEvaluation?: Prisma.OrderIntentEvaluationUncheckedUpdateOneWithoutAnchorMessageNestedInput
 }
 
 export type MessageUncheckedUpdateManyWithoutConversationInput = {
@@ -1960,6 +2125,7 @@ export type MessageSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   sentBy?: boolean | Prisma.Message$sentByArgs<ExtArgs>
   attachments?: boolean | Prisma.Message$attachmentsArgs<ExtArgs>
   triggeredOrders?: boolean | Prisma.Message$triggeredOrdersArgs<ExtArgs>
+  orderIntentEvaluation?: boolean | Prisma.Message$orderIntentEvaluationArgs<ExtArgs>
   _count?: boolean | Prisma.MessageCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["message"]>
 
@@ -2051,6 +2217,7 @@ export type MessageInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   sentBy?: boolean | Prisma.Message$sentByArgs<ExtArgs>
   attachments?: boolean | Prisma.Message$attachmentsArgs<ExtArgs>
   triggeredOrders?: boolean | Prisma.Message$triggeredOrdersArgs<ExtArgs>
+  orderIntentEvaluation?: boolean | Prisma.Message$orderIntentEvaluationArgs<ExtArgs>
   _count?: boolean | Prisma.MessageCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type MessageIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2075,6 +2242,7 @@ export type $MessagePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     sentBy: Prisma.$UserPayload<ExtArgs> | null
     attachments: Prisma.$AttachmentPayload<ExtArgs>[]
     triggeredOrders: Prisma.$OrderPayload<ExtArgs>[]
+    orderIntentEvaluation: Prisma.$OrderIntentEvaluationPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2498,6 +2666,7 @@ export interface Prisma__MessageClient<T, Null = never, ExtArgs extends runtime.
   sentBy<T extends Prisma.Message$sentByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Message$sentByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   attachments<T extends Prisma.Message$attachmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Message$attachmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AttachmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   triggeredOrders<T extends Prisma.Message$triggeredOrdersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Message$triggeredOrdersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  orderIntentEvaluation<T extends Prisma.Message$orderIntentEvaluationArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Message$orderIntentEvaluationArgs<ExtArgs>>): Prisma.Prisma__OrderIntentEvaluationClient<runtime.Types.Result.GetResult<Prisma.$OrderIntentEvaluationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3032,6 +3201,25 @@ export type Message$triggeredOrdersArgs<ExtArgs extends runtime.Types.Extensions
   take?: number
   skip?: number
   distinct?: Prisma.OrderScalarFieldEnum | Prisma.OrderScalarFieldEnum[]
+}
+
+/**
+ * Message.orderIntentEvaluation
+ */
+export type Message$orderIntentEvaluationArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the OrderIntentEvaluation
+   */
+  select?: Prisma.OrderIntentEvaluationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the OrderIntentEvaluation
+   */
+  omit?: Prisma.OrderIntentEvaluationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OrderIntentEvaluationInclude<ExtArgs> | null
+  where?: Prisma.OrderIntentEvaluationWhereInput
 }
 
 /**

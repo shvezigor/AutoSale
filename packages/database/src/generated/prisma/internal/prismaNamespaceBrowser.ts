@@ -84,6 +84,7 @@ export const ModelName = {
   GoogleSheetsDestination: 'GoogleSheetsDestination',
   TenantSettings: 'TenantSettings',
   Order: 'Order',
+  OrderIntentEvaluation: 'OrderIntentEvaluation',
   DeliveryConnection: 'DeliveryConnection',
   DeliverySenderProfile: 'DeliverySenderProfile',
   Shipment: 'Shipment',
@@ -643,6 +644,7 @@ export type GoogleSheetsDestinationScalarFieldEnum = (typeof GoogleSheetsDestina
 export const TenantSettingsScalarFieldEnum = {
   id: 'id',
   tenantId: 'tenantId',
+  intentDetectionMode: 'intentDetectionMode',
   approvalMode: 'approvalMode',
   autoApprovalThreshold: 'autoApprovalThreshold',
   promptVersion: 'promptVersion',
@@ -681,6 +683,31 @@ export const OrderScalarFieldEnum = {
 } as const
 
 export type OrderScalarFieldEnum = (typeof OrderScalarFieldEnum)[keyof typeof OrderScalarFieldEnum]
+
+
+export const OrderIntentEvaluationScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  conversationId: 'conversationId',
+  anchorMessageId: 'anchorMessageId',
+  orderId: 'orderId',
+  mode: 'mode',
+  status: 'status',
+  reason: 'reason',
+  attempts: 'attempts',
+  aiResponseId: 'aiResponseId',
+  aiModel: 'aiModel',
+  inputTokens: 'inputTokens',
+  outputTokens: 'outputTokens',
+  latencyMs: 'latencyMs',
+  leaseExpiresAt: 'leaseExpiresAt',
+  lastErrorCode: 'lastErrorCode',
+  completedAt: 'completedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type OrderIntentEvaluationScalarFieldEnum = (typeof OrderIntentEvaluationScalarFieldEnum)[keyof typeof OrderIntentEvaluationScalarFieldEnum]
 
 
 export const DeliveryConnectionScalarFieldEnum = {

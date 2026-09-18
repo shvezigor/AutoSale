@@ -1,6 +1,7 @@
 import { Prisma, type PrismaClient, type ProcurementStore } from '@autosale/database';
 
 import type { ApprovalMode } from './approval-policy.js';
+import { decideConversationalIntent, type IntentDetectionMode } from './order-intent-policy.js';
 import { isOrderTrigger } from './order-trigger.js';
 import type { OrderRecognitionService } from './order-recognition.service.js';
 import type { TelegramAlertEvent } from '../notifications/telegram-alert.service.js';
@@ -22,9 +23,190 @@ export class TriggeredOrderProcessor {
     const settings = await this.prisma.tenantSettings.findUnique({
       where: { tenantId: message.tenantId },
     });
-    if (!settings || !isOrderTrigger(message, stringArray(settings.triggerPhrases))) return null;
+    if (!settings) return null;
+    if (isOrderTrigger(message, stringArray(settings.triggerPhrases))) return this.process(messageId);
+    if (
+      message.direction === 'INBOUND'
+      && message.text?.trim()
+      && settings.intentDetectionMode !== 'PHRASE_ONLY'
+    ) {
+      return this.processConversationalIntent(message, settings);
+    }
 
-    return this.process(messageId);
+    return null;
+  }
+
+  private async processConversationalIntent(
+    anchor: { id: string; tenantId: string; conversationId: string; rawEventId: string | null; sourceTimestamp: Date },
+    settings: {
+      intentDetectionMode: string;
+      autoApprovalThreshold: number;
+      promptVersion: string;
+    },
+  ): Promise<{ id: string; status: string } | null> {
+    const claimed = await this.claimIntentEvaluation(anchor, settings.intentDetectionMode);
+    if (!claimed.claimed) {
+      if (!claimed.orderId) return null;
+      return this.prisma.order.findUnique({ where: { id: claimed.orderId } });
+    }
+
+    const startedAt = Date.now();
+    const correlationId = anchor.rawEventId ?? anchor.id;
+    try {
+      const [recentMessages, products, conversation] = await Promise.all([
+        this.prisma.message.findMany({
+          where: { conversationId: anchor.conversationId, sourceTimestamp: { lte: anchor.sourceTimestamp } },
+          orderBy: { sourceTimestamp: 'desc' },
+          take: 50,
+        }),
+        this.prisma.product.findMany({
+          where: { tenantId: anchor.tenantId, active: true },
+          orderBy: { name: 'asc' },
+        }),
+        this.prisma.conversation.findUnique({
+          where: { id: anchor.conversationId },
+          select: { displayName: true, profile: { select: { displayName: true, username: true } } },
+        }),
+      ]);
+      const result = await this.recognition.recognize(
+        {
+          messages: recentMessages.reverse().map((message) => ({ id: message.id, direction: message.direction, text: message.text })),
+          products: products.map((product) => ({ id: product.sku, name: product.name, aliases: stringArray(product.aliases) })),
+        },
+        { approvalMode: 'ALWAYS', autoApprovalThreshold: settings.autoApprovalThreshold },
+      );
+      const decision = decideConversationalIntent({
+        mode: settings.intentDetectionMode as IntentDetectionMode,
+        isOrder: result.order.isOrder,
+        hasUsableProduct: result.order.items.some((item) => item.originalText.trim().length > 0),
+        isComplete: result.validationIssues.length === 0,
+        confidence: result.order.overallConfidence,
+        threshold: settings.autoApprovalThreshold,
+      });
+      const evaluationMetadata = {
+        reason: decision.reason,
+        aiResponseId: result.metadata.responseId,
+        aiModel: result.metadata.model,
+        inputTokens: result.metadata.inputTokens,
+        outputTokens: result.metadata.outputTokens,
+        latencyMs: Date.now() - startedAt,
+        leaseExpiresAt: null,
+        completedAt: new Date(),
+      };
+      if (decision.action === 'IGNORE') {
+        await this.prisma.orderIntentEvaluation.update({
+          where: { anchorMessageId: anchor.id },
+          data: { ...evaluationMetadata, status: 'IGNORED' },
+        });
+        this.telemetry?.('ai_order_intent_evaluated', { correlationId, orderId: anchor.id, result: decision.reason });
+        return null;
+      }
+
+      const autoApproved = decision.action === 'AUTO_CREATE';
+      const order = await this.prisma.$transaction(async (transaction) => {
+        const created = await transaction.order.create({
+          data: {
+            tenantId: anchor.tenantId,
+            conversationId: anchor.conversationId,
+            triggerMessageId: anchor.id,
+            promptVersion: settings.promptVersion,
+            status: autoApproved ? 'AUTO_APPROVED' : 'NEEDS_REVIEW',
+            extraction: result.order as Prisma.InputJsonObject,
+            validationIssues: result.validationIssues,
+            overallConfidence: result.order.overallConfidence,
+            aiResponseId: result.metadata.responseId,
+            aiModel: result.metadata.model,
+            inputTokens: result.metadata.inputTokens,
+            outputTokens: result.metadata.outputTokens,
+            approvedAt: autoApproved ? new Date() : null,
+            approvedBy: autoApproved ? 'SYSTEM' : null,
+            sortCustomer: normalizeSortValue(
+              result.order.customer?.name
+                ?? conversation?.profile?.displayName
+                ?? conversation?.displayName
+                ?? conversation?.profile?.username
+                ?? '',
+            ),
+            sortProduct: productSortValue(result.order.items, new Map(products.map((product) => [product.sku, product.name]))),
+          },
+        });
+        for (const item of result.order.items) {
+          await transaction.$executeRaw(Prisma.sql`
+            INSERT INTO "order_items" ("id", "tenant_id", "order_id", "catalog_id", "original_text", "quantity", "color", "size", "confidence")
+            VALUES (gen_random_uuid(), ${anchor.tenantId}::uuid, ${created.id}::uuid, ${item.catalogId}, ${item.originalText}, ${item.quantity}, ${item.color}, ${item.size}, ${item.confidence})
+          `);
+        }
+        await transaction.orderIntentEvaluation.update({
+          where: { anchorMessageId: anchor.id },
+          data: {
+            ...evaluationMetadata,
+            orderId: created.id,
+            status: autoApproved ? 'AUTO_CREATED' : 'PROPOSED',
+          },
+        });
+        await this.alerts?.persist(transaction, {
+          eventId: created.id,
+          tenantId: anchor.tenantId,
+          orderId: created.id,
+          type: autoApproved ? 'ORDER_AUTO_APPROVED' : 'ORDER_NEEDS_REVIEW',
+        });
+        return created;
+      });
+      if (autoApproved) {
+        await this.procurement.assessApprovedOrder(anchor.tenantId, order.id, 'SYSTEM');
+        await this.scheduleExport?.(order.id, anchor.tenantId);
+      }
+      this.telemetry?.('ai_order_intent_evaluated', { correlationId, orderId: order.id, result: decision.reason });
+      return order;
+    } catch (error) {
+      await this.prisma.orderIntentEvaluation.updateMany({
+        where: { anchorMessageId: anchor.id, status: 'PROCESSING' },
+        data: { status: 'FAILED', leaseExpiresAt: null, lastErrorCode: 'INTENT_EVALUATION_FAILED' },
+      });
+      throw error;
+    }
+  }
+
+  private async claimIntentEvaluation(
+    anchor: { id: string; tenantId: string; conversationId: string },
+    mode: string,
+  ): Promise<{ claimed: boolean; orderId: string | null }> {
+    const leaseExpiresAt = new Date(Date.now() + 5 * 60_000);
+    try {
+      await this.prisma.orderIntentEvaluation.create({
+        data: {
+          tenantId: anchor.tenantId,
+          conversationId: anchor.conversationId,
+          anchorMessageId: anchor.id,
+          mode,
+          leaseExpiresAt,
+        },
+      });
+      return { claimed: true, orderId: null };
+    } catch (error) {
+      if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== 'P2002') throw error;
+    }
+    const existing = await this.prisma.orderIntentEvaluation.findUniqueOrThrow({ where: { anchorMessageId: anchor.id } });
+    if (existing.orderId || ['IGNORED', 'PROPOSED', 'AUTO_CREATED'].includes(existing.status)) {
+      return { claimed: false, orderId: existing.orderId };
+    }
+    const reclaimed = await this.prisma.orderIntentEvaluation.updateMany({
+      where: {
+        id: existing.id,
+        OR: [
+          { status: 'FAILED' },
+          { status: 'PROCESSING', leaseExpiresAt: { lt: new Date() } },
+        ],
+      },
+      data: {
+        status: 'PROCESSING',
+        mode,
+        attempts: { increment: 1 },
+        leaseExpiresAt,
+        lastErrorCode: null,
+      },
+    });
+    return { claimed: reclaimed.count === 1, orderId: null };
   }
 
   async process(triggerMessageId: string): Promise<{ id: string; status: string }> {

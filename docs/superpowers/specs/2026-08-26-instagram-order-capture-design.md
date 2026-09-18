@@ -164,6 +164,8 @@ Only official Meta APIs are supported. Browser scraping and personal-account aut
 
 ## 11. Order Trigger and AI Extraction
 
+The optional owner-controlled conversational intent modes are specified separately in [Conversational order-intent detection](./2026-09-18-conversational-order-intent-detection-design.md). The deterministic trigger described below remains the default and remains available in every mode.
+
 A manager confirmation phrase is a trigger, not proof that all order data is correct.
 
 The trigger service:

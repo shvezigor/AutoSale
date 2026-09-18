@@ -276,6 +276,7 @@ model Tenant {
   shipments                       Shipment[]
   shipmentAttempts                ShipmentAttempt[]
   shipmentStatusEvents            ShipmentStatusEvent[]
+  orderIntentEvaluations          OrderIntentEvaluation[]
 
   @@index([status])
   @@map("tenants")
@@ -786,6 +787,7 @@ model Conversation {
   profile                InstagramCustomerProfile? @relation(fields: [tenantId, profileId], references: [tenantId, id], onDelete: Restrict)
   messages               Message[]
   orders                 Order[]
+  orderIntentEvaluations OrderIntentEvaluation[]
 
   @@unique([tenantId, channel, externalConversationId])
   @@index([tenantId, lastMessageAt])
@@ -868,6 +870,7 @@ model Message {
   sentBy                 User?                   @relation("InstagramMessageSender", fields: [sentByUserId], references: [id], onDelete: SetNull)
   attachments            Attachment[]
   triggeredOrders        Order[]                 @relation("OrderTriggerMessage")
+  orderIntentEvaluation  OrderIntentEvaluation?
 
   @@unique([tenantId, channel, externalMessageId])
   @@index([conversationId, sourceTimestamp])
@@ -897,6 +900,7 @@ model GoogleSheetsDestination {
 model TenantSettings {
   id                    String   @id @default(uuid()) @db.Uuid
   tenantId              String   @unique @map("tenant_id") @db.Uuid
+  intentDetectionMode   String   @default("PHRASE_ONLY") @map("intent_detection_mode")
   approvalMode          String   @default("ALWAYS") @map("approval_mode")
   autoApprovalThreshold Float    @default(0.9) @map("auto_approval_threshold")
   promptVersion         String   @default("instagram-order-v2") @map("prompt_version")
@@ -941,6 +945,7 @@ model Order {
   procurementHandedOffByUser User?              @relation("OrderProcurementHandedOffBy", fields: [procurementHandedOffBy], references: [id], onDelete: SetNull)
   telegramDeliveries         TelegramDelivery[]
   shipments                  Shipment[]
+  intentEvaluation           OrderIntentEvaluation?
 
   @@unique([tenantId, id])
   @@index([tenantId, status, createdAt])
@@ -949,6 +954,36 @@ model Order {
   @@index([tenantId, sortProcurement, id])
   @@index([conversationId, createdAt])
   @@map("orders")
+}
+
+model OrderIntentEvaluation {
+  id                String    @id @default(uuid()) @db.Uuid
+  tenantId          String    @map("tenant_id") @db.Uuid
+  conversationId    String    @map("conversation_id") @db.Uuid
+  anchorMessageId   String    @unique @map("anchor_message_id") @db.Uuid
+  orderId           String?   @unique @map("order_id") @db.Uuid
+  mode              String
+  status            String    @default("PROCESSING")
+  reason            String?
+  attempts          Int       @default(1)
+  aiResponseId      String?   @map("ai_response_id")
+  aiModel           String?   @map("ai_model")
+  inputTokens       Int?      @map("input_tokens")
+  outputTokens      Int?      @map("output_tokens")
+  latencyMs         Int?      @map("latency_ms")
+  leaseExpiresAt    DateTime? @map("lease_expires_at")
+  lastErrorCode     String?   @map("last_error_code")
+  completedAt       DateTime? @map("completed_at")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+  tenant            Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  conversation      Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  anchorMessage     Message   @relation(fields: [anchorMessageId], references: [id], onDelete: Restrict)
+  order             Order?    @relation(fields: [orderId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, status, createdAt])
+  @@index([conversationId, createdAt])
+  @@map("order_intent_evaluations")
 }
 
 model DeliveryConnection {

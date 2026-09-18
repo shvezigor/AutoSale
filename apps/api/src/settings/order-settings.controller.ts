@@ -12,6 +12,7 @@ import {
 
 const updateSchema = z
   .object({
+    intentDetectionMode: z.enum(['PHRASE_ONLY', 'AI_SUGGESTION', 'AI_AUTOMATION']).optional(),
     approvalMode: z.enum(['ALWAYS', 'NEVER', 'ON_LOW_CONFIDENCE']).optional(),
     autoApprovalThreshold: z.number().min(0).max(1).optional(),
     triggerPhrases: z.array(z.string().trim().min(1)).min(1).optional(),
@@ -38,6 +39,9 @@ export class OrderSettingsController {
     const parsed = updateSchema.safeParse(body);
     if (!parsed.success) throw new BadRequestException('Invalid order settings');
     const input: UpdateOrderSettingsInput = {};
+    if (parsed.data.intentDetectionMode !== undefined) {
+      input.intentDetectionMode = parsed.data.intentDetectionMode;
+    }
     if (parsed.data.approvalMode !== undefined) input.approvalMode = parsed.data.approvalMode;
     if (parsed.data.autoApprovalThreshold !== undefined) {
       input.autoApprovalThreshold = parsed.data.autoApprovalThreshold;

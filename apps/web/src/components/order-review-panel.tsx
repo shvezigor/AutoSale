@@ -93,6 +93,7 @@ export function OrderReviewPanel({ initialOrder, backHref = '/orders' }: { initi
   return <section className="review-panel" aria-labelledby="order-heading">
     <Link className="order-back-link" href={backHref}><span aria-hidden="true">←</span> {t('orders.backToTable')}</Link>
     <header className="review-heading"><div><h1 id="order-heading">{t('orders.orderTitle')}</h1><span className={`order-status status-${order.status.toLowerCase()}`}>{reviewStatusLabel(order.status, t)}</span></div><strong>{formatNumber(Math.round((order.overallConfidence ?? 0) * 100))}%<small>{t('orders.confidenceLabel')}</small></strong></header>
+    {order.intentDetection && <p className="order-intent-notice" role="status">{intentDetectionExplanation(order.intentDetection.reason, t)}</p>}
     {unresolved && <section className="validation-warning" aria-labelledby="validation-heading"><strong id="validation-heading">{t('orders.reviewWarning')}</strong><ul>{reviewIssues.map((issue) => <li key={issue}>{issue}</li>)}</ul></section>}
     <div className="review-fields-grid">
       <EditableFields title={t('orders.customerSection')} rows={[[t('orders.nameField'), draft.customer.name, (value) => changeDraft({ ...draft, customer: { ...draft.customer, name: value } })], [t('orders.phoneField'), draft.customer.phone, (value) => changeDraft({ ...draft, customer: { ...draft.customer, phone: value } })]]} />
@@ -161,6 +162,15 @@ function SheetsExportState({ value, pending, retry }: { value: NonNullable<Manag
 
 function reviewStatusLabel(status: ManagerOrder['status'], t: Translator) {
   return ({ NEEDS_REVIEW: t('orders.needsReview'), APPROVED: t('orders.approved'), AUTO_APPROVED: t('orders.autoApprovedFull'), CANCELLED: t('orders.rejected'), AI_PROCESSING: t('orders.aiProcessing'), AI_FAILED: t('orders.aiFailed') } satisfies Record<ManagerOrder['status'], string>)[status];
+}
+
+function intentDetectionExplanation(reason: NonNullable<ManagerOrder['intentDetection']>['reason'], t: Translator): string {
+  return ({
+    MANAGER_REVIEW_MODE: t('orders.intentManagerReview'),
+    INCOMPLETE_ORDER: t('orders.intentIncomplete'),
+    LOW_CONFIDENCE: t('orders.intentLowConfidence'),
+    COMPLETE_HIGH_CONFIDENCE: t('orders.intentAutoCreated'),
+  } satisfies Record<NonNullable<ManagerOrder['intentDetection']>['reason'], string>)[reason];
 }
 
 function EditableFields({ title, rows }: { title: string; rows: Array<[string, string | null, (value: string | null) => void]> }) {

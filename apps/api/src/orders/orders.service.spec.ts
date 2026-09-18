@@ -14,6 +14,7 @@ describe('OrdersService Google Sheets retry', () => {
         displayName: null, channel: 'INSTAGRAM',
         profile: { displayName: 'Davida Shvets', username: 'davidashvets' },
       },
+      intentEvaluation: { mode: 'AI_SUGGESTION', reason: 'MANAGER_REVIEW_MODE' },
       items: [], exports: [],
     };
     const prisma = {
@@ -26,6 +27,7 @@ describe('OrdersService Google Sheets retry', () => {
     expect(result.items[0]).toMatchObject({
       participantName: 'Davida Shvets',
       customer: { name: 'Ігор', phone: '+380976536783', instagramUsername: 'davidashvets' },
+      intentDetection: { mode: 'AI_SUGGESTION', reason: 'MANAGER_REVIEW_MODE' },
     });
     expect(result).toMatchObject({ page: 1, pageSize: 25, total: 1 });
   });

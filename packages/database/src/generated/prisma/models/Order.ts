@@ -373,6 +373,7 @@ export type OrderWhereInput = {
   procurementHandedOffByUser?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   telegramDeliveries?: Prisma.TelegramDeliveryListRelationFilter
   shipments?: Prisma.ShipmentListRelationFilter
+  intentEvaluation?: Prisma.XOR<Prisma.OrderIntentEvaluationNullableScalarRelationFilter, Prisma.OrderIntentEvaluationWhereInput> | null
 }
 
 export type OrderOrderByWithRelationInput = {
@@ -408,6 +409,7 @@ export type OrderOrderByWithRelationInput = {
   procurementHandedOffByUser?: Prisma.UserOrderByWithRelationInput
   telegramDeliveries?: Prisma.TelegramDeliveryOrderByRelationAggregateInput
   shipments?: Prisma.ShipmentOrderByRelationAggregateInput
+  intentEvaluation?: Prisma.OrderIntentEvaluationOrderByWithRelationInput
 }
 
 export type OrderWhereUniqueInput = Prisma.AtLeast<{
@@ -447,6 +449,7 @@ export type OrderWhereUniqueInput = Prisma.AtLeast<{
   procurementHandedOffByUser?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   telegramDeliveries?: Prisma.TelegramDeliveryListRelationFilter
   shipments?: Prisma.ShipmentListRelationFilter
+  intentEvaluation?: Prisma.XOR<Prisma.OrderIntentEvaluationNullableScalarRelationFilter, Prisma.OrderIntentEvaluationWhereInput> | null
 }, "id" | "triggerMessageId" | "tenantId_id">
 
 export type OrderOrderByWithAggregationInput = {
@@ -538,6 +541,7 @@ export type OrderCreateInput = {
   procurementHandedOffByUser?: Prisma.UserCreateNestedOneWithoutProcurementHandOffsInput
   telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutOrderInput
   shipments?: Prisma.ShipmentCreateNestedManyWithoutOrderInput
+  intentEvaluation?: Prisma.OrderIntentEvaluationCreateNestedOneWithoutOrderInput
 }
 
 export type OrderUncheckedCreateInput = {
@@ -569,6 +573,7 @@ export type OrderUncheckedCreateInput = {
   exports?: Prisma.OrderExportUncheckedCreateNestedManyWithoutOrderInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutOrderInput
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutOrderInput
+  intentEvaluation?: Prisma.OrderIntentEvaluationUncheckedCreateNestedOneWithoutOrderInput
 }
 
 export type OrderUpdateInput = {
@@ -600,6 +605,7 @@ export type OrderUpdateInput = {
   procurementHandedOffByUser?: Prisma.UserUpdateOneWithoutProcurementHandOffsNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutOrderNestedInput
   shipments?: Prisma.ShipmentUpdateManyWithoutOrderNestedInput
+  intentEvaluation?: Prisma.OrderIntentEvaluationUpdateOneWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateInput = {
@@ -631,6 +637,7 @@ export type OrderUncheckedUpdateInput = {
   exports?: Prisma.OrderExportUncheckedUpdateManyWithoutOrderNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutOrderNestedInput
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutOrderNestedInput
+  intentEvaluation?: Prisma.OrderIntentEvaluationUncheckedUpdateOneWithoutOrderNestedInput
 }
 
 export type OrderCreateManyInput = {
@@ -1020,6 +1027,22 @@ export type NullableIntFieldUpdateOperationsInput = {
   divide?: number
 }
 
+export type OrderCreateNestedOneWithoutIntentEvaluationInput = {
+  create?: Prisma.XOR<Prisma.OrderCreateWithoutIntentEvaluationInput, Prisma.OrderUncheckedCreateWithoutIntentEvaluationInput>
+  connectOrCreate?: Prisma.OrderCreateOrConnectWithoutIntentEvaluationInput
+  connect?: Prisma.OrderWhereUniqueInput
+}
+
+export type OrderUpdateOneWithoutIntentEvaluationNestedInput = {
+  create?: Prisma.XOR<Prisma.OrderCreateWithoutIntentEvaluationInput, Prisma.OrderUncheckedCreateWithoutIntentEvaluationInput>
+  connectOrCreate?: Prisma.OrderCreateOrConnectWithoutIntentEvaluationInput
+  upsert?: Prisma.OrderUpsertWithoutIntentEvaluationInput
+  disconnect?: Prisma.OrderWhereInput | boolean
+  delete?: Prisma.OrderWhereInput | boolean
+  connect?: Prisma.OrderWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrderUpdateToOneWithWhereWithoutIntentEvaluationInput, Prisma.OrderUpdateWithoutIntentEvaluationInput>, Prisma.OrderUncheckedUpdateWithoutIntentEvaluationInput>
+}
+
 export type OrderCreateNestedOneWithoutShipmentsInput = {
   create?: Prisma.XOR<Prisma.OrderCreateWithoutShipmentsInput, Prisma.OrderUncheckedCreateWithoutShipmentsInput>
   connectOrCreate?: Prisma.OrderCreateOrConnectWithoutShipmentsInput
@@ -1104,6 +1127,7 @@ export type OrderCreateWithoutTenantInput = {
   procurementHandedOffByUser?: Prisma.UserCreateNestedOneWithoutProcurementHandOffsInput
   telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutOrderInput
   shipments?: Prisma.ShipmentCreateNestedManyWithoutOrderInput
+  intentEvaluation?: Prisma.OrderIntentEvaluationCreateNestedOneWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutTenantInput = {
@@ -1134,6 +1158,7 @@ export type OrderUncheckedCreateWithoutTenantInput = {
   exports?: Prisma.OrderExportUncheckedCreateNestedManyWithoutOrderInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutOrderInput
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutOrderInput
+  intentEvaluation?: Prisma.OrderIntentEvaluationUncheckedCreateNestedOneWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutTenantInput = {
@@ -1219,6 +1244,7 @@ export type OrderCreateWithoutProcurementHandedOffByUserInput = {
   exports?: Prisma.OrderExportCreateNestedManyWithoutOrderInput
   telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutOrderInput
   shipments?: Prisma.ShipmentCreateNestedManyWithoutOrderInput
+  intentEvaluation?: Prisma.OrderIntentEvaluationCreateNestedOneWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutProcurementHandedOffByUserInput = {
@@ -1249,6 +1275,7 @@ export type OrderUncheckedCreateWithoutProcurementHandedOffByUserInput = {
   exports?: Prisma.OrderExportUncheckedCreateNestedManyWithoutOrderInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutOrderInput
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutOrderInput
+  intentEvaluation?: Prisma.OrderIntentEvaluationUncheckedCreateNestedOneWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutProcurementHandedOffByUserInput = {
@@ -1305,6 +1332,7 @@ export type OrderCreateWithoutTelegramDeliveriesInput = {
   exports?: Prisma.OrderExportCreateNestedManyWithoutOrderInput
   procurementHandedOffByUser?: Prisma.UserCreateNestedOneWithoutProcurementHandOffsInput
   shipments?: Prisma.ShipmentCreateNestedManyWithoutOrderInput
+  intentEvaluation?: Prisma.OrderIntentEvaluationCreateNestedOneWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutTelegramDeliveriesInput = {
@@ -1335,6 +1363,7 @@ export type OrderUncheckedCreateWithoutTelegramDeliveriesInput = {
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrderInput
   exports?: Prisma.OrderExportUncheckedCreateNestedManyWithoutOrderInput
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutOrderInput
+  intentEvaluation?: Prisma.OrderIntentEvaluationUncheckedCreateNestedOneWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutTelegramDeliveriesInput = {
@@ -1381,6 +1410,7 @@ export type OrderUpdateWithoutTelegramDeliveriesInput = {
   exports?: Prisma.OrderExportUpdateManyWithoutOrderNestedInput
   procurementHandedOffByUser?: Prisma.UserUpdateOneWithoutProcurementHandOffsNestedInput
   shipments?: Prisma.ShipmentUpdateManyWithoutOrderNestedInput
+  intentEvaluation?: Prisma.OrderIntentEvaluationUpdateOneWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutTelegramDeliveriesInput = {
@@ -1411,6 +1441,7 @@ export type OrderUncheckedUpdateWithoutTelegramDeliveriesInput = {
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrderNestedInput
   exports?: Prisma.OrderExportUncheckedUpdateManyWithoutOrderNestedInput
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutOrderNestedInput
+  intentEvaluation?: Prisma.OrderIntentEvaluationUncheckedUpdateOneWithoutOrderNestedInput
 }
 
 export type OrderCreateWithoutConversationInput = {
@@ -1441,6 +1472,7 @@ export type OrderCreateWithoutConversationInput = {
   procurementHandedOffByUser?: Prisma.UserCreateNestedOneWithoutProcurementHandOffsInput
   telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutOrderInput
   shipments?: Prisma.ShipmentCreateNestedManyWithoutOrderInput
+  intentEvaluation?: Prisma.OrderIntentEvaluationCreateNestedOneWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutConversationInput = {
@@ -1471,6 +1503,7 @@ export type OrderUncheckedCreateWithoutConversationInput = {
   exports?: Prisma.OrderExportUncheckedCreateNestedManyWithoutOrderInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutOrderInput
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutOrderInput
+  intentEvaluation?: Prisma.OrderIntentEvaluationUncheckedCreateNestedOneWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutConversationInput = {
@@ -1527,6 +1560,7 @@ export type OrderCreateWithoutTriggerMessageInput = {
   procurementHandedOffByUser?: Prisma.UserCreateNestedOneWithoutProcurementHandOffsInput
   telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutOrderInput
   shipments?: Prisma.ShipmentCreateNestedManyWithoutOrderInput
+  intentEvaluation?: Prisma.OrderIntentEvaluationCreateNestedOneWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutTriggerMessageInput = {
@@ -1557,6 +1591,7 @@ export type OrderUncheckedCreateWithoutTriggerMessageInput = {
   exports?: Prisma.OrderExportUncheckedCreateNestedManyWithoutOrderInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutOrderInput
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutOrderInput
+  intentEvaluation?: Prisma.OrderIntentEvaluationUncheckedCreateNestedOneWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutTriggerMessageInput = {
@@ -1583,6 +1618,146 @@ export type OrderUpdateWithWhereUniqueWithoutTriggerMessageInput = {
 export type OrderUpdateManyWithWhereWithoutTriggerMessageInput = {
   where: Prisma.OrderScalarWhereInput
   data: Prisma.XOR<Prisma.OrderUpdateManyMutationInput, Prisma.OrderUncheckedUpdateManyWithoutTriggerMessageInput>
+}
+
+export type OrderCreateWithoutIntentEvaluationInput = {
+  id?: string
+  status?: string
+  extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  overallConfidence?: number | null
+  sortProduct?: string
+  sortCustomer?: string
+  sortProcurement?: string
+  aiResponseId?: string | null
+  aiModel?: string | null
+  promptVersion: string
+  inputTokens?: number | null
+  outputTokens?: number | null
+  approvedAt?: Date | string | null
+  approvedBy?: string | null
+  procurementHandedOffAt?: Date | string | null
+  supplierDispatchVersion?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tenant: Prisma.TenantCreateNestedOneWithoutOrdersInput
+  conversation: Prisma.ConversationCreateNestedOneWithoutOrdersInput
+  triggerMessage: Prisma.MessageCreateNestedOneWithoutTriggeredOrdersInput
+  items?: Prisma.OrderItemCreateNestedManyWithoutOrderInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrderInput
+  exports?: Prisma.OrderExportCreateNestedManyWithoutOrderInput
+  procurementHandedOffByUser?: Prisma.UserCreateNestedOneWithoutProcurementHandOffsInput
+  telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutOrderInput
+  shipments?: Prisma.ShipmentCreateNestedManyWithoutOrderInput
+}
+
+export type OrderUncheckedCreateWithoutIntentEvaluationInput = {
+  id?: string
+  tenantId: string
+  conversationId: string
+  triggerMessageId: string
+  status?: string
+  extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  overallConfidence?: number | null
+  sortProduct?: string
+  sortCustomer?: string
+  sortProcurement?: string
+  aiResponseId?: string | null
+  aiModel?: string | null
+  promptVersion: string
+  inputTokens?: number | null
+  outputTokens?: number | null
+  approvedAt?: Date | string | null
+  approvedBy?: string | null
+  procurementHandedOffAt?: Date | string | null
+  procurementHandedOffBy?: string | null
+  supplierDispatchVersion?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrderInput
+  exports?: Prisma.OrderExportUncheckedCreateNestedManyWithoutOrderInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutOrderInput
+  shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutOrderInput
+}
+
+export type OrderCreateOrConnectWithoutIntentEvaluationInput = {
+  where: Prisma.OrderWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrderCreateWithoutIntentEvaluationInput, Prisma.OrderUncheckedCreateWithoutIntentEvaluationInput>
+}
+
+export type OrderUpsertWithoutIntentEvaluationInput = {
+  update: Prisma.XOR<Prisma.OrderUpdateWithoutIntentEvaluationInput, Prisma.OrderUncheckedUpdateWithoutIntentEvaluationInput>
+  create: Prisma.XOR<Prisma.OrderCreateWithoutIntentEvaluationInput, Prisma.OrderUncheckedCreateWithoutIntentEvaluationInput>
+  where?: Prisma.OrderWhereInput
+}
+
+export type OrderUpdateToOneWithWhereWithoutIntentEvaluationInput = {
+  where?: Prisma.OrderWhereInput
+  data: Prisma.XOR<Prisma.OrderUpdateWithoutIntentEvaluationInput, Prisma.OrderUncheckedUpdateWithoutIntentEvaluationInput>
+}
+
+export type OrderUpdateWithoutIntentEvaluationInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  overallConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  sortProduct?: Prisma.StringFieldUpdateOperationsInput | string
+  sortCustomer?: Prisma.StringFieldUpdateOperationsInput | string
+  sortProcurement?: Prisma.StringFieldUpdateOperationsInput | string
+  aiResponseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aiModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  promptVersion?: Prisma.StringFieldUpdateOperationsInput | string
+  inputTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  outputTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  approvedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  procurementHandedOffAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  supplierDispatchVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutOrdersNestedInput
+  conversation?: Prisma.ConversationUpdateOneRequiredWithoutOrdersNestedInput
+  triggerMessage?: Prisma.MessageUpdateOneRequiredWithoutTriggeredOrdersNestedInput
+  items?: Prisma.OrderItemUpdateManyWithoutOrderNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutOrderNestedInput
+  exports?: Prisma.OrderExportUpdateManyWithoutOrderNestedInput
+  procurementHandedOffByUser?: Prisma.UserUpdateOneWithoutProcurementHandOffsNestedInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutOrderNestedInput
+  shipments?: Prisma.ShipmentUpdateManyWithoutOrderNestedInput
+}
+
+export type OrderUncheckedUpdateWithoutIntentEvaluationInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  conversationId?: Prisma.StringFieldUpdateOperationsInput | string
+  triggerMessageId?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  overallConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  sortProduct?: Prisma.StringFieldUpdateOperationsInput | string
+  sortCustomer?: Prisma.StringFieldUpdateOperationsInput | string
+  sortProcurement?: Prisma.StringFieldUpdateOperationsInput | string
+  aiResponseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aiModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  promptVersion?: Prisma.StringFieldUpdateOperationsInput | string
+  inputTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  outputTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  approvedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  procurementHandedOffAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  procurementHandedOffBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supplierDispatchVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrderNestedInput
+  exports?: Prisma.OrderExportUncheckedUpdateManyWithoutOrderNestedInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutOrderNestedInput
+  shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderCreateWithoutShipmentsInput = {
@@ -1613,6 +1788,7 @@ export type OrderCreateWithoutShipmentsInput = {
   exports?: Prisma.OrderExportCreateNestedManyWithoutOrderInput
   procurementHandedOffByUser?: Prisma.UserCreateNestedOneWithoutProcurementHandOffsInput
   telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutOrderInput
+  intentEvaluation?: Prisma.OrderIntentEvaluationCreateNestedOneWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutShipmentsInput = {
@@ -1643,6 +1819,7 @@ export type OrderUncheckedCreateWithoutShipmentsInput = {
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrderInput
   exports?: Prisma.OrderExportUncheckedCreateNestedManyWithoutOrderInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutOrderInput
+  intentEvaluation?: Prisma.OrderIntentEvaluationUncheckedCreateNestedOneWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutShipmentsInput = {
@@ -1689,6 +1866,7 @@ export type OrderUpdateWithoutShipmentsInput = {
   exports?: Prisma.OrderExportUpdateManyWithoutOrderNestedInput
   procurementHandedOffByUser?: Prisma.UserUpdateOneWithoutProcurementHandOffsNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutOrderNestedInput
+  intentEvaluation?: Prisma.OrderIntentEvaluationUpdateOneWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutShipmentsInput = {
@@ -1719,6 +1897,7 @@ export type OrderUncheckedUpdateWithoutShipmentsInput = {
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrderNestedInput
   exports?: Prisma.OrderExportUncheckedUpdateManyWithoutOrderNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutOrderNestedInput
+  intentEvaluation?: Prisma.OrderIntentEvaluationUncheckedUpdateOneWithoutOrderNestedInput
 }
 
 export type OrderCreateWithoutExportsInput = {
@@ -1749,6 +1928,7 @@ export type OrderCreateWithoutExportsInput = {
   procurementHandedOffByUser?: Prisma.UserCreateNestedOneWithoutProcurementHandOffsInput
   telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutOrderInput
   shipments?: Prisma.ShipmentCreateNestedManyWithoutOrderInput
+  intentEvaluation?: Prisma.OrderIntentEvaluationCreateNestedOneWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutExportsInput = {
@@ -1779,6 +1959,7 @@ export type OrderUncheckedCreateWithoutExportsInput = {
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrderInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutOrderInput
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutOrderInput
+  intentEvaluation?: Prisma.OrderIntentEvaluationUncheckedCreateNestedOneWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutExportsInput = {
@@ -1825,6 +2006,7 @@ export type OrderUpdateWithoutExportsInput = {
   procurementHandedOffByUser?: Prisma.UserUpdateOneWithoutProcurementHandOffsNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutOrderNestedInput
   shipments?: Prisma.ShipmentUpdateManyWithoutOrderNestedInput
+  intentEvaluation?: Prisma.OrderIntentEvaluationUpdateOneWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutExportsInput = {
@@ -1855,6 +2037,7 @@ export type OrderUncheckedUpdateWithoutExportsInput = {
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrderNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutOrderNestedInput
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutOrderNestedInput
+  intentEvaluation?: Prisma.OrderIntentEvaluationUncheckedUpdateOneWithoutOrderNestedInput
 }
 
 export type OrderCreateWithoutAuditLogsInput = {
@@ -1885,6 +2068,7 @@ export type OrderCreateWithoutAuditLogsInput = {
   procurementHandedOffByUser?: Prisma.UserCreateNestedOneWithoutProcurementHandOffsInput
   telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutOrderInput
   shipments?: Prisma.ShipmentCreateNestedManyWithoutOrderInput
+  intentEvaluation?: Prisma.OrderIntentEvaluationCreateNestedOneWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutAuditLogsInput = {
@@ -1915,6 +2099,7 @@ export type OrderUncheckedCreateWithoutAuditLogsInput = {
   exports?: Prisma.OrderExportUncheckedCreateNestedManyWithoutOrderInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutOrderInput
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutOrderInput
+  intentEvaluation?: Prisma.OrderIntentEvaluationUncheckedCreateNestedOneWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutAuditLogsInput = {
@@ -1961,6 +2146,7 @@ export type OrderUpdateWithoutAuditLogsInput = {
   procurementHandedOffByUser?: Prisma.UserUpdateOneWithoutProcurementHandOffsNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutOrderNestedInput
   shipments?: Prisma.ShipmentUpdateManyWithoutOrderNestedInput
+  intentEvaluation?: Prisma.OrderIntentEvaluationUpdateOneWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutAuditLogsInput = {
@@ -1991,6 +2177,7 @@ export type OrderUncheckedUpdateWithoutAuditLogsInput = {
   exports?: Prisma.OrderExportUncheckedUpdateManyWithoutOrderNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutOrderNestedInput
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutOrderNestedInput
+  intentEvaluation?: Prisma.OrderIntentEvaluationUncheckedUpdateOneWithoutOrderNestedInput
 }
 
 export type OrderCreateWithoutItemsInput = {
@@ -2021,6 +2208,7 @@ export type OrderCreateWithoutItemsInput = {
   procurementHandedOffByUser?: Prisma.UserCreateNestedOneWithoutProcurementHandOffsInput
   telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutOrderInput
   shipments?: Prisma.ShipmentCreateNestedManyWithoutOrderInput
+  intentEvaluation?: Prisma.OrderIntentEvaluationCreateNestedOneWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutItemsInput = {
@@ -2051,6 +2239,7 @@ export type OrderUncheckedCreateWithoutItemsInput = {
   exports?: Prisma.OrderExportUncheckedCreateNestedManyWithoutOrderInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutOrderInput
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutOrderInput
+  intentEvaluation?: Prisma.OrderIntentEvaluationUncheckedCreateNestedOneWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutItemsInput = {
@@ -2097,6 +2286,7 @@ export type OrderUpdateWithoutItemsInput = {
   procurementHandedOffByUser?: Prisma.UserUpdateOneWithoutProcurementHandOffsNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutOrderNestedInput
   shipments?: Prisma.ShipmentUpdateManyWithoutOrderNestedInput
+  intentEvaluation?: Prisma.OrderIntentEvaluationUpdateOneWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutItemsInput = {
@@ -2127,6 +2317,7 @@ export type OrderUncheckedUpdateWithoutItemsInput = {
   exports?: Prisma.OrderExportUncheckedUpdateManyWithoutOrderNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutOrderNestedInput
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutOrderNestedInput
+  intentEvaluation?: Prisma.OrderIntentEvaluationUncheckedUpdateOneWithoutOrderNestedInput
 }
 
 export type OrderCreateManyTenantInput = {
@@ -2182,6 +2373,7 @@ export type OrderUpdateWithoutTenantInput = {
   procurementHandedOffByUser?: Prisma.UserUpdateOneWithoutProcurementHandOffsNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutOrderNestedInput
   shipments?: Prisma.ShipmentUpdateManyWithoutOrderNestedInput
+  intentEvaluation?: Prisma.OrderIntentEvaluationUpdateOneWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutTenantInput = {
@@ -2212,6 +2404,7 @@ export type OrderUncheckedUpdateWithoutTenantInput = {
   exports?: Prisma.OrderExportUncheckedUpdateManyWithoutOrderNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutOrderNestedInput
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutOrderNestedInput
+  intentEvaluation?: Prisma.OrderIntentEvaluationUncheckedUpdateOneWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateManyWithoutTenantInput = {
@@ -2292,6 +2485,7 @@ export type OrderUpdateWithoutProcurementHandedOffByUserInput = {
   exports?: Prisma.OrderExportUpdateManyWithoutOrderNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutOrderNestedInput
   shipments?: Prisma.ShipmentUpdateManyWithoutOrderNestedInput
+  intentEvaluation?: Prisma.OrderIntentEvaluationUpdateOneWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutProcurementHandedOffByUserInput = {
@@ -2322,6 +2516,7 @@ export type OrderUncheckedUpdateWithoutProcurementHandedOffByUserInput = {
   exports?: Prisma.OrderExportUncheckedUpdateManyWithoutOrderNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutOrderNestedInput
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutOrderNestedInput
+  intentEvaluation?: Prisma.OrderIntentEvaluationUncheckedUpdateOneWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateManyWithoutProcurementHandedOffByUserInput = {
@@ -2402,6 +2597,7 @@ export type OrderUpdateWithoutConversationInput = {
   procurementHandedOffByUser?: Prisma.UserUpdateOneWithoutProcurementHandOffsNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutOrderNestedInput
   shipments?: Prisma.ShipmentUpdateManyWithoutOrderNestedInput
+  intentEvaluation?: Prisma.OrderIntentEvaluationUpdateOneWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutConversationInput = {
@@ -2432,6 +2628,7 @@ export type OrderUncheckedUpdateWithoutConversationInput = {
   exports?: Prisma.OrderExportUncheckedUpdateManyWithoutOrderNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutOrderNestedInput
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutOrderNestedInput
+  intentEvaluation?: Prisma.OrderIntentEvaluationUncheckedUpdateOneWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateManyWithoutConversationInput = {
@@ -2512,6 +2709,7 @@ export type OrderUpdateWithoutTriggerMessageInput = {
   procurementHandedOffByUser?: Prisma.UserUpdateOneWithoutProcurementHandOffsNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutOrderNestedInput
   shipments?: Prisma.ShipmentUpdateManyWithoutOrderNestedInput
+  intentEvaluation?: Prisma.OrderIntentEvaluationUpdateOneWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutTriggerMessageInput = {
@@ -2542,6 +2740,7 @@ export type OrderUncheckedUpdateWithoutTriggerMessageInput = {
   exports?: Prisma.OrderExportUncheckedUpdateManyWithoutOrderNestedInput
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutOrderNestedInput
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutOrderNestedInput
+  intentEvaluation?: Prisma.OrderIntentEvaluationUncheckedUpdateOneWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateManyWithoutTriggerMessageInput = {
@@ -2669,6 +2868,7 @@ export type OrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   procurementHandedOffByUser?: boolean | Prisma.Order$procurementHandedOffByUserArgs<ExtArgs>
   telegramDeliveries?: boolean | Prisma.Order$telegramDeliveriesArgs<ExtArgs>
   shipments?: boolean | Prisma.Order$shipmentsArgs<ExtArgs>
+  intentEvaluation?: boolean | Prisma.Order$intentEvaluationArgs<ExtArgs>
   _count?: boolean | Prisma.OrderCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["order"]>
 
@@ -2769,6 +2969,7 @@ export type OrderInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   procurementHandedOffByUser?: boolean | Prisma.Order$procurementHandedOffByUserArgs<ExtArgs>
   telegramDeliveries?: boolean | Prisma.Order$telegramDeliveriesArgs<ExtArgs>
   shipments?: boolean | Prisma.Order$shipmentsArgs<ExtArgs>
+  intentEvaluation?: boolean | Prisma.Order$intentEvaluationArgs<ExtArgs>
   _count?: boolean | Prisma.OrderCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type OrderIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2796,6 +2997,7 @@ export type $OrderPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     procurementHandedOffByUser: Prisma.$UserPayload<ExtArgs> | null
     telegramDeliveries: Prisma.$TelegramDeliveryPayload<ExtArgs>[]
     shipments: Prisma.$ShipmentPayload<ExtArgs>[]
+    intentEvaluation: Prisma.$OrderIntentEvaluationPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -3224,6 +3426,7 @@ export interface Prisma__OrderClient<T, Null = never, ExtArgs extends runtime.Ty
   procurementHandedOffByUser<T extends Prisma.Order$procurementHandedOffByUserArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$procurementHandedOffByUserArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   telegramDeliveries<T extends Prisma.Order$telegramDeliveriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$telegramDeliveriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TelegramDeliveryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   shipments<T extends Prisma.Order$shipmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$shipmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ShipmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  intentEvaluation<T extends Prisma.Order$intentEvaluationArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$intentEvaluationArgs<ExtArgs>>): Prisma.Prisma__OrderIntentEvaluationClient<runtime.Types.Result.GetResult<Prisma.$OrderIntentEvaluationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3813,6 +4016,25 @@ export type Order$shipmentsArgs<ExtArgs extends runtime.Types.Extensions.Interna
   take?: number
   skip?: number
   distinct?: Prisma.ShipmentScalarFieldEnum | Prisma.ShipmentScalarFieldEnum[]
+}
+
+/**
+ * Order.intentEvaluation
+ */
+export type Order$intentEvaluationArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the OrderIntentEvaluation
+   */
+  select?: Prisma.OrderIntentEvaluationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the OrderIntentEvaluation
+   */
+  omit?: Prisma.OrderIntentEvaluationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OrderIntentEvaluationInclude<ExtArgs> | null
+  where?: Prisma.OrderIntentEvaluationWhereInput
 }
 
 /**

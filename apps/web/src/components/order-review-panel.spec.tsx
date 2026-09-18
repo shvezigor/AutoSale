@@ -42,6 +42,15 @@ const order: ManagerOrder = {
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
 describe('OrderReviewPanel', () => {
+  it('explains when AI proposed the order from the conversation', () => {
+    render(<OrderReviewPanel initialOrder={{
+      ...order,
+      intentDetection: { mode: 'AI_SUGGESTION', reason: 'MANAGER_REVIEW_MODE' },
+    }} />);
+
+    expect(screen.getByText('AI знайшов у діалозі домовленість про покупку. Перевірте дані перед підтвердженням.')).toBeInTheDocument();
+  });
+
   it('offers a clear return to the originating orders table', () => {
     render(<OrderReviewPanel initialOrder={order} backHref="/orders?page=3&status=APPROVED" />);
 

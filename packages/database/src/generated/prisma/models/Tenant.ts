@@ -229,6 +229,7 @@ export type TenantWhereInput = {
   shipments?: Prisma.ShipmentListRelationFilter
   shipmentAttempts?: Prisma.ShipmentAttemptListRelationFilter
   shipmentStatusEvents?: Prisma.ShipmentStatusEventListRelationFilter
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationListRelationFilter
 }
 
 export type TenantOrderByWithRelationInput = {
@@ -277,6 +278,7 @@ export type TenantOrderByWithRelationInput = {
   shipments?: Prisma.ShipmentOrderByRelationAggregateInput
   shipmentAttempts?: Prisma.ShipmentAttemptOrderByRelationAggregateInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventOrderByRelationAggregateInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationOrderByRelationAggregateInput
 }
 
 export type TenantWhereUniqueInput = Prisma.AtLeast<{
@@ -328,6 +330,7 @@ export type TenantWhereUniqueInput = Prisma.AtLeast<{
   shipments?: Prisma.ShipmentListRelationFilter
   shipmentAttempts?: Prisma.ShipmentAttemptListRelationFilter
   shipmentStatusEvents?: Prisma.ShipmentStatusEventListRelationFilter
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationListRelationFilter
 }, "id" | "key">
 
 export type TenantOrderByWithAggregationInput = {
@@ -400,6 +403,7 @@ export type TenantCreateInput = {
   shipments?: Prisma.ShipmentCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateInput = {
@@ -448,6 +452,7 @@ export type TenantUncheckedCreateInput = {
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUpdateInput = {
@@ -496,6 +501,7 @@ export type TenantUpdateInput = {
   shipments?: Prisma.ShipmentUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateInput = {
@@ -544,6 +550,7 @@ export type TenantUncheckedUpdateInput = {
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateManyInput = {
@@ -966,6 +973,20 @@ export type TenantUpdateOneRequiredWithoutOrdersNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.TenantUpdateToOneWithWhereWithoutOrdersInput, Prisma.TenantUpdateWithoutOrdersInput>, Prisma.TenantUncheckedUpdateWithoutOrdersInput>
 }
 
+export type TenantCreateNestedOneWithoutOrderIntentEvaluationsInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutOrderIntentEvaluationsInput, Prisma.TenantUncheckedCreateWithoutOrderIntentEvaluationsInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutOrderIntentEvaluationsInput
+  connect?: Prisma.TenantWhereUniqueInput
+}
+
+export type TenantUpdateOneRequiredWithoutOrderIntentEvaluationsNestedInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutOrderIntentEvaluationsInput, Prisma.TenantUncheckedCreateWithoutOrderIntentEvaluationsInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutOrderIntentEvaluationsInput
+  upsert?: Prisma.TenantUpsertWithoutOrderIntentEvaluationsInput
+  connect?: Prisma.TenantWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TenantUpdateToOneWithWhereWithoutOrderIntentEvaluationsInput, Prisma.TenantUpdateWithoutOrderIntentEvaluationsInput>, Prisma.TenantUncheckedUpdateWithoutOrderIntentEvaluationsInput>
+}
+
 export type TenantCreateNestedOneWithoutDeliveryConnectionsInput = {
   create?: Prisma.XOR<Prisma.TenantCreateWithoutDeliveryConnectionsInput, Prisma.TenantUncheckedCreateWithoutDeliveryConnectionsInput>
   connectOrCreate?: Prisma.TenantCreateOrConnectWithoutDeliveryConnectionsInput
@@ -1221,6 +1242,7 @@ export type TenantCreateWithoutGoogleConnectionInput = {
   shipments?: Prisma.ShipmentCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutGoogleConnectionInput = {
@@ -1268,6 +1290,7 @@ export type TenantUncheckedCreateWithoutGoogleConnectionInput = {
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutGoogleConnectionInput = {
@@ -1331,6 +1354,7 @@ export type TenantUpdateWithoutGoogleConnectionInput = {
   shipments?: Prisma.ShipmentUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutGoogleConnectionInput = {
@@ -1378,6 +1402,7 @@ export type TenantUncheckedUpdateWithoutGoogleConnectionInput = {
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutGoogleOAuthAttemptsInput = {
@@ -1425,6 +1450,7 @@ export type TenantCreateWithoutGoogleOAuthAttemptsInput = {
   shipments?: Prisma.ShipmentCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutGoogleOAuthAttemptsInput = {
@@ -1472,6 +1498,7 @@ export type TenantUncheckedCreateWithoutGoogleOAuthAttemptsInput = {
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutGoogleOAuthAttemptsInput = {
@@ -1535,6 +1562,7 @@ export type TenantUpdateWithoutGoogleOAuthAttemptsInput = {
   shipments?: Prisma.ShipmentUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutGoogleOAuthAttemptsInput = {
@@ -1582,6 +1610,7 @@ export type TenantUncheckedUpdateWithoutGoogleOAuthAttemptsInput = {
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutGoogleCredentialCleanupsInput = {
@@ -1629,6 +1658,7 @@ export type TenantCreateWithoutGoogleCredentialCleanupsInput = {
   shipments?: Prisma.ShipmentCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutGoogleCredentialCleanupsInput = {
@@ -1676,6 +1706,7 @@ export type TenantUncheckedCreateWithoutGoogleCredentialCleanupsInput = {
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutGoogleCredentialCleanupsInput = {
@@ -1739,6 +1770,7 @@ export type TenantUpdateWithoutGoogleCredentialCleanupsInput = {
   shipments?: Prisma.ShipmentUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutGoogleCredentialCleanupsInput = {
@@ -1786,6 +1818,7 @@ export type TenantUncheckedUpdateWithoutGoogleCredentialCleanupsInput = {
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutInstagramConnectionInput = {
@@ -1833,6 +1866,7 @@ export type TenantCreateWithoutInstagramConnectionInput = {
   shipments?: Prisma.ShipmentCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutInstagramConnectionInput = {
@@ -1880,6 +1914,7 @@ export type TenantUncheckedCreateWithoutInstagramConnectionInput = {
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutInstagramConnectionInput = {
@@ -1943,6 +1978,7 @@ export type TenantUpdateWithoutInstagramConnectionInput = {
   shipments?: Prisma.ShipmentUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutInstagramConnectionInput = {
@@ -1990,6 +2026,7 @@ export type TenantUncheckedUpdateWithoutInstagramConnectionInput = {
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutInstagramOAuthStatesInput = {
@@ -2037,6 +2074,7 @@ export type TenantCreateWithoutInstagramOAuthStatesInput = {
   shipments?: Prisma.ShipmentCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutInstagramOAuthStatesInput = {
@@ -2084,6 +2122,7 @@ export type TenantUncheckedCreateWithoutInstagramOAuthStatesInput = {
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutInstagramOAuthStatesInput = {
@@ -2147,6 +2186,7 @@ export type TenantUpdateWithoutInstagramOAuthStatesInput = {
   shipments?: Prisma.ShipmentUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutInstagramOAuthStatesInput = {
@@ -2194,6 +2234,7 @@ export type TenantUncheckedUpdateWithoutInstagramOAuthStatesInput = {
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutInstagramCredentialCleanupsInput = {
@@ -2241,6 +2282,7 @@ export type TenantCreateWithoutInstagramCredentialCleanupsInput = {
   shipments?: Prisma.ShipmentCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutInstagramCredentialCleanupsInput = {
@@ -2288,6 +2330,7 @@ export type TenantUncheckedCreateWithoutInstagramCredentialCleanupsInput = {
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutInstagramCredentialCleanupsInput = {
@@ -2351,6 +2394,7 @@ export type TenantUpdateWithoutInstagramCredentialCleanupsInput = {
   shipments?: Prisma.ShipmentUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutInstagramCredentialCleanupsInput = {
@@ -2398,6 +2442,7 @@ export type TenantUncheckedUpdateWithoutInstagramCredentialCleanupsInput = {
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutNotificationsInput = {
@@ -2445,6 +2490,7 @@ export type TenantCreateWithoutNotificationsInput = {
   shipments?: Prisma.ShipmentCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutNotificationsInput = {
@@ -2492,6 +2538,7 @@ export type TenantUncheckedCreateWithoutNotificationsInput = {
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutNotificationsInput = {
@@ -2555,6 +2602,7 @@ export type TenantUpdateWithoutNotificationsInput = {
   shipments?: Prisma.ShipmentUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutNotificationsInput = {
@@ -2602,6 +2650,7 @@ export type TenantUncheckedUpdateWithoutNotificationsInput = {
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutTelegramLinkAttemptsInput = {
@@ -2649,6 +2698,7 @@ export type TenantCreateWithoutTelegramLinkAttemptsInput = {
   shipments?: Prisma.ShipmentCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutTelegramLinkAttemptsInput = {
@@ -2696,6 +2746,7 @@ export type TenantUncheckedCreateWithoutTelegramLinkAttemptsInput = {
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutTelegramLinkAttemptsInput = {
@@ -2759,6 +2810,7 @@ export type TenantUpdateWithoutTelegramLinkAttemptsInput = {
   shipments?: Prisma.ShipmentUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutTelegramLinkAttemptsInput = {
@@ -2806,6 +2858,7 @@ export type TenantUncheckedUpdateWithoutTelegramLinkAttemptsInput = {
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutTelegramUserBindingsInput = {
@@ -2853,6 +2906,7 @@ export type TenantCreateWithoutTelegramUserBindingsInput = {
   shipments?: Prisma.ShipmentCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutTelegramUserBindingsInput = {
@@ -2900,6 +2954,7 @@ export type TenantUncheckedCreateWithoutTelegramUserBindingsInput = {
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutTelegramUserBindingsInput = {
@@ -2963,6 +3018,7 @@ export type TenantUpdateWithoutTelegramUserBindingsInput = {
   shipments?: Prisma.ShipmentUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutTelegramUserBindingsInput = {
@@ -3010,6 +3066,7 @@ export type TenantUncheckedUpdateWithoutTelegramUserBindingsInput = {
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutTelegramBusinessConnectionsInput = {
@@ -3057,6 +3114,7 @@ export type TenantCreateWithoutTelegramBusinessConnectionsInput = {
   shipments?: Prisma.ShipmentCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutTelegramBusinessConnectionsInput = {
@@ -3104,6 +3162,7 @@ export type TenantUncheckedCreateWithoutTelegramBusinessConnectionsInput = {
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutTelegramBusinessConnectionsInput = {
@@ -3167,6 +3226,7 @@ export type TenantUpdateWithoutTelegramBusinessConnectionsInput = {
   shipments?: Prisma.ShipmentUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutTelegramBusinessConnectionsInput = {
@@ -3214,6 +3274,7 @@ export type TenantUncheckedUpdateWithoutTelegramBusinessConnectionsInput = {
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutTelegramChatsInput = {
@@ -3261,6 +3322,7 @@ export type TenantCreateWithoutTelegramChatsInput = {
   shipments?: Prisma.ShipmentCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutTelegramChatsInput = {
@@ -3308,6 +3370,7 @@ export type TenantUncheckedCreateWithoutTelegramChatsInput = {
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutTelegramChatsInput = {
@@ -3371,6 +3434,7 @@ export type TenantUpdateWithoutTelegramChatsInput = {
   shipments?: Prisma.ShipmentUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutTelegramChatsInput = {
@@ -3418,6 +3482,7 @@ export type TenantUncheckedUpdateWithoutTelegramChatsInput = {
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutTelegramSupplierSettingInput = {
@@ -3465,6 +3530,7 @@ export type TenantCreateWithoutTelegramSupplierSettingInput = {
   shipments?: Prisma.ShipmentCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutTelegramSupplierSettingInput = {
@@ -3512,6 +3578,7 @@ export type TenantUncheckedCreateWithoutTelegramSupplierSettingInput = {
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutTelegramSupplierSettingInput = {
@@ -3575,6 +3642,7 @@ export type TenantUpdateWithoutTelegramSupplierSettingInput = {
   shipments?: Prisma.ShipmentUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutTelegramSupplierSettingInput = {
@@ -3622,6 +3690,7 @@ export type TenantUncheckedUpdateWithoutTelegramSupplierSettingInput = {
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutTelegramDeliveriesInput = {
@@ -3669,6 +3738,7 @@ export type TenantCreateWithoutTelegramDeliveriesInput = {
   shipments?: Prisma.ShipmentCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutTelegramDeliveriesInput = {
@@ -3716,6 +3786,7 @@ export type TenantUncheckedCreateWithoutTelegramDeliveriesInput = {
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutTelegramDeliveriesInput = {
@@ -3779,6 +3850,7 @@ export type TenantUpdateWithoutTelegramDeliveriesInput = {
   shipments?: Prisma.ShipmentUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutTelegramDeliveriesInput = {
@@ -3826,6 +3898,7 @@ export type TenantUncheckedUpdateWithoutTelegramDeliveriesInput = {
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutMembershipsInput = {
@@ -3873,6 +3946,7 @@ export type TenantCreateWithoutMembershipsInput = {
   shipments?: Prisma.ShipmentCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutMembershipsInput = {
@@ -3920,6 +3994,7 @@ export type TenantUncheckedCreateWithoutMembershipsInput = {
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutMembershipsInput = {
@@ -3983,6 +4058,7 @@ export type TenantUpdateWithoutMembershipsInput = {
   shipments?: Prisma.ShipmentUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutMembershipsInput = {
@@ -4030,6 +4106,7 @@ export type TenantUncheckedUpdateWithoutMembershipsInput = {
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutSessionsInput = {
@@ -4077,6 +4154,7 @@ export type TenantCreateWithoutSessionsInput = {
   shipments?: Prisma.ShipmentCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutSessionsInput = {
@@ -4124,6 +4202,7 @@ export type TenantUncheckedCreateWithoutSessionsInput = {
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutSessionsInput = {
@@ -4187,6 +4266,7 @@ export type TenantUpdateWithoutSessionsInput = {
   shipments?: Prisma.ShipmentUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutSessionsInput = {
@@ -4234,6 +4314,7 @@ export type TenantUncheckedUpdateWithoutSessionsInput = {
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutInvitationsInput = {
@@ -4281,6 +4362,7 @@ export type TenantCreateWithoutInvitationsInput = {
   shipments?: Prisma.ShipmentCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutInvitationsInput = {
@@ -4328,6 +4410,7 @@ export type TenantUncheckedCreateWithoutInvitationsInput = {
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutInvitationsInput = {
@@ -4391,6 +4474,7 @@ export type TenantUpdateWithoutInvitationsInput = {
   shipments?: Prisma.ShipmentUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutInvitationsInput = {
@@ -4438,6 +4522,7 @@ export type TenantUncheckedUpdateWithoutInvitationsInput = {
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutSecurityAuditLogsInput = {
@@ -4485,6 +4570,7 @@ export type TenantCreateWithoutSecurityAuditLogsInput = {
   shipments?: Prisma.ShipmentCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutSecurityAuditLogsInput = {
@@ -4532,6 +4618,7 @@ export type TenantUncheckedCreateWithoutSecurityAuditLogsInput = {
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutSecurityAuditLogsInput = {
@@ -4595,6 +4682,7 @@ export type TenantUpdateWithoutSecurityAuditLogsInput = {
   shipments?: Prisma.ShipmentUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutSecurityAuditLogsInput = {
@@ -4642,6 +4730,7 @@ export type TenantUncheckedUpdateWithoutSecurityAuditLogsInput = {
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutEventsInput = {
@@ -4689,6 +4778,7 @@ export type TenantCreateWithoutEventsInput = {
   shipments?: Prisma.ShipmentCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutEventsInput = {
@@ -4736,6 +4826,7 @@ export type TenantUncheckedCreateWithoutEventsInput = {
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutEventsInput = {
@@ -4799,6 +4890,7 @@ export type TenantUpdateWithoutEventsInput = {
   shipments?: Prisma.ShipmentUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutEventsInput = {
@@ -4846,6 +4938,7 @@ export type TenantUncheckedUpdateWithoutEventsInput = {
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutConversationsInput = {
@@ -4893,6 +4986,7 @@ export type TenantCreateWithoutConversationsInput = {
   shipments?: Prisma.ShipmentCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutConversationsInput = {
@@ -4940,6 +5034,7 @@ export type TenantUncheckedCreateWithoutConversationsInput = {
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutConversationsInput = {
@@ -5003,6 +5098,7 @@ export type TenantUpdateWithoutConversationsInput = {
   shipments?: Prisma.ShipmentUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutConversationsInput = {
@@ -5050,6 +5146,7 @@ export type TenantUncheckedUpdateWithoutConversationsInput = {
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutInstagramCustomerProfilesInput = {
@@ -5097,6 +5194,7 @@ export type TenantCreateWithoutInstagramCustomerProfilesInput = {
   shipments?: Prisma.ShipmentCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutInstagramCustomerProfilesInput = {
@@ -5144,6 +5242,7 @@ export type TenantUncheckedCreateWithoutInstagramCustomerProfilesInput = {
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutInstagramCustomerProfilesInput = {
@@ -5207,6 +5306,7 @@ export type TenantUpdateWithoutInstagramCustomerProfilesInput = {
   shipments?: Prisma.ShipmentUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutInstagramCustomerProfilesInput = {
@@ -5254,6 +5354,7 @@ export type TenantUncheckedUpdateWithoutInstagramCustomerProfilesInput = {
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutMessagesInput = {
@@ -5301,6 +5402,7 @@ export type TenantCreateWithoutMessagesInput = {
   shipments?: Prisma.ShipmentCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutMessagesInput = {
@@ -5348,6 +5450,7 @@ export type TenantUncheckedCreateWithoutMessagesInput = {
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutMessagesInput = {
@@ -5411,6 +5514,7 @@ export type TenantUpdateWithoutMessagesInput = {
   shipments?: Prisma.ShipmentUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutMessagesInput = {
@@ -5458,6 +5562,7 @@ export type TenantUncheckedUpdateWithoutMessagesInput = {
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutSheetsDestinationInput = {
@@ -5505,6 +5610,7 @@ export type TenantCreateWithoutSheetsDestinationInput = {
   shipments?: Prisma.ShipmentCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutSheetsDestinationInput = {
@@ -5552,6 +5658,7 @@ export type TenantUncheckedCreateWithoutSheetsDestinationInput = {
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutSheetsDestinationInput = {
@@ -5615,6 +5722,7 @@ export type TenantUpdateWithoutSheetsDestinationInput = {
   shipments?: Prisma.ShipmentUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutSheetsDestinationInput = {
@@ -5662,6 +5770,7 @@ export type TenantUncheckedUpdateWithoutSheetsDestinationInput = {
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutSettingsInput = {
@@ -5709,6 +5818,7 @@ export type TenantCreateWithoutSettingsInput = {
   shipments?: Prisma.ShipmentCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutSettingsInput = {
@@ -5756,6 +5866,7 @@ export type TenantUncheckedCreateWithoutSettingsInput = {
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutSettingsInput = {
@@ -5819,6 +5930,7 @@ export type TenantUpdateWithoutSettingsInput = {
   shipments?: Prisma.ShipmentUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutSettingsInput = {
@@ -5866,6 +5978,7 @@ export type TenantUncheckedUpdateWithoutSettingsInput = {
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutOrdersInput = {
@@ -5913,6 +6026,7 @@ export type TenantCreateWithoutOrdersInput = {
   shipments?: Prisma.ShipmentCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutOrdersInput = {
@@ -5960,6 +6074,7 @@ export type TenantUncheckedCreateWithoutOrdersInput = {
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutOrdersInput = {
@@ -6023,6 +6138,7 @@ export type TenantUpdateWithoutOrdersInput = {
   shipments?: Prisma.ShipmentUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutOrdersInput = {
@@ -6036,6 +6152,215 @@ export type TenantUncheckedUpdateWithoutOrdersInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
+  catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
+  catalogueMappings?: Prisma.CatalogueMappingUncheckedUpdateManyWithoutTenantNestedInput
+  catalogueImportRuns?: Prisma.CatalogueImportRunUncheckedUpdateManyWithoutTenantNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedUpdateOneWithoutTenantNestedInput
+  orderExports?: Prisma.OrderExportUncheckedUpdateManyWithoutTenantNestedInput
+  memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutTenantNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutTenantNestedInput
+  invitations?: Prisma.TenantInvitationUncheckedUpdateManyWithoutTenantNestedInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUncheckedUpdateManyWithoutTenantNestedInput
+  instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
+  instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
+  googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutTenantNestedInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUncheckedUpdateManyWithoutTenantNestedInput
+  telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedUpdateManyWithoutTenantNestedInput
+  telegramChats?: Prisma.TelegramChatUncheckedUpdateManyWithoutTenantNestedInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedUpdateOneWithoutTenantNestedInput
+  orderItems?: Prisma.OrderItemUncheckedUpdateManyWithoutTenantNestedInput
+  inventoryReservations?: Prisma.InventoryReservationUncheckedUpdateManyWithoutTenantNestedInput
+  telegramDeliveryItems?: Prisma.TelegramDeliveryItemUncheckedUpdateManyWithoutTenantNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutTenantNestedInput
+  deliveryConnections?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutTenantNestedInput
+  deliverySenderProfiles?: Prisma.DeliverySenderProfileUncheckedUpdateManyWithoutTenantNestedInput
+  shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutTenantNestedInput
+  shipmentAttempts?: Prisma.ShipmentAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutTenantNestedInput
+}
+
+export type TenantCreateWithoutOrderIntentEvaluationsInput = {
+  id?: string
+  key: string
+  name: string
+  status?: $Enums.AccessStatus
+  createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
+  events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
+  conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
+  messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
+  settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
+  products?: Prisma.ProductCreateNestedManyWithoutTenantInput
+  catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
+  catalogueMappings?: Prisma.CatalogueMappingCreateNestedManyWithoutTenantInput
+  catalogueImportRuns?: Prisma.CatalogueImportRunCreateNestedManyWithoutTenantInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationCreateNestedOneWithoutTenantInput
+  orderExports?: Prisma.OrderExportCreateNestedManyWithoutTenantInput
+  memberships?: Prisma.TenantMembershipCreateNestedManyWithoutTenantInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutTenantInput
+  invitations?: Prisma.TenantInvitationCreateNestedManyWithoutTenantInput
+  securityAuditLogs?: Prisma.SecurityAuditLogCreateNestedManyWithoutTenantInput
+  instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
+  instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
+  googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
+  googleCredentialCleanups?: Prisma.GoogleCredentialCleanupCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationCreateNestedManyWithoutTenantInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptCreateNestedManyWithoutTenantInput
+  telegramUserBindings?: Prisma.TelegramUserBindingCreateNestedManyWithoutTenantInput
+  telegramBusinessConnections?: Prisma.TelegramBusinessConnectionCreateNestedManyWithoutTenantInput
+  telegramChats?: Prisma.TelegramChatCreateNestedManyWithoutTenantInput
+  telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingCreateNestedOneWithoutTenantInput
+  orderItems?: Prisma.OrderItemCreateNestedManyWithoutTenantInput
+  inventoryReservations?: Prisma.InventoryReservationCreateNestedManyWithoutTenantInput
+  telegramDeliveryItems?: Prisma.TelegramDeliveryItemCreateNestedManyWithoutTenantInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutTenantInput
+  deliveryConnections?: Prisma.DeliveryConnectionCreateNestedManyWithoutTenantInput
+  deliverySenderProfiles?: Prisma.DeliverySenderProfileCreateNestedManyWithoutTenantInput
+  shipments?: Prisma.ShipmentCreateNestedManyWithoutTenantInput
+  shipmentAttempts?: Prisma.ShipmentAttemptCreateNestedManyWithoutTenantInput
+  shipmentStatusEvents?: Prisma.ShipmentStatusEventCreateNestedManyWithoutTenantInput
+}
+
+export type TenantUncheckedCreateWithoutOrderIntentEvaluationsInput = {
+  id?: string
+  key: string
+  name: string
+  status?: $Enums.AccessStatus
+  createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
+  events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
+  conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
+  messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
+  settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
+  catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
+  catalogueMappings?: Prisma.CatalogueMappingUncheckedCreateNestedManyWithoutTenantInput
+  catalogueImportRuns?: Prisma.CatalogueImportRunUncheckedCreateNestedManyWithoutTenantInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedCreateNestedOneWithoutTenantInput
+  orderExports?: Prisma.OrderExportUncheckedCreateNestedManyWithoutTenantInput
+  memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutTenantInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutTenantInput
+  invitations?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutTenantInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUncheckedCreateNestedManyWithoutTenantInput
+  instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
+  instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
+  googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutTenantInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedCreateNestedManyWithoutTenantInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUncheckedCreateNestedManyWithoutTenantInput
+  telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedCreateNestedManyWithoutTenantInput
+  telegramChats?: Prisma.TelegramChatUncheckedCreateNestedManyWithoutTenantInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedCreateNestedOneWithoutTenantInput
+  orderItems?: Prisma.OrderItemUncheckedCreateNestedManyWithoutTenantInput
+  inventoryReservations?: Prisma.InventoryReservationUncheckedCreateNestedManyWithoutTenantInput
+  telegramDeliveryItems?: Prisma.TelegramDeliveryItemUncheckedCreateNestedManyWithoutTenantInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutTenantInput
+  deliveryConnections?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutTenantInput
+  deliverySenderProfiles?: Prisma.DeliverySenderProfileUncheckedCreateNestedManyWithoutTenantInput
+  shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutTenantInput
+  shipmentAttempts?: Prisma.ShipmentAttemptUncheckedCreateNestedManyWithoutTenantInput
+  shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedCreateNestedManyWithoutTenantInput
+}
+
+export type TenantCreateOrConnectWithoutOrderIntentEvaluationsInput = {
+  where: Prisma.TenantWhereUniqueInput
+  create: Prisma.XOR<Prisma.TenantCreateWithoutOrderIntentEvaluationsInput, Prisma.TenantUncheckedCreateWithoutOrderIntentEvaluationsInput>
+}
+
+export type TenantUpsertWithoutOrderIntentEvaluationsInput = {
+  update: Prisma.XOR<Prisma.TenantUpdateWithoutOrderIntentEvaluationsInput, Prisma.TenantUncheckedUpdateWithoutOrderIntentEvaluationsInput>
+  create: Prisma.XOR<Prisma.TenantCreateWithoutOrderIntentEvaluationsInput, Prisma.TenantUncheckedCreateWithoutOrderIntentEvaluationsInput>
+  where?: Prisma.TenantWhereInput
+}
+
+export type TenantUpdateToOneWithWhereWithoutOrderIntentEvaluationsInput = {
+  where?: Prisma.TenantWhereInput
+  data: Prisma.XOR<Prisma.TenantUpdateWithoutOrderIntentEvaluationsInput, Prisma.TenantUncheckedUpdateWithoutOrderIntentEvaluationsInput>
+}
+
+export type TenantUpdateWithoutOrderIntentEvaluationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
+  conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
+  messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
+  settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
+  products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
+  catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
+  catalogueMappings?: Prisma.CatalogueMappingUpdateManyWithoutTenantNestedInput
+  catalogueImportRuns?: Prisma.CatalogueImportRunUpdateManyWithoutTenantNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUpdateOneWithoutTenantNestedInput
+  orderExports?: Prisma.OrderExportUpdateManyWithoutTenantNestedInput
+  memberships?: Prisma.TenantMembershipUpdateManyWithoutTenantNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutTenantNestedInput
+  invitations?: Prisma.TenantInvitationUpdateManyWithoutTenantNestedInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUpdateManyWithoutTenantNestedInput
+  instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
+  instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
+  googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
+  googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUpdateManyWithoutTenantNestedInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUpdateManyWithoutTenantNestedInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUpdateManyWithoutTenantNestedInput
+  telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUpdateManyWithoutTenantNestedInput
+  telegramChats?: Prisma.TelegramChatUpdateManyWithoutTenantNestedInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUpdateOneWithoutTenantNestedInput
+  orderItems?: Prisma.OrderItemUpdateManyWithoutTenantNestedInput
+  inventoryReservations?: Prisma.InventoryReservationUpdateManyWithoutTenantNestedInput
+  telegramDeliveryItems?: Prisma.TelegramDeliveryItemUpdateManyWithoutTenantNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutTenantNestedInput
+  deliveryConnections?: Prisma.DeliveryConnectionUpdateManyWithoutTenantNestedInput
+  deliverySenderProfiles?: Prisma.DeliverySenderProfileUpdateManyWithoutTenantNestedInput
+  shipments?: Prisma.ShipmentUpdateManyWithoutTenantNestedInput
+  shipmentAttempts?: Prisma.ShipmentAttemptUpdateManyWithoutTenantNestedInput
+  shipmentStatusEvents?: Prisma.ShipmentStatusEventUpdateManyWithoutTenantNestedInput
+}
+
+export type TenantUncheckedUpdateWithoutOrderIntentEvaluationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
+  conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
+  messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
+  settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
   catalogueMappings?: Prisma.CatalogueMappingUncheckedUpdateManyWithoutTenantNestedInput
@@ -6117,6 +6442,7 @@ export type TenantCreateWithoutDeliveryConnectionsInput = {
   shipments?: Prisma.ShipmentCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutDeliveryConnectionsInput = {
@@ -6164,6 +6490,7 @@ export type TenantUncheckedCreateWithoutDeliveryConnectionsInput = {
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutDeliveryConnectionsInput = {
@@ -6227,6 +6554,7 @@ export type TenantUpdateWithoutDeliveryConnectionsInput = {
   shipments?: Prisma.ShipmentUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutDeliveryConnectionsInput = {
@@ -6274,6 +6602,7 @@ export type TenantUncheckedUpdateWithoutDeliveryConnectionsInput = {
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutDeliverySenderProfilesInput = {
@@ -6321,6 +6650,7 @@ export type TenantCreateWithoutDeliverySenderProfilesInput = {
   shipments?: Prisma.ShipmentCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutDeliverySenderProfilesInput = {
@@ -6368,6 +6698,7 @@ export type TenantUncheckedCreateWithoutDeliverySenderProfilesInput = {
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutDeliverySenderProfilesInput = {
@@ -6431,6 +6762,7 @@ export type TenantUpdateWithoutDeliverySenderProfilesInput = {
   shipments?: Prisma.ShipmentUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutDeliverySenderProfilesInput = {
@@ -6478,6 +6810,7 @@ export type TenantUncheckedUpdateWithoutDeliverySenderProfilesInput = {
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutShipmentsInput = {
@@ -6525,6 +6858,7 @@ export type TenantCreateWithoutShipmentsInput = {
   deliverySenderProfiles?: Prisma.DeliverySenderProfileCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutShipmentsInput = {
@@ -6572,6 +6906,7 @@ export type TenantUncheckedCreateWithoutShipmentsInput = {
   deliverySenderProfiles?: Prisma.DeliverySenderProfileUncheckedCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutShipmentsInput = {
@@ -6635,6 +6970,7 @@ export type TenantUpdateWithoutShipmentsInput = {
   deliverySenderProfiles?: Prisma.DeliverySenderProfileUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutShipmentsInput = {
@@ -6682,6 +7018,7 @@ export type TenantUncheckedUpdateWithoutShipmentsInput = {
   deliverySenderProfiles?: Prisma.DeliverySenderProfileUncheckedUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutShipmentAttemptsInput = {
@@ -6729,6 +7066,7 @@ export type TenantCreateWithoutShipmentAttemptsInput = {
   deliverySenderProfiles?: Prisma.DeliverySenderProfileCreateNestedManyWithoutTenantInput
   shipments?: Prisma.ShipmentCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutShipmentAttemptsInput = {
@@ -6776,6 +7114,7 @@ export type TenantUncheckedCreateWithoutShipmentAttemptsInput = {
   deliverySenderProfiles?: Prisma.DeliverySenderProfileUncheckedCreateNestedManyWithoutTenantInput
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutShipmentAttemptsInput = {
@@ -6839,6 +7178,7 @@ export type TenantUpdateWithoutShipmentAttemptsInput = {
   deliverySenderProfiles?: Prisma.DeliverySenderProfileUpdateManyWithoutTenantNestedInput
   shipments?: Prisma.ShipmentUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutShipmentAttemptsInput = {
@@ -6886,6 +7226,7 @@ export type TenantUncheckedUpdateWithoutShipmentAttemptsInput = {
   deliverySenderProfiles?: Prisma.DeliverySenderProfileUncheckedUpdateManyWithoutTenantNestedInput
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutShipmentStatusEventsInput = {
@@ -6933,6 +7274,7 @@ export type TenantCreateWithoutShipmentStatusEventsInput = {
   deliverySenderProfiles?: Prisma.DeliverySenderProfileCreateNestedManyWithoutTenantInput
   shipments?: Prisma.ShipmentCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutShipmentStatusEventsInput = {
@@ -6980,6 +7322,7 @@ export type TenantUncheckedCreateWithoutShipmentStatusEventsInput = {
   deliverySenderProfiles?: Prisma.DeliverySenderProfileUncheckedCreateNestedManyWithoutTenantInput
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutShipmentStatusEventsInput = {
@@ -7043,6 +7386,7 @@ export type TenantUpdateWithoutShipmentStatusEventsInput = {
   deliverySenderProfiles?: Prisma.DeliverySenderProfileUpdateManyWithoutTenantNestedInput
   shipments?: Prisma.ShipmentUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutShipmentStatusEventsInput = {
@@ -7090,6 +7434,7 @@ export type TenantUncheckedUpdateWithoutShipmentStatusEventsInput = {
   deliverySenderProfiles?: Prisma.DeliverySenderProfileUncheckedUpdateManyWithoutTenantNestedInput
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutOrderExportsInput = {
@@ -7137,6 +7482,7 @@ export type TenantCreateWithoutOrderExportsInput = {
   shipments?: Prisma.ShipmentCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutOrderExportsInput = {
@@ -7184,6 +7530,7 @@ export type TenantUncheckedCreateWithoutOrderExportsInput = {
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutOrderExportsInput = {
@@ -7247,6 +7594,7 @@ export type TenantUpdateWithoutOrderExportsInput = {
   shipments?: Prisma.ShipmentUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutOrderExportsInput = {
@@ -7294,6 +7642,7 @@ export type TenantUncheckedUpdateWithoutOrderExportsInput = {
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutAuditLogsInput = {
@@ -7341,6 +7690,7 @@ export type TenantCreateWithoutAuditLogsInput = {
   shipments?: Prisma.ShipmentCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutAuditLogsInput = {
@@ -7388,6 +7738,7 @@ export type TenantUncheckedCreateWithoutAuditLogsInput = {
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutAuditLogsInput = {
@@ -7451,6 +7802,7 @@ export type TenantUpdateWithoutAuditLogsInput = {
   shipments?: Prisma.ShipmentUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutAuditLogsInput = {
@@ -7498,6 +7850,7 @@ export type TenantUncheckedUpdateWithoutAuditLogsInput = {
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutOrderItemsInput = {
@@ -7545,6 +7898,7 @@ export type TenantCreateWithoutOrderItemsInput = {
   shipments?: Prisma.ShipmentCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutOrderItemsInput = {
@@ -7592,6 +7946,7 @@ export type TenantUncheckedCreateWithoutOrderItemsInput = {
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutOrderItemsInput = {
@@ -7655,6 +8010,7 @@ export type TenantUpdateWithoutOrderItemsInput = {
   shipments?: Prisma.ShipmentUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutOrderItemsInput = {
@@ -7702,6 +8058,7 @@ export type TenantUncheckedUpdateWithoutOrderItemsInput = {
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutProductsInput = {
@@ -7749,6 +8106,7 @@ export type TenantCreateWithoutProductsInput = {
   shipments?: Prisma.ShipmentCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutProductsInput = {
@@ -7796,6 +8154,7 @@ export type TenantUncheckedCreateWithoutProductsInput = {
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutProductsInput = {
@@ -7859,6 +8218,7 @@ export type TenantUpdateWithoutProductsInput = {
   shipments?: Prisma.ShipmentUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutProductsInput = {
@@ -7906,6 +8266,7 @@ export type TenantUncheckedUpdateWithoutProductsInput = {
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutInventoryReservationsInput = {
@@ -7953,6 +8314,7 @@ export type TenantCreateWithoutInventoryReservationsInput = {
   shipments?: Prisma.ShipmentCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutInventoryReservationsInput = {
@@ -8000,6 +8362,7 @@ export type TenantUncheckedCreateWithoutInventoryReservationsInput = {
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutInventoryReservationsInput = {
@@ -8063,6 +8426,7 @@ export type TenantUpdateWithoutInventoryReservationsInput = {
   shipments?: Prisma.ShipmentUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutInventoryReservationsInput = {
@@ -8110,6 +8474,7 @@ export type TenantUncheckedUpdateWithoutInventoryReservationsInput = {
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutTelegramDeliveryItemsInput = {
@@ -8157,6 +8522,7 @@ export type TenantCreateWithoutTelegramDeliveryItemsInput = {
   shipments?: Prisma.ShipmentCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutTelegramDeliveryItemsInput = {
@@ -8204,6 +8570,7 @@ export type TenantUncheckedCreateWithoutTelegramDeliveryItemsInput = {
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutTelegramDeliveryItemsInput = {
@@ -8267,6 +8634,7 @@ export type TenantUpdateWithoutTelegramDeliveryItemsInput = {
   shipments?: Prisma.ShipmentUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutTelegramDeliveryItemsInput = {
@@ -8314,6 +8682,7 @@ export type TenantUncheckedUpdateWithoutTelegramDeliveryItemsInput = {
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutTelegramNotificationPreferencesInput = {
@@ -8361,6 +8730,7 @@ export type TenantCreateWithoutTelegramNotificationPreferencesInput = {
   shipments?: Prisma.ShipmentCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutTelegramNotificationPreferencesInput = {
@@ -8408,6 +8778,7 @@ export type TenantUncheckedCreateWithoutTelegramNotificationPreferencesInput = {
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutTelegramNotificationPreferencesInput = {
@@ -8471,6 +8842,7 @@ export type TenantUpdateWithoutTelegramNotificationPreferencesInput = {
   shipments?: Prisma.ShipmentUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutTelegramNotificationPreferencesInput = {
@@ -8518,6 +8890,7 @@ export type TenantUncheckedUpdateWithoutTelegramNotificationPreferencesInput = {
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutCatalogueSourcesInput = {
@@ -8565,6 +8938,7 @@ export type TenantCreateWithoutCatalogueSourcesInput = {
   shipments?: Prisma.ShipmentCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutCatalogueSourcesInput = {
@@ -8612,6 +8986,7 @@ export type TenantUncheckedCreateWithoutCatalogueSourcesInput = {
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutCatalogueSourcesInput = {
@@ -8675,6 +9050,7 @@ export type TenantUpdateWithoutCatalogueSourcesInput = {
   shipments?: Prisma.ShipmentUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutCatalogueSourcesInput = {
@@ -8722,6 +9098,7 @@ export type TenantUncheckedUpdateWithoutCatalogueSourcesInput = {
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutCatalogueMappingsInput = {
@@ -8769,6 +9146,7 @@ export type TenantCreateWithoutCatalogueMappingsInput = {
   shipments?: Prisma.ShipmentCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutCatalogueMappingsInput = {
@@ -8816,6 +9194,7 @@ export type TenantUncheckedCreateWithoutCatalogueMappingsInput = {
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutCatalogueMappingsInput = {
@@ -8879,6 +9258,7 @@ export type TenantUpdateWithoutCatalogueMappingsInput = {
   shipments?: Prisma.ShipmentUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutCatalogueMappingsInput = {
@@ -8926,6 +9306,7 @@ export type TenantUncheckedUpdateWithoutCatalogueMappingsInput = {
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutCatalogueImportRunsInput = {
@@ -8973,6 +9354,7 @@ export type TenantCreateWithoutCatalogueImportRunsInput = {
   shipments?: Prisma.ShipmentCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutCatalogueImportRunsInput = {
@@ -9020,6 +9402,7 @@ export type TenantUncheckedCreateWithoutCatalogueImportRunsInput = {
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutTenantInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedCreateNestedManyWithoutTenantInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutCatalogueImportRunsInput = {
@@ -9083,6 +9466,7 @@ export type TenantUpdateWithoutCatalogueImportRunsInput = {
   shipments?: Prisma.ShipmentUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutCatalogueImportRunsInput = {
@@ -9130,6 +9514,7 @@ export type TenantUncheckedUpdateWithoutCatalogueImportRunsInput = {
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutTenantNestedInput
   shipmentAttempts?: Prisma.ShipmentAttemptUncheckedUpdateManyWithoutTenantNestedInput
   shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 
@@ -9172,6 +9557,7 @@ export type TenantCountOutputType = {
   shipments: number
   shipmentAttempts: number
   shipmentStatusEvents: number
+  orderIntentEvaluations: number
 }
 
 export type TenantCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -9209,6 +9595,7 @@ export type TenantCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions
   shipments?: boolean | TenantCountOutputTypeCountShipmentsArgs
   shipmentAttempts?: boolean | TenantCountOutputTypeCountShipmentAttemptsArgs
   shipmentStatusEvents?: boolean | TenantCountOutputTypeCountShipmentStatusEventsArgs
+  orderIntentEvaluations?: boolean | TenantCountOutputTypeCountOrderIntentEvaluationsArgs
 }
 
 /**
@@ -9459,6 +9846,13 @@ export type TenantCountOutputTypeCountShipmentStatusEventsArgs<ExtArgs extends r
   where?: Prisma.ShipmentStatusEventWhereInput
 }
 
+/**
+ * TenantCountOutputType without action
+ */
+export type TenantCountOutputTypeCountOrderIntentEvaluationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.OrderIntentEvaluationWhereInput
+}
+
 
 export type TenantSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -9506,6 +9900,7 @@ export type TenantSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   shipments?: boolean | Prisma.Tenant$shipmentsArgs<ExtArgs>
   shipmentAttempts?: boolean | Prisma.Tenant$shipmentAttemptsArgs<ExtArgs>
   shipmentStatusEvents?: boolean | Prisma.Tenant$shipmentStatusEventsArgs<ExtArgs>
+  orderIntentEvaluations?: boolean | Prisma.Tenant$orderIntentEvaluationsArgs<ExtArgs>
   _count?: boolean | Prisma.TenantCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["tenant"]>
 
@@ -9577,6 +9972,7 @@ export type TenantInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   shipments?: boolean | Prisma.Tenant$shipmentsArgs<ExtArgs>
   shipmentAttempts?: boolean | Prisma.Tenant$shipmentAttemptsArgs<ExtArgs>
   shipmentStatusEvents?: boolean | Prisma.Tenant$shipmentStatusEventsArgs<ExtArgs>
+  orderIntentEvaluations?: boolean | Prisma.Tenant$orderIntentEvaluationsArgs<ExtArgs>
   _count?: boolean | Prisma.TenantCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type TenantIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -9624,6 +10020,7 @@ export type $TenantPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     shipments: Prisma.$ShipmentPayload<ExtArgs>[]
     shipmentAttempts: Prisma.$ShipmentAttemptPayload<ExtArgs>[]
     shipmentStatusEvents: Prisma.$ShipmentStatusEventPayload<ExtArgs>[]
+    orderIntentEvaluations: Prisma.$OrderIntentEvaluationPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -10065,6 +10462,7 @@ export interface Prisma__TenantClient<T, Null = never, ExtArgs extends runtime.T
   shipments<T extends Prisma.Tenant$shipmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$shipmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ShipmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   shipmentAttempts<T extends Prisma.Tenant$shipmentAttemptsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$shipmentAttemptsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ShipmentAttemptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   shipmentStatusEvents<T extends Prisma.Tenant$shipmentStatusEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$shipmentStatusEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ShipmentStatusEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  orderIntentEvaluations<T extends Prisma.Tenant$orderIntentEvaluationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$orderIntentEvaluationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderIntentEvaluationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -11401,6 +11799,30 @@ export type Tenant$shipmentStatusEventsArgs<ExtArgs extends runtime.Types.Extens
   take?: number
   skip?: number
   distinct?: Prisma.ShipmentStatusEventScalarFieldEnum | Prisma.ShipmentStatusEventScalarFieldEnum[]
+}
+
+/**
+ * Tenant.orderIntentEvaluations
+ */
+export type Tenant$orderIntentEvaluationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the OrderIntentEvaluation
+   */
+  select?: Prisma.OrderIntentEvaluationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the OrderIntentEvaluation
+   */
+  omit?: Prisma.OrderIntentEvaluationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OrderIntentEvaluationInclude<ExtArgs> | null
+  where?: Prisma.OrderIntentEvaluationWhereInput
+  orderBy?: Prisma.OrderIntentEvaluationOrderByWithRelationInput | Prisma.OrderIntentEvaluationOrderByWithRelationInput[]
+  cursor?: Prisma.OrderIntentEvaluationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.OrderIntentEvaluationScalarFieldEnum | Prisma.OrderIntentEvaluationScalarFieldEnum[]
 }
 
 /**

@@ -14,12 +14,14 @@ describe('OrderSettingsController', () => {
 
   beforeEach(async () => {
     get.mockResolvedValue({
+      intentDetectionMode: 'PHRASE_ONLY',
       approvalMode: 'ALWAYS',
       autoApprovalThreshold: 0.9,
       promptVersion: 'instagram-order-v1',
       triggerPhrases: ['беремо замовлення в роботу'],
     });
     update.mockImplementation(async (_tenantId, input) => ({
+      intentDetectionMode: input.intentDetectionMode ?? 'PHRASE_ONLY',
       approvalMode: input.approvalMode,
       autoApprovalThreshold: input.autoApprovalThreshold ?? 0.9,
       promptVersion: 'instagram-order-v1',
@@ -54,6 +56,23 @@ describe('OrderSettingsController', () => {
 
     expect(response.body.approvalMode).toBe('NEVER');
     expect(update).toHaveBeenCalledWith(tenantId, { approvalMode: 'NEVER' });
+  });
+
+  it('updates the conversational intent detection mode', async () => {
+    const response = await request(app!.getHttpServer())
+      .patch('/api/settings/orders')
+      .send({ intentDetectionMode: 'AI_SUGGESTION' })
+      .expect(200);
+
+    expect(response.body.intentDetectionMode).toBe('AI_SUGGESTION');
+    expect(update).toHaveBeenCalledWith(tenantId, { intentDetectionMode: 'AI_SUGGESTION' });
+  });
+
+  it('rejects an unsupported intent detection mode', async () => {
+    await request(app!.getHttpServer())
+      .patch('/api/settings/orders')
+      .send({ intentDetectionMode: 'AI_ALWAYS' })
+      .expect(400);
   });
 
   it('rejects an unsupported approval mode', async () => {

@@ -37,6 +37,7 @@ export type TenantSettingsSumAggregateOutputType = {
 export type TenantSettingsMinAggregateOutputType = {
   id: string | null
   tenantId: string | null
+  intentDetectionMode: string | null
   approvalMode: string | null
   autoApprovalThreshold: number | null
   promptVersion: string | null
@@ -47,6 +48,7 @@ export type TenantSettingsMinAggregateOutputType = {
 export type TenantSettingsMaxAggregateOutputType = {
   id: string | null
   tenantId: string | null
+  intentDetectionMode: string | null
   approvalMode: string | null
   autoApprovalThreshold: number | null
   promptVersion: string | null
@@ -57,6 +59,7 @@ export type TenantSettingsMaxAggregateOutputType = {
 export type TenantSettingsCountAggregateOutputType = {
   id: number
   tenantId: number
+  intentDetectionMode: number
   approvalMode: number
   autoApprovalThreshold: number
   promptVersion: number
@@ -78,6 +81,7 @@ export type TenantSettingsSumAggregateInputType = {
 export type TenantSettingsMinAggregateInputType = {
   id?: true
   tenantId?: true
+  intentDetectionMode?: true
   approvalMode?: true
   autoApprovalThreshold?: true
   promptVersion?: true
@@ -88,6 +92,7 @@ export type TenantSettingsMinAggregateInputType = {
 export type TenantSettingsMaxAggregateInputType = {
   id?: true
   tenantId?: true
+  intentDetectionMode?: true
   approvalMode?: true
   autoApprovalThreshold?: true
   promptVersion?: true
@@ -98,6 +103,7 @@ export type TenantSettingsMaxAggregateInputType = {
 export type TenantSettingsCountAggregateInputType = {
   id?: true
   tenantId?: true
+  intentDetectionMode?: true
   approvalMode?: true
   autoApprovalThreshold?: true
   promptVersion?: true
@@ -196,6 +202,7 @@ export type TenantSettingsGroupByArgs<ExtArgs extends runtime.Types.Extensions.I
 export type TenantSettingsGroupByOutputType = {
   id: string
   tenantId: string
+  intentDetectionMode: string
   approvalMode: string
   autoApprovalThreshold: number
   promptVersion: string
@@ -230,6 +237,7 @@ export type TenantSettingsWhereInput = {
   NOT?: Prisma.TenantSettingsWhereInput | Prisma.TenantSettingsWhereInput[]
   id?: Prisma.UuidFilter<"TenantSettings"> | string
   tenantId?: Prisma.UuidFilter<"TenantSettings"> | string
+  intentDetectionMode?: Prisma.StringFilter<"TenantSettings"> | string
   approvalMode?: Prisma.StringFilter<"TenantSettings"> | string
   autoApprovalThreshold?: Prisma.FloatFilter<"TenantSettings"> | number
   promptVersion?: Prisma.StringFilter<"TenantSettings"> | string
@@ -242,6 +250,7 @@ export type TenantSettingsWhereInput = {
 export type TenantSettingsOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   tenantId?: Prisma.SortOrder
+  intentDetectionMode?: Prisma.SortOrder
   approvalMode?: Prisma.SortOrder
   autoApprovalThreshold?: Prisma.SortOrder
   promptVersion?: Prisma.SortOrder
@@ -257,6 +266,7 @@ export type TenantSettingsWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.TenantSettingsWhereInput | Prisma.TenantSettingsWhereInput[]
   OR?: Prisma.TenantSettingsWhereInput[]
   NOT?: Prisma.TenantSettingsWhereInput | Prisma.TenantSettingsWhereInput[]
+  intentDetectionMode?: Prisma.StringFilter<"TenantSettings"> | string
   approvalMode?: Prisma.StringFilter<"TenantSettings"> | string
   autoApprovalThreshold?: Prisma.FloatFilter<"TenantSettings"> | number
   promptVersion?: Prisma.StringFilter<"TenantSettings"> | string
@@ -269,6 +279,7 @@ export type TenantSettingsWhereUniqueInput = Prisma.AtLeast<{
 export type TenantSettingsOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   tenantId?: Prisma.SortOrder
+  intentDetectionMode?: Prisma.SortOrder
   approvalMode?: Prisma.SortOrder
   autoApprovalThreshold?: Prisma.SortOrder
   promptVersion?: Prisma.SortOrder
@@ -288,6 +299,7 @@ export type TenantSettingsScalarWhereWithAggregatesInput = {
   NOT?: Prisma.TenantSettingsScalarWhereWithAggregatesInput | Prisma.TenantSettingsScalarWhereWithAggregatesInput[]
   id?: Prisma.UuidWithAggregatesFilter<"TenantSettings"> | string
   tenantId?: Prisma.UuidWithAggregatesFilter<"TenantSettings"> | string
+  intentDetectionMode?: Prisma.StringWithAggregatesFilter<"TenantSettings"> | string
   approvalMode?: Prisma.StringWithAggregatesFilter<"TenantSettings"> | string
   autoApprovalThreshold?: Prisma.FloatWithAggregatesFilter<"TenantSettings"> | number
   promptVersion?: Prisma.StringWithAggregatesFilter<"TenantSettings"> | string
@@ -298,6 +310,7 @@ export type TenantSettingsScalarWhereWithAggregatesInput = {
 
 export type TenantSettingsCreateInput = {
   id?: string
+  intentDetectionMode?: string
   approvalMode?: string
   autoApprovalThreshold?: number
   promptVersion?: string
@@ -310,6 +323,7 @@ export type TenantSettingsCreateInput = {
 export type TenantSettingsUncheckedCreateInput = {
   id?: string
   tenantId: string
+  intentDetectionMode?: string
   approvalMode?: string
   autoApprovalThreshold?: number
   promptVersion?: string
@@ -320,6 +334,7 @@ export type TenantSettingsUncheckedCreateInput = {
 
 export type TenantSettingsUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  intentDetectionMode?: Prisma.StringFieldUpdateOperationsInput | string
   approvalMode?: Prisma.StringFieldUpdateOperationsInput | string
   autoApprovalThreshold?: Prisma.FloatFieldUpdateOperationsInput | number
   promptVersion?: Prisma.StringFieldUpdateOperationsInput | string
@@ -332,6 +347,7 @@ export type TenantSettingsUpdateInput = {
 export type TenantSettingsUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  intentDetectionMode?: Prisma.StringFieldUpdateOperationsInput | string
   approvalMode?: Prisma.StringFieldUpdateOperationsInput | string
   autoApprovalThreshold?: Prisma.FloatFieldUpdateOperationsInput | number
   promptVersion?: Prisma.StringFieldUpdateOperationsInput | string
@@ -343,6 +359,7 @@ export type TenantSettingsUncheckedUpdateInput = {
 export type TenantSettingsCreateManyInput = {
   id?: string
   tenantId: string
+  intentDetectionMode?: string
   approvalMode?: string
   autoApprovalThreshold?: number
   promptVersion?: string
@@ -353,6 +370,7 @@ export type TenantSettingsCreateManyInput = {
 
 export type TenantSettingsUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  intentDetectionMode?: Prisma.StringFieldUpdateOperationsInput | string
   approvalMode?: Prisma.StringFieldUpdateOperationsInput | string
   autoApprovalThreshold?: Prisma.FloatFieldUpdateOperationsInput | number
   promptVersion?: Prisma.StringFieldUpdateOperationsInput | string
@@ -364,6 +382,7 @@ export type TenantSettingsUpdateManyMutationInput = {
 export type TenantSettingsUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  intentDetectionMode?: Prisma.StringFieldUpdateOperationsInput | string
   approvalMode?: Prisma.StringFieldUpdateOperationsInput | string
   autoApprovalThreshold?: Prisma.FloatFieldUpdateOperationsInput | number
   promptVersion?: Prisma.StringFieldUpdateOperationsInput | string
@@ -380,6 +399,7 @@ export type TenantSettingsNullableScalarRelationFilter = {
 export type TenantSettingsCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   tenantId?: Prisma.SortOrder
+  intentDetectionMode?: Prisma.SortOrder
   approvalMode?: Prisma.SortOrder
   autoApprovalThreshold?: Prisma.SortOrder
   promptVersion?: Prisma.SortOrder
@@ -395,6 +415,7 @@ export type TenantSettingsAvgOrderByAggregateInput = {
 export type TenantSettingsMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   tenantId?: Prisma.SortOrder
+  intentDetectionMode?: Prisma.SortOrder
   approvalMode?: Prisma.SortOrder
   autoApprovalThreshold?: Prisma.SortOrder
   promptVersion?: Prisma.SortOrder
@@ -405,6 +426,7 @@ export type TenantSettingsMaxOrderByAggregateInput = {
 export type TenantSettingsMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   tenantId?: Prisma.SortOrder
+  intentDetectionMode?: Prisma.SortOrder
   approvalMode?: Prisma.SortOrder
   autoApprovalThreshold?: Prisma.SortOrder
   promptVersion?: Prisma.SortOrder
@@ -458,6 +480,7 @@ export type FloatFieldUpdateOperationsInput = {
 
 export type TenantSettingsCreateWithoutTenantInput = {
   id?: string
+  intentDetectionMode?: string
   approvalMode?: string
   autoApprovalThreshold?: number
   promptVersion?: string
@@ -468,6 +491,7 @@ export type TenantSettingsCreateWithoutTenantInput = {
 
 export type TenantSettingsUncheckedCreateWithoutTenantInput = {
   id?: string
+  intentDetectionMode?: string
   approvalMode?: string
   autoApprovalThreshold?: number
   promptVersion?: string
@@ -494,6 +518,7 @@ export type TenantSettingsUpdateToOneWithWhereWithoutTenantInput = {
 
 export type TenantSettingsUpdateWithoutTenantInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  intentDetectionMode?: Prisma.StringFieldUpdateOperationsInput | string
   approvalMode?: Prisma.StringFieldUpdateOperationsInput | string
   autoApprovalThreshold?: Prisma.FloatFieldUpdateOperationsInput | number
   promptVersion?: Prisma.StringFieldUpdateOperationsInput | string
@@ -504,6 +529,7 @@ export type TenantSettingsUpdateWithoutTenantInput = {
 
 export type TenantSettingsUncheckedUpdateWithoutTenantInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  intentDetectionMode?: Prisma.StringFieldUpdateOperationsInput | string
   approvalMode?: Prisma.StringFieldUpdateOperationsInput | string
   autoApprovalThreshold?: Prisma.FloatFieldUpdateOperationsInput | number
   promptVersion?: Prisma.StringFieldUpdateOperationsInput | string
@@ -517,6 +543,7 @@ export type TenantSettingsUncheckedUpdateWithoutTenantInput = {
 export type TenantSettingsSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   tenantId?: boolean
+  intentDetectionMode?: boolean
   approvalMode?: boolean
   autoApprovalThreshold?: boolean
   promptVersion?: boolean
@@ -529,6 +556,7 @@ export type TenantSettingsSelect<ExtArgs extends runtime.Types.Extensions.Intern
 export type TenantSettingsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   tenantId?: boolean
+  intentDetectionMode?: boolean
   approvalMode?: boolean
   autoApprovalThreshold?: boolean
   promptVersion?: boolean
@@ -541,6 +569,7 @@ export type TenantSettingsSelectCreateManyAndReturn<ExtArgs extends runtime.Type
 export type TenantSettingsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   tenantId?: boolean
+  intentDetectionMode?: boolean
   approvalMode?: boolean
   autoApprovalThreshold?: boolean
   promptVersion?: boolean
@@ -553,6 +582,7 @@ export type TenantSettingsSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
 export type TenantSettingsSelectScalar = {
   id?: boolean
   tenantId?: boolean
+  intentDetectionMode?: boolean
   approvalMode?: boolean
   autoApprovalThreshold?: boolean
   promptVersion?: boolean
@@ -561,7 +591,7 @@ export type TenantSettingsSelectScalar = {
   updatedAt?: boolean
 }
 
-export type TenantSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "approvalMode" | "autoApprovalThreshold" | "promptVersion" | "triggerPhrases" | "createdAt" | "updatedAt", ExtArgs["result"]["tenantSettings"]>
+export type TenantSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "intentDetectionMode" | "approvalMode" | "autoApprovalThreshold" | "promptVersion" | "triggerPhrases" | "createdAt" | "updatedAt", ExtArgs["result"]["tenantSettings"]>
 export type TenantSettingsInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
 }
@@ -580,6 +610,7 @@ export type $TenantSettingsPayload<ExtArgs extends runtime.Types.Extensions.Inte
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenantId: string
+    intentDetectionMode: string
     approvalMode: string
     autoApprovalThreshold: number
     promptVersion: string
@@ -1012,6 +1043,7 @@ export interface Prisma__TenantSettingsClient<T, Null = never, ExtArgs extends r
 export interface TenantSettingsFieldRefs {
   readonly id: Prisma.FieldRef<"TenantSettings", 'String'>
   readonly tenantId: Prisma.FieldRef<"TenantSettings", 'String'>
+  readonly intentDetectionMode: Prisma.FieldRef<"TenantSettings", 'String'>
   readonly approvalMode: Prisma.FieldRef<"TenantSettings", 'String'>
   readonly autoApprovalThreshold: Prisma.FieldRef<"TenantSettings", 'Float'>
   readonly promptVersion: Prisma.FieldRef<"TenantSettings", 'String'>

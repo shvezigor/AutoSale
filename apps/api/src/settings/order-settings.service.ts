@@ -2,6 +2,7 @@ import { Prisma, type PrismaClient } from '@autosale/database';
 import { INSTAGRAM_ORDER_PROMPT_VERSION } from '@autosale/contracts';
 
 export interface OrderSettingsResponse {
+  intentDetectionMode: 'PHRASE_ONLY' | 'AI_SUGGESTION' | 'AI_AUTOMATION';
   approvalMode: 'ALWAYS' | 'NEVER' | 'ON_LOW_CONFIDENCE';
   autoApprovalThreshold: number;
   promptVersion: string;
@@ -9,6 +10,7 @@ export interface OrderSettingsResponse {
 }
 
 export interface UpdateOrderSettingsInput {
+  intentDetectionMode?: OrderSettingsResponse['intentDetectionMode'];
   approvalMode?: OrderSettingsResponse['approvalMode'];
   autoApprovalThreshold?: number;
   triggerPhrases?: string[];
@@ -24,6 +26,7 @@ export class OrderSettingsService {
         update: {},
         create: {
           tenantId,
+          intentDetectionMode: 'PHRASE_ONLY',
           approvalMode: 'ALWAYS',
           autoApprovalThreshold: 0.9,
           promptVersion: INSTAGRAM_ORDER_PROMPT_VERSION,
@@ -47,12 +50,14 @@ export class OrderSettingsService {
 }
 
 function toResponse(settings: {
+  intentDetectionMode: string;
   approvalMode: string;
   autoApprovalThreshold: number;
   promptVersion: string;
   triggerPhrases: Prisma.JsonValue;
 }): OrderSettingsResponse {
   return {
+    intentDetectionMode: settings.intentDetectionMode as OrderSettingsResponse['intentDetectionMode'],
     approvalMode: settings.approvalMode as OrderSettingsResponse['approvalMode'],
     autoApprovalThreshold: settings.autoApprovalThreshold,
     promptVersion: settings.promptVersion,

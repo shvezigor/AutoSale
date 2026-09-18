@@ -232,6 +232,7 @@ export class OrdersService {
       take: 1,
       include: { statusEvents: { orderBy: { occurredAt: 'desc' as const } } },
     },
+    intentEvaluation: { select: { mode: true, reason: true } },
   };
 
   private async productNames(tenantId: string): Promise<Map<string, string>> {
@@ -257,6 +258,12 @@ export class OrdersService {
       channel: 'INSTAGRAM',
       overallConfidence: row.overallConfidence,
       validationIssues: validationIssues(extraction, row.items),
+      intentDetection: row.intentEvaluation && row.intentEvaluation.mode !== 'PHRASE_ONLY'
+        ? {
+            mode: row.intentEvaluation.mode as NonNullable<ManagerOrder['intentDetection']>['mode'],
+            reason: row.intentEvaluation.reason as NonNullable<ManagerOrder['intentDetection']>['reason'],
+          }
+        : null,
       customer,
       delivery: extraction.delivery ?? { city: null, address: null, novaPoshtaBranch: null },
       items: row.items.map((item, index) => ({

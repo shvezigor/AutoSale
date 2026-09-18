@@ -19,6 +19,7 @@ describe('OrderSettingsForm', () => {
     render(
       <ToastProvider><ActivityProvider><OrderSettingsForm
         initial={{
+          intentDetectionMode: 'PHRASE_ONLY',
           approvalMode: 'ALWAYS',
           autoApprovalThreshold: 0.9,
           promptVersion: 'instagram-order-v1',
@@ -35,17 +36,47 @@ describe('OrderSettingsForm', () => {
         '/api/settings/orders',
         expect.objectContaining({
           method: 'PATCH',
-          body: JSON.stringify({ approvalMode: 'NEVER' }),
+          body: JSON.stringify({ intentDetectionMode: 'PHRASE_ONLY', approvalMode: 'NEVER' }),
           headers: expect.objectContaining({ 'x-csrf-token': 'csrf-token' }),
         }),
       ),
     );
     expect((await screen.findAllByText('Налаштування збережено')).length).toBeGreaterThan(0);
   });
+
+  it('saves AI suggestion mode without enabling automatic order creation', async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ token: 'csrf-token' }) })
+      .mockResolvedValueOnce({ ok: true });
+    vi.stubGlobal('fetch', fetchMock);
+    render(
+      <ToastProvider><ActivityProvider><OrderSettingsForm
+        initial={{
+          intentDetectionMode: 'PHRASE_ONLY',
+          approvalMode: 'ALWAYS',
+          autoApprovalThreshold: 0.9,
+          promptVersion: 'instagram-order-v2',
+          triggerPhrases: ['замовлення прийнято'],
+        }}
+      /></ActivityProvider></ToastProvider>,
+    );
+
+    fireEvent.click(screen.getByLabelText('AI пропонує замовлення'));
+    fireEvent.click(screen.getByRole('button', { name: 'Зберегти налаштування' }));
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledWith(
+      '/api/settings/orders',
+      expect.objectContaining({
+        method: 'PATCH',
+        body: JSON.stringify({ intentDetectionMode: 'AI_SUGGESTION', approvalMode: 'ALWAYS' }),
+      }),
+    ));
+  });
 });
   it('translates approval settings while preserving the prompt version', () => {
-    render(<I18nProvider locale="en" authenticated={false}><ToastProvider><ActivityProvider><OrderSettingsForm initial={{ approvalMode: 'ALWAYS', autoApprovalThreshold: 0.9, promptVersion: 'instagram-order-v1', triggerPhrases: [] }} /></ActivityProvider></ToastProvider></I18nProvider>);
+    render(<I18nProvider locale="en" authenticated={false}><ToastProvider><ActivityProvider><OrderSettingsForm initial={{ intentDetectionMode: 'PHRASE_ONLY', approvalMode: 'ALWAYS', autoApprovalThreshold: 0.9, promptVersion: 'instagram-order-v1', triggerPhrases: [] }} /></ActivityProvider></ToastProvider></I18nProvider>);
     expect(screen.getByRole('heading', { name: 'Order approval' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Trigger phrase only')).toBeInTheDocument();
     expect(screen.getByLabelText('No approval required')).toBeInTheDocument();
     expect(screen.getByText('instagram-order-v1')).toBeInTheDocument();
   });

@@ -160,4 +160,110 @@ describe('TriggeredOrderProcessor', () => {
     });
     expect(telemetry).toHaveBeenCalledWith('ai_order_recognition_completed', expect.objectContaining({ orderId: first!.id, result: 'AUTO_APPROVED' }));
   });
+
+  it('creates idempotent proposals and automatic orders for new inbound revisions according to owner mode', async () => {
+    const tenant = await prisma.tenant.create({ data: { key: 'intent-suggestion', name: 'Intent suggestion' } });
+    await prisma.tenantSettings.create({
+      data: {
+        tenantId: tenant.id,
+        intentDetectionMode: 'AI_SUGGESTION',
+        approvalMode: 'NEVER',
+        autoApprovalThreshold: 0.9,
+        promptVersion: 'instagram-order-v2',
+        triggerPhrases: ['замовлення прийнято'],
+      },
+    });
+    const event = await prisma.webhookEvent.create({
+      data: { tenantId: tenant.id, provider: 'META', externalEventId: 'intent-suggestion-event', payload: {} },
+    });
+    const conversation = await prisma.conversation.create({
+      data: {
+        tenantId: tenant.id,
+        channel: 'INSTAGRAM',
+        externalConversationId: 'intent-suggestion-customer',
+        participantId: 'intent-suggestion-customer',
+        lastMessageAt: new Date('2026-09-18T09:00:00Z'),
+      },
+    });
+    const anchor = await prisma.message.create({
+      data: {
+        tenantId: tenant.id,
+        conversationId: conversation.id,
+        rawEventId: event.id,
+        channel: 'INSTAGRAM',
+        externalMessageId: 'intent-suggestion-message',
+        direction: 'INBOUND',
+        senderId: 'customer',
+        text: 'Беру двері Авангард, доставляйте у Луцьк на відділення 22',
+        sourceTimestamp: new Date('2026-09-18T09:00:00Z'),
+      },
+    });
+    await prisma.product.create({ data: { tenantId: tenant.id, sku: 'DOOR-1', name: 'Двері Авангард', aliases: ['двері авангард'] } });
+    const recognize = vi.fn().mockResolvedValue({
+      order: {
+        isOrder: true,
+        customer: { name: 'Ігор', phone: '+380501112233', instagramUsername: 'customer' },
+        delivery: { city: 'Луцьк', address: null, novaPoshtaBranch: '22' },
+        items: [{ catalogId: 'DOOR-1', originalText: 'двері Авангард', quantity: 1, color: null, size: null, confidence: 0.98 }],
+        missingFields: [],
+        overallConfidence: 0.97,
+      },
+      metadata: { responseId: 'resp-intent', model: 'gpt-5.4-mini', inputTokens: 90, outputTokens: 50 },
+    });
+    const assessApprovedOrder = vi.fn().mockResolvedValue({ orderId: 'automatic', summary: 'READY', items: [] });
+    const scheduleExport = vi.fn().mockResolvedValue(undefined);
+    const processor = new TriggeredOrderProcessor(
+      prisma,
+      new OrderRecognitionService({ recognize }),
+      { assessApprovedOrder } as never,
+      scheduleExport,
+    );
+
+    const first = await processor.processIfTriggered(anchor.id);
+    const replay = await processor.processIfTriggered(anchor.id);
+
+    expect(first).toMatchObject({ status: 'NEEDS_REVIEW' });
+    expect(replay?.id).toBe(first?.id);
+    expect(recognize).toHaveBeenCalledTimes(1);
+    expect(await prisma.orderIntentEvaluation.findUniqueOrThrow({ where: { anchorMessageId: anchor.id } })).toMatchObject({
+      orderId: first?.id,
+      mode: 'AI_SUGGESTION',
+      status: 'PROPOSED',
+      reason: 'MANAGER_REVIEW_MODE',
+      aiResponseId: 'resp-intent',
+    });
+
+    await prisma.tenantSettings.update({
+      where: { tenantId: tenant.id },
+      data: { intentDetectionMode: 'AI_AUTOMATION' },
+    });
+    const automaticAnchor = await prisma.message.create({
+      data: {
+        tenantId: tenant.id,
+        conversationId: conversation.id,
+        rawEventId: event.id,
+        channel: 'INSTAGRAM',
+        externalMessageId: 'intent-automation-message',
+        direction: 'INBOUND',
+        senderId: 'customer',
+        text: 'Так, усе вірно — оформляйте',
+        sourceTimestamp: new Date('2026-09-18T09:01:00Z'),
+      },
+    });
+
+    const automatic = await processor.processIfTriggered(automaticAnchor.id);
+    const automaticReplay = await processor.processIfTriggered(automaticAnchor.id);
+
+    expect(automatic).toMatchObject({ status: 'AUTO_APPROVED' });
+    expect(automaticReplay?.id).toBe(automatic?.id);
+    expect(recognize).toHaveBeenCalledTimes(2);
+    expect(assessApprovedOrder).toHaveBeenCalledWith(tenant.id, automatic?.id, 'SYSTEM');
+    expect(scheduleExport).toHaveBeenCalledWith(automatic?.id, tenant.id);
+    expect(await prisma.orderIntentEvaluation.findUniqueOrThrow({ where: { anchorMessageId: automaticAnchor.id } })).toMatchObject({
+      orderId: automatic?.id,
+      mode: 'AI_AUTOMATION',
+      status: 'AUTO_CREATED',
+      reason: 'COMPLETE_HIGH_CONFIDENCE',
+    });
+  });
 });

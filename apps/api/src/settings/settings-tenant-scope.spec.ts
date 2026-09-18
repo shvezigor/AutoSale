@@ -6,6 +6,7 @@ import { OrderSettingsService } from './order-settings.service.js';
 describe('settings tenant scope', () => {
   it('creates default order settings for a tenant that does not have them yet', async () => {
     const upsert = vi.fn().mockResolvedValue({
+      intentDetectionMode: 'PHRASE_ONLY',
       approvalMode: 'ALWAYS',
       autoApprovalThreshold: 0.9,
       promptVersion: 'instagram-order-v2',
@@ -16,6 +17,7 @@ describe('settings tenant scope', () => {
     const settings = await service.get('tenant-b');
 
     expect(settings).toEqual({
+      intentDetectionMode: 'PHRASE_ONLY',
       approvalMode: 'ALWAYS',
       autoApprovalThreshold: 0.9,
       promptVersion: 'instagram-order-v2',
@@ -26,6 +28,7 @@ describe('settings tenant scope', () => {
       update: {},
       create: {
         tenantId: 'tenant-b',
+        intentDetectionMode: 'PHRASE_ONLY',
         approvalMode: 'ALWAYS',
         autoApprovalThreshold: 0.9,
         promptVersion: 'instagram-order-v2',

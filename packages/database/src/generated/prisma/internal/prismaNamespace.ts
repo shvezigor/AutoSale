@@ -430,6 +430,7 @@ export const ModelName = {
   GoogleSheetsDestination: 'GoogleSheetsDestination',
   TenantSettings: 'TenantSettings',
   Order: 'Order',
+  OrderIntentEvaluation: 'OrderIntentEvaluation',
   DeliveryConnection: 'DeliveryConnection',
   DeliverySenderProfile: 'DeliverySenderProfile',
   Shipment: 'Shipment',
@@ -462,7 +463,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "tenant" | "googleConnection" | "googleOAuthAttempt" | "googleCredentialCleanup" | "instagramConnection" | "instagramOAuthState" | "instagramCredentialCleanup" | "user" | "userAvatarCleanup" | "userNotification" | "telegramLinkAttempt" | "telegramUserBinding" | "telegramBusinessConnection" | "telegramChat" | "telegramSupplierSetting" | "telegramWebhookUpdate" | "telegramDelivery" | "googleIdentity" | "googleSignInAttempt" | "tenantMembership" | "session" | "emailVerificationToken" | "passwordResetToken" | "tenantInvitation" | "securityAuditLog" | "webhookEvent" | "conversation" | "instagramCustomerProfile" | "instagramAvatarCleanup" | "message" | "googleSheetsDestination" | "tenantSettings" | "order" | "deliveryConnection" | "deliverySenderProfile" | "shipment" | "shipmentAttempt" | "shipmentStatusEvent" | "orderExport" | "auditLog" | "orderItem" | "product" | "inventoryReservation" | "telegramDeliveryItem" | "telegramNotificationPreference" | "catalogueSource" | "catalogueMapping" | "catalogueImportRun" | "attachment" | "demoLead"
+    modelProps: "tenant" | "googleConnection" | "googleOAuthAttempt" | "googleCredentialCleanup" | "instagramConnection" | "instagramOAuthState" | "instagramCredentialCleanup" | "user" | "userAvatarCleanup" | "userNotification" | "telegramLinkAttempt" | "telegramUserBinding" | "telegramBusinessConnection" | "telegramChat" | "telegramSupplierSetting" | "telegramWebhookUpdate" | "telegramDelivery" | "googleIdentity" | "googleSignInAttempt" | "tenantMembership" | "session" | "emailVerificationToken" | "passwordResetToken" | "tenantInvitation" | "securityAuditLog" | "webhookEvent" | "conversation" | "instagramCustomerProfile" | "instagramAvatarCleanup" | "message" | "googleSheetsDestination" | "tenantSettings" | "order" | "orderIntentEvaluation" | "deliveryConnection" | "deliverySenderProfile" | "shipment" | "shipmentAttempt" | "shipmentStatusEvent" | "orderExport" | "auditLog" | "orderItem" | "product" | "inventoryReservation" | "telegramDeliveryItem" | "telegramNotificationPreference" | "catalogueSource" | "catalogueMapping" | "catalogueImportRun" | "attachment" | "demoLead"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2908,6 +2909,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    OrderIntentEvaluation: {
+      payload: Prisma.$OrderIntentEvaluationPayload<ExtArgs>
+      fields: Prisma.OrderIntentEvaluationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.OrderIntentEvaluationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderIntentEvaluationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.OrderIntentEvaluationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderIntentEvaluationPayload>
+        }
+        findFirst: {
+          args: Prisma.OrderIntentEvaluationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderIntentEvaluationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.OrderIntentEvaluationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderIntentEvaluationPayload>
+        }
+        findMany: {
+          args: Prisma.OrderIntentEvaluationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderIntentEvaluationPayload>[]
+        }
+        create: {
+          args: Prisma.OrderIntentEvaluationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderIntentEvaluationPayload>
+        }
+        createMany: {
+          args: Prisma.OrderIntentEvaluationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.OrderIntentEvaluationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderIntentEvaluationPayload>[]
+        }
+        delete: {
+          args: Prisma.OrderIntentEvaluationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderIntentEvaluationPayload>
+        }
+        update: {
+          args: Prisma.OrderIntentEvaluationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderIntentEvaluationPayload>
+        }
+        deleteMany: {
+          args: Prisma.OrderIntentEvaluationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.OrderIntentEvaluationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.OrderIntentEvaluationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderIntentEvaluationPayload>[]
+        }
+        upsert: {
+          args: Prisma.OrderIntentEvaluationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderIntentEvaluationPayload>
+        }
+        aggregate: {
+          args: Prisma.OrderIntentEvaluationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateOrderIntentEvaluation>
+        }
+        groupBy: {
+          args: Prisma.OrderIntentEvaluationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.OrderIntentEvaluationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.OrderIntentEvaluationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.OrderIntentEvaluationCountAggregateOutputType> | number
+        }
+      }
+    }
     DeliveryConnection: {
       payload: Prisma.$DeliveryConnectionPayload<ExtArgs>
       fields: Prisma.DeliveryConnectionFieldRefs
@@ -4729,6 +4804,7 @@ export type GoogleSheetsDestinationScalarFieldEnum = (typeof GoogleSheetsDestina
 export const TenantSettingsScalarFieldEnum = {
   id: 'id',
   tenantId: 'tenantId',
+  intentDetectionMode: 'intentDetectionMode',
   approvalMode: 'approvalMode',
   autoApprovalThreshold: 'autoApprovalThreshold',
   promptVersion: 'promptVersion',
@@ -4767,6 +4843,31 @@ export const OrderScalarFieldEnum = {
 } as const
 
 export type OrderScalarFieldEnum = (typeof OrderScalarFieldEnum)[keyof typeof OrderScalarFieldEnum]
+
+
+export const OrderIntentEvaluationScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  conversationId: 'conversationId',
+  anchorMessageId: 'anchorMessageId',
+  orderId: 'orderId',
+  mode: 'mode',
+  status: 'status',
+  reason: 'reason',
+  attempts: 'attempts',
+  aiResponseId: 'aiResponseId',
+  aiModel: 'aiModel',
+  inputTokens: 'inputTokens',
+  outputTokens: 'outputTokens',
+  latencyMs: 'latencyMs',
+  leaseExpiresAt: 'leaseExpiresAt',
+  lastErrorCode: 'lastErrorCode',
+  completedAt: 'completedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type OrderIntentEvaluationScalarFieldEnum = (typeof OrderIntentEvaluationScalarFieldEnum)[keyof typeof OrderIntentEvaluationScalarFieldEnum]
 
 
 export const DeliveryConnectionScalarFieldEnum = {
@@ -5897,6 +5998,7 @@ export type GlobalOmitConfig = {
   googleSheetsDestination?: Prisma.GoogleSheetsDestinationOmit
   tenantSettings?: Prisma.TenantSettingsOmit
   order?: Prisma.OrderOmit
+  orderIntentEvaluation?: Prisma.OrderIntentEvaluationOmit
   deliveryConnection?: Prisma.DeliveryConnectionOmit
   deliverySenderProfile?: Prisma.DeliverySenderProfileOmit
   shipment?: Prisma.ShipmentOmit
