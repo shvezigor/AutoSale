@@ -172,6 +172,7 @@ Manual test data belongs under `tests/fixtures/` and must be clearly fictional. 
 Production deployment uses the verified `master` commit or an immutable release tag. The migration container runs `prisma migrate deploy` before API and worker startup.
 
 - [Deployment](docs/operations/deployment.md)
+- [Hosting provider analysis: Hetzner, AWS and Google Cloud](docs/research/2026-09-18-hosting-provider-analysis.md)
 - [Authentication administration](docs/operations/authentication.md)
 - [Backup and restore](docs/operations/backup-restore.md)
 - [Observability](docs/operations/observability.md)
