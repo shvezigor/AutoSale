@@ -30,7 +30,7 @@
 
 - [x] 2026-09-18: реальне текстове повідомлення отримане з активного Instagram Professional account; окремий реальний image attachment скопійований у контрольоване сховище. Evidence перевірено лише за агрегованими статусами без тексту, профілю клієнта або provider ID.
 - [x] 2026-09-18: реальна відповідь з AutoSale отримала `SENT` і provider confirmation, користувач підтвердив її появу в Instagram, а перевірка у сховищі не виявила дубльованих outbound message identities. Evidence містить лише статуси й агрегований duplicate count.
-- [ ] Підтвердити один callback у Meta dashboard і перевірити signature/event ID evidence без PII.
+- [x] 2026-09-18: активний Meta callback доставив свіжу подію, яка пройшла обов'язкову `X-Hub-Signature-256` перевірку перед реєстрацією, отримала унікальну external event identity та статус `PROCESSED`; дубльованих event identities не виявлено. Signature, payload і provider ID не записувалися в evidence.
 - [x] 2026-09-18: на новому реальному вхідному повідомленні режим `AI_SUGGESTION` завершив оцінювання з першої спроби, створив пов'язану пропозицію замовлення з AI-response evidence, після чого менеджер підтвердив замовлення. Текст діалогу, персональні дані та provider ID не зберігалися в evidence.
 - [ ] Перевірити режими approval `ALWAYS`, `NEVER`, `ON_LOW_CONFIDENCE` на реальних запитах.
 - [ ] Додати та оновити рівно один рядок у тестовому Google Sheet.
