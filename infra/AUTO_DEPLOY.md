@@ -1,5 +1,7 @@
 # AutoSale automatic deployment
 
+Complete the host provisioning, migration, and first-deploy gates in [`../docs/operations/hetzner-production.md`](../docs/operations/hetzner-production.md) before enabling this workflow for the Hetzner production environment.
+
 The GitHub Actions workflow in `.github/workflows/ci-deploy.yml` verifies every
 pull request and every push to `master`. Production deployment remains disabled
 until a real server is prepared and the repository variable below is enabled.

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Production Deployment"
+  short_description: "Provision and deploy Sales AITO production safely"
+  default_prompt: "Use $production-deployment to prepare or deploy Sales AITO production safely."

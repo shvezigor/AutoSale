@@ -172,6 +172,8 @@ Manual test data belongs under `tests/fixtures/` and must be clearly fictional. 
 Production deployment uses the verified `master` commit or an immutable release tag. The migration container runs `prisma migrate deploy` before API and worker startup.
 
 - [Deployment](docs/operations/deployment.md)
+- [Hetzner production provisioning and rollout](docs/operations/hetzner-production.md)
+- [ADR 0001: Hetzner single-host production baseline](docs/adr/0001-hetzner-single-host-production.md)
 - [Hosting provider analysis: Hetzner, AWS and Google Cloud](docs/research/2026-09-18-hosting-provider-analysis.md)
 - [Authentication administration](docs/operations/authentication.md)
 - [Backup and restore](docs/operations/backup-restore.md)

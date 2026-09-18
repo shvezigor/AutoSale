@@ -1,5 +1,7 @@
 # Розгортання AutoSale на Linux Docker host
 
+Для первинного розгортання, міграції, масштабування або відновлення production у Hetzner спочатку використовуйте [`hetzner-production.md`](hetzner-production.md). Цей документ описує provider-neutral реліз уже підготовленого Docker host.
+
 ## Вимоги
 
 - Linux x86_64/arm64, Docker Engine із Compose v2, Git і щонайменше 4 ГБ RAM.
