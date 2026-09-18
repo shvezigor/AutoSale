@@ -16,6 +16,7 @@ export type InstagramMessageDeliveryResult = 'SENT' | 'RETRY' | 'FAILED' | 'UNKN
 
 interface InstagramTextClient {
   sendText(
+    accountId: string,
     recipientId: string,
     text: string,
     accessToken: string,
@@ -92,6 +93,7 @@ export class InstagramMessageDeliveryService {
       },
       select: {
         id: true,
+        externalAccountId: true,
         encryptedAccessToken: true,
         credentialGenerationId: true,
       },
@@ -116,6 +118,7 @@ export class InstagramMessageDeliveryService {
     let sent: { recipientId: string; messageId: string };
     try {
       sent = await this.meta.sendText(
+        connection.externalAccountId,
         message.conversation.participantId,
         message.text,
         accessToken,
@@ -247,5 +250,5 @@ export class InstagramMessageDeliveryService {
 }
 
 function isReconnectError(error: MetaInstagramError): boolean {
-  return error.providerCode === 190 || error.providerCode === 10 || error.providerCode === 200;
+  return error.providerCode === 190;
 }

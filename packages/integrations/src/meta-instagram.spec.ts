@@ -184,11 +184,11 @@ describe('MetaInstagramClient', () => {
     const client = new MetaInstagramClient({ ...config, fetch: fetchFn });
 
     await expect(
-      client.sendText('ig-customer-1', 'Вітаю', 'secret-token'),
+      client.sendText('instagram-shop', 'ig-customer-1', 'Вітаю', 'secret-token'),
     ).resolves.toEqual({ recipientId: 'ig-customer-1', messageId: 'mid.123' });
 
     const [requestUrl, init] = fetchFn.mock.calls[0] ?? [];
-    expect(String(requestUrl)).toBe('https://graph.instagram.com/v24.0/me/messages');
+    expect(String(requestUrl)).toBe('https://graph.instagram.com/v24.0/instagram-shop/messages');
     expect(init).toMatchObject({
       method: 'POST',
       headers: {
@@ -204,15 +204,16 @@ describe('MetaInstagramClient', () => {
   });
 
   it.each([
-    ['../me', 'Вітаю'],
-    ['', 'Вітаю'],
-    ['ig-customer-1', ''],
-    ['ig-customer-1', 'x'.repeat(1_001)],
-  ])('rejects invalid outbound message input before fetch', async (recipientId, text) => {
+    ['../me', 'ig-customer-1', 'Вітаю'],
+    ['instagram-shop', '../me', 'Вітаю'],
+    ['instagram-shop', '', 'Вітаю'],
+    ['instagram-shop', 'ig-customer-1', ''],
+    ['instagram-shop', 'ig-customer-1', 'x'.repeat(1_001)],
+  ])('rejects invalid outbound message input before fetch', async (accountId, recipientId, text) => {
     const fetchFn = vi.fn<typeof fetch>();
     const client = new MetaInstagramClient({ ...config, fetch: fetchFn });
 
-    await expect(client.sendText(recipientId, text, 'secret-token')).rejects.toThrow();
+    await expect(client.sendText(accountId, recipientId, text, 'secret-token')).rejects.toThrow();
     expect(fetchFn).not.toHaveBeenCalled();
   });
 
@@ -225,7 +226,7 @@ describe('MetaInstagramClient', () => {
       })),
     });
 
-    const failure = client.sendText('ig-customer-1', 'Вітаю', 'secret-token');
+    const failure = client.sendText('instagram-shop', 'ig-customer-1', 'Вітаю', 'secret-token');
     await expect(failure).rejects.toEqual(expect.objectContaining({
       name: 'MetaInstagramError',
       status: 200,
@@ -244,7 +245,7 @@ describe('MetaInstagramClient', () => {
       fetch: vi.fn<typeof fetch>().mockResolvedValue(response(envelope, status)),
     });
 
-    const failure = client.sendText('ig-customer-1', 'Вітаю', 'secret-token');
+    const failure = client.sendText('instagram-shop', 'ig-customer-1', 'Вітаю', 'secret-token');
     await expect(failure).rejects.toEqual(expect.objectContaining({
       name: 'MetaInstagramError', status, providerCode, isTransient,
     }));
@@ -260,7 +261,7 @@ describe('MetaInstagramClient', () => {
       ),
     });
 
-    const failure = client.sendText('ig-customer-1', 'Вітаю', 'secret-token');
+    const failure = client.sendText('instagram-shop', 'ig-customer-1', 'Вітаю', 'secret-token');
     await expect(failure).rejects.toEqual(expect.objectContaining({
       name: 'MetaInstagramError', status: null, providerCode: null,
     }));

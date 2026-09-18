@@ -145,10 +145,14 @@ export class MetaInstagramClient {
   }
 
   async sendText(
+    accountId: string,
     recipientId: string,
     text: string,
     accessToken: string,
   ): Promise<MetaInstagramSendResult> {
+    if (!/^[A-Za-z0-9_-]{1,128}$/.test(accountId)) {
+      throw new Error('Invalid Instagram account id');
+    }
     if (!/^[A-Za-z0-9_-]{1,128}$/.test(recipientId)) {
       throw new Error('Invalid Instagram participant id');
     }
@@ -158,7 +162,7 @@ export class MetaInstagramClient {
 
     let payload: unknown;
     try {
-      payload = await this.requestJson(this.graphUrl('me/messages'), {
+      payload = await this.requestJson(this.graphUrl(`${accountId}/messages`), {
         method: 'POST',
         headers: {
           authorization: `Bearer ${accessToken}`,

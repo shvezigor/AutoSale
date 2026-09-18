@@ -66,7 +66,7 @@ describe('InstagramMessageDeliveryService', () => {
     await expect(service().process({ tenantId, messageId })).resolves.toBe('SENT');
 
     expect(sendText).toHaveBeenCalledWith(
-      'ig-customer-1', 'Вітаю', 'access-token-that-must-not-leak',
+      'instagram-shop', 'ig-customer-1', 'Вітаю', 'access-token-that-must-not-leak',
     );
     await expect(prisma.message.findUniqueOrThrow({ where: { id: messageId } })).resolves.toMatchObject({
       deliveryStatus: 'SENT',
@@ -93,6 +93,23 @@ describe('InstagramMessageDeliveryService', () => {
     await prisma.instagramConnection.update({
       where: { tenantId },
       data: { status: 'ACTIVE', lastErrorCode: null },
+    });
+  });
+
+  it.each([
+    ['recipient restriction', 10, 2018108],
+    ['message permission rejection', 200, null],
+  ])('keeps a valid connection active after a %s', async (_reason, providerCode, errorSubcode) => {
+    const messageId = await seedMessage();
+    sendText.mockRejectedValueOnce(new MetaInstagramError(403, providerCode, false, errorSubcode, 'SEND'));
+
+    await expect(service().process({ tenantId, messageId })).resolves.toBe('FAILED');
+
+    await expect(prisma.message.findUniqueOrThrow({ where: { id: messageId } })).resolves.toMatchObject({
+      deliveryStatus: 'FAILED', deliveryErrorCode: 'INSTAGRAM_SEND_FAILED', deliveryLeaseId: null,
+    });
+    await expect(prisma.instagramConnection.findUniqueOrThrow({ where: { tenantId } })).resolves.toMatchObject({
+      status: 'ACTIVE', lastErrorCode: null,
     });
   });
 

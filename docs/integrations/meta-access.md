@@ -43,6 +43,73 @@ Meta Send API спрямований у контрольований stub. По�
 Зберігати як evidence можна лише санітизовані ID, статуси й час — без токенів та
 тексту клієнта.
 
+## Інцидент 2026-09-18: хибний `REAUTH_REQUIRED` після відправлення
+
+### Симптом
+
+- OAuth завершується успішно, webhook `/webhooks/meta` приймає події, але перша
+  невдала відповідь клієнту переводить всю інтеграцію у
+  `INSTAGRAM_RECONNECT_REQUIRED`.
+- Повторне підключення тимчасово показує `ACTIVE`, однак наступна невдала
+  відправка знову повертає той самий стан.
+
+### Першопричина
+
+Було дві пов'язані помилки в адаптері відправлення:
+
+1. Запит надсилався на alias `/me/messages`, хоча Send API для Instagram Login
+   документує endpoint `/{instagram-account-id}/messages`. Збережений
+   `externalAccountId` не передавався з worker до Meta-клієнта.
+2. Будь-які provider codes `10`, `190` або `200` вважалися доказом
+   недійсного токена. Codes `10` і `200` можуть описувати заборону для
+   конкретного одержувача або конкретної операції; вони не доводять, що OAuth
+   token чи webhook subscription втрачено. Через це локальний стан
+   `REAUTH_REQUIRED` міг бути хибним і зберігався навіть при справному токені.
+
+Попереднє виправлення від'єднання Instagram було присутнє в релізі. Цей
+інцидент повторився не через втрачений commit, а через окрему помилку Send API,
+яку попередній fix не охоплював.
+
+### Виправлення
+
+- `MetaInstagramClient.sendText` тепер вимагає явний Instagram account ID і
+  викликає `/{instagram-account-id}/messages`.
+- Worker читає `externalAccountId` тієї самої активної credential generation і
+  передає його до клієнта разом з recipient ID.
+- Лише provider code `190` переводить підключення у `REAUTH_REQUIRED`.
+  Codes `10` і `200` завершують конкретне повідомлення контрольованою помилкою,
+  але залишають справне підключення активним.
+
+### Безпечна діагностика
+
+Перевіряти шари окремо й не просити користувача циклічно перепідключати акаунт:
+
+1. `POST /webhooks/meta` має повертати 2xx для підписаних подій.
+2. У `instagram_connections` перевірити лише `status`, `last_error_code`,
+   `token_expires_at`, `last_verified_at`, `granted_scopes` і наявність
+   encrypted token. Не виводити token або повний account ID.
+3. Усередині worker виконати read-only identity probe `GET /me` з bearer token;
+   у evidence зберегти тільки HTTP status і provider code.
+4. Виконати read-only subscription probe `GET /me/subscribed_apps`; очікується
+   200 і поле `messages`. Не записувати response body, токен чи персональні дані.
+5. Звірити `messages.delivery_error_code`. `INSTAGRAM_RECONNECT_REQUIRED`
+   допустимий лише після Meta code `190`, помилки decrypt або фактичного
+   завершення `token_expires_at`.
+6. Code `10`/`200` діагностувати на рівні конкретного recipient, messaging
+   window, app role/review та дозволеної операції. Він не є підставою
+   деактивувати підключення.
+
+Після позитивних identity і subscription probes хибний локальний
+`REAUTH_REQUIRED` можна повернути в `ACTIVE`, очистивши `last_error_code` для
+тієї самої credential generation. Перед зміною обов'язково звірити generation,
+щоб не перезаписати новіше підключення.
+
+Контрольна регресія: adapter test має доводити точний account-scoped URL, а
+worker test — що code `190` вимагає reconnect, тоді як `10`/`200` не змінюють
+стан активного підключення.
+
+Офіційний контракт Send API: [Meta Instagram API workspace](https://www.postman.com/meta/workspace/instagram/documentation/23987686-9386f468-7714-490f-9bfc-9442db5c8f00).
+
 ## Локальна перевірка — 2026-08-26
 
 - Контейнер міграції Docker успішно застосував `20260826090000_init_webhook_events`.
