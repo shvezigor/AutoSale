@@ -24,8 +24,8 @@ export class MalformedSupportedEventError extends Error {
 }
 
 export function normalizeInstagramEvent(payload: unknown): NormalizedInstagramMessage[] {
-  if (!isRecord(payload) || !Array.isArray(payload.entry)) {
-    return [];
+  if (!isRecord(payload) || payload.object !== 'instagram' || !Array.isArray(payload.entry)) {
+    throw new MalformedSupportedEventError('Expected a persisted Instagram webhook payload');
   }
 
   const normalized: NormalizedInstagramMessage[] = [];

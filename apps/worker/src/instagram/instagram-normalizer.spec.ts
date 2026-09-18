@@ -64,6 +64,12 @@ describe('normalizeInstagramEvent', () => {
     ).toEqual([]);
   });
 
+  it('rejects a persisted payload that is not an Instagram callback', () => {
+    expect(() => normalizeInstagramEvent({ object: 'page', entry: [] })).toThrow(
+      MalformedSupportedEventError,
+    );
+  });
+
   it('rejects a supported message without a stable identity', () => {
     expect(() =>
       normalizeInstagramEvent({

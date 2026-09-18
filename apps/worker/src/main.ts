@@ -20,6 +20,7 @@ import { metrics, StructuredLogger } from '@autosale/observability';
 import { createWorkerHealthServer } from './health-server.js';
 import { InstagramProcessor } from './instagram/instagram.processor.js';
 import { InstagramAvatarCleanupReconciler } from './instagram/instagram-avatar-cleanup-reconciler.js';
+import { InstagramEventReconciler } from './instagram/instagram-event-reconciler.js';
 import { InstagramAvatarCopyService } from './instagram/instagram-avatar-copy.service.js';
 import { InstagramProfileEnrichmentService } from './instagram/instagram-profile-enrichment.service.js';
 import { InstagramProfileReconciler } from './instagram/instagram-profile-reconciler.js';
@@ -405,6 +406,22 @@ async function bootstrap(): Promise<void> {
   const instagramProfileReconciler = new InstagramProfileReconciler(prisma, instagramProfileQueue);
   const instagramMessageReconciler = new InstagramMessageReconciler(prisma, instagramProfileQueue);
   const instagramAvatarCleanupReconciler = new InstagramAvatarCleanupReconciler(prisma, storage);
+  const instagramQueue = new Queue('instagram', {
+    connection: {
+      host: redis.hostname,
+      port: Number(redis.port || 6379),
+      username: redis.username || undefined,
+      password: redis.password || undefined,
+      tls: redis.protocol === 'rediss:' ? {} : undefined,
+    },
+    defaultJobOptions: {
+      attempts: 5,
+      backoff: { type: 'exponential', delay: 1_000 },
+      removeOnComplete: 1_000,
+      removeOnFail: true,
+    },
+  });
+  const instagramReconciler = new InstagramEventReconciler(prisma, instagramQueue);
   const catalogueWorker = new Worker(
     'catalogue',
     async (job) => {
@@ -518,6 +535,24 @@ async function bootstrap(): Promise<void> {
     }
   };
   const catalogueReconcileTimer = setInterval(() => void reconcileCatalogueMappings(), 5_000);
+  let reconcilingInstagramEvents = false;
+  const reconcileInstagramEvents = async (): Promise<void> => {
+    if (reconcilingInstagramEvents) return;
+    reconcilingInstagramEvents = true;
+    try {
+      const result = await instagramReconciler.reconcile();
+      metrics.set('autosale_queue_backlog', result.attempted, { queue: 'instagram' });
+      if (result.failed > 0) {
+        metrics.increment('autosale_operations_total', { operation: 'instagram_event_reconcile', result: 'failure' });
+      }
+    } catch (error) {
+      metrics.increment('autosale_operations_total', { operation: 'instagram_event_reconcile', result: 'failure' });
+      logger.warn('instagram_event_reconcile_failed', { correlationId: 'system:instagram-event', errorCode: error instanceof Error ? error.name : 'UNKNOWN' });
+    } finally {
+      reconcilingInstagramEvents = false;
+    }
+  };
+  const instagramReconcileTimer = setInterval(() => void reconcileInstagramEvents(), 5_000);
   let reconcilingInstagramProfiles = false;
   const reconcileInstagramProfiles = async (): Promise<void> => {
     if (reconcilingInstagramProfiles) return;
@@ -678,6 +713,7 @@ async function bootstrap(): Promise<void> {
   const shipmentReconcileTimer = setInterval(() => void reconcileShipments(), 5_000);
   void pollExports();
   void reconcileCatalogueMappings();
+  void reconcileInstagramEvents();
   void reconcileInstagramProfiles();
   void reconcileInstagramMessages();
   void scheduleCatalogueSources();
@@ -693,6 +729,7 @@ async function bootstrap(): Promise<void> {
   const shutdown = async (): Promise<void> => {
     clearInterval(sheetsTimer);
     clearInterval(catalogueReconcileTimer);
+    clearInterval(instagramReconcileTimer);
     clearInterval(instagramProfileReconcileTimer);
     clearInterval(instagramMessageReconcileTimer);
     clearInterval(catalogueScheduleTimer);
@@ -706,6 +743,7 @@ async function bootstrap(): Promise<void> {
     await telegramWorker?.close();
     await telegramQueue?.close();
     await worker.close();
+    await instagramQueue.close();
     await instagramProfileQueue.close();
     await catalogueWorker.close();
     await catalogueQueue.close();

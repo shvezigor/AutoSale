@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import type { IncomingMessage } from 'node:http';
 
 import {
+  BadRequestException,
   Body,
   Controller,
   ForbiddenException,
@@ -28,7 +29,11 @@ export interface MetaWebhookConfig {
 }
 
 interface NormalizeQueue {
-  add(name: 'instagram.normalize', data: { eventId: string; correlationId: string }): Promise<unknown>;
+  add(
+    name: 'instagram.normalize',
+    data: { eventId: string; correlationId: string },
+    options: { jobId: string; removeOnFail: true },
+  ): Promise<unknown>;
 }
 
 @Controller('webhooks/meta')
@@ -65,29 +70,55 @@ export class MetaController {
       throw new UnauthorizedException();
     }
 
-    const externalAccountId = extractAccountId(payload);
-    if (!externalAccountId) return { received: true };
-    const tenantId = await this.events.resolveTenant(externalAccountId);
-    if (!tenantId) return { received: true };
-    const externalEventId = deriveExternalEventId(payload, tenantId);
-    const registered = await this.events.register({
-      tenantId,
-      externalEventId,
-      payload,
-    });
+    const entries = validateInstagramEntries(payload);
+    for (const entry of entries) {
+      const tenantId = await this.events.resolveTenant(entry.id);
+      if (!tenantId) continue;
 
-    if (!registered.duplicate) {
-      await this.queue.add('instagram.normalize', { eventId: registered.eventId, correlationId: registered.eventId });
+      const entryPayload = { object: 'instagram', entry: [entry] };
+      const externalEventId = deriveExternalEventId(entryPayload, tenantId);
+      const registered = await this.events.register({
+        tenantId,
+        externalEventId,
+        payload: entryPayload,
+      });
+
+      if (registered.pending) {
+        void this.dispatch(registered.eventId);
+      }
     }
 
     return { received: true };
   }
+
+  private async dispatch(eventId: string): Promise<void> {
+    try {
+      await this.queue.add(
+        'instagram.normalize',
+        { eventId, correlationId: eventId },
+        { jobId: eventId, removeOnFail: true },
+      );
+    } catch {
+      // RECEIVED is the durable dispatch record; Meta retry or the reconciler will retry.
+    }
+  }
 }
 
-function extractAccountId(payload: Record<string, unknown>): string | null {
-  const entries = Array.isArray(payload.entry) ? payload.entry : [];
-  const first = entries[0];
-  return isRecord(first) && typeof first.id === 'string' ? first.id : null;
+interface InstagramEntry extends Record<string, unknown> {
+  id: string;
+}
+
+function validateInstagramEntries(payload: Record<string, unknown>): InstagramEntry[] {
+  if (payload.object !== 'instagram' || !Array.isArray(payload.entry)) {
+    throw new BadRequestException('Malformed Instagram webhook payload');
+  }
+
+  return payload.entry.map((entry) => {
+    if (!isRecord(entry) || typeof entry.id !== 'string' || entry.id.length === 0) {
+      throw new BadRequestException('Instagram webhook entry requires an account id');
+    }
+    return entry as InstagramEntry;
+  });
 }
 
 function deriveExternalEventId(payload: Record<string, unknown>, tenantId: string): string {
