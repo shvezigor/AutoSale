@@ -61,15 +61,37 @@ export function calculateCommercialTerms(lines: CommercialLineInput[]): Commerci
 
 export async function materializeCommercialTerms(
   tx: Prisma.TransactionClient,
-  input: { tenantId: string; orderId: string; actor: string; lines: CommercialLineInput[] },
+  input: {
+    tenantId: string;
+    orderId: string;
+    actor: string;
+    lines: CommercialLineInput[];
+    selection?: { legalEntityId: string | null; bankAccountId: string | null };
+  },
 ): Promise<CommercialCalculation> {
   const calculation = calculateCommercialTerms(input.lines);
-  const legalEntity = await tx.tenantLegalEntity.findFirst({
-    where: { tenantId: input.tenantId, active: true },
-    orderBy: [{ isDefault: 'desc' }, { createdAt: 'asc' }],
-  });
-  const bankAccount = legalEntity && calculation.currency
-    ? await tx.tenantBankAccount.findFirst({
+  const selectedEntity = input.selection?.legalEntityId
+    ? await tx.tenantLegalEntity.findFirst({ where: { id: input.selection.legalEntityId, tenantId: input.tenantId, active: true } })
+    : null;
+  const legalEntity = input.selection !== undefined
+    ? selectedEntity
+    : await tx.tenantLegalEntity.findFirst({
+        where: { tenantId: input.tenantId, active: true },
+        orderBy: [{ isDefault: 'desc' }, { createdAt: 'asc' }],
+      });
+  const selectedAccount = legalEntity && calculation.currency && input.selection?.bankAccountId
+    ? await tx.tenantBankAccount.findFirst({ where: {
+        id: input.selection.bankAccountId,
+        tenantId: input.tenantId,
+        legalEntityId: legalEntity.id,
+        currency: calculation.currency,
+        active: true,
+      } })
+    : null;
+  const bankAccount = input.selection !== undefined
+    ? selectedAccount
+    : legalEntity && calculation.currency
+      ? await tx.tenantBankAccount.findFirst({
         where: {
           tenantId: input.tenantId,
           legalEntityId: legalEntity.id,
@@ -77,8 +99,8 @@ export async function materializeCommercialTerms(
           active: true,
         },
         orderBy: [{ isDefault: 'desc' }, { createdAt: 'asc' }],
-      })
-    : null;
+        })
+      : null;
   for (const line of calculation.lines) {
     await tx.orderItem.updateMany({
       where: { id: line.itemId, tenantId: input.tenantId, orderId: input.orderId },

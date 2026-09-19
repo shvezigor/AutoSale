@@ -1,4 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
+import { Prisma } from '@autosale/database';
 import { describe, expect, it, vi } from 'vitest';
 
 import { OrdersService } from './orders.service.js';
@@ -42,15 +43,18 @@ describe('OrdersService Google Sheets retry', () => {
       },
       validationIssues: [], overallConfidence: 1, createdAt: new Date('2026-09-18T19:10:00.000Z'),
       conversation: { displayName: 'Олена', channel: 'INSTAGRAM', profile: null },
-      items: [{ id: 'item-1', catalogId: 'SKU-1', originalText: 'Товар', quantity: 1, color: null, size: null, confidence: 1, reservation: { id: 'reservation-1', quantity: 1, status: 'ACTIVE' } }],
+      items: [{ id: 'item-1', catalogId: 'SKU-1', originalText: 'Товар', quantity: 1, color: null, size: null, confidence: 1, reservation: { id: 'reservation-1', quantity: 1, status: 'ACTIVE' }, unitPriceSnapshot: new Prisma.Decimal('4395.00'), currencySnapshot: 'UAH', lineTotalSnapshot: new Prisma.Decimal('4395.00'), priceSourceSku: 'SKU-1' }],
       exports: [], procurementHandedOffAt: null, telegramDeliveries: [], shipments: [], intentEvaluation: null,
+      commercialTerms: { id: 'terms-1', legalEntityId: null, bankAccountId: null, pricingStatus: 'READY', issueCodes: [], currency: 'UAH', itemsSubtotal: new Prisma.Decimal('4395.00'), discountAmount: new Prisma.Decimal(0), deliveryAmount: new Prisma.Decimal(0), totalAmount: new Prisma.Decimal('4395.00'), version: 1, legalEntity: null, bankAccount: null },
     };
     const reopened = { ...current, status: 'NEEDS_REVIEW', items: [{ ...current.items[0], quantity: 2, reservation: null }] };
+    const termsUpsert = vi.fn().mockResolvedValue({});
     const prisma = {
       order: { findFirst: vi.fn().mockResolvedValue(current) },
-      product: { findMany: vi.fn().mockResolvedValue([{ sku: 'SKU-1', name: 'Товар' }]) },
+      product: { findMany: vi.fn().mockResolvedValue([{ sku: 'SKU-1', name: 'Товар', price: new Prisma.Decimal('9999.00'), currency: 'UAH' }]) },
       $transaction: vi.fn(async (callback: (tx: unknown) => unknown) => callback({
         orderItem: { update: vi.fn().mockResolvedValue({}), updateMany: vi.fn().mockResolvedValue({ count: 1 }) },
+        orderCommercialTerms: { upsert: termsUpsert },
         inventoryReservation: { updateMany: vi.fn().mockResolvedValue({ count: 1 }) },
         order: { update: vi.fn().mockResolvedValue(reopened) },
         auditLog: { create: vi.fn().mockResolvedValue({}) },
@@ -66,6 +70,9 @@ describe('OrdersService Google Sheets retry', () => {
     });
 
     expect(result).toMatchObject({ status: 'NEEDS_REVIEW', items: [{ quantity: 2 }] });
+    expect(termsUpsert).toHaveBeenCalledWith(expect.objectContaining({
+      update: expect.objectContaining({ itemsSubtotal: '8790.00', totalAmount: '8790.00' }),
+    }));
   });
 
   it('paginates and filters orders inside the authenticated tenant', async () => {

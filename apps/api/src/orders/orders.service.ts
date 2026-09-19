@@ -3,16 +3,19 @@ import { procurementSummaryFor } from '@autosale/contracts/procurement';
 import type { ProcurementStatus, ProcurementSummary } from '@autosale/contracts/procurement';
 import {
   InvalidProcurementTransitionError,
+  materializeCommercialTerms,
   ProcurementItemNotFoundError,
   ProcurementOrderNotReadyError,
   ProcurementStore,
   Prisma,
   type PrismaClient,
+  type CommercialLineInput,
 } from '@autosale/database';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { metrics } from '@autosale/observability';
 import { mapShipmentSummary, shipmentReadiness } from '../delivery/delivery.service.js';
 import type { ShipmentStatus } from '@autosale/contracts';
+import type { BankAccountSummary, LegalEntitySummary, OrderCommercialTermsSummary } from '@autosale/contracts/commercial';
 
 type Extraction = {
   isOrder?: boolean;
@@ -142,6 +145,7 @@ export class OrdersService {
       throw new BadRequestException('Order cannot be corrected after external fulfillment has started');
     }
     const products = await this.productNames(tenantId);
+    const pricing = await this.productPricing(tenantId);
     for (const item of input.items ?? []) {
       if (item.catalogId !== null && !products.has(item.catalogId)) throw new BadRequestException('Unknown catalogue SKU');
       if (!current.items.some((existing) => existing.id === item.id)) throw new BadRequestException('Unknown order item');
@@ -187,6 +191,30 @@ export class OrdersService {
         ...(input.items?.find((item) => item.id === existing.id) ?? {}),
       }));
       const issues = validationIssues(nextExtraction, rows);
+      if (current.commercialTerms) {
+        const lines: CommercialLineInput[] = rows.map((row) => {
+          const submitted = input.items?.find((item) => item.id === row.id);
+          const productChanged = submitted !== undefined && submitted.catalogId !== current.items.find((item) => item.id === row.id)?.catalogId;
+          const product = row.catalogId ? pricing.get(row.catalogId) : undefined;
+          return {
+            itemId: row.id,
+            quantity: row.quantity,
+            unitPrice: productChanged ? product?.price ?? null : row.unitPriceSnapshot?.toFixed(2) ?? null,
+            currency: productChanged ? product?.currency ?? null : row.currencySnapshot,
+            sourceSku: productChanged ? product?.sku ?? null : row.priceSourceSku,
+          };
+        });
+        await materializeCommercialTerms(tx, {
+          tenantId,
+          orderId: id,
+          actor,
+          lines,
+          selection: {
+            legalEntityId: current.commercialTerms.legalEntityId,
+            bankAccountId: current.commercialTerms.bankAccountId,
+          },
+        });
+      }
       const order = await tx.order.update({
         where: { id, tenantId },
         data: {
@@ -263,11 +291,22 @@ export class OrdersService {
       include: { statusEvents: { orderBy: { occurredAt: 'desc' as const } } },
     },
     intentEvaluation: { select: { mode: true, reason: true } },
+    commercialTerms: {
+      include: {
+        bankAccount: true,
+        legalEntity: { include: { bankAccounts: { where: { active: true }, orderBy: [{ isDefault: 'desc' as const }, { label: 'asc' as const }] } } },
+      },
+    },
   };
 
   private async productNames(tenantId: string): Promise<Map<string, string>> {
     const products = await this.prisma.product.findMany({ where: { tenantId }, select: { sku: true, name: true } });
     return new Map(products.map((product) => [product.sku, product.name]));
+  }
+
+  private async productPricing(tenantId: string): Promise<Map<string, { sku: string; price: string | null; currency: string | null }>> {
+    const products = await this.prisma.product.findMany({ where: { tenantId, active: true }, select: { sku: true, price: true, currency: true } });
+    return new Map(products.map((product) => [product.sku, { sku: product.sku, price: product.price?.toFixed(2) ?? null, currency: product.currency }]));
   }
 
   private map(row: Awaited<ReturnType<OrdersService['find']>>, products: Map<string, string>): ManagerOrder {
@@ -316,7 +355,7 @@ export class OrdersService {
         currencySnapshot: item.currencySnapshot,
         lineTotalSnapshot: item.lineTotalSnapshot?.toFixed(2) ?? null,
       })),
-      commercialTerms: null,
+      commercialTerms: row.commercialTerms ? mapCommercialTerms(row.commercialTerms) : null,
       procurementSummary: ['APPROVED', 'AUTO_APPROVED'].includes(row.status)
         ? procurementSummaryFor(procurementStatuses, Boolean(row.procurementHandedOffAt))
         : 'UNASSESSED',
@@ -351,6 +390,48 @@ export class OrdersService {
     }
     throw error;
   }
+}
+
+function mapLegalEntity(entity: {
+  id: string; displayName: string; legalName: string; type: string; registrationId: string | null; active: boolean; isDefault: boolean;
+}): LegalEntitySummary {
+  return { ...entity, type: entity.type as LegalEntitySummary['type'] };
+}
+
+function mapBankAccount(account: {
+  id: string; legalEntityId: string; label: string; iban: string; bankName: string | null; currency: string; active: boolean; isDefault: boolean;
+}): BankAccountSummary {
+  const iban = account.iban.replace(/\s/g, '').toUpperCase();
+  return {
+    id: account.id, legalEntityId: account.legalEntityId, label: account.label,
+    maskedIban: `${iban.slice(0, 2)}••••${iban.slice(-4)}`,
+    bankName: account.bankName, currency: account.currency, active: account.active, isDefault: account.isDefault,
+  };
+}
+
+type CommercialTermsRow = Prisma.OrderCommercialTermsGetPayload<{
+  include: { bankAccount: true; legalEntity: { include: { bankAccounts: true } } };
+}>;
+
+function mapCommercialTerms(terms: CommercialTermsRow): OrderCommercialTermsSummary {
+  return {
+    pricingStatus: terms.pricingStatus,
+    issueCodes: Array.isArray(terms.issueCodes)
+      ? terms.issueCodes.filter((issue): issue is OrderCommercialTermsSummary['issueCodes'][number] => typeof issue === 'string' && ['ITEM_PRICE_MISSING', 'ITEM_CURRENCY_MISSING', 'MIXED_CURRENCIES'].includes(issue))
+      : [],
+    currency: terms.currency,
+    itemsSubtotal: terms.itemsSubtotal?.toFixed(2) ?? null,
+    discountAmount: terms.discountAmount.toFixed(2),
+    deliveryAmount: terms.deliveryAmount.toFixed(2),
+    totalAmount: terms.totalAmount?.toFixed(2) ?? null,
+    legalEntity: terms.legalEntity ? mapLegalEntity(terms.legalEntity) : null,
+    bankAccount: terms.bankAccount ? mapBankAccount(terms.bankAccount) : null,
+    eligibleAccounts: terms.legalEntity?.bankAccounts
+      .filter((account) => account.currency === terms.currency)
+      .map(mapBankAccount) ?? [],
+    version: terms.version,
+    legacy: false,
+  };
 }
 
 function orderListOrderBy(sort: NonNullable<OrderListQuery['sort']>, direction: NonNullable<OrderListQuery['direction']>): Prisma.OrderOrderByWithRelationInput[] {
