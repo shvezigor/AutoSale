@@ -18,6 +18,8 @@ import { SocialChannelHub } from '../../../src/components/social-channel-hub';
 import { NotificationChannelHub } from '../../../src/components/notification-channel-hub';
 import { DataIntegrationHub } from '../../../src/components/data-integration-hub';
 import { createTranslator, type Translator } from '../../../src/i18n/translator';
+import type { CommercialSettingsSummary } from '../../../../../packages/contracts/src/commercial';
+import { CommercialSettingsHub } from '../../../src/components/commercial-settings-hub';
 
 export const dynamic = 'force-dynamic';
 
@@ -38,8 +40,10 @@ export default async function SettingsPage({ searchParams = Promise.resolve({}) 
           ? 'notifications'
           : requestedTab === 'suppliers'
             ? 'suppliers'
-            : requestedTab === 'delivery' ? 'delivery' : 'data';
-  const [instagramResponse, googleResponse, telegramResponse, telegramPreferencesResponse, deliveryResponse, meestResponse, ukrposhtaResponse] = await Promise.all([
+            : requestedTab === 'delivery'
+              ? 'delivery'
+              : requestedTab === 'payments' ? 'payments' : 'data';
+  const [instagramResponse, googleResponse, telegramResponse, telegramPreferencesResponse, deliveryResponse, meestResponse, ukrposhtaResponse, legalEntitiesResponse, bankAccountsResponse] = await Promise.all([
     authenticatedApiFetch('/api/integrations/instagram'),
     authenticatedApiFetch('/api/integrations/google'),
     authenticatedApiFetch('/api/integrations/telegram'),
@@ -47,8 +51,10 @@ export default async function SettingsPage({ searchParams = Promise.resolve({}) 
     authenticatedApiFetch('/api/integrations/delivery'),
     authenticatedApiFetch('/api/integrations/delivery/meest'),
     authenticatedApiFetch('/api/integrations/delivery/ukrposhta'),
+    authenticatedApiFetch('/api/settings/legal-entities'),
+    authenticatedApiFetch('/api/settings/bank-accounts'),
   ]);
-  if (!instagramResponse.ok || !googleResponse.ok || !telegramResponse.ok || !telegramPreferencesResponse.ok || !deliveryResponse.ok || !meestResponse.ok || !ukrposhtaResponse.ok) throw new Error('Не вдалося завантажити налаштування');
+  if (!instagramResponse.ok || !googleResponse.ok || !telegramResponse.ok || !telegramPreferencesResponse.ok || !deliveryResponse.ok || !meestResponse.ok || !ukrposhtaResponse.ok || !legalEntitiesResponse.ok || !bankAccountsResponse.ok) throw new Error('Не вдалося завантажити налаштування');
   const instagram = (await instagramResponse.json()) as InstagramConnectionSummary;
   const google = (await googleResponse.json()) as GoogleConnectionSummary;
   const telegram = (await telegramResponse.json()) as TelegramConnectionSummary;
@@ -56,7 +62,11 @@ export default async function SettingsPage({ searchParams = Promise.resolve({}) 
   const delivery = (await deliveryResponse.json()) as DeliverySettingsSummary;
   const meest = (await meestResponse.json()) as MeestSettingsSummary;
   const ukrposhta = (await ukrposhtaResponse.json()) as UkrposhtaSettingsSummary;
-  if (session.membershipRole === 'MANAGER') return <SettingsLayout t={t} google={google} instagram={instagram} telegram={telegram} telegramPreferences={telegramPreferences} delivery={delivery} meest={meest} ukrposhta={ukrposhta} initialTab={initialTab} pickerAction={pickerAction} session={session} />;
+  const commercialSettings: CommercialSettingsSummary = {
+    legalEntities: await legalEntitiesResponse.json(),
+    bankAccounts: await bankAccountsResponse.json(),
+  };
+  if (session.membershipRole === 'MANAGER') return <SettingsLayout t={t} google={google} instagram={instagram} telegram={telegram} telegramPreferences={telegramPreferences} delivery={delivery} meest={meest} ukrposhta={ukrposhta} commercialSettings={commercialSettings} initialTab={initialTab} pickerAction={pickerAction} session={session} />;
 
   const [supplierResponse, response, sheetsResponse, catalogueSourcesResponse] = await Promise.all([
     authenticatedApiFetch('/api/integrations/telegram/supplier'),
@@ -74,7 +84,7 @@ export default async function SettingsPage({ searchParams = Promise.resolve({}) 
     if (!sourceResponse.ok) throw new Error('Не вдалося завантажити джерело каталогу');
     return await sourceResponse.json() as CatalogueSourceConfiguration;
   }));
-  return <SettingsLayout t={t} google={google} instagram={instagram} telegram={telegram} telegramPreferences={telegramPreferences} delivery={delivery} meest={meest} ukrposhta={ukrposhta} supplier={supplier} initialTab={initialTab} pickerAction={pickerAction} session={session} settings={settings} sheets={sheets} catalogueSources={catalogueSources} catalogueConfigurations={catalogueConfigurations} />;
+  return <SettingsLayout t={t} google={google} instagram={instagram} telegram={telegram} telegramPreferences={telegramPreferences} delivery={delivery} meest={meest} ukrposhta={ukrposhta} commercialSettings={commercialSettings} supplier={supplier} initialTab={initialTab} pickerAction={pickerAction} session={session} settings={settings} sheets={sheets} catalogueSources={catalogueSources} catalogueConfigurations={catalogueConfigurations} />;
 }
 
 function SettingsLayout({
@@ -86,6 +96,7 @@ function SettingsLayout({
   delivery,
   meest,
   ukrposhta,
+  commercialSettings,
   supplier,
   initialTab,
   pickerAction,
@@ -103,6 +114,7 @@ function SettingsLayout({
   delivery: DeliverySettingsSummary;
   meest: MeestSettingsSummary;
   ukrposhta: UkrposhtaSettingsSummary;
+  commercialSettings: CommercialSettingsSummary;
   supplier?: TelegramSupplierConfiguration;
   initialTab: SettingsTabId;
   pickerAction: string;
@@ -140,6 +152,11 @@ function SettingsLayout({
       id: 'delivery' as const,
       label: t('settings.deliveryTab'), description: t('settings.deliveryTabDescription'),
       content: <section className="settings-section delivery-settings-section"><div className="settings-section-heading"><h2>{t('settings.deliveryTitle')}</h2><p>{t('settings.deliveryDescription')}</p></div><DeliveryCarrierHub delivery={delivery} meest={meest} ukrposhta={ukrposhta} role={session.membershipRole!} /></section>,
+    },
+    {
+      id: 'payments' as const,
+      label: t('settings.paymentsTab'), description: t('settings.paymentsTabDescription'),
+      content: <section className="settings-section"><div className="settings-section-heading"><h2>{t('settings.paymentsTitle')}</h2><p>{t('settings.paymentsDescription')}</p></div><CommercialSettingsHub initial={commercialSettings} role={session.membershipRole!} /></section>,
     },
     {
       id: 'notifications' as const,

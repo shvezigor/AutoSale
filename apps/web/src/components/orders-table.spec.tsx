@@ -20,7 +20,7 @@ const order: ManagerOrder = {
   validationIssues: [],
   customer: { name: 'Ігор Швець', phone: '0976536783', instagramUsername: 'davidashvets' },
   delivery: { city: 'Луцьк', address: null, novaPoshtaBranch: '22 Кравчука' },
-  items: [{ id: 'item-1', catalogId: 'VIN-1200', productName: 'Авангард VINARIT', originalText: 'двері 1200x2050', quantity: 1, color: null, size: '1200x2050', confidence: 0.95, procurementStatus: 'TO_ORDER', procurementSource: 'AUTO', procurementReason: 'STOCK_UNKNOWN', stockAtDecision: null, availableAtDecision: null, reservation: null }],
+  items: [{ id: 'item-1', catalogId: 'VIN-1200', productName: 'Авангард VINARIT', originalText: 'двері 1200x2050', quantity: 1, color: null, size: '1200x2050', confidence: 0.95, procurementStatus: 'TO_ORDER', procurementSource: 'AUTO', procurementReason: 'STOCK_UNKNOWN', stockAtDecision: null, availableAtDecision: null, reservation: null, unitPriceSnapshot: '4870.00', currencySnapshot: 'UAH', lineTotalSnapshot: '4870.00' }],
   procurementSummary: 'NEEDS_ORDER',
   procurementHandedOffAt: null,
   supplierDispatch: null,
@@ -29,6 +29,7 @@ const order: ManagerOrder = {
   catalogueCandidates: [],
   createdAt: '2026-09-08T09:30:00.000Z',
   sheetsExport: null,
+  commercialTerms: null,
 };
 
 afterEach(() => { cleanup(); push.mockReset(); replace.mockReset(); });

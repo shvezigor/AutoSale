@@ -41,6 +41,8 @@ describe('SettingsPage', () => {
       .mockResolvedValueOnce({ ok: true, json: async () => ({ enabled: true, connections: [] }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ enabled: true, connection: null }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ enabled: true, connection: null }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ([]) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ([]) })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ businessConnected: true, selectedDestinationId: null, autoDispatch: false, destinations: [] }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ approvalMode: 'REVIEW', minimumConfidence: 0.8, promptVersion: 'v1' }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ spreadsheetId: null, sheetName: 'Orders', status: 'NOT_CONFIGURED', requiredHeaders: ['order_id'], lastValidatedAt: null, errorSummary: null }) })
@@ -51,7 +53,7 @@ describe('SettingsPage', () => {
 
     expect(screen.getByRole('tablist', { name: 'Розділи налаштувань' })).toBeInTheDocument();
     expect(screen.getAllByRole('tab').map((tab) => tab.querySelector('span')?.textContent)).toEqual([
-      'Дані', 'Соцмережі / клієнти', 'Замовлення', 'Постачальники', 'Доставка', 'Сповіщення',
+      'Дані', 'Соцмережі / клієнти', 'Замовлення', 'Постачальники', 'Доставка', 'Оплата', 'Сповіщення',
     ]);
     expect(screen.getByRole('tab', { name: /Соцмережі \/ клієнти/ })).toHaveAttribute('aria-selected', 'false');
     expect(screen.getByRole('tab', { name: /Сповіщення/ })).toHaveAttribute('aria-selected', 'true');
@@ -134,11 +136,13 @@ describe('SettingsPage', () => {
       .mockResolvedValueOnce({ ok: true, json: async () => ({ ORDER_NEEDS_REVIEW: true, ORDER_AUTO_APPROVED: true, SUPPLIER_DELIVERY_FAILED: true }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ enabled: true, connections: [{ provider: 'NOVA_POSHTA', status: 'ACTIVE', accountLabel: 'ТОВ Приклад', lastVerifiedAt: null, lastErrorCode: null, senderProfile: null }] }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ enabled: true, connection: null }) })
-      .mockResolvedValueOnce({ ok: true, json: async () => ({ enabled: true, connection: null }) });
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ enabled: true, connection: null }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ([{ id: 'entity-1', displayName: 'AutoSale', legalName: 'ТОВ Авто Сейл', type: 'COMPANY', registrationId: '12345678', active: true, isDefault: true }]) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ([{ id: 'account-1', legalEntityId: 'entity-1', label: 'Основний', maskedIban: 'UA12••••3456', bankName: 'Тест Банк', currency: 'UAH', active: true, isDefault: true }]) });
 
     render(await WorkspaceLayout({ children: await SettingsPage() }));
 
-    expect(authenticatedApiFetch).toHaveBeenCalledTimes(7);
+    expect(authenticatedApiFetch).toHaveBeenCalledTimes(9);
     expect(screen.getByRole('tab', { name: /Дані/ })).toHaveAttribute('aria-selected', 'true');
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/integrations/instagram');
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/integrations/google');
@@ -147,6 +151,8 @@ describe('SettingsPage', () => {
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/integrations/delivery');
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/integrations/delivery/meest');
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/integrations/delivery/ukrposhta');
+    expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/settings/legal-entities');
+    expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/settings/bank-accounts');
     fireEvent.click(screen.getByRole('tab', { name: /Соцмережі \/ клієнти/ }));
     expect(screen.getByRole('button', { name: /Instagram.*Активне/ })).toHaveAttribute('aria-expanded', 'false');
     expect(screen.queryByText('@autosale_store')).not.toBeInTheDocument();

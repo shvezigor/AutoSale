@@ -24,6 +24,9 @@ const item: ManagerOrder['items'][number] = {
   stockAtDecision: 8,
   availableAtDecision: 6,
   reservation: { id: 'reservation-1', quantity: 1, status: 'ACTIVE' },
+  unitPriceSnapshot: '4870.00',
+  currencySnapshot: 'UAH',
+  lineTotalSnapshot: '4870.00',
 };
 
 function renderCard(overrides: Partial<typeof item> = {}, onOrderChange = vi.fn()) {

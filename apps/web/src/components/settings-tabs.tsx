@@ -3,7 +3,7 @@
 import { type KeyboardEvent, type ReactNode, useEffect, useRef, useState } from 'react';
 import { useI18n } from '../i18n/i18n-provider';
 
-export type SettingsTabId = 'social' | 'notifications' | 'suppliers' | 'delivery' | 'data' | 'orders';
+export type SettingsTabId = 'social' | 'notifications' | 'suppliers' | 'delivery' | 'payments' | 'data' | 'orders';
 
 type SettingsTab = {
   id: SettingsTabId;

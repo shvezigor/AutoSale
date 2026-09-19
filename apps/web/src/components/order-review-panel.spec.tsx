@@ -29,7 +29,7 @@ const order: ManagerOrder = {
   validationIssues: [],
   customer: { name: 'Олена', phone: '+380671234567', instagramUsername: 'olena' },
   delivery: { city: 'Київ', address: null, novaPoshtaBranch: '24' },
-  items: [{ id: 'item-1', catalogId: 'UB-038-BLK', productName: 'Кросівки Urban Black', originalText: 'чорна модель 38', quantity: 1, color: 'Чорний', size: '38', confidence: 0.82, procurementStatus: 'UNASSESSED', procurementSource: null, procurementReason: null, stockAtDecision: null, availableAtDecision: null, reservation: null }],
+  items: [{ id: 'item-1', catalogId: 'UB-038-BLK', productName: 'Кросівки Urban Black', originalText: 'чорна модель 38', quantity: 1, color: 'Чорний', size: '38', confidence: 0.82, procurementStatus: 'UNASSESSED', procurementSource: null, procurementReason: null, stockAtDecision: null, availableAtDecision: null, reservation: null, unitPriceSnapshot: '1299.00', currencySnapshot: 'UAH', lineTotalSnapshot: '1299.00' }],
   procurementSummary: 'UNASSESSED',
   procurementHandedOffAt: null,
   supplierDispatch: null,
@@ -38,6 +38,7 @@ const order: ManagerOrder = {
   catalogueCandidates: [{ sku: 'UB-038-BLK', name: 'Кросівки Urban Black' }],
   createdAt: '2026-08-26T12:00:00.000Z',
   sheetsExport: null,
+  commercialTerms: null,
 };
 
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });

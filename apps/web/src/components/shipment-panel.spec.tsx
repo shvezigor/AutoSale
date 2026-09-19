@@ -17,6 +17,7 @@ const order = {
   delivery: { city: 'Київ', address: null, novaPoshtaBranch: '24' }, items: [], procurementSummary: 'READY',
   procurementHandedOffAt: null, supplierDispatch: null, shipment: null, canCreateShipment: true,
   catalogueCandidates: [], createdAt: '2026-09-11T00:00:00.000Z', sheetsExport: null,
+  commercialTerms: null,
 } satisfies ManagerOrder;
 
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
