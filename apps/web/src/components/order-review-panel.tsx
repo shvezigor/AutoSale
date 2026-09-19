@@ -10,6 +10,7 @@ import { SupplierDispatchDialog } from './supplier-dispatch-dialog';
 import { ShipmentPanel } from './shipment-panel';
 import { useI18n } from '../i18n/i18n-provider';
 import type { Translator } from '../i18n/translator';
+import { OrderCommercialTermsCard } from './order-commercial-terms-card';
 
 export function OrderReviewPanel({ initialOrder, backHref = '/orders' }: { initialOrder: ManagerOrder; backHref?: string }) {
   const { t, formatNumber } = useI18n();
@@ -105,6 +106,7 @@ export function OrderReviewPanel({ initialOrder, backHref = '/orders' }: { initi
       ]} />
     </div>
     <section className="review-section"><h2>{t('orders.productsSection')}</h2>{draft.items.map((item, index) => <article className="review-item" data-low-confidence={item.confidence < 0.9} key={item.id}><div className="review-item-head"><label><span className="sr-only">{t('orders.productField', { number: formatNumber(index + 1) })}</span><select disabled={!correctionAllowed} value={item.catalogId ?? ''} onChange={(event) => changeItem(item.id, { catalogId: event.target.value || null, productName: draft.catalogueCandidates.find((candidate) => candidate.sku === event.target.value)?.name ?? null })}><option value="">{t('orders.selectProduct')}</option>{draft.catalogueCandidates.map((candidate) => <option key={candidate.sku} value={candidate.sku}>{candidate.sku} — {candidate.name}</option>)}</select></label><b>{formatNumber(Math.round(item.confidence * 100))}%</b></div><div className="item-edit-grid"><label>{t('orders.sizeField')}<input disabled={!correctionAllowed} value={item.size ?? ''} onChange={(event) => changeItem(item.id, { size: event.target.value || null })} /></label><label>{t('orders.colorField')}<input disabled={!correctionAllowed} value={item.color ?? ''} onChange={(event) => changeItem(item.id, { color: event.target.value || null })} /></label><label>{t('orders.quantityField')}<input disabled={!correctionAllowed} min="1" type="number" value={item.quantity} onChange={(event) => changeItem(item.id, { quantity: Number(event.target.value) })} /></label></div>{approved && <ProcurementItemCard item={item} locked={order.procurementSummary === 'HANDED_OFF'} onOrderChange={applyOrder} orderId={order.id} />}</article>)}</section>
+    <OrderCommercialTermsCard orderId={order.id} initial={order.commercialTerms} locked={!correctionAllowed} onChange={(commercialTerms) => applyOrder({ ...order, commercialTerms })} />
     {sheetsExport && <SheetsExportState value={sheetsExport} pending={pending} retry={() => void retrySheetsExport()} />}
     <ShipmentPanel order={order} />
     <div className="review-actions">
