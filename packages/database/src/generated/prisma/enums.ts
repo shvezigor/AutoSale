@@ -320,3 +320,20 @@ export const DemoLeadNotificationStatus = {
 } as const
 
 export type DemoLeadNotificationStatus = (typeof DemoLeadNotificationStatus)[keyof typeof DemoLeadNotificationStatus]
+
+
+export const LegalEntityType = {
+  COMPANY: 'COMPANY',
+  SOLE_PROPRIETOR: 'SOLE_PROPRIETOR',
+  OTHER: 'OTHER'
+} as const
+
+export type LegalEntityType = (typeof LegalEntityType)[keyof typeof LegalEntityType]
+
+
+export const CommercialPricingStatus = {
+  READY: 'READY',
+  NEEDS_REVIEW: 'NEEDS_REVIEW'
+} as const
+
+export type CommercialPricingStatus = (typeof CommercialPricingStatus)[keyof typeof CommercialPricingStatus]

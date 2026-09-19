@@ -6,7 +6,7 @@
 /*
  * This file should be your main import to use Prisma-related types and utilities in a browser. 
  * Use it to get access to models, enums, and input types.
- *
+ * 
  * This file does not contain a `PrismaClient` class, nor several other helpers that are intended as server-side only.
  * See `client.ts` for the standard, server-side entry point.
  *
@@ -178,13 +178,28 @@ export type GoogleSheetsDestination = Prisma.GoogleSheetsDestinationModel
  */
 export type TenantSettings = Prisma.TenantSettingsModel
 /**
+ * Model TenantLegalEntity
+ * 
+ */
+export type TenantLegalEntity = Prisma.TenantLegalEntityModel
+/**
+ * Model TenantBankAccount
+ * 
+ */
+export type TenantBankAccount = Prisma.TenantBankAccountModel
+/**
  * Model Order
  * 
  */
 export type Order = Prisma.OrderModel
 /**
+ * Model OrderCommercialTerms
+ * 
+ */
+export type OrderCommercialTerms = Prisma.OrderCommercialTermsModel
+/**
  * Model OrderIntentEvaluation
- *
+ * 
  */
 export type OrderIntentEvaluation = Prisma.OrderIntentEvaluationModel
 /**

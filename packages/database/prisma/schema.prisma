@@ -230,6 +230,17 @@ enum DemoLeadNotificationStatus {
   FAILED
 }
 
+enum LegalEntityType {
+  COMPANY
+  SOLE_PROPRIETOR
+  OTHER
+}
+
+enum CommercialPricingStatus {
+  READY
+  NEEDS_REVIEW
+}
+
 model Tenant {
   id                              String                           @id @default(uuid()) @db.Uuid
   key                             String                           @unique
@@ -277,6 +288,9 @@ model Tenant {
   shipmentAttempts                ShipmentAttempt[]
   shipmentStatusEvents            ShipmentStatusEvent[]
   orderIntentEvaluations          OrderIntentEvaluation[]
+  legalEntities                   TenantLegalEntity[]
+  bankAccounts                    TenantBankAccount[]
+  orderCommercialTerms            OrderCommercialTerms[]
 
   @@index([status])
   @@map("tenants")
@@ -912,6 +926,48 @@ model TenantSettings {
   @@map("tenant_settings")
 }
 
+model TenantLegalEntity {
+  id              String                 @id @default(uuid()) @db.Uuid
+  tenantId        String                 @map("tenant_id") @db.Uuid
+  displayName     String                 @map("display_name")
+  legalName       String                 @map("legal_name")
+  type            LegalEntityType
+  registrationId  String?                @map("registration_id")
+  active          Boolean                @default(true)
+  isDefault       Boolean                @default(false) @map("is_default")
+  createdAt       DateTime               @default(now()) @map("created_at")
+  updatedAt       DateTime               @updatedAt @map("updated_at")
+  tenant          Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  bankAccounts    TenantBankAccount[]
+  commercialTerms OrderCommercialTerms[]
+
+  @@unique([tenantId, displayName])
+  @@index([tenantId, active])
+  @@map("tenant_legal_entities")
+}
+
+model TenantBankAccount {
+  id              String                 @id @default(uuid()) @db.Uuid
+  tenantId        String                 @map("tenant_id") @db.Uuid
+  legalEntityId   String                 @map("legal_entity_id") @db.Uuid
+  label           String
+  iban            String
+  normalizedIban  String                 @map("normalized_iban")
+  bankName        String?                @map("bank_name")
+  currency        String                 @db.VarChar(3)
+  active          Boolean                @default(true)
+  isDefault       Boolean                @default(false) @map("is_default")
+  createdAt       DateTime               @default(now()) @map("created_at")
+  updatedAt       DateTime               @updatedAt @map("updated_at")
+  tenant          Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  legalEntity     TenantLegalEntity      @relation(fields: [legalEntityId], references: [id], onDelete: Restrict)
+  commercialTerms OrderCommercialTerms[]
+
+  @@unique([tenantId, normalizedIban, currency])
+  @@index([tenantId, legalEntityId, currency, active])
+  @@map("tenant_bank_accounts")
+}
+
 model Order {
   id                         String             @id @default(uuid()) @db.Uuid
   publicNumber               String             @unique @default(dbgenerated()) @map("public_number")
@@ -947,6 +1003,7 @@ model Order {
   telegramDeliveries         TelegramDelivery[]
   shipments                  Shipment[]
   intentEvaluation           OrderIntentEvaluation?
+  commercialTerms            OrderCommercialTerms?
 
   @@unique([tenantId, id])
   @@index([tenantId, status, createdAt])
@@ -955,6 +1012,34 @@ model Order {
   @@index([tenantId, sortProcurement, id])
   @@index([conversationId, createdAt])
   @@map("orders")
+}
+
+model OrderCommercialTerms {
+  id                  String                  @id @default(uuid()) @db.Uuid
+  tenantId            String                  @map("tenant_id") @db.Uuid
+  orderId             String                  @unique @map("order_id") @db.Uuid
+  legalEntityId       String?                 @map("legal_entity_id") @db.Uuid
+  bankAccountId       String?                 @map("bank_account_id") @db.Uuid
+  currency            String?                 @db.VarChar(3)
+  itemsSubtotal       Decimal?                @map("items_subtotal") @db.Decimal(14, 2)
+  discountAmount      Decimal                 @default(0) @map("discount_amount") @db.Decimal(14, 2)
+  deliveryAmount      Decimal                 @default(0) @map("delivery_amount") @db.Decimal(14, 2)
+  totalAmount         Decimal?                @map("total_amount") @db.Decimal(14, 2)
+  pricingStatus       CommercialPricingStatus @map("pricing_status")
+  issueCodes          Json                    @map("issue_codes")
+  legalEntitySnapshot Json?                   @map("legal_entity_snapshot")
+  bankAccountSnapshot Json?                   @map("bank_account_snapshot")
+  version             Int                     @default(1)
+  updatedBy           String                  @map("updated_by")
+  createdAt           DateTime                @default(now()) @map("created_at")
+  updatedAt           DateTime                @updatedAt @map("updated_at")
+  tenant              Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  order               Order                   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  legalEntity         TenantLegalEntity?      @relation(fields: [legalEntityId], references: [id], onDelete: SetNull)
+  bankAccount         TenantBankAccount?      @relation(fields: [bankAccountId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, pricingStatus])
+  @@map("order_commercial_terms")
 }
 
 model OrderIntentEvaluation {
@@ -1189,6 +1274,10 @@ model OrderItem {
   color                String?
   size                 String?
   confidence           Float
+  unitPriceSnapshot    Decimal?                   @map("unit_price_snapshot") @db.Decimal(14, 2)
+  currencySnapshot     String?                    @map("currency_snapshot") @db.VarChar(3)
+  lineTotalSnapshot    Decimal?                   @map("line_total_snapshot") @db.Decimal(14, 2)
+  priceSourceSku       String?                    @map("price_source_sku")
   procurementStatus    ProcurementStatus          @default(UNASSESSED) @map("procurement_status")
   procurementSource    ProcurementDecisionSource? @map("procurement_source")
   procurementReason    ProcurementReason?         @map("procurement_reason")

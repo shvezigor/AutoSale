@@ -24,7 +24,7 @@ export * as $Enums from './enums.js'
 export * from "./enums.js"
 /**
  * ## Prisma Client
- *
+ * 
  * Type-safe database client for TypeScript
  * @example
  * ```
@@ -202,13 +202,28 @@ export type GoogleSheetsDestination = Prisma.GoogleSheetsDestinationModel
  */
 export type TenantSettings = Prisma.TenantSettingsModel
 /**
+ * Model TenantLegalEntity
+ * 
+ */
+export type TenantLegalEntity = Prisma.TenantLegalEntityModel
+/**
+ * Model TenantBankAccount
+ * 
+ */
+export type TenantBankAccount = Prisma.TenantBankAccountModel
+/**
  * Model Order
  * 
  */
 export type Order = Prisma.OrderModel
 /**
+ * Model OrderCommercialTerms
+ * 
+ */
+export type OrderCommercialTerms = Prisma.OrderCommercialTermsModel
+/**
  * Model OrderIntentEvaluation
- *
+ * 
  */
 export type OrderIntentEvaluation = Prisma.OrderIntentEvaluationModel
 /**

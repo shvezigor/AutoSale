@@ -83,7 +83,10 @@ export const ModelName = {
   Message: 'Message',
   GoogleSheetsDestination: 'GoogleSheetsDestination',
   TenantSettings: 'TenantSettings',
+  TenantLegalEntity: 'TenantLegalEntity',
+  TenantBankAccount: 'TenantBankAccount',
   Order: 'Order',
+  OrderCommercialTerms: 'OrderCommercialTerms',
   OrderIntentEvaluation: 'OrderIntentEvaluation',
   DeliveryConnection: 'DeliveryConnection',
   DeliverySenderProfile: 'DeliverySenderProfile',
@@ -656,6 +659,40 @@ export const TenantSettingsScalarFieldEnum = {
 export type TenantSettingsScalarFieldEnum = (typeof TenantSettingsScalarFieldEnum)[keyof typeof TenantSettingsScalarFieldEnum]
 
 
+export const TenantLegalEntityScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  displayName: 'displayName',
+  legalName: 'legalName',
+  type: 'type',
+  registrationId: 'registrationId',
+  active: 'active',
+  isDefault: 'isDefault',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TenantLegalEntityScalarFieldEnum = (typeof TenantLegalEntityScalarFieldEnum)[keyof typeof TenantLegalEntityScalarFieldEnum]
+
+
+export const TenantBankAccountScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  legalEntityId: 'legalEntityId',
+  label: 'label',
+  iban: 'iban',
+  normalizedIban: 'normalizedIban',
+  bankName: 'bankName',
+  currency: 'currency',
+  active: 'active',
+  isDefault: 'isDefault',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TenantBankAccountScalarFieldEnum = (typeof TenantBankAccountScalarFieldEnum)[keyof typeof TenantBankAccountScalarFieldEnum]
+
+
 export const OrderScalarFieldEnum = {
   id: 'id',
   publicNumber: 'publicNumber',
@@ -684,6 +721,30 @@ export const OrderScalarFieldEnum = {
 } as const
 
 export type OrderScalarFieldEnum = (typeof OrderScalarFieldEnum)[keyof typeof OrderScalarFieldEnum]
+
+
+export const OrderCommercialTermsScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  orderId: 'orderId',
+  legalEntityId: 'legalEntityId',
+  bankAccountId: 'bankAccountId',
+  currency: 'currency',
+  itemsSubtotal: 'itemsSubtotal',
+  discountAmount: 'discountAmount',
+  deliveryAmount: 'deliveryAmount',
+  totalAmount: 'totalAmount',
+  pricingStatus: 'pricingStatus',
+  issueCodes: 'issueCodes',
+  legalEntitySnapshot: 'legalEntitySnapshot',
+  bankAccountSnapshot: 'bankAccountSnapshot',
+  version: 'version',
+  updatedBy: 'updatedBy',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type OrderCommercialTermsScalarFieldEnum = (typeof OrderCommercialTermsScalarFieldEnum)[keyof typeof OrderCommercialTermsScalarFieldEnum]
 
 
 export const OrderIntentEvaluationScalarFieldEnum = {
@@ -878,6 +939,10 @@ export const OrderItemScalarFieldEnum = {
   color: 'color',
   size: 'size',
   confidence: 'confidence',
+  unitPriceSnapshot: 'unitPriceSnapshot',
+  currencySnapshot: 'currencySnapshot',
+  lineTotalSnapshot: 'lineTotalSnapshot',
+  priceSourceSku: 'priceSourceSku',
   procurementStatus: 'procurementStatus',
   procurementSource: 'procurementSource',
   procurementReason: 'procurementReason',

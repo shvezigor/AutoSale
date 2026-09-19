@@ -429,7 +429,10 @@ export const ModelName = {
   Message: 'Message',
   GoogleSheetsDestination: 'GoogleSheetsDestination',
   TenantSettings: 'TenantSettings',
+  TenantLegalEntity: 'TenantLegalEntity',
+  TenantBankAccount: 'TenantBankAccount',
   Order: 'Order',
+  OrderCommercialTerms: 'OrderCommercialTerms',
   OrderIntentEvaluation: 'OrderIntentEvaluation',
   DeliveryConnection: 'DeliveryConnection',
   DeliverySenderProfile: 'DeliverySenderProfile',
@@ -463,7 +466,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "tenant" | "googleConnection" | "googleOAuthAttempt" | "googleCredentialCleanup" | "instagramConnection" | "instagramOAuthState" | "instagramCredentialCleanup" | "user" | "userAvatarCleanup" | "userNotification" | "telegramLinkAttempt" | "telegramUserBinding" | "telegramBusinessConnection" | "telegramChat" | "telegramSupplierSetting" | "telegramWebhookUpdate" | "telegramDelivery" | "googleIdentity" | "googleSignInAttempt" | "tenantMembership" | "session" | "emailVerificationToken" | "passwordResetToken" | "tenantInvitation" | "securityAuditLog" | "webhookEvent" | "conversation" | "instagramCustomerProfile" | "instagramAvatarCleanup" | "message" | "googleSheetsDestination" | "tenantSettings" | "order" | "orderIntentEvaluation" | "deliveryConnection" | "deliverySenderProfile" | "shipment" | "shipmentAttempt" | "shipmentStatusEvent" | "orderExport" | "auditLog" | "orderItem" | "product" | "inventoryReservation" | "telegramDeliveryItem" | "telegramNotificationPreference" | "catalogueSource" | "catalogueMapping" | "catalogueImportRun" | "attachment" | "demoLead"
+    modelProps: "tenant" | "googleConnection" | "googleOAuthAttempt" | "googleCredentialCleanup" | "instagramConnection" | "instagramOAuthState" | "instagramCredentialCleanup" | "user" | "userAvatarCleanup" | "userNotification" | "telegramLinkAttempt" | "telegramUserBinding" | "telegramBusinessConnection" | "telegramChat" | "telegramSupplierSetting" | "telegramWebhookUpdate" | "telegramDelivery" | "googleIdentity" | "googleSignInAttempt" | "tenantMembership" | "session" | "emailVerificationToken" | "passwordResetToken" | "tenantInvitation" | "securityAuditLog" | "webhookEvent" | "conversation" | "instagramCustomerProfile" | "instagramAvatarCleanup" | "message" | "googleSheetsDestination" | "tenantSettings" | "tenantLegalEntity" | "tenantBankAccount" | "order" | "orderCommercialTerms" | "orderIntentEvaluation" | "deliveryConnection" | "deliverySenderProfile" | "shipment" | "shipmentAttempt" | "shipmentStatusEvent" | "orderExport" | "auditLog" | "orderItem" | "product" | "inventoryReservation" | "telegramDeliveryItem" | "telegramNotificationPreference" | "catalogueSource" | "catalogueMapping" | "catalogueImportRun" | "attachment" | "demoLead"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2835,6 +2838,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    TenantLegalEntity: {
+      payload: Prisma.$TenantLegalEntityPayload<ExtArgs>
+      fields: Prisma.TenantLegalEntityFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TenantLegalEntityFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantLegalEntityPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TenantLegalEntityFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantLegalEntityPayload>
+        }
+        findFirst: {
+          args: Prisma.TenantLegalEntityFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantLegalEntityPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TenantLegalEntityFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantLegalEntityPayload>
+        }
+        findMany: {
+          args: Prisma.TenantLegalEntityFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantLegalEntityPayload>[]
+        }
+        create: {
+          args: Prisma.TenantLegalEntityCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantLegalEntityPayload>
+        }
+        createMany: {
+          args: Prisma.TenantLegalEntityCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TenantLegalEntityCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantLegalEntityPayload>[]
+        }
+        delete: {
+          args: Prisma.TenantLegalEntityDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantLegalEntityPayload>
+        }
+        update: {
+          args: Prisma.TenantLegalEntityUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantLegalEntityPayload>
+        }
+        deleteMany: {
+          args: Prisma.TenantLegalEntityDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TenantLegalEntityUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TenantLegalEntityUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantLegalEntityPayload>[]
+        }
+        upsert: {
+          args: Prisma.TenantLegalEntityUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantLegalEntityPayload>
+        }
+        aggregate: {
+          args: Prisma.TenantLegalEntityAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTenantLegalEntity>
+        }
+        groupBy: {
+          args: Prisma.TenantLegalEntityGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TenantLegalEntityGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TenantLegalEntityCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TenantLegalEntityCountAggregateOutputType> | number
+        }
+      }
+    }
+    TenantBankAccount: {
+      payload: Prisma.$TenantBankAccountPayload<ExtArgs>
+      fields: Prisma.TenantBankAccountFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TenantBankAccountFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantBankAccountPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TenantBankAccountFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantBankAccountPayload>
+        }
+        findFirst: {
+          args: Prisma.TenantBankAccountFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantBankAccountPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TenantBankAccountFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantBankAccountPayload>
+        }
+        findMany: {
+          args: Prisma.TenantBankAccountFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantBankAccountPayload>[]
+        }
+        create: {
+          args: Prisma.TenantBankAccountCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantBankAccountPayload>
+        }
+        createMany: {
+          args: Prisma.TenantBankAccountCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TenantBankAccountCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantBankAccountPayload>[]
+        }
+        delete: {
+          args: Prisma.TenantBankAccountDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantBankAccountPayload>
+        }
+        update: {
+          args: Prisma.TenantBankAccountUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantBankAccountPayload>
+        }
+        deleteMany: {
+          args: Prisma.TenantBankAccountDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TenantBankAccountUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TenantBankAccountUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantBankAccountPayload>[]
+        }
+        upsert: {
+          args: Prisma.TenantBankAccountUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantBankAccountPayload>
+        }
+        aggregate: {
+          args: Prisma.TenantBankAccountAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTenantBankAccount>
+        }
+        groupBy: {
+          args: Prisma.TenantBankAccountGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TenantBankAccountGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TenantBankAccountCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TenantBankAccountCountAggregateOutputType> | number
+        }
+      }
+    }
     Order: {
       payload: Prisma.$OrderPayload<ExtArgs>
       fields: Prisma.OrderFieldRefs
@@ -2906,6 +3057,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.OrderCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.OrderCountAggregateOutputType> | number
+        }
+      }
+    }
+    OrderCommercialTerms: {
+      payload: Prisma.$OrderCommercialTermsPayload<ExtArgs>
+      fields: Prisma.OrderCommercialTermsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.OrderCommercialTermsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderCommercialTermsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.OrderCommercialTermsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderCommercialTermsPayload>
+        }
+        findFirst: {
+          args: Prisma.OrderCommercialTermsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderCommercialTermsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.OrderCommercialTermsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderCommercialTermsPayload>
+        }
+        findMany: {
+          args: Prisma.OrderCommercialTermsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderCommercialTermsPayload>[]
+        }
+        create: {
+          args: Prisma.OrderCommercialTermsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderCommercialTermsPayload>
+        }
+        createMany: {
+          args: Prisma.OrderCommercialTermsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.OrderCommercialTermsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderCommercialTermsPayload>[]
+        }
+        delete: {
+          args: Prisma.OrderCommercialTermsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderCommercialTermsPayload>
+        }
+        update: {
+          args: Prisma.OrderCommercialTermsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderCommercialTermsPayload>
+        }
+        deleteMany: {
+          args: Prisma.OrderCommercialTermsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.OrderCommercialTermsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.OrderCommercialTermsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderCommercialTermsPayload>[]
+        }
+        upsert: {
+          args: Prisma.OrderCommercialTermsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderCommercialTermsPayload>
+        }
+        aggregate: {
+          args: Prisma.OrderCommercialTermsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateOrderCommercialTerms>
+        }
+        groupBy: {
+          args: Prisma.OrderCommercialTermsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.OrderCommercialTermsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.OrderCommercialTermsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.OrderCommercialTermsCountAggregateOutputType> | number
         }
       }
     }
@@ -4816,6 +5041,40 @@ export const TenantSettingsScalarFieldEnum = {
 export type TenantSettingsScalarFieldEnum = (typeof TenantSettingsScalarFieldEnum)[keyof typeof TenantSettingsScalarFieldEnum]
 
 
+export const TenantLegalEntityScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  displayName: 'displayName',
+  legalName: 'legalName',
+  type: 'type',
+  registrationId: 'registrationId',
+  active: 'active',
+  isDefault: 'isDefault',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TenantLegalEntityScalarFieldEnum = (typeof TenantLegalEntityScalarFieldEnum)[keyof typeof TenantLegalEntityScalarFieldEnum]
+
+
+export const TenantBankAccountScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  legalEntityId: 'legalEntityId',
+  label: 'label',
+  iban: 'iban',
+  normalizedIban: 'normalizedIban',
+  bankName: 'bankName',
+  currency: 'currency',
+  active: 'active',
+  isDefault: 'isDefault',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TenantBankAccountScalarFieldEnum = (typeof TenantBankAccountScalarFieldEnum)[keyof typeof TenantBankAccountScalarFieldEnum]
+
+
 export const OrderScalarFieldEnum = {
   id: 'id',
   publicNumber: 'publicNumber',
@@ -4844,6 +5103,30 @@ export const OrderScalarFieldEnum = {
 } as const
 
 export type OrderScalarFieldEnum = (typeof OrderScalarFieldEnum)[keyof typeof OrderScalarFieldEnum]
+
+
+export const OrderCommercialTermsScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  orderId: 'orderId',
+  legalEntityId: 'legalEntityId',
+  bankAccountId: 'bankAccountId',
+  currency: 'currency',
+  itemsSubtotal: 'itemsSubtotal',
+  discountAmount: 'discountAmount',
+  deliveryAmount: 'deliveryAmount',
+  totalAmount: 'totalAmount',
+  pricingStatus: 'pricingStatus',
+  issueCodes: 'issueCodes',
+  legalEntitySnapshot: 'legalEntitySnapshot',
+  bankAccountSnapshot: 'bankAccountSnapshot',
+  version: 'version',
+  updatedBy: 'updatedBy',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type OrderCommercialTermsScalarFieldEnum = (typeof OrderCommercialTermsScalarFieldEnum)[keyof typeof OrderCommercialTermsScalarFieldEnum]
 
 
 export const OrderIntentEvaluationScalarFieldEnum = {
@@ -5038,6 +5321,10 @@ export const OrderItemScalarFieldEnum = {
   color: 'color',
   size: 'size',
   confidence: 'confidence',
+  unitPriceSnapshot: 'unitPriceSnapshot',
+  currencySnapshot: 'currencySnapshot',
+  lineTotalSnapshot: 'lineTotalSnapshot',
+  priceSourceSku: 'priceSourceSku',
   procurementStatus: 'procurementStatus',
   procurementSource: 'procurementSource',
   procurementReason: 'procurementReason',
@@ -5565,6 +5852,48 @@ export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaMode
 
 
 /**
+ * Reference to a field of type 'LegalEntityType'
+ */
+export type EnumLegalEntityTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LegalEntityType'>
+    
+
+
+/**
+ * Reference to a field of type 'LegalEntityType[]'
+ */
+export type ListEnumLegalEntityTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LegalEntityType[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Decimal'
+ */
+export type DecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal'>
+    
+
+
+/**
+ * Reference to a field of type 'Decimal[]'
+ */
+export type ListDecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal[]'>
+    
+
+
+/**
+ * Reference to a field of type 'CommercialPricingStatus'
+ */
+export type EnumCommercialPricingStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CommercialPricingStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'CommercialPricingStatus[]'
+ */
+export type ListEnumCommercialPricingStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CommercialPricingStatus[]'>
+    
+
+
+/**
  * Reference to a field of type 'DeliveryProvider'
  */
 export type EnumDeliveryProviderFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DeliveryProvider'>
@@ -5617,20 +5946,6 @@ export type EnumShipmentPayerFieldRefInput<$PrismaModel> = FieldRefInputType<$Pr
  * Reference to a field of type 'ShipmentPayer[]'
  */
 export type ListEnumShipmentPayerFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ShipmentPayer[]'>
-    
-
-
-/**
- * Reference to a field of type 'Decimal'
- */
-export type DecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal'>
-    
-
-
-/**
- * Reference to a field of type 'Decimal[]'
- */
-export type ListDecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal[]'>
     
 
 
@@ -5998,7 +6313,10 @@ export type GlobalOmitConfig = {
   message?: Prisma.MessageOmit
   googleSheetsDestination?: Prisma.GoogleSheetsDestinationOmit
   tenantSettings?: Prisma.TenantSettingsOmit
+  tenantLegalEntity?: Prisma.TenantLegalEntityOmit
+  tenantBankAccount?: Prisma.TenantBankAccountOmit
   order?: Prisma.OrderOmit
+  orderCommercialTerms?: Prisma.OrderCommercialTermsOmit
   orderIntentEvaluation?: Prisma.OrderIntentEvaluationOmit
   deliveryConnection?: Prisma.DeliveryConnectionOmit
   deliverySenderProfile?: Prisma.DeliverySenderProfileOmit

@@ -29,6 +29,8 @@ export type AggregateOrderItem = {
 export type OrderItemAvgAggregateOutputType = {
   quantity: number | null
   confidence: number | null
+  unitPriceSnapshot: runtime.Decimal | null
+  lineTotalSnapshot: runtime.Decimal | null
   stockAtDecision: number | null
   availableAtDecision: number | null
 }
@@ -36,6 +38,8 @@ export type OrderItemAvgAggregateOutputType = {
 export type OrderItemSumAggregateOutputType = {
   quantity: number | null
   confidence: number | null
+  unitPriceSnapshot: runtime.Decimal | null
+  lineTotalSnapshot: runtime.Decimal | null
   stockAtDecision: number | null
   availableAtDecision: number | null
 }
@@ -50,6 +54,10 @@ export type OrderItemMinAggregateOutputType = {
   color: string | null
   size: string | null
   confidence: number | null
+  unitPriceSnapshot: runtime.Decimal | null
+  currencySnapshot: string | null
+  lineTotalSnapshot: runtime.Decimal | null
+  priceSourceSku: string | null
   procurementStatus: $Enums.ProcurementStatus | null
   procurementSource: $Enums.ProcurementDecisionSource | null
   procurementReason: $Enums.ProcurementReason | null
@@ -69,6 +77,10 @@ export type OrderItemMaxAggregateOutputType = {
   color: string | null
   size: string | null
   confidence: number | null
+  unitPriceSnapshot: runtime.Decimal | null
+  currencySnapshot: string | null
+  lineTotalSnapshot: runtime.Decimal | null
+  priceSourceSku: string | null
   procurementStatus: $Enums.ProcurementStatus | null
   procurementSource: $Enums.ProcurementDecisionSource | null
   procurementReason: $Enums.ProcurementReason | null
@@ -88,6 +100,10 @@ export type OrderItemCountAggregateOutputType = {
   color: number
   size: number
   confidence: number
+  unitPriceSnapshot: number
+  currencySnapshot: number
+  lineTotalSnapshot: number
+  priceSourceSku: number
   procurementStatus: number
   procurementSource: number
   procurementReason: number
@@ -102,6 +118,8 @@ export type OrderItemCountAggregateOutputType = {
 export type OrderItemAvgAggregateInputType = {
   quantity?: true
   confidence?: true
+  unitPriceSnapshot?: true
+  lineTotalSnapshot?: true
   stockAtDecision?: true
   availableAtDecision?: true
 }
@@ -109,6 +127,8 @@ export type OrderItemAvgAggregateInputType = {
 export type OrderItemSumAggregateInputType = {
   quantity?: true
   confidence?: true
+  unitPriceSnapshot?: true
+  lineTotalSnapshot?: true
   stockAtDecision?: true
   availableAtDecision?: true
 }
@@ -123,6 +143,10 @@ export type OrderItemMinAggregateInputType = {
   color?: true
   size?: true
   confidence?: true
+  unitPriceSnapshot?: true
+  currencySnapshot?: true
+  lineTotalSnapshot?: true
+  priceSourceSku?: true
   procurementStatus?: true
   procurementSource?: true
   procurementReason?: true
@@ -142,6 +166,10 @@ export type OrderItemMaxAggregateInputType = {
   color?: true
   size?: true
   confidence?: true
+  unitPriceSnapshot?: true
+  currencySnapshot?: true
+  lineTotalSnapshot?: true
+  priceSourceSku?: true
   procurementStatus?: true
   procurementSource?: true
   procurementReason?: true
@@ -161,6 +189,10 @@ export type OrderItemCountAggregateInputType = {
   color?: true
   size?: true
   confidence?: true
+  unitPriceSnapshot?: true
+  currencySnapshot?: true
+  lineTotalSnapshot?: true
+  priceSourceSku?: true
   procurementStatus?: true
   procurementSource?: true
   procurementReason?: true
@@ -267,6 +299,10 @@ export type OrderItemGroupByOutputType = {
   color: string | null
   size: string | null
   confidence: number
+  unitPriceSnapshot: runtime.Decimal | null
+  currencySnapshot: string | null
+  lineTotalSnapshot: runtime.Decimal | null
+  priceSourceSku: string | null
   procurementStatus: $Enums.ProcurementStatus
   procurementSource: $Enums.ProcurementDecisionSource | null
   procurementReason: $Enums.ProcurementReason | null
@@ -309,6 +345,10 @@ export type OrderItemWhereInput = {
   color?: Prisma.StringNullableFilter<"OrderItem"> | string | null
   size?: Prisma.StringNullableFilter<"OrderItem"> | string | null
   confidence?: Prisma.FloatFilter<"OrderItem"> | number
+  unitPriceSnapshot?: Prisma.DecimalNullableFilter<"OrderItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  currencySnapshot?: Prisma.StringNullableFilter<"OrderItem"> | string | null
+  lineTotalSnapshot?: Prisma.DecimalNullableFilter<"OrderItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  priceSourceSku?: Prisma.StringNullableFilter<"OrderItem"> | string | null
   procurementStatus?: Prisma.EnumProcurementStatusFilter<"OrderItem"> | $Enums.ProcurementStatus
   procurementSource?: Prisma.EnumProcurementDecisionSourceNullableFilter<"OrderItem"> | $Enums.ProcurementDecisionSource | null
   procurementReason?: Prisma.EnumProcurementReasonNullableFilter<"OrderItem"> | $Enums.ProcurementReason | null
@@ -332,6 +372,10 @@ export type OrderItemOrderByWithRelationInput = {
   color?: Prisma.SortOrderInput | Prisma.SortOrder
   size?: Prisma.SortOrderInput | Prisma.SortOrder
   confidence?: Prisma.SortOrder
+  unitPriceSnapshot?: Prisma.SortOrderInput | Prisma.SortOrder
+  currencySnapshot?: Prisma.SortOrderInput | Prisma.SortOrder
+  lineTotalSnapshot?: Prisma.SortOrderInput | Prisma.SortOrder
+  priceSourceSku?: Prisma.SortOrderInput | Prisma.SortOrder
   procurementStatus?: Prisma.SortOrder
   procurementSource?: Prisma.SortOrderInput | Prisma.SortOrder
   procurementReason?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -359,6 +403,10 @@ export type OrderItemWhereUniqueInput = Prisma.AtLeast<{
   color?: Prisma.StringNullableFilter<"OrderItem"> | string | null
   size?: Prisma.StringNullableFilter<"OrderItem"> | string | null
   confidence?: Prisma.FloatFilter<"OrderItem"> | number
+  unitPriceSnapshot?: Prisma.DecimalNullableFilter<"OrderItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  currencySnapshot?: Prisma.StringNullableFilter<"OrderItem"> | string | null
+  lineTotalSnapshot?: Prisma.DecimalNullableFilter<"OrderItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  priceSourceSku?: Prisma.StringNullableFilter<"OrderItem"> | string | null
   procurementStatus?: Prisma.EnumProcurementStatusFilter<"OrderItem"> | $Enums.ProcurementStatus
   procurementSource?: Prisma.EnumProcurementDecisionSourceNullableFilter<"OrderItem"> | $Enums.ProcurementDecisionSource | null
   procurementReason?: Prisma.EnumProcurementReasonNullableFilter<"OrderItem"> | $Enums.ProcurementReason | null
@@ -382,6 +430,10 @@ export type OrderItemOrderByWithAggregationInput = {
   color?: Prisma.SortOrderInput | Prisma.SortOrder
   size?: Prisma.SortOrderInput | Prisma.SortOrder
   confidence?: Prisma.SortOrder
+  unitPriceSnapshot?: Prisma.SortOrderInput | Prisma.SortOrder
+  currencySnapshot?: Prisma.SortOrderInput | Prisma.SortOrder
+  lineTotalSnapshot?: Prisma.SortOrderInput | Prisma.SortOrder
+  priceSourceSku?: Prisma.SortOrderInput | Prisma.SortOrder
   procurementStatus?: Prisma.SortOrder
   procurementSource?: Prisma.SortOrderInput | Prisma.SortOrder
   procurementReason?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -409,6 +461,10 @@ export type OrderItemScalarWhereWithAggregatesInput = {
   color?: Prisma.StringNullableWithAggregatesFilter<"OrderItem"> | string | null
   size?: Prisma.StringNullableWithAggregatesFilter<"OrderItem"> | string | null
   confidence?: Prisma.FloatWithAggregatesFilter<"OrderItem"> | number
+  unitPriceSnapshot?: Prisma.DecimalNullableWithAggregatesFilter<"OrderItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  currencySnapshot?: Prisma.StringNullableWithAggregatesFilter<"OrderItem"> | string | null
+  lineTotalSnapshot?: Prisma.DecimalNullableWithAggregatesFilter<"OrderItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  priceSourceSku?: Prisma.StringNullableWithAggregatesFilter<"OrderItem"> | string | null
   procurementStatus?: Prisma.EnumProcurementStatusWithAggregatesFilter<"OrderItem"> | $Enums.ProcurementStatus
   procurementSource?: Prisma.EnumProcurementDecisionSourceNullableWithAggregatesFilter<"OrderItem"> | $Enums.ProcurementDecisionSource | null
   procurementReason?: Prisma.EnumProcurementReasonNullableWithAggregatesFilter<"OrderItem"> | $Enums.ProcurementReason | null
@@ -426,6 +482,10 @@ export type OrderItemCreateInput = {
   color?: string | null
   size?: string | null
   confidence: number
+  unitPriceSnapshot?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  currencySnapshot?: string | null
+  lineTotalSnapshot?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  priceSourceSku?: string | null
   procurementStatus?: $Enums.ProcurementStatus
   procurementSource?: $Enums.ProcurementDecisionSource | null
   procurementReason?: $Enums.ProcurementReason | null
@@ -449,6 +509,10 @@ export type OrderItemUncheckedCreateInput = {
   color?: string | null
   size?: string | null
   confidence: number
+  unitPriceSnapshot?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  currencySnapshot?: string | null
+  lineTotalSnapshot?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  priceSourceSku?: string | null
   procurementStatus?: $Enums.ProcurementStatus
   procurementSource?: $Enums.ProcurementDecisionSource | null
   procurementReason?: $Enums.ProcurementReason | null
@@ -468,6 +532,10 @@ export type OrderItemUpdateInput = {
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   size?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confidence?: Prisma.FloatFieldUpdateOperationsInput | number
+  unitPriceSnapshot?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  currencySnapshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineTotalSnapshot?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  priceSourceSku?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   procurementStatus?: Prisma.EnumProcurementStatusFieldUpdateOperationsInput | $Enums.ProcurementStatus
   procurementSource?: Prisma.NullableEnumProcurementDecisionSourceFieldUpdateOperationsInput | $Enums.ProcurementDecisionSource | null
   procurementReason?: Prisma.NullableEnumProcurementReasonFieldUpdateOperationsInput | $Enums.ProcurementReason | null
@@ -491,6 +559,10 @@ export type OrderItemUncheckedUpdateInput = {
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   size?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confidence?: Prisma.FloatFieldUpdateOperationsInput | number
+  unitPriceSnapshot?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  currencySnapshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineTotalSnapshot?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  priceSourceSku?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   procurementStatus?: Prisma.EnumProcurementStatusFieldUpdateOperationsInput | $Enums.ProcurementStatus
   procurementSource?: Prisma.NullableEnumProcurementDecisionSourceFieldUpdateOperationsInput | $Enums.ProcurementDecisionSource | null
   procurementReason?: Prisma.NullableEnumProcurementReasonFieldUpdateOperationsInput | $Enums.ProcurementReason | null
@@ -512,6 +584,10 @@ export type OrderItemCreateManyInput = {
   color?: string | null
   size?: string | null
   confidence: number
+  unitPriceSnapshot?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  currencySnapshot?: string | null
+  lineTotalSnapshot?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  priceSourceSku?: string | null
   procurementStatus?: $Enums.ProcurementStatus
   procurementSource?: $Enums.ProcurementDecisionSource | null
   procurementReason?: $Enums.ProcurementReason | null
@@ -529,6 +605,10 @@ export type OrderItemUpdateManyMutationInput = {
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   size?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confidence?: Prisma.FloatFieldUpdateOperationsInput | number
+  unitPriceSnapshot?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  currencySnapshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineTotalSnapshot?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  priceSourceSku?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   procurementStatus?: Prisma.EnumProcurementStatusFieldUpdateOperationsInput | $Enums.ProcurementStatus
   procurementSource?: Prisma.NullableEnumProcurementDecisionSourceFieldUpdateOperationsInput | $Enums.ProcurementDecisionSource | null
   procurementReason?: Prisma.NullableEnumProcurementReasonFieldUpdateOperationsInput | $Enums.ProcurementReason | null
@@ -548,6 +628,10 @@ export type OrderItemUncheckedUpdateManyInput = {
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   size?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confidence?: Prisma.FloatFieldUpdateOperationsInput | number
+  unitPriceSnapshot?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  currencySnapshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineTotalSnapshot?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  priceSourceSku?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   procurementStatus?: Prisma.EnumProcurementStatusFieldUpdateOperationsInput | $Enums.ProcurementStatus
   procurementSource?: Prisma.NullableEnumProcurementDecisionSourceFieldUpdateOperationsInput | $Enums.ProcurementDecisionSource | null
   procurementReason?: Prisma.NullableEnumProcurementReasonFieldUpdateOperationsInput | $Enums.ProcurementReason | null
@@ -582,6 +666,10 @@ export type OrderItemCountOrderByAggregateInput = {
   color?: Prisma.SortOrder
   size?: Prisma.SortOrder
   confidence?: Prisma.SortOrder
+  unitPriceSnapshot?: Prisma.SortOrder
+  currencySnapshot?: Prisma.SortOrder
+  lineTotalSnapshot?: Prisma.SortOrder
+  priceSourceSku?: Prisma.SortOrder
   procurementStatus?: Prisma.SortOrder
   procurementSource?: Prisma.SortOrder
   procurementReason?: Prisma.SortOrder
@@ -594,6 +682,8 @@ export type OrderItemCountOrderByAggregateInput = {
 export type OrderItemAvgOrderByAggregateInput = {
   quantity?: Prisma.SortOrder
   confidence?: Prisma.SortOrder
+  unitPriceSnapshot?: Prisma.SortOrder
+  lineTotalSnapshot?: Prisma.SortOrder
   stockAtDecision?: Prisma.SortOrder
   availableAtDecision?: Prisma.SortOrder
 }
@@ -608,6 +698,10 @@ export type OrderItemMaxOrderByAggregateInput = {
   color?: Prisma.SortOrder
   size?: Prisma.SortOrder
   confidence?: Prisma.SortOrder
+  unitPriceSnapshot?: Prisma.SortOrder
+  currencySnapshot?: Prisma.SortOrder
+  lineTotalSnapshot?: Prisma.SortOrder
+  priceSourceSku?: Prisma.SortOrder
   procurementStatus?: Prisma.SortOrder
   procurementSource?: Prisma.SortOrder
   procurementReason?: Prisma.SortOrder
@@ -627,6 +721,10 @@ export type OrderItemMinOrderByAggregateInput = {
   color?: Prisma.SortOrder
   size?: Prisma.SortOrder
   confidence?: Prisma.SortOrder
+  unitPriceSnapshot?: Prisma.SortOrder
+  currencySnapshot?: Prisma.SortOrder
+  lineTotalSnapshot?: Prisma.SortOrder
+  priceSourceSku?: Prisma.SortOrder
   procurementStatus?: Prisma.SortOrder
   procurementSource?: Prisma.SortOrder
   procurementReason?: Prisma.SortOrder
@@ -639,6 +737,8 @@ export type OrderItemMinOrderByAggregateInput = {
 export type OrderItemSumOrderByAggregateInput = {
   quantity?: Prisma.SortOrder
   confidence?: Prisma.SortOrder
+  unitPriceSnapshot?: Prisma.SortOrder
+  lineTotalSnapshot?: Prisma.SortOrder
   stockAtDecision?: Prisma.SortOrder
   availableAtDecision?: Prisma.SortOrder
 }
@@ -780,6 +880,10 @@ export type OrderItemCreateWithoutTenantInput = {
   color?: string | null
   size?: string | null
   confidence: number
+  unitPriceSnapshot?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  currencySnapshot?: string | null
+  lineTotalSnapshot?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  priceSourceSku?: string | null
   procurementStatus?: $Enums.ProcurementStatus
   procurementSource?: $Enums.ProcurementDecisionSource | null
   procurementReason?: $Enums.ProcurementReason | null
@@ -801,6 +905,10 @@ export type OrderItemUncheckedCreateWithoutTenantInput = {
   color?: string | null
   size?: string | null
   confidence: number
+  unitPriceSnapshot?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  currencySnapshot?: string | null
+  lineTotalSnapshot?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  priceSourceSku?: string | null
   procurementStatus?: $Enums.ProcurementStatus
   procurementSource?: $Enums.ProcurementDecisionSource | null
   procurementReason?: $Enums.ProcurementReason | null
@@ -851,6 +959,10 @@ export type OrderItemScalarWhereInput = {
   color?: Prisma.StringNullableFilter<"OrderItem"> | string | null
   size?: Prisma.StringNullableFilter<"OrderItem"> | string | null
   confidence?: Prisma.FloatFilter<"OrderItem"> | number
+  unitPriceSnapshot?: Prisma.DecimalNullableFilter<"OrderItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  currencySnapshot?: Prisma.StringNullableFilter<"OrderItem"> | string | null
+  lineTotalSnapshot?: Prisma.DecimalNullableFilter<"OrderItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  priceSourceSku?: Prisma.StringNullableFilter<"OrderItem"> | string | null
   procurementStatus?: Prisma.EnumProcurementStatusFilter<"OrderItem"> | $Enums.ProcurementStatus
   procurementSource?: Prisma.EnumProcurementDecisionSourceNullableFilter<"OrderItem"> | $Enums.ProcurementDecisionSource | null
   procurementReason?: Prisma.EnumProcurementReasonNullableFilter<"OrderItem"> | $Enums.ProcurementReason | null
@@ -868,6 +980,10 @@ export type OrderItemCreateWithoutOrderInput = {
   color?: string | null
   size?: string | null
   confidence: number
+  unitPriceSnapshot?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  currencySnapshot?: string | null
+  lineTotalSnapshot?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  priceSourceSku?: string | null
   procurementStatus?: $Enums.ProcurementStatus
   procurementSource?: $Enums.ProcurementDecisionSource | null
   procurementReason?: $Enums.ProcurementReason | null
@@ -888,6 +1004,10 @@ export type OrderItemUncheckedCreateWithoutOrderInput = {
   color?: string | null
   size?: string | null
   confidence: number
+  unitPriceSnapshot?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  currencySnapshot?: string | null
+  lineTotalSnapshot?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  priceSourceSku?: string | null
   procurementStatus?: $Enums.ProcurementStatus
   procurementSource?: $Enums.ProcurementDecisionSource | null
   procurementReason?: $Enums.ProcurementReason | null
@@ -933,6 +1053,10 @@ export type OrderItemCreateWithoutReservationInput = {
   color?: string | null
   size?: string | null
   confidence: number
+  unitPriceSnapshot?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  currencySnapshot?: string | null
+  lineTotalSnapshot?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  priceSourceSku?: string | null
   procurementStatus?: $Enums.ProcurementStatus
   procurementSource?: $Enums.ProcurementDecisionSource | null
   procurementReason?: $Enums.ProcurementReason | null
@@ -955,6 +1079,10 @@ export type OrderItemUncheckedCreateWithoutReservationInput = {
   color?: string | null
   size?: string | null
   confidence: number
+  unitPriceSnapshot?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  currencySnapshot?: string | null
+  lineTotalSnapshot?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  priceSourceSku?: string | null
   procurementStatus?: $Enums.ProcurementStatus
   procurementSource?: $Enums.ProcurementDecisionSource | null
   procurementReason?: $Enums.ProcurementReason | null
@@ -989,6 +1117,10 @@ export type OrderItemUpdateWithoutReservationInput = {
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   size?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confidence?: Prisma.FloatFieldUpdateOperationsInput | number
+  unitPriceSnapshot?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  currencySnapshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineTotalSnapshot?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  priceSourceSku?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   procurementStatus?: Prisma.EnumProcurementStatusFieldUpdateOperationsInput | $Enums.ProcurementStatus
   procurementSource?: Prisma.NullableEnumProcurementDecisionSourceFieldUpdateOperationsInput | $Enums.ProcurementDecisionSource | null
   procurementReason?: Prisma.NullableEnumProcurementReasonFieldUpdateOperationsInput | $Enums.ProcurementReason | null
@@ -1011,6 +1143,10 @@ export type OrderItemUncheckedUpdateWithoutReservationInput = {
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   size?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confidence?: Prisma.FloatFieldUpdateOperationsInput | number
+  unitPriceSnapshot?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  currencySnapshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineTotalSnapshot?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  priceSourceSku?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   procurementStatus?: Prisma.EnumProcurementStatusFieldUpdateOperationsInput | $Enums.ProcurementStatus
   procurementSource?: Prisma.NullableEnumProcurementDecisionSourceFieldUpdateOperationsInput | $Enums.ProcurementDecisionSource | null
   procurementReason?: Prisma.NullableEnumProcurementReasonFieldUpdateOperationsInput | $Enums.ProcurementReason | null
@@ -1029,6 +1165,10 @@ export type OrderItemCreateWithoutDeliveryItemsInput = {
   color?: string | null
   size?: string | null
   confidence: number
+  unitPriceSnapshot?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  currencySnapshot?: string | null
+  lineTotalSnapshot?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  priceSourceSku?: string | null
   procurementStatus?: $Enums.ProcurementStatus
   procurementSource?: $Enums.ProcurementDecisionSource | null
   procurementReason?: $Enums.ProcurementReason | null
@@ -1051,6 +1191,10 @@ export type OrderItemUncheckedCreateWithoutDeliveryItemsInput = {
   color?: string | null
   size?: string | null
   confidence: number
+  unitPriceSnapshot?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  currencySnapshot?: string | null
+  lineTotalSnapshot?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  priceSourceSku?: string | null
   procurementStatus?: $Enums.ProcurementStatus
   procurementSource?: $Enums.ProcurementDecisionSource | null
   procurementReason?: $Enums.ProcurementReason | null
@@ -1085,6 +1229,10 @@ export type OrderItemUpdateWithoutDeliveryItemsInput = {
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   size?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confidence?: Prisma.FloatFieldUpdateOperationsInput | number
+  unitPriceSnapshot?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  currencySnapshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineTotalSnapshot?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  priceSourceSku?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   procurementStatus?: Prisma.EnumProcurementStatusFieldUpdateOperationsInput | $Enums.ProcurementStatus
   procurementSource?: Prisma.NullableEnumProcurementDecisionSourceFieldUpdateOperationsInput | $Enums.ProcurementDecisionSource | null
   procurementReason?: Prisma.NullableEnumProcurementReasonFieldUpdateOperationsInput | $Enums.ProcurementReason | null
@@ -1107,6 +1255,10 @@ export type OrderItemUncheckedUpdateWithoutDeliveryItemsInput = {
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   size?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confidence?: Prisma.FloatFieldUpdateOperationsInput | number
+  unitPriceSnapshot?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  currencySnapshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineTotalSnapshot?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  priceSourceSku?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   procurementStatus?: Prisma.EnumProcurementStatusFieldUpdateOperationsInput | $Enums.ProcurementStatus
   procurementSource?: Prisma.NullableEnumProcurementDecisionSourceFieldUpdateOperationsInput | $Enums.ProcurementDecisionSource | null
   procurementReason?: Prisma.NullableEnumProcurementReasonFieldUpdateOperationsInput | $Enums.ProcurementReason | null
@@ -1126,6 +1278,10 @@ export type OrderItemCreateManyTenantInput = {
   color?: string | null
   size?: string | null
   confidence: number
+  unitPriceSnapshot?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  currencySnapshot?: string | null
+  lineTotalSnapshot?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  priceSourceSku?: string | null
   procurementStatus?: $Enums.ProcurementStatus
   procurementSource?: $Enums.ProcurementDecisionSource | null
   procurementReason?: $Enums.ProcurementReason | null
@@ -1143,6 +1299,10 @@ export type OrderItemUpdateWithoutTenantInput = {
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   size?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confidence?: Prisma.FloatFieldUpdateOperationsInput | number
+  unitPriceSnapshot?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  currencySnapshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineTotalSnapshot?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  priceSourceSku?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   procurementStatus?: Prisma.EnumProcurementStatusFieldUpdateOperationsInput | $Enums.ProcurementStatus
   procurementSource?: Prisma.NullableEnumProcurementDecisionSourceFieldUpdateOperationsInput | $Enums.ProcurementDecisionSource | null
   procurementReason?: Prisma.NullableEnumProcurementReasonFieldUpdateOperationsInput | $Enums.ProcurementReason | null
@@ -1164,6 +1324,10 @@ export type OrderItemUncheckedUpdateWithoutTenantInput = {
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   size?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confidence?: Prisma.FloatFieldUpdateOperationsInput | number
+  unitPriceSnapshot?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  currencySnapshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineTotalSnapshot?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  priceSourceSku?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   procurementStatus?: Prisma.EnumProcurementStatusFieldUpdateOperationsInput | $Enums.ProcurementStatus
   procurementSource?: Prisma.NullableEnumProcurementDecisionSourceFieldUpdateOperationsInput | $Enums.ProcurementDecisionSource | null
   procurementReason?: Prisma.NullableEnumProcurementReasonFieldUpdateOperationsInput | $Enums.ProcurementReason | null
@@ -1184,6 +1348,10 @@ export type OrderItemUncheckedUpdateManyWithoutTenantInput = {
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   size?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confidence?: Prisma.FloatFieldUpdateOperationsInput | number
+  unitPriceSnapshot?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  currencySnapshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineTotalSnapshot?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  priceSourceSku?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   procurementStatus?: Prisma.EnumProcurementStatusFieldUpdateOperationsInput | $Enums.ProcurementStatus
   procurementSource?: Prisma.NullableEnumProcurementDecisionSourceFieldUpdateOperationsInput | $Enums.ProcurementDecisionSource | null
   procurementReason?: Prisma.NullableEnumProcurementReasonFieldUpdateOperationsInput | $Enums.ProcurementReason | null
@@ -1201,6 +1369,10 @@ export type OrderItemCreateManyOrderInput = {
   color?: string | null
   size?: string | null
   confidence: number
+  unitPriceSnapshot?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  currencySnapshot?: string | null
+  lineTotalSnapshot?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  priceSourceSku?: string | null
   procurementStatus?: $Enums.ProcurementStatus
   procurementSource?: $Enums.ProcurementDecisionSource | null
   procurementReason?: $Enums.ProcurementReason | null
@@ -1218,6 +1390,10 @@ export type OrderItemUpdateWithoutOrderInput = {
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   size?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confidence?: Prisma.FloatFieldUpdateOperationsInput | number
+  unitPriceSnapshot?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  currencySnapshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineTotalSnapshot?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  priceSourceSku?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   procurementStatus?: Prisma.EnumProcurementStatusFieldUpdateOperationsInput | $Enums.ProcurementStatus
   procurementSource?: Prisma.NullableEnumProcurementDecisionSourceFieldUpdateOperationsInput | $Enums.ProcurementDecisionSource | null
   procurementReason?: Prisma.NullableEnumProcurementReasonFieldUpdateOperationsInput | $Enums.ProcurementReason | null
@@ -1238,6 +1414,10 @@ export type OrderItemUncheckedUpdateWithoutOrderInput = {
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   size?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confidence?: Prisma.FloatFieldUpdateOperationsInput | number
+  unitPriceSnapshot?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  currencySnapshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineTotalSnapshot?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  priceSourceSku?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   procurementStatus?: Prisma.EnumProcurementStatusFieldUpdateOperationsInput | $Enums.ProcurementStatus
   procurementSource?: Prisma.NullableEnumProcurementDecisionSourceFieldUpdateOperationsInput | $Enums.ProcurementDecisionSource | null
   procurementReason?: Prisma.NullableEnumProcurementReasonFieldUpdateOperationsInput | $Enums.ProcurementReason | null
@@ -1257,6 +1437,10 @@ export type OrderItemUncheckedUpdateManyWithoutOrderInput = {
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   size?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confidence?: Prisma.FloatFieldUpdateOperationsInput | number
+  unitPriceSnapshot?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  currencySnapshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lineTotalSnapshot?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  priceSourceSku?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   procurementStatus?: Prisma.EnumProcurementStatusFieldUpdateOperationsInput | $Enums.ProcurementStatus
   procurementSource?: Prisma.NullableEnumProcurementDecisionSourceFieldUpdateOperationsInput | $Enums.ProcurementDecisionSource | null
   procurementReason?: Prisma.NullableEnumProcurementReasonFieldUpdateOperationsInput | $Enums.ProcurementReason | null
@@ -1307,6 +1491,10 @@ export type OrderItemSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   color?: boolean
   size?: boolean
   confidence?: boolean
+  unitPriceSnapshot?: boolean
+  currencySnapshot?: boolean
+  lineTotalSnapshot?: boolean
+  priceSourceSku?: boolean
   procurementStatus?: boolean
   procurementSource?: boolean
   procurementReason?: boolean
@@ -1331,6 +1519,10 @@ export type OrderItemSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   color?: boolean
   size?: boolean
   confidence?: boolean
+  unitPriceSnapshot?: boolean
+  currencySnapshot?: boolean
+  lineTotalSnapshot?: boolean
+  priceSourceSku?: boolean
   procurementStatus?: boolean
   procurementSource?: boolean
   procurementReason?: boolean
@@ -1352,6 +1544,10 @@ export type OrderItemSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   color?: boolean
   size?: boolean
   confidence?: boolean
+  unitPriceSnapshot?: boolean
+  currencySnapshot?: boolean
+  lineTotalSnapshot?: boolean
+  priceSourceSku?: boolean
   procurementStatus?: boolean
   procurementSource?: boolean
   procurementReason?: boolean
@@ -1373,6 +1569,10 @@ export type OrderItemSelectScalar = {
   color?: boolean
   size?: boolean
   confidence?: boolean
+  unitPriceSnapshot?: boolean
+  currencySnapshot?: boolean
+  lineTotalSnapshot?: boolean
+  priceSourceSku?: boolean
   procurementStatus?: boolean
   procurementSource?: boolean
   procurementReason?: boolean
@@ -1382,7 +1582,7 @@ export type OrderItemSelectScalar = {
   createdAt?: boolean
 }
 
-export type OrderItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "orderId" | "catalogId" | "originalText" | "quantity" | "color" | "size" | "confidence" | "procurementStatus" | "procurementSource" | "procurementReason" | "stockAtDecision" | "availableAtDecision" | "procurementUpdatedAt" | "createdAt", ExtArgs["result"]["orderItem"]>
+export type OrderItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "orderId" | "catalogId" | "originalText" | "quantity" | "color" | "size" | "confidence" | "unitPriceSnapshot" | "currencySnapshot" | "lineTotalSnapshot" | "priceSourceSku" | "procurementStatus" | "procurementSource" | "procurementReason" | "stockAtDecision" | "availableAtDecision" | "procurementUpdatedAt" | "createdAt", ExtArgs["result"]["orderItem"]>
 export type OrderItemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   order?: boolean | Prisma.OrderDefaultArgs<ExtArgs>
@@ -1417,6 +1617,10 @@ export type $OrderItemPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     color: string | null
     size: string | null
     confidence: number
+    unitPriceSnapshot: runtime.Decimal | null
+    currencySnapshot: string | null
+    lineTotalSnapshot: runtime.Decimal | null
+    priceSourceSku: string | null
     procurementStatus: $Enums.ProcurementStatus
     procurementSource: $Enums.ProcurementDecisionSource | null
     procurementReason: $Enums.ProcurementReason | null
@@ -1860,6 +2064,10 @@ export interface OrderItemFieldRefs {
   readonly color: Prisma.FieldRef<"OrderItem", 'String'>
   readonly size: Prisma.FieldRef<"OrderItem", 'String'>
   readonly confidence: Prisma.FieldRef<"OrderItem", 'Float'>
+  readonly unitPriceSnapshot: Prisma.FieldRef<"OrderItem", 'Decimal'>
+  readonly currencySnapshot: Prisma.FieldRef<"OrderItem", 'String'>
+  readonly lineTotalSnapshot: Prisma.FieldRef<"OrderItem", 'Decimal'>
+  readonly priceSourceSku: Prisma.FieldRef<"OrderItem", 'String'>
   readonly procurementStatus: Prisma.FieldRef<"OrderItem", 'ProcurementStatus'>
   readonly procurementSource: Prisma.FieldRef<"OrderItem", 'ProcurementDecisionSource'>
   readonly procurementReason: Prisma.FieldRef<"OrderItem", 'ProcurementReason'>
