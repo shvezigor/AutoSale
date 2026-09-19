@@ -312,7 +312,11 @@ export class OrdersService {
           quantity: item.reservation.quantity,
           status: item.reservation.status,
         } : null,
+        unitPriceSnapshot: item.unitPriceSnapshot?.toFixed(2) ?? null,
+        currencySnapshot: item.currencySnapshot,
+        lineTotalSnapshot: item.lineTotalSnapshot?.toFixed(2) ?? null,
       })),
+      commercialTerms: null,
       procurementSummary: ['APPROVED', 'AUTO_APPROVED'].includes(row.status)
         ? procurementSummaryFor(procurementStatuses, Boolean(row.procurementHandedOffAt))
         : 'UNASSESSED',

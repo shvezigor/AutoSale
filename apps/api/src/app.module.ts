@@ -21,6 +21,7 @@ import { TelegramModule } from './integrations/telegram.module.js';
 import { DeliveryModule } from './delivery/delivery.module.js';
 import { DashboardModule } from './dashboard/dashboard.module.js';
 import { DemoLeadsModule } from './demo-leads/demo-leads.module.js';
+import { CommercialSettingsModule } from './commercial-settings/commercial-settings.module.js';
 
 @Module({
   controllers: [HealthController],
@@ -49,6 +50,7 @@ export class AppModule {
         DeliveryModule.register(env),
         DashboardModule.register(env),
         DemoLeadsModule.register(env),
+        CommercialSettingsModule.register(env),
       ],
     };
   }
