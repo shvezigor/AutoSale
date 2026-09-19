@@ -7,6 +7,7 @@ import type {
   SupplierDispatchSummary,
 } from './procurement.js';
 import type { ShipmentStatus, ShipmentSummary } from './delivery.js';
+import type { OrderCommercialTermsSummary } from './commercial.js';
 
 export type OrderStatus = 'AI_PROCESSING' | 'AI_FAILED' | 'NEEDS_REVIEW' | 'AUTO_APPROVED' | 'APPROVED' | 'CANCELLED';
 
@@ -43,7 +44,11 @@ export interface ManagerOrder {
     stockAtDecision: number | null;
     availableAtDecision: number | null;
     reservation: InventoryReservationSummary | null;
+    unitPriceSnapshot: string | null;
+    currencySnapshot: string | null;
+    lineTotalSnapshot: string | null;
   }>;
+  commercialTerms: OrderCommercialTermsSummary | null;
   procurementSummary: ProcurementSummary;
   procurementHandedOffAt: string | null;
   supplierDispatch: SupplierDispatchSummary | null;

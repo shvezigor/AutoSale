@@ -42,6 +42,14 @@
       "import": "./dist/dashboard.js",
       "default": "./dist/dashboard.js"
     },
+    "./commercial": {
+      "react-server": "./src/commercial.ts",
+      "browser": "./src/commercial.ts",
+      "types": "./src/commercial.ts",
+      "development": "./src/commercial.ts",
+      "import": "./dist/commercial.js",
+      "default": "./dist/commercial.js"
+    },
     "./auth": {
       "react-server": "./src/auth.ts",
       "browser": "./src/auth.ts",
