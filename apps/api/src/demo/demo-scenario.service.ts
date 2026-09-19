@@ -14,8 +14,8 @@ export class DemoScenarioService {
   async start(tenantId: string): Promise<{ eventId: string; duplicate: boolean }> {
     await this.prisma.product.upsert({
       where: { tenantId_sku: { tenantId, sku: 'DEMO-BAG-001' } },
-      update: { name: 'Сумка Luna чорна', aliases: ['чорна сумка Luna', 'Luna black'], active: true },
-      create: { tenantId, sku: 'DEMO-BAG-001', name: 'Сумка Luna чорна', aliases: ['чорна сумка Luna', 'Luna black'] },
+      update: { name: 'Сумка Luna чорна', aliases: ['чорна сумка Luna', 'Luna black'], price: '1299.00', currency: 'UAH', active: true },
+      create: { tenantId, sku: 'DEMO-BAG-001', name: 'Сумка Luna чорна', aliases: ['чорна сумка Luna', 'Luna black'], price: '1299.00', currency: 'UAH' },
     });
 
     const externalEventId = 'demo:instagram-order:v1';

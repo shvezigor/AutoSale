@@ -96,6 +96,8 @@ describe('TriggeredOrderProcessor', () => {
         sku: 'SKU-1',
         name: 'Костюм Classic',
         aliases: ['чорний костюм'],
+        price: '4395.00',
+        currency: 'UAH',
       },
     });
     const recognize = vi.fn().mockResolvedValue({
@@ -153,7 +155,13 @@ describe('TriggeredOrderProcessor', () => {
       aiResponseId: 'resp-order',
       sortCustomer: 'іван',
       sortProduct: 'костюм classic',
-      items: [{ catalogId: 'SKU-1', size: 'M' }],
+      items: [{ catalogId: 'SKU-1', size: 'M', unitPriceSnapshot: new Prisma.Decimal('4395.00'), lineTotalSnapshot: new Prisma.Decimal('4395.00'), currencySnapshot: 'UAH' }],
+    });
+    expect(await prisma.orderCommercialTerms.findUnique({ where: { orderId: first!.id } })).toMatchObject({
+      pricingStatus: 'READY',
+      currency: 'UAH',
+      itemsSubtotal: new Prisma.Decimal('4395.00'),
+      totalAmount: new Prisma.Decimal('4395.00'),
     });
     const persistedItems = await prisma.$queryRaw<Array<{ quantity: number }>>(
       Prisma.sql`SELECT "quantity" FROM "order_items" WHERE "order_id" = ${first!.id}::uuid`,
@@ -207,7 +215,7 @@ describe('TriggeredOrderProcessor', () => {
         sourceTimestamp: new Date('2026-09-18T09:00:00Z'),
       },
     });
-    await prisma.product.create({ data: { tenantId: tenant.id, sku: 'DOOR-1', name: 'Двері Авангард', aliases: ['двері авангард'] } });
+    await prisma.product.create({ data: { tenantId: tenant.id, sku: 'DOOR-1', name: 'Двері Авангард', aliases: ['двері авангард'], price: '8000.00', currency: 'UAH' } });
     const recognize = vi.fn().mockResolvedValue({
       order: {
         isOrder: true,
@@ -241,6 +249,9 @@ describe('TriggeredOrderProcessor', () => {
       reason: 'MANAGER_REVIEW_MODE',
       aiResponseId: 'resp-intent',
     });
+    expect(await prisma.orderCommercialTerms.findUniqueOrThrow({ where: { orderId: first!.id } })).toMatchObject({
+      pricingStatus: 'READY', currency: 'UAH', totalAmount: new Prisma.Decimal('8000.00'),
+    });
 
     await prisma.tenantSettings.update({
       where: { tenantId: tenant.id },
@@ -273,6 +284,23 @@ describe('TriggeredOrderProcessor', () => {
       mode: 'AI_AUTOMATION',
       status: 'AUTO_CREATED',
       reason: 'COMPLETE_HIGH_CONFIDENCE',
+    });
+    expect(await prisma.orderCommercialTerms.findUniqueOrThrow({ where: { orderId: automatic!.id } })).toMatchObject({
+      pricingStatus: 'READY', currency: 'UAH', totalAmount: new Prisma.Decimal('8000.00'),
+    });
+
+    await prisma.product.update({ where: { tenantId_sku: { tenantId: tenant.id, sku: 'DOOR-1' } }, data: { price: null, currency: null } });
+    const unpricedAnchor = await prisma.message.create({
+      data: {
+        tenantId: tenant.id, conversationId: conversation.id, rawEventId: event.id, channel: 'INSTAGRAM',
+        externalMessageId: 'intent-unpriced-message', direction: 'INBOUND', senderId: 'customer',
+        text: 'Оформляйте ще одні двері', sourceTimestamp: new Date('2026-09-18T09:02:00Z'),
+      },
+    });
+    const unpriced = await processor.processIfTriggered(unpricedAnchor.id);
+    expect(unpriced).toMatchObject({ status: 'AUTO_APPROVED' });
+    expect(await prisma.orderCommercialTerms.findUniqueOrThrow({ where: { orderId: unpriced!.id } })).toMatchObject({
+      pricingStatus: 'NEEDS_REVIEW', currency: null, totalAmount: null,
     });
   });
 });

@@ -1,4 +1,4 @@
-import { Prisma, type PrismaClient, type ProcurementStore } from '@autosale/database';
+import { materializeCommercialTerms, Prisma, type CommercialLineInput, type PrismaClient, type ProcurementStore } from '@autosale/database';
 
 import type { ApprovalMode } from './approval-policy.js';
 import { decideConversationalIntent, type IntentDetectionMode } from './order-intent-policy.js';
@@ -130,12 +130,29 @@ export class TriggeredOrderProcessor {
             sortProduct: productSortValue(result.order.items, new Map(products.map((product) => [product.sku, product.name]))),
           },
         });
+        const commercialLines: CommercialLineInput[] = [];
+        const productsBySku = new Map(products.map((product) => [product.sku, product]));
         for (const item of result.order.items) {
-          await transaction.$executeRaw(Prisma.sql`
-            INSERT INTO "order_items" ("id", "tenant_id", "order_id", "catalog_id", "original_text", "quantity", "color", "size", "confidence")
-            VALUES (gen_random_uuid(), ${anchor.tenantId}::uuid, ${created.id}::uuid, ${item.catalogId}, ${item.originalText}, ${item.quantity}, ${item.color}, ${item.size}, ${item.confidence})
-          `);
+          const persisted = await transaction.orderItem.create({
+            data: {
+              tenantId: anchor.tenantId,
+              orderId: created.id,
+              catalogId: item.catalogId,
+              originalText: item.originalText,
+              quantity: item.quantity,
+              color: item.color,
+              size: item.size,
+              confidence: item.confidence,
+            },
+          });
+          commercialLines.push(commercialLine(persisted.id, item.catalogId, item.quantity, productsBySku));
         }
+        await materializeCommercialTerms(transaction, {
+          tenantId: anchor.tenantId,
+          orderId: created.id,
+          actor: 'SYSTEM',
+          lines: commercialLines,
+        });
         await transaction.orderIntentEvaluation.update({
           where: { anchorMessageId: anchor.id },
           data: {
@@ -291,12 +308,29 @@ export class TriggeredOrderProcessor {
           sortProduct: productSortValue(result.order.items, new Map(products.map((product) => [product.sku, product.name]))),
           },
         });
+        const commercialLines: CommercialLineInput[] = [];
+        const productsBySku = new Map(products.map((product) => [product.sku, product]));
         for (const item of result.order.items) {
-          await transaction.$executeRaw(Prisma.sql`
-            INSERT INTO "order_items" ("id", "tenant_id", "order_id", "catalog_id", "original_text", "quantity", "color", "size", "confidence")
-            VALUES (gen_random_uuid(), ${trigger.tenantId}::uuid, ${order.id}::uuid, ${item.catalogId}, ${item.originalText}, ${item.quantity}, ${item.color}, ${item.size}, ${item.confidence})
-          `);
+          const persisted = await transaction.orderItem.create({
+            data: {
+              tenantId: trigger.tenantId,
+              orderId: order.id,
+              catalogId: item.catalogId,
+              originalText: item.originalText,
+              quantity: item.quantity,
+              color: item.color,
+              size: item.size,
+              confidence: item.confidence,
+            },
+          });
+          commercialLines.push(commercialLine(persisted.id, item.catalogId, item.quantity, productsBySku));
         }
+        await materializeCommercialTerms(transaction, {
+          tenantId: trigger.tenantId,
+          orderId: order.id,
+          actor: 'SYSTEM',
+          lines: commercialLines,
+        });
         await this.alerts?.persist(transaction, {
           eventId: order.id,
           tenantId: trigger.tenantId,
@@ -354,4 +388,20 @@ function productSortValue(
   products: Map<string, string>,
 ): string {
   return normalizeSortValue(items.map((item) => item.catalogId ? products.get(item.catalogId) ?? item.originalText : item.originalText).filter(Boolean).join(', '));
+}
+
+function commercialLine(
+  itemId: string,
+  catalogId: string | null,
+  quantity: number,
+  products: Map<string, { sku: string; price: Prisma.Decimal | null; currency: string | null }>,
+): CommercialLineInput {
+  const product = catalogId ? products.get(catalogId) : undefined;
+  return {
+    itemId,
+    quantity,
+    unitPrice: product?.price?.toFixed(2) ?? null,
+    currency: product?.currency ?? null,
+    sourceSku: product?.sku ?? null,
+  };
 }
