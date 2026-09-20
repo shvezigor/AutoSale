@@ -1594,11 +1594,13 @@ Status: deferred by the owner on 2026-09-12. Resume with sandbox credentials, th
 
 Status: official research, secure connection, directories/sender defaults, the gated shipment lifecycle, and delayed StatusTracking were completed by 2026-09-14. Tracking uses the separate bearer, isolates tenant/environment/credential generations, checks physical registration before StatusTracking, batches at most 50 barcodes, stores bounded versioned provider events, and never sends customer messages automatically. The manager flow supports Ukrposhta quote, durable idempotent creation, CREATED-only cancellation, PDF labels and explicit customer-message previews. Ukrposhta requires a business contract and separate eCom, counterparty and tracking credentials; API shipments are not synchronized with the Personal Account. Implementation follows `docs/superpowers/plans/2026-09-12-ukrposhta-delivery-implementation.md`. Production shipment creation remains disabled until combined carrier acceptance; sandbox and controlled production acceptance remain in the backlog.
 
-## Task 73: Add bank accounts and payments
+## Task 73: Add order commercial terms and payment accounts
 
-- [ ] Model tenant legal entities, currencies, bank accounts and payment state after delivery adapters stabilize.
-- [ ] Filter selectable accounts by the order's legal entity and payment currency and show only active accounts.
+- [x] Model tenant legal entities, currencies, bank accounts and immutable expected-order totals after delivery adapters stabilize.
+- [x] Filter selectable accounts by the order's legal entity and payment currency and show only active accounts.
 - [ ] Add payment recording and reconciliation as a separate audited lifecycle.
+
+Status: the first stage was implemented on 2026-09-19. New orders snapshot catalogue prices and calculate the expected amount in the order transaction. Owners manage legal entities and accounts; managers see only masked IBANs and server-filtered compatible choices. Existing orders require an explicit preview and save. Approval, procurement, shipment and delivery never record money as received. The remaining item is a separate payment ledger and reconciliation design.
 
 ## Task 74: Define and verify the dashboard contract
 

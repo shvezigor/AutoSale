@@ -13,7 +13,7 @@ test('login and registration expose Google Sign-In without removing password aut
 
 test('expired Google onboarding exposes only a safe restart', async ({ page }) => {
   await page.goto('/onboarding/google');
-  await expect(page.getByRole('heading', { name: 'Посилання протерміновано' })).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Почати знову' })).toHaveAttribute('href', '/login');
+  await expect(page.getByRole('heading', { name: /Посилання протерміновано|Link expired/ })).toBeVisible();
+  await expect(page.getByRole('link', { name: /Почати знову|Start again/ })).toHaveAttribute('href', '/login');
   await expect(page.getByLabel('Email')).toHaveCount(0);
 });
