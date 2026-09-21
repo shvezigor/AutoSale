@@ -28,13 +28,21 @@ Verified on 2026-09-21 against [`order payment facts design`](../superpowers/spe
 
 ## Production rollout
 
-- [ ] Apply migration `20260920220000_order_payment_facts` before starting the new application version.
+- [x] Apply migration `20260920220000_order_payment_facts` before starting the new application version.
 - [ ] Create a fictional priced UAH order and record a partial cash payment.
 - [ ] Record the remaining amount to a compatible fictional UAH account and observe `Оплачено`.
 - [ ] Confirm item quantity and payment details are locked while an active payment exists.
 - [ ] As owner, cancel one payment with a fictional reason and observe `Частково оплачено` with the row retained.
 - [ ] Verify all four table filters and mobile layout in production.
-- [ ] Confirm API, web and worker health after deployment.
+- [x] Confirm API, web and worker health after deployment.
+
+### Deployment evidence
+
+- Deployed commit: `70ed657749cb5b8c567cf63c3a4a432bee825d8f`.
+- Pre-migration backup: `20260921T053217Z`; PostgreSQL, MinIO and configuration checksums verified locally.
+- Migration `20260920220000_order_payment_facts` completed successfully before the application containers were replaced.
+- API, web and worker reported `healthy`; `https://sales-aito.com/health/live` and `/login` returned HTTP 200 after deployment.
+- The remaining unchecked items require an authenticated fictional-order smoke test and must not be inferred from container or public-route health.
 
 ## Explicitly not implemented
 
