@@ -72,6 +72,7 @@ describe('OrderPaymentsCard', () => {
     const changed = vi.fn();
     renderCard({ onChange: changed });
     fireEvent.click(screen.getByRole('button', { name: 'Скасувати оплату' }));
+    expect(screen.getByRole('button', { name: 'Скасувати' })).toHaveClass('secondary-button');
     fireEvent.change(screen.getByLabelText('Причина скасування'), { target: { value: 'Помилковий запис' } });
     fireEvent.submit(screen.getByRole('form', { name: 'Скасувати оплату' }));
     await waitFor(() => expect(changed).toHaveBeenCalledWith(cancelled));

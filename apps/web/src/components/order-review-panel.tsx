@@ -115,8 +115,8 @@ export function OrderReviewPanel({ initialOrder, backHref = '/orders', role = 'M
     <div className="review-actions">
       {saved && <p className="save-success">{t('orders.changesSaved')}</p>}
       {error && <p role="alert">{error}</p>}
-      {!final && <button className="secondary" disabled={pending} onClick={() => void transition('cancel')} type="button">{t('orders.reject')}</button>}
-      {correctionAllowed && hasChanges && <LoadingButton className="secondary" pending={pendingAction === 'save'} pendingLabel={t('orders.saving')} disabled={pending} onClick={() => void save()} type="button">{t('orders.saveChanges')}</LoadingButton>}
+      {!final && <button className="secondary-button" disabled={pending} onClick={() => void transition('cancel')} type="button">{t('orders.reject')}</button>}
+      {correctionAllowed && hasChanges && <LoadingButton className="secondary-button" pending={pendingAction === 'save'} pendingLabel={t('orders.saving')} disabled={pending} onClick={() => void save()} type="button">{t('orders.saveChanges')}</LoadingButton>}
       {!final && <LoadingButton pending={pendingAction === 'approve'} pendingLabel={t('orders.approving')} disabled={pending || unresolved} onClick={() => void transition('approve')} type="button">{t('orders.approve')}</LoadingButton>}
       {approved && order.items.some((item) => item.procurementStatus === 'TO_ORDER') && <button disabled={pending} onClick={() => setDispatchOpen(true)} type="button">{t('orders.sendSupplier')}</button>}
       {approved && order.procurementSummary === 'READY' && <LoadingButton pending={pendingAction === 'handoff'} pendingLabel={t('orders.handingOff')} disabled={pending} onClick={() => void handOff()} type="button">{t('orders.handOff')}</LoadingButton>}
@@ -161,7 +161,7 @@ function validationHints(issues: string[], draft: ManagerOrder, t: Translator, f
 function SheetsExportState({ value, pending, retry }: { value: NonNullable<ManagerOrder['sheetsExport']>; pending: boolean; retry: () => void }) {
   const { t, formatNumber } = useI18n();
   const title = value.status === 'SUCCEEDED' ? t('orders.sheetsSucceeded') : value.status === 'FAILED' ? t('orders.sheetsFailed') : value.status === 'PROCESSING' ? t('orders.sheetsProcessing') : t('orders.sheetsPending');
-  return <section className={`sheets-export-state export-${value.status.toLowerCase()}`} aria-live="polite"><div><h2>{title}</h2>{value.rowNumber && <span>{t('orders.sheetRow', { number: formatNumber(value.rowNumber) })}</span>}{value.errorSummary && <p>{t('orders.syncErrorHint')}</p>}</div>{value.retryAllowed && <button className="secondary" disabled={pending} onClick={retry} type="button">{t('orders.retrySync')}</button>}</section>;
+  return <section className={`sheets-export-state export-${value.status.toLowerCase()}`} aria-live="polite"><div><h2>{title}</h2>{value.rowNumber && <span>{t('orders.sheetRow', { number: formatNumber(value.rowNumber) })}</span>}{value.errorSummary && <p>{t('orders.syncErrorHint')}</p>}</div>{value.retryAllowed && <button className="secondary-button" disabled={pending} onClick={retry} type="button">{t('orders.retrySync')}</button>}</section>;
 }
 
 function reviewStatusLabel(status: ManagerOrder['status'], t: Translator) {

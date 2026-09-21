@@ -8,6 +8,12 @@ import { LoadingButton } from './loading-button';
 afterEach(cleanup);
 
 describe('LoadingButton', () => {
+  it('uses the primary action style by default', () => {
+    render(<LoadingButton>Зберегти</LoadingButton>);
+
+    expect(screen.getByRole('button', { name: 'Зберегти' })).toHaveClass('loading-button', 'primary-button');
+  });
+
   it('uses a pointer cursor while the action is available', () => {
     render(<LoadingButton>Підключити Нову Пошту</LoadingButton>);
 

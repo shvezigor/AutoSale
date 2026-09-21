@@ -12,7 +12,8 @@ type LoadingButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 export function LoadingButton({ pending = false, pendingLabel, disabled, children, className = '', ...props }: LoadingButtonProps) {
   const { t } = useI18n();
   const visiblePendingLabel = pendingLabel ?? t('common.loading');
-  return <button {...props} className={`loading-button ${className}`.trim()} disabled={disabled || pending} aria-busy={pending || undefined}>
+  const variantClass = className.trim() || 'primary-button';
+  return <button {...props} className={`loading-button ${variantClass}`} disabled={disabled || pending} aria-busy={pending || undefined}>
     <span className="loading-button-idle" aria-hidden={pending || undefined}>{children}</span>
     <span className="loading-button-pending" aria-hidden={!pending || undefined}>
       <span className="button-spinner" aria-hidden="true" />

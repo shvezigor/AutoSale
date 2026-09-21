@@ -9,3 +9,9 @@ Update the canonical feature documentation and feature index in the same change 
 Work in a short-lived `codex/*` branch created from current `master`. Verify and commit scoped increments. Merge into `master`, push it, then delete the merged branch and clean worktree after proving that no unique tracked or untracked work remains.
 
 Never commit `.env`, credentials, OAuth tokens, database dumps, runtime PID/token files, build output, or production personal data. Test fixtures must contain clearly fictional data.
+
+## UI design rule
+
+- Use the shared `primary-button`, `secondary-button`, `danger-button`, `text-button`, or `icon-button` variants. Never introduce browser-default action buttons or the legacy `button-primary`, `button-secondary`, or `secondary` tokens.
+- Use `LoadingButton` for async mutations; it defaults to the primary variant, so pass an explicit shared variant for secondary or destructive actions.
+- When adding a new variant or contextual exception, update `docs/frontend/design-system.md` and the button contract test in the same change.

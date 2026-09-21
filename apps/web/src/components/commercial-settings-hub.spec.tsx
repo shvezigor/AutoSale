@@ -40,4 +40,13 @@ describe('CommercialSettingsHub', () => {
     expect(screen.queryByRole('button', { name: 'Редагувати' })).not.toBeInTheDocument();
     expect(screen.queryByLabelText('Коротка назва')).not.toBeInTheDocument();
   });
+
+  it('uses the shared primary and secondary button variants', () => {
+    render(<I18nProvider locale="uk" authenticated={false}><CommercialSettingsHub initial={initial} role="OWNER" /></I18nProvider>);
+
+    fireEvent.click(screen.getByRole('button', { name: /Юридичні особи/ }));
+
+    expect(screen.getByRole('button', { name: 'Редагувати' })).toHaveClass('secondary-button');
+    expect(screen.getByRole('button', { name: 'Додати' })).toHaveClass('primary-button');
+  });
 });

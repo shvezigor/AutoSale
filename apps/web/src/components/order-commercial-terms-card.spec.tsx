@@ -33,7 +33,9 @@ describe('OrderCommercialTermsCard', () => {
       .mockResolvedValueOnce(new Response(JSON.stringify(preview), { status: 200 }))
       .mockResolvedValueOnce(new Response(JSON.stringify(ready), { status: 200 }));
     render(<I18nProvider locale="uk" authenticated={false}><OrderCommercialTermsCard orderId="order-1" initial={null} locked={false} onChange={changed} /></I18nProvider>);
-    fireEvent.click(screen.getByRole('button', { name: 'Розрахувати суму' }));
+    const calculate = screen.getByRole('button', { name: 'Розрахувати суму' });
+    expect(calculate).toHaveClass('primary-button');
+    fireEvent.click(calculate);
     expect(await screen.findByRole('button', { name: 'Зберегти розрахунок' })).toBeInTheDocument();
     expect(mutatingFetch).toHaveBeenCalledTimes(1);
     fireEvent.click(screen.getByRole('button', { name: 'Зберегти розрахунок' }));
