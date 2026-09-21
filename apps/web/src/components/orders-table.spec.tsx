@@ -118,6 +118,27 @@ describe('OrdersTable', () => {
     expect([...document.querySelectorAll('.procurement-badge')].every((badge) => badge.textContent === 'Потрібно замовити')).toBe(true);
   });
 
+  it('filters and renders payment status across desktop, mobile, and return navigation', () => {
+    const paidOrder: ManagerOrder = { ...order, paymentSummary: { expectedAmount: '4870.00', paidAmount: '4870.00', remainingAmount: '0.00', currency: 'UAH', status: 'PAID', payments: [] } };
+    render(<OrdersTable orders={[paidOrder]} page={2} pageSize={25} total={30} search="Ігор" status="APPROVED" paymentStatus="PAID" />);
+
+    expect(screen.getByLabelText('Статус оплати')).toHaveDisplayValue('Оплачено');
+    expect(screen.getAllByText('Оплачено')).toHaveLength(3);
+    fireEvent.change(screen.getByLabelText('Статус оплати'), { target: { value: 'PARTIALLY_PAID' } });
+    expect(replace).toHaveBeenCalledWith('/orders?search=%D0%86%D0%B3%D0%BE%D1%80&status=APPROVED&paymentStatus=PARTIALLY_PAID', { scroll: false });
+
+    const returnTo = '/orders?search=%D0%86%D0%B3%D0%BE%D1%80&status=APPROVED&paymentStatus=PAID&page=2';
+    expect(screen.getAllByRole('link', { name: /Переглянути замовлення/ })[0])
+      .toHaveAttribute('href', `/orders/${order.id}?returnTo=${encodeURIComponent(returnTo)}`);
+  });
+
+  it('shows unavailable payment state and treats payment filtering as a filtered empty state', () => {
+    const { rerender } = render(<OrdersTable orders={[order]} page={1} pageSize={25} total={1} />);
+    expect(screen.getAllByLabelText(/Спочатку розрахуйте/)).toHaveLength(2);
+    rerender(<OrdersTable orders={[]} page={1} pageSize={25} total={0} paymentStatus="UNPAID" />);
+    expect(screen.getByRole('status')).toHaveTextContent('Замовлень за цим запитом не знайдено.');
+  });
+
   it('sorts from desktop headers and mobile controls while preserving filters', () => {
     render(<OrdersTable orders={[order]} page={2} pageSize={50} total={80} search="Ігор" status="APPROVED" procurementStatus="NEEDS_ORDER" shipmentStatus="IN_TRANSIT" sort="date" direction="desc" />);
 

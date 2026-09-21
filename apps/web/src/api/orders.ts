@@ -1,6 +1,7 @@
 import type { ManagerOrder, OrderListResponse, OrderStatus } from '../../../../packages/contracts/src/orders';
 import type { ProcurementSummary } from '../../../../packages/contracts/src/procurement';
 import type { ShipmentStatus } from '../../../../packages/contracts/src/delivery';
+import type { OrderPaymentStatus } from '../../../../packages/contracts/src/payments';
 import { authenticatedApiFetch } from '../auth/session';
 
 async function request<T>(path: string): Promise<T> {
@@ -9,12 +10,13 @@ async function request<T>(path: string): Promise<T> {
   return response.json() as Promise<T>;
 }
 
-export const getOrders = (query: { search?: string; status?: OrderStatus; procurementStatus?: ProcurementSummary; shipmentStatus?: ShipmentStatus; page?: number; pageSize?: number; sort?: 'product' | 'customer' | 'status' | 'procurement' | 'confidence' | 'date'; direction?: 'asc' | 'desc' } = {}) => {
+export const getOrders = (query: { search?: string; status?: OrderStatus; procurementStatus?: ProcurementSummary; shipmentStatus?: ShipmentStatus; paymentStatus?: OrderPaymentStatus; page?: number; pageSize?: number; sort?: 'product' | 'customer' | 'status' | 'procurement' | 'confidence' | 'date'; direction?: 'asc' | 'desc' } = {}) => {
   const params = new URLSearchParams();
   if (query.search) params.set('search', query.search);
   if (query.status) params.set('status', query.status);
   if (query.procurementStatus) params.set('procurementStatus', query.procurementStatus);
   if (query.shipmentStatus) params.set('shipmentStatus', query.shipmentStatus);
+  if (query.paymentStatus) params.set('paymentStatus', query.paymentStatus);
   if (query.sort) params.set('sort', query.sort);
   if (query.direction) params.set('direction', query.direction);
   if (query.page) params.set('page', String(query.page));
