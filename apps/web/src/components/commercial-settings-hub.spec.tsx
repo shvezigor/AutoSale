@@ -2,6 +2,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import type { CommercialSettingsSummary } from '../../../../packages/contracts/src/commercial';
+import * as commercialSettingsApi from '../api/commercial-settings';
 import { I18nProvider } from '../i18n/i18n-provider';
 import { CommercialSettingsHub } from './commercial-settings-hub';
 
@@ -15,7 +16,10 @@ const initial: CommercialSettingsSummary = {
   bankAccounts: [{ id: 'account-1', legalEntityId: 'entity-1', label: 'Основний', maskedIban: 'UA12••••••••3456', bankName: 'Тест Банк', currency: 'UAH', active: true, isDefault: true }],
 };
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.clearAllMocks();
+});
 
 describe('CommercialSettingsHub', () => {
   it('starts closed and opens one commercial section at a time', () => {
@@ -48,5 +52,17 @@ describe('CommercialSettingsHub', () => {
 
     expect(screen.getByRole('button', { name: 'Редагувати' })).toHaveClass('secondary-button');
     expect(screen.getByRole('button', { name: 'Додати' })).toHaveClass('primary-button');
+  });
+
+  it('explains an invalid IBAN before sending bank account data', () => {
+    render(<I18nProvider locale="uk" authenticated={false}><CommercialSettingsHub initial={initial} role="OWNER" /></I18nProvider>);
+
+    fireEvent.click(screen.getByRole('button', { name: /Банківські рахунки/ }));
+    fireEvent.change(screen.getByLabelText('Назва рахунку'), { target: { value: 'Основний UAH' } });
+    fireEvent.change(screen.getByLabelText('IBAN'), { target: { value: 'U345345345345' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Додати' }));
+
+    expect(screen.getByText('Введіть коректний IBAN: для України — UA та ще 27 символів.')).toBeInTheDocument();
+    expect(commercialSettingsApi.createBankAccount).not.toHaveBeenCalled();
   });
 });

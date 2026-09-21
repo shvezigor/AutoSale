@@ -33,6 +33,7 @@ export function CommercialSettingsHub({ initial, role }: { initial: CommercialSe
   const [entityId, setEntityId] = useState<string | null>(null);
   const [accountForm, setAccountForm] = useState<BankAccountInput>(emptyAccount(initial.legalEntities[0]?.id));
   const [accountId, setAccountId] = useState<string | null>(null);
+  const [accountValidationError, setAccountValidationError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -57,9 +58,16 @@ export function CommercialSettingsHub({ initial, role }: { initial: CommercialSe
   }
 
   async function submitAccount(event: FormEvent) {
-    event.preventDefault(); setPending(true); setMessage(null);
+    event.preventDefault(); setMessage(null);
+    const normalizedIban = normalizeIban(accountForm.iban);
+    if (!isValidIbanFormat(normalizedIban)) {
+      setAccountValidationError(t('settings.invalidIban'));
+      return;
+    }
+    setAccountValidationError(null); setPending(true);
     try {
-      const saved = accountId ? await updateBankAccount(accountId, accountForm) : await createBankAccount(accountForm);
+      const input = { ...accountForm, iban: normalizedIban };
+      const saved = accountId ? await updateBankAccount(accountId, input) : await createBankAccount(input);
       setSettings((current) => ({ ...current, bankAccounts: replaceOrAdd(current.bankAccounts, saved) }));
       setAccountId(null); setAccountForm(emptyAccount(settings.legalEntities[0]?.id)); setMessage(t('settings.commercialSettingsSaved'));
     } catch { setMessage(t('settings.commercialSettingsFailed')); } finally { setPending(false); }
@@ -85,7 +93,7 @@ export function CommercialSettingsHub({ initial, role }: { initial: CommercialSe
           {expanded && <div id={`commercial-${panel.id}`} className="delivery-carrier-panel commercial-panel">
             {panel.id === 'entities'
               ? <EntityPanel items={settings.legalEntities} role={role} form={entityForm} editing={entityId} pending={pending} onForm={setEntityForm} onEdit={(item) => { setEntityId(item.id); setEntityForm(toEntityInput(item)); }} onCancel={() => { setEntityId(null); setEntityForm(emptyEntity); }} onSubmit={submitEntity} t={t} />
-              : <AccountPanel items={settings.bankAccounts} entities={settings.legalEntities} role={role} form={accountForm} editing={accountId} pending={pending} onForm={setAccountForm} onEdit={editAccount} onCancel={() => { setAccountId(null); setAccountForm(emptyAccount(settings.legalEntities[0]?.id)); }} onSubmit={submitAccount} t={t} />}
+              : <AccountPanel items={settings.bankAccounts} entities={settings.legalEntities} role={role} form={accountForm} editing={accountId} pending={pending} validationError={accountValidationError} onForm={(value) => { setAccountForm(value); setAccountValidationError(null); }} onEdit={editAccount} onCancel={() => { setAccountId(null); setAccountForm(emptyAccount(settings.legalEntities[0]?.id)); setAccountValidationError(null); }} onSubmit={submitAccount} t={t} />}
             {message && <p className="settings-inline-message" role="status">{message}</p>}
           </div>}
         </section>;
@@ -106,12 +114,12 @@ function EntityPanel({ items, role, form, editing, pending, onForm, onEdit, onCa
   </div>;
 }
 
-function AccountPanel({ items, entities, role, form, editing, pending, onForm, onEdit, onCancel, onSubmit, t }: { items: BankAccountSummary[]; entities: LegalEntitySummary[]; role: Role; form: BankAccountInput; editing: string | null; pending: boolean; onForm: (v: BankAccountInput) => void; onEdit: (v: BankAccountSummary) => void; onCancel: () => void; onSubmit: (e: FormEvent) => void; t: T }) {
+function AccountPanel({ items, entities, role, form, editing, pending, validationError, onForm, onEdit, onCancel, onSubmit, t }: { items: BankAccountSummary[]; entities: LegalEntitySummary[]; role: Role; form: BankAccountInput; editing: string | null; pending: boolean; validationError: string | null; onForm: (v: BankAccountInput) => void; onEdit: (v: BankAccountSummary) => void; onCancel: () => void; onSubmit: (e: FormEvent) => void; t: T }) {
   return <div className="commercial-panel-content"><CommercialList empty={t('settings.noBankAccounts')}>{items.map((item) => <div className="commercial-list-row" key={item.id}><span><strong>{item.label} · {item.currency}</strong><small>{item.maskedIban}{item.bankName ? ` · ${item.bankName}` : ''}</small></span><span>{item.isDefault ? t('settings.commercialDefault') : item.active ? t('settings.active') : t('settings.inactive')}</span>{role === 'OWNER' && <button type="button" className="secondary-button" disabled={pending} onClick={() => void onEdit(item)}>{t('settings.edit')}</button>}</div>)}</CommercialList>
     {role === 'OWNER' && entities.length > 0 && <form className="commercial-form" onSubmit={onSubmit}><div className="commercial-form-grid">
       <label>{t('settings.legalEntities')}<select required value={form.legalEntityId} onChange={(e) => onForm({ ...form, legalEntityId: e.target.value })}>{entities.map((entity) => <option key={entity.id} value={entity.id}>{entity.displayName}</option>)}</select></label>
       <label>{t('settings.accountLabel')}<input required value={form.label} onChange={(e) => onForm({ ...form, label: e.target.value })} /></label>
-      <label>{t('settings.iban')}<input required value={form.iban} onChange={(e) => onForm({ ...form, iban: e.target.value })} /></label>
+      <label>{t('settings.iban')}<input required maxLength={42} autoCapitalize="characters" autoComplete="off" spellCheck={false} aria-invalid={validationError ? 'true' : undefined} aria-describedby={validationError ? 'bank-account-iban-error' : undefined} value={form.iban} onChange={(e) => onForm({ ...form, iban: e.target.value.toUpperCase() })} onBlur={() => onForm({ ...form, iban: formatIban(form.iban) })} />{validationError && <small id="bank-account-iban-error" className="commercial-field-error" role="alert">{validationError}</small>}</label>
       <label>{t('settings.bankName')}<input value={form.bankName ?? ''} onChange={(e) => onForm({ ...form, bankName: e.target.value || null })} /></label>
       <label>{t('settings.currency')}<input required maxLength={3} value={form.currency} onChange={(e) => onForm({ ...form, currency: e.target.value.toUpperCase() })} /></label>
     </div><CommercialFlags active={form.active} isDefault={form.isDefault} onChange={(next) => onForm({ ...form, ...next })} t={t} /><FormActions editing={editing} pending={pending} onCancel={onCancel} t={t} /></form>}
@@ -123,3 +131,6 @@ function CommercialFlags({ active, isDefault, onChange, t }: { active: boolean; 
 function FormActions({ editing, pending, onCancel, t }: { editing: string | null; pending: boolean; onCancel: () => void; t: T }) { return <div className="commercial-form-actions">{editing && <button type="button" className="secondary-button" onClick={onCancel}>{t('settings.cancel')}</button>}<button type="submit" className="primary-button" disabled={pending}>{pending ? t('settings.saving') : editing ? t('settings.save') : t('settings.add')}</button></div>; }
 function replaceOrAdd<T extends { id: string }>(items: T[], saved: T): T[] { return items.some((item) => item.id === saved.id) ? items.map((item) => item.id === saved.id ? saved : item) : [...items, saved]; }
 function toEntityInput(item: LegalEntitySummary): LegalEntityInput { return { displayName: item.displayName, legalName: item.legalName, type: item.type, registrationId: item.registrationId, active: item.active, isDefault: item.isDefault }; }
+function normalizeIban(value: string): string { return value.replace(/\s/g, '').toUpperCase(); }
+function formatIban(value: string): string { return normalizeIban(value).replace(/(.{4})(?=.)/g, '$1 '); }
+function isValidIbanFormat(value: string): boolean { return /^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$/.test(value) && (!value.startsWith('UA') || value.length === 29); }
