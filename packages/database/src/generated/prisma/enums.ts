@@ -337,3 +337,13 @@ export const CommercialPricingStatus = {
 } as const
 
 export type CommercialPricingStatus = (typeof CommercialPricingStatus)[keyof typeof CommercialPricingStatus]
+
+
+export const PaymentMethod = {
+  BANK_TRANSFER: 'BANK_TRANSFER',
+  CASH: 'CASH',
+  CASH_ON_DELIVERY: 'CASH_ON_DELIVERY',
+  OTHER: 'OTHER'
+} as const
+
+export type PaymentMethod = (typeof PaymentMethod)[keyof typeof PaymentMethod]

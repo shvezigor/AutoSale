@@ -87,6 +87,7 @@ export const ModelName = {
   TenantBankAccount: 'TenantBankAccount',
   Order: 'Order',
   OrderCommercialTerms: 'OrderCommercialTerms',
+  OrderPayment: 'OrderPayment',
   OrderIntentEvaluation: 'OrderIntentEvaluation',
   DeliveryConnection: 'DeliveryConnection',
   DeliverySenderProfile: 'DeliverySenderProfile',
@@ -745,6 +746,31 @@ export const OrderCommercialTermsScalarFieldEnum = {
 } as const
 
 export type OrderCommercialTermsScalarFieldEnum = (typeof OrderCommercialTermsScalarFieldEnum)[keyof typeof OrderCommercialTermsScalarFieldEnum]
+
+
+export const OrderPaymentScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  orderId: 'orderId',
+  amount: 'amount',
+  currency: 'currency',
+  method: 'method',
+  receivedAt: 'receivedAt',
+  bankAccountId: 'bankAccountId',
+  carrier: 'carrier',
+  note: 'note',
+  createdBy: 'createdBy',
+  idempotencyKey: 'idempotencyKey',
+  requestHash: 'requestHash',
+  cancelledAt: 'cancelledAt',
+  cancelledBy: 'cancelledBy',
+  cancellationReason: 'cancellationReason',
+  cancellationIdempotencyKey: 'cancellationIdempotencyKey',
+  cancellationRequestHash: 'cancellationRequestHash',
+  createdAt: 'createdAt'
+} as const
+
+export type OrderPaymentScalarFieldEnum = (typeof OrderPaymentScalarFieldEnum)[keyof typeof OrderPaymentScalarFieldEnum]
 
 
 export const OrderIntentEvaluationScalarFieldEnum = {

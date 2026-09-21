@@ -241,6 +241,7 @@ export type TenantBankAccountWhereInput = {
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
   legalEntity?: Prisma.XOR<Prisma.TenantLegalEntityScalarRelationFilter, Prisma.TenantLegalEntityWhereInput>
   commercialTerms?: Prisma.OrderCommercialTermsListRelationFilter
+  orderPayments?: Prisma.OrderPaymentListRelationFilter
 }
 
 export type TenantBankAccountOrderByWithRelationInput = {
@@ -259,6 +260,7 @@ export type TenantBankAccountOrderByWithRelationInput = {
   tenant?: Prisma.TenantOrderByWithRelationInput
   legalEntity?: Prisma.TenantLegalEntityOrderByWithRelationInput
   commercialTerms?: Prisma.OrderCommercialTermsOrderByRelationAggregateInput
+  orderPayments?: Prisma.OrderPaymentOrderByRelationAggregateInput
 }
 
 export type TenantBankAccountWhereUniqueInput = Prisma.AtLeast<{
@@ -281,6 +283,7 @@ export type TenantBankAccountWhereUniqueInput = Prisma.AtLeast<{
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
   legalEntity?: Prisma.XOR<Prisma.TenantLegalEntityScalarRelationFilter, Prisma.TenantLegalEntityWhereInput>
   commercialTerms?: Prisma.OrderCommercialTermsListRelationFilter
+  orderPayments?: Prisma.OrderPaymentListRelationFilter
 }, "id" | "tenantId_normalizedIban_currency">
 
 export type TenantBankAccountOrderByWithAggregationInput = {
@@ -333,6 +336,7 @@ export type TenantBankAccountCreateInput = {
   tenant: Prisma.TenantCreateNestedOneWithoutBankAccountsInput
   legalEntity: Prisma.TenantLegalEntityCreateNestedOneWithoutBankAccountsInput
   commercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutBankAccountInput
+  orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutBankAccountInput
 }
 
 export type TenantBankAccountUncheckedCreateInput = {
@@ -349,6 +353,7 @@ export type TenantBankAccountUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   commercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutBankAccountInput
+  orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutBankAccountInput
 }
 
 export type TenantBankAccountUpdateInput = {
@@ -365,6 +370,7 @@ export type TenantBankAccountUpdateInput = {
   tenant?: Prisma.TenantUpdateOneRequiredWithoutBankAccountsNestedInput
   legalEntity?: Prisma.TenantLegalEntityUpdateOneRequiredWithoutBankAccountsNestedInput
   commercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutBankAccountNestedInput
+  orderPayments?: Prisma.OrderPaymentUpdateManyWithoutBankAccountNestedInput
 }
 
 export type TenantBankAccountUncheckedUpdateInput = {
@@ -381,6 +387,7 @@ export type TenantBankAccountUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   commercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutBankAccountNestedInput
+  orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutBankAccountNestedInput
 }
 
 export type TenantBankAccountCreateManyInput = {
@@ -592,6 +599,22 @@ export type TenantBankAccountUpdateOneWithoutCommercialTermsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.TenantBankAccountUpdateToOneWithWhereWithoutCommercialTermsInput, Prisma.TenantBankAccountUpdateWithoutCommercialTermsInput>, Prisma.TenantBankAccountUncheckedUpdateWithoutCommercialTermsInput>
 }
 
+export type TenantBankAccountCreateNestedOneWithoutOrderPaymentsInput = {
+  create?: Prisma.XOR<Prisma.TenantBankAccountCreateWithoutOrderPaymentsInput, Prisma.TenantBankAccountUncheckedCreateWithoutOrderPaymentsInput>
+  connectOrCreate?: Prisma.TenantBankAccountCreateOrConnectWithoutOrderPaymentsInput
+  connect?: Prisma.TenantBankAccountWhereUniqueInput
+}
+
+export type TenantBankAccountUpdateOneWithoutOrderPaymentsNestedInput = {
+  create?: Prisma.XOR<Prisma.TenantBankAccountCreateWithoutOrderPaymentsInput, Prisma.TenantBankAccountUncheckedCreateWithoutOrderPaymentsInput>
+  connectOrCreate?: Prisma.TenantBankAccountCreateOrConnectWithoutOrderPaymentsInput
+  upsert?: Prisma.TenantBankAccountUpsertWithoutOrderPaymentsInput
+  disconnect?: Prisma.TenantBankAccountWhereInput | boolean
+  delete?: Prisma.TenantBankAccountWhereInput | boolean
+  connect?: Prisma.TenantBankAccountWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TenantBankAccountUpdateToOneWithWhereWithoutOrderPaymentsInput, Prisma.TenantBankAccountUpdateWithoutOrderPaymentsInput>, Prisma.TenantBankAccountUncheckedUpdateWithoutOrderPaymentsInput>
+}
+
 export type TenantBankAccountCreateWithoutTenantInput = {
   id?: string
   label: string
@@ -605,6 +628,7 @@ export type TenantBankAccountCreateWithoutTenantInput = {
   updatedAt?: Date | string
   legalEntity: Prisma.TenantLegalEntityCreateNestedOneWithoutBankAccountsInput
   commercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutBankAccountInput
+  orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutBankAccountInput
 }
 
 export type TenantBankAccountUncheckedCreateWithoutTenantInput = {
@@ -620,6 +644,7 @@ export type TenantBankAccountUncheckedCreateWithoutTenantInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   commercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutBankAccountInput
+  orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutBankAccountInput
 }
 
 export type TenantBankAccountCreateOrConnectWithoutTenantInput = {
@@ -679,6 +704,7 @@ export type TenantBankAccountCreateWithoutLegalEntityInput = {
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutBankAccountsInput
   commercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutBankAccountInput
+  orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutBankAccountInput
 }
 
 export type TenantBankAccountUncheckedCreateWithoutLegalEntityInput = {
@@ -694,6 +720,7 @@ export type TenantBankAccountUncheckedCreateWithoutLegalEntityInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   commercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutBankAccountInput
+  orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutBankAccountInput
 }
 
 export type TenantBankAccountCreateOrConnectWithoutLegalEntityInput = {
@@ -735,6 +762,7 @@ export type TenantBankAccountCreateWithoutCommercialTermsInput = {
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutBankAccountsInput
   legalEntity: Prisma.TenantLegalEntityCreateNestedOneWithoutBankAccountsInput
+  orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutBankAccountInput
 }
 
 export type TenantBankAccountUncheckedCreateWithoutCommercialTermsInput = {
@@ -750,6 +778,7 @@ export type TenantBankAccountUncheckedCreateWithoutCommercialTermsInput = {
   isDefault?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutBankAccountInput
 }
 
 export type TenantBankAccountCreateOrConnectWithoutCommercialTermsInput = {
@@ -781,6 +810,7 @@ export type TenantBankAccountUpdateWithoutCommercialTermsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutBankAccountsNestedInput
   legalEntity?: Prisma.TenantLegalEntityUpdateOneRequiredWithoutBankAccountsNestedInput
+  orderPayments?: Prisma.OrderPaymentUpdateManyWithoutBankAccountNestedInput
 }
 
 export type TenantBankAccountUncheckedUpdateWithoutCommercialTermsInput = {
@@ -796,6 +826,87 @@ export type TenantBankAccountUncheckedUpdateWithoutCommercialTermsInput = {
   isDefault?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutBankAccountNestedInput
+}
+
+export type TenantBankAccountCreateWithoutOrderPaymentsInput = {
+  id?: string
+  label: string
+  iban: string
+  normalizedIban: string
+  bankName?: string | null
+  currency: string
+  active?: boolean
+  isDefault?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tenant: Prisma.TenantCreateNestedOneWithoutBankAccountsInput
+  legalEntity: Prisma.TenantLegalEntityCreateNestedOneWithoutBankAccountsInput
+  commercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutBankAccountInput
+}
+
+export type TenantBankAccountUncheckedCreateWithoutOrderPaymentsInput = {
+  id?: string
+  tenantId: string
+  legalEntityId: string
+  label: string
+  iban: string
+  normalizedIban: string
+  bankName?: string | null
+  currency: string
+  active?: boolean
+  isDefault?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  commercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutBankAccountInput
+}
+
+export type TenantBankAccountCreateOrConnectWithoutOrderPaymentsInput = {
+  where: Prisma.TenantBankAccountWhereUniqueInput
+  create: Prisma.XOR<Prisma.TenantBankAccountCreateWithoutOrderPaymentsInput, Prisma.TenantBankAccountUncheckedCreateWithoutOrderPaymentsInput>
+}
+
+export type TenantBankAccountUpsertWithoutOrderPaymentsInput = {
+  update: Prisma.XOR<Prisma.TenantBankAccountUpdateWithoutOrderPaymentsInput, Prisma.TenantBankAccountUncheckedUpdateWithoutOrderPaymentsInput>
+  create: Prisma.XOR<Prisma.TenantBankAccountCreateWithoutOrderPaymentsInput, Prisma.TenantBankAccountUncheckedCreateWithoutOrderPaymentsInput>
+  where?: Prisma.TenantBankAccountWhereInput
+}
+
+export type TenantBankAccountUpdateToOneWithWhereWithoutOrderPaymentsInput = {
+  where?: Prisma.TenantBankAccountWhereInput
+  data: Prisma.XOR<Prisma.TenantBankAccountUpdateWithoutOrderPaymentsInput, Prisma.TenantBankAccountUncheckedUpdateWithoutOrderPaymentsInput>
+}
+
+export type TenantBankAccountUpdateWithoutOrderPaymentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  label?: Prisma.StringFieldUpdateOperationsInput | string
+  iban?: Prisma.StringFieldUpdateOperationsInput | string
+  normalizedIban?: Prisma.StringFieldUpdateOperationsInput | string
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isDefault?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutBankAccountsNestedInput
+  legalEntity?: Prisma.TenantLegalEntityUpdateOneRequiredWithoutBankAccountsNestedInput
+  commercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutBankAccountNestedInput
+}
+
+export type TenantBankAccountUncheckedUpdateWithoutOrderPaymentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  legalEntityId?: Prisma.StringFieldUpdateOperationsInput | string
+  label?: Prisma.StringFieldUpdateOperationsInput | string
+  iban?: Prisma.StringFieldUpdateOperationsInput | string
+  normalizedIban?: Prisma.StringFieldUpdateOperationsInput | string
+  bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isDefault?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  commercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutBankAccountNestedInput
 }
 
 export type TenantBankAccountCreateManyTenantInput = {
@@ -825,6 +936,7 @@ export type TenantBankAccountUpdateWithoutTenantInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   legalEntity?: Prisma.TenantLegalEntityUpdateOneRequiredWithoutBankAccountsNestedInput
   commercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutBankAccountNestedInput
+  orderPayments?: Prisma.OrderPaymentUpdateManyWithoutBankAccountNestedInput
 }
 
 export type TenantBankAccountUncheckedUpdateWithoutTenantInput = {
@@ -840,6 +952,7 @@ export type TenantBankAccountUncheckedUpdateWithoutTenantInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   commercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutBankAccountNestedInput
+  orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutBankAccountNestedInput
 }
 
 export type TenantBankAccountUncheckedUpdateManyWithoutTenantInput = {
@@ -883,6 +996,7 @@ export type TenantBankAccountUpdateWithoutLegalEntityInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutBankAccountsNestedInput
   commercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutBankAccountNestedInput
+  orderPayments?: Prisma.OrderPaymentUpdateManyWithoutBankAccountNestedInput
 }
 
 export type TenantBankAccountUncheckedUpdateWithoutLegalEntityInput = {
@@ -898,6 +1012,7 @@ export type TenantBankAccountUncheckedUpdateWithoutLegalEntityInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   commercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutBankAccountNestedInput
+  orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutBankAccountNestedInput
 }
 
 export type TenantBankAccountUncheckedUpdateManyWithoutLegalEntityInput = {
@@ -921,10 +1036,12 @@ export type TenantBankAccountUncheckedUpdateManyWithoutLegalEntityInput = {
 
 export type TenantBankAccountCountOutputType = {
   commercialTerms: number
+  orderPayments: number
 }
 
 export type TenantBankAccountCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   commercialTerms?: boolean | TenantBankAccountCountOutputTypeCountCommercialTermsArgs
+  orderPayments?: boolean | TenantBankAccountCountOutputTypeCountOrderPaymentsArgs
 }
 
 /**
@@ -944,6 +1061,13 @@ export type TenantBankAccountCountOutputTypeCountCommercialTermsArgs<ExtArgs ext
   where?: Prisma.OrderCommercialTermsWhereInput
 }
 
+/**
+ * TenantBankAccountCountOutputType without action
+ */
+export type TenantBankAccountCountOutputTypeCountOrderPaymentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.OrderPaymentWhereInput
+}
+
 
 export type TenantBankAccountSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -961,6 +1085,7 @@ export type TenantBankAccountSelect<ExtArgs extends runtime.Types.Extensions.Int
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   legalEntity?: boolean | Prisma.TenantLegalEntityDefaultArgs<ExtArgs>
   commercialTerms?: boolean | Prisma.TenantBankAccount$commercialTermsArgs<ExtArgs>
+  orderPayments?: boolean | Prisma.TenantBankAccount$orderPaymentsArgs<ExtArgs>
   _count?: boolean | Prisma.TenantBankAccountCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["tenantBankAccount"]>
 
@@ -1018,6 +1143,7 @@ export type TenantBankAccountInclude<ExtArgs extends runtime.Types.Extensions.In
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   legalEntity?: boolean | Prisma.TenantLegalEntityDefaultArgs<ExtArgs>
   commercialTerms?: boolean | Prisma.TenantBankAccount$commercialTermsArgs<ExtArgs>
+  orderPayments?: boolean | Prisma.TenantBankAccount$orderPaymentsArgs<ExtArgs>
   _count?: boolean | Prisma.TenantBankAccountCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type TenantBankAccountIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1035,6 +1161,7 @@ export type $TenantBankAccountPayload<ExtArgs extends runtime.Types.Extensions.I
     tenant: Prisma.$TenantPayload<ExtArgs>
     legalEntity: Prisma.$TenantLegalEntityPayload<ExtArgs>
     commercialTerms: Prisma.$OrderCommercialTermsPayload<ExtArgs>[]
+    orderPayments: Prisma.$OrderPaymentPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1446,6 +1573,7 @@ export interface Prisma__TenantBankAccountClient<T, Null = never, ExtArgs extend
   tenant<T extends Prisma.TenantDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TenantDefaultArgs<ExtArgs>>): Prisma.Prisma__TenantClient<runtime.Types.Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   legalEntity<T extends Prisma.TenantLegalEntityDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TenantLegalEntityDefaultArgs<ExtArgs>>): Prisma.Prisma__TenantLegalEntityClient<runtime.Types.Result.GetResult<Prisma.$TenantLegalEntityPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   commercialTerms<T extends Prisma.TenantBankAccount$commercialTermsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TenantBankAccount$commercialTermsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderCommercialTermsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  orderPayments<T extends Prisma.TenantBankAccount$orderPaymentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TenantBankAccount$orderPaymentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderPaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1909,6 +2037,30 @@ export type TenantBankAccount$commercialTermsArgs<ExtArgs extends runtime.Types.
   take?: number
   skip?: number
   distinct?: Prisma.OrderCommercialTermsScalarFieldEnum | Prisma.OrderCommercialTermsScalarFieldEnum[]
+}
+
+/**
+ * TenantBankAccount.orderPayments
+ */
+export type TenantBankAccount$orderPaymentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the OrderPayment
+   */
+  select?: Prisma.OrderPaymentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the OrderPayment
+   */
+  omit?: Prisma.OrderPaymentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OrderPaymentInclude<ExtArgs> | null
+  where?: Prisma.OrderPaymentWhereInput
+  orderBy?: Prisma.OrderPaymentOrderByWithRelationInput | Prisma.OrderPaymentOrderByWithRelationInput[]
+  cursor?: Prisma.OrderPaymentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.OrderPaymentScalarFieldEnum | Prisma.OrderPaymentScalarFieldEnum[]
 }
 
 /**

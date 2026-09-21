@@ -383,6 +383,7 @@ export type OrderWhereInput = {
   shipments?: Prisma.ShipmentListRelationFilter
   intentEvaluation?: Prisma.XOR<Prisma.OrderIntentEvaluationNullableScalarRelationFilter, Prisma.OrderIntentEvaluationWhereInput> | null
   commercialTerms?: Prisma.XOR<Prisma.OrderCommercialTermsNullableScalarRelationFilter, Prisma.OrderCommercialTermsWhereInput> | null
+  payments?: Prisma.OrderPaymentListRelationFilter
 }
 
 export type OrderOrderByWithRelationInput = {
@@ -421,6 +422,7 @@ export type OrderOrderByWithRelationInput = {
   shipments?: Prisma.ShipmentOrderByRelationAggregateInput
   intentEvaluation?: Prisma.OrderIntentEvaluationOrderByWithRelationInput
   commercialTerms?: Prisma.OrderCommercialTermsOrderByWithRelationInput
+  payments?: Prisma.OrderPaymentOrderByRelationAggregateInput
 }
 
 export type OrderWhereUniqueInput = Prisma.AtLeast<{
@@ -463,6 +465,7 @@ export type OrderWhereUniqueInput = Prisma.AtLeast<{
   shipments?: Prisma.ShipmentListRelationFilter
   intentEvaluation?: Prisma.XOR<Prisma.OrderIntentEvaluationNullableScalarRelationFilter, Prisma.OrderIntentEvaluationWhereInput> | null
   commercialTerms?: Prisma.XOR<Prisma.OrderCommercialTermsNullableScalarRelationFilter, Prisma.OrderCommercialTermsWhereInput> | null
+  payments?: Prisma.OrderPaymentListRelationFilter
 }, "id" | "publicNumber" | "triggerMessageId" | "tenantId_id">
 
 export type OrderOrderByWithAggregationInput = {
@@ -559,6 +562,7 @@ export type OrderCreateInput = {
   shipments?: Prisma.ShipmentCreateNestedManyWithoutOrderInput
   intentEvaluation?: Prisma.OrderIntentEvaluationCreateNestedOneWithoutOrderInput
   commercialTerms?: Prisma.OrderCommercialTermsCreateNestedOneWithoutOrderInput
+  payments?: Prisma.OrderPaymentCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateInput = {
@@ -593,6 +597,7 @@ export type OrderUncheckedCreateInput = {
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutOrderInput
   intentEvaluation?: Prisma.OrderIntentEvaluationUncheckedCreateNestedOneWithoutOrderInput
   commercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedOneWithoutOrderInput
+  payments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUpdateInput = {
@@ -627,6 +632,7 @@ export type OrderUpdateInput = {
   shipments?: Prisma.ShipmentUpdateManyWithoutOrderNestedInput
   intentEvaluation?: Prisma.OrderIntentEvaluationUpdateOneWithoutOrderNestedInput
   commercialTerms?: Prisma.OrderCommercialTermsUpdateOneWithoutOrderNestedInput
+  payments?: Prisma.OrderPaymentUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateInput = {
@@ -661,6 +667,7 @@ export type OrderUncheckedUpdateInput = {
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutOrderNestedInput
   intentEvaluation?: Prisma.OrderIntentEvaluationUncheckedUpdateOneWithoutOrderNestedInput
   commercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateOneWithoutOrderNestedInput
+  payments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderCreateManyInput = {
@@ -1070,6 +1077,20 @@ export type OrderUpdateOneRequiredWithoutCommercialTermsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.OrderUpdateToOneWithWhereWithoutCommercialTermsInput, Prisma.OrderUpdateWithoutCommercialTermsInput>, Prisma.OrderUncheckedUpdateWithoutCommercialTermsInput>
 }
 
+export type OrderCreateNestedOneWithoutPaymentsInput = {
+  create?: Prisma.XOR<Prisma.OrderCreateWithoutPaymentsInput, Prisma.OrderUncheckedCreateWithoutPaymentsInput>
+  connectOrCreate?: Prisma.OrderCreateOrConnectWithoutPaymentsInput
+  connect?: Prisma.OrderWhereUniqueInput
+}
+
+export type OrderUpdateOneRequiredWithoutPaymentsNestedInput = {
+  create?: Prisma.XOR<Prisma.OrderCreateWithoutPaymentsInput, Prisma.OrderUncheckedCreateWithoutPaymentsInput>
+  connectOrCreate?: Prisma.OrderCreateOrConnectWithoutPaymentsInput
+  upsert?: Prisma.OrderUpsertWithoutPaymentsInput
+  connect?: Prisma.OrderWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrderUpdateToOneWithWhereWithoutPaymentsInput, Prisma.OrderUpdateWithoutPaymentsInput>, Prisma.OrderUncheckedUpdateWithoutPaymentsInput>
+}
+
 export type OrderCreateNestedOneWithoutIntentEvaluationInput = {
   create?: Prisma.XOR<Prisma.OrderCreateWithoutIntentEvaluationInput, Prisma.OrderUncheckedCreateWithoutIntentEvaluationInput>
   connectOrCreate?: Prisma.OrderCreateOrConnectWithoutIntentEvaluationInput
@@ -1173,6 +1194,7 @@ export type OrderCreateWithoutTenantInput = {
   shipments?: Prisma.ShipmentCreateNestedManyWithoutOrderInput
   intentEvaluation?: Prisma.OrderIntentEvaluationCreateNestedOneWithoutOrderInput
   commercialTerms?: Prisma.OrderCommercialTermsCreateNestedOneWithoutOrderInput
+  payments?: Prisma.OrderPaymentCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutTenantInput = {
@@ -1206,6 +1228,7 @@ export type OrderUncheckedCreateWithoutTenantInput = {
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutOrderInput
   intentEvaluation?: Prisma.OrderIntentEvaluationUncheckedCreateNestedOneWithoutOrderInput
   commercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedOneWithoutOrderInput
+  payments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutTenantInput = {
@@ -1295,6 +1318,7 @@ export type OrderCreateWithoutProcurementHandedOffByUserInput = {
   shipments?: Prisma.ShipmentCreateNestedManyWithoutOrderInput
   intentEvaluation?: Prisma.OrderIntentEvaluationCreateNestedOneWithoutOrderInput
   commercialTerms?: Prisma.OrderCommercialTermsCreateNestedOneWithoutOrderInput
+  payments?: Prisma.OrderPaymentCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutProcurementHandedOffByUserInput = {
@@ -1328,6 +1352,7 @@ export type OrderUncheckedCreateWithoutProcurementHandedOffByUserInput = {
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutOrderInput
   intentEvaluation?: Prisma.OrderIntentEvaluationUncheckedCreateNestedOneWithoutOrderInput
   commercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedOneWithoutOrderInput
+  payments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutProcurementHandedOffByUserInput = {
@@ -1387,6 +1412,7 @@ export type OrderCreateWithoutTelegramDeliveriesInput = {
   shipments?: Prisma.ShipmentCreateNestedManyWithoutOrderInput
   intentEvaluation?: Prisma.OrderIntentEvaluationCreateNestedOneWithoutOrderInput
   commercialTerms?: Prisma.OrderCommercialTermsCreateNestedOneWithoutOrderInput
+  payments?: Prisma.OrderPaymentCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutTelegramDeliveriesInput = {
@@ -1420,6 +1446,7 @@ export type OrderUncheckedCreateWithoutTelegramDeliveriesInput = {
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutOrderInput
   intentEvaluation?: Prisma.OrderIntentEvaluationUncheckedCreateNestedOneWithoutOrderInput
   commercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedOneWithoutOrderInput
+  payments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutTelegramDeliveriesInput = {
@@ -1469,6 +1496,7 @@ export type OrderUpdateWithoutTelegramDeliveriesInput = {
   shipments?: Prisma.ShipmentUpdateManyWithoutOrderNestedInput
   intentEvaluation?: Prisma.OrderIntentEvaluationUpdateOneWithoutOrderNestedInput
   commercialTerms?: Prisma.OrderCommercialTermsUpdateOneWithoutOrderNestedInput
+  payments?: Prisma.OrderPaymentUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutTelegramDeliveriesInput = {
@@ -1502,6 +1530,7 @@ export type OrderUncheckedUpdateWithoutTelegramDeliveriesInput = {
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutOrderNestedInput
   intentEvaluation?: Prisma.OrderIntentEvaluationUncheckedUpdateOneWithoutOrderNestedInput
   commercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateOneWithoutOrderNestedInput
+  payments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderCreateWithoutConversationInput = {
@@ -1535,6 +1564,7 @@ export type OrderCreateWithoutConversationInput = {
   shipments?: Prisma.ShipmentCreateNestedManyWithoutOrderInput
   intentEvaluation?: Prisma.OrderIntentEvaluationCreateNestedOneWithoutOrderInput
   commercialTerms?: Prisma.OrderCommercialTermsCreateNestedOneWithoutOrderInput
+  payments?: Prisma.OrderPaymentCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutConversationInput = {
@@ -1568,6 +1598,7 @@ export type OrderUncheckedCreateWithoutConversationInput = {
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutOrderInput
   intentEvaluation?: Prisma.OrderIntentEvaluationUncheckedCreateNestedOneWithoutOrderInput
   commercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedOneWithoutOrderInput
+  payments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutConversationInput = {
@@ -1627,6 +1658,7 @@ export type OrderCreateWithoutTriggerMessageInput = {
   shipments?: Prisma.ShipmentCreateNestedManyWithoutOrderInput
   intentEvaluation?: Prisma.OrderIntentEvaluationCreateNestedOneWithoutOrderInput
   commercialTerms?: Prisma.OrderCommercialTermsCreateNestedOneWithoutOrderInput
+  payments?: Prisma.OrderPaymentCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutTriggerMessageInput = {
@@ -1660,6 +1692,7 @@ export type OrderUncheckedCreateWithoutTriggerMessageInput = {
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutOrderInput
   intentEvaluation?: Prisma.OrderIntentEvaluationUncheckedCreateNestedOneWithoutOrderInput
   commercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedOneWithoutOrderInput
+  payments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutTriggerMessageInput = {
@@ -1719,6 +1752,7 @@ export type OrderCreateWithoutCommercialTermsInput = {
   telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutOrderInput
   shipments?: Prisma.ShipmentCreateNestedManyWithoutOrderInput
   intentEvaluation?: Prisma.OrderIntentEvaluationCreateNestedOneWithoutOrderInput
+  payments?: Prisma.OrderPaymentCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutCommercialTermsInput = {
@@ -1752,6 +1786,7 @@ export type OrderUncheckedCreateWithoutCommercialTermsInput = {
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutOrderInput
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutOrderInput
   intentEvaluation?: Prisma.OrderIntentEvaluationUncheckedCreateNestedOneWithoutOrderInput
+  payments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutCommercialTermsInput = {
@@ -1801,6 +1836,7 @@ export type OrderUpdateWithoutCommercialTermsInput = {
   telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutOrderNestedInput
   shipments?: Prisma.ShipmentUpdateManyWithoutOrderNestedInput
   intentEvaluation?: Prisma.OrderIntentEvaluationUpdateOneWithoutOrderNestedInput
+  payments?: Prisma.OrderPaymentUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutCommercialTermsInput = {
@@ -1834,6 +1870,159 @@ export type OrderUncheckedUpdateWithoutCommercialTermsInput = {
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutOrderNestedInput
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutOrderNestedInput
   intentEvaluation?: Prisma.OrderIntentEvaluationUncheckedUpdateOneWithoutOrderNestedInput
+  payments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutOrderNestedInput
+}
+
+export type OrderCreateWithoutPaymentsInput = {
+  id?: string
+  publicNumber?: string
+  status?: string
+  extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  overallConfidence?: number | null
+  sortProduct?: string
+  sortCustomer?: string
+  sortProcurement?: string
+  aiResponseId?: string | null
+  aiModel?: string | null
+  promptVersion: string
+  inputTokens?: number | null
+  outputTokens?: number | null
+  approvedAt?: Date | string | null
+  approvedBy?: string | null
+  procurementHandedOffAt?: Date | string | null
+  supplierDispatchVersion?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tenant: Prisma.TenantCreateNestedOneWithoutOrdersInput
+  conversation: Prisma.ConversationCreateNestedOneWithoutOrdersInput
+  triggerMessage: Prisma.MessageCreateNestedOneWithoutTriggeredOrdersInput
+  items?: Prisma.OrderItemCreateNestedManyWithoutOrderInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrderInput
+  exports?: Prisma.OrderExportCreateNestedManyWithoutOrderInput
+  procurementHandedOffByUser?: Prisma.UserCreateNestedOneWithoutProcurementHandOffsInput
+  telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutOrderInput
+  shipments?: Prisma.ShipmentCreateNestedManyWithoutOrderInput
+  intentEvaluation?: Prisma.OrderIntentEvaluationCreateNestedOneWithoutOrderInput
+  commercialTerms?: Prisma.OrderCommercialTermsCreateNestedOneWithoutOrderInput
+}
+
+export type OrderUncheckedCreateWithoutPaymentsInput = {
+  id?: string
+  publicNumber?: string
+  tenantId: string
+  conversationId: string
+  triggerMessageId: string
+  status?: string
+  extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  overallConfidence?: number | null
+  sortProduct?: string
+  sortCustomer?: string
+  sortProcurement?: string
+  aiResponseId?: string | null
+  aiModel?: string | null
+  promptVersion: string
+  inputTokens?: number | null
+  outputTokens?: number | null
+  approvedAt?: Date | string | null
+  approvedBy?: string | null
+  procurementHandedOffAt?: Date | string | null
+  procurementHandedOffBy?: string | null
+  supplierDispatchVersion?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrderInput
+  exports?: Prisma.OrderExportUncheckedCreateNestedManyWithoutOrderInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutOrderInput
+  shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutOrderInput
+  intentEvaluation?: Prisma.OrderIntentEvaluationUncheckedCreateNestedOneWithoutOrderInput
+  commercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedOneWithoutOrderInput
+}
+
+export type OrderCreateOrConnectWithoutPaymentsInput = {
+  where: Prisma.OrderWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrderCreateWithoutPaymentsInput, Prisma.OrderUncheckedCreateWithoutPaymentsInput>
+}
+
+export type OrderUpsertWithoutPaymentsInput = {
+  update: Prisma.XOR<Prisma.OrderUpdateWithoutPaymentsInput, Prisma.OrderUncheckedUpdateWithoutPaymentsInput>
+  create: Prisma.XOR<Prisma.OrderCreateWithoutPaymentsInput, Prisma.OrderUncheckedCreateWithoutPaymentsInput>
+  where?: Prisma.OrderWhereInput
+}
+
+export type OrderUpdateToOneWithWhereWithoutPaymentsInput = {
+  where?: Prisma.OrderWhereInput
+  data: Prisma.XOR<Prisma.OrderUpdateWithoutPaymentsInput, Prisma.OrderUncheckedUpdateWithoutPaymentsInput>
+}
+
+export type OrderUpdateWithoutPaymentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  publicNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  overallConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  sortProduct?: Prisma.StringFieldUpdateOperationsInput | string
+  sortCustomer?: Prisma.StringFieldUpdateOperationsInput | string
+  sortProcurement?: Prisma.StringFieldUpdateOperationsInput | string
+  aiResponseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aiModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  promptVersion?: Prisma.StringFieldUpdateOperationsInput | string
+  inputTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  outputTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  approvedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  procurementHandedOffAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  supplierDispatchVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutOrdersNestedInput
+  conversation?: Prisma.ConversationUpdateOneRequiredWithoutOrdersNestedInput
+  triggerMessage?: Prisma.MessageUpdateOneRequiredWithoutTriggeredOrdersNestedInput
+  items?: Prisma.OrderItemUpdateManyWithoutOrderNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutOrderNestedInput
+  exports?: Prisma.OrderExportUpdateManyWithoutOrderNestedInput
+  procurementHandedOffByUser?: Prisma.UserUpdateOneWithoutProcurementHandOffsNestedInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutOrderNestedInput
+  shipments?: Prisma.ShipmentUpdateManyWithoutOrderNestedInput
+  intentEvaluation?: Prisma.OrderIntentEvaluationUpdateOneWithoutOrderNestedInput
+  commercialTerms?: Prisma.OrderCommercialTermsUpdateOneWithoutOrderNestedInput
+}
+
+export type OrderUncheckedUpdateWithoutPaymentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  publicNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  conversationId?: Prisma.StringFieldUpdateOperationsInput | string
+  triggerMessageId?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  validationIssues?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  overallConfidence?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  sortProduct?: Prisma.StringFieldUpdateOperationsInput | string
+  sortCustomer?: Prisma.StringFieldUpdateOperationsInput | string
+  sortProcurement?: Prisma.StringFieldUpdateOperationsInput | string
+  aiResponseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aiModel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  promptVersion?: Prisma.StringFieldUpdateOperationsInput | string
+  inputTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  outputTokens?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  approvedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  procurementHandedOffAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  procurementHandedOffBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supplierDispatchVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrderNestedInput
+  exports?: Prisma.OrderExportUncheckedUpdateManyWithoutOrderNestedInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutOrderNestedInput
+  shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutOrderNestedInput
+  intentEvaluation?: Prisma.OrderIntentEvaluationUncheckedUpdateOneWithoutOrderNestedInput
+  commercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateOneWithoutOrderNestedInput
 }
 
 export type OrderCreateWithoutIntentEvaluationInput = {
@@ -1867,6 +2056,7 @@ export type OrderCreateWithoutIntentEvaluationInput = {
   telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutOrderInput
   shipments?: Prisma.ShipmentCreateNestedManyWithoutOrderInput
   commercialTerms?: Prisma.OrderCommercialTermsCreateNestedOneWithoutOrderInput
+  payments?: Prisma.OrderPaymentCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutIntentEvaluationInput = {
@@ -1900,6 +2090,7 @@ export type OrderUncheckedCreateWithoutIntentEvaluationInput = {
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutOrderInput
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutOrderInput
   commercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedOneWithoutOrderInput
+  payments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutIntentEvaluationInput = {
@@ -1949,6 +2140,7 @@ export type OrderUpdateWithoutIntentEvaluationInput = {
   telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutOrderNestedInput
   shipments?: Prisma.ShipmentUpdateManyWithoutOrderNestedInput
   commercialTerms?: Prisma.OrderCommercialTermsUpdateOneWithoutOrderNestedInput
+  payments?: Prisma.OrderPaymentUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutIntentEvaluationInput = {
@@ -1982,6 +2174,7 @@ export type OrderUncheckedUpdateWithoutIntentEvaluationInput = {
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutOrderNestedInput
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutOrderNestedInput
   commercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateOneWithoutOrderNestedInput
+  payments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderCreateWithoutShipmentsInput = {
@@ -2015,6 +2208,7 @@ export type OrderCreateWithoutShipmentsInput = {
   telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutOrderInput
   intentEvaluation?: Prisma.OrderIntentEvaluationCreateNestedOneWithoutOrderInput
   commercialTerms?: Prisma.OrderCommercialTermsCreateNestedOneWithoutOrderInput
+  payments?: Prisma.OrderPaymentCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutShipmentsInput = {
@@ -2048,6 +2242,7 @@ export type OrderUncheckedCreateWithoutShipmentsInput = {
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutOrderInput
   intentEvaluation?: Prisma.OrderIntentEvaluationUncheckedCreateNestedOneWithoutOrderInput
   commercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedOneWithoutOrderInput
+  payments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutShipmentsInput = {
@@ -2097,6 +2292,7 @@ export type OrderUpdateWithoutShipmentsInput = {
   telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutOrderNestedInput
   intentEvaluation?: Prisma.OrderIntentEvaluationUpdateOneWithoutOrderNestedInput
   commercialTerms?: Prisma.OrderCommercialTermsUpdateOneWithoutOrderNestedInput
+  payments?: Prisma.OrderPaymentUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutShipmentsInput = {
@@ -2130,6 +2326,7 @@ export type OrderUncheckedUpdateWithoutShipmentsInput = {
   telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutOrderNestedInput
   intentEvaluation?: Prisma.OrderIntentEvaluationUncheckedUpdateOneWithoutOrderNestedInput
   commercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateOneWithoutOrderNestedInput
+  payments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderCreateWithoutExportsInput = {
@@ -2163,6 +2360,7 @@ export type OrderCreateWithoutExportsInput = {
   shipments?: Prisma.ShipmentCreateNestedManyWithoutOrderInput
   intentEvaluation?: Prisma.OrderIntentEvaluationCreateNestedOneWithoutOrderInput
   commercialTerms?: Prisma.OrderCommercialTermsCreateNestedOneWithoutOrderInput
+  payments?: Prisma.OrderPaymentCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutExportsInput = {
@@ -2196,6 +2394,7 @@ export type OrderUncheckedCreateWithoutExportsInput = {
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutOrderInput
   intentEvaluation?: Prisma.OrderIntentEvaluationUncheckedCreateNestedOneWithoutOrderInput
   commercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedOneWithoutOrderInput
+  payments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutExportsInput = {
@@ -2245,6 +2444,7 @@ export type OrderUpdateWithoutExportsInput = {
   shipments?: Prisma.ShipmentUpdateManyWithoutOrderNestedInput
   intentEvaluation?: Prisma.OrderIntentEvaluationUpdateOneWithoutOrderNestedInput
   commercialTerms?: Prisma.OrderCommercialTermsUpdateOneWithoutOrderNestedInput
+  payments?: Prisma.OrderPaymentUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutExportsInput = {
@@ -2278,6 +2478,7 @@ export type OrderUncheckedUpdateWithoutExportsInput = {
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutOrderNestedInput
   intentEvaluation?: Prisma.OrderIntentEvaluationUncheckedUpdateOneWithoutOrderNestedInput
   commercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateOneWithoutOrderNestedInput
+  payments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderCreateWithoutAuditLogsInput = {
@@ -2311,6 +2512,7 @@ export type OrderCreateWithoutAuditLogsInput = {
   shipments?: Prisma.ShipmentCreateNestedManyWithoutOrderInput
   intentEvaluation?: Prisma.OrderIntentEvaluationCreateNestedOneWithoutOrderInput
   commercialTerms?: Prisma.OrderCommercialTermsCreateNestedOneWithoutOrderInput
+  payments?: Prisma.OrderPaymentCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutAuditLogsInput = {
@@ -2344,6 +2546,7 @@ export type OrderUncheckedCreateWithoutAuditLogsInput = {
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutOrderInput
   intentEvaluation?: Prisma.OrderIntentEvaluationUncheckedCreateNestedOneWithoutOrderInput
   commercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedOneWithoutOrderInput
+  payments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutAuditLogsInput = {
@@ -2393,6 +2596,7 @@ export type OrderUpdateWithoutAuditLogsInput = {
   shipments?: Prisma.ShipmentUpdateManyWithoutOrderNestedInput
   intentEvaluation?: Prisma.OrderIntentEvaluationUpdateOneWithoutOrderNestedInput
   commercialTerms?: Prisma.OrderCommercialTermsUpdateOneWithoutOrderNestedInput
+  payments?: Prisma.OrderPaymentUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutAuditLogsInput = {
@@ -2426,6 +2630,7 @@ export type OrderUncheckedUpdateWithoutAuditLogsInput = {
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutOrderNestedInput
   intentEvaluation?: Prisma.OrderIntentEvaluationUncheckedUpdateOneWithoutOrderNestedInput
   commercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateOneWithoutOrderNestedInput
+  payments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderCreateWithoutItemsInput = {
@@ -2459,6 +2664,7 @@ export type OrderCreateWithoutItemsInput = {
   shipments?: Prisma.ShipmentCreateNestedManyWithoutOrderInput
   intentEvaluation?: Prisma.OrderIntentEvaluationCreateNestedOneWithoutOrderInput
   commercialTerms?: Prisma.OrderCommercialTermsCreateNestedOneWithoutOrderInput
+  payments?: Prisma.OrderPaymentCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutItemsInput = {
@@ -2492,6 +2698,7 @@ export type OrderUncheckedCreateWithoutItemsInput = {
   shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutOrderInput
   intentEvaluation?: Prisma.OrderIntentEvaluationUncheckedCreateNestedOneWithoutOrderInput
   commercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedOneWithoutOrderInput
+  payments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutItemsInput = {
@@ -2541,6 +2748,7 @@ export type OrderUpdateWithoutItemsInput = {
   shipments?: Prisma.ShipmentUpdateManyWithoutOrderNestedInput
   intentEvaluation?: Prisma.OrderIntentEvaluationUpdateOneWithoutOrderNestedInput
   commercialTerms?: Prisma.OrderCommercialTermsUpdateOneWithoutOrderNestedInput
+  payments?: Prisma.OrderPaymentUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutItemsInput = {
@@ -2574,6 +2782,7 @@ export type OrderUncheckedUpdateWithoutItemsInput = {
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutOrderNestedInput
   intentEvaluation?: Prisma.OrderIntentEvaluationUncheckedUpdateOneWithoutOrderNestedInput
   commercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateOneWithoutOrderNestedInput
+  payments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderCreateManyTenantInput = {
@@ -2633,6 +2842,7 @@ export type OrderUpdateWithoutTenantInput = {
   shipments?: Prisma.ShipmentUpdateManyWithoutOrderNestedInput
   intentEvaluation?: Prisma.OrderIntentEvaluationUpdateOneWithoutOrderNestedInput
   commercialTerms?: Prisma.OrderCommercialTermsUpdateOneWithoutOrderNestedInput
+  payments?: Prisma.OrderPaymentUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutTenantInput = {
@@ -2666,6 +2876,7 @@ export type OrderUncheckedUpdateWithoutTenantInput = {
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutOrderNestedInput
   intentEvaluation?: Prisma.OrderIntentEvaluationUncheckedUpdateOneWithoutOrderNestedInput
   commercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateOneWithoutOrderNestedInput
+  payments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateManyWithoutTenantInput = {
@@ -2751,6 +2962,7 @@ export type OrderUpdateWithoutProcurementHandedOffByUserInput = {
   shipments?: Prisma.ShipmentUpdateManyWithoutOrderNestedInput
   intentEvaluation?: Prisma.OrderIntentEvaluationUpdateOneWithoutOrderNestedInput
   commercialTerms?: Prisma.OrderCommercialTermsUpdateOneWithoutOrderNestedInput
+  payments?: Prisma.OrderPaymentUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutProcurementHandedOffByUserInput = {
@@ -2784,6 +2996,7 @@ export type OrderUncheckedUpdateWithoutProcurementHandedOffByUserInput = {
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutOrderNestedInput
   intentEvaluation?: Prisma.OrderIntentEvaluationUncheckedUpdateOneWithoutOrderNestedInput
   commercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateOneWithoutOrderNestedInput
+  payments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateManyWithoutProcurementHandedOffByUserInput = {
@@ -2869,6 +3082,7 @@ export type OrderUpdateWithoutConversationInput = {
   shipments?: Prisma.ShipmentUpdateManyWithoutOrderNestedInput
   intentEvaluation?: Prisma.OrderIntentEvaluationUpdateOneWithoutOrderNestedInput
   commercialTerms?: Prisma.OrderCommercialTermsUpdateOneWithoutOrderNestedInput
+  payments?: Prisma.OrderPaymentUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutConversationInput = {
@@ -2902,6 +3116,7 @@ export type OrderUncheckedUpdateWithoutConversationInput = {
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutOrderNestedInput
   intentEvaluation?: Prisma.OrderIntentEvaluationUncheckedUpdateOneWithoutOrderNestedInput
   commercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateOneWithoutOrderNestedInput
+  payments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateManyWithoutConversationInput = {
@@ -2987,6 +3202,7 @@ export type OrderUpdateWithoutTriggerMessageInput = {
   shipments?: Prisma.ShipmentUpdateManyWithoutOrderNestedInput
   intentEvaluation?: Prisma.OrderIntentEvaluationUpdateOneWithoutOrderNestedInput
   commercialTerms?: Prisma.OrderCommercialTermsUpdateOneWithoutOrderNestedInput
+  payments?: Prisma.OrderPaymentUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutTriggerMessageInput = {
@@ -3020,6 +3236,7 @@ export type OrderUncheckedUpdateWithoutTriggerMessageInput = {
   shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutOrderNestedInput
   intentEvaluation?: Prisma.OrderIntentEvaluationUncheckedUpdateOneWithoutOrderNestedInput
   commercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateOneWithoutOrderNestedInput
+  payments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateManyWithoutTriggerMessageInput = {
@@ -3059,6 +3276,7 @@ export type OrderCountOutputType = {
   exports: number
   telegramDeliveries: number
   shipments: number
+  payments: number
 }
 
 export type OrderCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -3067,6 +3285,7 @@ export type OrderCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.
   exports?: boolean | OrderCountOutputTypeCountExportsArgs
   telegramDeliveries?: boolean | OrderCountOutputTypeCountTelegramDeliveriesArgs
   shipments?: boolean | OrderCountOutputTypeCountShipmentsArgs
+  payments?: boolean | OrderCountOutputTypeCountPaymentsArgs
 }
 
 /**
@@ -3114,6 +3333,13 @@ export type OrderCountOutputTypeCountShipmentsArgs<ExtArgs extends runtime.Types
   where?: Prisma.ShipmentWhereInput
 }
 
+/**
+ * OrderCountOutputType without action
+ */
+export type OrderCountOutputTypeCountPaymentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.OrderPaymentWhereInput
+}
+
 
 export type OrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -3151,6 +3377,7 @@ export type OrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   shipments?: boolean | Prisma.Order$shipmentsArgs<ExtArgs>
   intentEvaluation?: boolean | Prisma.Order$intentEvaluationArgs<ExtArgs>
   commercialTerms?: boolean | Prisma.Order$commercialTermsArgs<ExtArgs>
+  payments?: boolean | Prisma.Order$paymentsArgs<ExtArgs>
   _count?: boolean | Prisma.OrderCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["order"]>
 
@@ -3256,6 +3483,7 @@ export type OrderInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   shipments?: boolean | Prisma.Order$shipmentsArgs<ExtArgs>
   intentEvaluation?: boolean | Prisma.Order$intentEvaluationArgs<ExtArgs>
   commercialTerms?: boolean | Prisma.Order$commercialTermsArgs<ExtArgs>
+  payments?: boolean | Prisma.Order$paymentsArgs<ExtArgs>
   _count?: boolean | Prisma.OrderCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type OrderIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -3285,6 +3513,7 @@ export type $OrderPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     shipments: Prisma.$ShipmentPayload<ExtArgs>[]
     intentEvaluation: Prisma.$OrderIntentEvaluationPayload<ExtArgs> | null
     commercialTerms: Prisma.$OrderCommercialTermsPayload<ExtArgs> | null
+    payments: Prisma.$OrderPaymentPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -3716,6 +3945,7 @@ export interface Prisma__OrderClient<T, Null = never, ExtArgs extends runtime.Ty
   shipments<T extends Prisma.Order$shipmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$shipmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ShipmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   intentEvaluation<T extends Prisma.Order$intentEvaluationArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$intentEvaluationArgs<ExtArgs>>): Prisma.Prisma__OrderIntentEvaluationClient<runtime.Types.Result.GetResult<Prisma.$OrderIntentEvaluationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   commercialTerms<T extends Prisma.Order$commercialTermsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$commercialTermsArgs<ExtArgs>>): Prisma.Prisma__OrderCommercialTermsClient<runtime.Types.Result.GetResult<Prisma.$OrderCommercialTermsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  payments<T extends Prisma.Order$paymentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$paymentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderPaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4344,6 +4574,30 @@ export type Order$commercialTermsArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   include?: Prisma.OrderCommercialTermsInclude<ExtArgs> | null
   where?: Prisma.OrderCommercialTermsWhereInput
+}
+
+/**
+ * Order.payments
+ */
+export type Order$paymentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the OrderPayment
+   */
+  select?: Prisma.OrderPaymentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the OrderPayment
+   */
+  omit?: Prisma.OrderPaymentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OrderPaymentInclude<ExtArgs> | null
+  where?: Prisma.OrderPaymentWhereInput
+  orderBy?: Prisma.OrderPaymentOrderByWithRelationInput | Prisma.OrderPaymentOrderByWithRelationInput[]
+  cursor?: Prisma.OrderPaymentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.OrderPaymentScalarFieldEnum | Prisma.OrderPaymentScalarFieldEnum[]
 }
 
 /**

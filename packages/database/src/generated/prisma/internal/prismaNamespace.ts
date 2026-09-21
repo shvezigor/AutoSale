@@ -433,6 +433,7 @@ export const ModelName = {
   TenantBankAccount: 'TenantBankAccount',
   Order: 'Order',
   OrderCommercialTerms: 'OrderCommercialTerms',
+  OrderPayment: 'OrderPayment',
   OrderIntentEvaluation: 'OrderIntentEvaluation',
   DeliveryConnection: 'DeliveryConnection',
   DeliverySenderProfile: 'DeliverySenderProfile',
@@ -466,7 +467,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "tenant" | "googleConnection" | "googleOAuthAttempt" | "googleCredentialCleanup" | "instagramConnection" | "instagramOAuthState" | "instagramCredentialCleanup" | "user" | "userAvatarCleanup" | "userNotification" | "telegramLinkAttempt" | "telegramUserBinding" | "telegramBusinessConnection" | "telegramChat" | "telegramSupplierSetting" | "telegramWebhookUpdate" | "telegramDelivery" | "googleIdentity" | "googleSignInAttempt" | "tenantMembership" | "session" | "emailVerificationToken" | "passwordResetToken" | "tenantInvitation" | "securityAuditLog" | "webhookEvent" | "conversation" | "instagramCustomerProfile" | "instagramAvatarCleanup" | "message" | "googleSheetsDestination" | "tenantSettings" | "tenantLegalEntity" | "tenantBankAccount" | "order" | "orderCommercialTerms" | "orderIntentEvaluation" | "deliveryConnection" | "deliverySenderProfile" | "shipment" | "shipmentAttempt" | "shipmentStatusEvent" | "orderExport" | "auditLog" | "orderItem" | "product" | "inventoryReservation" | "telegramDeliveryItem" | "telegramNotificationPreference" | "catalogueSource" | "catalogueMapping" | "catalogueImportRun" | "attachment" | "demoLead"
+    modelProps: "tenant" | "googleConnection" | "googleOAuthAttempt" | "googleCredentialCleanup" | "instagramConnection" | "instagramOAuthState" | "instagramCredentialCleanup" | "user" | "userAvatarCleanup" | "userNotification" | "telegramLinkAttempt" | "telegramUserBinding" | "telegramBusinessConnection" | "telegramChat" | "telegramSupplierSetting" | "telegramWebhookUpdate" | "telegramDelivery" | "googleIdentity" | "googleSignInAttempt" | "tenantMembership" | "session" | "emailVerificationToken" | "passwordResetToken" | "tenantInvitation" | "securityAuditLog" | "webhookEvent" | "conversation" | "instagramCustomerProfile" | "instagramAvatarCleanup" | "message" | "googleSheetsDestination" | "tenantSettings" | "tenantLegalEntity" | "tenantBankAccount" | "order" | "orderCommercialTerms" | "orderPayment" | "orderIntentEvaluation" | "deliveryConnection" | "deliverySenderProfile" | "shipment" | "shipmentAttempt" | "shipmentStatusEvent" | "orderExport" | "auditLog" | "orderItem" | "product" | "inventoryReservation" | "telegramDeliveryItem" | "telegramNotificationPreference" | "catalogueSource" | "catalogueMapping" | "catalogueImportRun" | "attachment" | "demoLead"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -3134,6 +3135,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    OrderPayment: {
+      payload: Prisma.$OrderPaymentPayload<ExtArgs>
+      fields: Prisma.OrderPaymentFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.OrderPaymentFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderPaymentPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.OrderPaymentFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderPaymentPayload>
+        }
+        findFirst: {
+          args: Prisma.OrderPaymentFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderPaymentPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.OrderPaymentFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderPaymentPayload>
+        }
+        findMany: {
+          args: Prisma.OrderPaymentFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderPaymentPayload>[]
+        }
+        create: {
+          args: Prisma.OrderPaymentCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderPaymentPayload>
+        }
+        createMany: {
+          args: Prisma.OrderPaymentCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.OrderPaymentCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderPaymentPayload>[]
+        }
+        delete: {
+          args: Prisma.OrderPaymentDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderPaymentPayload>
+        }
+        update: {
+          args: Prisma.OrderPaymentUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderPaymentPayload>
+        }
+        deleteMany: {
+          args: Prisma.OrderPaymentDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.OrderPaymentUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.OrderPaymentUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderPaymentPayload>[]
+        }
+        upsert: {
+          args: Prisma.OrderPaymentUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OrderPaymentPayload>
+        }
+        aggregate: {
+          args: Prisma.OrderPaymentAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateOrderPayment>
+        }
+        groupBy: {
+          args: Prisma.OrderPaymentGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.OrderPaymentGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.OrderPaymentCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.OrderPaymentCountAggregateOutputType> | number
+        }
+      }
+    }
     OrderIntentEvaluation: {
       payload: Prisma.$OrderIntentEvaluationPayload<ExtArgs>
       fields: Prisma.OrderIntentEvaluationFieldRefs
@@ -5129,6 +5204,31 @@ export const OrderCommercialTermsScalarFieldEnum = {
 export type OrderCommercialTermsScalarFieldEnum = (typeof OrderCommercialTermsScalarFieldEnum)[keyof typeof OrderCommercialTermsScalarFieldEnum]
 
 
+export const OrderPaymentScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  orderId: 'orderId',
+  amount: 'amount',
+  currency: 'currency',
+  method: 'method',
+  receivedAt: 'receivedAt',
+  bankAccountId: 'bankAccountId',
+  carrier: 'carrier',
+  note: 'note',
+  createdBy: 'createdBy',
+  idempotencyKey: 'idempotencyKey',
+  requestHash: 'requestHash',
+  cancelledAt: 'cancelledAt',
+  cancelledBy: 'cancelledBy',
+  cancellationReason: 'cancellationReason',
+  cancellationIdempotencyKey: 'cancellationIdempotencyKey',
+  cancellationRequestHash: 'cancellationRequestHash',
+  createdAt: 'createdAt'
+} as const
+
+export type OrderPaymentScalarFieldEnum = (typeof OrderPaymentScalarFieldEnum)[keyof typeof OrderPaymentScalarFieldEnum]
+
+
 export const OrderIntentEvaluationScalarFieldEnum = {
   id: 'id',
   tenantId: 'tenantId',
@@ -5894,6 +5994,20 @@ export type ListEnumCommercialPricingStatusFieldRefInput<$PrismaModel> = FieldRe
 
 
 /**
+ * Reference to a field of type 'PaymentMethod'
+ */
+export type EnumPaymentMethodFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PaymentMethod'>
+    
+
+
+/**
+ * Reference to a field of type 'PaymentMethod[]'
+ */
+export type ListEnumPaymentMethodFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PaymentMethod[]'>
+    
+
+
+/**
  * Reference to a field of type 'DeliveryProvider'
  */
 export type EnumDeliveryProviderFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DeliveryProvider'>
@@ -6317,6 +6431,7 @@ export type GlobalOmitConfig = {
   tenantBankAccount?: Prisma.TenantBankAccountOmit
   order?: Prisma.OrderOmit
   orderCommercialTerms?: Prisma.OrderCommercialTermsOmit
+  orderPayment?: Prisma.OrderPaymentOmit
   orderIntentEvaluation?: Prisma.OrderIntentEvaluationOmit
   deliveryConnection?: Prisma.DeliveryConnectionOmit
   deliverySenderProfile?: Prisma.DeliverySenderProfileOmit

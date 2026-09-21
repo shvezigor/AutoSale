@@ -283,6 +283,8 @@ export type UserWhereInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionListRelationFilter
   shipmentsCreated?: Prisma.ShipmentListRelationFilter
   avatarCleanups?: Prisma.UserAvatarCleanupListRelationFilter
+  orderPaymentsCreated?: Prisma.OrderPaymentListRelationFilter
+  orderPaymentsCancelled?: Prisma.OrderPaymentListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -322,6 +324,8 @@ export type UserOrderByWithRelationInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionOrderByRelationAggregateInput
   shipmentsCreated?: Prisma.ShipmentOrderByRelationAggregateInput
   avatarCleanups?: Prisma.UserAvatarCleanupOrderByRelationAggregateInput
+  orderPaymentsCreated?: Prisma.OrderPaymentOrderByRelationAggregateInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -364,6 +368,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionListRelationFilter
   shipmentsCreated?: Prisma.ShipmentListRelationFilter
   avatarCleanups?: Prisma.UserAvatarCleanupListRelationFilter
+  orderPaymentsCreated?: Prisma.OrderPaymentListRelationFilter
+  orderPaymentsCancelled?: Prisma.OrderPaymentListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -445,6 +451,8 @@ export type UserCreateInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentCreateNestedManyWithoutCreatedByInput
   avatarCleanups?: Prisma.UserAvatarCleanupCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentCreateNestedManyWithoutCancellerInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -484,6 +492,8 @@ export type UserUncheckedCreateInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentUncheckedCreateNestedManyWithoutCreatedByInput
   avatarCleanups?: Prisma.UserAvatarCleanupUncheckedCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCancellerInput
 }
 
 export type UserUpdateInput = {
@@ -523,6 +533,8 @@ export type UserUpdateInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUpdateManyWithoutCreatedByNestedInput
   avatarCleanups?: Prisma.UserAvatarCleanupUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUpdateManyWithoutCancellerNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -562,6 +574,8 @@ export type UserUncheckedUpdateInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUncheckedUpdateManyWithoutCreatedByNestedInput
   avatarCleanups?: Prisma.UserAvatarCleanupUncheckedUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCancellerNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -950,6 +964,36 @@ export type UserUpdateOneWithoutProcurementHandOffsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutProcurementHandOffsInput, Prisma.UserUpdateWithoutProcurementHandOffsInput>, Prisma.UserUncheckedUpdateWithoutProcurementHandOffsInput>
 }
 
+export type UserCreateNestedOneWithoutOrderPaymentsCreatedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutOrderPaymentsCreatedInput, Prisma.UserUncheckedCreateWithoutOrderPaymentsCreatedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutOrderPaymentsCreatedInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutOrderPaymentsCancelledInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutOrderPaymentsCancelledInput, Prisma.UserUncheckedCreateWithoutOrderPaymentsCancelledInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutOrderPaymentsCancelledInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutOrderPaymentsCreatedNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutOrderPaymentsCreatedInput, Prisma.UserUncheckedCreateWithoutOrderPaymentsCreatedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutOrderPaymentsCreatedInput
+  upsert?: Prisma.UserUpsertWithoutOrderPaymentsCreatedInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutOrderPaymentsCreatedInput, Prisma.UserUpdateWithoutOrderPaymentsCreatedInput>, Prisma.UserUncheckedUpdateWithoutOrderPaymentsCreatedInput>
+}
+
+export type UserUpdateOneWithoutOrderPaymentsCancelledNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutOrderPaymentsCancelledInput, Prisma.UserUncheckedCreateWithoutOrderPaymentsCancelledInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutOrderPaymentsCancelledInput
+  upsert?: Prisma.UserUpsertWithoutOrderPaymentsCancelledInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutOrderPaymentsCancelledInput, Prisma.UserUpdateWithoutOrderPaymentsCancelledInput>, Prisma.UserUncheckedUpdateWithoutOrderPaymentsCancelledInput>
+}
+
 export type UserCreateNestedOneWithoutDeliveryConnectionsConnectedInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutDeliveryConnectionsConnectedInput, Prisma.UserUncheckedCreateWithoutDeliveryConnectionsConnectedInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutDeliveryConnectionsConnectedInput
@@ -1032,6 +1076,8 @@ export type UserCreateWithoutGoogleConnectionsInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentCreateNestedManyWithoutCreatedByInput
   avatarCleanups?: Prisma.UserAvatarCleanupCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentCreateNestedManyWithoutCancellerInput
 }
 
 export type UserUncheckedCreateWithoutGoogleConnectionsInput = {
@@ -1070,6 +1116,8 @@ export type UserUncheckedCreateWithoutGoogleConnectionsInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentUncheckedCreateNestedManyWithoutCreatedByInput
   avatarCleanups?: Prisma.UserAvatarCleanupUncheckedCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCancellerInput
 }
 
 export type UserCreateOrConnectWithoutGoogleConnectionsInput = {
@@ -1124,6 +1172,8 @@ export type UserUpdateWithoutGoogleConnectionsInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUpdateManyWithoutCreatedByNestedInput
   avatarCleanups?: Prisma.UserAvatarCleanupUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUpdateManyWithoutCancellerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutGoogleConnectionsInput = {
@@ -1162,6 +1212,8 @@ export type UserUncheckedUpdateWithoutGoogleConnectionsInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUncheckedUpdateManyWithoutCreatedByNestedInput
   avatarCleanups?: Prisma.UserAvatarCleanupUncheckedUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCancellerNestedInput
 }
 
 export type UserCreateWithoutGoogleOAuthAttemptsInput = {
@@ -1200,6 +1252,8 @@ export type UserCreateWithoutGoogleOAuthAttemptsInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentCreateNestedManyWithoutCreatedByInput
   avatarCleanups?: Prisma.UserAvatarCleanupCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentCreateNestedManyWithoutCancellerInput
 }
 
 export type UserUncheckedCreateWithoutGoogleOAuthAttemptsInput = {
@@ -1238,6 +1292,8 @@ export type UserUncheckedCreateWithoutGoogleOAuthAttemptsInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentUncheckedCreateNestedManyWithoutCreatedByInput
   avatarCleanups?: Prisma.UserAvatarCleanupUncheckedCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCancellerInput
 }
 
 export type UserCreateOrConnectWithoutGoogleOAuthAttemptsInput = {
@@ -1292,6 +1348,8 @@ export type UserUpdateWithoutGoogleOAuthAttemptsInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUpdateManyWithoutCreatedByNestedInput
   avatarCleanups?: Prisma.UserAvatarCleanupUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUpdateManyWithoutCancellerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutGoogleOAuthAttemptsInput = {
@@ -1330,6 +1388,8 @@ export type UserUncheckedUpdateWithoutGoogleOAuthAttemptsInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUncheckedUpdateManyWithoutCreatedByNestedInput
   avatarCleanups?: Prisma.UserAvatarCleanupUncheckedUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCancellerNestedInput
 }
 
 export type UserCreateWithoutInstagramConnectionsInput = {
@@ -1368,6 +1428,8 @@ export type UserCreateWithoutInstagramConnectionsInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentCreateNestedManyWithoutCreatedByInput
   avatarCleanups?: Prisma.UserAvatarCleanupCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentCreateNestedManyWithoutCancellerInput
 }
 
 export type UserUncheckedCreateWithoutInstagramConnectionsInput = {
@@ -1406,6 +1468,8 @@ export type UserUncheckedCreateWithoutInstagramConnectionsInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentUncheckedCreateNestedManyWithoutCreatedByInput
   avatarCleanups?: Prisma.UserAvatarCleanupUncheckedCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCancellerInput
 }
 
 export type UserCreateOrConnectWithoutInstagramConnectionsInput = {
@@ -1460,6 +1524,8 @@ export type UserUpdateWithoutInstagramConnectionsInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUpdateManyWithoutCreatedByNestedInput
   avatarCleanups?: Prisma.UserAvatarCleanupUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUpdateManyWithoutCancellerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutInstagramConnectionsInput = {
@@ -1498,6 +1564,8 @@ export type UserUncheckedUpdateWithoutInstagramConnectionsInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUncheckedUpdateManyWithoutCreatedByNestedInput
   avatarCleanups?: Prisma.UserAvatarCleanupUncheckedUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCancellerNestedInput
 }
 
 export type UserCreateWithoutInstagramOAuthStatesInput = {
@@ -1536,6 +1604,8 @@ export type UserCreateWithoutInstagramOAuthStatesInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentCreateNestedManyWithoutCreatedByInput
   avatarCleanups?: Prisma.UserAvatarCleanupCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentCreateNestedManyWithoutCancellerInput
 }
 
 export type UserUncheckedCreateWithoutInstagramOAuthStatesInput = {
@@ -1574,6 +1644,8 @@ export type UserUncheckedCreateWithoutInstagramOAuthStatesInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentUncheckedCreateNestedManyWithoutCreatedByInput
   avatarCleanups?: Prisma.UserAvatarCleanupUncheckedCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCancellerInput
 }
 
 export type UserCreateOrConnectWithoutInstagramOAuthStatesInput = {
@@ -1628,6 +1700,8 @@ export type UserUpdateWithoutInstagramOAuthStatesInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUpdateManyWithoutCreatedByNestedInput
   avatarCleanups?: Prisma.UserAvatarCleanupUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUpdateManyWithoutCancellerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutInstagramOAuthStatesInput = {
@@ -1666,6 +1740,8 @@ export type UserUncheckedUpdateWithoutInstagramOAuthStatesInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUncheckedUpdateManyWithoutCreatedByNestedInput
   avatarCleanups?: Prisma.UserAvatarCleanupUncheckedUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCancellerNestedInput
 }
 
 export type UserCreateWithoutInstagramCleanupsDeadLetteredInput = {
@@ -1704,6 +1780,8 @@ export type UserCreateWithoutInstagramCleanupsDeadLetteredInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentCreateNestedManyWithoutCreatedByInput
   avatarCleanups?: Prisma.UserAvatarCleanupCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentCreateNestedManyWithoutCancellerInput
 }
 
 export type UserUncheckedCreateWithoutInstagramCleanupsDeadLetteredInput = {
@@ -1742,6 +1820,8 @@ export type UserUncheckedCreateWithoutInstagramCleanupsDeadLetteredInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentUncheckedCreateNestedManyWithoutCreatedByInput
   avatarCleanups?: Prisma.UserAvatarCleanupUncheckedCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCancellerInput
 }
 
 export type UserCreateOrConnectWithoutInstagramCleanupsDeadLetteredInput = {
@@ -1796,6 +1876,8 @@ export type UserUpdateWithoutInstagramCleanupsDeadLetteredInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUpdateManyWithoutCreatedByNestedInput
   avatarCleanups?: Prisma.UserAvatarCleanupUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUpdateManyWithoutCancellerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutInstagramCleanupsDeadLetteredInput = {
@@ -1834,6 +1916,8 @@ export type UserUncheckedUpdateWithoutInstagramCleanupsDeadLetteredInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUncheckedUpdateManyWithoutCreatedByNestedInput
   avatarCleanups?: Prisma.UserAvatarCleanupUncheckedUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCancellerNestedInput
 }
 
 export type UserCreateWithoutAvatarCleanupsInput = {
@@ -1872,6 +1956,8 @@ export type UserCreateWithoutAvatarCleanupsInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutUserInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentCreateNestedManyWithoutCreatedByInput
+  orderPaymentsCreated?: Prisma.OrderPaymentCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentCreateNestedManyWithoutCancellerInput
 }
 
 export type UserUncheckedCreateWithoutAvatarCleanupsInput = {
@@ -1910,6 +1996,8 @@ export type UserUncheckedCreateWithoutAvatarCleanupsInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentUncheckedCreateNestedManyWithoutCreatedByInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCancellerInput
 }
 
 export type UserCreateOrConnectWithoutAvatarCleanupsInput = {
@@ -1964,6 +2052,8 @@ export type UserUpdateWithoutAvatarCleanupsInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutUserNestedInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUpdateManyWithoutCreatedByNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUpdateManyWithoutCancellerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAvatarCleanupsInput = {
@@ -2002,6 +2092,8 @@ export type UserUncheckedUpdateWithoutAvatarCleanupsInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUncheckedUpdateManyWithoutCreatedByNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCancellerNestedInput
 }
 
 export type UserCreateWithoutNotificationsInput = {
@@ -2040,6 +2132,8 @@ export type UserCreateWithoutNotificationsInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentCreateNestedManyWithoutCreatedByInput
   avatarCleanups?: Prisma.UserAvatarCleanupCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentCreateNestedManyWithoutCancellerInput
 }
 
 export type UserUncheckedCreateWithoutNotificationsInput = {
@@ -2078,6 +2172,8 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentUncheckedCreateNestedManyWithoutCreatedByInput
   avatarCleanups?: Prisma.UserAvatarCleanupUncheckedCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCancellerInput
 }
 
 export type UserCreateOrConnectWithoutNotificationsInput = {
@@ -2132,6 +2228,8 @@ export type UserUpdateWithoutNotificationsInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUpdateManyWithoutCreatedByNestedInput
   avatarCleanups?: Prisma.UserAvatarCleanupUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUpdateManyWithoutCancellerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutNotificationsInput = {
@@ -2170,6 +2268,8 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUncheckedUpdateManyWithoutCreatedByNestedInput
   avatarCleanups?: Prisma.UserAvatarCleanupUncheckedUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCancellerNestedInput
 }
 
 export type UserCreateWithoutTelegramLinkAttemptsInput = {
@@ -2208,6 +2308,8 @@ export type UserCreateWithoutTelegramLinkAttemptsInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentCreateNestedManyWithoutCreatedByInput
   avatarCleanups?: Prisma.UserAvatarCleanupCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentCreateNestedManyWithoutCancellerInput
 }
 
 export type UserUncheckedCreateWithoutTelegramLinkAttemptsInput = {
@@ -2246,6 +2348,8 @@ export type UserUncheckedCreateWithoutTelegramLinkAttemptsInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentUncheckedCreateNestedManyWithoutCreatedByInput
   avatarCleanups?: Prisma.UserAvatarCleanupUncheckedCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCancellerInput
 }
 
 export type UserCreateOrConnectWithoutTelegramLinkAttemptsInput = {
@@ -2300,6 +2404,8 @@ export type UserUpdateWithoutTelegramLinkAttemptsInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUpdateManyWithoutCreatedByNestedInput
   avatarCleanups?: Prisma.UserAvatarCleanupUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUpdateManyWithoutCancellerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTelegramLinkAttemptsInput = {
@@ -2338,6 +2444,8 @@ export type UserUncheckedUpdateWithoutTelegramLinkAttemptsInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUncheckedUpdateManyWithoutCreatedByNestedInput
   avatarCleanups?: Prisma.UserAvatarCleanupUncheckedUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCancellerNestedInput
 }
 
 export type UserCreateWithoutTelegramUserBindingsInput = {
@@ -2376,6 +2484,8 @@ export type UserCreateWithoutTelegramUserBindingsInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentCreateNestedManyWithoutCreatedByInput
   avatarCleanups?: Prisma.UserAvatarCleanupCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentCreateNestedManyWithoutCancellerInput
 }
 
 export type UserUncheckedCreateWithoutTelegramUserBindingsInput = {
@@ -2414,6 +2524,8 @@ export type UserUncheckedCreateWithoutTelegramUserBindingsInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentUncheckedCreateNestedManyWithoutCreatedByInput
   avatarCleanups?: Prisma.UserAvatarCleanupUncheckedCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCancellerInput
 }
 
 export type UserCreateOrConnectWithoutTelegramUserBindingsInput = {
@@ -2468,6 +2580,8 @@ export type UserUpdateWithoutTelegramUserBindingsInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUpdateManyWithoutCreatedByNestedInput
   avatarCleanups?: Prisma.UserAvatarCleanupUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUpdateManyWithoutCancellerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTelegramUserBindingsInput = {
@@ -2506,6 +2620,8 @@ export type UserUncheckedUpdateWithoutTelegramUserBindingsInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUncheckedUpdateManyWithoutCreatedByNestedInput
   avatarCleanups?: Prisma.UserAvatarCleanupUncheckedUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCancellerNestedInput
 }
 
 export type UserCreateWithoutGoogleIdentityInput = {
@@ -2544,6 +2660,8 @@ export type UserCreateWithoutGoogleIdentityInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentCreateNestedManyWithoutCreatedByInput
   avatarCleanups?: Prisma.UserAvatarCleanupCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentCreateNestedManyWithoutCancellerInput
 }
 
 export type UserUncheckedCreateWithoutGoogleIdentityInput = {
@@ -2582,6 +2700,8 @@ export type UserUncheckedCreateWithoutGoogleIdentityInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentUncheckedCreateNestedManyWithoutCreatedByInput
   avatarCleanups?: Prisma.UserAvatarCleanupUncheckedCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCancellerInput
 }
 
 export type UserCreateOrConnectWithoutGoogleIdentityInput = {
@@ -2636,6 +2756,8 @@ export type UserUpdateWithoutGoogleIdentityInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUpdateManyWithoutCreatedByNestedInput
   avatarCleanups?: Prisma.UserAvatarCleanupUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUpdateManyWithoutCancellerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutGoogleIdentityInput = {
@@ -2674,6 +2796,8 @@ export type UserUncheckedUpdateWithoutGoogleIdentityInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUncheckedUpdateManyWithoutCreatedByNestedInput
   avatarCleanups?: Prisma.UserAvatarCleanupUncheckedUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCancellerNestedInput
 }
 
 export type UserCreateWithoutMembershipsInput = {
@@ -2712,6 +2836,8 @@ export type UserCreateWithoutMembershipsInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentCreateNestedManyWithoutCreatedByInput
   avatarCleanups?: Prisma.UserAvatarCleanupCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentCreateNestedManyWithoutCancellerInput
 }
 
 export type UserUncheckedCreateWithoutMembershipsInput = {
@@ -2750,6 +2876,8 @@ export type UserUncheckedCreateWithoutMembershipsInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentUncheckedCreateNestedManyWithoutCreatedByInput
   avatarCleanups?: Prisma.UserAvatarCleanupUncheckedCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCancellerInput
 }
 
 export type UserCreateOrConnectWithoutMembershipsInput = {
@@ -2804,6 +2932,8 @@ export type UserUpdateWithoutMembershipsInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUpdateManyWithoutCreatedByNestedInput
   avatarCleanups?: Prisma.UserAvatarCleanupUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUpdateManyWithoutCancellerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMembershipsInput = {
@@ -2842,6 +2972,8 @@ export type UserUncheckedUpdateWithoutMembershipsInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUncheckedUpdateManyWithoutCreatedByNestedInput
   avatarCleanups?: Prisma.UserAvatarCleanupUncheckedUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCancellerNestedInput
 }
 
 export type UserCreateWithoutSessionsInput = {
@@ -2880,6 +3012,8 @@ export type UserCreateWithoutSessionsInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentCreateNestedManyWithoutCreatedByInput
   avatarCleanups?: Prisma.UserAvatarCleanupCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentCreateNestedManyWithoutCancellerInput
 }
 
 export type UserUncheckedCreateWithoutSessionsInput = {
@@ -2918,6 +3052,8 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentUncheckedCreateNestedManyWithoutCreatedByInput
   avatarCleanups?: Prisma.UserAvatarCleanupUncheckedCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCancellerInput
 }
 
 export type UserCreateOrConnectWithoutSessionsInput = {
@@ -2972,6 +3108,8 @@ export type UserUpdateWithoutSessionsInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUpdateManyWithoutCreatedByNestedInput
   avatarCleanups?: Prisma.UserAvatarCleanupUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUpdateManyWithoutCancellerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -3010,6 +3148,8 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUncheckedUpdateManyWithoutCreatedByNestedInput
   avatarCleanups?: Prisma.UserAvatarCleanupUncheckedUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCancellerNestedInput
 }
 
 export type UserCreateWithoutEmailVerificationTokensInput = {
@@ -3048,6 +3188,8 @@ export type UserCreateWithoutEmailVerificationTokensInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentCreateNestedManyWithoutCreatedByInput
   avatarCleanups?: Prisma.UserAvatarCleanupCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentCreateNestedManyWithoutCancellerInput
 }
 
 export type UserUncheckedCreateWithoutEmailVerificationTokensInput = {
@@ -3086,6 +3228,8 @@ export type UserUncheckedCreateWithoutEmailVerificationTokensInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentUncheckedCreateNestedManyWithoutCreatedByInput
   avatarCleanups?: Prisma.UserAvatarCleanupUncheckedCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCancellerInput
 }
 
 export type UserCreateOrConnectWithoutEmailVerificationTokensInput = {
@@ -3140,6 +3284,8 @@ export type UserUpdateWithoutEmailVerificationTokensInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUpdateManyWithoutCreatedByNestedInput
   avatarCleanups?: Prisma.UserAvatarCleanupUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUpdateManyWithoutCancellerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutEmailVerificationTokensInput = {
@@ -3178,6 +3324,8 @@ export type UserUncheckedUpdateWithoutEmailVerificationTokensInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUncheckedUpdateManyWithoutCreatedByNestedInput
   avatarCleanups?: Prisma.UserAvatarCleanupUncheckedUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCancellerNestedInput
 }
 
 export type UserCreateWithoutPasswordResetTokensInput = {
@@ -3216,6 +3364,8 @@ export type UserCreateWithoutPasswordResetTokensInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentCreateNestedManyWithoutCreatedByInput
   avatarCleanups?: Prisma.UserAvatarCleanupCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentCreateNestedManyWithoutCancellerInput
 }
 
 export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
@@ -3254,6 +3404,8 @@ export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentUncheckedCreateNestedManyWithoutCreatedByInput
   avatarCleanups?: Prisma.UserAvatarCleanupUncheckedCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCancellerInput
 }
 
 export type UserCreateOrConnectWithoutPasswordResetTokensInput = {
@@ -3308,6 +3460,8 @@ export type UserUpdateWithoutPasswordResetTokensInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUpdateManyWithoutCreatedByNestedInput
   avatarCleanups?: Prisma.UserAvatarCleanupUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUpdateManyWithoutCancellerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
@@ -3346,6 +3500,8 @@ export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUncheckedUpdateManyWithoutCreatedByNestedInput
   avatarCleanups?: Prisma.UserAvatarCleanupUncheckedUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCancellerNestedInput
 }
 
 export type UserCreateWithoutInvitationsCreatedInput = {
@@ -3384,6 +3540,8 @@ export type UserCreateWithoutInvitationsCreatedInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentCreateNestedManyWithoutCreatedByInput
   avatarCleanups?: Prisma.UserAvatarCleanupCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentCreateNestedManyWithoutCancellerInput
 }
 
 export type UserUncheckedCreateWithoutInvitationsCreatedInput = {
@@ -3422,6 +3580,8 @@ export type UserUncheckedCreateWithoutInvitationsCreatedInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentUncheckedCreateNestedManyWithoutCreatedByInput
   avatarCleanups?: Prisma.UserAvatarCleanupUncheckedCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCancellerInput
 }
 
 export type UserCreateOrConnectWithoutInvitationsCreatedInput = {
@@ -3476,6 +3636,8 @@ export type UserUpdateWithoutInvitationsCreatedInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUpdateManyWithoutCreatedByNestedInput
   avatarCleanups?: Prisma.UserAvatarCleanupUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUpdateManyWithoutCancellerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutInvitationsCreatedInput = {
@@ -3514,6 +3676,8 @@ export type UserUncheckedUpdateWithoutInvitationsCreatedInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUncheckedUpdateManyWithoutCreatedByNestedInput
   avatarCleanups?: Prisma.UserAvatarCleanupUncheckedUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCancellerNestedInput
 }
 
 export type UserCreateWithoutSecurityAuditLogsInput = {
@@ -3552,6 +3716,8 @@ export type UserCreateWithoutSecurityAuditLogsInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentCreateNestedManyWithoutCreatedByInput
   avatarCleanups?: Prisma.UserAvatarCleanupCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentCreateNestedManyWithoutCancellerInput
 }
 
 export type UserUncheckedCreateWithoutSecurityAuditLogsInput = {
@@ -3590,6 +3756,8 @@ export type UserUncheckedCreateWithoutSecurityAuditLogsInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentUncheckedCreateNestedManyWithoutCreatedByInput
   avatarCleanups?: Prisma.UserAvatarCleanupUncheckedCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCancellerInput
 }
 
 export type UserCreateOrConnectWithoutSecurityAuditLogsInput = {
@@ -3644,6 +3812,8 @@ export type UserUpdateWithoutSecurityAuditLogsInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUpdateManyWithoutCreatedByNestedInput
   avatarCleanups?: Prisma.UserAvatarCleanupUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUpdateManyWithoutCancellerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSecurityAuditLogsInput = {
@@ -3682,6 +3852,8 @@ export type UserUncheckedUpdateWithoutSecurityAuditLogsInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUncheckedUpdateManyWithoutCreatedByNestedInput
   avatarCleanups?: Prisma.UserAvatarCleanupUncheckedUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCancellerNestedInput
 }
 
 export type UserCreateWithoutInstagramMessagesSentInput = {
@@ -3720,6 +3892,8 @@ export type UserCreateWithoutInstagramMessagesSentInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentCreateNestedManyWithoutCreatedByInput
   avatarCleanups?: Prisma.UserAvatarCleanupCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentCreateNestedManyWithoutCancellerInput
 }
 
 export type UserUncheckedCreateWithoutInstagramMessagesSentInput = {
@@ -3758,6 +3932,8 @@ export type UserUncheckedCreateWithoutInstagramMessagesSentInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentUncheckedCreateNestedManyWithoutCreatedByInput
   avatarCleanups?: Prisma.UserAvatarCleanupUncheckedCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCancellerInput
 }
 
 export type UserCreateOrConnectWithoutInstagramMessagesSentInput = {
@@ -3812,6 +3988,8 @@ export type UserUpdateWithoutInstagramMessagesSentInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUpdateManyWithoutCreatedByNestedInput
   avatarCleanups?: Prisma.UserAvatarCleanupUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUpdateManyWithoutCancellerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutInstagramMessagesSentInput = {
@@ -3850,6 +4028,8 @@ export type UserUncheckedUpdateWithoutInstagramMessagesSentInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUncheckedUpdateManyWithoutCreatedByNestedInput
   avatarCleanups?: Prisma.UserAvatarCleanupUncheckedUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCancellerNestedInput
 }
 
 export type UserCreateWithoutProcurementHandOffsInput = {
@@ -3888,6 +4068,8 @@ export type UserCreateWithoutProcurementHandOffsInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentCreateNestedManyWithoutCreatedByInput
   avatarCleanups?: Prisma.UserAvatarCleanupCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentCreateNestedManyWithoutCancellerInput
 }
 
 export type UserUncheckedCreateWithoutProcurementHandOffsInput = {
@@ -3926,6 +4108,8 @@ export type UserUncheckedCreateWithoutProcurementHandOffsInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentUncheckedCreateNestedManyWithoutCreatedByInput
   avatarCleanups?: Prisma.UserAvatarCleanupUncheckedCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCancellerInput
 }
 
 export type UserCreateOrConnectWithoutProcurementHandOffsInput = {
@@ -3980,6 +4164,8 @@ export type UserUpdateWithoutProcurementHandOffsInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUpdateManyWithoutCreatedByNestedInput
   avatarCleanups?: Prisma.UserAvatarCleanupUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUpdateManyWithoutCancellerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutProcurementHandOffsInput = {
@@ -4018,6 +4204,360 @@ export type UserUncheckedUpdateWithoutProcurementHandOffsInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUncheckedUpdateManyWithoutCreatedByNestedInput
   avatarCleanups?: Prisma.UserAvatarCleanupUncheckedUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCancellerNestedInput
+}
+
+export type UserCreateWithoutOrderPaymentsCreatedInput = {
+  id?: string
+  email: string
+  name: string
+  phone?: string | null
+  locale?: string
+  passwordHash?: string | null
+  emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
+  platformRole?: $Enums.PlatformRole
+  status?: $Enums.AccessStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+  invitationsCreated?: Prisma.TenantInvitationCreateNestedManyWithoutInvitedByInput
+  securityAuditLogs?: Prisma.SecurityAuditLogCreateNestedManyWithoutUserInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutUserInput
+  instagramConnections?: Prisma.InstagramConnectionCreateNestedManyWithoutConnectedByInput
+  instagramMessagesSent?: Prisma.MessageCreateNestedManyWithoutSentByInput
+  instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutUserInput
+  googleConnections?: Prisma.GoogleConnectionCreateNestedManyWithoutConnectedByInput
+  googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
+  notifications?: Prisma.UserNotificationCreateNestedManyWithoutUserInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptCreateNestedManyWithoutUserInput
+  telegramUserBindings?: Prisma.TelegramUserBindingCreateNestedManyWithoutUserInput
+  procurementHandOffs?: Prisma.OrderCreateNestedManyWithoutProcurementHandedOffByUserInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutUserInput
+  deliveryConnectionsConnected?: Prisma.DeliveryConnectionCreateNestedManyWithoutConnectedByInput
+  shipmentsCreated?: Prisma.ShipmentCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupCreateNestedManyWithoutUserInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentCreateNestedManyWithoutCancellerInput
+}
+
+export type UserUncheckedCreateWithoutOrderPaymentsCreatedInput = {
+  id?: string
+  email: string
+  name: string
+  phone?: string | null
+  locale?: string
+  passwordHash?: string | null
+  emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
+  platformRole?: $Enums.PlatformRole
+  status?: $Enums.AccessStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  invitationsCreated?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUncheckedCreateNestedManyWithoutUserInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutUserInput
+  instagramConnections?: Prisma.InstagramConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  instagramMessagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSentByInput
+  instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
+  googleConnections?: Prisma.GoogleConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
+  notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutUserInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedCreateNestedManyWithoutUserInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUncheckedCreateNestedManyWithoutUserInput
+  procurementHandOffs?: Prisma.OrderUncheckedCreateNestedManyWithoutProcurementHandedOffByUserInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
+  deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  shipmentsCreated?: Prisma.ShipmentUncheckedCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedCreateNestedManyWithoutUserInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCancellerInput
+}
+
+export type UserCreateOrConnectWithoutOrderPaymentsCreatedInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutOrderPaymentsCreatedInput, Prisma.UserUncheckedCreateWithoutOrderPaymentsCreatedInput>
+}
+
+export type UserCreateWithoutOrderPaymentsCancelledInput = {
+  id?: string
+  email: string
+  name: string
+  phone?: string | null
+  locale?: string
+  passwordHash?: string | null
+  emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
+  platformRole?: $Enums.PlatformRole
+  status?: $Enums.AccessStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+  invitationsCreated?: Prisma.TenantInvitationCreateNestedManyWithoutInvitedByInput
+  securityAuditLogs?: Prisma.SecurityAuditLogCreateNestedManyWithoutUserInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutUserInput
+  instagramConnections?: Prisma.InstagramConnectionCreateNestedManyWithoutConnectedByInput
+  instagramMessagesSent?: Prisma.MessageCreateNestedManyWithoutSentByInput
+  instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutUserInput
+  googleConnections?: Prisma.GoogleConnectionCreateNestedManyWithoutConnectedByInput
+  googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
+  notifications?: Prisma.UserNotificationCreateNestedManyWithoutUserInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptCreateNestedManyWithoutUserInput
+  telegramUserBindings?: Prisma.TelegramUserBindingCreateNestedManyWithoutUserInput
+  procurementHandOffs?: Prisma.OrderCreateNestedManyWithoutProcurementHandedOffByUserInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutUserInput
+  deliveryConnectionsConnected?: Prisma.DeliveryConnectionCreateNestedManyWithoutConnectedByInput
+  shipmentsCreated?: Prisma.ShipmentCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentCreateNestedManyWithoutCreatorInput
+}
+
+export type UserUncheckedCreateWithoutOrderPaymentsCancelledInput = {
+  id?: string
+  email: string
+  name: string
+  phone?: string | null
+  locale?: string
+  passwordHash?: string | null
+  emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
+  platformRole?: $Enums.PlatformRole
+  status?: $Enums.AccessStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  invitationsCreated?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUncheckedCreateNestedManyWithoutUserInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutUserInput
+  instagramConnections?: Prisma.InstagramConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  instagramMessagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSentByInput
+  instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
+  googleConnections?: Prisma.GoogleConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
+  notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutUserInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedCreateNestedManyWithoutUserInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUncheckedCreateNestedManyWithoutUserInput
+  procurementHandOffs?: Prisma.OrderUncheckedCreateNestedManyWithoutProcurementHandedOffByUserInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
+  deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  shipmentsCreated?: Prisma.ShipmentUncheckedCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCreatorInput
+}
+
+export type UserCreateOrConnectWithoutOrderPaymentsCancelledInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutOrderPaymentsCancelledInput, Prisma.UserUncheckedCreateWithoutOrderPaymentsCancelledInput>
+}
+
+export type UserUpsertWithoutOrderPaymentsCreatedInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutOrderPaymentsCreatedInput, Prisma.UserUncheckedUpdateWithoutOrderPaymentsCreatedInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutOrderPaymentsCreatedInput, Prisma.UserUncheckedCreateWithoutOrderPaymentsCreatedInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutOrderPaymentsCreatedInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutOrderPaymentsCreatedInput, Prisma.UserUncheckedUpdateWithoutOrderPaymentsCreatedInput>
+}
+
+export type UserUpdateWithoutOrderPaymentsCreatedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+  invitationsCreated?: Prisma.TenantInvitationUpdateManyWithoutInvitedByNestedInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUpdateManyWithoutUserNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutUserNestedInput
+  instagramConnections?: Prisma.InstagramConnectionUpdateManyWithoutConnectedByNestedInput
+  instagramMessagesSent?: Prisma.MessageUpdateManyWithoutSentByNestedInput
+  instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutUserNestedInput
+  googleConnections?: Prisma.GoogleConnectionUpdateManyWithoutConnectedByNestedInput
+  googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
+  notifications?: Prisma.UserNotificationUpdateManyWithoutUserNestedInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUpdateManyWithoutUserNestedInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUpdateManyWithoutUserNestedInput
+  procurementHandOffs?: Prisma.OrderUpdateManyWithoutProcurementHandedOffByUserNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutUserNestedInput
+  deliveryConnectionsConnected?: Prisma.DeliveryConnectionUpdateManyWithoutConnectedByNestedInput
+  shipmentsCreated?: Prisma.ShipmentUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUpdateManyWithoutUserNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUpdateManyWithoutCancellerNestedInput
+}
+
+export type UserUncheckedUpdateWithoutOrderPaymentsCreatedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+  invitationsCreated?: Prisma.TenantInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUncheckedUpdateManyWithoutUserNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutUserNestedInput
+  instagramConnections?: Prisma.InstagramConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  instagramMessagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSentByNestedInput
+  instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
+  googleConnections?: Prisma.GoogleConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutUserNestedInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedUpdateManyWithoutUserNestedInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUncheckedUpdateManyWithoutUserNestedInput
+  procurementHandOffs?: Prisma.OrderUncheckedUpdateManyWithoutProcurementHandedOffByUserNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
+  deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  shipmentsCreated?: Prisma.ShipmentUncheckedUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedUpdateManyWithoutUserNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCancellerNestedInput
+}
+
+export type UserUpsertWithoutOrderPaymentsCancelledInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutOrderPaymentsCancelledInput, Prisma.UserUncheckedUpdateWithoutOrderPaymentsCancelledInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutOrderPaymentsCancelledInput, Prisma.UserUncheckedCreateWithoutOrderPaymentsCancelledInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutOrderPaymentsCancelledInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutOrderPaymentsCancelledInput, Prisma.UserUncheckedUpdateWithoutOrderPaymentsCancelledInput>
+}
+
+export type UserUpdateWithoutOrderPaymentsCancelledInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+  invitationsCreated?: Prisma.TenantInvitationUpdateManyWithoutInvitedByNestedInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUpdateManyWithoutUserNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutUserNestedInput
+  instagramConnections?: Prisma.InstagramConnectionUpdateManyWithoutConnectedByNestedInput
+  instagramMessagesSent?: Prisma.MessageUpdateManyWithoutSentByNestedInput
+  instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutUserNestedInput
+  googleConnections?: Prisma.GoogleConnectionUpdateManyWithoutConnectedByNestedInput
+  googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
+  notifications?: Prisma.UserNotificationUpdateManyWithoutUserNestedInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUpdateManyWithoutUserNestedInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUpdateManyWithoutUserNestedInput
+  procurementHandOffs?: Prisma.OrderUpdateManyWithoutProcurementHandedOffByUserNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutUserNestedInput
+  deliveryConnectionsConnected?: Prisma.DeliveryConnectionUpdateManyWithoutConnectedByNestedInput
+  shipmentsCreated?: Prisma.ShipmentUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUpdateManyWithoutCreatorNestedInput
+}
+
+export type UserUncheckedUpdateWithoutOrderPaymentsCancelledInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+  invitationsCreated?: Prisma.TenantInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUncheckedUpdateManyWithoutUserNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutUserNestedInput
+  instagramConnections?: Prisma.InstagramConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  instagramMessagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSentByNestedInput
+  instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
+  googleConnections?: Prisma.GoogleConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutUserNestedInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedUpdateManyWithoutUserNestedInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUncheckedUpdateManyWithoutUserNestedInput
+  procurementHandOffs?: Prisma.OrderUncheckedUpdateManyWithoutProcurementHandedOffByUserNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
+  deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  shipmentsCreated?: Prisma.ShipmentUncheckedUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCreatorNestedInput
 }
 
 export type UserCreateWithoutDeliveryConnectionsConnectedInput = {
@@ -4056,6 +4596,8 @@ export type UserCreateWithoutDeliveryConnectionsConnectedInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutUserInput
   shipmentsCreated?: Prisma.ShipmentCreateNestedManyWithoutCreatedByInput
   avatarCleanups?: Prisma.UserAvatarCleanupCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentCreateNestedManyWithoutCancellerInput
 }
 
 export type UserUncheckedCreateWithoutDeliveryConnectionsConnectedInput = {
@@ -4094,6 +4636,8 @@ export type UserUncheckedCreateWithoutDeliveryConnectionsConnectedInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
   shipmentsCreated?: Prisma.ShipmentUncheckedCreateNestedManyWithoutCreatedByInput
   avatarCleanups?: Prisma.UserAvatarCleanupUncheckedCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCancellerInput
 }
 
 export type UserCreateOrConnectWithoutDeliveryConnectionsConnectedInput = {
@@ -4148,6 +4692,8 @@ export type UserUpdateWithoutDeliveryConnectionsConnectedInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutUserNestedInput
   shipmentsCreated?: Prisma.ShipmentUpdateManyWithoutCreatedByNestedInput
   avatarCleanups?: Prisma.UserAvatarCleanupUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUpdateManyWithoutCancellerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutDeliveryConnectionsConnectedInput = {
@@ -4186,6 +4732,8 @@ export type UserUncheckedUpdateWithoutDeliveryConnectionsConnectedInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
   shipmentsCreated?: Prisma.ShipmentUncheckedUpdateManyWithoutCreatedByNestedInput
   avatarCleanups?: Prisma.UserAvatarCleanupUncheckedUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCancellerNestedInput
 }
 
 export type UserCreateWithoutShipmentsCreatedInput = {
@@ -4224,6 +4772,8 @@ export type UserCreateWithoutShipmentsCreatedInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutUserInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionCreateNestedManyWithoutConnectedByInput
   avatarCleanups?: Prisma.UserAvatarCleanupCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentCreateNestedManyWithoutCancellerInput
 }
 
 export type UserUncheckedCreateWithoutShipmentsCreatedInput = {
@@ -4262,6 +4812,8 @@ export type UserUncheckedCreateWithoutShipmentsCreatedInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   avatarCleanups?: Prisma.UserAvatarCleanupUncheckedCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCancellerInput
 }
 
 export type UserCreateOrConnectWithoutShipmentsCreatedInput = {
@@ -4316,6 +4868,8 @@ export type UserUpdateWithoutShipmentsCreatedInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutUserNestedInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUpdateManyWithoutConnectedByNestedInput
   avatarCleanups?: Prisma.UserAvatarCleanupUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUpdateManyWithoutCancellerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutShipmentsCreatedInput = {
@@ -4354,6 +4908,8 @@ export type UserUncheckedUpdateWithoutShipmentsCreatedInput = {
   telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   avatarCleanups?: Prisma.UserAvatarCleanupUncheckedUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCancellerNestedInput
 }
 
 export type UserCreateWithoutTelegramNotificationPreferencesInput = {
@@ -4392,6 +4948,8 @@ export type UserCreateWithoutTelegramNotificationPreferencesInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentCreateNestedManyWithoutCreatedByInput
   avatarCleanups?: Prisma.UserAvatarCleanupCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentCreateNestedManyWithoutCancellerInput
 }
 
 export type UserUncheckedCreateWithoutTelegramNotificationPreferencesInput = {
@@ -4430,6 +4988,8 @@ export type UserUncheckedCreateWithoutTelegramNotificationPreferencesInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   shipmentsCreated?: Prisma.ShipmentUncheckedCreateNestedManyWithoutCreatedByInput
   avatarCleanups?: Prisma.UserAvatarCleanupUncheckedCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCancellerInput
 }
 
 export type UserCreateOrConnectWithoutTelegramNotificationPreferencesInput = {
@@ -4484,6 +5044,8 @@ export type UserUpdateWithoutTelegramNotificationPreferencesInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUpdateManyWithoutCreatedByNestedInput
   avatarCleanups?: Prisma.UserAvatarCleanupUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUpdateManyWithoutCancellerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTelegramNotificationPreferencesInput = {
@@ -4522,6 +5084,8 @@ export type UserUncheckedUpdateWithoutTelegramNotificationPreferencesInput = {
   deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   shipmentsCreated?: Prisma.ShipmentUncheckedUpdateManyWithoutCreatedByNestedInput
   avatarCleanups?: Prisma.UserAvatarCleanupUncheckedUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCancellerNestedInput
 }
 
 
@@ -4550,6 +5114,8 @@ export type UserCountOutputType = {
   deliveryConnectionsConnected: number
   shipmentsCreated: number
   avatarCleanups: number
+  orderPaymentsCreated: number
+  orderPaymentsCancelled: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -4573,6 +5139,8 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   deliveryConnectionsConnected?: boolean | UserCountOutputTypeCountDeliveryConnectionsConnectedArgs
   shipmentsCreated?: boolean | UserCountOutputTypeCountShipmentsCreatedArgs
   avatarCleanups?: boolean | UserCountOutputTypeCountAvatarCleanupsArgs
+  orderPaymentsCreated?: boolean | UserCountOutputTypeCountOrderPaymentsCreatedArgs
+  orderPaymentsCancelled?: boolean | UserCountOutputTypeCountOrderPaymentsCancelledArgs
 }
 
 /**
@@ -4725,6 +5293,20 @@ export type UserCountOutputTypeCountAvatarCleanupsArgs<ExtArgs extends runtime.T
   where?: Prisma.UserAvatarCleanupWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountOrderPaymentsCreatedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.OrderPaymentWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountOrderPaymentsCancelledArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.OrderPaymentWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -4763,6 +5345,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   deliveryConnectionsConnected?: boolean | Prisma.User$deliveryConnectionsConnectedArgs<ExtArgs>
   shipmentsCreated?: boolean | Prisma.User$shipmentsCreatedArgs<ExtArgs>
   avatarCleanups?: boolean | Prisma.User$avatarCleanupsArgs<ExtArgs>
+  orderPaymentsCreated?: boolean | Prisma.User$orderPaymentsCreatedArgs<ExtArgs>
+  orderPaymentsCancelled?: boolean | Prisma.User$orderPaymentsCancelledArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -4843,6 +5427,8 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   deliveryConnectionsConnected?: boolean | Prisma.User$deliveryConnectionsConnectedArgs<ExtArgs>
   shipmentsCreated?: boolean | Prisma.User$shipmentsCreatedArgs<ExtArgs>
   avatarCleanups?: boolean | Prisma.User$avatarCleanupsArgs<ExtArgs>
+  orderPaymentsCreated?: boolean | Prisma.User$orderPaymentsCreatedArgs<ExtArgs>
+  orderPaymentsCancelled?: boolean | Prisma.User$orderPaymentsCancelledArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -4872,6 +5458,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     deliveryConnectionsConnected: Prisma.$DeliveryConnectionPayload<ExtArgs>[]
     shipmentsCreated: Prisma.$ShipmentPayload<ExtArgs>[]
     avatarCleanups: Prisma.$UserAvatarCleanupPayload<ExtArgs>[]
+    orderPaymentsCreated: Prisma.$OrderPaymentPayload<ExtArgs>[]
+    orderPaymentsCancelled: Prisma.$OrderPaymentPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -5304,6 +5892,8 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   deliveryConnectionsConnected<T extends Prisma.User$deliveryConnectionsConnectedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$deliveryConnectionsConnectedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DeliveryConnectionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   shipmentsCreated<T extends Prisma.User$shipmentsCreatedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$shipmentsCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ShipmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   avatarCleanups<T extends Prisma.User$avatarCleanupsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$avatarCleanupsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserAvatarCleanupPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  orderPaymentsCreated<T extends Prisma.User$orderPaymentsCreatedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$orderPaymentsCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderPaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  orderPaymentsCancelled<T extends Prisma.User$orderPaymentsCancelledArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$orderPaymentsCancelledArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderPaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -6237,6 +6827,54 @@ export type User$avatarCleanupsArgs<ExtArgs extends runtime.Types.Extensions.Int
   take?: number
   skip?: number
   distinct?: Prisma.UserAvatarCleanupScalarFieldEnum | Prisma.UserAvatarCleanupScalarFieldEnum[]
+}
+
+/**
+ * User.orderPaymentsCreated
+ */
+export type User$orderPaymentsCreatedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the OrderPayment
+   */
+  select?: Prisma.OrderPaymentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the OrderPayment
+   */
+  omit?: Prisma.OrderPaymentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OrderPaymentInclude<ExtArgs> | null
+  where?: Prisma.OrderPaymentWhereInput
+  orderBy?: Prisma.OrderPaymentOrderByWithRelationInput | Prisma.OrderPaymentOrderByWithRelationInput[]
+  cursor?: Prisma.OrderPaymentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.OrderPaymentScalarFieldEnum | Prisma.OrderPaymentScalarFieldEnum[]
+}
+
+/**
+ * User.orderPaymentsCancelled
+ */
+export type User$orderPaymentsCancelledArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the OrderPayment
+   */
+  select?: Prisma.OrderPaymentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the OrderPayment
+   */
+  omit?: Prisma.OrderPaymentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OrderPaymentInclude<ExtArgs> | null
+  where?: Prisma.OrderPaymentWhereInput
+  orderBy?: Prisma.OrderPaymentOrderByWithRelationInput | Prisma.OrderPaymentOrderByWithRelationInput[]
+  cursor?: Prisma.OrderPaymentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.OrderPaymentScalarFieldEnum | Prisma.OrderPaymentScalarFieldEnum[]
 }
 
 /**

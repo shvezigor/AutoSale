@@ -241,6 +241,13 @@ enum CommercialPricingStatus {
   NEEDS_REVIEW
 }
 
+enum PaymentMethod {
+  BANK_TRANSFER
+  CASH
+  CASH_ON_DELIVERY
+  OTHER
+}
+
 model Tenant {
   id                              String                           @id @default(uuid()) @db.Uuid
   key                             String                           @unique
@@ -291,6 +298,7 @@ model Tenant {
   legalEntities                   TenantLegalEntity[]
   bankAccounts                    TenantBankAccount[]
   orderCommercialTerms            OrderCommercialTerms[]
+  orderPayments                   OrderPayment[]
 
   @@index([status])
   @@map("tenants")
@@ -464,6 +472,8 @@ model User {
   deliveryConnectionsConnected    DeliveryConnection[]             @relation("DeliveryConnectionConnectedBy")
   shipmentsCreated                Shipment[]                       @relation("ShipmentCreatedBy")
   avatarCleanups                  UserAvatarCleanup[]
+  orderPaymentsCreated            OrderPayment[]                   @relation("OrderPaymentCreatedBy")
+  orderPaymentsCancelled          OrderPayment[]                   @relation("OrderPaymentCancelledBy")
 
   @@index([status])
   @@map("users")
@@ -962,6 +972,7 @@ model TenantBankAccount {
   tenant          Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   legalEntity     TenantLegalEntity      @relation(fields: [legalEntityId], references: [id], onDelete: Restrict)
   commercialTerms OrderCommercialTerms[]
+  orderPayments   OrderPayment[]
 
   @@unique([tenantId, normalizedIban, currency])
   @@index([tenantId, legalEntityId, currency, active])
@@ -1004,6 +1015,7 @@ model Order {
   shipments                  Shipment[]
   intentEvaluation           OrderIntentEvaluation?
   commercialTerms            OrderCommercialTerms?
+  payments                   OrderPayment[]
 
   @@unique([tenantId, id])
   @@index([tenantId, status, createdAt])
@@ -1040,6 +1052,39 @@ model OrderCommercialTerms {
 
   @@index([tenantId, pricingStatus])
   @@map("order_commercial_terms")
+}
+
+model OrderPayment {
+  id                         String             @id @default(uuid()) @db.Uuid
+  tenantId                   String             @map("tenant_id") @db.Uuid
+  orderId                    String             @map("order_id") @db.Uuid
+  amount                     Decimal            @db.Decimal(14, 2)
+  currency                   String             @db.VarChar(3)
+  method                     PaymentMethod
+  receivedAt                 DateTime           @map("received_at")
+  bankAccountId              String?            @map("bank_account_id") @db.Uuid
+  carrier                    String?
+  note                       String?
+  createdBy                  String             @map("created_by") @db.Uuid
+  idempotencyKey             String             @map("idempotency_key") @db.Uuid
+  requestHash                String             @map("request_hash") @db.VarChar(64)
+  cancelledAt                DateTime?          @map("cancelled_at")
+  cancelledBy                String?            @map("cancelled_by") @db.Uuid
+  cancellationReason         String?            @map("cancellation_reason")
+  cancellationIdempotencyKey String?            @map("cancellation_idempotency_key") @db.Uuid
+  cancellationRequestHash    String?            @map("cancellation_request_hash") @db.VarChar(64)
+  createdAt                  DateTime           @default(now()) @map("created_at")
+  tenant                     Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  order                      Order              @relation(fields: [tenantId, orderId], references: [tenantId, id], onDelete: Cascade)
+  bankAccount                TenantBankAccount? @relation(fields: [bankAccountId], references: [id], onDelete: SetNull)
+  creator                    User               @relation("OrderPaymentCreatedBy", fields: [createdBy], references: [id], onDelete: Restrict)
+  canceller                  User?              @relation("OrderPaymentCancelledBy", fields: [cancelledBy], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, idempotencyKey])
+  @@unique([tenantId, cancellationIdempotencyKey])
+  @@index([tenantId, orderId, receivedAt(sort: Desc)])
+  @@index([tenantId, orderId, cancelledAt])
+  @@map("order_payments")
 }
 
 model OrderIntentEvaluation {

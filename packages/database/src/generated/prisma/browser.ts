@@ -198,6 +198,11 @@ export type Order = Prisma.OrderModel
  */
 export type OrderCommercialTerms = Prisma.OrderCommercialTermsModel
 /**
+ * Model OrderPayment
+ * 
+ */
+export type OrderPayment = Prisma.OrderPaymentModel
+/**
  * Model OrderIntentEvaluation
  * 
  */
