@@ -15,7 +15,7 @@ export default async function OrderPage({ params, searchParams = Promise.resolve
   const query = await searchParams;
   const backHref = safeOrdersReturn(query.returnTo);
   const [order, list] = await Promise.all([getOrder(id), getOrders()]);
-  return <main className="order-detail-layout order-detail-layout-content"><section className="orders-rail"><h1>{t('orders.title')}</h1>{list.items.map((item) => <Link className="order-row" data-selected={item.id === id} href={detailHref(item.id, backHref)} key={item.id}><span><strong>{item.participantName ?? t('orders.instagramCustomer')}</strong><small>{item.items[0]?.productName ?? item.items[0]?.originalText ?? t('orders.noProducts')}</small></span><b>{formatNumber(Math.round((item.overallConfidence ?? 0) * 100))}%</b></Link>)}</section><OrderReviewPanel backHref={backHref} initialOrder={order} /></main>;
+  return <main className="order-detail-layout order-detail-layout-content"><section className="orders-rail"><h1>{t('orders.title')}</h1>{list.items.map((item) => <Link className="order-row" data-selected={item.id === id} href={detailHref(item.id, backHref)} key={item.id}><span><strong>{item.participantName ?? t('orders.instagramCustomer')}</strong><small>{item.items[0]?.productName ?? item.items[0]?.originalText ?? t('orders.noProducts')}</small></span><b>{formatNumber(Math.round((item.overallConfidence ?? 0) * 100))}%</b></Link>)}</section><OrderReviewPanel backHref={backHref} initialOrder={order} role={session?.membershipRole ?? null} /></main>;
 }
 
 function safeOrdersReturn(value: string | string[] | undefined): string {

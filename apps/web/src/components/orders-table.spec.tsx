@@ -30,6 +30,7 @@ const order: ManagerOrder = {
   createdAt: '2026-09-08T09:30:00.000Z',
   sheetsExport: null,
   commercialTerms: null,
+  paymentSummary: null,
 };
 
 afterEach(() => { cleanup(); push.mockReset(); replace.mockReset(); });

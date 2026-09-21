@@ -18,6 +18,7 @@ const order = {
   procurementHandedOffAt: null, supplierDispatch: null, shipment: null, canCreateShipment: true,
   catalogueCandidates: [], createdAt: '2026-09-11T00:00:00.000Z', sheetsExport: null,
   commercialTerms: null,
+  paymentSummary: null,
 } satisfies ManagerOrder;
 
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });

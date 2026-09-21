@@ -11,8 +11,9 @@ import { ShipmentPanel } from './shipment-panel';
 import { useI18n } from '../i18n/i18n-provider';
 import type { Translator } from '../i18n/translator';
 import { OrderCommercialTermsCard } from './order-commercial-terms-card';
+import { OrderPaymentsCard } from './order-payments-card';
 
-export function OrderReviewPanel({ initialOrder, backHref = '/orders' }: { initialOrder: ManagerOrder; backHref?: string }) {
+export function OrderReviewPanel({ initialOrder, backHref = '/orders', role = 'MANAGER' }: { initialOrder: ManagerOrder; backHref?: string; role?: 'OWNER' | 'MANAGER' | null }) {
   const { t, formatNumber } = useI18n();
   const [order, setOrder] = useState(initialOrder);
   const [draft, setDraft] = useState(initialOrder);
@@ -26,6 +27,7 @@ export function OrderReviewPanel({ initialOrder, backHref = '/orders' }: { initi
   const final = ['APPROVED', 'AUTO_APPROVED', 'CANCELLED'].includes(order.status);
   const approved = order.status === 'APPROVED' || order.status === 'AUTO_APPROVED';
   const correctionAllowed = order.status !== 'CANCELLED' && !order.procurementHandedOffAt && !order.supplierDispatch && !order.shipment;
+  const hasActivePayment = order.paymentSummary?.payments.some((payment) => payment.cancelledAt === null) ?? false;
   const pending = pendingAction !== null;
   const hasChanges = editableOrderSnapshot(order) !== editableOrderSnapshot(draft);
 
@@ -42,7 +44,7 @@ export function OrderReviewPanel({ initialOrder, backHref = '/orders' }: { initi
   async function save() {
     setPendingAction('save'); setError(null); setSaved(false);
     try {
-      const response = await mutatingFetch(`/api/orders/${order.id}`, { method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ actor: 'Андрій', customer: draft.customer, delivery: draft.delivery, items: draft.items.map(({ id, catalogId, quantity, color, size }) => ({ id, catalogId, quantity, color, size })) }) });
+      const response = await mutatingFetch(`/api/orders/${order.id}`, { method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ actor: 'Андрій', customer: draft.customer, delivery: draft.delivery, ...(!hasActivePayment ? { items: draft.items.map(({ id, catalogId, quantity, color, size }) => ({ id, catalogId, quantity, color, size })) } : {}) }) });
       if (!response.ok) throw new Error(t('orders.saveFailed'));
       const next = await response.json() as ManagerOrder; setOrder(next); setDraft(next); setSaved(true);
     } catch (reason) { setError(reason instanceof Error ? reason.message : t('orders.genericError')); }
@@ -105,8 +107,9 @@ export function OrderReviewPanel({ initialOrder, backHref = '/orders' }: { initi
         [t('orders.addressField'), draft.delivery.address, (value) => changeDraft({ ...draft, delivery: { ...draft.delivery, address: value } })],
       ]} />
     </div>
-    <section className="review-section"><h2>{t('orders.productsSection')}</h2>{draft.items.map((item, index) => <article className="review-item" data-low-confidence={item.confidence < 0.9} key={item.id}><div className="review-item-head"><label><span className="sr-only">{t('orders.productField', { number: formatNumber(index + 1) })}</span><select disabled={!correctionAllowed} value={item.catalogId ?? ''} onChange={(event) => changeItem(item.id, { catalogId: event.target.value || null, productName: draft.catalogueCandidates.find((candidate) => candidate.sku === event.target.value)?.name ?? null })}><option value="">{t('orders.selectProduct')}</option>{draft.catalogueCandidates.map((candidate) => <option key={candidate.sku} value={candidate.sku}>{candidate.sku} — {candidate.name}</option>)}</select></label><b>{formatNumber(Math.round(item.confidence * 100))}%</b></div><div className="item-edit-grid"><label>{t('orders.sizeField')}<input disabled={!correctionAllowed} value={item.size ?? ''} onChange={(event) => changeItem(item.id, { size: event.target.value || null })} /></label><label>{t('orders.colorField')}<input disabled={!correctionAllowed} value={item.color ?? ''} onChange={(event) => changeItem(item.id, { color: event.target.value || null })} /></label><label>{t('orders.quantityField')}<input disabled={!correctionAllowed} min="1" type="number" value={item.quantity} onChange={(event) => changeItem(item.id, { quantity: Number(event.target.value) })} /></label></div>{approved && <ProcurementItemCard item={item} locked={order.procurementSummary === 'HANDED_OFF'} onOrderChange={applyOrder} orderId={order.id} />}</article>)}</section>
-    <OrderCommercialTermsCard orderId={order.id} initial={order.commercialTerms} locked={!correctionAllowed} onChange={(commercialTerms) => applyOrder({ ...order, commercialTerms })} />
+    <section className="review-section"><h2>{t('orders.productsSection')}</h2>{hasActivePayment && <p className="payment-lock-notice">{t('orders.paymentLocksItems')}</p>}{draft.items.map((item, index) => <article className="review-item" data-low-confidence={item.confidence < 0.9} key={item.id}><div className="review-item-head"><label><span className="sr-only">{t('orders.productField', { number: formatNumber(index + 1) })}</span><select disabled={!correctionAllowed || hasActivePayment} value={item.catalogId ?? ''} onChange={(event) => changeItem(item.id, { catalogId: event.target.value || null, productName: draft.catalogueCandidates.find((candidate) => candidate.sku === event.target.value)?.name ?? null })}><option value="">{t('orders.selectProduct')}</option>{draft.catalogueCandidates.map((candidate) => <option key={candidate.sku} value={candidate.sku}>{candidate.sku} — {candidate.name}</option>)}</select></label><b>{formatNumber(Math.round(item.confidence * 100))}%</b></div><div className="item-edit-grid"><label>{t('orders.sizeField')}<input disabled={!correctionAllowed || hasActivePayment} value={item.size ?? ''} onChange={(event) => changeItem(item.id, { size: event.target.value || null })} /></label><label>{t('orders.colorField')}<input disabled={!correctionAllowed || hasActivePayment} value={item.color ?? ''} onChange={(event) => changeItem(item.id, { color: event.target.value || null })} /></label><label>{t('orders.quantityField')}<input disabled={!correctionAllowed || hasActivePayment} min="1" type="number" value={item.quantity} onChange={(event) => changeItem(item.id, { quantity: Number(event.target.value) })} /></label></div>{approved && <ProcurementItemCard item={item} locked={order.procurementSummary === 'HANDED_OFF'} onOrderChange={applyOrder} orderId={order.id} />}</article>)}</section>
+    <OrderCommercialTermsCard orderId={order.id} initial={order.commercialTerms} locked={!correctionAllowed || hasActivePayment} onChange={(commercialTerms) => applyOrder({ ...order, commercialTerms })} />
+    <OrderPaymentsCard orderId={order.id} initial={order.paymentSummary} accounts={order.commercialTerms?.eligibleAccounts ?? []} role={role} onChange={(paymentSummary) => applyOrder({ ...order, paymentSummary })} />
     {sheetsExport && <SheetsExportState value={sheetsExport} pending={pending} retry={() => void retrySheetsExport()} />}
     <ShipmentPanel order={order} />
     <div className="review-actions">

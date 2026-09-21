@@ -39,6 +39,7 @@ const order: ManagerOrder = {
   createdAt: '2026-08-26T12:00:00.000Z',
   sheetsExport: null,
   commercialTerms: null,
+  paymentSummary: null,
 };
 
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
