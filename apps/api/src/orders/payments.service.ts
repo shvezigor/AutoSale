@@ -165,7 +165,7 @@ function isPrismaCode(error: unknown, code: string): boolean {
   return error instanceof Prisma.PrismaClientKnownRequestError && error.code === code;
 }
 
-function mapPayment(payment: {
+export function mapPayment(payment: {
   id: string; amount: { toFixed(digits: number): string }; currency: string; method: PaymentMethod; receivedAt: Date;
   bankAccount: { id: string; label: string } | null; carrier: string | null; note: string | null;
   creator: { id: string; name: string }; createdAt: Date; cancelledAt: Date | null;

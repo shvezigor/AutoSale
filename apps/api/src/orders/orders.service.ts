@@ -11,11 +11,14 @@ import {
   type PrismaClient,
   type CommercialLineInput,
 } from '@autosale/database';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 import { metrics } from '@autosale/observability';
 import { mapShipmentSummary, shipmentReadiness } from '../delivery/delivery.service.js';
 import type { ShipmentStatus } from '@autosale/contracts';
 import type { BankAccountSummary, LegalEntitySummary, OrderCommercialTermsSummary } from '@autosale/contracts/commercial';
+import type { OrderPaymentStatus } from '@autosale/contracts/payments';
+import { calculateOrderPaymentSummary } from '@autosale/database';
+import { mapPayment } from './payments.service.js';
 
 type Extraction = {
   isOrder?: boolean;
@@ -29,6 +32,7 @@ export type OrderListQuery = {
   status?: OrderStatus | undefined;
   procurementStatus?: ProcurementSummary | undefined;
   shipmentStatus?: ShipmentStatus | undefined;
+  paymentStatus?: OrderPaymentStatus | undefined;
   page: number;
   pageSize: number;
   sort?: 'product' | 'customer' | 'status' | 'procurement' | 'confidence' | 'date';
@@ -43,8 +47,15 @@ export class OrdersService {
 
   async list(tenantId: string, query: OrderListQuery): Promise<OrderListResponse> {
     const search = query.search?.trim();
+    const paymentOrderIds = query.paymentStatus
+      ? await this.paymentOrderIds(tenantId, query.paymentStatus)
+      : null;
+    if (paymentOrderIds?.length === 0) {
+      return { items: [], page: query.page, pageSize: query.pageSize, total: 0 };
+    }
     const where: Prisma.OrderWhereInput = {
       tenantId,
+      ...(paymentOrderIds ? { id: { in: paymentOrderIds } } : {}),
       ...(query.status ? { status: query.status } : {}),
       ...(query.procurementStatus ? { AND: [procurementWhere(query.procurementStatus)] } : {}),
       ...(query.shipmentStatus ? { shipments: { some: { status: query.shipmentStatus } } } : {}),
@@ -157,6 +168,10 @@ export class OrdersService {
       delivery: { city: null, address: null, novaPoshtaBranch: null, ...extraction.delivery, ...input.delivery },
     };
     const updated = await this.prisma.$transaction(async (tx) => {
+      if (input.items !== undefined) {
+        const activePayments = await tx.orderPayment.count({ where: { tenantId, orderId: id, cancelledAt: null } });
+        if (activePayments > 0) throw new ConflictException('Order items are locked after payment');
+      }
       for (const item of input.items ?? []) {
         await tx.orderItem.update({
           where: { id: item.id },
@@ -297,6 +312,14 @@ export class OrdersService {
         legalEntity: { include: { bankAccounts: { where: { active: true }, orderBy: [{ isDefault: 'desc' as const }, { label: 'asc' as const }] } } },
       },
     },
+    payments: {
+      orderBy: [{ receivedAt: 'desc' as const }, { createdAt: 'desc' as const }],
+      include: {
+        creator: { select: { id: true, name: true } },
+        canceller: { select: { id: true, name: true } },
+        bankAccount: { select: { id: true, label: true } },
+      },
+    },
   };
 
   private async productNames(tenantId: string): Promise<Map<string, string>> {
@@ -355,8 +378,8 @@ export class OrdersService {
         currencySnapshot: item.currencySnapshot,
         lineTotalSnapshot: item.lineTotalSnapshot?.toFixed(2) ?? null,
       })),
-    commercialTerms: row.commercialTerms ? mapCommercialTerms(row.commercialTerms) : null,
-    paymentSummary: null,
+      commercialTerms: row.commercialTerms ? mapCommercialTerms(row.commercialTerms) : null,
+      paymentSummary: paymentSummary(row),
       procurementSummary: ['APPROVED', 'AUTO_APPROVED'].includes(row.status)
         ? procurementSummaryFor(procurementStatuses, Boolean(row.procurementHandedOffAt))
         : 'UNASSESSED',
@@ -390,6 +413,44 @@ export class OrdersService {
       throw new BadRequestException(error.message);
     }
     throw error;
+  }
+
+  private async paymentOrderIds(tenantId: string, status: OrderPaymentStatus): Promise<string[]> {
+    const rows = await this.prisma.$queryRaw<Array<{ id: string }>>(Prisma.sql`
+      SELECT o.id
+      FROM orders o
+      JOIN order_commercial_terms ct
+        ON ct.order_id = o.id AND ct.tenant_id = o.tenant_id
+      LEFT JOIN order_payments p
+        ON p.order_id = o.id AND p.tenant_id = o.tenant_id AND p.cancelled_at IS NULL
+      WHERE o.tenant_id = ${tenantId}::uuid
+        AND ct.pricing_status = 'READY'
+        AND ct.total_amount IS NOT NULL
+      GROUP BY o.id, ct.total_amount
+      HAVING ${paymentStatusPredicate(status)}
+    `);
+    return rows.map((row) => row.id);
+  }
+}
+
+function paymentSummary(row: Awaited<ReturnType<OrdersService['find']>>): ManagerOrder['paymentSummary'] {
+  const terms = row.commercialTerms;
+  if (!terms || terms.pricingStatus !== 'READY' || !terms.totalAmount || !terms.currency) return null;
+  const payments = row.payments ?? [];
+  const amounts = calculateOrderPaymentSummary(
+    terms.totalAmount.toFixed(2),
+    payments.map((payment) => ({ amount: payment.amount.toFixed(2), cancelledAt: payment.cancelledAt })),
+  );
+  return { ...amounts, currency: terms.currency, payments: payments.map(mapPayment) };
+}
+
+function paymentStatusPredicate(status: OrderPaymentStatus): Prisma.Sql {
+  const paid = Prisma.sql`COALESCE(SUM(p.amount), 0)`;
+  switch (status) {
+    case 'UNPAID': return Prisma.sql`${paid} = 0`;
+    case 'PARTIALLY_PAID': return Prisma.sql`${paid} > 0 AND ${paid} < ct.total_amount`;
+    case 'PAID': return Prisma.sql`${paid} = ct.total_amount`;
+    case 'OVERPAID': return Prisma.sql`${paid} > ct.total_amount`;
   }
 }
 

@@ -14,6 +14,7 @@ const listSchema = z.object({
   status: z.enum(['AI_PROCESSING', 'AI_FAILED', 'NEEDS_REVIEW', 'AUTO_APPROVED', 'APPROVED', 'CANCELLED']).optional(),
   procurementStatus: z.enum(['UNASSESSED', 'READY', 'PARTIALLY_READY', 'NEEDS_ORDER', 'SENDING', 'AWAITING_SUPPLIER', 'BLOCKED', 'HANDED_OFF']).optional(),
   shipmentStatus: z.enum(['DRAFT', 'CREATING', 'CREATED', 'ACCEPTED', 'IN_TRANSIT', 'DELIVERED', 'RETURNING', 'RETURNED', 'CANCELLED', 'FAILED']).optional(),
+  paymentStatus: z.enum(['UNPAID', 'PARTIALLY_PAID', 'PAID', 'OVERPAID']).optional(),
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(25),
   sort: z.enum(['product', 'customer', 'status', 'procurement', 'confidence', 'date']).default('date'),

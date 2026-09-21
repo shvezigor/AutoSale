@@ -39,4 +39,23 @@ describe('CommercialTermsService', () => {
       version: 2, legalEntityId: null, bankAccountId: null, initializeLegacy: false,
     })).rejects.toBeInstanceOf(ConflictException);
   });
+
+  it('locks commercial selections while an active payment exists', async () => {
+    const updateMany = vi.fn();
+    const service = new CommercialTermsService({
+      order: { findFirst: vi.fn().mockResolvedValue({
+        id: 'order', procurementHandedOffAt: null, telegramDeliveries: [], shipments: [], items: [],
+      }) },
+      orderCommercialTerms: { findFirst: vi.fn().mockResolvedValue({ version: 1, currency: 'UAH' }) },
+      $transaction: vi.fn(async (callback: (tx: unknown) => unknown) => callback({
+        orderPayment: { count: vi.fn().mockResolvedValue(1) },
+        orderCommercialTerms: { updateMany },
+      })),
+    } as never);
+
+    await expect(service.update('tenant', 'order', 'manager', {
+      version: 1, legalEntityId: null, bankAccountId: null, initializeLegacy: false,
+    })).rejects.toBeInstanceOf(ConflictException);
+    expect(updateMany).not.toHaveBeenCalled();
+  });
 });

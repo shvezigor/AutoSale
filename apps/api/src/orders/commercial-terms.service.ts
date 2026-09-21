@@ -45,6 +45,7 @@ export class CommercialTermsService {
       if (!input.initializeLegacy || input.version !== 0) throw new ConflictException('Commercial terms must be initialized from a preview');
       const lines = await this.currentCatalogueLines(tenantId, context.items);
       await this.prisma.$transaction(async (tx) => {
+        await this.assertNoActivePayments(tx, tenantId, orderId);
         await materializeCommercialTerms(tx, { tenantId, orderId, actor, lines });
         await this.applySelection(tx, tenantId, orderId, input.legalEntityId, input.bankAccountId, actor);
         await tx.auditLog.create({ data: {
@@ -56,6 +57,7 @@ export class CommercialTermsService {
     }
     if (current.version !== input.version) throw new ConflictException('Commercial terms changed; reload and try again');
     await this.prisma.$transaction(async (tx) => {
+      await this.assertNoActivePayments(tx, tenantId, orderId);
       const selected = await this.validateSelection(tx, tenantId, current.currency, input.legalEntityId, input.bankAccountId);
       const result = await tx.orderCommercialTerms.updateMany({
         where: { id: current.id, tenantId, version: input.version },
@@ -122,6 +124,15 @@ export class CommercialTermsService {
       bankAccountSnapshot: selected.account ? bankAccountSnapshot(selected.account) : Prisma.JsonNull,
       updatedBy: actor,
     } });
+  }
+
+  private async assertNoActivePayments(
+    tx: Pick<Prisma.TransactionClient, 'orderPayment'>,
+    tenantId: string,
+    orderId: string,
+  ): Promise<void> {
+    const activePayments = await tx.orderPayment.count({ where: { tenantId, orderId, cancelledAt: null } });
+    if (activePayments > 0) throw new ConflictException('Commercial terms are locked after payment');
   }
 
   private async validateSelection(

@@ -68,6 +68,10 @@ describe('OrdersController', () => {
     expect(list).toHaveBeenCalledWith(tenantId, { search: 'Авангард', status: 'NEEDS_REVIEW', page: 2, pageSize: 10, sort: 'date', direction: 'desc' });
 
     await request(app.getHttpServer()).get('/api/orders?status=UNKNOWN').expect(400);
+
+    await request(app.getHttpServer()).get('/api/orders?paymentStatus=PARTIALLY_PAID').expect(200);
+    expect(list).toHaveBeenLastCalledWith(tenantId, expect.objectContaining({ paymentStatus: 'PARTIALLY_PAID' }));
+    await request(app.getHttpServer()).get('/api/orders?paymentStatus=UNKNOWN').expect(400);
   });
 
   it('accepts allowlisted order sorting and rejects unsupported fields', async () => {

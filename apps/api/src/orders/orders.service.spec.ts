@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, ConflictException } from '@nestjs/common';
 import { Prisma } from '@autosale/database';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -17,6 +17,17 @@ describe('OrdersService Google Sheets retry', () => {
       },
       intentEvaluation: { mode: 'AI_SUGGESTION', reason: 'MANAGER_REVIEW_MODE' },
       items: [], exports: [],
+      commercialTerms: {
+        pricingStatus: 'READY', issueCodes: [], currency: 'UAH', itemsSubtotal: new Prisma.Decimal('100.00'),
+        discountAmount: new Prisma.Decimal('0.00'), deliveryAmount: new Prisma.Decimal('0.00'),
+        totalAmount: new Prisma.Decimal('100.00'), legalEntity: null, bankAccount: null, version: 1,
+      },
+      payments: [{
+        id: 'payment-1', amount: new Prisma.Decimal('40.00'), currency: 'UAH', method: 'CASH',
+        receivedAt: new Date('2026-09-07T09:00:00.000Z'), bankAccount: null, carrier: null, note: null,
+        creator: { id: 'manager-1', name: 'Manager' }, createdAt: new Date('2026-09-07T09:00:00.000Z'),
+        cancelledAt: null, canceller: null, cancellationReason: null,
+      }],
     };
     const prisma = {
       order: { findMany: vi.fn().mockResolvedValue([row]), count: vi.fn().mockResolvedValue(1) },
@@ -30,6 +41,7 @@ describe('OrdersService Google Sheets retry', () => {
       participantName: 'Davida Shvets',
       customer: { name: 'Ігор', phone: '+380976536783', instagramUsername: 'davidashvets' },
       intentDetection: { mode: 'AI_SUGGESTION', reason: 'MANAGER_REVIEW_MODE' },
+      paymentSummary: { expectedAmount: '100.00', paidAmount: '40.00', remainingAmount: '60.00', status: 'PARTIALLY_PAID' },
     });
     expect(result).toMatchObject({ page: 1, pageSize: 25, total: 1 });
   });
@@ -53,6 +65,7 @@ describe('OrdersService Google Sheets retry', () => {
       order: { findFirst: vi.fn().mockResolvedValue(current) },
       product: { findMany: vi.fn().mockResolvedValue([{ sku: 'SKU-1', name: 'Товар', price: new Prisma.Decimal('9999.00'), currency: 'UAH' }]) },
       $transaction: vi.fn(async (callback: (tx: unknown) => unknown) => callback({
+        orderPayment: { count: vi.fn().mockResolvedValue(0) },
         orderItem: { update: vi.fn().mockResolvedValue({}), updateMany: vi.fn().mockResolvedValue({ count: 1 }) },
         orderCommercialTerms: { upsert: termsUpsert },
         inventoryReservation: { updateMany: vi.fn().mockResolvedValue({ count: 1 }) },
@@ -113,6 +126,70 @@ describe('OrdersService Google Sheets retry', () => {
       } })],
     }) });
     expect(result).toEqual({ items: [], page: 2, pageSize: 10, total: 0 });
+  });
+
+  it('uses an exact tenant-scoped payment status result before paginating', async () => {
+    const queryRaw = vi.fn().mockResolvedValue([{ id: 'order-paid' }]);
+    const findMany = vi.fn().mockResolvedValue([]);
+    const count = vi.fn().mockResolvedValue(0);
+    const prisma = {
+      $queryRaw: queryRaw,
+      order: { findMany, count },
+      product: { findMany: vi.fn().mockResolvedValue([]) },
+    };
+
+    await new OrdersService(prisma as never).list('tenant-a', {
+      paymentStatus: 'PAID', page: 1, pageSize: 25,
+    });
+
+    expect(queryRaw).toHaveBeenCalledOnce();
+    expect(findMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({ tenantId: 'tenant-a', id: { in: ['order-paid'] } }),
+    }));
+    expect(count).toHaveBeenCalledWith({
+      where: expect.objectContaining({ tenantId: 'tenant-a', id: { in: ['order-paid'] } }),
+    });
+  });
+
+  it('short-circuits an empty payment status filter without querying orders', async () => {
+    const findMany = vi.fn();
+    const count = vi.fn();
+    const prisma = { $queryRaw: vi.fn().mockResolvedValue([]), order: { findMany, count } };
+
+    await expect(new OrdersService(prisma as never).list('tenant-a', {
+      paymentStatus: 'UNPAID', page: 3, pageSize: 10,
+    })).resolves.toEqual({ items: [], page: 3, pageSize: 10, total: 0 });
+    expect(findMany).not.toHaveBeenCalled();
+    expect(count).not.toHaveBeenCalled();
+  });
+
+  it('blocks item corrections after a payment but allows customer-only corrections', async () => {
+    const current = {
+      id: 'order-1', tenantId: 'tenant-1', status: 'NEEDS_REVIEW', extraction: {}, validationIssues: [],
+      overallConfidence: 1, createdAt: new Date(), procurementHandedOffAt: null,
+      conversation: { displayName: 'Customer', channel: 'INSTAGRAM', profile: null },
+      items: [], exports: [], telegramDeliveries: [], shipments: [], intentEvaluation: null,
+      commercialTerms: null, payments: [],
+    };
+    const orderPaymentCount = vi.fn().mockResolvedValue(1);
+    const orderUpdate = vi.fn().mockResolvedValue(current);
+    const prisma = {
+      order: { findFirst: vi.fn().mockResolvedValue(current) },
+      product: { findMany: vi.fn().mockResolvedValue([]) },
+      $transaction: vi.fn(async (callback: (tx: unknown) => unknown) => callback({
+        orderPayment: { count: orderPaymentCount },
+        orderItem: { updateMany: vi.fn().mockResolvedValue({ count: 0 }) },
+        inventoryReservation: { updateMany: vi.fn().mockResolvedValue({ count: 0 }) },
+        order: { update: orderUpdate }, auditLog: { create: vi.fn().mockResolvedValue({}) },
+      })),
+    };
+    const service = new OrdersService(prisma as never);
+
+    await expect(service.update('tenant-1', 'order-1', 'manager-1', { items: [] }))
+      .rejects.toBeInstanceOf(ConflictException);
+    await expect(service.update('tenant-1', 'order-1', 'manager-1', { customer: { name: 'Updated' } }))
+      .resolves.toMatchObject({ id: 'order-1' });
+    expect(orderPaymentCount).toHaveBeenCalledOnce();
   });
 
   it('sorts projected customer names and nullable confidence in the database', async () => {
