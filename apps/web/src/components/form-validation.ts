@@ -14,12 +14,17 @@ type NativeControl = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
 
 export function nativeConstraintMessage(element: NativeControl, t: Translator): string | null {
   const { validity } = element;
-  if (validity.valid) return null;
   if (validity.valueMissing) return t('validation.required');
   if (validity.typeMismatch) {
     return element instanceof HTMLInputElement && element.type === 'email'
       ? t('validation.email')
       : t('validation.invalid');
+  }
+  if (!(element instanceof HTMLSelectElement) && element.value.length > 0 && element.minLength >= 0 && element.value.length < element.minLength) {
+    return t('validation.tooShort', { count: element.minLength });
+  }
+  if (!(element instanceof HTMLSelectElement) && element.maxLength >= 0 && element.value.length > element.maxLength) {
+    return t('validation.tooLong', { count: element.maxLength });
   }
   if (validity.tooShort && !(element instanceof HTMLSelectElement)) {
     return t('validation.tooShort', { count: element.minLength });
@@ -31,6 +36,7 @@ export function nativeConstraintMessage(element: NativeControl, t: Translator): 
   if (validity.rangeOverflow && element instanceof HTMLInputElement) return t('validation.maximum', { value: element.max });
   if (validity.stepMismatch) return t('validation.step');
   if (validity.patternMismatch) return t('validation.pattern');
+  if (validity.valid) return null;
   return t('validation.invalid');
 }
 

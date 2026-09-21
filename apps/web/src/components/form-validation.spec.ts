@@ -43,6 +43,14 @@ describe('nativeConstraintMessage', () => {
 
     expect(nativeConstraintMessage(input, createTranslator('uk'))).toBeNull();
   });
+
+  it('checks minimum length consistently for programmatically updated controls', () => {
+    const input = document.createElement('input');
+    input.minLength = 12;
+    input.value = 'short';
+
+    expect(nativeConstraintMessage(input, createTranslator('uk'))).toBe('Введіть щонайменше 12 символів.');
+  });
 });
 
 describe('focusFirstInvalid', () => {

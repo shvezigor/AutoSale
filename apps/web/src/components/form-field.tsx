@@ -22,10 +22,10 @@ export type FormFieldProps = {
   id: string;
   label: ReactNode;
   children: ReactElement<FieldControlProps>;
-  error?: string | null;
-  hint?: ReactNode;
+  error?: string | null | undefined;
+  hint?: ReactNode | undefined;
   required?: boolean;
-  className?: string;
+  className?: string | undefined;
 };
 
 function mergeDescriptionIds(...values: Array<string | undefined | false>): string | undefined {

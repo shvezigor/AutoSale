@@ -62,7 +62,33 @@ describe('ProfileEditor', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Зберегти зміни' }));
 
     expect(screen.getByLabelText('Телефон')).toHaveValue('050 12');
+    expect(screen.getByRole('alert')).toHaveAttribute('id', 'profile-phone-error');
     expect(screen.getByRole('alert')).toHaveTextContent('Вкажіть номер у міжнародному форматі');
+    expect(screen.getByLabelText('Телефон')).toHaveFocus();
+    expect(mutatingFetch).not.toHaveBeenCalled();
+  });
+
+  it('shows all missing password fields and focuses the first one without sending', async () => {
+    render();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Змінити пароль' }));
+
+    expect(await screen.findAllByText('Заповніть це поле.')).toHaveLength(3);
+    expect(screen.getByLabelText('Поточний пароль')).toHaveFocus();
+    expect(mutatingFetch).not.toHaveBeenCalled();
+  });
+
+  it('attaches a password mismatch to confirmation and preserves entered secrets', async () => {
+    render();
+    fireEvent.change(screen.getByLabelText('Поточний пароль'), { target: { value: 'current-password' } });
+    fireEvent.change(screen.getByLabelText('Новий пароль'), { target: { value: 'new-password-123' } });
+    fireEvent.change(screen.getByLabelText('Повторіть новий пароль'), { target: { value: 'different-pass-123' } });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Змінити пароль' }));
+
+    expect(await screen.findByText('Новий пароль і підтвердження не збігаються.')).toHaveAttribute('id', 'profile-confirmation-error');
+    expect(screen.getByLabelText('Повторіть новий пароль')).toHaveFocus();
+    expect(screen.getByLabelText('Новий пароль')).toHaveValue('new-password-123');
     expect(mutatingFetch).not.toHaveBeenCalled();
   });
 
@@ -97,6 +123,7 @@ describe('ProfileEditor', () => {
     render();
     const input = screen.getByLabelText('Оберіть фото профілю');
     fireEvent.change(input, { target: { files: [new File(['x'], 'avatar.gif', { type: 'image/gif' })] } });
+    expect(screen.getByRole('alert')).toHaveAttribute('id', 'profile-avatar-error');
     expect(screen.getByRole('alert')).toHaveTextContent('JPEG, PNG або WebP');
     fireEvent.change(input, { target: { files: [new File([new Uint8Array(5 * 1024 * 1024 + 1)], 'large.png', { type: 'image/png' })] } });
     expect(screen.getByRole('alert')).toHaveTextContent('не більше 5 МБ');

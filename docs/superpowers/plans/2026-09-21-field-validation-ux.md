@@ -211,29 +211,29 @@ Commit: `feat(api): expose safe field validation issues`
 - Consumes: `FormField`, `FieldErrors`, `nativeConstraintMessage`, `clearFieldError`, `focusFirstInvalid`, `ValidationApiError`.
 - Produces: all identity/account forms on the shared validation lifecycle.
 
-- [ ] **Step 1: Add failing auth/onboarding tests**
+- [x] **Step 1: Add failing auth/onboarding tests**
 
 Cover empty email, malformed email, password under 12 characters, password mismatch, and short workspace name. Assert no fetch occurs, each message is under its control, and the first invalid control has focus after submit.
 
-- [ ] **Step 2: Run auth/onboarding tests and verify RED**
+- [x] **Step 2: Run auth/onboarding tests and verify RED**
 
 Run: `pnpm --filter @autosale/web exec vitest run src/components/auth-form.spec.tsx src/components/google-onboarding-form.spec.tsx`
 
 Expected: FAIL because the forms currently rely on native validation and form-level errors.
 
-- [ ] **Step 3: Migrate auth and onboarding forms**
+- [x] **Step 3: Migrate auth and onboarding forms**
 
 Add `noValidate`, collect all client issues on submit, render with `FormField`, clear per field on change, and keep invalid credentials / expired token / Google provider failures as form-level alerts.
 
-- [ ] **Step 4: Add failing profile/team tests**
+- [x] **Step 4: Add failing profile/team tests**
 
 Cover invalid phone, incomplete password trio, mismatched passwords, wrong email format, and missing invite email. Ensure invalid current password remains a form-level security message rather than exposing backend detail.
 
-- [ ] **Step 5: Migrate profile and team forms**
+- [x] **Step 5: Migrate profile and team forms**
 
 Keep avatar MIME/size errors attached to the avatar control. Preserve existing values on failure. Use domain messages for phone/password and base messages for email/required.
 
-- [ ] **Step 6: Verify and commit Task 3**
+- [x] **Step 6: Verify and commit Task 3**
 
 Run:
 

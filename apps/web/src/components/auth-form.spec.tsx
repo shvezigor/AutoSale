@@ -13,6 +13,35 @@ function renderAuth(node: React.ReactNode, locale: 'uk' | 'en' = 'uk') {
 afterEach(cleanup);
 
 describe('authentication forms', () => {
+  it('shows every required login error after submit and focuses the first field', async () => {
+    const submit = vi.fn();
+    renderAuth(<LoginForm submit={submit} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Увійти' }));
+
+    expect(await screen.findAllByText('Заповніть це поле.')).toHaveLength(2);
+    expect(screen.getByLabelText('Email')).toHaveFocus();
+    expect(screen.getByLabelText('Email')).toHaveAttribute('aria-invalid', 'true');
+    expect(screen.getByLabelText('Пароль')).toHaveAttribute('aria-invalid', 'true');
+    expect(submit).not.toHaveBeenCalled();
+  });
+
+  it('places format and length errors under registration fields without sending', async () => {
+    const submit = vi.fn();
+    renderAuth(<RegisterForm submit={submit} />);
+    fireEvent.change(screen.getByLabelText('Ім’я'), { target: { value: 'Олена' } });
+    fireEvent.change(screen.getByLabelText('Назва організації'), { target: { value: 'Крамниця' } });
+    fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'invalid' } });
+    fireEvent.change(screen.getByLabelText(/Пароль/), { target: { value: 'short' } });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Зареєструватися' }));
+
+    expect(await screen.findByText('Введіть коректну email-адресу.')).toHaveAttribute('id', 'auth-email-error');
+    expect(screen.getByText('Введіть щонайменше 12 символів.')).toHaveAttribute('id', 'auth-password-error');
+    expect(screen.getByLabelText('Email')).toHaveFocus();
+    expect(submit).not.toHaveBeenCalled();
+  });
+
   it('submits login credentials and shows a safe error', async () => {
     const submit = vi.fn().mockResolvedValue({ ok: false });
     renderAuth(<LoginForm submit={submit} />);
