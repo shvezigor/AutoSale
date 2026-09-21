@@ -39,8 +39,7 @@ Verified on 2026-09-19 against the implementation described in [`order commercia
 
 ## Explicitly not implemented
 
-- [ ] Manual recording of money received.
 - [ ] Bank webhook ingestion and reconciliation.
-- [ ] Partial payments, overpayments, refunds or payment allocation.
+- [ ] Refunds or payment allocation.
 
-These unchecked items require a separate audited payment-ledger design. They must not be inferred from approval, shipment, delivery or order closure.
+Manual partial payments, overpayments and audited cancellation are now implemented under the separate [`payment facts checklist`](order-payment-facts-checklist.md). Remaining items must not be inferred from approval, shipment, delivery or order closure.

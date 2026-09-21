@@ -1,0 +1,44 @@
+# Order payment facts acceptance checklist
+
+Verified on 2026-09-21 against [`order payment facts design`](../superpowers/specs/2026-09-20-order-payment-facts-design.md).
+
+## Automated evidence
+
+- [x] Additive tenant-safe migration stores immutable payment facts and complete cancellation metadata.
+- [x] Decimal-safe calculation covers unpaid, partial, exact and overpaid states without storing a derived status.
+- [x] Create and cancel commands are idempotent; conflicting replay is rejected.
+- [x] Manager and owner can record a payment; only owner can cancel one.
+- [x] Bank transfer requires an active account matching the selected legal entity and order currency.
+- [x] Cash on delivery requires a supported carrier.
+- [x] Cancelled payments remain in history and no longer affect the paid balance.
+- [x] Active payment locks item and commercial-term changes while customer and delivery corrections remain available.
+- [x] List totals and pagination use the exact derived payment-status filter.
+- [x] Ukrainian and English order cards show loading, error, success and owner-only cancellation states without a page reload.
+- [x] Desktop table and mobile cards show payment status; all filter and return URLs preserve it.
+- [x] Mobile payment summary, form and history have no horizontal overflow at 390 px.
+- [x] Audit events and metrics omit notes, cancellation reasons, IBANs and customer data.
+
+## Verification commands
+
+- [x] Contract tests and typecheck
+- [x] Database unit, migration and PostgreSQL integration tests
+- [x] API tests and typecheck
+- [x] Web tests, typecheck and production build
+- [x] `pnpm exec playwright test tests/e2e/order-payment-facts.spec.ts --workers=1`
+
+## Production rollout
+
+- [ ] Apply migration `20260920220000_order_payment_facts` before starting the new application version.
+- [ ] Create a fictional priced UAH order and record a partial cash payment.
+- [ ] Record the remaining amount to a compatible fictional UAH account and observe `Оплачено`.
+- [ ] Confirm item quantity and payment details are locked while an active payment exists.
+- [ ] As owner, cancel one payment with a fictional reason and observe `Частково оплачено` with the row retained.
+- [ ] Verify all four table filters and mobile layout in production.
+- [ ] Confirm API, web and worker health after deployment.
+
+## Explicitly not implemented
+
+- Automatic bank statement or webhook reconciliation.
+- Automatic carrier cash-on-delivery reconciliation.
+- Refunds, payment allocation, online acquiring or accounting reports.
+- Subscription billing for Sales AITO.

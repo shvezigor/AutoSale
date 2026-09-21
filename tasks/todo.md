@@ -1598,9 +1598,9 @@ Status: official research, secure connection, directories/sender defaults, the g
 
 - [x] Model tenant legal entities, currencies, bank accounts and immutable expected-order totals after delivery adapters stabilize.
 - [x] Filter selectable accounts by the order's legal entity and payment currency and show only active accounts.
-- [ ] Add payment recording and reconciliation as a separate audited lifecycle.
+- [x] Add manual payment recording and cancellation as a separate audited lifecycle; automated reconciliation remains backlog.
 
-Status: the first stage was implemented on 2026-09-19. New orders snapshot catalogue prices and calculate the expected amount in the order transaction. Owners manage legal entities and accounts; managers see only masked IBANs and server-filtered compatible choices. Existing orders require an explicit preview and save. Approval, procurement, shipment and delivery never record money as received. The remaining item is a separate payment ledger and reconciliation design.
+Status: commercial terms were implemented on 2026-09-19 and manual audited payment facts on 2026-09-21. New orders snapshot catalogue prices and calculate the expected amount in the order transaction. Owners manage legal entities and accounts; managers see only masked IBANs and server-filtered compatible choices. Existing orders require an explicit preview and save. Owner and manager can record actual money received, only owner can cancel a fact, and status is derived from active facts. Approval, procurement, shipment and delivery never record money as received. Automatic bank/carrier reconciliation remains backlog.
 
 ## Task 74: Define and verify the dashboard contract
 
