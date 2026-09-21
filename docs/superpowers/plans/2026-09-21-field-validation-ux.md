@@ -130,21 +130,21 @@ Commit: `feat(web): add shared field validation primitives`
 - Produces: `parseValidationFailure(response): Promise<ValidationFailure | null>`
 - Consumes in later tasks: stable field/code pairs; never server prose.
 
-- [ ] **Step 1: Write failing contract tests**
+- [x] **Step 1: Write failing contract tests**
 
 Assert a valid payload parses and these payloads fail: field path outside `[A-Za-z0-9_.\[\]-]`, empty code, extra personal-value property, more than 32 issues.
 
-- [ ] **Step 2: Run contract tests and verify RED**
+- [x] **Step 2: Run contract tests and verify RED**
 
 Run: `pnpm --filter @autosale/contracts exec vitest run src/validation-errors.spec.ts`
 
 Expected: FAIL because the contract does not exist.
 
-- [ ] **Step 3: Implement bounded contracts**
+- [x] **Step 3: Implement bounded contracts**
 
 Use strict Zod objects, `field` max 120, `code` max 80, and issue array max 32. Export inferred TypeScript types from `src/index.ts`, and add an explicit `./validation-errors` subpath in `package.json` following the existing source/development/dist export pattern.
 
-- [ ] **Step 4: Write failing API mapping tests**
+- [x] **Step 4: Write failing API mapping tests**
 
 Create a Zod object with `iban` and `currency`, parse invalid input, and assert `validationBadRequest(error, { iban: 'INVALID_IBAN', currency: 'INVALID_CURRENCY' }).getResponse()` equals:
 
@@ -157,19 +157,19 @@ Create a Zod object with `iban` and `currency`, parse invalid input, and assert 
 
 Assert an unallowlisted path becomes `{ field: '_form', code: 'INVALID_INPUT' }` without the submitted value or Zod message.
 
-- [ ] **Step 5: Implement API helper and migrate commercial settings controller**
+- [x] **Step 5: Implement API helper and migrate commercial settings controller**
 
 Map legal entity fields and bank account fields explicitly. Preserve owner/tenant guards and status codes. Update controller tests to assert structured issues for invalid IBAN and invalid currency.
 
-- [ ] **Step 6: Write failing web parser tests**
+- [x] **Step 6: Write failing web parser tests**
 
 Mock a `400` response containing safe issues and assert the parser returns them. Mock malformed JSON, unknown codes, `409`, and `500`; assert it returns null so callers keep form-level handling.
 
-- [ ] **Step 7: Implement the web parser and typed API error**
+- [x] **Step 7: Implement the web parser and typed API error**
 
 `commercial-settings.ts` should throw `ValidationApiError` only for a parsed `VALIDATION_FAILED` response and retain a generic safe error for all other statuses.
 
-- [ ] **Step 8: Verify and commit Task 2**
+- [x] **Step 8: Verify and commit Task 2**
 
 Run:
 

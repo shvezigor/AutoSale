@@ -16,10 +16,12 @@ describe('CommercialSettingsController', () => {
   let app: INestApplication;
   const list = vi.fn();
   const createLegalEntity = vi.fn();
+  const createBankAccount = vi.fn();
 
   beforeEach(async () => {
     list.mockReset().mockResolvedValue({ legalEntities: [entity], bankAccounts: [] });
     createLegalEntity.mockReset().mockResolvedValue(entity);
+    createBankAccount.mockReset();
     const sessions = { resolve: vi.fn(async (token: string) => token === 'owner'
       ? { userId: 'owner', email: 'owner@example.test', platformRole: 'USER', tenantId, membershipRole: 'OWNER', sessionId: 'owner-session' }
       : token === 'manager'
@@ -28,7 +30,7 @@ describe('CommercialSettingsController', () => {
     const moduleRef = await Test.createTestingModule({
       controllers: [CommercialSettingsController],
       providers: [
-        { provide: CommercialSettingsService, useValue: { list, createLegalEntity, updateLegalEntity: vi.fn(), accountDetail: vi.fn(), createBankAccount: vi.fn(), updateBankAccount: vi.fn() } },
+        { provide: CommercialSettingsService, useValue: { list, createLegalEntity, updateLegalEntity: vi.fn(), accountDetail: vi.fn(), createBankAccount, updateBankAccount: vi.fn() } },
         { provide: APP_GUARD, useFactory: () => new AuthGuard(new Reflector(), sessions as never, { cookieName: 'session', production: false }, { verify: () => true } as never) },
       ],
     }).compile();
@@ -50,8 +52,19 @@ describe('CommercialSettingsController', () => {
     await request(app.getHttpServer()).post('/api/settings/legal-entities').set('Cookie', 'session=manager').set('x-csrf-token', 'csrf').send(body).expect(403);
   });
 
-  it('rejects invalid account input before calling the service', async () => {
-    await request(app.getHttpServer()).post('/api/settings/bank-accounts').set('Cookie', 'session=owner').set('x-csrf-token', 'csrf')
-      .send({ legalEntityId: entityId, label: 'Bad', iban: 'bad', currency: 'UAH', active: true, isDefault: true }).expect(400);
+  it('returns safe field issues for invalid account input before calling the service', async () => {
+    const response = await request(app.getHttpServer()).post('/api/settings/bank-accounts').set('Cookie', 'session=owner').set('x-csrf-token', 'csrf')
+      .send({ legalEntityId: entityId, label: 'Bad', iban: 'private-invalid-iban', currency: 'X', active: true, isDefault: true }).expect(400);
+
+    expect(response.body).toEqual({
+      statusCode: 400,
+      code: 'VALIDATION_FAILED',
+      issues: [
+        { field: 'iban', code: 'INVALID_IBAN' },
+        { field: 'currency', code: 'INVALID_CURRENCY' },
+      ],
+    });
+    expect(JSON.stringify(response.body)).not.toContain('private-invalid-iban');
+    expect(createBankAccount).not.toHaveBeenCalled();
   });
 });

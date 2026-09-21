@@ -58,6 +58,14 @@
       "import": "./dist/payments.js",
       "default": "./dist/payments.js"
     },
+    "./validation-errors": {
+      "react-server": "./src/validation-errors.ts",
+      "browser": "./src/validation-errors.ts",
+      "types": "./src/validation-errors.ts",
+      "development": "./src/validation-errors.ts",
+      "import": "./dist/validation-errors.js",
+      "default": "./dist/validation-errors.js"
+    },
     "./auth": {
       "react-server": "./src/auth.ts",
       "browser": "./src/auth.ts",

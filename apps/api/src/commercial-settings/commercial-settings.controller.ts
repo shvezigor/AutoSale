@@ -1,9 +1,29 @@
 import type { AuthPrincipal } from '@autosale/contracts/auth';
 import { bankAccountInputSchema, legalEntityInputSchema } from '@autosale/contracts/commercial';
-import { BadRequestException, Body, Controller, Get, Inject, Param, ParseUUIDPipe, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Get, Inject, Param, ParseUUIDPipe, Patch, Post } from '@nestjs/common';
 
 import { CurrentPrincipal, RequireMembership } from '../auth/auth.decorators.js';
+import { validationBadRequest } from '../common/validation-error.js';
 import { CommercialSettingsService } from './commercial-settings.service.js';
+
+const legalEntityIssueCodes = {
+  displayName: 'INVALID_DISPLAY_NAME',
+  legalName: 'INVALID_LEGAL_NAME',
+  type: 'INVALID_LEGAL_ENTITY_TYPE',
+  registrationId: 'INVALID_REGISTRATION_ID',
+  active: 'INVALID_ACTIVE_FLAG',
+  isDefault: 'INVALID_DEFAULT_FLAG',
+} as const;
+
+const bankAccountIssueCodes = {
+  legalEntityId: 'INVALID_LEGAL_ENTITY',
+  label: 'INVALID_ACCOUNT_LABEL',
+  iban: 'INVALID_IBAN',
+  bankName: 'INVALID_BANK_NAME',
+  currency: 'INVALID_CURRENCY',
+  active: 'INVALID_ACTIVE_FLAG',
+  isDefault: 'INVALID_DEFAULT_FLAG',
+} as const;
 
 @Controller('api/settings')
 @RequireMembership('MANAGER')
@@ -19,7 +39,7 @@ export class CommercialSettingsController {
   @RequireMembership('OWNER')
   createLegalEntity(@CurrentPrincipal() principal: AuthPrincipal, @Body() body: unknown) {
     const parsed = legalEntityInputSchema.safeParse(body);
-    if (!parsed.success) throw new BadRequestException('Invalid legal entity');
+    if (!parsed.success) throw validationBadRequest(parsed.error, legalEntityIssueCodes);
     return this.settings.createLegalEntity(principal.tenantId!, parsed.data);
   }
 
@@ -31,7 +51,7 @@ export class CommercialSettingsController {
     @Body() body: unknown,
   ) {
     const parsed = legalEntityInputSchema.safeParse(body);
-    if (!parsed.success) throw new BadRequestException('Invalid legal entity');
+    if (!parsed.success) throw validationBadRequest(parsed.error, legalEntityIssueCodes);
     return this.settings.updateLegalEntity(principal.tenantId!, id, parsed.data);
   }
 
@@ -53,7 +73,7 @@ export class CommercialSettingsController {
   @RequireMembership('OWNER')
   createBankAccount(@CurrentPrincipal() principal: AuthPrincipal, @Body() body: unknown) {
     const parsed = bankAccountInputSchema.safeParse(body);
-    if (!parsed.success) throw new BadRequestException('Invalid bank account');
+    if (!parsed.success) throw validationBadRequest(parsed.error, bankAccountIssueCodes);
     return this.settings.createBankAccount(principal.tenantId!, parsed.data);
   }
 
@@ -65,7 +85,7 @@ export class CommercialSettingsController {
     @Body() body: unknown,
   ) {
     const parsed = bankAccountInputSchema.safeParse(body);
-    if (!parsed.success) throw new BadRequestException('Invalid bank account');
+    if (!parsed.success) throw validationBadRequest(parsed.error, bankAccountIssueCodes);
     return this.settings.updateBankAccount(principal.tenantId!, id, parsed.data);
   }
 }

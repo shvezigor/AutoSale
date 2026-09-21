@@ -7,6 +7,25 @@ import type {
 } from '../../../../packages/contracts/src/commercial';
 
 import { mutatingFetch } from '../auth/csrf-fetch';
+import {
+  parseValidationFailure,
+  ValidationApiError,
+  type ClientValidationIssueAllowlist,
+} from './validation-errors';
+
+const commercialIssueAllowlist = {
+  displayName: ['INVALID_DISPLAY_NAME'],
+  legalName: ['INVALID_LEGAL_NAME'],
+  type: ['INVALID_LEGAL_ENTITY_TYPE'],
+  registrationId: ['INVALID_REGISTRATION_ID'],
+  active: ['INVALID_ACTIVE_FLAG'],
+  isDefault: ['INVALID_DEFAULT_FLAG'],
+  legalEntityId: ['INVALID_LEGAL_ENTITY'],
+  label: ['INVALID_ACCOUNT_LABEL'],
+  iban: ['INVALID_IBAN'],
+  bankName: ['INVALID_BANK_NAME'],
+  currency: ['INVALID_CURRENCY'],
+} as const satisfies ClientValidationIssueAllowlist;
 
 async function mutation<T>(path: string, method: 'POST' | 'PATCH', body: unknown): Promise<T> {
   const response = await mutatingFetch(path, {
@@ -14,7 +33,11 @@ async function mutation<T>(path: string, method: 'POST' | 'PATCH', body: unknown
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify(body),
   });
-  if (!response.ok) throw new Error(`Commercial settings API returned HTTP ${response.status}`);
+  if (!response.ok) {
+    const failure = await parseValidationFailure(response, commercialIssueAllowlist);
+    if (failure) throw new ValidationApiError(failure);
+    throw new Error(`Commercial settings API returned HTTP ${response.status}`);
+  }
   return response.json() as Promise<T>;
 }
 
