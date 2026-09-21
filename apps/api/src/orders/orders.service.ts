@@ -355,7 +355,8 @@ export class OrdersService {
         currencySnapshot: item.currencySnapshot,
         lineTotalSnapshot: item.lineTotalSnapshot?.toFixed(2) ?? null,
       })),
-      commercialTerms: row.commercialTerms ? mapCommercialTerms(row.commercialTerms) : null,
+    commercialTerms: row.commercialTerms ? mapCommercialTerms(row.commercialTerms) : null,
+    paymentSummary: null,
       procurementSummary: ['APPROVED', 'AUTO_APPROVED'].includes(row.status)
         ? procurementSummaryFor(procurementStatuses, Boolean(row.procurementHandedOffAt))
         : 'UNASSESSED',

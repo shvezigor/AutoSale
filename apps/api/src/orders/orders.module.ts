@@ -6,13 +6,15 @@ import { OrdersController } from './orders.controller.js';
 import { OrdersService } from './orders.service.js';
 import { CommercialTermsController } from './commercial-terms.controller.js';
 import { CommercialTermsService } from './commercial-terms.service.js';
+import { PaymentsController } from './payments.controller.js';
+import { PaymentsService } from './payments.service.js';
 
 @Module({})
 export class OrdersModule {
   static register(env: ApiEnv): DynamicModule {
     return {
       module: OrdersModule,
-      controllers: [OrdersController, CommercialTermsController],
+      controllers: [OrdersController, CommercialTermsController, PaymentsController],
       providers: [
         {
           provide: OrdersService,
@@ -22,6 +24,7 @@ export class OrdersModule {
           },
         },
         { provide: CommercialTermsService, useFactory: () => new CommercialTermsService(createPrismaClient(env.DATABASE_URL)) },
+        { provide: PaymentsService, useFactory: () => new PaymentsService(createPrismaClient(env.DATABASE_URL)) },
       ],
     };
   }
