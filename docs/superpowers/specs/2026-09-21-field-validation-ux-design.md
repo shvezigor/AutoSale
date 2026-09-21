@@ -1,0 +1,181 @@
+# Єдина UX-система валідації форм
+
+## Мета
+
+Кожна форма AutoSale має однозначно пояснювати користувачу, яке поле заповнене неправильно і як це виправити. Помилки не повинні ховатися за загальним повідомленням на кшталт «Не вдалося зберегти» або покладатися лише на стандартне браузерне сповіщення.
+
+Система охоплює workspace, автентифікацію та публічні форми українською й англійською мовами. Вона уніфікує представлення помилки, момент перевірки, фокус, доступність і безпечне відображення серверних validation issues.
+
+## Погоджена поведінка
+
+1. До першої спроби відправлення порожнє або незавершене поле не підсвічується помилкою.
+2. Після submit усі відомі некоректні поля отримують локалізоване повідомлення безпосередньо під полем.
+3. Фокус переходить на перше некоректне поле; решта помилок залишаються видимими.
+4. Коли користувач змінює конкретне поле, його попередня помилка прибирається. Інші польові помилки не зникають.
+5. Повторна перевірка зміненого поля може виконуватись на blur або наступному submit; помилка не повертається на кожне натискання клавіші.
+6. Загальний form-level alert використовується тільки для мережевих, системних, конфліктних або невідомих помилок, які не можна чесно прив'язати до одного поля.
+7. Колір не є єдиним сигналом: помилка завжди має текст і доступний зв'язок із контролом.
+
+## Межі
+
+### Входить
+
+- login, registration, password reset, invitation та Google onboarding;
+- профіль, пароль і запрошення команди;
+- каталог, редактор товару, імпорт і mapping;
+- юридичні особи, банківські рахунки, комерційні умови та факти оплат;
+- редагування замовлення, доставка, ТТН, постачальники й інтеграційні налаштування;
+- публічна заявка на демонстрацію;
+- desktop і mobile layout;
+- українські та англійські повідомлення;
+- client-side constraints і безпечні validation issues від API.
+
+### Не входить
+
+- показ сирих stack trace, SQL/Prisma/Zod payload або текстів сторонніх провайдерів;
+- зміна бізнес-правил валідації доменів;
+- підсвічування read-only статусів, provider outages або помилок фонових job як польових помилок;
+- переведення всіх API-помилок у validation issues, якщо вони не стосуються введених користувачем даних.
+
+## Обраний підхід
+
+Застосовується гібридна система: спільні presentation-компоненти та typed form-state на frontend, плюс необов'язковий структурований список безпечних issues у відповідях API.
+
+Відхилено глобальний CSS-only підхід через `:invalid`: він не дає якісних локалізованих пояснень, не покриває міжпольові правила й не відрізняє доменну помилку від browser constraint.
+
+Відхилено одну універсальну schema-driven form library для всіх екранів: наявні форми мають різну архітектуру й provider-specific стани, тому повний перепис створить зайвий ризик. Спільними стають контракт помилок, presentation та lifecycle, а доменні валідатори залишаються поруч із відповідною формою або shared contract.
+
+## Frontend-архітектура
+
+### `FormField`
+
+Спільний компонент відповідає лише за presentation і accessibility:
+
+- стабільний `id` поля;
+- label, required marker та необов'язковий hint;
+- slot для `input`, `select` або `textarea`;
+- текст помилки під контролом;
+- `aria-invalid=true` та `aria-describedby` до hint/error;
+- однакові стилі normal, focus, invalid і disabled.
+
+Компонент не знає бізнес-правил і не виконує API-запити.
+
+### `FieldError`
+
+Відображає локалізований текст, має стабільний id та семантику, яку screen reader оголошує без дублювання всіх помилок при кожному render. Для checkbox/radio помилка розміщується під групою, а не біля одного елемента.
+
+### Form error state
+
+Кожна форма зберігає:
+
+- `fieldErrors: Partial<Record<FieldName, ValidationMessageKey>>`;
+- `formError: ValidationMessageKey | null`;
+- ознаку першої спроби submit;
+- ref на form або registry контролів для фокусування першого invalid field.
+
+Спільні helpers:
+
+- перетворюють HTML constraints (`required`, `type`, `minLength`, `maxLength`, `min`, `max`, `step`) на локалізовані message keys;
+- об'єднують browser constraints, client domain validation і safe API issues;
+- очищають лише помилку зміненого поля;
+- після невдалого submit фокусують перше доступне invalid поле;
+- не очищають введені значення.
+
+## Контракт API-помилок
+
+Validation response може додатково містити:
+
+```json
+{
+  "statusCode": 400,
+  "code": "VALIDATION_FAILED",
+  "issues": [
+    { "field": "iban", "code": "INVALID_IBAN" }
+  ]
+}
+```
+
+Правила:
+
+- `field` — стабільний allowlisted path із request contract, а не довільний текст;
+- `code` — стабільний machine-readable code, який frontend перекладає локально;
+- API не надсилає персональні значення, IBAN, токени або сирі provider errors;
+- невідомий code стає безпечним form-level повідомленням;
+- `409`, `429`, `5xx`, network failure і provider outage за замовчуванням залишаються form-level помилками;
+- tenant/role/security помилки не розкривають деталей через field issues.
+
+Існуючі endpoint можуть додавати `code` та `issues` без видалення стандартного HTTP status. Міграція не потребує одночасної зміни всіх backend-модулів: форма спочатку покривається client validation, після чого відповідний endpoint отримує структуровані issues там, де server має додаткові правила.
+
+## Локалізація повідомлень
+
+Спільна група `validation` містить базові повідомлення:
+
+- required;
+- invalid email, phone, URL, date і number;
+- too short / too long;
+- minimum / maximum;
+- invalid selection;
+- values do not match;
+- generic invalid value.
+
+Доменні повідомлення залишаються у відповідному namespace: IBAN, SKU/aliases, сума оплати, банківський рахунок, місто/відділення, API key тощо. Повідомлення пояснює спосіб виправлення, а не внутрішню причину відмови.
+
+## Візуальний стандарт
+
+- invalid control: semantic danger border і помірне focus ring;
+- message: 12–13 px, danger color із достатнім контрастом, відступ 6–8 px;
+- label не змінює розкладку при появі помилки;
+- на mobile повідомлення переноситься, не створює горизонтальний scroll і не відривається від поля;
+- submit/pending state не приховує помилки;
+- toast може дублювати form-level failure, але не замінює польове повідомлення.
+
+## Послідовність міграції
+
+1. Shared primitives, CSS, localized base messages, focus/error helpers і contract tests.
+2. Auth, onboarding, profile та team forms.
+3. Product editor, catalogue import, orders, commercial settings і payments.
+4. Delivery, shipment, Telegram/Instagram/Google settings та інші integrations.
+5. Public demo form.
+6. Repository audit: кожна user-editable форма або використовує shared field contract, або має задокументоване contextual виключення.
+
+Provider connection/status errors, background job errors і confirmation dialogs перевіряються під час аудиту, але мігруються лише якщо справді мають user-editable invalid field.
+
+## Тестування
+
+### Shared unit/component tests
+
+- submit показує всі польові помилки;
+- перший invalid control отримує focus;
+- зміна одного поля очищає тільки його помилку;
+- blur не створює помилку до першого submit;
+- `aria-invalid` і `aria-describedby` зв'язують control та message;
+- server issues мапляться на allowlisted поля;
+- unknown issue стає form-level alert;
+- українська та англійська локалізації мають однакові ключі.
+
+### Form regression tests
+
+Для кожної мігрованої форми тестується щонайменше один required/format сценарій і один server-only failure. Критичні грошові, delivery та auth форми додатково тестують міжпольові правила.
+
+### Browser acceptance
+
+- keyboard-only submit і виправлення;
+- screen-reader semantics;
+- 320, 768, 1024 і 1440 px;
+- введені дані не губляться після validation failure;
+- жодна помилка не показує секрет або сирий provider payload.
+
+## Rollout і сумісність
+
+Міграція виконується вертикальними зрізами та не змінює business validation. Shared primitives додаються без видалення чинних CSS-класів, після чого форми переводяться групами. Кожен зріз проходить web tests, typecheck і production build; критичні API-зміни проходять controller/e2e tests. Після повної міграції contract test забороняє нові user-editable форми без польового error presentation.
+
+## Критерії приймання
+
+1. Некоректний submit підсвічує кожне invalid поле й пояснює, що виправити.
+2. Фокус переходить на перше invalid поле.
+3. Після редагування поля його помилка зникає одразу, інші залишаються.
+4. API validation issue з безпечним field/code показується під правильним контролом.
+5. Network/provider/conflict error показується на рівні форми й не приписується випадковому полю.
+6. Поведінка однакова українською та англійською, на desktop і mobile.
+7. Введені значення не губляться після помилки.
+8. Нові форми захищені documentation rule та automated contract test.
