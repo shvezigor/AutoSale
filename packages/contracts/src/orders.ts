@@ -8,6 +8,7 @@ import type {
 } from './procurement.js';
 import type { ShipmentStatus, ShipmentSummary } from './delivery.js';
 import type { OrderCommercialTermsSummary } from './commercial.js';
+import type { OrderPaymentStatus, OrderPaymentSummary } from './payments.js';
 
 export type OrderStatus = 'AI_PROCESSING' | 'AI_FAILED' | 'NEEDS_REVIEW' | 'AUTO_APPROVED' | 'APPROVED' | 'CANCELLED';
 
@@ -49,6 +50,7 @@ export interface ManagerOrder {
     lineTotalSnapshot: string | null;
   }>;
   commercialTerms: OrderCommercialTermsSummary | null;
+  paymentSummary: OrderPaymentSummary | null;
   procurementSummary: ProcurementSummary;
   procurementHandedOffAt: string | null;
   supplierDispatch: SupplierDispatchSummary | null;
@@ -85,6 +87,7 @@ export interface OrderListQuery {
   status?: OrderStatus;
   procurementStatus?: ProcurementSummary;
   shipmentStatus?: ShipmentStatus;
+  paymentStatus?: OrderPaymentStatus;
   page: number;
   pageSize: number;
   sort?: 'product' | 'customer' | 'status' | 'procurement' | 'confidence' | 'date';

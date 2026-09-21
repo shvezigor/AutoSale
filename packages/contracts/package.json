@@ -50,6 +50,14 @@
       "import": "./dist/commercial.js",
       "default": "./dist/commercial.js"
     },
+    "./payments": {
+      "react-server": "./src/payments.ts",
+      "browser": "./src/payments.ts",
+      "types": "./src/payments.ts",
+      "development": "./src/payments.ts",
+      "import": "./dist/payments.js",
+      "default": "./dist/payments.js"
+    },
     "./auth": {
       "react-server": "./src/auth.ts",
       "browser": "./src/auth.ts",
