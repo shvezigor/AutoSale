@@ -9,6 +9,12 @@ export const ukMessages = {
   errors: {
     generic: 'Сталася помилка. Спробуйте ще раз.', sectionLoadFailed: 'Не вдалося завантажити розділ', retryRequest: 'Спробуйте повторити запит.', retry: 'Повторити', currentPasswordInvalid: 'Поточний пароль неправильний', avatarInvalid: 'Не вдалося обробити зображення профілю', authenticationRequired: 'Потрібно увійти в систему', accessDenied: 'Недостатньо прав для цієї дії', rateLimit: 'Забагато запитів', catalogueImportFailed: 'Не вдалося імпортувати каталог', deliveryConnectionRequired: 'Підключіть службу доставки', telegramUnavailable: 'Telegram тимчасово недоступний', googleRequired: 'Підключіть Google', instagramRateLimited: 'Instagram тимчасово обмежив надсилання',
   },
+  validation: {
+    required: 'Заповніть це поле.', email: 'Введіть коректну email-адресу.', invalid: 'Перевірте введене значення.',
+    tooShort: 'Введіть щонайменше {count} символів.', tooLong: 'Введіть не більше {count} символів.',
+    minimum: 'Значення має бути не менше {value}.', maximum: 'Значення має бути не більше {value}.',
+    step: 'Введіть значення з допустимим кроком.', pattern: 'Перевірте формат значення.',
+  },
   language: {
     label: 'Мова інтерфейсу',
     ukrainian: 'Українська',

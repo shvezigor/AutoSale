@@ -44,7 +44,7 @@
 - Produces: `<FieldError id message />` with stable accessible markup.
 - Produces: `<FormField id label error hint required>{control}</FormField>` that clones one form control with accessible attributes.
 
-- [ ] **Step 1: Write failing presentation tests**
+- [x] **Step 1: Write failing presentation tests**
 
 Add component tests that render one input inside `FormField` and assert literal behavior:
 
@@ -58,17 +58,17 @@ expect(screen.getByText('Введіть email')).toHaveAttribute('id', 'email-er
 
 Add a second test proving hint and error ids are both referenced and the error is absent when `error` is null. Add a focused `FieldError` test that verifies the stable id and announced text without rendering an empty alert when `message` is null.
 
-- [ ] **Step 2: Run the presentation test and verify RED**
+- [x] **Step 2: Run the presentation test and verify RED**
 
 Run: `pnpm --filter @autosale/web exec vitest run src/components/form-field.spec.tsx`
 
 Expected: FAIL because `form-field.tsx` does not exist.
 
-- [ ] **Step 3: Implement `FormField` minimally**
+- [x] **Step 3: Implement `FormField` minimally**
 
 Use `cloneElement` for one `input`, `select`, or `textarea`; merge existing `aria-describedby` with `${id}-hint` and `${id}-error`. Delegate the message markup to `FieldError`, render `.form-field__error` below the control, and mark it with `role="alert"` only when it first appears.
 
-- [ ] **Step 4: Write failing lifecycle tests**
+- [x] **Step 4: Write failing lifecycle tests**
 
 Cover these literal outcomes in `form-validation.spec.ts`:
 
@@ -80,21 +80,21 @@ expect(nativeConstraintMessage(invalidEmailInput, enTranslator)).toBe('Enter a v
 
 Render a real form in the focus test, pass `['phone', 'email']`, and assert `document.activeElement` is the first enabled control with an error.
 
-- [ ] **Step 5: Run lifecycle tests and verify RED**
+- [x] **Step 5: Run lifecycle tests and verify RED**
 
 Run: `pnpm --filter @autosale/web exec vitest run src/components/form-validation.spec.ts`
 
 Expected: FAIL because the exported helpers do not exist.
 
-- [ ] **Step 6: Implement lifecycle helpers and base translations**
+- [x] **Step 6: Implement lifecycle helpers and base translations**
 
 Map `ValidityState` in this priority: `valueMissing`, `typeMismatch`, `tooShort`, `tooLong`, `rangeUnderflow`, `rangeOverflow`, `stepMismatch`, `patternMismatch`, then generic invalid. Use `data-field` or `name` to locate controls for focus; escape selector values with `CSS.escape` when available and fall back to iterating `form.elements`.
 
-- [ ] **Step 7: Add canonical styles**
+- [x] **Step 7: Add canonical styles**
 
 Add `.form-field`, `.form-field__label`, `.form-field__hint`, `.form-field__error`, and `[aria-invalid="true"]` styles using existing `--danger`, `--border`, and focus tokens. Add a mobile rule that preserves wrapping and prevents horizontal overflow.
 
-- [ ] **Step 8: Verify and commit Task 1**
+- [x] **Step 8: Verify and commit Task 1**
 
 Run:
 

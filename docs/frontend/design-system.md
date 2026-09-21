@@ -21,3 +21,14 @@ Use `LoadingButton` for mutations and other network actions. It defaults to `pri
 Controls must remain keyboard reachable, show a visible `:focus-visible` ring, and remain usable at the mobile breakpoint. Keep labels meaningful; do not communicate state by color alone. Every new variant or exception requires an update to this document and the button contract test.
 
 The contract is checked by `apps/web/src/components/button-style-contract.spec.ts`.
+
+## Form validation
+
+Use `FormField` and `FieldError` from `apps/web/src/components/form-field.tsx` for user-editable controls. The field owns its stable label, hint, error id, `aria-invalid`, and `aria-describedby` relationship. Shared lifecycle helpers live in `form-validation.ts`.
+
+- Do not show an error before the first submit attempt.
+- After an invalid submit, show every known field error and focus the first invalid editable control.
+- Clear only the changed field's error while preserving all other errors and entered values.
+- Translate browser constraints through the application dictionaries; do not expose browser, provider, Zod, or database prose.
+- Keep network, permission, conflict, provider availability, and unknown failures at form level.
+- Field messages must wrap without horizontal overflow on mobile and must not rely on color alone.

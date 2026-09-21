@@ -11,6 +11,12 @@ export const enMessages = {
   errors: {
     generic: 'Something went wrong. Please try again.', sectionLoadFailed: 'Could not load this section', retryRequest: 'Please try the request again.', retry: 'Retry', currentPasswordInvalid: 'The current password is incorrect', avatarInvalid: 'Could not process the profile image', authenticationRequired: 'Please sign in', accessDenied: 'You do not have permission for this action', rateLimit: 'Too many requests', catalogueImportFailed: 'Could not import the catalogue', deliveryConnectionRequired: 'Connect a delivery service', telegramUnavailable: 'Telegram is temporarily unavailable', googleRequired: 'Connect Google', instagramRateLimited: 'Instagram temporarily limited sending',
   },
+  validation: {
+    required: 'Complete this field.', email: 'Enter a valid email address.', invalid: 'Check the entered value.',
+    tooShort: 'Enter at least {count} characters.', tooLong: 'Enter no more than {count} characters.',
+    minimum: 'Enter a value of at least {value}.', maximum: 'Enter a value no greater than {value}.',
+    step: 'Enter a value using the allowed step.', pattern: 'Check the value format.',
+  },
   language: {
     label: 'Interface language',
     ukrainian: 'Українська',
