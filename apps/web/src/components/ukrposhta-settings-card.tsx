@@ -38,6 +38,8 @@ export function UkrposhtaSettingsCard({ initial, role, embedded = false, onConne
   type CredentialField = 'ecom' | 'counterpartyToken' | 'tracking' | 'counterpartyUuid';
   const [credentialErrors, setCredentialErrors] = useState<FieldErrors<CredentialField>>({});
   const [profile, setProfile] = useState<UkrposhtaSenderProfileInput>(initial.connection?.senderProfile ?? emptyProfile);
+  type SenderField = 'name' | 'phone' | 'origin' | 'weight' | 'length' | 'width' | 'height' | 'template';
+  const [senderErrors, setSenderErrors] = useState<FieldErrors<SenderField>>({});
   const [city, setCity] = useState<DeliveryLocation | null>(() => citySelectionFromProfile(initial.connection?.senderProfile));
   const [pending, setPending] = useState<'connect' | 'disconnect' | 'profile' | null>(null);
   const activity = useActivity();
@@ -89,6 +91,24 @@ export function UkrposhtaSettingsCard({ initial, role, embedded = false, onConne
   }
 
   async function saveProfile(): Promise<void> {
+    const errors: FieldErrors<SenderField> = {};
+    if (!isUkrposhtaPersonName(profile.senderName) || profile.senderName.trim().length > 120) errors.name = t('validation.invalid');
+    if (!/^\+380\d{9}$/.test(profile.senderPhone)) errors.phone = t('validation.invalid');
+    if (!profile.origin.cityRef || !/^up:\d{1,20}:\d{5}$/.test(profile.origin.locationRef)) errors.origin = t('ukrposhtaSettings.branchRequired');
+    for (const [field, value, max] of [
+      ['weight', profile.defaultParcel.weightKg, 1_000], ['length', profile.defaultParcel.lengthCm, 300],
+      ['width', profile.defaultParcel.widthCm, 300], ['height', profile.defaultParcel.heightCm, 300],
+    ] as const) {
+      if (!Number.isFinite(value) || value <= 0) errors[field] = t('validation.minimum', { value: 0.01 });
+      else if (value > max) errors[field] = t('validation.maximum', { value: max });
+    }
+    if (!profile.customerNotificationTemplate.trim()) errors.template = t('validation.required');
+    setSenderErrors(errors);
+    if (Object.keys(errors).length) {
+      const first = (['name', 'phone', 'origin', 'weight', 'length', 'width', 'height', 'template'] as const).find((field) => errors[field]);
+      document.getElementById(`ukrposhta-sender-${first}`)?.focus();
+      return;
+    }
     setPending('profile');
     try {
       const response = await activity.run(t('ukrposhtaSettings.savingSender'), () => mutatingFetch('/api/integrations/delivery/ukrposhta/sender-profile', {
@@ -174,9 +194,9 @@ export function UkrposhtaSettingsCard({ initial, role, embedded = false, onConne
           {active && <fieldset className="delivery-sender-form" disabled={pending !== null}>
             <legend>{t('ukrposhtaSettings.senderLegend')}</legend>
             <div className="ukrposhta-connect-grid">
-              <label><span>{t('ukrposhtaSettings.senderName')}</span><input aria-label={t('ukrposhtaSettings.senderName')} value={profile.senderName} onChange={(event) => setProfile((current) => ({ ...current, senderName: event.target.value }))} /></label>
+              <label><span>{t('ukrposhtaSettings.senderName')}</span><input id="ukrposhta-sender-name" aria-label={t('ukrposhtaSettings.senderName')} aria-invalid={Boolean(senderErrors.name)} aria-describedby={senderErrors.name ? 'ukrposhta-sender-name-error' : undefined} value={profile.senderName} onChange={(event) => { setProfile((current) => ({ ...current, senderName: event.target.value })); setSenderErrors((current) => clearFieldError(current, 'name')); }} /><FieldError id="ukrposhta-sender-name-error" message={senderErrors.name} /></label>
               <p>{t('ukrposhtaSettings.personHint')}</p>
-              <label><span>{t('ukrposhtaSettings.senderPhone')}</span><input aria-label={t('ukrposhtaSettings.senderPhone')} inputMode="tel" placeholder="+380501112233" value={profile.senderPhone} onChange={(event) => setProfile((current) => ({ ...current, senderPhone: event.target.value }))} /></label>
+              <label><span>{t('ukrposhtaSettings.senderPhone')}</span><input id="ukrposhta-sender-phone" aria-label={t('ukrposhtaSettings.senderPhone')} aria-invalid={Boolean(senderErrors.phone)} aria-describedby={senderErrors.phone ? 'ukrposhta-sender-phone-error' : undefined} inputMode="tel" placeholder="+380501112233" value={profile.senderPhone} onChange={(event) => { setProfile((current) => ({ ...current, senderPhone: event.target.value })); setSenderErrors((current) => clearFieldError(current, 'phone')); }} /><FieldError id="ukrposhta-sender-phone-error" message={senderErrors.phone} /></label>
             </div>
             <div className="delivery-origin-grid">
               <DeliveryLocationPicker
@@ -195,29 +215,31 @@ export function UkrposhtaSettingsCard({ initial, role, embedded = false, onConne
                 }}
               />
               <DeliveryLocationPicker
+                fieldId="ukrposhta-sender-origin"
+                fieldError={senderErrors.origin}
                 provider="UKRPOSHTA"
                 label={t('ukrposhtaSettings.originBranch')}
                 type="BRANCH"
                 {...(city?.ref || profile.origin.cityRef ? { cityRef: city?.ref ?? profile.origin.cityRef } : {})}
                 value={profile.origin.locationRef ? { ref: profile.origin.locationRef, provider: 'UKRPOSHTA', type: 'BRANCH', label: profile.origin.label, cityRef: profile.origin.cityRef } : null}
-                onSelect={(value) => setProfile((current) => ({
+                onSelect={(value) => { setSenderErrors((current) => clearFieldError(current, 'origin')); setProfile((current) => ({
                   ...current,
                   origin: value
                     ? { type: 'BRANCH', cityRef: value.cityRef!, locationRef: value.ref, label: value.label }
                     : { type: 'BRANCH', cityRef: city?.ref ?? '', locationRef: '', label: '' },
-                }))}
+                })); }}
               />
             </div>
             <div className="delivery-parcel-grid">
-              <NumberField label={t('ukrposhtaSettings.weight')} value={profile.defaultParcel.weightKg} max={1_000} onChange={(value) => setProfile((current) => ({ ...current, defaultParcel: { ...current.defaultParcel, weightKg: value } }))} />
-              <NumberField label={t('ukrposhtaSettings.length')} value={profile.defaultParcel.lengthCm} max={300} onChange={(value) => setProfile((current) => ({ ...current, defaultParcel: { ...current.defaultParcel, lengthCm: value } }))} />
-              <NumberField label={t('ukrposhtaSettings.width')} value={profile.defaultParcel.widthCm} max={300} onChange={(value) => setProfile((current) => ({ ...current, defaultParcel: { ...current.defaultParcel, widthCm: value } }))} />
-              <NumberField label={t('ukrposhtaSettings.height')} value={profile.defaultParcel.heightCm} max={300} onChange={(value) => setProfile((current) => ({ ...current, defaultParcel: { ...current.defaultParcel, heightCm: value } }))} />
+              <NumberField id="ukrposhta-sender-weight" error={senderErrors.weight} label={t('ukrposhtaSettings.weight')} value={profile.defaultParcel.weightKg} max={1_000} onChange={(value) => { setProfile((current) => ({ ...current, defaultParcel: { ...current.defaultParcel, weightKg: value } })); setSenderErrors((current) => clearFieldError(current, 'weight')); }} />
+              <NumberField id="ukrposhta-sender-length" error={senderErrors.length} label={t('ukrposhtaSettings.length')} value={profile.defaultParcel.lengthCm} max={300} onChange={(value) => { setProfile((current) => ({ ...current, defaultParcel: { ...current.defaultParcel, lengthCm: value } })); setSenderErrors((current) => clearFieldError(current, 'length')); }} />
+              <NumberField id="ukrposhta-sender-width" error={senderErrors.width} label={t('ukrposhtaSettings.width')} value={profile.defaultParcel.widthCm} max={300} onChange={(value) => { setProfile((current) => ({ ...current, defaultParcel: { ...current.defaultParcel, widthCm: value } })); setSenderErrors((current) => clearFieldError(current, 'width')); }} />
+              <NumberField id="ukrposhta-sender-height" error={senderErrors.height} label={t('ukrposhtaSettings.height')} value={profile.defaultParcel.heightCm} max={300} onChange={(value) => { setProfile((current) => ({ ...current, defaultParcel: { ...current.defaultParcel, heightCm: value } })); setSenderErrors((current) => clearFieldError(current, 'height')); }} />
             </div>
             <label><span>{t('ukrposhtaSettings.deliveryPayer')}</span><select aria-label={t('ukrposhtaSettings.deliveryPayer')} value={profile.payer} onChange={(event) => setProfile((current) => ({ ...current, payer: event.target.value as UkrposhtaSenderProfileInput['payer'] }))}><option value="SENDER">{t('ukrposhtaSettings.sender')}</option><option value="RECIPIENT">{t('ukrposhtaSettings.recipient')}</option></select></label>
             <label className="delivery-checkbox"><input type="checkbox" checked={profile.suggestCustomerNotification} onChange={(event) => setProfile((current) => ({ ...current, suggestCustomerNotification: event.target.checked }))} /><span>{t('ukrposhtaSettings.suggestMessage')}</span></label>
-            <label><span>{t('ukrposhtaSettings.messageTemplate')}</span><textarea aria-label={t('ukrposhtaSettings.messageTemplate')} value={profile.customerNotificationTemplate} onChange={(event) => setProfile((current) => ({ ...current, customerNotificationTemplate: event.target.value }))} /></label>
-            <div className="settings-actions delivery-settings-actions"><LoadingButton type="button" pending={pending === 'profile'} pendingLabel={t('ukrposhtaSettings.saving')} disabled={pending !== null || !validProfile(profile)} onClick={() => void saveProfile()}>{t('ukrposhtaSettings.saveSender')}</LoadingButton></div>
+            <label><span>{t('ukrposhtaSettings.messageTemplate')}</span><textarea id="ukrposhta-sender-template" aria-label={t('ukrposhtaSettings.messageTemplate')} aria-invalid={Boolean(senderErrors.template)} aria-describedby={senderErrors.template ? 'ukrposhta-sender-template-error' : undefined} value={profile.customerNotificationTemplate} onChange={(event) => { setProfile((current) => ({ ...current, customerNotificationTemplate: event.target.value })); setSenderErrors((current) => clearFieldError(current, 'template')); }} /><FieldError id="ukrposhta-sender-template-error" message={senderErrors.template} /></label>
+            <div className="settings-actions delivery-settings-actions"><LoadingButton type="button" pending={pending === 'profile'} pendingLabel={t('ukrposhtaSettings.saving')} disabled={pending !== null} onClick={() => void saveProfile()}>{t('ukrposhtaSettings.saveSender')}</LoadingButton></div>
           </fieldset>}
         </>}
   </section>;
@@ -264,16 +286,6 @@ function isUkrposhtaSenderProfile(value: unknown): value is UkrposhtaSenderProfi
     && typeof profile.customerNotificationTemplate === 'string';
 }
 
-function validProfile(profile: UkrposhtaSenderProfileInput): boolean {
-  return isUkrposhtaPersonName(profile.senderName) && profile.senderName.trim().length <= 120
-    && /^\+380\d{9}$/.test(profile.senderPhone)
-    && Boolean(profile.origin.cityRef && /^up:\d{1,20}:\d{5}$/.test(profile.origin.locationRef) && profile.origin.label)
-    && profile.defaultParcel.weightKg > 0 && profile.defaultParcel.weightKg <= 1_000
-    && [profile.defaultParcel.lengthCm, profile.defaultParcel.widthCm, profile.defaultParcel.heightCm]
-      .every((value) => Number.isFinite(value) && value > 0 && value <= 300)
-    && Boolean(profile.customerNotificationTemplate.trim()) && profile.customerNotificationTemplate.trim().length <= 1_000;
-}
-
 function parcelSummary(t: Translator, formatNumber: ReturnType<typeof useI18n>['formatNumber'], profile: UkrposhtaSenderProfileInput): string {
   const parcel = profile.defaultParcel;
   return t('ukrposhtaSettings.parcelSummary', { weight: formatNumber(parcel.weightKg), length: formatNumber(parcel.lengthCm), width: formatNumber(parcel.widthCm), height: formatNumber(parcel.heightCm) });
@@ -284,6 +296,6 @@ function citySelectionFromProfile(profile: UkrposhtaSenderProfileInput | null | 
   return { ref: profile.origin.cityRef, provider: 'UKRPOSHTA', type: 'CITY', label: '' };
 }
 
-function NumberField({ label, value, max, onChange }: { label: string; value: number; max: number; onChange(value: number): void }) {
-  return <label><span>{label}</span><input aria-label={label} type="number" min="0.01" max={max} step="0.01" value={value} onChange={(event) => onChange(Number(event.target.value))} /></label>;
+function NumberField({ id, error, label, value, max, onChange }: { id: string; error?: string | undefined; label: string; value: number; max: number; onChange(value: number): void }) {
+  return <label><span>{label}</span><input id={id} aria-label={label} aria-invalid={Boolean(error)} aria-describedby={error ? `${id}-error` : undefined} type="number" min="0.01" max={max} step="0.01" value={value} onChange={(event) => onChange(Number(event.target.value))} /><FieldError id={`${id}-error`} message={error} /></label>;
 }

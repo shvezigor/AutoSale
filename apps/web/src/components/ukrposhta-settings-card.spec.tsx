@@ -44,6 +44,14 @@ afterEach(() => {
 });
 
 describe('UkrposhtaSettingsCard', () => {
+  it('shows incomplete sender fields before saving', () => {
+    render(<UkrposhtaSettingsCard initial={active} role="OWNER" />);
+    fireEvent.click(screen.getByRole('button', { name: 'Зберегти відправника Укрпошти' }));
+    expect(screen.getByLabelText('Назва відправника Укрпошти')).toHaveFocus();
+    expect(screen.getByText('Перевірте введене значення.', { selector: '#ukrposhta-sender-name-error' })).toBeInTheDocument();
+    expect(screen.getByText('Перевірте введене значення.', { selector: '#ukrposhta-sender-phone-error' })).toBeInTheDocument();
+    expect(mutatingFetch).not.toHaveBeenCalled();
+  });
   it('identifies each missing credential before connecting', () => {
     render(<UkrposhtaSettingsCard initial={disconnected} role="OWNER" />);
     fireEvent.click(screen.getByRole('button', { name: 'Підключити Укрпошту' }));
@@ -102,7 +110,7 @@ describe('UkrposhtaSettingsCard', () => {
     expect(body).not.toHaveProperty('counterpartyUuid');
   });
 
-  it('clears the selected branch and disables save when the selected city is edited', async () => {
+  it('clears the selected branch and explains it when the selected city is edited', async () => {
     const fetchFn = vi.fn().mockImplementation(async (request: string) => {
       const url = new URL(request, 'http://localhost');
       const payload = url.searchParams.get('type') === 'CITY'
@@ -127,7 +135,9 @@ describe('UkrposhtaSettingsCard', () => {
     fireEvent.change(cityInput, { target: { value: 'Лу' } });
 
     await waitFor(() => expect(branchInput).toHaveValue(''));
-    expect(save).toBeDisabled();
+    fireEvent.click(save);
+    expect(screen.getByText('Оберіть точне відділення.', { selector: '#ukrposhta-sender-origin-error' })).toBeInTheDocument();
+    expect(mutatingFetch).not.toHaveBeenCalled();
   });
 
   it('invalidates a persisted branch when the owner edits its saved city field', async () => {
@@ -141,7 +151,8 @@ describe('UkrposhtaSettingsCard', () => {
     fireEvent.change(cityInput, { target: { value: 'Лу' } });
 
     await waitFor(() => expect(branchInput).toHaveValue(''));
-    expect(save).toBeDisabled();
+    fireEvent.click(save);
+    expect(screen.getByText('Оберіть точне відділення.', { selector: '#ukrposhta-sender-origin-error' })).toBeInTheDocument();
   });
 
   it('lets an owner choose production with an inline warning and submit one complete credential bundle', async () => {
