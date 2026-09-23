@@ -12,6 +12,7 @@ import { DeliveryLocationPicker } from './delivery-location-picker';
 import { LoadingButton } from './loading-button';
 import { useToast } from './toast-provider';
 import { FieldError } from './form-field';
+import { clearFieldError, type FieldErrors } from './form-validation';
 
 export type DeliverySettingsSummary = {
   enabled: boolean;
@@ -19,6 +20,7 @@ export type DeliverySettingsSummary = {
 };
 
 type PendingAction = 'connect' | 'save' | 'disconnect' | null;
+type SenderField = 'sender' | 'contact' | 'phone' | 'origin' | 'weight' | 'length' | 'width' | 'height' | 'template';
 type SenderOption = {
   ref: string;
   label: string;
@@ -54,6 +56,7 @@ export function DeliverySettingsCard({
   const [profile, setProfile] = useState<DeliverySenderProfileInput>(initial.connections[0]?.senderProfile ?? emptyProfile);
   const [apiKey, setApiKey] = useState('');
   const [apiKeyError, setApiKeyError] = useState<string | null>(null);
+  const [senderErrors, setSenderErrors] = useState<FieldErrors<SenderField>>({});
   const [pending, setPending] = useState<PendingAction>(null);
   const [senderOptions, setSenderOptions] = useState<SenderOption[]>([]);
   const [originCity, setOriginCity] = useState<DeliveryLocation | null>(null);
@@ -124,6 +127,30 @@ export function DeliverySettingsCard({
   }
 
   async function saveProfile() {
+    const errors: FieldErrors<SenderField> = {};
+    if (!profile.senderRef) errors.sender = t('validation.required');
+    if (!profile.contactRef) errors.contact = t('validation.required');
+    if (!/^\+380\d{9}$/.test(profile.contactPhone)) errors.phone = t('validation.invalid');
+    if (!profile.origin.cityRef || (profile.origin.type === 'ADDRESS'
+      ? !profile.origin.addressRef || !profile.origin.building
+      : !profile.origin.locationRef)) errors.origin = t('validation.required');
+    for (const [field, value, max] of [
+      ['weight', profile.defaultParcel.weightKg, 1_000], ['length', profile.defaultParcel.lengthCm, 300],
+      ['width', profile.defaultParcel.widthCm, 300], ['height', profile.defaultParcel.heightCm, 300],
+    ] as const) {
+      if (!Number.isFinite(value) || value <= 0) errors[field] = t('validation.minimum', { value: 0.01 });
+      else if (value > max) errors[field] = t('validation.maximum', { value: max });
+    }
+    if (!profile.customerNotificationTemplate.trim()) errors.template = t('validation.required');
+    setSenderErrors(errors);
+    if (Object.keys(errors).length) {
+      const first = (['sender', 'contact', 'phone', 'origin', 'weight', 'length', 'width', 'height', 'template'] as const).find((field) => errors[field]);
+      const firstControl = (['sender', 'contact', 'phone', 'origin', 'weight', 'length', 'width', 'height', 'template'] as const)
+        .map((field) => document.getElementById(`nova-${field}`))
+        .find((control) => control && !(control as HTMLInputElement).disabled);
+      (firstControl ?? document.getElementById(`nova-${first}`))?.focus();
+      return;
+    }
     setPending('save');
     try {
       const response = await activity.run(t('novaPoshtaSettings.savingSender'), () => mutatingFetch(
@@ -214,7 +241,8 @@ export function DeliverySettingsCard({
         <fieldset className="delivery-sender-form" disabled={pending !== null}>
           <legend>{t('novaPoshtaSettings.senderData')}</legend>
           <div className="delivery-form-grid">
-            <SelectField label={t('novaPoshtaSettings.sender')} value={profile.senderRef} loading={loadingOptions} options={senderOptions.map((sender) => ({ value: sender.ref, label: sender.label }))} onChange={(value) => {
+            <SelectField id="nova-sender" error={senderErrors.sender} label={t('novaPoshtaSettings.sender')} value={profile.senderRef} loading={loadingOptions} options={senderOptions.map((sender) => ({ value: sender.ref, label: sender.label }))} onChange={(value) => {
+              setSenderErrors((current) => clearFieldError(current, 'sender'));
               const sender = senderOptions.find((option) => option.ref === value);
               const contact = sender?.contacts[0];
               const origin = sender?.origins[0];
@@ -227,11 +255,12 @@ export function DeliverySettingsCard({
                 origin: origin ? { type: origin.type, cityRef: origin.cityRef, locationRef: origin.ref, label: origin.label } : emptyProfile.origin,
               });
             }} />
-            <SelectField label={t('novaPoshtaSettings.contact')} value={profile.contactRef} loading={loadingOptions} options={(selectedSender?.contacts ?? []).map((contact) => ({ value: contact.ref, label: contact.label }))} onChange={(value) => {
+            <SelectField id="nova-contact" error={senderErrors.contact} label={t('novaPoshtaSettings.contact')} value={profile.contactRef} loading={loadingOptions} options={(selectedSender?.contacts ?? []).map((contact) => ({ value: contact.ref, label: contact.label }))} onChange={(value) => {
+              setSenderErrors((current) => clearFieldError(current, 'contact'));
               const contact = selectedSender?.contacts.find((option) => option.ref === value);
               setProfile({ ...profile, contactRef: value, contactPhone: contact?.phone ?? profile.contactPhone });
             }} />
-            <TextField label={t('novaPoshtaSettings.senderPhone')} value={profile.contactPhone} onChange={(value) => setProfile({ ...profile, contactPhone: value })} />
+            <TextField id="nova-phone" error={senderErrors.phone} label={t('novaPoshtaSettings.senderPhone')} value={profile.contactPhone} onChange={(value) => { setProfile({ ...profile, contactPhone: value }); setSenderErrors((current) => clearFieldError(current, 'phone')); }} />
             {selectedSender && selectedSender.origins.length === 0
               ? profile.origin.type !== 'ADDRESS' && profile.origin.locationRef && profile.origin.label
                 ? <div className="delivery-origin-summary">
@@ -244,6 +273,7 @@ export function DeliverySettingsCard({
                   </div>
                 : <>
                     <DeliveryLocationPicker
+                      fieldId="nova-origin-city"
                       label={t('novaPoshtaSettings.originCity')}
                       type="CITY"
                       value={originCity}
@@ -263,39 +293,47 @@ export function DeliverySettingsCard({
                       </select>
                     </label>
                     <DeliveryLocationPicker
+                      fieldId="nova-origin"
+                      fieldError={senderErrors.origin}
                       label={t('novaPoshtaSettings.origin')}
                       type={profile.origin.type === 'PARCEL_LOCKER' ? 'PARCEL_LOCKER' : 'BRANCH'}
                       cityRef={originCity?.ref ?? ''}
                       value={null}
                       onSelect={(origin) => {
                         if (origin && (origin.type === 'BRANCH' || origin.type === 'PARCEL_LOCKER')) {
+                          setSenderErrors((current) => clearFieldError(current, 'origin'));
                           setProfile({ ...profile, origin: { type: origin.type, cityRef: origin.cityRef ?? originCity?.ref ?? '', locationRef: origin.ref, label: origin.label } });
                         }
                       }}
                     />
                   </>
-              : <SelectField label={t('novaPoshtaSettings.origin')} value={profile.origin.type === 'ADDRESS' ? '' : profile.origin.locationRef} loading={loadingOptions} options={(selectedSender?.origins ?? []).map((origin) => ({ value: origin.ref, label: origin.label }))} onChange={(value) => {
+              : <SelectField id="nova-origin" error={senderErrors.origin} label={t('novaPoshtaSettings.origin')} value={profile.origin.type === 'ADDRESS' ? '' : profile.origin.locationRef} loading={loadingOptions} options={(selectedSender?.origins ?? []).map((origin) => ({ value: origin.ref, label: origin.label }))} onChange={(value) => {
+                  setSenderErrors((current) => clearFieldError(current, 'origin'));
                   const origin = selectedSender?.origins.find((option) => option.ref === value);
                   if (origin) setProfile({ ...profile, origin: { type: origin.type, cityRef: origin.cityRef, locationRef: origin.ref, label: origin.label } });
                 }} />}
             <label><span>{t('novaPoshtaSettings.deliveryPayer')}</span><select aria-label={t('novaPoshtaSettings.deliveryPayer')} value={profile.payer} onChange={(event) => setProfile({ ...profile, payer: event.target.value as 'SENDER' | 'RECIPIENT' })}><option value="SENDER">{t('novaPoshtaSettings.sender')}</option><option value="RECIPIENT">{t('novaPoshtaSettings.recipient')}</option></select></label>
           </div>
           <div className="delivery-parcel-grid">
-            <NumberField label={t('novaPoshtaSettings.weight')} value={profile.defaultParcel.weightKg} onChange={(value) => setProfile({ ...profile, defaultParcel: { ...profile.defaultParcel, weightKg: value } })} />
-            <NumberField label={t('novaPoshtaSettings.length')} value={profile.defaultParcel.lengthCm} onChange={(value) => setProfile({ ...profile, defaultParcel: { ...profile.defaultParcel, lengthCm: value } })} />
-            <NumberField label={t('novaPoshtaSettings.width')} value={profile.defaultParcel.widthCm} onChange={(value) => setProfile({ ...profile, defaultParcel: { ...profile.defaultParcel, widthCm: value } })} />
-            <NumberField label={t('novaPoshtaSettings.height')} value={profile.defaultParcel.heightCm} onChange={(value) => setProfile({ ...profile, defaultParcel: { ...profile.defaultParcel, heightCm: value } })} />
+            <NumberField id="nova-weight" error={senderErrors.weight} label={t('novaPoshtaSettings.weight')} value={profile.defaultParcel.weightKg} onChange={(value) => { setProfile({ ...profile, defaultParcel: { ...profile.defaultParcel, weightKg: value } }); setSenderErrors((current) => clearFieldError(current, 'weight')); }} />
+            <NumberField id="nova-length" error={senderErrors.length} label={t('novaPoshtaSettings.length')} value={profile.defaultParcel.lengthCm} onChange={(value) => { setProfile({ ...profile, defaultParcel: { ...profile.defaultParcel, lengthCm: value } }); setSenderErrors((current) => clearFieldError(current, 'length')); }} />
+            <NumberField id="nova-width" error={senderErrors.width} label={t('novaPoshtaSettings.width')} value={profile.defaultParcel.widthCm} onChange={(value) => { setProfile({ ...profile, defaultParcel: { ...profile.defaultParcel, widthCm: value } }); setSenderErrors((current) => clearFieldError(current, 'width')); }} />
+            <NumberField id="nova-height" error={senderErrors.height} label={t('novaPoshtaSettings.height')} value={profile.defaultParcel.heightCm} onChange={(value) => { setProfile({ ...profile, defaultParcel: { ...profile.defaultParcel, heightCm: value } }); setSenderErrors((current) => clearFieldError(current, 'height')); }} />
           </div>
           <label className="delivery-notification-toggle"><input type="checkbox" checked={profile.suggestCustomerNotification} onChange={(event) => setProfile({ ...profile, suggestCustomerNotification: event.target.checked })} />{t('novaPoshtaSettings.suggestNotification')}</label>
           <label className="delivery-notification-template">
             <span>{t('novaPoshtaSettings.notificationTemplate')}</span>
             <textarea
+              id="nova-template"
+              aria-invalid={Boolean(senderErrors.template)}
+              aria-describedby={senderErrors.template ? 'nova-template-error' : undefined}
               aria-label={t('novaPoshtaSettings.notificationTemplate')}
               maxLength={1_000}
               rows={4}
               value={profile.customerNotificationTemplate}
-              onChange={(event) => setProfile({ ...profile, customerNotificationTemplate: event.target.value })}
+              onChange={(event) => { setProfile({ ...profile, customerNotificationTemplate: event.target.value }); setSenderErrors((current) => clearFieldError(current, 'template')); }}
             />
+            <FieldError id="nova-template-error" message={senderErrors.template} />
             <small>{t('novaPoshtaSettings.availableFields', { fields: '{company}, {trackingNumber}, {trackingUrl}', length: profile.customerNotificationTemplate.length })}</small>
           </label>
         </fieldset>
@@ -308,22 +346,22 @@ export function DeliverySettingsCard({
   </section>;
 }
 
-function TextField({ label, value, onChange }: { label: string; value: string; onChange(value: string): void }) {
-  return <label><span>{label}</span><input aria-label={label} value={value} onChange={(event) => onChange(event.target.value)} /></label>;
+function TextField({ id, error, label, value, onChange }: { id: string; error?: string | undefined; label: string; value: string; onChange(value: string): void }) {
+  return <label><span>{label}</span><input id={id} aria-label={label} aria-invalid={Boolean(error)} aria-describedby={error ? `${id}-error` : undefined} value={value} onChange={(event) => onChange(event.target.value)} /><FieldError id={`${id}-error`} message={error} /></label>;
 }
 
-function SelectField({ label, value, options, loading, onChange }: { label: string; value: string; options: Array<{ value: string; label: string }>; loading: boolean; onChange(value: string): void }) {
+function SelectField({ id, error, label, value, options, loading, onChange }: { id: string; error?: string | undefined; label: string; value: string; options: Array<{ value: string; label: string }>; loading: boolean; onChange(value: string): void }) {
   const { t } = useI18n();
   const includesCurrent = options.some((option) => option.value === value);
-  return <label><span>{label}</span><select aria-label={label} value={value} onChange={(event) => onChange(event.target.value)} disabled={loading}>
+  return <label><span>{label}</span><select id={id} aria-label={label} aria-invalid={Boolean(error)} aria-describedby={error ? `${id}-error` : undefined} value={value} onChange={(event) => onChange(event.target.value)} disabled={loading}>
     <option value="">{loading ? t('novaPoshtaSettings.loading') : t('novaPoshtaSettings.chooseFromList')}</option>
     {!includesCurrent && value && <option value={value}>{value}</option>}
     {options.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-  </select></label>;
+  </select><FieldError id={`${id}-error`} message={error} /></label>;
 }
 
-function NumberField({ label, value, onChange }: { label: string; value: number; onChange(value: number): void }) {
-  return <label><span>{label}</span><input aria-label={label} type="number" min="0.01" step="0.01" value={value} onChange={(event) => onChange(Number(event.target.value))} /></label>;
+function NumberField({ id, error, label, value, onChange }: { id: string; error?: string | undefined; label: string; value: number; onChange(value: number): void }) {
+  return <label><span>{label}</span><input id={id} aria-label={label} aria-invalid={Boolean(error)} aria-describedby={error ? `${id}-error` : undefined} type="number" min="0.01" step="0.01" value={value} onChange={(event) => onChange(Number(event.target.value))} /><FieldError id={`${id}-error`} message={error} /></label>;
 }
 
 function statusLabel(t: Translator, status: DeliveryConnectionSummary['status'] | undefined): string {

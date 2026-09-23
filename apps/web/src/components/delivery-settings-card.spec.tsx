@@ -23,6 +23,12 @@ const active: DeliverySettingsSummary = {
     lastVerifiedAt: '2026-09-11T08:00:00.000Z', lastErrorCode: null, senderProfile: null,
   }],
 };
+const configured: DeliverySettingsSummary = { ...active, connections: [{ ...active.connections[0]!, senderProfile: {
+  senderRef: 'sender-ref', contactRef: 'contact-ref', contactPhone: '+380501112233',
+  origin: { type: 'BRANCH', cityRef: 'city-ref', locationRef: 'branch-ref', label: 'Відділення №1' },
+  payer: 'SENDER', defaultParcel: { weightKg: 1, lengthCm: 20, widthCm: 20, heightCm: 20 },
+  suggestCustomerNotification: true, customerNotificationTemplate: 'ТТН {trackingNumber}',
+} }] };
 
 afterEach(() => {
   cleanup();
@@ -31,6 +37,17 @@ afterEach(() => {
 });
 
 describe('DeliverySettingsCard', () => {
+  it('shows sender profile errors at fields before saving', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify([]), { status: 200 })));
+    render(<DeliverySettingsCard initial={active} role="OWNER" />);
+    await waitFor(() => expect(screen.getByLabelText('Відправник')).toBeEnabled());
+    fireEvent.click(screen.getByRole('button', { name: 'Зберегти дані відправника' }));
+    expect(screen.getByLabelText('Відправник')).toHaveFocus();
+    expect(screen.getByText('Заповніть це поле.', { selector: '#nova-sender-error' })).toBeInTheDocument();
+    expect(screen.getByText('Заповніть це поле.', { selector: '#nova-contact-error' })).toBeInTheDocument();
+    expect(screen.getByText('Перевірте введене значення.', { selector: '#nova-phone-error' })).toBeInTheDocument();
+    expect(mutatingFetch).not.toHaveBeenCalled();
+  });
   it('explains a missing API key at the credential field before connecting', () => {
     render(<DeliverySettingsCard initial={disconnected} role="OWNER" />);
     fireEvent.click(screen.getByRole('button', { name: 'Підключити Нову Пошту' }));
@@ -95,7 +112,7 @@ describe('DeliverySettingsCard', () => {
   it('saves an editable customer TTN message template', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify([]), { status: 200 })));
     mutatingFetch.mockResolvedValue(new Response(JSON.stringify({}), { status: 200 }));
-    render(<DeliverySettingsCard initial={active} role="OWNER" />);
+    render(<DeliverySettingsCard initial={configured} role="OWNER" />);
     fireEvent.change(screen.getByLabelText('Шаблон повідомлення клієнту'), { target: { value: '{company}: ваша ТТН {trackingNumber}' } });
     fireEvent.click(screen.getByRole('button', { name: 'Зберегти дані відправника' }));
     await waitFor(() => expect(mutatingFetch).toHaveBeenCalledWith(

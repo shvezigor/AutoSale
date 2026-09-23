@@ -29,7 +29,7 @@ export function DeliveryLocationPicker({
   onSelect(value: DeliveryLocation | null): void;
   search?: SearchFunction;
   fieldId?: string;
-  fieldError?: string;
+  fieldError?: string | undefined;
 }) {
   const { t } = useI18n();
   const listId = useId();
