@@ -487,6 +487,6 @@ Fast-forward the verified short-lived branch into `master`, push `origin/master`
 
 Create a current backup using the repository runbook, run `scripts/deploy-local.ps1 -EnvFile ./.env`, wait until `api`, `web`, and `worker` are healthy, then verify `https://sales-aito.com/health/live` and `/login`. Perform one authenticated validation smoke without creating fictional financial or customer records in production.
 
-- [ ] **Step 6: Record acceptance evidence**
+- [x] **Step 6: Record acceptance evidence**
 
 Update the relevant acceptance checklist with date, commit SHA, automated test totals, widths tested, production health result, and any provider-account validation that remains external.
