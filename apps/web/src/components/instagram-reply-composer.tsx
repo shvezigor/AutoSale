@@ -15,6 +15,8 @@ import {
 import { MessageThread } from './message-thread';
 import { useToast } from './toast-provider';
 import { useI18n } from '../i18n/i18n-provider';
+import { FieldError } from './form-field';
+import { LoadingButton } from './loading-button';
 
 const MAX_MESSAGE_LENGTH = 1_000;
 const POLL_INTERVAL_MS = 2_000;
@@ -28,6 +30,7 @@ export function InstagramReplyComposer({
 }) {
   const [conversation, setConversation] = useState(initialConversation);
   const [text, setText] = useState('');
+  const [textError, setTextError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [retryingMessageId, setRetryingMessageId] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -41,11 +44,6 @@ export function InstagramReplyComposer({
   const { t } = useI18n();
 
   const trimmedText = text.trim();
-  const canSubmit = conversation.replyCapability.enabled
-    && !submitting
-    && trimmedText.length > 0
-    && trimmedText.length <= MAX_MESSAGE_LENGTH;
-
   function mergeMessage(message: ConversationMessage) {
     setConversation((current) => {
       const index = current.messages.findIndex((item) => item.id === message.id);
@@ -59,7 +57,15 @@ export function InstagramReplyComposer({
 
   async function submit(event?: FormEvent) {
     event?.preventDefault();
-    if (!canSubmit) return;
+    if (!conversation.replyCapability.enabled || submitting) return;
+    const error = !trimmedText ? t('validation.required')
+      : trimmedText.length > MAX_MESSAGE_LENGTH ? t('validation.tooLong', { count: MAX_MESSAGE_LENGTH }) : null;
+    if (error) {
+      setTextError(error);
+      textareaRef.current?.focus();
+      return;
+    }
+    setTextError(null);
     setSubmitting(true);
     try {
       const message = await sendConversationMessage(conversation.id, {
@@ -181,22 +187,24 @@ export function InstagramReplyComposer({
         <form className="instagram-reply-composer" onSubmit={(event) => void submit(event)}>
           <label className="sr-only" htmlFor="instagram-reply">{t('conversations.reply')}</label>
           <textarea
-            aria-describedby="instagram-reply-hint"
+            aria-describedby={textError ? 'instagram-reply-hint instagram-reply-error' : 'instagram-reply-hint'}
+            aria-invalid={Boolean(textError)}
             aria-label={t('conversations.reply')}
             disabled={!conversation.replyCapability.enabled}
             id="instagram-reply"
-            onChange={(event) => setText(event.target.value)}
+            onChange={(event) => { setText(event.target.value); setTextError(null); }}
             onKeyDown={handleKeyDown}
             placeholder={t('conversations.placeholder')}
             ref={textareaRef}
             rows={2}
             value={text}
           />
+          <FieldError id="instagram-reply-error" message={textError} />
           <div className="reply-composer-actions">
             <small id="instagram-reply-hint">
               {text.length >= 900 ? `${text.length}/${MAX_MESSAGE_LENGTH}` : t('conversations.newLineHint')}
             </small>
-            <button disabled={!canSubmit} type="submit">{submitting ? t('conversations.sending') : t('conversations.send')}</button>
+            <LoadingButton pending={submitting} pendingLabel={t('conversations.sending')} disabled={!conversation.replyCapability.enabled || submitting} type="submit">{t('conversations.send')}</LoadingButton>
           </div>
         </form>
       </div>

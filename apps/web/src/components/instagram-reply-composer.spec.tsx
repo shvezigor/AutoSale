@@ -58,17 +58,19 @@ describe('InstagramReplyComposer', () => {
     await waitFor(() => expect(api.sendConversationMessage).toHaveBeenCalledWith(conversation.id, {
       text: 'Вітаю', idempotencyKey: '44444444-4444-4444-8444-444444444444',
     }));
-    expect(await screen.findByText('Надсилається…')).toBeVisible();
+    expect(await screen.findByText('Надсилається…', { selector: '.delivery-status' })).toBeVisible();
     expect(screen.getByRole('textbox', { name: 'Відповідь' })).toHaveFocus();
   });
 
-  it('keeps Shift+Enter as a newline and blocks blank or oversized content', () => {
+  it('keeps Shift+Enter as a newline and explains blank or oversized content', () => {
     renderComposer();
     const field = screen.getByRole('textbox', { name: 'Відповідь' });
     fireEvent.change(field, { target: { value: ' ' } });
-    expect(screen.getByRole('button', { name: 'Надіслати' })).toBeDisabled();
+    fireEvent.click(screen.getByRole('button', { name: 'Надіслати' }));
+    expect(screen.getByText('Заповніть це поле.', { selector: '#instagram-reply-error' })).toBeInTheDocument();
     fireEvent.change(field, { target: { value: 'x'.repeat(1_001) } });
-    expect(screen.getByRole('button', { name: 'Надіслати' })).toBeDisabled();
+    fireEvent.click(screen.getByRole('button', { name: 'Надіслати' }));
+    expect(screen.getByText('Введіть не більше 1000 символів.', { selector: '#instagram-reply-error' })).toBeInTheDocument();
     fireEvent.keyDown(field, { key: 'Enter', shiftKey: true });
     expect(api.sendConversationMessage).not.toHaveBeenCalled();
   });
@@ -82,7 +84,7 @@ describe('InstagramReplyComposer', () => {
 
     await waitFor(() => expect(api.retryConversationMessage).toHaveBeenCalledWith(conversation.id, failed.id));
     expect(screen.getAllByText('Вітаю')).toHaveLength(1);
-    expect(screen.getByText('Надсилається…')).toBeVisible();
+    expect(screen.getByText('Надсилається…', { selector: '.delivery-status' })).toBeVisible();
   });
 
   it('keeps polling an unknown delivery until a late sent confirmation arrives', async () => {

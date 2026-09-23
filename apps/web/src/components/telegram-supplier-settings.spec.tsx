@@ -22,6 +22,12 @@ const destinationId = '11111111-1111-4111-8111-111111111111';
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
 describe('TelegramSupplierSettings', () => {
+  it('asks for a supplier chat at the selection field before saving', () => {
+    render(<ToastProvider><ActivityProvider><TelegramSupplierSettings initial={initial} /></ActivityProvider></ToastProvider>);
+    fireEvent.click(screen.getByRole('button', { name: 'Зберегти постачальника' }));
+    expect(screen.getByLabelText('Чат постачальника')).toHaveFocus();
+    expect(screen.getByText('Оберіть чат постачальника.', { selector: '#supplier-destination-error' })).toBeInTheDocument();
+  });
   it('translates controls while preserving the supplier chat title', () => {
     render(<I18nProvider locale="en" authenticated={false}><ToastProvider><ActivityProvider><TelegramSupplierSettings initial={initial} /></ActivityProvider></ToastProvider></I18nProvider>);
     expect(screen.getByRole('heading', { name: 'Supplier' })).toBeInTheDocument();
