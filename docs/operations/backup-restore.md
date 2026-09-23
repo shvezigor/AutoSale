@@ -44,3 +44,4 @@ Restore навмисно вимагає абсолютний шлях і точ�
 | Дата (UTC) | Середовище | Результат | Перевірені дані |
 | --- | --- | --- | --- |
 | 2026-08-27 | Ізольований Docker Compose project `autosale_restorecheck` | Успішно | SHA-256, 1 conversation, 1 order, 1 attachment, MinIO object, API/web HTTP 200, healthy API/worker |
+| 2026-09-23 | Тимчасові контейнери без мережі, backup `20260923T084613Z` | Успішно | SHA-256, PostgreSQL `pg_restore --exit-on-error` (56 таблиць), розпакування MinIO (40 файлів). Окрема локальна копія на диску D: перевірена; off-host копії ще немає. |
