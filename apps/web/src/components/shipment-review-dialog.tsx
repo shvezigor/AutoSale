@@ -1,6 +1,6 @@
 'use client';
 
-import { isUkrposhtaPersonName, type DeliveryLocation, type ShipmentDraftInput, type ShipmentDraftPrefill, type ShipmentOverview, type ShipmentQuote, type ShipmentSummary } from '../../../../packages/contracts/src/delivery';
+import { isUkrposhtaPersonName, shipmentDraftInputSchema, type DeliveryLocation, type ShipmentDraftInput, type ShipmentDraftPrefill, type ShipmentOverview, type ShipmentQuote, type ShipmentSummary } from '../../../../packages/contracts/src/delivery';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { mutatingFetch } from '../auth/csrf-fetch';
@@ -8,11 +8,14 @@ import { DeliveryLocationPicker } from './delivery-location-picker';
 import { LoadingButton } from './loading-button';
 import { useToast } from './toast-provider';
 import { useI18n } from '../i18n/i18n-provider';
+import { FieldError } from './form-field';
+import { clearFieldError, type FieldErrors } from './form-validation';
 
 type FormDraft = Omit<ShipmentDraftInput, 'recipient' | 'destination'> & {
   recipient: { name: string | null; phone: string | null };
   destination: ShipmentDraftInput['destination'] | null;
 };
+type DraftField = 'recipientName' | 'recipientPhone' | 'city' | 'location' | 'description' | 'weight' | 'length' | 'width' | 'height' | 'declaredValue' | 'codAmount';
 
 export function ShipmentReviewDialog({ orderId, onClose, onSaved }: {
   orderId: string;
@@ -27,6 +30,7 @@ export function ShipmentReviewDialog({ orderId, onClose, onSaved }: {
   const [destinationType, setDestinationType] = useState<'BRANCH' | 'PARCEL_LOCKER'>('BRANCH');
   const [quote, setQuote] = useState<ShipmentQuote | null>(null);
   const [quoteFailed, setQuoteFailed] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors<DraftField>>({});
   const [state, setState] = useState<'loading' | 'ready' | 'saving' | 'creating' | 'error'>('loading');
   const closeButton = useRef<HTMLButtonElement>(null);
   const dialog = useRef<HTMLElement>(null);
@@ -61,6 +65,7 @@ export function ShipmentReviewDialog({ orderId, onClose, onSaved }: {
       .then((value) => {
         if (!active) return;
         setOverview(value);
+        setFieldErrors({});
         setDraft(value.draft ? formDraft(value.draft) : null);
         if (value.draft && 'destination' in value.draft) {
           const destination = value.draft.destination;
@@ -79,11 +84,13 @@ export function ShipmentReviewDialog({ orderId, onClose, onSaved }: {
   const completeDraft = useMemo(() => {
     if (!draft || !city || !location || !draft.recipient.name || !draft.recipient.phone) return null;
     if (draft.provider === 'UKRPOSHTA' && !isUkrposhtaPersonName(draft.recipient.name)) return null;
-    return {
+    const candidate = {
       ...draft,
       recipient: { name: draft.recipient.name, phone: draft.recipient.phone },
       destination: { type: location.type as 'BRANCH' | 'PARCEL_LOCKER', cityRef: city.ref, locationRef: location.ref, label: location.label },
     } satisfies ShipmentDraftInput;
+    const parsed = shipmentDraftInputSchema.safeParse(candidate);
+    return parsed.success ? parsed.data : null;
   }, [city, draft, location]);
 
   useEffect(() => {
@@ -102,8 +109,33 @@ export function ShipmentReviewDialog({ orderId, onClose, onSaved }: {
     return () => { window.clearTimeout(timer); controller.abort(); };
   }, [completeDraft, orderId]);
 
+  function validateDraft(): boolean {
+    if (!draft) return false;
+    const errors: FieldErrors<DraftField> = {};
+    if ((draft.recipient.name?.trim().length ?? 0) < 2 || draft.provider === 'UKRPOSHTA' && !isUkrposhtaPersonName(draft.recipient.name ?? '')) {
+      errors.recipientName = draft.provider === 'UKRPOSHTA' ? t('validation.invalid') : t('validation.tooShort', { count: 2 });
+    }
+    if (!/^\+380\d{9}$/.test(draft.recipient.phone ?? '')) errors.recipientPhone = t('validation.invalid');
+    if (!city) errors.city = t('validation.required');
+    if (!location) errors.location = t('validation.required');
+    if (!draft.description.trim()) errors.description = t('validation.required');
+    for (const [field, value, max] of [
+      ['weight', draft.parcels[0]!.weightKg, 1_000], ['length', draft.parcels[0]!.lengthCm, 300],
+      ['width', draft.parcels[0]!.widthCm, 300], ['height', draft.parcels[0]!.heightCm, 300],
+    ] as const) {
+      if (!Number.isFinite(value) || value <= 0) errors[field] = t('validation.minimum', { value: 0.01 });
+      else if (value > max) errors[field] = t('validation.maximum', { value: max });
+    }
+    if (!Number.isFinite(draft.declaredValue) || draft.declaredValue <= 0) errors.declaredValue = t('validation.minimum', { value: 0.01 });
+    if (draft.codAmount !== null && draft.codAmount > draft.declaredValue) errors.codAmount = t('orders.codTooHigh');
+    setFieldErrors(errors);
+    const first = (['recipientName', 'recipientPhone', 'city', 'location', 'description', 'weight', 'length', 'width', 'height', 'declaredValue', 'codAmount'] as const).find((field) => errors[field]);
+    if (first) document.getElementById(`shipment-${first}`)?.focus();
+    return !first;
+  }
+
   async function save() {
-    if (!completeDraft) return;
+    if (!validateDraft() || !completeDraft) return;
     setState('saving');
     try {
       const response = await mutatingFetch(`/api/orders/${orderId}/shipments/draft`, {
@@ -121,7 +153,7 @@ export function ShipmentReviewDialog({ orderId, onClose, onSaved }: {
   }
 
   async function create() {
-    if (!completeDraft || state === 'creating' || overview?.creationEnabled === false || draft?.provider === 'UKRPOSHTA' && !quote) return;
+    if (state === 'creating' || overview?.creationEnabled === false || !validateDraft() || !completeDraft || draft?.provider === 'UKRPOSHTA' && !quote) return;
     setState('creating');
     try {
       const draftResponse = await mutatingFetch(`/api/orders/${orderId}/shipments/draft`, {
@@ -152,30 +184,29 @@ export function ShipmentReviewDialog({ orderId, onClose, onSaved }: {
       {overview && !overview.canCreateShipment && <p className="dialog-error">{blockedReasonLabel(overview.blockedReason, t)}</p>}
       {draft && overview?.canCreateShipment && <div className="shipment-form">
         <div className="shipment-form-grid">
-          <Field label={t('orders.recipientName')} value={draft.recipient.name ?? ''} onChange={(value) => setDraft({ ...draft, recipient: { ...draft.recipient, name: value } })} />
+          <Field id="shipment-recipientName" error={fieldErrors.recipientName} label={t('orders.recipientName')} value={draft.recipient.name ?? ''} onChange={(value) => { setDraft({ ...draft, recipient: { ...draft.recipient, name: value } }); setFieldErrors((current) => clearFieldError(current, 'recipientName')); }} />
           {draft.provider === 'UKRPOSHTA' && <p>{t('orders.ukrposhtaNameHint')}</p>}
-          <Field label={t('orders.recipientPhone')} value={draft.recipient.phone ?? ''} onChange={(value) => setDraft({ ...draft, recipient: { ...draft.recipient, phone: value } })} />
-          <DeliveryLocationPicker key={`${draft.provider}-city`} provider={draft.provider} label={t('orders.city')} type="CITY" initialQuery={'cityHint' in overview.draft! ? overview.draft.cityHint ?? '' : ''} value={city} onSelect={(value) => { setCity(value); setLocation(null); }} />
+          <Field id="shipment-recipientPhone" error={fieldErrors.recipientPhone} label={t('orders.recipientPhone')} value={draft.recipient.phone ?? ''} onChange={(value) => { setDraft({ ...draft, recipient: { ...draft.recipient, phone: value } }); setFieldErrors((current) => clearFieldError(current, 'recipientPhone')); }} />
+          <DeliveryLocationPicker key={`${draft.provider}-city`} fieldId="shipment-city" fieldError={fieldErrors.city} provider={draft.provider} label={t('orders.city')} type="CITY" initialQuery={'cityHint' in overview.draft! ? overview.draft.cityHint ?? '' : ''} value={city} onSelect={(value) => { setCity(value); setLocation(null); setFieldErrors((current) => clearFieldError(current, 'city')); }} />
           <label><span>{t('orders.destinationType')}</span><select aria-label={t('orders.destinationType')} value={destinationType} onChange={(event) => { setDestinationType(event.target.value as 'BRANCH' | 'PARCEL_LOCKER'); setLocation(null); }}><option value="BRANCH">{t('orders.branch')}</option>{draft.provider !== 'UKRPOSHTA' && <option value="PARCEL_LOCKER">{t('orders.parcelLocker')}</option>}</select></label>
-          <DeliveryLocationPicker key={`${draft.provider}-${destinationType}`} provider={draft.provider} label={t('orders.branchOrLocker')} type={destinationType} {...(city ? { cityRef: city.ref } : {})} initialQuery={'locationHint' in overview.draft! ? overview.draft.locationHint ?? '' : ''} value={location} onSelect={setLocation} />
+          <DeliveryLocationPicker key={`${draft.provider}-${destinationType}`} fieldId="shipment-location" fieldError={fieldErrors.location} provider={draft.provider} label={t('orders.branchOrLocker')} type={destinationType} {...(city ? { cityRef: city.ref } : {})} initialQuery={'locationHint' in overview.draft! ? overview.draft.locationHint ?? '' : ''} value={location} onSelect={(value) => { setLocation(value); setFieldErrors((current) => clearFieldError(current, 'location')); }} />
           <label><span>{t('orders.shipmentPayer')}</span><select aria-label={t('orders.shipmentPayer')} value={draft.payer} onChange={(event) => setDraft({ ...draft, payer: event.target.value as 'SENDER' | 'RECIPIENT' })}><option value="SENDER">{t('orders.sender')}</option><option value="RECIPIENT">{t('orders.recipient')}</option></select></label>
-          <Field label={t('orders.shipmentDescription')} value={draft.description} onChange={(description) => setDraft({ ...draft, description })} />
+          <Field id="shipment-description" error={fieldErrors.description} label={t('orders.shipmentDescription')} value={draft.description} onChange={(description) => { setDraft({ ...draft, description }); setFieldErrors((current) => clearFieldError(current, 'description')); }} />
         </div>
         <div className="shipment-parcel-grid">
-          <NumberField label={t('orders.weightKg')} value={draft.parcels[0]!.weightKg} onChange={(value) => setDraft(withParcel(draft, 'weightKg', value))} />
-          <NumberField label={t('orders.lengthCm')} value={draft.parcels[0]!.lengthCm} onChange={(value) => setDraft(withParcel(draft, 'lengthCm', value))} />
-          <NumberField label={t('orders.widthCm')} value={draft.parcels[0]!.widthCm} onChange={(value) => setDraft(withParcel(draft, 'widthCm', value))} />
-          <NumberField label={t('orders.heightCm')} value={draft.parcels[0]!.heightCm} onChange={(value) => setDraft(withParcel(draft, 'heightCm', value))} />
-          <NumberField label={t('orders.declaredValueUah')} value={draft.declaredValue} onChange={(value) => setDraft({ ...draft, declaredValue: value })} />
-          <NumberField label={t('orders.codAmountUah')} value={draft.codAmount ?? 0} onChange={(value) => setDraft({ ...draft, codAmount: value > 0 ? value : null })} />
+          <NumberField id="shipment-weight" error={fieldErrors.weight} label={t('orders.weightKg')} value={draft.parcels[0]!.weightKg} onChange={(value) => { setDraft(withParcel(draft, 'weightKg', value)); setFieldErrors((current) => clearFieldError(current, 'weight')); }} />
+          <NumberField id="shipment-length" error={fieldErrors.length} label={t('orders.lengthCm')} value={draft.parcels[0]!.lengthCm} onChange={(value) => { setDraft(withParcel(draft, 'lengthCm', value)); setFieldErrors((current) => clearFieldError(current, 'length')); }} />
+          <NumberField id="shipment-width" error={fieldErrors.width} label={t('orders.widthCm')} value={draft.parcels[0]!.widthCm} onChange={(value) => { setDraft(withParcel(draft, 'widthCm', value)); setFieldErrors((current) => clearFieldError(current, 'width')); }} />
+          <NumberField id="shipment-height" error={fieldErrors.height} label={t('orders.heightCm')} value={draft.parcels[0]!.heightCm} onChange={(value) => { setDraft(withParcel(draft, 'heightCm', value)); setFieldErrors((current) => clearFieldError(current, 'height')); }} />
+          <NumberField id="shipment-declaredValue" error={fieldErrors.declaredValue} label={t('orders.declaredValueUah')} value={draft.declaredValue} onChange={(value) => { setDraft({ ...draft, declaredValue: value }); setFieldErrors((current) => clearFieldError(current, 'declaredValue')); }} />
+          <NumberField id="shipment-codAmount" error={fieldErrors.codAmount} label={t('orders.codAmountUah')} value={draft.codAmount ?? 0} onChange={(value) => { setDraft({ ...draft, codAmount: value > 0 ? value : null }); setFieldErrors((current) => clearFieldError(current, 'codAmount')); }} />
         </div>
-        {draft.codAmount !== null && draft.codAmount > draft.declaredValue && <p className="shipment-validation" role="alert">{t('orders.codTooHigh')}</p>}
         <div className="shipment-quote" aria-live="polite">{quote ? <><strong>{t('orders.amountUah', { amount: formatNumber(quote.cost) })}</strong><span>{draft.provider === 'UKRPOSHTA' ? t('orders.estimatedCostFinalLater') : quote.estimatedDeliveryDate ? t('orders.estimatedDate', { date: quote.estimatedDeliveryDate }) : t('orders.costCalculated')}</span></> : <span>{quoteFailed ? t('orders.quoteFailed') : completeDraft ? t('orders.calculatingCost') : t('orders.selectExactDestination')}</span>}</div>
       </div>}
       <footer>
         <button type="button" className="secondary-button" disabled={state === 'creating'} onClick={onClose}>{t('orders.cancel')}</button>
-        <LoadingButton type="button" pending={state === 'saving'} pendingLabel={t('orders.savingShipmentDraft')} disabled={!completeDraft || state === 'saving' || state === 'creating' || (draft?.codAmount !== null && (draft?.codAmount ?? 0) > (draft?.declaredValue ?? 0))} onClick={() => void save()}>{t('orders.saveShipmentDraft')}</LoadingButton>
-        <LoadingButton className="shipment-create-button" type="button" pending={state === 'creating'} pendingLabel={t('orders.creatingTtn')} disabled={!completeDraft || overview?.creationEnabled === false || draft?.provider === 'UKRPOSHTA' && !quote || state === 'saving' || state === 'creating' || (draft?.codAmount !== null && (draft?.codAmount ?? 0) > (draft?.declaredValue ?? 0))} onClick={() => void create()}>{t('orders.createTtn')}</LoadingButton>
+        <LoadingButton type="button" pending={state === 'saving'} pendingLabel={t('orders.savingShipmentDraft')} disabled={!draft || state === 'saving' || state === 'creating'} onClick={() => void save()}>{t('orders.saveShipmentDraft')}</LoadingButton>
+        <LoadingButton className="shipment-create-button" type="button" pending={state === 'creating'} pendingLabel={t('orders.creatingTtn')} disabled={!draft || overview?.creationEnabled === false || draft?.provider === 'UKRPOSHTA' && Boolean(completeDraft) && !quote || state === 'saving' || state === 'creating'} onClick={() => void create()}>{t('orders.createTtn')}</LoadingButton>
       </footer>
     </section>
   </div>;
@@ -186,11 +217,11 @@ function formDraft(value: ShipmentDraftPrefill | ShipmentDraftInput): FormDraft 
   return { provider: value.provider, recipient: value.recipient, destination: null, parcels: value.parcels as [ShipmentDraftInput['parcels'][0]], payer: value.payer, declaredValue: value.declaredValue, codAmount: value.codAmount, description: value.description };
 }
 
-function Field({ label, value, onChange }: { label: string; value: string; onChange(value: string): void }) {
-  return <label><span>{label}</span><input aria-label={label} value={value} onChange={(event) => onChange(event.target.value)} /></label>;
+function Field({ id, error, label, value, onChange }: { id: string; error?: string | undefined; label: string; value: string; onChange(value: string): void }) {
+  return <label><span>{label}</span><input id={id} aria-label={label} aria-invalid={Boolean(error)} aria-describedby={error ? `${id}-error` : undefined} value={value} onChange={(event) => onChange(event.target.value)} /><FieldError id={`${id}-error`} message={error} /></label>;
 }
-function NumberField({ label, value, onChange }: { label: string; value: number; onChange(value: number): void }) {
-  return <label><span>{label}</span><input aria-label={label} type="number" min="0" step="0.01" value={value} onChange={(event) => onChange(Number(event.target.value))} /></label>;
+function NumberField({ id, error, label, value, onChange }: { id: string; error?: string | undefined; label: string; value: number; onChange(value: number): void }) {
+  return <label><span>{label}</span><input id={id} aria-label={label} aria-invalid={Boolean(error)} aria-describedby={error ? `${id}-error` : undefined} type="number" min="0" step="0.01" value={value} onChange={(event) => onChange(Number(event.target.value))} /><FieldError id={`${id}-error`} message={error} /></label>;
 }
 function withParcel(draft: FormDraft, key: keyof ShipmentDraftInput['parcels'][number], value: number): FormDraft {
   return { ...draft, parcels: [{ ...draft.parcels[0]!, [key]: value }] };

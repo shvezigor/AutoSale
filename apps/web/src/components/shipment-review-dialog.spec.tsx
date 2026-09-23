@@ -31,6 +31,22 @@ function renderDialog(props: Partial<Parameters<typeof ShipmentReviewDialog>[0]>
 }
 
 describe('ShipmentReviewDialog', () => {
+  it('explains incomplete recipient and parcel fields before saving', async () => {
+    const incomplete = { ...exactOverview, draft: { ...exactOverview.draft,
+      recipient: { name: '', phone: '' }, parcels: [{ weightKg: 0, lengthCm: 0, widthCm: 20, heightCm: 20 }],
+      declaredValue: 0, description: '',
+    } };
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => incomplete });
+    vi.stubGlobal('fetch', fetchMock);
+    renderDialog();
+    const save = await screen.findByRole('button', { name: 'Зберегти чернетку' });
+    fireEvent.click(save);
+    expect(screen.getByLabelText('Ім’я отримувача')).toHaveFocus();
+    expect(screen.getByText('Введіть щонайменше 2 символів.', { selector: '#shipment-recipientName-error' })).toBeInTheDocument();
+    expect(screen.getByText('Перевірте введене значення.', { selector: '#shipment-recipientPhone-error' })).toBeInTheDocument();
+    expect(screen.getByText('Значення має бути не менше 0.01.', { selector: '#shipment-weight-error' })).toBeInTheDocument();
+    expect(fetchMock).not.toHaveBeenCalledWith(expect.stringContaining('/draft'), expect.anything());
+  });
   it('translates the form while preserving recipient and location values', async () => {
     vi.stubGlobal('fetch', vi.fn().mockImplementation(async (path: string) => ({
       ok: true,
@@ -85,8 +101,8 @@ describe('ShipmentReviewDialog', () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => overview }));
     renderDialog();
     await screen.findByDisplayValue('І Я');
-    expect(screen.getByRole('button', { name: 'Зберегти чернетку' })).toBeDisabled();
-    expect(screen.getByRole('button', { name: 'Створити ТТН' })).toBeDisabled();
+    fireEvent.click(screen.getByRole('button', { name: 'Зберегти чернетку' }));
+    expect(screen.getByText('Перевірте введене значення.', { selector: '#shipment-recipientName-error' })).toBeInTheDocument();
   });
   it('loads prefilled fields, locks background scroll and closes on Escape', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => exactOverview }));
@@ -136,8 +152,9 @@ describe('ShipmentReviewDialog', () => {
     renderDialog();
     await screen.findByDisplayValue('Олена');
     fireEvent.change(screen.getByLabelText('Післяплата, грн'), { target: { value: '6000' } });
-    expect(screen.getByRole('alert')).toHaveTextContent('Післяплата не може перевищувати');
-    expect(screen.getByRole('button', { name: 'Зберегти чернетку' })).toBeDisabled();
+    fireEvent.click(screen.getByRole('button', { name: 'Зберегти чернетку' }));
+    expect(screen.getByText('Післяплата не може перевищувати оголошену вартість.', { selector: '#shipment-codAmount-error' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Післяплата, грн')).toHaveFocus();
   });
 
   it('refreshes the quote automatically after a complete draft is available', async () => {
