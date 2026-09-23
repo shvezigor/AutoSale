@@ -39,6 +39,14 @@ afterEach(() => {
 });
 
 describe('MeestSettingsCard', () => {
+  it('explains incomplete sender details at fields before saving', () => {
+    render(<MeestSettingsCard initial={active} role="OWNER" />);
+    fireEvent.click(screen.getByRole('button', { name: 'Зберегти відправника' }));
+    expect(screen.getByLabelText('Назва відправника Meest')).toHaveFocus();
+    expect(screen.getByText('Введіть щонайменше 2 символів.', { selector: '#meest-sender-name-error' })).toBeInTheDocument();
+    expect(screen.getByText('Перевірте введене значення.', { selector: '#meest-sender-phone-error' })).toBeInTheDocument();
+    expect(mutatingFetch).not.toHaveBeenCalled();
+  });
   it('shows missing credential errors at the fields before connecting', () => {
     render(<MeestSettingsCard initial={disconnected} role="OWNER" />);
     fireEvent.click(screen.getByRole('button', { name: 'Підключити Meest' }));

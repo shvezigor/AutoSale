@@ -35,6 +35,8 @@ export function MeestSettingsCard({ initial, role, embedded = false, onConnectio
   const [clientUid, setClientUid] = useState('');
   const [credentialErrors, setCredentialErrors] = useState<FieldErrors<'login' | 'password' | 'clientUid'>>({});
   const [profile, setProfile] = useState<MeestSenderProfileInput>(initial.connection?.senderProfile ?? emptyProfile);
+  type SenderField = 'name' | 'phone' | 'origin' | 'weight' | 'length' | 'width' | 'height' | 'template';
+  const [senderErrors, setSenderErrors] = useState<FieldErrors<SenderField>>({});
   const [city, setCity] = useState<DeliveryLocation | null>(null);
   const [pending, setPending] = useState<'connect' | 'disconnect' | 'profile' | null>(null);
   const activity = useActivity();
@@ -79,6 +81,24 @@ export function MeestSettingsCard({ initial, role, embedded = false, onConnectio
   }
 
   async function saveProfile(): Promise<void> {
+    const errors: FieldErrors<SenderField> = {};
+    if (profile.senderName.trim().length < 2) errors.name = t('validation.tooShort', { count: 2 });
+    if (!/^\+380\d{9}$/.test(profile.senderPhone)) errors.phone = t('validation.invalid');
+    if (!profile.origin.cityRef || !profile.origin.locationRef) errors.origin = t('validation.required');
+    for (const [field, value, max] of [
+      ['weight', profile.defaultParcel.weightKg, 1_000], ['length', profile.defaultParcel.lengthCm, 300],
+      ['width', profile.defaultParcel.widthCm, 300], ['height', profile.defaultParcel.heightCm, 300],
+    ] as const) {
+      if (!Number.isFinite(value) || value <= 0) errors[field] = t('validation.minimum', { value: 0.01 });
+      else if (value > max) errors[field] = t('validation.maximum', { value: max });
+    }
+    if (!profile.customerNotificationTemplate.trim()) errors.template = t('validation.required');
+    setSenderErrors(errors);
+    if (Object.keys(errors).length) {
+      const first = (['name', 'phone', 'origin', 'weight', 'length', 'width', 'height', 'template'] as const).find((field) => errors[field]);
+      document.getElementById(`meest-sender-${first}`)?.focus();
+      return;
+    }
     setPending('profile');
     try {
       const response = await activity.run(t('meestSettings.savingSender'), () => mutatingFetch('/api/integrations/delivery/meest/sender-profile', {
@@ -147,33 +167,35 @@ export function MeestSettingsCard({ initial, role, embedded = false, onConnectio
           {active && <fieldset className="delivery-sender-form" disabled={pending !== null}>
             <legend>{t('meestSettings.senderLegend')}</legend>
             <div className="meest-connect-grid">
-              <label><span>{t('meestSettings.senderName')}</span><input aria-label={t('meestSettings.senderName')} value={profile.senderName} onChange={(event) => setProfile((current) => ({ ...current, senderName: event.target.value }))} /></label>
-              <label><span>{t('meestSettings.senderPhone')}</span><input aria-label={t('meestSettings.senderPhone')} inputMode="tel" placeholder="+380501112233" value={profile.senderPhone} onChange={(event) => setProfile((current) => ({ ...current, senderPhone: event.target.value }))} /></label>
+              <label><span>{t('meestSettings.senderName')}</span><input id="meest-sender-name" aria-label={t('meestSettings.senderName')} aria-invalid={Boolean(senderErrors.name)} aria-describedby={senderErrors.name ? 'meest-sender-name-error' : undefined} value={profile.senderName} onChange={(event) => { setProfile((current) => ({ ...current, senderName: event.target.value })); setSenderErrors((current) => clearFieldError(current, 'name')); }} /><FieldError id="meest-sender-name-error" message={senderErrors.name} /></label>
+              <label><span>{t('meestSettings.senderPhone')}</span><input id="meest-sender-phone" aria-label={t('meestSettings.senderPhone')} aria-invalid={Boolean(senderErrors.phone)} aria-describedby={senderErrors.phone ? 'meest-sender-phone-error' : undefined} inputMode="tel" placeholder="+380501112233" value={profile.senderPhone} onChange={(event) => { setProfile((current) => ({ ...current, senderPhone: event.target.value })); setSenderErrors((current) => clearFieldError(current, 'phone')); }} /><FieldError id="meest-sender-phone-error" message={senderErrors.phone} /></label>
             </div>
             <div className="delivery-origin-grid">
               <DeliveryLocationPicker provider="MEEST" label={t('meestSettings.city')} type="CITY" value={city} onSelect={(value) => setCity(value)} />
               <DeliveryLocationPicker
+                fieldId="meest-sender-origin"
+                fieldError={senderErrors.origin}
                 provider="MEEST"
                 label={t('meestSettings.branch')}
                 type="BRANCH"
                 {...(city?.ref || profile.origin.cityRef ? { cityRef: city?.ref ?? profile.origin.cityRef } : {})}
                 value={profile.origin.locationRef ? { ref: profile.origin.locationRef, provider: 'MEEST', type: profile.origin.type, label: profile.origin.label, cityRef: profile.origin.cityRef } : null}
-                onSelect={(value) => setProfile((current) => ({
+                onSelect={(value) => { setSenderErrors((current) => clearFieldError(current, 'origin')); setProfile((current) => ({
                   ...current,
                   origin: value ? { type: value.type === 'PARCEL_LOCKER' ? 'PARCEL_LOCKER' : 'BRANCH', cityRef: value.cityRef!, locationRef: value.ref, label: value.label } : { type: 'BRANCH', cityRef: city?.ref ?? '', locationRef: '', label: '' },
-                }))}
+                })); }}
               />
             </div>
             <div className="delivery-parcel-grid">
-              <NumberField label={t('novaPoshtaSettings.weight')} value={profile.defaultParcel.weightKg} onChange={(value) => setProfile((current) => ({ ...current, defaultParcel: { ...current.defaultParcel, weightKg: value } }))} />
-              <NumberField label={t('novaPoshtaSettings.length')} value={profile.defaultParcel.lengthCm} onChange={(value) => setProfile((current) => ({ ...current, defaultParcel: { ...current.defaultParcel, lengthCm: value } }))} />
-              <NumberField label={t('novaPoshtaSettings.width')} value={profile.defaultParcel.widthCm} onChange={(value) => setProfile((current) => ({ ...current, defaultParcel: { ...current.defaultParcel, widthCm: value } }))} />
-              <NumberField label={t('novaPoshtaSettings.height')} value={profile.defaultParcel.heightCm} onChange={(value) => setProfile((current) => ({ ...current, defaultParcel: { ...current.defaultParcel, heightCm: value } }))} />
+              <NumberField id="meest-sender-weight" error={senderErrors.weight} label={t('novaPoshtaSettings.weight')} value={profile.defaultParcel.weightKg} onChange={(value) => { setProfile((current) => ({ ...current, defaultParcel: { ...current.defaultParcel, weightKg: value } })); setSenderErrors((current) => clearFieldError(current, 'weight')); }} />
+              <NumberField id="meest-sender-length" error={senderErrors.length} label={t('novaPoshtaSettings.length')} value={profile.defaultParcel.lengthCm} onChange={(value) => { setProfile((current) => ({ ...current, defaultParcel: { ...current.defaultParcel, lengthCm: value } })); setSenderErrors((current) => clearFieldError(current, 'length')); }} />
+              <NumberField id="meest-sender-width" error={senderErrors.width} label={t('novaPoshtaSettings.width')} value={profile.defaultParcel.widthCm} onChange={(value) => { setProfile((current) => ({ ...current, defaultParcel: { ...current.defaultParcel, widthCm: value } })); setSenderErrors((current) => clearFieldError(current, 'width')); }} />
+              <NumberField id="meest-sender-height" error={senderErrors.height} label={t('novaPoshtaSettings.height')} value={profile.defaultParcel.heightCm} onChange={(value) => { setProfile((current) => ({ ...current, defaultParcel: { ...current.defaultParcel, heightCm: value } })); setSenderErrors((current) => clearFieldError(current, 'height')); }} />
             </div>
             <label><span>{t('meestSettings.payer')}</span><select value={profile.payer} onChange={(event) => setProfile((current) => ({ ...current, payer: event.target.value as MeestSenderProfileInput['payer'] }))}><option value="SENDER">{t('meestSettings.sender')}</option><option value="RECIPIENT">{t('meestSettings.recipient')}</option></select></label>
             <label className="delivery-checkbox"><input type="checkbox" checked={profile.suggestCustomerNotification} onChange={(event) => setProfile((current) => ({ ...current, suggestCustomerNotification: event.target.checked }))} /><span>{t('meestSettings.suggestNotification')}</span></label>
-            <label><span>{t('meestSettings.template')}</span><textarea value={profile.customerNotificationTemplate} onChange={(event) => setProfile((current) => ({ ...current, customerNotificationTemplate: event.target.value }))} /></label>
-            <div className="settings-actions delivery-settings-actions"><LoadingButton type="button" pending={pending === 'profile'} pendingLabel={t('meestSettings.saving')} disabled={pending !== null || !validProfile(profile)} onClick={() => void saveProfile()}>{t('meestSettings.saveSender')}</LoadingButton></div>
+            <label><span>{t('meestSettings.template')}</span><textarea id="meest-sender-template" aria-invalid={Boolean(senderErrors.template)} aria-describedby={senderErrors.template ? 'meest-sender-template-error' : undefined} value={profile.customerNotificationTemplate} onChange={(event) => { setProfile((current) => ({ ...current, customerNotificationTemplate: event.target.value })); setSenderErrors((current) => clearFieldError(current, 'template')); }} /><FieldError id="meest-sender-template-error" message={senderErrors.template} /></label>
+            <div className="settings-actions delivery-settings-actions"><LoadingButton type="button" pending={pending === 'profile'} pendingLabel={t('meestSettings.saving')} disabled={pending !== null} onClick={() => void saveProfile()}>{t('meestSettings.saveSender')}</LoadingButton></div>
           </fieldset>}
         </>}
   </section>;
@@ -215,14 +237,6 @@ function isMeestSenderProfile(value: unknown): value is MeestSenderProfileInput 
     && typeof profile.customerNotificationTemplate === 'string';
 }
 
-function validProfile(profile: MeestSenderProfileInput): boolean {
-  return profile.senderName.trim().length >= 2
-    && /^\+380\d{9}$/.test(profile.senderPhone)
-    && Boolean(profile.origin.cityRef && profile.origin.locationRef && profile.origin.label)
-    && Object.values(profile.defaultParcel).every((value) => Number.isFinite(value) && value > 0)
-    && Boolean(profile.customerNotificationTemplate.trim());
-}
-
-function NumberField({ label, value, onChange }: { label: string; value: number; onChange(value: number): void }) {
-  return <label><span>{label}</span><input aria-label={label} type="number" min="0.01" step="0.01" value={value} onChange={(event) => onChange(Number(event.target.value))} /></label>;
+function NumberField({ id, error, label, value, onChange }: { id: string; error?: string | undefined; label: string; value: number; onChange(value: number): void }) {
+  return <label><span>{label}</span><input id={id} aria-label={label} aria-invalid={Boolean(error)} aria-describedby={error ? `${id}-error` : undefined} type="number" min="0.01" step="0.01" value={value} onChange={(event) => onChange(Number(event.target.value))} /><FieldError id={`${id}-error`} message={error} /></label>;
 }
