@@ -31,6 +31,14 @@ afterEach(() => {
 });
 
 describe('DeliverySettingsCard', () => {
+  it('explains a missing API key at the credential field before connecting', () => {
+    render(<DeliverySettingsCard initial={disconnected} role="OWNER" />);
+    fireEvent.click(screen.getByRole('button', { name: 'Підключити Нову Пошту' }));
+    expect(screen.getByLabelText('API-ключ Нової Пошти')).toHaveFocus();
+    expect(screen.getByText('Введіть щонайменше 8 символів.')).toHaveAttribute('id', 'nova-poshta-api-key-error');
+    expect(mutatingFetch).not.toHaveBeenCalled();
+  });
+
   it('renders English controls while preserving the Nova Poshta account label', () => {
     render(<DeliverySettingsCard initial={active} role="OWNER" />, 'en');
     expect(screen.getByText('ТОВ Приклад')).toBeInTheDocument();

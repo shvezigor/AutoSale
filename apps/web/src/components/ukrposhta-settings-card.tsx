@@ -9,6 +9,8 @@ import type { Translator } from '../i18n/translator';
 import { useActivity } from './activity-provider';
 import { useConfirm } from './confirm-provider';
 import { DeliveryLocationPicker } from './delivery-location-picker';
+import { FieldError } from './form-field';
+import { clearFieldError, type FieldErrors } from './form-validation';
 import { LoadingButton } from './loading-button';
 import { useToast } from './toast-provider';
 
@@ -33,6 +35,8 @@ export function UkrposhtaSettingsCard({ initial, role, embedded = false, onConne
   const [counterpartyToken, setCounterpartyToken] = useState('');
   const [trackingBearer, setTrackingBearer] = useState('');
   const [counterpartyUuid, setCounterpartyUuid] = useState('');
+  type CredentialField = 'ecom' | 'counterpartyToken' | 'tracking' | 'counterpartyUuid';
+  const [credentialErrors, setCredentialErrors] = useState<FieldErrors<CredentialField>>({});
   const [profile, setProfile] = useState<UkrposhtaSenderProfileInput>(initial.connection?.senderProfile ?? emptyProfile);
   const [city, setCity] = useState<DeliveryLocation | null>(() => citySelectionFromProfile(initial.connection?.senderProfile));
   const [pending, setPending] = useState<'connect' | 'disconnect' | 'profile' | null>(null);
@@ -50,6 +54,17 @@ export function UkrposhtaSettingsCard({ initial, role, embedded = false, onConne
   }
 
   async function connect(): Promise<void> {
+    const errors: FieldErrors<CredentialField> = {};
+    if (ecomBearer.trim().length < 8) errors.ecom = ecomBearer.trim() ? t('validation.invalid') : t('validation.required');
+    if (counterpartyToken.trim().length < 8) errors.counterpartyToken = counterpartyToken.trim() ? t('validation.invalid') : t('validation.required');
+    if (trackingBearer.trim().length < 8) errors.tracking = trackingBearer.trim() ? t('validation.invalid') : t('validation.required');
+    if (!isUuid(counterpartyUuid.trim())) errors.counterpartyUuid = t('validation.invalid');
+    setCredentialErrors(errors);
+    if (Object.keys(errors).length) {
+      const first = (['ecom', 'counterpartyToken', 'tracking', 'counterpartyUuid'] as const).find((field) => errors[field]);
+      document.getElementById(`ukrposhta-${first}`)?.focus();
+      return;
+    }
     setPending('connect');
     try {
       const response = await activity.run(t('ukrposhtaSettings.connectingActivity'), () => mutatingFetch('/api/integrations/delivery/ukrposhta', {
@@ -145,15 +160,15 @@ export function UkrposhtaSettingsCard({ initial, role, embedded = false, onConne
           </div>
           <div className="ukrposhta-connect-grid">
             <label><span>{t('ukrposhtaSettings.environmentField')}</span><select aria-label={t('ukrposhtaSettings.environmentField')} value={environment} onChange={(event) => setEnvironment(event.target.value as 'SANDBOX' | 'PRODUCTION')}><option value="SANDBOX">{t('ukrposhtaSettings.sandbox')}</option><option value="PRODUCTION">{t('ukrposhtaSettings.production')}</option></select></label>
-            <label><span>eCom bearer</span><input aria-label="eCom bearer" autoComplete="new-password" type="password" value={ecomBearer} onChange={(event) => setEcomBearer(event.target.value)} /></label>
-            <label><span>{t('ukrposhtaSettings.counterpartyToken')}</span><input aria-label={t('ukrposhtaSettings.counterpartyToken')} autoComplete="new-password" type="password" value={counterpartyToken} onChange={(event) => setCounterpartyToken(event.target.value)} /></label>
-            <label><span>StatusTracking bearer</span><input aria-label="StatusTracking bearer" autoComplete="new-password" type="password" value={trackingBearer} onChange={(event) => setTrackingBearer(event.target.value)} /></label>
-            <label><span>{t('ukrposhtaSettings.counterpartyUuid')}</span><input aria-label={t('ukrposhtaSettings.counterpartyUuid')} autoComplete="off" value={counterpartyUuid} onChange={(event) => setCounterpartyUuid(event.target.value)} placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" /></label>
+            <label><span>eCom bearer</span><input id="ukrposhta-ecom" aria-label="eCom bearer" aria-invalid={Boolean(credentialErrors.ecom)} aria-describedby={credentialErrors.ecom ? 'ukrposhta-ecom-error' : undefined} autoComplete="new-password" type="password" value={ecomBearer} onChange={(event) => { setEcomBearer(event.target.value); setCredentialErrors((current) => clearFieldError(current, 'ecom')); }} /><FieldError id="ukrposhta-ecom-error" message={credentialErrors.ecom} /></label>
+            <label><span>{t('ukrposhtaSettings.counterpartyToken')}</span><input id="ukrposhta-counterpartyToken" aria-label={t('ukrposhtaSettings.counterpartyToken')} aria-invalid={Boolean(credentialErrors.counterpartyToken)} aria-describedby={credentialErrors.counterpartyToken ? 'ukrposhta-counterparty-token-error' : undefined} autoComplete="new-password" type="password" value={counterpartyToken} onChange={(event) => { setCounterpartyToken(event.target.value); setCredentialErrors((current) => clearFieldError(current, 'counterpartyToken')); }} /><FieldError id="ukrposhta-counterparty-token-error" message={credentialErrors.counterpartyToken} /></label>
+            <label><span>StatusTracking bearer</span><input id="ukrposhta-tracking" aria-label="StatusTracking bearer" aria-invalid={Boolean(credentialErrors.tracking)} aria-describedby={credentialErrors.tracking ? 'ukrposhta-tracking-error' : undefined} autoComplete="new-password" type="password" value={trackingBearer} onChange={(event) => { setTrackingBearer(event.target.value); setCredentialErrors((current) => clearFieldError(current, 'tracking')); }} /><FieldError id="ukrposhta-tracking-error" message={credentialErrors.tracking} /></label>
+            <label><span>{t('ukrposhtaSettings.counterpartyUuid')}</span><input id="ukrposhta-counterpartyUuid" aria-label={t('ukrposhtaSettings.counterpartyUuid')} aria-invalid={Boolean(credentialErrors.counterpartyUuid)} aria-describedby={credentialErrors.counterpartyUuid ? 'ukrposhta-counterparty-uuid-error' : undefined} autoComplete="off" value={counterpartyUuid} onChange={(event) => { setCounterpartyUuid(event.target.value); setCredentialErrors((current) => clearFieldError(current, 'counterpartyUuid')); }} placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" /><FieldError id="ukrposhta-counterparty-uuid-error" message={credentialErrors.counterpartyUuid} /></label>
           </div>
           {environment === 'PRODUCTION' && <p className="ukrposhta-production-warning"><strong>{t('ukrposhtaSettings.production')}</strong> {t('ukrposhtaSettings.productionWarning')}</p>}
           <p className="delivery-key-note">{t('ukrposhtaSettings.securityHint')}</p>
           <div className="settings-actions delivery-settings-actions">
-            <LoadingButton type="button" pending={pending === 'connect'} pendingLabel={t('ukrposhtaSettings.connecting')} disabled={pending !== null || !ready(ecomBearer, counterpartyToken, trackingBearer, counterpartyUuid)} onClick={() => void connect()}>{active ? t('ukrposhtaSettings.replaceAccess') : t('ukrposhtaSettings.connect')}</LoadingButton>
+            <LoadingButton type="button" pending={pending === 'connect'} pendingLabel={t('ukrposhtaSettings.connecting')} disabled={pending !== null} onClick={() => void connect()}>{active ? t('ukrposhtaSettings.replaceAccess') : t('ukrposhtaSettings.connect')}</LoadingButton>
             {active && <LoadingButton type="button" className="danger-button" pending={pending === 'disconnect'} pendingLabel={t('ukrposhtaSettings.disconnecting')} disabled={pending !== null} onClick={() => void disconnect()}>{t('ukrposhtaSettings.disconnect')}</LoadingButton>}
           </div>
           {active && <fieldset className="delivery-sender-form" disabled={pending !== null}>
@@ -206,10 +221,6 @@ export function UkrposhtaSettingsCard({ initial, role, embedded = false, onConne
           </fieldset>}
         </>}
   </section>;
-}
-
-function ready(ecomBearer: string, counterpartyToken: string, trackingBearer: string, counterpartyUuid: string): boolean {
-  return ecomBearer.trim().length >= 8 && counterpartyToken.trim().length >= 8 && trackingBearer.trim().length >= 8 && isUuid(counterpartyUuid.trim());
 }
 
 function isUuid(value: string): boolean {

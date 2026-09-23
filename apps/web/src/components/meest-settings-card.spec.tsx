@@ -39,6 +39,16 @@ afterEach(() => {
 });
 
 describe('MeestSettingsCard', () => {
+  it('shows missing credential errors at the fields before connecting', () => {
+    render(<MeestSettingsCard initial={disconnected} role="OWNER" />);
+    fireEvent.click(screen.getByRole('button', { name: 'Підключити Meest' }));
+    expect(screen.getByLabelText('Логін Meest API')).toHaveFocus();
+    expect(screen.getByText('Заповніть це поле.', { selector: '#meest-login-error' })).toBeInTheDocument();
+    expect(screen.getByText('Заповніть це поле.', { selector: '#meest-password-error' })).toBeInTheDocument();
+    expect(screen.getByText('Перевірте введене значення.', { selector: '#meest-client-uid-error' })).toBeInTheDocument();
+    expect(mutatingFetch).not.toHaveBeenCalled();
+  });
+
   it('renders English controls while preserving the Meest account label', () => {
     render(<MeestSettingsCard initial={active} role="OWNER" />, 'en');
     expect(screen.getByText('merchant')).toBeInTheDocument();

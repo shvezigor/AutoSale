@@ -9,6 +9,8 @@ import type { Translator } from '../i18n/translator';
 import { useActivity } from './activity-provider';
 import { useConfirm } from './confirm-provider';
 import { DeliveryLocationPicker } from './delivery-location-picker';
+import { FieldError } from './form-field';
+import { clearFieldError, type FieldErrors } from './form-validation';
 import { LoadingButton } from './loading-button';
 import { useToast } from './toast-provider';
 
@@ -31,6 +33,7 @@ export function MeestSettingsCard({ initial, role, embedded = false, onConnectio
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
   const [clientUid, setClientUid] = useState('');
+  const [credentialErrors, setCredentialErrors] = useState<FieldErrors<'login' | 'password' | 'clientUid'>>({});
   const [profile, setProfile] = useState<MeestSenderProfileInput>(initial.connection?.senderProfile ?? emptyProfile);
   const [city, setCity] = useState<DeliveryLocation | null>(null);
   const [pending, setPending] = useState<'connect' | 'disconnect' | 'profile' | null>(null);
@@ -41,6 +44,16 @@ export function MeestSettingsCard({ initial, role, embedded = false, onConnectio
   const active = connection?.status === 'ACTIVE';
 
   async function connect(): Promise<void> {
+    const errors: typeof credentialErrors = {};
+    if (!login.trim()) errors.login = t('validation.required');
+    if (!password) errors.password = t('validation.required');
+    if (!isUuid(clientUid.trim())) errors.clientUid = t('validation.invalid');
+    setCredentialErrors(errors);
+    if (Object.keys(errors).length) {
+      const first = (['login', 'password', 'clientUid'] as const).find((field) => errors[field]);
+      document.getElementById(`meest-${first}`)?.focus();
+      return;
+    }
     setPending('connect');
     try {
       const response = await activity.run(t('meestSettings.connectingActivity'), () => mutatingFetch('/api/integrations/delivery/meest', {
@@ -122,13 +135,13 @@ export function MeestSettingsCard({ initial, role, embedded = false, onConnectio
             <a className="secondary-button" href="https://wiki.meest-group.com/uk/api/api-eng" target="_blank" rel="noreferrer">{t('meestSettings.docs')}</a>
           </div>
           <div className="meest-connect-grid">
-            <label className="settings-field"><span>{t('meestSettings.login')}</span><input aria-label={t('meestSettings.login')} autoComplete="off" value={login} onChange={(event) => setLogin(event.target.value)} /></label>
-            <label className="settings-field"><span>{t('meestSettings.password')}</span><input aria-label={t('meestSettings.password')} autoComplete="new-password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} /></label>
-            <label className="settings-field"><span>ClientUID</span><input aria-label="ClientUID" autoComplete="off" value={clientUid} onChange={(event) => setClientUid(event.target.value)} placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" /></label>
+            <label className="settings-field"><span>{t('meestSettings.login')}</span><input id="meest-login" aria-label={t('meestSettings.login')} aria-invalid={Boolean(credentialErrors.login)} aria-describedby={credentialErrors.login ? 'meest-login-error' : undefined} autoComplete="off" value={login} onChange={(event) => { setLogin(event.target.value); setCredentialErrors((current) => clearFieldError(current, 'login')); }} /><FieldError id="meest-login-error" message={credentialErrors.login} /></label>
+            <label className="settings-field"><span>{t('meestSettings.password')}</span><input id="meest-password" aria-label={t('meestSettings.password')} aria-invalid={Boolean(credentialErrors.password)} aria-describedby={credentialErrors.password ? 'meest-password-error' : undefined} autoComplete="new-password" type="password" value={password} onChange={(event) => { setPassword(event.target.value); setCredentialErrors((current) => clearFieldError(current, 'password')); }} /><FieldError id="meest-password-error" message={credentialErrors.password} /></label>
+            <label className="settings-field"><span>ClientUID</span><input id="meest-clientUid" aria-label="ClientUID" aria-invalid={Boolean(credentialErrors.clientUid)} aria-describedby={credentialErrors.clientUid ? 'meest-client-uid-error' : undefined} autoComplete="off" value={clientUid} onChange={(event) => { setClientUid(event.target.value); setCredentialErrors((current) => clearFieldError(current, 'clientUid')); }} placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" /><FieldError id="meest-client-uid-error" message={credentialErrors.clientUid} /></label>
           </div>
           <p className="delivery-key-note">{t('meestSettings.security')}</p>
           <div className="settings-actions delivery-settings-actions">
-            <LoadingButton type="button" pending={pending === 'connect'} pendingLabel={t('meestSettings.connecting')} disabled={pending !== null || !login.trim() || !password || !isUuid(clientUid.trim())} onClick={() => void connect()}>{active ? t('meestSettings.replaceAccess') : t('meestSettings.connect')}</LoadingButton>
+            <LoadingButton type="button" pending={pending === 'connect'} pendingLabel={t('meestSettings.connecting')} disabled={pending !== null} onClick={() => void connect()}>{active ? t('meestSettings.replaceAccess') : t('meestSettings.connect')}</LoadingButton>
             {active && <LoadingButton type="button" className="danger-button" pending={pending === 'disconnect'} pendingLabel={t('meestSettings.disconnecting')} disabled={pending !== null} onClick={() => void disconnect()}>{t('meestSettings.disconnect')}</LoadingButton>}
           </div>
           {active && <fieldset className="delivery-sender-form" disabled={pending !== null}>

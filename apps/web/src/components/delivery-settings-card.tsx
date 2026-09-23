@@ -11,6 +11,7 @@ import { useConfirm } from './confirm-provider';
 import { DeliveryLocationPicker } from './delivery-location-picker';
 import { LoadingButton } from './loading-button';
 import { useToast } from './toast-provider';
+import { FieldError } from './form-field';
 
 export type DeliverySettingsSummary = {
   enabled: boolean;
@@ -52,6 +53,7 @@ export function DeliverySettingsCard({
   const [connection, setConnection] = useState<DeliveryConnectionSummary | null>(initial.connections[0] ?? null);
   const [profile, setProfile] = useState<DeliverySenderProfileInput>(initial.connections[0]?.senderProfile ?? emptyProfile);
   const [apiKey, setApiKey] = useState('');
+  const [apiKeyError, setApiKeyError] = useState<string | null>(null);
   const [pending, setPending] = useState<PendingAction>(null);
   const [senderOptions, setSenderOptions] = useState<SenderOption[]>([]);
   const [originCity, setOriginCity] = useState<DeliveryLocation | null>(null);
@@ -89,9 +91,11 @@ export function DeliverySettingsCard({
   async function connect() {
     const normalizedKey = apiKey.trim();
     if (normalizedKey.length < 8) {
-      toast.show({ type: 'error', title: t('novaPoshtaSettings.invalidKey') });
+      setApiKeyError(t('validation.tooShort', { count: 8 }));
+      document.getElementById('nova-poshta-api-key')?.focus();
       return;
     }
+    setApiKeyError(null);
     setPending('connect');
     try {
       const response = await activity.run(t('novaPoshtaSettings.connectingActivity'), () => mutatingFetch('/api/integrations/delivery/nova-poshta', {
@@ -197,9 +201,10 @@ export function DeliverySettingsCard({
       <div className="delivery-connect-form">
         <label>
           <span>{t('novaPoshtaSettings.apiKey')}</span>
-          <input aria-label={t('novaPoshtaSettings.apiKey')} autoComplete="off" type="password" value={apiKey} onChange={(event) => setApiKey(event.target.value)} placeholder={active ? t('novaPoshtaSettings.replaceKeyPlaceholder') : t('novaPoshtaSettings.keyPlaceholder')} />
+          <input id="nova-poshta-api-key" aria-label={t('novaPoshtaSettings.apiKey')} aria-invalid={apiKeyError ? 'true' : undefined} aria-describedby={apiKeyError ? 'nova-poshta-api-key-error' : undefined} autoComplete="off" type="password" value={apiKey} onChange={(event) => { setApiKey(event.target.value); setApiKeyError(null); }} placeholder={active ? t('novaPoshtaSettings.replaceKeyPlaceholder') : t('novaPoshtaSettings.keyPlaceholder')} />
+          <FieldError id="nova-poshta-api-key-error" message={apiKeyError} />
         </label>
-        <LoadingButton type="button" pending={pending === 'connect'} pendingLabel={t('novaPoshtaSettings.connecting')} disabled={pending !== null || apiKey.trim().length < 8} onClick={() => void connect()}>
+        <LoadingButton type="button" pending={pending === 'connect'} pendingLabel={t('novaPoshtaSettings.connecting')} disabled={pending !== null} onClick={() => void connect()}>
           {active ? t('novaPoshtaSettings.replaceKey') : t('novaPoshtaSettings.connect')}
         </LoadingButton>
       </div>

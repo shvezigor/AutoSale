@@ -143,6 +143,8 @@ Validation response може додатково містити:
 2. Auth, onboarding, profile та team forms.
 3. Product editor, catalogue import, orders, commercial settings і payments.
 4. Delivery, shipment, Telegram/Instagram/Google settings та інші integrations.
+
+У підключенні перевізників Nova Poshta, Meest та Укрпошта локально перевіряються формат і обов'язковість API-реквізитів: кнопка залишається доступною, щоб submit показав помилки під конкретними полями та перевів фокус на перше з них. Значення секретів ніколи не додаються до тексту помилки. Відмова провайдера за синтаксично коректними реквізитами лишається загальною помилкою картки. Дані відправника, ТТН та решта інтеграцій ще мігруються в цьому блоці.
 5. Public demo form.
 6. Repository audit: кожна user-editable форма або використовує shared field contract, або має задокументоване contextual виключення.
 

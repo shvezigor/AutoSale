@@ -3,6 +3,7 @@
 import type { DeliveryLocation, DeliveryLocationQuery, DeliveryLocationType, DeliveryProvider } from '../../../../packages/contracts/src/delivery';
 import { useEffect, useId, useRef, useState } from 'react';
 import { useI18n } from '../i18n/i18n-provider';
+import { FieldError } from './form-field';
 
 type SearchInput = DeliveryLocationQuery;
 type SearchFunction = (input: SearchInput, signal: AbortSignal) => Promise<DeliveryLocation[]>;
@@ -16,6 +17,8 @@ export function DeliveryLocationPicker({
   value,
   onSelect,
   search = searchDeliveryLocations,
+  fieldId,
+  fieldError,
 }: {
   label: string;
   provider?: Extract<DeliveryProvider, 'NOVA_POSHTA' | 'MEEST' | 'UKRPOSHTA'>;
@@ -25,6 +28,8 @@ export function DeliveryLocationPicker({
   value: DeliveryLocation | null;
   onSelect(value: DeliveryLocation | null): void;
   search?: SearchFunction;
+  fieldId?: string;
+  fieldError?: string;
 }) {
   const { t } = useI18n();
   const listId = useId();
@@ -111,16 +116,18 @@ export function DeliveryLocationPicker({
   }
 
   return <div className="delivery-location-picker">
-    <label htmlFor={`${listId}-input`}>{label}</label>
+    <label htmlFor={fieldId ?? `${listId}-input`}>{label}</label>
     <div className="delivery-location-input-wrap">
       <input
-        id={`${listId}-input`}
+        id={fieldId ?? `${listId}-input`}
         role="combobox"
         aria-label={label}
         aria-autocomplete="list"
         aria-expanded={open}
         aria-controls={listId}
         aria-activedescendant={activeIndex >= 0 ? `${listId}-${activeIndex}` : undefined}
+        aria-invalid={Boolean(fieldError)}
+        aria-describedby={fieldError ? `${fieldId ?? listId}-error` : undefined}
         value={query}
         autoComplete="off"
         onChange={(event) => {
@@ -132,6 +139,7 @@ export function DeliveryLocationPicker({
       />
       <span className="delivery-location-progress" aria-live="polite">{loading ? t('orders.searchingLocations') : ''}</span>
     </div>
+    <FieldError id={`${fieldId ?? listId}-error`} message={fieldError} />
     <div className="delivery-location-results-wrap">
       {open && <ul id={listId} role="listbox" className="delivery-location-results">
         {error && <li role="alert" className="delivery-location-state">{t('orders.locationsFailed')}</li>}

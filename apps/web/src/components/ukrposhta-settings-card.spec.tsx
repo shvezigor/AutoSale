@@ -44,6 +44,16 @@ afterEach(() => {
 });
 
 describe('UkrposhtaSettingsCard', () => {
+  it('identifies each missing credential before connecting', () => {
+    render(<UkrposhtaSettingsCard initial={disconnected} role="OWNER" />);
+    fireEvent.click(screen.getByRole('button', { name: 'Підключити Укрпошту' }));
+    expect(screen.getByLabelText('eCom bearer')).toHaveFocus();
+    expect(screen.getByText('Заповніть це поле.', { selector: '#ukrposhta-ecom-error' })).toBeInTheDocument();
+    expect(screen.getByText('Заповніть це поле.', { selector: '#ukrposhta-counterparty-token-error' })).toBeInTheDocument();
+    expect(screen.getByText('Заповніть це поле.', { selector: '#ukrposhta-tracking-error' })).toBeInTheDocument();
+    expect(screen.getByText('Перевірте введене значення.', { selector: '#ukrposhta-counterparty-uuid-error' })).toBeInTheDocument();
+    expect(mutatingFetch).not.toHaveBeenCalled();
+  });
   it('renders English controls while preserving the Ukrposhta account label', () => {
     render(<UkrposhtaSettingsCard initial={active} role="OWNER" />, 'en');
     expect(screen.getByText('ТОВ Приклад · тестове середовище')).toBeInTheDocument();
