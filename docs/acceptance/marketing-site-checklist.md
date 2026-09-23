@@ -4,6 +4,8 @@ Date: 2026-09-17
 
 ## Automated evidence
 
+- [x] 2026-09-23: invalid demo submission Playwright regression passes at 320/768/1024/1440 px: field text, focus, retained values, independent clearing and no horizontal overflow.
+
 - [x] Web typecheck passes.
 - [x] Web production build passes.
 - [x] Existing web tests and new marketing registry/locale tests pass.

@@ -43,4 +43,24 @@ test.describe('Sales AITO marketing site', () => {
     await expect(page.getByRole('heading', { name: 'Request received' })).toBeVisible();
     expect(receivedKey.length).toBeGreaterThan(10);
   });
+
+  test('explains invalid demo fields without overflow or losing entered values', async ({ page }) => {
+    await page.goto('/uk/demo');
+    for (const width of [320, 768, 1024, 1440]) {
+      await page.setViewportSize({ width, height: 850 });
+      await page.getByLabel('Ім’я').fill('А');
+      await page.getByLabel('Компанія або магазин').fill('Тестовий магазин');
+      await page.getByRole('button', { name: 'Замовити демо' }).click();
+      await expect(page.getByLabel('Ім’я')).toBeFocused();
+      await expect(page.getByLabel('Ім’я')).toHaveAttribute('aria-invalid', 'true');
+      await expect(page.locator('#demo-name-error')).toBeVisible();
+      await expect(page.locator('#demo-orderVolume-error')).toBeVisible();
+      await expect(page.getByLabel('Компанія або магазин')).toHaveValue('Тестовий магазин');
+      const dimensions = await page.evaluate(() => ({ scrollWidth: document.documentElement.scrollWidth, clientWidth: document.documentElement.clientWidth }));
+      expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.clientWidth);
+      await page.getByLabel('Ім’я').fill('Олена');
+      await expect(page.locator('#demo-name-error')).toHaveCount(0);
+      await expect(page.locator('#demo-orderVolume-error')).toBeVisible();
+    }
+  });
 });

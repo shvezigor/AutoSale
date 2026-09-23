@@ -430,7 +430,7 @@ Expected first run: FAIL listing unmigrated forms. Inspect each file and either 
 
 Add the field-error standard to `AGENTS.md` and `docs/frontend/design-system.md`. Change the feature index status from `Planned` to `Available` only after the audit test, full suite and browser acceptance pass.
 
-- [ ] **Step 6: Verify and commit Task 6**
+- [x] **Step 6: Verify and commit Task 6**
 
 Run:
 
@@ -465,7 +465,7 @@ Test representative forms at 320, 768, 1024 and 1440 px: registration, profile, 
 
 Keyboard-submit each representative form, inspect accessible names/descriptions, ensure `aria-invalid` changes with state, and confirm no horizontal scrolling caused by messages.
 
-- [ ] **Step 3: Run final verification**
+- [x] **Step 3: Run final verification**
 
 Run:
 
