@@ -16,4 +16,23 @@ describe('DemoLeadsController', () => {
     const controller = new DemoLeadsController({ create: vi.fn() } as never);
     expect(() => controller.create({ ...valid, email: '', phone: '' }, 'request-2')).toThrow(BadRequestException);
   });
+  it('returns only safe field codes for an invalid public request', () => {
+    const controller = new DemoLeadsController({ create: vi.fn() } as never);
+    try { controller.create({ ...valid, name: 'A', company: '', email: 'bad', orderVolume: '', privacyConsent: false }, 'request-3'); }
+    catch (error) {
+      expect(error).toBeInstanceOf(BadRequestException);
+      expect((error as BadRequestException).getResponse()).toEqual(expect.objectContaining({
+        code: 'VALIDATION_FAILED',
+        issues: expect.arrayContaining([
+          { field: 'name', code: 'INVALID_NAME' },
+          { field: 'company', code: 'INVALID_COMPANY' },
+          { field: 'email', code: 'INVALID_EMAIL' },
+          { field: 'orderVolume', code: 'INVALID_ORDER_VOLUME' },
+          { field: 'privacyConsent', code: 'CONSENT_REQUIRED' },
+        ]),
+      }));
+      return;
+    }
+    throw new Error('expected validation error');
+  });
 });
