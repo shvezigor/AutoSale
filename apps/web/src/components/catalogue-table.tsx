@@ -51,7 +51,7 @@ export function CatalogueTable({ session, products, page, pageSize, total, searc
 
   return <>
     <div className="catalogue-toolbar">
-      <form onSubmit={submitSearch} role="search"><label className="sr-only" htmlFor="catalogue-search">{t('catalogue.searchLabel')}</label><input id="catalogue-search" onChange={(event) => setQuery(event.target.value)} placeholder={t('catalogue.searchPlaceholder')} type="search" value={query} /><button className="secondary-button" type="submit">{t('catalogue.search')}</button></form>
+      <form onSubmit={submitSearch} role="search" data-validation-context="non-field"><label className="sr-only" htmlFor="catalogue-search">{t('catalogue.searchLabel')}</label><input id="catalogue-search" onChange={(event) => setQuery(event.target.value)} placeholder={t('catalogue.searchPlaceholder')} type="search" value={query} /><button className="secondary-button" type="submit">{t('catalogue.search')}</button></form>
       {isOwner && <div className="catalogue-toolbar-actions"><button className="danger-text-button" disabled={clearing || total === 0} onClick={() => void clearCatalogue()} type="button">{clearing ? t('catalogue.clearing') : t('catalogue.clear')}</button><button className="primary-button catalogue-add-button" onClick={() => setEditing('new')} type="button">{t('catalogue.add')}</button></div>}
     </div>
     {editing === 'new' && isOwner && <ProductEditor onClose={() => setEditing(null)} />}

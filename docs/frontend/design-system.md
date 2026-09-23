@@ -32,3 +32,5 @@ Use `FormField` and `FieldError` from `apps/web/src/components/form-field.tsx` f
 - Translate browser constraints through the application dictionaries; do not expose browser, provider, Zod, or database prose.
 - Keep network, permission, conflict, provider availability, and unknown failures at form level.
 - Field messages must wrap without horizontal overflow on mobile and must not rely on color alone.
+
+The repository form contract inventories production TSX forms. Catalogue and order search forms are explicit `data-validation-context="non-field"` exceptions: their free-text queries have no independently invalid value. Google Picker settings are not native form controls; they select real provider files/tabs and report picker or access failures at integration level.

@@ -15,3 +15,9 @@ Never commit `.env`, credentials, OAuth tokens, database dumps, runtime PID/toke
 - Use the shared `primary-button`, `secondary-button`, `danger-button`, `text-button`, or `icon-button` variants. Never introduce browser-default action buttons or the legacy `button-primary`, `button-secondary`, or `secondary` tokens.
 - Use `LoadingButton` for async mutations; it defaults to the primary variant, so pass an explicit shared variant for secondary or destructive actions.
 - When adding a new variant or contextual exception, update `docs/frontend/design-system.md` and the button contract test in the same change.
+
+## Form validation rule
+
+- User-editable forms must show localized errors next to the invalid field after submit, mark it with `aria-invalid`/`aria-describedby`, focus the first invalid control, preserve entered values, and clear only the edited field's error. Use shared `FormField`, `FieldError`, and `form-validation.ts` helpers.
+- Keep permission, conflict, provider outage, and unknown server failures at form level. Never display raw API/Zod messages or credentials.
+- Forms without independently invalid inputs may use `data-validation-context="non-field"` only when listed with a reason in `form-validation-contract.spec.ts`. Update the test and `docs/frontend/design-system.md` when adding such an exception.

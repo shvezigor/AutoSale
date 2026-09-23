@@ -356,27 +356,27 @@ Commit: `feat(web): add field errors to commerce forms`
 - Consumes shared validation primitives and safe API issue mapping.
 - Produces field errors for credentials, sender profile, location, parcel dimensions/weight/value, recipient data, message text, sheet/tab selection, and supplier selection.
 
-- [ ] **Step 1: Add failing carrier settings tests**
+- [x] **Step 1: Add failing carrier settings tests**
 
 For each carrier assert malformed/missing credentials and incomplete sender profile attach to the exact field. Provider rejection after syntactically valid credentials remains a card-level alert.
 
-- [ ] **Step 2: Migrate carrier settings forms**
+- [x] **Step 2: Migrate carrier settings forms**
 
 Keep credentials masked and never echo rejected secrets in field messages. A server issue may identify `apiKey` or `sender.phone`, but UI copy is selected locally.
 
-- [ ] **Step 3: Add failing shipment tests**
+- [x] **Step 3: Add failing shipment tests**
 
 Cover missing recipient name/phone, location, parcel weight/dimensions, declared value and COD over declared value. Assert dependent errors clear only when the relevant field changes.
 
-- [ ] **Step 4: Migrate shipment forms**
+- [x] **Step 4: Migrate shipment forms**
 
 Keep quote/provider availability errors dialog-level. Focus the first invalid editable control after create/quote submit.
 
-- [ ] **Step 5: Add and implement integration field tests**
+- [x] **Step 5: Add and implement integration field tests**
 
 Telegram/Instagram message text, supplier selection, Google spreadsheet/tab, and catalogue source controls receive local field errors. OAuth cancellation, revoked access, picker launch failure, webhook/provider outage, and background sync failure remain integration-level alerts.
 
-- [ ] **Step 6: Verify and commit Task 5**
+- [x] **Step 6: Verify and commit Task 5**
 
 Run:
 
@@ -408,25 +408,25 @@ Commit: `feat(web): add field errors to delivery integrations`
 - Consumes shared validation primitives and API issue contract.
 - Produces final guardrail that inventories user-editable forms and requires shared field error presentation or an explicit contextual exception.
 
-- [ ] **Step 1: Write failing demo-form tests**
+- [x] **Step 1: Write failing demo-form tests**
 
 Cover name/company length, invalid email/phone, missing order volume and consent. Assert values survive failed submission, the first field is focused, and notification/service failure remains form-level.
 
-- [ ] **Step 2: Migrate demo form and API issues**
+- [x] **Step 2: Migrate demo form and API issues**
 
 Return only safe codes for `name`, `company`, `email`, `phone`, `orderVolume`, and `privacyConsent`. Do not reveal idempotency internals or notifier errors.
 
-- [ ] **Step 3: Write failing repository contract test**
+- [x] **Step 3: Write failing repository contract test**
 
 Inventory production TSX files containing `<form`. Require each form to either import `FormField`/validation lifecycle or include a nearby `data-validation-context="non-field"` marker. The marker is allowed only for forms whose controls cannot be independently invalid; list each exception in the test fixture with a reason.
 
-- [ ] **Step 4: Run the contract test and close every remaining gap**
+- [x] **Step 4: Run the contract test and close every remaining gap**
 
 Run: `pnpm --filter @autosale/web exec vitest run src/components/form-validation-contract.spec.ts`
 
 Expected first run: FAIL listing unmigrated forms. Inspect each file and either migrate it with a focused component test or add a justified non-field exception. Do not add blanket directory exceptions.
 
-- [ ] **Step 5: Update rules and feature status**
+- [x] **Step 5: Update rules and feature status**
 
 Add the field-error standard to `AGENTS.md` and `docs/frontend/design-system.md`. Change the feature index status from `Planned` to `Available` only after the audit test, full suite and browser acceptance pass.
 
