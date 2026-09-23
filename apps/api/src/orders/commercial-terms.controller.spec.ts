@@ -45,4 +45,10 @@ describe('CommercialTermsController', () => {
     expect(update).toHaveBeenCalledWith(tenantId, orderId, 'manager-id', { ...selection, initializeLegacy: false });
     await request(app.getHttpServer()).put(`/api/orders/${orderId}/commercial-terms`).set('Cookie', 'session=manager').set('x-csrf-token', 'csrf').send({ ...selection, totalAmount: '1.00' }).expect(400);
   });
+
+  it('returns a safe account field issue for malformed selection', async () => {
+    const result = await request(app.getHttpServer()).put(`/api/orders/${orderId}/commercial-terms`).set('Cookie', 'session=manager').set('x-csrf-token', 'csrf').send({ version: 1, legalEntityId: null, bankAccountId: 'private-account' }).expect(400);
+    expect(result.body).toMatchObject({ code: 'VALIDATION_FAILED', issues: [{ field: 'bankAccountId', code: 'INVALID_BANK_ACCOUNT' }] });
+    expect(JSON.stringify(result.body)).not.toContain('private-account');
+  });
 });

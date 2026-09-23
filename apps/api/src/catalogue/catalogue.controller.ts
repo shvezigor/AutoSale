@@ -5,6 +5,9 @@ import { z } from 'zod';
 
 import { CurrentPrincipal, RequireMembership } from '../auth/auth.decorators.js';
 import { CatalogueService, type CatalogueProductCreate, type CatalogueProductUpdate } from './catalogue.service.js';
+import { validationBadRequest } from '../common/validation-error.js';
+
+const productIssueCodes = { sku: 'INVALID_SKU', name: 'INVALID_NAME', aliases: 'INVALID_ALIASES', price: 'INVALID_PRICE', currency: 'INVALID_CURRENCY', stockQuantity: 'INVALID_STOCK', description: 'INVALID_DESCRIPTION', category: 'INVALID_CATEGORY', brand: 'INVALID_BRAND', color: 'INVALID_COLOR', size: 'INVALID_SIZE', imageUrls: 'INVALID_IMAGES', attributes: 'INVALID_ATTRIBUTES', active: 'INVALID_ACTIVE_FLAG' } as const;
 
 const nullableText = z.string().trim().max(10_000).nullable();
 const productFieldsSchema = z.object({
@@ -82,14 +85,14 @@ export class CatalogueController {
     @Body() body: unknown,
   ) {
     const parsed = updateSchema.safeParse(body);
-    if (!parsed.success) throw new BadRequestException('Invalid catalogue product');
+    if (!parsed.success) throw validationBadRequest(parsed.error, productIssueCodes);
     return this.catalogue.update(principal.tenantId!, id, parsed.data as CatalogueProductUpdate);
   }
 }
 
 function parseCreate(body: unknown): CatalogueProductCreate {
   const parsed = createSchema.safeParse(body);
-  if (!parsed.success) throw new BadRequestException('Invalid catalogue product');
+  if (!parsed.success) throw validationBadRequest(parsed.error, productIssueCodes);
   return parsed.data;
 }
 

@@ -16,6 +16,21 @@ const preview = { rows: [], totals: { created: 1, updated: 1, skipped: 0, failed
 afterEach(() => { cleanup(); mutatingFetch.mockReset(); vi.unstubAllGlobals(); vi.useRealTimers(); });
 
 describe('CatalogueImportWizard', () => {
+  it('attaches a missing or invalid source file error to the file picker', () => {
+    render(<CatalogueImportWizard session={{ membershipRole: 'OWNER' }} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Обрати файл' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Завантажити каталог' }));
+
+    const picker = screen.getByLabelText('Файл каталогу');
+    expect(picker).toHaveFocus();
+    expect(picker).toHaveAttribute('aria-describedby', 'catalogue-import-file-error');
+    expect(screen.getByText('Оберіть CSV або XLSX файл каталогу.')).toHaveAttribute('id', 'catalogue-import-file-error');
+
+    fireEvent.change(picker, { target: { files: [new File(['bad'], 'catalogue.txt', { type: 'text/plain' })] } });
+    fireEvent.click(screen.getByRole('button', { name: 'Завантажити каталог' }));
+    expect(screen.getByText('Оберіть CSV або XLSX файл каталогу.')).toHaveAttribute('id', 'catalogue-import-file-error');
+    expect(mutatingFetch).not.toHaveBeenCalled();
+  });
   it('translates the wizard chrome while preserving the customer source name', () => {
     render(
       <I18nProvider locale="en" authenticated={false}>
@@ -125,7 +140,8 @@ describe('CatalogueImportWizard', () => {
     await screen.findByText('AI недоступний — зіставте колонки вручну');
     fireEvent.change(screen.getByLabelText('sku'), { target: { value: 'sku' } });
     fireEvent.click(screen.getByRole('button', { name: 'Перевірити зіставлення' }));
-    expect(screen.getByText('Зіставте обов’язкове поле назви.')).toBeInTheDocument();
+    expect(screen.getByText('Зіставте обов’язкове поле назви.')).toHaveAttribute('id', 'catalogue-mapping-error');
+    expect(screen.getByRole('group', { name: 'Зіставлення' })).toHaveAttribute('aria-describedby', 'catalogue-mapping-error');
   });
 
   it('keeps polling confirmed work until a terminal completed status reports progress totals', async () => {

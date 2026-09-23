@@ -7,6 +7,7 @@ import { procurementTransitionSchema } from '@autosale/contracts/procurement';
 
 import { CurrentPrincipal, RequireMembership } from '../auth/auth.decorators.js';
 import { OrdersService } from './orders.service.js';
+import { validationBadRequest } from '../common/validation-error.js';
 
 const actorSchema = z.object({ actor: z.string().trim().min(1).max(120) }).strict();
 const listSchema = z.object({
@@ -77,7 +78,7 @@ export class OrdersController {
 
   @Patch(':id') update(@CurrentPrincipal() principal: AuthPrincipal, @Param('id', new ParseUUIDPipe({ version: '4' })) id: string, @Body() body: unknown) {
     const parsed = updateSchema.safeParse(body);
-    if (!parsed.success) throw new BadRequestException('Invalid order correction');
+    if (!parsed.success) throw validationBadRequest(parsed.error, { actor: 'INVALID_ACTOR', 'customer.name': 'INVALID_CUSTOMER_NAME', 'customer.phone': 'INVALID_CUSTOMER_PHONE', 'customer.instagramUsername': 'INVALID_INSTAGRAM_USERNAME', 'delivery.city': 'INVALID_DELIVERY_CITY', 'delivery.address': 'INVALID_DELIVERY_ADDRESS', 'delivery.novaPoshtaBranch': 'INVALID_DELIVERY_BRANCH' });
     const { actor } = parsed.data;
     const changes: ManagerOrderUpdate = {};
     if (parsed.data.customer !== undefined) changes.customer = parsed.data.customer as NonNullable<ManagerOrderUpdate['customer']>;

@@ -154,6 +154,30 @@ describe('OrderReviewPanel', () => {
     expect(fetchMock).toHaveBeenCalledWith(`/api/orders/${order.id}`, expect.objectContaining({ method: 'PATCH' }));
   });
 
+  it('explains an invalid item quantity beside the item and does not save', () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+    render(<OrderReviewPanel initialOrder={order} />);
+
+    fireEvent.change(screen.getByLabelText('Кількість'), { target: { value: '0' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Зберегти зміни' }));
+
+    expect(screen.getByLabelText('Кількість')).toHaveFocus();
+    expect(screen.getByText('Значення має бути не менше 1.')).toHaveAttribute('id', 'order-item-item-1-quantity-error');
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('marks a cleared customer name directly under the field', () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+    render(<OrderReviewPanel initialOrder={order} />);
+    fireEvent.change(screen.getByLabelText('Ім’я'), { target: { value: '' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Зберегти зміни' }));
+    expect(screen.getByLabelText('Ім’я')).toHaveFocus();
+    expect(screen.getByText('Заповніть це поле.')).toHaveAttribute('id', 'order-customer-name-error');
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   it('lets a manager correct an auto-approved order before fulfillment', async () => {
     const autoApproved = { ...order, status: 'AUTO_APPROVED' as const };
     const fetchMock = vi.fn()

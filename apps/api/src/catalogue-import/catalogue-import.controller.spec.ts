@@ -74,8 +74,9 @@ describe('CatalogueImportController', () => {
   });
 
   it('rejects mismatched extensions, unsupported media, and over-limit uploads before service execution', async () => {
-    await request(app.getHttpServer()).post('/api/catalogue/imports/upload').set('Cookie', 'session=owner').set('x-csrf-token', 'csrf')
+    const invalidFile = await request(app.getHttpServer()).post('/api/catalogue/imports/upload').set('Cookie', 'session=owner').set('x-csrf-token', 'csrf')
       .attach('file', Buffer.from('SKU,Name\nA-1,Alpha'), { filename: 'products.xlsx', contentType: 'text/csv' }).expect(400);
+    expect(invalidFile.body).toMatchObject({ code: 'VALIDATION_FAILED', issues: [{ field: 'file', code: 'INVALID_FILE' }] });
     await request(app.getHttpServer()).post('/api/catalogue/imports/upload').set('Cookie', 'session=owner').set('x-csrf-token', 'csrf')
       .attach('file', Buffer.from('{}'), { filename: 'products.json', contentType: 'application/json' }).expect(400);
     await request(app.getHttpServer()).post('/api/catalogue/imports/upload').set('Cookie', 'session=owner').set('x-csrf-token', 'csrf')

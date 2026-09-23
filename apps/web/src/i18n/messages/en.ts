@@ -15,7 +15,7 @@ export const enMessages = {
     required: 'Complete this field.', email: 'Enter a valid email address.', invalid: 'Check the entered value.',
     tooShort: 'Enter at least {count} characters.', tooLong: 'Enter no more than {count} characters.',
     minimum: 'Enter a value of at least {value}.', maximum: 'Enter a value no greater than {value}.',
-    step: 'Enter a value using the allowed step.', pattern: 'Check the value format.',
+    step: 'Enter a value using the allowed step.', pattern: 'Check the value format.', currency: 'Enter a three-letter currency code.',
   },
   language: {
     label: 'Interface language',

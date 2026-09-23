@@ -75,6 +75,12 @@ describe('CatalogueController', () => {
     expect(create).toHaveBeenCalledWith(tenantId, { sku: 'LUNA-01', name: 'Luna', aliases: [] });
   });
 
+  it('returns safe field codes for malformed product input', async () => {
+    const result = await request(app.getHttpServer()).post('/api/catalogue').set('Cookie', 'session=owner').set('x-csrf-token', 'csrf').send({ sku: '', name: '' }).expect(400);
+    expect(result.body).toMatchObject({ code: 'VALIDATION_FAILED', issues: expect.arrayContaining([{ field: 'sku', code: 'INVALID_SKU' }, { field: 'name', code: 'INVALID_NAME' }]) });
+    expect(create).not.toHaveBeenCalled();
+  });
+
   it('allows an owner to patch a product', async () => {
     await request(app.getHttpServer()).patch(`/api/catalogue/${productId}`).set('Cookie', 'session=owner').set('x-csrf-token', 'csrf').send({ name: 'Luna Pro' }).expect(200, product);
 

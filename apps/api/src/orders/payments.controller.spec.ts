@@ -61,4 +61,12 @@ describe('PaymentsController', () => {
     await request(app.getHttpServer()).post(`/api/orders/${orderId}/payments`).set('Cookie', 'session=manager').set('x-csrf-token', 'valid-csrf').send({}).expect(400);
     expect(record).not.toHaveBeenCalled();
   });
+
+  it('returns safe field codes without echoing payment values', async () => {
+    const result = await request(app.getHttpServer()).post(`/api/orders/${orderId}/payments`).set('Cookie', 'session=manager').set('x-csrf-token', 'valid-csrf').send({
+      amount: '0.00', method: 'BANK_TRANSFER', receivedAt: '2026-09-21T10:00:00.000Z', bankAccountId: 'private-account', idempotencyKey: '66666666-6666-4666-8666-666666666666',
+    }).expect(400);
+    expect(result.body).toMatchObject({ code: 'VALIDATION_FAILED', issues: expect.arrayContaining([{ field: 'amount', code: 'INVALID_AMOUNT' }, { field: 'bankAccountId', code: 'INVALID_BANK_ACCOUNT' }]) });
+    expect(JSON.stringify(result.body)).not.toContain('private-account');
+  });
 });

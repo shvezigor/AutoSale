@@ -7,13 +7,14 @@ This is the routing index for product functionality. It is intentionally compact
 - **Available** — implemented and covered by automated tests; production availability may still depend on credentials or a feature flag.
 - **Validation pending** — implemented, but a live provider/account acceptance step remains.
 - **Planned** — product direction or marketing promise; no production implementation should be assumed.
+- **In progress** — implementation exists in a feature branch, but the full capability and rollout checks are incomplete.
 
 ## Capability catalogue
 
 | Capability | Status | Canonical knowledge | Main implementation and verification |
 |---|---|---|---|
 | Cross-cutting workspace UI | Available | [`UI design system`](../frontend/design-system.md) | `apps/web/app/globals.css`, `apps/web/src/components/loading-button.tsx`, `apps/web/src/components/button-style-contract.spec.ts` |
-| Consistent field validation UX across forms | Planned | [`field validation UX`](../superpowers/specs/2026-09-21-field-validation-ux-design.md) | Current forms use mixed native and local validation; shared primitives, structured safe API issues and migration coverage are not implemented yet. |
+| Consistent field validation UX across forms | In progress | [`field validation UX`](../superpowers/specs/2026-09-21-field-validation-ux-design.md) | Shared `FormField`, localized constraint helpers and safe API issues are implemented; auth, profile, team, catalogue, order and payment forms are migrated. Delivery, integration and demo forms plus browser acceptance remain. |
 | Public marketing site, Ukrainian/English SEO, pricing and demo leads | Available | [`marketing design`](../superpowers/specs/2026-09-17-sales-aito-marketing-site-design.md), [`marketing acceptance`](../acceptance/marketing-site-checklist.md), [`search indexing`](../operations/search-indexing.md), [`monetization`](../product/2026-09-17-sales-aito-monetization.md) | `apps/web/app/[locale]`, `apps/web/app/sitemap.ts`, `apps/api/src/demo-leads`, `tests/e2e/marketing-site.spec.ts` |
 | Registration, sessions, Google Sign-In, roles, teams and profile | Available | [`authentication`](../operations/authentication.md), [`auth design`](../superpowers/specs/2026-08-27-self-hosted-auth-design.md), [`Google Sign-In`](../integrations/google-sign-in.md) | `apps/api/src/auth`, `apps/api/src/team`, `apps/web/app/(auth)`, `apps/web/app/(workspace)/profile`, `tests/e2e/auth.spec.ts` |
 | Meta Instagram OAuth, webhook ingestion and inbox | Validation pending | [`Instagram system design`](../superpowers/specs/2026-08-26-instagram-order-capture-design.md), [`Meta access`](../integrations/meta-access.md), [`OAuth runbook`](../integrations/meta-instagram-oauth.md), [`MVP acceptance`](../acceptance/mvp-checklist.md) | `apps/api/src/meta`, `apps/api/src/integrations/instagram-*`, `apps/worker/src/instagram`, `apps/web/app/(workspace)/conversations` |

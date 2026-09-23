@@ -7,6 +7,9 @@ import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { mutatingFetch } from '../auth/csrf-fetch';
 import { useI18n } from '../i18n/i18n-provider';
 import { LoadingButton } from './loading-button';
+import { FormField } from './form-field';
+import { clearFieldError, focusFirstInvalid, nativeConstraintMessage, type FieldErrors } from './form-validation';
+import { parseValidationFailure } from '../api/validation-errors';
 
 type MembershipRole = 'OWNER' | 'MANAGER' | null;
 
@@ -28,8 +31,10 @@ export function OrderPaymentsCard({ orderId, initial, accounts, role, onChange }
   const [idempotencyKey, setIdempotencyKey] = useState(() => crypto.randomUUID());
   const [pending, setPending] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors<'amount' | 'receivedAt' | 'bankAccountId' | 'carrier'>>({});
   const [cancelPaymentId, setCancelPaymentId] = useState<string | null>(null);
   const [cancelReason, setCancelReason] = useState('');
+  const [cancelReasonError, setCancelReasonError] = useState('');
 
   useEffect(() => { setSummary(initial); }, [initial]);
   useEffect(() => {
@@ -46,18 +51,52 @@ export function OrderPaymentsCard({ orderId, initial, accounts, role, onChange }
 
   async function recordPayment(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const form = event.currentTarget;
+    const fields: Array<'amount' | 'receivedAt' | 'bankAccountId' | 'carrier'> = ['amount', 'receivedAt'];
+    if (method === 'BANK_TRANSFER') fields.push('bankAccountId');
+    if (method === 'CASH_ON_DELIVERY') fields.push('carrier');
+    const errors: FieldErrors<'amount' | 'receivedAt' | 'bankAccountId' | 'carrier'> = {};
+    for (const field of fields) {
+      const control = form.elements.namedItem(field);
+      if (control instanceof HTMLInputElement || control instanceof HTMLSelectElement) {
+        const message = nativeConstraintMessage(control, t);
+        if (message) errors[field] = message;
+      }
+    }
+    setFieldErrors(errors);
+    if (Object.keys(errors).length > 0) {
+      focusFirstInvalid(form, fields.filter((field) => field in errors));
+      return;
+    }
     setPending('record'); setError(null);
     try {
       const response = await mutatingFetch(`/api/orders/${orderId}/payments`, {
         method: 'POST', headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
-          amount, method, receivedAt: new Date(receivedAt).toISOString(),
+          amount: Number(amount).toFixed(2), method, receivedAt: new Date(receivedAt).toISOString(),
           bankAccountId: method === 'BANK_TRANSFER' ? bankAccountId : null,
           carrier: method === 'CASH_ON_DELIVERY' ? carrier : null,
           note: note.trim() || null, idempotencyKey,
         }),
       });
-      if (!response.ok) throw new Error(await paymentError(response, t('orders.paymentSaveFailed')));
+      if (!response.ok) {
+        const failure = await parseValidationFailure(response, { amount: ['INVALID_AMOUNT'], receivedAt: ['INVALID_RECEIVED_AT'], method: ['INVALID_METHOD'], bankAccountId: ['INVALID_BANK_ACCOUNT'], carrier: ['INVALID_CARRIER'], note: ['INVALID_NOTE'], idempotencyKey: ['INVALID_IDEMPOTENCY_KEY'] });
+        if (failure) {
+          const mapped: FieldErrors<'amount' | 'receivedAt' | 'bankAccountId' | 'carrier'> = {};
+          for (const issue of failure.issues) {
+            if (issue.field === 'amount') mapped.amount = t('validation.minimum', { value: '0.01' });
+            if (issue.field === 'receivedAt') mapped.receivedAt = t('validation.invalid');
+            if (issue.field === 'bankAccountId') mapped.bankAccountId = t('validation.invalid');
+            if (issue.field === 'carrier') mapped.carrier = t('validation.invalid');
+          }
+          if (Object.keys(mapped).length) {
+            setFieldErrors(mapped);
+            focusFirstInvalid(form, fields.filter((field) => field in mapped));
+            return;
+          }
+        }
+        throw new Error(await paymentError(response, t('orders.paymentSaveFailed')));
+      }
       const next = await response.json() as OrderPaymentSummary;
       apply(next); setNote(''); setIdempotencyKey(crypto.randomUUID());
     } catch (reason) { setError(reason instanceof Error ? reason.message : t('orders.paymentSaveFailed')); }
@@ -66,13 +105,29 @@ export function OrderPaymentsCard({ orderId, initial, accounts, role, onChange }
 
   async function cancelPayment(event: FormEvent<HTMLFormElement>, payment: OrderPaymentRecord) {
     event.preventDefault();
+    const form = event.currentTarget;
+    const control = form.elements.namedItem('cancellationReason');
+    const validationMessage = control instanceof HTMLTextAreaElement ? nativeConstraintMessage(control, t) : t('validation.invalid');
+    setCancelReasonError(validationMessage ?? '');
+    if (validationMessage) {
+      focusFirstInvalid(form, ['cancellationReason']);
+      return;
+    }
     setPending(`cancel:${payment.id}`); setError(null);
     try {
       const response = await mutatingFetch(`/api/orders/${orderId}/payments/${payment.id}/cancel`, {
         method: 'POST', headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ reason: cancelReason.trim(), idempotencyKey: crypto.randomUUID() }),
       });
-      if (!response.ok) throw new Error(await paymentError(response, t('orders.paymentCancelFailed')));
+      if (!response.ok) {
+        const failure = await parseValidationFailure(response, { reason: ['INVALID_REASON'], idempotencyKey: ['INVALID_IDEMPOTENCY_KEY'] });
+        if (failure?.issues.some((issue) => issue.field === 'reason')) {
+          setCancelReasonError(t('validation.tooShort', { count: 3 }));
+          focusFirstInvalid(form, ['cancellationReason']);
+          return;
+        }
+        throw new Error(await paymentError(response, t('orders.paymentCancelFailed')));
+      }
       const next = await response.json() as OrderPaymentSummary;
       apply(next); setCancelPaymentId(null); setCancelReason('');
     } catch (reason) { setError(reason instanceof Error ? reason.message : t('orders.paymentCancelFailed')); }
@@ -88,21 +143,21 @@ export function OrderPaymentsCard({ orderId, initial, accounts, role, onChange }
         <SummaryValue label={t('orders.paymentRemaining')} value={money(summary.remainingAmount, summary.currency, locale)} />
         <SummaryValue label={t('orders.paymentStatus')} value={paymentStatus(summary.status, t)} />
       </dl>
-      <form className="payment-form" aria-label={t('orders.addPayment')} onSubmit={(event) => void recordPayment(event)}>
+      <form className="payment-form" noValidate aria-label={t('orders.addPayment')} onSubmit={(event) => void recordPayment(event)}>
         <div className="payment-form-grid">
-          <label>{t('orders.paymentAmount')}<input min="0.01" required step="0.01" inputMode="decimal" value={amount} onChange={(event) => setAmount(event.target.value)} /></label>
+          <FormField id="payment-amount" label={t('orders.paymentAmount')} error={fieldErrors.amount} required><input name="amount" type="number" min="0.01" required step="0.01" inputMode="decimal" value={amount} onChange={(event) => { setAmount(event.target.value); setFieldErrors((current) => clearFieldError(current, 'amount')); }} /></FormField>
           <label>{t('orders.paymentMethod')}<select value={method} onChange={(event) => setMethod(event.target.value as PaymentMethod)}>{(['BANK_TRANSFER', 'CASH', 'CASH_ON_DELIVERY', 'OTHER'] as const).map((value) => <option key={value} value={value}>{methodLabel(value, t)}</option>)}</select></label>
-          <label>{t('orders.paymentDate')}<input required type="datetime-local" value={receivedAt} onChange={(event) => setReceivedAt(event.target.value)} /></label>
-          {method === 'BANK_TRANSFER' && <label>{t('orders.paymentAccount')}<select required value={bankAccountId} onChange={(event) => setBankAccountId(event.target.value)}><option value="">{t('orders.selectPaymentAccount')}</option>{accounts.map((account) => <option key={account.id} value={account.id}>{account.label} · {account.maskedIban}</option>)}</select></label>}
-          {method === 'CASH_ON_DELIVERY' && <label>{t('orders.paymentCarrier')}<select value={carrier} onChange={(event) => setCarrier(event.target.value as CashOnDeliveryCarrier)}>{(['NOVA_POSHTA', 'MEEST', 'UKRPOSHTA'] as const).map((value) => <option key={value} value={value}>{carrierLabel(value, t)}</option>)}</select></label>}
+          <FormField id="payment-received-at" label={t('orders.paymentDate')} error={fieldErrors.receivedAt} required><input name="receivedAt" required max={localDateTime()} type="datetime-local" value={receivedAt} onChange={(event) => { setReceivedAt(event.target.value); setFieldErrors((current) => clearFieldError(current, 'receivedAt')); }} /></FormField>
+          {method === 'BANK_TRANSFER' && <FormField id="payment-account" label={t('orders.paymentAccount')} error={fieldErrors.bankAccountId} required><select name="bankAccountId" required value={bankAccountId} onChange={(event) => { setBankAccountId(event.target.value); setFieldErrors((current) => clearFieldError(current, 'bankAccountId')); }}><option value="">{t('orders.selectPaymentAccount')}</option>{accounts.map((account) => <option key={account.id} value={account.id}>{account.label} · {account.maskedIban}</option>)}</select></FormField>}
+          {method === 'CASH_ON_DELIVERY' && <FormField id="payment-carrier" label={t('orders.paymentCarrier')} error={fieldErrors.carrier} required><select name="carrier" required value={carrier} onChange={(event) => { setCarrier(event.target.value as CashOnDeliveryCarrier); setFieldErrors((current) => clearFieldError(current, 'carrier')); }}>{(['NOVA_POSHTA', 'MEEST', 'UKRPOSHTA'] as const).map((value) => <option key={value} value={value}>{carrierLabel(value, t)}</option>)}</select></FormField>}
           <label className="payment-note">{t('orders.paymentNote')}<textarea maxLength={500} value={note} onChange={(event) => setNote(event.target.value)} /></label>
         </div>
-        <div className="payment-form-actions"><LoadingButton pending={pending === 'record'} pendingLabel={t('orders.paymentSaving')} disabled={pending !== null || (method === 'BANK_TRANSFER' && !bankAccountId)} type="submit">{t('orders.recordPayment')}</LoadingButton></div>
+        <div className="payment-form-actions"><LoadingButton pending={pending === 'record'} pendingLabel={t('orders.paymentSaving')} disabled={pending !== null} type="submit">{t('orders.recordPayment')}</LoadingButton></div>
       </form>
       <section className="payment-history" aria-labelledby="payment-history-heading"><h3 id="payment-history-heading">{t('orders.paymentHistory')}</h3>{summary.payments.length === 0 ? <p>{t('orders.noPayments')}</p> : <ul>{summary.payments.map((payment) => <li className="payment-history-row" data-cancelled={Boolean(payment.cancelledAt)} key={payment.id}>
         <div><strong>{money(payment.amount, payment.currency, locale)}</strong><span>{methodLabel(payment.method, t)} · {formatDate(payment.receivedAt, { dateStyle: 'medium', timeStyle: 'short' })}</span>{payment.note && <small>{payment.note}</small>}{payment.cancelledAt && <small>{t('orders.paymentCancelled')}: {payment.cancellationReason}</small>}</div>
         <span>{payment.createdBy.name}</span>
-        {role === 'OWNER' && !payment.cancelledAt && (cancelPaymentId === payment.id ? <form className="payment-cancel-form" aria-label={t('orders.cancelPayment')} onSubmit={(event) => void cancelPayment(event, payment)}><label>{t('orders.cancellationReason')}<textarea required minLength={3} maxLength={500} value={cancelReason} onChange={(event) => setCancelReason(event.target.value)} /></label><div><button className="secondary-button" disabled={pending !== null} onClick={() => { setCancelPaymentId(null); setCancelReason(''); }} type="button">{t('orders.cancel')}</button><LoadingButton pending={pending === `cancel:${payment.id}`} pendingLabel={t('orders.paymentCancelling')} disabled={pending !== null} type="submit">{t('orders.confirmCancellation')}</LoadingButton></div></form> : <button className="text-button" disabled={pending !== null} onClick={() => setCancelPaymentId(payment.id)} type="button">{t('orders.cancelPayment')}</button>)}
+        {role === 'OWNER' && !payment.cancelledAt && (cancelPaymentId === payment.id ? <form className="payment-cancel-form" noValidate aria-label={t('orders.cancelPayment')} onSubmit={(event) => void cancelPayment(event, payment)}><FormField id="payment-cancellation-reason" label={t('orders.cancellationReason')} error={cancelReasonError} required><textarea name="cancellationReason" required minLength={3} maxLength={500} value={cancelReason} onChange={(event) => { setCancelReason(event.target.value); setCancelReasonError(''); }} /></FormField><div><button className="secondary-button" disabled={pending !== null} onClick={() => { setCancelPaymentId(null); setCancelReason(''); setCancelReasonError(''); }} type="button">{t('orders.cancel')}</button><LoadingButton pending={pending === `cancel:${payment.id}`} pendingLabel={t('orders.paymentCancelling')} disabled={pending !== null} type="submit">{t('orders.confirmCancellation')}</LoadingButton></div></form> : <button className="text-button" disabled={pending !== null} onClick={() => setCancelPaymentId(payment.id)} type="button">{t('orders.cancelPayment')}</button>)}
       </li>)}</ul>}</section>
       {activePayments.length > 0 && <p className="payment-lock-notice" role="status">{t('orders.paymentLocksOrder')}</p>}
     </>}

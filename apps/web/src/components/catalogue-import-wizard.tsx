@@ -1,10 +1,12 @@
 'use client';
 
-import { ChangeEvent, useCallback, useEffect, useState } from 'react';
+import { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
 
 import { mutatingFetch } from '../auth/csrf-fetch';
 import { useI18n } from '../i18n/i18n-provider';
 import type { Translator } from '../i18n/translator';
+import { FieldError } from './form-field';
+import { parseValidationFailure } from '../api/validation-errors';
 
 type Target = 'sku' | 'name' | 'description' | 'price' | 'currency' | 'stockQuantity' | 'category' | 'brand' | 'aliases' | 'color' | 'size' | 'imageUrls' | 'active' | 'attributes' | 'ignore';
 type Column = { source: string; target: Target; confidence?: number };
@@ -15,6 +17,7 @@ type Status = { status: string; headers?: string[]; mapping: { columns: Column[]
 type Preview = { totals: { created: number; updated: number; skipped: number; failed: number } };
 
 const targets: Target[] = ['ignore', 'sku', 'name', 'description', 'price', 'currency', 'stockQuantity', 'category', 'brand', 'aliases', 'color', 'size', 'imageUrls', 'active', 'attributes'];
+const ACCEPTED_FILE = /\.(csv|xlsx)$/i;
 
 export function CatalogueImportWizard({ session, reviewRuns = [], initialReview }: { session: Session; reviewRuns?: Array<{ id: string; sourceName: string; headers: string[] }>; initialReview?: { id: string; headers: string[] } }) {
   const { t, formatNumber } = useI18n();
@@ -27,6 +30,10 @@ export function CatalogueImportWizard({ session, reviewRuns = [], initialReview 
   const [preview, setPreview] = useState<Preview | null>(null);
   const [confirmed, setConfirmed] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
+  const [mappingError, setMappingError] = useState<string | null>(null);
+  const fileInput = useRef<HTMLInputElement>(null);
+  const mappingGroup = useRef<HTMLDivElement>(null);
   const [importStatus, setImportStatus] = useState<Status | null>(null);
   const [statusRetry, setStatusRetry] = useState(0);
 
@@ -86,12 +93,21 @@ export function CatalogueImportWizard({ session, reviewRuns = [], initialReview 
   if (session.membershipRole !== 'OWNER') return null;
 
   async function upload() {
-    if (!file) { setError(t('catalogueImport.fileRequired')); return; }
+    if (!file || !ACCEPTED_FILE.test(file.name)) {
+      setFileError(t('catalogueImport.fileRequired'));
+      fileInput.current?.focus();
+      return;
+    }
+    setFileError(null);
     setError(null);
     const body = new FormData();
     body.set('file', file);
     const response = await mutatingFetch('/api/catalogue/imports/upload', { method: 'POST', body });
-    if (!response.ok) { setError(t('catalogueImport.uploadFailed')); return; }
+    if (!response.ok) {
+      const failure = await parseValidationFailure(response, { file: ['INVALID_FILE'] });
+      if (failure?.issues.some((issue) => issue.field === 'file')) { setFileError(t('catalogueImport.fileRequired')); fileInput.current?.focus(); return; }
+      setError(t('catalogueImport.uploadFailed')); return;
+    }
     const result = await response.json() as UploadResult;
     setRunId(result.id);
     setHeaders(result.headers);
@@ -104,8 +120,9 @@ export function CatalogueImportWizard({ session, reviewRuns = [], initialReview 
 
   function checkMapping() {
     const values = columns.map((column) => column.target);
-    if (!values.includes('name')) { setError(t('catalogueImport.nameMappingRequired')); return; }
-    if (new Set(values.filter((target) => target !== 'ignore')).size !== values.filter((target) => target !== 'ignore').length) { setError(t('catalogueImport.duplicateMapping')); return; }
+    if (!values.includes('name')) { setMappingError(t('catalogueImport.nameMappingRequired')); mappingGroup.current?.focus(); return; }
+    if (new Set(values.filter((target) => target !== 'ignore')).size !== values.filter((target) => target !== 'ignore').length) { setMappingError(t('catalogueImport.duplicateMapping')); mappingGroup.current?.focus(); return; }
+    setMappingError(null);
     setError(null);
     setStep(5);
   }
@@ -113,7 +130,11 @@ export function CatalogueImportWizard({ session, reviewRuns = [], initialReview 
   async function createPreview() {
     if (!runId) return;
     const response = await mutatingFetch(`/api/catalogue/imports/${runId}/mapping`, { method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ columns }) });
-    if (!response.ok) { setError(t('catalogueImport.previewFailed')); return; }
+    if (!response.ok) {
+      const failure = await parseValidationFailure(response, { mapping: ['INVALID_MAPPING'] });
+      if (failure?.issues.some((issue) => issue.field === 'mapping')) { setMappingError(t('validation.invalid')); setStep(4); window.setTimeout(() => mappingGroup.current?.focus(), 0); return; }
+      setError(t('catalogueImport.previewFailed')); return;
+    }
     setPreview(await response.json() as Preview);
     setStep(6);
   }
@@ -127,7 +148,7 @@ export function CatalogueImportWizard({ session, reviewRuns = [], initialReview 
     setStep(7);
   }
 
-  const updateColumn = (source: string) => (event: ChangeEvent<HTMLSelectElement>) => setColumns((current) => current.map((column) => column.source === source ? { ...column, target: event.target.value as Target } : column));
+  const updateColumn = (source: string) => (event: ChangeEvent<HTMLSelectElement>) => { setMappingError(null); setColumns((current) => current.map((column) => column.source === source ? { ...column, target: event.target.value as Target } : column)); };
   const stepLabels = [t('catalogueImport.steps.source'), t('catalogueImport.steps.upload'), t('catalogueImport.steps.analysis'), t('catalogueImport.steps.mapping'), t('catalogueImport.steps.validation'), t('catalogueImport.steps.preview'), t('catalogueImport.steps.progress')];
   const targetLabels: Record<Target, string> = {
     ignore: t('catalogueImport.targets.ignore'), sku: t('catalogueImport.targets.sku'), name: t('catalogueImport.targets.name'), description: t('catalogueImport.targets.description'), price: t('catalogueImport.targets.price'), currency: t('catalogueImport.targets.currency'), stockQuantity: t('catalogueImport.targets.stockQuantity'), category: t('catalogueImport.targets.category'), brand: t('catalogueImport.targets.brand'), aliases: t('catalogueImport.targets.aliases'), color: t('catalogueImport.targets.color'), size: t('catalogueImport.targets.size'), imageUrls: t('catalogueImport.targets.imageUrls'), active: t('catalogueImport.targets.active'), attributes: t('catalogueImport.targets.attributes'),
@@ -137,9 +158,9 @@ export function CatalogueImportWizard({ session, reviewRuns = [], initialReview 
     <ol className="catalogue-import-steps">{stepLabels.map((label, index) => <li key={label} className={step === index + 1 ? 'is-current' : step > index + 1 ? 'is-complete' : ''}><span>{t('catalogueImport.step', { current: index + 1, total: stepLabels.length })}</span>{label}</li>)}</ol>
     {error ? <p className="catalogue-import-error" role="alert">{error}</p> : null}
     {step === 1 ? <div className="catalogue-import-panel"><h2>{t('catalogueImport.chooseSource')}</h2><p>{t('catalogueImport.chooseSourceDescription')}</p>{reviewRuns.map((run) => <button key={run.id} type="button" className="secondary-button" onClick={() => openReview(run)}>{t('catalogueImport.reviewSource', { name: run.sourceName })}</button>)}<button type="button" className="secondary-button" onClick={() => setStep(2)}>{t('catalogueImport.chooseFile')}</button></div> : null}
-    {step === 2 ? <div className="catalogue-import-panel"><h2>{t('catalogueImport.uploadTitle')}</h2><label>{t('catalogueImport.fileLabel')}<input aria-label={t('catalogueImport.fileLabel')} type="file" accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onChange={(event) => setFile(event.target.files?.[0] ?? null)} /></label><button type="button" className="primary-button" onClick={() => void upload()}>{t('catalogueImport.upload')}</button></div> : null}
+    {step === 2 ? <div className="catalogue-import-panel"><h2>{t('catalogueImport.uploadTitle')}</h2><label>{t('catalogueImport.fileLabel')}<input ref={fileInput} id="catalogue-import-file" aria-label={t('catalogueImport.fileLabel')} aria-invalid={fileError ? 'true' : undefined} aria-describedby={fileError ? 'catalogue-import-file-error' : undefined} type="file" accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onChange={(event) => { setFileError(null); setFile(event.target.files?.[0] ?? null); }} /><FieldError id="catalogue-import-file-error" message={fileError} /></label><button type="button" className="primary-button" onClick={() => void upload()}>{t('catalogueImport.upload')}</button></div> : null}
     {step === 3 ? <div className="catalogue-import-panel" aria-live="polite" aria-busy="true"><h2>{analysisStage(t, importStatus?.status)}</h2><p>{t('catalogueImport.analysisDescription')}</p></div> : null}
-    {step === 4 ? <div className="catalogue-import-panel"><h2>{manualFallback ? t('catalogueImport.manualMapping') : t('catalogueImport.suggestedMapping')}</h2><p>{t('catalogueImport.mappingDescription')}</p>{importStatus?.analysis && importStatus.analysis.confidenceBand !== 'HIGH' ? <div className="catalogue-analysis-review"><p>{t('catalogueImport.headerRows', { rows: formatHeaderRows(t, importStatus.analysis.headerRows) })}</p><a href="#catalogue-mapping">{t('catalogueImport.reviewUncertain')}</a></div> : null}<div id="catalogue-mapping" className="catalogue-mapping-grid">{columns.map((column) => <label key={column.source}>{column.source}<small>{column.confidence === undefined ? t('catalogueImport.manualConfidence') : formatNumber(column.confidence, { style: 'percent', maximumFractionDigits: 0 })}</small><select aria-label={column.source} value={column.target} onChange={updateColumn(column.source)}>{targets.map((target) => <option key={target} value={target}>{targetLabels[target]}</option>)}</select></label>)}</div><button type="button" className="primary-button" onClick={checkMapping}>{t('catalogueImport.checkMapping')}</button></div> : null}
+    {step === 4 ? <div className="catalogue-import-panel"><h2>{manualFallback ? t('catalogueImport.manualMapping') : t('catalogueImport.suggestedMapping')}</h2><p>{t('catalogueImport.mappingDescription')}</p>{importStatus?.analysis && importStatus.analysis.confidenceBand !== 'HIGH' ? <div className="catalogue-analysis-review"><p>{t('catalogueImport.headerRows', { rows: formatHeaderRows(t, importStatus.analysis.headerRows) })}</p><a href="#catalogue-mapping">{t('catalogueImport.reviewUncertain')}</a></div> : null}<div ref={mappingGroup} id="catalogue-mapping" className="catalogue-mapping-grid" role="group" aria-label={t('catalogueImport.steps.mapping')} aria-invalid={mappingError ? 'true' : undefined} aria-describedby={mappingError ? 'catalogue-mapping-error' : undefined} tabIndex={-1}>{columns.map((column) => <label key={column.source}>{column.source}<small>{column.confidence === undefined ? t('catalogueImport.manualConfidence') : formatNumber(column.confidence, { style: 'percent', maximumFractionDigits: 0 })}</small><select aria-label={column.source} value={column.target} onChange={updateColumn(column.source)}>{targets.map((target) => <option key={target} value={target}>{targetLabels[target]}</option>)}</select></label>)}</div><FieldError id="catalogue-mapping-error" message={mappingError} /><button type="button" className="primary-button" onClick={checkMapping}>{t('catalogueImport.checkMapping')}</button></div> : null}
     {step === 5 ? <div className="catalogue-import-panel"><h2>{t('catalogueImport.requiredMapped')}</h2><p>{columns.some((column) => column.target === 'sku') ? t('catalogueImport.skuReady') : t('catalogueImport.skuGenerated')}</p><button type="button" className="primary-button" onClick={() => void createPreview()}>{t('catalogueImport.createPreview')}</button></div> : null}
     {step === 6 && preview ? <div className="catalogue-import-panel"><h2>{t('catalogueImport.previewTitle')}</h2><dl className="catalogue-import-totals"><div><dt>{t('catalogueImport.createdLabel')}</dt><dd>{t('catalogueImport.createdCount', { count: formatNumber(preview.totals.created) })}</dd></div><div><dt>{t('catalogueImport.updatedLabel')}</dt><dd>{t('catalogueImport.updatedCount', { count: formatNumber(preview.totals.updated) })}</dd></div><div><dt>{t('catalogueImport.skippedLabel')}</dt><dd>{formatNumber(preview.totals.skipped)}</dd></div><div><dt>{t('catalogueImport.failedLabel')}</dt><dd>{formatNumber(preview.totals.failed)}</dd></div></dl><label className="catalogue-confirmation"><input type="checkbox" checked={confirmed} onChange={(event) => setConfirmed(event.target.checked)} />{t('catalogueImport.confirmReview')}</label><button type="button" className="primary-button" disabled={!confirmed} onClick={() => void confirmImport()}>{t('catalogueImport.confirm')}</button></div> : null}
     {step === 7 ? <div className="catalogue-import-panel" aria-live="polite">{importStatus?.status === 'COMPLETED' ? <><h2>{t('catalogueImport.completed')}</h2><p>{t('catalogueImport.createdResult', { count: formatNumber(importStatus.createdRows ?? 0) })}</p><p>{t('catalogueImport.updatedResult', { count: formatNumber(importStatus.updatedRows ?? 0) })}</p></> : importStatus?.status === 'FAILED' ? <><h2>{t('catalogueImport.failed')}</h2><p>{t('catalogueImport.failedResult', { count: formatNumber(importStatus.failedRows ?? 0) })}</p></> : <><h2>{t('catalogueImport.processing')}</h2><p>{t('catalogueImport.processingDescription')}</p></>}{error ? <button type="button" className="secondary-button" onClick={() => setStatusRetry((value) => value + 1)}>{t('catalogueImport.retryStatus')}</button> : null}</div> : null}

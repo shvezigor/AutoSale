@@ -28,6 +28,35 @@ beforeEach(() => vi.stubGlobal('crypto', { randomUUID: vi.fn(() => '11111111-111
 afterEach(() => { cleanup(); mutatingFetch.mockReset(); vi.unstubAllGlobals(); });
 
 describe('OrderPaymentsCard', () => {
+  it('shows field errors for invalid payment data and focuses the first invalid field', () => {
+    renderCard({ accounts: [] });
+    fireEvent.change(screen.getByLabelText('Сума'), { target: { value: '0' } });
+    fireEvent.submit(screen.getByRole('form', { name: 'Додати факт оплати' }));
+
+    expect(screen.getByLabelText('Сума')).toHaveFocus();
+    expect(screen.getByText('Значення має бути не менше 0.01.')).toHaveAttribute('id', 'payment-amount-error');
+    expect(screen.getByText('Заповніть це поле.')).toHaveAttribute('id', 'payment-account-error');
+    expect(mutatingFetch).not.toHaveBeenCalled();
+  });
+
+  it('normalizes a valid decimal amount to the ledger money format', async () => {
+    mutatingFetch.mockResolvedValue(new Response(JSON.stringify(summary), { status: 200 }));
+    renderCard();
+    fireEvent.change(screen.getByLabelText('Сума'), { target: { value: '1.5' } });
+    fireEvent.submit(screen.getByRole('form', { name: 'Додати факт оплати' }));
+    await waitFor(() => expect(mutatingFetch).toHaveBeenCalled());
+    expect(JSON.parse(mutatingFetch.mock.calls[0]![1].body)).toMatchObject({ amount: '1.50' });
+  });
+
+  it('keeps a future payment date under its field and avoids API calls', () => {
+    renderCard();
+    fireEvent.change(screen.getByLabelText('Дата й час отримання'), { target: { value: '2099-01-01T12:00' } });
+    fireEvent.submit(screen.getByRole('form', { name: 'Додати факт оплати' }));
+    expect(screen.getByLabelText('Дата й час отримання')).toHaveFocus();
+    expect(screen.getByLabelText('Дата й час отримання')).toHaveAttribute('aria-describedby', 'payment-received-at-error');
+    expect(mutatingFetch).not.toHaveBeenCalled();
+  });
+
   it('renders a responsive Ukrainian summary and retained history without a table dependency', () => {
     const { container } = renderCard();
     expect(screen.getAllByText('Частково оплачено')).toHaveLength(2);
@@ -81,5 +110,24 @@ describe('OrderPaymentsCard', () => {
     cleanup();
     renderCard({ role: 'MANAGER' });
     expect(screen.queryByRole('button', { name: 'Скасувати оплату' })).not.toBeInTheDocument();
+  });
+
+  it('puts a safe server amount issue under the amount control', async () => {
+    mutatingFetch.mockResolvedValue(new Response(JSON.stringify({ statusCode: 400, code: 'VALIDATION_FAILED', issues: [{ field: 'amount', code: 'INVALID_AMOUNT' }] }), { status: 400 }));
+    renderCard();
+    fireEvent.submit(screen.getByRole('form', { name: 'Додати факт оплати' }));
+    await waitFor(() => expect(screen.getByText('Значення має бути не менше 0.01.')).toHaveAttribute('id', 'payment-amount-error'));
+    expect(screen.getByLabelText('Сума')).toHaveFocus();
+  });
+
+  it('attaches a short cancellation reason to the textarea without calling the API', () => {
+    renderCard();
+    fireEvent.click(screen.getByRole('button', { name: 'Скасувати оплату' }));
+    fireEvent.change(screen.getByLabelText('Причина скасування'), { target: { value: 'ні' } });
+    fireEvent.submit(screen.getByRole('form', { name: 'Скасувати оплату' }));
+
+    expect(screen.getByLabelText('Причина скасування')).toHaveFocus();
+    expect(screen.getByText('Введіть щонайменше 3 символів.')).toHaveAttribute('id', 'payment-cancellation-reason-error');
+    expect(mutatingFetch).not.toHaveBeenCalled();
   });
 });

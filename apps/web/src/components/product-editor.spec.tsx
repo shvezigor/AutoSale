@@ -15,6 +15,36 @@ vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh }) }));
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); refresh.mockReset(); });
 
 describe('ProductEditor', () => {
+  it('shows required SKU and name errors below the fields and focuses SKU without saving', () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+    render(<ProductEditor onClose={vi.fn()} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Додати товар' }));
+
+    expect(screen.getByLabelText('Артикул')).toHaveFocus();
+    expect(screen.getByLabelText('Артикул')).toHaveAttribute('aria-describedby', 'product-sku-error');
+    expect(screen.getByLabelText('Назва товару')).toHaveAttribute('aria-describedby', 'product-name-error');
+    expect(screen.getAllByText('Заповніть це поле.')).toHaveLength(2);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('attaches duplicate aliases to the aliases field and does not save', () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+    render(<ProductEditor onClose={vi.fn()} />);
+
+    fireEvent.change(screen.getByLabelText('Артикул'), { target: { value: 'LUNA-01' } });
+    fireEvent.change(screen.getByLabelText('Назва товару'), { target: { value: 'Сукня Luna' } });
+    fireEvent.change(screen.getByLabelText('Аліаси'), { target: { value: 'luna, luna' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Додати товар' }));
+
+    expect(screen.getByLabelText('Аліаси')).toHaveFocus();
+    expect(screen.getByLabelText('Аліаси')).toHaveAttribute('aria-describedby', expect.stringContaining('product-aliases-error'));
+    expect(screen.getByText('Аліаси не мають повторюватися.')).toHaveAttribute('id', 'product-aliases-error');
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   it('edits aliases and saves an existing product with csrf protection', async () => {
     const fetchMock = vi.fn()
       .mockResolvedValueOnce({ ok: true, json: async () => ({ token: 'csrf-token' }) })
@@ -112,6 +142,17 @@ describe('ProductEditor', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Додати товар' }));
 
     await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('Не вдалося зберегти товар. Спробуйте ще раз.'));
+  });
+
+  it('puts a safe server SKU issue under the SKU field', async () => {
+    const fetchMock = vi.fn().mockResolvedValueOnce({ ok: true, json: async () => ({ token: 'csrf-token' }) }).mockResolvedValueOnce(new Response(JSON.stringify({ statusCode: 400, code: 'VALIDATION_FAILED', issues: [{ field: 'sku', code: 'INVALID_SKU' }] }), { status: 400 }));
+    vi.stubGlobal('fetch', fetchMock);
+    render(<ProductEditor onClose={vi.fn()} />);
+    fireEvent.change(screen.getByLabelText('Артикул'), { target: { value: 'LUNA-01' } });
+    fireEvent.change(screen.getByLabelText('Назва товару'), { target: { value: 'Сукня Luna' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Додати товар' }));
+    await waitFor(() => expect(screen.getByText('Перевірте введене значення.')).toHaveAttribute('id', 'product-sku-error'));
+    expect(screen.getByLabelText('Артикул')).toHaveFocus();
   });
 
   it('recovers to a safe error message after a network failure', async () => {

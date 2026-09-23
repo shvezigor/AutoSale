@@ -281,31 +281,31 @@ Commit: `feat(web): add field errors to account forms`
 - Consumes all shared validation primitives and safe API issues.
 - Produces domain validators for SKU/name/aliases, legal entity/account/IBAN/currency, order correction, commercial selection, payment amount/date/account/carrier, and cancellation reason.
 
-- [ ] **Step 1: Write failing product/import tests**
+- [x] **Step 1: Write failing product/import tests**
 
 Assert SKU and name required errors appear below fields, duplicate aliases attach to aliases, missing mapping attaches to the mapping group, and an invalid source file attaches to the file picker while background analysis failures remain panel-level.
 
-- [ ] **Step 2: Migrate product and catalogue import UI**
+- [x] **Step 2: Migrate product and catalogue import UI**
 
 Replace `validation-error` footer-only state with field errors. Preserve successful save/import states and job/provider errors.
 
-- [ ] **Step 3: Write failing commercial and order tests**
+- [x] **Step 3: Write failing commercial and order tests**
 
 Cover all legal-entity required fields, IBAN, ISO currency, unresolved catalogue selection, invalid quantity, incompatible legal entity/account, and locked terms. Assert locked/fulfilment conflicts remain form-level.
 
-- [ ] **Step 4: Migrate commercial settings and order editing**
+- [x] **Step 4: Migrate commercial settings and order editing**
 
 Replace the IBAN-only local state with `FieldErrors` for every editable field. Map safe API issues by allowlist. For order item arrays, use stable paths such as `items.${item.id}.quantity`, never list indices that change after rendering.
 
-- [ ] **Step 5: Write failing payment tests**
+- [x] **Step 5: Write failing payment tests**
 
 Cover amount below `0.01`, invalid/future date, missing bank account for bank transfer, missing COD carrier, and cancellation reason under three characters. Assert the first bad field is focused and API is not called.
 
-- [ ] **Step 6: Migrate payment forms**
+- [x] **Step 6: Migrate payment forms**
 
 Attach service-returned safe codes to amount/date/account/carrier when applicable. Keep pricing-not-ready, idempotency conflict, already-cancelled, network and permission errors form-level.
 
-- [ ] **Step 7: Verify and commit Task 4**
+- [x] **Step 7: Verify and commit Task 4**
 
 Run:
 

@@ -57,4 +57,12 @@ describe('OrderCommercialTermsCard', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(/Оновіть сторінку/);
     expect(screen.getByRole('button', { name: 'Зберегти реквізити' })).not.toBeDisabled();
   });
+
+  it('attaches a safe server account issue to the account selector', async () => {
+    mutatingFetch.mockResolvedValue(new Response(JSON.stringify({ statusCode: 400, code: 'VALIDATION_FAILED', issues: [{ field: 'bankAccountId', code: 'INVALID_BANK_ACCOUNT' }] }), { status: 400 }));
+    render(<OrderCommercialTermsCard orderId="order-1" initial={ready} locked={false} onChange={vi.fn()} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Зберегти реквізити' }));
+    await waitFor(() => expect(screen.getByText('Перевірте введене значення.')).toHaveAttribute('id', 'commercial-payment-account-error'));
+    await waitFor(() => expect(screen.getByLabelText('Рахунок для оплати')).toHaveFocus());
+  });
 });

@@ -1,8 +1,9 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import type { CommercialSettingsSummary } from '../../../../packages/contracts/src/commercial';
 import * as commercialSettingsApi from '../api/commercial-settings';
+import { ValidationApiError } from '../api/validation-errors';
 import { I18nProvider } from '../i18n/i18n-provider';
 import { CommercialSettingsHub } from './commercial-settings-hub';
 
@@ -62,7 +63,31 @@ describe('CommercialSettingsHub', () => {
     fireEvent.change(screen.getByLabelText('IBAN'), { target: { value: 'U345345345345' } });
     fireEvent.click(screen.getByRole('button', { name: 'Додати' }));
 
-    expect(screen.getByText('Введіть коректний IBAN: для України — UA та ще 27 символів.')).toBeInTheDocument();
+    expect(screen.getByLabelText('IBAN')).toHaveFocus();
+    expect(screen.getByText('Введіть коректний IBAN: для України — UA та ще 27 символів.')).toHaveAttribute('id', 'bank-account-iban-error');
     expect(commercialSettingsApi.createBankAccount).not.toHaveBeenCalled();
+  });
+
+  it('shows every missing legal entity field below its control', () => {
+    render(<I18nProvider locale="uk" authenticated={false}><CommercialSettingsHub initial={initial} role="OWNER" /></I18nProvider>);
+    fireEvent.click(screen.getByRole('button', { name: /Юридичні особи/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Додати' }));
+    expect(screen.getByLabelText('Коротка назва')).toHaveFocus();
+    expect(screen.getByText('Заповніть це поле.', { selector: '#legal-entity-display-name-error' })).toBeInTheDocument();
+    expect(screen.getByText('Заповніть це поле.', { selector: '#legal-entity-legal-name-error' })).toBeInTheDocument();
+    expect(commercialSettingsApi.createLegalEntity).not.toHaveBeenCalled();
+  });
+
+  it('maps a safe server currency issue to the bank account field', async () => {
+    vi.mocked(commercialSettingsApi.createBankAccount).mockRejectedValueOnce(new ValidationApiError({
+      statusCode: 400, code: 'VALIDATION_FAILED', issues: [{ field: 'currency', code: 'INVALID_CURRENCY' }],
+    }));
+    render(<I18nProvider locale="uk" authenticated={false}><CommercialSettingsHub initial={initial} role="OWNER" /></I18nProvider>);
+    fireEvent.click(screen.getByRole('button', { name: /Банківські рахунки/ }));
+    fireEvent.change(screen.getByLabelText('Назва рахунку'), { target: { value: 'Тестовий рахунок' } });
+    fireEvent.change(screen.getByLabelText('IBAN'), { target: { value: 'UA123456789012345678901234567' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Додати' }));
+    await waitFor(() => expect(screen.getByText('Введіть трилітерний код валюти.')).toHaveAttribute('id', 'bank-account-currency-error'));
+    expect(screen.getByLabelText('Валюта')).toHaveFocus();
   });
 });

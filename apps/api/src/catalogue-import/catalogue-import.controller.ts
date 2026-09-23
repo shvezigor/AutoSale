@@ -35,7 +35,7 @@ export class CatalogueImportController {
   @Post('upload')
   @UseInterceptors(FileInterceptor('file', { limits: { fileSize: MAX_CATALOGUE_UPLOAD_BYTES, files: 1 } }))
   upload(@CurrentPrincipal() principal: AuthPrincipal, @UploadedFile() file: MultipartFile | undefined) {
-    if (!file || !validFilePair(file.originalname, file.mimetype)) throw new BadRequestException('Invalid catalogue upload');
+    if (!file || !validFilePair(file.originalname, file.mimetype)) throw new BadRequestException({ statusCode: 400, code: 'VALIDATION_FAILED', issues: [{ field: 'file', code: 'INVALID_FILE' }] });
     return this.imports.upload(principal.tenantId!, principal.userId, {
       originalName: file.originalname,
       mediaType: file.mimetype,
@@ -50,7 +50,7 @@ export class CatalogueImportController {
     @Body() body: unknown,
   ) {
     const parsed = mappingSchema.safeParse(body);
-    if (!parsed.success) throw new BadRequestException('Invalid catalogue mapping');
+    if (!parsed.success) throw new BadRequestException({ statusCode: 400, code: 'VALIDATION_FAILED', issues: [{ field: 'mapping', code: 'INVALID_MAPPING' }] });
     return this.imports.updateMapping(principal.tenantId!, principal.userId, id, parsed.data);
   }
 
