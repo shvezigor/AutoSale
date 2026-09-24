@@ -65,6 +65,7 @@ describe('ShipmentReviewDialog', () => {
     expect(await screen.findByText(/Не вдалося розрахувати вартість/)).toBeInTheDocument();
     expect(screen.queryByText('Розраховуємо вартість…')).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Зберегти чернетку' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Створити ТТН' })).toBeDisabled();
   });
   it('switches to an active Ukrposhta connection, limits destination to branches and respects create gate', async () => {
     const ukrposhta = { ...exactOverview, availableProviders: ['NOVA_POSHTA', 'UKRPOSHTA'], creationEnabled: false, draft: { ...exactOverview.draft, provider: 'UKRPOSHTA', recipient: { name: 'Петренко Олена', phone: '+380671234567' }, destination: { type: 'BRANCH', cityRef: '263:297', locationRef: 'up:1:43000', label: 'Луцьк' } } };
@@ -115,10 +116,11 @@ describe('ShipmentReviewDialog', () => {
   });
 
   it('traps keyboard focus inside the dialog', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => exactOverview }));
+    vi.stubGlobal('fetch', vi.fn().mockImplementation(async (path: string) => ({ ok: true, json: async () => path.includes('quote') ? { currency: 'UAH', cost: 120, estimatedDeliveryDate: null } : path.includes('csrf') ? { token: 'csrf-token' } : exactOverview })));
     renderDialog();
     const close = screen.getByRole('button', { name: 'Закрити' });
-    const create = await screen.findByRole('button', { name: 'Створити ТТН' });
+    await screen.findByText('120 грн');
+    const create = screen.getByRole('button', { name: 'Створити ТТН' });
     create.focus();
     fireEvent.keyDown(window, { key: 'Tab' });
     expect(close).toHaveFocus();
@@ -139,7 +141,7 @@ describe('ShipmentReviewDialog', () => {
     });
     vi.stubGlobal('fetch', fetchMock);
     const { onSaved } = renderDialog();
-    await screen.findByDisplayValue('Олена');
+    await screen.findByText('120 грн');
     fireEvent.click(screen.getByRole('button', { name: 'Створити ТТН' }));
     expect(screen.getByRole('button', { name: 'Створюємо ТТН…' })).toBeDisabled();
     await waitFor(() => expect(onSaved).toHaveBeenCalledWith(creatingShipment));
@@ -164,7 +166,19 @@ describe('ShipmentReviewDialog', () => {
       .mockResolvedValueOnce({ ok: true, json: async () => ({ currency: 'UAH', cost: 120, estimatedDeliveryDate: '2026-09-13' }) });
     vi.stubGlobal('fetch', fetchMock);
     renderDialog();
+    expect(screen.getByRole('button', { name: 'Створити ТТН' })).toBeDisabled();
     expect(await screen.findByText('120 грн')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Створити ТТН' })).toBeEnabled();
     expect(fetchMock).toHaveBeenCalledWith(`/api/orders/${orderId}/shipments/quote`, expect.objectContaining({ method: 'POST' }));
+  });
+  it('invalidates the reviewed quote immediately when parcel details change', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockImplementation(async (path: string) => ({
+      ok: true,
+      json: async () => path.includes('csrf') ? { token: 'csrf-token' } : path.includes('quote') ? { currency: 'UAH', cost: 120, estimatedDeliveryDate: null } : exactOverview,
+    })));
+    renderDialog();
+    await screen.findByText('120 грн');
+    fireEvent.change(screen.getByLabelText('Вага, кг'), { target: { value: '3' } });
+    expect(screen.getByRole('button', { name: 'Створити ТТН' })).toBeDisabled();
   });
 });

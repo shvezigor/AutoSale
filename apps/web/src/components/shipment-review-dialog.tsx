@@ -153,7 +153,7 @@ export function ShipmentReviewDialog({ orderId, onClose, onSaved }: {
   }
 
   async function create() {
-    if (state === 'creating' || overview?.creationEnabled === false || !validateDraft() || !completeDraft || draft?.provider === 'UKRPOSHTA' && !quote) return;
+    if (state === 'creating' || overview?.creationEnabled === false || !validateDraft() || !completeDraft || !quote) return;
     setState('creating');
     try {
       const draftResponse = await mutatingFetch(`/api/orders/${orderId}/shipments/draft`, {
@@ -206,7 +206,7 @@ export function ShipmentReviewDialog({ orderId, onClose, onSaved }: {
       <footer>
         <button type="button" className="secondary-button" disabled={state === 'creating'} onClick={onClose}>{t('orders.cancel')}</button>
         <LoadingButton type="button" pending={state === 'saving'} pendingLabel={t('orders.savingShipmentDraft')} disabled={!draft || state === 'saving' || state === 'creating'} onClick={() => void save()}>{t('orders.saveShipmentDraft')}</LoadingButton>
-        <LoadingButton className="shipment-create-button" type="button" pending={state === 'creating'} pendingLabel={t('orders.creatingTtn')} disabled={!draft || overview?.creationEnabled === false || draft?.provider === 'UKRPOSHTA' && Boolean(completeDraft) && !quote || state === 'saving' || state === 'creating'} onClick={() => void create()}>{t('orders.createTtn')}</LoadingButton>
+        <LoadingButton className="shipment-create-button" type="button" pending={state === 'creating'} pendingLabel={t('orders.creatingTtn')} disabled={!draft || !quote || overview?.creationEnabled === false || state === 'saving' || state === 'creating'} onClick={() => void create()}>{t('orders.createTtn')}</LoadingButton>
       </footer>
     </section>
   </div>;
