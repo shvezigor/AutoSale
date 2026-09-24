@@ -91,7 +91,8 @@ describe('authentication forms', () => {
 
   it('renders the login journey in English', () => {
     renderAuth(<LoginForm submit={vi.fn()} />, 'en');
-    expect(screen.getByRole('heading', { name: 'Sign in to AutoSale' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Sales AITO' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Sign in to Sales AITO' })).toBeInTheDocument();
     expect(screen.getByLabelText('Password')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Continue with Google' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Sign in' })).toBeInTheDocument();

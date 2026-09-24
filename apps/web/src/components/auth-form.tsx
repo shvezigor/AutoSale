@@ -103,7 +103,7 @@ export function InviteAcceptForm({ token, submit }: { token: string; submit: (in
 
 export function AuthFrame({ title, description, children }: { title: string; description: string; children: ReactNode }) {
   const { t } = useI18n();
-  return <main className="auth-layout"><section className="auth-brand-panel"><Link className="brand" href="/">AutoSale</Link><div><h1>{t('authentication.brandTitle')}</h1><p>{t('authentication.brandDescription')}</p></div></section><section className="auth-content"><div className="auth-card"><header><h2>{title}</h2><p>{description}</p></header>{children}</div></section></main>;
+  return <main className="auth-layout"><section className="auth-brand-panel"><Link className="brand" href="/">Sales AITO</Link><div><h1>{t('authentication.brandTitle')}</h1><p>{t('authentication.brandDescription')}</p></div></section><section className="auth-content"><div className="auth-card"><header><h2>{title}</h2><p>{description}</p></header>{children}</div></section></main>;
 }
 
 function Field({ label, hint, error, onClear, ...input }: InputHTMLAttributes<HTMLInputElement> & { label: string; hint?: string | undefined; name: string; error?: string | undefined; onClear: () => void }) {

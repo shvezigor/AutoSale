@@ -7,7 +7,7 @@ describe('PrivacyPage', () => {
   it('describes the Instagram data flow and provides deletion instructions', () => {
     render(<PrivacyPage />);
 
-    expect(screen.getByRole('heading', { name: 'Політика конфіденційності AutoSale' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Політика конфіденційності Sales AITO' })).toBeInTheDocument();
     expect(screen.getByText(/повідомлення та вкладення з підключеного Instagram/)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Запит на видалення даних' })).toHaveAttribute('href', '/privacy/data-deletion');
     expect(screen.getByText('shvezigor@gmail.com')).toBeInTheDocument();

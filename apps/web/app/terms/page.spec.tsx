@@ -7,7 +7,7 @@ describe('TermsPage', () => {
   it('states the service scope and customer responsibility for connected systems', () => {
     render(<TermsPage />);
 
-    expect(screen.getByRole('heading', { name: 'Умови використання AutoSale' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Умови використання Sales AITO' })).toBeInTheDocument();
     expect(screen.getByText(/автоматизації обробки замовлень/)).toBeInTheDocument();
     expect(screen.getByText(/відповідає за законність обробки даних своїх клієнтів/)).toBeInTheDocument();
   });

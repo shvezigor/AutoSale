@@ -59,7 +59,7 @@ export function PrimaryNavigation({
 
   return <aside className={`primary-nav ${className}`.trim()}>
     <div className="primary-nav-brand-row">
-      <Link className="brand" href="/dashboard" aria-label="AutoSale" {...navigationHandler}><span className="brand-mark" aria-hidden="true">A</span><span className="brand-label">AutoSale</span></Link>
+      <Link className="brand" href="/dashboard" aria-label="Sales AITO" {...navigationHandler}><span className="brand-mark" aria-hidden="true">A</span><span className="brand-label">Sales AITO</span></Link>
       {onToggleCollapse && <button className="sidebar-toggle" type="button" aria-label={collapsed ? t('navigation.expand') : t('navigation.collapse')} aria-expanded={!collapsed} onClick={onToggleCollapse}><CollapseIcon data-collapsed={collapsed} /></button>}
     </div>
     <nav aria-label={ariaLabel ?? t('navigation.mainLabel')} id={navId}>

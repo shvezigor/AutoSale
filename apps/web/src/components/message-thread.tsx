@@ -22,7 +22,7 @@ export function MessageThread({
             {message.text ? <p>{message.text}</p> : null}
             {message.attachments.map((attachment) =>
               attachment.copyStatus === 'COPIED' ? (
-                // The API URL is controlled by AutoSale and never exposes provider or S3 credentials.
+                // The API URL is controlled by Sales AITO and never exposes provider or S3 credentials.
                 <img
                   alt={t('conversations.instagramAttachment')}
                   className="message-media"

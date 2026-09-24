@@ -63,7 +63,7 @@ describe('CatalogueSourceSettings', () => {
     const file = new File(['Name,Price\nСукня,1200'], 'products.csv', { type: 'text/csv' });
     fireEvent.change(input, { target: { files: [file] } });
     await waitFor(() => expect(mutatingFetch).toHaveBeenCalledWith('/api/catalogue/imports/upload', expect.objectContaining({ method: 'POST', body: expect.any(FormData) })));
-    expect((await screen.findAllByText(/AutoSale розпізнає колонки/)).length).toBeGreaterThan(0);
+    expect((await screen.findAllByText(/Sales AITO розпізнає колонки/)).length).toBeGreaterThan(0);
   });
 
   it('starts synchronization immediately after a Google table is saved', async () => {

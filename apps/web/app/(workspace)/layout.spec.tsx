@@ -31,7 +31,7 @@ describe('WorkspaceLayout', () => {
 
     render(await WorkspaceLayout({ children: <h1>Каталог товарів</h1> }));
 
-    expect(screen.getByRole('link', { name: 'AutoSale' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Sales AITO' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Меню профілю' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Каталог товарів' }).parentElement).toHaveClass('workspace-route-transition');
   });

@@ -5,7 +5,7 @@ Status: approved design
 
 ## Problem and outcome
 
-AutoSale currently mixes company settings with a minimal header identity, has no editable personal profile, exposes Ukrainian copy directly in components, and cannot sort paginated catalogue or order data. The outcome is a clear personal profile, a production-grade Ukrainian/English interface, and stable server-side sorting that works with search, filters, and pagination.
+Sales AITO previously mixed company settings with a minimal header identity, had no editable personal profile, exposed Ukrainian copy directly in components, and could not sort paginated catalogue or order data. The outcome is a clear personal profile, a production-grade Ukrainian/English interface, and stable server-side sorting that works with search, filters, and pagination.
 
 The primary actor is any authenticated user. Tenant owners additionally see their company role and retain access to team management. Managers receive the same personal-profile capabilities without gaining tenant-owner permissions.
 
@@ -47,6 +47,7 @@ Rejected approaches:
 - Ukrainian and English locale preference.
 - A fast `UA` / `EN` header switcher.
 - Typed translations for all user-visible web application copy.
+- The customer-facing product name is consistently `Sales AITO` in authentication, onboarding, the workspace shell, settings, integration guidance, and legal pages. Historical internal package, container, storage, and configuration identifiers may retain `autosale` and are not user-facing branding.
 - Localized labels for stable domain and API error codes.
 - Server-side sorting for catalogue and orders.
 - Accessible desktop sort headers and a compact mobile sort control.

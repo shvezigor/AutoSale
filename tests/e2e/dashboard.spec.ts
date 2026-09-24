@@ -44,7 +44,7 @@ test('desktop sidebar stays pinned while the dashboard scrolls', async ({ page }
 
   await page.setContent(`<!doctype html><meta name="viewport" content="width=device-width,initial-scale=1"><style>${styles}</style>
     <div class="authenticated-shell">
-      <aside class="primary-nav" data-testid="desktop-sidebar"><div class="primary-nav-brand-row"><span class="brand">AutoSale</span></div><nav><a class="nav-item active" href="#">Дашборд</a></nav></aside>
+      <aside class="primary-nav" data-testid="desktop-sidebar"><div class="primary-nav-brand-row"><span class="brand">Sales AITO</span></div><nav><a class="nav-item active" href="#">Дашборд</a></nav></aside>
       <div class="authenticated-workspace"><header class="app-header">Header</header><main class="dashboard-page" style="min-height:2400px">Dashboard</main></div>
     </div>`);
 

@@ -23,6 +23,10 @@ describe('localization completeness', () => {
     expect(messageLeafPaths(enMessages)).toEqual(messageLeafPaths(ukMessages));
   });
 
+  it('uses the Sales AITO product name in localized customer-facing copy', () => {
+    expect(JSON.stringify({ enMessages, ukMessages })).not.toContain('AutoSale');
+  });
+
   it.each(localizedUiFiles)('keeps application copy out of %s', (relativePath) => {
     const source = readFileSync(resolve(process.cwd(), 'src/i18n', relativePath), 'utf8');
     expect(source).not.toMatch(/[А-Яа-яІіЇїЄє]/);

@@ -1,6 +1,6 @@
 # Workspace UI design system
 
-This is the canonical rule for action controls in the AutoSale workspace. New UI work must use the shared variants and must not fall back to browser-default buttons.
+This is the canonical rule for action controls in the Sales AITO workspace. New UI work must use the shared variants and must not fall back to browser-default buttons.
 
 ## Action variants
 

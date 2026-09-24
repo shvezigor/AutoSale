@@ -37,7 +37,7 @@ describe('TelegramSettingsCard', () => {
   it('explains the one-click shared bot connection without asking for a token', () => {
     renderCard(disconnected);
 
-    expect(screen.getByText(/бот AutoSale вже налаштований/i)).toBeInTheDocument();
+    expect(screen.getByText(/бот Sales AITO вже налаштований/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Підключити Telegram' })).toBeInTheDocument();
     expect(screen.queryByText(/BotFather/i)).not.toBeInTheDocument();
     expect(screen.queryByRole('textbox')).not.toBeInTheDocument();

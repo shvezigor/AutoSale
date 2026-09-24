@@ -7,10 +7,10 @@ export default async function DataDeletionPage({ searchParams }: Props) {
 
   return (
     <main className="route-state">
-      <p className="eyebrow">Meta · AutoSale</p>
+      <p className="eyebrow">Meta · Sales AITO</p>
       <h1>Запит на видалення даних прийнято</h1>
       <p>
-        Instagram-підключення від’єднано, а токен доступу більше не використовується AutoSale.
+        Instagram-підключення від’єднано, а токен доступу більше не використовується Sales AITO.
       </p>
       {code ? (
         <p>
@@ -20,7 +20,7 @@ export default async function DataDeletionPage({ searchParams }: Props) {
         <p>Код підтвердження не передано.</p>
       )}
       <p>
-        Цей запит не видаляє обліковий запис AutoSale або бізнес-записи, створені користувачами сервісу.
+        Цей запит не видаляє обліковий запис Sales AITO або бізнес-записи, створені користувачами сервісу.
       </p>
     </main>
   );

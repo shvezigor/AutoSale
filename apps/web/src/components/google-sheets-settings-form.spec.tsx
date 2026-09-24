@@ -63,6 +63,6 @@ describe('GoogleSheetsSettingsForm', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Обрати таблицю для замовлень' }));
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledWith('/api/settings/google-sheets', expect.objectContaining({ method: 'PATCH', body: JSON.stringify({ spreadsheetId: 'orders-sheet', sheetName: 'Замовлення' }) })));
-    await waitFor(() => expect(screen.getByText('Шаблон AutoSale створено. Експорт активний.')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Шаблон Sales AITO створено. Експорт активний.')).toBeInTheDocument());
   });
 });
