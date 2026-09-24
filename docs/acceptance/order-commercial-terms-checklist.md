@@ -11,6 +11,7 @@ Verified on 2026-09-19 against the implementation described in [`order commercia
 - [x] Missing catalogue price produces `NEEDS_REVIEW` commercial terms without silently changing the recognition status.
 - [x] Quantity corrections recalculate from the immutable unit-price snapshot; product replacement takes a new snapshot from the selected catalogue product.
 - [x] Legal-entity and bank-account mutations are owner-only; manager reads contain masked IBANs.
+- [x] Owner can delete unused legal entities and bank accounts after confirmation; records used by orders or payments require deactivation, and legal entities with accounts must be cleared in dependency order.
 - [x] Account selection is enforced server-side by tenant, active legal entity and currency; cross-tenant or mismatched IDs are rejected.
 - [x] Concurrent version changes return a conflict instead of overwriting a newer selection.
 - [x] Existing orders support a read-only preview and require explicit initialization before snapshots are written.

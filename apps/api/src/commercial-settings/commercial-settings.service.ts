@@ -56,6 +56,18 @@ export class CommercialSettingsService {
     return mapLegalEntity(entity);
   }
 
+  async deleteLegalEntity(tenantId: string, id: string): Promise<void> {
+    await this.prisma.$transaction(async (tx) => {
+      const current = await tx.tenantLegalEntity.findFirst({ where: { id, tenantId } });
+      if (!current) throw new NotFoundException('Legal entity not found');
+      const bankAccountCount = await tx.tenantBankAccount.count({ where: { tenantId, legalEntityId: id } });
+      if (bankAccountCount > 0) throw commercialConflict('LEGAL_ENTITY_HAS_ACCOUNTS');
+      const historicalUseCount = await tx.orderCommercialTerms.count({ where: { tenantId, legalEntityId: id } });
+      if (historicalUseCount > 0) throw commercialConflict('LEGAL_ENTITY_IN_USE');
+      await tx.tenantLegalEntity.delete({ where: { id } });
+    }).catch((error: unknown) => this.mapDeleteConflict(error, 'LEGAL_ENTITY_IN_USE'));
+  }
+
   async createBankAccount(tenantId: string, input: BankAccountInput): Promise<BankAccountSummary> {
     try {
       const account = await this.prisma.$transaction(async (tx) => {
@@ -95,6 +107,19 @@ export class CommercialSettingsService {
     return mapBankAccount(account);
   }
 
+  async deleteBankAccount(tenantId: string, id: string): Promise<void> {
+    await this.prisma.$transaction(async (tx) => {
+      const current = await tx.tenantBankAccount.findFirst({ where: { id, tenantId } });
+      if (!current) throw new NotFoundException('Bank account not found');
+      const [commercialTermsCount, paymentCount] = await Promise.all([
+        tx.orderCommercialTerms.count({ where: { tenantId, bankAccountId: id } }),
+        tx.orderPayment.count({ where: { tenantId, bankAccountId: id } }),
+      ]);
+      if (commercialTermsCount > 0 || paymentCount > 0) throw commercialConflict('BANK_ACCOUNT_IN_USE');
+      await tx.tenantBankAccount.delete({ where: { id } });
+    }).catch((error: unknown) => this.mapDeleteConflict(error, 'BANK_ACCOUNT_IN_USE'));
+  }
+
   private async requireLegalEntity(
     tx: Pick<PrismaClient, 'tenantLegalEntity'>,
     tenantId: string,
@@ -109,6 +134,18 @@ export class CommercialSettingsService {
     if (isPrismaUniqueError(error)) throw new ConflictException('Commercial settings record already exists');
     throw error;
   }
+
+  private mapDeleteConflict(error: unknown, fallbackCode: CommercialDeleteConflictCode): never {
+    if (error instanceof NotFoundException || error instanceof ConflictException) throw error;
+    if (isPrismaForeignKeyError(error)) throw commercialConflict(fallbackCode);
+    throw error;
+  }
+}
+
+type CommercialDeleteConflictCode = 'LEGAL_ENTITY_HAS_ACCOUNTS' | 'LEGAL_ENTITY_IN_USE' | 'BANK_ACCOUNT_IN_USE';
+
+function commercialConflict(code: CommercialDeleteConflictCode): ConflictException {
+  return new ConflictException({ code, message: code });
 }
 
 function mapLegalEntity(entity: {
@@ -143,4 +180,8 @@ function maskIban(value: string): string {
 
 function isPrismaUniqueError(error: unknown): boolean {
   return typeof error === 'object' && error !== null && 'code' in error && error.code === 'P2002';
+}
+
+function isPrismaForeignKeyError(error: unknown): boolean {
+  return typeof error === 'object' && error !== null && 'code' in error && error.code === 'P2003';
 }

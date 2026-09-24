@@ -5,10 +5,11 @@ import type { CommercialSettingsSummary } from '../../../../packages/contracts/s
 import * as commercialSettingsApi from '../api/commercial-settings';
 import { ValidationApiError } from '../api/validation-errors';
 import { I18nProvider } from '../i18n/i18n-provider';
+import { ConfirmProvider } from './confirm-provider';
 import { CommercialSettingsHub } from './commercial-settings-hub';
 
 vi.mock('../api/commercial-settings', () => ({
-  createLegalEntity: vi.fn(), updateLegalEntity: vi.fn(), createBankAccount: vi.fn(), updateBankAccount: vi.fn(), getBankAccountDetail: vi.fn(),
+  createLegalEntity: vi.fn(), updateLegalEntity: vi.fn(), deleteLegalEntity: vi.fn(), createBankAccount: vi.fn(), updateBankAccount: vi.fn(), deleteBankAccount: vi.fn(), getBankAccountDetail: vi.fn(),
 }));
 vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
 
@@ -17,6 +18,10 @@ const initial: CommercialSettingsSummary = {
   bankAccounts: [{ id: 'account-1', legalEntityId: 'entity-1', label: 'Основний', maskedIban: 'UA12••••••••3456', bankName: 'Тест Банк', currency: 'UAH', active: true, isDefault: true }],
 };
 
+function renderHub(role: 'OWNER' | 'MANAGER' = 'OWNER') {
+  return render(<I18nProvider locale="uk" authenticated={false}><ConfirmProvider><CommercialSettingsHub initial={initial} role={role} /></ConfirmProvider></I18nProvider>);
+}
+
 afterEach(() => {
   cleanup();
   vi.clearAllMocks();
@@ -24,7 +29,7 @@ afterEach(() => {
 
 describe('CommercialSettingsHub', () => {
   it('starts closed and opens one commercial section at a time', () => {
-    render(<I18nProvider locale="uk" authenticated={false}><CommercialSettingsHub initial={initial} role="OWNER" /></I18nProvider>);
+    renderHub();
     const entities = screen.getByRole('button', { name: /Юридичні особи/ });
     const accounts = screen.getByRole('button', { name: /Банківські рахунки/ });
     expect(entities).toHaveAttribute('aria-expanded', 'false');
@@ -40,14 +45,14 @@ describe('CommercialSettingsHub', () => {
   });
 
   it('keeps manager view read-only', () => {
-    render(<I18nProvider locale="uk" authenticated={false}><CommercialSettingsHub initial={initial} role="MANAGER" /></I18nProvider>);
+    renderHub('MANAGER');
     fireEvent.click(screen.getByRole('button', { name: /Юридичні особи/ }));
     expect(screen.queryByRole('button', { name: 'Редагувати' })).not.toBeInTheDocument();
     expect(screen.queryByLabelText('Коротка назва')).not.toBeInTheDocument();
   });
 
   it('uses the shared primary and secondary button variants', () => {
-    render(<I18nProvider locale="uk" authenticated={false}><CommercialSettingsHub initial={initial} role="OWNER" /></I18nProvider>);
+    renderHub();
 
     fireEvent.click(screen.getByRole('button', { name: /Юридичні особи/ }));
 
@@ -56,7 +61,7 @@ describe('CommercialSettingsHub', () => {
   });
 
   it('explains an invalid IBAN before sending bank account data', () => {
-    render(<I18nProvider locale="uk" authenticated={false}><CommercialSettingsHub initial={initial} role="OWNER" /></I18nProvider>);
+    renderHub();
 
     fireEvent.click(screen.getByRole('button', { name: /Банківські рахунки/ }));
     fireEvent.change(screen.getByLabelText('Назва рахунку'), { target: { value: 'Основний UAH' } });
@@ -69,7 +74,7 @@ describe('CommercialSettingsHub', () => {
   });
 
   it('shows every missing legal entity field below its control', () => {
-    render(<I18nProvider locale="uk" authenticated={false}><CommercialSettingsHub initial={initial} role="OWNER" /></I18nProvider>);
+    renderHub();
     fireEvent.click(screen.getByRole('button', { name: /Юридичні особи/ }));
     fireEvent.click(screen.getByRole('button', { name: 'Додати' }));
     expect(screen.getByLabelText('Коротка назва')).toHaveFocus();
@@ -82,12 +87,43 @@ describe('CommercialSettingsHub', () => {
     vi.mocked(commercialSettingsApi.createBankAccount).mockRejectedValueOnce(new ValidationApiError({
       statusCode: 400, code: 'VALIDATION_FAILED', issues: [{ field: 'currency', code: 'INVALID_CURRENCY' }],
     }));
-    render(<I18nProvider locale="uk" authenticated={false}><CommercialSettingsHub initial={initial} role="OWNER" /></I18nProvider>);
+    renderHub();
     fireEvent.click(screen.getByRole('button', { name: /Банківські рахунки/ }));
     fireEvent.change(screen.getByLabelText('Назва рахунку'), { target: { value: 'Тестовий рахунок' } });
     fireEvent.change(screen.getByLabelText('IBAN'), { target: { value: 'UA123456789012345678901234567' } });
     fireEvent.click(screen.getByRole('button', { name: 'Додати' }));
     await waitFor(() => expect(screen.getByText('Введіть трилітерний код валюти.')).toHaveAttribute('id', 'bank-account-currency-error'));
     expect(screen.getByLabelText('Валюта')).toHaveFocus();
+  });
+
+  it('deletes a bank account after explicit confirmation and removes its row', async () => {
+    vi.mocked(commercialSettingsApi.deleteBankAccount).mockResolvedValueOnce(undefined);
+    renderHub();
+    fireEvent.click(screen.getByRole('button', { name: /Банківські рахунки/ }));
+
+    fireEvent.click(screen.getByRole('button', { name: 'Видалити рахунок Основний' }));
+    expect(screen.getByRole('dialog')).toHaveTextContent('Основний');
+    fireEvent.click(screen.getByRole('button', { name: 'Видалити' }));
+
+    await waitFor(() => expect(commercialSettingsApi.deleteBankAccount).toHaveBeenCalledWith('account-1'));
+    await waitFor(() => expect(screen.queryByText(/UA12/)).not.toBeInTheDocument());
+  });
+
+  it('deletes an unused legal entity after explicit confirmation', async () => {
+    vi.mocked(commercialSettingsApi.deleteLegalEntity).mockResolvedValueOnce(undefined);
+    renderHub();
+    fireEvent.click(screen.getByRole('button', { name: /Юридичні особи/ }));
+
+    fireEvent.click(screen.getByRole('button', { name: 'Видалити юридичну особу AutoSale' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Видалити' }));
+
+    await waitFor(() => expect(commercialSettingsApi.deleteLegalEntity).toHaveBeenCalledWith('entity-1'));
+    await waitFor(() => expect(screen.queryByText('ТОВ Авто Сейл')).not.toBeInTheDocument());
+  });
+
+  it('does not offer destructive actions to a manager', () => {
+    renderHub('MANAGER');
+    fireEvent.click(screen.getByRole('button', { name: /Банківські рахунки/ }));
+    expect(screen.queryByRole('button', { name: /Видалити рахунок/ })).not.toBeInTheDocument();
   });
 });

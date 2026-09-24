@@ -1,6 +1,6 @@
 import type { AuthPrincipal } from '@autosale/contracts/auth';
 import { bankAccountInputSchema, legalEntityInputSchema } from '@autosale/contracts/commercial';
-import { Body, Controller, Get, Inject, Param, ParseUUIDPipe, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Inject, Param, ParseUUIDPipe, Patch, Post } from '@nestjs/common';
 
 import { CurrentPrincipal, RequireMembership } from '../auth/auth.decorators.js';
 import { validationBadRequest } from '../common/validation-error.js';
@@ -55,6 +55,16 @@ export class CommercialSettingsController {
     return this.settings.updateLegalEntity(principal.tenantId!, id, parsed.data);
   }
 
+  @Delete('legal-entities/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @RequireMembership('OWNER')
+  deleteLegalEntity(
+    @CurrentPrincipal() principal: AuthPrincipal,
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ) {
+    return this.settings.deleteLegalEntity(principal.tenantId!, id);
+  }
+
   @Get('bank-accounts')
   async bankAccounts(@CurrentPrincipal() principal: AuthPrincipal) {
     return (await this.settings.list(principal.tenantId!)).bankAccounts;
@@ -87,5 +97,15 @@ export class CommercialSettingsController {
     const parsed = bankAccountInputSchema.safeParse(body);
     if (!parsed.success) throw validationBadRequest(parsed.error, bankAccountIssueCodes);
     return this.settings.updateBankAccount(principal.tenantId!, id, parsed.data);
+  }
+
+  @Delete('bank-accounts/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @RequireMembership('OWNER')
+  deleteBankAccount(
+    @CurrentPrincipal() principal: AuthPrincipal,
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ) {
+    return this.settings.deleteBankAccount(principal.tenantId!, id);
   }
 }

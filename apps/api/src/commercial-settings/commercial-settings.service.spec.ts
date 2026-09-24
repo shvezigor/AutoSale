@@ -52,4 +52,87 @@ describe('CommercialSettingsService', () => {
       displayName: 'Main', legalName: 'Fictional Main LLC', type: 'COMPANY', registrationId: null, active: true, isDefault: false,
     })).rejects.toBeInstanceOf(ConflictException);
   });
+
+  it('deletes an unused bank account inside the authenticated tenant', async () => {
+    const remove = vi.fn().mockResolvedValue({ id: 'account-1' });
+    const tx = {
+      tenantBankAccount: {
+        findFirst: vi.fn().mockResolvedValue({ id: 'account-1' }),
+        delete: remove,
+      },
+      orderCommercialTerms: { count: vi.fn().mockResolvedValue(0) },
+      orderPayment: { count: vi.fn().mockResolvedValue(0) },
+    };
+    const service = new CommercialSettingsService({ $transaction: vi.fn((operation) => operation(tx)) } as never);
+
+    await service.deleteBankAccount('tenant-a', 'account-1');
+
+    expect(tx.tenantBankAccount.findFirst).toHaveBeenCalledWith({ where: { id: 'account-1', tenantId: 'tenant-a' } });
+    expect(remove).toHaveBeenCalledWith({ where: { id: 'account-1' } });
+  });
+
+  it('keeps a bank account that is referenced by an order or payment', async () => {
+    const remove = vi.fn();
+    const tx = {
+      tenantBankAccount: {
+        findFirst: vi.fn().mockResolvedValue({ id: 'account-1' }),
+        delete: remove,
+      },
+      orderCommercialTerms: { count: vi.fn().mockResolvedValue(1) },
+      orderPayment: { count: vi.fn().mockResolvedValue(0) },
+    };
+    const service = new CommercialSettingsService({ $transaction: vi.fn((operation) => operation(tx)) } as never);
+
+    await expect(service.deleteBankAccount('tenant-a', 'account-1')).rejects.toMatchObject({
+      response: expect.objectContaining({ code: 'BANK_ACCOUNT_IN_USE' }),
+    });
+    expect(remove).not.toHaveBeenCalled();
+  });
+
+  it('requires bank accounts to be removed before deleting a legal entity', async () => {
+    const remove = vi.fn();
+    const tx = {
+      tenantLegalEntity: {
+        findFirst: vi.fn().mockResolvedValue({ id: 'entity-1' }),
+        delete: remove,
+      },
+      tenantBankAccount: { count: vi.fn().mockResolvedValue(1) },
+      orderCommercialTerms: { count: vi.fn().mockResolvedValue(0) },
+    };
+    const service = new CommercialSettingsService({ $transaction: vi.fn((operation) => operation(tx)) } as never);
+
+    await expect(service.deleteLegalEntity('tenant-a', 'entity-1')).rejects.toMatchObject({
+      response: expect.objectContaining({ code: 'LEGAL_ENTITY_HAS_ACCOUNTS' }),
+    });
+    expect(remove).not.toHaveBeenCalled();
+  });
+
+  it('deletes an unused legal entity inside the authenticated tenant', async () => {
+    const remove = vi.fn().mockResolvedValue({ id: 'entity-1' });
+    const tx = {
+      tenantLegalEntity: {
+        findFirst: vi.fn().mockResolvedValue({ id: 'entity-1' }),
+        delete: remove,
+      },
+      tenantBankAccount: { count: vi.fn().mockResolvedValue(0) },
+      orderCommercialTerms: { count: vi.fn().mockResolvedValue(0) },
+    };
+    const service = new CommercialSettingsService({ $transaction: vi.fn((operation) => operation(tx)) } as never);
+
+    await service.deleteLegalEntity('tenant-a', 'entity-1');
+
+    expect(remove).toHaveBeenCalledWith({ where: { id: 'entity-1' } });
+  });
+
+  it('does not delete a legal entity from another tenant', async () => {
+    const tx = {
+      tenantLegalEntity: { findFirst: vi.fn().mockResolvedValue(null), delete: vi.fn() },
+      tenantBankAccount: { count: vi.fn() },
+      orderCommercialTerms: { count: vi.fn() },
+    };
+    const service = new CommercialSettingsService({ $transaction: vi.fn((operation) => operation(tx)) } as never);
+
+    await expect(service.deleteLegalEntity('tenant-b', 'entity-1')).rejects.toBeInstanceOf(NotFoundException);
+    expect(tx.tenantLegalEntity.delete).not.toHaveBeenCalled();
+  });
 });

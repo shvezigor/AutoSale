@@ -17,11 +17,15 @@ describe('CommercialSettingsController', () => {
   const list = vi.fn();
   const createLegalEntity = vi.fn();
   const createBankAccount = vi.fn();
+  const deleteLegalEntity = vi.fn();
+  const deleteBankAccount = vi.fn();
 
   beforeEach(async () => {
     list.mockReset().mockResolvedValue({ legalEntities: [entity], bankAccounts: [] });
     createLegalEntity.mockReset().mockResolvedValue(entity);
     createBankAccount.mockReset();
+    deleteLegalEntity.mockReset().mockResolvedValue(undefined);
+    deleteBankAccount.mockReset().mockResolvedValue(undefined);
     const sessions = { resolve: vi.fn(async (token: string) => token === 'owner'
       ? { userId: 'owner', email: 'owner@example.test', platformRole: 'USER', tenantId, membershipRole: 'OWNER', sessionId: 'owner-session' }
       : token === 'manager'
@@ -30,7 +34,7 @@ describe('CommercialSettingsController', () => {
     const moduleRef = await Test.createTestingModule({
       controllers: [CommercialSettingsController],
       providers: [
-        { provide: CommercialSettingsService, useValue: { list, createLegalEntity, updateLegalEntity: vi.fn(), accountDetail: vi.fn(), createBankAccount, updateBankAccount: vi.fn() } },
+        { provide: CommercialSettingsService, useValue: { list, createLegalEntity, updateLegalEntity: vi.fn(), deleteLegalEntity, accountDetail: vi.fn(), createBankAccount, updateBankAccount: vi.fn(), deleteBankAccount } },
         { provide: APP_GUARD, useFactory: () => new AuthGuard(new Reflector(), sessions as never, { cookieName: 'session', production: false }, { verify: () => true } as never) },
       ],
     }).compile();
@@ -66,5 +70,18 @@ describe('CommercialSettingsController', () => {
     });
     expect(JSON.stringify(response.body)).not.toContain('private-invalid-iban');
     expect(createBankAccount).not.toHaveBeenCalled();
+  });
+
+  it('allows only an owner to delete a legal entity', async () => {
+    await request(app.getHttpServer()).delete(`/api/settings/legal-entities/${entityId}`).set('Cookie', 'session=owner').set('x-csrf-token', 'csrf').expect(204);
+    expect(deleteLegalEntity).toHaveBeenCalledWith(tenantId, entityId);
+    await request(app.getHttpServer()).delete(`/api/settings/legal-entities/${entityId}`).set('Cookie', 'session=manager').set('x-csrf-token', 'csrf').expect(403);
+  });
+
+  it('allows only an owner to delete a bank account', async () => {
+    const accountId = '33333333-3333-4333-8333-333333333333';
+    await request(app.getHttpServer()).delete(`/api/settings/bank-accounts/${accountId}`).set('Cookie', 'session=owner').set('x-csrf-token', 'csrf').expect(204);
+    expect(deleteBankAccount).toHaveBeenCalledWith(tenantId, accountId);
+    await request(app.getHttpServer()).delete(`/api/settings/bank-accounts/${accountId}`).set('Cookie', 'session=manager').set('x-csrf-token', 'csrf').expect(403);
   });
 });

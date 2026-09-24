@@ -11,8 +11,11 @@ import type {
 import { type FormEvent, type ReactNode, useState } from 'react';
 
 import {
+  CommercialSettingsApiError,
   createBankAccount,
   createLegalEntity,
+  deleteBankAccount,
+  deleteLegalEntity,
   getBankAccountDetail,
   updateBankAccount,
   updateLegalEntity,
@@ -21,6 +24,8 @@ import { useI18n } from '../i18n/i18n-provider';
 import { ValidationApiError } from '../api/validation-errors';
 import { FormField } from './form-field';
 import { clearFieldError, focusFirstInvalid, nativeConstraintMessage, type FieldErrors } from './form-validation';
+import { useConfirm } from './confirm-provider';
+import { LoadingButton } from './loading-button';
 
 type Panel = 'entities' | 'accounts';
 type Role = 'OWNER' | 'MANAGER';
@@ -32,6 +37,7 @@ const emptyAccount = (legalEntityId = ''): BankAccountInput => ({ legalEntityId,
 
 export function CommercialSettingsHub({ initial, role }: { initial: CommercialSettingsSummary; role: Role }) {
   const { t } = useI18n();
+  const confirm = useConfirm();
   const [settings, setSettings] = useState(initial);
   const [open, setOpen] = useState<Panel | null>(null);
   const [entityForm, setEntityForm] = useState<LegalEntityInput>(emptyEntity);
@@ -41,6 +47,7 @@ export function CommercialSettingsHub({ initial, role }: { initial: CommercialSe
   const [entityErrors, setEntityErrors] = useState<FieldErrors<EntityField>>({});
   const [accountErrors, setAccountErrors] = useState<FieldErrors<AccountField>>({});
   const [pending, setPending] = useState(false);
+  const [deleting, setDeleting] = useState<{ kind: Panel; id: string } | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
   const toggle = (panel: Panel) => { setOpen((current) => current === panel ? null : panel); setMessage(null); };
@@ -118,6 +125,34 @@ export function CommercialSettingsHub({ initial, role }: { initial: CommercialSe
     } finally { setPending(false); }
   }
 
+  async function removeEntity(item: LegalEntitySummary) {
+    if (!await confirm({ title: t('settings.deleteLegalEntityTitle'), description: t('settings.deleteLegalEntityDescription', { name: item.displayName }), confirmLabel: t('settings.delete'), tone: 'danger' })) return;
+    setDeleting({ kind: 'entities', id: item.id }); setMessage(null);
+    try {
+      await deleteLegalEntity(item.id);
+      const remaining = settings.legalEntities.filter((entity) => entity.id !== item.id);
+      setSettings((current) => ({ ...current, legalEntities: current.legalEntities.filter((entity) => entity.id !== item.id) }));
+      if (entityId === item.id) { setEntityId(null); setEntityForm(emptyEntity); setEntityErrors({}); }
+      if (accountForm.legalEntityId === item.id) setAccountForm(emptyAccount(remaining[0]?.id));
+      setMessage(t('settings.legalEntityDeleted'));
+    } catch (reason) {
+      setMessage(commercialDeleteMessage(reason, t));
+    } finally { setDeleting(null); }
+  }
+
+  async function removeAccount(item: BankAccountSummary) {
+    if (!await confirm({ title: t('settings.deleteBankAccountTitle'), description: t('settings.deleteBankAccountDescription', { name: item.label }), confirmLabel: t('settings.delete'), tone: 'danger' })) return;
+    setDeleting({ kind: 'accounts', id: item.id }); setMessage(null);
+    try {
+      await deleteBankAccount(item.id);
+      setSettings((current) => ({ ...current, bankAccounts: current.bankAccounts.filter((account) => account.id !== item.id) }));
+      if (accountId === item.id) { setAccountId(null); setAccountForm(emptyAccount(settings.legalEntities[0]?.id)); setAccountErrors({}); }
+      setMessage(t('settings.bankAccountDeleted'));
+    } catch (reason) {
+      setMessage(commercialDeleteMessage(reason, t));
+    } finally { setDeleting(null); }
+  }
+
   const panels = [
     { id: 'entities' as const, mark: 'ЮО', title: t('settings.legalEntities'), description: t('settings.legalEntitiesDescription'), count: settings.legalEntities.length },
     { id: 'accounts' as const, mark: '₴', title: t('settings.bankAccounts'), description: t('settings.bankAccountsDescription'), count: settings.bankAccounts.length },
@@ -137,8 +172,8 @@ export function CommercialSettingsHub({ initial, role }: { initial: CommercialSe
           </button>
           {expanded && <div id={`commercial-${panel.id}`} className="delivery-carrier-panel commercial-panel">
             {panel.id === 'entities'
-              ? <EntityPanel items={settings.legalEntities} role={role} form={entityForm} errors={entityErrors} editing={entityId} pending={pending} onForm={updateEntity} onEdit={(item) => { setEntityId(item.id); setEntityForm(toEntityInput(item)); setEntityErrors({}); }} onCancel={() => { setEntityId(null); setEntityForm(emptyEntity); setEntityErrors({}); }} onSubmit={submitEntity} t={t} />
-              : <AccountPanel items={settings.bankAccounts} entities={settings.legalEntities} role={role} form={accountForm} errors={accountErrors} editing={accountId} pending={pending} onForm={updateAccount} onEdit={editAccount} onCancel={() => { setAccountId(null); setAccountForm(emptyAccount(settings.legalEntities[0]?.id)); setAccountErrors({}); }} onSubmit={submitAccount} t={t} />}
+              ? <EntityPanel items={settings.legalEntities} role={role} form={entityForm} errors={entityErrors} editing={entityId} pending={pending} deleting={deleting} onForm={updateEntity} onEdit={(item) => { setEntityId(item.id); setEntityForm(toEntityInput(item)); setEntityErrors({}); }} onDelete={removeEntity} onCancel={() => { setEntityId(null); setEntityForm(emptyEntity); setEntityErrors({}); }} onSubmit={submitEntity} t={t} />
+              : <AccountPanel items={settings.bankAccounts} entities={settings.legalEntities} role={role} form={accountForm} errors={accountErrors} editing={accountId} pending={pending} deleting={deleting} onForm={updateAccount} onEdit={editAccount} onDelete={removeAccount} onCancel={() => { setAccountId(null); setAccountForm(emptyAccount(settings.legalEntities[0]?.id)); setAccountErrors({}); }} onSubmit={submitAccount} t={t} />}
             {message && <p className="settings-inline-message" role="status">{message}</p>}
           </div>}
         </section>;
@@ -148,8 +183,8 @@ export function CommercialSettingsHub({ initial, role }: { initial: CommercialSe
 }
 
 type T = ReturnType<typeof useI18n>['t'];
-function EntityPanel({ items, role, form, errors, editing, pending, onForm, onEdit, onCancel, onSubmit, t }: { items: LegalEntitySummary[]; role: Role; form: LegalEntityInput; errors: FieldErrors<EntityField>; editing: string | null; pending: boolean; onForm: (v: LegalEntityInput) => void; onEdit: (v: LegalEntitySummary) => void; onCancel: () => void; onSubmit: (e: FormEvent<HTMLFormElement>) => void; t: T }) {
-  return <div className="commercial-panel-content"><CommercialList empty={t('settings.noLegalEntities')}>{items.map((item) => <div className="commercial-list-row" key={item.id}><span><strong>{item.displayName}</strong><small>{item.legalName}{item.registrationId ? ` · ${item.registrationId}` : ''}</small></span><span>{item.isDefault ? t('settings.commercialDefault') : item.active ? t('settings.active') : t('settings.inactive')}</span>{role === 'OWNER' && <button type="button" className="secondary-button" onClick={() => onEdit(item)}>{t('settings.edit')}</button>}</div>)}</CommercialList>
+function EntityPanel({ items, role, form, errors, editing, pending, deleting, onForm, onEdit, onDelete, onCancel, onSubmit, t }: { items: LegalEntitySummary[]; role: Role; form: LegalEntityInput; errors: FieldErrors<EntityField>; editing: string | null; pending: boolean; deleting: { kind: Panel; id: string } | null; onForm: (v: LegalEntityInput) => void; onEdit: (v: LegalEntitySummary) => void; onDelete: (v: LegalEntitySummary) => Promise<void>; onCancel: () => void; onSubmit: (e: FormEvent<HTMLFormElement>) => void; t: T }) {
+  return <div className="commercial-panel-content"><CommercialList empty={t('settings.noLegalEntities')}>{items.map((item) => <div className="commercial-list-row" key={item.id}><span><strong>{item.displayName}</strong><small>{item.legalName}{item.registrationId ? ` · ${item.registrationId}` : ''}</small></span><span>{item.isDefault ? t('settings.commercialDefault') : item.active ? t('settings.active') : t('settings.inactive')}</span>{role === 'OWNER' && <div className="commercial-list-actions"><button type="button" className="secondary-button" disabled={Boolean(deleting)} onClick={() => onEdit(item)}>{t('settings.edit')}</button><LoadingButton type="button" className="danger-button" aria-label={t('settings.deleteLegalEntityAria', { name: item.displayName })} pending={deleting?.kind === 'entities' && deleting.id === item.id} pendingLabel={t('settings.deleting')} disabled={Boolean(deleting)} onClick={() => void onDelete(item)}>{t('settings.delete')}</LoadingButton></div>}</div>)}</CommercialList>
     {role === 'OWNER' && <form className="commercial-form" noValidate onSubmit={onSubmit}><div className="commercial-form-grid">
       <FormField id="legal-entity-display-name" label={t('settings.legalEntityDisplayName')} error={errors.displayName} required><input name="displayName" required maxLength={120} value={form.displayName} onChange={(e) => onForm({ ...form, displayName: e.target.value })} /></FormField>
       <FormField id="legal-entity-legal-name" label={t('settings.legalEntityLegalName')} error={errors.legalName} required><input name="legalName" required maxLength={240} value={form.legalName} onChange={(e) => onForm({ ...form, legalName: e.target.value })} /></FormField>
@@ -159,8 +194,8 @@ function EntityPanel({ items, role, form, errors, editing, pending, onForm, onEd
   </div>;
 }
 
-function AccountPanel({ items, entities, role, form, errors, editing, pending, onForm, onEdit, onCancel, onSubmit, t }: { items: BankAccountSummary[]; entities: LegalEntitySummary[]; role: Role; form: BankAccountInput; errors: FieldErrors<AccountField>; editing: string | null; pending: boolean; onForm: (v: BankAccountInput) => void; onEdit: (v: BankAccountSummary) => void; onCancel: () => void; onSubmit: (e: FormEvent<HTMLFormElement>) => void; t: T }) {
-  return <div className="commercial-panel-content"><CommercialList empty={t('settings.noBankAccounts')}>{items.map((item) => <div className="commercial-list-row" key={item.id}><span><strong>{item.label} · {item.currency}</strong><small>{item.maskedIban}{item.bankName ? ` · ${item.bankName}` : ''}</small></span><span>{item.isDefault ? t('settings.commercialDefault') : item.active ? t('settings.active') : t('settings.inactive')}</span>{role === 'OWNER' && <button type="button" className="secondary-button" disabled={pending} onClick={() => void onEdit(item)}>{t('settings.edit')}</button>}</div>)}</CommercialList>
+function AccountPanel({ items, entities, role, form, errors, editing, pending, deleting, onForm, onEdit, onDelete, onCancel, onSubmit, t }: { items: BankAccountSummary[]; entities: LegalEntitySummary[]; role: Role; form: BankAccountInput; errors: FieldErrors<AccountField>; editing: string | null; pending: boolean; deleting: { kind: Panel; id: string } | null; onForm: (v: BankAccountInput) => void; onEdit: (v: BankAccountSummary) => void; onDelete: (v: BankAccountSummary) => Promise<void>; onCancel: () => void; onSubmit: (e: FormEvent<HTMLFormElement>) => void; t: T }) {
+  return <div className="commercial-panel-content"><CommercialList empty={t('settings.noBankAccounts')}>{items.map((item) => <div className="commercial-list-row" key={item.id}><span><strong>{item.label} · {item.currency}</strong><small>{item.maskedIban}{item.bankName ? ` · ${item.bankName}` : ''}</small></span><span>{item.isDefault ? t('settings.commercialDefault') : item.active ? t('settings.active') : t('settings.inactive')}</span>{role === 'OWNER' && <div className="commercial-list-actions"><button type="button" className="secondary-button" disabled={pending || Boolean(deleting)} onClick={() => void onEdit(item)}>{t('settings.edit')}</button><LoadingButton type="button" className="danger-button" aria-label={t('settings.deleteBankAccountAria', { name: item.label })} pending={deleting?.kind === 'accounts' && deleting.id === item.id} pendingLabel={t('settings.deleting')} disabled={pending || Boolean(deleting)} onClick={() => void onDelete(item)}>{t('settings.delete')}</LoadingButton></div>}</div>)}</CommercialList>
     {role === 'OWNER' && entities.length > 0 && <form className="commercial-form" noValidate onSubmit={onSubmit}><div className="commercial-form-grid">
       <FormField id="bank-account-legal-entity" label={t('settings.legalEntities')} error={errors.legalEntityId} required><select name="legalEntityId" required value={form.legalEntityId} onChange={(e) => onForm({ ...form, legalEntityId: e.target.value })}>{entities.map((entity) => <option key={entity.id} value={entity.id}>{entity.displayName}</option>)}</select></FormField>
       <FormField id="bank-account-label" label={t('settings.accountLabel')} error={errors.label} required><input name="label" required maxLength={120} value={form.label} onChange={(e) => onForm({ ...form, label: e.target.value })} /></FormField>
@@ -173,7 +208,7 @@ function AccountPanel({ items, entities, role, form, errors, editing, pending, o
 
 function CommercialList({ empty, children }: { empty: string; children: ReactNode }) { return <div className="commercial-list">{Array.isArray(children) && children.length === 0 ? <p>{empty}</p> : children}</div>; }
 function CommercialFlags({ active, isDefault, onChange, t }: { active: boolean; isDefault: boolean; onChange: (v: { active: boolean; isDefault: boolean }) => void; t: T }) { return <div className="commercial-flags"><label><input type="checkbox" checked={active} onChange={(e) => onChange({ active: e.target.checked, isDefault })} /> {t('settings.active')}</label><label><input type="checkbox" checked={isDefault} onChange={(e) => onChange({ active, isDefault: e.target.checked })} /> {t('settings.commercialDefault')}</label></div>; }
-function FormActions({ editing, pending, onCancel, t }: { editing: string | null; pending: boolean; onCancel: () => void; t: T }) { return <div className="commercial-form-actions">{editing && <button type="button" className="secondary-button" onClick={onCancel}>{t('settings.cancel')}</button>}<button type="submit" className="primary-button" disabled={pending}>{pending ? t('settings.saving') : editing ? t('settings.save') : t('settings.add')}</button></div>; }
+function FormActions({ editing, pending, onCancel, t }: { editing: string | null; pending: boolean; onCancel: () => void; t: T }) { return <div className="commercial-form-actions">{editing && <button type="button" className="secondary-button" disabled={pending} onClick={onCancel}>{t('settings.cancel')}</button>}<LoadingButton type="submit" className="primary-button" pending={pending} pendingLabel={t('settings.saving')}>{editing ? t('settings.save') : t('settings.add')}</LoadingButton></div>; }
 function replaceOrAdd<T extends { id: string }>(items: T[], saved: T): T[] { return items.some((item) => item.id === saved.id) ? items.map((item) => item.id === saved.id ? saved : item) : [...items, saved]; }
 function toEntityInput(item: LegalEntitySummary): LegalEntityInput { return { displayName: item.displayName, legalName: item.legalName, type: item.type, registrationId: item.registrationId, active: item.active, isDefault: item.isDefault }; }
 function normalizeIban(value: string): string { return value.replace(/\s/g, '').toUpperCase(); }
@@ -213,4 +248,12 @@ function mapAccountIssues(reason: ValidationApiError, t: T): FieldErrors<Account
     if (issue.field === 'currency') errors.currency = t('validation.currency');
   }
   return errors;
+}
+
+function commercialDeleteMessage(reason: unknown, t: T): string {
+  if (!(reason instanceof CommercialSettingsApiError)) return t('settings.commercialDeleteFailed');
+  if (reason.code === 'LEGAL_ENTITY_HAS_ACCOUNTS') return t('settings.legalEntityHasAccounts');
+  if (reason.code === 'LEGAL_ENTITY_IN_USE') return t('settings.legalEntityInUse');
+  if (reason.code === 'BANK_ACCOUNT_IN_USE') return t('settings.bankAccountInUse');
+  return t('settings.commercialDeleteFailed');
 }
