@@ -159,7 +159,7 @@ export class CommercialTermsService {
       where: { id: orderId, tenantId },
       include: {
         items: { orderBy: { createdAt: 'asc' } },
-        telegramDeliveries: { take: 1 },
+        telegramDeliveries: { where: { purpose: 'SUPPLIER_ORDER' }, take: 1 },
         shipments: { take: 1 },
       },
     });

@@ -1,4 +1,4 @@
-import { ConflictException } from '@nestjs/common';
+import { BadRequestException, ConflictException } from '@nestjs/common';
 import { describe, expect, it, vi } from 'vitest';
 
 import { CommercialTermsService } from './commercial-terms.service.js';
@@ -57,5 +57,46 @@ describe('CommercialTermsService', () => {
       version: 1, legalEntityId: null, bankAccountId: null, initializeLegacy: false,
     })).rejects.toBeInstanceOf(ConflictException);
     expect(updateMany).not.toHaveBeenCalled();
+  });
+
+  it('allows updating commercial terms when Telegram only sent a personal alert', async () => {
+    const updateMany = vi.fn().mockResolvedValue({ count: 1 });
+    const delivery = { purpose: 'PERSONAL_ALERT', status: 'SUCCEEDED' };
+    const service = new CommercialTermsService({
+      order: { findFirst: vi.fn().mockImplementation(({ include }) => Promise.resolve({
+        id: 'order', procurementHandedOffAt: null, shipments: [],
+        telegramDeliveries: include.telegramDeliveries.where?.purpose === 'SUPPLIER_ORDER' ? [] : [delivery],
+      })) },
+      orderCommercialTerms: { findFirst: vi.fn()
+        .mockResolvedValueOnce({ id: 'terms', version: 1, currency: 'UAH' })
+        .mockResolvedValueOnce({
+          id: 'terms', version: 2, pricingStatus: 'READY', issueCodes: [], currency: 'UAH',
+          itemsSubtotal: { toFixed: () => '10.00' }, discountAmount: { toFixed: () => '0.00' },
+          deliveryAmount: { toFixed: () => '0.00' }, totalAmount: { toFixed: () => '10.00' },
+          legalEntityId: null, legalEntity: null, bankAccount: null,
+        }) },
+      $transaction: vi.fn(async (callback: (tx: unknown) => unknown) => callback({
+        orderPayment: { count: vi.fn().mockResolvedValue(0) },
+        orderCommercialTerms: { updateMany },
+        auditLog: { create: vi.fn() },
+      })),
+    } as never);
+
+    await expect(service.update('tenant', 'order', 'manager', {
+      version: 1, legalEntityId: null, bankAccountId: null, initializeLegacy: false,
+    })).resolves.toMatchObject({ version: 2, totalAmount: '10.00' });
+  });
+
+  it('rejects commercial changes after an order was sent to a supplier', async () => {
+    const service = new CommercialTermsService({
+      order: { findFirst: vi.fn().mockResolvedValue({
+        id: 'order', procurementHandedOffAt: null, shipments: [],
+        telegramDeliveries: [{ purpose: 'SUPPLIER_ORDER', status: 'SUCCEEDED' }],
+      }) },
+    } as never);
+
+    await expect(service.update('tenant', 'order', 'manager', {
+      version: 1, legalEntityId: null, bankAccountId: null, initializeLegacy: false,
+    })).rejects.toBeInstanceOf(BadRequestException);
   });
 });
