@@ -255,12 +255,35 @@ describe('DeliveryService shipment review', () => {
     expect(calculateShipment).not.toHaveBeenCalled();
   });
 
+  it('does not enqueue a saved Nova Poshta draft when the required quote fails', async () => {
+    const { service, prisma, calculateShipment } = shipmentFixture();
+    const active = {
+      id: '66666666-6666-4666-8666-666666666666', tenantId, orderId: approvedOrder.id, connectionId: connection.id,
+      createdByUserId: userId, provider: 'NOVA_POSHTA', status: 'DRAFT', version: 1, idempotencyKey: 'draft-key',
+      requestHash: 'a'.repeat(64), senderSnapshot: profile,
+      recipientSnapshot: { name: 'Олена', phone: '+380671234567' },
+      destinationSnapshot: { type: 'BRANCH', cityRef: 'recipient-city', locationRef: 'recipient-branch', label: 'Відділення №24' },
+      parcels: [{ weightKg: 2, lengthCm: 80, widthCm: 20, heightCm: 205 }], payer: 'RECIPIENT',
+      declaredValue: 5000, codAmount: null, description: 'Двері', trackingNumber: null, cost: null, currency: 'UAH',
+      createdAt: now, providerCreatedAt: null, acceptedAt: null, deliveredAt: null, cancelledAt: null,
+      lastStatusCheckedAt: null, lastErrorCode: null, statusEvents: [],
+    };
+    prisma.shipment.findFirst.mockResolvedValueOnce(active).mockResolvedValueOnce({ ...active, status: 'CREATING' });
+    calculateShipment.mockRejectedValue(new Error('quote failed'));
+
+    await expect(service.createShipment(tenantId, approvedOrder.id, userId)).rejects.toThrow('quote failed');
+    expect(prisma.$transaction).not.toHaveBeenCalled();
+  });
+
   it('durably transitions a draft and attempt before waking the delivery queue', async () => {
     const { service, prisma } = shipmentFixture();
     const active = {
       id: '66666666-6666-4666-8666-666666666666', tenantId, orderId: approvedOrder.id, connectionId: connection.id,
       createdByUserId: userId, provider: 'NOVA_POSHTA', status: 'DRAFT', version: 1, idempotencyKey: 'draft-key',
-      requestHash: 'a'.repeat(64), senderSnapshot: {}, recipientSnapshot: {}, destinationSnapshot: {}, parcels: [], payer: 'SENDER',
+      requestHash: 'a'.repeat(64), senderSnapshot: profile,
+      recipientSnapshot: { name: 'Олена', phone: '+380671234567' },
+      destinationSnapshot: { type: 'BRANCH', cityRef: 'recipient-city', locationRef: 'recipient-branch', label: 'Відділення №24' },
+      parcels: [{ weightKg: 2, lengthCm: 80, widthCm: 20, heightCm: 205 }], payer: 'SENDER',
       declaredValue: 5000, codAmount: null, description: 'Двері', trackingNumber: null, cost: null, currency: 'UAH',
       createdAt: now, providerCreatedAt: null, acceptedAt: null, deliveredAt: null, cancelledAt: null,
       lastStatusCheckedAt: null, lastErrorCode: null, statusEvents: [],
@@ -268,7 +291,8 @@ describe('DeliveryService shipment review', () => {
     const creating = { ...active, status: 'CREATING' };
     prisma.shipment.findFirst.mockResolvedValueOnce(active).mockResolvedValueOnce(creating);
     const queue = { add: vi.fn().mockResolvedValue(undefined) };
-    const queuedService = new DeliveryService(prisma as never, { encrypt: vi.fn(), decrypt: vi.fn() } as never, vi.fn() as never, { enabled: true }, queue);
+    const queuedFactory = vi.fn().mockReturnValue({ calculateShipment: vi.fn().mockResolvedValue({ currency: 'UAH', cost: 120, estimatedDeliveryDate: null }) });
+    const queuedService = new DeliveryService(prisma as never, { encrypt: vi.fn(), decrypt: vi.fn().mockReturnValue('np-live-key') } as never, queuedFactory, { enabled: true }, queue);
 
     await expect(queuedService.createShipment(tenantId, approvedOrder.id, userId)).resolves.toMatchObject({ status: 'CREATING' });
     expect(prisma.shipment.updateMany).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ status: 'CREATING' }) }));

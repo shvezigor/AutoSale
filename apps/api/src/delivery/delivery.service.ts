@@ -226,16 +226,16 @@ export class DeliveryService {
     });
     if (!active) throw new BadRequestException('SHIPMENT_DRAFT_REQUIRED');
     if (active.status !== 'DRAFT') return mapShipmentSummary(active);
+    let storedUkrposhtaSender: ReturnType<typeof safeSenderProfile> | null = null;
     if (active.provider === 'UKRPOSHTA') {
       const connection = await this.prisma.deliveryConnection.findUnique({ where: { tenantId_provider: { tenantId, provider: 'UKRPOSHTA' } } });
       if (!connection || connection.status !== 'ACTIVE' || connection.id !== active.connectionId) throw new BadRequestException('CONNECTION_REQUIRED');
       if (!this.ukrposhtaCreationEnabled(connection.encryptedCredential)) throw new BadRequestException('UKRPOSHTA_CREATION_DISABLED');
       const metadata = active.providerMetadata as { credentialGenerationId?: string } | null;
       if (metadata?.credentialGenerationId !== connection.credentialGenerationId) throw new BadRequestException('SHIPMENT_CONNECTION_CHANGED');
-      const storedDraft = draftFromShipment(active);
       const storedSender = deliverySenderProfileInputSchema.safeParse(active.senderSnapshot);
-      if (!storedDraft || !storedSender.success) throw new BadRequestException('INVALID_SHIPMENT_DRAFT');
-      assertUkrposhtaPeople(storedDraft, storedSender.data);
+      if (!storedSender.success) throw new BadRequestException('INVALID_SHIPMENT_DRAFT');
+      storedUkrposhtaSender = storedSender.data;
     }
 
     const version = active.version;
@@ -248,6 +248,10 @@ export class DeliveryService {
     if (conflictingAttempt && (conflictingAttempt.shipmentId !== active.id || conflictingAttempt.requestHash !== active.requestHash)) {
       throw new UnprocessableEntityException('IDEMPOTENCY_KEY_REUSED');
     }
+    const storedDraft = draftFromShipment(active);
+    if (!storedDraft) throw new BadRequestException('INVALID_SHIPMENT_DRAFT');
+    if (storedUkrposhtaSender) assertUkrposhtaPeople(storedDraft, storedUkrposhtaSender);
+    await this.quoteShipment(tenantId, orderId, storedDraft);
 
     try {
       await this.prisma.$transaction(async (transaction) => {
