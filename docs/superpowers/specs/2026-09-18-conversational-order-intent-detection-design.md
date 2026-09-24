@@ -1,7 +1,7 @@
 # Conversational order-intent detection
 
 **Status:** Available, owner opt-in
-**Updated:** 2026-09-18
+**Updated:** 2026-09-24
 
 ## Objective
 
@@ -21,7 +21,7 @@ The deterministic phrase and manual action remain available in every mode. Chang
 
 AI output is first validated through the existing structured order-recognition contract and catalogue matcher. The policy then applies these gates in order:
 
-1. The conversation must express explicit purchase intent.
+1. The new inbound anchor message itself must express explicit purchase intent. An older product discussion or completed order in the bounded context cannot make an unrelated greeting, thanks, reaction, link, media share, or informational question into a new order.
 2. At least one usable product description must exist; AI cannot invent a SKU.
 3. Suggestion mode always requires manager review.
 4. Automation mode requires no validation issues and confidence at or above the tenant threshold.
@@ -33,7 +33,7 @@ The order review displays a localized, bounded explanation: manager-review mode,
 
 `OrderIntentEvaluation` is keyed uniquely by the inbound anchor message. The worker claims that row before calling the model, uses a five-minute processing lease, and stores a terminal `IGNORED`, `PROPOSED`, or `AUTO_CREATED` state. A replay returns the already linked order or no result and never calls the model twice. Failed or expired claims can be reclaimed safely and increment `attempts`.
 
-The evaluated context is bounded to the latest 50 messages at or before the anchor timestamp and active tenant products. A later inbound message is a new revision with its own evaluation; older messages are never re-evaluated as anchors.
+The evaluated context is bounded to the latest 50 messages at or before the anchor timestamp and active tenant products. Context may resolve references in an explicit purchase commitment, but it is not independent proof of intent. The structured model result therefore includes an anchor-specific purchase-intent gate that is checked again by deterministic policy. A later inbound message is a new revision with its own evaluation; older messages are never re-evaluated as anchors.
 
 ## Data, audit and observability
 

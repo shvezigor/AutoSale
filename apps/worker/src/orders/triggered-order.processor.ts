@@ -72,12 +72,14 @@ export class TriggeredOrderProcessor {
         {
           messages: recentMessages.reverse().map((message) => ({ id: message.id, direction: message.direction, text: message.text })),
           products: products.map((product) => ({ id: product.sku, name: product.name, aliases: stringArray(product.aliases) })),
+          recognitionMode: 'CONVERSATIONAL_INTENT',
         },
         { approvalMode: 'ALWAYS', autoApprovalThreshold: settings.autoApprovalThreshold },
       );
       const decision = decideConversationalIntent({
         mode: settings.intentDetectionMode as IntentDetectionMode,
         isOrder: result.order.isOrder,
+        anchorHasExplicitPurchaseIntent: result.order.anchorHasExplicitPurchaseIntent,
         hasUsableProduct: result.order.items.some((item) => item.originalText.trim().length > 0),
         isComplete: result.validationIssues.length === 0,
         confidence: result.order.overallConfidence,
@@ -276,6 +278,7 @@ export class TriggeredOrderProcessor {
             name: product.name,
             aliases: stringArray(product.aliases),
           })),
+          recognitionMode: 'TRIGGERED_ORDER',
         },
         {
           approvalMode: settings.approvalMode as ApprovalMode,

@@ -7,6 +7,20 @@ interface PendingEventStore {
       select: { id: true };
     }): Promise<Array<{ id: string }>>;
   };
+  message: {
+    findMany(input: {
+      where: {
+        channel: 'INSTAGRAM';
+        text: null;
+        rawEventId: { not: null };
+        attachments: { none: Record<string, never> };
+      };
+      distinct: ['rawEventId'];
+      orderBy: [{ sourceTimestamp: 'asc' }, { id: 'asc' }];
+      take: number;
+      select: { rawEventId: true };
+    }): Promise<Array<{ rawEventId: string | null }>>;
+  };
 }
 
 interface NormalizeQueue {
@@ -24,12 +38,26 @@ export class InstagramEventReconciler {
   ) {}
 
   async reconcile(): Promise<{ attempted: number; failed: number }> {
-    const pending = await this.store.webhookEvent.findMany({
-      where: { provider: 'META', status: 'RECEIVED' },
-      orderBy: [{ receivedAt: 'asc' }, { id: 'asc' }],
-      take: 100,
-      select: { id: true },
-    });
+    const [pending, attachmentBackfills] = await Promise.all([
+      this.store.webhookEvent.findMany({
+        where: { provider: 'META', status: 'RECEIVED' },
+        orderBy: [{ receivedAt: 'asc' }, { id: 'asc' }],
+        take: 100,
+        select: { id: true },
+      }),
+      this.store.message.findMany({
+        where: {
+          channel: 'INSTAGRAM',
+          text: null,
+          rawEventId: { not: null },
+          attachments: { none: {} },
+        },
+        distinct: ['rawEventId'],
+        orderBy: [{ sourceTimestamp: 'asc' }, { id: 'asc' }],
+        take: 100,
+        select: { rawEventId: true },
+      }),
+    ]);
     let failed = 0;
 
     for (const event of pending) {
@@ -44,6 +72,25 @@ export class InstagramEventReconciler {
       }
     }
 
-    return { attempted: pending.length, failed };
+    const pendingIds = new Set(pending.map((event) => event.id));
+    for (const message of attachmentBackfills) {
+      const eventId = message.rawEventId;
+      if (!eventId || pendingIds.has(eventId)) continue;
+
+      try {
+        await this.queue.add(
+          'instagram.normalize',
+          { eventId, correlationId: eventId },
+          { jobId: `instagram-attachment-backfill-${eventId}`, removeOnFail: true },
+        );
+      } catch {
+        failed += 1;
+      }
+    }
+
+    const uniqueBackfills = attachmentBackfills.filter(
+      (message) => message.rawEventId && !pendingIds.has(message.rawEventId),
+    ).length;
+    return { attempted: pending.length + uniqueBackfills, failed };
   }
 }

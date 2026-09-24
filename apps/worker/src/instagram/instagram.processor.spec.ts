@@ -34,6 +34,7 @@ describe('InstagramProcessor', () => {
       '20260831100000_catalogue_source_object_key',
       '20260902090000_instagram_customer_profiles',
       '20260907160000_instagram_outbound_messages',
+      '20260924190000_instagram_attachment_recovery',
     ];
     const pool = new pg.Pool({ connectionString });
     for (const migrationPath of migrationPaths) {
@@ -115,6 +116,64 @@ describe('InstagramProcessor', () => {
       checksum: 'checksum',
       storageKey: 'tenants/test/instagram/sha256/checksum.jpg',
     });
+  });
+
+  it('backfills a shared link for an already durable message without retriggering AI', async () => {
+    copy.mockReset();
+    processIfTriggered.mockReset();
+    const timestamp = new Date('2026-09-24T10:00:00.000Z');
+    const payload = {
+      object: 'instagram',
+      entry: [{
+        id: 'page',
+        messaging: [{
+          sender: { id: 'ig-link-backfill' },
+          recipient: { id: 'page' },
+          timestamp: timestamp.getTime(),
+          message: {
+            mid: 'm_link_backfill',
+            attachments: [{ type: 'ig_reel', payload: { url: 'https://www.instagram.com/reel/fictional' } }],
+          },
+        }],
+      }],
+    };
+    const event = await prisma.webhookEvent.create({
+      data: { tenantId, provider: 'META', externalEventId: 'm_link_backfill', payload },
+    });
+    const conversation = await prisma.conversation.create({
+      data: {
+        tenantId,
+        channel: 'INSTAGRAM',
+        externalConversationId: 'ig-link-backfill',
+        participantId: 'ig-link-backfill',
+        lastMessageAt: timestamp,
+      },
+    });
+    const message = await prisma.message.create({
+      data: {
+        tenantId,
+        conversationId: conversation.id,
+        rawEventId: event.id,
+        channel: 'INSTAGRAM',
+        externalMessageId: 'm_link_backfill',
+        direction: 'INBOUND',
+        senderId: 'ig-link-backfill',
+        text: null,
+        sourceTimestamp: timestamp,
+      },
+    });
+
+    await new InstagramProcessor(prisma, { copy }, { processIfTriggered }).process(event.id);
+    await new InstagramProcessor(prisma, { copy }, { processIfTriggered }).process(event.id);
+
+    await expect(prisma.attachment.findFirstOrThrow({ where: { messageId: message.id } })).resolves.toMatchObject({
+      type: 'LINK',
+      originalUrl: 'https://www.instagram.com/reel/fictional',
+      copyStatus: 'NOT_REQUIRED',
+    });
+    expect(await prisma.attachment.count({ where: { messageId: message.id } })).toBe(1);
+    expect(copy).not.toHaveBeenCalled();
+    expect(processIfTriggered).not.toHaveBeenCalled();
   });
 
   it('checks a durable outbound message for an order trigger', async () => {

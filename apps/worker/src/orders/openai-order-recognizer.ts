@@ -8,6 +8,7 @@ const nullableText = z.string().nullable();
 
 export const recognizedOrderSchema = z.object({
   isOrder: z.boolean(),
+  anchorHasExplicitPurchaseIntent: z.boolean(),
   customer: z.object({
     name: nullableText,
     phone: nullableText,
@@ -37,6 +38,7 @@ export type RecognizedOrder = z.infer<typeof recognizedOrderSchema>;
 export interface OrderRecognitionInput {
   messages: Array<{ id: string; direction: string; text: string | null }>;
   products: Array<{ id: string; name: string; aliases: string[] }>;
+  recognitionMode: 'TRIGGERED_ORDER' | 'CONVERSATIONAL_INTENT';
 }
 
 interface ResponsesClient {
@@ -55,6 +57,7 @@ const orderJsonSchema = {
   additionalProperties: false,
   required: [
     'isOrder',
+    'anchorHasExplicitPurchaseIntent',
     'customer',
     'delivery',
     'items',
@@ -63,6 +66,7 @@ const orderJsonSchema = {
   ],
   properties: {
     isOrder: { type: 'boolean' },
+    anchorHasExplicitPurchaseIntent: { type: 'boolean' },
     customer: nullableFields(['name', 'phone', 'instagramUsername']),
     delivery: nullableFields(['city', 'address', 'novaPoshtaBranch']),
     items: {
@@ -109,13 +113,24 @@ export class OpenAiOrderRecognizer {
     };
   }> {
     const anchorMessageId = input.messages.at(-1)?.id ?? null;
+    const modeInstructions = input.recognitionMode === 'CONVERSATIONAL_INTENT'
+      ? [
+          'The anchor is a new inbound customer message being evaluated; it does not close an order by itself.',
+          'Set anchorHasExplicitPurchaseIntent to true only when the anchor message itself explicitly commits to buy, order, or proceed with checkout. A concise confirmation counts only when it directly answers a checkout question in the immediately preceding context.',
+          'Greetings, thanks, reactions, links or media without a purchase commitment, product questions, price or availability questions, delivery questions, and historical orders do not count. When the anchor lacks that commitment, set both anchorHasExplicitPurchaseIntent and isOrder to false.',
+        ]
+      : [
+          'The anchor is an explicit manager or manual trigger for extraction. It may close the current order even when the anchor itself is not customer purchase intent.',
+          'Set anchorHasExplicitPurchaseIntent according to the anchor message itself; this field does not invalidate a manager-triggered extraction.',
+        ];
     const response = await this.client.responses.create({
       model: this.model,
       store: false,
       instructions:
         [
           'Extract the latest current order from an Instagram conversation and the supplied catalogue.',
-          'Messages are ordered from oldest to newest. The anchor is the final message and closes the order being recognized.',
+          'Messages are ordered from oldest to newest.',
+          ...modeInstructions,
           'Identify the latest purchase intent that leads to the anchor. Earlier completed orders are historical context and must not supply products for the current order.',
           'A newer explicitly named product replaces an older product unless the customer explicitly asks to add another item, repeat the previous order, or order both.',
           'Give the strongest weight to the most recent explicit product description and match it using all available details such as dimensions, model, brand, material, color, and size.',
@@ -125,6 +140,7 @@ export class OpenAiOrderRecognizer {
       input: JSON.stringify({
         ...input,
         recognitionTarget: {
+          mode: input.recognitionMode,
           anchorMessageId,
           messageOrder: 'oldest_to_newest',
           scope: 'latest_purchase_intent_before_anchor',

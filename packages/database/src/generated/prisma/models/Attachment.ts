@@ -241,6 +241,7 @@ export type AttachmentOrderByWithRelationInput = {
 
 export type AttachmentWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  messageId_type_originalUrl?: Prisma.AttachmentMessageIdTypeOriginalUrlCompoundUniqueInput
   AND?: Prisma.AttachmentWhereInput | Prisma.AttachmentWhereInput[]
   OR?: Prisma.AttachmentWhereInput[]
   NOT?: Prisma.AttachmentWhereInput | Prisma.AttachmentWhereInput[]
@@ -254,7 +255,7 @@ export type AttachmentWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"Attachment"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Attachment"> | Date | string
   message?: Prisma.XOR<Prisma.MessageScalarRelationFilter, Prisma.MessageWhereInput>
-}, "id">
+}, "id" | "messageId_type_originalUrl">
 
 export type AttachmentOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -386,6 +387,12 @@ export type AttachmentListRelationFilter = {
 
 export type AttachmentOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type AttachmentMessageIdTypeOriginalUrlCompoundUniqueInput = {
+  messageId: string
+  type: string
+  originalUrl: string
 }
 
 export type AttachmentCountOrderByAggregateInput = {

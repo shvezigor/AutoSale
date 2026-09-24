@@ -69,6 +69,34 @@ describe('conversation profile contracts', () => {
     expect(parsed.messages[0]?.delivery).toEqual({ status: 'PENDING', attempts: 0, errorCode: null, retryAllowed: false });
   });
 
+  it('retains image, link, and unsupported Instagram attachments', () => {
+    const parsed = conversationDetailResponseSchema.parse({
+      id: '11111111-1111-4111-8111-111111111111',
+      channel: 'INSTAGRAM',
+      participantName: 'Олена',
+      participantUsername: 'olena',
+      participantAvatarUrl: null,
+      replyCapability: { enabled: true, reason: null },
+      messages: [{
+        id: '22222222-2222-4222-8222-222222222222',
+        direction: 'INBOUND',
+        senderId: 'customer',
+        text: null,
+        sourceTimestamp: '2026-09-24T10:00:00.000Z',
+        attachments: [
+          { id: '33333333-3333-4333-8333-333333333333', type: 'LINK', mediaUrl: 'https://www.instagram.com/reel/fictional', copyStatus: 'NOT_REQUIRED' },
+          { id: '44444444-4444-4444-8444-444444444444', type: 'UNSUPPORTED', mediaUrl: null, copyStatus: 'NOT_REQUIRED' },
+        ],
+        delivery: null,
+      }],
+    });
+
+    expect(parsed.messages[0]?.attachments).toEqual([
+      expect.objectContaining({ type: 'LINK', mediaUrl: 'https://www.instagram.com/reel/fictional' }),
+      expect.objectContaining({ type: 'UNSUPPORTED', mediaUrl: null }),
+    ]);
+  });
+
   it('validates trimmed Instagram reply input at its boundaries', () => {
     const schema = (conversationContracts as unknown as Record<string, { parse(value: unknown): unknown }>).outboundMessageInputSchema;
     expect(schema).toBeDefined();

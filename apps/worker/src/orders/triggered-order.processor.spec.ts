@@ -103,6 +103,7 @@ describe('TriggeredOrderProcessor', () => {
     const recognize = vi.fn().mockResolvedValue({
       order: {
         isOrder: true,
+        anchorHasExplicitPurchaseIntent: false,
         customer: { name: 'Іван', phone: '+380501112233', instagramUsername: 'ig-customer' },
         delivery: { city: 'Львів', address: null, novaPoshtaBranch: '12' },
         items: [
@@ -219,6 +220,7 @@ describe('TriggeredOrderProcessor', () => {
     const recognize = vi.fn().mockResolvedValue({
       order: {
         isOrder: true,
+        anchorHasExplicitPurchaseIntent: true,
         customer: { name: 'Ігор', phone: '+380501112233', instagramUsername: 'customer' },
         delivery: { city: 'Луцьк', address: null, novaPoshtaBranch: '22' },
         items: [{ catalogId: 'DOOR-1', originalText: 'двері Авангард', quantity: 1, color: null, size: null, confidence: 0.98 }],

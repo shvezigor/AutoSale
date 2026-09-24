@@ -8,13 +8,16 @@ export type ConversationalIntentDecision =
 export function decideConversationalIntent(input: {
   mode: IntentDetectionMode;
   isOrder: boolean;
+  anchorHasExplicitPurchaseIntent: boolean;
   hasUsableProduct: boolean;
   isComplete: boolean;
   confidence: number;
   threshold: number;
 }): ConversationalIntentDecision {
   if (input.mode === 'PHRASE_ONLY') return { action: 'IGNORE', reason: 'PHRASE_ONLY' };
-  if (!input.isOrder) return { action: 'IGNORE', reason: 'NO_EXPLICIT_PURCHASE_INTENT' };
+  if (!input.isOrder || !input.anchorHasExplicitPurchaseIntent) {
+    return { action: 'IGNORE', reason: 'NO_EXPLICIT_PURCHASE_INTENT' };
+  }
   if (!input.hasUsableProduct) return { action: 'IGNORE', reason: 'NO_USABLE_PRODUCT' };
   if (input.mode === 'AI_SUGGESTION') return { action: 'SUGGEST', reason: 'MANAGER_REVIEW_MODE' };
   if (!input.isComplete) return { action: 'SUGGEST', reason: 'INCOMPLETE_ORDER' };

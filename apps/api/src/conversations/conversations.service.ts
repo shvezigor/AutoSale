@@ -81,7 +81,10 @@ export class ConversationsService {
         messages: {
           orderBy: [{ sourceTimestamp: 'desc' }, { id: 'desc' }],
           take: 1,
-          select: { text: true },
+          select: {
+            text: true,
+            attachments: { take: 1, orderBy: { createdAt: 'asc' }, select: { type: true } },
+          },
         },
       },
     });
@@ -97,7 +100,8 @@ export class ConversationsService {
         participantName: participantName(conversation.profile, conversation.displayName),
         participantUsername: conversation.profile?.username ?? null,
         participantAvatarUrl: profileAvatarUrl(conversation.profile),
-        lastMessagePreview: conversation.messages[0]?.text ?? null,
+        lastMessagePreview: conversation.messages[0]?.text
+          ?? attachmentPreview(conversation.messages[0]?.attachments[0]?.type),
         lastMessageAt: conversation.lastMessageAt.toISOString(),
       })),
       nextCursor:
@@ -365,7 +369,7 @@ function mapMessage(message: {
   deliveryStatus: 'PENDING' | 'SENDING' | 'SENT' | 'FAILED' | 'UNKNOWN' | null;
   deliveryAttempts: number;
   deliveryErrorCode: string | null;
-  attachments: Array<{ id: string; copyStatus: string }>;
+  attachments: Array<{ id: string; type: string; originalUrl: string; copyStatus: string }>;
 }, connectionActive: boolean): ConversationMessage {
   const isOutbound = message.direction === 'OUTBOUND';
   const retryAllowed = connectionActive &&
@@ -377,12 +381,7 @@ function mapMessage(message: {
     senderId: message.senderId,
     text: message.text,
     sourceTimestamp: message.sourceTimestamp.toISOString(),
-    attachments: message.attachments.map((attachment) => ({
-      id: attachment.id,
-      type: 'IMAGE',
-      mediaUrl: `/api/media/${attachment.id}`,
-      copyStatus: attachment.copyStatus,
-    })),
+    attachments: message.attachments.map(mapAttachment),
     delivery: isOutbound && message.deliveryStatus
       ? {
           status: message.deliveryStatus,
@@ -394,6 +393,52 @@ function mapMessage(message: {
         }
       : null,
   };
+}
+
+function mapAttachment(attachment: {
+  id: string;
+  type: string;
+  originalUrl: string;
+  copyStatus: string;
+}): ConversationMessage['attachments'][number] {
+  if (attachment.type === 'IMAGE') {
+    return {
+      id: attachment.id,
+      type: 'IMAGE',
+      mediaUrl: `/api/media/${attachment.id}`,
+      copyStatus: attachment.copyStatus,
+    };
+  }
+  if (attachment.type === 'LINK' && isSafeExternalUrl(attachment.originalUrl)) {
+    return {
+      id: attachment.id,
+      type: 'LINK',
+      mediaUrl: attachment.originalUrl,
+      copyStatus: attachment.copyStatus,
+    };
+  }
+  return {
+    id: attachment.id,
+    type: 'UNSUPPORTED',
+    mediaUrl: null,
+    copyStatus: attachment.copyStatus,
+  };
+}
+
+function isSafeExternalUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:' || url.protocol === 'http:';
+  } catch {
+    return false;
+  }
+}
+
+function attachmentPreview(type: string | undefined): string | null {
+  if (type === 'IMAGE') return '📷 Instagram';
+  if (type === 'LINK') return '🔗 Instagram';
+  if (type) return '📎 Instagram';
+  return null;
 }
 
 function isDeliveryErrorCode(value: string | null): value is NonNullable<ConversationMessage['delivery']>['errorCode'] {

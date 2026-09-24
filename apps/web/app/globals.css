@@ -267,6 +267,9 @@ html[data-sidebar-state="collapsed"] .authenticated-shell > .primary-nav .nav-it
 .delivery-unknown { color: #805b0b; }
 .message-retry { display: block; margin: 7px 0 0 auto; border: 0; padding: 3px 0; background: transparent; color: var(--accent); font: inherit; font-size: 11px; font-weight: 700; cursor: pointer; }
 .message-media { display: block; width: min(280px, 100%); height: auto; max-height: 260px; object-fit: cover; border-radius: 9px; margin-bottom: 8px; background: #e7ebf1; }
+.message-attachment-link { display: inline-flex; align-items: center; min-height: 38px; margin: 4px 0 8px; padding: 8px 11px; border: 1px solid currentColor; border-radius: 9px; color: inherit; font-size: 13px; font-weight: 700; text-decoration: none; }
+.message-attachment-link:hover { text-decoration: underline; }
+.attachment-placeholder { margin: 6px 0 8px; padding: 12px; border: 1px dashed var(--border); border-radius: 8px; color: var(--muted); font-size: 12px; }
 .attachment-failure { margin: 6px 0; padding: 12px; border: 1px dashed #d5a1a1; border-radius: 8px; color: #9b3333; font-size: 12px; }
 .reply-area { position: relative; z-index: 2; margin: 0; padding: 10px 22px 20px; border-top: 1px solid var(--border); background: rgba(255,255,255,.98); }
 .reply-guidance { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 8px; padding: 10px 12px; border-radius: 9px; background: #fff7e8; color: #72500b; font-size: 12px; }

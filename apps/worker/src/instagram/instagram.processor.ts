@@ -124,13 +124,15 @@ export class InstagramProcessor {
           });
         }
 
-        if (wasCreated && normalized.attachments.length > 0) {
+        if (normalized.attachments.length > 0) {
           await transaction.attachment.createMany({
             data: normalized.attachments.map((attachment) => ({
               messageId: message.id,
               type: attachment.type,
               originalUrl: attachment.sourceUrl,
+              copyStatus: attachment.type === 'IMAGE' ? 'PENDING' : 'NOT_REQUIRED',
             })),
+            skipDuplicates: true,
           });
         }
 
@@ -138,7 +140,11 @@ export class InstagramProcessor {
           messageId: message.id,
           wasCreated,
           attachments: await transaction.attachment.findMany({
-            where: { messageId: message.id, copyStatus: { in: ['PENDING', 'RETRYABLE_FAILURE'] } },
+            where: {
+              messageId: message.id,
+              type: 'IMAGE',
+              copyStatus: { in: ['PENDING', 'RETRYABLE_FAILURE'] },
+            },
           }),
         };
       });

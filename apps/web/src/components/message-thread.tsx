@@ -20,8 +20,24 @@ export function MessageThread({
           <article className="message-bubble">
             <span className="sr-only">{message.direction === 'INBOUND' ? t('conversations.incoming') : t('conversations.outgoing')}</span>
             {message.text ? <p>{message.text}</p> : null}
-            {message.attachments.map((attachment) =>
-              attachment.copyStatus === 'COPIED' ? (
+            {message.attachments.map((attachment) => {
+              if (attachment.type === 'LINK' && attachment.mediaUrl) {
+                return (
+                  <a
+                    className="message-attachment-link"
+                    href={attachment.mediaUrl}
+                    key={attachment.id}
+                    rel="noreferrer"
+                    target="_blank"
+                  >
+                    {t('conversations.openInstagramContent')}
+                  </a>
+                );
+              }
+              if (attachment.type === 'UNSUPPORTED') {
+                return <div className="attachment-placeholder" key={attachment.id}>{t('conversations.unsupportedInstagramAttachment')}</div>;
+              }
+              return attachment.copyStatus === 'COPIED' && attachment.mediaUrl ? (
                 // The API URL is controlled by Sales AITO and never exposes provider or S3 credentials.
                 <img
                   alt={t('conversations.instagramAttachment')}
@@ -36,8 +52,8 @@ export function MessageThread({
                 <div className="attachment-failure" key={attachment.id} role="status">
                   {t('conversations.attachmentFailed')}
                 </div>
-              ),
-            )}
+              );
+            })}
             <footer className="message-meta">
               {message.delivery ? (
                 <span className={`delivery-status delivery-${message.delivery.status.toLowerCase()}`} aria-live="polite">

@@ -33,6 +33,18 @@ const detail: ConversationDetailResponse = {
           mediaUrl: '/api/media/44444444-4444-4444-8444-444444444444',
           copyStatus: 'FAILED',
         },
+        {
+          id: '66666666-6666-4666-8666-666666666666',
+          type: 'LINK',
+          mediaUrl: 'https://www.instagram.com/reel/fictional',
+          copyStatus: 'NOT_REQUIRED',
+        },
+        {
+          id: '77777777-7777-4777-8777-777777777777',
+          type: 'UNSUPPORTED',
+          mediaUrl: null,
+          copyStatus: 'NOT_REQUIRED',
+        },
       ],
       delivery: null,
     },
@@ -58,6 +70,11 @@ describe('MessageThread', () => {
     expect(screen.getByText(/11:00/)).toBeVisible();
     expect(screen.getByRole('img', { name: /вкладення з Instagram/i })).toBeVisible();
     expect(screen.getByText('Не вдалося завантажити вкладення')).toBeVisible();
+    expect(screen.getByRole('link', { name: 'Відкрити матеріал в Instagram' })).toHaveAttribute(
+      'href',
+      'https://www.instagram.com/reel/fictional',
+    );
+    expect(screen.getByText('Непідтримуване вкладення Instagram')).toBeVisible();
   });
 
   it('translates message metadata but preserves message text', () => {

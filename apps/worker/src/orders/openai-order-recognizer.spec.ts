@@ -9,6 +9,7 @@ describe('OpenAiOrderRecognizer', () => {
       model: 'gpt-5.4-mini',
       output_text: JSON.stringify({
         isOrder: true,
+        anchorHasExplicitPurchaseIntent: true,
         customer: { name: 'Іван', phone: '+380501112233', instagramUsername: 'ivan' },
         delivery: { city: 'Львів', address: null, novaPoshtaBranch: '12' },
         items: [
@@ -31,6 +32,7 @@ describe('OpenAiOrderRecognizer', () => {
     const result = await recognizer.recognize({
       messages: [{ id: 'msg-1', direction: 'INBOUND', text: 'Хочу чорний костюм M' }],
       products: [{ id: 'SKU-1042', name: 'Костюм Classic', aliases: ['чорний костюм'] }],
+      recognitionMode: 'CONVERSATIONAL_INTENT',
     });
 
     expect(result.order.items[0]?.catalogId).toBe('SKU-1042');
@@ -49,6 +51,11 @@ describe('OpenAiOrderRecognizer', () => {
         },
       }),
     );
+    const request = create.mock.calls[0]?.[0] as { instructions: string; input: string };
+    expect(request.instructions).toContain('anchor message itself explicitly commits');
+    expect(JSON.parse(request.input)).toMatchObject({
+      recognitionTarget: { mode: 'CONVERSATIONAL_INTENT', anchorMessageId: 'msg-1' },
+    });
   });
 
   it('rejects a structurally invalid model response', async () => {
@@ -59,7 +66,7 @@ describe('OpenAiOrderRecognizer', () => {
     });
     const recognizer = new OpenAiOrderRecognizer({ responses: { create } }, 'gpt-5.4-mini');
 
-    await expect(recognizer.recognize({ messages: [], products: [] })).rejects.toThrow(
+    await expect(recognizer.recognize({ messages: [], products: [], recognitionMode: 'TRIGGERED_ORDER' })).rejects.toThrow(
       'OpenAI returned an invalid order extraction',
     );
   });
@@ -70,6 +77,7 @@ describe('OpenAiOrderRecognizer', () => {
       model: 'gpt-5.4-mini',
       output_text: JSON.stringify({
         isOrder: true,
+        anchorHasExplicitPurchaseIntent: true,
         customer: { name: 'Ігор', phone: '0976536783', instagramUsername: null },
         delivery: { city: 'Луцьк', address: null, novaPoshtaBranch: '22' },
         items: [{
@@ -95,11 +103,13 @@ describe('OpenAiOrderRecognizer', () => {
         { id: 'trigger', direction: 'OUTBOUND', text: 'Замовлення прийнято' },
       ],
       products: [{ id: 'DOOR-1200', name: '1200х2050 Стандарт VINARIT Вологостійка МДФ', aliases: [] }],
+      recognitionMode: 'TRIGGERED_ORDER',
     });
 
     const request = create.mock.calls[0]?.[0] as { input: string };
     expect(JSON.parse(request.input)).toMatchObject({
       recognitionTarget: {
+        mode: 'TRIGGERED_ORDER',
         anchorMessageId: 'trigger',
         messageOrder: 'oldest_to_newest',
         scope: 'latest_purchase_intent_before_anchor',

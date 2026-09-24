@@ -7,6 +7,7 @@ describe('decideConversationalIntent', () => {
     expect(decideConversationalIntent({
       mode: 'PHRASE_ONLY',
       isOrder: true,
+      anchorHasExplicitPurchaseIntent: true,
       hasUsableProduct: true,
       isComplete: true,
       confidence: 0.99,
@@ -18,6 +19,19 @@ describe('decideConversationalIntent', () => {
     expect(decideConversationalIntent({
       mode: 'AI_AUTOMATION',
       isOrder: false,
+      anchorHasExplicitPurchaseIntent: false,
+      hasUsableProduct: true,
+      isComplete: true,
+      confidence: 0.99,
+      threshold: 0.9,
+    })).toEqual({ action: 'IGNORE', reason: 'NO_EXPLICIT_PURCHASE_INTENT' });
+  });
+
+  it('ignores an older order when the new anchor does not explicitly commit to a purchase', () => {
+    expect(decideConversationalIntent({
+      mode: 'AI_SUGGESTION',
+      isOrder: true,
+      anchorHasExplicitPurchaseIntent: false,
       hasUsableProduct: true,
       isComplete: true,
       confidence: 0.99,
@@ -29,6 +43,7 @@ describe('decideConversationalIntent', () => {
     expect(decideConversationalIntent({
       mode: 'AI_SUGGESTION',
       isOrder: true,
+      anchorHasExplicitPurchaseIntent: true,
       hasUsableProduct: false,
       isComplete: false,
       confidence: 0.7,
@@ -40,6 +55,7 @@ describe('decideConversationalIntent', () => {
     expect(decideConversationalIntent({
       mode: 'AI_SUGGESTION',
       isOrder: true,
+      anchorHasExplicitPurchaseIntent: true,
       hasUsableProduct: true,
       isComplete: true,
       confidence: 0.99,
@@ -51,6 +67,7 @@ describe('decideConversationalIntent', () => {
     expect(decideConversationalIntent({
       mode: 'AI_AUTOMATION',
       isOrder: true,
+      anchorHasExplicitPurchaseIntent: true,
       hasUsableProduct: true,
       isComplete: true,
       confidence: 0.94,
@@ -62,6 +79,7 @@ describe('decideConversationalIntent', () => {
     expect(decideConversationalIntent({
       mode: 'AI_AUTOMATION',
       isOrder: true,
+      anchorHasExplicitPurchaseIntent: true,
       hasUsableProduct: true,
       isComplete: false,
       confidence: 0.94,
@@ -71,6 +89,7 @@ describe('decideConversationalIntent', () => {
     expect(decideConversationalIntent({
       mode: 'AI_AUTOMATION',
       isOrder: true,
+      anchorHasExplicitPurchaseIntent: true,
       hasUsableProduct: true,
       isComplete: true,
       confidence: 0.89,

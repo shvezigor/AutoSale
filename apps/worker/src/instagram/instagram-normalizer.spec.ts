@@ -55,6 +55,56 @@ describe('normalizeInstagramEvent', () => {
     ]);
   });
 
+  it('keeps shared Instagram posts, reels, stories, and unknown attachments visible', () => {
+    const payload = {
+      object: 'instagram',
+      entry: [{
+        messaging: [{
+          sender: { id: 'ig-user-200' },
+          recipient: { id: 'ig-business' },
+          timestamp: 1787731202123,
+          message: {
+            mid: 'm_shared_content_001',
+            attachments: [
+              { type: 'ig_post', payload: { url: 'https://lookaside.example/post.jpg', title: 'Post' } },
+              { type: 'ig_reel', payload: { url: 'https://www.instagram.com/reel/fictional', title: 'Reel' } },
+              { type: 'ig_story', payload: { story_media_url: 'https://lookaside.example/story.jpg' } },
+              { type: 'template', payload: { generic: { elements: [] } } },
+            ],
+          },
+        }],
+      }],
+    };
+
+    expect(normalizeInstagramEvent(payload)[0]?.attachments).toEqual([
+      { type: 'IMAGE', sourceUrl: 'https://lookaside.example/post.jpg' },
+      { type: 'LINK', sourceUrl: 'https://www.instagram.com/reel/fictional' },
+      { type: 'LINK', sourceUrl: 'https://lookaside.example/story.jpg' },
+      { type: 'UNSUPPORTED', sourceUrl: 'instagram:template' },
+    ]);
+  });
+
+  it('does not expose unsafe attachment URLs as clickable links', () => {
+    const payload = {
+      object: 'instagram',
+      entry: [{
+        messaging: [{
+          sender: { id: 'ig-user-201' },
+          recipient: { id: 'ig-business' },
+          timestamp: 1787731203123,
+          message: {
+            mid: 'm_unsafe_share_001',
+            attachments: [{ type: 'share', payload: { url: 'javascript:alert(1)' } }],
+          },
+        }],
+      }],
+    };
+
+    expect(normalizeInstagramEvent(payload)[0]?.attachments).toEqual([
+      { type: 'UNSUPPORTED', sourceUrl: 'instagram:share' },
+    ]);
+  });
+
   it('ignores unsupported delivery events', () => {
     expect(
       normalizeInstagramEvent({

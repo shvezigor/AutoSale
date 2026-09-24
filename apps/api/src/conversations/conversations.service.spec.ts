@@ -170,6 +170,31 @@ describe('ConversationsService', () => {
     });
   });
 
+  it('returns copied images, safe shared links, and unsupported attachment placeholders', async () => {
+    const message = await prisma.message.findFirstOrThrow({
+      where: { tenantId, conversationId: newestId },
+      orderBy: { sourceTimestamp: 'desc' },
+    });
+    await prisma.attachment.createMany({
+      data: [
+        { messageId: message.id, type: 'IMAGE', originalUrl: 'https://provider.test/photo.jpg', copyStatus: 'COPIED' },
+        { messageId: message.id, type: 'LINK', originalUrl: 'https://www.instagram.com/reel/fictional', copyStatus: 'NOT_REQUIRED' },
+        { messageId: message.id, type: 'UNSUPPORTED', originalUrl: 'instagram:template', copyStatus: 'NOT_REQUIRED' },
+      ],
+    });
+
+    try {
+      const detail = await service.detail(tenantId, newestId);
+      expect(detail.messages.at(-1)?.attachments).toEqual([
+        expect.objectContaining({ type: 'IMAGE', mediaUrl: expect.stringMatching(/^\/api\/media\//) }),
+        expect.objectContaining({ type: 'LINK', mediaUrl: 'https://www.instagram.com/reel/fictional' }),
+        expect.objectContaining({ type: 'UNSUPPORTED', mediaUrl: null }),
+      ]);
+    } finally {
+      await prisma.attachment.deleteMany({ where: { messageId: message.id } });
+    }
+  });
+
   it('prefers a current profile username over a stale legacy name in list and detail responses', async () => {
     const list = await service.list(tenantId, { limit: 20 });
     const summary = list.items.find((item) => item.id === usernameOnlyId);

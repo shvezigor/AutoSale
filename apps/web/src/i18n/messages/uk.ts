@@ -107,7 +107,7 @@ export const ukMessages = {
     selectTitle: 'Оберіть діалог', selectDescription: 'Повідомлення клієнта з’являться тут.', orderInformation: 'Інформація про замовлення',
     noOrder: 'Замовлення ще не створено', selectForCustomer: 'Оберіть діалог, щоб переглянути дані клієнта.',
     loadError: 'Не вдалося завантажити діалог', connectionRetry: 'Перевірте з’єднання та спробуйте ще раз.', retry: 'Повторити',
-    messageHistory: 'Історія повідомлень', incoming: 'Вхідне', outgoing: 'Вихідне', attachmentFailed: 'Не вдалося завантажити вкладення',
+    messageHistory: 'Історія повідомлень', incoming: 'Вхідне', outgoing: 'Вихідне', attachmentFailed: 'Не вдалося завантажити вкладення', openInstagramContent: 'Відкрити матеріал в Instagram', unsupportedInstagramAttachment: 'Непідтримуване вкладення Instagram',
     sending: 'Надсилається…', sent: 'Надіслано', deliveryUnknown: 'Статус доставки невідомий', reconnectRequired: 'Потрібно перепідключити Instagram', rateLimited: 'Instagram тимчасово обмежив надсилання', sendFailed: 'Не вдалося надіслати', retrying: 'Повторюємо…', retrySending: 'Повторити надсилання',
     aiAnalyzing: 'AI аналізує переписку', createFailed: 'Не вдалося створити замовлення', createFailedHint: 'Перевірте, чи в діалозі є повідомлення, та спробуйте ще раз.',
     processingOrder: 'AI аналізує замовлення', processingFailed: 'Потрібна повторна обробка', managerReview: 'Очікує перевірки менеджера', cancelled: 'Замовлення скасовано', ready: 'Замовлення готове',

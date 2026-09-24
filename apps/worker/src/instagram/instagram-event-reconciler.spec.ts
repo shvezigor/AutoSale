@@ -10,7 +10,10 @@ describe('InstagramEventReconciler', () => {
     ]);
     const add = vi.fn().mockResolvedValue(undefined);
     const reconciler = new InstagramEventReconciler(
-      { webhookEvent: { findMany } } as never,
+      {
+        webhookEvent: { findMany },
+        message: { findMany: vi.fn().mockResolvedValue([]) },
+      } as never,
       { add } as never,
     );
 
@@ -32,11 +35,51 @@ describe('InstagramEventReconciler', () => {
     );
   });
 
+  it('re-enqueues processed attachment-only messages that were normalized as empty', async () => {
+    const findPending = vi.fn().mockResolvedValue([]);
+    const findMessages = vi.fn().mockResolvedValue([
+      { rawEventId: '33333333-3333-4333-8333-333333333333' },
+    ]);
+    const add = vi.fn().mockResolvedValue(undefined);
+    const reconciler = new InstagramEventReconciler(
+      {
+        webhookEvent: { findMany: findPending },
+        message: { findMany: findMessages },
+      } as never,
+      { add } as never,
+    );
+
+    await expect(reconciler.reconcile()).resolves.toEqual({ attempted: 1, failed: 0 });
+    expect(findMessages).toHaveBeenCalledWith({
+      where: {
+        channel: 'INSTAGRAM',
+        text: null,
+        rawEventId: { not: null },
+        attachments: { none: {} },
+      },
+      distinct: ['rawEventId'],
+      orderBy: [{ sourceTimestamp: 'asc' }, { id: 'asc' }],
+      take: 100,
+      select: { rawEventId: true },
+    });
+    expect(add).toHaveBeenCalledWith(
+      'instagram.normalize',
+      {
+        eventId: '33333333-3333-4333-8333-333333333333',
+        correlationId: '33333333-3333-4333-8333-333333333333',
+      },
+      { jobId: 'instagram-attachment-backfill-33333333-3333-4333-8333-333333333333', removeOnFail: true },
+    );
+  });
+
   it('continues after one queue failure so another pending event can recover', async () => {
     const findMany = vi.fn().mockResolvedValue([{ id: 'event-1' }, { id: 'event-2' }]);
     const add = vi.fn().mockRejectedValueOnce(new Error('redis unavailable')).mockResolvedValueOnce(undefined);
     const reconciler = new InstagramEventReconciler(
-      { webhookEvent: { findMany } } as never,
+      {
+        webhookEvent: { findMany },
+        message: { findMany: vi.fn().mockResolvedValue([]) },
+      } as never,
       { add } as never,
     );
 

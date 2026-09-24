@@ -22,8 +22,8 @@ export const conversationListResponseSchema = z.object({
 
 export const conversationAttachmentSchema = z.object({
   id: z.string().uuid(),
-  type: z.literal('IMAGE'),
-  mediaUrl: z.string(),
+  type: z.enum(['IMAGE', 'LINK', 'UNSUPPORTED']),
+  mediaUrl: z.string().nullable(),
   copyStatus: z.string(),
 });
 

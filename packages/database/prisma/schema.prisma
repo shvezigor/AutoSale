@@ -1531,6 +1531,7 @@ model Attachment {
   updatedAt      DateTime @updatedAt @map("updated_at")
   message        Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
 
+  @@unique([messageId, type, originalUrl])
   @@index([copyStatus, createdAt])
   @@index([checksum])
   @@map("attachments")

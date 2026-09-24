@@ -4,6 +4,7 @@ import { OrderRecognitionService } from './order-recognition.service.js';
 
 const completeOrder = {
   isOrder: true,
+  anchorHasExplicitPurchaseIntent: true,
   customer: { name: 'Іван', phone: '+380501112233', instagramUsername: 'ivan' },
   delivery: { city: 'Львів', address: null, novaPoshtaBranch: '12' },
   items: [
@@ -26,7 +27,7 @@ describe('OrderRecognitionService', () => {
     const service = new OrderRecognitionService({ recognize });
 
     const result = await service.recognize(
-      { messages: [], products: [{ id: 'SKU-1', name: 'Костюм', aliases: [] }] },
+      { messages: [], products: [{ id: 'SKU-1', name: 'Костюм', aliases: [] }], recognitionMode: 'TRIGGERED_ORDER' },
       { approvalMode: 'NEVER', autoApprovalThreshold: 0.9 },
     );
 
@@ -44,7 +45,7 @@ describe('OrderRecognitionService', () => {
     const service = new OrderRecognitionService({ recognize });
 
     const result = await service.recognize(
-      { messages: [], products: [{ id: 'SKU-1', name: 'Костюм', aliases: [] }] },
+      { messages: [], products: [{ id: 'SKU-1', name: 'Костюм', aliases: [] }], recognitionMode: 'TRIGGERED_ORDER' },
       { approvalMode: 'NEVER', autoApprovalThreshold: 0.9 },
     );
 
@@ -73,6 +74,7 @@ describe('OrderRecognitionService', () => {
           { id: 'AUTO-3D4BAFDE3B26', name: '860х2050 Регіон (плівка мат)', aliases: [] },
           { id: 'AUTO-4956535657C9', name: '860х2050 Регіон VINARIT Вологостійка МДФ', aliases: [] },
         ],
+        recognitionMode: 'TRIGGERED_ORDER',
       },
       { approvalMode: 'NEVER', autoApprovalThreshold: 0.9 },
     );
@@ -93,7 +95,7 @@ describe('OrderRecognitionService', () => {
     const service = new OrderRecognitionService({ recognize });
 
     const result = await service.recognize(
-      { messages: [], products: [{ id: 'SKU-1', name: 'Костюм', aliases: [] }] },
+      { messages: [], products: [{ id: 'SKU-1', name: 'Костюм', aliases: [] }], recognitionMode: 'TRIGGERED_ORDER' },
       { approvalMode: 'NEVER', autoApprovalThreshold: 0.9 },
     );
 
@@ -124,6 +126,7 @@ describe('OrderRecognitionService', () => {
           { id: 'AUTO-5E44CA0A3C32', name: '860х2050      Колізей (VINARIT) Вологостійка МДФ', aliases: [] },
           { id: 'AUTO-E179854373E0', name: '860х2050 Колізей (плівка мат)', aliases: [] },
         ],
+        recognitionMode: 'TRIGGERED_ORDER',
       },
       { approvalMode: 'NEVER', autoApprovalThreshold: 0.9 },
     );
@@ -134,6 +137,7 @@ describe('OrderRecognitionService', () => {
           { id: 'DOOR-860', name: 'Колізей', aliases: [] },
           { id: 'DOOR-960', name: 'Колізей', aliases: [] },
         ],
+        recognitionMode: 'TRIGGERED_ORDER',
       },
       { approvalMode: 'NEVER', autoApprovalThreshold: 0.9 },
     );
