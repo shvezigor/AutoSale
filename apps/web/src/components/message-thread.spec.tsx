@@ -84,4 +84,24 @@ describe('MessageThread', () => {
     expect(screen.getByText('Sent')).toBeVisible();
     expect(screen.getAllByText('Хочу чорну модель 38 розміру').at(-1)).toBeVisible();
   });
+
+  it('renders an HTTP URL inside message text as a safe clickable link', () => {
+    const conversation = {
+      ...detail,
+      messages: [{
+        ...detail.messages[0]!,
+        text: 'Подивіться https://www.instagram.com/p/fictional?igsh=test, будь ласка. Не відкривайте javascript:alert(1)',
+        attachments: [],
+      }],
+    } satisfies ConversationDetailResponse;
+
+    render(<MessageThread conversation={conversation} />);
+
+    expect(screen.getByRole('link', { name: 'https://www.instagram.com/p/fictional?igsh=test' })).toHaveAttribute(
+      'href',
+      'https://www.instagram.com/p/fictional?igsh=test',
+    );
+    expect(screen.getByRole('link', { name: /instagram\.com/ })).toHaveAttribute('target', '_blank');
+    expect(screen.queryByRole('link', { name: /javascript:/ })).not.toBeInTheDocument();
+  });
 });

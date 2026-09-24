@@ -19,7 +19,7 @@ export function MessageThread({
         <li className="message-row" data-direction={message.direction} key={message.id}>
           <article className="message-bubble">
             <span className="sr-only">{message.direction === 'INBOUND' ? t('conversations.incoming') : t('conversations.outgoing')}</span>
-            {message.text ? <p>{message.text}</p> : null}
+            {message.text ? <p>{messageText(message.text)}</p> : null}
             {message.attachments.map((attachment) => {
               if (attachment.type === 'LINK' && attachment.mediaUrl) {
                 return (
@@ -77,6 +77,33 @@ export function MessageThread({
       ))}
     </ol>
   );
+}
+
+const httpUrlPattern = /https?:\/\/[^\s<>"']+/gi;
+const trailingPunctuationPattern = /[.,!?;:]+$/;
+
+function messageText(text: string) {
+  const content: Array<string | React.ReactElement> = [];
+  let cursor = 0;
+
+  for (const match of text.matchAll(httpUrlPattern)) {
+    const rawUrl = match[0];
+    const index = match.index;
+    const trailing = rawUrl.match(trailingPunctuationPattern)?.[0] ?? '';
+    const url = trailing ? rawUrl.slice(0, -trailing.length) : rawUrl;
+
+    if (index > cursor) content.push(text.slice(cursor, index));
+    content.push(
+      <a className="message-text-link" href={url} key={`${index}:${url}`} rel="noopener noreferrer" target="_blank">
+        {url}
+      </a>,
+    );
+    if (trailing) content.push(trailing);
+    cursor = index + rawUrl.length;
+  }
+
+  if (cursor < text.length) content.push(text.slice(cursor));
+  return content.length > 0 ? content : text;
 }
 
 function deliveryLabel(

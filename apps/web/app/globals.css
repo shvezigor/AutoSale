@@ -260,6 +260,8 @@ html[data-sidebar-state="collapsed"] .authenticated-shell > .primary-nav .nav-it
 .message-row[data-direction="OUTBOUND"] .message-bubble { border-color: var(--accent); background: var(--accent); color: #fff; }
 .message-row[data-direction="OUTBOUND"] .message-bubble time, .message-row[data-direction="OUTBOUND"] .delivery-status { color: rgba(255,255,255,.72); }
 .message-bubble p { margin: 0 0 8px; line-height: 1.48; font-size: 14px; }
+.message-text-link { color: inherit; font-weight: 650; overflow-wrap: anywhere; text-decoration: underline; text-underline-offset: 2px; }
+.message-text-link:hover { text-decoration-thickness: 2px; }
 .message-bubble time { color: var(--muted); font-size: 10px; white-space: nowrap; }
 .message-meta { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
 .delivery-status { color: var(--muted); font-size: 10px; }

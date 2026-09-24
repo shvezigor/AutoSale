@@ -159,7 +159,7 @@ State transitions are performed by the order domain service. Queue processors re
 4. The raw payload and safe metadata are stored without access tokens.
 5. The event is enqueued and the webhook returns promptly.
 6. The worker normalizes conversation, sender, message, time, direction, and attachments.
-7. Direct images and supported post/mention previews are downloaded immediately, checksummed, and copied to object storage. Shared reels, stories, posts or other safe HTTP(S) targets remain visible as external links when a controlled copy is not appropriate. Unknown or URL-less Meta attachment types render as a neutral unsupported-attachment placeholder instead of an empty message.
+7. Direct images and supported post/mention previews are downloaded immediately, checksummed, and copied to object storage. Shared reels, stories, posts or other safe HTTP(S) targets remain visible as external links when a controlled copy is not appropriate. HTTP(S) URLs embedded in message text are rendered as safe clickable links while preserving the surrounding text; other schemes remain plain text. Unknown or URL-less Meta attachment types render as a neutral unsupported-attachment placeholder instead of an empty message.
 8. Retry is safe because message and attachment identities are unique. The periodic event reconciler also replays legacy Instagram messages that have no text and no durable attachment; replay adds only the missing attachment and does not trigger AI order recognition again.
 
 Only official Meta APIs are supported. Browser scraping and personal-account automation are outside the design.
