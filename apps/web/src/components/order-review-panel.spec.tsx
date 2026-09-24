@@ -2,6 +2,8 @@ import { cleanup, fireEvent, render as rtlRender, screen, waitFor } from '@testi
 import type { ReactElement } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { ManagerOrder } from '../../../../packages/contracts/src/orders';
+import type { OrderCommercialTermsSummary } from '../../../../packages/contracts/src/commercial';
+import type { OrderPaymentSummary } from '../../../../packages/contracts/src/payments';
 
 vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
 
@@ -45,6 +47,35 @@ const order: ManagerOrder = {
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
 describe('OrderReviewPanel', () => {
+  it('shows payment entry immediately after saving the first commercial calculation', async () => {
+    const terms: OrderCommercialTermsSummary = {
+      pricingStatus: 'READY', issueCodes: [], currency: 'UAH', itemsSubtotal: '1299.00',
+      discountAmount: '0.00', deliveryAmount: '0.00', totalAmount: '1299.00',
+      legalEntity: null, bankAccount: null, eligibleAccounts: [], version: 1, legacy: false,
+    };
+    const paymentSummary: OrderPaymentSummary = {
+      expectedAmount: '1299.00', paidAmount: '0.00', remainingAmount: '1299.00',
+      currency: 'UAH', status: 'UNPAID', payments: [],
+    };
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const path = String(input);
+      if (path === '/api/auth/csrf') return new Response(JSON.stringify({ token: 'csrf-token' }), { status: 200 });
+      if (path.endsWith('/commercial-terms/preview')) return new Response(JSON.stringify({ ...terms, version: 0, legacy: true }), { status: 200 });
+      if (path.endsWith('/commercial-terms')) return new Response(JSON.stringify(terms), { status: 200 });
+      if (path === `/api/orders/${order.id}`) return new Response(JSON.stringify({ ...order, commercialTerms: terms, paymentSummary }), { status: 200 });
+      throw new Error(`Unexpected request: ${path}`);
+    });
+    vi.stubGlobal('fetch', fetchMock);
+    render(<OrderReviewPanel initialOrder={order} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Розрахувати суму' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Зберегти розрахунок' }));
+
+    expect(await screen.findByRole('form', { name: 'Додати факт оплати' })).toBeInTheDocument();
+    expect(screen.getByText('Оплат ще немає.')).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledWith(`/api/orders/${order.id}`);
+  });
+
   it('explains when AI proposed the order from the conversation', () => {
     render(<OrderReviewPanel initialOrder={{
       ...order,

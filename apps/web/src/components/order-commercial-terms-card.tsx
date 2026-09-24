@@ -13,7 +13,7 @@ export function OrderCommercialTermsCard({ orderId, initial, locked, onChange }:
   orderId: string;
   initial: OrderCommercialTermsSummary | null;
   locked: boolean;
-  onChange: (terms: OrderCommercialTermsSummary) => void;
+  onChange: (terms: OrderCommercialTermsSummary) => void | Promise<void>;
 }) {
   const { t, locale } = useI18n();
   const [terms, setTerms] = useState(initial);
@@ -64,7 +64,7 @@ export function OrderCommercialTermsCard({ orderId, initial, locked, onChange }:
         throw new Error(t('orders.commercialSaveFailed'));
       }
       const next = await response.json() as OrderCommercialTermsSummary;
-      setTerms(next); setAccountId(next.bankAccount?.id ?? ''); onChange(next);
+      setTerms(next); setAccountId(next.bankAccount?.id ?? ''); await onChange(next);
     } catch (reason) { setError(reason instanceof Error ? reason.message : t('orders.commercialSaveFailed')); }
     finally { setPending(null); }
   }

@@ -35,6 +35,8 @@ Verified on 2026-09-21 against [`order payment facts design`](../superpowers/spe
 - [ ] As owner, cancel one payment with a fictional reason and observe `Частково оплачено` with the row retained.
 - [ ] Verify all four table filters and mobile layout in production.
 - [x] Confirm API, web and worker health after deployment.
+- [x] 2026-09-24, тестовий акаунт: `MN-000001` із явно збереженою сумою 4 840 UAH — готівковий тестовий факт 1 UAH перевів баланс у «Частково оплачено» та заблокував редагування товару; owner скасував запис із поясненням, баланс повернувся до 0 UAH, історія збереглась, редагування знову доступне. Це не був реальний платіж.
+- [ ] Після релізу регресійного виправлення перевірити, що форма оплати з'являється одразу після першого збереження commercial terms, без reload.
 
 ### Deployment evidence
 

@@ -36,6 +36,7 @@ Verified on 2026-09-19 against the implementation described in [`order commercia
 - [ ] Change quantity before fulfillment and verify the expected total updates without duplicating the order export.
 - [ ] Verify the settings and order card at desktop and mobile widths.
 - [ ] Confirm application health after manual deployment.
+- [x] 2026-09-24: на тестовому акаунті для `AUTO-3D4BAFDE3B26` заповнено валюту `UAH`; старе замовлення `MN-000001` спочатку показало причину відсутньої валюти, після виправлення товару preview показав 4 840 UAH для двох одиниць за ціною 2 420 UAH, а явне збереження створило commercial terms.
 
 ## Explicitly not implemented
 
