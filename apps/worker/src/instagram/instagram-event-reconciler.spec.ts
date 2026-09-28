@@ -53,9 +53,19 @@ describe('InstagramEventReconciler', () => {
     expect(findMessages).toHaveBeenCalledWith({
       where: {
         channel: 'INSTAGRAM',
-        text: null,
         rawEventId: { not: null },
-        attachments: { none: {} },
+        OR: [
+          { text: null, attachments: { none: {} } },
+          {
+            attachments: {
+              some: {
+                type: 'IMAGE',
+                copyStatus: 'FAILED',
+                failureSummary: { startsWith: 'Unsupported media type: video/mp4' },
+              },
+            },
+          },
+        ],
       },
       distinct: ['rawEventId'],
       orderBy: [{ sourceTimestamp: 'asc' }, { id: 'asc' }],
@@ -69,6 +79,48 @@ describe('InstagramEventReconciler', () => {
         correlationId: '33333333-3333-4333-8333-333333333333',
       },
       { jobId: 'instagram-attachment-backfill-33333333-3333-4333-8333-333333333333', removeOnFail: true },
+    );
+  });
+
+  it('re-enqueues the event for an MP4 that legacy image-only handling rejected', async () => {
+    const findMessages = vi.fn().mockResolvedValue([
+      { rawEventId: '44444444-4444-4444-8444-444444444444' },
+    ]);
+    const add = vi.fn().mockResolvedValue(undefined);
+    const reconciler = new InstagramEventReconciler(
+      {
+        webhookEvent: { findMany: vi.fn().mockResolvedValue([]) },
+        message: { findMany: findMessages },
+      } as never,
+      { add } as never,
+    );
+
+    await expect(reconciler.reconcile()).resolves.toEqual({ attempted: 1, failed: 0 });
+    expect(findMessages).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({
+        OR: expect.arrayContaining([
+          {
+            attachments: {
+              some: {
+                type: 'IMAGE',
+                copyStatus: 'FAILED',
+                failureSummary: { startsWith: 'Unsupported media type: video/mp4' },
+              },
+            },
+          },
+        ]),
+      }),
+    }));
+    expect(add).toHaveBeenCalledWith(
+      'instagram.normalize',
+      {
+        eventId: '44444444-4444-4444-8444-444444444444',
+        correlationId: '44444444-4444-4444-8444-444444444444',
+      },
+      {
+        jobId: 'instagram-attachment-backfill-44444444-4444-4444-8444-444444444444',
+        removeOnFail: true,
+      },
     );
   });
 

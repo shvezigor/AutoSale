@@ -118,6 +118,115 @@ describe('InstagramProcessor', () => {
     });
   });
 
+  it('classifies an ambiguous Instagram post as video from its copied MIME type', async () => {
+    const sourceUrl = 'https://lookaside.instagram.test/video-source';
+    const payload = {
+      object: 'instagram',
+      entry: [{
+        id: 'page',
+        messaging: [{
+          sender: { id: 'ig-video-customer' },
+          recipient: { id: 'page' },
+          timestamp: new Date('2026-09-24T12:00:00.000Z').getTime(),
+          message: {
+            mid: 'm_video_001',
+            attachments: [{ type: 'ig_post', payload: { url: sourceUrl } }],
+          },
+        }],
+      }],
+    };
+    const event = await prisma.webhookEvent.create({
+      data: { tenantId, provider: 'META', externalEventId: 'm_video_001', payload },
+    });
+    copy.mockResolvedValue({
+      key: 'tenants/test/instagram/sha256/checksum.mp4',
+      etag: 'etag',
+      checksum: 'video-checksum',
+      contentType: 'video/mp4',
+    });
+
+    const processor = new InstagramProcessor(prisma, { copy });
+    await processor.process(event.id);
+    await processor.process(event.id);
+
+    await expect(prisma.attachment.findFirstOrThrow({ where: { originalUrl: sourceUrl } }))
+      .resolves.toMatchObject({
+        type: 'VIDEO',
+        copyStatus: 'COPIED',
+        storageKey: 'tenants/test/instagram/sha256/checksum.mp4',
+      });
+    await expect(prisma.attachment.count({ where: { originalUrl: sourceUrl } })).resolves.toBe(1);
+  });
+
+  it('recovers a legacy MP4 attachment that previously failed image-only validation', async () => {
+    const sourceUrl = 'https://lookaside.instagram.test/legacy-video-source';
+    const timestamp = new Date('2026-09-24T12:10:00.000Z');
+    const payload = {
+      object: 'instagram',
+      entry: [{
+        id: 'page',
+        messaging: [{
+          sender: { id: 'ig-legacy-video-customer' },
+          recipient: { id: 'page' },
+          timestamp: timestamp.getTime(),
+          message: {
+            mid: 'm_legacy_video_001',
+            attachments: [{ type: 'ig_post', payload: { url: sourceUrl } }],
+          },
+        }],
+      }],
+    };
+    const event = await prisma.webhookEvent.create({
+      data: { tenantId, provider: 'META', externalEventId: 'm_legacy_video_001', payload },
+    });
+    const conversation = await prisma.conversation.create({
+      data: {
+        tenantId,
+        channel: 'INSTAGRAM',
+        externalConversationId: 'ig-legacy-video-customer',
+        participantId: 'ig-legacy-video-customer',
+        lastMessageAt: timestamp,
+      },
+    });
+    const message = await prisma.message.create({
+      data: {
+        tenantId,
+        conversationId: conversation.id,
+        rawEventId: event.id,
+        channel: 'INSTAGRAM',
+        externalMessageId: 'm_legacy_video_001',
+        direction: 'INBOUND',
+        senderId: 'ig-legacy-video-customer',
+        text: null,
+        sourceTimestamp: timestamp,
+      },
+    });
+    await prisma.attachment.create({
+      data: {
+        messageId: message.id,
+        type: 'IMAGE',
+        originalUrl: sourceUrl,
+        copyStatus: 'FAILED',
+        failureSummary: 'Unsupported media type: video/mp4',
+      },
+    });
+    copy.mockResolvedValue({
+      key: 'tenants/test/instagram/sha256/legacy-checksum.mp4',
+      etag: 'etag',
+      checksum: 'legacy-video-checksum',
+      contentType: 'video/mp4',
+    });
+
+    await new InstagramProcessor(prisma, { copy }).process(event.id);
+
+    await expect(prisma.attachment.findFirstOrThrow({ where: { messageId: message.id } }))
+      .resolves.toMatchObject({
+        type: 'VIDEO',
+        copyStatus: 'COPIED',
+        failureSummary: null,
+      });
+  });
+
   it('backfills a shared link for an already durable message without retriggering AI', async () => {
     copy.mockReset();
     processIfTriggered.mockReset();

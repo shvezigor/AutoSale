@@ -401,10 +401,10 @@ function mapAttachment(attachment: {
   originalUrl: string;
   copyStatus: string;
 }): ConversationMessage['attachments'][number] {
-  if (attachment.type === 'IMAGE') {
+  if (attachment.type === 'IMAGE' || attachment.type === 'VIDEO') {
     return {
       id: attachment.id,
-      type: 'IMAGE',
+      type: attachment.type,
       mediaUrl: `/api/media/${attachment.id}`,
       copyStatus: attachment.copyStatus,
     };
@@ -436,6 +436,7 @@ function isSafeExternalUrl(value: string): boolean {
 
 function attachmentPreview(type: string | undefined): string | null {
   if (type === 'IMAGE') return '📷 Instagram';
+  if (type === 'VIDEO') return '🎬 Instagram';
   if (type === 'LINK') return '🔗 Instagram';
   if (type) return '📎 Instagram';
   return null;

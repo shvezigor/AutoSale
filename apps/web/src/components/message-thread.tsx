@@ -37,6 +37,22 @@ export function MessageThread({
               if (attachment.type === 'UNSUPPORTED') {
                 return <div className="attachment-placeholder" key={attachment.id}>{t('conversations.unsupportedInstagramAttachment')}</div>;
               }
+              if (attachment.type === 'VIDEO') {
+                return attachment.copyStatus === 'COPIED' && attachment.mediaUrl ? (
+                  <video
+                    aria-label={t('conversations.instagramVideo')}
+                    className="message-media"
+                    controls
+                    key={attachment.id}
+                    preload="metadata"
+                    src={attachment.mediaUrl}
+                  />
+                ) : (
+                  <div className="attachment-failure" key={attachment.id} role="status">
+                    {t('conversations.attachmentFailed')}
+                  </div>
+                );
+              }
               return attachment.copyStatus === 'COPIED' && attachment.mediaUrl ? (
                 // The API URL is controlled by Sales AITO and never exposes provider or S3 credentials.
                 <img

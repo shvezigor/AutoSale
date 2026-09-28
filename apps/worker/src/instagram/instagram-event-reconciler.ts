@@ -11,9 +11,19 @@ interface PendingEventStore {
     findMany(input: {
       where: {
         channel: 'INSTAGRAM';
-        text: null;
         rawEventId: { not: null };
-        attachments: { none: Record<string, never> };
+        OR: Array<
+          | { text: null; attachments: { none: Record<string, never> } }
+          | {
+              attachments: {
+                some: {
+                  type: 'IMAGE';
+                  copyStatus: 'FAILED';
+                  failureSummary: { startsWith: 'Unsupported media type: video/mp4' };
+                };
+              };
+            }
+        >;
       };
       distinct: ['rawEventId'];
       orderBy: [{ sourceTimestamp: 'asc' }, { id: 'asc' }];
@@ -48,9 +58,19 @@ export class InstagramEventReconciler {
       this.store.message.findMany({
         where: {
           channel: 'INSTAGRAM',
-          text: null,
           rawEventId: { not: null },
-          attachments: { none: {} },
+          OR: [
+            { text: null, attachments: { none: {} } },
+            {
+              attachments: {
+                some: {
+                  type: 'IMAGE',
+                  copyStatus: 'FAILED',
+                  failureSummary: { startsWith: 'Unsupported media type: video/mp4' },
+                },
+              },
+            },
+          ],
         },
         distinct: ['rawEventId'],
         orderBy: [{ sourceTimestamp: 'asc' }, { id: 'asc' }],

@@ -45,6 +45,12 @@ const detail: ConversationDetailResponse = {
           mediaUrl: null,
           copyStatus: 'NOT_REQUIRED',
         },
+        {
+          id: '88888888-8888-4888-8888-888888888888',
+          type: 'VIDEO',
+          mediaUrl: '/api/media/88888888-8888-4888-8888-888888888888',
+          copyStatus: 'COPIED',
+        },
       ],
       delivery: null,
     },
@@ -68,7 +74,8 @@ describe('MessageThread', () => {
     expect(screen.getByText('Вихідне')).toBeVisible();
     expect(screen.getByText('Хочу чорну модель 38 розміру')).toBeVisible();
     expect(screen.getByText(/11:00/)).toBeVisible();
-    expect(screen.getByRole('img', { name: /вкладення з Instagram/i })).toBeVisible();
+    expect(screen.getAllByRole('img', { name: /вкладення з Instagram/i })).toHaveLength(1);
+    expect(screen.getByLabelText('Відео з Instagram')).toHaveAttribute('controls');
     expect(screen.getByText('Не вдалося завантажити вкладення')).toBeVisible();
     expect(screen.getByRole('link', { name: 'Відкрити матеріал в Instagram' })).toHaveAttribute(
       'href',

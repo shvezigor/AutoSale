@@ -8,6 +8,7 @@ const MIME_EXTENSIONS = new Map([
   ['image/jpeg', 'jpg'],
   ['image/png', 'png'],
   ['image/webp', 'webp'],
+  ['video/mp4', 'mp4'],
 ]);
 
 type FetchMedia = (url: string, init: RequestInit) => Promise<Response>;

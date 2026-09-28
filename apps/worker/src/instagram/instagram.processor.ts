@@ -125,13 +125,23 @@ export class InstagramProcessor {
         }
 
         if (normalized.attachments.length > 0) {
-          await transaction.attachment.createMany({
-            data: normalized.attachments.map((attachment) => ({
+          const existingAttachments = await transaction.attachment.findMany({
+            where: {
               messageId: message.id,
-              type: attachment.type,
-              originalUrl: attachment.sourceUrl,
-              copyStatus: attachment.type === 'IMAGE' ? 'PENDING' : 'NOT_REQUIRED',
-            })),
+              originalUrl: { in: normalized.attachments.map((attachment) => attachment.sourceUrl) },
+            },
+            select: { originalUrl: true },
+          });
+          const existingUrls = new Set(existingAttachments.map((attachment) => attachment.originalUrl));
+          await transaction.attachment.createMany({
+            data: normalized.attachments
+              .filter((attachment) => !existingUrls.has(attachment.sourceUrl))
+              .map((attachment) => ({
+                messageId: message.id,
+                type: attachment.type,
+                originalUrl: attachment.sourceUrl,
+                copyStatus: attachment.type === 'IMAGE' ? 'PENDING' : 'NOT_REQUIRED',
+              })),
             skipDuplicates: true,
           });
         }
@@ -143,7 +153,13 @@ export class InstagramProcessor {
             where: {
               messageId: message.id,
               type: 'IMAGE',
-              copyStatus: { in: ['PENDING', 'RETRYABLE_FAILURE'] },
+              OR: [
+                { copyStatus: { in: ['PENDING', 'RETRYABLE_FAILURE'] } },
+                {
+                  copyStatus: 'FAILED',
+                  failureSummary: { startsWith: 'Unsupported media type: video/mp4' },
+                },
+              ],
             },
           }),
         };
@@ -158,6 +174,7 @@ export class InstagramProcessor {
           await this.prisma.attachment.update({
             where: { id: attachment.id },
             data: {
+              type: copied.contentType === 'video/mp4' ? 'VIDEO' : 'IMAGE',
               copyStatus: 'COPIED',
               storageKey: copied.key,
               checksum: copied.checksum,

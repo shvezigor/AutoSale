@@ -22,7 +22,7 @@ export const conversationListResponseSchema = z.object({
 
 export const conversationAttachmentSchema = z.object({
   id: z.string().uuid(),
-  type: z.enum(['IMAGE', 'LINK', 'UNSUPPORTED']),
+  type: z.enum(['IMAGE', 'VIDEO', 'LINK', 'UNSUPPORTED']),
   mediaUrl: z.string().nullable(),
   copyStatus: z.string(),
 });

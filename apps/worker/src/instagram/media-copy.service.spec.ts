@@ -44,6 +44,28 @@ describe('MediaCopyService', () => {
     );
   });
 
+  it('copies an Instagram MP4 to a tenant-scoped video key', async () => {
+    fetchMedia.mockResolvedValue(
+      new Response(Uint8Array.from([0, 0, 0, 24]), {
+        status: 200,
+        headers: { 'Content-Type': 'video/mp4' },
+      }),
+    );
+    put.mockImplementation(async (input: { key: string }) => ({ key: input.key, etag: 'etag' }));
+    const service = new MediaCopyService(storage, fetchMedia, { maxBytes: 1024 });
+
+    const result = await service.copy({
+      tenantId: 'tenant-1',
+      sourceUrl: 'https://lookaside.instagram.test/media',
+    });
+
+    expect(put).toHaveBeenCalledWith(expect.objectContaining({
+      key: expect.stringMatching(/\.mp4$/),
+      contentType: 'video/mp4',
+    }));
+    expect(result.contentType).toBe('video/mp4');
+  });
+
   it('rejects a response that exceeds the byte ceiling', async () => {
     fetchMedia.mockResolvedValue(
       new Response(Uint8Array.from([1, 2, 3, 4]), {

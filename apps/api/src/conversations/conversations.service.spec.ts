@@ -170,7 +170,7 @@ describe('ConversationsService', () => {
     });
   });
 
-  it('returns copied images, safe shared links, and unsupported attachment placeholders', async () => {
+  it('returns copied images and videos, safe shared links, and unsupported attachment placeholders', async () => {
     const message = await prisma.message.findFirstOrThrow({
       where: { tenantId, conversationId: newestId },
       orderBy: { sourceTimestamp: 'desc' },
@@ -178,6 +178,7 @@ describe('ConversationsService', () => {
     await prisma.attachment.createMany({
       data: [
         { messageId: message.id, type: 'IMAGE', originalUrl: 'https://provider.test/photo.jpg', copyStatus: 'COPIED' },
+        { messageId: message.id, type: 'VIDEO', originalUrl: 'https://provider.test/video.mp4', copyStatus: 'COPIED' },
         { messageId: message.id, type: 'LINK', originalUrl: 'https://www.instagram.com/reel/fictional', copyStatus: 'NOT_REQUIRED' },
         { messageId: message.id, type: 'UNSUPPORTED', originalUrl: 'instagram:template', copyStatus: 'NOT_REQUIRED' },
       ],
@@ -187,6 +188,7 @@ describe('ConversationsService', () => {
       const detail = await service.detail(tenantId, newestId);
       expect(detail.messages.at(-1)?.attachments).toEqual([
         expect.objectContaining({ type: 'IMAGE', mediaUrl: expect.stringMatching(/^\/api\/media\//) }),
+        expect.objectContaining({ type: 'VIDEO', mediaUrl: expect.stringMatching(/^\/api\/media\//) }),
         expect.objectContaining({ type: 'LINK', mediaUrl: 'https://www.instagram.com/reel/fictional' }),
         expect.objectContaining({ type: 'UNSUPPORTED', mediaUrl: null }),
       ]);

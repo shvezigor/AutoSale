@@ -103,7 +103,7 @@ export const ukMessages = {
   },
   conversations: {
     title: 'Діалоги', search: 'Пошук у діалогах', listLabel: 'Список діалогів', emptyList: 'Діалогів поки немає', total: 'Усього діалогів: {count}',
-    instagramCustomer: 'Клієнт Instagram', instagramAttachment: 'Вкладення з Instagram', profilePhoto: 'Фото профілю {name}',
+    instagramCustomer: 'Клієнт Instagram', instagramAttachment: 'Вкладення з Instagram', instagramVideo: 'Відео з Instagram', profilePhoto: 'Фото профілю {name}',
     selectTitle: 'Оберіть діалог', selectDescription: 'Повідомлення клієнта з’являться тут.', orderInformation: 'Інформація про замовлення',
     noOrder: 'Замовлення ще не створено', selectForCustomer: 'Оберіть діалог, щоб переглянути дані клієнта.',
     loadError: 'Не вдалося завантажити діалог', connectionRetry: 'Перевірте з’єднання та спробуйте ще раз.', retry: 'Повторити',
