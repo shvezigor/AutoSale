@@ -358,6 +358,7 @@ export type OrderCommercialTermsOrderByWithRelationInput = {
 export type OrderCommercialTermsWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   orderId?: string
+  tenantId_orderId?: Prisma.OrderCommercialTermsTenantIdOrderIdCompoundUniqueInput
   AND?: Prisma.OrderCommercialTermsWhereInput | Prisma.OrderCommercialTermsWhereInput[]
   OR?: Prisma.OrderCommercialTermsWhereInput[]
   NOT?: Prisma.OrderCommercialTermsWhereInput | Prisma.OrderCommercialTermsWhereInput[]
@@ -381,7 +382,7 @@ export type OrderCommercialTermsWhereUniqueInput = Prisma.AtLeast<{
   order?: Prisma.XOR<Prisma.OrderScalarRelationFilter, Prisma.OrderWhereInput>
   legalEntity?: Prisma.XOR<Prisma.TenantLegalEntityNullableScalarRelationFilter, Prisma.TenantLegalEntityWhereInput> | null
   bankAccount?: Prisma.XOR<Prisma.TenantBankAccountNullableScalarRelationFilter, Prisma.TenantBankAccountWhereInput> | null
-}, "id" | "orderId">
+}, "id" | "orderId" | "tenantId_orderId">
 
 export type OrderCommercialTermsOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -589,6 +590,11 @@ export type OrderCommercialTermsOrderByRelationAggregateInput = {
 export type OrderCommercialTermsNullableScalarRelationFilter = {
   is?: Prisma.OrderCommercialTermsWhereInput | null
   isNot?: Prisma.OrderCommercialTermsWhereInput | null
+}
+
+export type OrderCommercialTermsTenantIdOrderIdCompoundUniqueInput = {
+  tenantId: string
+  orderId: string
 }
 
 export type OrderCommercialTermsCountOrderByAggregateInput = {
@@ -1086,7 +1092,6 @@ export type OrderCommercialTermsCreateWithoutOrderInput = {
 
 export type OrderCommercialTermsUncheckedCreateWithoutOrderInput = {
   id?: string
-  tenantId: string
   legalEntityId?: string | null
   bankAccountId?: string | null
   currency?: string | null
@@ -1142,7 +1147,6 @@ export type OrderCommercialTermsUpdateWithoutOrderInput = {
 
 export type OrderCommercialTermsUncheckedUpdateWithoutOrderInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   legalEntityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bankAccountId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currency?: Prisma.NullableStringFieldUpdateOperationsInput | string | null

@@ -792,6 +792,7 @@ model WebhookEvent {
   messages        Message[]
 
   @@unique([tenantId, provider, externalEventId])
+  @@unique([tenantId, id])
   @@index([status, receivedAt])
   @@map("webhook_events")
 }
@@ -814,6 +815,7 @@ model Conversation {
   orderIntentEvaluations OrderIntentEvaluation[]
 
   @@unique([tenantId, channel, externalConversationId])
+  @@unique([tenantId, id])
   @@index([tenantId, lastMessageAt])
   @@map("conversations")
 }
@@ -889,14 +891,15 @@ model Message {
   deliveryErrorCode      String?                 @map("delivery_error_code")
   createdAt              DateTime                @default(now()) @map("created_at")
   tenant                 Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  conversation           Conversation            @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  rawEvent               WebhookEvent?           @relation(fields: [rawEventId], references: [id], onDelete: Restrict)
+  conversation           Conversation            @relation(fields: [tenantId, conversationId], references: [tenantId, id], onDelete: Cascade)
+  rawEvent               WebhookEvent?           @relation(fields: [tenantId, rawEventId], references: [tenantId, id], onDelete: Restrict)
   sentBy                 User?                   @relation("InstagramMessageSender", fields: [sentByUserId], references: [id], onDelete: SetNull)
   attachments            Attachment[]
   triggeredOrders        Order[]                 @relation("OrderTriggerMessage")
   orderIntentEvaluation  OrderIntentEvaluation?
 
   @@unique([tenantId, channel, externalMessageId])
+  @@unique([tenantId, id])
   @@index([conversationId, sourceTimestamp])
   @@index([deliveryStatus, nextDeliveryAttemptAt])
   @@map("messages")
@@ -918,6 +921,7 @@ model GoogleSheetsDestination {
   exports         OrderExport[]
 
   @@index([credentialRef])
+  @@unique([tenantId, id])
   @@map("google_sheets_destinations")
 }
 
@@ -952,6 +956,7 @@ model TenantLegalEntity {
   commercialTerms OrderCommercialTerms[]
 
   @@unique([tenantId, displayName])
+  @@unique([tenantId, id])
   @@index([tenantId, active])
   @@map("tenant_legal_entities")
 }
@@ -970,11 +975,12 @@ model TenantBankAccount {
   createdAt       DateTime               @default(now()) @map("created_at")
   updatedAt       DateTime               @updatedAt @map("updated_at")
   tenant          Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  legalEntity     TenantLegalEntity      @relation(fields: [legalEntityId], references: [id], onDelete: Restrict)
+  legalEntity     TenantLegalEntity      @relation(fields: [tenantId, legalEntityId], references: [tenantId, id], onDelete: Restrict)
   commercialTerms OrderCommercialTerms[]
   orderPayments   OrderPayment[]
 
   @@unique([tenantId, normalizedIban, currency])
+  @@unique([tenantId, id])
   @@index([tenantId, legalEntityId, currency, active])
   @@map("tenant_bank_accounts")
 }
@@ -1005,8 +1011,8 @@ model Order {
   createdAt                  DateTime           @default(now()) @map("created_at")
   updatedAt                  DateTime           @updatedAt @map("updated_at")
   tenant                     Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  conversation               Conversation       @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  triggerMessage             Message            @relation("OrderTriggerMessage", fields: [triggerMessageId], references: [id], onDelete: Restrict)
+  conversation               Conversation       @relation(fields: [tenantId, conversationId], references: [tenantId, id], onDelete: Cascade)
+  triggerMessage             Message            @relation("OrderTriggerMessage", fields: [tenantId, triggerMessageId], references: [tenantId, id], onDelete: Restrict)
   items                      OrderItem[]        @relation("TenantOrderItems")
   auditLogs                  AuditLog[]
   exports                    OrderExport[]
@@ -1046,10 +1052,11 @@ model OrderCommercialTerms {
   createdAt           DateTime                @default(now()) @map("created_at")
   updatedAt           DateTime                @updatedAt @map("updated_at")
   tenant              Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  order               Order                   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  order               Order                   @relation(fields: [tenantId, orderId], references: [tenantId, id], onDelete: Cascade)
   legalEntity         TenantLegalEntity?      @relation(fields: [legalEntityId], references: [id], onDelete: SetNull)
   bankAccount         TenantBankAccount?      @relation(fields: [bankAccountId], references: [id], onDelete: SetNull)
 
+  @@unique([tenantId, orderId])
   @@index([tenantId, pricingStatus])
   @@map("order_commercial_terms")
 }
@@ -1286,8 +1293,8 @@ model OrderExport {
   createdAt     DateTime                @default(now()) @map("created_at")
   updatedAt     DateTime                @updatedAt @map("updated_at")
   tenant        Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  order         Order                   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  destination   GoogleSheetsDestination @relation(fields: [destinationId], references: [id], onDelete: Cascade)
+  order         Order                   @relation(fields: [tenantId, orderId], references: [tenantId, id], onDelete: Cascade)
+  destination   GoogleSheetsDestination @relation(fields: [tenantId, destinationId], references: [tenantId, id], onDelete: Cascade)
 
   @@unique([orderId, destinationId])
   @@index([status, updatedAt])
@@ -1303,7 +1310,7 @@ model AuditLog {
   changes   Json
   createdAt DateTime @default(now()) @map("created_at")
   tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  order     Order    @relation(fields: [tenantId, orderId], references: [tenantId, id], onDelete: Cascade)
 
   @@index([orderId, createdAt])
   @@map("audit_logs")

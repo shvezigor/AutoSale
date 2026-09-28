@@ -222,6 +222,7 @@ export type WebhookEventOrderByWithRelationInput = {
 export type WebhookEventWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   tenantId_provider_externalEventId?: Prisma.WebhookEventTenantIdProviderExternalEventIdCompoundUniqueInput
+  tenantId_id?: Prisma.WebhookEventTenantIdIdCompoundUniqueInput
   AND?: Prisma.WebhookEventWhereInput | Prisma.WebhookEventWhereInput[]
   OR?: Prisma.WebhookEventWhereInput[]
   NOT?: Prisma.WebhookEventWhereInput | Prisma.WebhookEventWhereInput[]
@@ -234,7 +235,7 @@ export type WebhookEventWhereUniqueInput = Prisma.AtLeast<{
   processedAt?: Prisma.DateTimeNullableFilter<"WebhookEvent"> | Date | string | null
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
   messages?: Prisma.MessageListRelationFilter
-}, "id" | "tenantId_provider_externalEventId">
+}, "id" | "tenantId_provider_externalEventId" | "tenantId_id">
 
 export type WebhookEventOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -358,6 +359,11 @@ export type WebhookEventTenantIdProviderExternalEventIdCompoundUniqueInput = {
   tenantId: string
   provider: string
   externalEventId: string
+}
+
+export type WebhookEventTenantIdIdCompoundUniqueInput = {
+  tenantId: string
+  id: string
 }
 
 export type WebhookEventCountOrderByAggregateInput = {

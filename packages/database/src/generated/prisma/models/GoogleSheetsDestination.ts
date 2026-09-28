@@ -249,6 +249,7 @@ export type GoogleSheetsDestinationOrderByWithRelationInput = {
 export type GoogleSheetsDestinationWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   tenantId?: string
+  tenantId_id?: Prisma.GoogleSheetsDestinationTenantIdIdCompoundUniqueInput
   AND?: Prisma.GoogleSheetsDestinationWhereInput | Prisma.GoogleSheetsDestinationWhereInput[]
   OR?: Prisma.GoogleSheetsDestinationWhereInput[]
   NOT?: Prisma.GoogleSheetsDestinationWhereInput | Prisma.GoogleSheetsDestinationWhereInput[]
@@ -263,7 +264,7 @@ export type GoogleSheetsDestinationWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"GoogleSheetsDestination"> | Date | string
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
   exports?: Prisma.OrderExportListRelationFilter
-}, "id" | "tenantId">
+}, "id" | "tenantId" | "tenantId_id">
 
 export type GoogleSheetsDestinationOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -403,6 +404,11 @@ export type GoogleSheetsDestinationUncheckedUpdateManyInput = {
 export type GoogleSheetsDestinationNullableScalarRelationFilter = {
   is?: Prisma.GoogleSheetsDestinationWhereInput | null
   isNot?: Prisma.GoogleSheetsDestinationWhereInput | null
+}
+
+export type GoogleSheetsDestinationTenantIdIdCompoundUniqueInput = {
+  tenantId: string
+  id: string
 }
 
 export type GoogleSheetsDestinationCountOrderByAggregateInput = {

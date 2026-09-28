@@ -509,7 +509,6 @@ export type AuditLogCreateWithoutOrderInput = {
 
 export type AuditLogUncheckedCreateWithoutOrderInput = {
   id?: string
-  tenantId: string
   actor: string
   action: string
   changes: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -580,7 +579,6 @@ export type AuditLogUncheckedUpdateManyWithoutTenantInput = {
 
 export type AuditLogCreateManyOrderInput = {
   id?: string
-  tenantId: string
   actor: string
   action: string
   changes: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -598,7 +596,6 @@ export type AuditLogUpdateWithoutOrderInput = {
 
 export type AuditLogUncheckedUpdateWithoutOrderInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   actor?: Prisma.StringFieldUpdateOperationsInput | string
   action?: Prisma.StringFieldUpdateOperationsInput | string
   changes?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -607,7 +604,6 @@ export type AuditLogUncheckedUpdateWithoutOrderInput = {
 
 export type AuditLogUncheckedUpdateManyWithoutOrderInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   actor?: Prisma.StringFieldUpdateOperationsInput | string
   action?: Prisma.StringFieldUpdateOperationsInput | string
   changes?: Prisma.JsonNullValueInput | runtime.InputJsonValue

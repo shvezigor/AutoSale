@@ -246,6 +246,7 @@ export type TenantLegalEntityOrderByWithRelationInput = {
 export type TenantLegalEntityWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   tenantId_displayName?: Prisma.TenantLegalEntityTenantIdDisplayNameCompoundUniqueInput
+  tenantId_id?: Prisma.TenantLegalEntityTenantIdIdCompoundUniqueInput
   AND?: Prisma.TenantLegalEntityWhereInput | Prisma.TenantLegalEntityWhereInput[]
   OR?: Prisma.TenantLegalEntityWhereInput[]
   NOT?: Prisma.TenantLegalEntityWhereInput | Prisma.TenantLegalEntityWhereInput[]
@@ -261,7 +262,7 @@ export type TenantLegalEntityWhereUniqueInput = Prisma.AtLeast<{
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
   bankAccounts?: Prisma.TenantBankAccountListRelationFilter
   commercialTerms?: Prisma.OrderCommercialTermsListRelationFilter
-}, "id" | "tenantId_displayName">
+}, "id" | "tenantId_displayName" | "tenantId_id">
 
 export type TenantLegalEntityOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -406,6 +407,11 @@ export type TenantLegalEntityOrderByRelationAggregateInput = {
 export type TenantLegalEntityTenantIdDisplayNameCompoundUniqueInput = {
   tenantId: string
   displayName: string
+}
+
+export type TenantLegalEntityTenantIdIdCompoundUniqueInput = {
+  tenantId: string
+  id: string
 }
 
 export type TenantLegalEntityCountOrderByAggregateInput = {

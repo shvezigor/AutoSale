@@ -745,7 +745,6 @@ export type OrderExportCreateWithoutDestinationInput = {
 
 export type OrderExportUncheckedCreateWithoutDestinationInput = {
   id?: string
-  tenantId: string
   orderId: string
   status?: string
   attempts?: number
@@ -799,7 +798,6 @@ export type OrderExportCreateWithoutOrderInput = {
 
 export type OrderExportUncheckedCreateWithoutOrderInput = {
   id?: string
-  tenantId: string
   destinationId: string
   status?: string
   attempts?: number
@@ -895,7 +893,6 @@ export type OrderExportUncheckedUpdateManyWithoutTenantInput = {
 
 export type OrderExportCreateManyDestinationInput = {
   id?: string
-  tenantId: string
   orderId: string
   status?: string
   attempts?: number
@@ -923,7 +920,6 @@ export type OrderExportUpdateWithoutDestinationInput = {
 
 export type OrderExportUncheckedUpdateWithoutDestinationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   orderId?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   attempts?: Prisma.IntFieldUpdateOperationsInput | number
@@ -937,7 +933,6 @@ export type OrderExportUncheckedUpdateWithoutDestinationInput = {
 
 export type OrderExportUncheckedUpdateManyWithoutDestinationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   orderId?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   attempts?: Prisma.IntFieldUpdateOperationsInput | number
@@ -951,7 +946,6 @@ export type OrderExportUncheckedUpdateManyWithoutDestinationInput = {
 
 export type OrderExportCreateManyOrderInput = {
   id?: string
-  tenantId: string
   destinationId: string
   status?: string
   attempts?: number
@@ -979,7 +973,6 @@ export type OrderExportUpdateWithoutOrderInput = {
 
 export type OrderExportUncheckedUpdateWithoutOrderInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   destinationId?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   attempts?: Prisma.IntFieldUpdateOperationsInput | number
@@ -993,7 +986,6 @@ export type OrderExportUncheckedUpdateWithoutOrderInput = {
 
 export type OrderExportUncheckedUpdateManyWithoutOrderInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   destinationId?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   attempts?: Prisma.IntFieldUpdateOperationsInput | number

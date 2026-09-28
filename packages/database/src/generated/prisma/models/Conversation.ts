@@ -250,6 +250,7 @@ export type ConversationOrderByWithRelationInput = {
 export type ConversationWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   tenantId_channel_externalConversationId?: Prisma.ConversationTenantIdChannelExternalConversationIdCompoundUniqueInput
+  tenantId_id?: Prisma.ConversationTenantIdIdCompoundUniqueInput
   AND?: Prisma.ConversationWhereInput | Prisma.ConversationWhereInput[]
   OR?: Prisma.ConversationWhereInput[]
   NOT?: Prisma.ConversationWhereInput | Prisma.ConversationWhereInput[]
@@ -267,7 +268,7 @@ export type ConversationWhereUniqueInput = Prisma.AtLeast<{
   messages?: Prisma.MessageListRelationFilter
   orders?: Prisma.OrderListRelationFilter
   orderIntentEvaluations?: Prisma.OrderIntentEvaluationListRelationFilter
-}, "id" | "tenantId_channel_externalConversationId">
+}, "id" | "tenantId_channel_externalConversationId" | "tenantId_id">
 
 export type ConversationOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -416,6 +417,11 @@ export type ConversationTenantIdChannelExternalConversationIdCompoundUniqueInput
   tenantId: string
   channel: string
   externalConversationId: string
+}
+
+export type ConversationTenantIdIdCompoundUniqueInput = {
+  tenantId: string
+  id: string
 }
 
 export type ConversationCountOrderByAggregateInput = {

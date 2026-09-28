@@ -266,6 +266,7 @@ export type TenantBankAccountOrderByWithRelationInput = {
 export type TenantBankAccountWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   tenantId_normalizedIban_currency?: Prisma.TenantBankAccountTenantIdNormalizedIbanCurrencyCompoundUniqueInput
+  tenantId_id?: Prisma.TenantBankAccountTenantIdIdCompoundUniqueInput
   AND?: Prisma.TenantBankAccountWhereInput | Prisma.TenantBankAccountWhereInput[]
   OR?: Prisma.TenantBankAccountWhereInput[]
   NOT?: Prisma.TenantBankAccountWhereInput | Prisma.TenantBankAccountWhereInput[]
@@ -284,7 +285,7 @@ export type TenantBankAccountWhereUniqueInput = Prisma.AtLeast<{
   legalEntity?: Prisma.XOR<Prisma.TenantLegalEntityScalarRelationFilter, Prisma.TenantLegalEntityWhereInput>
   commercialTerms?: Prisma.OrderCommercialTermsListRelationFilter
   orderPayments?: Prisma.OrderPaymentListRelationFilter
-}, "id" | "tenantId_normalizedIban_currency">
+}, "id" | "tenantId_normalizedIban_currency" | "tenantId_id">
 
 export type TenantBankAccountOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -447,6 +448,11 @@ export type TenantBankAccountTenantIdNormalizedIbanCurrencyCompoundUniqueInput =
   tenantId: string
   normalizedIban: string
   currency: string
+}
+
+export type TenantBankAccountTenantIdIdCompoundUniqueInput = {
+  tenantId: string
+  id: string
 }
 
 export type TenantBankAccountCountOrderByAggregateInput = {
@@ -709,7 +715,6 @@ export type TenantBankAccountCreateWithoutLegalEntityInput = {
 
 export type TenantBankAccountUncheckedCreateWithoutLegalEntityInput = {
   id?: string
-  tenantId: string
   label: string
   iban: string
   normalizedIban: string
@@ -971,7 +976,6 @@ export type TenantBankAccountUncheckedUpdateManyWithoutTenantInput = {
 
 export type TenantBankAccountCreateManyLegalEntityInput = {
   id?: string
-  tenantId: string
   label: string
   iban: string
   normalizedIban: string
@@ -1001,7 +1005,6 @@ export type TenantBankAccountUpdateWithoutLegalEntityInput = {
 
 export type TenantBankAccountUncheckedUpdateWithoutLegalEntityInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   label?: Prisma.StringFieldUpdateOperationsInput | string
   iban?: Prisma.StringFieldUpdateOperationsInput | string
   normalizedIban?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1017,7 +1020,6 @@ export type TenantBankAccountUncheckedUpdateWithoutLegalEntityInput = {
 
 export type TenantBankAccountUncheckedUpdateManyWithoutLegalEntityInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   label?: Prisma.StringFieldUpdateOperationsInput | string
   iban?: Prisma.StringFieldUpdateOperationsInput | string
   normalizedIban?: Prisma.StringFieldUpdateOperationsInput | string

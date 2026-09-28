@@ -1570,7 +1570,6 @@ export type OrderCreateWithoutConversationInput = {
 export type OrderUncheckedCreateWithoutConversationInput = {
   id?: string
   publicNumber?: string
-  tenantId: string
   triggerMessageId: string
   status?: string
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -1664,7 +1663,6 @@ export type OrderCreateWithoutTriggerMessageInput = {
 export type OrderUncheckedCreateWithoutTriggerMessageInput = {
   id?: string
   publicNumber?: string
-  tenantId: string
   conversationId: string
   status?: string
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -3028,7 +3026,6 @@ export type OrderUncheckedUpdateManyWithoutProcurementHandedOffByUserInput = {
 export type OrderCreateManyConversationInput = {
   id?: string
   publicNumber?: string
-  tenantId: string
   triggerMessageId: string
   status?: string
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -3088,7 +3085,6 @@ export type OrderUpdateWithoutConversationInput = {
 export type OrderUncheckedUpdateWithoutConversationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   publicNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   triggerMessageId?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -3122,7 +3118,6 @@ export type OrderUncheckedUpdateWithoutConversationInput = {
 export type OrderUncheckedUpdateManyWithoutConversationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   publicNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   triggerMessageId?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -3148,7 +3143,6 @@ export type OrderUncheckedUpdateManyWithoutConversationInput = {
 export type OrderCreateManyTriggerMessageInput = {
   id?: string
   publicNumber?: string
-  tenantId: string
   conversationId: string
   status?: string
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -3208,7 +3202,6 @@ export type OrderUpdateWithoutTriggerMessageInput = {
 export type OrderUncheckedUpdateWithoutTriggerMessageInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   publicNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   conversationId?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -3242,7 +3235,6 @@ export type OrderUncheckedUpdateWithoutTriggerMessageInput = {
 export type OrderUncheckedUpdateManyWithoutTriggerMessageInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   publicNumber?: Prisma.StringFieldUpdateOperationsInput | string
-  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   conversationId?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   extraction?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue

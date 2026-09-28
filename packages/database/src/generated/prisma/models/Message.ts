@@ -387,6 +387,7 @@ export type MessageOrderByWithRelationInput = {
 export type MessageWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   tenantId_channel_externalMessageId?: Prisma.MessageTenantIdChannelExternalMessageIdCompoundUniqueInput
+  tenantId_id?: Prisma.MessageTenantIdIdCompoundUniqueInput
   AND?: Prisma.MessageWhereInput | Prisma.MessageWhereInput[]
   OR?: Prisma.MessageWhereInput[]
   NOT?: Prisma.MessageWhereInput | Prisma.MessageWhereInput[]
@@ -417,7 +418,7 @@ export type MessageWhereUniqueInput = Prisma.AtLeast<{
   attachments?: Prisma.AttachmentListRelationFilter
   triggeredOrders?: Prisma.OrderListRelationFilter
   orderIntentEvaluation?: Prisma.XOR<Prisma.OrderIntentEvaluationNullableScalarRelationFilter, Prisma.OrderIntentEvaluationWhereInput> | null
-}, "id" | "tenantId_channel_externalMessageId">
+}, "id" | "tenantId_channel_externalMessageId" | "tenantId_id">
 
 export type MessageOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -665,6 +666,11 @@ export type MessageTenantIdChannelExternalMessageIdCompoundUniqueInput = {
   tenantId: string
   channel: string
   externalMessageId: string
+}
+
+export type MessageTenantIdIdCompoundUniqueInput = {
+  tenantId: string
+  id: string
 }
 
 export type MessageCountOrderByAggregateInput = {
@@ -1177,7 +1183,6 @@ export type MessageCreateWithoutRawEventInput = {
 
 export type MessageUncheckedCreateWithoutRawEventInput = {
   id?: string
-  tenantId: string
   conversationId: string
   channel: string
   externalMessageId: string
@@ -1255,7 +1260,6 @@ export type MessageCreateWithoutConversationInput = {
 
 export type MessageUncheckedCreateWithoutConversationInput = {
   id?: string
-  tenantId: string
   rawEventId?: string | null
   channel: string
   externalMessageId: string
@@ -1863,7 +1867,6 @@ export type MessageUncheckedUpdateManyWithoutSentByInput = {
 
 export type MessageCreateManyRawEventInput = {
   id?: string
-  tenantId: string
   conversationId: string
   channel: string
   externalMessageId: string
@@ -1912,7 +1915,6 @@ export type MessageUpdateWithoutRawEventInput = {
 
 export type MessageUncheckedUpdateWithoutRawEventInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   conversationId?: Prisma.StringFieldUpdateOperationsInput | string
   channel?: Prisma.StringFieldUpdateOperationsInput | string
   externalMessageId?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1938,7 +1940,6 @@ export type MessageUncheckedUpdateWithoutRawEventInput = {
 
 export type MessageUncheckedUpdateManyWithoutRawEventInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   conversationId?: Prisma.StringFieldUpdateOperationsInput | string
   channel?: Prisma.StringFieldUpdateOperationsInput | string
   externalMessageId?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1961,7 +1962,6 @@ export type MessageUncheckedUpdateManyWithoutRawEventInput = {
 
 export type MessageCreateManyConversationInput = {
   id?: string
-  tenantId: string
   rawEventId?: string | null
   channel: string
   externalMessageId: string
@@ -2010,7 +2010,6 @@ export type MessageUpdateWithoutConversationInput = {
 
 export type MessageUncheckedUpdateWithoutConversationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   rawEventId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   channel?: Prisma.StringFieldUpdateOperationsInput | string
   externalMessageId?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2036,7 +2035,6 @@ export type MessageUncheckedUpdateWithoutConversationInput = {
 
 export type MessageUncheckedUpdateManyWithoutConversationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   rawEventId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   channel?: Prisma.StringFieldUpdateOperationsInput | string
   externalMessageId?: Prisma.StringFieldUpdateOperationsInput | string
