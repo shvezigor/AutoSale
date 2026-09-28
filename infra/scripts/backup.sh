@@ -1,6 +1,10 @@
 #!/usr/bin/env sh
 set -eu
 
+# Full-system archives contain every tenant. Keep newly created directories and
+# files private even when the operator shell has a permissive default umask.
+umask 077
+
 BACKUP_ROOT=${BACKUP_ROOT:-./backups}
 RETENTION_DAYS=${RETENTION_DAYS:-14}
 STAMP=$(date -u +%Y%m%dT%H%M%SZ)
@@ -46,4 +50,3 @@ find "$BACKUP_ROOT" -mindepth 1 -maxdepth 1 -type d \
   -name '????????T??????Z' -mtime "+$RETENTION_DAYS" -exec rm -rf -- {} +
 
 echo "Backup created: $BACKUP_DIR"
-
