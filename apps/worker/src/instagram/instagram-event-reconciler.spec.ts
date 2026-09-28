@@ -31,7 +31,7 @@ describe('InstagramEventReconciler', () => {
         eventId: '11111111-1111-4111-8111-111111111111',
         correlationId: '11111111-1111-4111-8111-111111111111',
       },
-      { jobId: '11111111-1111-4111-8111-111111111111', removeOnFail: true },
+      { jobId: '11111111-1111-4111-8111-111111111111', removeOnComplete: true, removeOnFail: true },
     );
   });
 
@@ -83,7 +83,7 @@ describe('InstagramEventReconciler', () => {
         eventId: '33333333-3333-4333-8333-333333333333',
         correlationId: '33333333-3333-4333-8333-333333333333',
       },
-      { jobId: 'instagram-attachment-backfill-33333333-3333-4333-8333-333333333333', removeOnFail: true },
+      { jobId: 'instagram-attachment-backfill-v2-33333333-3333-4333-8333-333333333333', removeOnComplete: true, removeOnFail: true },
     );
   });
 
@@ -128,7 +128,8 @@ describe('InstagramEventReconciler', () => {
         correlationId: '44444444-4444-4444-8444-444444444444',
       },
       {
-        jobId: 'instagram-attachment-backfill-44444444-4444-4444-8444-444444444444',
+        jobId: 'instagram-attachment-backfill-v2-44444444-4444-4444-8444-444444444444',
+        removeOnComplete: true,
         removeOnFail: true,
       },
     );

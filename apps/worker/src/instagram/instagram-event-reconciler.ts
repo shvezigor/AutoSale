@@ -42,7 +42,7 @@ interface NormalizeQueue {
   add(
     name: 'instagram.normalize',
     data: { eventId: string; correlationId: string },
-    options: { jobId: string; removeOnFail: true },
+    options: { jobId: string; removeOnComplete: true; removeOnFail: true },
   ): Promise<unknown>;
 }
 
@@ -95,7 +95,7 @@ export class InstagramEventReconciler {
         await this.queue.add(
           'instagram.normalize',
           { eventId: event.id, correlationId: event.id },
-          { jobId: event.id, removeOnFail: true },
+          { jobId: event.id, removeOnComplete: true, removeOnFail: true },
         );
       } catch {
         failed += 1;
@@ -111,7 +111,7 @@ export class InstagramEventReconciler {
         await this.queue.add(
           'instagram.normalize',
           { eventId, correlationId: eventId },
-          { jobId: `instagram-attachment-backfill-${eventId}`, removeOnFail: true },
+          { jobId: `instagram-attachment-backfill-v2-${eventId}`, removeOnComplete: true, removeOnFail: true },
         );
       } catch {
         failed += 1;
