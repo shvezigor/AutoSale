@@ -66,6 +66,24 @@ describe('MediaCopyService', () => {
     expect(result.contentType).toBe('video/mp4');
   });
 
+  it('allows a copied MP4 to exceed the stricter image byte ceiling', async () => {
+    fetchMedia.mockResolvedValue(
+      new Response(Uint8Array.from([0, 0, 0, 24]), {
+        status: 200,
+        headers: {
+          'Content-Type': 'video/mp4',
+          'Content-Length': String(10 * 1024 * 1024 + 1),
+        },
+      }),
+    );
+    const service = new MediaCopyService(storage, fetchMedia);
+
+    await expect(service.copy({
+      tenantId: 'tenant-1',
+      sourceUrl: 'https://lookaside.instagram.test/medium-video',
+    })).resolves.toMatchObject({ contentType: 'video/mp4' });
+  });
+
   it('rejects a response that exceeds the byte ceiling', async () => {
     fetchMedia.mockResolvedValue(
       new Response(Uint8Array.from([1, 2, 3, 4]), {

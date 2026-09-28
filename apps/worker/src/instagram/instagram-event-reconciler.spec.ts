@@ -61,7 +61,12 @@ describe('InstagramEventReconciler', () => {
               some: {
                 type: 'IMAGE',
                 copyStatus: 'FAILED',
-                failureSummary: { startsWith: 'Unsupported media type: video/mp4' },
+                failureSummary: {
+                  in: [
+                    'Unsupported media type: video/mp4',
+                    'Media exceeds the configured byte ceiling',
+                  ],
+                },
               },
             },
           },
@@ -104,7 +109,12 @@ describe('InstagramEventReconciler', () => {
               some: {
                 type: 'IMAGE',
                 copyStatus: 'FAILED',
-                failureSummary: { startsWith: 'Unsupported media type: video/mp4' },
+                failureSummary: {
+                  in: [
+                    'Unsupported media type: video/mp4',
+                    'Media exceeds the configured byte ceiling',
+                  ],
+                },
               },
             },
           },

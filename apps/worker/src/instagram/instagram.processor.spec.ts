@@ -207,7 +207,7 @@ describe('InstagramProcessor', () => {
         type: 'IMAGE',
         originalUrl: sourceUrl,
         copyStatus: 'FAILED',
-        failureSummary: 'Unsupported media type: video/mp4',
+        failureSummary: 'Media exceeds the configured byte ceiling',
       },
     });
     copy.mockResolvedValue({

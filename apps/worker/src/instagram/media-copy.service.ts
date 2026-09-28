@@ -2,7 +2,8 @@ import { createHash } from 'node:crypto';
 
 import type { ObjectStorage } from '@autosale/integrations';
 
-const DEFAULT_MAX_BYTES = 10 * 1024 * 1024;
+const DEFAULT_MAX_IMAGE_BYTES = 10 * 1024 * 1024;
+const DEFAULT_MAX_VIDEO_BYTES = 25 * 1024 * 1024;
 const DEFAULT_TIMEOUT_MS = 10_000;
 const MIME_EXTENSIONS = new Map([
   ['image/jpeg', 'jpg'],
@@ -26,15 +27,17 @@ export class MediaCopyError extends Error {
 }
 
 export class MediaCopyService {
-  private readonly maxBytes: number;
+  private readonly maxImageBytes: number;
+  private readonly maxVideoBytes: number;
   private readonly timeoutMs: number;
 
   constructor(
     private readonly storage: ObjectStorage,
     private readonly fetchMedia: FetchMedia = fetch,
-    options: { maxBytes?: number; timeoutMs?: number } = {},
+    options: { maxBytes?: number; maxVideoBytes?: number; timeoutMs?: number } = {},
   ) {
-    this.maxBytes = options.maxBytes ?? DEFAULT_MAX_BYTES;
+    this.maxImageBytes = options.maxBytes ?? DEFAULT_MAX_IMAGE_BYTES;
+    this.maxVideoBytes = options.maxVideoBytes ?? DEFAULT_MAX_VIDEO_BYTES;
     this.timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   }
 
@@ -67,12 +70,13 @@ export class MediaCopyService {
         );
       }
 
+      const maxBytes = contentType === 'video/mp4' ? this.maxVideoBytes : this.maxImageBytes;
       const declaredLength = Number(response.headers.get('content-length'));
-      if (Number.isFinite(declaredLength) && declaredLength > this.maxBytes) {
-        throw new MediaCopyError('TOO_LARGE', false, 'Media exceeds the configured byte ceiling');
+      if (Number.isFinite(declaredLength) && declaredLength > maxBytes) {
+        throw new MediaCopyError('TOO_LARGE', false, `Media exceeds the configured ${maxBytes} byte ceiling`);
       }
 
-      const body = await readWithLimit(response, this.maxBytes);
+      const body = await readWithLimit(response, maxBytes);
       const checksum = createHash('sha256').update(body).digest('hex');
       const key = `tenants/${input.tenantId}/instagram/sha256/${checksum}.${extension}`;
       const stored = await this.storage.put({ key, body, contentType });
@@ -100,7 +104,7 @@ async function readWithLimit(response: Response, maxBytes: number): Promise<Uint
     total += value.byteLength;
     if (total > maxBytes) {
       await reader.cancel();
-      throw new MediaCopyError('TOO_LARGE', false, 'Media exceeds the configured byte ceiling');
+      throw new MediaCopyError('TOO_LARGE', false, `Media exceeds the configured ${maxBytes} byte ceiling`);
     }
     chunks.push(value);
   }

@@ -157,7 +157,12 @@ export class InstagramProcessor {
                 { copyStatus: { in: ['PENDING', 'RETRYABLE_FAILURE'] } },
                 {
                   copyStatus: 'FAILED',
-                  failureSummary: { startsWith: 'Unsupported media type: video/mp4' },
+                  failureSummary: {
+                    in: [
+                      'Unsupported media type: video/mp4',
+                      'Media exceeds the configured byte ceiling',
+                    ],
+                  },
                 },
               ],
             },
