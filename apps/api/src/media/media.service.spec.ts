@@ -6,13 +6,17 @@ import { MediaService } from './media.service.js';
 describe('MediaService', () => {
   it('scopes attachment lookup through the message tenant and hides foreign ids', async () => {
     let query: unknown;
-    const prisma = { attachment: { findFirst: async (input: unknown) => { query = input; return null; } } };
+    const transaction = {
+      $queryRaw: async () => [{ set_config: '22222222-2222-4222-8222-222222222222' }],
+      attachment: { findFirst: async (input: unknown) => { query = input; return null; } },
+    };
+    const prisma = { $transaction: async (operation: (tx: typeof transaction) => Promise<unknown>) => operation(transaction) };
     const service = new MediaService(prisma as never, {} as never);
 
-    await expect(service.load('tenant-b', '11111111-1111-4111-8111-111111111111'))
+    await expect(service.load('22222222-2222-4222-8222-222222222222', '11111111-1111-4111-8111-111111111111'))
       .rejects.toBeInstanceOf(NotFoundException);
     expect(query).toEqual(expect.objectContaining({
-      where: expect.objectContaining({ message: { tenantId: 'tenant-b' } }),
+      where: expect.objectContaining({ message: { tenantId: '22222222-2222-4222-8222-222222222222' } }),
     }));
   });
 

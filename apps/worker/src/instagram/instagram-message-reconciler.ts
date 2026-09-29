@@ -17,26 +17,18 @@ export class InstagramMessageReconciler {
 
   async reconcile(): Promise<{ attempted: number; queued: number }> {
     const now = this.now();
-    const messages = await this.prisma.message.findMany({
-      where: {
-        direction: 'OUTBOUND',
-        OR: [
-          { deliveryStatus: 'PENDING', nextDeliveryAttemptAt: { lte: now } },
-          { deliveryStatus: 'SENDING', deliveryLeaseExpiresAt: { lte: now } },
-        ],
-      },
-      orderBy: [{ nextDeliveryAttemptAt: 'asc' }, { createdAt: 'asc' }],
-      take: 50,
-      select: { id: true, tenantId: true },
-    });
+    const messages = await this.prisma.$queryRaw<Array<{ tenant_id: string; message_id: string }>>`
+      SELECT tenant_id, message_id
+      FROM public.worker_due_instagram_messages(${now}, 50)
+    `;
 
     let queued = 0;
     for (const message of messages) {
       try {
         await this.queue.add(
           'instagram.message.send',
-          { tenantId: message.tenantId, messageId: message.id },
-          { jobId: message.id, attempts: 1, removeOnComplete: true, removeOnFail: true },
+          { tenantId: message.tenant_id, messageId: message.message_id },
+          { jobId: message.message_id, attempts: 1, removeOnComplete: true, removeOnFail: true },
         );
         queued += 1;
       } catch {

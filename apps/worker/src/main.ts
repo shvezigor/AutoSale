@@ -300,12 +300,12 @@ async function bootstrap(): Promise<void> {
         typeof job.data?.tenantId === 'string' &&
         typeof job.data?.triggerMessageId === 'string'
       ) {
-        const trigger = await prisma.message.findFirst({
+        const trigger = await withTenantTransaction(prisma, job.data.tenantId, (transaction) => transaction.message.findFirst({
           where: { id: job.data.triggerMessageId, tenantId: job.data.tenantId },
           select: { id: true },
-        });
+        }));
         if (!trigger) throw new Error('Manual order trigger message not found');
-        await orderProcessor.process(trigger.id);
+        await orderProcessor.process(job.data.tenantId, trigger.id);
         return;
       }
       if (

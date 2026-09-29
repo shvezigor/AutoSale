@@ -1,4 +1,4 @@
-import type { Prisma, PrismaClient } from '@autosale/database';
+import { type Prisma, type PrismaClient, withTenantTransaction } from '@autosale/database';
 
 import { MediaCopyError } from './media-copy.service.js';
 import { normalizeInstagramEvent } from './instagram-normalizer.js';
@@ -13,7 +13,7 @@ interface MediaCopier {
 }
 
 interface OrderTriggerProcessor {
-  processIfTriggered(messageId: string): Promise<unknown>;
+  processIfTriggered(tenantId: string, messageId: string): Promise<unknown>;
 }
 
 export class InstagramProcessor {
@@ -28,7 +28,7 @@ export class InstagramProcessor {
     const messages = normalizeInstagramEvent(event.payload);
 
     for (const normalized of messages) {
-      const persisted = await this.prisma.$transaction(async (transaction) => {
+      const persisted = await withTenantTransaction(this.prisma, event.tenantId, async (transaction) => {
         const profile = await transaction.instagramCustomerProfile.upsert({
           where: {
             tenantId_participantId: {
@@ -200,7 +200,7 @@ export class InstagramProcessor {
       }
 
       if (persisted.wasCreated || normalized.direction === 'OUTBOUND') {
-        await this.orders?.processIfTriggered(persisted.messageId);
+        await this.orders?.processIfTriggered(event.tenantId, persisted.messageId);
       }
     }
 

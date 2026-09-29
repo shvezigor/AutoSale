@@ -327,7 +327,7 @@ describe('InstagramProcessor', () => {
         },
       },
     });
-    expect(processIfTriggered).toHaveBeenCalledWith(message.id);
+    expect(processIfTriggered).toHaveBeenCalledWith(tenantId, message.id);
   });
 
   it('links a customer profile when the first observed event is an outbound echo', async () => {
@@ -405,7 +405,7 @@ describe('InstagramProcessor', () => {
       deliveryErrorCode: null,
     });
     expect(processIfTriggered).toHaveBeenCalledOnce();
-    expect(processIfTriggered).toHaveBeenCalledWith(localId);
+    expect(processIfTriggered).toHaveBeenCalledWith(tenantId, localId);
   });
 
   it('reconciles exactly one narrow text/time candidate when the provider id is not stored yet', async () => {

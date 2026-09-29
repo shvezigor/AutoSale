@@ -7,35 +7,7 @@ interface PendingEventStore {
       select: { id: true };
     }): Promise<Array<{ id: string }>>;
   };
-  message: {
-    findMany(input: {
-      where: {
-        channel: 'INSTAGRAM';
-        rawEventId: { not: null };
-        OR: Array<
-          | { text: null; attachments: { none: Record<string, never> } }
-          | {
-              attachments: {
-                some: {
-                  type: 'IMAGE';
-                  copyStatus: 'FAILED';
-                  failureSummary: {
-                    in: [
-                      'Unsupported media type: video/mp4',
-                      'Media exceeds the configured byte ceiling',
-                    ];
-                  };
-                };
-              };
-            }
-        >;
-      };
-      distinct: ['rawEventId'];
-      orderBy: [{ sourceTimestamp: 'asc' }, { id: 'asc' }];
-      take: number;
-      select: { rawEventId: true };
-    }): Promise<Array<{ rawEventId: string | null }>>;
-  };
+  $queryRaw<T>(query: TemplateStringsArray, ...values: unknown[]): Promise<T>;
 }
 
 interface NormalizeQueue {
@@ -60,33 +32,10 @@ export class InstagramEventReconciler {
         take: 100,
         select: { id: true },
       }),
-      this.store.message.findMany({
-        where: {
-          channel: 'INSTAGRAM',
-          rawEventId: { not: null },
-          OR: [
-            { text: null, attachments: { none: {} } },
-            {
-              attachments: {
-                some: {
-                  type: 'IMAGE',
-                  copyStatus: 'FAILED',
-                  failureSummary: {
-                    in: [
-                      'Unsupported media type: video/mp4',
-                      'Media exceeds the configured byte ceiling',
-                    ],
-                  },
-                },
-              },
-            },
-          ],
-        },
-        distinct: ['rawEventId'],
-        orderBy: [{ sourceTimestamp: 'asc' }, { id: 'asc' }],
-        take: 100,
-        select: { rawEventId: true },
-      }),
+      this.store.$queryRaw<Array<{ event_id: string }>>`
+        SELECT event_id
+        FROM public.worker_instagram_attachment_backfill_events(100)
+      `,
     ]);
     let failed = 0;
 
@@ -104,8 +53,8 @@ export class InstagramEventReconciler {
 
     const pendingIds = new Set(pending.map((event) => event.id));
     for (const message of attachmentBackfills) {
-      const eventId = message.rawEventId;
-      if (!eventId || pendingIds.has(eventId)) continue;
+      const eventId = message.event_id;
+      if (pendingIds.has(eventId)) continue;
 
       try {
         await this.queue.add(
@@ -119,7 +68,7 @@ export class InstagramEventReconciler {
     }
 
     const uniqueBackfills = attachmentBackfills.filter(
-      (message) => message.rawEventId && !pendingIds.has(message.rawEventId),
+      (message) => !pendingIds.has(message.event_id),
     ).length;
     return { attempted: pending.length + uniqueBackfills, failed };
   }

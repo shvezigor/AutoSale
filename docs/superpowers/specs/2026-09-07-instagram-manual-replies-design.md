@@ -19,11 +19,11 @@ If the tenant has no active Instagram connection, or its credential is expired o
 
 ## Architecture
 
-The durable PostgreSQL message record is the outbox. The request flow is:
+The durable PostgreSQL message record is the outbox. `Conversation` and `Message` use forced row-level security; the API and delivery worker load and mutate them only inside the authenticated or validated job tenant's transaction-local context. The request flow is:
 
 1. The client creates a random idempotency key and submits the message text.
 2. The NestJS API authorizes the tenant membership, verifies the tenant-bound conversation and active Instagram connection, and creates one `OUTBOUND` message with status `PENDING`.
-3. A BullMQ dispatch wakes the worker. If Redis dispatch fails after the database commit, the worker's periodic outbox scan still discovers the pending record.
+3. A BullMQ dispatch wakes the worker. If Redis dispatch fails after the database commit, the worker's periodic outbox scan still discovers the pending record through a bounded security-definer function that returns only tenant/message IDs. That function is unavailable to the API and never returns message text or customer data.
 4. The worker claims the record atomically as `SENDING`, decrypts the tenant credential server-side, and calls the Meta Instagram Send API.
 5. The worker records `SENT` plus the provider message ID and evaluates the existing confirmed-order trigger once, or records a sanitized failure and retry metadata.
 6. The client polling response updates the existing bubble without remounting the workspace page.

@@ -17,14 +17,17 @@ export class TriggeredOrderProcessor {
   ) {}
 
   async processIfTriggered(
+    tenantId: string,
     messageId: string,
   ): Promise<{ id: string; status: string } | null> {
-    const message = await this.prisma.message.findUniqueOrThrow({ where: { id: messageId } });
-    const settings = await withTenantTransaction(this.prisma, message.tenantId, (transaction) =>
-      transaction.tenantSettings.findUnique({ where: { tenantId: message.tenantId } }),
+    const message = await withTenantTransaction(this.prisma, tenantId, (transaction) =>
+      transaction.message.findFirstOrThrow({ where: { id: messageId, tenantId } }),
+    );
+    const settings = await withTenantTransaction(this.prisma, tenantId, (transaction) =>
+      transaction.tenantSettings.findUnique({ where: { tenantId } }),
     );
     if (!settings) return null;
-    if (isOrderTrigger(message, stringArray(settings.triggerPhrases))) return this.process(messageId);
+    if (isOrderTrigger(message, stringArray(settings.triggerPhrases))) return this.process(tenantId, messageId);
     if (
       message.direction === 'INBOUND'
       && message.text?.trim()
@@ -55,21 +58,24 @@ export class TriggeredOrderProcessor {
     const startedAt = Date.now();
     const correlationId = anchor.rawEventId ?? anchor.id;
     try {
-      const [recentMessages, products, conversation] = await Promise.all([
-        this.prisma.message.findMany({
-          where: { conversationId: anchor.conversationId, sourceTimestamp: { lte: anchor.sourceTimestamp } },
-          orderBy: { sourceTimestamp: 'desc' },
-          take: 50,
-        }),
+      const [conversationContext, products] = await Promise.all([
+        withTenantTransaction(this.prisma, anchor.tenantId, async (transaction) => ({
+          recentMessages: await transaction.message.findMany({
+            where: { conversationId: anchor.conversationId, sourceTimestamp: { lte: anchor.sourceTimestamp } },
+            orderBy: { sourceTimestamp: 'desc' },
+            take: 50,
+          }),
+          conversation: await transaction.conversation.findUnique({
+            where: { id: anchor.conversationId },
+            select: { displayName: true, profile: { select: { displayName: true, username: true } } },
+          }),
+        })),
         this.prisma.product.findMany({
           where: { tenantId: anchor.tenantId, active: true },
           orderBy: { name: 'asc' },
         }),
-        this.prisma.conversation.findUnique({
-          where: { id: anchor.conversationId },
-          select: { displayName: true, profile: { select: { displayName: true, username: true } } },
-        }),
       ]);
+      const { recentMessages, conversation } = conversationContext;
       const result = await this.recognition.recognize(
         {
           messages: recentMessages.reverse().map((message) => ({ id: message.id, direction: message.direction, text: message.text })),
@@ -230,11 +236,11 @@ export class TriggeredOrderProcessor {
     return { claimed: reclaimed.count === 1, orderId: null };
   }
 
-  async process(triggerMessageId: string): Promise<{ id: string; status: string }> {
-    const trigger = await this.prisma.message.findUniqueOrThrow({
-      where: { id: triggerMessageId },
-    });
-    const existing = await withTenantTransaction(this.prisma, trigger.tenantId, (transaction) =>
+  async process(tenantId: string, triggerMessageId: string): Promise<{ id: string; status: string }> {
+    const trigger = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.message.findFirstOrThrow({
+      where: { id: triggerMessageId, tenantId },
+    }));
+    const existing = await withTenantTransaction(this.prisma, tenantId, (transaction) =>
       transaction.order.findUnique({ where: { triggerMessageId } }),
     );
     if (existing) return existing;
@@ -251,24 +257,27 @@ export class TriggeredOrderProcessor {
     if (order.status !== 'AI_PROCESSING') return order;
 
     try {
-      const [recentMessages, products, conversation] = await Promise.all([
-        this.prisma.message.findMany({
-          where: {
-            conversationId: trigger.conversationId,
-            sourceTimestamp: { lte: trigger.sourceTimestamp },
-          },
-          orderBy: { sourceTimestamp: 'desc' },
-          take: 50,
-        }),
+      const [conversationContext, products] = await Promise.all([
+        withTenantTransaction(this.prisma, trigger.tenantId, async (transaction) => ({
+          recentMessages: await transaction.message.findMany({
+            where: {
+              conversationId: trigger.conversationId,
+              sourceTimestamp: { lte: trigger.sourceTimestamp },
+            },
+            orderBy: { sourceTimestamp: 'desc' },
+            take: 50,
+          }),
+          conversation: await transaction.conversation.findUnique({
+            where: { id: trigger.conversationId },
+            select: { displayName: true, profile: { select: { displayName: true, username: true } } },
+          }),
+        })),
         this.prisma.product.findMany({
           where: { tenantId: trigger.tenantId, active: true },
           orderBy: { name: 'asc' },
         }),
-        this.prisma.conversation.findUnique({
-          where: { id: trigger.conversationId },
-          select: { displayName: true, profile: { select: { displayName: true, username: true } } },
-        }),
       ]);
+      const { recentMessages, conversation } = conversationContext;
       const result = await this.recognition.recognize(
         {
           messages: recentMessages.reverse().map((message) => ({

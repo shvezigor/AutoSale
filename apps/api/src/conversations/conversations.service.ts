@@ -53,7 +53,7 @@ export class ConversationsService {
   async list(tenantId: string, query: ConversationQuery): Promise<ConversationListResponse> {
     const limit = Math.min(query.limit, 50);
     const cursor = query.cursor ? decodeCursor(query.cursor) : undefined;
-    const rows = await this.prisma.conversation.findMany({
+    const rows = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.conversation.findMany({
       where: {
         tenantId,
         ...(cursor
@@ -87,7 +87,7 @@ export class ConversationsService {
           },
         },
       },
-    });
+    }));
 
     const hasMore = rows.length > limit;
     const page = hasMore ? rows.slice(0, limit) : rows;
@@ -113,7 +113,7 @@ export class ConversationsService {
 
   async detail(tenantId: string, id: string): Promise<ConversationDetailResponse> {
     const [conversation, connection] = await Promise.all([
-      this.prisma.conversation.findFirst({
+      withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.conversation.findFirst({
         where: { id, tenantId },
         include: {
           profile: {
@@ -131,7 +131,7 @@ export class ConversationsService {
             include: { attachments: { orderBy: { createdAt: 'asc' } } },
           },
         },
-      }),
+      })),
       this.prisma.instagramConnection.findUnique({ where: { tenantId } }),
     ]);
 
@@ -154,7 +154,7 @@ export class ConversationsService {
   }
 
   async orderState(tenantId: string, conversationId: string): Promise<ConversationOrderState> {
-    const conversation = await this.prisma.conversation.findFirst({
+    const conversation = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.conversation.findFirst({
       where: { id: conversationId, tenantId, channel: 'INSTAGRAM' },
       include: {
         messages: {
@@ -163,7 +163,7 @@ export class ConversationsService {
           select: { id: true },
         },
       },
-    });
+    }));
     if (!conversation) throw new NotFoundException('Conversation not found');
     const latestMessage = conversation.messages[0];
     if (!latestMessage) return { order: null };
@@ -178,7 +178,7 @@ export class ConversationsService {
   }
 
   async createOrder(tenantId: string, conversationId: string): Promise<ConversationOrderStartResponse> {
-    const conversation = await this.prisma.conversation.findFirst({
+    const conversation = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.conversation.findFirst({
       where: { id: conversationId, tenantId, channel: 'INSTAGRAM' },
       include: {
         messages: {
@@ -187,7 +187,7 @@ export class ConversationsService {
           select: { id: true },
         },
       },
-    });
+    }));
     if (!conversation) throw new NotFoundException('Conversation not found');
     const latestMessage = conversation.messages[0];
     if (!latestMessage) throw new BadRequestException('Conversation has no messages');
@@ -218,7 +218,7 @@ export class ConversationsService {
   ): Promise<ConversationMessage> {
     const now = new Date();
     const text = input.text.trim();
-    const result = await this.prisma.$transaction(async (transaction) => {
+    const result = await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
       const conversation = await transaction.conversation.findFirst({
         where: { id: conversationId, tenantId, channel: 'INSTAGRAM' },
       });
@@ -293,7 +293,7 @@ export class ConversationsService {
     messageId: string,
   ): Promise<ConversationMessage> {
     const now = new Date();
-    const message = await this.prisma.$transaction(async (transaction) => {
+    const message = await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
       const conversation = await transaction.conversation.findFirst({
         where: { id: conversationId, tenantId, channel: 'INSTAGRAM' },
       });

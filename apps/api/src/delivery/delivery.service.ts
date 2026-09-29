@@ -340,10 +340,10 @@ export class DeliveryService {
   async customerMessagePreview(tenantId: string, shipmentId: string): Promise<ShipmentCustomerMessagePreview> {
     this.assertEnabled();
     const context = await this.customerMessageContext(tenantId, shipmentId);
-    const existing = await this.prisma.message.findFirst({
+    const existing = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.message.findFirst({
       where: { tenantId, clientIdempotencyKey: shipmentCustomerMessageKey(context.shipment.id, context.shipment.version) },
       select: { deliveryStatus: true, deliveryErrorCode: true },
-    });
+    }));
     return {
       text: renderCustomerMessage(context.template, context.tenantName, context.shipment.trackingNumber, context.shipment.provider),
       suggested: context.suggested,

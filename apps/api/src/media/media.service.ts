@@ -1,4 +1,4 @@
-import type { PrismaClient } from '@autosale/database';
+import { type PrismaClient, withTenantTransaction } from '@autosale/database';
 import type { ObjectStorage } from '@autosale/integrations';
 import { NotFoundException } from '@nestjs/common';
 
@@ -9,7 +9,7 @@ export class MediaService {
   ) {}
 
   async load(tenantId: string, id: string): Promise<{ body: Uint8Array; contentType: string }> {
-    const attachment = await this.prisma.attachment.findFirst({
+    const attachment = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.attachment.findFirst({
       where: {
         id,
         copyStatus: 'COPIED',
@@ -17,7 +17,7 @@ export class MediaService {
         message: { tenantId },
       },
       select: { storageKey: true },
-    });
+    }));
     if (!attachment?.storageKey) {
       throw new NotFoundException('Media not found');
     }

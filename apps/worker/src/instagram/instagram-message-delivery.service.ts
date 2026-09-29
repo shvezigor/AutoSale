@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
-import type { PrismaClient } from '@autosale/database';
+import { type PrismaClient, withTenantTransaction } from '@autosale/database';
 import { CredentialCipher, MetaInstagramError } from '@autosale/integrations';
 
 const LEASE_MS = 60_000;
@@ -24,7 +24,7 @@ interface InstagramTextClient {
 }
 
 interface OrderTriggerProcessor {
-  processIfTriggered(messageId: string): Promise<unknown>;
+  processIfTriggered(tenantId: string, messageId: string): Promise<unknown>;
 }
 
 export class InstagramMessageDeliveryService {
@@ -39,7 +39,7 @@ export class InstagramMessageDeliveryService {
   async process(job: InstagramMessageDeliveryJob): Promise<InstagramMessageDeliveryResult> {
     const startedAt = this.now();
     const leaseId = randomUUID();
-    const claimed = await this.prisma.message.updateMany({
+    const claimed = await withTenantTransaction(this.prisma, job.tenantId, (transaction) => transaction.message.updateMany({
       where: {
         id: job.messageId,
         tenantId: job.tenantId,
@@ -68,13 +68,13 @@ export class InstagramMessageDeliveryService {
         lastDeliveryAttemptAt: startedAt,
         deliveryErrorCode: null,
       },
-    });
+    }));
     if (claimed.count !== 1) return 'IGNORED';
 
-    const message = await this.prisma.message.findFirst({
+    const message = await withTenantTransaction(this.prisma, job.tenantId, (transaction) => transaction.message.findFirst({
       where: { id: job.messageId, tenantId: job.tenantId, deliveryLeaseId: leaseId },
       include: { conversation: { select: { participantId: true } } },
-    });
+    }));
     if (!message || message.text === null) {
       await this.finish(job, leaseId, {
         deliveryStatus: 'FAILED',
@@ -181,7 +181,7 @@ export class InstagramMessageDeliveryService {
       nextDeliveryAttemptAt: null,
     });
     if (!updated) return 'IGNORED';
-    await this.orders.processIfTriggered(job.messageId);
+    await this.orders.processIfTriggered(job.tenantId, job.messageId);
     return 'SENT';
   }
 
@@ -195,7 +195,7 @@ export class InstagramMessageDeliveryService {
       providerMessageId?: string;
     },
   ): Promise<boolean> {
-    const updated = await this.prisma.message.updateMany({
+    const updated = await withTenantTransaction(this.prisma, job.tenantId, (transaction) => transaction.message.updateMany({
       where: {
         id: job.messageId,
         tenantId: job.tenantId,
@@ -207,7 +207,7 @@ export class InstagramMessageDeliveryService {
         deliveryLeaseId: null,
         deliveryLeaseExpiresAt: null,
       },
-    });
+    }));
     return updated.count === 1;
   }
 
@@ -217,8 +217,8 @@ export class InstagramMessageDeliveryService {
     connection: { id: string; credentialGenerationId: string | null },
     now: Date,
   ): Promise<void> {
-    await this.prisma.$transaction([
-      this.prisma.message.updateMany({
+    await withTenantTransaction(this.prisma, job.tenantId, async (transaction) => {
+      await transaction.message.updateMany({
         where: {
           id: job.messageId,
           tenantId: job.tenantId,
@@ -232,8 +232,8 @@ export class InstagramMessageDeliveryService {
           deliveryLeaseId: null,
           deliveryLeaseExpiresAt: null,
         },
-      }),
-      this.prisma.instagramConnection.updateMany({
+      });
+      await transaction.instagramConnection.updateMany({
         where: {
           id: connection.id,
           tenantId: job.tenantId,
@@ -244,8 +244,8 @@ export class InstagramMessageDeliveryService {
           lastErrorCode: 'INSTAGRAM_RECONNECT_REQUIRED',
           lastVerifiedAt: now,
         },
-      }),
-    ]);
+      });
+    });
   }
 }
 

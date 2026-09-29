@@ -141,8 +141,8 @@ describe('TriggeredOrderProcessor', () => {
       alerts,
     );
 
-    const first = await processor.processIfTriggered(trigger.id);
-    const replay = await processor.processIfTriggered(trigger.id);
+    const first = await processor.processIfTriggered(tenant.id, trigger.id);
+    const replay = await processor.processIfTriggered(tenant.id, trigger.id);
 
     expect(replay?.id).toBe(first?.id);
     expect(await prisma.order.count({ where: { triggerMessageId: trigger.id } })).toBe(1);
@@ -238,8 +238,8 @@ describe('TriggeredOrderProcessor', () => {
       scheduleExport,
     );
 
-    const first = await processor.processIfTriggered(anchor.id);
-    const replay = await processor.processIfTriggered(anchor.id);
+    const first = await processor.processIfTriggered(tenant.id, anchor.id);
+    const replay = await processor.processIfTriggered(tenant.id, anchor.id);
 
     expect(first).toMatchObject({ status: 'NEEDS_REVIEW' });
     expect(replay?.id).toBe(first?.id);
@@ -273,8 +273,8 @@ describe('TriggeredOrderProcessor', () => {
       },
     });
 
-    const automatic = await processor.processIfTriggered(automaticAnchor.id);
-    const automaticReplay = await processor.processIfTriggered(automaticAnchor.id);
+    const automatic = await processor.processIfTriggered(tenant.id, automaticAnchor.id);
+    const automaticReplay = await processor.processIfTriggered(tenant.id, automaticAnchor.id);
 
     expect(automatic).toMatchObject({ status: 'AUTO_APPROVED' });
     expect(automaticReplay?.id).toBe(automatic?.id);
@@ -299,7 +299,7 @@ describe('TriggeredOrderProcessor', () => {
         text: 'Оформляйте ще одні двері', sourceTimestamp: new Date('2026-09-18T09:02:00Z'),
       },
     });
-    const unpriced = await processor.processIfTriggered(unpricedAnchor.id);
+    const unpriced = await processor.processIfTriggered(tenant.id, unpricedAnchor.id);
     expect(unpriced).toMatchObject({ status: 'AUTO_APPROVED' });
     expect(await prisma.orderCommercialTerms.findUniqueOrThrow({ where: { orderId: unpriced!.id } })).toMatchObject({
       pricingStatus: 'NEEDS_REVIEW', currency: null, totalAmount: null,

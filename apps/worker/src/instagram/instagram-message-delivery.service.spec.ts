@@ -75,7 +75,7 @@ describe('InstagramMessageDeliveryService', () => {
       deliveryLeaseId: null,
       deliveryErrorCode: null,
     });
-    expect(processIfTriggered).toHaveBeenCalledWith(messageId);
+    expect(processIfTriggered).toHaveBeenCalledWith(tenantId, messageId);
   });
 
   it('marks an invalid token as reconnect-required for the same credential generation', async () => {
