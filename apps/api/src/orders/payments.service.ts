@@ -81,7 +81,9 @@ export class PaymentsService {
         }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }));
       } catch (error) {
         if (!isPrismaCode(error, 'P2002')) throw error;
-        const existing = await this.prisma.orderPayment.findUnique({ where: { tenantId_idempotencyKey: { tenantId, idempotencyKey: input.idempotencyKey } } });
+        const existing = await withTenantTransaction(this.prisma, tenantId, (tx) =>
+          tx.orderPayment.findUnique({ where: { tenantId_idempotencyKey: { tenantId, idempotencyKey: input.idempotencyKey } } }),
+        );
         if (!existing) throw error;
         assertCreateReplay(existing, orderId, requestHash);
       }

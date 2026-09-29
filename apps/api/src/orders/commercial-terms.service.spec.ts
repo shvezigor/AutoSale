@@ -35,9 +35,13 @@ describe('CommercialTermsService', () => {
   });
 
   it('rejects a stale commercial terms version', async () => {
+    const tx = {
+      $queryRaw: vi.fn(),
+      orderCommercialTerms: { findFirst: vi.fn().mockResolvedValue({ version: 3 }) },
+    };
     const service = new CommercialTermsService({
       order: { findFirst: vi.fn().mockResolvedValue({ id: 'order', procurementHandedOffAt: null, telegramDeliveries: [], shipments: [] }) },
-      orderCommercialTerms: { findFirst: vi.fn().mockResolvedValue({ version: 3 }) },
+      $transaction: vi.fn(async (callback: (tx: unknown) => unknown) => callback(tx)),
     } as never);
 
     await expect(service.update(tenantId, 'order', 'manager', {
@@ -47,16 +51,19 @@ describe('CommercialTermsService', () => {
 
   it('locks commercial selections while an active payment exists', async () => {
     const updateMany = vi.fn();
+    const tx = {
+      $queryRaw: vi.fn(),
+      orderPayment: { count: vi.fn().mockResolvedValue(1) },
+      orderCommercialTerms: {
+        findFirst: vi.fn().mockResolvedValue({ version: 1, currency: 'UAH' }),
+        updateMany,
+      },
+    };
     const service = new CommercialTermsService({
       order: { findFirst: vi.fn().mockResolvedValue({
         id: 'order', procurementHandedOffAt: null, telegramDeliveries: [], shipments: [], items: [],
       }) },
-      orderCommercialTerms: { findFirst: vi.fn().mockResolvedValue({ version: 1, currency: 'UAH' }) },
-      $transaction: vi.fn(async (callback: (tx: unknown) => unknown) => callback({
-        $queryRaw: vi.fn(),
-        orderPayment: { count: vi.fn().mockResolvedValue(1) },
-        orderCommercialTerms: { updateMany },
-      })),
+      $transaction: vi.fn(async (callback: (tx: unknown) => unknown) => callback(tx)),
     } as never);
 
     await expect(service.update(tenantId, 'order', 'manager', {

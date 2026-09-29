@@ -146,7 +146,7 @@ describe('OrdersService Google Sheets retry', () => {
       paymentStatus: 'PAID', page: 1, pageSize: 25,
     });
 
-    expect(queryRaw).toHaveBeenCalledTimes(2);
+    expect(queryRaw).toHaveBeenCalledTimes(3);
     expect(findMany).toHaveBeenCalledWith(expect.objectContaining({
       where: expect.objectContaining({ tenantId: tenantA, id: { in: ['order-paid'] } }),
     }));
@@ -158,7 +158,7 @@ describe('OrdersService Google Sheets retry', () => {
   it('short-circuits an empty payment status filter without querying orders', async () => {
     const findMany = vi.fn();
     const count = vi.fn();
-    const prisma = { $queryRaw: vi.fn().mockResolvedValue([]), order: { findMany, count } };
+    const prisma = transactional({ $queryRaw: vi.fn().mockResolvedValue([]), order: { findMany, count } });
 
     await expect(new OrdersService(prisma as never).list(tenantA, {
       paymentStatus: 'UNPAID', page: 3, pageSize: 10,

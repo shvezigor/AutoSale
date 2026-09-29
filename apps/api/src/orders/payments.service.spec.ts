@@ -1,4 +1,5 @@
 import { MetricRegistry } from '@autosale/observability';
+import { Prisma } from '@autosale/database';
 import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -71,6 +72,23 @@ describe('PaymentsService', () => {
     })).rejects.toBeInstanceOf(ConflictException);
   });
 
+  it('re-reads a duplicate idempotency key inside tenant context', async () => {
+    const duplicate = new Prisma.PrismaClientKnownRequestError('duplicate', {
+      code: 'P2002', clientVersion: 'test',
+    });
+    const prisma = prismaMock({
+      existing: { ...payment, requestHash: 'different' },
+      firstTransactionError: duplicate,
+    });
+    const service = new PaymentsService(prisma as never, () => now);
+
+    await expect(service.record(tenantId, orderId, actorId, {
+      amount: '200.00', method: 'CASH', receivedAt: now.toISOString(), bankAccountId: null, carrier: null,
+      note: null, idempotencyKey: payment.idempotencyKey,
+    })).rejects.toBeInstanceOf(ConflictException);
+    expect(prisma.$transaction).toHaveBeenCalledTimes(2);
+  });
+
   it('cancels without changing the original financial fields', async () => {
     const updateMany = vi.fn().mockResolvedValue({ count: 1 });
     const auditCreate = vi.fn().mockResolvedValue({});
@@ -94,6 +112,7 @@ function prismaMock(options: {
   account?: object | null;
   payments?: typeof payment[];
   updateMany?: ReturnType<typeof vi.fn>;
+  firstTransactionError?: Error;
 } = {}) {
   const client = {
     $queryRaw: vi.fn(),
@@ -108,5 +127,15 @@ function prismaMock(options: {
     },
     auditLog: { create: options.auditCreate ?? vi.fn().mockResolvedValue({}) },
   };
-  return { ...client, $transaction: vi.fn((operation: (tx: typeof client) => unknown) => operation(client)) };
+  let transactionAttempt = 0;
+  return {
+    ...client,
+    $transaction: vi.fn((operation: (tx: typeof client) => unknown) => {
+      transactionAttempt += 1;
+      if (transactionAttempt === 1 && options.firstTransactionError) {
+        return Promise.reject(options.firstTransactionError);
+      }
+      return operation(client);
+    }),
+  };
 }

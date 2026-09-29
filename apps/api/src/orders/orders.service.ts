@@ -418,19 +418,21 @@ export class OrdersService {
   }
 
   private async paymentOrderIds(tenantId: string, status: OrderPaymentStatus): Promise<string[]> {
-    const rows = await this.prisma.$queryRaw<Array<{ id: string }>>(Prisma.sql`
-      SELECT o.id
-      FROM orders o
-      JOIN order_commercial_terms ct
-        ON ct.order_id = o.id AND ct.tenant_id = o.tenant_id
-      LEFT JOIN order_payments p
-        ON p.order_id = o.id AND p.tenant_id = o.tenant_id AND p.cancelled_at IS NULL
-      WHERE o.tenant_id = ${tenantId}::uuid
-        AND ct.pricing_status = 'READY'
-        AND ct.total_amount IS NOT NULL
-      GROUP BY o.id, ct.total_amount
-      HAVING ${paymentStatusPredicate(status)}
-    `);
+    const rows = await withTenantTransaction(this.prisma, tenantId, (tx) =>
+      tx.$queryRaw<Array<{ id: string }>>(Prisma.sql`
+        SELECT o.id
+        FROM orders o
+        JOIN order_commercial_terms ct
+          ON ct.order_id = o.id AND ct.tenant_id = o.tenant_id
+        LEFT JOIN order_payments p
+          ON p.order_id = o.id AND p.tenant_id = o.tenant_id AND p.cancelled_at IS NULL
+        WHERE o.tenant_id = ${tenantId}::uuid
+          AND ct.pricing_status = 'READY'
+          AND ct.total_amount IS NOT NULL
+        GROUP BY o.id, ct.total_amount
+        HAVING ${paymentStatusPredicate(status)}
+      `),
+    );
     return rows.map((row) => row.id);
   }
 }

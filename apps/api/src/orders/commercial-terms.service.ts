@@ -43,7 +43,9 @@ export class CommercialTermsService {
   ): Promise<OrderCommercialTermsSummary> {
     const context = await this.orderContext(tenantId, orderId);
     this.assertCorrectable(context);
-    const current = await this.prisma.orderCommercialTerms.findFirst({ where: { tenantId, orderId } });
+    const current = await withTenantTransaction(this.prisma, tenantId, (tx) =>
+      tx.orderCommercialTerms.findFirst({ where: { tenantId, orderId } }),
+    );
     if (!current) {
       if (!input.initializeLegacy || input.version !== 0) throw new ConflictException('Commercial terms must be initialized from a preview');
       const lines = await this.currentCatalogueLines(tenantId, context.items);

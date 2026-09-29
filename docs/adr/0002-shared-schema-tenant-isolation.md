@@ -38,8 +38,8 @@ Keep one shared PostgreSQL schema for the current product stage and enforce thes
 - Deployments provision separate `autosale_api` and `autosale_worker` login roles after migrations. Both are non-owner, `NOSUPERUSER`, `NOCREATEDB`, `NOCREATEROLE`, `NOREPLICATION` and `NOBYPASSRLS`; neither can create or alter schema objects.
 - The owner connection remains available only to the one-shot migration and role-provisioning jobs. Application containers receive role-specific URLs and refuse to start when their distinct secrets are absent.
 - `withTenantTransaction` provides the transaction-local `app.current_tenant_id` context required by future policies. The context is validated as a UUID, parameterized, scoped with `set_config(..., true)` and automatically cleared when the transaction ends. PostgreSQL tests prove an absent context reads no rows, a valid context sees only its tenant, and cross-tenant writes fail.
-- Forced RLS protects `tenant_settings`, `tenant_legal_entities` and `tenant_bank_accounts`. Every production read/write of these tables, including order creation, commercial-term selection, payment validation and nested order summaries, executes inside `withTenantTransaction`; absent context sees no rows and mismatched writes are rejected.
-- The commercial-settings slice demonstrates that a rollout must include indirect relation loads, not only direct model calls. Order list/detail queries that hydrate legal entities or accounts are tenant-scoped transactions as well.
+- Forced RLS protects `tenant_settings`, `tenant_legal_entities`, `tenant_bank_accounts`, `order_commercial_terms` and `order_payments`. Every production read/write of these tables, including order creation, commercial-term selection, payment validation and nested order summaries, executes inside `withTenantTransaction`; absent context sees no rows and mismatched writes are rejected.
+- The commercial and order-financial slices demonstrate that a rollout must include indirect relation loads and raw reporting/filter queries, not only direct model calls. Order list/detail queries that hydrate legal entities, accounts, commercial terms or payments, plus payment-status filtering, are tenant-scoped transactions as well.
 
 ## RLS rollout gate
 
@@ -62,7 +62,7 @@ Benefits:
 
 Trade-offs:
 
-- a compromised API or worker credential still reaches all tenant rows until RLS is deployed, but it no longer grants schema ownership or DDL;
+- a compromised API or worker credential can still reach unconverted tenant tables until their RLS slice is deployed, but protected tables fail closed and the runtime role cannot bypass RLS, own schema objects or perform DDL;
 - full backups contain every tenant and require particularly strong encryption/access controls;
 - tenant export and deletion need deliberate workflows across PostgreSQL, object storage, providers and backup expiry.
 
