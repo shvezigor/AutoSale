@@ -71,17 +71,21 @@ export class OrdersService {
         ],
       } : {}),
     };
-    const [rows, total, products] = await Promise.all([
-      withTenantTransaction(this.prisma, tenantId, (tx) => tx.order.findMany({
-        where,
-        orderBy: orderListOrderBy(query.sort ?? 'date', query.direction ?? 'desc'),
-        skip: (query.page - 1) * query.pageSize,
-        take: query.pageSize,
-        include: this.include,
-      })),
-      this.prisma.order.count({ where }),
+    const [orderPage, products] = await Promise.all([
+      withTenantTransaction(this.prisma, tenantId, async (tx) => {
+        const rows = await tx.order.findMany({
+          where,
+          orderBy: orderListOrderBy(query.sort ?? 'date', query.direction ?? 'desc'),
+          skip: (query.page - 1) * query.pageSize,
+          take: query.pageSize,
+          include: this.include,
+        });
+        const total = await tx.order.count({ where });
+        return { rows, total };
+      }),
       this.productNames(tenantId),
     ]);
+    const { rows, total } = orderPage;
     return { items: rows.map((row) => this.map(row, products)), page: query.page, pageSize: query.pageSize, total };
   }
 

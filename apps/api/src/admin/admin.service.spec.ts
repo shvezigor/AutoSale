@@ -7,14 +7,16 @@ describe('AdminService privacy contract', () => {
     const findMany = vi.fn().mockResolvedValue([{
       id: 'tenant-1', name: 'Store', status: 'ACTIVE', createdAt: new Date('2026-08-27T00:00:00Z'),
       memberships: [{ user: { email: 'owner@example.com' } }],
-      _count: { memberships: 2, orders: 4 },
+      _count: { memberships: 2 },
     }]);
-    const service = new AdminService({ tenant: { findMany } } as never);
+    const queryRaw = vi.fn().mockResolvedValue([{ tenantId: 'tenant-1', orderCount: 4n }]);
+    const service = new AdminService({ tenant: { findMany }, $queryRaw: queryRaw } as never);
 
     const result = await service.listTenants();
     const serialized = JSON.stringify(result);
 
     expect(result).toEqual([{ tenantId: 'tenant-1', tenantName: 'Store', status: 'ACTIVE', ownerEmail: 'owner@example.com', userCount: 2, orderCount: 4, createdAt: '2026-08-27T00:00:00.000Z' }]);
+    expect(queryRaw).toHaveBeenCalledOnce();
     for (const forbidden of ['phone', 'address', 'message', 'extraction', 'storageKey']) expect(serialized).not.toContain(forbidden);
   });
 

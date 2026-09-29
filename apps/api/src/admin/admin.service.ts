@@ -1,4 +1,4 @@
-import type { PrismaClient } from '@autosale/database';
+import { Prisma, type PrismaClient } from '@autosale/database';
 
 export class AdminService {
   constructor(private readonly prisma: PrismaClient, private readonly now: () => Date = () => new Date()) {}
@@ -12,16 +12,21 @@ export class AdminService {
         status: true,
         createdAt: true,
         memberships: { where: { role: 'OWNER' }, take: 1, select: { user: { select: { email: true } } } },
-        _count: { select: { memberships: true, orders: true } },
+        _count: { select: { memberships: true } },
       },
     });
+    const orderCounts = await this.prisma.$queryRaw<Array<{ tenantId: string; orderCount: bigint }>>(Prisma.sql`
+      SELECT tenant_id AS "tenantId", order_count AS "orderCount"
+      FROM public.platform_order_counts()
+    `);
+    const ordersByTenant = new Map(orderCounts.map((row) => [row.tenantId, Number(row.orderCount)]));
     return tenants.map((tenant) => ({
       tenantId: tenant.id,
       tenantName: tenant.name,
       status: tenant.status,
       ownerEmail: tenant.memberships[0]?.user.email ?? null,
       userCount: tenant._count.memberships,
-      orderCount: tenant._count.orders,
+      orderCount: ordersByTenant.get(tenant.id) ?? 0,
       createdAt: tenant.createdAt.toISOString(),
     }));
   }

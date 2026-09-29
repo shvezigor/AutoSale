@@ -1,5 +1,5 @@
 import { dashboardResponseSchema, type DashboardPeriod, type DashboardResponse } from '@autosale/contracts/dashboard';
-import { Prisma, type PrismaClient } from '@autosale/database';
+import { Prisma, type PrismaClient, withTenantTransaction } from '@autosale/database';
 
 import { dashboardPeriodRange } from './dashboard-period.js';
 
@@ -44,21 +44,24 @@ export class DashboardService {
 
   async summary(tenantId: string, period: DashboardPeriod, now = new Date()): Promise<DashboardResponse> {
     const range = dashboardPeriodRange(period, now);
-    const [aggregateRows, dailyRows, queue, instagram, sheets, deliveryConnections] = await Promise.all([
-      this.aggregate(tenantId, range.previousStart, range.start, range.end, now),
-      this.daily(tenantId, range.start, range.end),
-      this.prisma.order.findMany({
-        where: { tenantId, status: { in: ['NEEDS_REVIEW', 'AI_FAILED'] } },
-        orderBy: { createdAt: 'asc' },
-        take: 5,
-        select: {
-          id: true,
-          status: true,
-          overallConfidence: true,
-          createdAt: true,
-          sortProduct: true,
-          conversation: { select: { displayName: true, profile: { select: { displayName: true, username: true } } } },
-        },
+    const [orderData, instagram, sheets, deliveryConnections] = await Promise.all([
+      withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+        const aggregateRows = await this.aggregate(transaction, tenantId, range.previousStart, range.start, range.end, now);
+        const dailyRows = await this.daily(transaction, tenantId, range.start, range.end);
+        const queue = await transaction.order.findMany({
+          where: { tenantId, status: { in: ['NEEDS_REVIEW', 'AI_FAILED'] } },
+          orderBy: { createdAt: 'asc' },
+          take: 5,
+          select: {
+            id: true,
+            status: true,
+            overallConfidence: true,
+            createdAt: true,
+            sortProduct: true,
+            conversation: { select: { displayName: true, profile: { select: { displayName: true, username: true } } } },
+          },
+        });
+        return { aggregateRows, dailyRows, queue };
       }),
       this.prisma.instagramConnection.findUnique({
         where: { tenantId },
@@ -74,6 +77,7 @@ export class DashboardService {
         select: { provider: true, status: true, accountLabel: true, lastErrorCode: true },
       }),
     ]);
+    const { aggregateRows, dailyRows, queue } = orderData;
     const aggregate = aggregateRows[0] ?? emptyAggregate();
     const newOrders = count(aggregate.newOrders);
     const previousOrders = count(aggregate.previousOrders);
@@ -174,8 +178,8 @@ export class DashboardService {
     });
   }
 
-  private aggregate(tenantId: string, previousStart: Date, start: Date, end: Date, now: Date) {
-    return this.prisma.$queryRaw<AggregateRow[]>(Prisma.sql`
+  private aggregate(transaction: Prisma.TransactionClient, tenantId: string, previousStart: Date, start: Date, end: Date, now: Date) {
+    return transaction.$queryRaw<AggregateRow[]>(Prisma.sql`
       WITH current_orders AS (
         SELECT id, status, created_at, approved_at
         FROM orders
@@ -214,8 +218,8 @@ export class DashboardService {
     `);
   }
 
-  private daily(tenantId: string, start: Date, end: Date) {
-    return this.prisma.$queryRaw<DailyRow[]>(Prisma.sql`
+  private daily(transaction: Prisma.TransactionClient, tenantId: string, start: Date, end: Date) {
+    return transaction.$queryRaw<DailyRow[]>(Prisma.sql`
       SELECT
         to_char(created_at AT TIME ZONE 'Europe/Kyiv', 'YYYY-MM-DD') AS day,
         COUNT(*) FILTER (WHERE status IN ('APPROVED', 'AUTO_APPROVED')) AS confirmed,

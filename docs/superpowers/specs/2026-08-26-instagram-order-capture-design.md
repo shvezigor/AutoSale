@@ -138,6 +138,8 @@ Every order keeps an internal UUID for relations and API routing and an immutabl
 
 Order lines are tenant-confidential records. PostgreSQL forced row-level security on `order_items` fails closed when transaction-local tenant context is absent and rejects cross-tenant writes. API reads, procurement, supplier delivery, shipment preparation, reconciliation and external export must therefore load or mutate lines through the shared tenant transaction helper. Global reconcilers may discover durable tenant identifiers first, but must query each tenant's order lines only inside that tenant's transaction.
 
+The order aggregate is protected by the same forced row-level security on `orders`. Recognition workers recover tenant authority from the durable trigger message before order replay, creation or failure updates. Dashboard raw SQL, order pagination/counting, conversation order state, shipment messaging and export correlation loads all execute inside the tenant transaction. Platform administration may read only per-tenant order counts through the dedicated aggregate function; it cannot retrieve cross-tenant order rows.
+
 ## 9. Order Lifecycle
 
 ```text

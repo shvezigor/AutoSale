@@ -9,7 +9,7 @@ import type {
   ConversationQuery,
   OutboundMessageInput,
 } from '@autosale/contracts/conversations';
-import type { PrismaClient } from '@autosale/database';
+import { type PrismaClient, withTenantTransaction } from '@autosale/database';
 import {
   BadRequestException,
   HttpException,
@@ -167,10 +167,10 @@ export class ConversationsService {
     if (!conversation) throw new NotFoundException('Conversation not found');
     const latestMessage = conversation.messages[0];
     if (!latestMessage) return { order: null };
-    const order = await this.prisma.order.findFirst({
+    const order = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.order.findFirst({
       where: { triggerMessageId: latestMessage.id, tenantId, conversationId },
       select: { id: true, status: true },
-    });
+    }));
     return { order: order ? {
       id: order.id,
       status: order.status as NonNullable<ConversationOrderState['order']>['status'],
@@ -191,10 +191,10 @@ export class ConversationsService {
     if (!conversation) throw new NotFoundException('Conversation not found');
     const latestMessage = conversation.messages[0];
     if (!latestMessage) throw new BadRequestException('Conversation has no messages');
-    const existing = await this.prisma.order.findFirst({
+    const existing = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.order.findFirst({
       where: { triggerMessageId: latestMessage.id, tenantId, conversationId },
       select: { id: true },
-    });
+    }));
     if (existing) return { orderId: existing.id, queued: false };
 
     await this.queue.add(

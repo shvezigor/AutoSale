@@ -90,6 +90,7 @@ The API returns values and raw numerator/denominator or sample counts where rele
 - Never accepts `tenantId` from the client.
 - Returns a Zod-validated `DashboardResponse` from `@autosale/contracts/dashboard`.
 - Performs grouped/aggregate database queries; it must not load unbounded order, message, export, or shipment rows into application memory.
+- Runs order aggregates, daily series and the attention queue in one tenant-scoped transaction so forced PostgreSQL RLS remains effective for both Prisma and raw SQL queries.
 - Response shape:
 
 ```ts

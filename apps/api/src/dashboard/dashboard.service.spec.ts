@@ -4,6 +4,8 @@ import { describe, expect, it, vi } from 'vitest';
 import { DashboardService } from './dashboard.service.js';
 
 describe('DashboardService', () => {
+  const tenantId = '11111111-1111-4111-8111-111111111111';
+  const emptyTenantId = '22222222-2222-4222-8222-222222222222';
   it('exports the operational dashboard service', async () => {
     const module = await import('./dashboard.service.js').catch(() => ({}));
     expect(module).toHaveProperty('DashboardService');
@@ -14,7 +16,7 @@ describe('DashboardService', () => {
     const service = new DashboardService(prisma as unknown as PrismaClient);
     const now = new Date('2026-09-17T07:00:00.000Z');
 
-    const result = await service.summary('tenant-a', '7d', now);
+    const result = await service.summary(tenantId, '7d', now);
 
     expect(result).toMatchObject({
       generatedAt: now.toISOString(),
@@ -39,23 +41,23 @@ describe('DashboardService', () => {
       { key: 'ukrposhta', state: 'not-configured', label: 'Укрпошта', detail: null, href: '/settings?tab=delivery' },
     ]);
 
-    for (const [query] of prisma.$queryRaw.mock.calls) expect(query.values).toContain('tenant-a');
-    expect(prisma.order.findMany).toHaveBeenCalledWith(expect.objectContaining({ where: expect.objectContaining({ tenantId: 'tenant-a' }), take: 5 }));
-    expect(prisma.instagramConnection.findUnique).toHaveBeenCalledWith(expect.objectContaining({ where: { tenantId: 'tenant-a' } }));
-    expect(prisma.googleSheetsDestination.findUnique).toHaveBeenCalledWith(expect.objectContaining({ where: { tenantId: 'tenant-a' } }));
-    expect(prisma.deliveryConnection.findMany).toHaveBeenCalledWith(expect.objectContaining({ where: { tenantId: 'tenant-a' } }));
+    for (const [query] of prisma.$queryRaw.mock.calls.slice(1)) expect(query.values).toContain(tenantId);
+    expect(prisma.order.findMany).toHaveBeenCalledWith(expect.objectContaining({ where: expect.objectContaining({ tenantId }), take: 5 }));
+    expect(prisma.instagramConnection.findUnique).toHaveBeenCalledWith(expect.objectContaining({ where: { tenantId } }));
+    expect(prisma.googleSheetsDestination.findUnique).toHaveBeenCalledWith(expect.objectContaining({ where: { tenantId } }));
+    expect(prisma.deliveryConnection.findMany).toHaveBeenCalledWith(expect.objectContaining({ where: { tenantId } }));
   });
 
   it('returns an honest empty state when a tenant has no activity and Sheets is disconnected', async () => {
     const prisma = fakePrisma();
-    prisma.$queryRaw.mockReset().mockResolvedValueOnce([]).mockResolvedValueOnce([]);
+    prisma.$queryRaw.mockReset().mockResolvedValueOnce([]).mockResolvedValueOnce([]).mockResolvedValueOnce([]);
     prisma.order.findMany.mockResolvedValue([]);
     prisma.instagramConnection.findUnique.mockResolvedValue(null);
     prisma.googleSheetsDestination.findUnique.mockResolvedValue({ status: 'DISCONNECTED', sheetName: 'Old sheet', errorSummary: null });
     prisma.deliveryConnection.findMany.mockResolvedValue([]);
 
     const result = await new DashboardService(prisma as unknown as PrismaClient)
-      .summary('empty-tenant', '30d', new Date('2026-09-17T07:00:00.000Z'));
+      .summary(emptyTenantId, '30d', new Date('2026-09-17T07:00:00.000Z'));
 
     expect(result.metrics).toMatchObject({
       newOrders: { value: 0, previousValue: 0, changePercent: null },
@@ -71,8 +73,9 @@ describe('DashboardService', () => {
 });
 
 function fakePrisma() {
-  return {
+  const prisma = {
     $queryRaw: vi.fn()
+      .mockResolvedValueOnce([])
       .mockResolvedValueOnce([{
         newOrders: 10n,
         previousOrders: 5n,
@@ -109,5 +112,9 @@ function fakePrisma() {
       { provider: 'NOVA_POSHTA', status: 'ACTIVE', accountLabel: 'Main', lastErrorCode: null },
       { provider: 'MEEST', status: 'NEEDS_ATTENTION', accountLabel: null, lastErrorCode: 'secret-provider-code' },
     ]) },
+  };
+  return {
+    ...prisma,
+    $transaction: vi.fn(async (operation: (transaction: typeof prisma) => Promise<unknown>) => operation(prisma)),
   };
 }

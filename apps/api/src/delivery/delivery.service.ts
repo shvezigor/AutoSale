@@ -440,13 +440,13 @@ export class DeliveryService {
   }
 
   private async customerMessageContext(tenantId: string, shipmentId: string) {
-    const shipment = await this.prisma.shipment.findFirst({
+    const shipment = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.shipment.findFirst({
       where: { id: shipmentId, tenantId },
       include: {
         order: { select: { conversationId: true } },
         connection: { include: { senderProfile: true } },
       },
-    });
+    }));
     if (!shipment) throw new NotFoundException('Shipment not found');
     if (!shipment.trackingNumber || !['CREATED', 'ACCEPTED', 'IN_TRANSIT'].includes(shipment.status)) {
       throw new BadRequestException('SHIPMENT_CUSTOMER_MESSAGE_UNAVAILABLE');

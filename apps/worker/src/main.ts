@@ -2,7 +2,7 @@ import { Buffer } from 'node:buffer';
 
 import { parseWorkerEnv } from '@autosale/config/worker-env';
 import { shipmentCreateJobSchema, telegramDeliveryJobSchema, ukrposhtaTrackingBatchJobSchema } from '@autosale/contracts';
-import { createPrismaClient, ProcurementStore } from '@autosale/database';
+import { createPrismaClient, ProcurementStore, withTenantTransaction } from '@autosale/database';
 import {
   createGoogleSheetsAdapter,
   CredentialCipher,
@@ -495,13 +495,19 @@ async function bootstrap(): Promise<void> {
     if (polling) return;
     polling = true;
     try {
-      const pending = await prisma.orderExport.findMany({ where: { status: 'PENDING' }, orderBy: { createdAt: 'asc' }, take: 10, include: { order: { select: { triggerMessage: { select: { rawEventId: true } } } } } });
+      const pending = await prisma.orderExport.findMany({ where: { status: 'PENDING' }, orderBy: { createdAt: 'asc' }, take: 10 });
       metrics.set('autosale_queue_backlog', pending.length, { queue: 'google_sheets' });
       if (!sheetsProcessor) return;
       for (const record of pending) {
         const claimed = await prisma.orderExport.updateMany({ where: { id: record.id, status: 'PENDING' }, data: { status: 'PROCESSING' } });
         if (claimed.count === 1) {
-          const correlationId = record.order.triggerMessage.rawEventId;
+          const orderContext = await withTenantTransaction(prisma, record.tenantId, (transaction) =>
+            transaction.order.findFirstOrThrow({
+              where: { id: record.orderId, tenantId: record.tenantId },
+              select: { triggerMessage: { select: { rawEventId: true } } },
+            }),
+          );
+          const correlationId = orderContext.triggerMessage.rawEventId;
           const started = performance.now();
           try {
             await sheetsProcessor.process(record.id);

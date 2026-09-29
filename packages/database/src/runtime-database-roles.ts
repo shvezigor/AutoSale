@@ -73,6 +73,14 @@ export async function configureRuntimeDatabaseRoles(
         GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO autosale_api, autosale_worker;
       ALTER DEFAULT PRIVILEGES IN SCHEMA public
         GRANT USAGE, SELECT, UPDATE ON SEQUENCES TO autosale_api, autosale_worker;
+      DO $functions$
+      BEGIN
+        IF to_regprocedure('public.platform_order_counts()') IS NOT NULL THEN
+          GRANT EXECUTE ON FUNCTION public.platform_order_counts() TO autosale_api;
+          REVOKE ALL ON FUNCTION public.platform_order_counts() FROM autosale_worker;
+        END IF;
+      END
+      $functions$;
     `);
     await client.query('COMMIT');
   } catch (error) {

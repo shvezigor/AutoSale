@@ -47,7 +47,9 @@ export class TriggeredOrderProcessor {
     const claimed = await this.claimIntentEvaluation(anchor, settings.intentDetectionMode);
     if (!claimed.claimed) {
       if (!claimed.orderId) return null;
-      return this.prisma.order.findUnique({ where: { id: claimed.orderId } });
+      return withTenantTransaction(this.prisma, anchor.tenantId, (transaction) =>
+        transaction.order.findUnique({ where: { id: claimed.orderId! } }),
+      );
     }
 
     const startedAt = Date.now();
@@ -229,12 +231,13 @@ export class TriggeredOrderProcessor {
   }
 
   async process(triggerMessageId: string): Promise<{ id: string; status: string }> {
-    const existing = await this.prisma.order.findUnique({ where: { triggerMessageId } });
-    if (existing) return existing;
-
     const trigger = await this.prisma.message.findUniqueOrThrow({
       where: { id: triggerMessageId },
     });
+    const existing = await withTenantTransaction(this.prisma, trigger.tenantId, (transaction) =>
+      transaction.order.findUnique({ where: { triggerMessageId } }),
+    );
+    if (existing) return existing;
     const settings = await withTenantTransaction(this.prisma, trigger.tenantId, (transaction) =>
       transaction.tenantSettings.findUniqueOrThrow({ where: { tenantId: trigger.tenantId } }),
     );
@@ -353,7 +356,9 @@ export class TriggeredOrderProcessor {
       this.telemetry?.('ai_order_recognition_completed', { correlationId, orderId: order.id, result: result.status });
       return updated;
     } catch (error) {
-      await this.prisma.order.update({ where: { id: order.id }, data: { status: 'AI_FAILED' } });
+      await withTenantTransaction(this.prisma, trigger.tenantId, (transaction) =>
+        transaction.order.update({ where: { id: order.id }, data: { status: 'AI_FAILED' } }),
+      );
       this.telemetry?.('ai_order_recognition_failed', { correlationId, orderId: order.id, result: 'failure' });
       throw error;
     }
@@ -365,16 +370,18 @@ export class TriggeredOrderProcessor {
     triggerMessageId: string;
     promptVersion: string;
   }): Promise<{ id: string; status: string }> {
-    try {
-      return await this.prisma.order.create({ data: input });
-    } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
-        return this.prisma.order.findUniqueOrThrow({
-          where: { triggerMessageId: input.triggerMessageId },
-        });
+    return withTenantTransaction(this.prisma, input.tenantId, async (transaction) => {
+      try {
+        return await transaction.order.create({ data: input });
+      } catch (error) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+          return transaction.order.findUniqueOrThrow({
+            where: { triggerMessageId: input.triggerMessageId },
+          });
+        }
+        throw error;
       }
-      throw error;
-    }
+    });
   }
 }
 
