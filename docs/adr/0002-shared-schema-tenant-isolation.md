@@ -1,6 +1,6 @@
 # ADR 0002: Shared-schema tenant isolation and database defense in depth
 
-- **Status:** Accepted; relation guards and runtime role separation available, RLS rollout pending
+- **Status:** Accepted; relation guards, runtime role separation and incremental RLS rollout in place
 - **Date:** 2026-09-28
 - **Decision owner:** Sales AITO
 
@@ -38,10 +38,11 @@ Keep one shared PostgreSQL schema for the current product stage and enforce thes
 - Deployments provision separate `autosale_api` and `autosale_worker` login roles after migrations. Both are non-owner, `NOSUPERUSER`, `NOCREATEDB`, `NOCREATEROLE`, `NOREPLICATION` and `NOBYPASSRLS`; neither can create or alter schema objects.
 - The owner connection remains available only to the one-shot migration and role-provisioning jobs. Application containers receive role-specific URLs and refuse to start when their distinct secrets are absent.
 - `withTenantTransaction` provides the transaction-local `app.current_tenant_id` context required by future policies. The context is validated as a UUID, parameterized, scoped with `set_config(..., true)` and automatically cleared when the transaction ends. PostgreSQL tests prove an absent context reads no rows, a valid context sees only its tenant, and cross-tenant writes fail.
+- `tenant_settings` is the first forced-RLS vertical slice. Every production read/write is executed inside `withTenantTransaction`; absent context sees no settings and a mismatched write is rejected. This narrow rollout validates the pattern before policies expand to orders, conversations, catalogue, delivery, payments and integration state.
 
 ## RLS rollout gate
 
-RLS is deliberately not enabled merely because runtime roles and the transaction primitive now exist. The next gate is routing every tenant-owned HTTP and background operation through that primitive, followed by explicit bootstrap/discovery and platform-administration paths. Enabling policies before those call sites are converted would break legitimate work or encourage unsafe bypasses.
+RLS is enabled incrementally, table by table, only after all production call sites for that table are routed through the tenant transaction primitive. The remaining gate is converting every other tenant-owned HTTP and background operation, followed by explicit bootstrap/discovery and platform-administration paths. Enabling all remaining policies before those call sites are converted would break legitimate work or encourage unsafe bypasses.
 
 The rollout is complete only when role/grant migrations, request/worker tenant transaction context, platform-admin access paths, background reconciliation, backup/restore and integration tests are all proven together. Production data must be audited for tenant consistency before policies are forced.
 

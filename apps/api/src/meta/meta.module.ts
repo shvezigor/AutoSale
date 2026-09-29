@@ -1,6 +1,6 @@
 import type { ApiEnv } from '@autosale/config/api-env';
 import { INSTAGRAM_ORDER_PROMPT_VERSION } from '@autosale/contracts';
-import { createPrismaClient } from '@autosale/database';
+import { createPrismaClient, withTenantTransaction } from '@autosale/database';
 import { DynamicModule, Module } from '@nestjs/common';
 
 import { QueueModule } from '../queue/queue.module.js';
@@ -37,20 +37,22 @@ export class MetaModule {
                 name: env.DEFAULT_TENANT_KEY,
               },
             });
-            await prisma.tenantSettings.upsert({
-              where: { tenantId: env.DEFAULT_TENANT_ID },
-              update: {},
-              create: {
-                tenantId: env.DEFAULT_TENANT_ID,
-                approvalMode: 'ALWAYS',
-                autoApprovalThreshold: 0.9,
-                promptVersion: INSTAGRAM_ORDER_PROMPT_VERSION,
-                triggerPhrases: [
-                  'беремо замовлення в роботу',
-                  'замовлення прийнято',
-                ],
-              },
-            });
+            await withTenantTransaction(prisma, env.DEFAULT_TENANT_ID, (transaction) =>
+              transaction.tenantSettings.upsert({
+                where: { tenantId: env.DEFAULT_TENANT_ID },
+                update: {},
+                create: {
+                  tenantId: env.DEFAULT_TENANT_ID,
+                  approvalMode: 'ALWAYS',
+                  autoApprovalThreshold: 0.9,
+                  promptVersion: INSTAGRAM_ORDER_PROMPT_VERSION,
+                  triggerPhrases: [
+                    'беремо замовлення в роботу',
+                    'замовлення прийнято',
+                  ],
+                },
+              }),
+            );
             return new MetaEventService(prisma);
           },
         },

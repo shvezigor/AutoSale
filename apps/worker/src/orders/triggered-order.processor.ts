@@ -1,4 +1,4 @@
-import { materializeCommercialTerms, Prisma, type CommercialLineInput, type PrismaClient, type ProcurementStore } from '@autosale/database';
+import { materializeCommercialTerms, Prisma, type CommercialLineInput, type PrismaClient, type ProcurementStore, withTenantTransaction } from '@autosale/database';
 
 import type { ApprovalMode } from './approval-policy.js';
 import { decideConversationalIntent, type IntentDetectionMode } from './order-intent-policy.js';
@@ -20,9 +20,9 @@ export class TriggeredOrderProcessor {
     messageId: string,
   ): Promise<{ id: string; status: string } | null> {
     const message = await this.prisma.message.findUniqueOrThrow({ where: { id: messageId } });
-    const settings = await this.prisma.tenantSettings.findUnique({
-      where: { tenantId: message.tenantId },
-    });
+    const settings = await withTenantTransaction(this.prisma, message.tenantId, (transaction) =>
+      transaction.tenantSettings.findUnique({ where: { tenantId: message.tenantId } }),
+    );
     if (!settings) return null;
     if (isOrderTrigger(message, stringArray(settings.triggerPhrases))) return this.process(messageId);
     if (
@@ -235,9 +235,9 @@ export class TriggeredOrderProcessor {
     const trigger = await this.prisma.message.findUniqueOrThrow({
       where: { id: triggerMessageId },
     });
-    const settings = await this.prisma.tenantSettings.findUniqueOrThrow({
-      where: { tenantId: trigger.tenantId },
-    });
+    const settings = await withTenantTransaction(this.prisma, trigger.tenantId, (transaction) =>
+      transaction.tenantSettings.findUniqueOrThrow({ where: { tenantId: trigger.tenantId } }),
+    );
     const correlationId = trigger.rawEventId ?? trigger.id;
     const order = await this.createProcessingOrder({
       tenantId: trigger.tenantId,

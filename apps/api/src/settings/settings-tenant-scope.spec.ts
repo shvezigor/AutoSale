@@ -5,6 +5,7 @@ import { OrderSettingsService } from './order-settings.service.js';
 
 describe('settings tenant scope', () => {
   it('creates default order settings for a tenant that does not have them yet', async () => {
+    const tenantId = '22222222-2222-4222-8222-222222222222';
     const upsert = vi.fn().mockResolvedValue({
       intentDetectionMode: 'PHRASE_ONLY',
       approvalMode: 'ALWAYS',
@@ -12,9 +13,15 @@ describe('settings tenant scope', () => {
       promptVersion: 'instagram-order-v2',
       triggerPhrases: ['беремо замовлення в роботу', 'замовлення прийнято'],
     });
-    const service = new OrderSettingsService({ tenantSettings: { upsert } } as never);
+    const transaction = {
+      $queryRaw: vi.fn().mockResolvedValue([]),
+      tenantSettings: { upsert },
+    };
+    const service = new OrderSettingsService({
+      $transaction: vi.fn(async (operation) => operation(transaction)),
+    } as never);
 
-    const settings = await service.get('tenant-b');
+    const settings = await service.get(tenantId);
 
     expect(settings).toEqual({
       intentDetectionMode: 'PHRASE_ONLY',
@@ -24,10 +31,10 @@ describe('settings tenant scope', () => {
       triggerPhrases: ['беремо замовлення в роботу', 'замовлення прийнято'],
     });
     expect(upsert).toHaveBeenCalledWith({
-      where: { tenantId: 'tenant-b' },
+      where: { tenantId },
       update: {},
       create: {
-        tenantId: 'tenant-b',
+        tenantId,
         intentDetectionMode: 'PHRASE_ONLY',
         approvalMode: 'ALWAYS',
         autoApprovalThreshold: 0.9,

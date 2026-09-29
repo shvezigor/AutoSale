@@ -50,7 +50,7 @@ Record at minimum: provider, purpose, data categories, regions, transfer mechani
 ## Security operations
 
 - Migration, API and worker database identities are split. Runtime roles do not own tables, cannot perform DDL and cannot bypass RLS. A restricted backup/restore identity remains to be added before EU production launch.
-- Enable fail-closed RLS only after tenant transaction context and all background/admin paths are verified.
+- Expand fail-closed RLS table by table only after that table's HTTP, webhook, worker and reconciliation paths use verified tenant transactions. `tenant_settings` is the first protected slice; do not describe the remaining schema as RLS-protected yet.
 - Use TLS in transit, encrypted disks/object storage/backups, restricted secret access and documented rotation.
 - Add Redis authentication/ACL and prevent unrelated containers from reaching privileged queues.
 - Use non-root object-store credentials and explicit bucket policy; tenant prefixes alone are not access control.

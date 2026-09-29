@@ -1,4 +1,4 @@
-import { Prisma, type PrismaClient } from '@autosale/database';
+import { Prisma, type PrismaClient, withTenantTransaction } from '@autosale/database';
 import { INSTAGRAM_ORDER_PROMPT_VERSION } from '@autosale/contracts';
 
 export interface OrderSettingsResponse {
@@ -21,30 +21,34 @@ export class OrderSettingsService {
 
   async get(tenantId: string): Promise<OrderSettingsResponse> {
     return toResponse(
-      await this.prisma.tenantSettings.upsert({
-        where: { tenantId },
-        update: {},
-        create: {
-          tenantId,
-          intentDetectionMode: 'PHRASE_ONLY',
-          approvalMode: 'ALWAYS',
-          autoApprovalThreshold: 0.9,
-          promptVersion: INSTAGRAM_ORDER_PROMPT_VERSION,
-          triggerPhrases: [
-            'беремо замовлення в роботу',
-            'замовлення прийнято',
-          ],
-        },
-      }),
+      await withTenantTransaction(this.prisma, tenantId, (transaction) =>
+        transaction.tenantSettings.upsert({
+          where: { tenantId },
+          update: {},
+          create: {
+            tenantId,
+            intentDetectionMode: 'PHRASE_ONLY',
+            approvalMode: 'ALWAYS',
+            autoApprovalThreshold: 0.9,
+            promptVersion: INSTAGRAM_ORDER_PROMPT_VERSION,
+            triggerPhrases: [
+              'беремо замовлення в роботу',
+              'замовлення прийнято',
+            ],
+          },
+        }),
+      ),
     );
   }
 
   async update(tenantId: string, input: UpdateOrderSettingsInput): Promise<OrderSettingsResponse> {
     return toResponse(
-      await this.prisma.tenantSettings.update({
-        where: { tenantId },
-        data: input,
-      }),
+      await withTenantTransaction(this.prisma, tenantId, (transaction) =>
+        transaction.tenantSettings.update({
+          where: { tenantId },
+          data: input,
+        }),
+      ),
     );
   }
 }
