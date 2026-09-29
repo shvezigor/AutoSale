@@ -10,6 +10,10 @@ describe('CommercialTermsService', () => {
     const bankFindMany = vi.fn().mockResolvedValue([]);
     const tx = {
       $queryRaw: vi.fn(),
+      order: { findFirst: vi.fn().mockResolvedValue({
+        id: 'order', tenantId: 'tenant', procurementHandedOffAt: null, telegramDeliveries: [], shipments: [],
+        items: [{ id: 'item', catalogId: 'SKU-1', quantity: 2 }],
+      }) },
       tenantLegalEntity: { findFirst: vi.fn().mockResolvedValue({
         id: 'entity', displayName: 'Main', legalName: 'Fictional LLC', type: 'COMPANY', registrationId: null, active: true, isDefault: true,
       }) },
@@ -17,10 +21,6 @@ describe('CommercialTermsService', () => {
     };
     const transaction = vi.fn((callback) => callback(tx));
     const service = new CommercialTermsService({
-      order: { findFirst: vi.fn().mockResolvedValue({
-        id: 'order', tenantId: 'tenant', procurementHandedOffAt: null, telegramDeliveries: [], shipments: [],
-        items: [{ id: 'item', catalogId: 'SKU-1', quantity: 2 }],
-      }) },
       product: { findMany: vi.fn().mockResolvedValue([{ sku: 'SKU-1', price: { toFixed: () => '10.00' }, currency: 'UAH' }]) },
       $transaction: transaction,
     } as never);
@@ -31,16 +31,16 @@ describe('CommercialTermsService', () => {
     expect(bankFindMany).toHaveBeenCalledWith(expect.objectContaining({
       where: { tenantId, legalEntityId: 'entity', currency: 'UAH', active: true },
     }));
-    expect(transaction).toHaveBeenCalledOnce();
+    expect(transaction).toHaveBeenCalledTimes(2);
   });
 
   it('rejects a stale commercial terms version', async () => {
     const tx = {
       $queryRaw: vi.fn(),
+      order: { findFirst: vi.fn().mockResolvedValue({ id: 'order', procurementHandedOffAt: null, telegramDeliveries: [], shipments: [] }) },
       orderCommercialTerms: { findFirst: vi.fn().mockResolvedValue({ version: 3 }) },
     };
     const service = new CommercialTermsService({
-      order: { findFirst: vi.fn().mockResolvedValue({ id: 'order', procurementHandedOffAt: null, telegramDeliveries: [], shipments: [] }) },
       $transaction: vi.fn(async (callback: (tx: unknown) => unknown) => callback(tx)),
     } as never);
 
@@ -53,6 +53,9 @@ describe('CommercialTermsService', () => {
     const updateMany = vi.fn();
     const tx = {
       $queryRaw: vi.fn(),
+      order: { findFirst: vi.fn().mockResolvedValue({
+        id: 'order', procurementHandedOffAt: null, telegramDeliveries: [], shipments: [], items: [],
+      }) },
       orderPayment: { count: vi.fn().mockResolvedValue(1) },
       orderCommercialTerms: {
         findFirst: vi.fn().mockResolvedValue({ version: 1, currency: 'UAH' }),
@@ -60,9 +63,6 @@ describe('CommercialTermsService', () => {
       },
     };
     const service = new CommercialTermsService({
-      order: { findFirst: vi.fn().mockResolvedValue({
-        id: 'order', procurementHandedOffAt: null, telegramDeliveries: [], shipments: [], items: [],
-      }) },
       $transaction: vi.fn(async (callback: (tx: unknown) => unknown) => callback(tx)),
     } as never);
 
@@ -85,15 +85,15 @@ describe('CommercialTermsService', () => {
       });
     const tx = {
       $queryRaw: vi.fn(),
+      order: { findFirst: vi.fn().mockImplementation(({ include }) => Promise.resolve({
+        id: 'order', procurementHandedOffAt: null, shipments: [],
+        telegramDeliveries: include.telegramDeliveries.where?.purpose === 'SUPPLIER_ORDER' ? [] : [delivery],
+      })) },
       orderPayment: { count: vi.fn().mockResolvedValue(0) },
       orderCommercialTerms: { findFirst: termsFindFirst, updateMany },
       auditLog: { create: vi.fn() },
     };
     const service = new CommercialTermsService({
-      order: { findFirst: vi.fn().mockImplementation(({ include }) => Promise.resolve({
-        id: 'order', procurementHandedOffAt: null, shipments: [],
-        telegramDeliveries: include.telegramDeliveries.where?.purpose === 'SUPPLIER_ORDER' ? [] : [delivery],
-      })) },
       orderCommercialTerms: { findFirst: termsFindFirst },
       $transaction: vi.fn(async (callback: (tx: unknown) => unknown) => callback(tx)),
     } as never);
@@ -104,11 +104,15 @@ describe('CommercialTermsService', () => {
   });
 
   it('rejects commercial changes after an order was sent to a supplier', async () => {
-    const service = new CommercialTermsService({
+    const tx = {
+      $queryRaw: vi.fn(),
       order: { findFirst: vi.fn().mockResolvedValue({
         id: 'order', procurementHandedOffAt: null, shipments: [],
         telegramDeliveries: [{ purpose: 'SUPPLIER_ORDER', status: 'SUCCEEDED' }],
       }) },
+    };
+    const service = new CommercialTermsService({
+      $transaction: vi.fn(async (callback: (tx: unknown) => unknown) => callback(tx)),
     } as never);
 
     await expect(service.update(tenantId, 'order', 'manager', {

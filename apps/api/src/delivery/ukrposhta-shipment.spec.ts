@@ -22,6 +22,7 @@ function fixture(enabled = false) {
     shipment: { findFirst: vi.fn().mockResolvedValue(null), create: vi.fn().mockImplementation(async ({ data }) => ({ ...stored, ...data })), update: vi.fn().mockImplementation(async ({ data }) => ({ ...stored, ...data })), updateMany: vi.fn().mockResolvedValue({ count: 1 }) },
     shipmentAttempt: { findUnique: vi.fn().mockResolvedValue(null), upsert: vi.fn() },
     tenant: { findUnique: vi.fn().mockResolvedValue({ name: 'Магазин' }) }, message: { findFirst: vi.fn().mockResolvedValue(null) },
+    $queryRaw: vi.fn(),
     $transaction: vi.fn(),
   };
   prisma.$transaction.mockImplementation(async (run) => run(prisma));

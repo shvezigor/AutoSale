@@ -1,4 +1,4 @@
-import type { PrismaClient, ProcurementStore } from '@autosale/database';
+import { type PrismaClient, type ProcurementStore, withTenantTransaction } from '@autosale/database';
 
 export type ProcurementBackfillResult = {
   attempted: number;
@@ -9,20 +9,33 @@ export type ProcurementBackfillResult = {
 
 export class ProcurementBackfillReconciler {
   constructor(
-    private readonly prisma: Pick<PrismaClient, 'order'>,
+    private readonly prisma: PrismaClient,
     private readonly procurement: Pick<ProcurementStore, 'assessApprovedOrder'>,
   ) {}
 
   async reconcile(): Promise<ProcurementBackfillResult> {
-    const orders = await this.prisma.order.findMany({
-      where: {
-        status: { in: ['APPROVED', 'AUTO_APPROVED'] },
-        items: { some: { procurementStatus: 'UNASSESSED' } },
-      },
-      orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
-      take: 25,
-      select: { id: true, tenantId: true },
+    const tenants = await this.prisma.tenant.findMany({
+      where: { status: 'ACTIVE' },
+      orderBy: { id: 'asc' },
+      select: { id: true },
     });
+    const candidates: Array<{ id: string; tenantId: string; createdAt: Date }> = [];
+    for (const tenant of tenants) {
+      const tenantOrders = await withTenantTransaction(this.prisma, tenant.id, (tx) => tx.order.findMany({
+        where: {
+          tenantId: tenant.id,
+          status: { in: ['APPROVED', 'AUTO_APPROVED'] },
+          items: { some: { procurementStatus: 'UNASSESSED' } },
+        },
+        orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+        take: 25,
+        select: { id: true, tenantId: true, createdAt: true },
+      }));
+      candidates.push(...tenantOrders);
+    }
+    const orders = candidates
+      .sort((left, right) => left.createdAt.getTime() - right.createdAt.getTime() || left.id.localeCompare(right.id))
+      .slice(0, 25);
     const result: ProcurementBackfillResult = {
       attempted: orders.length,
       assessed: 0,

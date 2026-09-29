@@ -2,9 +2,8 @@ import { randomUUID } from 'node:crypto';
 
 import type { TelegramDeliveryJob } from '@autosale/contracts';
 import { procurementSummaryFor } from '@autosale/contracts/procurement';
-import type { PrismaClient } from '@autosale/database';
+import { type Prisma, type PrismaClient, withTenantTransaction } from '@autosale/database';
 import { TelegramBotError } from '@autosale/integrations';
-import type { Prisma } from '@autosale/database';
 
 import type { TelegramAlertEvent } from '../notifications/telegram-alert.service.js';
 
@@ -127,7 +126,13 @@ export class TelegramDeliveryService {
       completedAt: Date | null;
     },
   ): Promise<boolean> {
-    return this.prisma.$transaction(async (transaction) => {
+    const authority = await this.prisma.telegramDelivery.findFirst({
+      where: { id: deliveryId, status: 'PROCESSING', leaseId },
+      select: { tenantId: true },
+    });
+    if (!authority) return false;
+
+    return withTenantTransaction(this.prisma, authority.tenantId, async (transaction) => {
       const updated = await transaction.telegramDelivery.updateMany({
         where: { id: deliveryId, status: 'PROCESSING', leaseId },
         data: { ...data, leaseId: null, leaseExpiresAt: null },

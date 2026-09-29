@@ -5,7 +5,7 @@ import type {
   TelegramSupplierSettings, TelegramSupplierSettingsUpdate, SupplierOrderPreview,
   TelegramNotificationPreferences,
 } from '@autosale/contracts';
-import { Prisma, type PrismaClient } from '@autosale/database';
+import { Prisma, type PrismaClient, withTenantTransaction } from '@autosale/database';
 import { z } from 'zod';
 
 const userSchema = z.object({
@@ -204,7 +204,7 @@ export class TelegramService {
   }
 
   async supplierOrderPreview(tenantId: string, orderId: string): Promise<SupplierOrderPreview> {
-    const order = await this.prisma.order.findFirst({
+    const order = await withTenantTransaction(this.prisma, tenantId, (tx) => tx.order.findFirst({
       where: { id: orderId, tenantId },
       select: {
         id: true,
@@ -217,7 +217,7 @@ export class TelegramService {
           },
         },
       },
-    });
+    }));
     if (!order) throw new Error('Order not found');
     if (!['APPROVED', 'AUTO_APPROVED'].includes(order.status)) throw new Error('Approved order required');
     const items = order.items.filter((item) => item.procurementStatus === 'TO_ORDER');
@@ -251,7 +251,7 @@ export class TelegramService {
 
   async queueSupplierOrder(tenantId: string, orderId: string): Promise<{ deliveryId: string; status: string }> {
     if (!this.options.botUsername || !this.options.queue) throw new Error('Telegram is not configured');
-    const delivery = await this.prisma.$transaction(async (transaction) => {
+    const delivery = await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
       await transaction.$queryRaw(Prisma.sql`
         SELECT "id" FROM "orders"
         WHERE "tenant_id" = ${tenantId}::uuid AND "id" = ${orderId}::uuid

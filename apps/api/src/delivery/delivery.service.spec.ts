@@ -189,6 +189,7 @@ describe('DeliveryService shipment review', () => {
       tenant: { findUnique: vi.fn().mockResolvedValue({ name: 'Магазин Двері' }) },
       message: { findFirst: vi.fn().mockResolvedValue(null) },
       shipmentAttempt: { findUnique: vi.fn().mockResolvedValue(null), upsert: vi.fn().mockResolvedValue({ id: 'attempt-id' }) },
+      $queryRaw: vi.fn(),
       $transaction: vi.fn(),
     };
     prisma.$transaction.mockImplementation(async (run) => run(prisma));
@@ -272,7 +273,8 @@ describe('DeliveryService shipment review', () => {
     calculateShipment.mockRejectedValue(new Error('quote failed'));
 
     await expect(service.createShipment(tenantId, approvedOrder.id, userId)).rejects.toThrow('quote failed');
-    expect(prisma.$transaction).not.toHaveBeenCalled();
+    expect(prisma.shipment.updateMany).not.toHaveBeenCalled();
+    expect(prisma.shipmentAttempt.upsert).not.toHaveBeenCalled();
   });
 
   it('durably transitions a draft and attempt before waking the delivery queue', async () => {
@@ -309,7 +311,8 @@ describe('DeliveryService shipment review', () => {
     prisma.shipmentAttempt.findUnique.mockResolvedValue({ shipmentId: '77777777-7777-4777-8777-777777777777', requestHash: 'b'.repeat(64) });
     await expect(service.createShipment(tenantId, approvedOrder.id, userId, 'X' /* minimum valid opaque key */))
       .rejects.toMatchObject({ status: 422 });
-    expect(prisma.$transaction).not.toHaveBeenCalled();
+    expect(prisma.shipment.updateMany).not.toHaveBeenCalled();
+    expect(prisma.shipmentAttempt.upsert).not.toHaveBeenCalled();
   });
 
   it('downloads a bounded label only for a tenant-owned created shipment', async () => {

@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { TelegramService } from './telegram.service.js';
 
 const orderId = '11111111-1111-4111-8111-111111111111';
+const tenantId = '77777777-7777-4777-8777-777777777777';
 const order = {
   id: orderId,
   status: 'APPROVED',
@@ -41,7 +42,7 @@ describe('Telegram supplier dispatch', () => {
     };
     const service = new TelegramService(prisma as never, undefined, { botUsername: 'AutoSaleBot', queue: { add } });
 
-    const preview = await service.supplierOrderPreview('tenant-1', orderId);
+    const preview = await service.supplierOrderPreview(tenantId, orderId);
     expect(preview).toMatchObject({
       orderId,
       companyName: 'ФОП Швець Ігор Олександрович',
@@ -50,10 +51,10 @@ describe('Telegram supplier dispatch', () => {
     });
     expect(preview.items).toHaveLength(2);
 
-    await expect(service.queueSupplierOrder('tenant-1', orderId))
+    await expect(service.queueSupplierOrder(tenantId, orderId))
       .resolves.toEqual({ deliveryId: 'delivery-1', status: 'PENDING' });
     expect(createDelivery).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({
-      tenantId: 'tenant-1', orderId, purpose: 'SUPPLIER_ORDER', destinationId: 'destination-1',
+      tenantId, orderId, purpose: 'SUPPLIER_ORDER', destinationId: 'destination-1',
       idempotencyKey: `supplier-order:${orderId}:1`,
     }) }));
     const text = createDelivery.mock.calls[0]?.[0]?.data?.messageText as string;
@@ -64,11 +65,11 @@ describe('Telegram supplier dispatch', () => {
     expect(text).not.toContain('AutoSale');
     expect(text).not.toMatch(/телефон|адрес/i);
     expect(createManyLinks).toHaveBeenCalledWith({ data: [
-      { tenantId: 'tenant-1', deliveryId: 'delivery-1', orderItemId: 'item-a' },
-      { tenantId: 'tenant-1', deliveryId: 'delivery-1', orderItemId: 'item-b' },
+      { tenantId, deliveryId: 'delivery-1', orderItemId: 'item-a' },
+      { tenantId, deliveryId: 'delivery-1', orderItemId: 'item-b' },
     ] });
     expect(markSending).toHaveBeenCalledWith(expect.objectContaining({
-      where: { tenantId: 'tenant-1', id: { in: ['item-a', 'item-b'] }, procurementStatus: 'TO_ORDER' },
+      where: { tenantId, id: { in: ['item-a', 'item-b'] }, procurementStatus: 'TO_ORDER' },
       data: expect.objectContaining({ procurementStatus: 'SENDING' }),
     }));
     expect(add).toHaveBeenCalledWith('telegram.deliver', { deliveryId: 'delivery-1' }, expect.any(Object));
@@ -85,18 +86,22 @@ describe('Telegram supplier dispatch', () => {
     const add = vi.fn();
 
     await expect(new TelegramService(prisma as never, undefined, { botUsername: 'AutoSaleBot', queue: { add } })
-      .queueSupplierOrder('tenant-1', orderId)).resolves.toEqual({ deliveryId: active.id, status: active.status });
+      .queueSupplierOrder(tenantId, orderId)).resolves.toEqual({ deliveryId: active.id, status: active.status });
     expect(transaction.telegramDelivery.create).not.toHaveBeenCalled();
     expect(add).not.toHaveBeenCalled();
   });
 
   it('rejects an order without supplier-order items', async () => {
-    const prisma = {
+    const transaction = {
+      $queryRaw: vi.fn(),
       order: { findFirst: vi.fn().mockResolvedValue({ ...order, items: [order.items[0]] }) },
+    };
+    const prisma = {
       telegramSupplierSetting: { findUnique: vi.fn().mockResolvedValue({ destination: { title: 'Supplier' } }) },
       product: { findMany: vi.fn().mockResolvedValue([]) },
+      $transaction: vi.fn(async (callback: (tx: typeof transaction) => unknown) => callback(transaction)),
     };
-    await expect(new TelegramService(prisma as never).supplierOrderPreview('tenant-1', orderId))
+    await expect(new TelegramService(prisma as never).supplierOrderPreview(tenantId, orderId))
       .rejects.toThrow('No items require supplier ordering');
   });
 });

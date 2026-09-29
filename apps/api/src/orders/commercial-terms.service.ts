@@ -163,14 +163,14 @@ export class CommercialTermsService {
   }
 
   private async orderContext(tenantId: string, orderId: string) {
-    const order = await this.prisma.order.findFirst({
+    const order = await withTenantTransaction(this.prisma, tenantId, (tx) => tx.order.findFirst({
       where: { id: orderId, tenantId },
       include: {
         items: { orderBy: { createdAt: 'asc' } },
         telegramDeliveries: { where: { purpose: 'SUPPLIER_ORDER' }, take: 1 },
         shipments: { take: 1 },
       },
-    });
+    }));
     if (!order) throw new NotFoundException('Order not found');
     return order;
   }

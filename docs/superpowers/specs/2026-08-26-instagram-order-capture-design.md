@@ -136,6 +136,8 @@ All business records carry `tenant_id`, even though the MVP configures one tenan
 
 Every order keeps an internal UUID for relations and API routing and an immutable public number for managers and external projections. The public format is `<company-prefix>-<six-digit-sequence>` (for example `AS-260918`). The prefix is derived from the first two useful company initials or letters and falls back to `AS`; the globally allocated numeric suffix prevents collisions between tenants while keeping the identifier compact.
 
+Order lines are tenant-confidential records. PostgreSQL forced row-level security on `order_items` fails closed when transaction-local tenant context is absent and rejects cross-tenant writes. API reads, procurement, supplier delivery, shipment preparation, reconciliation and external export must therefore load or mutate lines through the shared tenant transaction helper. Global reconcilers may discover durable tenant identifiers first, but must query each tenant's order lines only inside that tenant's transaction.
+
 ## 9. Order Lifecycle
 
 ```text

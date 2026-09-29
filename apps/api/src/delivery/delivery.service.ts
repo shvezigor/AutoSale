@@ -1,7 +1,7 @@
 import { createHash, randomUUID } from 'node:crypto';
 
 import { deliverySenderProfileInputSchema, isUkrposhtaPersonName, shipmentCustomerMessageInputSchema, shipmentDraftInputSchema, type ConversationMessage, type DeliveryConnectionInput, type DeliveryConnectionSummary, type DeliverySenderProfileInput, type OutboundMessageInput, type ShipmentCustomerMessageInput, type ShipmentCustomerMessagePreview, type ShipmentDraftInput, type ShipmentOverview, type ShipmentQuote, type ShipmentSummary } from '@autosale/contracts';
-import type { PrismaClient } from '@autosale/database';
+import { type PrismaClient, withTenantTransaction } from '@autosale/database';
 import { parseUkrposhtaLocationRef, type CredentialCipher, type NovaPoshtaClient, type NovaPoshtaSenderProfile, type UkrposhtaClient } from '@autosale/integrations';
 import { ukrposhtaConnectionInputSchema, type UkrposhtaConnectionInput } from '@autosale/contracts';
 import { BadRequestException, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
@@ -431,10 +431,10 @@ export class DeliveryService {
   }
 
   private async orderForShipment(tenantId: string, orderId: string) {
-    const order = await this.prisma.order.findFirst({
+    const order = await withTenantTransaction(this.prisma, tenantId, (tx) => tx.order.findFirst({
       where: { id: orderId, tenantId },
       include: { items: true },
-    });
+    }));
     if (!order) throw new NotFoundException('Order not found');
     return order;
   }

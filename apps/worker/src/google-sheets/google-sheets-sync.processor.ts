@@ -1,4 +1,4 @@
-import type { PrismaClient } from '@autosale/database';
+import { type PrismaClient, withTenantTransaction } from '@autosale/database';
 import type { GoogleSheetsAdapter } from '@autosale/integrations';
 import { WorkerNotificationService } from '../notifications/worker-notification.service.js';
 
@@ -17,7 +17,12 @@ export class GoogleSheetsSyncProcessor {
     await this.prisma.orderExport.update({ where: { id: exportId }, data: { status: 'PROCESSING', attempts: { increment: 1 }, lastAttemptAt: new Date() } });
     let approvedBy: string | null = null;
     try {
-      const order = await this.prisma.order.findUniqueOrThrow({ where: { id: record.orderId }, include: { items: { orderBy: { createdAt: 'asc' } } } });
+      const order = await withTenantTransaction(this.prisma, record.tenantId, (tx) =>
+        tx.order.findUniqueOrThrow({
+          where: { id: record.orderId },
+          include: { items: { orderBy: { createdAt: 'asc' } } },
+        }),
+      );
       approvedBy = typeof order.approvedBy === 'string' ? order.approvedBy : null;
       if (order.status !== 'APPROVED' && order.status !== 'AUTO_APPROVED') throw new Error('Only approved orders can be exported');
       const destination = await this.prisma.googleSheetsDestination.findUniqueOrThrow({ where: { tenantId: record.tenantId } });
