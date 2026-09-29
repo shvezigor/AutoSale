@@ -5,3 +5,4 @@ export * from './procurement-store.js';
 export * from './commercial-terms.js';
 export * from './order-payments.js';
 export * from './runtime-database-roles.js';
+export * from './tenant-transaction.js';

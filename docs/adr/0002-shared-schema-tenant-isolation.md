@@ -37,10 +37,11 @@ Keep one shared PostgreSQL schema for the current product stage and enforce thes
 - `tenant-relations.postgres.spec.ts` proves representative cross-tenant writes fail with PostgreSQL foreign-key violations.
 - Deployments provision separate `autosale_api` and `autosale_worker` login roles after migrations. Both are non-owner, `NOSUPERUSER`, `NOCREATEDB`, `NOCREATEROLE`, `NOREPLICATION` and `NOBYPASSRLS`; neither can create or alter schema objects.
 - The owner connection remains available only to the one-shot migration and role-provisioning jobs. Application containers receive role-specific URLs and refuse to start when their distinct secrets are absent.
+- `withTenantTransaction` provides the transaction-local `app.current_tenant_id` context required by future policies. The context is validated as a UUID, parameterized, scoped with `set_config(..., true)` and automatically cleared when the transaction ends. PostgreSQL tests prove an absent context reads no rows, a valid context sees only its tenant, and cross-tenant writes fail.
 
 ## RLS rollout gate
 
-RLS is deliberately not enabled merely because runtime roles are now separated. The next gate is a fail-closed tenant transaction context for HTTP requests and background jobs, followed by explicit administration paths and PostgreSQL policy tests. Enabling policies before those paths exist would break legitimate work or encourage unsafe bypasses.
+RLS is deliberately not enabled merely because runtime roles and the transaction primitive now exist. The next gate is routing every tenant-owned HTTP and background operation through that primitive, followed by explicit bootstrap/discovery and platform-administration paths. Enabling policies before those call sites are converted would break legitimate work or encourage unsafe bypasses.
 
 The rollout is complete only when role/grant migrations, request/worker tenant transaction context, platform-admin access paths, background reconciliation, backup/restore and integration tests are all proven together. Production data must be audited for tenant consistency before policies are forced.
 
