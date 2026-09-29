@@ -10,6 +10,7 @@ import {
   Prisma,
   type PrismaClient,
   type CommercialLineInput,
+  withTenantTransaction,
 } from '@autosale/database';
 import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 import { metrics } from '@autosale/observability';
@@ -71,13 +72,13 @@ export class OrdersService {
       } : {}),
     };
     const [rows, total, products] = await Promise.all([
-      this.prisma.order.findMany({
+      withTenantTransaction(this.prisma, tenantId, (tx) => tx.order.findMany({
         where,
         orderBy: orderListOrderBy(query.sort ?? 'date', query.direction ?? 'desc'),
         skip: (query.page - 1) * query.pageSize,
         take: query.pageSize,
         include: this.include,
-      }),
+      })),
       this.prisma.order.count({ where }),
       this.productNames(tenantId),
     ]);
@@ -167,7 +168,7 @@ export class OrdersService {
       customer: { name: null, phone: null, instagramUsername: null, ...extraction.customer, ...input.customer },
       delivery: { city: null, address: null, novaPoshtaBranch: null, ...extraction.delivery, ...input.delivery },
     };
-    const updated = await this.prisma.$transaction(async (tx) => {
+    const updated = await withTenantTransaction(this.prisma, tenantId, async (tx) => {
       if (input.items !== undefined) {
         const activePayments = await tx.orderPayment.count({ where: { tenantId, orderId: id, cancelledAt: null } });
         if (activePayments > 0) throw new ConflictException('Order items are locked after payment');
@@ -260,7 +261,7 @@ export class OrdersService {
     if (status === 'APPROVED' && currentIssues.length > 0) {
       throw new BadRequestException('Order has unresolved validation issues');
     }
-    const updated = await this.prisma.$transaction(async (tx) => {
+    const updated = await withTenantTransaction(this.prisma, tenantId, async (tx) => {
       const order = await tx.order.update({
         where: { id, tenantId },
         data: {
@@ -278,7 +279,8 @@ export class OrdersService {
   }
 
   private find(tenantId: string, id: string) {
-    return this.prisma.order.findFirst({ where: { id, tenantId }, include: this.include }).then((row) => {
+    return withTenantTransaction(this.prisma, tenantId, (tx) =>
+      tx.order.findFirst({ where: { id, tenantId }, include: this.include })).then((row) => {
       if (!row) throw new NotFoundException('Order not found');
       return row;
     });

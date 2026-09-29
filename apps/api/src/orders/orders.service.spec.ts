@@ -4,10 +4,13 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { OrdersService } from './orders.service.js';
 
+const tenantA = '11111111-1111-4111-8111-111111111111';
+const tenantB = '22222222-2222-4222-8222-222222222222';
+
 describe('OrdersService Google Sheets retry', () => {
   it('uses the current Instagram profile in order summaries and customer data', async () => {
     const row = {
-      id: 'order-1', publicNumber: 'AS-260918', tenantId: 'tenant-1', status: 'NEEDS_REVIEW', extraction: {
+      id: 'order-1', publicNumber: 'AS-260918', tenantId: tenantA, status: 'NEEDS_REVIEW', extraction: {
         customer: { name: 'Ігор', phone: '+380976536783', instagramUsername: null },
       }, validationIssues: [], overallConfidence: 0.8,
       createdAt: new Date('2026-09-07T10:00:00.000Z'),
@@ -29,12 +32,12 @@ describe('OrdersService Google Sheets retry', () => {
         cancelledAt: null, canceller: null, cancellationReason: null,
       }],
     };
-    const prisma = {
+    const prisma = transactional({
       order: { findMany: vi.fn().mockResolvedValue([row]), count: vi.fn().mockResolvedValue(1) },
       product: { findMany: vi.fn().mockResolvedValue([]) },
-    };
+    });
 
-    const result = await new OrdersService(prisma as never).list('tenant-1', { page: 1, pageSize: 25 });
+    const result = await new OrdersService(prisma as never).list(tenantA, { page: 1, pageSize: 25 });
 
     expect(result.items[0]).toMatchObject({
       publicNumber: 'AS-260918',
@@ -48,7 +51,7 @@ describe('OrdersService Google Sheets retry', () => {
 
   it('reopens an auto-approved order for review and releases its stock reservation after correction', async () => {
     const current = {
-      id: 'order-1', publicNumber: 'AS-260918', tenantId: 'tenant-1', status: 'AUTO_APPROVED', extraction: {
+      id: 'order-1', publicNumber: 'AS-260918', tenantId: tenantA, status: 'AUTO_APPROVED', extraction: {
         isOrder: true,
         customer: { name: 'Олена', phone: '+380671234567', instagramUsername: 'olena' },
         delivery: { city: 'Київ', address: null, novaPoshtaBranch: '24' },
@@ -65,11 +68,12 @@ describe('OrdersService Google Sheets retry', () => {
       order: { findFirst: vi.fn().mockResolvedValue(current) },
       product: { findMany: vi.fn().mockResolvedValue([{ sku: 'SKU-1', name: 'Товар', price: new Prisma.Decimal('9999.00'), currency: 'UAH' }]) },
       $transaction: vi.fn(async (callback: (tx: unknown) => unknown) => callback({
+        $queryRaw: vi.fn(),
         orderPayment: { count: vi.fn().mockResolvedValue(0) },
         orderItem: { update: vi.fn().mockResolvedValue({}), updateMany: vi.fn().mockResolvedValue({ count: 1 }) },
         orderCommercialTerms: { upsert: termsUpsert },
         inventoryReservation: { updateMany: vi.fn().mockResolvedValue({ count: 1 }) },
-        order: { update: vi.fn().mockResolvedValue(reopened) },
+        order: { findFirst: vi.fn().mockResolvedValue(current), update: vi.fn().mockResolvedValue(reopened) },
         auditLog: { create: vi.fn().mockResolvedValue({}) },
       })),
     };
@@ -78,7 +82,7 @@ describe('OrdersService Google Sheets retry', () => {
       releaseOrderReservations: vi.fn().mockResolvedValue(undefined),
     };
 
-    const result = await new OrdersService(prisma as never, procurement as never).update('tenant-1', 'order-1', 'manager-1', {
+    const result = await new OrdersService(prisma as never, procurement as never).update(tenantA, 'order-1', 'manager-1', {
       items: [{ id: 'item-1', catalogId: 'SKU-1', quantity: 2, color: null, size: null }],
     });
 
@@ -91,12 +95,12 @@ describe('OrdersService Google Sheets retry', () => {
   it('paginates and filters orders inside the authenticated tenant', async () => {
     const findMany = vi.fn().mockResolvedValue([]);
     const count = vi.fn().mockResolvedValue(0);
-    const prisma = {
+    const prisma = transactional({
       order: { findMany, count },
       product: { findMany: vi.fn().mockResolvedValue([]) },
-    };
+    });
 
-    const result = await new OrdersService(prisma as never).list('tenant-a', {
+    const result = await new OrdersService(prisma as never).list(tenantA, {
       search: 'Авангард',
       status: 'NEEDS_REVIEW',
       procurementStatus: 'NEEDS_ORDER',
@@ -106,7 +110,7 @@ describe('OrdersService Google Sheets retry', () => {
 
     expect(findMany).toHaveBeenCalledWith(expect.objectContaining({
       where: expect.objectContaining({
-        tenantId: 'tenant-a',
+        tenantId: tenantA,
         status: 'NEEDS_REVIEW',
         AND: [expect.objectContaining({ items: {
           some: { procurementStatus: 'TO_ORDER' },
@@ -118,7 +122,7 @@ describe('OrdersService Google Sheets retry', () => {
       take: 10,
     }));
     expect(count).toHaveBeenCalledWith({ where: expect.objectContaining({
-      tenantId: 'tenant-a',
+      tenantId: tenantA,
       status: 'NEEDS_REVIEW',
       AND: [expect.objectContaining({ items: {
         some: { procurementStatus: 'TO_ORDER' },
@@ -132,22 +136,22 @@ describe('OrdersService Google Sheets retry', () => {
     const queryRaw = vi.fn().mockResolvedValue([{ id: 'order-paid' }]);
     const findMany = vi.fn().mockResolvedValue([]);
     const count = vi.fn().mockResolvedValue(0);
-    const prisma = {
+    const prisma = transactional({
       $queryRaw: queryRaw,
       order: { findMany, count },
       product: { findMany: vi.fn().mockResolvedValue([]) },
-    };
+    });
 
-    await new OrdersService(prisma as never).list('tenant-a', {
+    await new OrdersService(prisma as never).list(tenantA, {
       paymentStatus: 'PAID', page: 1, pageSize: 25,
     });
 
-    expect(queryRaw).toHaveBeenCalledOnce();
+    expect(queryRaw).toHaveBeenCalledTimes(2);
     expect(findMany).toHaveBeenCalledWith(expect.objectContaining({
-      where: expect.objectContaining({ tenantId: 'tenant-a', id: { in: ['order-paid'] } }),
+      where: expect.objectContaining({ tenantId: tenantA, id: { in: ['order-paid'] } }),
     }));
     expect(count).toHaveBeenCalledWith({
-      where: expect.objectContaining({ tenantId: 'tenant-a', id: { in: ['order-paid'] } }),
+      where: expect.objectContaining({ tenantId: tenantA, id: { in: ['order-paid'] } }),
     });
   });
 
@@ -156,7 +160,7 @@ describe('OrdersService Google Sheets retry', () => {
     const count = vi.fn();
     const prisma = { $queryRaw: vi.fn().mockResolvedValue([]), order: { findMany, count } };
 
-    await expect(new OrdersService(prisma as never).list('tenant-a', {
+    await expect(new OrdersService(prisma as never).list(tenantA, {
       paymentStatus: 'UNPAID', page: 3, pageSize: 10,
     })).resolves.toEqual({ items: [], page: 3, pageSize: 10, total: 0 });
     expect(findMany).not.toHaveBeenCalled();
@@ -165,7 +169,7 @@ describe('OrdersService Google Sheets retry', () => {
 
   it('blocks item corrections after a payment but allows customer-only corrections', async () => {
     const current = {
-      id: 'order-1', tenantId: 'tenant-1', status: 'NEEDS_REVIEW', extraction: {}, validationIssues: [],
+      id: 'order-1', tenantId: tenantA, status: 'NEEDS_REVIEW', extraction: {}, validationIssues: [],
       overallConfidence: 1, createdAt: new Date(), procurementHandedOffAt: null,
       conversation: { displayName: 'Customer', channel: 'INSTAGRAM', profile: null },
       items: [], exports: [], telegramDeliveries: [], shipments: [], intentEvaluation: null,
@@ -177,34 +181,35 @@ describe('OrdersService Google Sheets retry', () => {
       order: { findFirst: vi.fn().mockResolvedValue(current) },
       product: { findMany: vi.fn().mockResolvedValue([]) },
       $transaction: vi.fn(async (callback: (tx: unknown) => unknown) => callback({
+        $queryRaw: vi.fn(),
         orderPayment: { count: orderPaymentCount },
         orderItem: { updateMany: vi.fn().mockResolvedValue({ count: 0 }) },
         inventoryReservation: { updateMany: vi.fn().mockResolvedValue({ count: 0 }) },
-        order: { update: orderUpdate }, auditLog: { create: vi.fn().mockResolvedValue({}) },
+        order: { findFirst: vi.fn().mockResolvedValue(current), update: orderUpdate }, auditLog: { create: vi.fn().mockResolvedValue({}) },
       })),
     };
     const service = new OrdersService(prisma as never);
 
-    await expect(service.update('tenant-1', 'order-1', 'manager-1', { items: [] }))
+    await expect(service.update(tenantA, 'order-1', 'manager-1', { items: [] }))
       .rejects.toBeInstanceOf(ConflictException);
-    await expect(service.update('tenant-1', 'order-1', 'manager-1', { customer: { name: 'Updated' } }))
+    await expect(service.update(tenantA, 'order-1', 'manager-1', { customer: { name: 'Updated' } }))
       .resolves.toMatchObject({ id: 'order-1' });
     expect(orderPaymentCount).toHaveBeenCalledOnce();
   });
 
   it('sorts projected customer names and nullable confidence in the database', async () => {
     const findMany = vi.fn().mockResolvedValue([]);
-    const prisma = { order: { findMany, count: vi.fn().mockResolvedValue(0) }, product: { findMany: vi.fn().mockResolvedValue([]) } };
+    const prisma = transactional({ order: { findMany, count: vi.fn().mockResolvedValue(0) }, product: { findMany: vi.fn().mockResolvedValue([]) } });
     const service = new OrdersService(prisma as never);
-    await service.list('tenant-a', { page: 1, pageSize: 25, sort: 'customer', direction: 'asc' });
+    await service.list(tenantA, { page: 1, pageSize: 25, sort: 'customer', direction: 'asc' });
     expect(findMany).toHaveBeenLastCalledWith(expect.objectContaining({ orderBy: [{ sortCustomer: 'asc' }, { id: 'asc' }] }));
-    await service.list('tenant-a', { page: 1, pageSize: 25, sort: 'confidence', direction: 'desc' });
+    await service.list(tenantA, { page: 1, pageSize: 25, sort: 'confidence', direction: 'desc' });
     expect(findMany).toHaveBeenLastCalledWith(expect.objectContaining({ orderBy: [{ overallConfidence: { sort: 'desc', nulls: 'last' } }, { id: 'asc' }] }));
   });
 
   it('returns the pending Sheets export immediately after approval', async () => {
     const baseOrder = {
-      id: 'order-1', tenantId: 'tenant-1', status: 'NEEDS_REVIEW', extraction: {
+      id: 'order-1', tenantId: tenantA, status: 'NEEDS_REVIEW', extraction: {
         isOrder: true,
         customer: { name: 'Олена', phone: '+380671234567', instagramUsername: 'olena' },
         delivery: { city: 'Київ', address: null, novaPoshtaBranch: '24' },
@@ -229,7 +234,8 @@ describe('OrdersService Google Sheets retry', () => {
       googleSheetsDestination: { findUnique: vi.fn().mockResolvedValue({ id: 'destination-1', status: 'ACTIVE' }) },
       orderExport: { upsert },
       $transaction: vi.fn(async (callback: (tx: unknown) => unknown) => callback({
-        order: { update: vi.fn().mockResolvedValue(approvedOrder) },
+        $queryRaw: vi.fn(),
+        order: { findFirst, update: vi.fn().mockResolvedValue(approvedOrder) },
         auditLog: { create: vi.fn().mockResolvedValue({}) },
       })),
     };
@@ -239,9 +245,9 @@ describe('OrdersService Google Sheets retry', () => {
     };
 
     const result = await new OrdersService(prisma as never, procurement as never)
-      .approve('tenant-1', 'order-1', 'manager-1');
+      .approve(tenantA, 'order-1', 'manager-1');
 
-    expect(procurement.assessApprovedOrder).toHaveBeenCalledWith('tenant-1', 'order-1', 'manager-1');
+    expect(procurement.assessApprovedOrder).toHaveBeenCalledWith(tenantA, 'order-1', 'manager-1');
     expect(upsert).toHaveBeenCalled();
     expect(result.status).toBe('APPROVED');
     expect(result.sheetsExport).toMatchObject({ status: 'PENDING', retryAllowed: false });
@@ -249,7 +255,7 @@ describe('OrdersService Google Sheets retry', () => {
 
   it('releases active reservations when an order is cancelled', async () => {
     const baseOrder = {
-      id: 'order-1', tenantId: 'tenant-1', status: 'APPROVED', extraction: {},
+      id: 'order-1', tenantId: tenantA, status: 'APPROVED', extraction: {},
       validationIssues: [], overallConfidence: 1, createdAt: new Date(),
       conversation: { displayName: 'Customer', channel: 'INSTAGRAM', profile: null },
       items: [], exports: [], procurementHandedOffAt: null, telegramDeliveries: [],
@@ -258,7 +264,8 @@ describe('OrdersService Google Sheets retry', () => {
       order: { findFirst: vi.fn().mockResolvedValue(baseOrder) },
       product: { findMany: vi.fn().mockResolvedValue([]) },
       $transaction: vi.fn(async (callback: (tx: unknown) => unknown) => callback({
-        order: { update: vi.fn().mockResolvedValue({ ...baseOrder, status: 'CANCELLED' }) },
+        $queryRaw: vi.fn(),
+        order: { findFirst: vi.fn().mockResolvedValue(baseOrder), update: vi.fn().mockResolvedValue({ ...baseOrder, status: 'CANCELLED' }) },
         auditLog: { create: vi.fn().mockResolvedValue({}) },
       })),
     };
@@ -268,18 +275,18 @@ describe('OrdersService Google Sheets retry', () => {
     };
 
     await new OrdersService(prisma as never, procurement as never)
-      .cancel('tenant-1', 'order-1', 'manager-1');
+      .cancel(tenantA, 'order-1', 'manager-1');
 
-    expect(procurement.releaseOrderReservations).toHaveBeenCalledWith('tenant-1', 'order-1', 'manager-1');
+    expect(procurement.releaseOrderReservations).toHaveBeenCalledWith(tenantA, 'order-1', 'manager-1');
   });
 
   it('moves one failed export back to pending when its destination is active', async () => {
     const update = vi.fn().mockResolvedValue({ status: 'PENDING', attempts: 2, rowNumber: null, lastAttemptAt: null, lastSyncedAt: null, errorSummary: null });
-    const prisma = {
+    const prisma = transactional({
       order: { findFirst: vi.fn().mockResolvedValue({ id: 'order-1', exports: [], items: [], conversation: {} }) },
       orderExport: { findFirst: vi.fn().mockResolvedValue({ id: 'export-1', status: 'FAILED', destination: { status: 'ACTIVE' } }), update },
-    };
-    const result = await new OrdersService(prisma as never).retrySheetsExport('tenant-1', 'order-1');
+    });
+    const result = await new OrdersService(prisma as never).retrySheetsExport(tenantA, 'order-1');
     expect(result.status).toBe('PENDING');
     expect(result.retryAllowed).toBe(false);
     expect(update).toHaveBeenCalledWith({ where: { id: 'export-1' }, data: { status: 'PENDING', errorSummary: null } });
@@ -287,21 +294,29 @@ describe('OrdersService Google Sheets retry', () => {
 
   it('blocks retry while the destination configuration is invalid', async () => {
     const update = vi.fn();
-    const prisma = {
+    const prisma = transactional({
       order: { findFirst: vi.fn().mockResolvedValue({ id: 'order-1', exports: [], items: [], conversation: {} }) },
       orderExport: { findFirst: vi.fn().mockResolvedValue({ id: 'export-1', status: 'FAILED', destination: { status: 'ERROR' } }), update },
-    };
-    await expect(new OrdersService(prisma as never).retrySheetsExport('tenant-1', 'order-1')).rejects.toBeInstanceOf(BadRequestException);
+    });
+    await expect(new OrdersService(prisma as never).retrySheetsExport(tenantA, 'order-1')).rejects.toBeInstanceOf(BadRequestException);
     expect(update).not.toHaveBeenCalled();
   });
 
   it('returns 404 before mutating an order from another tenant', async () => {
     const findFirst = vi.fn().mockResolvedValue(null);
-    const prisma = { order: { findFirst }, orderExport: { findFirst: vi.fn(), update: vi.fn() } };
+    const prisma = transactional({ order: { findFirst }, orderExport: { findFirst: vi.fn(), update: vi.fn() } });
 
-    await expect(new OrdersService(prisma as never).retrySheetsExport('tenant-b', 'order-a'))
+    await expect(new OrdersService(prisma as never).retrySheetsExport(tenantB, 'order-a'))
       .rejects.toMatchObject({ status: 404 });
-    expect(findFirst).toHaveBeenCalledWith(expect.objectContaining({ where: { id: 'order-a', tenantId: 'tenant-b' } }));
+    expect(findFirst).toHaveBeenCalledWith(expect.objectContaining({ where: { id: 'order-a', tenantId: tenantB } }));
     expect(prisma.orderExport.findFirst).not.toHaveBeenCalled();
   });
 });
+
+function transactional<T extends object>(client: T): T & { $transaction: ReturnType<typeof vi.fn> } {
+  const transaction = { $queryRaw: vi.fn(), ...client };
+  return {
+    ...client,
+    $transaction: vi.fn((callback: (tx: typeof transaction) => unknown) => callback(transaction)),
+  };
+}

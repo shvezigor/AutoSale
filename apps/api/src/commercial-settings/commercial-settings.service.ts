@@ -6,17 +6,17 @@ import type {
   LegalEntityInput,
   LegalEntitySummary,
 } from '@autosale/contracts/commercial';
-import type { PrismaClient } from '@autosale/database';
+import { type PrismaClient, withTenantTransaction } from '@autosale/database';
 import { ConflictException, NotFoundException } from '@nestjs/common';
 
 export class CommercialSettingsService {
   constructor(private readonly prisma: PrismaClient) {}
 
   async list(tenantId: string): Promise<CommercialSettingsSummary> {
-    const [legalEntities, bankAccounts] = await Promise.all([
-      this.prisma.tenantLegalEntity.findMany({ where: { tenantId }, orderBy: [{ isDefault: 'desc' }, { displayName: 'asc' }] }),
-      this.prisma.tenantBankAccount.findMany({ where: { tenantId }, orderBy: [{ active: 'desc' }, { currency: 'asc' }, { label: 'asc' }] }),
-    ]);
+    const [legalEntities, bankAccounts] = await withTenantTransaction(this.prisma, tenantId, (tx) => Promise.all([
+      tx.tenantLegalEntity.findMany({ where: { tenantId }, orderBy: [{ isDefault: 'desc' }, { displayName: 'asc' }] }),
+      tx.tenantBankAccount.findMany({ where: { tenantId }, orderBy: [{ active: 'desc' }, { currency: 'asc' }, { label: 'asc' }] }),
+    ]));
     return {
       legalEntities: legalEntities.map(mapLegalEntity),
       bankAccounts: bankAccounts.map(mapBankAccount),
@@ -24,14 +24,15 @@ export class CommercialSettingsService {
   }
 
   async accountDetail(tenantId: string, id: string): Promise<BankAccountDetail> {
-    const account = await this.prisma.tenantBankAccount.findFirst({ where: { id, tenantId } });
+    const account = await withTenantTransaction(this.prisma, tenantId, (tx) =>
+      tx.tenantBankAccount.findFirst({ where: { id, tenantId } }));
     if (!account) throw new NotFoundException('Bank account not found');
     return { ...mapBankAccount(account), iban: account.iban };
   }
 
   async createLegalEntity(tenantId: string, input: LegalEntityInput): Promise<LegalEntitySummary> {
     try {
-      const entity = await this.prisma.$transaction(async (tx) => {
+      const entity = await withTenantTransaction(this.prisma, tenantId, async (tx) => {
         if (input.isDefault) {
           await tx.tenantLegalEntity.updateMany({ where: { tenantId, isDefault: true }, data: { isDefault: false } });
         }
@@ -44,7 +45,7 @@ export class CommercialSettingsService {
   }
 
   async updateLegalEntity(tenantId: string, id: string, input: LegalEntityInput): Promise<LegalEntitySummary> {
-    const entity = await this.prisma.$transaction(async (tx) => {
+    const entity = await withTenantTransaction(this.prisma, tenantId, async (tx) => {
       const current = await tx.tenantLegalEntity.findFirst({ where: { id, tenantId } });
       if (!current) throw new NotFoundException('Legal entity not found');
       if (!input.active && current.isDefault) throw new ConflictException('Select another default legal entity first');
@@ -57,7 +58,7 @@ export class CommercialSettingsService {
   }
 
   async deleteLegalEntity(tenantId: string, id: string): Promise<void> {
-    await this.prisma.$transaction(async (tx) => {
+    await withTenantTransaction(this.prisma, tenantId, async (tx) => {
       const current = await tx.tenantLegalEntity.findFirst({ where: { id, tenantId } });
       if (!current) throw new NotFoundException('Legal entity not found');
       const bankAccountCount = await tx.tenantBankAccount.count({ where: { tenantId, legalEntityId: id } });
@@ -70,7 +71,7 @@ export class CommercialSettingsService {
 
   async createBankAccount(tenantId: string, input: BankAccountInput): Promise<BankAccountSummary> {
     try {
-      const account = await this.prisma.$transaction(async (tx) => {
+      const account = await withTenantTransaction(this.prisma, tenantId, async (tx) => {
         await this.requireLegalEntity(tx, tenantId, input.legalEntityId);
         if (input.isDefault) {
           await tx.tenantBankAccount.updateMany({
@@ -89,7 +90,7 @@ export class CommercialSettingsService {
   }
 
   async updateBankAccount(tenantId: string, id: string, input: BankAccountInput): Promise<BankAccountSummary> {
-    const account = await this.prisma.$transaction(async (tx) => {
+    const account = await withTenantTransaction(this.prisma, tenantId, async (tx) => {
       const current = await tx.tenantBankAccount.findFirst({ where: { id, tenantId } });
       if (!current) throw new NotFoundException('Bank account not found');
       await this.requireLegalEntity(tx, tenantId, input.legalEntityId);
@@ -108,7 +109,7 @@ export class CommercialSettingsService {
   }
 
   async deleteBankAccount(tenantId: string, id: string): Promise<void> {
-    await this.prisma.$transaction(async (tx) => {
+    await withTenantTransaction(this.prisma, tenantId, async (tx) => {
       const current = await tx.tenantBankAccount.findFirst({ where: { id, tenantId } });
       if (!current) throw new NotFoundException('Bank account not found');
       const [commercialTermsCount, paymentCount] = await Promise.all([

@@ -4,7 +4,7 @@ import type {
   LegalEntitySummary,
   OrderCommercialTermsSummary,
 } from '@autosale/contracts/commercial';
-import { calculateCommercialTerms, materializeCommercialTerms, Prisma, type CommercialLineInput, type PrismaClient } from '@autosale/database';
+import { calculateCommercialTerms, materializeCommercialTerms, Prisma, type CommercialLineInput, type PrismaClient, withTenantTransaction } from '@autosale/database';
 import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 
 export class CommercialTermsService {
@@ -13,15 +13,18 @@ export class CommercialTermsService {
   async preview(tenantId: string, orderId: string): Promise<OrderCommercialTermsSummary> {
     const context = await this.orderContext(tenantId, orderId);
     const calculation = calculateCommercialTerms(await this.currentCatalogueLines(tenantId, context.items));
-    const legalEntity = await this.prisma.tenantLegalEntity.findFirst({
-      where: { tenantId, active: true }, orderBy: [{ isDefault: 'desc' }, { createdAt: 'asc' }],
+    const { legalEntity, accounts } = await withTenantTransaction(this.prisma, tenantId, async (tx) => {
+      const legalEntity = await tx.tenantLegalEntity.findFirst({
+        where: { tenantId, active: true }, orderBy: [{ isDefault: 'desc' }, { createdAt: 'asc' }],
+      });
+      const accounts = legalEntity && calculation.currency
+        ? await tx.tenantBankAccount.findMany({
+            where: { tenantId, legalEntityId: legalEntity.id, currency: calculation.currency, active: true },
+            orderBy: [{ isDefault: 'desc' }, { label: 'asc' }],
+          })
+        : [];
+      return { legalEntity, accounts };
     });
-    const accounts = legalEntity && calculation.currency
-      ? await this.prisma.tenantBankAccount.findMany({
-          where: { tenantId, legalEntityId: legalEntity.id, currency: calculation.currency, active: true },
-          orderBy: [{ isDefault: 'desc' }, { label: 'asc' }],
-        })
-      : [];
     return {
       ...summaryAmounts(calculation),
       legalEntity: legalEntity ? mapLegalEntity(legalEntity) : null,
@@ -44,7 +47,7 @@ export class CommercialTermsService {
     if (!current) {
       if (!input.initializeLegacy || input.version !== 0) throw new ConflictException('Commercial terms must be initialized from a preview');
       const lines = await this.currentCatalogueLines(tenantId, context.items);
-      await this.prisma.$transaction(async (tx) => {
+      await withTenantTransaction(this.prisma, tenantId, async (tx) => {
         await this.assertNoActivePayments(tx, tenantId, orderId);
         await materializeCommercialTerms(tx, { tenantId, orderId, actor, lines });
         await this.applySelection(tx, tenantId, orderId, input.legalEntityId, input.bankAccountId, actor);
@@ -56,7 +59,7 @@ export class CommercialTermsService {
       return this.get(tenantId, orderId);
     }
     if (current.version !== input.version) throw new ConflictException('Commercial terms changed; reload and try again');
-    await this.prisma.$transaction(async (tx) => {
+    await withTenantTransaction(this.prisma, tenantId, async (tx) => {
       await this.assertNoActivePayments(tx, tenantId, orderId);
       const selected = await this.validateSelection(tx, tenantId, current.currency, input.legalEntityId, input.bankAccountId);
       const result = await tx.orderCommercialTerms.updateMany({
@@ -80,17 +83,20 @@ export class CommercialTermsService {
   }
 
   async get(tenantId: string, orderId: string): Promise<OrderCommercialTermsSummary> {
-    const terms = await this.prisma.orderCommercialTerms.findFirst({
-      where: { tenantId, orderId },
-      include: { legalEntity: true, bankAccount: true },
+    const { terms, accounts } = await withTenantTransaction(this.prisma, tenantId, async (tx) => {
+      const terms = await tx.orderCommercialTerms.findFirst({
+        where: { tenantId, orderId },
+        include: { legalEntity: true, bankAccount: true },
+      });
+      if (!terms) throw new NotFoundException('Commercial terms not found');
+      const accounts = terms.legalEntityId && terms.currency
+        ? await tx.tenantBankAccount.findMany({
+            where: { tenantId, legalEntityId: terms.legalEntityId, currency: terms.currency, active: true },
+            orderBy: [{ isDefault: 'desc' }, { label: 'asc' }],
+          })
+        : [];
+      return { terms, accounts };
     });
-    if (!terms) throw new NotFoundException('Commercial terms not found');
-    const accounts = terms.legalEntityId && terms.currency
-      ? await this.prisma.tenantBankAccount.findMany({
-          where: { tenantId, legalEntityId: terms.legalEntityId, currency: terms.currency, active: true },
-          orderBy: [{ isDefault: 'desc' }, { label: 'asc' }],
-        })
-      : [];
     return {
       pricingStatus: terms.pricingStatus,
       issueCodes: issueCodes(terms.issueCodes),

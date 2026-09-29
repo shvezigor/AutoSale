@@ -105,7 +105,7 @@ export class TriggeredOrderProcessor {
       }
 
       const autoApproved = decision.action === 'AUTO_CREATE';
-      const order = await this.prisma.$transaction(async (transaction) => {
+      const order = await withTenantTransaction(this.prisma, anchor.tenantId, async (transaction) => {
         const created = await transaction.order.create({
           data: {
             tenantId: anchor.tenantId,
@@ -287,7 +287,7 @@ export class TriggeredOrderProcessor {
       );
       const autoApproved = result.status === 'AUTO_APPROVED';
 
-      const updated = await this.prisma.$transaction(async (transaction) => {
+      const updated = await withTenantTransaction(this.prisma, trigger.tenantId, async (transaction) => {
         const persisted = await transaction.order.update({
           where: { id: order.id },
           data: {

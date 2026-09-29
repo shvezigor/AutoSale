@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 
 import type { CancelOrderPayment, CashOnDeliveryCarrier, CreateOrderPayment, OrderPaymentRecord, OrderPaymentSummary, PaymentMethod } from '@autosale/contracts/payments';
-import { calculateOrderPaymentSummary, Prisma, type PrismaClient } from '@autosale/database';
+import { calculateOrderPaymentSummary, Prisma, type PrismaClient, withTenantTransaction } from '@autosale/database';
 import { metrics, type MetricRegistry } from '@autosale/observability';
 import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 
@@ -16,23 +16,26 @@ export class PaymentsService {
   ) {}
 
   async get(tenantId: string, orderId: string): Promise<OrderPaymentSummary> {
-    const order = await this.prisma.order.findFirst({
-      where: { id: orderId, tenantId },
-      include: { commercialTerms: true },
-    });
-    if (!order) throw new NotFoundException('Order not found');
-    const terms = order.commercialTerms;
-    if (!terms || terms.pricingStatus !== 'READY' || !terms.totalAmount || !terms.currency) {
-      throw new BadRequestException('Order payment amount is not ready');
-    }
-    const payments = await this.prisma.orderPayment.findMany({
-      where: { tenantId, orderId },
-      orderBy: [{ receivedAt: 'desc' }, { createdAt: 'desc' }],
-      include: {
-        creator: { select: { id: true, name: true } },
-        canceller: { select: { id: true, name: true } },
-        bankAccount: { select: { id: true, label: true } },
-      },
+    const { terms, payments } = await withTenantTransaction(this.prisma, tenantId, async (tx) => {
+      const order = await tx.order.findFirst({
+        where: { id: orderId, tenantId },
+        include: { commercialTerms: true },
+      });
+      if (!order) throw new NotFoundException('Order not found');
+      const terms = order.commercialTerms;
+      if (!terms || terms.pricingStatus !== 'READY' || !terms.totalAmount || !terms.currency) {
+        throw new BadRequestException('Order payment amount is not ready');
+      }
+      const payments = await tx.orderPayment.findMany({
+        where: { tenantId, orderId },
+        orderBy: [{ receivedAt: 'desc' }, { createdAt: 'desc' }],
+        include: {
+          creator: { select: { id: true, name: true } },
+          canceller: { select: { id: true, name: true } },
+          bankAccount: { select: { id: true, label: true } },
+        },
+      });
+      return { terms: { totalAmount: terms.totalAmount, currency: terms.currency }, payments };
     });
     const amounts = calculateOrderPaymentSummary(
       terms.totalAmount.toFixed(2),
@@ -47,7 +50,7 @@ export class PaymentsService {
       if (receivedAt.getTime() > this.now().getTime() + MAX_FUTURE_SKEW_MS) throw new BadRequestException('Payment date is in the future');
       const requestHash = commandHash(createCommandPayload(orderId, input));
       try {
-        await this.serializable(async () => this.prisma.$transaction(async (tx) => {
+        await this.serializable(async () => withTenantTransaction(this.prisma, tenantId, async (tx) => {
           const order = await readyOrder(tx, tenantId, orderId);
           if (input.method === 'BANK_TRANSFER') {
             const legalEntityId = order.commercialTerms!.legalEntityId;
@@ -89,7 +92,7 @@ export class PaymentsService {
   async cancel(tenantId: string, orderId: string, paymentId: string, actorUserId: string, input: CancelOrderPayment): Promise<OrderPaymentSummary> {
     return this.measure('order_payment_cancel', async () => {
       const requestHash = commandHash({ orderId, paymentId, reason: input.reason });
-      await this.serializable(async () => this.prisma.$transaction(async (tx) => {
+      await this.serializable(async () => withTenantTransaction(this.prisma, tenantId, async (tx) => {
         const payment = await tx.orderPayment.findFirst({ where: { id: paymentId, tenantId, orderId } });
         if (!payment) throw new NotFoundException('Payment not found');
         if (payment.cancelledAt) {

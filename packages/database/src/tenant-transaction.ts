@@ -6,6 +6,11 @@ export async function withTenantTransaction<T>(
   prisma: Pick<PrismaClient, '$transaction'>,
   tenantId: string,
   operation: (transaction: Prisma.TransactionClient) => Promise<T>,
+  options?: {
+    maxWait?: number;
+    timeout?: number;
+    isolationLevel?: Prisma.TransactionIsolationLevel;
+  },
 ): Promise<T> {
   if (!UUID_PATTERN.test(tenantId)) {
     throw new Error('A valid tenant identifier is required');
@@ -14,5 +19,5 @@ export async function withTenantTransaction<T>(
   return prisma.$transaction(async (transaction) => {
     await transaction.$queryRaw`SELECT set_config('app.current_tenant_id', ${tenantId}, true)`;
     return operation(transaction);
-  });
+  }, options);
 }

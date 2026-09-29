@@ -96,6 +96,7 @@ function prismaMock(options: {
   updateMany?: ReturnType<typeof vi.fn>;
 } = {}) {
   const client = {
+    $queryRaw: vi.fn(),
     order: { findFirst: vi.fn().mockResolvedValue(options.order === undefined ? order : options.order) },
     tenantBankAccount: { findFirst: vi.fn().mockResolvedValue(options.account === undefined ? { id: accountId } : options.account) },
     orderPayment: {
