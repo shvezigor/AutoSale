@@ -1,6 +1,6 @@
 # ADR 0002: Shared-schema tenant isolation and database defense in depth
 
-- **Status:** Accepted; database relation guards available, runtime RLS rollout pending
+- **Status:** Accepted; relation guards and runtime role separation available, RLS rollout pending
 - **Date:** 2026-09-28
 - **Decision owner:** Sales AITO
 
@@ -35,10 +35,12 @@ Keep one shared PostgreSQL schema for the current product stage and enforce thes
 - Composite tenant relations already protect delivery, inventory and several catalogue/payment paths.
 - Migration `20260928224500_tenant_relation_guards` extends database protection to messages, orders, legal entities/accounts, commercial terms, Sheets exports and order audit logs.
 - `tenant-relations.postgres.spec.ts` proves representative cross-tenant writes fail with PostgreSQL foreign-key violations.
+- Deployments provision separate `autosale_api` and `autosale_worker` login roles after migrations. Both are non-owner, `NOSUPERUSER`, `NOCREATEDB`, `NOCREATEROLE`, `NOREPLICATION` and `NOBYPASSRLS`; neither can create or alter schema objects.
+- The owner connection remains available only to the one-shot migration and role-provisioning jobs. Application containers receive role-specific URLs and refuse to start when their distinct secrets are absent.
 
 ## RLS rollout gate
 
-RLS is deliberately not enabled under the current single `DATABASE_URL`. In the documented Compose baseline, API, worker and migrations use the same PostgreSQL owner identity; table owners and superusers can bypass ordinary RLS. Enabling policies before role separation would create a false security claim.
+RLS is deliberately not enabled merely because runtime roles are now separated. The next gate is a fail-closed tenant transaction context for HTTP requests and background jobs, followed by explicit administration paths and PostgreSQL policy tests. Enabling policies before those paths exist would break legitimate work or encourage unsafe bypasses.
 
 The rollout is complete only when role/grant migrations, request/worker tenant transaction context, platform-admin access paths, background reconciliation, backup/restore and integration tests are all proven together. Production data must be audited for tenant consistency before policies are forced.
 
@@ -57,7 +59,7 @@ Benefits:
 
 Trade-offs:
 
-- one compromised owner credential still reaches all tenants until runtime roles and RLS are deployed;
+- a compromised API or worker credential still reaches all tenant rows until RLS is deployed, but it no longer grants schema ownership or DDL;
 - full backups contain every tenant and require particularly strong encryption/access controls;
 - tenant export and deletion need deliberate workflows across PostgreSQL, object storage, providers and backup expiry.
 

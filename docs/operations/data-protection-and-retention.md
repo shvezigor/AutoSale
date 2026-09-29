@@ -49,7 +49,7 @@ Record at minimum: provider, purpose, data categories, regions, transfer mechani
 
 ## Security operations
 
-- Split migration, API, worker and backup database identities; runtime roles must not own tables or bypass RLS.
+- Migration, API and worker database identities are split. Runtime roles do not own tables, cannot perform DDL and cannot bypass RLS. A restricted backup/restore identity remains to be added before EU production launch.
 - Enable fail-closed RLS only after tenant transaction context and all background/admin paths are verified.
 - Use TLS in transit, encrypted disks/object storage/backups, restricted secret access and documented rotation.
 - Add Redis authentication/ACL and prevent unrelated containers from reaching privileged queues.
@@ -62,7 +62,8 @@ Record at minimum: provider, purpose, data categories, regions, transfer mechani
 
 - [ ] DPA, privacy notice, controller/processor roles and DSAR contact approved.
 - [ ] Subprocessor register and transfer mechanisms approved.
-- [ ] Runtime PostgreSQL roles and RLS rollout gate completed.
+- [x] Non-owner PostgreSQL identities are used by API and worker containers.
+- [ ] Restricted backup/restore identity and fail-closed RLS rollout gate completed.
 - [ ] Tenant export/deletion workflow and deletion ledger proven end to end.
 - [ ] Configurable retention jobs enabled with metrics and dry-run reporting.
 - [ ] Backups encrypted off-host, access-restricted, expiry-enforced and restore-tested.

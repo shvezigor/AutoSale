@@ -101,6 +101,7 @@ Capture a baseline of disk, memory, CPU, load, Docker, and kernel versions witho
 1. Clone the repository into `/srv/autosale` using the server's read-only GitHub deploy key.
 2. Checkout the approved `master` commit and keep the checkout deployment-only. Local tracked changes intentionally block automated deployment.
 3. Create `/srv/autosale/.env` from `.env.example`, set `NODE_ENV=production`, and apply restrictive file permissions.
+   Generate different URL-safe values of at least 32 characters for `POSTGRES_API_PASSWORD` and `POSTGRES_WORKER_PASSWORD`; never reuse the owner password from `DATABASE_URL` and never print expanded Compose configuration in shared logs.
 4. Required public values must agree:
    - `APP_PUBLIC_URL=https://sales-aito.com`;
    - Google and Meta callback URLs use the same exact origin;
@@ -168,7 +169,8 @@ The current deployment builds images on the server. Moving builds to GitHub Acti
 
 Record the deployed commit and require all applicable checks:
 
-- `docker compose ps` shows healthy long-running services and a successfully completed migration;
+- `docker compose ps` shows healthy long-running services and successfully completed migration/database-role jobs;
+- active API connections use `autosale_api`, active worker connections use `autosale_worker`, and neither role owns tables, can execute DDL or has `BYPASSRLS`;
 - host memory, swap, disk, and load are within thresholds;
 - `https://sales-aito.com/health/live` succeeds through Cloudflare;
 - Ukrainian and English public routes load with the correct canonical host;

@@ -16,6 +16,10 @@ docker compose $COMPOSE_FILES up -d --wait postgres redis minio
 # A non-zero migration exit stops this script before application rollout.
 # shellcheck disable=SC2086
 docker compose $COMPOSE_FILES run --rm migrate
+# Provision and rotate the non-owner API/worker identities only after schema
+# migrations succeed. A failure stops rollout before application replacement.
+# shellcheck disable=SC2086
+docker compose $COMPOSE_FILES run --rm --no-deps database_roles
 # Wait for every application health check so CI never reports a deployment as
 # successful while the API, worker, or web container is still unhealthy.
 # shellcheck disable=SC2086

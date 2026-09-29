@@ -37,6 +37,9 @@ RUN pnpm --filter @autosale/worker deploy --prod /prod/worker
 FROM build AS migrate
 CMD ["pnpm", "--filter", "@autosale/database", "exec", "prisma", "migrate", "deploy"]
 
+FROM build AS database-roles
+CMD ["node", "packages/database/dist/runtime-database-roles.cli.js"]
+
 FROM node:24-alpine AS api
 ENV NODE_ENV=production
 WORKDIR /app
