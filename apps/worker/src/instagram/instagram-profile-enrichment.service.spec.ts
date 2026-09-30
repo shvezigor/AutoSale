@@ -37,6 +37,7 @@ describe('InstagramProfileEnrichmentService', () => {
       '20260829120000_instagram_credential_cleanup_queue',
       '20260902090000_instagram_customer_profiles',
       '20260902130000_instagram_avatar_cleanup',
+      '20260930060000_instagram_assets_rls',
     ]) {
       await pool.query(await readFile(resolve(
         process.cwd(),

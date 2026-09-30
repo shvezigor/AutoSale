@@ -1,5 +1,5 @@
 import type { RegisterMetaEventInput } from '@autosale/contracts/meta';
-import { Prisma, type PrismaClient } from '@autosale/database';
+import { Prisma, type PrismaClient, withTenantTransaction } from '@autosale/database';
 
 export class MetaEventService {
   constructor(private readonly prisma: PrismaClient, private readonly now: () => Date = () => new Date()) {}
@@ -18,7 +18,7 @@ export class MetaEventService {
     input: RegisterMetaEventInput,
   ): Promise<{ eventId: string; duplicate: boolean; pending: boolean }> {
     try {
-      const event = await this.prisma.webhookEvent.create({
+      const event = await withTenantTransaction(this.prisma, input.tenantId, (transaction) => transaction.webhookEvent.create({
         data: {
           tenantId: input.tenantId,
           provider: 'META',
@@ -26,7 +26,7 @@ export class MetaEventService {
           payload: redactWebhookSecrets(input.payload) as Prisma.InputJsonObject,
         },
         select: { id: true },
-      });
+      }));
 
       return { eventId: event.id, duplicate: false, pending: true };
     } catch (error) {
@@ -34,7 +34,7 @@ export class MetaEventService {
         throw error;
       }
 
-      const existing = await this.prisma.webhookEvent.findUniqueOrThrow({
+      const existing = await withTenantTransaction(this.prisma, input.tenantId, (transaction) => transaction.webhookEvent.findUniqueOrThrow({
         where: {
           tenantId_provider_externalEventId: {
             tenantId: input.tenantId,
@@ -43,7 +43,7 @@ export class MetaEventService {
           },
         },
         select: { id: true, status: true },
-      });
+      }));
 
       return { eventId: existing.id, duplicate: true, pending: existing.status === 'RECEIVED' };
     }

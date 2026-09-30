@@ -25,14 +25,14 @@ export class MediaService {
   }
 
   async loadProfileAvatar(tenantId: string, profileId: string): Promise<{ body: Uint8Array; contentType: string }> {
-    const profile = await this.prisma.instagramCustomerProfile.findFirst({
+    const profile = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.instagramCustomerProfile.findFirst({
       where: {
         id: profileId,
         tenantId,
         avatarStorageKey: { not: null },
       },
       select: { avatarStorageKey: true },
-    });
+    }));
     if (!profile?.avatarStorageKey) throw new NotFoundException('Profile avatar not found');
     return this.storage.get(profile.avatarStorageKey);
   }

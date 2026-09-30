@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
-import type { PrismaClient } from '@autosale/database';
+import { type PrismaClient, withTenantTransaction } from '@autosale/database';
 import type { ObjectStorage } from '@autosale/integrations';
 
 const LEASE_MS = 5 * 60_000;
@@ -36,10 +36,10 @@ export class InstagramAvatarCleanupReconciler {
     let referenced = 0;
 
     for (const cleanup of cleanups) {
-      const currentReference = await this.prisma.instagramCustomerProfile.findFirst({
+      const currentReference = await withTenantTransaction(this.prisma, cleanup.tenantId, (transaction) => transaction.instagramCustomerProfile.findFirst({
         where: { avatarStorageKey: cleanup.storageKey },
         select: { id: true },
-      });
+      }));
       if (currentReference) {
         referenced += 1;
         await this.complete(cleanup.id, leaseId);

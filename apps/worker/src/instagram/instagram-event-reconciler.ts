@@ -1,21 +1,19 @@
 interface PendingEventStore {
-  webhookEvent: {
-    findMany(input: {
-      where: { provider: 'META'; status: 'RECEIVED' };
-      orderBy: [{ receivedAt: 'asc' }, { id: 'asc' }];
-      take: number;
-      select: { id: true };
-    }): Promise<Array<{ id: string }>>;
-  };
   $queryRaw<T>(query: TemplateStringsArray, ...values: unknown[]): Promise<T>;
 }
 
 interface NormalizeQueue {
   add(
     name: 'instagram.normalize',
-    data: { eventId: string; correlationId: string },
+    data: { tenantId: string; eventId: string; correlationId: string },
     options: { jobId: string; removeOnComplete: true; removeOnFail: true },
   ): Promise<unknown>;
+}
+
+interface DueInstagramEvent {
+  tenant_id: string;
+  event_id: string;
+  recovery_kind: 'RECEIVED' | 'ATTACHMENT_BACKFILL';
 }
 
 export class InstagramEventReconciler {
@@ -25,51 +23,34 @@ export class InstagramEventReconciler {
   ) {}
 
   async reconcile(): Promise<{ attempted: number; failed: number }> {
-    const [pending, attachmentBackfills] = await Promise.all([
-      this.store.webhookEvent.findMany({
-        where: { provider: 'META', status: 'RECEIVED' },
-        orderBy: [{ receivedAt: 'asc' }, { id: 'asc' }],
-        take: 100,
-        select: { id: true },
-      }),
-      this.store.$queryRaw<Array<{ event_id: string }>>`
-        SELECT event_id
-        FROM public.worker_instagram_attachment_backfill_events(100)
-      `,
-    ]);
+    const pending = await this.store.$queryRaw<DueInstagramEvent[]>`
+      SELECT tenant_id, event_id, recovery_kind
+      FROM public.worker_due_instagram_events(100)
+    `;
     let failed = 0;
 
     for (const event of pending) {
       try {
         await this.queue.add(
           'instagram.normalize',
-          { eventId: event.id, correlationId: event.id },
-          { jobId: event.id, removeOnComplete: true, removeOnFail: true },
+          {
+            tenantId: event.tenant_id,
+            eventId: event.event_id,
+            correlationId: event.event_id,
+          },
+          {
+            jobId: event.recovery_kind === 'ATTACHMENT_BACKFILL'
+              ? `instagram-attachment-backfill-v3-${event.event_id}`
+              : event.event_id,
+            removeOnComplete: true,
+            removeOnFail: true,
+          },
         );
       } catch {
         failed += 1;
       }
     }
 
-    const pendingIds = new Set(pending.map((event) => event.id));
-    for (const message of attachmentBackfills) {
-      const eventId = message.event_id;
-      if (pendingIds.has(eventId)) continue;
-
-      try {
-        await this.queue.add(
-          'instagram.normalize',
-          { eventId, correlationId: eventId },
-          { jobId: `instagram-attachment-backfill-v2-${eventId}`, removeOnComplete: true, removeOnFail: true },
-        );
-      } catch {
-        failed += 1;
-      }
-    }
-
-    const uniqueBackfills = attachmentBackfills.filter(
-      (message) => !pendingIds.has(message.event_id),
-    ).length;
-    return { attempted: pending.length + uniqueBackfills, failed };
+    return { attempted: pending.length, failed };
   }
 }

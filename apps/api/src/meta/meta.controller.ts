@@ -31,7 +31,7 @@ export interface MetaWebhookConfig {
 interface NormalizeQueue {
   add(
     name: 'instagram.normalize',
-    data: { eventId: string; correlationId: string },
+    data: { tenantId: string; eventId: string; correlationId: string },
     options: { jobId: string; removeOnFail: true },
   ): Promise<unknown>;
 }
@@ -84,18 +84,18 @@ export class MetaController {
       });
 
       if (registered.pending) {
-        void this.dispatch(registered.eventId);
+        void this.dispatch(tenantId, registered.eventId);
       }
     }
 
     return { received: true };
   }
 
-  private async dispatch(eventId: string): Promise<void> {
+  private async dispatch(tenantId: string, eventId: string): Promise<void> {
     try {
       await this.queue.add(
         'instagram.normalize',
-        { eventId, correlationId: eventId },
+        { tenantId, eventId, correlationId: eventId },
         { jobId: eventId, removeOnFail: true },
       );
     } catch {

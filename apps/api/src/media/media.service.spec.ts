@@ -21,24 +21,27 @@ describe('MediaService', () => {
   });
 
   it('scopes cached Instagram avatars by both tenant and profile id', async () => {
+    const tenantId = '22222222-2222-4222-8222-222222222222';
     let query: unknown;
-    const prisma = {
+    const transaction = {
+      $queryRaw: async () => [{ set_config: tenantId }],
       instagramCustomerProfile: {
         findFirst: async (input: unknown) => {
           query = input;
-          return { avatarStorageKey: 'tenants/tenant-a/profile/avatar.jpg' };
+          return { avatarStorageKey: `tenants/${tenantId}/profile/avatar.jpg` };
         },
       },
     };
+    const prisma = { $transaction: async (operation: (tx: typeof transaction) => Promise<unknown>) => operation(transaction) };
     const get = async () => ({ body: Uint8Array.from([1]), contentType: 'image/jpeg' });
     const service = new MediaService(prisma as never, { get } as never);
 
-    await expect(service.loadProfileAvatar('tenant-a', '11111111-1111-4111-8111-111111111111'))
+    await expect(service.loadProfileAvatar(tenantId, '11111111-1111-4111-8111-111111111111'))
       .resolves.toMatchObject({ contentType: 'image/jpeg' });
     expect(query).toEqual({
       where: {
         id: '11111111-1111-4111-8111-111111111111',
-        tenantId: 'tenant-a',
+        tenantId,
         avatarStorageKey: { not: null },
       },
       select: { avatarStorageKey: true },

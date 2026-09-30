@@ -362,11 +362,15 @@ async function bootstrap(): Promise<void> {
         });
         return;
       }
-      if (job.name !== 'instagram.normalize' || typeof job.data?.eventId !== 'string') return;
+      if (
+        job.name !== 'instagram.normalize'
+        || typeof job.data?.tenantId !== 'string'
+        || typeof job.data?.eventId !== 'string'
+      ) return;
       const correlationId = typeof job.data.correlationId === 'string' ? job.data.correlationId : job.data.eventId;
       const started = performance.now();
       try {
-        await processor.process(job.data.eventId);
+        await processor.process(job.data.tenantId, job.data.eventId);
         metrics.increment('autosale_operations_total', { operation: 'instagram_normalize', result: 'success' });
         logger.info('instagram_normalize_completed', { correlationId, eventId: job.data.eventId, jobId: job.id });
       } catch (error) {

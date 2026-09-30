@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
-import type { PrismaClient } from '@autosale/database';
+import { type PrismaClient, withTenantTransaction } from '@autosale/database';
 import { CredentialCipher, MetaInstagramError, type MetaInstagramUserProfile } from '@autosale/integrations';
 
 import { AvatarCopyError, type InstagramAvatarCopyService } from './instagram-avatar-copy.service.js';
@@ -43,7 +43,7 @@ export class InstagramProfileEnrichmentService {
   async process(job: InstagramProfileEnrichmentJob): Promise<void> {
     const startedAt = this.now();
     const leaseId = randomUUID();
-    const claimed = await this.prisma.instagramCustomerProfile.updateManyAndReturn({
+    const claimed = await withTenantTransaction(this.prisma, job.tenantId, (transaction) => transaction.instagramCustomerProfile.updateManyAndReturn({
       where: {
         id: job.profileId,
         tenantId: job.tenantId,
@@ -60,12 +60,12 @@ export class InstagramProfileEnrichmentService {
         leaseExpiresAt: new Date(startedAt.getTime() + LEASE_MS),
         attempts: { increment: 1 },
       },
-    });
+    }));
     const profile = claimed[0];
     if (!profile || profile.leaseId !== leaseId) return;
     const claimedLeaseId = profile.leaseId;
 
-    const connection = await this.prisma.instagramConnection.findFirst({
+    const connection = await withTenantTransaction(this.prisma, job.tenantId, (transaction) => transaction.instagramConnection.findFirst({
       where: {
         tenantId: job.tenantId,
         status: 'ACTIVE',
@@ -73,7 +73,7 @@ export class InstagramProfileEnrichmentService {
         OR: [{ tokenExpiresAt: null }, { tokenExpiresAt: { gt: startedAt } }],
       },
       select: { encryptedAccessToken: true },
-    });
+    }));
     if (!connection?.encryptedAccessToken) {
       await this.markUnavailable(job, claimedLeaseId, 'META_PROFILE_CREDENTIAL_UNAVAILABLE', startedAt);
       return;
@@ -143,7 +143,7 @@ export class InstagramProfileEnrichmentService {
     }
 
     const refreshAfter = new Date(startedAt.getTime() + REFRESH_INTERVAL_MS);
-    await this.prisma.$transaction(async (transaction) => {
+    await withTenantTransaction(this.prisma, job.tenantId, async (transaction) => {
       const updated = await transaction.instagramCustomerProfile.updateMany({
         where: fencedClaim(job, claimedLeaseId),
         data: {
@@ -190,7 +190,7 @@ export class InstagramProfileEnrichmentService {
     code: string,
     now: Date,
   ): Promise<void> {
-    await this.prisma.instagramCustomerProfile.updateMany({
+    await withTenantTransaction(this.prisma, job.tenantId, (transaction) => transaction.instagramCustomerProfile.updateMany({
       where: fencedClaim(job, leaseId),
       data: {
         status: 'RETRYABLE_FAILURE',
@@ -199,7 +199,7 @@ export class InstagramProfileEnrichmentService {
         leaseExpiresAt: null,
         lastErrorCode: code,
       },
-    });
+    }));
   }
 
   private async markUnavailable(
@@ -209,7 +209,7 @@ export class InstagramProfileEnrichmentService {
     now: Date,
   ): Promise<void> {
     const refreshAfter = new Date(now.getTime() + REFRESH_INTERVAL_MS);
-    await this.prisma.instagramCustomerProfile.updateMany({
+    await withTenantTransaction(this.prisma, job.tenantId, (transaction) => transaction.instagramCustomerProfile.updateMany({
       where: fencedClaim(job, leaseId),
       data: {
         status: 'UNAVAILABLE',
@@ -219,7 +219,7 @@ export class InstagramProfileEnrichmentService {
         leaseExpiresAt: null,
         lastErrorCode: code,
       },
-    });
+    }));
   }
 }
 

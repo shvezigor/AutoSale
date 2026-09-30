@@ -87,6 +87,14 @@ export async function configureRuntimeDatabaseRoles(
           REVOKE ALL ON FUNCTION public.worker_instagram_attachment_backfill_events(integer) FROM autosale_api;
           GRANT EXECUTE ON FUNCTION public.worker_instagram_attachment_backfill_events(integer) TO autosale_worker;
         END IF;
+        IF to_regprocedure('public.worker_due_instagram_events(integer)') IS NOT NULL THEN
+          REVOKE ALL ON FUNCTION public.worker_due_instagram_events(integer) FROM autosale_api;
+          GRANT EXECUTE ON FUNCTION public.worker_due_instagram_events(integer) TO autosale_worker;
+        END IF;
+        IF to_regprocedure('public.worker_due_instagram_profiles(timestamp with time zone,integer)') IS NOT NULL THEN
+          REVOKE ALL ON FUNCTION public.worker_due_instagram_profiles(timestamp with time zone, integer) FROM autosale_api;
+          GRANT EXECUTE ON FUNCTION public.worker_due_instagram_profiles(timestamp with time zone, integer) TO autosale_worker;
+        END IF;
       END
       $functions$;
     `);

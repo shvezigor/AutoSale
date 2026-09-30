@@ -23,8 +23,10 @@ export class InstagramProcessor {
     private readonly orders?: OrderTriggerProcessor,
   ) {}
 
-  async process(eventId: string): Promise<void> {
-    const event = await this.prisma.webhookEvent.findUniqueOrThrow({ where: { id: eventId } });
+  async process(tenantId: string, eventId: string): Promise<void> {
+    const event = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.webhookEvent.findUniqueOrThrow({
+      where: { id: eventId },
+    }));
     const messages = normalizeInstagramEvent(event.payload);
 
     for (const normalized of messages) {
@@ -176,7 +178,7 @@ export class InstagramProcessor {
             tenantId: event.tenantId,
             sourceUrl: attachment.originalUrl,
           });
-          await this.prisma.attachment.update({
+          await withTenantTransaction(this.prisma, event.tenantId, (transaction) => transaction.attachment.update({
             where: { id: attachment.id },
             data: {
               type: copied.contentType === 'video/mp4' ? 'VIDEO' : 'IMAGE',
@@ -185,16 +187,16 @@ export class InstagramProcessor {
               checksum: copied.checksum,
               failureSummary: null,
             },
-          });
+          }));
         } catch (error) {
           const retryable = !(error instanceof MediaCopyError) || error.retryable;
-          await this.prisma.attachment.update({
+          await withTenantTransaction(this.prisma, event.tenantId, (transaction) => transaction.attachment.update({
             where: { id: attachment.id },
             data: {
               copyStatus: retryable ? 'RETRYABLE_FAILURE' : 'FAILED',
               failureSummary: summarizeError(error),
             },
-          });
+          }));
           if (retryable) throw error;
         }
       }
@@ -204,10 +206,10 @@ export class InstagramProcessor {
       }
     }
 
-    await this.prisma.webhookEvent.update({
+    await withTenantTransaction(this.prisma, event.tenantId, (transaction) => transaction.webhookEvent.update({
       where: { id: event.id },
       data: { status: 'PROCESSED', processedAt: new Date() },
-    });
+    }));
   }
 }
 

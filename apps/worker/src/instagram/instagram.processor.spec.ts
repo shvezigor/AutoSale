@@ -70,8 +70,8 @@ describe('InstagramProcessor', () => {
     });
     const processor = new InstagramProcessor(prisma, { copy });
 
-    await processor.process(event.id);
-    await processor.process(event.id);
+    await processor.process(tenantId, event.id);
+    await processor.process(tenantId, event.id);
 
     expect(await prisma.conversation.count()).toBe(1);
     expect(await prisma.message.count()).toBe(1);
@@ -105,7 +105,7 @@ describe('InstagramProcessor', () => {
     });
     const processor = new InstagramProcessor(prisma, { copy });
 
-    await processor.process(event.id);
+    await processor.process(tenantId, event.id);
 
     expect(copy).toHaveBeenCalledWith({
       tenantId,
@@ -146,8 +146,8 @@ describe('InstagramProcessor', () => {
     });
 
     const processor = new InstagramProcessor(prisma, { copy });
-    await processor.process(event.id);
-    await processor.process(event.id);
+    await processor.process(tenantId, event.id);
+    await processor.process(tenantId, event.id);
 
     await expect(prisma.attachment.findFirstOrThrow({ where: { originalUrl: sourceUrl } }))
       .resolves.toMatchObject({
@@ -217,7 +217,7 @@ describe('InstagramProcessor', () => {
       contentType: 'video/mp4',
     });
 
-    await new InstagramProcessor(prisma, { copy }).process(event.id);
+    await new InstagramProcessor(prisma, { copy }).process(tenantId, event.id);
 
     await expect(prisma.attachment.findFirstOrThrow({ where: { messageId: message.id } }))
       .resolves.toMatchObject({
@@ -272,8 +272,8 @@ describe('InstagramProcessor', () => {
       },
     });
 
-    await new InstagramProcessor(prisma, { copy }, { processIfTriggered }).process(event.id);
-    await new InstagramProcessor(prisma, { copy }, { processIfTriggered }).process(event.id);
+    await new InstagramProcessor(prisma, { copy }, { processIfTriggered }).process(tenantId, event.id);
+    await new InstagramProcessor(prisma, { copy }, { processIfTriggered }).process(tenantId, event.id);
 
     await expect(prisma.attachment.findFirstOrThrow({ where: { messageId: message.id } })).resolves.toMatchObject({
       type: 'LINK',
@@ -316,7 +316,7 @@ describe('InstagramProcessor', () => {
     });
     const processor = new InstagramProcessor(prisma, { copy }, { processIfTriggered });
 
-    await processor.process(event.id);
+    await processor.process(tenantId, event.id);
 
     const message = await prisma.message.findUniqueOrThrow({
       where: {
@@ -346,7 +346,7 @@ describe('InstagramProcessor', () => {
       },
     });
 
-    await new InstagramProcessor(prisma, { copy }).process(event.id);
+    await new InstagramProcessor(prisma, { copy }).process(tenantId, event.id);
 
     expect(await prisma.instagramCustomerProfile.count({
       where: { tenantId, participantId: 'ig-first-outbound-profile' },
@@ -395,7 +395,7 @@ describe('InstagramProcessor', () => {
       },
     });
 
-    await new InstagramProcessor(prisma, { copy }, { processIfTriggered }).process(event.id);
+    await new InstagramProcessor(prisma, { copy }, { processIfTriggered }).process(tenantId, event.id);
 
     expect(await prisma.message.count({ where: { conversationId: conversation.id } })).toBe(1);
     await expect(prisma.message.findUniqueOrThrow({ where: { id: localId } })).resolves.toMatchObject({
@@ -429,7 +429,7 @@ describe('InstagramProcessor', () => {
       },
     });
 
-    await new InstagramProcessor(prisma, { copy }).process(event.id);
+    await new InstagramProcessor(prisma, { copy }).process(tenantId, event.id);
 
     expect(await prisma.message.count({ where: { conversationId: conversation.id } })).toBe(1);
     await expect(prisma.message.findUniqueOrThrow({ where: { id: localId } })).resolves.toMatchObject({
@@ -461,7 +461,7 @@ describe('InstagramProcessor', () => {
       },
     });
 
-    await new InstagramProcessor(prisma, { copy }).process(event.id);
+    await new InstagramProcessor(prisma, { copy }).process(tenantId, event.id);
 
     expect(await prisma.message.count({ where: { conversationId: conversation.id } })).toBe(3);
     await expect(prisma.message.findFirstOrThrow({

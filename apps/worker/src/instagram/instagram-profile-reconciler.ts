@@ -1,4 +1,4 @@
-import type { PrismaClient } from '@autosale/database';
+import { type PrismaClient, withTenantTransaction } from '@autosale/database';
 
 import type { InstagramProfileEnrichmentJob } from './instagram-profile-enrichment.service.js';
 
@@ -10,6 +10,11 @@ interface ProfileQueue {
   ): Promise<unknown>;
 }
 
+interface DueInstagramProfile {
+  tenant_id: string;
+  profile_id: string;
+}
+
 export class InstagramProfileReconciler {
   constructor(
     private readonly prisma: PrismaClient,
@@ -19,32 +24,26 @@ export class InstagramProfileReconciler {
 
   async reconcile(): Promise<{ attempted: number; failed: number }> {
     const now = this.now();
-    await this.prisma.instagramCustomerProfile.updateMany({
-      where: {
-        status: { in: ['READY', 'UNAVAILABLE'] },
-        refreshAfter: { lte: now },
-      },
-      data: {
-        status: 'PENDING',
-        nextAttemptAt: now,
-        refreshVersion: { increment: 1 },
-      },
-    });
-
-    const due = await this.prisma.instagramCustomerProfile.findMany({
-      where: {
-        OR: [
-          { status: { in: ['PENDING', 'RETRYABLE_FAILURE'] }, nextAttemptAt: { lte: now } },
-          { status: 'PROCESSING', leaseExpiresAt: { lte: now } },
-        ],
-      },
-      orderBy: [{ nextAttemptAt: 'asc' }, { id: 'asc' }],
-      take: 100,
-      select: { id: true, tenantId: true, participantId: true, refreshVersion: true, attempts: true, nextAttemptAt: true },
-    });
+    const due = await this.prisma.$queryRaw<DueInstagramProfile[]>`
+      SELECT tenant_id, profile_id
+      FROM public.worker_due_instagram_profiles(${now}, 100)
+    `;
     let failed = 0;
-    for (const profile of due) {
+    for (const discovered of due) {
       try {
+        const profile = await withTenantTransaction(this.prisma, discovered.tenant_id, (transaction) =>
+          transaction.instagramCustomerProfile.findUnique({
+            where: { id: discovered.profile_id },
+            select: {
+              id: true,
+              tenantId: true,
+              participantId: true,
+              refreshVersion: true,
+              attempts: true,
+              nextAttemptAt: true,
+            },
+          }));
+        if (!profile) continue;
         await this.queue.add(
           'instagram.profile.enrich',
           {

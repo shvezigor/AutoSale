@@ -1,7 +1,7 @@
-import { Prisma, type PrismaClient } from '@autosale/database';
+import { Prisma, type PrismaClient, withTenantTransaction } from '@autosale/database';
 
 interface NormalizeQueue {
-  add(name: 'instagram.normalize', data: { eventId: string; correlationId: string }): Promise<unknown>;
+  add(name: 'instagram.normalize', data: { tenantId: string; eventId: string; correlationId: string }): Promise<unknown>;
 }
 
 export class DemoScenarioService {
@@ -12,16 +12,16 @@ export class DemoScenarioService {
   ) {}
 
   async start(tenantId: string): Promise<{ eventId: string; duplicate: boolean }> {
-    await this.prisma.product.upsert({
+    await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.product.upsert({
       where: { tenantId_sku: { tenantId, sku: 'DEMO-BAG-001' } },
       update: { name: 'Сумка Luna чорна', aliases: ['чорна сумка Luna', 'Luna black'], price: '1299.00', currency: 'UAH', active: true },
       create: { tenantId, sku: 'DEMO-BAG-001', name: 'Сумка Luna чорна', aliases: ['чорна сумка Luna', 'Luna black'], price: '1299.00', currency: 'UAH' },
-    });
+    }));
 
     const externalEventId = 'demo:instagram-order:v1';
     let event: { id: string };
     try {
-      event = await this.prisma.webhookEvent.create({
+      event = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.webhookEvent.create({
         data: {
           tenantId,
           provider: 'META',
@@ -29,17 +29,17 @@ export class DemoScenarioService {
           payload: this.payload(tenantId) as Prisma.InputJsonObject,
         },
         select: { id: true },
-      });
+      }));
     } catch (error) {
       if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== 'P2002') throw error;
-      event = await this.prisma.webhookEvent.findUniqueOrThrow({
+      event = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.webhookEvent.findUniqueOrThrow({
         where: { tenantId_provider_externalEventId: { tenantId, provider: 'META', externalEventId } },
         select: { id: true },
-      });
+      }));
       return { eventId: event.id, duplicate: true };
     }
 
-    await this.queue.add('instagram.normalize', { eventId: event.id, correlationId: event.id });
+    await this.queue.add('instagram.normalize', { tenantId, eventId: event.id, correlationId: event.id });
     return { eventId: event.id, duplicate: false };
   }
 

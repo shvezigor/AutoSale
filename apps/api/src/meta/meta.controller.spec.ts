@@ -96,7 +96,7 @@ describe('MetaController', () => {
     });
     expect(add).toHaveBeenCalledWith(
       'instagram.normalize',
-      { eventId: 'event-1', correlationId: 'event-1' },
+      { tenantId, eventId: 'event-1', correlationId: 'event-1' },
       { jobId: 'event-1', removeOnFail: true },
     );
     expect(resolveTenant).toHaveBeenCalledWith('17841400000000000');
@@ -151,7 +151,7 @@ describe('MetaController', () => {
     expect(add).toHaveBeenNthCalledWith(
       2,
       'instagram.normalize',
-      { eventId: 'event-2', correlationId: 'event-2' },
+      { tenantId: secondTenantId, eventId: 'event-2', correlationId: 'event-2' },
       { jobId: 'event-2', removeOnFail: true },
     );
   });
