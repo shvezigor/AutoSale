@@ -1,8 +1,11 @@
-import { CatalogueSkuOwnershipError } from '@autosale/database';
-import { GoogleSheetsReadError, GoogleSheetsTableValidationError, googleSheetsStructureFingerprint } from '@autosale/integrations';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { CatalogueSkuOwnershipError, type CatalogueImportCounts } from '@autosale/database';
+import { GoogleSheetsReadError, GoogleSheetsTableValidationError, googleSheetsStructureFingerprint, type ObjectStorage } from '@autosale/integrations';
+import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 import { GoogleCatalogueSyncProcessor } from './google-catalogue-sync.processor.js';
+
+type ProcessorImporter = NonNullable<ConstructorParameters<typeof GoogleCatalogueSyncProcessor>[3]>;
+type ProcessorNotifications = NonNullable<ConstructorParameters<typeof GoogleCatalogueSyncProcessor>[5]>;
 
 describe('GoogleCatalogueSyncProcessor', () => {
   const tenantId = '22222222-2222-4222-8222-222222222222';
@@ -21,16 +24,22 @@ describe('GoogleCatalogueSyncProcessor', () => {
   };
   let prisma: ReturnType<typeof prismaDouble>;
   let sheets: { readTable: ReturnType<typeof vi.fn> };
-  let importer: { importTable: ReturnType<typeof vi.fn> };
-  let storage: { put: ReturnType<typeof vi.fn> };
-  let notifications: { catalogueSyncCompleted: ReturnType<typeof vi.fn>; catalogueSyncFailed: ReturnType<typeof vi.fn> };
+  let importer: { importTable: Mock<ProcessorImporter['importTable']> };
+  let storage: { put: Mock<ObjectStorage['put']> };
+  let notifications: {
+    catalogueSyncCompleted: Mock<ProcessorNotifications['catalogueSyncCompleted']>;
+    catalogueSyncFailed: Mock<ProcessorNotifications['catalogueSyncFailed']>;
+  };
 
   beforeEach(() => {
     prisma = prismaDouble();
     sheets = { readTable: vi.fn().mockResolvedValue({ headers, rows: [['LUNA-01', 'Luna']], revision: 'revision-1' }) };
-    importer = { importTable: vi.fn().mockResolvedValue({ totalRows: 1, validRows: 1, createdRows: 1, updatedRows: 0, skippedRows: 0, failedRows: 0, rowErrors: [] }) };
-    storage = { put: vi.fn().mockResolvedValue({ key: 'snapshot', etag: 'etag' }) };
-    notifications = { catalogueSyncCompleted: vi.fn().mockResolvedValue(undefined), catalogueSyncFailed: vi.fn().mockResolvedValue(undefined) };
+    importer = { importTable: vi.fn<ProcessorImporter['importTable']>().mockResolvedValue({ totalRows: 1, validRows: 1, createdRows: 1, updatedRows: 0, skippedRows: 0, failedRows: 0, rowErrors: [] }) };
+    storage = { put: vi.fn<ObjectStorage['put']>().mockResolvedValue({ key: 'snapshot', etag: 'etag' }) };
+    notifications = {
+      catalogueSyncCompleted: vi.fn<ProcessorNotifications['catalogueSyncCompleted']>().mockResolvedValue(undefined),
+      catalogueSyncFailed: vi.fn<ProcessorNotifications['catalogueSyncFailed']>().mockResolvedValue(undefined),
+    };
   });
 
   afterEach(() => {
@@ -287,7 +296,7 @@ describe('GoogleCatalogueSyncProcessor', () => {
       if (data.syncLeaseId === null) { leaseState.id = null; leaseState.expiresAt = 0; }
       return { count: 1 };
     });
-    let finishImport!: (value: CatalogueImportCountsFixture) => void;
+    let finishImport!: (value: CatalogueImportCounts) => void;
     importer.importTable.mockImplementation(() => importer.importTable.mock.calls.length === 1
       ? new Promise((resolve) => { finishImport = resolve; })
       : Promise.resolve({ totalRows: 1, validRows: 1, createdRows: 1, updatedRows: 0, skippedRows: 0, failedRows: 0, rowErrors: [] }));
@@ -428,8 +437,3 @@ describe('GoogleCatalogueSyncProcessor', () => {
     return { ...delegates, $transaction: vi.fn().mockImplementation((work) => work(delegates)) };
   }
 });
-
-type CatalogueImportCountsFixture = {
-  totalRows: number; validRows: number; createdRows: number; updatedRows: number; skippedRows: number; failedRows: number;
-  rowErrors: Array<{ rowNumber?: number; errors: string[] }>;
-};

@@ -8,10 +8,14 @@ syncInjectedDepsAfterScripts:
   - build
 
 overrides:
+  'brace-expansion@1': 1.1.21
+  'brace-expansion@2': 2.1.7
   deepmerge-ts: 8.0.0
-  fast-uri: 3.1.7
-  multer: 2.3.0
-  mysql2: 3.22.0
+  fast-uri: 3.1.8
+  js-yaml: 5.4.1
+  multer: 2.4.0
+  mysql2: 3.23.1
+  qs: 6.16.0
   sharp: 0.35.4
   uuid: 11.1.1
 
