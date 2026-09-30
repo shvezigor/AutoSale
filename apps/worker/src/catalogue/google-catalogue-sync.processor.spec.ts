@@ -2,6 +2,11 @@ import { CatalogueSkuOwnershipError, type CatalogueImportCounts } from '@autosal
 import { GoogleSheetsReadError, GoogleSheetsTableValidationError, googleSheetsStructureFingerprint, type ObjectStorage } from '@autosale/integrations';
 import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
+vi.mock('@autosale/database', async (importOriginal) => ({
+  ...await importOriginal<typeof import('@autosale/database')>(),
+  withTenantTransaction: async <T>(prisma: unknown, _tenantId: string, operation: (transaction: unknown) => Promise<T>) => operation(prisma),
+}));
+
 import { GoogleCatalogueSyncProcessor } from './google-catalogue-sync.processor.js';
 
 type ProcessorImporter = NonNullable<ConstructorParameters<typeof GoogleCatalogueSyncProcessor>[3]>;

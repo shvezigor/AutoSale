@@ -333,12 +333,14 @@ export class OrdersService {
   };
 
   private async productNames(tenantId: string): Promise<Map<string, string>> {
-    const products = await this.prisma.product.findMany({ where: { tenantId }, select: { sku: true, name: true } });
+    const products = await withTenantTransaction(this.prisma, tenantId, (transaction) =>
+      transaction.product.findMany({ where: { tenantId }, select: { sku: true, name: true } }));
     return new Map(products.map((product) => [product.sku, product.name]));
   }
 
   private async productPricing(tenantId: string): Promise<Map<string, { sku: string; price: string | null; currency: string | null }>> {
-    const products = await this.prisma.product.findMany({ where: { tenantId, active: true }, select: { sku: true, price: true, currency: true } });
+    const products = await withTenantTransaction(this.prisma, tenantId, (transaction) =>
+      transaction.product.findMany({ where: { tenantId, active: true }, select: { sku: true, price: true, currency: true } }));
     return new Map(products.map((product) => [product.sku, { sku: product.sku, price: product.price?.toFixed(2) ?? null, currency: product.currency }]));
   }
 

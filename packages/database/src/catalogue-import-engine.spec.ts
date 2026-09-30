@@ -2,6 +2,8 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { CatalogueImportLeaseLostError, CatalogueSkuOwnershipError, buildCatalogueImportPlan, importCatalogueTable } from './index.js';
 
+const tenantId = '11111111-1111-4111-8111-111111111111';
+
 const mapping = [
   { source: 'sku', target: 'sku' as const }, { source: 'name', target: 'name' as const },
   { source: 'price', target: 'price' as const }, { source: 'stock', target: 'stockQuantity' as const },
@@ -14,7 +16,7 @@ describe('catalogue table import engine', () => {
   it('generates the same SKU from source and product name when the source has no SKU column', async () => {
     const prisma = prismaDouble([]);
     const input = {
-      tenantId: 'tenant-1', sourceId: 'google-source', mapping: [{ source: 'name', target: 'name' as const }],
+      tenantId, sourceId: 'google-source', mapping: [{ source: 'name', target: 'name' as const }],
       transformSettings: null, headers: ['Name'], rows: [['Двері Неаполь'], ['Двері Флоренція']],
     };
 
@@ -29,7 +31,7 @@ describe('catalogue table import engine', () => {
 
   it('generates an SKU when a mapped SKU cell is empty', async () => {
     const plan = await buildCatalogueImportPlan(prismaDouble([]) as never, {
-      tenantId: 'tenant-1', sourceId: 'google-source',
+      tenantId, sourceId: 'google-source',
       mapping: [{ source: 'sku', target: 'sku' }, { source: 'name', target: 'name' }],
       transformSettings: null, headers: ['SKU', 'Name'], rows: [['', 'Двері Неаполь']],
     });
@@ -42,7 +44,7 @@ describe('catalogue table import engine', () => {
   it('distinguishes same-name priced variants and skips unpriced category rows in a name-only source', async () => {
     const prisma = prismaDouble([]);
     const plan = await buildCatalogueImportPlan(prisma as never, {
-      tenantId: 'tenant-1', sourceId: 'google-source',
+      tenantId, sourceId: 'google-source',
       mapping: [{ source: 'name', target: 'name' }, { source: 'price', target: 'price' }],
       transformSettings: null, headers: ['Name', 'Price'],
       rows: [['Двері двокольорові', 158], ['Двері двокольорові', 165], ['Додаткова комплектація', '']],
@@ -58,7 +60,7 @@ describe('catalogue table import engine', () => {
   it('uses the production normalization and validation semantics for every supported value type', async () => {
     const prisma = prismaDouble([{ sku: 'OLD', sourceId: 'source-1' }]);
     const plan = await buildCatalogueImportPlan(prisma as never, {
-      tenantId: 'tenant-1', sourceId: 'source-1', mapping,
+      tenantId, sourceId: 'source-1', mapping,
       transformSettings: { clearEmptyFields: ['description'] },
       headers: [' SKU ', 'Name', 'Price', 'Stock', 'Active', 'Aliases', 'Images', 'Attributes', 'Description'],
       rows: [
@@ -81,7 +83,7 @@ describe('catalogue table import engine', () => {
   it('detects duplicate normalized SKUs and never upserts either row', async () => {
     const prisma = prismaDouble([]);
     const result = await importCatalogueTable(prisma as never, {
-      tenantId: 'tenant-1', sourceId: 'source-1', mapping: mapping.slice(0, 2), transformSettings: null,
+      tenantId, sourceId: 'source-1', mapping: mapping.slice(0, 2), transformSettings: null,
       headers: ['SKU', 'Name'], rows: [[' luna-1 ', 'One'], ['LUNA-1', 'Two']],
     });
 
@@ -91,7 +93,7 @@ describe('catalogue table import engine', () => {
 
   it('preserves the original source row number in normalized import errors', async () => {
     const plan = await buildCatalogueImportPlan(prismaDouble([]) as never, {
-      tenantId: 'tenant-1', sourceId: 'source-1', mapping: mapping.slice(0, 2), transformSettings: null,
+      tenantId, sourceId: 'source-1', mapping: mapping.slice(0, 2), transformSettings: null,
       headers: ['SKU', 'Name'], rows: [['BAD', '']], sourceRowNumbers: [24],
     });
 
@@ -102,7 +104,7 @@ describe('catalogue table import engine', () => {
     const prisma = prismaDouble([{ sku: 'LUNA-1', sourceId: 'old-upload' }]);
 
     await expect(importCatalogueTable(prisma as never, {
-      tenantId: 'tenant-1', sourceId: 'new-upload', ownershipPolicy: 'REASSIGN', mapping: mapping.slice(0, 2), transformSettings: null,
+      tenantId, sourceId: 'new-upload', ownershipPolicy: 'REASSIGN', mapping: mapping.slice(0, 2), transformSettings: null,
       headers: ['SKU', 'Name'], rows: [['LUNA-1', 'Luna renamed by Task 7']],
     })).resolves.toMatchObject({ validRows: 1, updatedRows: 1 });
     expect(prisma.product.upsert).toHaveBeenCalledWith(expect.objectContaining({
@@ -114,7 +116,7 @@ describe('catalogue table import engine', () => {
     const prisma = prismaDouble([{ sku: 'LUNA-1', sourceId: 'source-2' }]);
 
     await expect(importCatalogueTable(prisma as never, {
-      tenantId: 'tenant-1', sourceId: 'source-1', ownershipPolicy: 'FENCE_CROSS_SOURCE', mapping: mapping.slice(0, 2), transformSettings: null,
+      tenantId, sourceId: 'source-1', ownershipPolicy: 'FENCE_CROSS_SOURCE', mapping: mapping.slice(0, 2), transformSettings: null,
       headers: ['SKU', 'Name'], rows: [['LUNA-1', 'Luna']],
     })).rejects.toBeInstanceOf(CatalogueSkuOwnershipError);
     expect(prisma.product.upsert).not.toHaveBeenCalled();
@@ -125,7 +127,7 @@ describe('catalogue table import engine', () => {
     const rows = Array.from({ length: 101 }, (_, index) => [`SKU-${index + 1}`, `Product ${index + 1}`]);
 
     await expect(importCatalogueTable(prisma as never, {
-      tenantId: 'tenant-1', sourceId: 'google-source', ownershipPolicy: 'FENCE_CROSS_SOURCE', mapping: mapping.slice(0, 2), transformSettings: null,
+      tenantId, sourceId: 'google-source', ownershipPolicy: 'FENCE_CROSS_SOURCE', mapping: mapping.slice(0, 2), transformSettings: null,
       headers: ['SKU', 'Name'], rows,
     })).rejects.toBeInstanceOf(CatalogueSkuOwnershipError);
     expect(prisma.product.upsert).not.toHaveBeenCalled();
@@ -135,7 +137,7 @@ describe('catalogue table import engine', () => {
     const prisma = prismaDouble([], { leaseCounts: [0], transactionalWrites: true });
 
     await expect(importCatalogueTable(prisma as never, {
-      tenantId: 'tenant-1', sourceId: 'google-source', ownershipPolicy: 'FENCE_CROSS_SOURCE', mapping: mapping.slice(0, 2), transformSettings: null,
+      tenantId, sourceId: 'google-source', ownershipPolicy: 'FENCE_CROSS_SOURCE', mapping: mapping.slice(0, 2), transformSettings: null,
       headers: ['SKU', 'Name'], rows: [['LUNA-1', 'Luna']],
       lease: { id: 'lease-1', syncVersion: 7, ttlMs: 300_000 },
     })).rejects.toBeInstanceOf(CatalogueImportLeaseLostError);
@@ -146,7 +148,7 @@ describe('catalogue table import engine', () => {
     const prisma = prismaDouble([], { leaseOwned: false, transactionalWrites: true });
 
     await expect(importCatalogueTable(prisma as never, {
-      tenantId: 'tenant-1', sourceId: 'google-source', ownershipPolicy: 'FENCE_CROSS_SOURCE', mapping: mapping.slice(0, 2), transformSettings: null,
+      tenantId, sourceId: 'google-source', ownershipPolicy: 'FENCE_CROSS_SOURCE', mapping: mapping.slice(0, 2), transformSettings: null,
       headers: ['SKU', 'Name'], rows: [['LUNA-1', 'Luna']],
       lease: { id: 'expired-lease', syncVersion: 7, ttlMs: 300_000 },
     })).rejects.toBeInstanceOf(CatalogueImportLeaseLostError);

@@ -70,10 +70,9 @@ export class TriggeredOrderProcessor {
             select: { displayName: true, profile: { select: { displayName: true, username: true } } },
           }),
         })),
-        this.prisma.product.findMany({
-          where: { tenantId: anchor.tenantId, active: true },
-          orderBy: { name: 'asc' },
-        }),
+        withTenantTransaction(this.prisma, anchor.tenantId, (transaction) => transaction.product.findMany({
+          where: { tenantId: anchor.tenantId, active: true }, orderBy: { name: 'asc' },
+        })),
       ]);
       const { recentMessages, conversation } = conversationContext;
       const result = await this.recognition.recognize(
@@ -272,10 +271,9 @@ export class TriggeredOrderProcessor {
             select: { displayName: true, profile: { select: { displayName: true, username: true } } },
           }),
         })),
-        this.prisma.product.findMany({
-          where: { tenantId: trigger.tenantId, active: true },
-          orderBy: { name: 'asc' },
-        }),
+        withTenantTransaction(this.prisma, trigger.tenantId, (transaction) => transaction.product.findMany({
+          where: { tenantId: trigger.tenantId, active: true }, orderBy: { name: 'asc' },
+        })),
       ]);
       const { recentMessages, conversation } = conversationContext;
       const result = await this.recognition.recognize(

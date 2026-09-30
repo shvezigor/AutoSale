@@ -469,7 +469,9 @@ export class DeliveryService {
       delivery?: { city?: string | null; novaPoshtaBranch?: string | null; address?: string | null };
     };
     const skus = order.items.map((item) => item.catalogId).filter((value): value is string => Boolean(value));
-    const products = await this.prisma.product.findMany({ where: { tenantId: order.tenantId, sku: { in: skus } }, select: { sku: true, name: true, price: true } });
+    const products = await withTenantTransaction(this.prisma, order.tenantId, (transaction) => transaction.product.findMany({
+      where: { tenantId: order.tenantId, sku: { in: skus } }, select: { sku: true, name: true, price: true },
+    }));
     const bySku = new Map(products.map((product) => [product.sku, product]));
     const declaredValue = order.items.reduce((sum, item) => sum + Number(bySku.get(item.catalogId ?? '')?.price ?? 0) * item.quantity, 0);
     const description = order.items.map((item) => bySku.get(item.catalogId ?? '')?.name ?? item.originalText).filter(Boolean).join(', ').slice(0, 100) || 'Товари';

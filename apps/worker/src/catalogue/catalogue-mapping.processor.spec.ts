@@ -3,6 +3,11 @@ import { describe, expect, it, vi } from 'vitest';
 import { CatalogueMappingProcessor } from './catalogue-mapping.processor.js';
 import { CatalogueMappingReconciler } from './catalogue-mapping-reconciler.js';
 
+vi.mock('@autosale/database', async (importOriginal) => ({
+  ...await importOriginal<typeof import('@autosale/database')>(),
+  withTenantTransaction: async <T>(prisma: unknown, _tenantId: string, operation: (transaction: unknown) => Promise<T>) => operation(prisma),
+}));
+
 const tenantId = '11111111-1111-4111-8111-111111111111';
 const runId = '22222222-2222-4222-8222-222222222222';
 
@@ -332,6 +337,7 @@ describe('CatalogueMappingProcessor', () => {
         findMany: vi.fn().mockImplementation(async () => run.status === 'UPLOADED' || (run.status === 'MAPPING' && run.expiresAt !== null && run.expiresAt < new Date()) ? [{ id: runId, tenantId }] : []),
       },
       catalogueMapping: { findFirst: vi.fn().mockResolvedValue(null), create: vi.fn().mockResolvedValue({ id: 'mapping-heartbeat-long' }) },
+      $queryRaw: vi.fn().mockResolvedValue([]),
       $transaction: async (work: (tx: unknown) => Promise<unknown>) => work(prisma),
     };
     let resolveSuggestion!: (value: { proposal: { columns: Array<{ source: string; target: 'sku'; confidence: number }> }; metadata: { responseId: string; model: string; promptVersion: string; schemaVersion: string; latencyMs: number; inputTokens: number; outputTokens: number } }) => void;

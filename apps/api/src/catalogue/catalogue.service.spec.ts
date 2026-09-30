@@ -3,6 +3,11 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { CatalogueService } from './catalogue.service.js';
 
+vi.mock('@autosale/database', async (importOriginal) => ({
+  ...await importOriginal<typeof import('@autosale/database')>(),
+  withTenantTransaction: async <T>(prisma: unknown, _tenantId: string, operation: (transaction: unknown) => Promise<T>) => operation(prisma),
+}));
+
 const product = {
   id: '11111111-1111-4111-8111-111111111111',
   sku: 'LUNA-01',
@@ -91,8 +96,7 @@ describe('CatalogueService', () => {
   it('clears only the authenticated tenant catalogue and writes an audit event', async () => {
     const deleteMany = vi.fn().mockResolvedValue({ count: 14 });
     const auditCreate = vi.fn().mockResolvedValue({});
-    const transaction = { product: { deleteMany }, securityAuditLog: { create: auditCreate } };
-    const service = new CatalogueService({ $transaction: vi.fn((operation) => operation(transaction)) } as never);
+    const service = new CatalogueService({ product: { deleteMany }, securityAuditLog: { create: auditCreate } } as never);
 
     await expect(service.clear('tenant-a', 'user-a')).resolves.toEqual({ deleted: 14 });
 

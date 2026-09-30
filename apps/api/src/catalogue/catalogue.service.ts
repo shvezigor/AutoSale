@@ -1,5 +1,5 @@
 import type { CatalogueProduct } from '@autosale/contracts';
-import { Prisma, type PrismaClient } from '@autosale/database';
+import { Prisma, type PrismaClient, withTenantTransaction } from '@autosale/database';
 import { ConflictException, NotFoundException } from '@nestjs/common';
 
 export type CatalogueListQuery = {
@@ -44,25 +44,23 @@ export class CatalogueService {
         ],
       } : {}),
     };
-    const [rows, total] = await Promise.all([
-      this.prisma.product.findMany({
+    const [rows, total] = await withTenantTransaction(this.prisma, tenantId, (transaction) => Promise.all([
+      transaction.product.findMany({
         where,
         orderBy: catalogueOrderBy(query.sort ?? 'name', query.direction ?? 'asc'),
         skip: (query.page - 1) * query.pageSize,
         take: query.pageSize,
         select: productSelect,
       }),
-      this.prisma.product.count({ where }),
-    ]);
+      transaction.product.count({ where }),
+    ]));
     return { items: rows.map(mapProduct), page: query.page, pageSize: query.pageSize, total };
   }
 
   async create(tenantId: string, input: CatalogueProductCreate): Promise<CatalogueProduct> {
     try {
-      const row = await this.prisma.product.create({
-        data: mapCreate(tenantId, input),
-        select: productSelect,
-      });
+      const row = await withTenantTransaction(this.prisma, tenantId, (transaction) =>
+        transaction.product.create({ data: mapCreate(tenantId, input), select: productSelect }));
       return mapProduct(row);
     } catch (error) {
       throwUniqueSkuConflict(error);
@@ -71,20 +69,21 @@ export class CatalogueService {
 
   async update(tenantId: string, id: string, input: CatalogueProductUpdate): Promise<CatalogueProduct> {
     try {
-      const result = await this.prisma.product.updateMany({
-        where: { id, tenantId },
-        data: mapUpdate(input),
+      return await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+        const result = await transaction.product.updateMany({ where: { id, tenantId }, data: mapUpdate(input) });
+        if (result.count !== 1) throw new NotFoundException('Catalogue product not found');
+        const row = await transaction.product.findFirst({ where: { id, tenantId }, select: productSelect });
+        if (!row) throw new NotFoundException('Catalogue product not found');
+        return mapProduct(row);
       });
-      if (result.count !== 1) throw new NotFoundException('Catalogue product not found');
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
       throwUniqueSkuConflict(error);
     }
-    return this.findOne(tenantId, id);
   }
 
   async clear(tenantId: string, userId: string): Promise<{ deleted: number }> {
-    return this.prisma.$transaction(async (transaction) => {
+    return withTenantTransaction(this.prisma, tenantId, async (transaction) => {
       const result = await transaction.product.deleteMany({ where: { tenantId } });
       await transaction.securityAuditLog.create({ data: {
         tenantId,
@@ -98,11 +97,6 @@ export class CatalogueService {
     });
   }
 
-  private async findOne(tenantId: string, id: string): Promise<CatalogueProduct> {
-    const row = await this.prisma.product.findFirst({ where: { id, tenantId }, select: productSelect });
-    if (!row) throw new NotFoundException('Catalogue product not found');
-    return mapProduct(row);
-  }
 }
 
 function catalogueOrderBy(sort: NonNullable<CatalogueListQuery['sort']>, direction: NonNullable<CatalogueListQuery['direction']>): Prisma.ProductOrderByWithRelationInput[] {

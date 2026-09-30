@@ -1,5 +1,5 @@
 import type { CatalogueMappingProposal, RawCatalogueMatrix, TableStructureProposal } from '@autosale/contracts';
-import type { PrismaClient } from '@autosale/database';
+import { type PrismaClient, withTenantTransaction } from '@autosale/database';
 import { googleSheetsStructureFingerprint, matrixFromRows, type ObjectStorage } from '@autosale/integrations';
 import { parse as parseCsv } from 'csv-parse/sync';
 import { randomUUID } from 'node:crypto';
@@ -39,7 +39,7 @@ export class CatalogueMappingProcessor {
   async process(job: CatalogueMappingJob): Promise<{ status: 'COMPLETED' | 'MAPPING_REVIEW' | 'SKIPPED'; proposal: CatalogueMappingSuggestion['proposal'] | null }> {
     const leaseId = randomUUID();
     const claimedAt = new Date();
-    const claimed = await this.prisma.catalogueImportRun.updateMany({
+    const claimed = await withTenantTransaction(this.prisma, job.tenantId, (transaction) => transaction.catalogueImportRun.updateMany({
       where: {
         id: job.runId, tenantId: job.tenantId,
         OR: [
@@ -48,7 +48,7 @@ export class CatalogueMappingProcessor {
         ],
       },
       data: { status: 'MAPPING', mappingLeaseId: leaseId, mappingLeaseExpiresAt: leaseExpiry(claimedAt) },
-    });
+    }));
     if (claimed.count !== 1) return { status: 'SKIPPED', proposal: null };
 
     let ownsLease = true;
@@ -57,7 +57,7 @@ export class CatalogueMappingProcessor {
     const heartbeat = async (): Promise<boolean> => {
       if (!ownsLease) return false;
       const now = new Date();
-      const refreshed = await this.prisma.catalogueImportRun.updateMany({
+      const refreshed = await withTenantTransaction(this.prisma, job.tenantId, (transaction) => transaction.catalogueImportRun.updateMany({
         where: {
           id: job.runId, tenantId: job.tenantId, status: 'MAPPING', mappingLeaseId: leaseId,
           // An owner may extend only its still-valid lease.  Once it has expired,
@@ -65,17 +65,17 @@ export class CatalogueMappingProcessor {
           mappingLeaseExpiresAt: { gt: now },
         },
         data: { mappingLeaseExpiresAt: leaseExpiry(now) },
-      });
+      }));
       ownsLease = refreshed.count === 1;
       return ownsLease;
     };
     const heartbeatTimer = setInterval(() => { void heartbeat().catch(() => { ownsLease = false; }); }, CATALOGUE_MAPPING_HEARTBEAT_MS);
 
     try {
-      const run = await this.prisma.catalogueImportRun.findFirst({
+      const run = await withTenantTransaction(this.prisma, job.tenantId, (transaction) => transaction.catalogueImportRun.findFirst({
         where: { id: job.runId, tenantId: job.tenantId, status: 'MAPPING', mappingLeaseId: leaseId },
         include: { source: { select: { objectKey: true, type: true, headerFingerprint: true } } },
-      });
+      }));
       const objectKey = run?.source.type === 'GOOGLE_SHEETS' ? run.snapshotObjectKey : run?.source.objectKey;
       if (!run || !objectKey) throw new Error('source unavailable');
       if (this.hybrid) {
@@ -95,7 +95,7 @@ export class CatalogueMappingProcessor {
       const autoImport = decision.action === 'AUTO_IMPORT';
 
       failureCode = 'MAPPING_PERSIST_FAILED';
-      await this.prisma.$transaction(async (tx) => {
+      await withTenantTransaction(this.prisma, job.tenantId, async (tx) => {
         const latest = await tx.catalogueMapping.findFirst({
           where: { tenantId: job.tenantId, sourceId: run.sourceId }, orderBy: { version: 'desc' }, select: { version: true },
         });
@@ -132,7 +132,7 @@ export class CatalogueMappingProcessor {
     } catch (error) {
       if (autoImportStarted) throw error;
       if (!ownsLease) return { status: 'SKIPPED', proposal: null };
-      const fallback = await this.prisma.catalogueImportRun.updateMany({
+      const fallback = await withTenantTransaction(this.prisma, job.tenantId, (transaction) => transaction.catalogueImportRun.updateMany({
         where: {
           id: job.runId, tenantId: job.tenantId, status: 'MAPPING', mappingLeaseId: leaseId,
           mappingLeaseExpiresAt: { gt: new Date() },
@@ -141,7 +141,7 @@ export class CatalogueMappingProcessor {
           mappingId: null, status: 'MAPPING_REVIEW', mappingLeaseId: null, mappingLeaseExpiresAt: null,
           rowErrors: [{ errors: [mappingFailureCode(error, failureCode)] }],
         },
-      });
+      }));
       return fallback.count === 1 ? { status: 'MAPPING_REVIEW', proposal: null } : { status: 'SKIPPED', proposal: null };
     } finally {
       clearInterval(heartbeatTimer);
@@ -203,7 +203,7 @@ export class CatalogueMappingProcessor {
     const confident = hybridIsConfident(structure.proposal, decisions, normalized.products.length);
     const autoImport = Boolean(this.autoImporter) && confident;
 
-    await this.prisma.$transaction(async (tx) => {
+    await withTenantTransaction(this.prisma, job.tenantId, async (tx) => {
       const latest = await tx.catalogueMapping.findFirst({
         where: { tenantId: job.tenantId, sourceId: run.sourceId }, orderBy: { version: 'desc' }, select: { version: true },
       });

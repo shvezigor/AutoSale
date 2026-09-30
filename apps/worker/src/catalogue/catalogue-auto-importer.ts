@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
-import { importCatalogueTable, type PrismaClient } from '@autosale/database';
+import { importCatalogueTable, type PrismaClient, withTenantTransaction } from '@autosale/database';
 import type { ObjectStorage } from '@autosale/integrations';
 import { parse as parseCsv } from 'csv-parse/sync';
 import ExcelJS from 'exceljs';
@@ -18,13 +18,13 @@ export class CatalogueAutoImporter {
   ) {}
 
   async process(input: CatalogueMappingJob): Promise<{ status: 'COMPLETED' }> {
-    const run = await this.prisma.catalogueImportRun.findFirst({
+    const run = await withTenantTransaction(this.prisma, input.tenantId, (transaction) => transaction.catalogueImportRun.findFirst({
       where: { id: input.runId, tenantId: input.tenantId, status: 'PREVIEW_READY' },
       include: {
         mapping: { select: { columns: true, transformSettings: true } },
         source: { select: { type: true, objectKey: true, syncVersion: true } },
       },
-    });
+    }));
     if (!run?.mapping) throw new Error('Auto import is unavailable');
     const objectKey = run.snapshotObjectKey ?? run.source.objectKey;
     if (!objectKey) throw new Error('Auto import source is unavailable');
@@ -33,10 +33,10 @@ export class CatalogueAutoImporter {
     const mapping = readMapping(run.mapping.columns);
     const lease = run.source.type === 'GOOGLE_SHEETS' ? await this.claimGoogle(input, run.sourceId, run.sourceSyncVersion) : undefined;
     if (!lease) {
-      const claimed = await this.prisma.catalogueImportRun.updateMany({
+      const claimed = await withTenantTransaction(this.prisma, input.tenantId, (transaction) => transaction.catalogueImportRun.updateMany({
         where: { id: input.runId, tenantId: input.tenantId, status: 'PREVIEW_READY' },
         data: { status: 'PROCESSING', startedAt: new Date() },
-      });
+      }));
       if (claimed.count !== 1) throw new Error('Auto import was already claimed');
     }
 
@@ -53,26 +53,28 @@ export class CatalogueAutoImporter {
         ...(lease ? { lease } : {}),
       });
       const completedAt = new Date();
+      await withTenantTransaction(this.prisma, input.tenantId, async (transaction) => {
       if (lease) {
-        const activated = await this.prisma.catalogueSource.updateMany({
+        const activated = await transaction.catalogueSource.updateMany({
           where: { id: run.sourceId, tenantId: input.tenantId, syncLeaseId: lease.id, syncVersion: lease.syncVersion, syncLeaseExpiresAt: { gt: completedAt } },
           data: { status: 'ACTIVE', lastSyncedAt: completedAt, lastErrorSummary: null, syncLeaseId: null, syncLeaseExpiresAt: null },
         });
         if (activated.count !== 1) throw new Error('Auto import lease was lost');
       } else {
-        await this.prisma.catalogueSource.updateMany({ where: { id: run.sourceId, tenantId: input.tenantId }, data: { status: 'ACTIVE', lastSyncedAt: completedAt, lastErrorSummary: null } });
+        await transaction.catalogueSource.updateMany({ where: { id: run.sourceId, tenantId: input.tenantId }, data: { status: 'ACTIVE', lastSyncedAt: completedAt, lastErrorSummary: null } });
       }
-      const completed = await this.prisma.catalogueImportRun.updateMany({
+      const completed = await transaction.catalogueImportRun.updateMany({
         where: { id: input.runId, tenantId: input.tenantId, status: 'PROCESSING', ...(lease ? { sourceSyncVersion: lease.syncVersion } : {}) },
         data: { status: 'COMPLETED', ...result, rowErrors: result.rowErrors as never, completedAt },
       });
       if (completed.count !== 1) throw new Error('Auto import completion was lost');
+      });
       return { status: 'COMPLETED' };
     } catch (error) {
-      await this.prisma.catalogueImportRun.updateMany({
+      await withTenantTransaction(this.prisma, input.tenantId, (transaction) => transaction.catalogueImportRun.updateMany({
         where: { id: input.runId, tenantId: input.tenantId, status: 'PROCESSING' },
         data: { status: 'FAILED', rowErrors: [{ errors: ['IMPORT_FAILED'] }], completedAt: new Date() },
-      });
+      }));
       throw error;
     }
   }
@@ -81,21 +83,23 @@ export class CatalogueAutoImporter {
     if (sourceSyncVersion === null) throw new Error('Google source version is unavailable');
     const id = randomUUID();
     const now = new Date();
-    const claimedSource = await this.prisma.catalogueSource.updateMany({
+    return withTenantTransaction(this.prisma, input.tenantId, async (transaction) => {
+    const claimedSource = await transaction.catalogueSource.updateMany({
       where: { id: sourceId, tenantId: input.tenantId, type: 'GOOGLE_SHEETS', syncVersion: sourceSyncVersion, OR: [{ syncLeaseId: null }, { syncLeaseExpiresAt: { lte: now } }] },
       data: { syncLeaseId: id, syncLeaseExpiresAt: new Date(now.getTime() + LEASE_MS), syncVersion: { increment: 1 } },
     });
     if (claimedSource.count !== 1) throw new Error('Google source changed before auto import');
     const syncVersion = sourceSyncVersion + 1;
-    const claimedRun = await this.prisma.catalogueImportRun.updateMany({
+    const claimedRun = await transaction.catalogueImportRun.updateMany({
       where: { id: input.runId, tenantId: input.tenantId, status: 'PREVIEW_READY', sourceSyncVersion },
       data: { status: 'PROCESSING', startedAt: now, sourceSyncVersion: syncVersion },
     });
     if (claimedRun.count !== 1) {
-      await this.prisma.catalogueSource.updateMany({ where: { id: sourceId, tenantId: input.tenantId, syncLeaseId: id, syncVersion }, data: { syncLeaseId: null, syncLeaseExpiresAt: null } });
+      await transaction.catalogueSource.updateMany({ where: { id: sourceId, tenantId: input.tenantId, syncLeaseId: id, syncVersion }, data: { syncLeaseId: null, syncLeaseExpiresAt: null } });
       throw new Error('Auto import was already claimed');
     }
     return { id, syncVersion, ttlMs: LEASE_MS };
+    });
   }
 }
 

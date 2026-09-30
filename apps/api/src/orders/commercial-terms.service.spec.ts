@@ -10,6 +10,7 @@ describe('CommercialTermsService', () => {
     const bankFindMany = vi.fn().mockResolvedValue([]);
     const tx = {
       $queryRaw: vi.fn(),
+      product: { findMany: vi.fn().mockResolvedValue([{ sku: 'SKU-1', price: { toFixed: () => '10.00' }, currency: 'UAH' }]) },
       order: { findFirst: vi.fn().mockResolvedValue({
         id: 'order', tenantId: 'tenant', procurementHandedOffAt: null, telegramDeliveries: [], shipments: [],
         items: [{ id: 'item', catalogId: 'SKU-1', quantity: 2 }],
@@ -21,7 +22,6 @@ describe('CommercialTermsService', () => {
     };
     const transaction = vi.fn((callback) => callback(tx));
     const service = new CommercialTermsService({
-      product: { findMany: vi.fn().mockResolvedValue([{ sku: 'SKU-1', price: { toFixed: () => '10.00' }, currency: 'UAH' }]) },
       $transaction: transaction,
     } as never);
 
@@ -31,7 +31,7 @@ describe('CommercialTermsService', () => {
     expect(bankFindMany).toHaveBeenCalledWith(expect.objectContaining({
       where: { tenantId, legalEntityId: 'entity', currency: 'UAH', active: true },
     }));
-    expect(transaction).toHaveBeenCalledTimes(2);
+    expect(transaction).toHaveBeenCalledTimes(3);
   });
 
   it('rejects a stale commercial terms version', async () => {

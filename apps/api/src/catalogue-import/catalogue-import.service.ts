@@ -2,7 +2,7 @@ import { createHash, randomUUID } from 'node:crypto';
 import { basename, extname } from 'node:path';
 
 import { catalogueTargetFieldSchema, type CatalogueImportSummary, type CataloguePreview, type CatalogueTargetField } from '@autosale/contracts';
-import { buildCatalogueImportPlan, CatalogueImportLeaseLostError, importCatalogueTable, Prisma, type PrismaClient } from '@autosale/database';
+import { buildCatalogueImportPlan, CatalogueImportLeaseLostError, importCatalogueTable, Prisma, type PrismaClient, withTenantTransaction } from '@autosale/database';
 import { googleSheetsStructureFingerprint, type ObjectStorage } from '@autosale/integrations';
 import { BadRequestException, ConflictException, Logger, NotFoundException, ServiceUnavailableException, UnprocessableEntityException } from '@nestjs/common';
 
@@ -111,7 +111,7 @@ export class CatalogueImportService {
       await this.storage.put({ key: objectKey, body: file.buffer, contentType: file.mediaType });
       storedObjectKey = objectKey;
 
-      const run = await this.prisma.$transaction(async (tx) => {
+      const run = await withTenantTransaction(this.prisma, tenantId, async (tx) => {
         const source = await tx.catalogueSource.create({
           data: {
             tenantId,
@@ -154,7 +154,7 @@ export class CatalogueImportService {
   }
 
   async updateMapping(tenantId: string, userId: string, runId: string, input: CatalogueMappingInput): Promise<CataloguePreview> {
-    await this.prisma.$transaction(async (tx) => {
+    await withTenantTransaction(this.prisma, tenantId, async (tx) => {
       const lock = await tx.catalogueImportRun.updateMany({
         where: { id: runId, tenantId, status: { in: [...REMAPPABLE_STATUSES] } },
         data: { status: 'MAPPING' },
@@ -200,7 +200,7 @@ export class CatalogueImportService {
     });
 
     const preview = await this.preview(tenantId, runId);
-    await this.prisma.catalogueImportRun.updateMany({
+    await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.catalogueImportRun.updateMany({
       where: { id: runId, tenantId },
       data: {
         totalRows: preview.rows.length,
@@ -208,7 +208,7 @@ export class CatalogueImportService {
         skippedRows: preview.totals.skipped,
         failedRows: preview.totals.failed,
       },
-    });
+    }));
     return preview;
   }
 
@@ -223,10 +223,10 @@ export class CatalogueImportService {
   }
 
   async status(tenantId: string, runId: string): Promise<CatalogueImportStatusResult> {
-    const run = await this.prisma.catalogueImportRun.findFirst({
+    const run = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.catalogueImportRun.findFirst({
       where: { id: runId, tenantId },
       include: { mapping: { select: { columns: true, transformSettings: true, aiModel: true, promptVersion: true, schemaVersion: true } } },
-    });
+    }));
     if (!run) throw new NotFoundException('Catalogue import not found');
     const plan = readStructurePlan(run.mapping?.transformSettings);
     return {
@@ -275,19 +275,21 @@ export class CatalogueImportService {
       await this.notify({ tenantId, userId, type: 'SUCCESS', category: 'CATALOGUE_IMPORT_COMPLETED', title: 'Каталог товарів оновлено', message: `Додано: ${result.createdRows}, оновлено: ${result.updatedRows}`, actionUrl: '/catalogue' });
       return mapSummary(completed);
     } catch (error) {
-      await this.prisma.catalogueImportRun.updateMany({
-        where: {
-          id: runId, tenantId, status: 'PROCESSING',
-          ...(claim.lease ? { sourceSyncVersion: claim.lease.syncVersion } : {}),
-        },
-        data: { status: 'FAILED', rowErrors: [{ errors: ['IMPORT_FAILED'] }], completedAt: new Date() },
-      });
-      if (claim.lease) {
-        await this.prisma.catalogueSource.updateMany({
-          where: { id: claim.sourceId, tenantId, syncLeaseId: claim.lease.id, syncVersion: claim.lease.syncVersion },
-          data: { status: 'ERROR', lastErrorSummary: 'IMPORT_FAILED', syncLeaseId: null, syncLeaseExpiresAt: null },
+      await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+        await transaction.catalogueImportRun.updateMany({
+          where: {
+            id: runId, tenantId, status: 'PROCESSING',
+            ...(claim.lease ? { sourceSyncVersion: claim.lease.syncVersion } : {}),
+          },
+          data: { status: 'FAILED', rowErrors: [{ errors: ['IMPORT_FAILED'] }], completedAt: new Date() },
         });
-      }
+        if (claim.lease) {
+          await transaction.catalogueSource.updateMany({
+            where: { id: claim.sourceId, tenantId, syncLeaseId: claim.lease.id, syncVersion: claim.lease.syncVersion },
+            data: { status: 'ERROR', lastErrorSummary: 'IMPORT_FAILED', syncLeaseId: null, syncLeaseExpiresAt: null },
+          });
+        }
+      });
       await this.notify({ tenantId, userId, type: 'ERROR', category: 'CATALOGUE_IMPORT_FAILED', title: 'Не вдалося оновити каталог', actionUrl: '/settings?tab=data' });
       throw error;
     } finally {
@@ -306,13 +308,13 @@ export class CatalogueImportService {
     const renew = () => {
       renewal = renewal.then(async () => {
         const now = new Date();
-        const renewed = await this.prisma.catalogueSource.updateMany({
+        const renewed = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.catalogueSource.updateMany({
           where: {
             id: sourceId, tenantId, type: 'GOOGLE_SHEETS', syncLeaseId: lease.id,
             syncVersion: lease.syncVersion, syncLeaseExpiresAt: { gt: now },
           },
           data: { syncLeaseExpiresAt: new Date(now.getTime() + lease.ttlMs) },
-        });
+        }));
         if (renewed.count !== 1) lost = true;
       }).catch(() => { lost = true; });
     };
@@ -333,7 +335,7 @@ export class CatalogueImportService {
   private async claimConfirmation(tenantId: string, userId: string, runId: string): Promise<
     { sourceId: string; lease?: { id: string; syncVersion: number; ttlMs: number } } | { completed: CatalogueImportSummary }
   > {
-    return this.prisma.$transaction(async (tx) => {
+    return withTenantTransaction(this.prisma, tenantId, async (tx) => {
       const run = await tx.catalogueImportRun.findFirst({
         where: { id: runId, tenantId },
         include: { source: { select: { type: true, syncVersion: true } } },
@@ -381,7 +383,7 @@ export class CatalogueImportService {
     result: Awaited<ReturnType<typeof importCatalogueTable>>,
     lease?: { id: string; syncVersion: number; ttlMs: number },
   ) {
-    return this.prisma.$transaction(async (tx) => {
+    return withTenantTransaction(this.prisma, tenantId, async (tx) => {
       const completedAt = new Date();
       if (lease) {
         const activated = await tx.catalogueSource.updateMany({
@@ -406,15 +408,12 @@ export class CatalogueImportService {
   }
 
   private async buildPreview(tenantId: string, sourceId: string, table: ParsedTable, mapping: CatalogueColumnMapping[], clearEmptyFields: Set<CatalogueTargetField>): Promise<{ rows: InternalPreviewRow[]; totals: CataloguePreview['totals'] }> {
-    const plan = await buildCatalogueImportPlan(this.prisma, {
-      tenantId,
-      sourceId,
-      headers: table.headers,
+    const plan = await withTenantTransaction(this.prisma, tenantId, (transaction) => buildCatalogueImportPlan(transaction, {
+      tenantId, sourceId, headers: table.headers,
       rows: table.rows.map((row) => table.headers.map((header) => row[header] ?? null)),
       ...(table.sourceRowNumbers ? { sourceRowNumbers: table.sourceRowNumbers } : {}),
-      mapping,
-      transformSettings: { clearEmptyFields: [...clearEmptyFields] },
-    });
+      mapping, transformSettings: { clearEmptyFields: [...clearEmptyFields] },
+    }));
     return {
       rows: plan.rows as InternalPreviewRow[],
       totals: plan.totals,
@@ -422,22 +421,22 @@ export class CatalogueImportService {
   }
 
   private async loadRun(tenantId: string, runId: string) {
-    const run = await this.prisma.catalogueImportRun.findFirst({
+    const run = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.catalogueImportRun.findFirst({
       where: { id: runId, tenantId },
       include: {
         source: { select: { type: true, objectKey: true, syncSchedule: true, syncVersion: true, syncLeaseId: true, syncLeaseExpiresAt: true } },
         mapping: { select: { sourceFingerprint: true, columns: true, transformSettings: true } },
       },
-    });
+    }));
     if (!run) throw new NotFoundException('Catalogue import not found');
     return run;
   }
 
   private findUploadRunByRevision(tenantId: string, idempotencyKey: string) {
-    return this.prisma.catalogueImportRun.findUnique({
+    return withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.catalogueImportRun.findUnique({
       where: { tenantId_idempotencyKey: { tenantId, idempotencyKey } },
       include: { source: { select: { headerFingerprint: true, objectKey: true } } },
-    });
+    }));
   }
 
   private async loadTable(objectKey: string | null, sourceType: 'CSV_UPLOAD' | 'XLSX_UPLOAD' | 'GOOGLE_SHEETS', snapshotObjectKey?: string | null): Promise<ParsedTable> {

@@ -227,10 +227,10 @@ export class TelegramService {
         where: { tenantId },
         select: { destination: { select: { title: true } } },
       }),
-      this.prisma.product.findMany({
+      withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.product.findMany({
         where: { tenantId, sku: { in: items.flatMap((item) => item.catalogId ? [item.catalogId] : []) } },
         select: { sku: true, name: true },
-      }),
+      })),
     ]);
     if (!setting) throw new Error('Telegram supplier destination required');
     const names = new Map(products.map((product) => [product.sku, product.name]));

@@ -186,7 +186,8 @@ export class CommercialTermsService {
     items: Array<{ id: string; catalogId: string | null; quantity: number }>,
   ): Promise<CommercialLineInput[]> {
     const skus = [...new Set(items.flatMap((item) => item.catalogId ? [item.catalogId] : []))];
-    const products = await this.prisma.product.findMany({ where: { tenantId, sku: { in: skus }, active: true } });
+    const products = await withTenantTransaction(this.prisma, tenantId, (transaction) =>
+      transaction.product.findMany({ where: { tenantId, sku: { in: skus }, active: true } }));
     const bySku = new Map(products.map((product) => [product.sku, product]));
     return items.map((item) => {
       const product = item.catalogId ? bySku.get(item.catalogId) : undefined;

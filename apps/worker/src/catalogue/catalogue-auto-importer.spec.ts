@@ -2,6 +2,11 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { CatalogueAutoImporter } from './catalogue-auto-importer.js';
 
+vi.mock('@autosale/database', async (importOriginal) => ({
+  ...await importOriginal<typeof import('@autosale/database')>(),
+  withTenantTransaction: async <T>(prisma: unknown, _tenantId: string, operation: (transaction: unknown) => Promise<T>) => operation(prisma),
+}));
+
 describe('CatalogueAutoImporter', () => {
   it('imports a version-2 normalized snapshot with original source coordinates', async () => {
     const updateMany = vi.fn().mockResolvedValue({ count: 1 });

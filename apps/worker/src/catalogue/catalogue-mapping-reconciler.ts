@@ -7,22 +7,17 @@ export class CatalogueMappingReconciler {
 
   async reconcile(): Promise<{ attempted: number; enqueued: number }> {
     const now = new Date();
-    const runs = await this.prisma.catalogueImportRun.findMany({
-      where: {
-        OR: [
-          { status: 'UPLOADED' },
-          { status: 'MAPPING', mappingLeaseId: { not: null }, mappingLeaseExpiresAt: { lt: now } },
-        ],
-      },
-      select: { id: true, tenantId: true, updatedAt: true }, orderBy: { updatedAt: 'asc' }, take: 100,
-    });
+    const runs = await this.prisma.$queryRaw<Array<{ tenant_id: string; run_id: string; updated_at: Date }>>`
+      SELECT tenant_id, run_id, updated_at
+      FROM public.worker_due_catalogue_mapping_runs(${now}, ${100})
+    `;
     let enqueued = 0;
     for (const run of runs) {
       try {
-        await this.queue.add('catalogue.mapping', { tenantId: run.tenantId, runId: run.id }, {
+        await this.queue.add('catalogue.mapping', { tenantId: run.tenant_id, runId: run.run_id }, {
           // A run can legitimately return to UPLOADED after its structure changes.
           // Version the queue id so a retained completed BullMQ job cannot block recovery.
-          jobId: `catalogue.mapping:${run.id}:${run.updatedAt.getTime()}`, removeOnComplete: 1_000, removeOnFail: 5_000,
+          jobId: `catalogue.mapping:${run.run_id}:${run.updated_at.getTime()}`, removeOnComplete: 1_000, removeOnFail: 5_000,
         });
         enqueued += 1;
       } catch {

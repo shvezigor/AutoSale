@@ -32,7 +32,12 @@ export class GoogleSheetsSyncProcessor {
         : this.sheets;
       if (!sheets) throw new Error('Google connection is not configured');
       const headers = stringArray(destination.requiredHeaders);
-      const products = headers.includes('product_name') ? await this.prisma.product.findMany({ where: { tenantId: order.tenantId, sku: { in: order.items.flatMap((item) => item.catalogId ? [item.catalogId] : []) } }, select: { sku: true, name: true } }) : [];
+      const products = headers.includes('product_name')
+        ? await withTenantTransaction(this.prisma, order.tenantId, (transaction) => transaction.product.findMany({
+          where: { tenantId: order.tenantId, sku: { in: order.items.flatMap((item) => item.catalogId ? [item.catalogId] : []) } },
+          select: { sku: true, name: true },
+        }))
+        : [];
       const values = mapRow(headers, order, new Map(products.map((product) => [product.sku, product.name])));
       const result = await sheets.upsertRow({
         spreadsheetId: destination.spreadsheetId,

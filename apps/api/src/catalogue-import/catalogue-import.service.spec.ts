@@ -521,14 +521,17 @@ function createPrismaWithLostRemapLock(prisma: PrismaClient): PrismaClient {
 }
 
 function createPrismaWithFailingUploadTransaction(prisma: PrismaClient): PrismaClient {
+  let transactionCount = 0;
   return new Proxy(prisma, {
     get(target, property, receiver) {
       if (property === '$transaction') {
         return async (arg: unknown) => {
           if (typeof arg === 'function') {
+            transactionCount += 1;
             return prisma.$transaction(async (tx) => {
-              await arg(tx);
-              throw new Error('simulated upload transaction failure');
+              const result = await arg(tx);
+              if (transactionCount === 2) throw new Error('simulated upload transaction failure');
+              return result;
             });
           }
           return prisma.$transaction(arg as Parameters<PrismaClient['$transaction']>[0]);
@@ -546,7 +549,7 @@ function createPrismaWithDuplicateUploadRace(prisma: PrismaClient): PrismaClient
     releasePrechecks = resolve;
   });
 
-  const runDelegate = new Proxy(prisma.catalogueImportRun, {
+  const wrapRunDelegate = (delegate: Prisma.TransactionClient['catalogueImportRun']) => new Proxy(delegate, {
     get(target, property, receiver) {
       if (property === 'findUnique') {
         return async (args: { where?: { tenantId_idempotencyKey?: { tenantId: string; idempotencyKey: string } } }) => {
@@ -556,7 +559,7 @@ function createPrismaWithDuplicateUploadRace(prisma: PrismaClient): PrismaClient
             await prechecksReleased;
             return null;
           }
-          return prisma.catalogueImportRun.findUnique(args as never);
+          return delegate.findUnique(args as never);
         };
       }
       return Reflect.get(target, property, receiver);
@@ -565,7 +568,17 @@ function createPrismaWithDuplicateUploadRace(prisma: PrismaClient): PrismaClient
 
   return new Proxy(prisma, {
     get(target, property, receiver) {
-      if (property === 'catalogueImportRun') return runDelegate;
+      if (property === '$transaction') {
+        return (argument: unknown, options?: unknown) => {
+          if (typeof argument !== 'function') return prisma.$transaction(argument as never, options as never);
+          return prisma.$transaction((tx) => argument(new Proxy(tx, {
+            get(transaction, transactionProperty, transactionReceiver) {
+              if (transactionProperty === 'catalogueImportRun') return wrapRunDelegate(tx.catalogueImportRun);
+              return Reflect.get(transaction, transactionProperty, transactionReceiver);
+            },
+          })), options as never);
+        };
+      }
       return Reflect.get(target, property, receiver);
     },
   }) as PrismaClient;

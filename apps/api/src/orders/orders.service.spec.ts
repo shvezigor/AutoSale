@@ -64,11 +64,13 @@ describe('OrdersService Google Sheets retry', () => {
     };
     const reopened = { ...current, status: 'NEEDS_REVIEW', items: [{ ...current.items[0], quantity: 2, reservation: null }] };
     const termsUpsert = vi.fn().mockResolvedValue({});
+    const productFindMany = vi.fn().mockResolvedValue([{ sku: 'SKU-1', name: 'Товар', price: new Prisma.Decimal('9999.00'), currency: 'UAH' }]);
     const prisma = {
       order: { findFirst: vi.fn().mockResolvedValue(current) },
-      product: { findMany: vi.fn().mockResolvedValue([{ sku: 'SKU-1', name: 'Товар', price: new Prisma.Decimal('9999.00'), currency: 'UAH' }]) },
+      product: { findMany: productFindMany },
       $transaction: vi.fn(async (callback: (tx: unknown) => unknown) => callback({
         $queryRaw: vi.fn(),
+        product: { findMany: productFindMany },
         orderPayment: { count: vi.fn().mockResolvedValue(0) },
         orderItem: { update: vi.fn().mockResolvedValue({}), updateMany: vi.fn().mockResolvedValue({ count: 1 }) },
         orderCommercialTerms: { upsert: termsUpsert },
@@ -146,7 +148,7 @@ describe('OrdersService Google Sheets retry', () => {
       paymentStatus: 'PAID', page: 1, pageSize: 25,
     });
 
-    expect(queryRaw).toHaveBeenCalledTimes(3);
+    expect(queryRaw).toHaveBeenCalledTimes(4);
     expect(findMany).toHaveBeenCalledWith(expect.objectContaining({
       where: expect.objectContaining({ tenantId: tenantA, id: { in: ['order-paid'] } }),
     }));
@@ -177,11 +179,13 @@ describe('OrdersService Google Sheets retry', () => {
     };
     const orderPaymentCount = vi.fn().mockResolvedValue(1);
     const orderUpdate = vi.fn().mockResolvedValue(current);
+    const productFindMany = vi.fn().mockResolvedValue([]);
     const prisma = {
       order: { findFirst: vi.fn().mockResolvedValue(current) },
-      product: { findMany: vi.fn().mockResolvedValue([]) },
+      product: { findMany: productFindMany },
       $transaction: vi.fn(async (callback: (tx: unknown) => unknown) => callback({
         $queryRaw: vi.fn(),
+        product: { findMany: productFindMany },
         orderPayment: { count: orderPaymentCount },
         orderItem: { updateMany: vi.fn().mockResolvedValue({ count: 0 }) },
         inventoryReservation: { updateMany: vi.fn().mockResolvedValue({ count: 0 }) },
@@ -229,13 +233,15 @@ describe('OrdersService Google Sheets retry', () => {
       .mockResolvedValueOnce({ ...approvedOrder, exports: [pendingExport] });
     const upsert = vi.fn().mockResolvedValue(pendingExport);
     const findDestination = vi.fn().mockResolvedValue({ id: 'destination-1', status: 'ACTIVE' });
+    const productFindMany = vi.fn().mockResolvedValue([{ sku: 'SKU-1', name: 'Товар' }]);
     const prisma = {
       order: { findFirst },
-      product: { findMany: vi.fn().mockResolvedValue([{ sku: 'SKU-1', name: 'Товар' }]) },
+      product: { findMany: productFindMany },
       googleSheetsDestination: { findUnique: findDestination },
       orderExport: { upsert },
       $transaction: vi.fn(async (callback: (tx: unknown) => unknown) => callback({
         $queryRaw: vi.fn(),
+        product: { findMany: productFindMany },
         order: { findFirst, update: vi.fn().mockResolvedValue(approvedOrder) },
         googleSheetsDestination: { findUnique: findDestination },
         orderExport: { upsert },
@@ -263,11 +269,13 @@ describe('OrdersService Google Sheets retry', () => {
       conversation: { displayName: 'Customer', channel: 'INSTAGRAM', profile: null },
       items: [], exports: [], procurementHandedOffAt: null, telegramDeliveries: [],
     };
+    const productFindMany = vi.fn().mockResolvedValue([]);
     const prisma = {
       order: { findFirst: vi.fn().mockResolvedValue(baseOrder) },
-      product: { findMany: vi.fn().mockResolvedValue([]) },
+      product: { findMany: productFindMany },
       $transaction: vi.fn(async (callback: (tx: unknown) => unknown) => callback({
         $queryRaw: vi.fn(),
+        product: { findMany: productFindMany },
         order: { findFirst: vi.fn().mockResolvedValue(baseOrder), update: vi.fn().mockResolvedValue({ ...baseOrder, status: 'CANCELLED' }) },
         auditLog: { create: vi.fn().mockResolvedValue({}) },
       })),

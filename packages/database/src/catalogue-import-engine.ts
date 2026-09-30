@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 
 import { Prisma, type PrismaClient } from './generated/prisma/client.js';
+import { setTenantContext, withTenantTransaction } from './tenant-transaction.js';
 
 export type CatalogueTarget = 'sku' | 'name' | 'description' | 'price' | 'currency' | 'stockQuantity'
   | 'category' | 'brand' | 'aliases' | 'color' | 'size' | 'imageUrls' | 'active' | 'attributes' | 'ignore';
@@ -96,7 +97,7 @@ export async function buildCatalogueImportPlan(prisma: Pick<PrismaClient, 'produ
 }
 
 export async function importCatalogueTable(prisma: PrismaClient, input: CatalogueTableInput): Promise<CatalogueImportCounts> {
-  const plan = await buildCatalogueImportPlan(prisma, input);
+  const plan = await withTenantTransaction(prisma, input.tenantId, (transaction) => buildCatalogueImportPlan(transaction, input));
   const validRows = plan.rows.filter((row): row is CatalogueImportPlanRow & { product: CatalogueImportProduct } => Boolean(row.product) && row.errors.length === 0);
   await upsertCatalogueProducts(prisma, {
     tenantId: input.tenantId, sourceId: input.sourceId, rows: validRows,
@@ -124,7 +125,7 @@ export async function upsertCatalogueProducts(
     batchSize?: number;
   },
 ): Promise<void> {
-  await catalogueWriteRetry(prisma, async (tx) => {
+  await catalogueWriteRetry(prisma, input.tenantId, async (tx) => {
     await lockTenantCatalogueWrites(tx, input.tenantId);
     if (input.lease) await assertImportLeaseOwned(tx, input, input.lease);
     const owned = await tx.product.findMany({
@@ -184,10 +185,13 @@ async function fenceImportLease(
   if (fenced.count !== 1) throw new CatalogueImportLeaseLostError();
 }
 
-async function catalogueWriteRetry(prisma: PrismaClient, operation: (tx: Prisma.TransactionClient) => Promise<void>): Promise<void> {
+async function catalogueWriteRetry(prisma: PrismaClient, tenantId: string, operation: (tx: Prisma.TransactionClient) => Promise<void>): Promise<void> {
   for (let attempt = 0; attempt < 3; attempt += 1) {
     try {
-      await prisma.$transaction(operation, {
+      await prisma.$transaction(async (transaction) => {
+        await setTenantContext(transaction, tenantId);
+        await operation(transaction);
+      }, {
         // The final source fence must observe heartbeat renewals committed
         // after this long transaction began. Tenant advisory locking provides
         // the catalogue-writer serialization previously supplied by SSI.

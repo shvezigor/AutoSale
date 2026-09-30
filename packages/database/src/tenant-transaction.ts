@@ -12,12 +12,13 @@ export async function withTenantTransaction<T>(
     isolationLevel?: Prisma.TransactionIsolationLevel;
   },
 ): Promise<T> {
-  if (!UUID_PATTERN.test(tenantId)) {
-    throw new Error('A valid tenant identifier is required');
-  }
-
   return prisma.$transaction(async (transaction) => {
-    await transaction.$queryRaw`SELECT set_config('app.current_tenant_id', ${tenantId}, true)`;
+    await setTenantContext(transaction, tenantId);
     return operation(transaction);
   }, options);
+}
+
+export async function setTenantContext(transaction: Prisma.TransactionClient, tenantId: string): Promise<void> {
+  if (!UUID_PATTERN.test(tenantId)) throw new Error('A valid tenant identifier is required');
+  await transaction.$queryRaw`SELECT set_config('app.current_tenant_id', ${tenantId}, true)`;
 }

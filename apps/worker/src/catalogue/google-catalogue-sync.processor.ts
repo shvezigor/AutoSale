@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
 import { catalogueStructurePlanSchema, type AmbiguousRowClassification, type CatalogueStructurePlan, type CatalogueTargetField, type RawCatalogueMatrix, type TableStructureProposal } from '@autosale/contracts';
-import { CatalogueImportLeaseLostError, CatalogueSkuOwnershipError, importCatalogueTable, type CatalogueImportCounts, type PrismaClient } from '@autosale/database';
+import { CatalogueImportLeaseLostError, CatalogueSkuOwnershipError, importCatalogueTable, type CatalogueImportCounts, type PrismaClient, withTenantTransaction } from '@autosale/database';
 import { GoogleOAuthAccessError, GoogleSheetsReadError, GoogleSheetsTableValidationError, googleSheetsStructureFingerprint, type GoogleSheetsAdapter, type GoogleSheetsCell, type ObjectStorage } from '@autosale/integrations';
 import { buildCatalogueStructureProfile } from './catalogue-table-profiler.js';
 import { applyAmbiguousDecisions, normalizeCatalogueRows, type ClassifiedCatalogueRow } from './catalogue-row-classifier.js';
@@ -41,20 +41,20 @@ export class GoogleCatalogueSyncProcessor {
   }
 
   async process(input: { tenantId: string; sourceId: string; finalAttempt?: boolean }) {
-    const source = await this.prisma.catalogueSource.findFirst({
+    const source = await withTenantTransaction(this.prisma, input.tenantId, (transaction) => transaction.catalogueSource.findFirst({
       where: { id: input.sourceId, tenantId: input.tenantId, type: 'GOOGLE_SHEETS' },
       select: { id: true, createdByUserId: true, spreadsheetId: true, sheetName: true, credentialRef: true, syncSchedule: true, syncVersion: true, syncLeaseId: true, syncLeaseExpiresAt: true },
-    });
+    }));
     if (!source?.spreadsheetId || !source.sheetName) throw new Error('Google catalogue source is unavailable');
     const now = new Date();
     const leaseId = randomUUID();
-    const claimed = await this.prisma.catalogueSource.updateMany({
+    const claimed = await withTenantTransaction(this.prisma, input.tenantId, (transaction) => transaction.catalogueSource.updateMany({
       where: {
         id: input.sourceId, tenantId: input.tenantId, type: 'GOOGLE_SHEETS', syncVersion: source.syncVersion,
         OR: [{ syncLeaseId: null }, { syncLeaseExpiresAt: { lte: now } }],
       },
       data: { syncLeaseId: leaseId, syncLeaseExpiresAt: new Date(now.getTime() + SOURCE_LEASE_MS), syncVersion: { increment: 1 } },
-    });
+    }));
     if (claimed.count !== 1) return { status: 'BUSY' as const };
     const syncVersion = source.syncVersion + 1;
     const leaseWhere = { id: input.sourceId, tenantId: input.tenantId, type: 'GOOGLE_SHEETS' as const, syncLeaseId: leaseId, syncVersion };
@@ -81,9 +81,9 @@ export class GoogleCatalogueSyncProcessor {
       }
     } catch (error) {
       if (error instanceof GoogleSheetsTableValidationError) {
-        await this.prisma.catalogueSource.updateMany({ where: leaseWhere, data: {
+        await withTenantTransaction(this.prisma, input.tenantId, (transaction) => transaction.catalogueSource.updateMany({ where: leaseWhere, data: {
           status: 'PAUSED', lastErrorSummary: `TABLE_${error.code}`, syncLeaseId: null, syncLeaseExpiresAt: null,
-        } });
+        } }));
         await this.notifyFailed(input.tenantId, source.createdByUserId);
         return { status: 'FAILED' as const, reason: 'TABLE_VALIDATION' as const, validationCode: error.code };
       }
@@ -96,27 +96,27 @@ export class GoogleCatalogueSyncProcessor {
         await this.releaseLease(leaseWhere, source.syncSchedule);
         throw failure;
       }
-      await this.prisma.catalogueSource.updateMany({ where: leaseWhere, data: {
+      await withTenantTransaction(this.prisma, input.tenantId, (transaction) => transaction.catalogueSource.updateMany({ where: leaseWhere, data: {
         status: failure.code === 'AUTHORIZATION' ? 'DISCONNECTED' : 'ERROR', lastErrorSummary: failure.code,
         syncLeaseId: null, syncLeaseExpiresAt: null,
-      } });
+      } }));
       await this.notifyFailed(input.tenantId, source.createdByUserId);
       throw failure;
     }
 
     const fingerprint = googleSheetsStructureFingerprint(table.headers);
-    const mapping = await this.prisma.catalogueMapping.findFirst({
+    const mapping = await withTenantTransaction(this.prisma, input.tenantId, (transaction) => transaction.catalogueMapping.findFirst({
       where: { tenantId: input.tenantId, sourceId: input.sourceId, confirmedAt: { not: null } }, orderBy: { version: 'desc' },
       select: { id: true, version: true, sourceFingerprint: true, columns: true, transformSettings: true },
-    });
+    }));
     const columns = readMapping(mapping?.columns);
     const snapshotObjectKey = `catalogue/${input.tenantId}/${input.sourceId}/google/${table.revision}.json`;
     try {
       await this.storage.put({ key: snapshotObjectKey, contentType: SNAPSHOT_CONTENT_TYPE, body: Buffer.from(JSON.stringify({ headers: table.headers, rows: table.rows, sourceRowNumbers: table.sourceRowNumbers })) });
     } catch {
-      await this.prisma.catalogueSource.updateMany({ where: leaseWhere, data: {
+      await withTenantTransaction(this.prisma, input.tenantId, (transaction) => transaction.catalogueSource.updateMany({ where: leaseWhere, data: {
         status: 'ERROR', lastErrorSummary: 'SNAPSHOT_WRITE_FAILED', syncLeaseId: null, syncLeaseExpiresAt: null,
-      } });
+      } }));
       await this.notifyFailed(input.tenantId, source.createdByUserId);
       throw new Error('Catalogue snapshot could not be stored');
     }
@@ -129,30 +129,30 @@ export class GoogleCatalogueSyncProcessor {
     }
 
     const idempotencyKey = `google:${input.sourceId}:${table.revision}:mapping:${mapping.version}`;
-    const existing = await this.prisma.catalogueImportRun.findUnique({
+    const existing = await withTenantTransaction(this.prisma, input.tenantId, (transaction) => transaction.catalogueImportRun.findUnique({
       where: { tenantId_idempotencyKey: { tenantId: input.tenantId, idempotencyKey } },
       select: { id: true, status: true, mappingId: true, startedAt: true, failedRows: true },
-    });
+    }));
     const completedSourceWasCleared = existing?.status === 'COMPLETED' && existing.failedRows === 0
-      ? await this.prisma.product.count({ where: { tenantId: input.tenantId, sourceId: input.sourceId } }) === 0
+      ? await withTenantTransaction(this.prisma, input.tenantId, (transaction) => transaction.product.count({ where: { tenantId: input.tenantId, sourceId: input.sourceId } })) === 0
       : false;
     if (existing?.status === 'COMPLETED' && existing.failedRows === 0 && !completedSourceWasCleared) {
       await this.releaseLease(leaseWhere, source.syncSchedule);
       return { status: 'NOOP' as const, revision: table.revision, runId: existing.id };
     }
     if (existing?.status === 'MAPPING_REVIEW') {
-      await this.prisma.catalogueImportRun.updateMany({
+      await withTenantTransaction(this.prisma, input.tenantId, (transaction) => transaction.catalogueImportRun.updateMany({
         where: { id: existing.id, tenantId: input.tenantId, status: 'MAPPING_REVIEW' },
         data: { sourceSyncVersion: syncVersion, snapshotObjectKey, sourceHeaders: table.headers, totalRows: table.rows.length },
-      });
+      }));
       await this.releaseLease(leaseWhere, source.syncSchedule);
       return { status: 'MAPPING_REVIEW' as const, revision: table.revision, runId: existing.id };
     }
     if (existing?.status === 'PREVIEW_READY') {
-      await this.prisma.catalogueImportRun.updateMany({
+      await withTenantTransaction(this.prisma, input.tenantId, (transaction) => transaction.catalogueImportRun.updateMany({
         where: { id: existing.id, tenantId: input.tenantId, status: 'PREVIEW_READY' },
         data: { sourceSyncVersion: syncVersion, snapshotObjectKey, sourceHeaders: table.headers, totalRows: table.rows.length },
-      });
+      }));
       await this.releaseLease(leaseWhere, source.syncSchedule);
       return { status: 'PREVIEW_READY' as const, revision: table.revision, runId: existing.id };
     }
@@ -163,21 +163,21 @@ export class GoogleCatalogueSyncProcessor {
 
     let runId: string;
     if (existing && (existing.status === 'FAILED' || existing.status === 'PROCESSING' || (existing.status === 'COMPLETED' && (existing.failedRows > 0 || completedSourceWasCleared)))) {
-      const recovered = await this.prisma.catalogueImportRun.updateMany({
+      const recovered = await withTenantTransaction(this.prisma, input.tenantId, (transaction) => transaction.catalogueImportRun.updateMany({
         where: { id: existing.id, tenantId: input.tenantId, status: existing.status },
         data: {
           status: 'PROCESSING', mappingId: mapping.id, snapshotObjectKey, sourceHeaders: table.headers,
           sourceSyncVersion: syncVersion, startedAt: now, completedAt: null, rowErrors: [],
         },
-      });
+      }));
       if (recovered.count !== 1) { await this.releaseLease(leaseWhere, source.syncSchedule); return { status: 'BUSY' as const }; }
       runId = existing.id;
     } else {
-      const run = await this.prisma.catalogueImportRun.create({ data: {
+      const run = await withTenantTransaction(this.prisma, input.tenantId, (transaction) => transaction.catalogueImportRun.create({ data: {
         tenantId: input.tenantId, sourceId: input.sourceId, mappingId: mapping.id, status: 'PROCESSING', idempotencyKey,
         sourceRevision: table.revision, sourceHeaders: table.headers, snapshotObjectKey, sourceSyncVersion: syncVersion,
         totalRows: table.rows.length, startedAt: now,
-      } });
+      } }));
       runId = run.id;
     }
 
@@ -190,7 +190,7 @@ export class GoogleCatalogueSyncProcessor {
         lease: { id: leaseId, syncVersion, ttlMs: SOURCE_LEASE_MS },
       });
       await heartbeat.assertOwned();
-      await this.prisma.$transaction(async (tx) => {
+      await withTenantTransaction(this.prisma, input.tenantId, async (tx) => {
         const completedAt = new Date();
         const activated = await tx.catalogueSource.updateMany({ where: {
           ...leaseWhere, syncLeaseExpiresAt: { gt: completedAt },
@@ -210,17 +210,17 @@ export class GoogleCatalogueSyncProcessor {
     } catch (error) {
       const collision = error instanceof CatalogueSkuOwnershipError;
       const leaseLost = error instanceof CatalogueImportLeaseLostError;
-      await this.prisma.catalogueImportRun.updateMany({
+      await withTenantTransaction(this.prisma, input.tenantId, (transaction) => transaction.catalogueImportRun.updateMany({
         where: { id: runId, tenantId: input.tenantId, status: 'PROCESSING', sourceSyncVersion: syncVersion },
         data: {
           status: 'FAILED', rowErrors: [{ errors: [collision ? 'SKU_COLLISION' : leaseLost ? 'LEASE_LOST' : 'IMPORT_FAILED'] }], completedAt: new Date(),
           ...(collision ? { failedRows: table.rows.length } : {}),
         },
-      });
-      await this.prisma.catalogueSource.updateMany({ where: leaseWhere, data: {
+      }));
+      await withTenantTransaction(this.prisma, input.tenantId, (transaction) => transaction.catalogueSource.updateMany({ where: leaseWhere, data: {
         status: collision ? 'PAUSED' : 'ERROR', lastErrorSummary: collision ? 'SKU_COLLISION' : leaseLost ? 'LEASE_LOST' : 'IMPORT_FAILED',
         syncLeaseId: null, syncLeaseExpiresAt: null,
-      } });
+      } }));
       await this.notifyFailed(input.tenantId, source.createdByUserId);
       if (collision) return { status: 'FAILED' as const, revision: table.revision, runId, reason: 'SKU_COLLISION' as const };
       throw new Error('Catalogue synchronization failed');
@@ -236,7 +236,7 @@ export class GoogleCatalogueSyncProcessor {
     matrix: RawCatalogueMatrix,
     userId: string | null,
   ): Promise<{ table: { headers: string[]; rows: GoogleSheetsCell[][]; revision: string; sourceRowNumbers: number[] }; confident: boolean }> {
-    const existing = await this.prisma.catalogueMapping.findFirst({
+    const existing = await withTenantTransaction(this.prisma, input.tenantId, (transaction) => transaction.catalogueMapping.findFirst({
       where: {
         tenantId: input.tenantId,
         sourceId: input.sourceId,
@@ -245,7 +245,7 @@ export class GoogleCatalogueSyncProcessor {
       },
       orderBy: { version: 'desc' },
       select: { id: true, version: true, sourceFingerprint: true, columns: true, transformSettings: true },
-    });
+    }));
     const storedPlan = readStructurePlan(existing?.transformSettings);
     let proposal: TableStructureProposal;
     let metadata: TableStructureSuggestion['metadata'] | null = null;
@@ -267,9 +267,9 @@ export class GoogleCatalogueSyncProcessor {
       && decisions.every((decision) => decision.confidence >= 0.9)
       && sourceRowNumbers.length > 0;
     if (!reused && confident && metadata) {
-      const latest = await this.prisma.catalogueMapping.findFirst({
+      const latest = await withTenantTransaction(this.prisma, input.tenantId, (transaction) => transaction.catalogueMapping.findFirst({
         where: { tenantId: input.tenantId, sourceId: input.sourceId }, orderBy: { version: 'desc' }, select: { version: true },
-      });
+      }));
       const columns = proposal.columns.filter((column) => column.target !== 'ignore').map((column, index) => ({
         source: normalizeHeader(normalized.headers[index]!), target: column.target, confidence: column.confidence,
       }));
@@ -277,14 +277,14 @@ export class GoogleCatalogueSyncProcessor {
         version: 2 as const, ...proposal, productRowNumbers: sourceRowNumbers,
         skippedRowNumbers: normalized.skippedRowNumbers, sourceRowNumbers, sourceRevision: matrix.revision,
       };
-      await this.prisma.catalogueMapping.create({ data: {
+      await withTenantTransaction(this.prisma, input.tenantId, (transaction) => transaction.catalogueMapping.create({ data: {
         tenantId: input.tenantId, sourceId: input.sourceId, version: (latest?.version ?? 0) + 1,
         sourceFingerprint: googleSheetsStructureFingerprint(normalized.headers), columns,
         transformSettings: { clearEmptyFields: [], structurePlan },
         aiModel: metadata.model, promptVersion: metadata.promptVersion, schemaVersion: metadata.schemaVersion,
         aiLatencyMs: metadata.latencyMs, aiInputTokens: metadata.inputTokens, aiOutputTokens: metadata.outputTokens,
         ownerModified: false, confirmedAt: new Date(), confirmedByUserId: userId,
-      } });
+      } }));
     }
     return {
       table: { headers: normalized.headers, rows: normalized.products.map((row) => row.cells), revision: matrix.revision, sourceRowNumbers },
@@ -317,10 +317,10 @@ export class GoogleCatalogueSyncProcessor {
     const renew = () => {
       renewal = renewal.then(async () => {
         const now = new Date();
-        const result = await this.prisma.catalogueSource.updateMany({
+        const result = await withTenantTransaction(this.prisma, leaseWhere.tenantId, (transaction) => transaction.catalogueSource.updateMany({
           where: { ...leaseWhere, syncLeaseExpiresAt: { gt: now } },
           data: { syncLeaseExpiresAt: new Date(now.getTime() + SOURCE_LEASE_MS) },
-        });
+        }));
         if (result.count !== 1) lost = true;
       }).catch(() => { lost = true; });
     };
@@ -343,33 +343,33 @@ export class GoogleCatalogueSyncProcessor {
     fingerprint: string, leaseWhere: LeaseWhere, reason: 'STRUCTURE_CHANGED' | 'MISSING_REQUIRED_COLUMNS',
   ) {
     const idempotencyKey = `google:${input.sourceId}:${table.revision}:review`;
-    const existing = await this.prisma.catalogueImportRun.findUnique({
+    const existing = await withTenantTransaction(this.prisma, input.tenantId, (transaction) => transaction.catalogueImportRun.findUnique({
       where: { tenantId_idempotencyKey: { tenantId: input.tenantId, idempotencyKey } }, select: { id: true, status: true },
-    });
-    const run = existing ?? await this.prisma.catalogueImportRun.create({ data: {
+    }));
+    const run = existing ?? await withTenantTransaction(this.prisma, input.tenantId, (transaction) => transaction.catalogueImportRun.create({ data: {
       tenantId: input.tenantId, sourceId: input.sourceId, mappingId: null, status: 'UPLOADED', idempotencyKey,
       sourceRevision: table.revision, sourceHeaders: table.headers, snapshotObjectKey, sourceSyncVersion: leaseWhere.syncVersion,
       totalRows: table.rows.length, rowErrors: [{ errors: [reason] }],
-    } });
+    } }));
     if (existing) {
-      await this.prisma.catalogueImportRun.updateMany({
+      await withTenantTransaction(this.prisma, input.tenantId, (transaction) => transaction.catalogueImportRun.updateMany({
         where: { id: existing.id, tenantId: input.tenantId, status: { in: ['UPLOADED', 'MAPPING_REVIEW'] } },
         data: {
           sourceRevision: table.revision, sourceHeaders: table.headers, snapshotObjectKey, sourceSyncVersion: leaseWhere.syncVersion,
           totalRows: table.rows.length, rowErrors: [{ errors: [reason] }], status: 'UPLOADED', completedAt: null,
         },
-      });
+      }));
     }
-    await this.prisma.catalogueSource.updateMany({ where: leaseWhere, data: {
+    await withTenantTransaction(this.prisma, input.tenantId, (transaction) => transaction.catalogueSource.updateMany({ where: leaseWhere, data: {
       status: 'PAUSED', headerFingerprint: fingerprint, lastErrorSummary: reason, syncLeaseId: null, syncLeaseExpiresAt: null,
-    } });
+    } }));
     return { status: 'MAPPING_REVIEW' as const, revision: table.revision, runId: run.id, reason };
   }
 
   private async releaseLease(leaseWhere: LeaseWhere, schedule: string | null) {
-    await this.prisma.catalogueSource.updateMany({ where: leaseWhere, data: {
+    await withTenantTransaction(this.prisma, leaseWhere.tenantId, (transaction) => transaction.catalogueSource.updateMany({ where: leaseWhere, data: {
       nextSyncAt: nextSyncAt(schedule), syncLeaseId: null, syncLeaseExpiresAt: null,
-    } });
+    } }));
   }
 }
 
