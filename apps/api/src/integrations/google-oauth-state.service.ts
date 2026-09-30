@@ -1,6 +1,6 @@
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
 
-import type { PrismaClient } from '@autosale/database';
+import { type PrismaClient, withTenantTransaction } from '@autosale/database';
 
 const STATE_TTL_MS = 10 * 60 * 1000;
 const DEFAULT_RETURN_PATH = '/settings';
@@ -36,7 +36,7 @@ export class GoogleOAuthStateService {
     const state = randomBytes(32).toString('base64url');
     const now = new Date();
 
-    await this.prisma.$transaction(async (transaction) => {
+    await withTenantTransaction(this.prisma, input.tenantId, async (transaction) => {
       await transaction.googleOAuthAttempt.updateMany({
         where: { tenantId: input.tenantId, usedAt: null },
         data: { usedAt: now },
@@ -59,12 +59,18 @@ export class GoogleOAuthStateService {
 
   async consumeAttempt(state: string): Promise<ConsumedGoogleOAuthAttempt> {
     try {
-      const attempts = await this.prisma.googleOAuthAttempt.updateManyAndReturn({
-        where: { tokenHash: hashState(state), usedAt: null, expiresAt: { gt: new Date() } },
-        data: { usedAt: new Date() },
-        select: { id: true, tenantId: true, userId: true, returnPath: true },
-      });
-      const attempt = attempts[0];
+      const consumedAt = new Date();
+      const authority = await this.prisma.$queryRaw<Array<{ tenant_id: string; attempt_id: string }>>`
+        SELECT tenant_id, attempt_id
+        FROM public.api_consume_google_oauth_attempt(${hashState(state)}, ${consumedAt})
+      `;
+      const consumed = authority[0];
+      if (!consumed) throw new Error(INVALID_STATE_ERROR);
+      const attempt = await withTenantTransaction(this.prisma, consumed.tenant_id, (transaction) =>
+        transaction.googleOAuthAttempt.findUnique({
+          where: { id: consumed.attempt_id },
+          select: { id: true, tenantId: true, userId: true, returnPath: true },
+        }));
       if (!attempt) throw new Error(INVALID_STATE_ERROR);
       return attempt;
     } catch {

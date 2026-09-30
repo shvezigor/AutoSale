@@ -1,4 +1,4 @@
-import type { PrismaClient } from '@autosale/database';
+import { type PrismaClient, withTenantTransaction } from '@autosale/database';
 
 import { CredentialCipher } from './credential-cipher.js';
 import type { GoogleOAuthClientPort } from './google-oauth.client.js';
@@ -13,7 +13,7 @@ export class GoogleCredentialCleanupService {
   ) {}
 
   async disconnect(tenantId: string, _actorUserId: string): Promise<{ status: 'DISCONNECTED' | 'DISCONNECTING' }> {
-    const cleanup = await this.prisma.$transaction(async (transaction) => {
+    const cleanup = await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
       const connection = await transaction.googleConnection.findUnique({
         where: { tenantId },
         select: { credentialGenerationId: true, encryptedRefreshToken: true },
@@ -42,26 +42,27 @@ export class GoogleCredentialCleanupService {
 
   async reconcilePending(limit = 25): Promise<{ attempted: number; completed: number }> {
     const boundedLimit = Math.max(1, Math.min(limit, 100));
-    const cleanups = await this.prisma.googleCredentialCleanup.findMany({
-      where: {
-        terminalAt: null,
-        status: { in: ['PENDING', 'FAILED'] },
-      },
-      orderBy: { updatedAt: 'asc' },
-      take: boundedLimit,
-    });
+    const candidates = await this.prisma.$queryRaw<Array<{ tenant_id: string; cleanup_id: string }>>`
+      SELECT tenant_id, cleanup_id
+      FROM public.api_due_google_credential_cleanups(${boundedLimit})
+    `;
     let completed = 0;
-    for (const cleanup of cleanups) {
+    let attempted = 0;
+    for (const candidate of candidates) {
+      const cleanup = await withTenantTransaction(this.prisma, candidate.tenant_id, (transaction) =>
+        transaction.googleCredentialCleanup.findUnique({ where: { id: candidate.cleanup_id } }));
+      if (!cleanup || cleanup.terminalAt !== null || !['PENDING', 'FAILED'].includes(cleanup.status)) continue;
+      attempted += 1;
       if (await this.processCleanup(cleanup)) completed += 1;
     }
-    return { attempted: cleanups.length, completed };
+    return { attempted, completed };
   }
 
   private async processCleanup(cleanup: GoogleCredentialCleanupRow): Promise<boolean> {
     try {
       await this.client.revokeRefreshToken(this.cipher.decrypt(cleanup.encryptedRefreshToken));
       const now = new Date();
-      await this.prisma.$transaction(async (transaction) => {
+      await withTenantTransaction(this.prisma, cleanup.tenantId, async (transaction) => {
         await transaction.googleCredentialCleanup.update({
           where: { id: cleanup.id },
           data: { status: 'SUCCEEDED', attempts: { increment: 1 }, terminalAt: now, lastErrorCode: null },
@@ -73,10 +74,11 @@ export class GoogleCredentialCleanupService {
       });
       return true;
     } catch {
-      await this.prisma.googleCredentialCleanup.update({
-        where: { id: cleanup.id },
-        data: { status: 'FAILED', attempts: { increment: 1 }, lastErrorCode: 'GOOGLE_REVOCATION_FAILED' },
-      });
+      await withTenantTransaction(this.prisma, cleanup.tenantId, (transaction) =>
+        transaction.googleCredentialCleanup.update({
+          where: { id: cleanup.id },
+          data: { status: 'FAILED', attempts: { increment: 1 }, lastErrorCode: 'GOOGLE_REVOCATION_FAILED' },
+        }));
       return false;
     }
   }

@@ -102,12 +102,14 @@ export class OrdersService {
   }
 
   private async ensurePendingExport(tenantId: string, orderId: string): Promise<void> {
-    const destination = await this.prisma.googleSheetsDestination.findUnique({ where: { tenantId } });
-    if (!destination || destination.status !== 'ACTIVE') return;
-    await this.prisma.orderExport.upsert({
-      where: { orderId_destinationId: { orderId, destinationId: destination.id } },
-      create: { tenantId, orderId, destinationId: destination.id },
-      update: { status: 'PENDING', errorSummary: null },
+    await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+      const destination = await transaction.googleSheetsDestination.findUnique({ where: { tenantId } });
+      if (!destination || destination.status !== 'ACTIVE') return;
+      await transaction.orderExport.upsert({
+        where: { orderId_destinationId: { orderId, destinationId: destination.id } },
+        create: { tenantId, orderId, destinationId: destination.id },
+        update: { status: 'PENDING', errorSummary: null },
+      });
     });
   }
 
@@ -119,11 +121,13 @@ export class OrdersService {
 
   async retrySheetsExport(tenantId: string, id: string): Promise<NonNullable<ManagerOrder['sheetsExport']>> {
     await this.find(tenantId, id);
-    const record = await this.prisma.orderExport.findFirst({ where: { orderId: id, tenantId }, include: { destination: { select: { status: true } } } });
+    const record = await withTenantTransaction(this.prisma, tenantId, (transaction) =>
+      transaction.orderExport.findFirst({ where: { orderId: id, tenantId }, include: { destination: { select: { status: true } } } }));
     if (!record) throw new NotFoundException('Google Sheets export not found');
     if (record.destination.status !== 'ACTIVE') throw new BadRequestException('Google Sheets destination must be active before retry');
     if (record.status !== 'FAILED') throw new BadRequestException('Only failed exports can be retried');
-    const updated = await this.prisma.orderExport.update({ where: { id: record.id }, data: { status: 'PENDING', errorSummary: null } });
+    const updated = await withTenantTransaction(this.prisma, tenantId, (transaction) =>
+      transaction.orderExport.update({ where: { id: record.id }, data: { status: 'PENDING', errorSummary: null } }));
     return this.mapExport(updated, true);
   }
 

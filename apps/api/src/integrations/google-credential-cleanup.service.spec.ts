@@ -5,6 +5,19 @@ import { describe, expect, it, vi } from 'vitest';
 import { CredentialCipher } from './credential-cipher.js';
 import { GoogleCredentialCleanupService } from './google-credential-cleanup.service.js';
 
+vi.mock('@autosale/database', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@autosale/database')>();
+  return {
+    ...actual,
+    withTenantTransaction: <T>(
+      prisma: { $transaction?: (operation: (transaction: unknown) => Promise<T>, options?: unknown) => Promise<T> },
+      _tenantId: string,
+      operation: (transaction: unknown) => Promise<T>,
+      options?: unknown,
+    ) => prisma.$transaction ? prisma.$transaction(operation, options) : operation(prisma),
+  };
+});
+
 describe('GoogleCredentialCleanupService', () => {
   it('blocks dependent jobs before revoking and removes only the matching credential generation', async () => {
     const cipher = new CredentialCipher(Buffer.alloc(32, 4));
@@ -60,14 +73,15 @@ describe('GoogleCredentialCleanupService', () => {
     };
     const transaction = {
       googleConnection: { updateMany: vi.fn().mockResolvedValue({ count: 1 }) },
-      googleCredentialCleanup: { update: vi.fn().mockResolvedValue({}) },
+      googleCredentialCleanup: {
+        findUnique: vi.fn().mockResolvedValue({ ...row, status: 'PENDING', terminalAt: null }),
+        update: vi.fn().mockResolvedValue({}),
+      },
     };
+    const queryRaw = vi.fn().mockResolvedValue([{ tenant_id: 'tenant-a', cleanup_id: 'cleanup-a' }]);
     const prisma = {
       ...transaction,
-      googleCredentialCleanup: {
-        ...transaction.googleCredentialCleanup,
-        findMany: vi.fn().mockResolvedValue([row]),
-      },
+      $queryRaw: queryRaw,
       $transaction: async (callback: any) => callback(transaction),
     };
     const client = { revokeRefreshToken: vi.fn().mockResolvedValue(undefined) };
@@ -75,7 +89,7 @@ describe('GoogleCredentialCleanupService', () => {
 
     await expect(service.reconcilePending(5)).resolves.toEqual({ attempted: 1, completed: 1 });
 
-    expect(prisma.googleCredentialCleanup.findMany).toHaveBeenCalledWith(expect.objectContaining({ take: 5 }));
+    expect(queryRaw).toHaveBeenCalledOnce();
     expect(transaction.googleConnection.updateMany).toHaveBeenCalledWith(expect.objectContaining({
       where: { tenantId: 'tenant-a', credentialGenerationId: 'generation-a' },
     }));

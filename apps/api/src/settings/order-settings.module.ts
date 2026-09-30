@@ -1,7 +1,7 @@
 import { Buffer } from 'node:buffer';
 
 import type { ApiEnv } from '@autosale/config/api-env';
-import { createPrismaClient } from '@autosale/database';
+import { createPrismaClient, withTenantTransaction } from '@autosale/database';
 import { CredentialCipher, createGoogleSheetsAdapter, GoogleOAuthTokenProvider, GoogleSheetsAdapter } from '@autosale/integrations';
 import { DynamicModule, Module } from '@nestjs/common';
 
@@ -31,15 +31,16 @@ export class OrderSettingsModule {
             const prisma = createPrismaClient(env.DATABASE_URL);
             const oauthTokens = env.GOOGLE_OAUTH_CLIENT_ID && env.GOOGLE_OAUTH_CLIENT_SECRET
               ? new GoogleOAuthTokenProvider({
-                findConnection: async (connectionId, tenantId) => prisma.googleConnection.findFirst({
-                  where: { id: connectionId, tenantId },
-                  select: { id: true, tenantId: true, status: true, encryptedRefreshToken: true, credentialGenerationId: true },
-                }),
+                findConnection: async (connectionId, tenantId) => withTenantTransaction(prisma, tenantId, (transaction) =>
+                  transaction.googleConnection.findFirst({
+                    where: { id: connectionId, tenantId },
+                    select: { id: true, tenantId: true, status: true, encryptedRefreshToken: true, credentialGenerationId: true },
+                  })),
                 markReauthorizationRequired: async (tenantId, credentialGenerationId) => {
-                  await prisma.googleConnection.updateMany({
-                    where: { tenantId, credentialGenerationId },
-                    data: { status: 'REAUTHORIZATION_REQUIRED', lastErrorCode: 'GOOGLE_TOKEN_REFRESH_FAILED' },
-                  });
+                  await withTenantTransaction(prisma, tenantId, (transaction) => transaction.googleConnection.updateMany({
+                      where: { tenantId, credentialGenerationId },
+                      data: { status: 'REAUTHORIZATION_REQUIRED', lastErrorCode: 'GOOGLE_TOKEN_REFRESH_FAILED' },
+                    }));
                 },
               }, new CredentialCipher(Buffer.from(env.INTEGRATION_ENCRYPTION_KEY, 'base64')), {
                 clientId: env.GOOGLE_OAUTH_CLIENT_ID,

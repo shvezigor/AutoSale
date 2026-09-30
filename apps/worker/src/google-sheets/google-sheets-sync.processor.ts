@@ -25,7 +25,8 @@ export class GoogleSheetsSyncProcessor {
       );
       approvedBy = typeof order.approvedBy === 'string' ? order.approvedBy : null;
       if (order.status !== 'APPROVED' && order.status !== 'AUTO_APPROVED') throw new Error('Only approved orders can be exported');
-      const destination = await this.prisma.googleSheetsDestination.findUniqueOrThrow({ where: { tenantId: record.tenantId } });
+      const destination = await withTenantTransaction(this.prisma, record.tenantId, (transaction) =>
+        transaction.googleSheetsDestination.findUniqueOrThrow({ where: { tenantId: record.tenantId } }));
       const sheets = destination.credentialRef && this.oauthSheets
         ? await this.oauthSheets(record.tenantId, destination.credentialRef)
         : this.sheets;

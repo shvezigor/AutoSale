@@ -45,14 +45,21 @@ describe('settings tenant scope', () => {
   });
 
   it('creates a Google Sheets destination only for the supplied tenant', async () => {
+    const tenantId = '55555555-5555-4555-8555-555555555555';
     const upsert = vi.fn().mockResolvedValue({ spreadsheetId: 'sheet-id', sheetName: 'Orders', status: 'PENDING', requiredHeaders: [], lastValidatedAt: null, errorSummary: null });
-    const service = new GoogleSheetsSettingsService({ googleSheetsDestination: { upsert } } as never);
+    const transaction = {
+      $queryRaw: vi.fn().mockResolvedValue([]),
+      googleSheetsDestination: { upsert },
+    };
+    const service = new GoogleSheetsSettingsService({
+      $transaction: vi.fn(async (operation) => operation(transaction)),
+    } as never);
 
-    await service.update('tenant-b', { spreadsheetId: 'sheet-id', sheetName: 'Orders' });
+    await service.update(tenantId, { spreadsheetId: 'sheet-id', sheetName: 'Orders' });
 
     expect(upsert).toHaveBeenCalledWith(expect.objectContaining({
-      where: { tenantId: 'tenant-b' },
-      create: expect.objectContaining({ tenantId: 'tenant-b' }),
+      where: { tenantId },
+      create: expect.objectContaining({ tenantId }),
     }));
   });
 });

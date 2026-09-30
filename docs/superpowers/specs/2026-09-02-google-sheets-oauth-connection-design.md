@@ -42,6 +42,7 @@ Development and production use separate Google Cloud projects or OAuth clients. 
 - A `MANAGER` may view safe connection and synchronization status but cannot obtain tokens or change authorization.
 - A platform administrator may see aggregate connection health, error categories, and timestamps but cannot see Google account email, spreadsheet names, file IDs, source rows, products, orders, or tokens.
 - Every connection, OAuth attempt, selected file, source, destination, job, and credential lookup is server-scoped by `tenantId`.
+- Forced PostgreSQL RLS protects Google connections, OAuth attempts, credential cleanups and Sheets destinations for both non-owner runtime roles. Missing tenant context reads no rows and cannot write; mismatched tenant writes are rejected independently of application predicates.
 
 ## Domain Model
 
@@ -119,6 +120,7 @@ The interface never asks a normal customer for a client secret, API key, service
 - Credential rotation or replacement uses generation IDs so an old cleanup job cannot delete a newer connection.
 - Background jobs load connection and tenant state from PostgreSQL; queue payloads contain internal IDs only.
 - API keys are restricted by origin and API. They do not authorize spreadsheet data access.
+- The public OAuth callback atomically consumes its 256-bit state through an API-only security-definer function that returns only tenant and attempt IDs. Durable user/redirect fields are re-read under that tenant context. Cleanup recovery receives only bounded tenant/cleanup IDs and must re-read encrypted credentials under RLS; the worker role and `PUBLIC` cannot execute either authority function.
 
 ## Error Handling
 
@@ -132,7 +134,7 @@ The interface never asks a normal customer for a client secret, API key, service
 
 ## Verification and Release
 
-Automated coverage includes OAuth state consumption, tenant/user binding, callback replay, refresh-token preservation, subject mismatch, token encryption, disconnect cleanup, Picker file validation, tab selection, tenant isolation, revoked grants, and safe logging. Existing catalogue and order export tests are rerun with a tenant OAuth token provider instead of a global service account.
+Automated coverage includes OAuth state consumption, tenant/user binding, callback replay, refresh-token preservation, subject mismatch, token encryption, disconnect cleanup, Picker file validation, tab selection, fail-closed runtime-role RLS, cross-tenant write rejection, least-privilege authority functions, revoked grants, and safe logging. Existing catalogue and order export tests are rerun with a tenant OAuth token provider instead of a global service account.
 
 Staging acceptance requires a real test Google account to:
 

@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
-import type { PrismaClient } from '@autosale/database';
+import { type PrismaClient, withTenantTransaction } from '@autosale/database';
 
 import { CredentialCipher } from './credential-cipher.js';
 import type { GoogleOAuthClientPort } from './google-oauth.client.js';
@@ -51,7 +51,8 @@ export class GoogleOAuthService {
     try {
       const token = await this.client.exchangeCode(input.code);
       if (!token.grantedScopes.includes(DRIVE_FILE_SCOPE)) throw new Error('Required Google scope missing');
-      const existing = await this.prisma.googleConnection.findUnique({ where: { tenantId: binding.tenantId } });
+      const existing = await withTenantTransaction(this.prisma, binding.tenantId, (transaction) =>
+        transaction.googleConnection.findUnique({ where: { tenantId: binding.tenantId } }));
       let encryptedRefreshToken: string;
       if (token.refreshToken) {
         encryptedRefreshToken = this.cipher.encrypt(token.refreshToken);
@@ -62,7 +63,7 @@ export class GoogleOAuthService {
       }
 
       const checkedAt = this.now();
-      await this.prisma.googleConnection.upsert({
+      await withTenantTransaction(this.prisma, binding.tenantId, (transaction) => transaction.googleConnection.upsert({
         where: { tenantId: binding.tenantId },
         create: {
           tenantId: binding.tenantId,
@@ -87,7 +88,7 @@ export class GoogleOAuthService {
           lastErrorCode: null,
           disconnectedAt: null,
         },
-      });
+      }));
       await this.audit(binding.tenantId, binding.userId, 'GOOGLE_CONNECT_COMPLETED', 'SUCCESS');
       return { returnPath: binding.returnPath, summary: await this.summary(binding.tenantId) };
     } catch {
@@ -98,10 +99,11 @@ export class GoogleOAuthService {
   }
 
   async summary(tenantId: string, includePrivateAccount = true): Promise<GoogleConnectionSummary> {
-    const connection = await this.prisma.googleConnection.findUnique({
-      where: { tenantId },
-      select: { status: true, accountEmail: true, grantedScopes: true, createdAt: true, lastVerifiedAt: true, lastErrorCode: true },
-    });
+    const connection = await withTenantTransaction(this.prisma, tenantId, (transaction) =>
+      transaction.googleConnection.findUnique({
+        where: { tenantId },
+        select: { status: true, accountEmail: true, grantedScopes: true, createdAt: true, lastVerifiedAt: true, lastErrorCode: true },
+      }));
     if (!connection) return { status: 'NOT_CONNECTED', email: null, grantedScopes: [], connectedAt: null, lastVerifiedAt: null, lastErrorCode: null };
     return {
       status: connection.status,
@@ -114,20 +116,22 @@ export class GoogleOAuthService {
   }
 
   async getAccessToken(tenantId: string): Promise<string> {
-    const connection = await this.prisma.googleConnection.findUnique({
-      where: { tenantId },
-      select: { status: true, encryptedRefreshToken: true, credentialGenerationId: true, connectedByUserId: true },
-    });
+    const connection = await withTenantTransaction(this.prisma, tenantId, (transaction) =>
+      transaction.googleConnection.findUnique({
+        where: { tenantId },
+        select: { status: true, encryptedRefreshToken: true, credentialGenerationId: true, connectedByUserId: true },
+      }));
     if (connection?.status !== 'ACTIVE' || !connection.encryptedRefreshToken || !connection.credentialGenerationId) {
       throw new Error(SAFE_FAILURE);
     }
     try {
       return await this.client.refreshAccessToken(this.cipher.decrypt(connection.encryptedRefreshToken));
     } catch {
-      await this.prisma.googleConnection.updateMany({
-        where: { tenantId, credentialGenerationId: connection.credentialGenerationId },
-        data: { status: 'REAUTHORIZATION_REQUIRED', lastErrorCode: 'GOOGLE_TOKEN_REFRESH_FAILED' },
-      });
+      await withTenantTransaction(this.prisma, tenantId, (transaction) =>
+        transaction.googleConnection.updateMany({
+          where: { tenantId, credentialGenerationId: connection.credentialGenerationId },
+          data: { status: 'REAUTHORIZATION_REQUIRED', lastErrorCode: 'GOOGLE_TOKEN_REFRESH_FAILED' },
+        }));
       if (connection.connectedByUserId) await this.notify({ tenantId, userId: connection.connectedByUserId, type: 'WARNING', category: 'GOOGLE_REAUTHORIZATION_REQUIRED', title: 'Потрібно повторно підключити Google', actionUrl: '/settings?tab=google' });
       throw new Error(SAFE_FAILURE);
     }

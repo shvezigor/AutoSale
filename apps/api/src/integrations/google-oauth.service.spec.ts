@@ -5,6 +5,19 @@ import { describe, expect, it, vi } from 'vitest';
 import { CredentialCipher } from './credential-cipher.js';
 import { GoogleOAuthService } from './google-oauth.service.js';
 
+vi.mock('@autosale/database', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@autosale/database')>();
+  return {
+    ...actual,
+    withTenantTransaction: <T>(
+      prisma: { $transaction?: (operation: (transaction: unknown) => Promise<T>, options?: unknown) => Promise<T> },
+      _tenantId: string,
+      operation: (transaction: unknown) => Promise<T>,
+      options?: unknown,
+    ) => prisma.$transaction ? prisma.$transaction(operation, options) : operation(prisma),
+  };
+});
+
 const tenantId = '11111111-1111-4111-8111-111111111111';
 const userId = '22222222-2222-4222-8222-222222222222';
 

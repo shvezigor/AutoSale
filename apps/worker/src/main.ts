@@ -89,15 +89,16 @@ async function bootstrap(): Promise<void> {
   const googleSheets = env.GOOGLE_SERVICE_ACCOUNT_FILE ? createGoogleSheetsAdapter(env.GOOGLE_SERVICE_ACCOUNT_FILE) : undefined;
   const googleOAuthTokens = env.GOOGLE_OAUTH_CLIENT_ID && env.GOOGLE_OAUTH_CLIENT_SECRET
     ? new GoogleOAuthTokenProvider({
-      findConnection: async (connectionId, tenantId) => prisma.googleConnection.findFirst({
-        where: { id: connectionId, tenantId },
-        select: { id: true, tenantId: true, status: true, encryptedRefreshToken: true, credentialGenerationId: true },
-      }),
+      findConnection: async (connectionId, tenantId) => withTenantTransaction(prisma, tenantId, (transaction) =>
+        transaction.googleConnection.findFirst({
+          where: { id: connectionId, tenantId },
+          select: { id: true, tenantId: true, status: true, encryptedRefreshToken: true, credentialGenerationId: true },
+        })),
       markReauthorizationRequired: async (tenantId, credentialGenerationId) => {
-        await prisma.googleConnection.updateMany({
-          where: { tenantId, credentialGenerationId },
-          data: { status: 'REAUTHORIZATION_REQUIRED', lastErrorCode: 'GOOGLE_TOKEN_REFRESH_FAILED' },
-        });
+        await withTenantTransaction(prisma, tenantId, (transaction) => transaction.googleConnection.updateMany({
+            where: { tenantId, credentialGenerationId },
+            data: { status: 'REAUTHORIZATION_REQUIRED', lastErrorCode: 'GOOGLE_TOKEN_REFRESH_FAILED' },
+          }));
       },
     }, credentialCipher, {
       clientId: env.GOOGLE_OAUTH_CLIENT_ID,
@@ -121,12 +122,14 @@ async function bootstrap(): Promise<void> {
     new OrderRecognitionService(orderRecognizer),
     procurementStore,
     async (orderId, tenantId) => {
-      const destination = await prisma.googleSheetsDestination.findUnique({ where: { tenantId } });
-      if (!destination || destination.status !== 'ACTIVE') return;
-      await prisma.orderExport.upsert({
-        where: { orderId_destinationId: { orderId, destinationId: destination.id } },
-        create: { tenantId, orderId, destinationId: destination.id },
-        update: { status: 'PENDING', errorSummary: null },
+      await withTenantTransaction(prisma, tenantId, async (transaction) => {
+        const destination = await transaction.googleSheetsDestination.findUnique({ where: { tenantId } });
+        if (!destination || destination.status !== 'ACTIVE') return;
+        await transaction.orderExport.upsert({
+          where: { orderId_destinationId: { orderId, destinationId: destination.id } },
+          create: { tenantId, orderId, destinationId: destination.id },
+          update: { status: 'PENDING', errorSummary: null },
+        });
       });
     },
     (event, fields) => {

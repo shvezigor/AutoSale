@@ -1,8 +1,21 @@
 import { createHash } from 'node:crypto';
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { GoogleOAuthStateService } from './google-oauth-state.service.js';
+
+vi.mock('@autosale/database', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@autosale/database')>();
+  return {
+    ...actual,
+    withTenantTransaction: <T>(
+      prisma: { $transaction?: (operation: (transaction: unknown) => Promise<T>, options?: unknown) => Promise<T> },
+      _tenantId: string,
+      operation: (transaction: unknown) => Promise<T>,
+      options?: unknown,
+    ) => prisma.$transaction ? prisma.$transaction(operation, options) : operation(prisma),
+  };
+});
 
 type Row = {
   id: string;
@@ -32,6 +45,11 @@ class Store {
         this.rows.push(data);
         return data;
       },
+      findUnique: async ({ where }: { where: { id: string } }) => {
+        const row = this.rows.find((candidate) => candidate.id === where.id);
+        if (!row) return null;
+        return { id: row.id, tenantId: row.tenantId, userId: row.userId, returnPath: row.returnPath };
+      },
       updateManyAndReturn: async ({ where, data }: {
         where: { tokenHash: string; usedAt: null; expiresAt: { gt: Date } };
         data: { usedAt: Date };
@@ -41,6 +59,15 @@ class Store {
         for (const row of matches) row.usedAt = data.usedAt;
         return matches.map(({ id, tenantId, userId, returnPath }) => ({ id, tenantId, userId, returnPath }));
       },
+    },
+    $queryRaw: async (_strings: TemplateStringsArray, ...values: unknown[]) => {
+      const tokenHash = values[0];
+      const consumedAt = values[1];
+      if (typeof tokenHash !== 'string' || !(consumedAt instanceof Date)) return [];
+      const attempt = this.rows.find((row) => row.tokenHash === tokenHash && row.usedAt === null && row.expiresAt > consumedAt);
+      if (!attempt) return [];
+      attempt.usedAt = consumedAt;
+      return [{ tenant_id: attempt.tenantId, attempt_id: attempt.id }];
     },
     $transaction: async <T>(callback: (transaction: Store['prisma']) => Promise<T>) => callback(this.prisma),
   };

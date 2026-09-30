@@ -107,6 +107,14 @@ export async function configureRuntimeDatabaseRoles(
           REVOKE ALL ON FUNCTION public.worker_due_instagram_avatar_cleanups(timestamp with time zone, integer) FROM autosale_api;
           GRANT EXECUTE ON FUNCTION public.worker_due_instagram_avatar_cleanups(timestamp with time zone, integer) TO autosale_worker;
         END IF;
+        IF to_regprocedure('public.api_consume_google_oauth_attempt(text,timestamp with time zone)') IS NOT NULL THEN
+          GRANT EXECUTE ON FUNCTION public.api_consume_google_oauth_attempt(text, timestamp with time zone) TO autosale_api;
+          REVOKE ALL ON FUNCTION public.api_consume_google_oauth_attempt(text, timestamp with time zone) FROM autosale_worker;
+        END IF;
+        IF to_regprocedure('public.api_due_google_credential_cleanups(integer)') IS NOT NULL THEN
+          GRANT EXECUTE ON FUNCTION public.api_due_google_credential_cleanups(integer) TO autosale_api;
+          REVOKE ALL ON FUNCTION public.api_due_google_credential_cleanups(integer) FROM autosale_worker;
+        END IF;
       END
       $functions$;
     `);

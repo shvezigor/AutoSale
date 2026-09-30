@@ -1,4 +1,4 @@
-import type { PrismaClient } from '@autosale/database';
+import { type PrismaClient, withTenantTransaction } from '@autosale/database';
 import { GoogleSheetsReadError, GoogleSheetsTableValidationError, googleSheetsStructureFingerprint, type GoogleSheetsAdapter } from '@autosale/integrations';
 import { BadRequestException, ConflictException, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
 
@@ -218,10 +218,11 @@ export class CatalogueSourcesService {
 
   private async verifyOAuthBinding(tenantId: string, spreadsheetId: string, sheetName: string): Promise<string | null> {
     if (!this.config.oauthRequired) return null;
-    const connection = await this.prisma.googleConnection.findUnique({
-      where: { tenantId },
-      select: { id: true, status: true },
-    });
+    const connection = await withTenantTransaction(this.prisma, tenantId, (transaction) =>
+      transaction.googleConnection.findUnique({
+        where: { tenantId },
+        select: { id: true, status: true },
+      }));
     if (connection?.status !== 'ACTIVE' || !this.oauth) throw new BadRequestException('Connect Google before selecting a spreadsheet');
     const metadata = await this.oauth.verifySpreadsheet(tenantId, connection.id, spreadsheetId);
     if (!metadata.tabs.some((tab) => tab.title === sheetName)) throw new BadRequestException('Selected Google sheet tab is unavailable');

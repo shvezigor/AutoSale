@@ -2,6 +2,19 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { GoogleSheetsSettingsService } from './google-sheets-settings.service.js';
 
+vi.mock('@autosale/database', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@autosale/database')>();
+  return {
+    ...actual,
+    withTenantTransaction: <T>(
+      prisma: { $transaction?: (operation: (transaction: unknown) => Promise<T>, options?: unknown) => Promise<T> },
+      _tenantId: string,
+      operation: (transaction: unknown) => Promise<T>,
+      options?: unknown,
+    ) => prisma.$transaction ? prisma.$transaction(operation, options) : operation(prisma),
+  };
+});
+
 describe('GoogleSheetsSettingsService OAuth destination', () => {
   it('binds a Picker-verified destination to the active tenant connection', async () => {
     const row = { spreadsheetId: 'sheet-a', sheetName: 'Orders', credentialRef: 'connection-a', status: 'PENDING', requiredHeaders: [], lastValidatedAt: null, errorSummary: null };

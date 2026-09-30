@@ -228,14 +228,17 @@ describe('OrdersService Google Sheets retry', () => {
       .mockResolvedValueOnce(baseOrder)
       .mockResolvedValueOnce({ ...approvedOrder, exports: [pendingExport] });
     const upsert = vi.fn().mockResolvedValue(pendingExport);
+    const findDestination = vi.fn().mockResolvedValue({ id: 'destination-1', status: 'ACTIVE' });
     const prisma = {
       order: { findFirst },
       product: { findMany: vi.fn().mockResolvedValue([{ sku: 'SKU-1', name: 'Товар' }]) },
-      googleSheetsDestination: { findUnique: vi.fn().mockResolvedValue({ id: 'destination-1', status: 'ACTIVE' }) },
+      googleSheetsDestination: { findUnique: findDestination },
       orderExport: { upsert },
       $transaction: vi.fn(async (callback: (tx: unknown) => unknown) => callback({
         $queryRaw: vi.fn(),
         order: { findFirst, update: vi.fn().mockResolvedValue(approvedOrder) },
+        googleSheetsDestination: { findUnique: findDestination },
+        orderExport: { upsert },
         auditLog: { create: vi.fn().mockResolvedValue({}) },
       })),
     };

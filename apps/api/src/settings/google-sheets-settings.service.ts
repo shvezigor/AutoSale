@@ -1,4 +1,4 @@
-import type { PrismaClient } from '@autosale/database';
+import { type PrismaClient, withTenantTransaction } from '@autosale/database';
 import type { GoogleSheetsAdapter } from '@autosale/integrations';
 import { BadRequestException, Logger } from '@nestjs/common';
 
@@ -21,22 +21,24 @@ export class GoogleSheetsSettingsService {
   ) {}
 
   async get(tenantId: string) {
-    const row = await this.prisma.googleSheetsDestination.findUnique({ where: { tenantId } });
+    const row = await withTenantTransaction(this.prisma, tenantId, (transaction) =>
+      transaction.googleSheetsDestination.findUnique({ where: { tenantId } }));
     return row ? this.map(row) : { spreadsheetId: null, sheetName: 'Orders', status: 'NOT_CONFIGURED', requiredHeaders, lastValidatedAt: null, errorSummary: null };
   }
 
   async update(tenantId: string, input: { spreadsheetId: string; sheetName: string }) {
     const credentialRef = await this.verifyOAuthBinding(tenantId, input.spreadsheetId, input.sheetName);
-    const row = await this.prisma.googleSheetsDestination.upsert({
+    const row = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.googleSheetsDestination.upsert({
       where: { tenantId },
       create: { tenantId, ...input, credentialRef, requiredHeaders, status: 'PENDING' },
       update: { ...input, credentialRef, requiredHeaders, status: 'PENDING', lastValidatedAt: null, errorSummary: null },
-    });
+    }));
     return this.map(row);
   }
 
   async validate(tenantId: string, userId?: string) {
-    const destination = await this.prisma.googleSheetsDestination.findUnique({ where: { tenantId } });
+    const destination = await withTenantTransaction(this.prisma, tenantId, (transaction) =>
+      transaction.googleSheetsDestination.findUnique({ where: { tenantId } }));
     if (!destination) throw new BadRequestException('Google Sheets destination is not configured');
     try {
       const sheets = destination.credentialRef && this.oauth
@@ -51,13 +53,13 @@ export class GoogleSheetsSettingsService {
       }
       const missingHeaders = requiredHeaders.filter((name) => !header.includes(name));
       const status = missingHeaders.length === 0 ? 'ACTIVE' : 'INVALID_HEADERS';
-      await this.prisma.googleSheetsDestination.update({ where: { tenantId }, data: { status, lastValidatedAt: new Date(), errorSummary: missingHeaders.length ? `Missing headers: ${missingHeaders.join(', ')}` : null } });
+      await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.googleSheetsDestination.update({ where: { tenantId }, data: { status, lastValidatedAt: new Date(), errorSummary: missingHeaders.length ? `Missing headers: ${missingHeaders.join(', ')}` : null } }));
       if (initialized && userId) await this.notify({ tenantId, userId, type: 'SUCCESS', category: 'ORDER_SHEET_TEMPLATE_CREATED', title: 'Шаблон таблиці замовлень створено', actionUrl: '/settings?tab=data' });
       return { valid: missingHeaders.length === 0, missingHeaders, status, initialized };
     } catch (error) {
       if (error instanceof BadRequestException) throw error;
       const summary = error instanceof Error ? error.message : 'Google Sheets validation failed';
-      await this.prisma.googleSheetsDestination.update({ where: { tenantId }, data: { status: 'ERROR', lastValidatedAt: new Date(), errorSummary: summary } });
+      await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.googleSheetsDestination.update({ where: { tenantId }, data: { status: 'ERROR', lastValidatedAt: new Date(), errorSummary: summary } }));
       throw new BadRequestException(summary);
     }
   }
@@ -73,7 +75,8 @@ export class GoogleSheetsSettingsService {
 
   private async verifyOAuthBinding(tenantId: string, spreadsheetId: string, sheetName: string): Promise<string | null> {
     if (!this.config.oauthRequired) return null;
-    const connection = await this.prisma.googleConnection.findUnique({ where: { tenantId }, select: { id: true, status: true } });
+    const connection = await withTenantTransaction(this.prisma, tenantId, (transaction) =>
+      transaction.googleConnection.findUnique({ where: { tenantId }, select: { id: true, status: true } }));
     if (connection?.status !== 'ACTIVE' || !this.oauth) throw new BadRequestException('Connect Google before selecting a destination');
     const metadata = await this.oauth.verifySpreadsheet(tenantId, connection.id, spreadsheetId);
     if (!metadata.tabs.some((tab) => tab.title === sheetName)) throw new BadRequestException('Selected Google sheet tab is unavailable');

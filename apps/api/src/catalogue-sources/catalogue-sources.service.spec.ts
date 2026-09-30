@@ -4,6 +4,19 @@ import { GoogleSheetsTableValidationError } from '@autosale/integrations';
 
 import { CatalogueSourcesService } from './catalogue-sources.service.js';
 
+vi.mock('@autosale/database', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@autosale/database')>();
+  return {
+    ...actual,
+    withTenantTransaction: <T>(
+      prisma: { $transaction?: (operation: (transaction: unknown) => Promise<T>, options?: unknown) => Promise<T> },
+      _tenantId: string,
+      operation: (transaction: unknown) => Promise<T>,
+      options?: unknown,
+    ) => prisma.$transaction ? prisma.$transaction(operation, options) : operation(prisma),
+  };
+});
+
 describe('CatalogueSourcesService', () => {
   const tenantId = '22222222-2222-4222-8222-222222222222';
   const userId = '33333333-3333-4333-8333-333333333333';
