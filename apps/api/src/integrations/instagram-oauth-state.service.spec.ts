@@ -1,8 +1,21 @@
 import { createHash } from 'node:crypto';
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { InstagramOAuthStateService } from './instagram-oauth-state.service.js';
+
+vi.mock('@autosale/database', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@autosale/database')>();
+  return {
+    ...actual,
+    withTenantTransaction: <T>(
+      prisma: { $transaction: (operation: (transaction: unknown) => Promise<T>, options?: unknown) => Promise<T> },
+      _tenantId: string,
+      operation: (transaction: unknown) => Promise<T>,
+      options?: unknown,
+    ) => prisma.$transaction(operation, options),
+  };
+});
 
 type OAuthStateRow = {
   id: string;
@@ -26,6 +39,10 @@ type OAuthStatePrisma = {
   };
   instagramOAuthState: {
     create: (input: { data: Omit<OAuthStateRow, 'usedAt'> & { usedAt?: Date | null } }) => Promise<OAuthStateRow>;
+    findUnique: (input: {
+      where: { id: string };
+      select: { id: true; tenantId: true; userId: true; returnPath: true };
+    }) => Promise<Pick<OAuthStateRow, 'id' | 'tenantId' | 'userId' | 'returnPath'> | null>;
     updateMany: (input: {
       where: { tenantId?: string; usedAt?: null };
       data: { usedAt: Date };
@@ -44,6 +61,7 @@ type OAuthStatePrisma = {
     create: (input: { data: { tenantId: string; userId: string; actor: string; action: string; result: string; metadata: Record<string, never> } }) => Promise<unknown>;
   };
   tenant: { update: () => Promise<Record<string, never>> };
+  $queryRaw: (strings: TemplateStringsArray, ...values: unknown[]) => Promise<Array<{ tenant_id: string; state_id: string }>>;
   $transaction: <T>(callback: (transaction: OAuthStatePrisma) => Promise<T>) => Promise<T>;
 };
 
@@ -63,6 +81,11 @@ class OAuthStateStore {
           : this.cleanupRow,
     },
     instagramOAuthState: {
+      findUnique: async ({ where }) => {
+        const row = this.rows.find((candidate) => candidate.id === where.id);
+        if (!row) return null;
+        return { id: row.id, tenantId: row.tenantId, userId: row.userId, returnPath: row.returnPath };
+      },
       create: async ({ data }: { data: Omit<OAuthStateRow, 'usedAt'> & { usedAt?: Date | null } }) => {
         const row = { ...data, usedAt: data.usedAt ?? null };
         this.rows.push(row);
@@ -117,6 +140,16 @@ class OAuthStateStore {
       },
     },
     tenant: { update: async () => ({}) },
+    $queryRaw: async (_strings, ...values) => {
+      const tokenHash = values[0];
+      const consumedAt = values[1];
+      if (typeof tokenHash !== 'string' || !(consumedAt instanceof Date)) return [];
+      const state = this.rows.find((row) =>
+        row.tokenHash === tokenHash && row.usedAt === null && row.expiresAt > consumedAt);
+      if (!state) return [];
+      state.usedAt = consumedAt;
+      return [{ tenant_id: state.tenantId, state_id: state.id }];
+    },
     $transaction: async <T>(callback: (transaction: OAuthStatePrisma) => Promise<T>) => callback(this.prisma),
   };
 }

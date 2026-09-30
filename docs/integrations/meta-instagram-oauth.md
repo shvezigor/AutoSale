@@ -169,6 +169,20 @@ Access (розробка/дозволене тестове використан�
 використання після схвалення); актуальні вимоги видно поруч з кожним
 permission. Не перемикайте застосунок у Live лише заради обходу tester list.
 
+### Ізоляція інтеграції між клієнтами
+
+Підключення Instagram, одноразові OAuth state, черга очищення credential і
+черга видалення аватарів захищені forced PostgreSQL RLS. Звичайний API або
+worker без transaction-local tenant context не бачить цих записів. Webhook і
+Meta data-deletion callback, де tenant ще невідомий, можуть визначити лише
+`tenant_id` за точним зовнішнім account ID через API-only функцію. OAuth
+callback атомарно споживає високоентропійний state і отримує лише tenant/state
+UUID; user, return path та інші поля читаються вже в tenant-транзакції. Worker
+отримує для очищення аватарів лише обмежений список tenant/cleanup UUID. Жодна
+з цих службових функцій не повертає access token, username, повідомлення,
+payload або object-storage key, а протилежний runtime-роль не має права їх
+викликати.
+
 ## 5. App Review і перехід у Live
 
 До подання переконайтеся, що працює весь checklist нижче. Для кожного з двох

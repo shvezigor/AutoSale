@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises';
+import { readdir, readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
 import { PostgreSqlContainer, type StartedPostgreSqlContainer } from '@testcontainers/postgresql';
@@ -18,7 +18,9 @@ describe('MetaEventService', () => {
     container = await new PostgreSqlContainer('postgres:17.6-alpine').start();
     const connectionString = container.getConnectionUri();
     const pool = new pg.Pool({ connectionString });
-    for (const migrationName of ['20260826090000_init_webhook_events', '20260827160000_self_hosted_auth', '20260827170000_tenant_access_status', '20260827230000_instagram_connections', '20260828_meta_instagram_oauth', '20260828150000_instagram_oauth_attempt_guard', '20260829120000_instagram_credential_cleanup_queue']) {
+    const migrationsRoot = resolve(process.cwd(), '../../packages/database/prisma/migrations');
+    for (const migrationName of (await readdir(migrationsRoot)).sort()) {
+      if (migrationName === 'migration_lock.toml') continue;
       const migration = await readFile(resolve(process.cwd(), `../../packages/database/prisma/migrations/${migrationName}/migration.sql`), 'utf8');
       await pool.query(migration);
     }

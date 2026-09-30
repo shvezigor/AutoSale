@@ -1,12 +1,12 @@
-import type { PrismaClient } from '@autosale/database';
+import { type PrismaClient, withTenantTransaction } from '@autosale/database';
 
 import { INSTAGRAM_CLEANUP_ABANDON_AFTER_ATTEMPTS } from '../integrations/instagram-oauth.service.js';
 
 export class InstagramSettingsService {
   constructor(private readonly prisma: PrismaClient) {}
   async get(tenantId: string) {
-    const [value, cleanupRows] = await Promise.all([
-      this.prisma.instagramConnection.findUnique({
+    const [value, cleanupRows] = await withTenantTransaction(this.prisma, tenantId, (transaction) => Promise.all([
+      transaction.instagramConnection.findUnique({
         where: { tenantId },
         select: {
           externalAccountId: true,
@@ -17,7 +17,7 @@ export class InstagramSettingsService {
           lastErrorCode: true,
         },
       }),
-      this.prisma.instagramCredentialCleanup.findMany({
+      transaction.instagramCredentialCleanup.findMany({
         where: { tenantId, terminalAt: null },
         select: {
           unsubscribeStatus: true,
@@ -28,7 +28,7 @@ export class InstagramSettingsService {
           lastErrorCode: true,
         },
       }),
-    ]);
+    ]));
     const cleanup = summarizeCleanup(cleanupRows);
     return value
       ? {

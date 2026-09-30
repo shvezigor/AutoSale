@@ -44,8 +44,11 @@ export class DashboardService {
 
   async summary(tenantId: string, period: DashboardPeriod, now = new Date()): Promise<DashboardResponse> {
     const range = dashboardPeriodRange(period, now);
-    const [orderData, instagram, sheets, deliveryConnections] = await Promise.all([
-      withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+    const [orderData, instagram, sheets, deliveryConnections] = await withTenantTransaction(
+      this.prisma,
+      tenantId,
+      (transaction) => Promise.all([
+        (async () => {
         const aggregateRows = await this.aggregate(transaction, tenantId, range.previousStart, range.start, range.end, now);
         const dailyRows = await this.daily(transaction, tenantId, range.start, range.end);
         const queue = await transaction.order.findMany({
@@ -62,21 +65,21 @@ export class DashboardService {
           },
         });
         return { aggregateRows, dailyRows, queue };
-      }),
-      this.prisma.instagramConnection.findUnique({
+        })(),
+      transaction.instagramConnection.findUnique({
         where: { tenantId },
         select: { status: true, displayName: true, lastErrorCode: true },
       }),
-      this.prisma.googleSheetsDestination.findUnique({
+      transaction.googleSheetsDestination.findUnique({
         where: { tenantId },
         select: { status: true, sheetName: true, errorSummary: true },
       }),
-      this.prisma.deliveryConnection.findMany({
+      transaction.deliveryConnection.findMany({
         where: { tenantId },
         orderBy: { provider: 'asc' },
         select: { provider: true, status: true, accountLabel: true, lastErrorCode: true },
       }),
-    ]);
+    ]));
     const { aggregateRows, dailyRows, queue } = orderData;
     const aggregate = aggregateRows[0] ?? emptyAggregate();
     const newOrders = count(aggregate.newOrders);

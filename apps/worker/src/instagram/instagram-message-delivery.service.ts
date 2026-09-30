@@ -84,7 +84,7 @@ export class InstagramMessageDeliveryService {
       return 'FAILED';
     }
 
-    const connection = await this.prisma.instagramConnection.findFirst({
+    const connection = await withTenantTransaction(this.prisma, job.tenantId, (transaction) => transaction.instagramConnection.findFirst({
       where: {
         tenantId: job.tenantId,
         status: 'ACTIVE',
@@ -97,7 +97,7 @@ export class InstagramMessageDeliveryService {
         encryptedAccessToken: true,
         credentialGenerationId: true,
       },
-    });
+    }));
     if (!connection?.encryptedAccessToken) {
       await this.finish(job, leaseId, {
         deliveryStatus: 'FAILED',

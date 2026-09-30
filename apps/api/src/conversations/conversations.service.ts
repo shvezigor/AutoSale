@@ -112,8 +112,8 @@ export class ConversationsService {
   }
 
   async detail(tenantId: string, id: string): Promise<ConversationDetailResponse> {
-    const [conversation, connection] = await Promise.all([
-      withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.conversation.findFirst({
+    const [conversation, connection] = await withTenantTransaction(this.prisma, tenantId, (transaction) => Promise.all([
+      transaction.conversation.findFirst({
         where: { id, tenantId },
         include: {
           profile: {
@@ -131,9 +131,9 @@ export class ConversationsService {
             include: { attachments: { orderBy: { createdAt: 'asc' } } },
           },
         },
-      })),
-      this.prisma.instagramConnection.findUnique({ where: { tenantId } }),
-    ]);
+      }),
+      transaction.instagramConnection.findUnique({ where: { tenantId } }),
+    ]));
 
     if (!conversation) {
       throw new NotFoundException('Conversation not found');

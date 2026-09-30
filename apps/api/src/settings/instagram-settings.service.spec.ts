@@ -2,6 +2,18 @@ import type { PrismaClient } from '@autosale/database';
 import { describe, expect, it, vi } from 'vitest';
 import { InstagramSettingsService } from './instagram-settings.service.js';
 
+vi.mock('@autosale/database', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@autosale/database')>();
+  return {
+    ...actual,
+    withTenantTransaction: <T>(
+      prisma: unknown,
+      _tenantId: string,
+      operation: (transaction: unknown) => Promise<T>,
+    ) => operation(prisma),
+  };
+});
+
 describe('InstagramSettingsService', () => {
   it('returns only safe connection metadata for the requested tenant', async () => {
     const findUnique = vi.fn(async () => ({

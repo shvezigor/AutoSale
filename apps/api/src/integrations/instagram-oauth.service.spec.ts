@@ -6,6 +6,19 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { CredentialCipher } from './credential-cipher.js';
 import { InstagramOAuthService } from './instagram-oauth.service.js';
 
+vi.mock('@autosale/database', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@autosale/database')>();
+  return {
+    ...actual,
+    withTenantTransaction: <T>(
+      prisma: { $transaction: (operation: (transaction: unknown) => Promise<T>, options?: unknown) => Promise<T> },
+      _tenantId: string,
+      operation: (transaction: unknown) => Promise<T>,
+      options?: unknown,
+    ) => prisma.$transaction(operation, options),
+  };
+});
+
 const now = new Date('2026-08-28T12:00:00.000Z');
 const callbackUri = 'https://demo.ngrok-free.app/api/integrations/instagram/callback';
 
@@ -106,6 +119,7 @@ function setup(nowFn: () => Date = () => now) {
     status: 'ACTIVE',
     user: { status: 'ACTIVE' },
   });
+  const authorityQuery = vi.fn().mockResolvedValue([{ tenant_id: 'tenant-a' }]);
   const prisma = {
     instagramConnection: { findUnique, upsert, update, updateMany, updateManyAndReturn },
     instagramCredentialCleanup: {
@@ -121,6 +135,7 @@ function setup(nowFn: () => Date = () => now) {
     tenant: { findUnique: tenantFindUnique, updateMany: tenantUpdateMany },
     tenantMembership: { findUnique: membershipFindUnique, updateMany: vi.fn().mockResolvedValue({ count: 1 }) },
     user: { updateMany: vi.fn().mockResolvedValue({ count: 1 }) },
+    $queryRaw: authorityQuery,
   };
   (prisma as { $transaction?: unknown }).$transaction = async <T>(callback: (transaction: typeof prisma) => Promise<T>) => callback(prisma);
   const state = {
@@ -158,7 +173,7 @@ function setup(nowFn: () => Date = () => now) {
     cleanupCreate, cleanupFindUnique, cleanupFindFirst, cleanupFindMany, cleanupUpdateManyAndReturn,
     cleanupUpdateMany,
     oauthStateUpdateMany, auditCreate,
-    tenantFindUnique, tenantUpdateMany, membershipFindUnique, notifications,
+    tenantFindUnique, tenantUpdateMany, membershipFindUnique, notifications, authorityQuery,
   };
 }
 
@@ -476,10 +491,22 @@ describe('InstagramOAuthService', () => {
   });
 
   it('fails closed when the Instagram account belongs to another tenant', async () => {
-    const { service, findUnique, upsert, meta } = setup();
+    const { service, findUnique, upsert, meta, authorityQuery } = setup();
     findUnique.mockResolvedValue(connection({ tenantId: 'tenant-b' }));
+    authorityQuery.mockResolvedValue([{ tenant_id: 'tenant-b' }]);
 
     await expect(service.completeCallback('authorization-code', 'raw-state')).rejects.toThrow('Instagram connection failed');
+
+    expect(upsert).not.toHaveBeenCalled();
+    expect(meta.subscribe).not.toHaveBeenCalled();
+  });
+
+  it('fails safely when provider authority cannot be resolved', async () => {
+    const { service, upsert, meta, authorityQuery } = setup();
+    authorityQuery.mockRejectedValue(new Error('database unavailable'));
+
+    await expect(service.completeCallback('authorization-code', 'raw-state'))
+      .rejects.toThrow('Instagram connection failed');
 
     expect(upsert).not.toHaveBeenCalled();
     expect(meta.subscribe).not.toHaveBeenCalled();

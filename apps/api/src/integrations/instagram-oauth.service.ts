@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
-import { type Prisma, type PrismaClient } from '@autosale/database';
+import { type Prisma, type PrismaClient, withTenantTransaction } from '@autosale/database';
 import {
   MetaInstagramError,
   type MetaInstagramClient,
@@ -175,10 +175,10 @@ export class InstagramOAuthService {
 
   async getSummary(tenantId: string): Promise<InstagramConnectionSummary> {
     const [connection, cleanup] = await Promise.all([
-      this.prisma.instagramConnection.findUnique({
+      withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.instagramConnection.findUnique({
         where: { tenantId },
         select: SAFE_CONNECTION_SELECT,
-      }),
+      })),
       this.getCleanupSummary(tenantId),
     ]);
 
@@ -271,6 +271,18 @@ export class InstagramOAuthService {
       throw safeFailure();
     }
 
+    let existingOwnerTenantId: string | null;
+    try {
+      existingOwnerTenantId = await this.resolveAccountTenant(identity.accountId);
+    } catch {
+      await this.markCallbackFailure(binding, 'ERROR', 'META_CONNECTION_FAILED');
+      throw safeFailure();
+    }
+    if (existingOwnerTenantId !== null && existingOwnerTenantId !== binding.tenantId) {
+      await this.markCallbackFailure(binding, 'ERROR', 'META_CONNECTION_FAILED');
+      throw safeFailure();
+    }
+
     const pendingCredential = {
       credentialGenerationId: randomUUID(),
       externalAccountId: identity.accountId,
@@ -292,8 +304,6 @@ export class InstagramOAuthService {
 
     try {
       await this.withCurrentAttempt(binding, async (transaction) => {
-        const owner = await transaction.instagramConnection.findUnique({ where: { externalAccountId: identity.accountId }, select: { tenantId: true } });
-        if (owner && owner.tenantId !== binding.tenantId) throw safeFailure();
         await transaction.instagramConnection.upsert({
           where: { tenantId: binding.tenantId },
           create: { tenantId: binding.tenantId, ...pendingData },
@@ -334,7 +344,7 @@ export class InstagramOAuthService {
           'SUBSCRIPTION_FAILURE',
           'META_SUBSCRIPTION_FAILED',
         );
-        await this.cleanupCredentialById(cleanup.id, binding.userId);
+        await this.cleanupCredentialById(binding.tenantId, cleanup.id, binding.userId);
       } finally {
         // Even if a transient cleanup persistence/read failure prevents the
         // inline retry, keep the callback outcome safe and auditable. The
@@ -386,7 +396,7 @@ export class InstagramOAuthService {
           'CALLBACK_COMPENSATION',
           'META_ACTIVATION_FAILED',
         );
-        await this.cleanupCredentialById(cleanup.id, binding.userId);
+        await this.cleanupCredentialById(binding.tenantId, cleanup.id, binding.userId);
       } finally {
         await this.recordAuditBestEffort(binding, 'INSTAGRAM_CALLBACK_FAILED', 'FAILURE', { errorCode: 'META_ACTIVATION_FAILED' });
       }
@@ -401,17 +411,27 @@ export class InstagramOAuthService {
 
   async disconnect(tenantId: string, userId: string): Promise<InstagramConnectionSummary> {
     const cleanupId = await this.prepareDisconnect(tenantId, userId);
-    if (cleanupId) await this.cleanupCredentialById(cleanupId, userId);
+    if (cleanupId) await this.cleanupCredentialById(tenantId, cleanupId, userId);
     return this.getSummary(tenantId);
   }
 
   async disconnectByExternalAccountId(externalAccountId: string): Promise<void> {
-    const connection = await this.prisma.instagramConnection.findUnique({
-      where: { externalAccountId },
-      select: { tenantId: true, connectedByUserId: true },
-    });
+    const tenantId = await this.resolveAccountTenant(externalAccountId);
+    if (!tenantId) return;
+    const connection = await withTenantTransaction(this.prisma, tenantId, (transaction) =>
+      transaction.instagramConnection.findUnique({
+        where: { externalAccountId },
+        select: { tenantId: true, connectedByUserId: true },
+      }));
     if (!connection?.connectedByUserId) return;
     await this.disconnect(connection.tenantId, connection.connectedByUserId);
+  }
+
+  private async resolveAccountTenant(externalAccountId: string): Promise<string | null> {
+    const authority = await this.prisma.$queryRaw<Array<{ tenant_id: string }>>`
+      SELECT tenant_id FROM public.api_instagram_tenant_for_account(${externalAccountId})
+    `;
+    return authority[0]?.tenant_id ?? null;
   }
 
   async retryCleanup(tenantId: string, userId: string): Promise<InstagramConnectionSummary> {
@@ -426,7 +446,7 @@ export class InstagramOAuthService {
     confirmation: string,
   ): Promise<InstagramConnectionSummary> {
     if (confirmation !== INSTAGRAM_CLEANUP_ABANDON_CONFIRMATION) throw safeFailure();
-    await this.withSerializableRetry(() => this.prisma.$transaction(async (transaction) => {
+    await this.withSerializableRetry(() => withTenantTransaction(this.prisma, tenantId, async (transaction) => {
       const failed = await transaction.instagramCredentialCleanup.findMany({
         where: { tenantId, terminalAt: null },
         select: {
@@ -516,7 +536,7 @@ export class InstagramOAuthService {
     tenantId: string,
     userId: string,
   ): Promise<string | null> {
-    return this.withSerializableRetry(() => this.prisma.$transaction(async (transaction) => {
+    return this.withSerializableRetry(() => withTenantTransaction(this.prisma, tenantId, async (transaction) => {
       const locked = await transaction.tenant.updateMany({
         where: { id: tenantId },
         data: { instagramOAuthCurrentAttemptId: null },
@@ -655,7 +675,7 @@ export class InstagramOAuthService {
     source: Exclude<CleanupSource, 'DISCONNECT'>,
     lastErrorCode: string,
   ): Promise<CleanupRow> {
-    const cleanup = await this.withSerializableRetry(() => this.prisma.$transaction(async (transaction) => {
+    const cleanup = await this.withSerializableRetry(() => withTenantTransaction(this.prisma, binding.tenantId, async (transaction) => {
       const existing = await transaction.instagramCredentialCleanup.findUnique({
         where: { credentialGenerationId: credential.credentialGenerationId },
         select: CLEANUP_ROW_SELECT,
@@ -718,7 +738,7 @@ export class InstagramOAuthService {
   private async recoverUnresolvedCleanups(tenantId: string): Promise<void> {
     const recoveredAt = this.now();
     const staleBefore = new Date(recoveredAt.getTime() - CLEANUP_LEASE_MS);
-    await this.withSerializableRetry(() => this.prisma.$transaction(async (transaction) => {
+    await this.withSerializableRetry(() => withTenantTransaction(this.prisma, tenantId, async (transaction) => {
       const unresolved = await transaction.instagramCredentialCleanup.findMany({
         where: {
           tenantId,
@@ -774,24 +794,24 @@ export class InstagramOAuthService {
     }
   }
 
-  private async cleanupCredentialById(cleanupId: string, userId: string): Promise<void> {
-    const cleanup = await this.leaseCleanupById(cleanupId);
+  private async cleanupCredentialById(tenantId: string, cleanupId: string, userId: string): Promise<void> {
+    const cleanup = await this.leaseCleanupById(tenantId, cleanupId);
     if (!cleanup) return;
     await this.cleanupLeasedCredential(cleanup, userId);
   }
 
-  private async leaseCleanupById(cleanupId: string): Promise<LeasedCleanupRow | null> {
-    const row = await this.prisma.instagramCredentialCleanup.findUnique({
+  private async leaseCleanupById(tenantId: string, cleanupId: string): Promise<LeasedCleanupRow | null> {
+    const row = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.instagramCredentialCleanup.findUnique({
       where: { id: cleanupId },
       select: CLEANUP_ROW_SELECT,
-    });
+    }));
     if (!row || row.terminalAt !== null || row.state !== 'REQUIRED' || row.callbackResolvedAt === null) return null;
     return this.leaseCleanupRow(row);
   }
 
   private async leaseNextCleanup(tenantId: string, excludedIds: string[]): Promise<LeasedCleanupRow | null> {
     const checkedAt = this.now();
-    const row = await this.prisma.instagramCredentialCleanup.findFirst({
+    const row = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.instagramCredentialCleanup.findFirst({
       where: {
         tenantId,
         state: 'REQUIRED',
@@ -802,7 +822,7 @@ export class InstagramOAuthService {
       },
       orderBy: { createdAt: 'asc' },
       select: CLEANUP_ROW_SELECT,
-    });
+    }));
     if (!row) return null;
     return this.leaseCleanupRow(row, checkedAt);
   }
@@ -810,7 +830,7 @@ export class InstagramOAuthService {
   private async leaseCleanupRow(row: CleanupRow, leasedAt = this.now()): Promise<LeasedCleanupRow | null> {
     const leaseId = randomUUID();
     const leaseExpiresAt = new Date(leasedAt.getTime() + CLEANUP_LEASE_MS);
-    const rows = await this.prisma.instagramCredentialCleanup.updateManyAndReturn({
+    const rows = await withTenantTransaction(this.prisma, row.tenantId, (transaction) => transaction.instagramCredentialCleanup.updateManyAndReturn({
       where: {
         id: row.id,
         version: row.version,
@@ -826,7 +846,7 @@ export class InstagramOAuthService {
         version: { increment: 1 },
       },
       select: CLEANUP_ROW_SELECT,
-    });
+    }));
     return asLeasedCleanup(rows[0]);
   }
 
@@ -961,7 +981,7 @@ export class InstagramOAuthService {
     }
 
     const completedAt = this.now();
-    const completed = await this.prisma.$transaction(async (transaction) => {
+    const completed = await withTenantTransaction(this.prisma, cleanup.tenantId, async (transaction) => {
       const rows = await transaction.instagramCredentialCleanup.updateManyAndReturn({
         where: {
           id: cleanup.id,
@@ -1012,7 +1032,7 @@ export class InstagramOAuthService {
     cleanup: LeasedCleanupRow,
     data: Prisma.InstagramCredentialCleanupUpdateManyMutationInput,
   ): Promise<CleanupRow | null> {
-    const rows = await this.prisma.instagramCredentialCleanup.updateManyAndReturn({
+    const rows = await withTenantTransaction(this.prisma, cleanup.tenantId, (transaction) => transaction.instagramCredentialCleanup.updateManyAndReturn({
       where: {
         id: cleanup.id,
         leaseId: cleanup.leaseId,
@@ -1025,15 +1045,16 @@ export class InstagramOAuthService {
         version: { increment: 1 },
       },
       select: CLEANUP_ROW_SELECT,
-    });
+    }));
     return rows[0] ?? null;
   }
 
   private async getCleanupSummary(tenantId: string): Promise<CleanupSummary> {
-    const rows = await this.prisma.instagramCredentialCleanup.findMany({
-      where: { tenantId, terminalAt: null },
-      select: CLEANUP_SUMMARY_SELECT,
-    });
+    const rows = await withTenantTransaction(this.prisma, tenantId, (transaction) =>
+      transaction.instagramCredentialCleanup.findMany({
+        where: { tenantId, terminalAt: null },
+        select: CLEANUP_SUMMARY_SELECT,
+      }));
     return summarizeCleanup(rows);
   }
 
@@ -1116,10 +1137,11 @@ export class InstagramOAuthService {
 
   private async markExpired(tenantId: string, checkedAt: Date): Promise<void> {
     try {
-      await this.prisma.instagramConnection.updateMany({
-        where: { tenantId, status: 'ACTIVE', tokenExpiresAt: { lte: checkedAt } },
-        data: { status: 'REAUTH_REQUIRED', lastErrorCode: 'META_TOKEN_EXPIRED' },
-      });
+      await withTenantTransaction(this.prisma, tenantId, (transaction) =>
+        transaction.instagramConnection.updateMany({
+          where: { tenantId, status: 'ACTIVE', tokenExpiresAt: { lte: checkedAt } },
+          data: { status: 'REAUTH_REQUIRED', lastErrorCode: 'META_TOKEN_EXPIRED' },
+        }));
     } catch {
       // The safe summary still reports the expired credential as unusable.
     }
@@ -1150,7 +1172,7 @@ export class InstagramOAuthService {
     binding: OAuthBinding,
     operation: (transaction: Prisma.TransactionClient) => Promise<T>,
   ): Promise<T> {
-    return this.withSerializableRetry(() => this.prisma.$transaction(async (transaction) => {
+    return this.withSerializableRetry(() => withTenantTransaction(this.prisma, binding.tenantId, async (transaction) => {
       const locked = await transaction.tenant.updateMany({
         where: { id: binding.tenantId, instagramOAuthCurrentAttemptId: binding.id, status: 'ACTIVE' },
         data: { instagramOAuthCurrentAttemptId: binding.id },

@@ -5,13 +5,28 @@ export class MetaEventService {
   constructor(private readonly prisma: PrismaClient, private readonly now: () => Date = () => new Date()) {}
 
   async resolveTenant(externalAccountId: string): Promise<string | null> {
-    const connection = await this.prisma.instagramConnection.findUnique({ where: { externalAccountId }, select: { tenantId: true, status: true, tokenExpiresAt: true } });
-    if (connection?.status !== 'ACTIVE') return null;
-    if (connection.tokenExpiresAt !== null && connection.tokenExpiresAt <= this.now()) {
-      await this.prisma.instagramConnection.updateMany({ where: { externalAccountId, status: 'ACTIVE', tokenExpiresAt: { lte: this.now() } }, data: { status: 'REAUTH_REQUIRED', lastErrorCode: 'META_TOKEN_EXPIRED' } });
-      return null;
-    }
-    return connection.tenantId;
+    const authority = await this.prisma.$queryRaw<Array<{ tenant_id: string }>>`
+      SELECT tenant_id FROM public.api_instagram_tenant_for_account(${externalAccountId})
+    `;
+    const tenantId = authority[0]?.tenant_id;
+    if (!tenantId) return null;
+
+    return withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+      const connection = await transaction.instagramConnection.findUnique({
+        where: { externalAccountId },
+        select: { tenantId: true, status: true, tokenExpiresAt: true },
+      });
+      if (connection?.status !== 'ACTIVE') return null;
+      const now = this.now();
+      if (connection.tokenExpiresAt !== null && connection.tokenExpiresAt <= now) {
+        await transaction.instagramConnection.updateMany({
+          where: { externalAccountId, status: 'ACTIVE', tokenExpiresAt: { lte: now } },
+          data: { status: 'REAUTH_REQUIRED', lastErrorCode: 'META_TOKEN_EXPIRED' },
+        });
+        return null;
+      }
+      return connection.tenantId;
+    });
   }
 
   async register(

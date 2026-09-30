@@ -1,5 +1,5 @@
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
-import type { PrismaClient } from '@autosale/database';
+import { type PrismaClient, withTenantTransaction } from '@autosale/database';
 
 const STATE_TTL_MS = 10 * 60 * 1000;
 const DEFAULT_RETURN_PATH = '/settings';
@@ -46,7 +46,7 @@ export class InstagramOAuthStateService {
     const stateId = randomUUID();
     const now = new Date();
 
-    await this.withSerializableRetry(() => this.prisma.$transaction(async (transaction) => {
+    await this.withSerializableRetry(() => withTenantTransaction(this.prisma, input.tenantId, async (transaction) => {
       await transaction.tenant.update({
         where: { id: input.tenantId },
         data: { instagramOAuthCurrentAttemptId: stateId },
@@ -93,22 +93,20 @@ export class InstagramOAuthStateService {
         throw new Error(INVALID_STATE_ERROR);
       }
 
-      const states = await this.prisma.instagramOAuthState.updateManyAndReturn({
-        where: {
-          tokenHash: hashState(rawState),
-          usedAt: null,
-          expiresAt: { gt: new Date() },
-        },
-        data: { usedAt: new Date() },
-        select: { id: true, tenantId: true, userId: true, returnPath: true },
-      });
+      const consumedAt = new Date();
+      const authority = await this.prisma.$queryRaw<Array<{ tenant_id: string; state_id: string }>>`
+        SELECT tenant_id, state_id
+        FROM public.api_consume_instagram_oauth_state(${hashState(rawState)}, ${consumedAt})
+      `;
+      const consumed = authority[0];
+      if (!consumed) throw new Error(INVALID_STATE_ERROR);
 
-      const state = states[0];
-
-      if (state === undefined) {
-        throw new Error(INVALID_STATE_ERROR);
-      }
-
+      const state = await withTenantTransaction(this.prisma, consumed.tenant_id, (transaction) =>
+        transaction.instagramOAuthState.findUnique({
+          where: { id: consumed.state_id },
+          select: { id: true, tenantId: true, userId: true, returnPath: true },
+        }));
+      if (!state) throw new Error(INVALID_STATE_ERROR);
       return state;
     } catch {
       throw new Error(INVALID_STATE_ERROR);

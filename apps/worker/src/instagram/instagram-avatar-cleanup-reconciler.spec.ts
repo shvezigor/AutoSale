@@ -20,6 +20,7 @@ const MIGRATIONS = [
   '20260829120000_instagram_credential_cleanup_queue',
   '20260902090000_instagram_customer_profiles',
   '20260902130000_instagram_avatar_cleanup',
+  '20260930124500_instagram_integration_rls',
 ] as const;
 
 describe('InstagramAvatarCleanupReconciler', () => {
