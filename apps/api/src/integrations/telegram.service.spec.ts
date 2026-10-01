@@ -187,7 +187,7 @@ describe('TelegramService webhook processing', () => {
         destinationId: chat.id,
         purpose: 'TEST',
         status: 'PENDING',
-        messageText: 'AutoSale підключено. Тестове сповіщення працює.',
+        messageText: 'Sales AITO підключено. Тестове сповіщення працює.',
       });
     });
     const service = new TelegramService(prisma, undefined, { botUsername: 'AutoSaleBot', queue: { add } });

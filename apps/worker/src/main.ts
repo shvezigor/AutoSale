@@ -45,6 +45,7 @@ import { TelegramAlertService } from './notifications/telegram-alert.service.js'
 import { NotificationRetentionReconciler } from './notifications/notification-retention.reconciler.js';
 import { TelegramDeliveryReconciler } from './telegram/telegram-delivery-reconciler.js';
 import { TelegramDeliveryService } from './telegram/telegram-delivery.service.js';
+import { resolveTelegramDeliveryAuthority } from './telegram/telegram-authority.js';
 import { ShipmentCreateService } from './delivery/shipment-create.service.js';
 import { UkrposhtaShipmentService } from './delivery/ukrposhta-shipment.service.js';
 import { UkrposhtaClient } from '@autosale/integrations';
@@ -250,13 +251,10 @@ async function bootstrap(): Promise<void> {
         const parsed = telegramDeliveryJobSchema.safeParse(job.data);
         if (!parsed.success) return;
         const started = performance.now();
-        const deliveryRecord = await prisma.telegramDelivery.findUnique({
-          where: { id: parsed.data.deliveryId },
-          select: { purpose: true },
-        });
-        const telegramOperation = deliveryRecord?.purpose === 'SUPPLIER_ORDER'
+        const deliveryAuthority = await resolveTelegramDeliveryAuthority(prisma, parsed.data.deliveryId);
+        const telegramOperation = deliveryAuthority?.purpose === 'SUPPLIER_ORDER'
           ? 'telegram_supplier_delivery'
-          : deliveryRecord?.purpose === 'PERSONAL_ALERT'
+          : deliveryAuthority?.purpose === 'PERSONAL_ALERT'
             ? 'telegram_personal_alert'
             : 'telegram_delivery';
         try {

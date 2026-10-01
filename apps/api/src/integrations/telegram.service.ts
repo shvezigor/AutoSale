@@ -5,7 +5,7 @@ import type {
   TelegramSupplierSettings, TelegramSupplierSettingsUpdate, SupplierOrderPreview,
   TelegramNotificationPreferences,
 } from '@autosale/contracts';
-import { Prisma, type PrismaClient, withTenantTransaction } from '@autosale/database';
+import { Prisma, setTenantContext, type PrismaClient, withTenantTransaction } from '@autosale/database';
 import { z } from 'zod';
 
 const userSchema = z.object({
@@ -57,16 +57,17 @@ export class TelegramService {
     const token = this.options.token?.() ?? randomBytes(32).toString('base64url');
     if (!/^[A-Za-z0-9_-]{8,64}$/.test(token)) throw new Error('Telegram link token invalid');
     const expiresAt = new Date(this.now().getTime() + 5 * 60_000);
-    await this.prisma.telegramLinkAttempt.create({ data: {
+    await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.telegramLinkAttempt.create({ data: {
       tenantId, userId, purpose, tokenHash: createHash('sha256').update(token).digest('hex'),
       returnPath: safeReturnPath(returnPath), expiresAt,
-    } });
+    } }));
     const parameter = purpose === 'PERSONAL' ? 'start' : 'startgroup';
     return { url: `https://t.me/${this.options.botUsername}?${parameter}=${token}`, expiresAt: expiresAt.toISOString() };
   }
 
   async summary(tenantId: string, userId: string): Promise<TelegramConnectionSummary> {
-    const binding = await this.prisma.telegramUserBinding.findUnique({ where: { tenantId_userId: { tenantId, userId } } });
+    const binding = await withTenantTransaction(this.prisma, tenantId, (transaction) =>
+      transaction.telegramUserBinding.findUnique({ where: { tenantId_userId: { tenantId, userId } } }));
     const connected = Boolean(binding && !binding.revokedAt);
     return {
       available: Boolean(this.options.botUsername), botUsername: this.options.botUsername ?? null,
@@ -80,17 +81,19 @@ export class TelegramService {
   }
 
   async unlink(tenantId: string, userId: string): Promise<{ disconnected: boolean }> {
-    const result = await this.prisma.telegramUserBinding.updateMany({
-      where: { tenantId, userId, revokedAt: null }, data: { revokedAt: this.now() },
-    });
+    const result = await withTenantTransaction(this.prisma, tenantId, (transaction) =>
+      transaction.telegramUserBinding.updateMany({
+        where: { tenantId, userId, revokedAt: null }, data: { revokedAt: this.now() },
+      }));
     return { disconnected: result.count > 0 };
   }
 
   async notificationPreferences(tenantId: string, userId: string): Promise<TelegramNotificationPreferences> {
-    const rows = await this.prisma.telegramNotificationPreference.findMany({
-      where: { tenantId, userId },
-      select: { eventType: true, enabled: true },
-    });
+    const rows = await withTenantTransaction(this.prisma, tenantId, (transaction) =>
+      transaction.telegramNotificationPreference.findMany({
+        where: { tenantId, userId },
+        select: { eventType: true, enabled: true },
+      }));
     return rows.reduce<TelegramNotificationPreferences>(
       (result, row) => ({ ...result, [row.eventType]: row.enabled }),
       { ORDER_NEEDS_REVIEW: true, ORDER_AUTO_APPROVED: true, SUPPLIER_DELIVERY_FAILED: true },
@@ -102,42 +105,45 @@ export class TelegramService {
     userId: string,
     input: TelegramNotificationPreferences,
   ): Promise<TelegramNotificationPreferences> {
-    await this.prisma.$transaction(Object.entries(input).map(([eventType, enabled]) =>
-      this.prisma.telegramNotificationPreference.upsert({
-        where: {
-          tenantId_userId_eventType: {
-            tenantId,
-            userId,
-            eventType: eventType as keyof TelegramNotificationPreferences,
+    await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+      await Promise.all(Object.entries(input).map(([eventType, enabled]) =>
+        transaction.telegramNotificationPreference.upsert({
+          where: {
+            tenantId_userId_eventType: {
+              tenantId,
+              userId,
+              eventType: eventType as keyof TelegramNotificationPreferences,
+            },
           },
-        },
-        create: { tenantId, userId, eventType: eventType as keyof TelegramNotificationPreferences, enabled },
-        update: { enabled },
-      })));
+          create: { tenantId, userId, eventType: eventType as keyof TelegramNotificationPreferences, enabled },
+          update: { enabled },
+        })));
+    });
     return this.notificationPreferences(tenantId, userId);
   }
 
   async queueTest(tenantId: string, userId: string): Promise<{ deliveryId: string; status: 'PENDING' }> {
     if (!this.options.botUsername || !this.options.queue) throw new Error('Telegram is not configured');
-    const binding = await this.prisma.telegramUserBinding.findUnique({
-      where: { tenantId_userId: { tenantId, userId } },
-      select: { privateChatId: true, revokedAt: true },
+    const delivery = await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+      const binding = await transaction.telegramUserBinding.findUnique({
+        where: { tenantId_userId: { tenantId, userId } },
+        select: { privateChatId: true, revokedAt: true },
+      });
+      if (!binding || binding.revokedAt) throw new Error('Telegram personal connection required');
+      const destination = await transaction.telegramChat.findUnique({
+        where: { tenantId_externalChatId_route: { tenantId, externalChatId: binding.privateChatId, route: 'BOT' } },
+        select: { id: true },
+      });
+      if (!destination) throw new Error('Telegram personal connection required');
+      return transaction.telegramDelivery.create({ data: {
+        tenantId,
+        destinationId: destination.id,
+        purpose: 'TEST',
+        idempotencyKey: `test:${userId}:${randomUUID()}`,
+        messageText: 'Sales AITO підключено. Тестове сповіщення працює.',
+        nextAttemptAt: this.now(),
+      } });
     });
-    if (!binding || binding.revokedAt) throw new Error('Telegram personal connection required');
-    const destination = await this.prisma.telegramChat.findUnique({
-      where: { tenantId_externalChatId_route: { tenantId, externalChatId: binding.privateChatId, route: 'BOT' } },
-      select: { id: true },
-    });
-    if (!destination) throw new Error('Telegram personal connection required');
-
-    const delivery = await this.prisma.telegramDelivery.create({ data: {
-      tenantId,
-      destinationId: destination.id,
-      purpose: 'TEST',
-      idempotencyKey: `test:${userId}:${randomUUID()}`,
-      messageText: 'AutoSale підключено. Тестове сповіщення працює.',
-      nextAttemptAt: this.now(),
-    } });
     try {
       await this.options.queue.add(
         'telegram.deliver',
@@ -151,23 +157,26 @@ export class TelegramService {
   }
 
   async supplierSettings(tenantId: string): Promise<TelegramSupplierSettings> {
-    const [connections, setting] = await Promise.all([
-      this.prisma.telegramBusinessConnection.findMany({
-        where: { tenantId, enabled: true }, select: { externalConnectionId: true },
-      }),
-      this.prisma.telegramSupplierSetting.findUnique({ where: { tenantId } }),
-    ]);
-    const connectionIds = connections.map((connection) => connection.externalConnectionId);
-    const destinations = await this.prisma.telegramChat.findMany({
-      where: {
-        tenantId,
-        OR: [
-          { route: 'BOT', type: { in: ['group', 'supergroup'] } },
-          ...(connectionIds.length > 0 ? [{ route: 'BUSINESS' as const, businessConnectionId: { in: connectionIds } }] : []),
-        ],
-      },
-      orderBy: { lastObservedAt: 'desc' },
-      select: { id: true, title: true, route: true, lastObservedAt: true },
+    const { connections, setting, destinations } = await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+      const [connections, setting] = await Promise.all([
+        transaction.telegramBusinessConnection.findMany({
+          where: { tenantId, enabled: true }, select: { externalConnectionId: true },
+        }),
+        transaction.telegramSupplierSetting.findUnique({ where: { tenantId } }),
+      ]);
+      const connectionIds = connections.map((connection) => connection.externalConnectionId);
+      const destinations = await transaction.telegramChat.findMany({
+        where: {
+          tenantId,
+          OR: [
+            { route: 'BOT', type: { in: ['group', 'supergroup'] } },
+            ...(connectionIds.length > 0 ? [{ route: 'BUSINESS' as const, businessConnectionId: { in: connectionIds } }] : []),
+          ],
+        },
+        orderBy: { lastObservedAt: 'desc' },
+        select: { id: true, title: true, route: true, lastObservedAt: true },
+      });
+      return { connections, setting, destinations };
     });
     return {
       businessConnected: connections.length > 0,
@@ -183,22 +192,24 @@ export class TelegramService {
   }
 
   async saveSupplierSettings(tenantId: string, input: TelegramSupplierSettingsUpdate): Promise<TelegramSupplierSettings> {
-    const destination = await this.prisma.telegramChat.findFirst({
-      where: { id: input.destinationId, tenantId }, select: { id: true, route: true, type: true, businessConnectionId: true },
-    });
-    if (!destination || (destination.route === 'BOT' && !['group', 'supergroup'].includes(destination.type))) {
-      throw new Error('Telegram supplier destination unavailable');
-    }
-    if (destination.route === 'BUSINESS') {
-      const connection = await this.prisma.telegramBusinessConnection.findFirst({
-        where: { tenantId, externalConnectionId: destination.businessConnectionId ?? '', enabled: true }, select: { id: true },
+    await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+      const destination = await transaction.telegramChat.findFirst({
+        where: { id: input.destinationId, tenantId }, select: { id: true, route: true, type: true, businessConnectionId: true },
       });
-      if (!connection) throw new Error('Telegram supplier destination unavailable');
-    }
-    await this.prisma.telegramSupplierSetting.upsert({
-      where: { tenantId },
-      create: { tenantId, destinationId: destination.id, autoDispatch: false },
-      update: { destinationId: destination.id, autoDispatch: false },
+      if (!destination || (destination.route === 'BOT' && !['group', 'supergroup'].includes(destination.type))) {
+        throw new Error('Telegram supplier destination unavailable');
+      }
+      if (destination.route === 'BUSINESS') {
+        const connection = await transaction.telegramBusinessConnection.findFirst({
+          where: { tenantId, externalConnectionId: destination.businessConnectionId ?? '', enabled: true }, select: { id: true },
+        });
+        if (!connection) throw new Error('Telegram supplier destination unavailable');
+      }
+      await transaction.telegramSupplierSetting.upsert({
+        where: { tenantId },
+        create: { tenantId, destinationId: destination.id, autoDispatch: false },
+        update: { destinationId: destination.id, autoDispatch: false },
+      });
     });
     return this.supplierSettings(tenantId);
   }
@@ -222,16 +233,16 @@ export class TelegramService {
     if (!['APPROVED', 'AUTO_APPROVED'].includes(order.status)) throw new Error('Approved order required');
     const items = order.items.filter((item) => item.procurementStatus === 'TO_ORDER');
     if (items.length === 0) throw new Error('No items require supplier ordering');
-    const [setting, products] = await Promise.all([
-      this.prisma.telegramSupplierSetting.findUnique({
+    const [setting, products] = await withTenantTransaction(this.prisma, tenantId, (transaction) => Promise.all([
+      transaction.telegramSupplierSetting.findUnique({
         where: { tenantId },
         select: { destination: { select: { title: true } } },
       }),
-      withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.product.findMany({
+      transaction.product.findMany({
         where: { tenantId, sku: { in: items.flatMap((item) => item.catalogId ? [item.catalogId] : []) } },
         select: { sku: true, name: true },
-      })),
-    ]);
+      }),
+    ]));
     if (!setting) throw new Error('Telegram supplier destination required');
     const names = new Map(products.map((product) => [product.sku, product.name]));
     return {
@@ -382,14 +393,15 @@ export class TelegramService {
     const command = /^\/start(?:@[A-Za-z][A-Za-z0-9_]{4,31})?\s+([A-Za-z0-9_-]{8,64})$/.exec(message.text.trim());
     if (!command?.[1]) return 'IGNORED';
     const tokenHash = createHash('sha256').update(command[1]).digest('hex');
-    const attempt = await transaction.telegramLinkAttempt.findUnique({ where: { tokenHash } });
-    if (!attempt || attempt.usedAt || attempt.expiresAt <= this.now()) return 'IGNORED';
     const expectedPurpose = message.chat.type === 'private' ? 'PERSONAL' : 'SUPPLIER_GROUP';
-    if (attempt.purpose !== expectedPurpose) return 'IGNORED';
-    const consumed = await transaction.telegramLinkAttempt.updateMany({
-      where: { id: attempt.id, usedAt: null, expiresAt: { gt: this.now() } }, data: { usedAt: this.now() },
-    });
-    if (consumed.count !== 1) return 'IGNORED';
+    const consumed = await transaction.$queryRaw<Array<{ tenant_id: string; attempt_id: string }>>(Prisma.sql`
+      SELECT tenant_id, attempt_id
+      FROM public.api_consume_telegram_link_attempt(${tokenHash}, ${expectedPurpose}, ${this.now()})
+    `);
+    if (consumed.length !== 1 || !consumed[0]) return 'IGNORED';
+    await setTenantContext(transaction, consumed[0].tenant_id);
+    const attempt = await transaction.telegramLinkAttempt.findUnique({ where: { id: consumed[0].attempt_id } });
+    if (!attempt) return 'IGNORED';
 
     const externalChatId = String(message.chat.id);
     await transaction.telegramChat.upsert({
@@ -415,14 +427,16 @@ export class TelegramService {
   }
 
   private async processBusinessConnection(transaction: Prisma.TransactionClient, connection: z.infer<typeof businessConnectionSchema>): Promise<'PROCESSED' | 'IGNORED'> {
-    const bindings = await transaction.telegramUserBinding.findMany({
-      where: { telegramUserId: String(connection.user.id), revokedAt: null }, select: { tenantId: true }, take: 2,
-    });
-    if (bindings.length !== 1 || !bindings[0]) return 'IGNORED';
+    const authority = await transaction.$queryRaw<Array<{ tenant_id: string }>>(Prisma.sql`
+      SELECT tenant_id
+      FROM public.api_telegram_tenant_for_user(${String(connection.user.id)})
+    `);
+    if (authority.length !== 1 || !authority[0]) return 'IGNORED';
+    await setTenantContext(transaction, authority[0].tenant_id);
     await transaction.telegramBusinessConnection.upsert({
-      where: { tenantId_externalConnectionId: { tenantId: bindings[0].tenantId, externalConnectionId: connection.id } },
+      where: { tenantId_externalConnectionId: { tenantId: authority[0].tenant_id, externalConnectionId: connection.id } },
       create: {
-        tenantId: bindings[0].tenantId, externalConnectionId: connection.id, telegramUserId: String(connection.user.id),
+        tenantId: authority[0].tenant_id, externalConnectionId: connection.id, telegramUserId: String(connection.user.id),
         rights: connection.rights as Prisma.InputJsonValue, enabled: connection.is_enabled,
         lastUpdatedAt: new Date(connection.date * 1_000),
       },
@@ -435,11 +449,12 @@ export class TelegramService {
   }
 
   private async processBusinessMessage(transaction: Prisma.TransactionClient, message: z.infer<typeof businessMessageSchema>): Promise<'PROCESSED' | 'IGNORED'> {
-    const connections = await transaction.telegramBusinessConnection.findMany({
-      where: { externalConnectionId: message.business_connection_id, enabled: true },
-      select: { id: true, tenantId: true }, take: 2,
-    });
-    if (connections.length !== 1 || !connections[0]) return 'IGNORED';
+    const authority = await transaction.$queryRaw<Array<{ tenant_id: string }>>(Prisma.sql`
+      SELECT tenant_id
+      FROM public.api_telegram_tenant_for_business_connection(${message.business_connection_id})
+    `);
+    if (authority.length !== 1 || !authority[0]) return 'IGNORED';
+    await setTenantContext(transaction, authority[0].tenant_id);
 
     const displayName = message.chat.title
       ?? [message.chat.first_name, message.chat.last_name].filter(Boolean).join(' ')
@@ -449,11 +464,11 @@ export class TelegramService {
     const destination = await transaction.telegramChat.upsert({
       where: {
         tenantId_externalChatId_route: {
-          tenantId: connections[0].tenantId, externalChatId, route: 'BUSINESS',
+          tenantId: authority[0].tenant_id, externalChatId, route: 'BUSINESS',
         },
       },
       create: {
-        tenantId: connections[0].tenantId, externalChatId, type: message.chat.type, title,
+        tenantId: authority[0].tenant_id, externalChatId, type: message.chat.type, title,
         route: 'BUSINESS', businessConnectionId: message.business_connection_id, lastObservedAt: this.now(),
       },
       update: {
@@ -461,8 +476,8 @@ export class TelegramService {
       },
     });
     await transaction.telegramSupplierSetting.upsert({
-      where: { tenantId: connections[0].tenantId },
-      create: { tenantId: connections[0].tenantId, destinationId: destination.id, autoDispatch: false },
+      where: { tenantId: authority[0].tenant_id },
+      create: { tenantId: authority[0].tenant_id, destinationId: destination.id, autoDispatch: false },
       update: {},
     });
     return 'PROCESSED';

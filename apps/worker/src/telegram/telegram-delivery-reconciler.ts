@@ -1,5 +1,7 @@
 import type { PrismaClient } from '@autosale/database';
 
+import { dueTelegramDeliveryAuthorities } from './telegram-authority.js';
+
 interface TelegramDeliveryQueue {
   add(
     name: 'telegram.deliver',
@@ -17,26 +19,16 @@ export class TelegramDeliveryReconciler {
 
   async reconcile(): Promise<{ attempted: number; queued: number }> {
     const now = this.now();
-    const deliveries = await this.prisma.telegramDelivery.findMany({
-      where: {
-        OR: [
-          { status: { in: ['PENDING', 'RETRYABLE'] }, nextAttemptAt: { lte: now } },
-          { status: 'PROCESSING', leaseExpiresAt: { lte: now } },
-        ],
-      },
-      orderBy: [{ nextAttemptAt: 'asc' }, { createdAt: 'asc' }],
-      take: 50,
-      select: { id: true },
-    });
+    const deliveries = await dueTelegramDeliveryAuthorities(this.prisma, now, 50);
 
     let queued = 0;
     for (const delivery of deliveries) {
       try {
         await this.queue.add(
           'telegram.deliver',
-          { deliveryId: delivery.id },
+          { deliveryId: delivery.deliveryId },
           {
-            jobId: `telegram:${delivery.id}`,
+            jobId: `telegram:${delivery.deliveryId}`,
             attempts: 1,
             removeOnComplete: true,
             removeOnFail: true,

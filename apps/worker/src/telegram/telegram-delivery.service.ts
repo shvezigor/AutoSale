@@ -6,6 +6,7 @@ import { type Prisma, type PrismaClient, withTenantTransaction } from '@autosale
 import { TelegramBotError } from '@autosale/integrations';
 
 import type { TelegramAlertEvent } from '../notifications/telegram-alert.service.js';
+import { resolveTelegramDeliveryAuthority } from './telegram-authority.js';
 
 const LEASE_MS = 60_000;
 const MAX_ATTEMPTS = 5;
@@ -31,34 +32,38 @@ export class TelegramDeliveryService {
   async process(job: TelegramDeliveryJob): Promise<TelegramDeliveryResult> {
     const startedAt = this.now();
     const leaseId = randomUUID();
-    const claimed = await this.prisma.telegramDelivery.updateMany({
-      where: {
-        id: job.deliveryId,
-        OR: [
-          { status: { in: ['PENDING', 'RETRYABLE'] }, nextAttemptAt: { lte: startedAt } },
-          { status: 'PROCESSING', leaseExpiresAt: { lte: startedAt } },
-        ],
-        AND: [{ OR: [{ leaseId: null }, { leaseExpiresAt: { lte: startedAt } }] }],
-      },
-      data: {
-        status: 'PROCESSING',
-        attempts: { increment: 1 },
-        lastAttemptAt: startedAt,
-        leaseId,
-        leaseExpiresAt: new Date(startedAt.getTime() + LEASE_MS),
-        lastErrorCode: null,
-      },
-    });
-    if (claimed.count !== 1) return 'IGNORED';
-
-    const delivery = await this.prisma.telegramDelivery.findFirst({
-      where: { id: job.deliveryId, status: 'PROCESSING', leaseId },
-      include: { destination: true },
+    const authority = await resolveTelegramDeliveryAuthority(this.prisma, job.deliveryId);
+    if (!authority) return 'IGNORED';
+    const delivery = await withTenantTransaction(this.prisma, authority.tenantId, async (transaction) => {
+      const claimed = await transaction.telegramDelivery.updateMany({
+        where: {
+          tenantId: authority.tenantId,
+          id: job.deliveryId,
+          OR: [
+            { status: { in: ['PENDING', 'RETRYABLE'] }, nextAttemptAt: { lte: startedAt } },
+            { status: 'PROCESSING', leaseExpiresAt: { lte: startedAt } },
+          ],
+          AND: [{ OR: [{ leaseId: null }, { leaseExpiresAt: { lte: startedAt } }] }],
+        },
+        data: {
+          status: 'PROCESSING',
+          attempts: { increment: 1 },
+          lastAttemptAt: startedAt,
+          leaseId,
+          leaseExpiresAt: new Date(startedAt.getTime() + LEASE_MS),
+          lastErrorCode: null,
+        },
+      });
+      if (claimed.count !== 1) return null;
+      return transaction.telegramDelivery.findFirst({
+        where: { tenantId: authority.tenantId, id: job.deliveryId, status: 'PROCESSING', leaseId },
+        include: { destination: true },
+      });
     });
     if (!delivery) return 'IGNORED';
 
     if (delivery.destination.route === 'BUSINESS' && !delivery.destination.businessConnectionId) {
-      const updated = await this.finish(job.deliveryId, leaseId, {
+      const updated = await this.finish(authority.tenantId, job.deliveryId, leaseId, {
         status: 'FAILED',
         lastErrorCode: 'TELEGRAM_DESTINATION_INVALID',
         completedAt: startedAt,
@@ -80,7 +85,7 @@ export class TelegramDeliveryService {
       if (error instanceof TelegramBotError && error.code === 'RATE_LIMITED') {
         const exhausted = delivery.attempts >= MAX_ATTEMPTS;
         const retrySeconds = Math.min(3_600, Math.max(1, error.retryAfterSeconds ?? 30));
-        const updated = await this.finish(job.deliveryId, leaseId, {
+        const updated = await this.finish(authority.tenantId, job.deliveryId, leaseId, {
           status: exhausted ? 'FAILED' : 'RETRYABLE',
           nextAttemptAt: exhausted ? startedAt : new Date(startedAt.getTime() + retrySeconds * 1_000),
           lastErrorCode: 'TELEGRAM_RATE_LIMITED',
@@ -89,7 +94,7 @@ export class TelegramDeliveryService {
         if (!updated) return 'IGNORED';
         return exhausted ? 'FAILED' : 'RETRY';
       }
-      const updated = await this.finish(job.deliveryId, leaseId, {
+      const updated = await this.finish(authority.tenantId, job.deliveryId, leaseId, {
         status: 'FAILED',
         lastErrorCode: telegramFailureCode(error),
         completedAt: startedAt,
@@ -98,7 +103,7 @@ export class TelegramDeliveryService {
     }
 
     if (sent.chatId !== delivery.destination.externalChatId) {
-      const updated = await this.finish(job.deliveryId, leaseId, {
+      const updated = await this.finish(authority.tenantId, job.deliveryId, leaseId, {
         status: 'FAILED',
         lastErrorCode: 'TELEGRAM_DESTINATION_MISMATCH',
         completedAt: startedAt,
@@ -106,7 +111,7 @@ export class TelegramDeliveryService {
       return updated ? 'FAILED' : 'IGNORED';
     }
 
-    const completed = await this.finish(job.deliveryId, leaseId, {
+    const completed = await this.finish(authority.tenantId, job.deliveryId, leaseId, {
       status: 'SUCCEEDED',
       providerMessageId: sent.messageId,
       completedAt: startedAt,
@@ -116,6 +121,7 @@ export class TelegramDeliveryService {
   }
 
   private async finish(
+    tenantId: string,
     deliveryId: string,
     leaseId: string,
     data: {
@@ -126,15 +132,9 @@ export class TelegramDeliveryService {
       completedAt: Date | null;
     },
   ): Promise<boolean> {
-    const authority = await this.prisma.telegramDelivery.findFirst({
-      where: { id: deliveryId, status: 'PROCESSING', leaseId },
-      select: { tenantId: true },
-    });
-    if (!authority) return false;
-
-    return withTenantTransaction(this.prisma, authority.tenantId, async (transaction) => {
+    return withTenantTransaction(this.prisma, tenantId, async (transaction) => {
       const updated = await transaction.telegramDelivery.updateMany({
-        where: { id: deliveryId, status: 'PROCESSING', leaseId },
+        where: { tenantId, id: deliveryId, status: 'PROCESSING', leaseId },
         data: { ...data, leaseId: null, leaseExpiresAt: null },
       });
       if (updated.count !== 1) return false;

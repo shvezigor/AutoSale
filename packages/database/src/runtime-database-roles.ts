@@ -135,6 +135,26 @@ export async function configureRuntimeDatabaseRoles(
           REVOKE ALL ON FUNCTION public.worker_due_shipment_statuses(timestamp with time zone, text, integer) FROM autosale_api;
           GRANT EXECUTE ON FUNCTION public.worker_due_shipment_statuses(timestamp with time zone, text, integer) TO autosale_worker;
         END IF;
+        IF to_regprocedure('public.api_consume_telegram_link_attempt(text,text,timestamp with time zone)') IS NOT NULL THEN
+          GRANT EXECUTE ON FUNCTION public.api_consume_telegram_link_attempt(text, text, timestamp with time zone) TO autosale_api;
+          REVOKE ALL ON FUNCTION public.api_consume_telegram_link_attempt(text, text, timestamp with time zone) FROM autosale_worker;
+        END IF;
+        IF to_regprocedure('public.api_telegram_tenant_for_user(text)') IS NOT NULL THEN
+          GRANT EXECUTE ON FUNCTION public.api_telegram_tenant_for_user(text) TO autosale_api;
+          REVOKE ALL ON FUNCTION public.api_telegram_tenant_for_user(text) FROM autosale_worker;
+        END IF;
+        IF to_regprocedure('public.api_telegram_tenant_for_business_connection(text)') IS NOT NULL THEN
+          GRANT EXECUTE ON FUNCTION public.api_telegram_tenant_for_business_connection(text) TO autosale_api;
+          REVOKE ALL ON FUNCTION public.api_telegram_tenant_for_business_connection(text) FROM autosale_worker;
+        END IF;
+        IF to_regprocedure('public.worker_telegram_tenants_for_deliveries(uuid[])') IS NOT NULL THEN
+          REVOKE ALL ON FUNCTION public.worker_telegram_tenants_for_deliveries(uuid[]) FROM autosale_api;
+          GRANT EXECUTE ON FUNCTION public.worker_telegram_tenants_for_deliveries(uuid[]) TO autosale_worker;
+        END IF;
+        IF to_regprocedure('public.worker_due_telegram_deliveries(timestamp with time zone,integer)') IS NOT NULL THEN
+          REVOKE ALL ON FUNCTION public.worker_due_telegram_deliveries(timestamp with time zone, integer) FROM autosale_api;
+          GRANT EXECUTE ON FUNCTION public.worker_due_telegram_deliveries(timestamp with time zone, integer) TO autosale_worker;
+        END IF;
       END
       $functions$;
     `);
