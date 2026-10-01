@@ -10,6 +10,8 @@ Redis, Caddy certificates і секрети не входять до backup: п�
 
 ## Створення
 
+Перед першим backup виконайте звичайний deploy: одноразовий `database_roles` має створити `autosale_backup`, а `.env` — містити окремий `POSTGRES_BACKUP_PASSWORD`. Скрипт запускає `pg_dump` в ефемерному `database_backup` tools-контейнері. Контейнер отримує лише read-only backup-credential: він може прочитати всі tenant-рядки попри RLS, але не може змінювати БД, виконувати прикладні функції або створювати схему.
+
 ```sh
 chmod +x infra/scripts/*.sh
 BACKUP_ROOT=/srv/autosale-backups RETENTION_DAYS=14 infra/scripts/backup.sh
@@ -17,6 +19,9 @@ BACKUP_ROOT=/srv/autosale-backups RETENTION_DAYS=14 infra/scripts/backup.sh
 
 Після створення синхронізуйте каталог у приватне versioned object storage та перевірте контрольні суми. Не розміщуйте backup у публічному bucket.
 Скрипт примусово використовує `umask 077`: нові архіви доступні лише користувачу, який їх створив. Off-host копія також має бути зашифрована, приватна та мати окремо контрольований ключ.
+До завершення перевірок скрипт пише у прихований каталог `.incomplete-<timestamp>` і публікує timestamp-каталог лише атомарним перейменуванням. Наявність `.incomplete-*` означає невдалий backup; не використовуйте його для restore, дослідіть причину та видаліть окремим контрольованим кроком.
+
+Не передавайте `POSTGRES_BACKUP_PASSWORD` API, worker або стороннім backup-сервісам. Компрометація цієї ролі розкриває дані всіх tenant-ів, хоча й не дозволяє їх змінити. Ротуйте секрет через `ensure-runtime-db-secrets.ps1 -Rotate` або еквівалентний secret-manager workflow і одразу повторно запускайте `database_roles`.
 
 ## Відновлення на чистому сервері
 
@@ -29,7 +34,7 @@ CONFIRM_RESTORE=autosale infra/scripts/restore.sh /srv/autosale-backups/20260827
 infra/scripts/deploy.sh
 ```
 
-Restore навмисно вимагає абсолютний шлях і точне підтвердження, бо повністю замінює поточну БД та вміст MinIO.
+Restore навмисно вимагає абсолютний шлях і точне підтвердження, бо повністю замінює поточну БД та вміст MinIO. Read-only `autosale_backup` для restore не використовується: відновлення виконується owner-ідентичністю лише в одноразовому операторському процесі, коли API/worker зупинені. Owner credential не передається runtime- або backup-контейнерам.
 
 ## Перевірка після restore
 

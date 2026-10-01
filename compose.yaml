@@ -132,6 +132,7 @@ services:
       DATABASE_URL: ${DATABASE_URL}
       POSTGRES_API_PASSWORD: ${POSTGRES_API_PASSWORD:?POSTGRES_API_PASSWORD is required}
       POSTGRES_WORKER_PASSWORD: ${POSTGRES_WORKER_PASSWORD:?POSTGRES_WORKER_PASSWORD is required}
+      POSTGRES_BACKUP_PASSWORD: ${POSTGRES_BACKUP_PASSWORD:?POSTGRES_BACKUP_PASSWORD is required}
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -203,6 +204,26 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+    networks:
+      - internal
+
+  database_backup:
+    image: postgres:17.6-alpine
+    profiles: ["tools"]
+    restart: "no"
+    environment:
+      PGHOST: postgres
+      PGDATABASE: ${POSTGRES_DB}
+      PGUSER: autosale_backup
+      PGPASSWORD: ${POSTGRES_BACKUP_PASSWORD:?POSTGRES_BACKUP_PASSWORD is required}
+    command:
+      - pg_dump
+      - --format=custom
+      - --no-owner
+      - --no-privileges
+    depends_on:
+      postgres:
+        condition: service_healthy
     networks:
       - internal
 

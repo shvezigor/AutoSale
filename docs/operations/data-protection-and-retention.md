@@ -49,7 +49,7 @@ Record at minimum: provider, purpose, data categories, regions, transfer mechani
 
 ## Security operations
 
-- Migration, API and worker database identities are split. Runtime roles do not own tables, cannot perform DDL and cannot bypass RLS. A restricted backup/restore identity remains to be added before EU production launch.
+- Migration, API, worker and backup database identities are split. Runtime roles do not own tables, cannot perform DDL and cannot bypass RLS. The backup role can bypass RLS only to read a complete disaster-recovery dataset; it cannot write, execute application functions or assume runtime roles. Restore uses the owner credential only in an explicitly confirmed one-shot process with runtime services stopped.
 - Forced fail-closed RLS now covers every current public table containing `tenant_id`, including order audit, inventory reservations, Sheets exports and conversational intent evaluations. Cross-tenant schedulers use role-specific bounded ID directories, then re-read and mutate durable state inside `withTenantTransaction`. Any future tenant-owned table must add its policy and PostgreSQL isolation test in the same migration. Operational lifecycle workflows remain incomplete even though the current database schema is covered.
 - Use TLS in transit, encrypted disks/object storage/backups, restricted secret access and documented rotation.
 - Add Redis authentication/ACL and prevent unrelated containers from reaching privileged queues.
@@ -65,7 +65,8 @@ Record at minimum: provider, purpose, data categories, regions, transfer mechani
 - [ ] Subprocessor register and transfer mechanisms approved.
 - [x] Non-owner PostgreSQL identities are used by API and worker containers.
 - [x] Fail-closed RLS rollout completed for every current public table containing `tenant_id`.
-- [ ] Restricted backup/restore identity provisioned and restore exercise completed.
+- [x] Restricted backup identity provisioned; restore remains an explicitly confirmed one-shot owner operation.
+- [ ] A restore made from the restricted-role dump is exercised on an isolated host at least quarterly.
 - [ ] Tenant export/deletion workflow and deletion ledger proven end to end.
 - [ ] Configurable retention jobs enabled with metrics and dry-run reporting.
 - [ ] Backups encrypted off-host, access-restricted, expiry-enforced and restore-tested.

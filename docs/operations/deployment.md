@@ -8,7 +8,7 @@
 - DNS домену спрямований на сервер; відкриті лише TCP 80/443 і адміністративний SSH.
 - Репозиторій розгорнутий під окремим системним користувачем без root-login.
 - `.env` створений із `.env.example`. Для tenant Google Sheets використовується OAuth; service-account JSON дозволений лише як тимчасовий development fallback і не потрібен у production.
-- `POSTGRES_API_PASSWORD` і `POSTGRES_WORKER_PASSWORD` — різні URL-safe секрети щонайменше з 32 символів. Вони не збігаються з owner-паролем у `DATABASE_URL`.
+- `POSTGRES_API_PASSWORD`, `POSTGRES_WORKER_PASSWORD` і `POSTGRES_BACKUP_PASSWORD` — три різні URL-safe секрети щонайменше з 32 символів. Вони не збігаються з owner-паролем у `DATABASE_URL`.
 
 Для поточного Windows-host секрети можна створити без їх виведення в консоль:
 
@@ -16,7 +16,7 @@
 & .\scripts\ensure-runtime-db-secrets.ps1 -EnvFile .\.env
 ```
 
-Скрипт не змінює вже наявні валідні значення. Планову ротацію обох runtime-секретів запускають тим самим скриптом із `-Rotate`, після чого одразу виконують повний deploy. `.env` не можна додавати до Git або копіювати в журнали.
+Скрипт не змінює вже наявні валідні значення. Планову ротацію трьох role-секретів запускають тим самим скриптом із `-Rotate`, після чого одразу виконують повний deploy. `.env` не можна додавати до Git або копіювати в журнали.
 
 ## Реліз
 
@@ -27,7 +27,7 @@ chmod +x infra/scripts/*.sh
 infra/scripts/deploy.sh
 ```
 
-Скрипт спочатку перевіряє Compose, збирає образи, запускає залежності й виконує одноразовий `prisma migrate deploy` під owner-ідентичністю. Потім одноразовий `database_roles` створює або обертає non-owner ролі `autosale_api` та `autosale_worker`; тільки після цього стартують runtime-контейнери з окремими URL. Якщо міграція або provisioning завершується помилкою, API та worker нової версії не розгортаються. Після успіху перевірте `docker compose ps`, `/health/live`, вхід менеджера та внутрішні `/metrics`.
+Скрипт спочатку перевіряє Compose, збирає образи, запускає залежності й виконує одноразовий `prisma migrate deploy` під owner-ідентичністю. Потім одноразовий `database_roles` створює або обертає non-owner ролі `autosale_api`, `autosale_worker` та read-only `autosale_backup`; тільки після цього стартують runtime-контейнери з окремими URL. Backup-роль має `BYPASSRLS`, бо повна disaster-recovery копія повинна містити всі tenant-рядки, але не має прав запису, DDL, виконання прикладних функцій або членства в runtime-ролях. Її пароль передається лише ефемерному tools-контейнеру під час backup. Якщо міграція або provisioning завершується помилкою, API та worker нової версії не розгортаються. Після успіху перевірте `docker compose ps`, `/health/live`, вхід менеджера та внутрішні `/metrics`.
 
 Після першого auth-релізу створіть платформного адміністратора або прив'яжіть наявну організацію за процедурою [`authentication.md`](authentication.md). Bootstrap ніколи не запускається автоматично під час старту контейнерів.
 

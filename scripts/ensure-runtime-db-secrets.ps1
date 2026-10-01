@@ -5,7 +5,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $resolvedEnvFile = (Resolve-Path -LiteralPath $EnvFile).Path
-$secretNames = @('POSTGRES_API_PASSWORD', 'POSTGRES_WORKER_PASSWORD')
+$secretNames = @('POSTGRES_API_PASSWORD', 'POSTGRES_WORKER_PASSWORD', 'POSTGRES_BACKUP_PASSWORD')
 $content = [System.IO.File]::ReadAllText($resolvedEnvFile)
 $newline = if ($content.Contains("`r`n")) { "`r`n" } else { "`n" }
 $changed = $false
@@ -42,13 +42,19 @@ foreach ($name in $secretNames) {
 
 $apiPassword = Get-EnvValue 'POSTGRES_API_PASSWORD' $content
 $workerPassword = Get-EnvValue 'POSTGRES_WORKER_PASSWORD' $content
-foreach ($value in @($apiPassword, $workerPassword)) {
+$backupPassword = Get-EnvValue 'POSTGRES_BACKUP_PASSWORD' $content
+$ownerPassword = Get-EnvValue 'POSTGRES_PASSWORD' $content
+foreach ($value in @($apiPassword, $workerPassword, $backupPassword)) {
   if ($value.Length -lt 32 -or $value -notmatch '^[A-Za-z0-9_-]+$') {
     throw 'Runtime database secrets must be different URL-safe values with at least 32 characters.'
   }
 }
-if ($apiPassword -eq $workerPassword) {
-  throw 'API and worker database secrets must be different.'
+$distinctPasswords = @($apiPassword, $workerPassword, $backupPassword) | Select-Object -Unique
+if ($distinctPasswords.Count -ne 3) {
+  throw 'API, worker, and backup database secrets must be different.'
+}
+if (-not [string]::IsNullOrWhiteSpace($ownerPassword) -and $ownerPassword -in @($apiPassword, $workerPassword, $backupPassword)) {
+  throw 'API, worker, and backup database secrets must be different from the owner secret.'
 }
 
 if ($changed) {

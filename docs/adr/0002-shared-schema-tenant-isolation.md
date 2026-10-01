@@ -24,7 +24,8 @@ Keep one shared PostgreSQL schema for the current product stage and enforce thes
    - owner/migrator role for schema migrations only;
    - non-owner, `NOBYPASSRLS` API role;
    - non-owner worker role with only the operations it needs;
-   - restricted backup/restore operator.
+   - restricted read-only backup role with cross-tenant visibility;
+   - owner/migrator credential only for explicitly confirmed one-shot restore.
 8. RLS must fail closed when tenant context is absent. Platform administration must use explicit aggregate functions/views instead of silently bypassing tenant policy.
 
 ## Available controls
@@ -36,6 +37,7 @@ Keep one shared PostgreSQL schema for the current product stage and enforce thes
 - Migration `20260928224500_tenant_relation_guards` extends database protection to messages, orders, legal entities/accounts, commercial terms, Sheets exports and order audit logs.
 - `tenant-relations.postgres.spec.ts` proves representative cross-tenant writes fail with PostgreSQL foreign-key violations.
 - Deployments provision separate `autosale_api` and `autosale_worker` login roles after migrations. Both are non-owner, `NOSUPERUSER`, `NOCREATEDB`, `NOCREATEROLE`, `NOREPLICATION` and `NOBYPASSRLS`; neither can create or alter schema objects.
+- Deployments also provision `autosale_backup`: a non-owner, read-only login with `BYPASSRLS`, required so a logical disaster-recovery dump includes every tenant. It has only database connect, schema usage and table/sequence read access; it cannot mutate data, perform DDL, execute application authority functions, assume runtime roles or use temporary objects. Its distinct credential is mounted only into the ephemeral backup tools container. Restore remains an explicitly confirmed, one-shot owner operation while runtime services are stopped.
 - The owner connection remains available only to the one-shot migration and role-provisioning jobs. Application containers receive role-specific URLs and refuse to start when their distinct secrets are absent.
 - `withTenantTransaction` provides the transaction-local `app.current_tenant_id` context required by future policies. The context is validated as a UUID, parameterized, scoped with `set_config(..., true)` and automatically cleared when the transaction ends. PostgreSQL tests prove an absent context reads no rows, a valid context sees only its tenant, and cross-tenant writes fail.
 - Forced RLS protects every current public table that stores a `tenant_id`, including `audit_logs`, `inventory_reservations`, `order_exports` and `order_intent_evaluations`. Every production read/write of tenant-owned state, including team management, catalogue work, order intent evaluation, procurement reservations, order audit, delivery, Telegram, notifications and Sheets export, executes inside `withTenantTransaction`; absent context sees no rows and mismatched writes are rejected. Attachment ownership is derived through its protected parent message rather than duplicated on the attachment row.
@@ -56,7 +58,7 @@ Keep one shared PostgreSQL schema for the current product stage and enforce thes
 
 RLS was enabled incrementally, table by table, only after all production call sites and relation loads for that table were routed through the tenant transaction primitive. Every current public table with a `tenant_id` now has forced RLS. Any future tenant-owned table must ship its policy, tenant-scoped call paths and PostgreSQL isolation tests in the same change.
 
-The database isolation rollout is complete for the current schema: role/grant migrations, request/worker tenant transaction context, explicit authority functions and PostgreSQL integration tests are present. EU launch readiness still requires a restricted backup/restore identity, tenant export/deletion and retention automation, and production restore exercises.
+The database isolation rollout is complete for the current schema: role/grant migrations, request/worker tenant transaction context, explicit authority functions, a restricted backup identity and PostgreSQL integration tests are present. EU launch readiness still requires tenant export/deletion and retention automation, encrypted off-host backup storage and recurring production-like restore exercises.
 
 ## Performance strategy
 
