@@ -66,7 +66,7 @@ Record at minimum: provider, purpose, data categories, regions, transfer mechani
 - [x] Non-owner PostgreSQL identities are used by API and worker containers.
 - [x] Fail-closed RLS rollout completed for every current public table containing `tenant_id`.
 - [x] Restricted backup identity provisioned; restore remains an explicitly confirmed one-shot owner operation.
-- [ ] A restore made from the restricted-role dump is exercised on an isolated host at least quarterly.
+- [x] Current-quarter restore from a restricted-role dump exercised on an isolated host; keep the quarterly schedule active.
 - [ ] Tenant export/deletion workflow and deletion ledger proven end to end.
 - [ ] Configurable retention jobs enabled with metrics and dry-run reporting.
 - [ ] Backups encrypted off-host, access-restricted, expiry-enforced and restore-tested.
