@@ -12,32 +12,39 @@ export class GoogleSheetsSyncProcessor {
     private readonly notifications?: WorkerNotificationService,
   ) {}
 
-  async process(exportId: string): Promise<void> {
-    const record = await this.prisma.orderExport.findUniqueOrThrow({ where: { id: exportId } });
-    await this.prisma.orderExport.update({ where: { id: exportId }, data: { status: 'PROCESSING', attempts: { increment: 1 }, lastAttemptAt: new Date() } });
+  async process(tenantId: string, exportId: string): Promise<void> {
+    const record = await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+      const record = await transaction.orderExport.findFirstOrThrow({ where: { id: exportId, tenantId } });
+      await transaction.orderExport.update({
+        where: { id: exportId },
+        data: { status: 'PROCESSING', attempts: { increment: 1 }, lastAttemptAt: new Date() },
+      });
+      return record;
+    });
     let approvedBy: string | null = null;
     try {
-      const order = await withTenantTransaction(this.prisma, record.tenantId, (tx) =>
-        tx.order.findUniqueOrThrow({
+      const context = await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+        const order = await transaction.order.findUniqueOrThrow({
           where: { id: record.orderId },
           include: { items: { orderBy: { createdAt: 'asc' } } },
-        }),
-      );
+        });
+        const destination = await transaction.googleSheetsDestination.findUniqueOrThrow({ where: { tenantId } });
+        const headers = stringArray(destination.requiredHeaders);
+        const products = headers.includes('product_name')
+          ? await transaction.product.findMany({
+            where: { tenantId, sku: { in: order.items.flatMap((item) => item.catalogId ? [item.catalogId] : []) } },
+            select: { sku: true, name: true },
+          })
+          : [];
+        return { order, destination, headers, products };
+      });
+      const { order, destination, headers, products } = context;
       approvedBy = typeof order.approvedBy === 'string' ? order.approvedBy : null;
       if (order.status !== 'APPROVED' && order.status !== 'AUTO_APPROVED') throw new Error('Only approved orders can be exported');
-      const destination = await withTenantTransaction(this.prisma, record.tenantId, (transaction) =>
-        transaction.googleSheetsDestination.findUniqueOrThrow({ where: { tenantId: record.tenantId } }));
       const sheets = destination.credentialRef && this.oauthSheets
-        ? await this.oauthSheets(record.tenantId, destination.credentialRef)
+        ? await this.oauthSheets(tenantId, destination.credentialRef)
         : this.sheets;
       if (!sheets) throw new Error('Google connection is not configured');
-      const headers = stringArray(destination.requiredHeaders);
-      const products = headers.includes('product_name')
-        ? await withTenantTransaction(this.prisma, order.tenantId, (transaction) => transaction.product.findMany({
-          where: { tenantId: order.tenantId, sku: { in: order.items.flatMap((item) => item.catalogId ? [item.catalogId] : []) } },
-          select: { sku: true, name: true },
-        }))
-        : [];
       const values = mapRow(headers, order, new Map(products.map((product) => [product.sku, product.name])));
       const result = await sheets.upsertRow({
         spreadsheetId: destination.spreadsheetId,
@@ -46,11 +53,16 @@ export class GoogleSheetsSyncProcessor {
         legacyOrderIds: [order.id],
         values,
       });
-      await this.prisma.orderExport.update({ where: { id: exportId }, data: { status: 'SUCCEEDED', rowNumber: result.rowNumber, lastSyncedAt: new Date(), errorSummary: null } });
+      await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.orderExport.update({
+        where: { id: exportId },
+        data: { status: 'SUCCEEDED', rowNumber: result.rowNumber, lastSyncedAt: new Date(), errorSummary: null },
+      }));
     } catch (error) {
       const summary = error instanceof Error ? error.message.slice(0, 500) : 'Unknown Google Sheets synchronization error';
-      await this.prisma.orderExport.update({ where: { id: exportId }, data: { status: 'FAILED', errorSummary: summary } });
-      try { await this.notifications?.orderExportFailed(record.tenantId, approvedBy, record.orderId); } catch { /* export retry remains authoritative */ }
+      await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.orderExport.update({
+        where: { id: exportId }, data: { status: 'FAILED', errorSummary: summary },
+      }));
+      try { await this.notifications?.orderExportFailed(tenantId, approvedBy, record.orderId); } catch { /* export retry remains authoritative */ }
       throw error;
     }
   }

@@ -158,6 +158,7 @@ Cross-tenant order, item, reservation, preference і delivery IDs поверта
 ## Безпека й спостережуваність
 
 - Всі запити обмежені `tenantId`; ручні зміни потребують ролі менеджера та CSRF.
+- `inventory_reservations` і журнал дій замовлення `audit_logs` захищені примусовим PostgreSQL RLS; оцінювання, ручні переходи, звільнення/споживання резервів та аудит виконуються в одній tenant-транзакції.
 - `telegram_link_attempts`, персональні прив'язки, Business-з'єднання, чати, налаштування постачальника, доставки, їх позиції та preferences захищені примусовим PostgreSQL RLS. Звичайний API і worker без transaction-local tenant context не бачать жодного рядка.
 - Webhook до встановлення tenant context може лише атомарно спожити purpose-bound одноразовий link token або отримати один tenant ID за однозначною активною прив'язкою Telegram user/business connection. Ці API-only authority-функції не повертають профіль, chat ID, права, текст чи інші клієнтські дані й при неоднозначності повертають порожній результат.
 - Worker отримує tenant authority для opaque delivery ID і знаходить прострочену роботу лише через worker-only bounded-функції (до 50 записів). Destination і текст доставки повторно читаються тільки всередині `withTenantTransaction`; API та `PUBLIC` не мають execute-доступу до worker-функцій.

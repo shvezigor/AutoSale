@@ -119,6 +119,7 @@ The interface never asks a normal customer for a client secret, API key, service
 - A disconnect first blocks new jobs, then revokes the Google grant when possible, deletes local credential material through a durable cleanup workflow, and marks dependent configurations paused.
 - Credential rotation or replacement uses generation IDs so an old cleanup job cannot delete a newer connection.
 - Background jobs load connection and tenant state from PostgreSQL; queue payloads contain internal IDs only.
+- Pending order exports are discovered only through the worker-only bounded `worker_due_order_exports(...)` directory, which returns tenant and export IDs without order or customer content. The export row, order, destination and optional products are then loaded and updated under that tenant's transaction-local RLS context before and after the external Google request.
 - API keys are restricted by origin and API. They do not authorize spreadsheet data access.
 - The public OAuth callback atomically consumes its 256-bit state through an API-only security-definer function that returns only tenant and attempt IDs. Durable user/redirect fields are re-read under that tenant context. Cleanup recovery receives only bounded tenant/cleanup IDs and must re-read encrypted credentials under RLS; the worker role and `PUBLIC` cannot execute either authority function.
 

@@ -500,27 +500,37 @@ async function bootstrap(): Promise<void> {
     if (polling) return;
     polling = true;
     try {
-      const pending = await prisma.orderExport.findMany({ where: { status: 'PENDING' }, orderBy: { createdAt: 'asc' }, take: 10 });
+      const pending = await prisma.$queryRaw<Array<{ tenant_id: string; export_id: string }>>`
+        SELECT tenant_id, export_id FROM public.worker_due_order_exports(${10})
+      `;
       metrics.set('autosale_queue_backlog', pending.length, { queue: 'google_sheets' });
       if (!sheetsProcessor) return;
       for (const record of pending) {
-        const claimed = await prisma.orderExport.updateMany({ where: { id: record.id, status: 'PENDING' }, data: { status: 'PROCESSING' } });
-        if (claimed.count === 1) {
-          const orderContext = await withTenantTransaction(prisma, record.tenantId, (transaction) =>
-            transaction.order.findFirstOrThrow({
-              where: { id: record.orderId, tenantId: record.tenantId },
-              select: { triggerMessage: { select: { rawEventId: true } } },
-            }),
-          );
+        const claimed = await withTenantTransaction(prisma, record.tenant_id, async (transaction) => {
+          const result = await transaction.orderExport.updateMany({
+            where: { id: record.export_id, tenantId: record.tenant_id, status: 'PENDING' },
+            data: { status: 'PROCESSING' },
+          });
+          if (result.count !== 1) return null;
+          return transaction.orderExport.findFirstOrThrow({
+            where: { id: record.export_id, tenantId: record.tenant_id },
+            select: { orderId: true, order: { select: { triggerMessage: { select: { rawEventId: true } } } } },
+          });
+        });
+        if (claimed) {
+          const orderId = claimed.orderId;
+          const exportId = record.export_id;
+          const tenantId = record.tenant_id;
+          const orderContext = claimed.order;
           const correlationId = orderContext.triggerMessage.rawEventId;
           const started = performance.now();
           try {
-            await sheetsProcessor.process(record.id);
+            await sheetsProcessor.process(tenantId, exportId);
             metrics.increment('autosale_operations_total', { operation: 'sheets_export', result: 'success' });
-            logger.info('sheets_export_completed', { correlationId, orderId: record.orderId, exportId: record.id });
+            logger.info('sheets_export_completed', { correlationId, orderId, exportId });
           } catch (error) {
             metrics.increment('autosale_operations_total', { operation: 'sheets_export', result: 'failure' });
-            logger.warn('sheets_export_failed', { correlationId, orderId: record.orderId, exportId: record.id, errorCode: error instanceof Error ? error.name : 'UNKNOWN' });
+            logger.warn('sheets_export_failed', { correlationId, orderId, exportId, errorCode: error instanceof Error ? error.name : 'UNKNOWN' });
           } finally {
             metrics.observe('autosale_operation_duration_seconds', (performance.now() - started) / 1000, { operation: 'sheets_export' });
           }

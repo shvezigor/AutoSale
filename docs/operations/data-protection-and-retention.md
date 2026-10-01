@@ -50,7 +50,7 @@ Record at minimum: provider, purpose, data categories, regions, transfer mechani
 ## Security operations
 
 - Migration, API and worker database identities are split. Runtime roles do not own tables, cannot perform DDL and cannot bypass RLS. A restricted backup/restore identity remains to be added before EU production launch.
-- Expand fail-closed RLS table by table only after that table's HTTP, webhook, worker, relation-load, raw reporting/filter query and reconciliation paths use verified tenant transactions. Settings, membership/invitation/session, conversation/message, Instagram integration/media, Google OAuth/Sheets destination, catalogue/product, order/item, order-financial, delivery, Telegram, user-notification and security-audit slices are protected. Notification retention uses a worker-only bounded ID directory followed by tenant-scoped deletion; tenantless platform-administrator audits use a constrained API-only append function. Remaining tenant-owned tables and operational lifecycle workflows still prevent describing the entire schema as fully rolled out.
+- Forced fail-closed RLS now covers every current public table containing `tenant_id`, including order audit, inventory reservations, Sheets exports and conversational intent evaluations. Cross-tenant schedulers use role-specific bounded ID directories, then re-read and mutate durable state inside `withTenantTransaction`. Any future tenant-owned table must add its policy and PostgreSQL isolation test in the same migration. Operational lifecycle workflows remain incomplete even though the current database schema is covered.
 - Use TLS in transit, encrypted disks/object storage/backups, restricted secret access and documented rotation.
 - Add Redis authentication/ACL and prevent unrelated containers from reaching privileged queues.
 - Use non-root object-store credentials and explicit bucket policy; tenant prefixes alone are not access control.
@@ -64,7 +64,8 @@ Record at minimum: provider, purpose, data categories, regions, transfer mechani
 - [ ] DPA, privacy notice, controller/processor roles and DSAR contact approved.
 - [ ] Subprocessor register and transfer mechanisms approved.
 - [x] Non-owner PostgreSQL identities are used by API and worker containers.
-- [ ] Restricted backup/restore identity and fail-closed RLS rollout gate completed.
+- [x] Fail-closed RLS rollout completed for every current public table containing `tenant_id`.
+- [ ] Restricted backup/restore identity provisioned and restore exercise completed.
 - [ ] Tenant export/deletion workflow and deletion ledger proven end to end.
 - [ ] Configurable retention jobs enabled with metrics and dry-run reporting.
 - [ ] Backups encrypted off-host, access-restricted, expiry-enforced and restore-tested.

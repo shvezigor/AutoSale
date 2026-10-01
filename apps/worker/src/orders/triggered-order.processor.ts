@@ -103,10 +103,11 @@ export class TriggeredOrderProcessor {
         completedAt: new Date(),
       };
       if (decision.action === 'IGNORE') {
-        await this.prisma.orderIntentEvaluation.update({
-          where: { anchorMessageId: anchor.id },
-          data: { ...evaluationMetadata, status: 'IGNORED' },
-        });
+        await withTenantTransaction(this.prisma, anchor.tenantId, (transaction) =>
+          transaction.orderIntentEvaluation.update({
+            where: { anchorMessageId: anchor.id },
+            data: { ...evaluationMetadata, status: 'IGNORED' },
+          }));
         this.telemetry?.('ai_order_intent_evaluated', { correlationId, orderId: anchor.id, result: decision.reason });
         return null;
       }
@@ -185,10 +186,11 @@ export class TriggeredOrderProcessor {
       this.telemetry?.('ai_order_intent_evaluated', { correlationId, orderId: order.id, result: decision.reason });
       return order;
     } catch (error) {
-      await this.prisma.orderIntentEvaluation.updateMany({
-        where: { anchorMessageId: anchor.id, status: 'PROCESSING' },
-        data: { status: 'FAILED', leaseExpiresAt: null, lastErrorCode: 'INTENT_EVALUATION_FAILED' },
-      });
+      await withTenantTransaction(this.prisma, anchor.tenantId, (transaction) =>
+        transaction.orderIntentEvaluation.updateMany({
+          where: { anchorMessageId: anchor.id, status: 'PROCESSING' },
+          data: { status: 'FAILED', leaseExpiresAt: null, lastErrorCode: 'INTENT_EVALUATION_FAILED' },
+        }));
       throw error;
     }
   }
@@ -199,39 +201,42 @@ export class TriggeredOrderProcessor {
   ): Promise<{ claimed: boolean; orderId: string | null }> {
     const leaseExpiresAt = new Date(Date.now() + 5 * 60_000);
     try {
-      await this.prisma.orderIntentEvaluation.create({
-        data: {
-          tenantId: anchor.tenantId,
-          conversationId: anchor.conversationId,
-          anchorMessageId: anchor.id,
-          mode,
-          leaseExpiresAt,
-        },
-      });
+      await withTenantTransaction(this.prisma, anchor.tenantId, (transaction) =>
+        transaction.orderIntentEvaluation.create({
+          data: {
+            tenantId: anchor.tenantId,
+            conversationId: anchor.conversationId,
+            anchorMessageId: anchor.id,
+            mode,
+            leaseExpiresAt,
+          },
+        }));
       return { claimed: true, orderId: null };
     } catch (error) {
       if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== 'P2002') throw error;
     }
-    const existing = await this.prisma.orderIntentEvaluation.findUniqueOrThrow({ where: { anchorMessageId: anchor.id } });
+    const existing = await withTenantTransaction(this.prisma, anchor.tenantId, (transaction) =>
+      transaction.orderIntentEvaluation.findUniqueOrThrow({ where: { anchorMessageId: anchor.id } }));
     if (existing.orderId || ['IGNORED', 'PROPOSED', 'AUTO_CREATED'].includes(existing.status)) {
       return { claimed: false, orderId: existing.orderId };
     }
-    const reclaimed = await this.prisma.orderIntentEvaluation.updateMany({
-      where: {
-        id: existing.id,
-        OR: [
-          { status: 'FAILED' },
-          { status: 'PROCESSING', leaseExpiresAt: { lt: new Date() } },
-        ],
-      },
-      data: {
-        status: 'PROCESSING',
-        mode,
-        attempts: { increment: 1 },
-        leaseExpiresAt,
-        lastErrorCode: null,
-      },
-    });
+    const reclaimed = await withTenantTransaction(this.prisma, anchor.tenantId, (transaction) =>
+      transaction.orderIntentEvaluation.updateMany({
+        where: {
+          id: existing.id,
+          OR: [
+            { status: 'FAILED' },
+            { status: 'PROCESSING', leaseExpiresAt: { lt: new Date() } },
+          ],
+        },
+        data: {
+          status: 'PROCESSING',
+          mode,
+          attempts: { increment: 1 },
+          leaseExpiresAt,
+          lastErrorCode: null,
+        },
+      }));
     return { claimed: reclaimed.count === 1, orderId: null };
   }
 

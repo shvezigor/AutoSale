@@ -8,7 +8,7 @@ describe('GoogleSheetsSyncProcessor', () => {
   it('maps an approved order to configured headers and records a successful export', async () => {
     const update = vi.fn().mockResolvedValue({});
     const prisma = {
-      orderExport: { findUniqueOrThrow: vi.fn().mockResolvedValue({ id: 'export-1', orderId: 'order-42', tenantId }), update },
+      orderExport: { findFirstOrThrow: vi.fn().mockResolvedValue({ id: 'export-1', orderId: 'order-42', tenantId }), update },
       order: { findUniqueOrThrow: vi.fn().mockResolvedValue({
         id: 'order-42', publicNumber: 'AS-260918', status: 'APPROVED',
         createdAt: new Date('2026-09-18T19:10:54.817Z'), approvedAt: new Date('2026-09-18T19:15:00Z'),
@@ -22,7 +22,7 @@ describe('GoogleSheetsSyncProcessor', () => {
     prisma.$transaction.mockImplementation(async (run) => run(prisma));
     const sheets = { upsertRow: vi.fn().mockResolvedValue({ action: 'appended', rowNumber: 5 }) };
 
-    await new GoogleSheetsSyncProcessor(prisma as never, sheets as never).process('export-1');
+    await new GoogleSheetsSyncProcessor(prisma as never, sheets as never).process(tenantId, 'export-1');
 
     expect(sheets.upsertRow).toHaveBeenCalledWith({
       spreadsheetId: 'sheet-id', sheetName: 'Orders', orderId: 'AS-260918', legacyOrderIds: ['order-42'],
@@ -34,7 +34,7 @@ describe('GoogleSheetsSyncProcessor', () => {
   it('keeps a safe failure state before rethrowing a retryable error', async () => {
     const update = vi.fn().mockResolvedValue({});
     const prisma = {
-      orderExport: { findUniqueOrThrow: vi.fn().mockResolvedValue({ id: 'export-1', orderId: 'order-42', tenantId }), update },
+      orderExport: { findFirstOrThrow: vi.fn().mockResolvedValue({ id: 'export-1', orderId: 'order-42', tenantId }), update },
       order: { findUniqueOrThrow: vi.fn().mockResolvedValue({ id: 'order-42', status: 'APPROVED', approvedBy: 'user-a', extraction: {}, items: [] }) },
       googleSheetsDestination: { findUniqueOrThrow: vi.fn().mockResolvedValue({ spreadsheetId: 'sheet-id', sheetName: 'Orders', requiredHeaders: ['order_id'] }) },
       $queryRaw: vi.fn(),
@@ -44,7 +44,7 @@ describe('GoogleSheetsSyncProcessor', () => {
     const sheets = { upsertRow: vi.fn().mockRejectedValue(new Error('Google Sheets API returned HTTP 503')) };
     const notifications = { orderExportFailed: vi.fn().mockResolvedValue(undefined) };
 
-    await expect(new GoogleSheetsSyncProcessor(prisma as never, sheets as never, undefined, notifications as never).process('export-1')).rejects.toThrow('HTTP 503');
+    await expect(new GoogleSheetsSyncProcessor(prisma as never, sheets as never, undefined, notifications as never).process(tenantId, 'export-1')).rejects.toThrow('HTTP 503');
     expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ data: expect.objectContaining({ status: 'FAILED', errorSummary: 'Google Sheets API returned HTTP 503' }) }));
     expect(notifications.orderExportFailed).toHaveBeenCalledWith(tenantId, 'user-a', 'order-42');
   });
@@ -52,7 +52,7 @@ describe('GoogleSheetsSyncProcessor', () => {
   it('resolves the destination tenant OAuth connection for each export', async () => {
     const update = vi.fn().mockResolvedValue({});
     const prisma = {
-      orderExport: { findUniqueOrThrow: vi.fn().mockResolvedValue({ id: 'export-1', orderId: 'order-42', tenantId }), update },
+      orderExport: { findFirstOrThrow: vi.fn().mockResolvedValue({ id: 'export-1', orderId: 'order-42', tenantId }), update },
       order: { findUniqueOrThrow: vi.fn().mockResolvedValue({ id: 'order-42', tenantId, status: 'APPROVED', extraction: {}, items: [] }) },
       googleSheetsDestination: { findUniqueOrThrow: vi.fn().mockResolvedValue({ spreadsheetId: 'sheet-id', sheetName: 'Orders', credentialRef: 'connection-a', requiredHeaders: ['order_id'] }) },
       product: { findMany: vi.fn().mockResolvedValue([]) },
@@ -63,7 +63,7 @@ describe('GoogleSheetsSyncProcessor', () => {
     const sheets = { upsertRow: vi.fn().mockResolvedValue({ action: 'appended', rowNumber: 2 }) };
     const oauthSheets = vi.fn().mockResolvedValue(sheets);
 
-    await new GoogleSheetsSyncProcessor(prisma as never, undefined, oauthSheets).process('export-1');
+    await new GoogleSheetsSyncProcessor(prisma as never, undefined, oauthSheets).process(tenantId, 'export-1');
 
     expect(oauthSheets).toHaveBeenCalledWith(tenantId, 'connection-a');
     expect(sheets.upsertRow).toHaveBeenCalledOnce();

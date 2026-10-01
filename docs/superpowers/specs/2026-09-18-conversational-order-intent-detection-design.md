@@ -39,6 +39,8 @@ The evaluated context is bounded to the latest 50 messages at or before the anch
 
 Each evaluation stores the safe reason, mode, attempts, response/model identifiers, input/output token counts, latency, completion time and safe failure code. The existing order audit log records manager corrections, approval and cancellation; because the evaluation links to its order, corrections and rejected proposals can be used to calculate false-positive and correction rates without storing extra conversation content in telemetry.
 
+`order_intent_evaluations` and `audit_logs` use forced PostgreSQL RLS. Claim, retry, failure and completion writes run only inside the anchor message's tenant transaction; an absent context reads no rows and a mismatched tenant cannot update an evaluation or audit record.
+
 Operational telemetry emits `ai_order_intent_evaluated` with correlation ID, resulting order or anchor ID, and bounded result reason. Automatic mode remains opt-in; `PHRASE_ONLY` is the database and UI default.
 
 ## Verification ownership
