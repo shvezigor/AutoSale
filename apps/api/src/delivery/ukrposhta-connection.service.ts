@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
 import { ukrposhtaConnectionInputSchema, ukrposhtaSenderProfileInputSchema, type UkrposhtaConnectionInput, type UkrposhtaConnectionSummary, type UkrposhtaSenderProfileInput } from '@autosale/contracts';
-import type { PrismaClient } from '@autosale/database';
+import { type PrismaClient, withTenantTransaction } from '@autosale/database';
 import type { CredentialCipher, UkrposhtaClient } from '@autosale/integrations';
 
 type UkrposhtaClientPort = Pick<UkrposhtaClient, 'validateCredential' | 'searchCities' | 'searchLocations'>;
@@ -26,10 +26,10 @@ export class UkrposhtaConnectionService {
 
   async summary(tenantId: string): Promise<{ enabled: boolean; connection: UkrposhtaConnectionSummary | null }> {
     if (!this.options.enabled) return { enabled: false, connection: null };
-    const connection = await this.prisma.deliveryConnection.findUnique({
+    const connection = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.deliveryConnection.findUnique({
       where: { tenantId_provider: { tenantId, provider: 'UKRPOSHTA' } },
       include: { senderProfile: true },
-    });
+    }));
     return { enabled: true, connection: connection ? safeConnection(connection, this.cipher) : null };
   }
 
@@ -40,7 +40,7 @@ export class UkrposhtaConnectionService {
     const encryptedCredential = this.cipher.encrypt(JSON.stringify(input));
     const credentialGenerationId = randomUUID();
     const verifiedAt = this.now();
-    const connection = await this.prisma.deliveryConnection.upsert({
+    const connection = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.deliveryConnection.upsert({
       where: { tenantId_provider: { tenantId, provider: 'UKRPOSHTA' } },
       create: {
         tenantId, provider: 'UKRPOSHTA', status: 'ACTIVE', encryptedCredential, credentialGenerationId,
@@ -51,19 +51,19 @@ export class UkrposhtaConnectionService {
         connectedByUserId: userId, lastVerifiedAt: verifiedAt, lastErrorCode: null, disconnectedAt: null,
       },
       include: { senderProfile: true },
-    });
+    }));
     return safeConnection(connection, this.cipher, input.environment);
   }
 
   async disconnect(tenantId: string): Promise<UkrposhtaConnectionSummary> {
     this.assertEnabled();
-    const result = await this.prisma.deliveryConnection.updateMany({
+    const result = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.deliveryConnection.updateMany({
       where: { tenantId, provider: 'UKRPOSHTA' },
       data: {
         status: 'DISCONNECTED', disconnectedAt: this.now(), encryptedCredential: this.cipher.encrypt(randomUUID()),
         credentialGenerationId: randomUUID(), lastErrorCode: null,
       },
-    });
+    }));
     if (result.count !== 1) throw new Error('Ukrposhta connection not found');
     return {
       provider: 'UKRPOSHTA', status: 'DISCONNECTED', accountLabel: null, lastVerifiedAt: null,
@@ -73,10 +73,10 @@ export class UkrposhtaConnectionService {
 
   async clientContextForTenant(tenantId: string): Promise<{ client: UkrposhtaClientPort; credentialGenerationId: string }> {
     this.assertEnabled();
-    const connection = await this.prisma.deliveryConnection.findUnique({
+    const connection = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.deliveryConnection.findUnique({
       where: { tenantId_provider: { tenantId, provider: 'UKRPOSHTA' } },
       select: { status: true, encryptedCredential: true, credentialGenerationId: true },
-    });
+    }));
     if (!connection || connection.status !== 'ACTIVE') throw new Error('Active Ukrposhta connection required');
     const credentials = parseStoredCredentials(this.cipher.decrypt(connection.encryptedCredential));
     return { client: this.clientFactory(credentials), credentialGenerationId: connection.credentialGenerationId };
@@ -85,17 +85,17 @@ export class UkrposhtaConnectionService {
   async saveSenderProfile(tenantId: string, input: UkrposhtaSenderProfileInput): Promise<UkrposhtaSenderProfileInput> {
     this.assertEnabled();
     const parsed = ukrposhtaSenderProfileInputSchema.parse(input);
-    const connection = await this.prisma.deliveryConnection.findUnique({
+    const connection = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.deliveryConnection.findUnique({
       where: { tenantId_provider: { tenantId, provider: 'UKRPOSHTA' } },
       select: { id: true, status: true },
-    });
+    }));
     if (!connection || connection.status !== 'ACTIVE') throw new Error('Active Ukrposhta connection required');
     const data = ukrposhtaSenderProfileData(parsed);
-    await this.prisma.deliverySenderProfile.upsert({
+    await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.deliverySenderProfile.upsert({
       where: { tenantId_connectionId: { tenantId, connectionId: connection.id } },
       create: { tenantId, connectionId: connection.id, ...data },
       update: data,
-    });
+    }));
     return parsed;
   }
 

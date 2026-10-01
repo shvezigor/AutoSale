@@ -1,5 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
 
+vi.mock('@autosale/database', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@autosale/database')>()),
+  withTenantTransaction: async <T>(prisma: unknown, _tenantId: string, operation: (transaction: unknown) => Promise<T>) => operation(prisma),
+}));
+
 import { UkrposhtaConnectionService } from './ukrposhta-connection.service.js';
 
 const tenantId = '11111111-1111-4111-8111-111111111111';

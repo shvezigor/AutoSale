@@ -186,6 +186,9 @@ State-changing endpoints використовують CSRF, tenant scope, role c
 
 ## Безпека та приватність
 
+- `delivery_connections`, `delivery_sender_profiles`, `shipments`, `shipment_attempts` і `shipment_status_events` захищені fail-closed `FORCE ROW LEVEL SECURITY`; API та worker читають і змінюють їх лише у transaction-local tenant context.
+- Queue payload містить лише `shipmentId`/`shipmentIds`. Worker отримує tenant authority через bounded worker-only database functions, після чого повторно читає захищений запис у відповідному tenant context; customer, credential і parcel дані не повертаються discovery-функціями.
+- Ukrposhta batch не може об'єднувати shipment різних tenant навіть за однакових provider credentials.
 - API-ключі зашифровані, маскуються і не потрапляють у frontend, логи, audit changes або telemetry.
 - Телефон, ім'я та адреса передаються лише обраному перевізнику для виконання доставки.
 - Логи містять tenant/shipment correlation IDs, provider operation, latency та safe error code без payload.

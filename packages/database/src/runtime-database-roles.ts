@@ -123,6 +123,18 @@ export async function configureRuntimeDatabaseRoles(
           REVOKE ALL ON FUNCTION public.worker_due_catalogue_mapping_runs(timestamp with time zone, integer) FROM autosale_api;
           GRANT EXECUTE ON FUNCTION public.worker_due_catalogue_mapping_runs(timestamp with time zone, integer) TO autosale_worker;
         END IF;
+        IF to_regprocedure('public.worker_delivery_tenants_for_shipments(uuid[])') IS NOT NULL THEN
+          REVOKE ALL ON FUNCTION public.worker_delivery_tenants_for_shipments(uuid[]) FROM autosale_api;
+          GRANT EXECUTE ON FUNCTION public.worker_delivery_tenants_for_shipments(uuid[]) TO autosale_worker;
+        END IF;
+        IF to_regprocedure('public.worker_due_shipment_attempts(timestamp with time zone,text,integer)') IS NOT NULL THEN
+          REVOKE ALL ON FUNCTION public.worker_due_shipment_attempts(timestamp with time zone, text, integer) FROM autosale_api;
+          GRANT EXECUTE ON FUNCTION public.worker_due_shipment_attempts(timestamp with time zone, text, integer) TO autosale_worker;
+        END IF;
+        IF to_regprocedure('public.worker_due_shipment_statuses(timestamp with time zone,text,integer)') IS NOT NULL THEN
+          REVOKE ALL ON FUNCTION public.worker_due_shipment_statuses(timestamp with time zone, text, integer) FROM autosale_api;
+          GRANT EXECUTE ON FUNCTION public.worker_due_shipment_statuses(timestamp with time zone, text, integer) TO autosale_worker;
+        END IF;
       END
       $functions$;
     `);

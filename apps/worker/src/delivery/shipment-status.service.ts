@@ -1,8 +1,9 @@
 import { randomUUID } from 'node:crypto';
 
 import type { ShipmentStatus, ShipmentStatusJob } from '@autosale/contracts';
-import type { PrismaClient } from '@autosale/database';
+import { type PrismaClient, withTenantTransaction } from '@autosale/database';
 import { NovaPoshtaError, type NovaPoshtaShipmentStatus } from '@autosale/integrations';
+import { resolveShipmentTenant } from './delivery-authority.js';
 
 const LEASE_MS = 60_000;
 
@@ -29,22 +30,24 @@ export class ShipmentStatusService {
   async process(job: ShipmentStatusJob): Promise<'UPDATED' | 'RETRY' | 'IGNORED'> {
     const now = this.now();
     const leaseId = randomUUID();
-    const attempt = await this.prisma.shipmentAttempt.findFirst({
+    const tenantId = await resolveShipmentTenant(this.prisma, job.shipmentId);
+    if (!tenantId) return 'IGNORED';
+    const attempt = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.shipmentAttempt.findFirst({
       where: { shipmentId: job.shipmentId, operation: 'STATUS_SYNC', status: { in: ['PENDING', 'RETRYABLE'] }, nextAttemptAt: { lte: now } },
       orderBy: { version: 'desc' }, include: { shipment: { include: { connection: true } } },
-    });
+    }));
     if (!attempt?.shipment.trackingNumber || terminal(attempt.shipment.status)) return 'IGNORED';
     if (attempt.shipment.provider === 'UKRPOSHTA') return 'IGNORED';
-    const claimed = await this.prisma.shipmentAttempt.updateMany({
+    const claimed = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.shipmentAttempt.updateMany({
       where: { id: attempt.id, status: attempt.status, leaseId: null },
       data: { status: 'PROCESSING', leaseId, leaseExpiresAt: new Date(now.getTime() + LEASE_MS), attempts: { increment: 1 }, lastAttemptAt: now },
-    });
+    }));
     if (claimed.count !== 1) return 'IGNORED';
     try {
       const provider = await this.clientFactory(this.decrypt(attempt.shipment.connection.encryptedCredential)).getShipmentStatus(attempt.shipment.trackingNumber);
       const mapped = mapNovaPoshtaStatus(provider.providerCode);
       const next = mapped ?? attempt.shipment.status;
-      await this.prisma.$transaction(async (tx) => {
+      await withTenantTransaction(this.prisma, tenantId, async (tx) => {
         const completed = await tx.shipmentAttempt.updateMany({ where: { id: attempt.id, status: 'PROCESSING', leaseId }, data: { status: 'SUCCEEDED', completedAt: now, leaseId: null, leaseExpiresAt: null } });
         if (completed.count !== 1) return;
         const last = await tx.shipmentStatusEvent.findFirst({ where: { tenantId: attempt.tenantId, shipmentId: attempt.shipmentId }, orderBy: { occurredAt: 'desc' }, select: { providerCode: true } });
@@ -58,11 +61,11 @@ export class ShipmentStatusService {
       return 'UPDATED';
     } catch (error) {
       const retryable = !(error instanceof NovaPoshtaError) || ['RATE_LIMITED', 'TIMEOUT', 'NETWORK', 'PROVIDER_ERROR'].includes(error.code);
-      await this.prisma.shipmentAttempt.updateMany({ where: { id: attempt.id, status: 'PROCESSING', leaseId }, data: {
+      await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.shipmentAttempt.updateMany({ where: { id: attempt.id, status: 'PROCESSING', leaseId }, data: {
         status: retryable ? 'RETRYABLE' : 'FAILED', nextAttemptAt: new Date(now.getTime() + 60_000),
         completedAt: retryable ? null : now, leaseId: null, leaseExpiresAt: null,
         lastErrorCode: error instanceof NovaPoshtaError ? `NOVA_POSHTA_${error.code}` : 'SHIPMENT_STATUS_FAILED',
-      } });
+      } }));
       return retryable ? 'RETRY' : 'IGNORED';
     }
   }
@@ -70,17 +73,19 @@ export class ShipmentStatusService {
   async cancel(job: ShipmentStatusJob): Promise<'CANCELLED' | 'RETRY' | 'IGNORED'> {
     const now = this.now();
     const leaseId = randomUUID();
-    const attempt = await this.prisma.shipmentAttempt.findFirst({
+    const tenantId = await resolveShipmentTenant(this.prisma, job.shipmentId);
+    if (!tenantId) return 'IGNORED';
+    const attempt = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.shipmentAttempt.findFirst({
       where: { shipmentId: job.shipmentId, operation: 'CANCEL', status: { in: ['PENDING', 'RETRYABLE'] }, nextAttemptAt: { lte: now } },
       orderBy: { version: 'desc' }, include: { shipment: { include: { connection: true } } },
-    });
+    }));
     if (!attempt?.shipment.providerDocumentId || attempt.shipment.status === 'CANCELLED') return 'IGNORED';
     if (attempt.shipment.provider === 'UKRPOSHTA') return this.ukrposhta ? this.ukrposhta.cancel(job) : 'IGNORED';
-    const claimed = await this.prisma.shipmentAttempt.updateMany({ where: { id: attempt.id, status: attempt.status, leaseId: null }, data: { status: 'PROCESSING', leaseId, leaseExpiresAt: new Date(now.getTime() + LEASE_MS), attempts: { increment: 1 }, lastAttemptAt: now } });
+    const claimed = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.shipmentAttempt.updateMany({ where: { id: attempt.id, status: attempt.status, leaseId: null }, data: { status: 'PROCESSING', leaseId, leaseExpiresAt: new Date(now.getTime() + LEASE_MS), attempts: { increment: 1 }, lastAttemptAt: now } }));
     if (claimed.count !== 1) return 'IGNORED';
     try {
       await this.clientFactory(this.decrypt(attempt.shipment.connection.encryptedCredential)).cancelShipment(attempt.shipment.providerDocumentId);
-      await this.prisma.$transaction(async (tx) => {
+      await withTenantTransaction(this.prisma, tenantId, async (tx) => {
         const completed = await tx.shipmentAttempt.updateMany({ where: { id: attempt.id, status: 'PROCESSING', leaseId }, data: { status: 'SUCCEEDED', completedAt: now, leaseId: null, leaseExpiresAt: null } });
         if (completed.count !== 1) return;
         await tx.shipment.update({ where: { id: attempt.shipmentId }, data: { status: 'CANCELLED', cancelledAt: now, nextStatusCheckAt: null, lastErrorCode: null, version: { increment: 1 } } });
@@ -89,7 +94,7 @@ export class ShipmentStatusService {
       return 'CANCELLED';
     } catch (error) {
       const retryable = !(error instanceof NovaPoshtaError) || ['RATE_LIMITED', 'TIMEOUT', 'NETWORK', 'PROVIDER_ERROR'].includes(error.code);
-      await this.prisma.shipmentAttempt.updateMany({ where: { id: attempt.id, status: 'PROCESSING', leaseId }, data: { status: retryable ? 'RETRYABLE' : 'FAILED', nextAttemptAt: new Date(now.getTime() + 60_000), completedAt: retryable ? null : now, leaseId: null, leaseExpiresAt: null, lastErrorCode: error instanceof NovaPoshtaError ? `NOVA_POSHTA_${error.code}` : 'SHIPMENT_CANCEL_FAILED' } });
+      await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.shipmentAttempt.updateMany({ where: { id: attempt.id, status: 'PROCESSING', leaseId }, data: { status: retryable ? 'RETRYABLE' : 'FAILED', nextAttemptAt: new Date(now.getTime() + 60_000), completedAt: retryable ? null : now, leaseId: null, leaseExpiresAt: null, lastErrorCode: error instanceof NovaPoshtaError ? `NOVA_POSHTA_${error.code}` : 'SHIPMENT_CANCEL_FAILED' } }));
       return retryable ? 'RETRY' : 'IGNORED';
     }
   }

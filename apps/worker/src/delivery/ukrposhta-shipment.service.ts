@@ -1,7 +1,8 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { deliverySenderProfileInputSchema, isUkrposhtaPersonName, shipmentDraftInputSchema, ukrposhtaConnectionInputSchema, type ShipmentCreateJob, type ShipmentStatus, type UkrposhtaConnectionInput } from '@autosale/contracts';
-import type { Prisma, PrismaClient } from '@autosale/database';
+import { type Prisma, type PrismaClient, withTenantTransaction } from '@autosale/database';
 import { parseUkrposhtaLocationRef, UkrposhtaError, type UkrposhtaClient, type UkrposhtaLifecycle, type UkrposhtaShipment } from '@autosale/integrations';
+import { resolveShipmentTenant } from './delivery-authority.js';
 
 type Client = Pick<UkrposhtaClient, 'createAddress' | 'findClientByExternalId' | 'createClient' | 'createShipment' | 'getShipment' | 'getShipmentByBarcode' | 'getLifecycle' | 'cancelShipment'>;
 type Candidate = Prisma.ShipmentAttemptGetPayload<{ include: { shipment: { include: { connection: true } } } }>;
@@ -127,7 +128,7 @@ export class UkrposhtaShipmentService {
       }
       const retryable = error instanceof UkrposhtaError && ['TIMEOUT', 'NETWORK', 'PROVIDER_ERROR', 'RATE_LIMITED'].includes(error.code);
       const code = error instanceof UkrposhtaError ? `UKRPOSHTA_${error.code}` : 'UKRPOSHTA_CONNECTION_CHANGED';
-      await this.prisma.$transaction(async (tx) => {
+      await withTenantTransaction(this.prisma, candidate.tenantId, async (tx) => {
         const owned = await tx.shipmentAttempt.updateMany({ where: { id: candidate.id, tenantId: candidate.tenantId, status: 'PROCESSING', leaseId }, data: { status: retryable ? 'RETRYABLE' : 'FAILED', completedAt: retryable ? null : this.now(), leaseId: null, leaseExpiresAt: null, nextAttemptAt: new Date(this.now().getTime() + 60_000), lastErrorCode: code } });
         if (owned.count === 1 && !retryable) await tx.shipment.update({ where: { id: candidate.shipmentId, tenantId: candidate.tenantId }, data: { lastErrorCode: code } });
       });
@@ -135,12 +136,14 @@ export class UkrposhtaShipmentService {
     }
   }
 
-  private candidate(job: ShipmentCreateJob, operation: 'CREATE' | 'CANCEL') {
-    return this.prisma.shipmentAttempt.findFirst({ where: { shipmentId: job.shipmentId, operation, shipment: { provider: 'UKRPOSHTA' }, OR: [{ status: { in: ['PENDING', 'RETRYABLE', 'UNKNOWN'] }, nextAttemptAt: { lte: this.now() } }, { status: 'PROCESSING', leaseExpiresAt: { lte: this.now() } }] }, orderBy: { version: 'desc' }, include: { shipment: { include: { connection: true } } } });
+  private async candidate(job: ShipmentCreateJob, operation: 'CREATE' | 'CANCEL') {
+    const tenantId = await resolveShipmentTenant(this.prisma, job.shipmentId);
+    if (!tenantId) return null;
+    return withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.shipmentAttempt.findFirst({ where: { shipmentId: job.shipmentId, operation, shipment: { provider: 'UKRPOSHTA' }, OR: [{ status: { in: ['PENDING', 'RETRYABLE', 'UNKNOWN'] }, nextAttemptAt: { lte: this.now() } }, { status: 'PROCESSING', leaseExpiresAt: { lte: this.now() } }] }, orderBy: { version: 'desc' }, include: { shipment: { include: { connection: true } } } }));
   }
   private async claim(candidate: Candidate): Promise<string | null> {
     const leaseId = randomUUID();
-    const result = await this.prisma.shipmentAttempt.updateMany({ where: { id: candidate.id, tenantId: candidate.tenantId, status: candidate.status, leaseId: candidate.leaseId, ...(candidate.status === 'PROCESSING' ? { leaseExpiresAt: { lte: this.now() } } : {}) }, data: { status: 'PROCESSING', leaseId, leaseExpiresAt: new Date(this.now().getTime() + leaseMs), attempts: { increment: 1 }, lastAttemptAt: this.now() } });
+    const result = await withTenantTransaction(this.prisma, candidate.tenantId, (transaction) => transaction.shipmentAttempt.updateMany({ where: { id: candidate.id, tenantId: candidate.tenantId, status: candidate.status, leaseId: candidate.leaseId, ...(candidate.status === 'PROCESSING' ? { leaseExpiresAt: { lte: this.now() } } : {}) }, data: { status: 'PROCESSING', leaseId, leaseExpiresAt: new Date(this.now().getTime() + leaseMs), attempts: { increment: 1 }, lastAttemptAt: this.now() } }));
     return result.count === 1 ? leaseId : null;
   }
   private metadata(candidate: Candidate): Metadata {
@@ -155,7 +158,7 @@ export class UkrposhtaShipmentService {
     } catch { throw new ConnectionChanged(); }
   }
   private async checkpoint(candidate: Candidate, leaseId: string, metadata: Metadata): Promise<void> {
-    await this.prisma.$transaction(async (tx) => {
+    await withTenantTransaction(this.prisma, candidate.tenantId, async (tx) => {
       const owned = await tx.shipmentAttempt.updateMany({ where: { id: candidate.id, tenantId: candidate.tenantId, status: 'PROCESSING', leaseId, leaseExpiresAt: { gt: this.now() } }, data: { leaseExpiresAt: new Date(this.now().getTime() + leaseMs) } });
       if (owned.count !== 1) throw new LostLease();
       await tx.shipment.update({ where: { id: candidate.shipmentId, tenantId: candidate.tenantId }, data: { providerMetadata: JSON.parse(JSON.stringify(metadata)) } });
@@ -163,7 +166,7 @@ export class UkrposhtaShipmentService {
   }
   private async succeed(candidate: Candidate, leaseId: string, metadata: Metadata, result: UkrposhtaShipment): Promise<CreateResult> {
     const at = this.now();
-    return this.prisma.$transaction(async (tx) => {
+    return withTenantTransaction(this.prisma, candidate.tenantId, async (tx) => {
       const owned = await tx.shipmentAttempt.updateMany({ where: { id: candidate.id, tenantId: candidate.tenantId, status: 'PROCESSING', leaseId }, data: { status: 'SUCCEEDED', completedAt: at, leaseId: null, leaseExpiresAt: null, lastErrorCode: null } });
       if (owned.count !== 1) return 'IGNORED';
       const status = mapLifecycle(result.lifecycle.status);
@@ -173,7 +176,7 @@ export class UkrposhtaShipmentService {
     });
   }
   private async finish(candidate: Candidate, leaseId: string, status: 'UNKNOWN' | 'FAILED' | 'RETRYABLE', code: string): Promise<CreateResult> {
-    return this.prisma.$transaction(async (tx) => {
+    return withTenantTransaction(this.prisma, candidate.tenantId, async (tx) => {
       const owned = await tx.shipmentAttempt.updateMany({ where: { id: candidate.id, tenantId: candidate.tenantId, status: 'PROCESSING', leaseId }, data: { status, lastErrorCode: code, leaseId: null, leaseExpiresAt: null, completedAt: status === 'FAILED' ? this.now() : null, nextAttemptAt: new Date(this.now().getTime() + (status === 'UNKNOWN' ? 15 * 60_000 : 60_000)) } });
       if (owned.count !== 1) return 'IGNORED';
       await tx.shipment.update({ where: { id: candidate.shipmentId, tenantId: candidate.tenantId }, data: { status: status === 'FAILED' ? 'FAILED' : 'CREATING', lastErrorCode: code } });
@@ -182,7 +185,7 @@ export class UkrposhtaShipmentService {
   }
   private async completeCancellation(candidate: Candidate, leaseId: string, metadata: Metadata, status: ShipmentStatus, code: string | null): Promise<void> {
     if (status === 'CANCELLED' && code === null) metadata.lifecycle = { status: 'DELETED', statusDate: this.now().toISOString().slice(0, 19) };
-    await this.prisma.$transaction(async (tx) => {
+    await withTenantTransaction(this.prisma, candidate.tenantId, async (tx) => {
       const owned = await tx.shipmentAttempt.updateMany({ where: { id: candidate.id, tenantId: candidate.tenantId, status: 'PROCESSING', leaseId }, data: { status: code ? 'FAILED' : 'SUCCEEDED', completedAt: this.now(), leaseId: null, leaseExpiresAt: null, lastErrorCode: code } });
       if (owned.count !== 1) throw new LostLease();
       await tx.shipment.update({ where: { id: candidate.shipmentId, tenantId: candidate.tenantId }, data: { status, ...(status === 'CANCELLED' ? { cancelledAt: this.now() } : {}), nextStatusCheckAt: null, lastErrorCode: code, lastProviderCode: status === 'CANCELLED' ? 'DELETED' : metadata.lifecycle?.status ?? null, providerMetadata: JSON.parse(JSON.stringify(metadata)), version: { increment: 1 } } });

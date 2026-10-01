@@ -50,7 +50,7 @@ Record at minimum: provider, purpose, data categories, regions, transfer mechani
 ## Security operations
 
 - Migration, API and worker database identities are split. Runtime roles do not own tables, cannot perform DDL and cannot bypass RLS. A restricted backup/restore identity remains to be added before EU production launch.
-- Expand fail-closed RLS table by table only after that table's HTTP, webhook, worker, relation-load, raw reporting/filter query and reconciliation paths use verified tenant transactions. Settings, conversation/message, Instagram integration/media, Google OAuth/Sheets destination, catalogue/product, order/item and order-financial slices are protected; delivery, Telegram, membership/session, notification and audit tables remain incremental rollout work, so do not describe the entire schema as RLS-protected yet.
+- Expand fail-closed RLS table by table only after that table's HTTP, webhook, worker, relation-load, raw reporting/filter query and reconciliation paths use verified tenant transactions. Settings, conversation/message, Instagram integration/media, Google OAuth/Sheets destination, catalogue/product, order/item, order-financial and delivery slices are protected; Telegram, membership/session, notification and audit tables remain incremental rollout work, so do not describe the entire schema as RLS-protected yet.
 - Use TLS in transit, encrypted disks/object storage/backups, restricted secret access and documented rotation.
 - Add Redis authentication/ACL and prevent unrelated containers from reaching privileged queues.
 - Use non-root object-store credentials and explicit bucket policy; tenant prefixes alone are not access control.

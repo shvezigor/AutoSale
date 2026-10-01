@@ -1,5 +1,12 @@
 import { describe, expect, it, vi } from 'vitest';
 import { UkrposhtaError } from '@autosale/integrations';
+
+vi.mock('@autosale/database', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@autosale/database')>()),
+  withTenantTransaction: async <T>(prisma: { $transaction?: (operation: (transaction: unknown) => Promise<T>) => Promise<T> }, _tenantId: string, operation: (transaction: unknown) => Promise<T>) => prisma.$transaction ? prisma.$transaction(operation) : operation(prisma),
+}));
+vi.mock('./delivery-authority.js', () => ({ resolveShipmentTenant: vi.fn().mockResolvedValue('22222222-2222-4222-8222-222222222222') }));
+
 import { UkrposhtaShipmentService } from './ukrposhta-shipment.service.js';
 
 const id = '11111111-1111-4111-8111-111111111111';

@@ -1,8 +1,9 @@
 import { randomUUID } from 'node:crypto';
 
 import { deliverySenderProfileInputSchema, shipmentDraftInputSchema, type ShipmentCreateJob } from '@autosale/contracts';
-import type { PrismaClient } from '@autosale/database';
+import { type PrismaClient, withTenantTransaction } from '@autosale/database';
 import { NovaPoshtaError, type NovaPoshtaCreatedShipment, type NovaPoshtaShipmentInput, type NovaPoshtaShipmentReference } from '@autosale/integrations';
+import { resolveShipmentTenant } from './delivery-authority.js';
 
 const LEASE_MS = 60_000;
 const MAX_ATTEMPTS = 5;
@@ -26,7 +27,9 @@ export class ShipmentCreateService {
   async process(job: ShipmentCreateJob): Promise<ShipmentCreateResult> {
     const startedAt = this.now();
     const leaseId = randomUUID();
-    const candidate = await this.prisma.shipmentAttempt.findFirst({
+    const tenantId = await resolveShipmentTenant(this.prisma, job.shipmentId);
+    if (!tenantId) return 'IGNORED';
+    const candidate = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.shipmentAttempt.findFirst({
       where: {
         shipmentId: job.shipmentId,
         operation: 'CREATE',
@@ -37,11 +40,11 @@ export class ShipmentCreateService {
       },
       orderBy: { version: 'desc' },
       include: { shipment: { include: { connection: true } } },
-    });
+    }));
     if (!candidate || candidate.shipment.status !== 'CREATING') return 'IGNORED';
     if (candidate.shipment.provider === 'UKRPOSHTA') return this.ukrposhta ? this.ukrposhta.process(job) : 'IGNORED';
 
-    const claimed = await this.prisma.shipmentAttempt.updateMany({
+    const claimed = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.shipmentAttempt.updateMany({
       where: {
         id: candidate.id,
         status: candidate.status,
@@ -51,7 +54,7 @@ export class ShipmentCreateService {
         status: 'PROCESSING', leaseId, leaseExpiresAt: new Date(startedAt.getTime() + LEASE_MS),
         lastAttemptAt: startedAt, attempts: { increment: 1 }, lastErrorCode: null,
       },
-    });
+    }));
     if (claimed.count !== 1) return 'IGNORED';
 
     const clientRef = `shipment:${candidate.shipment.id}:${candidate.version}`;
@@ -59,24 +62,25 @@ export class ShipmentCreateService {
     try {
       if (candidate.status === 'UNKNOWN') {
         const existing = await client.findShipmentByClientRef(clientRef);
-        if (existing) return await this.succeed(candidate.id, candidate.shipment.id, leaseId, existing, null, startedAt);
+        if (existing) return await this.succeed(tenantId, candidate.id, candidate.shipment.id, leaseId, existing, null, startedAt);
       }
       const created = await client.createShipment(providerInput(candidate.shipment, clientRef));
-      return await this.succeed(candidate.id, candidate.shipment.id, leaseId, created, created.cost, startedAt);
+      return await this.succeed(tenantId, candidate.id, candidate.shipment.id, leaseId, created, created.cost, startedAt);
     } catch (error) {
       if (error instanceof NovaPoshtaError && ['TIMEOUT', 'NETWORK', 'PROVIDER_ERROR'].includes(error.code)) {
-        return await this.finish(candidate.id, candidate.shipment.id, leaseId, 'UNKNOWN', 'NOVA_POSHTA_OUTCOME_UNKNOWN', startedAt, 60_000);
+        return await this.finish(tenantId, candidate.id, candidate.shipment.id, leaseId, 'UNKNOWN', 'NOVA_POSHTA_OUTCOME_UNKNOWN', startedAt, 60_000);
       }
       if (error instanceof NovaPoshtaError && error.code === 'RATE_LIMITED' && candidate.attempts + 1 < MAX_ATTEMPTS) {
         const delay = Math.min(15 * 60_000, 30_000 * 2 ** candidate.attempts);
-        return await this.finish(candidate.id, candidate.shipment.id, leaseId, 'RETRYABLE', 'NOVA_POSHTA_RATE_LIMITED', startedAt, delay);
+        return await this.finish(tenantId, candidate.id, candidate.shipment.id, leaseId, 'RETRYABLE', 'NOVA_POSHTA_RATE_LIMITED', startedAt, delay);
       }
       const code = error instanceof NovaPoshtaError ? `NOVA_POSHTA_${error.code}` : 'SHIPMENT_CREATE_FAILED';
-      return await this.finish(candidate.id, candidate.shipment.id, leaseId, 'FAILED', code, startedAt, 0);
+      return await this.finish(tenantId, candidate.id, candidate.shipment.id, leaseId, 'FAILED', code, startedAt, 0);
     }
   }
 
   private async succeed(
+    tenantId: string,
     attemptId: string,
     shipmentId: string,
     leaseId: string,
@@ -84,7 +88,7 @@ export class ShipmentCreateService {
     cost: number | null,
     completedAt: Date,
   ): Promise<ShipmentCreateResult> {
-    return this.prisma.$transaction(async (tx) => {
+    return withTenantTransaction(this.prisma, tenantId, async (tx) => {
       const attempt = await tx.shipmentAttempt.updateMany({
         where: { id: attemptId, status: 'PROCESSING', leaseId },
         data: { status: 'SUCCEEDED', completedAt, leaseId: null, leaseExpiresAt: null, lastErrorCode: null },
@@ -104,6 +108,7 @@ export class ShipmentCreateService {
   }
 
   private async finish(
+    tenantId: string,
     attemptId: string,
     shipmentId: string,
     leaseId: string,
@@ -112,7 +117,7 @@ export class ShipmentCreateService {
     at: Date,
     delayMs: number,
   ): Promise<ShipmentCreateResult> {
-    const updated = await this.prisma.$transaction(async (tx) => {
+    const updated = await withTenantTransaction(this.prisma, tenantId, async (tx) => {
       const attempt = await tx.shipmentAttempt.updateMany({
         where: { id: attemptId, status: 'PROCESSING', leaseId },
         data: {

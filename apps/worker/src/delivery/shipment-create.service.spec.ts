@@ -1,6 +1,12 @@
 import { describe, expect, it, vi } from 'vitest';
 import { NovaPoshtaError } from '@autosale/integrations';
 
+vi.mock('@autosale/database', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@autosale/database')>()),
+  withTenantTransaction: async <T>(prisma: { $transaction?: (operation: (transaction: unknown) => Promise<T>) => Promise<T> }, _tenantId: string, operation: (transaction: unknown) => Promise<T>) => prisma.$transaction ? prisma.$transaction(operation) : operation(prisma),
+}));
+vi.mock('./delivery-authority.js', () => ({ resolveShipmentTenant: vi.fn().mockResolvedValue('22222222-2222-4222-8222-222222222222') }));
+
 import { ShipmentCreateService } from './shipment-create.service.js';
 
 const now = new Date('2026-09-11T10:00:00.000Z');

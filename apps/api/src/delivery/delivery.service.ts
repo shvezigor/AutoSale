@@ -42,10 +42,10 @@ export class DeliveryService {
 
   async summary(tenantId: string): Promise<{ enabled: boolean; connections: DeliveryConnectionSummary[] }> {
     if (!this.options.enabled) return { enabled: false, connections: [] };
-    const connection = await this.prisma.deliveryConnection.findUnique({
+    const connection = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.deliveryConnection.findUnique({
       where: { tenantId_provider: { tenantId, provider: 'NOVA_POSHTA' } },
       include: { senderProfile: true },
-    });
+    }));
     return { enabled: true, connections: connection ? [safeConnection(connection)] : [] };
   }
 
@@ -58,7 +58,7 @@ export class DeliveryService {
     const encryptedCredential = this.cipher.encrypt(input.apiKey);
     const credentialGenerationId = randomUUID();
     const verifiedAt = this.now();
-    const connection = await this.prisma.deliveryConnection.upsert({
+    const connection = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.deliveryConnection.upsert({
       where: { tenantId_provider: { tenantId, provider: 'NOVA_POSHTA' } },
       create: {
         tenantId,
@@ -81,36 +81,36 @@ export class DeliveryService {
         disconnectedAt: null,
       },
       include: { senderProfile: true },
-    });
+    }));
     return safeConnection(connection);
   }
 
   async senderProfile(tenantId: string): Promise<DeliverySenderProfileInput | null> {
     if (!this.options.enabled) return null;
-    const connection = await this.prisma.deliveryConnection.findUnique({
+    const connection = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.deliveryConnection.findUnique({
       where: { tenantId_provider: { tenantId, provider: 'NOVA_POSHTA' } },
       select: { id: true },
-    });
+    }));
     if (!connection) return null;
-    const profile = await this.prisma.deliverySenderProfile.findUnique({
+    const profile = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.deliverySenderProfile.findUnique({
       where: { tenantId_connectionId: { tenantId, connectionId: connection.id } },
-    });
+    }));
     return profile ? safeSenderProfile(profile) : null;
   }
 
   async saveSenderProfile(tenantId: string, input: DeliverySenderProfileInput): Promise<DeliverySenderProfileInput> {
     this.assertEnabled();
-    const connection = await this.prisma.deliveryConnection.findUnique({
+    const connection = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.deliveryConnection.findUnique({
       where: { tenantId_provider: { tenantId, provider: 'NOVA_POSHTA' } },
       select: { id: true, status: true },
-    });
+    }));
     if (!connection || connection.status !== 'ACTIVE') throw new Error('Active Nova Poshta connection required');
     const data = senderProfileData(input);
-    await this.prisma.deliverySenderProfile.upsert({
+    await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.deliverySenderProfile.upsert({
       where: { tenantId_connectionId: { tenantId, connectionId: connection.id } },
       create: { tenantId, connectionId: connection.id, ...data },
       update: data,
-    });
+    }));
     return input;
   }
 
@@ -123,17 +123,19 @@ export class DeliveryService {
     this.assertEnabled();
     const order = await this.orderForShipment(tenantId, orderId);
     const readiness = shipmentReadiness(order);
-    const shipment = await this.prisma.shipment.findFirst({
-      where: { tenantId, orderId },
-      orderBy: { createdAt: 'desc' },
-      include: { statusEvents: { orderBy: { occurredAt: 'desc' } } },
-    });
-    const available = this.ukrposhtaClient ? await this.prisma.deliveryConnection.findMany({ where: { tenantId, status: 'ACTIVE', provider: { in: ['NOVA_POSHTA', 'UKRPOSHTA'] } }, select: { provider: true } }) : [];
+    const { shipment, available } = await withTenantTransaction(this.prisma, tenantId, async (transaction) => ({
+      shipment: await transaction.shipment.findFirst({
+        where: { tenantId, orderId },
+        orderBy: { createdAt: 'desc' },
+        include: { statusEvents: { orderBy: { occurredAt: 'desc' } } },
+      }),
+      available: this.ukrposhtaClient ? await transaction.deliveryConnection.findMany({ where: { tenantId, status: 'ACTIVE', provider: { in: ['NOVA_POSHTA', 'UKRPOSHTA'] } }, select: { provider: true } }) : [],
+    }));
     const provider = requestedProvider ?? (shipment?.provider === 'UKRPOSHTA' ? 'UKRPOSHTA' : available.length === 1 && available[0]?.provider === 'UKRPOSHTA' ? 'UKRPOSHTA' : 'NOVA_POSHTA');
-    const connection = await this.prisma.deliveryConnection.findUnique({
+    const connection = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.deliveryConnection.findUnique({
       where: { tenantId_provider: { tenantId, provider } },
       include: { senderProfile: true },
-    });
+    }));
     const blockedReason = !readiness.allowed
       ? readiness.reason
       : !connection || connection.status !== 'ACTIVE'
@@ -157,10 +159,10 @@ export class DeliveryService {
     if (!readiness.allowed) throw new BadRequestException(readiness.reason);
     const parsed = shipmentDraftInputSchema.safeParse(input);
     if (!parsed.success) throw new BadRequestException('INVALID_SHIPMENT_DRAFT');
-    const connection = await this.prisma.deliveryConnection.findUnique({
+    const connection = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.deliveryConnection.findUnique({
       where: { tenantId_provider: { tenantId, provider: parsed.data.provider } },
       include: { senderProfile: true },
-    });
+    }));
     if (!connection || connection.status !== 'ACTIVE') throw new BadRequestException('CONNECTION_REQUIRED');
     if (!validSenderProfile(connection.senderProfile)) throw new BadRequestException('SENDER_PROFILE_REQUIRED');
     if (parsed.data.provider === 'UKRPOSHTA') assertUkrposhtaPeople(parsed.data, safeSenderProfile(connection.senderProfile));
@@ -170,20 +172,20 @@ export class DeliveryService {
       provider: parsed.data.provider, connectionId: connection.id,
       ...(parsed.data.provider === 'UKRPOSHTA' ? { providerMetadata: { environment: this.ukrposhtaCredentials(connection.encryptedCredential).environment, credentialGenerationId: connection.credentialGenerationId } } : {}),
     };
-    const existing = await this.prisma.shipment.findFirst({
+    const existing = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.shipment.findFirst({
       where: { tenantId, orderId, status: { in: ['DRAFT', 'CREATING', 'CREATED', 'ACCEPTED', 'IN_TRANSIT', 'RETURNING'] } },
       orderBy: { createdAt: 'desc' },
-    });
+    }));
     if (existing && existing.status !== 'DRAFT') throw new BadRequestException('SHIPMENT_ALREADY_CREATED');
     const shipment = existing
-      ? await this.prisma.shipment.update({ where: { id: existing.id, tenantId, status: 'DRAFT' }, data: { ...data, ...providerData }, include: { statusEvents: { orderBy: { occurredAt: 'desc' } } } })
-      : await this.prisma.shipment.create({
+      ? await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.shipment.update({ where: { id: existing.id, tenantId, status: 'DRAFT' }, data: { ...data, ...providerData }, include: { statusEvents: { orderBy: { occurredAt: 'desc' } } } }))
+      : await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.shipment.create({
           data: {
             tenantId, orderId, createdByUserId: userId, status: 'DRAFT',
             ...data, ...providerData, idempotencyKey: `shipment:draft:v1:${orderId}:${randomUUID()}`,
           },
           include: { statusEvents: { orderBy: { occurredAt: 'desc' } } },
-        });
+        }));
     return mapShipmentSummary(shipment);
   }
 
@@ -194,10 +196,10 @@ export class DeliveryService {
     if (!readiness.allowed) throw new BadRequestException(readiness.reason);
     const parsed = shipmentDraftInputSchema.safeParse(input);
     if (!parsed.success) throw new BadRequestException('INVALID_SHIPMENT_DRAFT');
-    const connection = await this.prisma.deliveryConnection.findUnique({
+    const connection = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.deliveryConnection.findUnique({
       where: { tenantId_provider: { tenantId, provider: parsed.data.provider } },
       include: { senderProfile: true },
-    });
+    }));
     if (!connection || connection.status !== 'ACTIVE') throw new BadRequestException('CONNECTION_REQUIRED');
     if (!validSenderProfile(connection.senderProfile)) throw new BadRequestException('SENDER_PROFILE_REQUIRED');
     if (parsed.data.provider === 'UKRPOSHTA') {
@@ -219,16 +221,16 @@ export class DeliveryService {
     const readiness = shipmentReadiness(order);
     if (!readiness.allowed) throw new BadRequestException(readiness.reason);
 
-    const active = await this.prisma.shipment.findFirst({
+    const active = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.shipment.findFirst({
       where: { tenantId, orderId, status: { in: ['DRAFT', 'CREATING', 'CREATED', 'ACCEPTED', 'IN_TRANSIT', 'RETURNING'] } },
       orderBy: { createdAt: 'desc' },
       include: { statusEvents: { orderBy: { occurredAt: 'desc' } } },
-    });
+    }));
     if (!active) throw new BadRequestException('SHIPMENT_DRAFT_REQUIRED');
     if (active.status !== 'DRAFT') return mapShipmentSummary(active);
     let storedUkrposhtaSender: ReturnType<typeof safeSenderProfile> | null = null;
     if (active.provider === 'UKRPOSHTA') {
-      const connection = await this.prisma.deliveryConnection.findUnique({ where: { tenantId_provider: { tenantId, provider: 'UKRPOSHTA' } } });
+      const connection = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.deliveryConnection.findUnique({ where: { tenantId_provider: { tenantId, provider: 'UKRPOSHTA' } } }));
       if (!connection || connection.status !== 'ACTIVE' || connection.id !== active.connectionId) throw new BadRequestException('CONNECTION_REQUIRED');
       if (!this.ukrposhtaCreationEnabled(connection.encryptedCredential)) throw new BadRequestException('UKRPOSHTA_CREATION_DISABLED');
       const metadata = active.providerMetadata as { credentialGenerationId?: string } | null;
@@ -241,10 +243,10 @@ export class DeliveryService {
     const version = active.version;
     const idempotencyKey = explicitIdempotencyKey?.trim() || `shipment:create:v1:${active.id}:${version}`;
     if (idempotencyKey.length > 200) throw new BadRequestException('INVALID_IDEMPOTENCY_KEY');
-    const conflictingAttempt = await this.prisma.shipmentAttempt.findUnique({
+    const conflictingAttempt = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.shipmentAttempt.findUnique({
       where: { tenantId_idempotencyKey: { tenantId, idempotencyKey } },
       select: { shipmentId: true, requestHash: true },
-    });
+    }));
     if (conflictingAttempt && (conflictingAttempt.shipmentId !== active.id || conflictingAttempt.requestHash !== active.requestHash)) {
       throw new UnprocessableEntityException('IDEMPOTENCY_KEY_REUSED');
     }
@@ -254,7 +256,7 @@ export class DeliveryService {
     await this.quoteShipment(tenantId, orderId, storedDraft);
 
     try {
-      await this.prisma.$transaction(async (transaction) => {
+      await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
         const claimed = await transaction.shipment.updateMany({
           where: { id: active.id, tenantId, status: 'DRAFT', version },
           data: { status: 'CREATING', createdByUserId: userId, idempotencyKey, lastErrorCode: null },
@@ -268,10 +270,10 @@ export class DeliveryService {
       });
     } catch (error) {
       if (!isUniqueConstraintError(error)) throw error;
-      const winner = await this.prisma.shipmentAttempt.findUnique({
+      const winner = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.shipmentAttempt.findUnique({
         where: { tenantId_idempotencyKey: { tenantId, idempotencyKey } },
         select: { shipmentId: true, requestHash: true },
-      });
+      }));
       if (!winner) throw error;
       if (winner.shipmentId !== active.id || winner.requestHash !== active.requestHash) {
         throw new UnprocessableEntityException('IDEMPOTENCY_KEY_REUSED');
@@ -285,18 +287,18 @@ export class DeliveryService {
     } catch {
       // PostgreSQL is the source of truth. The reconciler will retry this wake-up.
     }
-    const shipment = await this.prisma.shipment.findFirst({
+    const shipment = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.shipment.findFirst({
       where: { id: active.id, tenantId }, include: { statusEvents: { orderBy: { occurredAt: 'desc' } } },
-    });
+    }));
     if (!shipment) throw new NotFoundException('Shipment not found');
     return mapShipmentSummary(shipment);
   }
 
   async shipmentLabel(tenantId: string, shipmentId: string): Promise<{ bytes: Uint8Array; filename: string }> {
     this.assertEnabled();
-    const shipment = await this.prisma.shipment.findFirst({
+    const shipment = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.shipment.findFirst({
       where: { id: shipmentId, tenantId }, include: { connection: true },
-    });
+    }));
     if (!shipment) throw new NotFoundException('Shipment not found');
     if (!shipment.providerDocumentId || !shipment.trackingNumber || !['CREATED', 'ACCEPTED', 'IN_TRANSIT', 'DELIVERED', 'RETURNING', 'RETURNED'].includes(shipment.status)) {
       throw new BadRequestException('SHIPMENT_LABEL_UNAVAILABLE');
@@ -311,9 +313,9 @@ export class DeliveryService {
 
   async cancelShipment(tenantId: string, shipmentId: string): Promise<ShipmentSummary> {
     this.assertEnabled();
-    const shipment = await this.prisma.shipment.findFirst({
+    const shipment = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.shipment.findFirst({
       where: { id: shipmentId, tenantId }, include: { connection: true, statusEvents: { orderBy: { occurredAt: 'desc' } } },
-    });
+    }));
     if (!shipment) throw new NotFoundException('Shipment not found');
     if (shipment.status === 'CANCELLED') return mapShipmentSummary(shipment);
     if (['DELIVERED', 'RETURNED'].includes(shipment.status) || !shipment.providerDocumentId) throw new BadRequestException('SHIPMENT_CANNOT_BE_CANCELLED');
@@ -321,16 +323,16 @@ export class DeliveryService {
     if (shipment.provider === 'UKRPOSHTA' && (shipment.status !== 'CREATED' || (await this.ukrposhtaForConnection(shipment.connection.encryptedCredential).getLifecycle(shipment.providerDocumentId)).status !== 'CREATED')) throw new BadRequestException('SHIPMENT_CANNOT_BE_CANCELLED');
     const version = shipment.version;
     const idempotencyKey = `shipment:cancel:v1:${shipment.id}:${version}`;
-    const existingAttempt = await this.prisma.shipmentAttempt.findUnique({
+    const existingAttempt = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.shipmentAttempt.findUnique({
       where: { tenantId_shipmentId_operation_version: { tenantId, shipmentId, operation: 'CANCEL', version } },
       select: { status: true },
-    });
+    }));
     if (existingAttempt?.status === 'FAILED') throw new BadRequestException('SHIPMENT_CANCELLATION_FAILED');
-    await this.prisma.shipmentAttempt.upsert({
+    await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.shipmentAttempt.upsert({
       where: { tenantId_shipmentId_operation_version: { tenantId, shipmentId, operation: 'CANCEL', version } },
       create: { tenantId, shipmentId, operation: 'CANCEL', version, status: 'PENDING', idempotencyKey, requestHash: shipment.requestHash },
       update: {},
-    });
+    }));
     try {
       await this.shipmentQueue?.add('shipment.cancel', { shipmentId }, { jobId: `shipment:cancel:${shipmentId}:${version}`, attempts: 1, removeOnComplete: true, removeOnFail: true });
     } catch { /* durable attempt is reconciled by the worker */ }
@@ -368,7 +370,7 @@ export class DeliveryService {
   async disconnect(tenantId: string): Promise<DeliveryConnectionSummary> {
     this.assertEnabled();
     const disconnectedAt = this.now();
-    const result = await this.prisma.deliveryConnection.updateMany({
+    const result = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.deliveryConnection.updateMany({
       where: { tenantId, provider: 'NOVA_POSHTA' },
       data: {
         status: 'DISCONNECTED',
@@ -377,7 +379,7 @@ export class DeliveryService {
         credentialGenerationId: randomUUID(),
         lastErrorCode: null,
       },
-    });
+    }));
     if (result.count !== 1) throw new Error('Nova Poshta connection not found');
     return {
       provider: 'NOVA_POSHTA',
@@ -395,10 +397,10 @@ export class DeliveryService {
 
   async clientContextForTenant(tenantId: string): Promise<{ client: NovaPoshtaClientPort; credentialGenerationId: string }> {
     this.assertEnabled();
-    const connection = await this.prisma.deliveryConnection.findUnique({
+    const connection = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.deliveryConnection.findUnique({
       where: { tenantId_provider: { tenantId, provider: 'NOVA_POSHTA' } },
       select: { status: true, encryptedCredential: true, credentialGenerationId: true },
-    });
+    }));
     if (!connection || connection.status !== 'ACTIVE') throw new Error('Active Nova Poshta connection required');
     return {
       client: this.novaPoshtaClient(this.cipher.decrypt(connection.encryptedCredential)),

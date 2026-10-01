@@ -1,8 +1,9 @@
 import { createHash, randomUUID } from 'node:crypto';
 
 import { ukrposhtaConnectionInputSchema, ukrposhtaTrackingBatchJobSchema, type ShipmentStatus, type UkrposhtaConnectionInput, type UkrposhtaTrackingBatchJob } from '@autosale/contracts';
-import type { Prisma, PrismaClient } from '@autosale/database';
+import { type Prisma, type PrismaClient, withTenantTransaction } from '@autosale/database';
 import { UkrposhtaError, UkrposhtaTrackingError, type UkrposhtaLifecycle, type UkrposhtaTrackingBatchResult } from '@autosale/integrations';
+import { resolveShipmentTenants } from './delivery-authority.js';
 
 type TrackingContext = {
   lifecycle: { getLifecycle(id: string): Promise<UkrposhtaLifecycle> };
@@ -40,7 +41,12 @@ export class UkrposhtaTrackingService {
   async processBatch(input: UkrposhtaTrackingBatchJob): Promise<'UPDATED' | 'RETRY' | 'IGNORED'> {
     const job = ukrposhtaTrackingBatchJobSchema.parse(input);
     const now = this.now();
-    const candidates = await this.prisma.shipmentAttempt.findMany({
+    const authority = await resolveShipmentTenants(this.prisma, job.shipmentIds);
+    if (authority.size !== job.shipmentIds.length) return 'IGNORED';
+    const tenants = new Set(authority.values());
+    if (tenants.size !== 1) return 'IGNORED';
+    const tenantId = [...tenants][0]!;
+    const candidates = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.shipmentAttempt.findMany({
       where: {
         shipmentId: { in: job.shipmentIds }, operation: 'STATUS_SYNC',
         OR: [
@@ -51,19 +57,19 @@ export class UkrposhtaTrackingService {
       },
       orderBy: [{ nextAttemptAt: 'asc' }, { createdAt: 'asc' }], take: 50,
       include: { shipment: { include: { connection: true } } },
-    });
+    }));
     if (!candidates.length || !oneCredentialGroup(candidates)) return 'IGNORED';
 
     const claimed: Array<{ candidate: Candidate; leaseId: string }> = [];
     for (const candidate of candidates) {
       const leaseId = randomUUID();
-      const owned = await this.prisma.shipmentAttempt.updateMany({
+      const owned = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.shipmentAttempt.updateMany({
         where: {
           id: candidate.id, tenantId: candidate.tenantId, status: candidate.status, leaseId: candidate.leaseId,
           ...(candidate.status === 'PROCESSING' ? { leaseExpiresAt: { lte: now } } : {}),
         },
         data: { status: 'PROCESSING', leaseId, leaseExpiresAt: new Date(now.getTime() + leaseMs), attempts: { increment: 1 }, lastAttemptAt: now },
-      });
+      }));
       if (owned.count === 1) claimed.push({ candidate, leaseId });
     }
     if (!claimed.length) return 'IGNORED';
@@ -134,7 +140,7 @@ export class UkrposhtaTrackingService {
     const now = this.now();
     const accepted = candidate.shipment.acceptedAt === null && status !== 'CREATED' && status !== 'CANCELLED';
     try {
-      return await this.prisma.$transaction(async (tx) => {
+      return await withTenantTransaction(this.prisma, candidate.tenantId, async (tx) => {
         const shipment = await tx.shipment.updateMany({
           where: { id: candidate.shipmentId, tenantId: candidate.tenantId, version: candidate.shipment.version, status: candidate.shipment.status },
           data: {
@@ -171,7 +177,7 @@ export class UkrposhtaTrackingService {
     }
     const latest = ordered.at(-1)!;
     try {
-      return await this.prisma.$transaction(async (tx) => {
+      return await withTenantTransaction(this.prisma, candidate.tenantId, async (tx) => {
         const shipment = await tx.shipment.updateMany({
           where: { id: candidate.shipmentId, tenantId: candidate.tenantId, version: candidate.shipment.version, status: candidate.shipment.status },
           data: {
@@ -206,7 +212,7 @@ export class UkrposhtaTrackingService {
     const now = this.now();
     const delay = Math.min(6 * 60 * 60_000, 5 * 60_000 * 2 ** Math.min(candidate.attempts, 6));
     const retryAt = new Date(now.getTime() + delay);
-    await this.prisma.$transaction(async (tx) => {
+    await withTenantTransaction(this.prisma, candidate.tenantId, async (tx) => {
       const owned = await tx.shipmentAttempt.updateMany({ where: { id: candidate.id, tenantId: candidate.tenantId, status: 'PROCESSING', leaseId }, data: {
         status: canRetry ? 'RETRYABLE' : 'FAILED', nextAttemptAt: retryAt, completedAt: canRetry ? null : now,
         leaseId: null, leaseExpiresAt: null, lastErrorCode: code,

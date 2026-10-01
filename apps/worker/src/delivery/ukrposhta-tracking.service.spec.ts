@@ -1,6 +1,14 @@
 import { describe, expect, it, vi } from 'vitest';
 import { UkrposhtaTrackingError } from '@autosale/integrations';
 
+vi.mock('@autosale/database', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@autosale/database')>()),
+  withTenantTransaction: async <T>(prisma: { $transaction?: (operation: (transaction: unknown) => Promise<T>) => Promise<T> }, _tenantId: string, operation: (transaction: unknown) => Promise<T>) => prisma.$transaction ? prisma.$transaction(operation) : operation(prisma),
+}));
+vi.mock('./delivery-authority.js', () => ({
+  resolveShipmentTenants: vi.fn().mockImplementation(async (_prisma: unknown, shipmentIds: string[]) => new Map(shipmentIds.map((shipmentId) => [shipmentId, '55555555-5555-4555-8555-555555555555']))),
+}));
+
 import { mapUkrposhtaTrackingStatus, UkrposhtaTrackingService } from './ukrposhta-tracking.service.js';
 
 const now = new Date('2026-09-13T12:00:00.000Z');
@@ -23,13 +31,17 @@ function candidate(input: { status?: string; lifecycle?: string } = {}) {
 }
 
 function fixture(rows: ReturnType<typeof candidate>[], claimCount = 1) {
+  let attemptUpdateCalls = 0;
   const tx = {
-    shipmentAttempt: { updateMany: vi.fn().mockResolvedValue({ count: 1 }) },
+    shipmentAttempt: {
+      findMany: vi.fn().mockResolvedValue(rows),
+      updateMany: vi.fn().mockImplementation(async () => ({ count: attemptUpdateCalls++ === 0 ? claimCount : 1 })),
+    },
     shipmentStatusEvent: { upsert: vi.fn().mockResolvedValue({}) },
     shipment: { update: vi.fn().mockResolvedValue({}), updateMany: vi.fn().mockResolvedValue({ count: 1 }) },
   };
   const prisma = {
-    shipmentAttempt: { findMany: vi.fn().mockResolvedValue(rows), updateMany: vi.fn().mockResolvedValue({ count: claimCount }) },
+    shipmentAttempt: tx.shipmentAttempt,
     $transaction: vi.fn(async (run: (value: typeof tx) => unknown) => run(tx)),
   };
   return { prisma, tx };
@@ -151,12 +163,12 @@ describe('UkrposhtaTrackingService', () => {
   });
 
   it('does not call either provider when the durable attempt lease is not acquired', async () => {
-    const { prisma } = fixture([candidate()], 0);
+    const { prisma, tx } = fixture([candidate()], 0);
     const factory = vi.fn();
     const service = new UkrposhtaTrackingService(prisma as never, factory, () => JSON.stringify(credentials), () => now);
     await expect(service.processBatch({ shipmentIds: [shipmentId] })).resolves.toBe('IGNORED');
     expect(factory).not.toHaveBeenCalled();
-    expect(prisma.$transaction).not.toHaveBeenCalled();
+    expect(tx.shipmentStatusEvent.upsert).not.toHaveBeenCalled();
   });
 
   it('backs off both the durable attempt and shipment after a retryable tracking failure', async () => {

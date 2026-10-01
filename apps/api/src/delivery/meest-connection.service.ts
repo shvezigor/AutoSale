@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
 import { meestConnectionInputSchema, type MeestConnectionInput, type MeestConnectionSummary, type MeestSenderProfileInput } from '@autosale/contracts';
-import type { PrismaClient } from '@autosale/database';
+import { type PrismaClient, withTenantTransaction } from '@autosale/database';
 import type { CredentialCipher, MeestClient } from '@autosale/integrations';
 
 type MeestClientPort = Pick<MeestClient, 'validateCredential' | 'searchCities' | 'searchLocations'>;
@@ -26,10 +26,10 @@ export class MeestConnectionService {
 
   async summary(tenantId: string): Promise<{ enabled: boolean; connection: MeestConnectionSummary | null }> {
     if (!this.options.enabled) return { enabled: false, connection: null };
-    const connection = await this.prisma.deliveryConnection.findUnique({
+    const connection = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.deliveryConnection.findUnique({
       where: { tenantId_provider: { tenantId, provider: 'MEEST' } },
       include: { senderProfile: true },
-    });
+    }));
     return { enabled: true, connection: connection ? safeConnection(connection) : null };
   }
 
@@ -40,7 +40,7 @@ export class MeestConnectionService {
     const encryptedCredential = this.cipher.encrypt(JSON.stringify(input));
     const credentialGenerationId = randomUUID();
     const verifiedAt = this.now();
-    const connection = await this.prisma.deliveryConnection.upsert({
+    const connection = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.deliveryConnection.upsert({
       where: { tenantId_provider: { tenantId, provider: 'MEEST' } },
       create: {
         tenantId, provider: 'MEEST', status: 'ACTIVE', encryptedCredential, credentialGenerationId,
@@ -51,19 +51,19 @@ export class MeestConnectionService {
         connectedByUserId: userId, lastVerifiedAt: verifiedAt, lastErrorCode: null, disconnectedAt: null,
       },
       include: { senderProfile: true },
-    });
+    }));
     return safeConnection(connection);
   }
 
   async disconnect(tenantId: string): Promise<MeestConnectionSummary> {
     this.assertEnabled();
-    const result = await this.prisma.deliveryConnection.updateMany({
+    const result = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.deliveryConnection.updateMany({
       where: { tenantId, provider: 'MEEST' },
       data: {
         status: 'DISCONNECTED', disconnectedAt: this.now(), encryptedCredential: this.cipher.encrypt(randomUUID()),
         credentialGenerationId: randomUUID(), lastErrorCode: null,
       },
-    });
+    }));
     if (result.count !== 1) throw new Error('Meest connection not found');
     return {
       provider: 'MEEST', status: 'DISCONNECTED', accountLabel: null, lastVerifiedAt: null,
@@ -73,10 +73,10 @@ export class MeestConnectionService {
 
   async clientContextForTenant(tenantId: string): Promise<{ client: MeestClientPort; credentialGenerationId: string }> {
     this.assertEnabled();
-    const connection = await this.prisma.deliveryConnection.findUnique({
+    const connection = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.deliveryConnection.findUnique({
       where: { tenantId_provider: { tenantId, provider: 'MEEST' } },
       select: { status: true, encryptedCredential: true, credentialGenerationId: true },
-    });
+    }));
     if (!connection || connection.status !== 'ACTIVE') throw new Error('Active Meest connection required');
     const credentials = parseStoredCredentials(this.cipher.decrypt(connection.encryptedCredential));
     return {
@@ -87,17 +87,17 @@ export class MeestConnectionService {
 
   async saveSenderProfile(tenantId: string, input: MeestSenderProfileInput): Promise<MeestSenderProfileInput> {
     this.assertEnabled();
-    const connection = await this.prisma.deliveryConnection.findUnique({
+    const connection = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.deliveryConnection.findUnique({
       where: { tenantId_provider: { tenantId, provider: 'MEEST' } },
       select: { id: true, status: true },
-    });
+    }));
     if (!connection || connection.status !== 'ACTIVE') throw new Error('Active Meest connection required');
     const data = meestSenderProfileData(input);
-    await this.prisma.deliverySenderProfile.upsert({
+    await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.deliverySenderProfile.upsert({
       where: { tenantId_connectionId: { tenantId, connectionId: connection.id } },
       create: { tenantId, connectionId: connection.id, ...data },
       update: data,
-    });
+    }));
     return input;
   }
 

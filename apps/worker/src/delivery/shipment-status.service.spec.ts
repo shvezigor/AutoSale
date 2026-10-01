@@ -1,4 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
+
+vi.mock('@autosale/database', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@autosale/database')>()),
+  withTenantTransaction: async <T>(prisma: { $transaction?: (operation: (transaction: unknown) => Promise<T>) => Promise<T> }, _tenantId: string, operation: (transaction: unknown) => Promise<T>) => prisma.$transaction ? prisma.$transaction(operation) : operation(prisma),
+}));
+vi.mock('./delivery-authority.js', () => ({ resolveShipmentTenant: vi.fn().mockResolvedValue('11111111-1111-4111-8111-111111111111') }));
+
 import { mapNovaPoshtaStatus, ShipmentStatusService } from './shipment-status.service.js';
 
 describe('mapNovaPoshtaStatus', () => {
