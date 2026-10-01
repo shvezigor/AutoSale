@@ -155,6 +155,38 @@ export async function configureRuntimeDatabaseRoles(
           REVOKE ALL ON FUNCTION public.worker_due_telegram_deliveries(timestamp with time zone, integer) FROM autosale_api;
           GRANT EXECUTE ON FUNCTION public.worker_due_telegram_deliveries(timestamp with time zone, integer) TO autosale_worker;
         END IF;
+        IF to_regprocedure('public.api_active_membership_for_user(uuid)') IS NOT NULL THEN
+          GRANT EXECUTE ON FUNCTION public.api_active_membership_for_user(uuid) TO autosale_api;
+          REVOKE ALL ON FUNCTION public.api_active_membership_for_user(uuid) FROM autosale_worker;
+        END IF;
+        IF to_regprocedure('public.api_invitation_authority(text,timestamp with time zone)') IS NOT NULL THEN
+          GRANT EXECUTE ON FUNCTION public.api_invitation_authority(text, timestamp with time zone) TO autosale_api;
+          REVOKE ALL ON FUNCTION public.api_invitation_authority(text, timestamp with time zone) FROM autosale_worker;
+        END IF;
+        IF to_regprocedure('public.api_activate_owner_memberships(uuid)') IS NOT NULL THEN
+          GRANT EXECUTE ON FUNCTION public.api_activate_owner_memberships(uuid) TO autosale_api;
+          REVOKE ALL ON FUNCTION public.api_activate_owner_memberships(uuid) FROM autosale_worker;
+        END IF;
+        IF to_regprocedure('public.api_issue_session(uuid,uuid,uuid,text,timestamp with time zone,text,text)') IS NOT NULL THEN
+          GRANT EXECUTE ON FUNCTION public.api_issue_session(uuid, uuid, uuid, text, timestamp with time zone, text, text) TO autosale_api;
+          REVOKE ALL ON FUNCTION public.api_issue_session(uuid, uuid, uuid, text, timestamp with time zone, text, text) FROM autosale_worker;
+        END IF;
+        IF to_regprocedure('public.api_resolve_session(text,timestamp with time zone)') IS NOT NULL THEN
+          GRANT EXECUTE ON FUNCTION public.api_resolve_session(text, timestamp with time zone) TO autosale_api;
+          REVOKE ALL ON FUNCTION public.api_resolve_session(text, timestamp with time zone) FROM autosale_worker;
+        END IF;
+        IF to_regprocedure('public.api_revoke_session(uuid,timestamp with time zone)') IS NOT NULL THEN
+          GRANT EXECUTE ON FUNCTION public.api_revoke_session(uuid, timestamp with time zone) TO autosale_api;
+          REVOKE ALL ON FUNCTION public.api_revoke_session(uuid, timestamp with time zone) FROM autosale_worker;
+        END IF;
+        IF to_regprocedure('public.api_revoke_sessions(uuid,uuid,uuid,timestamp with time zone)') IS NOT NULL THEN
+          GRANT EXECUTE ON FUNCTION public.api_revoke_sessions(uuid, uuid, uuid, timestamp with time zone) TO autosale_api;
+          REVOKE ALL ON FUNCTION public.api_revoke_sessions(uuid, uuid, uuid, timestamp with time zone) FROM autosale_worker;
+        END IF;
+        IF to_regprocedure('public.platform_tenant_directory()') IS NOT NULL THEN
+          GRANT EXECUTE ON FUNCTION public.platform_tenant_directory() TO autosale_api;
+          REVOKE ALL ON FUNCTION public.platform_tenant_directory() FROM autosale_worker;
+        END IF;
       END
       $functions$;
     `);

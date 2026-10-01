@@ -42,10 +42,11 @@ export class GoogleOAuthService {
       throw new Error(SAFE_FAILURE);
     }
 
-    const owner = await this.prisma.tenantMembership.findFirst({
-      where: { tenantId: binding.tenantId, userId: binding.userId, role: 'OWNER', status: 'ACTIVE' },
-      select: { id: true },
-    });
+    const owner = await withTenantTransaction(this.prisma, binding.tenantId, (transaction) =>
+      transaction.tenantMembership.findFirst({
+        where: { tenantId: binding.tenantId, userId: binding.userId, role: 'OWNER', status: 'ACTIVE' },
+        select: { id: true },
+      }));
     if (!owner || input.denied || !input.code) throw new Error(SAFE_FAILURE);
 
     try {

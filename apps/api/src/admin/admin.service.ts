@@ -4,30 +4,26 @@ export class AdminService {
   constructor(private readonly prisma: PrismaClient, private readonly now: () => Date = () => new Date()) {}
 
   async listTenants() {
-    const tenants = await this.prisma.tenant.findMany({
-      orderBy: { createdAt: 'desc' },
-      select: {
-        id: true,
-        name: true,
-        status: true,
-        createdAt: true,
-        memberships: { where: { role: 'OWNER' }, take: 1, select: { user: { select: { email: true } } } },
-        _count: { select: { memberships: true } },
-      },
-    });
-    const orderCounts = await this.prisma.$queryRaw<Array<{ tenantId: string; orderCount: bigint }>>(Prisma.sql`
-      SELECT tenant_id AS "tenantId", order_count AS "orderCount"
-      FROM public.platform_order_counts()
-    `);
+    const [tenants, orderCounts] = await Promise.all([
+      this.prisma.$queryRaw<PlatformTenantRow[]>(Prisma.sql`
+        SELECT tenant_id, tenant_name, tenant_status, owner_email, user_count, created_at
+        FROM public.platform_tenant_directory()
+        ORDER BY created_at DESC
+      `),
+      this.prisma.$queryRaw<Array<{ tenantId: string; orderCount: bigint }>>(Prisma.sql`
+        SELECT tenant_id AS "tenantId", order_count AS "orderCount"
+        FROM public.platform_order_counts()
+      `),
+    ]);
     const ordersByTenant = new Map(orderCounts.map((row) => [row.tenantId, Number(row.orderCount)]));
     return tenants.map((tenant) => ({
-      tenantId: tenant.id,
-      tenantName: tenant.name,
-      status: tenant.status,
-      ownerEmail: tenant.memberships[0]?.user.email ?? null,
-      userCount: tenant._count.memberships,
-      orderCount: ordersByTenant.get(tenant.id) ?? 0,
-      createdAt: tenant.createdAt.toISOString(),
+      tenantId: tenant.tenant_id,
+      tenantName: tenant.tenant_name,
+      status: tenant.tenant_status,
+      ownerEmail: tenant.owner_email,
+      userCount: Number(tenant.user_count),
+      orderCount: ordersByTenant.get(tenant.tenant_id) ?? 0,
+      createdAt: tenant.created_at.toISOString(),
     }));
   }
 
@@ -35,7 +31,18 @@ export class AdminService {
     const result = await this.prisma.tenant.updateMany({ where: { id: tenantId }, data: { status } });
     if (result.count === 0) return null;
     if (status === 'ACTIVE') return { status, revokedSessions: 0 };
-    const revoked = await this.prisma.session.updateMany({ where: { tenantId, revokedAt: null }, data: { revokedAt: this.now() } });
-    return { status, revokedSessions: revoked.count };
+    const revoked = await this.prisma.$queryRaw<Array<{ revoked_count: number }>>`
+      SELECT revoked_count FROM public.api_revoke_sessions(NULL::uuid, NULL::uuid, ${tenantId}::uuid, ${this.now()})
+    `;
+    return { status, revokedSessions: revoked[0]?.revoked_count ?? 0 };
   }
 }
+
+type PlatformTenantRow = {
+  tenant_id: string;
+  tenant_name: string;
+  tenant_status: 'ACTIVE' | 'BLOCKED';
+  owner_email: string | null;
+  user_count: bigint;
+  created_at: Date;
+};

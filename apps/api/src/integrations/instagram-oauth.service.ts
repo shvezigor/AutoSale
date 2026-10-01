@@ -1149,16 +1149,16 @@ export class InstagramOAuthService {
 
   private async hasActiveOwner(tenantId: string, userId: string): Promise<boolean> {
     try {
-      const [tenant, membership] = await Promise.all([
-        this.prisma.tenant.findUnique({
+      const [tenant, membership] = await withTenantTransaction(this.prisma, tenantId, (transaction) => Promise.all([
+        transaction.tenant.findUnique({
           where: { id: tenantId },
           select: { status: true },
         }),
-        this.prisma.tenantMembership.findUnique({
+        transaction.tenantMembership.findUnique({
           where: { userId_tenantId: { userId, tenantId } },
           select: { role: true, status: true, user: { select: { status: true } } },
         }),
-      ]);
+      ]));
       return tenant?.status === 'ACTIVE' &&
         membership?.status === 'ACTIVE' &&
         membership.role === 'OWNER' &&

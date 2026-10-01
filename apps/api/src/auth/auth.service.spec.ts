@@ -13,6 +13,7 @@ describe('AuthService', () => {
       user: { create: vi.fn(async () => ({ id: '10000000-0000-4000-8000-000000000002', email: 'owner@example.com' })) },
       tenantMembership: { create: vi.fn(async () => ({})) },
       emailVerificationToken: { create: vi.fn(async ({ data }: { data: { tokenHash: string } }) => { createdToken.tokenHash = data.tokenHash; return {}; }) },
+      $queryRaw: vi.fn(async () => []),
     };
     const prisma = { $transaction: vi.fn(async (callback: (client: typeof tx) => unknown) => callback(tx)) } as unknown as PrismaClient;
     const email: EmailDelivery = { sendVerification: vi.fn(async () => undefined), sendPasswordReset: vi.fn(async () => undefined), sendInvitation: vi.fn(async () => undefined) };
@@ -69,7 +70,10 @@ describe('AuthService', () => {
       memberships: [{ tenantId: 'tenant-1', role: 'OWNER', status: 'ACTIVE' }],
     } as const;
     const update = vi.fn(async () => user);
-    const prisma = { user: { findUnique: vi.fn(async () => user), update } } as unknown as PrismaClient;
+    const prisma = {
+      user: { findUnique: vi.fn(async () => user), update },
+      $queryRaw: vi.fn(async () => [{ tenant_id: 'tenant-1', membership_role: 'OWNER' }]),
+    } as unknown as PrismaClient;
     const crypto = { verifyPassword: vi.fn(async () => true) };
     const sessions = { create: vi.fn(async () => ({
       rawToken: 'raw-session',
@@ -93,5 +97,27 @@ describe('AuthService', () => {
       locale: 'en',
       avatarUrl: '/api/media/profile/avatar?v=avatar-v2',
     });
+  });
+
+  it('rejects a regular user when no active tenant membership exists', async () => {
+    const user = {
+      id: '10000000-0000-4000-8000-000000000002', email: 'owner@example.com', name: 'Owner',
+      passwordHash: 'stored-hash', status: 'ACTIVE', emailVerifiedAt: new Date(), platformRole: 'USER',
+      locale: 'uk', avatarStorageKey: null, avatarChecksum: null,
+    };
+    const sessions = { create: vi.fn() };
+    const prisma = {
+      user: { findUnique: vi.fn().mockResolvedValue(user) },
+      $queryRaw: vi.fn().mockResolvedValue([]),
+    } as unknown as PrismaClient;
+    const auth = new AuthService(
+      prisma, { verifyPassword: vi.fn().mockResolvedValue(true) } as never, sessions as never,
+      { sendVerification: vi.fn(), sendPasswordReset: vi.fn(), sendInvitation: vi.fn() },
+      't'.repeat(32), 'http://localhost',
+    );
+
+    await expect(auth.login({ email: user.email, password: 'correct horse battery' }, {}))
+      .rejects.toThrow('Invalid credentials');
+    expect(sessions.create).not.toHaveBeenCalled();
   });
 });

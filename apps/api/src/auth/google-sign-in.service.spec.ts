@@ -24,6 +24,7 @@ function setup(overrides: Record<string, unknown> = {}) {
     tenant: { create: vi.fn(async () => ({ id: user.memberships[0]!.tenantId })) },
     tenantMembership: { create: vi.fn(async () => user.memberships[0]) },
     securityAuditLog: { create: vi.fn(async () => ({})) },
+    $queryRaw: vi.fn(async () => [{ tenant_id: user.memberships[0]!.tenantId, membership_role: 'OWNER' }]),
     $transaction: vi.fn(async (callback: (tx: unknown) => unknown) => callback(prisma)),
     ...overrides,
   };
@@ -127,5 +128,15 @@ describe('GoogleSignInService', () => {
     expect(disabled.prisma.user.create).not.toHaveBeenCalled();
     expect(disabled.prisma.user.update).not.toHaveBeenCalled();
     expect(disabled.provider.exchangeAndVerify).not.toHaveBeenCalled();
+  });
+
+  it('fails neutrally when a linked regular user no longer has an active workspace', async () => {
+    const fixture = setup();
+    vi.mocked(fixture.prisma.googleIdentity.findUnique).mockResolvedValue({ user } as never);
+    vi.mocked(fixture.prisma.$queryRaw).mockResolvedValue([]);
+
+    await expect(fixture.service.completeCallback({ state: 'state', code: 'code' }, {}))
+      .rejects.toThrow('Unable to complete Google Sign-In');
+    expect(fixture.sessions.create).not.toHaveBeenCalled();
   });
 });

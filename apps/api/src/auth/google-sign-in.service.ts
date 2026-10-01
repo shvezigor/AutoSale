@@ -1,12 +1,13 @@
 import { createHash, randomBytes } from 'node:crypto';
 
 import type { PublicSession } from '@autosale/contracts/auth';
-import type { PrismaClient } from '@autosale/database';
+import { setTenantContext, type PrismaClient } from '@autosale/database';
 import type { GoogleSignInClientPort, GoogleSignInIdentity } from '@autosale/integrations';
 import { BadRequestException, ServiceUnavailableException, UnauthorizedException } from '@nestjs/common';
 
 import type { SessionMetadata } from './auth.types.js';
 import { GoogleSignInStateService } from './google-sign-in-state.service.js';
+import { activeMembershipForUser } from './membership-authority.js';
 import { SessionService } from './session.service.js';
 
 const UNAVAILABLE = 'Google Sign-In is unavailable';
@@ -54,7 +55,7 @@ export class GoogleSignInService {
 
     const linked = await this.prisma.googleIdentity.findUnique({
       where: { googleSubject: identity.subject },
-      include: { user: { include: { memberships: true } } },
+      include: { user: true },
     });
     if (linked) {
       if (linked.user.status !== 'ACTIVE') throw new UnauthorizedException(FAILED);
@@ -65,7 +66,7 @@ export class GoogleSignInService {
       };
     }
 
-    const matchingUser = await this.prisma.user.findUnique({ where: { email: identity.email }, include: { memberships: true } });
+    const matchingUser = await this.prisma.user.findUnique({ where: { email: identity.email } });
     if (matchingUser) {
       if (matchingUser.status !== 'ACTIVE' || !matchingUser.emailVerifiedAt) throw new UnauthorizedException(FAILED);
       try {
@@ -74,7 +75,7 @@ export class GoogleSignInService {
             userId: matchingUser.id, googleSubject: identity.subject, emailAtLink: identity.email, lastUsedAt: this.now(),
           } });
           await transaction.securityAuditLog.create({ data: {
-            userId: matchingUser.id, tenantId: activeMembership(matchingUser)?.tenantId ?? null,
+            userId: matchingUser.id, tenantId: (await activeMembershipForUser(transaction, matchingUser.id))?.tenantId ?? null,
             actor: 'SYSTEM', action: 'GOOGLE_IDENTITY_AUTO_LINKED', result: 'SUCCESS',
             metadata: { subjectHash: hash(identity.subject), emailHash: hash(identity.email) },
           } });
@@ -111,6 +112,7 @@ export class GoogleSignInService {
         const tenant = await transaction.tenant.create({ data: {
           key: `${slug(tenantName)}-${randomBytes(4).toString('hex')}`, name: tenantName, status: 'ACTIVE',
         } });
+        await setTenantContext(transaction, tenant.id);
         const user = await transaction.user.create({ data: {
           email: pending.email.trim().toLowerCase(), name: pending.name, passwordHash: null,
           emailVerifiedAt: this.now(), status: 'ACTIVE',
@@ -127,10 +129,7 @@ export class GoogleSignInService {
         } });
         return { user, membership };
       });
-      return {
-        returnPath: pending.returnPath,
-        sessionResult: await this.createSessionResult({ ...created.user, memberships: [created.membership] }, metadata),
-      };
+      return { returnPath: pending.returnPath, sessionResult: await this.createSessionResult(created.user, metadata) };
     } catch {
       throw new UnauthorizedException(FAILED);
     }
@@ -141,7 +140,8 @@ export class GoogleSignInService {
   }
 
   private async createSessionResult(user: SessionUser, metadata: SessionMetadata): Promise<SessionResult> {
-    const membership = activeMembership(user);
+    const membership = await activeMembershipForUser(this.prisma, user.id);
+    if (user.platformRole !== 'PLATFORM_ADMIN' && !membership) throw new UnauthorizedException(FAILED);
     const issued = await this.sessions.create(user.id, membership?.tenantId ?? null, metadata);
     await this.prisma.user.update({ where: { id: user.id }, data: { lastLoginAt: this.now() } });
     return {
@@ -166,12 +166,7 @@ type SessionUser = {
   locale: string;
   avatarStorageKey: string | null;
   avatarChecksum: string | null;
-  memberships: Array<{ tenantId: string; role: 'OWNER' | 'MANAGER'; status: string }>;
 };
-
-function activeMembership(user: SessionUser) {
-  return user.memberships.find((membership) => membership.status === 'ACTIVE') ?? null;
-}
 
 function hash(value: string): string {
   return createHash('sha256').update(value.trim().toLowerCase()).digest('hex');

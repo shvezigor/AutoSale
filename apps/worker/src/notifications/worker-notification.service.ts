@@ -1,10 +1,7 @@
-type NotificationStore = {
-  tenantMembership: { findFirst(input: unknown): Promise<{ id: string } | null> };
-  userNotification: { create(input: unknown): Promise<unknown> };
-};
+import { type PrismaClient, withTenantTransaction } from '@autosale/database';
 
 export class WorkerNotificationService {
-  constructor(private readonly prisma: NotificationStore) {}
+  constructor(private readonly prisma: PrismaClient) {}
 
   async orderExportFailed(tenantId: string, userId: string | null, orderId: string): Promise<void> {
     await this.createForActiveMember(tenantId, userId, {
@@ -32,12 +29,14 @@ export class WorkerNotificationService {
     type: 'SUCCESS' | 'ERROR'; category: string; title: string; message: string; actionUrl: string;
   }): Promise<void> {
     if (!userId) return;
-    const membership = await this.prisma.tenantMembership.findFirst({
-      where: { tenantId, userId, status: 'ACTIVE' }, select: { id: true },
+    await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+      const membership = await transaction.tenantMembership.findFirst({
+        where: { tenantId, userId, status: 'ACTIVE' }, select: { id: true },
+      });
+      if (!membership) return;
+      await transaction.userNotification.create({ data: {
+        tenantId, userId, ...notification,
+      } });
     });
-    if (!membership) return;
-    await this.prisma.userNotification.create({ data: {
-      tenantId, userId, ...notification,
-    } });
   }
 }

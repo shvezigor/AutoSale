@@ -1,3 +1,5 @@
+import { randomUUID } from 'node:crypto';
+
 import type { AuthPrincipal } from '@autosale/contracts/auth';
 import type { PrismaClient } from '@autosale/database';
 
@@ -5,7 +7,6 @@ import type { IssuedSession, SessionMetadata } from './auth.types.js';
 import { CryptoService } from './crypto.service.js';
 
 const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1_000;
-const LAST_SEEN_WRITE_INTERVAL_MS = 15 * 60 * 1_000;
 
 export class SessionService {
   constructor(
@@ -18,74 +19,78 @@ export class SessionService {
   async create(userId: string, tenantId: string | null, metadata: SessionMetadata): Promise<IssuedSession> {
     const token = this.crypto.issueOpaqueToken(this.pepper);
     const expiresAt = new Date(this.now().getTime() + SESSION_TTL_MS);
-    const session = await this.prisma.session.create({
-      data: {
-        userId,
-        tenantId,
-        tokenHash: token.hash,
-        expiresAt,
-        ipPrefix: metadata.ipPrefix?.slice(0, 64) ?? null,
-        userAgent: metadata.userAgent?.slice(0, 256) ?? null,
-      },
-    });
-    return { sessionId: session.id, rawToken: token.raw, tokenHash: token.hash, expiresAt };
+    const sessionId = randomUUID();
+    const issued = await this.prisma.$queryRaw<Array<{ session_id: string }>>`
+      SELECT session_id FROM public.api_issue_session(
+        ${sessionId}::uuid,
+        ${userId}::uuid,
+        ${tenantId}::uuid,
+        ${token.hash},
+        ${expiresAt},
+        ${metadata.ipPrefix?.slice(0, 64) ?? null},
+        ${metadata.userAgent?.slice(0, 256) ?? null}
+      )
+    `;
+    if (!issued[0]) throw new Error('Unable to issue session');
+    return { sessionId: issued[0].session_id, rawToken: token.raw, tokenHash: token.hash, expiresAt };
   }
 
   async resolve(rawToken: string): Promise<AuthPrincipal | null> {
     const tokenHash = this.crypto.hashOpaqueToken(rawToken, this.pepper);
-    const session = await this.prisma.session.findUnique({
-      where: { tokenHash },
-      include: { tenant: { select: { status: true } }, user: { include: { memberships: true } } },
-    });
-    const now = this.now();
-    if (!session || session.revokedAt || session.expiresAt <= now || session.user.status !== 'ACTIVE') {
-      return null;
-    }
-    if (session.tenantId && session.tenant?.status !== 'ACTIVE') return null;
-
-    const membership = session.tenantId
-      ? session.user.memberships.find((item) => item.tenantId === session.tenantId)
-      : undefined;
-    if (session.tenantId && (!membership || membership.status !== 'ACTIVE')) {
-      return null;
-    }
-
-    if (now.getTime() - session.lastSeenAt.getTime() >= LAST_SEEN_WRITE_INTERVAL_MS) {
-      await this.prisma.session.update({ where: { id: session.id }, data: { lastSeenAt: now } });
-    }
+    const rows = await this.prisma.$queryRaw<SessionAuthorityRow[]>`
+      SELECT * FROM public.api_resolve_session(${tokenHash}, ${this.now()})
+    `;
+    const session = rows[0];
+    if (!session) return null;
 
     return {
-      userId: session.userId,
-      email: session.user.email,
-      name: session.user.name,
-      platformRole: session.user.platformRole,
-      tenantId: session.tenantId,
-      membershipRole: membership?.role ?? null,
-      locale: session.user.locale === 'en' ? 'en' : 'uk',
-      avatarUrl: session.user.avatarStorageKey
-        ? `/api/media/profile/avatar?v=${encodeURIComponent(session.user.avatarChecksum ?? '1')}`
+      userId: session.user_id,
+      email: session.email,
+      name: session.display_name,
+      platformRole: session.platform_role,
+      tenantId: session.tenant_id,
+      membershipRole: session.membership_role,
+      locale: session.locale === 'en' ? 'en' : 'uk',
+      avatarUrl: session.avatar_storage_key
+        ? `/api/media/profile/avatar?v=${encodeURIComponent(session.avatar_checksum ?? '1')}`
         : null,
-      sessionId: session.id,
+      sessionId: session.session_id,
     };
   }
 
   async revoke(sessionId: string): Promise<void> {
-    await this.prisma.session.update({ where: { id: sessionId }, data: { revokedAt: this.now() } });
+    await this.prisma.$queryRaw`
+      SELECT revoked_count FROM public.api_revoke_session(${sessionId}::uuid, ${this.now()})
+    `;
   }
 
   async revokeAllForUser(userId: string): Promise<number> {
-    const result = await this.prisma.session.updateMany({
-      where: { userId, revokedAt: null },
-      data: { revokedAt: this.now() },
-    });
-    return result.count;
+    return this.revokeMatching(userId, null, null);
   }
 
   async revokeOthersForUser(userId: string, currentSessionId: string): Promise<number> {
-    const result = await this.prisma.session.updateMany({
-      where: { userId, id: { not: currentSessionId }, revokedAt: null },
-      data: { revokedAt: this.now() },
-    });
-    return result.count;
+    return this.revokeMatching(userId, currentSessionId, null);
+  }
+
+  private async revokeMatching(userId: string | null, exceptSessionId: string | null, tenantId: string | null): Promise<number> {
+    const rows = await this.prisma.$queryRaw<Array<{ revoked_count: number }>>`
+      SELECT revoked_count FROM public.api_revoke_sessions(
+        ${userId}::uuid, ${exceptSessionId}::uuid, ${tenantId}::uuid, ${this.now()}
+      )
+    `;
+    return rows[0]?.revoked_count ?? 0;
   }
 }
+
+type SessionAuthorityRow = {
+  session_id: string;
+  user_id: string;
+  tenant_id: string | null;
+  email: string;
+  display_name: string;
+  platform_role: 'USER' | 'PLATFORM_ADMIN';
+  membership_role: 'OWNER' | 'MANAGER' | null;
+  locale: string;
+  avatar_storage_key: string | null;
+  avatar_checksum: string | null;
+};

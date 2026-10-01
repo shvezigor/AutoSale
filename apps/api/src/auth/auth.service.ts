@@ -1,10 +1,11 @@
 import type { LoginRequest, PublicSession, RegisterRequest } from '@autosale/contracts/auth';
-import type { PrismaClient } from '@autosale/database';
+import { setTenantContext, type PrismaClient } from '@autosale/database';
 import { BadRequestException, ServiceUnavailableException, UnauthorizedException } from '@nestjs/common';
 
 import type { SessionMetadata } from './auth.types.js';
 import { CryptoService } from './crypto.service.js';
 import type { EmailDelivery } from './email-delivery.js';
+import { activateOwnerMemberships, activeMembershipForUser } from './membership-authority.js';
 import { SessionService } from './session.service.js';
 
 const TOKEN_TTL_MS = 24 * 60 * 60 * 1_000;
@@ -31,6 +32,7 @@ export class AuthService {
         const tenant = await tx.tenant.create({
           data: { key: `${slug(input.tenantName)}-${token.raw.slice(0, 8).toLowerCase()}`, name: input.tenantName.trim() },
         });
+        await setTenantContext(tx, tenant.id);
         const user = await tx.user.create({
           data: { email: normalizedEmail, name: input.name.trim(), passwordHash, status: 'PENDING' },
         });
@@ -58,7 +60,7 @@ export class AuthService {
       const token = await tx.emailVerificationToken.findUnique({ where: { tokenHash } });
       if (!token || token.usedAt || token.expiresAt <= now) throw new BadRequestException('Invalid or expired token');
       await tx.user.update({ where: { id: token.userId }, data: { status: 'ACTIVE', emailVerifiedAt: now } });
-      await tx.tenantMembership.updateMany({ where: { userId: token.userId, role: 'OWNER' }, data: { status: 'ACTIVE' } });
+      await activateOwnerMemberships(tx, token.userId);
       await tx.emailVerificationToken.update({ where: { id: token.id }, data: { usedAt: now } });
     });
     return { verified: true };
@@ -66,12 +68,15 @@ export class AuthService {
 
   async login(input: LoginRequest, metadata: SessionMetadata): Promise<{ session: PublicSession; rawToken: string; expiresAt: Date }> {
     const email = input.email.trim().toLowerCase();
-    const user = await this.prisma.user.findUnique({ where: { email }, include: { memberships: true } });
+    const user = await this.prisma.user.findUnique({ where: { email } });
     const valid = user?.passwordHash ? await this.crypto.verifyPassword(user.passwordHash, input.password) : false;
     if (!user || !valid || user.status !== 'ACTIVE' || !user.emailVerifiedAt) {
       throw new UnauthorizedException('Invalid credentials');
     }
-    const membership = user.memberships.find((item) => item.status === 'ACTIVE') ?? null;
+    const membership = await activeMembershipForUser(this.prisma, user.id);
+    if (user.platformRole !== 'PLATFORM_ADMIN' && !membership) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
     const issued = await this.sessions.create(user.id, membership?.tenantId ?? null, metadata);
     await this.prisma.user.update({ where: { id: user.id }, data: { lastLoginAt: this.now() } });
     return {

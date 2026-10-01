@@ -5,89 +5,55 @@ import { CryptoService } from './crypto.service.js';
 import { SessionService } from './session.service.js';
 
 describe('SessionService', () => {
-  it('creates, resolves and revokes a session', async () => {
-    const record = {
-      id: '10000000-0000-4000-8000-000000000001',
-      userId: '10000000-0000-4000-8000-000000000002',
-      tenantId: '10000000-0000-4000-8000-000000000003',
-      tokenHash: '', expiresAt: new Date('2026-09-01T00:00:00Z'),
-      lastSeenAt: new Date('2026-08-27T00:00:00Z'), revokedAt: null,
-      tenant: { status: 'ACTIVE' },
-      user: {
-        email: 'owner@example.com', name: 'Олена', locale: 'en', avatarStorageKey: 'users/avatar.webp',
-        avatarChecksum: 'avatar-checksum', platformRole: 'USER', status: 'ACTIVE',
-        memberships: [{ tenantId: '10000000-0000-4000-8000-000000000003', role: 'OWNER', status: 'ACTIVE' }],
-      },
-    };
-    const prisma = {
-      session: {
-        create: vi.fn(async ({ data }: { data: Record<string, unknown> }) => ({ ...record, tokenHash: data.tokenHash })),
-        findUnique: vi.fn(async () => record),
-        update: vi.fn(async () => record),
-        updateMany: vi.fn(async () => ({ count: 1 })),
-      },
-    } as unknown as PrismaClient;
-    const sessions = new SessionService(prisma, new CryptoService(), 'p'.repeat(32), () => new Date('2026-08-27T12:00:00Z'));
+  it('issues, resolves and revokes a session through bounded database authority', async () => {
+    const sessionId = '10000000-0000-4000-8000-000000000001';
+    const userId = '10000000-0000-4000-8000-000000000002';
+    const tenantId = '10000000-0000-4000-8000-000000000003';
+    const queryRaw = vi.fn()
+      .mockResolvedValueOnce([{ session_id: sessionId }])
+      .mockResolvedValueOnce([{
+        session_id: sessionId, user_id: userId, tenant_id: tenantId,
+        email: 'owner@example.com', display_name: 'Олена', platform_role: 'USER', membership_role: 'OWNER',
+        locale: 'en', avatar_storage_key: 'users/avatar.webp', avatar_checksum: 'avatar-checksum',
+      }])
+      .mockResolvedValueOnce([{ revoked_count: 1 }]);
+    const sessions = new SessionService({ $queryRaw: queryRaw } as unknown as PrismaClient, new CryptoService(), 'p'.repeat(32), () => new Date('2026-08-27T12:00:00Z'));
 
-    const issued = await sessions.create(record.userId, record.tenantId, { ipPrefix: '127.0.0.0/24', userAgent: 'test' });
-    record.tokenHash = issued.tokenHash;
+    const issued = await sessions.create(userId, tenantId, { ipPrefix: '127.0.0.0/24', userAgent: 'test' });
     await expect(sessions.resolve(issued.rawToken)).resolves.toMatchObject({
-      userId: record.userId,
-      name: 'Олена',
-      tenantId: record.tenantId,
-      membershipRole: 'OWNER',
-      locale: 'en',
+      userId, name: 'Олена', tenantId, membershipRole: 'OWNER', locale: 'en',
       avatarUrl: '/api/media/profile/avatar?v=avatar-checksum',
     });
-    await sessions.revoke(record.id);
-    expect(prisma.session.update).toHaveBeenCalled();
+    await sessions.revoke(sessionId);
+    expect(queryRaw).toHaveBeenCalledTimes(3);
   });
 
-  it('rejects expired or blocked sessions', async () => {
-    const prisma = { session: { findUnique: vi.fn(async () => ({
-      id: 'session', userId: 'user', tenantId: null, revokedAt: null,
-      expiresAt: new Date('2026-08-01T00:00:00Z'), lastSeenAt: new Date(),
-      user: { email: 'x@example.com', name: 'X', platformRole: 'USER', status: 'ACTIVE', memberships: [] },
-    })) } } as unknown as PrismaClient;
-    const sessions = new SessionService(prisma, new CryptoService(), 'p'.repeat(32), () => new Date('2026-08-27T12:00:00Z'));
-    await expect(sessions.resolve('expired')).resolves.toBeNull();
-  });
-
-  it('rejects sessions for a blocked tenant', async () => {
-    const prisma = { session: { findUnique: vi.fn(async () => ({
-      id: 'session', userId: 'user', tenantId: 'tenant', revokedAt: null,
-      expiresAt: new Date('2026-09-01T00:00:00Z'), lastSeenAt: new Date(), tenant: { status: 'BLOCKED' },
-      user: { email: 'x@example.com', name: 'X', platformRole: 'USER', status: 'ACTIVE', memberships: [{ tenantId: 'tenant', role: 'OWNER', status: 'ACTIVE' }] },
-    })) } } as unknown as PrismaClient;
-    const sessions = new SessionService(prisma, new CryptoService(), 'p'.repeat(32), () => new Date('2026-08-27T12:00:00Z'));
-
-    await expect(sessions.resolve('blocked-tenant')).resolves.toBeNull();
+  it('returns null when database authority rejects the session', async () => {
+    const sessions = new SessionService(
+      { $queryRaw: vi.fn().mockResolvedValue([]) } as unknown as PrismaClient,
+      new CryptoService(),
+      'p'.repeat(32),
+    );
+    await expect(sessions.resolve('expired-or-blocked')).resolves.toBeNull();
   });
 
   it('returns a null avatar when the user has no controlled avatar', async () => {
-    const prisma = { session: { findUnique: vi.fn(async () => ({
-      id: 'session', userId: 'user', tenantId: null, revokedAt: null,
-      expiresAt: new Date('2026-09-01T00:00:00Z'), lastSeenAt: new Date('2026-08-27T12:00:00Z'),
-      user: {
-        email: 'x@example.com', name: 'X', locale: 'uk', avatarStorageKey: null, avatarChecksum: null,
-        platformRole: 'USER', status: 'ACTIVE', memberships: [],
-      },
-    })), update: vi.fn() } } as unknown as PrismaClient;
-    const sessions = new SessionService(prisma, new CryptoService(), 'p'.repeat(32), () => new Date('2026-08-27T12:00:00Z'));
-
+    const queryRaw = vi.fn().mockResolvedValue([{
+      session_id: '10000000-0000-4000-8000-000000000001',
+      user_id: '10000000-0000-4000-8000-000000000002', tenant_id: null,
+      email: 'admin@example.com', display_name: 'Admin', platform_role: 'PLATFORM_ADMIN', membership_role: null,
+      locale: 'uk', avatar_storage_key: null, avatar_checksum: null,
+    }]);
+    const sessions = new SessionService({ $queryRaw: queryRaw } as unknown as PrismaClient, new CryptoService(), 'p'.repeat(32));
     await expect(sessions.resolve('active')).resolves.toMatchObject({ locale: 'uk', avatarUrl: null });
   });
 
   it('revokes every active session except the current one', async () => {
-    const updateMany = vi.fn(async () => ({ count: 2 }));
-    const prisma = { session: { updateMany } } as unknown as PrismaClient;
-    const now = new Date('2026-08-27T12:00:00Z');
-    const sessions = new SessionService(prisma, new CryptoService(), 'p'.repeat(32), () => now);
-
-    await expect(sessions.revokeOthersForUser('user-1', 'session-current')).resolves.toBe(2);
-    expect(updateMany).toHaveBeenCalledWith({
-      where: { userId: 'user-1', id: { not: 'session-current' }, revokedAt: null },
-      data: { revokedAt: now },
-    });
+    const queryRaw = vi.fn().mockResolvedValue([{ revoked_count: 2 }]);
+    const sessions = new SessionService({ $queryRaw: queryRaw } as unknown as PrismaClient, new CryptoService(), 'p'.repeat(32));
+    await expect(sessions.revokeOthersForUser(
+      '10000000-0000-4000-8000-000000000002',
+      '10000000-0000-4000-8000-000000000001',
+    )).resolves.toBe(2);
   });
 });
