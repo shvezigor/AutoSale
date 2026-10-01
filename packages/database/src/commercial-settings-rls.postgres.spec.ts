@@ -13,6 +13,7 @@ import { withTenantTransaction } from './tenant-transaction.js';
 
 const apiPassword = 'fictional-api-password-32-characters';
 const workerPassword = 'fictional-worker-password-32-chars';
+const backupPassword = 'fictional-backup-password-32-chars';
 const tenantA = '11111111-1111-4111-8111-111111111111';
 const tenantB = '22222222-2222-4222-8222-222222222222';
 const entityA = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
@@ -44,7 +45,7 @@ describe('commercial settings row-level security', () => {
         ('${accountA}', '${tenantA}', '${entityA}', 'Account A', 'UA111111111111111111111111111', 'UA111111111111111111111111111', 'UAH', true, true, now()),
         ('${accountB}', '${tenantB}', '${entityB}', 'Account B', 'UA222222222222222222222222222', 'UA222222222222222222222222222', 'UAH', true, true, now());
     `);
-    await configureRuntimeDatabaseRoles(container.getConnectionUri(), { apiPassword, workerPassword });
+    await configureRuntimeDatabaseRoles(container.getConnectionUri(), { apiPassword, workerPassword, backupPassword });
     prisma = createPrismaClient(runtimeUrl(container.getConnectionUri(), 'autosale_api', apiPassword));
   }, 60_000);
 

@@ -13,6 +13,7 @@ import { withTenantTransaction } from './tenant-transaction.js';
 
 const apiPassword = 'fictional-api-password-32-characters';
 const workerPassword = 'fictional-worker-password-32-chars';
+const backupPassword = 'fictional-backup-password-32-chars';
 const tenantA = '11111111-1111-4111-8111-111111111111';
 const tenantB = '22222222-2222-4222-8222-222222222222';
 const userA = '33333333-3333-4333-8333-333333333333';
@@ -40,7 +41,7 @@ describe('Google integration state row-level security', () => {
       '88888888-8888-4888-8888-888888888888',
       cleanupB,
     );
-    await configureRuntimeDatabaseRoles(container.getConnectionUri(), { apiPassword, workerPassword });
+    await configureRuntimeDatabaseRoles(container.getConnectionUri(), { apiPassword, workerPassword, backupPassword });
     api = createPrismaClient(runtimeUrl(container.getConnectionUri(), 'autosale_api', apiPassword));
     worker = createPrismaClient(runtimeUrl(container.getConnectionUri(), 'autosale_worker', workerPassword));
   }, 60_000);

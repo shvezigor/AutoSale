@@ -3,6 +3,7 @@ import pg from 'pg';
 export interface RuntimeDatabaseRolePasswords {
   apiPassword: string;
   workerPassword: string;
+  backupPassword: string;
 }
 
 export interface RuntimeDatabaseRoleConfig {
@@ -16,22 +17,28 @@ export function runtimeDatabaseRoleConfigFromEnv(
   const connectionString = requiredEnvironmentValue(environment, 'DATABASE_URL');
   const apiPassword = requiredEnvironmentValue(environment, 'POSTGRES_API_PASSWORD');
   const workerPassword = requiredEnvironmentValue(environment, 'POSTGRES_WORKER_PASSWORD');
+  const backupPassword = requiredEnvironmentValue(environment, 'POSTGRES_BACKUP_PASSWORD');
 
-  return { connectionString, passwords: { apiPassword, workerPassword } };
+  return { connectionString, passwords: { apiPassword, workerPassword, backupPassword } };
 }
 
 export async function configureRuntimeDatabaseRoles(
   connectionString: string,
   passwords: RuntimeDatabaseRolePasswords,
 ): Promise<void> {
-  if (passwords.apiPassword.length < 32 || passwords.workerPassword.length < 32) {
-    throw new Error('Runtime database passwords must contain at least 32 characters');
+  const configuredPasswords = [passwords.apiPassword, passwords.workerPassword, passwords.backupPassword];
+  if (configuredPasswords.some((password) => password.length < 32)) {
+    throw new Error('Database role passwords must contain at least 32 characters');
   }
-  if (!/^[A-Za-z0-9_-]+$/.test(passwords.apiPassword) || !/^[A-Za-z0-9_-]+$/.test(passwords.workerPassword)) {
-    throw new Error('Runtime database passwords must use URL-safe letters, digits, underscore, or hyphen');
+  if (configuredPasswords.some((password) => !/^[A-Za-z0-9_-]+$/.test(password))) {
+    throw new Error('Database role passwords must use URL-safe letters, digits, underscore, or hyphen');
   }
-  if (passwords.apiPassword === passwords.workerPassword) {
-    throw new Error('API and worker database passwords must be different');
+  if (new Set(configuredPasswords).size !== configuredPasswords.length) {
+    throw new Error('API, worker, and backup database passwords must be different');
+  }
+  const ownerPassword = decodeURIComponent(new URL(connectionString).password);
+  if (ownerPassword && configuredPasswords.includes(ownerPassword)) {
+    throw new Error('Database role passwords must be different from the owner password');
   }
 
   const client = new pg.Client({ connectionString });
@@ -41,6 +48,7 @@ export async function configureRuntimeDatabaseRoles(
     await client.query('BEGIN');
     await client.query("SELECT set_config('autosale.bootstrap.api_password', $1, true)", [passwords.apiPassword]);
     await client.query("SELECT set_config('autosale.bootstrap.worker_password', $1, true)", [passwords.workerPassword]);
+    await client.query("SELECT set_config('autosale.bootstrap.backup_password', $1, true)", [passwords.backupPassword]);
     await client.query(`
       DO $roles$
       BEGIN
@@ -49,6 +57,9 @@ export async function configureRuntimeDatabaseRoles(
         END IF;
         IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'autosale_worker') THEN
           CREATE ROLE autosale_worker LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'autosale_backup') THEN
+          CREATE ROLE autosale_backup LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION BYPASSRLS;
         END IF;
 
         EXECUTE format(
@@ -59,20 +70,36 @@ export async function configureRuntimeDatabaseRoles(
           'ALTER ROLE autosale_worker WITH LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS PASSWORD %L',
           current_setting('autosale.bootstrap.worker_password')
         );
+        EXECUTE format(
+          'ALTER ROLE autosale_backup WITH LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION BYPASSRLS PASSWORD %L',
+          current_setting('autosale.bootstrap.backup_password')
+        );
         EXECUTE format('REVOKE ALL ON DATABASE %I FROM PUBLIC', current_database());
-        EXECUTE format('GRANT CONNECT ON DATABASE %I TO autosale_api, autosale_worker', current_database());
-        EXECUTE format('REVOKE CREATE, TEMPORARY ON DATABASE %I FROM autosale_api, autosale_worker', current_database());
+        EXECUTE format('GRANT CONNECT ON DATABASE %I TO autosale_api, autosale_worker, autosale_backup', current_database());
+        EXECUTE format('REVOKE CREATE, TEMPORARY ON DATABASE %I FROM autosale_api, autosale_worker, autosale_backup', current_database());
       END
       $roles$;
 
-      REVOKE CREATE ON SCHEMA public FROM PUBLIC, autosale_api, autosale_worker;
-      GRANT USAGE ON SCHEMA public TO autosale_api, autosale_worker;
+      REVOKE CREATE ON SCHEMA public FROM PUBLIC, autosale_api, autosale_worker, autosale_backup;
+      GRANT USAGE ON SCHEMA public TO autosale_api, autosale_worker, autosale_backup;
       GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO autosale_api, autosale_worker;
+      GRANT SELECT ON ALL TABLES IN SCHEMA public TO autosale_backup;
       GRANT USAGE, SELECT, UPDATE ON ALL SEQUENCES IN SCHEMA public TO autosale_api, autosale_worker;
+      GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO autosale_backup;
+      REVOKE INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER ON ALL TABLES IN SCHEMA public FROM autosale_backup;
+      REVOKE USAGE, UPDATE ON ALL SEQUENCES IN SCHEMA public FROM autosale_backup;
+      REVOKE EXECUTE ON ALL FUNCTIONS IN SCHEMA public FROM PUBLIC;
+      REVOKE EXECUTE ON ALL FUNCTIONS IN SCHEMA public FROM autosale_backup;
       ALTER DEFAULT PRIVILEGES IN SCHEMA public
         GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO autosale_api, autosale_worker;
       ALTER DEFAULT PRIVILEGES IN SCHEMA public
+        GRANT SELECT ON TABLES TO autosale_backup;
+      ALTER DEFAULT PRIVILEGES IN SCHEMA public
         GRANT USAGE, SELECT, UPDATE ON SEQUENCES TO autosale_api, autosale_worker;
+      ALTER DEFAULT PRIVILEGES IN SCHEMA public
+        GRANT SELECT ON SEQUENCES TO autosale_backup;
+      ALTER DEFAULT PRIVILEGES IN SCHEMA public
+        REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC;
       DO $functions$
       BEGIN
         IF to_regprocedure('public.platform_order_counts()') IS NOT NULL THEN

@@ -9,6 +9,7 @@ import { withTenantTransaction } from './tenant-transaction.js';
 
 const apiPassword = 'fictional-api-password-32-characters';
 const workerPassword = 'fictional-worker-password-32-chars';
+const backupPassword = 'fictional-backup-password-32-chars';
 const tenantA = '11111111-1111-4111-8111-111111111111';
 const tenantB = '22222222-2222-4222-8222-222222222222';
 
@@ -20,7 +21,7 @@ describe('tenant transaction context', () => {
   beforeAll(async () => {
     container = await new PostgreSqlContainer('postgres:17.6-alpine').start();
     admin = new pg.Pool({ connectionString: container.getConnectionUri() });
-    await configureRuntimeDatabaseRoles(container.getConnectionUri(), { apiPassword, workerPassword });
+    await configureRuntimeDatabaseRoles(container.getConnectionUri(), { apiPassword, workerPassword, backupPassword });
     await admin.query(`
       CREATE TABLE tenant_scoped_fixture (
         id uuid PRIMARY KEY,
