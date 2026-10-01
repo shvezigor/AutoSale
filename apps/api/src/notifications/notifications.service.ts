@@ -1,15 +1,7 @@
 import { BadRequestException } from '@nestjs/common';
+import { type PrismaClient, withTenantTransaction } from '@autosale/database';
 
 type NotificationType = 'SUCCESS' | 'ERROR' | 'WARNING' | 'INFO';
-type NotificationStore = {
-  userNotification: {
-    create(args: unknown): Promise<unknown>;
-    findMany(args: unknown): Promise<unknown[]>;
-    count(args: unknown): Promise<number>;
-    updateMany(args: unknown): Promise<{ count: number }>;
-  };
-};
-
 export type CreateNotificationInput = {
   tenantId: string;
   userId: string;
@@ -33,7 +25,7 @@ const notificationSelect = {
 
 export class NotificationService {
   constructor(
-    private readonly prisma: NotificationStore,
+    private readonly prisma: PrismaClient,
     private readonly now: () => Date = () => new Date(),
   ) {}
 
@@ -41,32 +33,33 @@ export class NotificationService {
     if (input.actionUrl !== undefined && !isSafeActionUrl(input.actionUrl)) {
       throw new BadRequestException('Invalid notification action URL');
     }
-    await this.prisma.userNotification.create({ data: input });
+    await withTenantTransaction(this.prisma, input.tenantId, (transaction) =>
+      transaction.userNotification.create({ data: input }));
   }
 
   async list(tenantId: string, userId: string, requestedLimit = 20) {
     const limit = Math.min(50, Math.max(1, Number.isFinite(requestedLimit) ? Math.trunc(requestedLimit) : 20));
     const where = { tenantId, userId };
-    const [items, unreadCount] = await Promise.all([
-      this.prisma.userNotification.findMany({ where, orderBy: [{ createdAt: 'desc' }, { id: 'desc' }], take: limit, select: notificationSelect }),
-      this.prisma.userNotification.count({ where: { ...where, readAt: null } }),
-    ]);
+    const [items, unreadCount] = await withTenantTransaction(this.prisma, tenantId, (transaction) => Promise.all([
+      transaction.userNotification.findMany({ where, orderBy: [{ createdAt: 'desc' }, { id: 'desc' }], take: limit, select: notificationSelect }),
+      transaction.userNotification.count({ where: { ...where, readAt: null } }),
+    ]));
     return { items, unreadCount };
   }
 
   async markRead(tenantId: string, userId: string, id: string): Promise<{ updated: boolean }> {
-    const result = await this.prisma.userNotification.updateMany({
+    const result = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.userNotification.updateMany({
       where: { id, tenantId, userId, readAt: null },
       data: { readAt: this.now() },
-    });
+    }));
     return { updated: result.count > 0 };
   }
 
   async markAllRead(tenantId: string, userId: string): Promise<{ updatedCount: number }> {
-    const result = await this.prisma.userNotification.updateMany({
+    const result = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.userNotification.updateMany({
       where: { tenantId, userId, readAt: null },
       data: { readAt: this.now() },
-    });
+    }));
     return { updatedCount: result.count };
   }
 }

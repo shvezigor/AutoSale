@@ -44,6 +44,7 @@ function createFixture() {
     securityAuditLog: { create: vi.fn(async () => ({})) },
     userAvatarCleanup: { create: vi.fn(async () => ({})) },
     session: { updateMany: vi.fn(async () => ({ count: 0 })) },
+    $queryRaw: vi.fn(async () => [{ audit_id: '30000000-0000-4000-8000-000000000003' }]),
     $transaction: vi.fn(async (work: (tx: unknown) => unknown) => work(prisma)),
   };
   const crypto = { verifyPassword: vi.fn(), hashPassword: vi.fn() };
@@ -115,6 +116,23 @@ describe('ProfileService', () => {
     const auditCall = fixture.prisma.securityAuditLog.create.mock.calls[0];
     expect(JSON.stringify(auditCall)).not.toContain('Ігор Новий');
     expect(JSON.stringify(auditCall)).not.toContain('+380');
+  });
+
+  it('uses the constrained platform audit path for a tenantless platform administrator', async () => {
+    const fixture = createFixture();
+    const platformPrincipal: AuthPrincipal = {
+      ...principal,
+      tenantId: null,
+      membershipRole: null,
+      platformRole: 'PLATFORM_ADMIN',
+    };
+
+    await expect(fixture.service.update(platformPrincipal, {
+      name: 'Platform Admin', phone: null, locale: 'en',
+    })).resolves.toMatchObject({ name: 'Platform Admin', locale: 'en' });
+
+    expect(fixture.prisma.securityAuditLog.create).not.toHaveBeenCalled();
+    expect(fixture.prisma.$queryRaw).toHaveBeenCalledTimes(1);
   });
 
   const passwordInput = {

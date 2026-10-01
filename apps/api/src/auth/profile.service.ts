@@ -2,7 +2,7 @@ import { createHash, randomUUID } from 'node:crypto';
 
 import type { AuthPrincipal } from '@autosale/contracts/auth';
 import type { ChangePasswordRequest, ProfileResponse, UpdateProfileRequest } from '@autosale/contracts/profile';
-import type { PrismaClient } from '@autosale/database';
+import { appendSecurityAudit, setTenantContext, type PrismaClient, withTenantTransaction } from '@autosale/database';
 import type { ObjectStorage } from '@autosale/integrations';
 import { BadRequestException, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import sharp from 'sharp';
@@ -78,20 +78,19 @@ export class ProfileService {
 
   async update(principal: AuthPrincipal, input: UpdateProfileRequest): Promise<ProfileResponse> {
     const user = await this.prisma.$transaction(async (transaction) => {
+      if (principal.tenantId) await setTenantContext(transaction, principal.tenantId);
       const updated = await transaction.user.update({
         where: { id: principal.userId },
         data: { name: input.name, phone: input.phone, locale: input.locale },
         select: profileSelect,
       });
-      await transaction.securityAuditLog.create({
-        data: {
+      await appendSecurityAudit(transaction, {
           userId: principal.userId,
           tenantId: principal.tenantId,
           actor: 'USER',
           action: 'PROFILE_UPDATED',
           result: 'SUCCESS',
           metadata: { fields: ['locale', 'name', 'phone'] },
-        },
       });
       return updated;
     });
@@ -147,6 +146,7 @@ export class ProfileService {
 
     try {
       const user = await this.prisma.$transaction(async (transaction) => {
+        if (principal.tenantId) await setTenantContext(transaction, principal.tenantId);
         const current = await transaction.user.findUnique({
           where: { id: principal.userId },
           select: { avatarStorageKey: true },
@@ -166,15 +166,13 @@ export class ProfileService {
             data: { userId: principal.userId, storageKey: current.avatarStorageKey },
           });
         }
-        await transaction.securityAuditLog.create({
-          data: {
+        await appendSecurityAudit(transaction, {
             userId: principal.userId,
             tenantId: principal.tenantId,
             actor: 'USER',
             action: 'PROFILE_AVATAR_REPLACED',
             result: 'SUCCESS',
             metadata: { operation: 'REPLACE', contentCategory: 'IMAGE' },
-          },
         });
         return updated;
       });
@@ -187,6 +185,7 @@ export class ProfileService {
 
   async removeAvatar(principal: AuthPrincipal): Promise<ProfileResponse> {
     const user = await this.prisma.$transaction(async (transaction) => {
+      if (principal.tenantId) await setTenantContext(transaction, principal.tenantId);
       const current = await transaction.user.findUnique({
         where: { id: principal.userId },
         select: { avatarStorageKey: true },
@@ -202,15 +201,13 @@ export class ProfileService {
           data: { userId: principal.userId, storageKey: current.avatarStorageKey },
         });
       }
-      await transaction.securityAuditLog.create({
-        data: {
+      await appendSecurityAudit(transaction, {
           userId: principal.userId,
           tenantId: principal.tenantId,
           actor: 'USER',
           action: 'PROFILE_AVATAR_REMOVED',
           result: 'SUCCESS',
           metadata: { operation: 'REMOVE', contentCategory: 'IMAGE' },
-        },
       });
       return updated;
     });
@@ -246,16 +243,19 @@ export class ProfileService {
     metadata: Record<string, string | number>,
   ): Promise<void> {
     try {
-      await this.prisma.securityAuditLog.create({
-        data: {
-          userId: principal.userId,
-          tenantId: principal.tenantId,
-          actor: 'USER',
-          action,
-          result,
-          metadata,
-        },
-      });
+      const entry = {
+        userId: principal.userId,
+        tenantId: principal.tenantId,
+        actor: 'USER',
+        action,
+        result: result === 'SUCCESS' ? 'SUCCESS' : 'FAILURE',
+        metadata,
+      } as const;
+      if (principal.tenantId) {
+        await withTenantTransaction(this.prisma, principal.tenantId, (transaction) => appendSecurityAudit(transaction, entry));
+      } else {
+        await appendSecurityAudit(this.prisma, entry);
+      }
     } catch (error) {
       this.logger.warn({
         event: 'profile_security_audit_failed',

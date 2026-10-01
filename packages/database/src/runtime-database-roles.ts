@@ -155,6 +155,14 @@ export async function configureRuntimeDatabaseRoles(
           REVOKE ALL ON FUNCTION public.worker_due_telegram_deliveries(timestamp with time zone, integer) FROM autosale_api;
           GRANT EXECUTE ON FUNCTION public.worker_due_telegram_deliveries(timestamp with time zone, integer) TO autosale_worker;
         END IF;
+        IF to_regprocedure('public.worker_expired_user_notifications(timestamp with time zone,integer)') IS NOT NULL THEN
+          REVOKE ALL ON FUNCTION public.worker_expired_user_notifications(timestamp with time zone, integer) FROM autosale_api;
+          GRANT EXECUTE ON FUNCTION public.worker_expired_user_notifications(timestamp with time zone, integer) TO autosale_worker;
+        END IF;
+        IF to_regprocedure('public.api_append_platform_security_audit_log(uuid,text,text,text,jsonb)') IS NOT NULL THEN
+          GRANT EXECUTE ON FUNCTION public.api_append_platform_security_audit_log(uuid, text, text, text, jsonb) TO autosale_api;
+          REVOKE ALL ON FUNCTION public.api_append_platform_security_audit_log(uuid, text, text, text, jsonb) FROM autosale_worker;
+        END IF;
         IF to_regprocedure('public.api_active_membership_for_user(uuid)') IS NOT NULL THEN
           GRANT EXECUTE ON FUNCTION public.api_active_membership_for_user(uuid) TO autosale_api;
           REVOKE ALL ON FUNCTION public.api_active_membership_for_user(uuid) FROM autosale_worker;

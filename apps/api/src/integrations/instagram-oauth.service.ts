@@ -1129,7 +1129,8 @@ export class InstagramOAuthService {
     metadata: Record<string, string> = {},
   ): Promise<void> {
     try {
-      await this.recordAudit(this.prisma, binding, action, result, metadata);
+      await withTenantTransaction(this.prisma, binding.tenantId, (transaction) =>
+        this.recordAudit(transaction, binding, action, result, metadata));
     } catch {
       // Audit persistence failure must not expose callback or provider details.
     }

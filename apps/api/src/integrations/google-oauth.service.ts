@@ -139,7 +139,10 @@ export class GoogleOAuthService {
   }
 
   private async audit(tenantId: string, userId: string, action: string, result: string): Promise<void> {
-    await this.prisma.securityAuditLog.create({ data: { tenantId, userId, actor: 'USER', action, result, metadata: {} } });
+    await withTenantTransaction(this.prisma, tenantId, (transaction) =>
+      transaction.securityAuditLog.create({
+        data: { tenantId, userId, actor: 'USER', action, result, metadata: {} },
+      }));
   }
 
   private async notify(input: Parameters<NotificationService['create']>[0]) {

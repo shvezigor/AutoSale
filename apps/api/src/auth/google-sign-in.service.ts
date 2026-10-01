@@ -1,7 +1,7 @@
 import { createHash, randomBytes } from 'node:crypto';
 
 import type { PublicSession } from '@autosale/contracts/auth';
-import { setTenantContext, type PrismaClient } from '@autosale/database';
+import { appendSecurityAudit, setTenantContext, type PrismaClient } from '@autosale/database';
 import type { GoogleSignInClientPort, GoogleSignInIdentity } from '@autosale/integrations';
 import { BadRequestException, ServiceUnavailableException, UnauthorizedException } from '@nestjs/common';
 
@@ -70,15 +70,17 @@ export class GoogleSignInService {
     if (matchingUser) {
       if (matchingUser.status !== 'ACTIVE' || !matchingUser.emailVerifiedAt) throw new UnauthorizedException(FAILED);
       try {
+        const membership = await activeMembershipForUser(this.prisma, matchingUser.id);
         await this.prisma.$transaction(async (transaction) => {
+          if (membership) await setTenantContext(transaction, membership.tenantId);
           await transaction.googleIdentity.create({ data: {
             userId: matchingUser.id, googleSubject: identity.subject, emailAtLink: identity.email, lastUsedAt: this.now(),
           } });
-          await transaction.securityAuditLog.create({ data: {
-            userId: matchingUser.id, tenantId: (await activeMembershipForUser(transaction, matchingUser.id))?.tenantId ?? null,
+          await appendSecurityAudit(transaction, {
+            userId: matchingUser.id, tenantId: membership?.tenantId ?? null,
             actor: 'SYSTEM', action: 'GOOGLE_IDENTITY_AUTO_LINKED', result: 'SUCCESS',
             metadata: { subjectHash: hash(identity.subject), emailHash: hash(identity.email) },
-          } });
+          });
         });
       } catch {
         throw new UnauthorizedException(FAILED);
