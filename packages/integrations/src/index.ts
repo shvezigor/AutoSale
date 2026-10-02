@@ -44,6 +44,16 @@ export {
   type MetaInstagramUserProfile,
 } from './meta-instagram.js';
 export {
+  MetaFacebookClient,
+  MetaFacebookError,
+  type MetaFacebookAuthorizationInput,
+  type MetaFacebookClientConfig,
+  type MetaFacebookCodeExchangeInput,
+  type MetaFacebookPage,
+  type MetaFacebookResponseStage,
+  type MetaFacebookUserToken,
+} from './meta-facebook.js';
+export {
   TelegramBotClient,
   TelegramBotError,
   type TelegramBotClientConfig,
