@@ -42,7 +42,7 @@ A1 contracts + safe API aggregates
 ### Phase 2: Admin navigation and overview
 
 - [x] A2: Add the responsive admin shell, navigation and localized copy.
-- [ ] A3: Replace the old card page with KPI and operations-attention overview.
+- [x] A3: Replace the old card page with KPI and operations-attention overview.
 
 **Acceptance:** desktop sidebar/mobile drawer work by keyboard; overview renders only approved aggregates and real monitoring state.
 

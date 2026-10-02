@@ -1,16 +1,32 @@
 import { cleanup, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
+
 import { AdminDashboard } from './admin-dashboard';
 
-vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
 afterEach(cleanup);
 
 describe('AdminDashboard privacy', () => {
-  it('shows aggregates without customer data or business links', () => {
-    render(<AdminDashboard tenants={[{ tenantId: '11111111-1111-4111-8111-111111111111', tenantName: 'Test Store', status: 'ACTIVE', ownerEmail: 'owner@example.com', userCount: 2, orderCount: 4, createdAt: '2026-08-27T00:00:00.000Z' }]} health={{ status: 'ok' }} />);
-    expect(screen.getByText('2 користувачі')).toBeInTheDocument();
+  it('shows platform aggregates and actionable queue state without tenant content', () => {
+    render(<AdminDashboard
+      overview={{
+        status: 'DEGRADED', attentionQueueCount: 1, updatedAt: '2026-10-02T12:00:00.000Z',
+        metrics: { tenantCount: 3, activeTenantCount: 2, blockedTenantCount: 1, userCount: 5, orderCount: 9, newTenantCount30Days: 1 },
+      }}
+      operations={{
+        status: 'DEGRADED', database: 'HEALTHY', updatedAt: '2026-10-02T12:00:00.000Z',
+        queues: [
+          { queue: 'instagram', status: 'ATTENTION', waiting: 3, active: 0, delayed: 0, failed: 1, completed: 8, workerCount: 0, oldestPendingAt: '2026-10-02T11:00:00.000Z', available: true },
+          { queue: 'catalogue', status: 'HEALTHY', waiting: 0, active: 1, delayed: 0, failed: 0, completed: 4, workerCount: 1, oldestPendingAt: null, available: true },
+        ],
+      }}
+    />);
+
+    expect(screen.getByRole('heading', { name: 'Огляд платформи' })).toBeInTheDocument();
+    expect(screen.getByText('3', { selector: 'strong' })).toBeInTheDocument();
+    expect(screen.getByText('Instagram')).toBeInTheDocument();
+    expect(screen.getByText('Потребує уваги')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Переглянути клієнтів' })).toHaveAttribute('href', '/admin/tenants');
+    expect(screen.getByRole('link', { name: 'Відкрити моніторинг' })).toHaveAttribute('href', '/admin/operations');
     expect(screen.queryByText(/телефон|адреса|повідомлення клієнта/i)).not.toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: /діалоги|замовлення/i })).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Керувати даними' })).toBeInTheDocument();
   });
 });
