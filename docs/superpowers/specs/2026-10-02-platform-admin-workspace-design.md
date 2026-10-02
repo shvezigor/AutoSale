@@ -148,6 +148,14 @@ Use shared `primary-button`, `secondary-button`, `danger-button`, `text-button` 
 - Browser acceptance covers desktop and mobile shell navigation, client-detail navigation and an operations view without horizontal overflow.
 - Existing RLS and lifecycle suites remain regression gates.
 
+## Release evidence
+
+- `pnpm test`: 301 test files and 1,744 tests passed on 2 October 2026.
+- `pnpm typecheck` and `pnpm build`: all workspace packages passed; the production build includes the overview, clients, client detail and operations routes.
+- `pnpm audit --audit-level high`: no known vulnerabilities after updating Next.js to 16.3.6 and constraining the test-only gRPC dependency to 1.14.5.
+- Browser acceptance against the rebuilt Docker stack covered the desktop overview, client sorting and detail navigation, operations monitoring, the 390 × 844 client layout and mobile drawer. The browser console reported no errors.
+- Authorization acceptance temporarily promoted the designated test account, then restored its `USER` role; a final `/admin` request redirected it back to `/dashboard`.
+
 ## Boundaries
 
 ### Always

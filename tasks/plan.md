@@ -52,8 +52,8 @@ A1 contracts + safe API aggregates
 
 ### Checkpoint: Overview
 
-- [ ] Focused API and web tests pass.
-- [ ] `/admin` loads without tenant navigation or business-data links.
+- [x] Focused API and web tests pass.
+- [x] `/admin` loads without tenant navigation or business-data links.
 
 ### Phase 3: Client management
 
@@ -68,13 +68,13 @@ A1 contracts + safe API aggregates
 
 ### Checkpoint: Client flow
 
-- [ ] Client list-to-detail path works on desktop and mobile.
-- [ ] Privacy assertions exclude customer/order content and workspace links.
+- [x] Client list-to-detail path works on desktop and mobile.
+- [x] Privacy assertions exclude customer/order content and workspace links.
 
 ### Phase 4: Operations and release evidence
 
 - [x] A6: Add the queue/service operations page and safe status presentation.
-- [ ] A7: Complete responsive, accessibility, security and full regression verification; update canonical status.
+- [x] A7: Complete responsive, accessibility, security and full regression verification; update canonical status.
 
 **Acceptance:** all configured queues are visible with counts, workers and pending age; 390 px layout does not overflow; full tests/typecheck/build pass.
 
@@ -84,8 +84,8 @@ A1 contracts + safe API aggregates
 
 ### Checkpoint: Complete
 
-- [ ] All spec success criteria are met.
-- [ ] Canonical feature index reports evidence-based status.
+- [x] All spec success criteria are met.
+- [x] Canonical feature index reports evidence-based status.
 - [ ] Scoped commits are merged to `master`, pushed and the feature branch is removed.
 
 ## Risks and mitigations
