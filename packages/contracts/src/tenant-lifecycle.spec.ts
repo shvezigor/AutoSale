@@ -5,6 +5,7 @@ import {
   createTenantLifecycleRequestSchema,
   lifecycleMutationRequestSchema,
   retentionDryRunJobSchema,
+  retentionDryRunSchema,
   tenantLifecycleJobSchema,
   tenantLifecycleRequestSchema,
 } from './tenant-lifecycle.js';
@@ -80,5 +81,20 @@ describe('tenant lifecycle contracts', () => {
 
     expect(parsed).not.toHaveProperty('exportObjectKey');
     expect(parsed).not.toHaveProperty('signedUrl');
+  });
+
+  it('rejects customer content in a retention dry-run summary', () => {
+    const base = {
+      id: requestId, tenantId, status: 'COMPLETED', lastErrorCode: null,
+      completedAt: '2026-10-02T09:01:00.000Z', requestedAt: '2026-10-02T09:00:00.000Z',
+    };
+    const safeEntry = {
+      category: 'RAW_WEBHOOKS', policyStatus: 'DRY_RUN_ONLY', cutoff: '2026-09-02T09:00:00.000Z',
+      candidateCount: 4, oldestCandidateAt: '2026-01-01T00:00:00.000Z', approximateBytes: null,
+    };
+    expect(retentionDryRunSchema.parse({ ...base, summary: [safeEntry] }).summary).toEqual([safeEntry]);
+    expect(retentionDryRunSchema.safeParse({
+      ...base, summary: [{ ...safeEntry, customerMessage: 'must never cross the API boundary' }],
+    }).success).toBe(false);
   });
 });

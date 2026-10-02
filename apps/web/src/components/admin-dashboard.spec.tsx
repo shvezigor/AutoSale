@@ -11,5 +11,6 @@ describe('AdminDashboard privacy', () => {
     expect(screen.getByText('2 користувачі')).toBeInTheDocument();
     expect(screen.queryByText(/телефон|адреса|повідомлення клієнта/i)).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: /діалоги|замовлення/i })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Керувати даними' })).toBeInTheDocument();
   });
 });

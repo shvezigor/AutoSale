@@ -714,7 +714,7 @@ git commit -m "feat: preview tenant retention candidates"
 - Consumes: lifecycle list/detail/create/cancel/retry/download and retention dry-run endpoints.
 - Produces: compact per-tenant lifecycle controls without exposing customer content.
 
-- [ ] **Step 1: Write failing UI behavior tests**
+- [x] **Step 1: Write failing UI behavior tests**
 
 ```tsx
 expect(screen.getByRole('button', { name: 'Створити експорт' })).toBeEnabled();
@@ -723,21 +723,21 @@ expect(screen.getByLabelText('Поточний пароль')).toHaveAttribute('
 expect(screen.queryByRole('button', { name: /видалити дані назавжди/i })).not.toBeInTheDocument();
 ```
 
-- [ ] **Step 2: Run and verify the missing component failure**
+- [x] **Step 2: Run and verify the missing component failure**
 
 Run: `pnpm --filter @autosale/web test -- admin-tenant-lifecycle.spec.tsx admin-dashboard.spec.tsx`
 
 Expected: FAIL because the lifecycle component is absent.
 
-- [ ] **Step 3: Implement lifecycle cards and safe confirmations**
+- [x] **Step 3: Implement lifecycle cards and safe confirmations**
 
 Show request kind/status, requested/export/expiry timestamps, safe error copy and actions. `EXPORT` needs one confirmation; `DELETE` needs tenant-name confirmation plus current-password step-up. Use `FormField`, `FieldError`, `focusFirstInvalid`, `LoadingButton`, `secondary-button` for export, `danger-button` for deletion preparation, and `text-button` for cancel/retry. Preserve values on server failure and clear only the edited field's error.
 
-- [ ] **Step 4: Add responsive styles without horizontal overflow**
+- [x] **Step 4: Add responsive styles without horizontal overflow**
 
 Use the existing admin max width, stack lifecycle actions below 720px, wrap hashes safely, and keep the signed URL out of rendered text by initiating download immediately from the response.
 
-- [ ] **Step 5: Run UI contract tests and commit**
+- [x] **Step 5: Run UI contract tests and commit**
 
 Run: `pnpm --filter @autosale/web test -- admin-tenant-lifecycle.spec.tsx admin-dashboard.spec.tsx form-validation-contract.spec.ts button-style-contract.spec.ts`
 
