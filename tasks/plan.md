@@ -31,18 +31,23 @@ A1 contracts + safe API aggregates
 
 - [x] A1: Add typed overview/operations contracts and a privacy-safe admin API.
 
-**Acceptance:** aggregates match tenant summaries; queue states are classified deterministically; queue inspection failures are safe and never expose job data.  
-**Verify:** API service/controller tests and contracts tests.  
-**Likely files:** contracts auth, admin service/controller/module and focused specs.  
+**Acceptance:** aggregates match tenant summaries; queue states are classified deterministically; queue inspection failures are safe and never expose job data.
+
+**Verify:** API service/controller tests and contracts tests.
+
+**Likely files:** contracts auth, admin service/controller/module and focused specs.
+
 **Dependencies:** none.
 
 ### Phase 2: Admin navigation and overview
 
-- [ ] A2: Add the responsive admin shell, navigation and localized copy.
+- [x] A2: Add the responsive admin shell, navigation and localized copy.
 - [ ] A3: Replace the old card page with KPI and operations-attention overview.
 
-**Acceptance:** desktop sidebar/mobile drawer work by keyboard; overview renders only approved aggregates and real monitoring state.  
-**Verify:** shell/dashboard component tests plus web typecheck.  
+**Acceptance:** desktop sidebar/mobile drawer work by keyboard; overview renders only approved aggregates and real monitoring state.
+
+**Verify:** shell/dashboard component tests plus web typecheck.
+
 **Dependencies:** A1.
 
 ### Checkpoint: Overview
@@ -55,8 +60,10 @@ A1 contracts + safe API aggregates
 - [ ] A4: Add the searchable, filterable and sortable client table.
 - [ ] A5: Add client detail with block/unblock and existing lifecycle controls.
 
-**Acceptance:** row click, keyboard activation and explicit action open detail; unknown ids return 404; mutations show confirmation/loading/failure feedback.  
-**Verify:** table/detail tests and controller regression tests.  
+**Acceptance:** row click, keyboard activation and explicit action open detail; unknown ids return 404; mutations show confirmation/loading/failure feedback.
+
+**Verify:** table/detail tests and controller regression tests.
+
 **Dependencies:** A1, A2.
 
 ### Checkpoint: Client flow
@@ -69,8 +76,10 @@ A1 contracts + safe API aggregates
 - [ ] A6: Add the queue/service operations page and safe status presentation.
 - [ ] A7: Complete responsive, accessibility, security and full regression verification; update canonical status.
 
-**Acceptance:** all configured queues are visible with counts, workers and pending age; 390 px layout does not overflow; full tests/typecheck/build pass.  
-**Verify:** focused tests, `pnpm test`, `pnpm typecheck`, `pnpm build`, browser acceptance and diff/security review.  
+**Acceptance:** all configured queues are visible with counts, workers and pending age; 390 px layout does not overflow; full tests/typecheck/build pass.
+
+**Verify:** focused tests, `pnpm test`, `pnpm typecheck`, `pnpm build`, browser acceptance and diff/security review.
+
 **Dependencies:** A1-A5.
 
 ### Checkpoint: Complete

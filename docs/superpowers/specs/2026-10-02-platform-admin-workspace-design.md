@@ -1,7 +1,9 @@
 # Platform administration workspace
 
-**Status:** approved for implementation  
-**Actor:** Sales AITO platform administrator  
+**Status:** approved for implementation
+
+**Actor:** Sales AITO platform administrator
+
 **Capability id:** `platform-admin-workspace`
 
 ## Objective

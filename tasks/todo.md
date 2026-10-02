@@ -1943,7 +1943,7 @@ Reference: [competitive analysis](../docs/research/2026-10-02-chatoryx-competiti
 # Current initiative: Platform administration workspace
 
 - [x] A1 — typed overview/operations contracts and privacy-safe admin API
-- [ ] A2 — responsive localized admin shell
+- [x] A2 — responsive localized admin shell
 - [ ] A3 — aggregate overview dashboard
 - [ ] A4 — searchable/filterable/sortable client table
 - [ ] A5 — client detail with safe actions and lifecycle controls
