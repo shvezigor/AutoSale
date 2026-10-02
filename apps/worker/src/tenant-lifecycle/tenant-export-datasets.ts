@@ -50,7 +50,7 @@ const identityFields = { id: true, tenantId: true, createdAt: true };
 
 export const TENANT_EXPORT_DATASETS: readonly TenantExportDataset[] = [
   dataset('tenants', 'tenant', {
-    id: true, key: true, name: true, status: true, createdAt: true, updatedAt: true,
+    id: true, key: true, name: true, status: true, createdAt: true,
   }, { tenantField: 'id' }),
   dataset('conversations', 'conversation', {
     ...identityFields, channel: true, externalConversationId: true, participantId: true,
