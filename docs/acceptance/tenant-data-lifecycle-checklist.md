@@ -34,13 +34,21 @@ Run:
 pnpm exec playwright test tests/e2e/tenant-data-lifecycle.spec.ts
 ```
 
+For a self-contained local run with fresh fictional identities, isolated Docker volumes and no provider connections, use:
+
+```powershell
+& .\infra\scripts\run-tenant-lifecycle-acceptance.ps1
+```
+
+The runner generates credentials only in its process environment, binds the temporary stack to loopback, uses a unique Compose project, and removes its containers and volumes in `finally`. It never reads production tenant data or writes credentials to disk.
+
 The scenario creates one export and one temporary `DELETE` preparation for fictional tenant A, confirms tenant B remains mutable, and cancels tenant A's request in `finally`. Keep the generated export private and allow its normal seven-day cleanup. Never store credentials, download responses, tenant IDs, archive contents or screenshots containing personal data in Git or CI artifacts.
 
 ## Current result
 
 - [x] The opt-in scenario is discovered by Playwright and safely skips when its explicit fictional fixture is absent.
-- [ ] Run the opt-in scenario against the isolated two-tenant fixture and record only the sanitized pass/fail result.
-- [ ] Do not mark the capability **Available** until that isolated run is green.
+- [x] On 2026-10-02 the self-contained runner passed against two fresh fictional tenants: export integrity and exclusions, tenant A lifecycle freeze, tenant B continuity and cancellation cleanup were all green.
+- [x] Phase-one tenant lifecycle is **Available**. The destructive phase and EU launch gates listed below remain out of scope.
 
 ## Deliberate phase-one limits
 
