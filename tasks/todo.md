@@ -896,6 +896,32 @@
 
 Detailed execution order and safety gates: [`docs/operations/hetzner-production.md`](../docs/operations/hetzner-production.md) and [`docs/operations/backup-restore.md`](../docs/operations/backup-restore.md).
 
+### Data security and EU launch backlog
+
+**Decision (2026-10-02):** The current tenant-isolation and phase-one lifecycle controls are available. The work below is deferred while the team switches to other product tasks, but remains mandatory before general EU production readiness is declared.
+
+#### P0 — technical launch gates
+
+- [ ] Implement the destructive tenant-deletion phase: revoke provider credentials, stop queued external actions, delete tenant PostgreSQL rows and object-store keys, verify absence and expose only bounded audit evidence.
+- [ ] Add a deletion ledger with backup-expiry metadata and require ledger replay before a restored environment can serve production traffic.
+- [ ] Add configurable retention and automated purge/anonymisation for conversations, media, customer data, orders, payments and delivery records, including explicit legal-hold handling.
+- [ ] Complete the deferred Hetzner off-host backup backlog above and retain quarterly independent restore evidence.
+- [ ] Harden the production host with Redis authentication/ACL, encrypted storage, documented secret rotation, MFA for privileged access and periodic access review.
+- [ ] Create and exercise the personal-data incident procedure, including breach register, containment, evidence preservation and controller notification contacts/templates.
+
+#### P0 — legal and operational approval
+
+- [ ] Obtain qualified review and approval of the DPA, privacy notice, controller/processor roles, lawful bases, DSAR contact and final category-specific retention schedule.
+- [ ] Complete the subprocessor register, processing regions, transfer mechanisms/SCC assessment, incident contacts and customer-facing change process before enabling providers in EU production.
+- [ ] Review SaaS switching/export obligations under the EU Data Act and record any required product or contract changes.
+
+#### P1 — risk-dependent readiness
+
+- [ ] Assess whether a DPIA and/or DPO is required for the actual launch scope and customer profile; record the decision and revisit it when processing scale or purpose changes.
+- [ ] Keep dependency, cross-tenant isolation, restore and privileged-access reviews on a recurring release/operations schedule.
+
+Canonical requirements and evidence remain in [`docs/operations/data-protection-and-retention.md`](../docs/operations/data-protection-and-retention.md), [`docs/acceptance/tenant-data-lifecycle-checklist.md`](../docs/acceptance/tenant-data-lifecycle-checklist.md) and [`docs/acceptance/offsite-backup-restore-checklist.md`](../docs/acceptance/offsite-backup-restore-checklist.md). This backlog must not be interpreted as completed compliance or legal advice.
+
 ## Task 17: Run end-to-end acceptance and failure testing
 
 **Description:** Verify the complete Instagram-to-Google-Sheets journey and critical recovery cases against the Definition of Done.
