@@ -1,6 +1,6 @@
 # Global workspace search
 
-**Status:** Approved for implementation
+**Status:** Available
 
 ## Purpose
 
@@ -61,3 +61,5 @@ The query is trimmed, limited to 100 characters and must contain at least two ch
 - API tests cover validation, permissions, tenant propagation, grouping, customer deduplication, bounded results and safe failures.
 - Component tests cover click and shortcut opening, debounce, rendering, keyboard selection, navigation, retry, empty state, close/focus restoration and both locales.
 - Browser acceptance covers desktop and mobile composition, keyboard operation, exact navigation destinations and absence of horizontal overflow.
+
+The shipped implementation is owned by `packages/contracts/src/search.ts`, `apps/api/src/search`, `apps/web/src/api/workspace-search.ts` and `apps/web/src/components/workspace-search.tsx`. Automated contract, API and component tests protect the public response shape, tenant-scoped aggregation and keyboard-accessible interface.
