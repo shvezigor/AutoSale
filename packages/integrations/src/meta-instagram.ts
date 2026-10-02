@@ -37,6 +37,22 @@ export interface MetaInstagramSendResult {
   messageId: string;
 }
 
+export type MetaInstagramReplyMode = 'STANDARD' | 'HUMAN_AGENT' | 'EXPIRED';
+
+const STANDARD_REPLY_WINDOW_MS = 24 * 60 * 60 * 1_000;
+const HUMAN_AGENT_REPLY_WINDOW_MS = 7 * 24 * 60 * 60 * 1_000;
+
+export function metaInstagramReplyMode(
+  lastInboundAt: Date | null,
+  now: Date,
+): MetaInstagramReplyMode {
+  if (!lastInboundAt) return 'EXPIRED';
+  const ageMs = Math.max(0, now.getTime() - lastInboundAt.getTime());
+  if (ageMs <= STANDARD_REPLY_WINDOW_MS) return 'STANDARD';
+  if (ageMs <= HUMAN_AGENT_REPLY_WINDOW_MS) return 'HUMAN_AGENT';
+  return 'EXPIRED';
+}
+
 export class MetaInstagramError extends Error {
   constructor(
     readonly status: number | null,
@@ -149,6 +165,7 @@ export class MetaInstagramClient {
     recipientId: string,
     text: string,
     accessToken: string,
+    options: { humanAgent?: boolean } = {},
   ): Promise<MetaInstagramSendResult> {
     if (!/^[A-Za-z0-9_-]{1,128}$/.test(accountId)) {
       throw new Error('Invalid Instagram account id');
@@ -171,6 +188,7 @@ export class MetaInstagramClient {
         body: JSON.stringify({
           recipient: { id: recipientId },
           message: { text },
+          ...(options.humanAgent ? { tag: 'HUMAN_AGENT' } : {}),
         }),
       });
     } catch (error) {

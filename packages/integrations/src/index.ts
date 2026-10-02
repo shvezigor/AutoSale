@@ -34,10 +34,12 @@ export {
 export {
   MetaInstagramClient,
   MetaInstagramError,
+  metaInstagramReplyMode,
   type MetaInstagramAuthorizationInput,
   type MetaInstagramClientConfig,
   type MetaInstagramCodeExchangeInput,
   type MetaInstagramIdentity,
+  type MetaInstagramReplyMode,
   type MetaInstagramToken,
   type MetaInstagramUserProfile,
 } from './meta-instagram.js';

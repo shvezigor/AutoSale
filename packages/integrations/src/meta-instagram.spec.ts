@@ -203,6 +203,30 @@ describe('MetaInstagramClient', () => {
     expect(String(requestUrl)).not.toContain('secret-token');
   });
 
+  it('marks an extended-window manual reply with the human agent tag', async () => {
+    const fetchFn = vi.fn<typeof fetch>().mockResolvedValue(response({
+      recipient_id: 'ig-customer-1',
+      message_id: 'mid.human-agent',
+    }));
+    const client = new MetaInstagramClient({ ...config, fetch: fetchFn });
+
+    await client.sendText(
+      'instagram-shop',
+      'ig-customer-1',
+      'Вітаю',
+      'secret-token',
+      { humanAgent: true },
+    );
+
+    expect(fetchFn.mock.calls[0]?.[1]).toMatchObject({
+      body: JSON.stringify({
+        recipient: { id: 'ig-customer-1' },
+        message: { text: 'Вітаю' },
+        tag: 'HUMAN_AGENT',
+      }),
+    });
+  });
+
   it.each([
     ['../me', 'ig-customer-1', 'Вітаю'],
     ['instagram-shop', '../me', 'Вітаю'],

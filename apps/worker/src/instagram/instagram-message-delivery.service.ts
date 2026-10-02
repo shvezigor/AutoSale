@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
 import { type PrismaClient, withTenantTransaction } from '@autosale/database';
-import { CredentialCipher, MetaInstagramError } from '@autosale/integrations';
+import { CredentialCipher, MetaInstagramError, metaInstagramReplyMode } from '@autosale/integrations';
 
 const LEASE_MS = 60_000;
 const RATE_LIMIT_DELAYS_MS = [5_000, 15_000, 60_000, 5 * 60_000] as const;
@@ -20,6 +20,7 @@ interface InstagramTextClient {
     recipientId: string,
     text: string,
     accessToken: string,
+    options?: { humanAgent?: boolean },
   ): Promise<{ recipientId: string; messageId: string }>;
 }
 
@@ -73,7 +74,19 @@ export class InstagramMessageDeliveryService {
 
     const message = await withTenantTransaction(this.prisma, job.tenantId, (transaction) => transaction.message.findFirst({
       where: { id: job.messageId, tenantId: job.tenantId, deliveryLeaseId: leaseId },
-      include: { conversation: { select: { participantId: true } } },
+      include: {
+        conversation: {
+          select: {
+            participantId: true,
+            messages: {
+              where: { direction: 'INBOUND' },
+              orderBy: [{ sourceTimestamp: 'desc' }, { id: 'desc' }],
+              take: 1,
+              select: { sourceTimestamp: true },
+            },
+          },
+        },
+      },
     }));
     if (!message || message.text === null) {
       await this.finish(job, leaseId, {
@@ -107,6 +120,19 @@ export class InstagramMessageDeliveryService {
       return 'FAILED';
     }
 
+    const replyMode = metaInstagramReplyMode(
+      message.conversation.messages[0]?.sourceTimestamp ?? null,
+      startedAt,
+    );
+    if (replyMode === 'EXPIRED' || (replyMode === 'HUMAN_AGENT' && !message.sentByUserId)) {
+      await this.finish(job, leaseId, {
+        deliveryStatus: 'FAILED',
+        deliveryErrorCode: 'INSTAGRAM_REPLY_WINDOW_EXPIRED',
+        nextDeliveryAttemptAt: null,
+      });
+      return 'FAILED';
+    }
+
     let accessToken: string;
     try {
       accessToken = this.cipher.decrypt(connection.encryptedAccessToken);
@@ -117,12 +143,20 @@ export class InstagramMessageDeliveryService {
 
     let sent: { recipientId: string; messageId: string };
     try {
-      sent = await this.meta.sendText(
-        connection.externalAccountId,
-        message.conversation.participantId,
-        message.text,
-        accessToken,
-      );
+      sent = replyMode === 'HUMAN_AGENT'
+        ? await this.meta.sendText(
+            connection.externalAccountId,
+            message.conversation.participantId,
+            message.text,
+            accessToken,
+            { humanAgent: true },
+          )
+        : await this.meta.sendText(
+            connection.externalAccountId,
+            message.conversation.participantId,
+            message.text,
+            accessToken,
+          );
     } catch (error) {
       if (!(error instanceof MetaInstagramError)) {
         await this.finish(job, leaseId, {
@@ -164,6 +198,15 @@ export class InstagramMessageDeliveryService {
           nextDeliveryAttemptAt: null,
         });
         return 'UNKNOWN';
+      }
+
+      if (replyMode === 'HUMAN_AGENT') {
+        await this.finish(job, leaseId, {
+          deliveryStatus: 'FAILED',
+          deliveryErrorCode: 'INSTAGRAM_HUMAN_AGENT_UNAVAILABLE',
+          nextDeliveryAttemptAt: null,
+        });
+        return 'FAILED';
       }
 
       await this.finish(job, leaseId, {

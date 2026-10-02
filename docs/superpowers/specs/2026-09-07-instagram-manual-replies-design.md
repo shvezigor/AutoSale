@@ -17,6 +17,8 @@ While a message is `PENDING`, `SENDING`, or newly `UNKNOWN`, the conversation cl
 
 If the tenant has no active Instagram connection, or its credential is expired or revoked, the composer is disabled. The page explains the reason and links an owner to the Instagram settings flow. A manager sees the same safe status without access to credentials or owner-only configuration.
 
+Meta's standard reply window is 24 hours after the latest inbound customer message. A manager-authored reply between 24 hours and 7 days uses the `HUMAN_AGENT` tag; this exception is never used for automated or AI-authored messages. After 7 days the composer is disabled and explains that the customer must send a new message. If Meta has not granted the application the Human Agent capability, the attempted manual reply receives a dedicated safe error instead of a reconnect prompt or a generic failure.
+
 ## Architecture
 
 The durable PostgreSQL message record is the outbox. `Conversation` and `Message` use forced row-level security; the API and delivery worker load and mutate them only inside the authenticated or validated job tenant's transaction-local context. The request flow is:
@@ -24,7 +26,7 @@ The durable PostgreSQL message record is the outbox. `Conversation` and `Message
 1. The client creates a random idempotency key and submits the message text.
 2. The NestJS API authorizes the tenant membership, verifies the tenant-bound conversation and active Instagram connection, and creates one `OUTBOUND` message with status `PENDING`.
 3. A BullMQ dispatch wakes the worker. If Redis dispatch fails after the database commit, the worker's periodic outbox scan still discovers the pending record through a bounded security-definer function that returns only tenant/message IDs. That function is unavailable to the API and never returns message text or customer data.
-4. The worker claims the record atomically as `SENDING`, decrypts the tenant credential server-side, and calls the Meta Instagram Send API.
+4. The worker claims the record atomically as `SENDING`, rechecks the latest inbound timestamp, decrypts the tenant credential server-side, and calls the Meta Instagram Send API with the standard request or the manual-only `HUMAN_AGENT` tag.
 5. The worker records `SENT` plus the provider message ID and evaluates the existing confirmed-order trigger once, or records a sanitized failure and retry metadata.
 6. The client polling response updates the existing bubble without remounting the workspace page.
 7. A later Meta echo webhook reconciles with the local outbound message and does not create a second message.
@@ -80,7 +82,7 @@ The existing conversation detail response includes outbound delivery status, ret
 
 Extend the existing `MetaInstagramClient` with a narrow text-send method. It sends a bearer token in the authorization header and the recipient participant ID plus text in the documented request body. The adapter validates the response and exposes only normalized success metadata or a sanitized `MetaInstagramError`.
 
-Explicit rate-limit responses that confirm rejection may be retried with bounded exponential backoff. Network timeouts and ambiguous Meta `5xx` responses become `UNKNOWN` and are never retried automatically. Authentication or permission failures are terminal for the message and mark the tenant connection as requiring reconnection. Other explicit permanent request failures become `FAILED` without deleting the local conversation or message.
+Explicit rate-limit responses that confirm rejection may be retried with bounded exponential backoff. Network timeouts and ambiguous Meta `5xx` responses become `UNKNOWN` and are never retried automatically. Only an invalid credential marks the tenant connection as requiring reconnection. Human Agent rejection is terminal for that message, keeps the valid connection active, and reports that the extended manual-reply capability is unavailable. Other explicit permanent request failures become `FAILED` without deleting the local conversation or message.
 
 ## Echo reconciliation and order triggers
 
@@ -111,7 +113,7 @@ Automated tests cover:
 - controller membership, CSRF, validation, and tenant isolation;
 - service idempotency and inactive-connection rejection;
 - Meta adapter request shape and sanitized errors;
-- worker claiming, success, explicit safe retry, ambiguous delivery, terminal failure, expired lease recovery, and duplicate-job safety;
+- worker claiming, standard and Human Agent send modes, 7-day expiry, unavailable Human Agent capability, explicit safe retry, ambiguous delivery, terminal failure, expired lease recovery, and duplicate-job safety;
 - webhook echo reconciliation and exactly-once trigger behavior;
 - composer validation, optimistic bubble, polling, sent/failed states, retry, and inactive-connection UX;
 - production builds and database migration safety.

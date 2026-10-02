@@ -64,10 +64,11 @@ describe('ConversationsService', () => {
     const event = await prisma.webhookEvent.create({
       data: { tenantId, provider: 'META', externalEventId: 'seed-a', payload: {} },
     });
+    const current = Date.now();
     const times = [
-      new Date('2026-08-26T10:00:00.000Z'),
-      new Date('2026-08-26T11:00:00.000Z'),
-      new Date('2026-08-26T12:00:00.000Z'),
+      new Date(current - 3_000),
+      new Date(current - 2_000),
+      new Date(current - 1_000),
     ];
     for (const [index, lastMessageAt] of times.entries()) {
       const profile = await prisma.instagramCustomerProfile.create({
@@ -332,6 +333,42 @@ describe('ConversationsService', () => {
         data: { status: 'ACTIVE' },
       });
     }
+  });
+
+  it('disables and rejects replies when the customer has not written for more than 7 days', async () => {
+    const staleConversation = await prisma.conversation.create({
+      data: {
+        tenantId,
+        channel: 'INSTAGRAM',
+        externalConversationId: 'stale-customer',
+        participantId: 'stale-customer',
+        lastMessageAt: new Date(Date.now() - (8 * 24 * 60 * 60 * 1_000)),
+      },
+    });
+    const staleEvent = await prisma.webhookEvent.create({
+      data: { tenantId, provider: 'META', externalEventId: `stale-${randomUUID()}`, payload: {} },
+    });
+    await prisma.message.create({
+      data: {
+        tenantId,
+        conversationId: staleConversation.id,
+        rawEventId: staleEvent.id,
+        channel: 'INSTAGRAM',
+        externalMessageId: 'stale-inbound-message',
+        direction: 'INBOUND',
+        senderId: 'stale-customer',
+        text: 'Давнє повідомлення',
+        sourceTimestamp: new Date(Date.now() - (8 * 24 * 60 * 60 * 1_000)),
+      },
+    });
+
+    const detail = await service.detail(tenantId, staleConversation.id);
+    expect(detail.replyCapability).toEqual({ enabled: false, reason: 'REPLY_WINDOW_EXPIRED' });
+    await expect(service.send(tenantId, actorUserId, staleConversation.id, {
+      text: 'Вітаю',
+      idempotencyKey: randomUUID(),
+    })).rejects.toBeInstanceOf(BadRequestException);
+    expect(queue.add).not.toHaveBeenCalled();
   });
 
   it('limits accepted replies to 30 per manager and tenant in a rolling minute', async () => {

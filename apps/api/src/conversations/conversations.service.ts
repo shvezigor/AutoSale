@@ -10,6 +10,7 @@ import type {
   OutboundMessageInput,
 } from '@autosale/contracts/conversations';
 import { assertTenantAcceptingMutations, type PrismaClient, withTenantTransaction } from '@autosale/database';
+import { metaInstagramReplyMode } from '@autosale/integrations';
 import {
   BadRequestException,
   HttpException,
@@ -145,7 +146,7 @@ export class ConversationsService {
       participantName: participantName(conversation.profile, conversation.displayName),
       participantUsername: conversation.profile?.username ?? null,
       participantAvatarUrl: profileAvatarUrl(conversation.profile),
-      replyCapability: replyCapability(connection, new Date()),
+      replyCapability: replyCapability(connection, new Date(), latestInboundAt(conversation.messages)),
       messages: conversation.messages.map((message) => mapMessage(
         message,
         isDeliveryConnectionActive(connection, new Date()),
@@ -225,12 +226,23 @@ export class ConversationsService {
       await assertTenantAcceptingMutations(transaction, tenantId, 'CONVERSATION_REPLY');
       const conversation = await transaction.conversation.findFirst({
         where: { id: conversationId, tenantId, channel: 'INSTAGRAM' },
+        include: {
+          messages: {
+            where: { direction: 'INBOUND' },
+            orderBy: [{ sourceTimestamp: 'desc' }, { id: 'desc' }],
+            take: 1,
+            select: { sourceTimestamp: true },
+          },
+        },
       });
       if (!conversation) throw new NotFoundException('Conversation not found');
 
       const connection = await transaction.instagramConnection.findUnique({ where: { tenantId } });
       if (!isDeliveryConnectionActive(connection, now)) {
         throw new BadRequestException('Instagram connection is not ready for replies');
+      }
+      if (metaInstagramReplyMode(conversation.messages[0]?.sourceTimestamp ?? null, now) === 'EXPIRED') {
+        throw new BadRequestException('Instagram reply window expired');
       }
 
       const existing = await transaction.message.findFirst({
@@ -350,12 +362,28 @@ export class ConversationsService {
   }
 }
 
-function replyCapability(connection: DeliveryConnection | null, now: Date): ConversationDetailResponse['replyCapability'] {
-  if (isDeliveryConnectionActive(connection, now)) return { enabled: true, reason: null };
+function replyCapability(
+  connection: DeliveryConnection | null,
+  now: Date,
+  lastInboundAt: Date | null,
+): ConversationDetailResponse['replyCapability'] {
+  if (isDeliveryConnectionActive(connection, now)) {
+    return metaInstagramReplyMode(lastInboundAt, now) === 'EXPIRED'
+      ? { enabled: false, reason: 'REPLY_WINDOW_EXPIRED' }
+      : { enabled: true, reason: null };
+  }
   return {
     enabled: false,
     reason: connection ? 'RECONNECT_REQUIRED' : 'NOT_CONNECTED',
   };
+}
+
+function latestInboundAt(messages: Array<{ direction: string; sourceTimestamp: Date }>): Date | null {
+  for (let index = messages.length - 1; index >= 0; index -= 1) {
+    const message = messages[index];
+    if (message?.direction === 'INBOUND') return message.sourceTimestamp;
+  }
+  return null;
 }
 
 function isDeliveryConnectionActive(connection: DeliveryConnection | null, now: Date): connection is DeliveryConnection {
@@ -451,7 +479,9 @@ function isDeliveryErrorCode(value: string | null): value is NonNullable<Convers
   return value === 'INSTAGRAM_RECONNECT_REQUIRED' ||
     value === 'INSTAGRAM_RATE_LIMITED' ||
     value === 'INSTAGRAM_SEND_FAILED' ||
-    value === 'INSTAGRAM_DELIVERY_UNKNOWN';
+    value === 'INSTAGRAM_DELIVERY_UNKNOWN' ||
+    value === 'INSTAGRAM_REPLY_WINDOW_EXPIRED' ||
+    value === 'INSTAGRAM_HUMAN_AGENT_UNAVAILABLE';
 }
 
 function participantName(

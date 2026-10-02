@@ -213,6 +213,7 @@ export function InstagramReplyComposer({
 }
 
 function replyDisabledText(reason: ConversationDetailResponse['replyCapability']['reason'], t: ReturnType<typeof useI18n>['t']) {
+  if (reason === 'REPLY_WINDOW_EXPIRED') return t('conversations.replyWindowExpired');
   return reason === 'RECONNECT_REQUIRED'
     ? t('conversations.reconnectToReply')
     : t('conversations.connectToReply');
@@ -221,5 +222,7 @@ function replyDisabledText(reason: ConversationDetailResponse['replyCapability']
 function deliveryErrorText(message: ConversationMessage, t: ReturnType<typeof useI18n>['t']) {
   if (message.delivery?.errorCode === 'INSTAGRAM_RECONNECT_REQUIRED') return t('conversations.reconnectInSettings');
   if (message.delivery?.errorCode === 'INSTAGRAM_RATE_LIMITED') return t('conversations.rateLimited');
+  if (message.delivery?.errorCode === 'INSTAGRAM_REPLY_WINDOW_EXPIRED') return t('conversations.replyWindowExpired');
+  if (message.delivery?.errorCode === 'INSTAGRAM_HUMAN_AGENT_UNAVAILABLE') return t('conversations.humanAgentUnavailable');
   return t('conversations.retryLater');
 }

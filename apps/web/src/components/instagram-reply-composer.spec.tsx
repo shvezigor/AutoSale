@@ -156,4 +156,13 @@ describe('InstagramReplyComposer', () => {
     expect(screen.getByText(/спочатку підключіть Instagram/i)).toBeVisible();
     expect(screen.queryByRole('link', { name: /Instagram/i })).not.toBeInTheDocument();
   });
+
+  it('explains that an expired conversation must be reopened by the customer', () => {
+    renderComposer({
+      ...conversation,
+      replyCapability: { enabled: false, reason: 'REPLY_WINDOW_EXPIRED' },
+    });
+    expect(screen.getByRole('textbox', { name: 'Відповідь' })).toBeDisabled();
+    expect(screen.getByText(/клієнт має написати нове повідомлення/i)).toBeVisible();
+  });
 });

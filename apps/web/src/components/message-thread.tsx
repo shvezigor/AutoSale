@@ -132,5 +132,7 @@ function deliveryLabel(
   if (status === 'UNKNOWN') return t('conversations.deliveryUnknown');
   if (errorCode === 'INSTAGRAM_RECONNECT_REQUIRED') return t('conversations.reconnectRequired');
   if (errorCode === 'INSTAGRAM_RATE_LIMITED') return t('conversations.rateLimited');
+  if (errorCode === 'INSTAGRAM_REPLY_WINDOW_EXPIRED') return t('conversations.replyWindowExpiredShort');
+  if (errorCode === 'INSTAGRAM_HUMAN_AGENT_UNAVAILABLE') return t('conversations.humanAgentUnavailableShort');
   return t('conversations.sendFailed');
 }

@@ -69,6 +69,32 @@ describe('conversation profile contracts', () => {
     expect(parsed.messages[0]?.delivery).toEqual({ status: 'PENDING', attempts: 0, errorCode: null, retryAllowed: false });
   });
 
+  it('retains expired reply-window capability and delivery errors', () => {
+    const parsed = conversationDetailResponseSchema.parse({
+      id: '11111111-1111-4111-8111-111111111111',
+      channel: 'INSTAGRAM',
+      participantName: 'Олена',
+      participantUsername: 'olena',
+      participantAvatarUrl: null,
+      replyCapability: { enabled: false, reason: 'REPLY_WINDOW_EXPIRED' },
+      messages: [{
+        id: '22222222-2222-4222-8222-222222222222',
+        direction: 'OUTBOUND',
+        senderId: 'shop',
+        text: 'Доброго дня!',
+        sourceTimestamp: '2026-09-07T12:00:00.000Z',
+        attachments: [],
+        delivery: {
+          status: 'FAILED', attempts: 1,
+          errorCode: 'INSTAGRAM_HUMAN_AGENT_UNAVAILABLE', retryAllowed: false,
+        },
+      }],
+    });
+
+    expect(parsed.replyCapability.reason).toBe('REPLY_WINDOW_EXPIRED');
+    expect(parsed.messages[0]?.delivery?.errorCode).toBe('INSTAGRAM_HUMAN_AGENT_UNAVAILABLE');
+  });
+
   it('retains image, video, link, and unsupported Instagram attachments', () => {
     const parsed = conversationDetailResponseSchema.parse({
       id: '11111111-1111-4111-8111-111111111111',

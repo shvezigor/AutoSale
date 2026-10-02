@@ -16,6 +16,7 @@ describe('InstagramMessageDeliveryService', () => {
   let prisma: PrismaClient;
   let tenantId: string;
   let conversationId: string;
+  let actorUserId: string;
   const now = new Date('2026-09-07T12:00:00.000Z');
   const cipher = new CredentialCipher(Buffer.alloc(32, 9));
   const sendText = vi.fn();
@@ -28,6 +29,10 @@ describe('InstagramMessageDeliveryService', () => {
     prisma = createPrismaClient(connectionString);
     const tenant = await prisma.tenant.create({ data: { key: 'delivery', name: 'Delivery' } });
     tenantId = tenant.id;
+    const actor = await prisma.user.create({
+      data: { email: 'instagram-manager@example.test', name: 'Instagram Manager', status: 'ACTIVE' },
+    });
+    actorUserId = actor.id;
     await prisma.instagramConnection.create({
       data: {
         tenantId,
@@ -48,10 +53,29 @@ describe('InstagramMessageDeliveryService', () => {
       },
     });
     conversationId = conversation.id;
+    const event = await prisma.webhookEvent.create({
+      data: { tenantId, provider: 'META', externalEventId: 'delivery-default-inbound', payload: {} },
+    });
+    await prisma.message.create({
+      data: {
+        tenantId,
+        conversationId,
+        rawEventId: event.id,
+        channel: 'INSTAGRAM',
+        externalMessageId: 'default-inbound-message',
+        direction: 'INBOUND',
+        senderId: 'ig-customer-1',
+        text: 'Вхідне повідомлення',
+        sourceTimestamp: now,
+      },
+    });
   }, 60_000);
 
   beforeEach(() => {
-    sendText.mockReset().mockResolvedValue({ recipientId: 'ig-customer-1', messageId: 'mid.123' });
+    sendText.mockReset().mockImplementation(async () => ({
+      recipientId: 'ig-customer-1',
+      messageId: `mid.${randomUUID()}`,
+    }));
     processIfTriggered.mockReset().mockResolvedValue(null);
   });
 
@@ -70,12 +94,75 @@ describe('InstagramMessageDeliveryService', () => {
     );
     await expect(prisma.message.findUniqueOrThrow({ where: { id: messageId } })).resolves.toMatchObject({
       deliveryStatus: 'SENT',
-      providerMessageId: 'mid.123',
+      providerMessageId: expect.stringMatching(/^mid\./),
       deliveryAttempts: 1,
       deliveryLeaseId: null,
       deliveryErrorCode: null,
     });
     expect(processIfTriggered).toHaveBeenCalledWith(tenantId, messageId);
+  });
+
+  it('uses the human-agent tag only for a manager reply sent 24 hours to 7 days after the last inbound message', async () => {
+    await prisma.message.updateMany({
+      where: { tenantId, conversationId, direction: 'INBOUND' },
+      data: { sourceTimestamp: new Date(now.getTime() - (4 * 24 * 60 * 60 * 1_000)) },
+    });
+    const messageId = await seedMessage({ sentByUserId: actorUserId });
+
+    try {
+      await expect(service().process({ tenantId, messageId })).resolves.toBe('SENT');
+      expect(sendText).toHaveBeenCalledWith(
+        'instagram-shop', 'ig-customer-1', 'Вітаю', 'access-token-that-must-not-leak',
+        { humanAgent: true },
+      );
+    } finally {
+      await prisma.message.updateMany({
+        where: { tenantId, conversationId, direction: 'INBOUND' },
+        data: { sourceTimestamp: now },
+      });
+    }
+  });
+
+  it('does not call Meta when the last inbound message is older than 7 days', async () => {
+    await prisma.message.updateMany({
+      where: { tenantId, conversationId, direction: 'INBOUND' },
+      data: { sourceTimestamp: new Date(now.getTime() - (8 * 24 * 60 * 60 * 1_000)) },
+    });
+    const messageId = await seedMessage();
+
+    try {
+      await expect(service().process({ tenantId, messageId })).resolves.toBe('FAILED');
+      expect(sendText).not.toHaveBeenCalled();
+      await expect(prisma.message.findUniqueOrThrow({ where: { id: messageId } })).resolves.toMatchObject({
+        deliveryStatus: 'FAILED', deliveryErrorCode: 'INSTAGRAM_REPLY_WINDOW_EXPIRED',
+      });
+    } finally {
+      await prisma.message.updateMany({
+        where: { tenantId, conversationId, direction: 'INBOUND' },
+        data: { sourceTimestamp: now },
+      });
+    }
+  });
+
+  it('reports when Meta has not enabled extended-window manual replies', async () => {
+    await prisma.message.updateMany({
+      where: { tenantId, conversationId, direction: 'INBOUND' },
+      data: { sourceTimestamp: new Date(now.getTime() - (4 * 24 * 60 * 60 * 1_000)) },
+    });
+    const messageId = await seedMessage({ sentByUserId: actorUserId });
+    sendText.mockRejectedValueOnce(new MetaInstagramError(403, 10, false, 2018278, 'SEND'));
+
+    try {
+      await expect(service().process({ tenantId, messageId })).resolves.toBe('FAILED');
+      await expect(prisma.message.findUniqueOrThrow({ where: { id: messageId } })).resolves.toMatchObject({
+        deliveryStatus: 'FAILED', deliveryErrorCode: 'INSTAGRAM_HUMAN_AGENT_UNAVAILABLE',
+      });
+    } finally {
+      await prisma.message.updateMany({
+        where: { tenantId, conversationId, direction: 'INBOUND' },
+        data: { sourceTimestamp: now },
+      });
+    }
   });
 
   it('marks an invalid token as reconnect-required for the same credential generation', async () => {
@@ -184,7 +271,7 @@ describe('InstagramMessageDeliveryService', () => {
     );
   }
 
-  async function seedMessage(overrides: { deliveryAttempts?: number } = {}): Promise<string> {
+  async function seedMessage(overrides: { deliveryAttempts?: number; sentByUserId?: string } = {}): Promise<string> {
     const id = randomUUID();
     await prisma.message.create({
       data: {
@@ -199,6 +286,7 @@ describe('InstagramMessageDeliveryService', () => {
         text: 'Вітаю',
         sourceTimestamp: now,
         clientIdempotencyKey: randomUUID(),
+        sentByUserId: overrides.sentByUserId ?? null,
         deliveryStatus: 'PENDING',
         deliveryAttempts: overrides.deliveryAttempts ?? 0,
         nextDeliveryAttemptAt: now,

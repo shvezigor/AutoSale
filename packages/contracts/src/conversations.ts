@@ -35,6 +35,8 @@ export const outboundDeliverySchema = z.object({
     'INSTAGRAM_RATE_LIMITED',
     'INSTAGRAM_SEND_FAILED',
     'INSTAGRAM_DELIVERY_UNKNOWN',
+    'INSTAGRAM_REPLY_WINDOW_EXPIRED',
+    'INSTAGRAM_HUMAN_AGENT_UNAVAILABLE',
   ]).nullable(),
   retryAllowed: z.boolean(),
 });
@@ -46,7 +48,7 @@ export const outboundMessageInputSchema = z.object({
 
 export const replyCapabilitySchema = z.object({
   enabled: z.boolean(),
-  reason: z.enum(['NOT_CONNECTED', 'RECONNECT_REQUIRED']).nullable(),
+  reason: z.enum(['NOT_CONNECTED', 'RECONNECT_REQUIRED', 'REPLY_WINDOW_EXPIRED']).nullable(),
 });
 
 export const conversationMessageSchema = z.object({
