@@ -1,6 +1,7 @@
 import { DynamicModule, Module } from '@nestjs/common';
 import { Queue } from 'bullmq';
 
+export const SOCIAL_INBOUND_QUEUE = Symbol('SOCIAL_INBOUND_QUEUE');
 export const INSTAGRAM_NORMALIZE_QUEUE = Symbol('INSTAGRAM_NORMALIZE_QUEUE');
 export const INSTAGRAM_QUEUE = Symbol('INSTAGRAM_QUEUE');
 
@@ -13,7 +14,7 @@ export class QueueModule {
       module: QueueModule,
       providers: [
         {
-          provide: INSTAGRAM_NORMALIZE_QUEUE,
+          provide: SOCIAL_INBOUND_QUEUE,
           useFactory: () =>
             new Queue('instagram', {
               connection: {
@@ -32,11 +33,15 @@ export class QueueModule {
             }),
         },
         {
+          provide: INSTAGRAM_NORMALIZE_QUEUE,
+          useExisting: SOCIAL_INBOUND_QUEUE,
+        },
+        {
           provide: INSTAGRAM_QUEUE,
-          useExisting: INSTAGRAM_NORMALIZE_QUEUE,
+          useExisting: SOCIAL_INBOUND_QUEUE,
         },
       ],
-      exports: [INSTAGRAM_NORMALIZE_QUEUE, INSTAGRAM_QUEUE],
+      exports: [SOCIAL_INBOUND_QUEUE, INSTAGRAM_NORMALIZE_QUEUE, INSTAGRAM_QUEUE],
     };
   }
 }

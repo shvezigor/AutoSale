@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { registerMetaEventSchema } from './meta.js';
+import { metaWebhookObjectSchema, registerMetaEventSchema } from './meta.js';
 
 describe('registerMetaEventSchema', () => {
   it('accepts a stable Meta event identity and JSON payload', () => {
@@ -21,5 +21,11 @@ describe('registerMetaEventSchema', () => {
         payload: {},
       }),
     ).toThrow();
+  });
+
+  it('accepts only supported Meta webhook objects', () => {
+    expect(metaWebhookObjectSchema.parse('instagram')).toBe('instagram');
+    expect(metaWebhookObjectSchema.parse('page')).toBe('page');
+    expect(() => metaWebhookObjectSchema.parse('user')).toThrow();
   });
 });

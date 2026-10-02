@@ -17,7 +17,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 
-import { INSTAGRAM_NORMALIZE_QUEUE } from '../queue/queue.module.js';
+import { SOCIAL_INBOUND_QUEUE } from '../queue/queue.module.js';
 import { Public } from '../auth/auth.decorators.js';
 import { MetaEventService } from './meta-event.service.js';
 import { MetaSignatureService } from './meta-signature.service.js';
@@ -30,7 +30,7 @@ export interface MetaWebhookConfig {
 
 interface NormalizeQueue {
   add(
-    name: 'instagram.normalize',
+    name: 'instagram.normalize' | 'facebook.normalize',
     data: { tenantId: string; eventId: string; correlationId: string },
     options: { jobId: string; removeOnFail: true },
   ): Promise<unknown>;
@@ -43,7 +43,7 @@ export class MetaController {
     @Inject(META_WEBHOOK_CONFIG) private readonly config: MetaWebhookConfig,
     @Inject(MetaSignatureService) private readonly signatures: MetaSignatureService,
     @Inject(MetaEventService) private readonly events: MetaEventService,
-    @Inject(INSTAGRAM_NORMALIZE_QUEUE) private readonly queue: NormalizeQueue,
+    @Inject(SOCIAL_INBOUND_QUEUE) private readonly queue: NormalizeQueue,
   ) {}
 
   @Get()
@@ -70,13 +70,14 @@ export class MetaController {
       throw new UnauthorizedException();
     }
 
-    const entries = validateInstagramEntries(payload);
-    for (const entry of entries) {
-      const tenantId = await this.events.resolveTenant(entry.id);
+    const webhook = validateMetaEntries(payload);
+    const channel = webhook.object === 'instagram' ? 'INSTAGRAM' : 'FACEBOOK';
+    for (const entry of webhook.entries) {
+      const tenantId = await this.events.resolveTenant(channel, entry.id);
       if (!tenantId) continue;
 
-      const entryPayload = { object: 'instagram', entry: [entry] };
-      const externalEventId = deriveExternalEventId(entryPayload, tenantId);
+      const entryPayload = { object: webhook.object, entry: [entry] };
+      const externalEventId = deriveExternalEventId(entryPayload, tenantId, channel);
       const registered = await this.events.register({
         tenantId,
         externalEventId,
@@ -84,17 +85,21 @@ export class MetaController {
       });
 
       if (registered.pending) {
-        void this.dispatch(tenantId, registered.eventId);
+        void this.dispatch(channel, tenantId, registered.eventId);
       }
     }
 
     return { received: true };
   }
 
-  private async dispatch(tenantId: string, eventId: string): Promise<void> {
+  private async dispatch(
+    channel: 'INSTAGRAM' | 'FACEBOOK',
+    tenantId: string,
+    eventId: string,
+  ): Promise<void> {
     try {
       await this.queue.add(
-        'instagram.normalize',
+        channel === 'INSTAGRAM' ? 'instagram.normalize' : 'facebook.normalize',
         { tenantId, eventId, correlationId: eventId },
         { jobId: eventId, removeOnFail: true },
       );
@@ -104,31 +109,40 @@ export class MetaController {
   }
 }
 
-interface InstagramEntry extends Record<string, unknown> {
+interface MetaEntry extends Record<string, unknown> {
   id: string;
 }
 
-function validateInstagramEntries(payload: Record<string, unknown>): InstagramEntry[] {
-  if (payload.object !== 'instagram' || !Array.isArray(payload.entry)) {
-    throw new BadRequestException('Malformed Instagram webhook payload');
+function validateMetaEntries(payload: Record<string, unknown>): {
+  object: 'instagram' | 'page';
+  entries: MetaEntry[];
+} {
+  if ((payload.object !== 'instagram' && payload.object !== 'page') || !Array.isArray(payload.entry)) {
+    throw new BadRequestException('Malformed Meta webhook payload');
   }
 
-  return payload.entry.map((entry) => {
+  const entries = payload.entry.map((entry) => {
     if (!isRecord(entry) || typeof entry.id !== 'string' || entry.id.length === 0) {
-      throw new BadRequestException('Instagram webhook entry requires an account id');
+      throw new BadRequestException('Meta webhook entry requires an account id');
     }
-    return entry as InstagramEntry;
+    return entry as MetaEntry;
   });
+  return { object: payload.object, entries };
 }
 
-function deriveExternalEventId(payload: Record<string, unknown>, tenantId: string): string {
+function deriveExternalEventId(
+  payload: Record<string, unknown>,
+  tenantId: string,
+  channel: 'INSTAGRAM' | 'FACEBOOK',
+): string {
   const messageIds = collectMessageIds(payload);
   if (messageIds.length === 1) {
-    return messageIds[0]!;
+    return channel === 'FACEBOOK' ? `facebook:${messageIds[0]!}` : messageIds[0]!;
   }
 
   const canonical = stableStringify({ tenantId, payload });
-  return `sha256:${createHash('sha256').update(canonical).digest('hex')}`;
+  const digest = `sha256:${createHash('sha256').update(canonical).digest('hex')}`;
+  return channel === 'FACEBOOK' ? `facebook:${digest}` : digest;
 }
 
 function collectMessageIds(payload: Record<string, unknown>): string[] {

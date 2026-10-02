@@ -9,9 +9,17 @@ import {
 import { metrics } from '@autosale/observability';
 
 export class MetaEventService {
-  constructor(private readonly prisma: PrismaClient, private readonly now: () => Date = () => new Date()) {}
+  constructor(
+    private readonly prisma: PrismaClient,
+    private readonly now: () => Date = () => new Date(),
+    private readonly facebookMessengerEnabled = false,
+  ) {}
 
-  async resolveTenant(externalAccountId: string): Promise<string | null> {
+  async resolveTenant(
+    channel: 'INSTAGRAM' | 'FACEBOOK',
+    externalAccountId: string,
+  ): Promise<string | null> {
+    if (channel === 'FACEBOOK') return this.resolveFacebookTenant(externalAccountId);
     const authority = await this.prisma.$queryRaw<Array<{ tenant_id: string }>>`
       SELECT tenant_id FROM public.api_instagram_tenant_for_account(${externalAccountId})
     `;
@@ -29,6 +37,32 @@ export class MetaEventService {
         await transaction.instagramConnection.updateMany({
           where: { externalAccountId, status: 'ACTIVE', tokenExpiresAt: { lte: now } },
           data: { status: 'REAUTH_REQUIRED', lastErrorCode: 'META_TOKEN_EXPIRED' },
+        });
+        return null;
+      }
+      return connection.tenantId;
+    });
+  }
+
+  private async resolveFacebookTenant(externalPageId: string): Promise<string | null> {
+    if (!this.facebookMessengerEnabled) return null;
+    const authority = await this.prisma.$queryRaw<Array<{ tenant_id: string }>>`
+      SELECT tenant_id FROM public.api_facebook_tenant_for_page(${externalPageId})
+    `;
+    const tenantId = authority[0]?.tenant_id;
+    if (!tenantId) return null;
+
+    return withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+      const connection = await transaction.facebookConnection.findUnique({
+        where: { externalPageId },
+        select: { tenantId: true, status: true, tokenExpiresAt: true },
+      });
+      if (connection?.status !== 'ACTIVE') return null;
+      const now = this.now();
+      if (connection.tokenExpiresAt !== null && connection.tokenExpiresAt <= now) {
+        await transaction.facebookConnection.updateMany({
+          where: { externalPageId, status: 'ACTIVE', tokenExpiresAt: { lte: now } },
+          data: { status: 'REAUTH_REQUIRED', lastErrorCode: 'FACEBOOK_TOKEN_EXPIRED' },
         });
         return null;
       }

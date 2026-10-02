@@ -1,0 +1,20 @@
+{
+  "object": "page",
+  "entry": [
+    {
+      "id": "fictional-page-100",
+      "time": 1790971200000,
+      "messaging": [
+        {
+          "sender": { "id": "fictional-psid-100" },
+          "recipient": { "id": "fictional-page-100" },
+          "timestamp": 1790971200123,
+          "message": {
+            "mid": "mid.facebook.text.001",
+            "text": "Хочу замовити один тестовий товар"
+          }
+        }
+      ]
+    }
+  ]
+}

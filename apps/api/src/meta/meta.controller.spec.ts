@@ -7,7 +7,7 @@ import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { INSTAGRAM_NORMALIZE_QUEUE } from '../queue/queue.module.js';
+import { SOCIAL_INBOUND_QUEUE } from '../queue/queue.module.js';
 import { MetaEventService } from './meta-event.service.js';
 import {
   META_WEBHOOK_CONFIG,
@@ -44,7 +44,7 @@ describe('MetaController', () => {
         { provide: META_WEBHOOK_CONFIG, useValue: config },
         { provide: MetaSignatureService, useValue: new MetaSignatureService(appSecret) },
         { provide: MetaEventService, useValue: { register, resolveTenant } },
-        { provide: INSTAGRAM_NORMALIZE_QUEUE, useValue: { add } },
+        { provide: SOCIAL_INBOUND_QUEUE, useValue: { add } },
       ],
     }).compile();
 
@@ -99,7 +99,7 @@ describe('MetaController', () => {
       { tenantId, eventId: 'event-1', correlationId: 'event-1' },
       { jobId: 'event-1', removeOnFail: true },
     );
-    expect(resolveTenant).toHaveBeenCalledWith('17841400000000000');
+    expect(resolveTenant).toHaveBeenCalledWith('INSTAGRAM', '17841400000000000');
   });
 
   it('routes every entry through its own Instagram account and tenant', async () => {
@@ -121,7 +121,7 @@ describe('MetaController', () => {
       object: 'instagram',
       entry: [firstEntry, secondEntry],
     };
-    resolveTenant.mockImplementation(async (accountId: string) =>
+    resolveTenant.mockImplementation(async (_channel: string, accountId: string) =>
       accountId === '17841400000000000' ? tenantId : secondTenantId,
     );
     register
@@ -169,7 +169,7 @@ describe('MetaController', () => {
     const unknownEntry = { id: 'unknown-account', time: 1787731200000, messaging: [] };
     const knownEntry = (fixture.entry as unknown[])[0]!;
     const payload = { object: 'instagram', entry: [unknownEntry, knownEntry] };
-    resolveTenant.mockImplementation(async (accountId: string) =>
+    resolveTenant.mockImplementation(async (_channel: string, accountId: string) =>
       accountId === '17841400000000000' ? tenantId : null,
     );
     const sentBody = Buffer.from(JSON.stringify(payload));
@@ -182,8 +182,8 @@ describe('MetaController', () => {
       .send(payload)
       .expect(200, { received: true });
 
-    expect(resolveTenant).toHaveBeenNthCalledWith(1, 'unknown-account');
-    expect(resolveTenant).toHaveBeenNthCalledWith(2, '17841400000000000');
+    expect(resolveTenant).toHaveBeenNthCalledWith(1, 'INSTAGRAM', 'unknown-account');
+    expect(resolveTenant).toHaveBeenNthCalledWith(2, 'INSTAGRAM', '17841400000000000');
     expect(register).toHaveBeenCalledOnce();
     expect(register.mock.calls[0]![0]).toMatchObject({
       tenantId,
@@ -192,7 +192,7 @@ describe('MetaController', () => {
   });
 
   it.each([
-    [{ object: 'page', entry: [] }, 'a non-Instagram object'],
+    [{ object: 'user', entry: [] }, 'an unsupported object'],
     [{ object: 'instagram' }, 'a missing entry array'],
     [{ object: 'instagram', entry: [{ messaging: [] }] }, 'an entry without an account id'],
   ])('rejects %s before tenant resolution (%s)', async (payload, _description) => {
@@ -209,6 +209,32 @@ describe('MetaController', () => {
     expect(resolveTenant).not.toHaveBeenCalled();
     expect(register).not.toHaveBeenCalled();
     expect(add).not.toHaveBeenCalled();
+  });
+
+  it('registers each signed Page entry with a namespaced identity and queues Facebook normalization', async () => {
+    const body = await readFile(resolve(process.cwd(), '../../tests/fixtures/meta/facebook-text-message.json'));
+    const pageFixture = JSON.parse(body.toString('utf8')) as Record<string, unknown>;
+    const sentBody = Buffer.from(JSON.stringify(pageFixture));
+    const signature = `sha256=${createHmac('sha256', appSecret).update(sentBody).digest('hex')}`;
+
+    await request(app!.getHttpServer())
+      .post('/webhooks/meta')
+      .set('Content-Type', 'application/json')
+      .set('X-Hub-Signature-256', signature)
+      .send(pageFixture)
+      .expect(200, { received: true });
+
+    expect(resolveTenant).toHaveBeenCalledWith('FACEBOOK', 'fictional-page-100');
+    expect(register).toHaveBeenCalledWith({
+      tenantId,
+      externalEventId: 'facebook:mid.facebook.text.001',
+      payload: pageFixture,
+    });
+    expect(add).toHaveBeenCalledWith(
+      'facebook.normalize',
+      { tenantId, eventId: 'event-1', correlationId: 'event-1' },
+      { jobId: 'event-1', removeOnFail: true },
+    );
   });
 
   it('rejects an invalid signature without writing or enqueueing', async () => {

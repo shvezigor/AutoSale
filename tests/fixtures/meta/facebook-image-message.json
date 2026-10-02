@@ -1,0 +1,25 @@
+{
+  "object": "page",
+  "entry": [
+    {
+      "id": "fictional-page-100",
+      "time": 1790971210000,
+      "messaging": [
+        {
+          "sender": { "id": "fictional-psid-100" },
+          "recipient": { "id": "fictional-page-100" },
+          "timestamp": 1790971210123,
+          "message": {
+            "mid": "mid.facebook.image.001",
+            "attachments": [
+              {
+                "type": "image",
+                "payload": { "url": "https://example.invalid/fictional-product.jpg" }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -53,7 +53,7 @@ export class MetaModule {
                 },
               }),
             );
-            return new MetaEventService(prisma);
+            return new MetaEventService(prisma, undefined, env.FACEBOOK_MESSENGER_ENABLED);
           },
         },
       ],

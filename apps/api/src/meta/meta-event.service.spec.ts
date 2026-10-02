@@ -41,8 +41,26 @@ describe('MetaEventService', () => {
   it('rejects and transitions an expired active Instagram connection before webhook processing', async () => {
     const connection = await prisma.instagramConnection.create({ data: { tenantId, externalAccountId: '17841400000000000', status: 'ACTIVE', tokenExpiresAt: new Date('2026-08-28T11:59:59.999Z') } });
     const expiredService = new MetaEventService(prisma, () => new Date('2026-08-28T12:00:00.000Z'));
-    await expect(expiredService.resolveTenant(connection.externalAccountId)).resolves.toBeNull();
+    await expect(expiredService.resolveTenant('INSTAGRAM', connection.externalAccountId)).resolves.toBeNull();
     await expect(prisma.instagramConnection.findUniqueOrThrow({ where: { id: connection.id } })).resolves.toMatchObject({ status: 'REAUTH_REQUIRED', lastErrorCode: 'META_TOKEN_EXPIRED' });
+  });
+
+  it('resolves only an active Facebook Page when the feature is enabled', async () => {
+    const connection = await prisma.facebookConnection.create({
+      data: {
+        tenantId,
+        externalPageId: 'fictional-page-100',
+        pageName: 'Fictional Page',
+        status: 'ACTIVE',
+      },
+    });
+    const enabledService = new MetaEventService(prisma, () => new Date('2026-10-02T12:00:00.000Z'), true);
+
+    await expect(enabledService.resolveTenant('FACEBOOK', connection.externalPageId)).resolves.toBe(tenantId);
+    await expect(service.resolveTenant('FACEBOOK', connection.externalPageId)).resolves.toBeNull();
+
+    await prisma.facebookConnection.update({ where: { id: connection.id }, data: { status: 'DISCONNECTED' } });
+    await expect(enabledService.resolveTenant('FACEBOOK', connection.externalPageId)).resolves.toBeNull();
   });
 
   it('returns the existing event when the same Meta event is replayed', async () => {
