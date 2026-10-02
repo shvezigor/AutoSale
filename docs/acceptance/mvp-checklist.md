@@ -25,6 +25,9 @@
 - [x] 2026-09-11: доставка Новою Поштою покрита tenant-scope матрицею для connection, location, draft, quote, create, label, cancel і customer message; `apiKey`, credentials, телефон, адреса та raw provider payload централізовано маскуються в structured logs і заборонені як metric labels.
 - [x] 2026-09-11: mobile regression на 390×844 підтверджує відсутність горизонтального overflow, стабільну ширину кнопки під час loading, sticky actions, праве розташування toast і повернення focus після закриття drawer.
 - [x] 2026-09-11: production migration `20260910180000_delivery_foundation` застосована; API, web, worker, PostgreSQL, Redis і MinIO healthy, `https://sales-aito.com/login` повертає 200, а delivery feature flag увімкнений після health-check.
+- [x] 2026-10-02: Facebook Page OAuth/Page selection, encrypted credential lifecycle, signed `object: page` webhook routing, tenant-safe normalization/ingestion та read-only inbox покриті автоматизованими contract, integration, API, worker і web тестами.
+- [x] 2026-10-02: Facebook text/image/video/link/unsupported fixtures не створюють порожніх повідомлень; повторна доставка має одну provider identity, одне повідомлення й не запускає повторний order trigger.
+- [x] 2026-10-02: Facebook connection/settings та inbox мають owner/manager межу, локалізовані помилки, collapsed-by-default UI і явний `CHANNEL_READ_ONLY` без Instagram composer.
 
 ## Потребує зовнішніх тестових доступів
 
@@ -45,6 +48,16 @@
 - [ ] Підключити контрольований API-ключ Нової Пошти в `Налаштування → Доставка`, вибрати відправника, контакт і точку відправлення без фіксації ключа в evidence.
 - [ ] На одному погодженому тестовому замовленні перевірити quote → рівно одну ТТН → label → status sync → дозволене cancel → ручне Instagram-повідомлення; зберегти лише замаскований номер ТТН.
 
+## Facebook Messenger live validation
+
+- [ ] У Meta налаштовані точні production OAuth callback і webhook callback; потрібні Page permissions мають Advanced Access/App Review.
+- [ ] Власник підключив одну контрольовану Facebook Page, а менеджер бачить лише безпечний read-only статус.
+- [ ] Одне реальне текстове та одне реальне image-повідомлення з'явилися рівно один раз із Facebook label; evidence містить лише статуси, counts і timestamps.
+- [ ] Повторна доставка одного signed event не створила другого повідомлення або другого order trigger.
+- [ ] Одне явне замовлення пройшло Facebook order-intent flow рівно один раз без дубльованого замовлення.
+- [ ] Reconnect і disconnect/cleanup перевірені без токенів, тексту клієнта, Page ID або PSID у evidence.
+- [ ] Після live acceptance окремим рішенням змінити публічний статус; до цього `FACEBOOK_MESSENGER_ENABLED=false` лишається production default.
+
 ## Команда
 
 ```sh
@@ -56,3 +69,4 @@ docker compose build
 E2E запускається проти `E2E_BASE_URL` (типово `http://localhost`) і підписує fixtures значенням `META_APP_SECRET`. Не використовуйте production Instagram account або production Google Sheet для acceptance.
 Для захищених сценаріїв також задайте тестові `E2E_OWNER_EMAIL`, `E2E_OWNER_PASSWORD`, `E2E_ADMIN_EMAIL` та `E2E_ADMIN_PASSWORD`; деталі наведені в `docs/operations/authentication.md`.
 Live Google сценарій додатково вимагає `E2E_GOOGLE_LIVE=1` і `E2E_GOOGLE_SPREADSHEET_NAME`. Не вмикайте його для production акаунта чи таблиці.
+Facebook browser acceptance додатково вимагає `E2E_FACEBOOK_CONNECTED=1` і `E2E_FACEBOOK_PAGE_ID` для вже підключеної контрольованої Page. Не запускайте його проти production customer Page.

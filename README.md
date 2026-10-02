@@ -15,6 +15,7 @@ Currently implemented areas include:
 - Ukrainian/English marketing pages with SEO metadata, sitemap, robots rules, pricing and demo-lead capture;
 - registration, sessions, Google Sign-In, tenant roles, teams and user profiles;
 - Meta Instagram OAuth, signed webhook ingestion, conversations, media and durable manual replies;
+- Facebook Page OAuth, selection and inbound Messenger conversations behind a disabled-by-default validation flag;
 - AI order recognition, manager review, approval and audit history;
 - product catalogue management, spreadsheet import, AI-assisted column mapping and scheduled synchronization;
 - per-tenant Google Sheets OAuth and exactly-once order export;
@@ -23,7 +24,7 @@ Currently implemented areas include:
 - operational dashboard, notifications, observability, backup and restore.
 - tenant-isolated lifecycle exports, deletion-request freeze controls and non-destructive retention previews for platform operators.
 
-Facebook, Threads, TikTok, Viber, email services and additional business integrations are planned extensions of the provider-neutral conversation and order model. They must not be presented as implemented until an adapter and acceptance evidence exist. Pricing is published as a hypothesis, while automated billing and subscription enforcement remain planned. See the [feature map](docs/features/README.md) for evidence-based status.
+Facebook Page Messenger inbound is implemented but remains in controlled validation until Meta access and live Page acceptance pass. Threads, TikTok, Viber, email services and additional business integrations are planned extensions of the provider-neutral conversation and order model. Pricing is published as a hypothesis, while automated billing and subscription enforcement remain planned. See the [feature map](docs/features/README.md) for evidence-based status.
 
 ## System flow
 
@@ -130,6 +131,7 @@ Integration runbooks:
 - [Meta / Instagram access](docs/integrations/meta-access.md)
 - [Meta app review](docs/integrations/meta-app-review.md)
 - [Meta Instagram OAuth and webhook setup](docs/integrations/meta-instagram-oauth.md)
+- [Meta Facebook Messenger setup and acceptance](docs/integrations/meta-facebook-messenger.md)
 - [Google OAuth and Picker setup](docs/integrations/google-oauth-setup.md)
 - [Google Sheets access model](docs/integrations/google-sheets-access.md)
 - [Google Sign-In](docs/integrations/google-sign-in.md)

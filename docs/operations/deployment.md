@@ -37,13 +37,14 @@ infra/scripts/deploy.sh
 
 Артефакт приватний і після step-up передається як same-origin attachment через API; внутрішня адреса object storage та ключ об'єкта не потрапляють у браузер. Metadata завантаження очищається після семи днів. Для `FAILED` спочатку усуньте причину за безпечним кодом, потім використайте retry в admin UI; не додавайте довільні BullMQ retries. Для помилково замороженої організації скасуйте активну підготовку видалення та перевірте `CANCELLED`. Повний чекліст: [`../acceptance/tenant-data-lifecycle-checklist.md`](../acceptance/tenant-data-lifecycle-checklist.md).
 
-## Публічний origin для Meta Instagram
+## Публічний origin для Meta каналів
 
-Для Instagram OAuth і Meta webhook API читає тільки `APP_PUBLIC_URL`. До
+Для Instagram/Facebook OAuth і Meta webhook API читає тільки `APP_PUBLIC_URL`. До
 запуску встановіть його у кореневому `.env` в точний публічний HTTPS origin та
 перезапустіть API/стек. Дозволений OAuth callback завжди має вигляд
-`<APP_PUBLIC_URL>/api/integrations/instagram/callback`, а webhook callback —
-`<APP_PUBLIC_URL>/webhooks/meta`.
+`<APP_PUBLIC_URL>/api/integrations/instagram/callback` для Instagram або
+`<APP_PUBLIC_URL>/api/integrations/facebook/callback` для Facebook, а спільний
+webhook callback — `<APP_PUBLIC_URL>/webhooks/meta`.
 
 Для локального тестування використовуйте призначений ngrok development domain
 і тримайте Docker, комп'ютер та ngrok active. Для власного домену можна
@@ -55,7 +56,14 @@ firewall-ом (або змініть binding на loopback).
 
 Після зміни домену оновіть **і** Meta redirect URI, **і** Meta webhook
 callback, потім повторіть webhook verification та приймальний OAuth-тест.
-Детальний runbook: [`../integrations/meta-instagram-oauth.md`](../integrations/meta-instagram-oauth.md).
+Детальні runbooks: [`../integrations/meta-instagram-oauth.md`](../integrations/meta-instagram-oauth.md)
+та [`../integrations/meta-facebook-messenger.md`](../integrations/meta-facebook-messenger.md).
+
+`FACEBOOK_MESSENGER_ENABLED` за замовчуванням має залишатися `false`. Для
+контрольованої перевірки ввімкніть його одночасно в API і worker, виконайте
+міграції, перевірте health та лише тоді під'єднайте тестову Page. Швидкий
+відкат — повернути прапорець у `false` в обох сервісах і перезапустити їх;
+збережені підключення та діалоги не видаляються.
 
 ## Google OAuth і приватні таблиці
 

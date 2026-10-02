@@ -12,7 +12,7 @@ export type Integration = {
 export const integrations: Integration[] = [
   { id: 'instagram', name: 'Instagram', status: 'available', summary: { uk: 'Діалоги й замовлення в одному робочому потоці.', en: 'Conversations and orders in one workflow.' } },
   { id: 'google-sheets', name: 'Google Sheets', status: 'available', summary: { uk: 'Експорт підтверджених замовлень у вашу таблицю.', en: 'Export confirmed orders to your spreadsheet.' } },
-  { id: 'facebook', name: 'Facebook', status: 'in-development', summary: { uk: 'Обробка повідомлень сторінки разом з іншими каналами.', en: 'Page messages handled alongside other channels.' } },
+  { id: 'facebook', name: 'Facebook', status: 'in-development', summary: { uk: 'Вхідні повідомлення сторінки проходять контрольовану перевірку перед запуском.', en: 'Inbound Page messages are in controlled validation before launch.' } },
   { id: 'threads', name: 'Threads', status: 'in-development', summary: { uk: 'Новий канал діалогів у спільній черзі.', en: 'A new conversation channel in the shared queue.' } },
   { id: 'tiktok', name: 'TikTok', status: 'in-development', summary: { uk: 'Звернення з social commerce без ручного перенесення.', en: 'Social commerce enquiries without manual copying.' } },
   { id: 'viber', name: 'Viber', status: 'in-development', summary: { uk: 'Повідомлення покупців у єдиній системі.', en: 'Customer messages inside one system.' } },

@@ -9,10 +9,13 @@ ngrok-домену, Meta Instagram Login, тестерів, App Review, webhook 
 Актуальний стан заявки, блокери та сценарій обов'язкових screencast:
 [meta-app-review.md](meta-app-review.md).
 
-Поточна інтеграція приймає лише Instagram Professional Business і Creator
-акаунти через Instagram API with Instagram Login. Її єдина public webhook
-адреса — `/webhooks/meta`, а OAuth callback —
-`/api/integrations/instagram/callback` від `APP_PUBLIC_URL`.
+Instagram приймає Professional Business і Creator акаунти через Instagram API
+with Instagram Login. Facebook Page Messenger inbound реалізований окремим
+Facebook Login/OAuth потоком і поки проходить контрольовану live-валідацію.
+Обидва канали використовують одну підписану public webhook адресу
+`/webhooks/meta`, але різні OAuth callback: `/api/integrations/instagram/callback`
+і `/api/integrations/facebook/callback` від `APP_PUBLIC_URL`. Деталі Facebook,
+дозволи та критерії ввімкнення: [meta-facebook-messenger.md](meta-facebook-messenger.md).
 
 ## Відповіді з діалогу AutoSale
 

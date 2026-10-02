@@ -1,7 +1,7 @@
 # Facebook Messenger inbound channel design
 
 **Date:** 2026-10-02  
-**Status:** Approved design; implementation pending  
+**Status:** Implemented behind a disabled-by-default flag; live Meta validation pending
 **Owner:** Sales AITO social channels
 
 ## 1. Purpose
