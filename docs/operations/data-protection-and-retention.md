@@ -31,7 +31,7 @@ The phased technical design is defined in [`Tenant data lifecycle`](../superpowe
 
 Deletion requests still cannot physically delete tenant data. Provider ingestion, authenticated API business mutations and queued/scheduled provider side effects are now frozen. Platform admins can request count-only retention previews; they do not update or delete candidate records. The remaining steps below describe the complete launch target and require a later destructive-workflow acceptance gate.
 
-The reproducible phase-one evidence is maintained in [`tenant-data-lifecycle-checklist.md`](../acceptance/tenant-data-lifecycle-checklist.md). Automated component and cross-service suites are green; the explicit two-tenant live scenario remains an isolated acceptance gate, so feature status stays **Validation pending**. The scenario must use fictional tenants and always cancel its temporary deletion request.
+The reproducible phase-one evidence is maintained in [`tenant-data-lifecycle-checklist.md`](../acceptance/tenant-data-lifecycle-checklist.md). Automated component/cross-service suites and the isolated two-tenant scenario are green, so phase one is **Available**. The scenario uses fresh fictional tenants and always cancels its temporary deletion request. Encrypted off-host backup readiness is tracked separately in [`offsite-backup-restore-checklist.md`](../acceptance/offsite-backup-restore-checklist.md).
 
 Before general EU availability, implement one operator-owned workflow that:
 
