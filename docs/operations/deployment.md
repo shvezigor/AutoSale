@@ -35,7 +35,7 @@ infra/scripts/deploy.sh
 
 Після міграції перевірте, що API і worker підключені різними non-owner ролями, а worker слухає чергу `tenant-lifecycle`. Безпечний smoke-test обмежується `EXPORT` для виділеної fictional-організації: дочекайтеся `EXPORT_READY`, перевірте metadata SHA-256/розмір, завантажте через step-up і скасуйте запит після перевірки. Не створюйте production `DELETE`-запит під час smoke-test — він одразу заморожує нові бізнес-мутації.
 
-Артефакт приватний, URL діє п'ять хвилин, metadata завантаження очищається після семи днів. Для `FAILED` спочатку усуньте причину за безпечним кодом, потім використайте retry в admin UI; не додавайте довільні BullMQ retries. Для помилково замороженої організації скасуйте активну підготовку видалення та перевірте `CANCELLED`. Повний чекліст: [`../acceptance/tenant-data-lifecycle-checklist.md`](../acceptance/tenant-data-lifecycle-checklist.md).
+Артефакт приватний і після step-up передається як same-origin attachment через API; внутрішня адреса object storage та ключ об'єкта не потрапляють у браузер. Metadata завантаження очищається після семи днів. Для `FAILED` спочатку усуньте причину за безпечним кодом, потім використайте retry в admin UI; не додавайте довільні BullMQ retries. Для помилково замороженої організації скасуйте активну підготовку видалення та перевірте `CANCELLED`. Повний чекліст: [`../acceptance/tenant-data-lifecycle-checklist.md`](../acceptance/tenant-data-lifecycle-checklist.md).
 
 ## Публічний origin для Meta Instagram
 
