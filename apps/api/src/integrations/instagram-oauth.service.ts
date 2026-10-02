@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
-import { type Prisma, type PrismaClient, withTenantTransaction } from '@autosale/database';
+import { assertTenantAcceptingMutations, type Prisma, type PrismaClient, TenantLifecycleFrozenError, withTenantTransaction } from '@autosale/database';
 import {
   MetaInstagramError,
   type MetaInstagramClient,
@@ -197,6 +197,7 @@ export class InstagramOAuthService {
     userId: string,
     returnPath?: string,
   ): Promise<{ authorizationUrl: string }> {
+    await withTenantTransaction(this.prisma, tenantId, (transaction) => assertTenantAcceptingMutations(transaction, tenantId, 'META_INBOUND'));
     const state = await this.states.create({
       tenantId,
       userId,
@@ -304,6 +305,7 @@ export class InstagramOAuthService {
 
     try {
       await this.withCurrentAttempt(binding, async (transaction) => {
+        await assertTenantAcceptingMutations(transaction, binding.tenantId, 'META_INBOUND');
         await transaction.instagramConnection.upsert({
           where: { tenantId: binding.tenantId },
           create: { tenantId: binding.tenantId, ...pendingData },
@@ -328,7 +330,8 @@ export class InstagramOAuthService {
           'SUCCESS',
         );
       });
-    } catch {
+    } catch (error) {
+      if (error instanceof TenantLifecycleFrozenError) throw error;
       // A concurrent unique-account claim must never overwrite the owning tenant.
       await this.markCallbackFailure(binding, 'ERROR', 'META_CONNECTION_FAILED');
       throw safeFailure();
@@ -357,6 +360,7 @@ export class InstagramOAuthService {
     let active: SafeConnectionRow;
     try {
       active = await this.withCurrentAttempt(binding, async (transaction) => {
+        await assertTenantAcceptingMutations(transaction, binding.tenantId, 'META_INBOUND');
         if (pendingData.tokenExpiresAt <= this.now()) throw safeFailure();
         const resolvedCleanup = await transaction.instagramCredentialCleanup.updateMany({
           where: {
@@ -388,7 +392,8 @@ export class InstagramOAuthService {
         await this.recordAudit(transaction, binding, 'INSTAGRAM_CONNECTED', 'SUCCESS');
         return connection;
       });
-    } catch {
+    } catch (error) {
+      if (error instanceof TenantLifecycleFrozenError) throw error;
       try {
         const cleanup = await this.requireCallbackCleanup(
           binding,
@@ -537,6 +542,7 @@ export class InstagramOAuthService {
     userId: string,
   ): Promise<string | null> {
     return this.withSerializableRetry(() => withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+      await assertTenantAcceptingMutations(transaction, tenantId, 'META_INBOUND');
       const locked = await transaction.tenant.updateMany({
         where: { id: tenantId },
         data: { instagramOAuthCurrentAttemptId: null },

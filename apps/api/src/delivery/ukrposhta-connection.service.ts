@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
 import { ukrposhtaConnectionInputSchema, ukrposhtaSenderProfileInputSchema, type UkrposhtaConnectionInput, type UkrposhtaConnectionSummary, type UkrposhtaSenderProfileInput } from '@autosale/contracts';
-import { type PrismaClient, withTenantTransaction } from '@autosale/database';
+import { assertTenantAcceptingMutations, type PrismaClient, withTenantTransaction } from '@autosale/database';
 import type { CredentialCipher, UkrposhtaClient } from '@autosale/integrations';
 
 type UkrposhtaClientPort = Pick<UkrposhtaClient, 'validateCredential' | 'searchCities' | 'searchLocations'>;
@@ -35,12 +35,15 @@ export class UkrposhtaConnectionService {
 
   async connect(tenantId: string, userId: string, input: UkrposhtaConnectionInput): Promise<UkrposhtaConnectionSummary> {
     this.assertEnabled();
+    await withTenantTransaction(this.prisma, tenantId, (transaction) => assertTenantAcceptingMutations(transaction, tenantId, 'DELIVERY'));
     const client = this.clientFactory(input);
     const identity = await client.validateCredential();
     const encryptedCredential = this.cipher.encrypt(JSON.stringify(input));
     const credentialGenerationId = randomUUID();
     const verifiedAt = this.now();
-    const connection = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.deliveryConnection.upsert({
+    const connection = await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+      await assertTenantAcceptingMutations(transaction, tenantId, 'DELIVERY');
+      return transaction.deliveryConnection.upsert({
       where: { tenantId_provider: { tenantId, provider: 'UKRPOSHTA' } },
       create: {
         tenantId, provider: 'UKRPOSHTA', status: 'ACTIVE', encryptedCredential, credentialGenerationId,
@@ -51,19 +54,23 @@ export class UkrposhtaConnectionService {
         connectedByUserId: userId, lastVerifiedAt: verifiedAt, lastErrorCode: null, disconnectedAt: null,
       },
       include: { senderProfile: true },
-    }));
+      });
+    });
     return safeConnection(connection, this.cipher, input.environment);
   }
 
   async disconnect(tenantId: string): Promise<UkrposhtaConnectionSummary> {
     this.assertEnabled();
-    const result = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.deliveryConnection.updateMany({
+    const result = await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+      await assertTenantAcceptingMutations(transaction, tenantId, 'DELIVERY');
+      return transaction.deliveryConnection.updateMany({
       where: { tenantId, provider: 'UKRPOSHTA' },
       data: {
         status: 'DISCONNECTED', disconnectedAt: this.now(), encryptedCredential: this.cipher.encrypt(randomUUID()),
         credentialGenerationId: randomUUID(), lastErrorCode: null,
       },
-    }));
+      });
+    });
     if (result.count !== 1) throw new Error('Ukrposhta connection not found');
     return {
       provider: 'UKRPOSHTA', status: 'DISCONNECTED', accountLabel: null, lastVerifiedAt: null,
@@ -91,11 +98,14 @@ export class UkrposhtaConnectionService {
     }));
     if (!connection || connection.status !== 'ACTIVE') throw new Error('Active Ukrposhta connection required');
     const data = ukrposhtaSenderProfileData(parsed);
-    await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.deliverySenderProfile.upsert({
+    await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+      await assertTenantAcceptingMutations(transaction, tenantId, 'DELIVERY');
+      return transaction.deliverySenderProfile.upsert({
       where: { tenantId_connectionId: { tenantId, connectionId: connection.id } },
       create: { tenantId, connectionId: connection.id, ...data },
       update: data,
-    }));
+      });
+    });
     return parsed;
   }
 

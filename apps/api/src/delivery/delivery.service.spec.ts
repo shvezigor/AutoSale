@@ -49,6 +49,8 @@ const profile = {
 
 function fixture(overrides: Record<string, unknown> = {}) {
   const prisma = {
+    $queryRaw: vi.fn().mockResolvedValue([{ available: true }]),
+    tenantLifecycleRequest: { findFirst: vi.fn().mockResolvedValue(overrides.frozen ? { id: 'freeze-1' } : null) },
     deliveryConnection: {
       findUnique: vi.fn().mockResolvedValue(connection),
       upsert: vi.fn().mockResolvedValue(connection),
@@ -78,6 +80,15 @@ describe('DeliveryService', () => {
     expect(shipmentReadiness({ status: 'APPROVED', items: [{ procurementStatus: 'IN_STOCK' }, { procurementStatus: 'RECEIVED' }] })).toEqual({ allowed: true });
     expect(shipmentReadiness({ status: 'NEEDS_REVIEW', items: [{ procurementStatus: 'IN_STOCK' }] })).toEqual({ allowed: false, reason: 'ORDER_NOT_APPROVED' });
     expect(shipmentReadiness({ status: 'AUTO_APPROVED', items: [{ procurementStatus: 'TO_ORDER' }] })).toEqual({ allowed: false, reason: 'PROCUREMENT_INCOMPLETE' });
+  });
+
+  it('does not call the carrier or persist credentials while tenant mutations are frozen', async () => {
+    const { service, prisma, validateCredential } = fixture({ frozen: true });
+
+    await expect(service.connect(tenantId, userId, { apiKey: 'np-live-key' }))
+      .rejects.toThrow('TENANT_LIFECYCLE_FROZEN');
+    expect(validateCredential).not.toHaveBeenCalled();
+    expect(prisma.deliveryConnection.upsert).not.toHaveBeenCalled();
   });
 
   it('returns only a tenant-scoped safe connection summary', async () => {

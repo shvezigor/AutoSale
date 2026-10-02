@@ -79,4 +79,5 @@ export type TenantMutationSurface =
   | 'DELIVERY'
   | 'SUPPLIER_SEND'
   | 'SHEETS_EXPORT'
-  | 'NOTIFICATION_SEND';
+  | 'NOTIFICATION_SEND'
+  | 'ACCOUNT_ADMINISTRATION';

@@ -4,7 +4,7 @@ const allowedMetricResults = new Set(['success', 'failure', 'skipped', 'conflict
 const allowedMutationSurfaces = new Set([
   'META_INBOUND', 'TELEGRAM_INBOUND', 'ORDER_RECOGNITION', 'CONVERSATION_REPLY',
   'ORDER_MUTATION', 'COMMERCIAL_TERMS', 'PAYMENT', 'PROCUREMENT', 'CATALOGUE',
-  'DELIVERY', 'SUPPLIER_SEND', 'SHEETS_EXPORT', 'NOTIFICATION_SEND',
+  'DELIVERY', 'SUPPLIER_SEND', 'SHEETS_EXPORT', 'NOTIFICATION_SEND', 'ACCOUNT_ADMINISTRATION',
 ]);
 const allowedSafeReasons = new Set(['lifecycle_frozen']);
 const buckets = [0.05, 0.1, 0.25, 0.5, 1, 2.5, 5];

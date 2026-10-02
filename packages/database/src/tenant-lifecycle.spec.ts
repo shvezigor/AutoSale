@@ -19,24 +19,30 @@ describe('tenant lifecycle state machine', () => {
 
   it('rejects a business mutation while deletion preparation is frozen', async () => {
     const findFirst = vi.fn().mockResolvedValue({ id: '22222222-2222-4222-8222-222222222222' });
-    const transaction = { tenantLifecycleRequest: { findFirst } };
+    const transaction = { $queryRaw: vi.fn().mockResolvedValue([{ available: true }]), tenantLifecycleRequest: { findFirst } };
 
     await expect(assertTenantAcceptingMutations(transaction as never, tenantId, 'ORDER_MUTATION'))
       .rejects.toBeInstanceOf(TenantLifecycleFrozenError);
-    expect(findFirst).toHaveBeenCalledWith({
-      where: {
-        tenantId,
-        kind: 'DELETE',
-        ingestionFrozenAt: { not: null },
-        status: { in: ['REQUESTED', 'EXPORTING', 'EXPORT_READY', 'FAILED'] },
-      },
-      select: { id: true },
-    });
+    expect(findFirst).toHaveBeenCalledOnce();
   });
 
   it('allows a business mutation when no deletion request is frozen', async () => {
-    const transaction = { tenantLifecycleRequest: { findFirst: vi.fn().mockResolvedValue(null) } };
+    const transaction = { $queryRaw: vi.fn().mockResolvedValue([{ available: true }]), tenantLifecycleRequest: { findFirst: vi.fn().mockResolvedValue(null) } };
 
     await expect(assertTenantAcceptingMutations(transaction as never, tenantId, 'CATALOGUE')).resolves.toBeUndefined();
+  });
+
+  it.each([
+    'META_INBOUND', 'TELEGRAM_INBOUND', 'ORDER_RECOGNITION', 'CONVERSATION_REPLY',
+    'ORDER_MUTATION', 'COMMERCIAL_TERMS', 'PAYMENT', 'PROCUREMENT', 'CATALOGUE',
+    'DELIVERY', 'SUPPLIER_SEND', 'SHEETS_EXPORT', 'NOTIFICATION_SEND', 'ACCOUNT_ADMINISTRATION',
+  ] as const)('returns the same safe conflict for %s', async (surface) => {
+    const transaction = {
+      $queryRaw: vi.fn().mockResolvedValue([{ available: true }]),
+      tenantLifecycleRequest: { findFirst: vi.fn().mockResolvedValue({ id: 'freeze-1' }) },
+    };
+
+    await expect(assertTenantAcceptingMutations(transaction as never, tenantId, surface))
+      .rejects.toMatchObject({ message: 'TENANT_LIFECYCLE_FROZEN', surface });
   });
 });

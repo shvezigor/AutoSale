@@ -47,6 +47,23 @@ describe('CommercialSettingsService', () => {
     });
   });
 
+  it('does not create a bank account while commercial mutations are frozen', async () => {
+    const create = vi.fn();
+    const tx = {
+      $queryRaw: vi.fn().mockResolvedValue([{ available: true }]),
+      tenantLifecycleRequest: { findFirst: vi.fn().mockResolvedValue({ id: 'freeze-1' }) },
+      tenantLegalEntity: { findFirst: vi.fn() },
+      tenantBankAccount: { updateMany: vi.fn(), create },
+    };
+    const service = new CommercialSettingsService({ $transaction: vi.fn((operation) => operation(tx)) } as never);
+
+    await expect(service.createBankAccount(tenantA, {
+      legalEntityId: 'entity', label: 'UAH', iban: 'UA000000000000000000000000000', bankName: null,
+      currency: 'UAH', active: true, isDefault: true,
+    })).rejects.toThrow('TENANT_LIFECYCLE_FROZEN');
+    expect(create).not.toHaveBeenCalled();
+  });
+
   it('does not expose or mutate an account from another tenant', async () => {
     const tx = { $queryRaw: vi.fn(), tenantBankAccount: { findFirst: vi.fn().mockResolvedValue(null) } };
     const service = new CommercialSettingsService({ $transaction: vi.fn((operation) => operation(tx)) } as never);

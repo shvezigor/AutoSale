@@ -2,7 +2,7 @@ import { createHash, randomUUID } from 'node:crypto';
 import { basename, extname } from 'node:path';
 
 import { catalogueTargetFieldSchema, type CatalogueImportSummary, type CataloguePreview, type CatalogueTargetField } from '@autosale/contracts';
-import { buildCatalogueImportPlan, CatalogueImportLeaseLostError, importCatalogueTable, Prisma, type PrismaClient, withTenantTransaction } from '@autosale/database';
+import { assertTenantAcceptingMutations, buildCatalogueImportPlan, CatalogueImportLeaseLostError, importCatalogueTable, Prisma, TenantLifecycleFrozenError, type PrismaClient, withTenantTransaction } from '@autosale/database';
 import { googleSheetsStructureFingerprint, type ObjectStorage } from '@autosale/integrations';
 import { BadRequestException, ConflictException, Logger, NotFoundException, ServiceUnavailableException, UnprocessableEntityException } from '@nestjs/common';
 
@@ -112,6 +112,7 @@ export class CatalogueImportService {
       storedObjectKey = objectKey;
 
       const run = await withTenantTransaction(this.prisma, tenantId, async (tx) => {
+        await assertTenantAcceptingMutations(tx, tenantId, 'CATALOGUE');
         const source = await tx.catalogueSource.create({
           data: {
             tenantId,
@@ -145,6 +146,7 @@ export class CatalogueImportService {
       return result;
     } catch (error) {
       await this.deleteStoredObject(storedObjectKey);
+      if (error instanceof TenantLifecycleFrozenError) throw error;
       if (isUniqueConstraintError(error)) {
         const persisted = await this.findUploadRunByRevision(tenantId, idempotencyKey);
         if (persisted) return { ...mapSummary(persisted), headers, fingerprint: persisted.source.headerFingerprint ?? fingerprint };
@@ -155,6 +157,7 @@ export class CatalogueImportService {
 
   async updateMapping(tenantId: string, userId: string, runId: string, input: CatalogueMappingInput): Promise<CataloguePreview> {
     await withTenantTransaction(this.prisma, tenantId, async (tx) => {
+      await assertTenantAcceptingMutations(tx, tenantId, 'CATALOGUE');
       const lock = await tx.catalogueImportRun.updateMany({
         where: { id: runId, tenantId, status: { in: [...REMAPPABLE_STATUSES] } },
         data: { status: 'MAPPING' },
@@ -336,6 +339,7 @@ export class CatalogueImportService {
     { sourceId: string; lease?: { id: string; syncVersion: number; ttlMs: number } } | { completed: CatalogueImportSummary }
   > {
     return withTenantTransaction(this.prisma, tenantId, async (tx) => {
+      await assertTenantAcceptingMutations(tx, tenantId, 'CATALOGUE');
       const run = await tx.catalogueImportRun.findFirst({
         where: { id: runId, tenantId },
         include: { source: { select: { type: true, syncVersion: true } } },

@@ -9,7 +9,7 @@ import type {
   ConversationQuery,
   OutboundMessageInput,
 } from '@autosale/contracts/conversations';
-import { type PrismaClient, withTenantTransaction } from '@autosale/database';
+import { assertTenantAcceptingMutations, type PrismaClient, withTenantTransaction } from '@autosale/database';
 import {
   BadRequestException,
   HttpException,
@@ -197,6 +197,9 @@ export class ConversationsService {
     }));
     if (existing) return { orderId: existing.id, queued: false };
 
+    await withTenantTransaction(this.prisma, tenantId, (transaction) =>
+      assertTenantAcceptingMutations(transaction, tenantId, 'ORDER_RECOGNITION'));
+
     await this.queue.add(
       'instagram.order.create',
       { tenantId, triggerMessageId: latestMessage.id },
@@ -219,6 +222,7 @@ export class ConversationsService {
     const now = new Date();
     const text = input.text.trim();
     const result = await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+      await assertTenantAcceptingMutations(transaction, tenantId, 'CONVERSATION_REPLY');
       const conversation = await transaction.conversation.findFirst({
         where: { id: conversationId, tenantId, channel: 'INSTAGRAM' },
       });
@@ -294,6 +298,7 @@ export class ConversationsService {
   ): Promise<ConversationMessage> {
     const now = new Date();
     const message = await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+      await assertTenantAcceptingMutations(transaction, tenantId, 'CONVERSATION_REPLY');
       const conversation = await transaction.conversation.findFirst({
         where: { id: conversationId, tenantId, channel: 'INSTAGRAM' },
       });

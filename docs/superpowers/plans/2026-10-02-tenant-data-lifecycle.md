@@ -508,7 +508,7 @@ Resolve provider authority exactly as today, enter that tenant transaction, and 
 
 Re-read the lifecycle gate at processing time. A queued pre-freeze job that has not created a durable business side effect returns `IGNORED_FROZEN`; a job with a provider-confirmed pre-boundary send may finish its idempotent local finalization but may not enqueue a new downstream order/export/notification.
 
-- [ ] **Step 5: Run tests and commit**
+- [x] **Step 5: Run tests and commit**
 
 Run: `pnpm --filter @autosale/api test -- meta-event.service.spec.ts telegram.service.spec.ts telegram-webhook.controller.spec.ts && pnpm --filter @autosale/worker test -- instagram.processor.spec.ts`
 
@@ -547,7 +547,7 @@ git commit -m "feat: freeze provider ingestion during deletion requests"
 - Consumes: the shared mutation guard inside existing tenant transactions.
 - Produces: safe API error `TENANT_LIFECYCLE_FROZEN`; read-only endpoints remain available.
 
-- [ ] **Step 1: Add one failing mutation test per business surface**
+- [x] **Step 1: Add one failing mutation test per business surface**
 
 ```ts
 guard.mockRejectedValue(new TenantLifecycleFrozenError('ORDER_MUTATION'));
@@ -557,13 +557,13 @@ expect(orderUpdate).not.toHaveBeenCalled();
 
 Cover manual replies/order triggers, order editing/approval, commercial terms, payment facts, procurement decisions/dispatch, catalogue create/update/import/sync, shipment create/cancel, Telegram test/supplier sends, team membership changes, order settings, legal entities/bank accounts, provider connect/disconnect and delivery-connection changes. Keep GET/list/detail reads and personal profile/security corrections green.
 
-- [ ] **Step 2: Run focused suites and verify each new case fails**
+- [x] **Step 2: Run focused suites and verify each new case fails**
 
 Run: `pnpm --filter @autosale/api test -- conversations.service.spec.ts orders.service.spec.ts commercial-terms.service.spec.ts payments.service.spec.ts catalogue.service.spec.ts catalogue-import.service.spec.ts catalogue-sources.service.spec.ts delivery.service.spec.ts telegram.service.spec.ts team.service.spec.ts settings-tenant-scope.spec.ts commercial-settings.service.spec.ts instagram-oauth.service.spec.ts google-oauth.service.spec.ts meest-connection.service.spec.ts ukrposhta-connection.service.spec.ts`
 
 Expected: FAIL because mutations still proceed.
 
-- [ ] **Step 3: Insert the guard inside each mutation transaction**
+- [x] **Step 3: Insert the guard inside each mutation transaction**
 
 ```ts
 return withTenantTransaction(this.prisma, tenantId, async (tx) => {
@@ -574,7 +574,7 @@ return withTenantTransaction(this.prisma, tenantId, async (tx) => {
 
 Do not place the check before the transaction or cache it between requests. Map `TenantLifecycleFrozenError` through the existing safe exception layer; do not add field validation because this is a form-level lifecycle conflict.
 
-- [ ] **Step 4: Run API/database tests and commit**
+- [x] **Step 4: Run API/database tests and commit**
 
 Run: `pnpm --filter @autosale/api test -- conversations.service.spec.ts orders.service.spec.ts commercial-terms.service.spec.ts payments.service.spec.ts catalogue.service.spec.ts catalogue-import.service.spec.ts catalogue-sources.service.spec.ts delivery.service.spec.ts telegram.service.spec.ts team.service.spec.ts settings-tenant-scope.spec.ts commercial-settings.service.spec.ts instagram-oauth.service.spec.ts google-oauth.service.spec.ts meest-connection.service.spec.ts ukrposhta-connection.service.spec.ts && pnpm --filter @autosale/database test -- procurement-store.postgres.spec.ts`
 

@@ -1,4 +1,4 @@
-import { type PrismaClient, withTenantTransaction } from '@autosale/database';
+import { assertTenantAcceptingMutations, TenantLifecycleFrozenError, type PrismaClient, withTenantTransaction } from '@autosale/database';
 import type { GoogleSheetsAdapter } from '@autosale/integrations';
 import { BadRequestException, Logger } from '@nestjs/common';
 
@@ -28,15 +28,19 @@ export class GoogleSheetsSettingsService {
 
   async update(tenantId: string, input: { spreadsheetId: string; sheetName: string }) {
     const credentialRef = await this.verifyOAuthBinding(tenantId, input.spreadsheetId, input.sheetName);
-    const row = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.googleSheetsDestination.upsert({
-      where: { tenantId },
-      create: { tenantId, ...input, credentialRef, requiredHeaders, status: 'PENDING' },
-      update: { ...input, credentialRef, requiredHeaders, status: 'PENDING', lastValidatedAt: null, errorSummary: null },
-    }));
+    const row = await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+      await assertTenantAcceptingMutations(transaction, tenantId, 'SHEETS_EXPORT');
+      return transaction.googleSheetsDestination.upsert({
+        where: { tenantId },
+        create: { tenantId, ...input, credentialRef, requiredHeaders, status: 'PENDING' },
+        update: { ...input, credentialRef, requiredHeaders, status: 'PENDING', lastValidatedAt: null, errorSummary: null },
+      });
+    });
     return this.map(row);
   }
 
   async validate(tenantId: string, userId?: string) {
+    await withTenantTransaction(this.prisma, tenantId, (transaction) => assertTenantAcceptingMutations(transaction, tenantId, 'SHEETS_EXPORT'));
     const destination = await withTenantTransaction(this.prisma, tenantId, (transaction) =>
       transaction.googleSheetsDestination.findUnique({ where: { tenantId } }));
     if (!destination) throw new BadRequestException('Google Sheets destination is not configured');
@@ -53,13 +57,20 @@ export class GoogleSheetsSettingsService {
       }
       const missingHeaders = requiredHeaders.filter((name) => !header.includes(name));
       const status = missingHeaders.length === 0 ? 'ACTIVE' : 'INVALID_HEADERS';
-      await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.googleSheetsDestination.update({ where: { tenantId }, data: { status, lastValidatedAt: new Date(), errorSummary: missingHeaders.length ? `Missing headers: ${missingHeaders.join(', ')}` : null } }));
+      await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+        await assertTenantAcceptingMutations(transaction, tenantId, 'SHEETS_EXPORT');
+        return transaction.googleSheetsDestination.update({ where: { tenantId }, data: { status, lastValidatedAt: new Date(), errorSummary: missingHeaders.length ? `Missing headers: ${missingHeaders.join(', ')}` : null } });
+      });
       if (initialized && userId) await this.notify({ tenantId, userId, type: 'SUCCESS', category: 'ORDER_SHEET_TEMPLATE_CREATED', title: 'Шаблон таблиці замовлень створено', actionUrl: '/settings?tab=data' });
       return { valid: missingHeaders.length === 0, missingHeaders, status, initialized };
     } catch (error) {
+      if (error instanceof TenantLifecycleFrozenError) throw error;
       if (error instanceof BadRequestException) throw error;
       const summary = error instanceof Error ? error.message : 'Google Sheets validation failed';
-      await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.googleSheetsDestination.update({ where: { tenantId }, data: { status: 'ERROR', lastValidatedAt: new Date(), errorSummary: summary } }));
+      await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+        await assertTenantAcceptingMutations(transaction, tenantId, 'SHEETS_EXPORT');
+        return transaction.googleSheetsDestination.update({ where: { tenantId }, data: { status: 'ERROR', lastValidatedAt: new Date(), errorSummary: summary } });
+      });
       throw new BadRequestException(summary);
     }
   }

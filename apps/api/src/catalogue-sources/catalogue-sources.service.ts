@@ -1,4 +1,4 @@
-import { type PrismaClient, withTenantTransaction } from '@autosale/database';
+import { assertTenantAcceptingMutations, TenantLifecycleFrozenError, type PrismaClient, withTenantTransaction } from '@autosale/database';
 import { GoogleSheetsReadError, GoogleSheetsTableValidationError, googleSheetsStructureFingerprint, type GoogleSheetsAdapter } from '@autosale/integrations';
 import { BadRequestException, ConflictException, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
 
@@ -42,8 +42,9 @@ export class CatalogueSourcesService {
   async create(tenantId: string, userId: string, input: CatalogueSourceInput) {
     const spreadsheetId = parseGoogleSpreadsheetId(input.spreadsheet);
     const credentialRef = await this.verifyOAuthBinding(tenantId, spreadsheetId, input.sheetName);
-    const source = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.catalogueSource.create({
-      data: {
+    const source = await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+      await assertTenantAcceptingMutations(transaction, tenantId, 'CATALOGUE');
+      return transaction.catalogueSource.create({ data: {
         tenantId,
         createdByUserId: userId,
         type: 'GOOGLE_SHEETS',
@@ -54,8 +55,8 @@ export class CatalogueSourcesService {
         syncSchedule: input.syncSchedule,
         nextSyncAt: initialNextSyncAt(input.syncSchedule),
         status: 'PENDING',
-      },
-    }));
+      } });
+    });
     return this.ownerView(source, null, null);
   }
 
@@ -64,6 +65,7 @@ export class CatalogueSourcesService {
     const credentialRef = await this.verifyOAuthBinding(tenantId, spreadsheetId, input.sheetName);
     const now = new Date();
     await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+      await assertTenantAcceptingMutations(transaction, tenantId, 'CATALOGUE');
       const updated = await transaction.catalogueSource.updateMany({
         where: { id: sourceId, tenantId, type: 'GOOGLE_SHEETS', OR: [{ syncLeaseId: null }, { syncLeaseExpiresAt: { lte: now } }] },
         data: {
@@ -89,11 +91,14 @@ export class CatalogueSourcesService {
 
   async remove(tenantId: string, sourceId: string) {
     try {
-      const deleted = await withTenantTransaction(this.prisma, tenantId, (transaction) =>
-        transaction.catalogueSource.deleteMany({ where: { id: sourceId, tenantId, type: 'GOOGLE_SHEETS' } }));
+      const deleted = await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+        await assertTenantAcceptingMutations(transaction, tenantId, 'CATALOGUE');
+        return transaction.catalogueSource.deleteMany({ where: { id: sourceId, tenantId, type: 'GOOGLE_SHEETS' } });
+      });
       if (deleted.count !== 1) throw new NotFoundException('Catalogue source not found');
       return { deleted: true as const };
     } catch (error) {
+      if (error instanceof TenantLifecycleFrozenError) throw error;
       if (error instanceof NotFoundException) throw error;
       throw new ConflictException('Catalogue source with imported products cannot be removed');
     }
@@ -134,6 +139,8 @@ export class CatalogueSourcesService {
   }
 
   async checkConnectivity(tenantId: string, sourceId: string) {
+    await withTenantTransaction(this.prisma, tenantId, (transaction) =>
+      assertTenantAcceptingMutations(transaction, tenantId, 'CATALOGUE'));
     const source = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.catalogueSource.findFirst({
       where: { id: sourceId, tenantId, type: 'GOOGLE_SHEETS' },
       select: { id: true, spreadsheetId: true, sheetName: true, credentialRef: true },
@@ -147,41 +154,33 @@ export class CatalogueSourcesService {
       if (!sheets) throw new BadRequestException('Google connection is not configured');
       const table = await sheets.readTable({ spreadsheetId: source.spreadsheetId, sheetName: source.sheetName, maxRows: 5_000 });
       if (table.headers.length === 0 || table.headers.every((header) => !header.trim())) {
-        await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.catalogueSource.updateMany({
-          where: { id: sourceId, tenantId, type: 'GOOGLE_SHEETS' },
-          data: { status: 'ERROR', lastErrorSummary: 'MISSING_HEADERS' },
-        }));
+        await this.updateHealthIfMutable(tenantId, sourceId, { status: 'ERROR', lastErrorSummary: 'MISSING_HEADERS' });
         throw new BadRequestException('Google sheet has no headers');
       }
       const fingerprint = googleSheetsStructureFingerprint(table.headers);
-      await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.catalogueSource.updateMany({
-        where: { id: sourceId, tenantId, type: 'GOOGLE_SHEETS' },
-        data: { status: 'ACTIVE', headerFingerprint: fingerprint, lastErrorSummary: null },
-      }));
+      await this.updateHealthIfMutable(tenantId, sourceId, { status: 'ACTIVE', headerFingerprint: fingerprint, lastErrorSummary: null });
       return { connected: true, headers: table.headers, fingerprint };
     } catch (error) {
+      if (error instanceof TenantLifecycleFrozenError) throw error;
       if (error instanceof BadRequestException) throw error;
       if (error instanceof GoogleSheetsTableValidationError) {
-        await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.catalogueSource.updateMany({
-          where: { id: sourceId, tenantId, type: 'GOOGLE_SHEETS' },
-          data: { status: 'PAUSED', lastErrorSummary: `TABLE_${error.code}` },
-        }));
+        await this.updateHealthIfMutable(tenantId, sourceId, { status: 'PAUSED', lastErrorSummary: `TABLE_${error.code}` });
         throw new BadRequestException('Google Sheets table structure is invalid');
       }
       const failure = error instanceof GoogleSheetsReadError ? error : new GoogleSheetsReadError('RETRYABLE', true);
-      await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.catalogueSource.updateMany({
-        where: { id: sourceId, tenantId, type: 'GOOGLE_SHEETS' },
-        data: { status: failure.code === 'AUTHORIZATION' ? 'DISCONNECTED' : 'ERROR', lastErrorSummary: failure.code },
-      }));
+      await this.updateHealthIfMutable(tenantId, sourceId, { status: failure.code === 'AUTHORIZATION' ? 'DISCONNECTED' : 'ERROR', lastErrorSummary: failure.code });
       if (failure.retryable) throw new ServiceUnavailableException('Google Sheets is temporarily unavailable');
       throw new BadRequestException(failure.message);
     }
   }
 
   async synchronizeNow(tenantId: string, sourceId: string) {
-    const source = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.catalogueSource.findFirst({
-      where: { id: sourceId, tenantId, type: 'GOOGLE_SHEETS' }, select: { id: true },
-    }));
+    const source = await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+      await assertTenantAcceptingMutations(transaction, tenantId, 'CATALOGUE');
+      return transaction.catalogueSource.findFirst({
+        where: { id: sourceId, tenantId, type: 'GOOGLE_SHEETS' }, select: { id: true },
+      });
+    });
     if (!source) throw new NotFoundException('Catalogue source not found');
     if (!this.queue) throw new ServiceUnavailableException('Catalogue synchronization is unavailable');
     try {
@@ -217,6 +216,16 @@ export class CatalogueSourcesService {
       pendingReview,
       latestRun,
     };
+  }
+
+  private updateHealthIfMutable(tenantId: string, sourceId: string, data: Record<string, unknown>) {
+    return withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+      await assertTenantAcceptingMutations(transaction, tenantId, 'CATALOGUE');
+      return transaction.catalogueSource.updateMany({
+        where: { id: sourceId, tenantId, type: 'GOOGLE_SHEETS' },
+        data,
+      });
+    });
   }
 
   private async verifyOAuthBinding(tenantId: string, spreadsheetId: string, sheetName: string): Promise<string | null> {

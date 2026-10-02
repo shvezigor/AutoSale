@@ -229,6 +229,26 @@ describe('TelegramService webhook processing', () => {
     });
   });
 
+  it('does not persist or queue a personal test notification after the tenant is frozen', async () => {
+    await prisma.telegramUserBinding.create({ data: {
+      tenantId, userId, telegramUserId: '987654321', privateChatId: '987654321', displayName: 'Ihor',
+    } });
+    await prisma.telegramChat.create({ data: {
+      tenantId, externalChatId: '987654321', type: 'private', route: 'BOT', lastObservedAt: new Date(),
+    } });
+    await prisma.tenantLifecycleRequest.create({ data: {
+      tenantId, kind: 'DELETE', status: 'EXPORTING', reasonCode: 'ADMINISTRATIVE_TEST',
+      requestedByUserId: userId, idempotencyKey: '77777777-8888-4999-8aaa-bbbbbbbbbbbb',
+      requestHash: 'f'.repeat(64), ingestionFrozenAt: new Date(),
+    } });
+    const add = vi.fn();
+    const service = new TelegramService(prisma, undefined, { botUsername: 'AutoSaleBot', queue: { add } });
+
+    await expect(service.queueTest(tenantId, userId)).rejects.toThrow('TENANT_LIFECYCLE_FROZEN');
+    await expect(prisma.telegramDelivery.count()).resolves.toBe(0);
+    expect(add).not.toHaveBeenCalled();
+  });
+
   it('keeps a persisted test notification pending when the queue wake-up fails', async () => {
     await prisma.telegramUserBinding.create({ data: {
       tenantId, userId, telegramUserId: '987654321', privateChatId: '987654321', displayName: 'Ihor',

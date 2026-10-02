@@ -155,6 +155,7 @@ Gate відхиляє нові бізнес-мутації з локалізов
 - нові Meta/Instagram і Telegram inbound events після встановленої boundary;
 - ручні повідомлення, нові або змінені замовлення, catalogue sync/import;
 - нові supplier dispatch, Sheets export, delivery create/cancel і notification sends;
+- зміни команди, правил замовлень, юридичних осіб/рахунків і підключень Meta, Google та перевізників;
 - scheduled reconciliation, якщо воно створює новий зовнішній side effect.
 
 Gate дозволяє:
@@ -168,6 +169,8 @@ Gate дозволяє:
 Provider callback під час freeze отримує успішну технічну відповідь там, де повтор провайдера не має сенсу, але payload не нормалізується у бізнес-дані. Мінімальна технічна ознака відхилення може зберігатися без message body для операційного доказу.
 
 Скасування `DELETE` прибирає lifecycle gate тільки якщо фізичне видалення ще не почалося. Воно не змінює незалежний `Tenant.status`; якщо tenant був адміністративно `BLOCKED`, він залишається заблокованим.
+
+Authenticated API повторно читає gate всередині тієї самої tenant-транзакції, що й запис. Конфлікт мапиться глобально в безпечну відповідь `409` із кодом/повідомленням `TENANT_LIFECYCLE_FROZEN`; field validation для нього не застосовується. Телеметрія використовує лише обмежені `surface` та `safe_reason=lifecycle_frozen`. Read-only endpoints і особисті зміни профілю/пароля не блокуються.
 
 ## API, права та аудит
 

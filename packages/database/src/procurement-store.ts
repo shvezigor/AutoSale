@@ -6,6 +6,7 @@ import {
 } from '@autosale/contracts/procurement';
 
 import { Prisma, type PrismaClient } from './generated/prisma/client.js';
+import { assertTenantAcceptingMutations } from './tenant-lifecycle.js';
 import { withTenantTransaction } from './tenant-transaction.js';
 
 export interface ProcurementAssessment {
@@ -64,6 +65,7 @@ export class ProcurementStore {
     actor: string,
   ): Promise<ProcurementAssessment> {
     return withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+      await assertTenantAcceptingMutations(transaction, tenantId, 'PROCUREMENT');
       const order = await transaction.order.findFirst({
         where: { id: orderId, tenantId },
         include: { items: { orderBy: { id: 'asc' } } },
@@ -202,6 +204,7 @@ export class ProcurementStore {
 
   async releaseOrderReservations(tenantId: string, orderId: string, actor: string): Promise<void> {
     await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+      await assertTenantAcceptingMutations(transaction, tenantId, 'PROCUREMENT');
       const order = await transaction.order.findFirst({
         where: { id: orderId, tenantId },
         select: { id: true, items: { select: { id: true } } },
@@ -237,6 +240,7 @@ export class ProcurementStore {
     actor: string,
   ): Promise<{ orderId: string; summary: ProcurementSummary }> {
     return withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+      await assertTenantAcceptingMutations(transaction, tenantId, 'PROCUREMENT');
       const item = await transaction.orderItem.findFirst({
         where: { id: itemId, orderId, tenantId },
         include: { reservation: true },
@@ -347,6 +351,7 @@ export class ProcurementStore {
     actor: string,
   ): Promise<{ orderId: string; summary: ProcurementSummary; handedOffAt: string }> {
     return withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+      await assertTenantAcceptingMutations(transaction, tenantId, 'PROCUREMENT');
       const order = await transaction.order.findFirst({
         where: { id: orderId, tenantId },
         include: { items: { include: { reservation: true }, orderBy: { id: 'asc' } } },

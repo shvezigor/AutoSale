@@ -133,6 +133,7 @@ export class TelegramService {
   async queueTest(tenantId: string, userId: string): Promise<{ deliveryId: string; status: 'PENDING' }> {
     if (!this.options.botUsername || !this.options.queue) throw new Error('Telegram is not configured');
     const delivery = await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+      await assertTenantAcceptingMutations(transaction, tenantId, 'NOTIFICATION_SEND');
       const binding = await transaction.telegramUserBinding.findUnique({
         where: { tenantId_userId: { tenantId, userId } },
         select: { privateChatId: true, revokedAt: true },
@@ -201,6 +202,7 @@ export class TelegramService {
 
   async saveSupplierSettings(tenantId: string, input: TelegramSupplierSettingsUpdate): Promise<TelegramSupplierSettings> {
     await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+      await assertTenantAcceptingMutations(transaction, tenantId, 'SUPPLIER_SEND');
       const destination = await transaction.telegramChat.findFirst({
         where: { id: input.destinationId, tenantId }, select: { id: true, route: true, type: true, businessConnectionId: true },
       });
@@ -271,6 +273,7 @@ export class TelegramService {
   async queueSupplierOrder(tenantId: string, orderId: string): Promise<{ deliveryId: string; status: string }> {
     if (!this.options.botUsername || !this.options.queue) throw new Error('Telegram is not configured');
     const delivery = await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+      await assertTenantAcceptingMutations(transaction, tenantId, 'SUPPLIER_SEND');
       await transaction.$queryRaw(Prisma.sql`
         SELECT "id" FROM "orders"
         WHERE "tenant_id" = ${tenantId}::uuid AND "id" = ${orderId}::uuid

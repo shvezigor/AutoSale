@@ -33,6 +33,22 @@ describe('TeamService', () => {
     expect(JSON.stringify(result)).not.toContain('hashed-secret');
   });
 
+  it('does not create or email an invitation while tenant administration is frozen', async () => {
+    const create = vi.fn();
+    const sendInvitation = vi.fn();
+    const prisma = {
+      $queryRaw: vi.fn().mockResolvedValue([{ available: true }]),
+      tenantLifecycleRequest: { findFirst: vi.fn().mockResolvedValue({ id: 'freeze-1' }) },
+      tenantInvitation: { findFirst: vi.fn(), create },
+    };
+    const service = new TeamService(prisma as never, {} as never, { sendInvitation } as never, 'pepper', 'https://app.example.com');
+
+    await expect(service.invite('tenant-1', 'owner-1', 'manager@example.com'))
+      .rejects.toThrow('TENANT_LIFECYCLE_FROZEN');
+    expect(create).not.toHaveBeenCalled();
+    expect(sendInvitation).not.toHaveBeenCalled();
+  });
+
   it('blocks only a member of the supplied tenant and revokes that tenant sessions', async () => {
     const updateMany = vi.fn().mockResolvedValue({ count: 1 });
     const revokeSessions = vi.fn().mockResolvedValue([{ revoked_count: 2 }]);
