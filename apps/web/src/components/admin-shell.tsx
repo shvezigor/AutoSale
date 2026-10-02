@@ -7,6 +7,7 @@ import { type ReactNode, type SVGProps, useCallback, useEffect, useRef, useState
 import { mutatingFetch } from '../auth/csrf-fetch';
 import { useI18n } from '../i18n/i18n-provider';
 import { getAdminCopy } from './admin-copy';
+import { ConfirmProvider } from './confirm-provider';
 import { LoadingButton } from './loading-button';
 import { LocaleSwitcher } from './locale-switcher';
 import { ToastProvider } from './toast-provider';
@@ -46,7 +47,7 @@ export function AdminShell({ session, children }: { session: AdminShellSession; 
     }
   }
 
-  return <ToastProvider><div className="admin-shell">
+  return <ToastProvider><ConfirmProvider><div className="admin-shell">
     <a className="skip-link" href="#admin-main">{locale === 'uk' ? 'Перейти до вмісту' : 'Skip to content'}</a>
     <AdminNavigation pathname={pathname} label={text.navigation} />
     <div className="admin-workspace" inert={mobileOpen}>
@@ -62,7 +63,7 @@ export function AdminShell({ session, children }: { session: AdminShellSession; 
     {mobileOpen && <div ref={drawer} className="admin-mobile-backdrop" role="dialog" aria-modal="true" aria-label={text.navigation.label} onMouseDown={(event) => { if (event.target === event.currentTarget) closeMobile(); }}>
       <div className="admin-mobile-drawer"><button className="secondary-button" type="button" onClick={closeMobile}>{text.shell.closeMenu}</button><AdminNavigation pathname={pathname} label={text.navigation} onNavigate={closeMobile} /></div>
     </div>}
-  </div></ToastProvider>;
+  </div></ConfirmProvider></ToastProvider>;
 }
 
 function AdminNavigation({ pathname, label, onNavigate }: { pathname: string; label: ReturnType<typeof getAdminCopy>['navigation']; onNavigate?: () => void }) {

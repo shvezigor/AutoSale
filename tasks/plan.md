@@ -58,7 +58,7 @@ A1 contracts + safe API aggregates
 ### Phase 3: Client management
 
 - [x] A4: Add the searchable, filterable and sortable client table.
-- [ ] A5: Add client detail with block/unblock and existing lifecycle controls.
+- [x] A5: Add client detail with block/unblock and existing lifecycle controls.
 
 **Acceptance:** row click, keyboard activation and explicit action open detail; unknown ids return 404; mutations show confirmation/loading/failure feedback.
 
