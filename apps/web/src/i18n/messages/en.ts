@@ -51,8 +51,21 @@ export const enMessages = {
     unavailable: '—', minutes: '{count} min', hours: '{count} hr',
   },
   onboarding: {
-    status: 'Section in development', title: 'Set up Sales AITO', description: 'This page will guide you through connecting channels, catalogue, and delivery. Existing integrations are already available in Settings.', settings: 'Open settings',
-    steps: { channel: 'Connect a sales channel', catalogue: 'Add your product catalogue', delivery: 'Configure delivery' },
+    title: 'Launch Sales AITO', description: 'Complete the core steps once. The system automatically shows what is ready and what still needs setup.',
+    progressLabel: 'Initial setup progress', progress: '{completed} of {total} required steps ready',
+    requiredTitle: 'Required for launch', optionalTitle: 'Add when needed', optionalDescription: 'Connect these integrations now or return to them later.',
+    ready: 'Ready', needsSetup: 'Setup required', optional: 'Optional', review: 'Review', configure: 'Configure',
+    next: 'Next step', continue: 'Continue setup', resumeHint: 'Return here after saving. Progress updates automatically.',
+    completeTitle: 'Core setup is complete', completeDescription: 'Sales AITO is ready to receive and process orders. Optional integrations remain available below.', openOrders: 'Open orders', optionalLater: 'Optional integrations do not block your work.',
+    steps: {
+      catalogue: { title: 'Add your product catalogue', description: 'Connect a Google Sheet or upload a file so AI can recognize products.' },
+      channel: { title: 'Connect a customer channel', description: 'Connect Instagram to receive conversations and create orders.' },
+      orders: { title: 'Review order rules', description: 'Choose when AI creates an order and when a manager must confirm it.' },
+      delivery: { title: 'Connect delivery', description: 'Configure a carrier and sender details to create shipping labels.' },
+      suppliers: { title: 'Add a supplier chat', description: 'Choose the Telegram chat that receives supplier orders.' },
+      notifications: { title: 'Enable notifications', description: 'Connect personal Telegram notifications for important Sales AITO events.' },
+      payments: { title: 'Add payment details', description: 'Create a legal entity and an active bank account for payments.' },
+    },
   },
   authentication: {
     brandTitle: 'Turn chat orders into a clear workflow.', brandDescription: 'AI recognizes the details, managers verify the result, and the whole team works in one place.',
