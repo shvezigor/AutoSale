@@ -517,14 +517,6 @@ export type EnumGoogleCredentialCleanupStatusFieldUpdateOperationsInput = {
   set?: $Enums.GoogleCredentialCleanupStatus
 }
 
-export type IntFieldUpdateOperationsInput = {
-  set?: number
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
 export type GoogleCredentialCleanupCreateWithoutTenantInput = {
   id?: string
   credentialGenerationId: string

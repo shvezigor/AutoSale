@@ -234,6 +234,8 @@ export type TenantWhereInput = {
   bankAccounts?: Prisma.TenantBankAccountListRelationFilter
   orderCommercialTerms?: Prisma.OrderCommercialTermsListRelationFilter
   orderPayments?: Prisma.OrderPaymentListRelationFilter
+  lifecycleRequests?: Prisma.TenantLifecycleRequestListRelationFilter
+  retentionDryRuns?: Prisma.TenantRetentionDryRunListRelationFilter
 }
 
 export type TenantOrderByWithRelationInput = {
@@ -287,6 +289,8 @@ export type TenantOrderByWithRelationInput = {
   bankAccounts?: Prisma.TenantBankAccountOrderByRelationAggregateInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsOrderByRelationAggregateInput
   orderPayments?: Prisma.OrderPaymentOrderByRelationAggregateInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestOrderByRelationAggregateInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunOrderByRelationAggregateInput
 }
 
 export type TenantWhereUniqueInput = Prisma.AtLeast<{
@@ -343,6 +347,8 @@ export type TenantWhereUniqueInput = Prisma.AtLeast<{
   bankAccounts?: Prisma.TenantBankAccountListRelationFilter
   orderCommercialTerms?: Prisma.OrderCommercialTermsListRelationFilter
   orderPayments?: Prisma.OrderPaymentListRelationFilter
+  lifecycleRequests?: Prisma.TenantLifecycleRequestListRelationFilter
+  retentionDryRuns?: Prisma.TenantRetentionDryRunListRelationFilter
 }, "id" | "key">
 
 export type TenantOrderByWithAggregationInput = {
@@ -420,6 +426,8 @@ export type TenantCreateInput = {
   bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateInput = {
@@ -473,6 +481,8 @@ export type TenantUncheckedCreateInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUpdateInput = {
@@ -526,6 +536,8 @@ export type TenantUpdateInput = {
   bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateInput = {
@@ -579,6 +591,8 @@ export type TenantUncheckedUpdateInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateManyInput = {
@@ -659,6 +673,34 @@ export type DateTimeFieldUpdateOperationsInput = {
 
 export type NullableStringFieldUpdateOperationsInput = {
   set?: string | null
+}
+
+export type TenantCreateNestedOneWithoutLifecycleRequestsInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutLifecycleRequestsInput, Prisma.TenantUncheckedCreateWithoutLifecycleRequestsInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutLifecycleRequestsInput
+  connect?: Prisma.TenantWhereUniqueInput
+}
+
+export type TenantUpdateOneRequiredWithoutLifecycleRequestsNestedInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutLifecycleRequestsInput, Prisma.TenantUncheckedCreateWithoutLifecycleRequestsInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutLifecycleRequestsInput
+  upsert?: Prisma.TenantUpsertWithoutLifecycleRequestsInput
+  connect?: Prisma.TenantWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TenantUpdateToOneWithWhereWithoutLifecycleRequestsInput, Prisma.TenantUpdateWithoutLifecycleRequestsInput>, Prisma.TenantUncheckedUpdateWithoutLifecycleRequestsInput>
+}
+
+export type TenantCreateNestedOneWithoutRetentionDryRunsInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutRetentionDryRunsInput, Prisma.TenantUncheckedCreateWithoutRetentionDryRunsInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutRetentionDryRunsInput
+  connect?: Prisma.TenantWhereUniqueInput
+}
+
+export type TenantUpdateOneRequiredWithoutRetentionDryRunsNestedInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutRetentionDryRunsInput, Prisma.TenantUncheckedCreateWithoutRetentionDryRunsInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutRetentionDryRunsInput
+  upsert?: Prisma.TenantUpsertWithoutRetentionDryRunsInput
+  connect?: Prisma.TenantWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TenantUpdateToOneWithWhereWithoutRetentionDryRunsInput, Prisma.TenantUpdateWithoutRetentionDryRunsInput>, Prisma.TenantUncheckedUpdateWithoutRetentionDryRunsInput>
 }
 
 export type TenantCreateNestedOneWithoutGoogleConnectionInput = {
@@ -1281,6 +1323,470 @@ export type TenantUpdateOneRequiredWithoutCatalogueImportRunsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.TenantUpdateToOneWithWhereWithoutCatalogueImportRunsInput, Prisma.TenantUpdateWithoutCatalogueImportRunsInput>, Prisma.TenantUncheckedUpdateWithoutCatalogueImportRunsInput>
 }
 
+export type TenantCreateWithoutLifecycleRequestsInput = {
+  id?: string
+  key: string
+  name: string
+  status?: $Enums.AccessStatus
+  createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
+  events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
+  conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
+  messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
+  settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
+  products?: Prisma.ProductCreateNestedManyWithoutTenantInput
+  catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
+  catalogueMappings?: Prisma.CatalogueMappingCreateNestedManyWithoutTenantInput
+  catalogueImportRuns?: Prisma.CatalogueImportRunCreateNestedManyWithoutTenantInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationCreateNestedOneWithoutTenantInput
+  orderExports?: Prisma.OrderExportCreateNestedManyWithoutTenantInput
+  memberships?: Prisma.TenantMembershipCreateNestedManyWithoutTenantInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutTenantInput
+  invitations?: Prisma.TenantInvitationCreateNestedManyWithoutTenantInput
+  securityAuditLogs?: Prisma.SecurityAuditLogCreateNestedManyWithoutTenantInput
+  instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
+  instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
+  googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
+  googleCredentialCleanups?: Prisma.GoogleCredentialCleanupCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationCreateNestedManyWithoutTenantInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptCreateNestedManyWithoutTenantInput
+  telegramUserBindings?: Prisma.TelegramUserBindingCreateNestedManyWithoutTenantInput
+  telegramBusinessConnections?: Prisma.TelegramBusinessConnectionCreateNestedManyWithoutTenantInput
+  telegramChats?: Prisma.TelegramChatCreateNestedManyWithoutTenantInput
+  telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingCreateNestedOneWithoutTenantInput
+  orderItems?: Prisma.OrderItemCreateNestedManyWithoutTenantInput
+  inventoryReservations?: Prisma.InventoryReservationCreateNestedManyWithoutTenantInput
+  telegramDeliveryItems?: Prisma.TelegramDeliveryItemCreateNestedManyWithoutTenantInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutTenantInput
+  deliveryConnections?: Prisma.DeliveryConnectionCreateNestedManyWithoutTenantInput
+  deliverySenderProfiles?: Prisma.DeliverySenderProfileCreateNestedManyWithoutTenantInput
+  shipments?: Prisma.ShipmentCreateNestedManyWithoutTenantInput
+  shipmentAttempts?: Prisma.ShipmentAttemptCreateNestedManyWithoutTenantInput
+  shipmentStatusEvents?: Prisma.ShipmentStatusEventCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutTenantInput
+  legalEntities?: Prisma.TenantLegalEntityCreateNestedManyWithoutTenantInput
+  bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
+  orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
+  orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
+}
+
+export type TenantUncheckedCreateWithoutLifecycleRequestsInput = {
+  id?: string
+  key: string
+  name: string
+  status?: $Enums.AccessStatus
+  createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
+  events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
+  conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
+  messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
+  settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
+  catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
+  catalogueMappings?: Prisma.CatalogueMappingUncheckedCreateNestedManyWithoutTenantInput
+  catalogueImportRuns?: Prisma.CatalogueImportRunUncheckedCreateNestedManyWithoutTenantInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedCreateNestedOneWithoutTenantInput
+  orderExports?: Prisma.OrderExportUncheckedCreateNestedManyWithoutTenantInput
+  memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutTenantInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutTenantInput
+  invitations?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutTenantInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUncheckedCreateNestedManyWithoutTenantInput
+  instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
+  instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
+  googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutTenantInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedCreateNestedManyWithoutTenantInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUncheckedCreateNestedManyWithoutTenantInput
+  telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedCreateNestedManyWithoutTenantInput
+  telegramChats?: Prisma.TelegramChatUncheckedCreateNestedManyWithoutTenantInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedCreateNestedOneWithoutTenantInput
+  orderItems?: Prisma.OrderItemUncheckedCreateNestedManyWithoutTenantInput
+  inventoryReservations?: Prisma.InventoryReservationUncheckedCreateNestedManyWithoutTenantInput
+  telegramDeliveryItems?: Prisma.TelegramDeliveryItemUncheckedCreateNestedManyWithoutTenantInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutTenantInput
+  deliveryConnections?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutTenantInput
+  deliverySenderProfiles?: Prisma.DeliverySenderProfileUncheckedCreateNestedManyWithoutTenantInput
+  shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutTenantInput
+  shipmentAttempts?: Prisma.ShipmentAttemptUncheckedCreateNestedManyWithoutTenantInput
+  shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutTenantInput
+  legalEntities?: Prisma.TenantLegalEntityUncheckedCreateNestedManyWithoutTenantInput
+  bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
+  orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
+  orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
+}
+
+export type TenantCreateOrConnectWithoutLifecycleRequestsInput = {
+  where: Prisma.TenantWhereUniqueInput
+  create: Prisma.XOR<Prisma.TenantCreateWithoutLifecycleRequestsInput, Prisma.TenantUncheckedCreateWithoutLifecycleRequestsInput>
+}
+
+export type TenantUpsertWithoutLifecycleRequestsInput = {
+  update: Prisma.XOR<Prisma.TenantUpdateWithoutLifecycleRequestsInput, Prisma.TenantUncheckedUpdateWithoutLifecycleRequestsInput>
+  create: Prisma.XOR<Prisma.TenantCreateWithoutLifecycleRequestsInput, Prisma.TenantUncheckedCreateWithoutLifecycleRequestsInput>
+  where?: Prisma.TenantWhereInput
+}
+
+export type TenantUpdateToOneWithWhereWithoutLifecycleRequestsInput = {
+  where?: Prisma.TenantWhereInput
+  data: Prisma.XOR<Prisma.TenantUpdateWithoutLifecycleRequestsInput, Prisma.TenantUncheckedUpdateWithoutLifecycleRequestsInput>
+}
+
+export type TenantUpdateWithoutLifecycleRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
+  conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
+  messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
+  settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
+  products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
+  catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
+  catalogueMappings?: Prisma.CatalogueMappingUpdateManyWithoutTenantNestedInput
+  catalogueImportRuns?: Prisma.CatalogueImportRunUpdateManyWithoutTenantNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUpdateOneWithoutTenantNestedInput
+  orderExports?: Prisma.OrderExportUpdateManyWithoutTenantNestedInput
+  memberships?: Prisma.TenantMembershipUpdateManyWithoutTenantNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutTenantNestedInput
+  invitations?: Prisma.TenantInvitationUpdateManyWithoutTenantNestedInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUpdateManyWithoutTenantNestedInput
+  instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
+  instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
+  googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
+  googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUpdateManyWithoutTenantNestedInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUpdateManyWithoutTenantNestedInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUpdateManyWithoutTenantNestedInput
+  telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUpdateManyWithoutTenantNestedInput
+  telegramChats?: Prisma.TelegramChatUpdateManyWithoutTenantNestedInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUpdateOneWithoutTenantNestedInput
+  orderItems?: Prisma.OrderItemUpdateManyWithoutTenantNestedInput
+  inventoryReservations?: Prisma.InventoryReservationUpdateManyWithoutTenantNestedInput
+  telegramDeliveryItems?: Prisma.TelegramDeliveryItemUpdateManyWithoutTenantNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutTenantNestedInput
+  deliveryConnections?: Prisma.DeliveryConnectionUpdateManyWithoutTenantNestedInput
+  deliverySenderProfiles?: Prisma.DeliverySenderProfileUpdateManyWithoutTenantNestedInput
+  shipments?: Prisma.ShipmentUpdateManyWithoutTenantNestedInput
+  shipmentAttempts?: Prisma.ShipmentAttemptUpdateManyWithoutTenantNestedInput
+  shipmentStatusEvents?: Prisma.ShipmentStatusEventUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutTenantNestedInput
+  legalEntities?: Prisma.TenantLegalEntityUpdateManyWithoutTenantNestedInput
+  bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
+  orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
+  orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
+}
+
+export type TenantUncheckedUpdateWithoutLifecycleRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
+  conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
+  messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
+  settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
+  catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
+  catalogueMappings?: Prisma.CatalogueMappingUncheckedUpdateManyWithoutTenantNestedInput
+  catalogueImportRuns?: Prisma.CatalogueImportRunUncheckedUpdateManyWithoutTenantNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedUpdateOneWithoutTenantNestedInput
+  orderExports?: Prisma.OrderExportUncheckedUpdateManyWithoutTenantNestedInput
+  memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutTenantNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutTenantNestedInput
+  invitations?: Prisma.TenantInvitationUncheckedUpdateManyWithoutTenantNestedInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUncheckedUpdateManyWithoutTenantNestedInput
+  instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
+  instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
+  googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutTenantNestedInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUncheckedUpdateManyWithoutTenantNestedInput
+  telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedUpdateManyWithoutTenantNestedInput
+  telegramChats?: Prisma.TelegramChatUncheckedUpdateManyWithoutTenantNestedInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedUpdateOneWithoutTenantNestedInput
+  orderItems?: Prisma.OrderItemUncheckedUpdateManyWithoutTenantNestedInput
+  inventoryReservations?: Prisma.InventoryReservationUncheckedUpdateManyWithoutTenantNestedInput
+  telegramDeliveryItems?: Prisma.TelegramDeliveryItemUncheckedUpdateManyWithoutTenantNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutTenantNestedInput
+  deliveryConnections?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutTenantNestedInput
+  deliverySenderProfiles?: Prisma.DeliverySenderProfileUncheckedUpdateManyWithoutTenantNestedInput
+  shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutTenantNestedInput
+  shipmentAttempts?: Prisma.ShipmentAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutTenantNestedInput
+  legalEntities?: Prisma.TenantLegalEntityUncheckedUpdateManyWithoutTenantNestedInput
+  bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
+  orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
+  orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
+}
+
+export type TenantCreateWithoutRetentionDryRunsInput = {
+  id?: string
+  key: string
+  name: string
+  status?: $Enums.AccessStatus
+  createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
+  events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
+  conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
+  messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
+  settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
+  products?: Prisma.ProductCreateNestedManyWithoutTenantInput
+  catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
+  catalogueMappings?: Prisma.CatalogueMappingCreateNestedManyWithoutTenantInput
+  catalogueImportRuns?: Prisma.CatalogueImportRunCreateNestedManyWithoutTenantInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationCreateNestedOneWithoutTenantInput
+  orderExports?: Prisma.OrderExportCreateNestedManyWithoutTenantInput
+  memberships?: Prisma.TenantMembershipCreateNestedManyWithoutTenantInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutTenantInput
+  invitations?: Prisma.TenantInvitationCreateNestedManyWithoutTenantInput
+  securityAuditLogs?: Prisma.SecurityAuditLogCreateNestedManyWithoutTenantInput
+  instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
+  instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
+  googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
+  googleCredentialCleanups?: Prisma.GoogleCredentialCleanupCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationCreateNestedManyWithoutTenantInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptCreateNestedManyWithoutTenantInput
+  telegramUserBindings?: Prisma.TelegramUserBindingCreateNestedManyWithoutTenantInput
+  telegramBusinessConnections?: Prisma.TelegramBusinessConnectionCreateNestedManyWithoutTenantInput
+  telegramChats?: Prisma.TelegramChatCreateNestedManyWithoutTenantInput
+  telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingCreateNestedOneWithoutTenantInput
+  orderItems?: Prisma.OrderItemCreateNestedManyWithoutTenantInput
+  inventoryReservations?: Prisma.InventoryReservationCreateNestedManyWithoutTenantInput
+  telegramDeliveryItems?: Prisma.TelegramDeliveryItemCreateNestedManyWithoutTenantInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutTenantInput
+  deliveryConnections?: Prisma.DeliveryConnectionCreateNestedManyWithoutTenantInput
+  deliverySenderProfiles?: Prisma.DeliverySenderProfileCreateNestedManyWithoutTenantInput
+  shipments?: Prisma.ShipmentCreateNestedManyWithoutTenantInput
+  shipmentAttempts?: Prisma.ShipmentAttemptCreateNestedManyWithoutTenantInput
+  shipmentStatusEvents?: Prisma.ShipmentStatusEventCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutTenantInput
+  legalEntities?: Prisma.TenantLegalEntityCreateNestedManyWithoutTenantInput
+  bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
+  orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
+  orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+}
+
+export type TenantUncheckedCreateWithoutRetentionDryRunsInput = {
+  id?: string
+  key: string
+  name: string
+  status?: $Enums.AccessStatus
+  createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
+  events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
+  conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
+  messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
+  settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
+  catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
+  catalogueMappings?: Prisma.CatalogueMappingUncheckedCreateNestedManyWithoutTenantInput
+  catalogueImportRuns?: Prisma.CatalogueImportRunUncheckedCreateNestedManyWithoutTenantInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedCreateNestedOneWithoutTenantInput
+  orderExports?: Prisma.OrderExportUncheckedCreateNestedManyWithoutTenantInput
+  memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutTenantInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutTenantInput
+  invitations?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutTenantInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUncheckedCreateNestedManyWithoutTenantInput
+  instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
+  instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
+  googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutTenantInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedCreateNestedManyWithoutTenantInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUncheckedCreateNestedManyWithoutTenantInput
+  telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedCreateNestedManyWithoutTenantInput
+  telegramChats?: Prisma.TelegramChatUncheckedCreateNestedManyWithoutTenantInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedCreateNestedOneWithoutTenantInput
+  orderItems?: Prisma.OrderItemUncheckedCreateNestedManyWithoutTenantInput
+  inventoryReservations?: Prisma.InventoryReservationUncheckedCreateNestedManyWithoutTenantInput
+  telegramDeliveryItems?: Prisma.TelegramDeliveryItemUncheckedCreateNestedManyWithoutTenantInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutTenantInput
+  deliveryConnections?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutTenantInput
+  deliverySenderProfiles?: Prisma.DeliverySenderProfileUncheckedCreateNestedManyWithoutTenantInput
+  shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutTenantInput
+  shipmentAttempts?: Prisma.ShipmentAttemptUncheckedCreateNestedManyWithoutTenantInput
+  shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutTenantInput
+  legalEntities?: Prisma.TenantLegalEntityUncheckedCreateNestedManyWithoutTenantInput
+  bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
+  orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
+  orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+}
+
+export type TenantCreateOrConnectWithoutRetentionDryRunsInput = {
+  where: Prisma.TenantWhereUniqueInput
+  create: Prisma.XOR<Prisma.TenantCreateWithoutRetentionDryRunsInput, Prisma.TenantUncheckedCreateWithoutRetentionDryRunsInput>
+}
+
+export type TenantUpsertWithoutRetentionDryRunsInput = {
+  update: Prisma.XOR<Prisma.TenantUpdateWithoutRetentionDryRunsInput, Prisma.TenantUncheckedUpdateWithoutRetentionDryRunsInput>
+  create: Prisma.XOR<Prisma.TenantCreateWithoutRetentionDryRunsInput, Prisma.TenantUncheckedCreateWithoutRetentionDryRunsInput>
+  where?: Prisma.TenantWhereInput
+}
+
+export type TenantUpdateToOneWithWhereWithoutRetentionDryRunsInput = {
+  where?: Prisma.TenantWhereInput
+  data: Prisma.XOR<Prisma.TenantUpdateWithoutRetentionDryRunsInput, Prisma.TenantUncheckedUpdateWithoutRetentionDryRunsInput>
+}
+
+export type TenantUpdateWithoutRetentionDryRunsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
+  conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
+  messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
+  settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
+  products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
+  catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
+  catalogueMappings?: Prisma.CatalogueMappingUpdateManyWithoutTenantNestedInput
+  catalogueImportRuns?: Prisma.CatalogueImportRunUpdateManyWithoutTenantNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUpdateOneWithoutTenantNestedInput
+  orderExports?: Prisma.OrderExportUpdateManyWithoutTenantNestedInput
+  memberships?: Prisma.TenantMembershipUpdateManyWithoutTenantNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutTenantNestedInput
+  invitations?: Prisma.TenantInvitationUpdateManyWithoutTenantNestedInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUpdateManyWithoutTenantNestedInput
+  instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
+  instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
+  googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
+  googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUpdateManyWithoutTenantNestedInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUpdateManyWithoutTenantNestedInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUpdateManyWithoutTenantNestedInput
+  telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUpdateManyWithoutTenantNestedInput
+  telegramChats?: Prisma.TelegramChatUpdateManyWithoutTenantNestedInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUpdateOneWithoutTenantNestedInput
+  orderItems?: Prisma.OrderItemUpdateManyWithoutTenantNestedInput
+  inventoryReservations?: Prisma.InventoryReservationUpdateManyWithoutTenantNestedInput
+  telegramDeliveryItems?: Prisma.TelegramDeliveryItemUpdateManyWithoutTenantNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutTenantNestedInput
+  deliveryConnections?: Prisma.DeliveryConnectionUpdateManyWithoutTenantNestedInput
+  deliverySenderProfiles?: Prisma.DeliverySenderProfileUpdateManyWithoutTenantNestedInput
+  shipments?: Prisma.ShipmentUpdateManyWithoutTenantNestedInput
+  shipmentAttempts?: Prisma.ShipmentAttemptUpdateManyWithoutTenantNestedInput
+  shipmentStatusEvents?: Prisma.ShipmentStatusEventUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutTenantNestedInput
+  legalEntities?: Prisma.TenantLegalEntityUpdateManyWithoutTenantNestedInput
+  bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
+  orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
+  orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+}
+
+export type TenantUncheckedUpdateWithoutRetentionDryRunsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
+  conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
+  messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
+  settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
+  catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
+  catalogueMappings?: Prisma.CatalogueMappingUncheckedUpdateManyWithoutTenantNestedInput
+  catalogueImportRuns?: Prisma.CatalogueImportRunUncheckedUpdateManyWithoutTenantNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedUpdateOneWithoutTenantNestedInput
+  orderExports?: Prisma.OrderExportUncheckedUpdateManyWithoutTenantNestedInput
+  memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutTenantNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutTenantNestedInput
+  invitations?: Prisma.TenantInvitationUncheckedUpdateManyWithoutTenantNestedInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUncheckedUpdateManyWithoutTenantNestedInput
+  instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
+  instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
+  googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutTenantNestedInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUncheckedUpdateManyWithoutTenantNestedInput
+  telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedUpdateManyWithoutTenantNestedInput
+  telegramChats?: Prisma.TelegramChatUncheckedUpdateManyWithoutTenantNestedInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedUpdateOneWithoutTenantNestedInput
+  orderItems?: Prisma.OrderItemUncheckedUpdateManyWithoutTenantNestedInput
+  inventoryReservations?: Prisma.InventoryReservationUncheckedUpdateManyWithoutTenantNestedInput
+  telegramDeliveryItems?: Prisma.TelegramDeliveryItemUncheckedUpdateManyWithoutTenantNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutTenantNestedInput
+  deliveryConnections?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutTenantNestedInput
+  deliverySenderProfiles?: Prisma.DeliverySenderProfileUncheckedUpdateManyWithoutTenantNestedInput
+  shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutTenantNestedInput
+  shipmentAttempts?: Prisma.ShipmentAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutTenantNestedInput
+  legalEntities?: Prisma.TenantLegalEntityUncheckedUpdateManyWithoutTenantNestedInput
+  bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
+  orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
+  orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+}
+
 export type TenantCreateWithoutGoogleConnectionInput = {
   id?: string
   key: string
@@ -1331,6 +1837,8 @@ export type TenantCreateWithoutGoogleConnectionInput = {
   bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutGoogleConnectionInput = {
@@ -1383,6 +1891,8 @@ export type TenantUncheckedCreateWithoutGoogleConnectionInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutGoogleConnectionInput = {
@@ -1451,6 +1961,8 @@ export type TenantUpdateWithoutGoogleConnectionInput = {
   bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutGoogleConnectionInput = {
@@ -1503,6 +2015,8 @@ export type TenantUncheckedUpdateWithoutGoogleConnectionInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutGoogleOAuthAttemptsInput = {
@@ -1555,6 +2069,8 @@ export type TenantCreateWithoutGoogleOAuthAttemptsInput = {
   bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutGoogleOAuthAttemptsInput = {
@@ -1607,6 +2123,8 @@ export type TenantUncheckedCreateWithoutGoogleOAuthAttemptsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutGoogleOAuthAttemptsInput = {
@@ -1675,6 +2193,8 @@ export type TenantUpdateWithoutGoogleOAuthAttemptsInput = {
   bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutGoogleOAuthAttemptsInput = {
@@ -1727,6 +2247,8 @@ export type TenantUncheckedUpdateWithoutGoogleOAuthAttemptsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutGoogleCredentialCleanupsInput = {
@@ -1779,6 +2301,8 @@ export type TenantCreateWithoutGoogleCredentialCleanupsInput = {
   bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutGoogleCredentialCleanupsInput = {
@@ -1831,6 +2355,8 @@ export type TenantUncheckedCreateWithoutGoogleCredentialCleanupsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutGoogleCredentialCleanupsInput = {
@@ -1899,6 +2425,8 @@ export type TenantUpdateWithoutGoogleCredentialCleanupsInput = {
   bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutGoogleCredentialCleanupsInput = {
@@ -1951,6 +2479,8 @@ export type TenantUncheckedUpdateWithoutGoogleCredentialCleanupsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutInstagramConnectionInput = {
@@ -2003,6 +2533,8 @@ export type TenantCreateWithoutInstagramConnectionInput = {
   bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutInstagramConnectionInput = {
@@ -2055,6 +2587,8 @@ export type TenantUncheckedCreateWithoutInstagramConnectionInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutInstagramConnectionInput = {
@@ -2123,6 +2657,8 @@ export type TenantUpdateWithoutInstagramConnectionInput = {
   bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutInstagramConnectionInput = {
@@ -2175,6 +2711,8 @@ export type TenantUncheckedUpdateWithoutInstagramConnectionInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutInstagramOAuthStatesInput = {
@@ -2227,6 +2765,8 @@ export type TenantCreateWithoutInstagramOAuthStatesInput = {
   bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutInstagramOAuthStatesInput = {
@@ -2279,6 +2819,8 @@ export type TenantUncheckedCreateWithoutInstagramOAuthStatesInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutInstagramOAuthStatesInput = {
@@ -2347,6 +2889,8 @@ export type TenantUpdateWithoutInstagramOAuthStatesInput = {
   bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutInstagramOAuthStatesInput = {
@@ -2399,6 +2943,8 @@ export type TenantUncheckedUpdateWithoutInstagramOAuthStatesInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutInstagramCredentialCleanupsInput = {
@@ -2451,6 +2997,8 @@ export type TenantCreateWithoutInstagramCredentialCleanupsInput = {
   bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutInstagramCredentialCleanupsInput = {
@@ -2503,6 +3051,8 @@ export type TenantUncheckedCreateWithoutInstagramCredentialCleanupsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutInstagramCredentialCleanupsInput = {
@@ -2571,6 +3121,8 @@ export type TenantUpdateWithoutInstagramCredentialCleanupsInput = {
   bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutInstagramCredentialCleanupsInput = {
@@ -2623,6 +3175,8 @@ export type TenantUncheckedUpdateWithoutInstagramCredentialCleanupsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutNotificationsInput = {
@@ -2675,6 +3229,8 @@ export type TenantCreateWithoutNotificationsInput = {
   bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutNotificationsInput = {
@@ -2727,6 +3283,8 @@ export type TenantUncheckedCreateWithoutNotificationsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutNotificationsInput = {
@@ -2795,6 +3353,8 @@ export type TenantUpdateWithoutNotificationsInput = {
   bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutNotificationsInput = {
@@ -2847,6 +3407,8 @@ export type TenantUncheckedUpdateWithoutNotificationsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutTelegramLinkAttemptsInput = {
@@ -2899,6 +3461,8 @@ export type TenantCreateWithoutTelegramLinkAttemptsInput = {
   bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutTelegramLinkAttemptsInput = {
@@ -2951,6 +3515,8 @@ export type TenantUncheckedCreateWithoutTelegramLinkAttemptsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutTelegramLinkAttemptsInput = {
@@ -3019,6 +3585,8 @@ export type TenantUpdateWithoutTelegramLinkAttemptsInput = {
   bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutTelegramLinkAttemptsInput = {
@@ -3071,6 +3639,8 @@ export type TenantUncheckedUpdateWithoutTelegramLinkAttemptsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutTelegramUserBindingsInput = {
@@ -3123,6 +3693,8 @@ export type TenantCreateWithoutTelegramUserBindingsInput = {
   bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutTelegramUserBindingsInput = {
@@ -3175,6 +3747,8 @@ export type TenantUncheckedCreateWithoutTelegramUserBindingsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutTelegramUserBindingsInput = {
@@ -3243,6 +3817,8 @@ export type TenantUpdateWithoutTelegramUserBindingsInput = {
   bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutTelegramUserBindingsInput = {
@@ -3295,6 +3871,8 @@ export type TenantUncheckedUpdateWithoutTelegramUserBindingsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutTelegramBusinessConnectionsInput = {
@@ -3347,6 +3925,8 @@ export type TenantCreateWithoutTelegramBusinessConnectionsInput = {
   bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutTelegramBusinessConnectionsInput = {
@@ -3399,6 +3979,8 @@ export type TenantUncheckedCreateWithoutTelegramBusinessConnectionsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutTelegramBusinessConnectionsInput = {
@@ -3467,6 +4049,8 @@ export type TenantUpdateWithoutTelegramBusinessConnectionsInput = {
   bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutTelegramBusinessConnectionsInput = {
@@ -3519,6 +4103,8 @@ export type TenantUncheckedUpdateWithoutTelegramBusinessConnectionsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutTelegramChatsInput = {
@@ -3571,6 +4157,8 @@ export type TenantCreateWithoutTelegramChatsInput = {
   bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutTelegramChatsInput = {
@@ -3623,6 +4211,8 @@ export type TenantUncheckedCreateWithoutTelegramChatsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutTelegramChatsInput = {
@@ -3691,6 +4281,8 @@ export type TenantUpdateWithoutTelegramChatsInput = {
   bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutTelegramChatsInput = {
@@ -3743,6 +4335,8 @@ export type TenantUncheckedUpdateWithoutTelegramChatsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutTelegramSupplierSettingInput = {
@@ -3795,6 +4389,8 @@ export type TenantCreateWithoutTelegramSupplierSettingInput = {
   bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutTelegramSupplierSettingInput = {
@@ -3847,6 +4443,8 @@ export type TenantUncheckedCreateWithoutTelegramSupplierSettingInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutTelegramSupplierSettingInput = {
@@ -3915,6 +4513,8 @@ export type TenantUpdateWithoutTelegramSupplierSettingInput = {
   bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutTelegramSupplierSettingInput = {
@@ -3967,6 +4567,8 @@ export type TenantUncheckedUpdateWithoutTelegramSupplierSettingInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutTelegramDeliveriesInput = {
@@ -4019,6 +4621,8 @@ export type TenantCreateWithoutTelegramDeliveriesInput = {
   bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutTelegramDeliveriesInput = {
@@ -4071,6 +4675,8 @@ export type TenantUncheckedCreateWithoutTelegramDeliveriesInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutTelegramDeliveriesInput = {
@@ -4139,6 +4745,8 @@ export type TenantUpdateWithoutTelegramDeliveriesInput = {
   bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutTelegramDeliveriesInput = {
@@ -4191,6 +4799,8 @@ export type TenantUncheckedUpdateWithoutTelegramDeliveriesInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutMembershipsInput = {
@@ -4243,6 +4853,8 @@ export type TenantCreateWithoutMembershipsInput = {
   bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutMembershipsInput = {
@@ -4295,6 +4907,8 @@ export type TenantUncheckedCreateWithoutMembershipsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutMembershipsInput = {
@@ -4363,6 +4977,8 @@ export type TenantUpdateWithoutMembershipsInput = {
   bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutMembershipsInput = {
@@ -4415,6 +5031,8 @@ export type TenantUncheckedUpdateWithoutMembershipsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutSessionsInput = {
@@ -4467,6 +5085,8 @@ export type TenantCreateWithoutSessionsInput = {
   bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutSessionsInput = {
@@ -4519,6 +5139,8 @@ export type TenantUncheckedCreateWithoutSessionsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutSessionsInput = {
@@ -4587,6 +5209,8 @@ export type TenantUpdateWithoutSessionsInput = {
   bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutSessionsInput = {
@@ -4639,6 +5263,8 @@ export type TenantUncheckedUpdateWithoutSessionsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutInvitationsInput = {
@@ -4691,6 +5317,8 @@ export type TenantCreateWithoutInvitationsInput = {
   bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutInvitationsInput = {
@@ -4743,6 +5371,8 @@ export type TenantUncheckedCreateWithoutInvitationsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutInvitationsInput = {
@@ -4811,6 +5441,8 @@ export type TenantUpdateWithoutInvitationsInput = {
   bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutInvitationsInput = {
@@ -4863,6 +5495,8 @@ export type TenantUncheckedUpdateWithoutInvitationsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutSecurityAuditLogsInput = {
@@ -4915,6 +5549,8 @@ export type TenantCreateWithoutSecurityAuditLogsInput = {
   bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutSecurityAuditLogsInput = {
@@ -4967,6 +5603,8 @@ export type TenantUncheckedCreateWithoutSecurityAuditLogsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutSecurityAuditLogsInput = {
@@ -5035,6 +5673,8 @@ export type TenantUpdateWithoutSecurityAuditLogsInput = {
   bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutSecurityAuditLogsInput = {
@@ -5087,6 +5727,8 @@ export type TenantUncheckedUpdateWithoutSecurityAuditLogsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutEventsInput = {
@@ -5139,6 +5781,8 @@ export type TenantCreateWithoutEventsInput = {
   bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutEventsInput = {
@@ -5191,6 +5835,8 @@ export type TenantUncheckedCreateWithoutEventsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutEventsInput = {
@@ -5259,6 +5905,8 @@ export type TenantUpdateWithoutEventsInput = {
   bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutEventsInput = {
@@ -5311,6 +5959,8 @@ export type TenantUncheckedUpdateWithoutEventsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutConversationsInput = {
@@ -5363,6 +6013,8 @@ export type TenantCreateWithoutConversationsInput = {
   bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutConversationsInput = {
@@ -5415,6 +6067,8 @@ export type TenantUncheckedCreateWithoutConversationsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutConversationsInput = {
@@ -5483,6 +6137,8 @@ export type TenantUpdateWithoutConversationsInput = {
   bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutConversationsInput = {
@@ -5535,6 +6191,8 @@ export type TenantUncheckedUpdateWithoutConversationsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutInstagramCustomerProfilesInput = {
@@ -5587,6 +6245,8 @@ export type TenantCreateWithoutInstagramCustomerProfilesInput = {
   bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutInstagramCustomerProfilesInput = {
@@ -5639,6 +6299,8 @@ export type TenantUncheckedCreateWithoutInstagramCustomerProfilesInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutInstagramCustomerProfilesInput = {
@@ -5707,6 +6369,8 @@ export type TenantUpdateWithoutInstagramCustomerProfilesInput = {
   bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutInstagramCustomerProfilesInput = {
@@ -5759,6 +6423,8 @@ export type TenantUncheckedUpdateWithoutInstagramCustomerProfilesInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutMessagesInput = {
@@ -5811,6 +6477,8 @@ export type TenantCreateWithoutMessagesInput = {
   bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutMessagesInput = {
@@ -5863,6 +6531,8 @@ export type TenantUncheckedCreateWithoutMessagesInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutMessagesInput = {
@@ -5931,6 +6601,8 @@ export type TenantUpdateWithoutMessagesInput = {
   bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutMessagesInput = {
@@ -5983,6 +6655,8 @@ export type TenantUncheckedUpdateWithoutMessagesInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutSheetsDestinationInput = {
@@ -6035,6 +6709,8 @@ export type TenantCreateWithoutSheetsDestinationInput = {
   bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutSheetsDestinationInput = {
@@ -6087,6 +6763,8 @@ export type TenantUncheckedCreateWithoutSheetsDestinationInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutSheetsDestinationInput = {
@@ -6155,6 +6833,8 @@ export type TenantUpdateWithoutSheetsDestinationInput = {
   bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutSheetsDestinationInput = {
@@ -6207,6 +6887,8 @@ export type TenantUncheckedUpdateWithoutSheetsDestinationInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutSettingsInput = {
@@ -6259,6 +6941,8 @@ export type TenantCreateWithoutSettingsInput = {
   bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutSettingsInput = {
@@ -6311,6 +6995,8 @@ export type TenantUncheckedCreateWithoutSettingsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutSettingsInput = {
@@ -6379,6 +7065,8 @@ export type TenantUpdateWithoutSettingsInput = {
   bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutSettingsInput = {
@@ -6431,6 +7119,8 @@ export type TenantUncheckedUpdateWithoutSettingsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutLegalEntitiesInput = {
@@ -6483,6 +7173,8 @@ export type TenantCreateWithoutLegalEntitiesInput = {
   bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutLegalEntitiesInput = {
@@ -6535,6 +7227,8 @@ export type TenantUncheckedCreateWithoutLegalEntitiesInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutLegalEntitiesInput = {
@@ -6603,6 +7297,8 @@ export type TenantUpdateWithoutLegalEntitiesInput = {
   bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutLegalEntitiesInput = {
@@ -6655,6 +7351,8 @@ export type TenantUncheckedUpdateWithoutLegalEntitiesInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutBankAccountsInput = {
@@ -6707,6 +7405,8 @@ export type TenantCreateWithoutBankAccountsInput = {
   legalEntities?: Prisma.TenantLegalEntityCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutBankAccountsInput = {
@@ -6759,6 +7459,8 @@ export type TenantUncheckedCreateWithoutBankAccountsInput = {
   legalEntities?: Prisma.TenantLegalEntityUncheckedCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutBankAccountsInput = {
@@ -6827,6 +7529,8 @@ export type TenantUpdateWithoutBankAccountsInput = {
   legalEntities?: Prisma.TenantLegalEntityUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutBankAccountsInput = {
@@ -6879,6 +7583,8 @@ export type TenantUncheckedUpdateWithoutBankAccountsInput = {
   legalEntities?: Prisma.TenantLegalEntityUncheckedUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutOrdersInput = {
@@ -6931,6 +7637,8 @@ export type TenantCreateWithoutOrdersInput = {
   bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutOrdersInput = {
@@ -6983,6 +7691,8 @@ export type TenantUncheckedCreateWithoutOrdersInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutOrdersInput = {
@@ -7051,6 +7761,8 @@ export type TenantUpdateWithoutOrdersInput = {
   bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutOrdersInput = {
@@ -7103,6 +7815,8 @@ export type TenantUncheckedUpdateWithoutOrdersInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutOrderCommercialTermsInput = {
@@ -7155,6 +7869,8 @@ export type TenantCreateWithoutOrderCommercialTermsInput = {
   legalEntities?: Prisma.TenantLegalEntityCreateNestedManyWithoutTenantInput
   bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutOrderCommercialTermsInput = {
@@ -7207,6 +7923,8 @@ export type TenantUncheckedCreateWithoutOrderCommercialTermsInput = {
   legalEntities?: Prisma.TenantLegalEntityUncheckedCreateNestedManyWithoutTenantInput
   bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutOrderCommercialTermsInput = {
@@ -7275,6 +7993,8 @@ export type TenantUpdateWithoutOrderCommercialTermsInput = {
   legalEntities?: Prisma.TenantLegalEntityUpdateManyWithoutTenantNestedInput
   bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutOrderCommercialTermsInput = {
@@ -7327,6 +8047,8 @@ export type TenantUncheckedUpdateWithoutOrderCommercialTermsInput = {
   legalEntities?: Prisma.TenantLegalEntityUncheckedUpdateManyWithoutTenantNestedInput
   bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutOrderPaymentsInput = {
@@ -7379,6 +8101,8 @@ export type TenantCreateWithoutOrderPaymentsInput = {
   legalEntities?: Prisma.TenantLegalEntityCreateNestedManyWithoutTenantInput
   bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutOrderPaymentsInput = {
@@ -7431,6 +8155,8 @@ export type TenantUncheckedCreateWithoutOrderPaymentsInput = {
   legalEntities?: Prisma.TenantLegalEntityUncheckedCreateNestedManyWithoutTenantInput
   bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutOrderPaymentsInput = {
@@ -7499,6 +8225,8 @@ export type TenantUpdateWithoutOrderPaymentsInput = {
   legalEntities?: Prisma.TenantLegalEntityUpdateManyWithoutTenantNestedInput
   bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutOrderPaymentsInput = {
@@ -7551,6 +8279,8 @@ export type TenantUncheckedUpdateWithoutOrderPaymentsInput = {
   legalEntities?: Prisma.TenantLegalEntityUncheckedUpdateManyWithoutTenantNestedInput
   bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutOrderIntentEvaluationsInput = {
@@ -7603,6 +8333,8 @@ export type TenantCreateWithoutOrderIntentEvaluationsInput = {
   bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutOrderIntentEvaluationsInput = {
@@ -7655,6 +8387,8 @@ export type TenantUncheckedCreateWithoutOrderIntentEvaluationsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutOrderIntentEvaluationsInput = {
@@ -7723,6 +8457,8 @@ export type TenantUpdateWithoutOrderIntentEvaluationsInput = {
   bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutOrderIntentEvaluationsInput = {
@@ -7775,6 +8511,8 @@ export type TenantUncheckedUpdateWithoutOrderIntentEvaluationsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutDeliveryConnectionsInput = {
@@ -7827,6 +8565,8 @@ export type TenantCreateWithoutDeliveryConnectionsInput = {
   bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutDeliveryConnectionsInput = {
@@ -7879,6 +8619,8 @@ export type TenantUncheckedCreateWithoutDeliveryConnectionsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutDeliveryConnectionsInput = {
@@ -7947,6 +8689,8 @@ export type TenantUpdateWithoutDeliveryConnectionsInput = {
   bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutDeliveryConnectionsInput = {
@@ -7999,6 +8743,8 @@ export type TenantUncheckedUpdateWithoutDeliveryConnectionsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutDeliverySenderProfilesInput = {
@@ -8051,6 +8797,8 @@ export type TenantCreateWithoutDeliverySenderProfilesInput = {
   bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutDeliverySenderProfilesInput = {
@@ -8103,6 +8851,8 @@ export type TenantUncheckedCreateWithoutDeliverySenderProfilesInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutDeliverySenderProfilesInput = {
@@ -8171,6 +8921,8 @@ export type TenantUpdateWithoutDeliverySenderProfilesInput = {
   bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutDeliverySenderProfilesInput = {
@@ -8223,6 +8975,8 @@ export type TenantUncheckedUpdateWithoutDeliverySenderProfilesInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutShipmentsInput = {
@@ -8275,6 +9029,8 @@ export type TenantCreateWithoutShipmentsInput = {
   bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutShipmentsInput = {
@@ -8327,6 +9083,8 @@ export type TenantUncheckedCreateWithoutShipmentsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutShipmentsInput = {
@@ -8395,6 +9153,8 @@ export type TenantUpdateWithoutShipmentsInput = {
   bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutShipmentsInput = {
@@ -8447,6 +9207,8 @@ export type TenantUncheckedUpdateWithoutShipmentsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutShipmentAttemptsInput = {
@@ -8499,6 +9261,8 @@ export type TenantCreateWithoutShipmentAttemptsInput = {
   bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutShipmentAttemptsInput = {
@@ -8551,6 +9315,8 @@ export type TenantUncheckedCreateWithoutShipmentAttemptsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutShipmentAttemptsInput = {
@@ -8619,6 +9385,8 @@ export type TenantUpdateWithoutShipmentAttemptsInput = {
   bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutShipmentAttemptsInput = {
@@ -8671,6 +9439,8 @@ export type TenantUncheckedUpdateWithoutShipmentAttemptsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutShipmentStatusEventsInput = {
@@ -8723,6 +9493,8 @@ export type TenantCreateWithoutShipmentStatusEventsInput = {
   bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutShipmentStatusEventsInput = {
@@ -8775,6 +9547,8 @@ export type TenantUncheckedCreateWithoutShipmentStatusEventsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutShipmentStatusEventsInput = {
@@ -8843,6 +9617,8 @@ export type TenantUpdateWithoutShipmentStatusEventsInput = {
   bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutShipmentStatusEventsInput = {
@@ -8895,6 +9671,8 @@ export type TenantUncheckedUpdateWithoutShipmentStatusEventsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutOrderExportsInput = {
@@ -8947,6 +9725,8 @@ export type TenantCreateWithoutOrderExportsInput = {
   bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutOrderExportsInput = {
@@ -8999,6 +9779,8 @@ export type TenantUncheckedCreateWithoutOrderExportsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutOrderExportsInput = {
@@ -9067,6 +9849,8 @@ export type TenantUpdateWithoutOrderExportsInput = {
   bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutOrderExportsInput = {
@@ -9119,6 +9903,8 @@ export type TenantUncheckedUpdateWithoutOrderExportsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutAuditLogsInput = {
@@ -9171,6 +9957,8 @@ export type TenantCreateWithoutAuditLogsInput = {
   bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutAuditLogsInput = {
@@ -9223,6 +10011,8 @@ export type TenantUncheckedCreateWithoutAuditLogsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutAuditLogsInput = {
@@ -9291,6 +10081,8 @@ export type TenantUpdateWithoutAuditLogsInput = {
   bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutAuditLogsInput = {
@@ -9343,6 +10135,8 @@ export type TenantUncheckedUpdateWithoutAuditLogsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutOrderItemsInput = {
@@ -9395,6 +10189,8 @@ export type TenantCreateWithoutOrderItemsInput = {
   bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutOrderItemsInput = {
@@ -9447,6 +10243,8 @@ export type TenantUncheckedCreateWithoutOrderItemsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutOrderItemsInput = {
@@ -9515,6 +10313,8 @@ export type TenantUpdateWithoutOrderItemsInput = {
   bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutOrderItemsInput = {
@@ -9567,6 +10367,8 @@ export type TenantUncheckedUpdateWithoutOrderItemsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutProductsInput = {
@@ -9619,6 +10421,8 @@ export type TenantCreateWithoutProductsInput = {
   bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutProductsInput = {
@@ -9671,6 +10475,8 @@ export type TenantUncheckedCreateWithoutProductsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutProductsInput = {
@@ -9739,6 +10545,8 @@ export type TenantUpdateWithoutProductsInput = {
   bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutProductsInput = {
@@ -9791,6 +10599,8 @@ export type TenantUncheckedUpdateWithoutProductsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutInventoryReservationsInput = {
@@ -9843,6 +10653,8 @@ export type TenantCreateWithoutInventoryReservationsInput = {
   bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutInventoryReservationsInput = {
@@ -9895,6 +10707,8 @@ export type TenantUncheckedCreateWithoutInventoryReservationsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutInventoryReservationsInput = {
@@ -9963,6 +10777,8 @@ export type TenantUpdateWithoutInventoryReservationsInput = {
   bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutInventoryReservationsInput = {
@@ -10015,6 +10831,8 @@ export type TenantUncheckedUpdateWithoutInventoryReservationsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutTelegramDeliveryItemsInput = {
@@ -10067,6 +10885,8 @@ export type TenantCreateWithoutTelegramDeliveryItemsInput = {
   bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutTelegramDeliveryItemsInput = {
@@ -10119,6 +10939,8 @@ export type TenantUncheckedCreateWithoutTelegramDeliveryItemsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutTelegramDeliveryItemsInput = {
@@ -10187,6 +11009,8 @@ export type TenantUpdateWithoutTelegramDeliveryItemsInput = {
   bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutTelegramDeliveryItemsInput = {
@@ -10239,6 +11063,8 @@ export type TenantUncheckedUpdateWithoutTelegramDeliveryItemsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutTelegramNotificationPreferencesInput = {
@@ -10291,6 +11117,8 @@ export type TenantCreateWithoutTelegramNotificationPreferencesInput = {
   bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutTelegramNotificationPreferencesInput = {
@@ -10343,6 +11171,8 @@ export type TenantUncheckedCreateWithoutTelegramNotificationPreferencesInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutTelegramNotificationPreferencesInput = {
@@ -10411,6 +11241,8 @@ export type TenantUpdateWithoutTelegramNotificationPreferencesInput = {
   bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutTelegramNotificationPreferencesInput = {
@@ -10463,6 +11295,8 @@ export type TenantUncheckedUpdateWithoutTelegramNotificationPreferencesInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutCatalogueSourcesInput = {
@@ -10515,6 +11349,8 @@ export type TenantCreateWithoutCatalogueSourcesInput = {
   bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutCatalogueSourcesInput = {
@@ -10567,6 +11403,8 @@ export type TenantUncheckedCreateWithoutCatalogueSourcesInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutCatalogueSourcesInput = {
@@ -10635,6 +11473,8 @@ export type TenantUpdateWithoutCatalogueSourcesInput = {
   bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutCatalogueSourcesInput = {
@@ -10687,6 +11527,8 @@ export type TenantUncheckedUpdateWithoutCatalogueSourcesInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutCatalogueMappingsInput = {
@@ -10739,6 +11581,8 @@ export type TenantCreateWithoutCatalogueMappingsInput = {
   bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutCatalogueMappingsInput = {
@@ -10791,6 +11635,8 @@ export type TenantUncheckedCreateWithoutCatalogueMappingsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutCatalogueMappingsInput = {
@@ -10859,6 +11705,8 @@ export type TenantUpdateWithoutCatalogueMappingsInput = {
   bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutCatalogueMappingsInput = {
@@ -10911,6 +11759,8 @@ export type TenantUncheckedUpdateWithoutCatalogueMappingsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutCatalogueImportRunsInput = {
@@ -10963,6 +11813,8 @@ export type TenantCreateWithoutCatalogueImportRunsInput = {
   bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutCatalogueImportRunsInput = {
@@ -11015,6 +11867,8 @@ export type TenantUncheckedCreateWithoutCatalogueImportRunsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
   orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutCatalogueImportRunsInput = {
@@ -11083,6 +11937,8 @@ export type TenantUpdateWithoutCatalogueImportRunsInput = {
   bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutCatalogueImportRunsInput = {
@@ -11135,6 +11991,8 @@ export type TenantUncheckedUpdateWithoutCatalogueImportRunsInput = {
   bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
   orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
   orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 
@@ -11182,6 +12040,8 @@ export type TenantCountOutputType = {
   bankAccounts: number
   orderCommercialTerms: number
   orderPayments: number
+  lifecycleRequests: number
+  retentionDryRuns: number
 }
 
 export type TenantCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -11224,6 +12084,8 @@ export type TenantCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions
   bankAccounts?: boolean | TenantCountOutputTypeCountBankAccountsArgs
   orderCommercialTerms?: boolean | TenantCountOutputTypeCountOrderCommercialTermsArgs
   orderPayments?: boolean | TenantCountOutputTypeCountOrderPaymentsArgs
+  lifecycleRequests?: boolean | TenantCountOutputTypeCountLifecycleRequestsArgs
+  retentionDryRuns?: boolean | TenantCountOutputTypeCountRetentionDryRunsArgs
 }
 
 /**
@@ -11509,6 +12371,20 @@ export type TenantCountOutputTypeCountOrderPaymentsArgs<ExtArgs extends runtime.
   where?: Prisma.OrderPaymentWhereInput
 }
 
+/**
+ * TenantCountOutputType without action
+ */
+export type TenantCountOutputTypeCountLifecycleRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TenantLifecycleRequestWhereInput
+}
+
+/**
+ * TenantCountOutputType without action
+ */
+export type TenantCountOutputTypeCountRetentionDryRunsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TenantRetentionDryRunWhereInput
+}
+
 
 export type TenantSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -11561,6 +12437,8 @@ export type TenantSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   bankAccounts?: boolean | Prisma.Tenant$bankAccountsArgs<ExtArgs>
   orderCommercialTerms?: boolean | Prisma.Tenant$orderCommercialTermsArgs<ExtArgs>
   orderPayments?: boolean | Prisma.Tenant$orderPaymentsArgs<ExtArgs>
+  lifecycleRequests?: boolean | Prisma.Tenant$lifecycleRequestsArgs<ExtArgs>
+  retentionDryRuns?: boolean | Prisma.Tenant$retentionDryRunsArgs<ExtArgs>
   _count?: boolean | Prisma.TenantCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["tenant"]>
 
@@ -11637,6 +12515,8 @@ export type TenantInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   bankAccounts?: boolean | Prisma.Tenant$bankAccountsArgs<ExtArgs>
   orderCommercialTerms?: boolean | Prisma.Tenant$orderCommercialTermsArgs<ExtArgs>
   orderPayments?: boolean | Prisma.Tenant$orderPaymentsArgs<ExtArgs>
+  lifecycleRequests?: boolean | Prisma.Tenant$lifecycleRequestsArgs<ExtArgs>
+  retentionDryRuns?: boolean | Prisma.Tenant$retentionDryRunsArgs<ExtArgs>
   _count?: boolean | Prisma.TenantCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type TenantIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -11689,6 +12569,8 @@ export type $TenantPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     bankAccounts: Prisma.$TenantBankAccountPayload<ExtArgs>[]
     orderCommercialTerms: Prisma.$OrderCommercialTermsPayload<ExtArgs>[]
     orderPayments: Prisma.$OrderPaymentPayload<ExtArgs>[]
+    lifecycleRequests: Prisma.$TenantLifecycleRequestPayload<ExtArgs>[]
+    retentionDryRuns: Prisma.$TenantRetentionDryRunPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -12135,6 +13017,8 @@ export interface Prisma__TenantClient<T, Null = never, ExtArgs extends runtime.T
   bankAccounts<T extends Prisma.Tenant$bankAccountsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$bankAccountsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TenantBankAccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   orderCommercialTerms<T extends Prisma.Tenant$orderCommercialTermsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$orderCommercialTermsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderCommercialTermsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   orderPayments<T extends Prisma.Tenant$orderPaymentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$orderPaymentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderPaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  lifecycleRequests<T extends Prisma.Tenant$lifecycleRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$lifecycleRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TenantLifecycleRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  retentionDryRuns<T extends Prisma.Tenant$retentionDryRunsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$retentionDryRunsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TenantRetentionDryRunPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -13591,6 +14475,54 @@ export type Tenant$orderPaymentsArgs<ExtArgs extends runtime.Types.Extensions.In
   take?: number
   skip?: number
   distinct?: Prisma.OrderPaymentScalarFieldEnum | Prisma.OrderPaymentScalarFieldEnum[]
+}
+
+/**
+ * Tenant.lifecycleRequests
+ */
+export type Tenant$lifecycleRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TenantLifecycleRequest
+   */
+  select?: Prisma.TenantLifecycleRequestSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the TenantLifecycleRequest
+   */
+  omit?: Prisma.TenantLifecycleRequestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TenantLifecycleRequestInclude<ExtArgs> | null
+  where?: Prisma.TenantLifecycleRequestWhereInput
+  orderBy?: Prisma.TenantLifecycleRequestOrderByWithRelationInput | Prisma.TenantLifecycleRequestOrderByWithRelationInput[]
+  cursor?: Prisma.TenantLifecycleRequestWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TenantLifecycleRequestScalarFieldEnum | Prisma.TenantLifecycleRequestScalarFieldEnum[]
+}
+
+/**
+ * Tenant.retentionDryRuns
+ */
+export type Tenant$retentionDryRunsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TenantRetentionDryRun
+   */
+  select?: Prisma.TenantRetentionDryRunSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the TenantRetentionDryRun
+   */
+  omit?: Prisma.TenantRetentionDryRunOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TenantRetentionDryRunInclude<ExtArgs> | null
+  where?: Prisma.TenantRetentionDryRunWhereInput
+  orderBy?: Prisma.TenantRetentionDryRunOrderByWithRelationInput | Prisma.TenantRetentionDryRunOrderByWithRelationInput[]
+  cursor?: Prisma.TenantRetentionDryRunWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TenantRetentionDryRunScalarFieldEnum | Prisma.TenantRetentionDryRunScalarFieldEnum[]
 }
 
 /**

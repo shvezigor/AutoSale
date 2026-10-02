@@ -1,0 +1,63 @@
+import { z } from 'zod';
+
+export const tenantLifecycleKindSchema = z.enum(['EXPORT', 'DELETE']);
+export const tenantLifecycleStatusSchema = z.enum(['REQUESTED', 'EXPORTING', 'EXPORT_READY', 'FAILED', 'CANCELLED']);
+export const tenantLifecycleReasonSchema = z.enum(['CONTROLLER_REQUEST', 'CONTRACT_TERMINATION', 'ADMINISTRATIVE_TEST']);
+
+export const createTenantLifecycleRequestSchema = z.object({
+  kind: tenantLifecycleKindSchema,
+  reasonCode: tenantLifecycleReasonSchema,
+  idempotencyKey: z.string().uuid(),
+}).strict();
+
+const optionalTimestamp = z.string().datetime().nullable();
+
+export const tenantLifecycleRequestSchema = z.object({
+  id: z.string().uuid(),
+  tenantId: z.string().uuid(),
+  kind: tenantLifecycleKindSchema,
+  status: tenantLifecycleStatusSchema,
+  reasonCode: tenantLifecycleReasonSchema,
+  requestedAt: z.string().datetime(),
+  ingestionFrozenAt: optionalTimestamp,
+  exportSha256: z.string().regex(/^[a-f0-9]{64}$/).nullable(),
+  exportSizeBytes: z.number().int().nonnegative().nullable(),
+  exportManifestVersion: z.number().int().positive().nullable(),
+  exportReadyAt: optionalTimestamp,
+  exportExpiresAt: optionalTimestamp,
+  lastErrorCode: z.string().min(1).max(80).nullable(),
+  cancelledAt: optionalTimestamp,
+}).strict();
+
+export const tenantLifecycleJobSchema = z.object({
+  requestId: z.string().uuid(),
+  tenantId: z.string().uuid(),
+}).strict();
+
+export const retentionDryRunJobSchema = z.object({
+  runId: z.string().uuid(),
+  tenantId: z.string().uuid(),
+}).strict();
+
+export type TenantLifecycleKind = z.infer<typeof tenantLifecycleKindSchema>;
+export type TenantLifecycleStatus = z.infer<typeof tenantLifecycleStatusSchema>;
+export type TenantLifecycleReason = z.infer<typeof tenantLifecycleReasonSchema>;
+export type CreateTenantLifecycleRequest = z.infer<typeof createTenantLifecycleRequestSchema>;
+export type TenantLifecycleRequest = z.infer<typeof tenantLifecycleRequestSchema>;
+export type TenantLifecycleJob = z.infer<typeof tenantLifecycleJobSchema>;
+export type RetentionDryRunJob = z.infer<typeof retentionDryRunJobSchema>;
+
+export type TenantMutationSurface =
+  | 'META_INBOUND'
+  | 'TELEGRAM_INBOUND'
+  | 'ORDER_RECOGNITION'
+  | 'CONVERSATION_REPLY'
+  | 'ORDER_MUTATION'
+  | 'COMMERCIAL_TERMS'
+  | 'PAYMENT'
+  | 'PROCUREMENT'
+  | 'CATALOGUE'
+  | 'DELIVERY'
+  | 'SUPPLIER_SEND'
+  | 'SHEETS_EXPORT'
+  | 'NOTIFICATION_SEND';

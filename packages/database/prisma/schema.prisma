@@ -299,9 +299,66 @@ model Tenant {
   bankAccounts                    TenantBankAccount[]
   orderCommercialTerms            OrderCommercialTerms[]
   orderPayments                   OrderPayment[]
+  lifecycleRequests               TenantLifecycleRequest[]
+  retentionDryRuns                TenantRetentionDryRun[]
 
   @@index([status])
   @@map("tenants")
+}
+
+model TenantLifecycleRequest {
+  id                    String    @id @default(uuid()) @db.Uuid
+  tenantId              String    @map("tenant_id") @db.Uuid
+  kind                  String
+  status                String    @default("REQUESTED")
+  reasonCode            String    @map("reason_code")
+  requestedByUserId     String    @map("requested_by_user_id") @db.Uuid
+  idempotencyKey        String    @map("idempotency_key") @db.Uuid
+  requestHash           String    @map("request_hash")
+  ingestionFrozenAt     DateTime? @map("ingestion_frozen_at")
+  exportObjectKey       String?   @map("export_object_key")
+  exportSha256          String?   @map("export_sha256")
+  exportSizeBytes       BigInt?   @map("export_size_bytes")
+  exportManifestVersion Int?      @map("export_manifest_version")
+  exportReadyAt         DateTime? @map("export_ready_at")
+  exportExpiresAt       DateTime? @map("export_expires_at")
+  leaseId               String?   @map("lease_id") @db.Uuid
+  leaseExpiresAt        DateTime? @map("lease_expires_at")
+  attemptCount          Int       @default(0) @map("attempt_count")
+  nextAttemptAt         DateTime  @default(now()) @map("next_attempt_at")
+  lastErrorCode         String?   @map("last_error_code")
+  cancelledAt           DateTime? @map("cancelled_at")
+  cancelledByUserId     String?   @map("cancelled_by_user_id") @db.Uuid
+  requestedAt           DateTime  @default(now()) @map("requested_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+  tenant                Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, idempotencyKey])
+  @@index([status, nextAttemptAt])
+  @@index([exportExpiresAt])
+  @@map("tenant_lifecycle_requests")
+}
+
+model TenantRetentionDryRun {
+  id                String    @id @default(uuid()) @db.Uuid
+  tenantId          String    @map("tenant_id") @db.Uuid
+  status            String    @default("REQUESTED")
+  requestedByUserId String    @map("requested_by_user_id") @db.Uuid
+  idempotencyKey    String    @map("idempotency_key") @db.Uuid
+  requestHash       String    @map("request_hash")
+  summary           Json?
+  leaseId           String?   @map("lease_id") @db.Uuid
+  leaseExpiresAt    DateTime? @map("lease_expires_at")
+  nextAttemptAt     DateTime  @default(now()) @map("next_attempt_at")
+  lastErrorCode     String?   @map("last_error_code")
+  completedAt       DateTime? @map("completed_at")
+  requestedAt       DateTime  @default(now()) @map("requested_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+  tenant            Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, idempotencyKey])
+  @@index([status, nextAttemptAt])
+  @@map("tenant_retention_dry_runs")
 }
 
 model GoogleConnection {

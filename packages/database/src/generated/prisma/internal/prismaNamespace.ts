@@ -398,6 +398,8 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 export const ModelName = {
   Tenant: 'Tenant',
+  TenantLifecycleRequest: 'TenantLifecycleRequest',
+  TenantRetentionDryRun: 'TenantRetentionDryRun',
   GoogleConnection: 'GoogleConnection',
   GoogleOAuthAttempt: 'GoogleOAuthAttempt',
   GoogleCredentialCleanup: 'GoogleCredentialCleanup',
@@ -467,7 +469,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "tenant" | "googleConnection" | "googleOAuthAttempt" | "googleCredentialCleanup" | "instagramConnection" | "instagramOAuthState" | "instagramCredentialCleanup" | "user" | "userAvatarCleanup" | "userNotification" | "telegramLinkAttempt" | "telegramUserBinding" | "telegramBusinessConnection" | "telegramChat" | "telegramSupplierSetting" | "telegramWebhookUpdate" | "telegramDelivery" | "googleIdentity" | "googleSignInAttempt" | "tenantMembership" | "session" | "emailVerificationToken" | "passwordResetToken" | "tenantInvitation" | "securityAuditLog" | "webhookEvent" | "conversation" | "instagramCustomerProfile" | "instagramAvatarCleanup" | "message" | "googleSheetsDestination" | "tenantSettings" | "tenantLegalEntity" | "tenantBankAccount" | "order" | "orderCommercialTerms" | "orderPayment" | "orderIntentEvaluation" | "deliveryConnection" | "deliverySenderProfile" | "shipment" | "shipmentAttempt" | "shipmentStatusEvent" | "orderExport" | "auditLog" | "orderItem" | "product" | "inventoryReservation" | "telegramDeliveryItem" | "telegramNotificationPreference" | "catalogueSource" | "catalogueMapping" | "catalogueImportRun" | "attachment" | "demoLead"
+    modelProps: "tenant" | "tenantLifecycleRequest" | "tenantRetentionDryRun" | "googleConnection" | "googleOAuthAttempt" | "googleCredentialCleanup" | "instagramConnection" | "instagramOAuthState" | "instagramCredentialCleanup" | "user" | "userAvatarCleanup" | "userNotification" | "telegramLinkAttempt" | "telegramUserBinding" | "telegramBusinessConnection" | "telegramChat" | "telegramSupplierSetting" | "telegramWebhookUpdate" | "telegramDelivery" | "googleIdentity" | "googleSignInAttempt" | "tenantMembership" | "session" | "emailVerificationToken" | "passwordResetToken" | "tenantInvitation" | "securityAuditLog" | "webhookEvent" | "conversation" | "instagramCustomerProfile" | "instagramAvatarCleanup" | "message" | "googleSheetsDestination" | "tenantSettings" | "tenantLegalEntity" | "tenantBankAccount" | "order" | "orderCommercialTerms" | "orderPayment" | "orderIntentEvaluation" | "deliveryConnection" | "deliverySenderProfile" | "shipment" | "shipmentAttempt" | "shipmentStatusEvent" | "orderExport" | "auditLog" | "orderItem" | "product" | "inventoryReservation" | "telegramDeliveryItem" | "telegramNotificationPreference" | "catalogueSource" | "catalogueMapping" | "catalogueImportRun" | "attachment" | "demoLead"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -542,6 +544,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.TenantCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.TenantCountAggregateOutputType> | number
+        }
+      }
+    }
+    TenantLifecycleRequest: {
+      payload: Prisma.$TenantLifecycleRequestPayload<ExtArgs>
+      fields: Prisma.TenantLifecycleRequestFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TenantLifecycleRequestFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantLifecycleRequestPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TenantLifecycleRequestFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantLifecycleRequestPayload>
+        }
+        findFirst: {
+          args: Prisma.TenantLifecycleRequestFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantLifecycleRequestPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TenantLifecycleRequestFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantLifecycleRequestPayload>
+        }
+        findMany: {
+          args: Prisma.TenantLifecycleRequestFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantLifecycleRequestPayload>[]
+        }
+        create: {
+          args: Prisma.TenantLifecycleRequestCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantLifecycleRequestPayload>
+        }
+        createMany: {
+          args: Prisma.TenantLifecycleRequestCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TenantLifecycleRequestCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantLifecycleRequestPayload>[]
+        }
+        delete: {
+          args: Prisma.TenantLifecycleRequestDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantLifecycleRequestPayload>
+        }
+        update: {
+          args: Prisma.TenantLifecycleRequestUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantLifecycleRequestPayload>
+        }
+        deleteMany: {
+          args: Prisma.TenantLifecycleRequestDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TenantLifecycleRequestUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TenantLifecycleRequestUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantLifecycleRequestPayload>[]
+        }
+        upsert: {
+          args: Prisma.TenantLifecycleRequestUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantLifecycleRequestPayload>
+        }
+        aggregate: {
+          args: Prisma.TenantLifecycleRequestAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTenantLifecycleRequest>
+        }
+        groupBy: {
+          args: Prisma.TenantLifecycleRequestGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TenantLifecycleRequestGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TenantLifecycleRequestCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TenantLifecycleRequestCountAggregateOutputType> | number
+        }
+      }
+    }
+    TenantRetentionDryRun: {
+      payload: Prisma.$TenantRetentionDryRunPayload<ExtArgs>
+      fields: Prisma.TenantRetentionDryRunFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TenantRetentionDryRunFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantRetentionDryRunPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TenantRetentionDryRunFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantRetentionDryRunPayload>
+        }
+        findFirst: {
+          args: Prisma.TenantRetentionDryRunFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantRetentionDryRunPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TenantRetentionDryRunFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantRetentionDryRunPayload>
+        }
+        findMany: {
+          args: Prisma.TenantRetentionDryRunFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantRetentionDryRunPayload>[]
+        }
+        create: {
+          args: Prisma.TenantRetentionDryRunCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantRetentionDryRunPayload>
+        }
+        createMany: {
+          args: Prisma.TenantRetentionDryRunCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TenantRetentionDryRunCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantRetentionDryRunPayload>[]
+        }
+        delete: {
+          args: Prisma.TenantRetentionDryRunDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantRetentionDryRunPayload>
+        }
+        update: {
+          args: Prisma.TenantRetentionDryRunUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantRetentionDryRunPayload>
+        }
+        deleteMany: {
+          args: Prisma.TenantRetentionDryRunDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TenantRetentionDryRunUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TenantRetentionDryRunUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantRetentionDryRunPayload>[]
+        }
+        upsert: {
+          args: Prisma.TenantRetentionDryRunUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantRetentionDryRunPayload>
+        }
+        aggregate: {
+          args: Prisma.TenantRetentionDryRunAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTenantRetentionDryRun>
+        }
+        groupBy: {
+          args: Prisma.TenantRetentionDryRunGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TenantRetentionDryRunGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TenantRetentionDryRunCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TenantRetentionDryRunCountAggregateOutputType> | number
         }
       }
     }
@@ -4592,6 +4742,56 @@ export const TenantScalarFieldEnum = {
 export type TenantScalarFieldEnum = (typeof TenantScalarFieldEnum)[keyof typeof TenantScalarFieldEnum]
 
 
+export const TenantLifecycleRequestScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  kind: 'kind',
+  status: 'status',
+  reasonCode: 'reasonCode',
+  requestedByUserId: 'requestedByUserId',
+  idempotencyKey: 'idempotencyKey',
+  requestHash: 'requestHash',
+  ingestionFrozenAt: 'ingestionFrozenAt',
+  exportObjectKey: 'exportObjectKey',
+  exportSha256: 'exportSha256',
+  exportSizeBytes: 'exportSizeBytes',
+  exportManifestVersion: 'exportManifestVersion',
+  exportReadyAt: 'exportReadyAt',
+  exportExpiresAt: 'exportExpiresAt',
+  leaseId: 'leaseId',
+  leaseExpiresAt: 'leaseExpiresAt',
+  attemptCount: 'attemptCount',
+  nextAttemptAt: 'nextAttemptAt',
+  lastErrorCode: 'lastErrorCode',
+  cancelledAt: 'cancelledAt',
+  cancelledByUserId: 'cancelledByUserId',
+  requestedAt: 'requestedAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TenantLifecycleRequestScalarFieldEnum = (typeof TenantLifecycleRequestScalarFieldEnum)[keyof typeof TenantLifecycleRequestScalarFieldEnum]
+
+
+export const TenantRetentionDryRunScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  status: 'status',
+  requestedByUserId: 'requestedByUserId',
+  idempotencyKey: 'idempotencyKey',
+  requestHash: 'requestHash',
+  summary: 'summary',
+  leaseId: 'leaseId',
+  leaseExpiresAt: 'leaseExpiresAt',
+  nextAttemptAt: 'nextAttemptAt',
+  lastErrorCode: 'lastErrorCode',
+  completedAt: 'completedAt',
+  requestedAt: 'requestedAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TenantRetentionDryRunScalarFieldEnum = (typeof TenantRetentionDryRunScalarFieldEnum)[keyof typeof TenantRetentionDryRunScalarFieldEnum]
+
+
 export const GoogleConnectionScalarFieldEnum = {
   id: 'id',
   tenantId: 'tenantId',
@@ -5632,19 +5832,19 @@ export const SortOrder = {
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
-export const JsonNullValueInput = {
-  JsonNull: JsonNull
-} as const
-
-export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
-
-
 export const NullableJsonNullValueInput = {
   DbNull: DbNull,
   JsonNull: JsonNull
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {
@@ -5682,28 +5882,28 @@ export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof Json
  * Reference to a field of type 'String'
  */
 export type StringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'String'>
-    
+
 
 
 /**
  * Reference to a field of type 'String[]'
  */
 export type ListStringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'String[]'>
-    
+
 
 
 /**
  * Reference to a field of type 'AccessStatus'
  */
 export type EnumAccessStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AccessStatus'>
-    
+
 
 
 /**
  * Reference to a field of type 'AccessStatus[]'
  */
 export type ListEnumAccessStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AccessStatus[]'>
-    
+
 
 
 /**
@@ -5721,30 +5921,16 @@ export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaM
 
 
 /**
- * Reference to a field of type 'GoogleConnectionStatus'
+ * Reference to a field of type 'BigInt'
  */
-export type EnumGoogleConnectionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'GoogleConnectionStatus'>
+export type BigIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BigInt'>
     
 
 
 /**
- * Reference to a field of type 'GoogleConnectionStatus[]'
+ * Reference to a field of type 'BigInt[]'
  */
-export type ListEnumGoogleConnectionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'GoogleConnectionStatus[]'>
-    
-
-
-/**
- * Reference to a field of type 'GoogleCredentialCleanupStatus'
- */
-export type EnumGoogleCredentialCleanupStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'GoogleCredentialCleanupStatus'>
-    
-
-
-/**
- * Reference to a field of type 'GoogleCredentialCleanupStatus[]'
- */
-export type ListEnumGoogleCredentialCleanupStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'GoogleCredentialCleanupStatus[]'>
+export type ListBigIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BigInt[]'>
     
 
 
@@ -5759,6 +5945,48 @@ export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'In
  * Reference to a field of type 'Int[]'
  */
 export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Json'
+ */
+export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+/**
+ * Reference to a field of type 'QueryMode'
+ */
+export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
+
+
+
+/**
+ * Reference to a field of type 'GoogleConnectionStatus'
+ */
+export type EnumGoogleConnectionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'GoogleConnectionStatus'>
+
+
+
+/**
+ * Reference to a field of type 'GoogleConnectionStatus[]'
+ */
+export type ListEnumGoogleConnectionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'GoogleConnectionStatus[]'>
+
+
+
+/**
+ * Reference to a field of type 'GoogleCredentialCleanupStatus'
+ */
+export type EnumGoogleCredentialCleanupStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'GoogleCredentialCleanupStatus'>
+
+
+
+/**
+ * Reference to a field of type 'GoogleCredentialCleanupStatus[]'
+ */
+export type ListEnumGoogleCredentialCleanupStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'GoogleCredentialCleanupStatus[]'>
     
 
 
@@ -5843,20 +6071,6 @@ export type EnumTelegramLinkPurposeFieldRefInput<$PrismaModel> = FieldRefInputTy
  * Reference to a field of type 'TelegramLinkPurpose[]'
  */
 export type ListEnumTelegramLinkPurposeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TelegramLinkPurpose[]'>
-    
-
-
-/**
- * Reference to a field of type 'Json'
- */
-export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
-    
-
-
-/**
- * Reference to a field of type 'QueryMode'
- */
-export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
     
 
 
@@ -6396,6 +6610,8 @@ export interface PrismaClientOptionsWithAdapter extends PrismaClientBaseOptions 
 export type PrismaClientOptions = PrismaClientOptionsWithAccelerateUrl | PrismaClientOptionsWithAdapter
 export type GlobalOmitConfig = {
   tenant?: Prisma.TenantOmit
+  tenantLifecycleRequest?: Prisma.TenantLifecycleRequestOmit
+  tenantRetentionDryRun?: Prisma.TenantRetentionDryRunOmit
   googleConnection?: Prisma.GoogleConnectionOmit
   googleOAuthAttempt?: Prisma.GoogleOAuthAttemptOmit
   googleCredentialCleanup?: Prisma.GoogleCredentialCleanupOmit
@@ -6512,4 +6728,3 @@ export type PrismaAction =
  * `PrismaClient` proxy available in interactive transactions.
  */
 export type TransactionClient = Omit<DefaultPrismaClient, runtime.ITXClientDenyList>
-
