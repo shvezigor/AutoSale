@@ -35,6 +35,7 @@ describe('SettingsPage', () => {
     });
     authenticatedApiFetch
       .mockResolvedValueOnce({ ok: true, json: async () => ({ status: 'DISCONNECTED', accountId: null, username: null, tokenExpiresAt: null, lastVerifiedAt: null, lastErrorCode: null, cleanupStatus: 'NONE', cleanupErrorCode: null, cleanupAbandonEligible: false }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ status: 'NOT_CONNECTED', pageId: null, pageName: null, tokenExpiresAt: null, lastVerifiedAt: null, lastErrorCode: null, cleanupStatus: 'NONE', cleanupErrorCode: null }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ status: 'ACTIVE', email: 'owner@gmail.com', grantedScopes: ['drive.file'], connectedAt: '2026-09-01T08:00:00.000Z', lastVerifiedAt: '2026-09-01T08:00:00.000Z', lastErrorCode: null }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ available: true, botUsername: 'AutoSaleBot', personal: { connected: false, displayName: null, username: null, linkedAt: null } }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ ORDER_NEEDS_REVIEW: true, ORDER_AUTO_APPROVED: true, SUPPLIER_DELIVERY_FAILED: true }) })
@@ -125,6 +126,7 @@ describe('SettingsPage', () => {
         cleanupAbandonEligible: false,
         }),
       })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ status: 'NOT_CONNECTED', pageId: null, pageName: null, tokenExpiresAt: null, lastVerifiedAt: null, lastErrorCode: null, cleanupStatus: 'NONE', cleanupErrorCode: null }) })
       .mockResolvedValueOnce({
         ok: true,
         json: async () => ({ status: 'ACTIVE', email: null, grantedScopes: [], connectedAt: null, lastVerifiedAt: null, lastErrorCode: null }),
@@ -142,9 +144,10 @@ describe('SettingsPage', () => {
 
     render(await WorkspaceLayout({ children: await SettingsPage() }));
 
-    expect(authenticatedApiFetch).toHaveBeenCalledTimes(9);
+    expect(authenticatedApiFetch).toHaveBeenCalledTimes(10);
     expect(screen.getByRole('tab', { name: /Дані/ })).toHaveAttribute('aria-selected', 'true');
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/integrations/instagram');
+    expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/integrations/facebook');
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/integrations/google');
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/integrations/telegram');
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/integrations/telegram/preferences');
@@ -155,6 +158,7 @@ describe('SettingsPage', () => {
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/settings/bank-accounts');
     fireEvent.click(screen.getByRole('tab', { name: /Соцмережі \/ клієнти/ }));
     expect(screen.getByRole('button', { name: /Instagram.*Активне/ })).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.getByRole('button', { name: /Facebook.*Не підключено/ })).toHaveAttribute('aria-expanded', 'false');
     expect(screen.queryByText('@autosale_store')).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /Instagram.*Активне/ }));
     expect(screen.getByText('@autosale_store')).toBeInTheDocument();

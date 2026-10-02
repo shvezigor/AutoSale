@@ -66,6 +66,15 @@ describe('OnboardingPage', () => {
     expect(within(screen.getByTestId('onboarding-step-payments')).getByRole('link', { name: 'Налаштувати' })).toHaveAttribute('href', '/settings?tab=payments');
   });
 
+  it('accepts an active Facebook Page as the required sales channel', async () => {
+    mockOnboardingResponses({ catalogueReady: true, instagramReady: false, facebookReady: true });
+
+    render(await OnboardingPage());
+
+    expect(screen.getByText('3 із 3 обов’язкових кроків готові')).toBeInTheDocument();
+    expect(within(screen.getByTestId('onboarding-step-channel')).getByText('Готово')).toBeVisible();
+  });
+
   it('renders the full checklist in English', async () => {
     getServerSession.mockResolvedValue({ ...ownerSession, locale: 'en' });
     mockOnboardingResponses({ catalogueReady: false, instagramReady: false });
@@ -82,16 +91,19 @@ describe('OnboardingPage', () => {
 function mockOnboardingResponses({
   catalogueReady,
   instagramReady,
+  facebookReady = false,
   supplierReady = false,
 }: {
   catalogueReady: boolean;
   instagramReady: boolean;
+  facebookReady?: boolean;
   supplierReady?: boolean;
 }) {
   const destinationId = 'f4d8d792-34d1-4e93-a436-662919cd204c';
   const payloads = [
     catalogueReady ? [{ id: 'source-1', status: 'ACTIVE' }] : [],
     { status: instagramReady ? 'ACTIVE' : 'NOT_CONNECTED' },
+    { status: facebookReady ? 'ACTIVE' : 'NOT_CONNECTED' },
     { intentDetectionMode: 'AI_SUGGESTION', approvalMode: 'ON_LOW_CONFIDENCE' },
     { enabled: true, connections: [] },
     { enabled: true, connection: null },

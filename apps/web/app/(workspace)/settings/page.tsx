@@ -20,16 +20,19 @@ import { DataIntegrationHub } from '../../../src/components/data-integration-hub
 import { createTranslator, type Translator } from '../../../src/i18n/translator';
 import type { CommercialSettingsSummary } from '../../../../../packages/contracts/src/commercial';
 import { CommercialSettingsHub } from '../../../src/components/commercial-settings-hub';
+import type { FacebookConnectionSummary, FacebookPageCandidate } from '../../../../../packages/contracts/src/facebook';
 
 export const dynamic = 'force-dynamic';
 
-export default async function SettingsPage({ searchParams = Promise.resolve({}) }: { searchParams?: Promise<{ tab?: string | string[]; action?: string | string[] }> } = {}) {
+export default async function SettingsPage({ searchParams = Promise.resolve({}) }: { searchParams?: Promise<{ tab?: string | string[]; action?: string | string[]; facebook?: string | string[]; attemptId?: string | string[] }> } = {}) {
   const session = await getServerSession();
   if (!session) return null;
   const t = createTranslator(session.locale ?? 'uk');
   const query = await searchParams;
   const requestedTab = textParam(query.tab);
   const pickerAction = textParam(query.action);
+  const facebookResult = textParam(query.facebook);
+  const facebookAttemptId = textParam(query.attemptId);
   const initialTab: SettingsTabId = requestedTab === 'google' || requestedTab === 'data'
     ? 'data'
     : requestedTab === 'social'
@@ -43,8 +46,9 @@ export default async function SettingsPage({ searchParams = Promise.resolve({}) 
             : requestedTab === 'delivery'
               ? 'delivery'
               : requestedTab === 'payments' ? 'payments' : 'data';
-  const [instagramResponse, googleResponse, telegramResponse, telegramPreferencesResponse, deliveryResponse, meestResponse, ukrposhtaResponse, legalEntitiesResponse, bankAccountsResponse] = await Promise.all([
+  const [instagramResponse, facebookResponse, googleResponse, telegramResponse, telegramPreferencesResponse, deliveryResponse, meestResponse, ukrposhtaResponse, legalEntitiesResponse, bankAccountsResponse] = await Promise.all([
     authenticatedApiFetch('/api/integrations/instagram'),
+    authenticatedApiFetch('/api/integrations/facebook'),
     authenticatedApiFetch('/api/integrations/google'),
     authenticatedApiFetch('/api/integrations/telegram'),
     authenticatedApiFetch('/api/integrations/telegram/preferences'),
@@ -54,8 +58,9 @@ export default async function SettingsPage({ searchParams = Promise.resolve({}) 
     authenticatedApiFetch('/api/settings/legal-entities'),
     authenticatedApiFetch('/api/settings/bank-accounts'),
   ]);
-  if (!instagramResponse.ok || !googleResponse.ok || !telegramResponse.ok || !telegramPreferencesResponse.ok || !deliveryResponse.ok || !meestResponse.ok || !ukrposhtaResponse.ok || !legalEntitiesResponse.ok || !bankAccountsResponse.ok) throw new Error('Не вдалося завантажити налаштування');
+  if (!instagramResponse.ok || !facebookResponse.ok || !googleResponse.ok || !telegramResponse.ok || !telegramPreferencesResponse.ok || !deliveryResponse.ok || !meestResponse.ok || !ukrposhtaResponse.ok || !legalEntitiesResponse.ok || !bankAccountsResponse.ok) throw new Error('Не вдалося завантажити налаштування');
   const instagram = (await instagramResponse.json()) as InstagramConnectionSummary;
+  const facebook = (await facebookResponse.json()) as FacebookConnectionSummary;
   const google = (await googleResponse.json()) as GoogleConnectionSummary;
   const telegram = (await telegramResponse.json()) as TelegramConnectionSummary;
   const telegramPreferences = (await telegramPreferencesResponse.json()) as TelegramNotificationPreferences;
@@ -66,7 +71,10 @@ export default async function SettingsPage({ searchParams = Promise.resolve({}) 
     legalEntities: await legalEntitiesResponse.json(),
     bankAccounts: await bankAccountsResponse.json(),
   };
-  if (session.membershipRole === 'MANAGER') return <SettingsLayout t={t} google={google} instagram={instagram} telegram={telegram} telegramPreferences={telegramPreferences} delivery={delivery} meest={meest} ukrposhta={ukrposhta} commercialSettings={commercialSettings} initialTab={initialTab} pickerAction={pickerAction} session={session} />;
+  const facebookSelection = session.membershipRole === 'OWNER' && facebookResult === 'select-page' && facebookAttemptId
+    ? await loadFacebookSelection(facebookAttemptId)
+    : null;
+  if (session.membershipRole === 'MANAGER') return <SettingsLayout t={t} google={google} instagram={instagram} facebook={facebook} facebookSelection={null} telegram={telegram} telegramPreferences={telegramPreferences} delivery={delivery} meest={meest} ukrposhta={ukrposhta} commercialSettings={commercialSettings} initialTab={initialTab} pickerAction={pickerAction} session={session} />;
 
   const [supplierResponse, response, sheetsResponse, catalogueSourcesResponse] = await Promise.all([
     authenticatedApiFetch('/api/integrations/telegram/supplier'),
@@ -84,12 +92,14 @@ export default async function SettingsPage({ searchParams = Promise.resolve({}) 
     if (!sourceResponse.ok) throw new Error('Не вдалося завантажити джерело каталогу');
     return await sourceResponse.json() as CatalogueSourceConfiguration;
   }));
-  return <SettingsLayout t={t} google={google} instagram={instagram} telegram={telegram} telegramPreferences={telegramPreferences} delivery={delivery} meest={meest} ukrposhta={ukrposhta} commercialSettings={commercialSettings} supplier={supplier} initialTab={initialTab} pickerAction={pickerAction} session={session} settings={settings} sheets={sheets} catalogueSources={catalogueSources} catalogueConfigurations={catalogueConfigurations} />;
+  return <SettingsLayout t={t} google={google} instagram={instagram} facebook={facebook} facebookSelection={facebookSelection} telegram={telegram} telegramPreferences={telegramPreferences} delivery={delivery} meest={meest} ukrposhta={ukrposhta} commercialSettings={commercialSettings} supplier={supplier} initialTab={initialTab} pickerAction={pickerAction} session={session} settings={settings} sheets={sheets} catalogueSources={catalogueSources} catalogueConfigurations={catalogueConfigurations} />;
 }
 
 function SettingsLayout({
   t,
   instagram,
+  facebook,
+  facebookSelection,
   google,
   telegram,
   telegramPreferences,
@@ -108,6 +118,8 @@ function SettingsLayout({
 }: {
   t: Translator;
   instagram: InstagramConnectionSummary;
+  facebook: FacebookConnectionSummary;
+  facebookSelection: { attemptId: string; pages: FacebookPageCandidate[] } | null;
   google: GoogleConnectionSummary;
   telegram: TelegramConnectionSummary;
   telegramPreferences: TelegramNotificationPreferences;
@@ -136,7 +148,7 @@ function SettingsLayout({
     {
       id: 'social' as const,
       label: t('settings.socialTab'), description: t('settings.socialTabDescription'),
-      content: <section className="settings-section"><div className="settings-section-heading"><h2>{t('settings.socialTitle')}</h2><p>{t('settings.socialDescription')}</p></div><SocialChannelHub instagram={instagram} membershipRole={session.membershipRole} /></section>,
+      content: <section className="settings-section"><div className="settings-section-heading"><h2>{t('settings.socialTitle')}</h2><p>{t('settings.socialDescription')}</p></div><SocialChannelHub instagram={instagram} facebook={facebook} facebookSelection={facebookSelection} membershipRole={session.membershipRole} /></section>,
     },
     ...(settings ? [{
       id: 'orders' as const,
@@ -168,3 +180,15 @@ function SettingsLayout({
 }
 
 function textParam(value: string | string[] | undefined) { return (Array.isArray(value) ? value[0] : value)?.trim().toLowerCase() ?? ''; }
+
+async function loadFacebookSelection(attemptId: string): Promise<{ attemptId: string; pages: FacebookPageCandidate[] } | null> {
+  try {
+    const response = await authenticatedApiFetch(`/api/integrations/facebook/selection?attemptId=${encodeURIComponent(attemptId)}`);
+    if (!response.ok) return null;
+    const payload = await response.json() as { attemptId?: unknown; pages?: unknown };
+    if (payload.attemptId !== attemptId || !Array.isArray(payload.pages)) return null;
+    return { attemptId, pages: payload.pages as FacebookPageCandidate[] };
+  } catch {
+    return null;
+  }
+}
