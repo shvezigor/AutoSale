@@ -114,7 +114,11 @@ export class S3ObjectStorage implements StreamingObjectStorage {
   }
 
   async head(key: string): Promise<StoredObjectHead> {
-    const response = await this.client.send(new HeadObjectCommand({ Bucket: this.config.bucket, Key: key }));
+    const response = await this.client.send(new HeadObjectCommand({
+      Bucket: this.config.bucket,
+      Key: key,
+      ChecksumMode: 'ENABLED',
+    }));
     if (!response.ContentType || typeof response.ContentLength !== 'number') {
       throw new Error('STORED_OBJECT_METADATA_MISSING');
     }

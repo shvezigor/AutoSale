@@ -41,6 +41,11 @@ describe('S3ObjectStorage lifecycle artifact support', () => {
     await expect(storage.head('tenant-lifecycle/fictional/export.zip')).resolves.toEqual({
       contentType: 'application/zip', contentLength: bytes.byteLength, checksumSha256,
     });
+    expect(send.mock.calls[2]![0].input).toEqual(expect.objectContaining({
+      Bucket: config.bucket,
+      Key: 'tenant-lifecycle/fictional/export.zip',
+      ChecksumMode: 'ENABLED',
+    }));
     await expect(storage.createSignedDownloadUrl('tenant-lifecycle/fictional/export.zip', 300))
       .resolves.toMatch(/^https:/);
 
