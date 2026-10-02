@@ -21,6 +21,7 @@ Currently implemented areas include:
 - procurement state, stock reservation, Telegram supplier dispatch and personal notifications;
 - delivery integrations for Nova Poshta, Meest and Ukrposhta;
 - operational dashboard, notifications, observability, backup and restore.
+- tenant-isolated lifecycle exports, deletion-request freeze controls and non-destructive retention previews for platform operators.
 
 Facebook, Threads, TikTok, Viber, email services and additional business integrations are planned extensions of the provider-neutral conversation and order model. They must not be presented as implemented until an adapter and acceptance evidence exist. Pricing is published as a hypothesis, while automated billing and subscription enforcement remain planned. See the [feature map](docs/features/README.md) for evidence-based status.
 
@@ -164,6 +165,7 @@ Primary acceptance records:
 
 - [MVP and provider acceptance](docs/acceptance/mvp-checklist.md)
 - [Marketing site acceptance](docs/acceptance/marketing-site-checklist.md)
+- [Tenant data lifecycle acceptance](docs/acceptance/tenant-data-lifecycle-checklist.md)
 
 Manual test data belongs under `tests/fixtures/` and must be clearly fictional. Runtime state, real database dumps, OAuth material and production evidence containing personal data must remain outside Git.
 

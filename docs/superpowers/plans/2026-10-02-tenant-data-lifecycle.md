@@ -763,7 +763,7 @@ git commit -m "feat: add tenant lifecycle admin interface"
 - Consumes: all phase-one functionality.
 - Produces: reproducible acceptance evidence and updated canonical status.
 
-- [ ] **Step 1: Write the failing end-to-end acceptance test**
+- [x] **Step 1: Write the failing end-to-end acceptance test**
 
 ```ts
 test('admin exports and freezes only the selected fictional tenant', async ({ page }) => {
@@ -782,7 +782,7 @@ Run: `pnpm test:e2e -- tenant-data-lifecycle.spec.ts`
 
 Expected: PASS against isolated fictional fixtures; downloaded archive checksum equals API metadata and prohibited fields are absent.
 
-- [ ] **Step 3: Update canonical documentation with verified behavior**
+- [x] **Step 3: Update canonical documentation with verified behavior**
 
 Mark phase one `Available` only after acceptance is green. Record queue name, artifact TTL, safe retry procedure, how to cancel a frozen request, how to inspect dry-run summaries, and that physical deletion/ledger replay remain launch gates. State explicitly that phase one does not change the restore procedure because no deletion ledger exists yet; a future destructive phase must add mandatory ledger replay before runtime startup. Keep the feature index compact and link the acceptance checklist.
 

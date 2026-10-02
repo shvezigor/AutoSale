@@ -1,6 +1,6 @@
 # ADR 0002: Shared-schema tenant isolation and database defense in depth
 
-- **Status:** Accepted; current tenant-owned tables are protected, lifecycle automation remains in progress
+- **Status:** Accepted; current tenant-owned tables are protected, phase-one lifecycle live acceptance remains pending
 - **Date:** 2026-09-28
 - **Decision owner:** Sales AITO
 
@@ -53,12 +53,13 @@ Keep one shared PostgreSQL schema for the current product stage and enforce thes
 - Authentication bootstraps tenant authority through API-only functions rather than bypassing RLS. `api_active_membership_for_user(...)` selects one deterministic active workspace; `api_invitation_authority(...)` reveals only tenant/invitation routing for a valid high-entropy token; and `api_resolve_session(...)` returns the minimum authenticated principal for an exact session hash while refreshing `last_seen_at`. Session issue/revocation and pending-owner activation are bounded mutations. The unscoped revocation shape changes no rows, worker and `PUBLIC` have no execute access, platform administration reads membership summaries only through `platform_tenant_directory()`, and full membership, invitation and session records remain tenant-protected.
 - Notification retention discovers at most 1,000 expired opaque notification IDs through worker-only `worker_expired_user_notifications(...)`, groups them by returned tenant authority, and deletes each group inside its own tenant transaction. The API role and `PUBLIC` cannot execute the discovery function. Tenantless security events are accepted only through API-only `api_append_platform_security_audit_log(...)`, which verifies an active platform administrator and constrained actor/result/action/JSON metadata; tenant audit rows remain ordinary RLS-protected writes. Tenantless audit rows are never visible to either runtime role through direct table access.
 - Google Sheets export polling discovers at most 50 pending opaque exports through worker-only `worker_due_order_exports(...)`. It returns only tenant and export IDs; the worker claims the row and reloads the order, destination and product snapshot inside that tenant transaction before contacting Google. The API role and `PUBLIC` cannot execute the directory function.
+- Platform lifecycle operations use bounded fixed-search-path authority functions instead of granting cross-tenant table reads. Phase one creates private checksum-verified exports and count-only retention previews; a `DELETE` request is intentionally only a freeze-plus-export preparation. API/worker roles remain `NOBYPASSRLS`, queue payloads carry only tenant/durable request IDs, and every worker re-reads protected state under tenant context. No physical-delete transition or authority function exists in phase one.
 
 ## RLS rollout gate
 
 RLS was enabled incrementally, table by table, only after all production call sites and relation loads for that table were routed through the tenant transaction primitive. Every current public table with a `tenant_id` now has forced RLS. Any future tenant-owned table must ship its policy, tenant-scoped call paths and PostgreSQL isolation tests in the same change.
 
-The database isolation rollout is complete for the current schema: role/grant migrations, request/worker tenant transaction context, explicit authority functions, a restricted backup identity and PostgreSQL integration tests are present. EU launch readiness still requires tenant export/deletion and retention automation, encrypted off-host backup storage and recurring production-like restore exercises.
+The database isolation rollout is complete for the current schema: role/grant migrations, request/worker tenant transaction context, explicit authority functions, a restricted backup identity and PostgreSQL integration tests are present. Export/freeze and retention-preview automation are implemented, with isolated two-tenant live acceptance still pending. EU launch readiness additionally requires the destructive deletion ledger/replay phase, encrypted off-host backup storage and recurring production-like restore exercises.
 
 ## Performance strategy
 
