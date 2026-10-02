@@ -1878,6 +1878,18 @@ Status: commercial terms were implemented on 2026-09-19 and manual audited payme
 - [x] Production deployment verification is complete before claiming the live dashboard is ready.
 ## Shared Product Backlog
 
+### Backlog: Validate differentiation against Chatoryx
+
+Reference: [competitive analysis](../docs/research/2026-10-02-chatoryx-competitive-analysis.md). Owner: product; status: proposed validation, no new runtime functionality.
+
+- [ ] P0: Complete existing Instagram and shipment live acceptance and measure a full conversation-to-fulfillment pilot; retain current deployment gates.
+- [ ] P1: Specify catalogue-grounded AI reply drafts with manager confirmation using existing conversation and durable delivery modules; preserve order, stock and payment invariants.
+- [ ] Validate with 5 consenting stores over 14 days: target 30% less median manager time, 70% factually unchanged draft acceptance and zero critical factual, privacy or duplicate-send incidents. These are proposed targets, not results.
+- [ ] P2: After draft evidence, specify opt-in bounded automatic replies, provider-window enforcement and explicit human handoff; never use HUMAN_AGENT for AI.
+- [ ] Validate photo/post lookup, customer Telegram and payment links before implementation; defer unlimited AI and simultaneous channel expansion.
+- [ ] Obtain voluntary competitor demo evidence for difficult variants, missing stock, handoff, payment and shipment; do not infer availability from policy text.
+- [ ] Keep pricing hypotheses until willingness-to-pay and direct service cost are measured.
+
 ### Backlog: Complete demo lead operations
 
 - [ ] Add bounded BullMQ retry with backoff for `FAILED` demo notifications.

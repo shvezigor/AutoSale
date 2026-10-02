@@ -45,6 +45,10 @@ This is the routing index for product functionality. It is intentionally compact
 5. Keep status evidence-based. Provider credentials, app review or a live acceptance gap means **Validation pending**, even when code is complete.
 6. Update README when the project-level architecture, setup, commands or public capability summary changes.
 
+## Competitive product direction
+
+[Chatoryx analysis and prioritized validation, 2026-10-02](../research/2026-10-02-chatoryx-competitive-analysis.md) records public competitor claims, our capability gaps and proposed pilot criteria. AI reply drafts and bounded autonomous customer dialogue are **Planned**, not available functionality. Product owns validation; future implementation must extend existing conversation, catalogue and durable delivery modules. Execution priorities are tracked in `tasks/todo.md`; pricing remains owned by the monetization hypothesis.
+
 ## Documentation ownership
 
 - `docs/features/README.md` — routing and current status only.

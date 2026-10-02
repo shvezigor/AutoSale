@@ -16,7 +16,9 @@ Affected actors are the tenant owner, managers invited by that owner, the platfo
 - PostgreSQL is the source of truth; Google Sheets is a projection.
 - AI output remains untrusted until schema, catalogue, completeness, duplicate, and approval checks pass.
 - Instagram, AI order recognition, manager review, catalogue management, and Google Sheets form the current product baseline.
-- Other social channels, autonomous replies, postal labels, and supplier messaging are roadmap capabilities and cannot be sold as available yet.
+- As of 2026-10-02, procurement, inventory reservation and Telegram supplier notifications are Available; delivery adapters and Instagram live acceptance are Validation pending. Autonomous replies and additional customer sales channels remain Planned. See the feature map for current availability; implemented capabilities must not be sold as live-provider-verified before acceptance.
+
+Competitive input: [Chatoryx analysis, 2026-10-02](../research/2026-10-02-chatoryx-competitive-analysis.md). Keep current prices as hypotheses; validate operational value and direct AI cost before changing prices or offering unlimited AI. Competitor admin-only and future AI tiers are not equivalent to our proposed order-based plans.
 
 ## Pricing principle
 
@@ -107,4 +109,3 @@ For the first 20 activated trials:
 - stop selling a tier at its current limits if projected direct service cost exceeds 30% of its revenue or the tier regularly requires manual operator intervention that makes delivery unprofitable.
 
 Because payment processing is not yet implemented, a demo request, signed pilot agreement, or explicit acceptance of the quoted plan counts as paid-plan intent during initial validation. It does not count as collected revenue.
-
