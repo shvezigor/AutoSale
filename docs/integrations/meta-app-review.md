@@ -9,6 +9,11 @@
 - Meta app `AutoSale` опублікований.
 - У заявці залишено лише `instagram_business_basic` і
   `instagram_business_manage_messages`.
+- Звичайні відповіді Send API доступні у 24-годинному вікні. Окремий live-тест
+  2026-10-02 довів, що `HUMAN_AGENT` для ручної відповіді до 7 днів ще не
+  надано: Meta повернув HTTP 403 / code 10 при справному token та recipient
+  access. Це окремий App Review / business verification gate, а не причина
+  перепідключати Instagram.
 - Налаштовано HTTPS OAuth callback, webhook, deauthorization callback і data
   deletion callback.
 - Webhook успішно пройшов verification і тест поля `messages`.
@@ -30,6 +35,9 @@
    submission draft.
 5. Перевірити заявку ще раз і лише після цього натиснути Submit for review.
    Після подання чернетку вже не можна редагувати.
+6. Додати Human Agent feature до review, якщо менеджери повинні відповідати на
+   повідомлення віком 24 години–7 днів. У screencast має бути саме ручна дія
+   менеджера; автоматичні або AI-відповіді не можна обґрунтовувати цим feature.
 
 Тимчасовий `trycloudflare.com` URL придатний для розробки, але може змінитися
 після перезапуску quick tunnel. Перед поданням краще перейти на named
@@ -85,5 +93,7 @@ DM бізнесу, дозволяє менеджеру відповідати н
 - [ ] Обидва screencast завантажені й не містять секретів.
 - [ ] Privacy, Terms і Data deletion URL повертають HTTP 200.
 - [ ] У заявці немає permissions, які продукт не використовує.
+- [ ] Human Agent access схвалено й одна ручна відповідь у діалозі віком
+  24 години–7 днів отримала `SENT` без повторного повідомлення.
 - [ ] Публічний домен залишатиметься активним протягом усього review.
 - [ ] Перед Submit виконано ручний перегляд усіх відповідей.

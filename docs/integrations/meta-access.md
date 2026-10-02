@@ -28,6 +28,10 @@ ngrok-домену, Meta Instagram Login, тестерів, App Review, webhook 
 - `HUMAN_AGENT` потребує відповідного доступу Meta для live data. Його відмова
   не означає, що OAuth token зламаний: підключення лишається активним, а UI
   показує окрему помилку доступності ручної відповіді.
+- Live probe 2026-10-02 на діалозі віком 96,5 години повернув HTTP 403 / code
+  10 для `HUMAN_AGENT`, тоді як identity і recipient profile probes були
+  успішними. Поточний Meta app не має цього feature; наступний крок — App
+  Review за [`meta-app-review.md`](meta-app-review.md), а не повторний OAuth.
 - `Надсилається…` означає, що повідомлення збережене й очікує worker;
   `Надіслано` — Meta повернула ID повідомлення або webhook echo підтвердив його.
 - `Статус доставки невідомий` з’являється після timeout або неоднозначної
