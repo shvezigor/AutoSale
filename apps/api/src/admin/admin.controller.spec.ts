@@ -24,12 +24,29 @@ const idempotencyKey = '55555555-5555-4555-8555-555555555555';
 
 describe('AdminController', () => {
   it('exposes aggregate tenants and tenant status controls only', async () => {
-    const service = { listTenants: vi.fn().mockResolvedValue([]), setTenantStatus: vi.fn().mockResolvedValue({ status: 'BLOCKED', revokedSessions: 2 }) };
+    const overview = { status: 'HEALTHY', metrics: {}, attentionQueueCount: 0, updatedAt: '2026-10-02T12:00:00.000Z' };
+    const operations = { status: 'HEALTHY', database: 'HEALTHY', queues: [], updatedAt: '2026-10-02T12:00:00.000Z' };
+    const tenant = { tenantId, tenantName: 'Fictional Store' };
+    const service = {
+      listTenants: vi.fn().mockResolvedValue([]),
+      getOverview: vi.fn().mockResolvedValue(overview),
+      getOperations: vi.fn().mockResolvedValue(operations),
+      getTenant: vi.fn().mockResolvedValue(tenant),
+      setTenantStatus: vi.fn().mockResolvedValue({ status: 'BLOCKED', revokedSessions: 2 }),
+    };
     const controller = new AdminController(service as never, {} as never, {} as never);
 
     await expect(controller.listTenants()).resolves.toEqual([]);
+    await expect(controller.overview()).resolves.toBe(overview);
+    await expect(controller.operations()).resolves.toBe(operations);
+    await expect(controller.tenant(tenantId)).resolves.toBe(tenant);
     await expect(controller.blockTenant('tenant-1')).resolves.toEqual({ status: 'BLOCKED', revokedSessions: 2 });
     expect(service.setTenantStatus).toHaveBeenCalledWith('tenant-1', 'BLOCKED');
+  });
+
+  it('returns not found for an unknown aggregate tenant', async () => {
+    const controller = new AdminController({ getTenant: vi.fn().mockResolvedValue(null) } as never, {} as never, {} as never);
+    await expect(controller.tenant(tenantId)).rejects.toThrow('Tenant not found');
   });
 
   it('returns a session-bound reauthentication token without echoing the password', async () => {

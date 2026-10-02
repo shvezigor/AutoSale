@@ -23,8 +23,24 @@ export class AdminController {
   @Get('tenants')
   listTenants() { return this.admin.listTenants(); }
 
+  @Get('overview')
+  overview() { return this.admin.getOverview(); }
+
+  @Get('operations')
+  operations() { return this.admin.getOperations(); }
+
   @Get('health-summary')
-  healthSummary() { return { status: 'ok' as const }; }
+  async healthSummary() {
+    const operations = await this.admin.getOperations();
+    return { status: operations.status === 'HEALTHY' ? 'ok' as const : 'attention' as const };
+  }
+
+  @Get('tenants/:id')
+  async tenant(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
+    const tenant = await this.admin.getTenant(id);
+    if (!tenant) throw new NotFoundException('Tenant not found');
+    return tenant;
+  }
 
   @Post('tenants/:id/block')
   async blockTenant(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {

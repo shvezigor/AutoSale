@@ -1,609 +1,94 @@
-# Current Implementation Plan: Sales AITO Marketing Website
+# Current Implementation Plan: Platform Administration Workspace
 
 ## Overview
 
-Build and release the bilingual Sales AITO public website at `https://sales-aito.com/` inside the existing Next.js application. The work delivers the Autonomous Command visual foundation, Ukrainian and English conversion pages, technical SEO, durable demo-lead capture, approved pricing communication, and production search/accessibility/performance evidence without changing existing workspace behavior or implementing payment processing.
+Build the approved `platform-admin-workspace` vertical slice: a privacy-safe administrator shell with an operational overview, client organization table/detail and background queue monitoring. The canonical behavior is defined in `docs/superpowers/specs/2026-10-02-platform-admin-workspace-design.md`.
 
-Source artifacts:
+## Architecture decisions
 
-- `CAPABILITY-MAP-sales-aito-marketing.md`
-- `SPEC-marketing-foundation.md`
-- `SPEC-localized-content-seo.md`
-- `SPEC-demo-leads.md`
-- `SPEC-pricing-conversion.md`
-- `SPEC-release-validation.md`
-- `docs/product/2026-09-17-sales-aito-monetization.md`
-- `docs/superpowers/specs/2026-09-17-sales-aito-marketing-site-design.md`
+- Reuse the current `PLATFORM_ADMIN` authorization boundary and `/admin` redirect behavior.
+- Reuse `platform_tenant_directory()` and `platform_order_counts()`; do not bypass RLS or add business-data queries.
+- Inspect BullMQ through narrow queue-monitor interfaces and return counts/worker metadata only.
+- Keep the admin shell separate from tenant navigation, search and notifications.
+- Keep lifecycle controls on the client detail page, not in the table or overview.
+- Use existing design tokens, shared button variants and locale infrastructure.
 
-Tasks are tracked in the current-initiative section of `tasks/todo.md` using ids `M1`–`M18`. The shared billing backlog remains in that file but is outside this implementation.
-
-## Architecture Decisions
-
-- Keep one Next.js application and preserve existing public/auth/workspace URLs.
-- Use locale-prefixed marketing routes (`/uk`, `/en`) with typed locale dictionaries and crawlable language links.
-- Use a thin request-path locale boundary to render the correct document language without moving every existing workspace route.
-- Render marketing content and SEO metadata on the server; client JavaScript is limited to navigation, forms, and purposeful interaction.
-- Keep content in type-checked repository modules for the first release; preserve an interface for a later CMS.
-- Store integration availability in one registry and present `available`, `in-development`, and `roadmap` as distinct semantic states.
-- Save demo leads in PostgreSQL before queuing notification; notifications are retryable and idempotent.
-- Treat public pricing as a conversion hypothesis, not an entitlement or authorization source.
-- Keep PostgreSQL as the source of truth and preserve all current tenant, role, AI-validation, Google, and Meta boundaries.
-- Do not add a UI library, i18n framework, CMS, analytics SaaS, or heavy animation library unless implementation evidence forces a revised approved plan.
-
-## Dependency Graph
+## Dependency graph
 
 ```text
-M1 baseline and route safety
-  -> M2 locale/metadata boundary
-      -> M3 Autonomous Command tokens and primitives
-          -> M4 Ukrainian home vertical slice
-              -> M5 English content contract
-                  -> M6 platform and AI pages
-                  -> M7 integrations, solutions, and about pages
-                      -> M8 canonical, hreflang, and JSON-LD
-                          -> M9 sitemap, robots, OG, and indexing guards
-                              -> M10 blog foundation and first article pair
-
-M3 -> M11 demo-lead contract and schema -> M12 API persistence
-                                           -> M13 retryable notification
-                                           -> M14 localized demo form
-
-M5 + M8 -> M15 pricing registry and page -> M16 conversion events
-
-M4 + M10 + M14 + M16 -> M17 browser/E2E/accessibility verification
-                         -> M18 production, search, and performance release
+A1 contracts + safe API aggregates
+  -> A2 admin shell
+      -> A3 overview dashboard
+      -> A4 clients table
+          -> A5 client detail/actions
+      -> A6 operations monitor
+          -> A7 responsive/browser/security verification
 ```
 
-## Task List
+## Task list
 
-### Phase 1: Public foundation
+### Phase 1: Safe platform data
 
-- [ ] M1: Lock the existing route and metadata baseline.
-- [ ] M2: Add locale resolution and public/private indexability boundaries.
-- [ ] M3: Create Autonomous Command tokens and reusable marketing primitives.
-- [ ] M4: Ship the complete Ukrainian home-page vertical slice.
+- [x] A1: Add typed overview/operations contracts and a privacy-safe admin API.
 
-### Checkpoint: Public foundation
+**Acceptance:** aggregates match tenant summaries; queue states are classified deterministically; queue inspection failures are safe and never expose job data.  
+**Verify:** API service/controller tests and contracts tests.  
+**Likely files:** contracts auth, admin service/controller/module and focused specs.  
+**Dependencies:** none.
 
-- [ ] Existing application routes still pass regression tests.
-- [ ] `/uk` renders correct server HTML and marketing navigation.
-- [ ] Web tests, typecheck, and production build pass.
-- [ ] Human visual review confirms the approved Autonomous Command direction.
+### Phase 2: Admin navigation and overview
 
-### Phase 2: Localized content and search
+- [ ] A2: Add the responsive admin shell, navigation and localized copy.
+- [ ] A3: Replace the old card page with KPI and operations-attention overview.
 
-- [ ] M5: Add the English content contract and locale-equivalence validation.
-- [ ] M6: Build localized Platform and AI Operator pages.
-- [ ] M7: Build localized Integrations, Solutions, and About pages.
-- [ ] M8: Generate canonical, `hreflang`, metadata, breadcrumbs, and safe JSON-LD.
-- [ ] M9: Generate sitemap, robots, OG images, and private-route indexing guards.
-- [ ] M10: Add the blog foundation and one evidence-backed article pair.
+**Acceptance:** desktop sidebar/mobile drawer work by keyboard; overview renders only approved aggregates and real monitoring state.  
+**Verify:** shell/dashboard component tests plus web typecheck.  
+**Dependencies:** A1.
 
-### Checkpoint: Search-ready content
+### Checkpoint: Overview
 
-- [ ] Every published localized route has meaningful server HTML and unique metadata.
-- [ ] Sitemap, robots, canonicals, alternates, JSON-LD, and internal links pass automated checks.
-- [ ] No workspace, auth, admin, preview, or unpublished route is in the sitemap.
-- [ ] Web tests, typecheck, production build, and crawler smoke checks pass.
+- [ ] Focused API and web tests pass.
+- [ ] `/admin` loads without tenant navigation or business-data links.
 
-### Phase 3: Demo conversion
+### Phase 3: Client management
 
-- [ ] M11: Define the demo-lead contract and PostgreSQL state.
-- [ ] M12: Persist idempotent public demo submissions.
-- [ ] M13: Deliver retryable demo-lead notifications.
-- [ ] M14: Build the accessible localized demo form.
+- [ ] A4: Add the searchable, filterable and sortable client table.
+- [ ] A5: Add client detail with block/unblock and existing lifecycle controls.
 
-### Checkpoint: Demo conversion
+**Acceptance:** row click, keyboard activation and explicit action open detail; unknown ids return 404; mutations show confirmation/loading/failure feedback.  
+**Verify:** table/detail tests and controller regression tests.  
+**Dependencies:** A1, A2.
 
-- [ ] One valid submission produces one durable lead and one notification chain.
-- [ ] Invalid, duplicate, abusive, and provider-failure cases are safe and observable.
-- [ ] Contract, database, API, worker, web, typecheck, build, and focused E2E tests pass.
+### Checkpoint: Client flow
 
-### Phase 4: Pricing conversion
+- [ ] Client list-to-detail path works on desktop and mobile.
+- [ ] Privacy assertions exclude customer/order content and workspace links.
 
-- [ ] M15: Build the approved pricing registry and localized pricing experience.
-- [ ] M16: Record privacy-safe pricing and trial-intent events.
+### Phase 4: Operations and release evidence
 
-### Checkpoint: Pricing conversion
+- [ ] A6: Add the queue/service operations page and safe status presentation.
+- [ ] A7: Complete responsive, accessibility, security and full regression verification; update canonical status.
 
-- [ ] Trial and plan values exactly match the approved monetization artifact.
-- [ ] Monthly/annual display, current/roadmap separation, and CTAs pass tests in both locales.
-- [ ] Public pricing data grants no entitlement and no payment capability is implied.
-
-### Phase 5: Release evidence
-
-- [ ] M17: Complete responsive, browser, accessibility, and end-to-end acceptance.
-- [ ] M18: Complete production domain, performance, and search-engine readiness.
+**Acceptance:** all configured queues are visible with counts, workers and pending age; 390 px layout does not overflow; full tests/typecheck/build pass.  
+**Verify:** focused tests, `pnpm test`, `pnpm typecheck`, `pnpm build`, browser acceptance and diff/security review.  
+**Dependencies:** A1-A5.
 
 ### Checkpoint: Complete
 
-- [ ] Full tests, typecheck, build, Playwright, Compose build/config, and diff checks pass.
-- [ ] `sales-aito.com` serves the localized public site over HTTPS and links safely into auth/workspace.
-- [ ] Search Console and Bing can fetch representative URLs and the sitemap.
-- [ ] IndexNow is verified or explicitly deferred.
-- [ ] Known limitations and external launch prerequisites are documented.
+- [ ] All spec success criteria are met.
+- [ ] Canonical feature index reports evidence-based status.
+- [ ] Scoped commits are merged to `master`, pushed and the feature branch is removed.
 
-## Vertical Slices
-
-1. **Ukrainian visitor can understand and enter the product:** foundation through M4.
-2. **Crawler can discover and understand both languages:** M5 through M10.
-3. **Prospect can request a demo without losing data:** M11 through M14.
-4. **Prospect can select a plan and express intent:** M15 through M16.
-5. **Operator can prove production readiness:** M17 through M18.
-
-Each slice ends in a deployable state. No later phase is required to keep earlier routes working.
-
-## Parallelization Opportunities
-
-- After M3, demo contract/schema work (M11) can proceed independently from localized content work (M5–M7).
-- After M5, page content (M6–M7) can be prepared independently, but both must consume the same approved content types.
-- M13 and M14 begin only after M12 fixes the submission contract.
-- M15 can begin after the locale/content contract is stable; M16 follows the final CTA/event vocabulary.
-- M17 and M18 are sequential because release evidence must inspect the integrated production output.
-
-## Risks and Mitigations
+## Risks and mitigations
 
 | Risk | Impact | Mitigation |
 |---|---|---|
-| Public routing breaks auth or workspace URLs | High | M1 locks route behavior before locale changes; retain regression tests through every checkpoint |
-| Incorrect locale handling weakens indexing | High | Direct `/uk` and `/en` URLs, correct server `lang`, crawlable links, reciprocal alternates, raw-HTML tests |
-| Production and checkout differ | High | Compare deployed route inventory before release and avoid unrelated workspace redesign |
-| Marketing claims outrun the product | High | Central integration registry with reviewed availability states and no roadmap offer markup |
-| Demo form collects PII unsafely | High | Minimal fields, consent, durable storage, redacted logs, rate limiting, retention rules, audited access |
-| Notification outage loses leads | High | Commit database record before an idempotent retryable job |
-| Low Scale price becomes unprofitable | Medium | No paid enforcement yet; collect plan intent and direct cost per processed order before billing build |
-| Added visual effects hurt Core Web Vitals | Medium | Server-first content, no heavy animation library, explicit image/font/JS budgets, early production profiling |
-| Search launch is technically correct but not indexed | Medium | Search Console/Bing verification, sitemap submission, URL Inspection, internal links, and post-launch monitoring |
-
-## Open Questions
-
-No implementation-blocking product questions remain. Production Search Console/Bing ownership, email recipient configuration, and deployment access are external prerequisites for M18 and will be reported rather than guessed.
-
----
-
-## Existing Plan: Instagram Order Capture MVP
-
-## Overview
-
-Build a self-hosted, single-client MVP that receives messages from an Instagram Professional account through the official Meta API, stores conversations, detects a confirmed order, extracts structured customer and product data with AI, lets a manager review uncertain results, and synchronizes approved orders to Google Sheets through the official API. The complete system must run with Docker Compose and remain portable between Linux servers.
-
-## Scope
-
-### Included in the MVP
-
-- One business client and one Instagram Professional account.
-- Official Meta webhook ingestion and Conversations/Send API integration.
-- Text and image attachment capture.
-- Conversation history and order-trigger detection.
-- AI extraction into a validated schema.
-- Product catalogue with aliases and deterministic candidate search.
-- Manager inbox for review, correction, and approval.
-- Google Sheets synchronization through the Google Sheets API.
-- Containerized web, API, worker, PostgreSQL, Redis, and MinIO services.
-- Audit log, retry handling, health checks, backups, and deployment documentation.
-
-### Explicitly deferred
-
-- Automatic customer replies.
-- Automatic Nova Poshta waybill creation.
-- Telegram, Viber, TikTok, and OLX channels.
-- Billing, subscriptions, and public self-service onboarding.
-- Multiple active tenants in the UI.
-
-The schema and integration interfaces will carry `tenant_id` from the beginning, but the MVP will expose only one configured tenant.
-
-## Architecture Decisions
-
-- **Monorepo:** pnpm workspaces with `apps/api`, `apps/worker`, `apps/web`, and shared packages.
-- **Backend:** TypeScript and NestJS for HTTP APIs, webhook verification, domain services, and generated OpenAPI documentation.
-- **Frontend:** Next.js, React, TypeScript, Tailwind CSS, and shadcn/ui.
-- **Primary storage:** PostgreSQL through Prisma migrations. Google Sheets is a projection, never the source of truth.
-- **Background processing:** Redis and BullMQ for media download, AI extraction, product matching, and Sheets synchronization.
-- **Object storage:** S3-compatible interface; MinIO in local/self-hosted deployments.
-- **AI boundary:** OpenAI Responses API adapter returning a strict, versioned JSON schema. The model extracts facts from prompts, conversation context, images, and supplied catalogue candidates; local validation rejects unknown SKUs and incomplete output.
-- **Approval policy:** each tenant selects `ALWAYS`, `NEVER`, or `ON_LOW_CONFIDENCE`. Automatic approval is permitted only after schema, catalogue, completeness, and duplicate validation.
-- **Instagram boundary:** official Meta APIs only. Raw webhook payloads are retained for replay and audit.
-- **Google Sheets boundary:** a dedicated adapter using the Google Sheets API. Each tenant owner connects Google through AutoSale's OAuth web application and explicitly selects files through Google Picker using the least-privilege `drive.file` scope. A service account remains development-only during migration.
-- **Idempotency:** unique external message IDs, unique order trigger IDs, and a unique `(tenant_id, order_id, destination)` export key prevent duplicate orders and rows.
-- **Portability:** one production-oriented Docker Compose definition, environment-based secrets, versioned database migrations, named volumes, and documented backup/restore procedures.
-
-## Runtime Topology
-
-```text
-Internet
-   |
-Caddy (HTTPS)
-   |-- Next.js web
-   `-- NestJS API <-- Meta webhooks
-           |
-        PostgreSQL
-           |
-        Redis/BullMQ --> Worker --> MinIO
-                         |  |        |
-                         |  |        `-- message images
-                         |  `----------- AI provider
-                         `-------------- Google Sheets API
-```
-
-## Core Data Flow
-
-1. Meta calls the webhook endpoint.
-2. API verifies the challenge/signature, records the raw event, and returns quickly.
-3. A queue job normalizes and deduplicates the message.
-4. Media is copied to controlled object storage before source URLs expire.
-5. Conversation context is evaluated for an explicit order trigger.
-6. AI extracts customer, products, quantity, and delivery fields into a strict schema.
-7. Deterministic catalogue search produces SKU candidates; AI may rank only those candidates.
-8. Local validation checks required fields, catalogue IDs, and duplicates after AI extraction.
-9. The tenant approval policy routes the order to `NEEDS_REVIEW` or `AUTO_APPROVED`; unsafe results always require review.
-10. When review is required, a manager approves or corrects the order in the web interface.
-10. An idempotent job appends or updates the Google Sheets row by `order_id`.
-
-## Google Sheets Contract
-
-The target spreadsheet contains one protected header row and one row per order. The adapter locates an existing row by `order_id`; it updates that row or appends a new one.
-
-Initial columns:
-
-| Column | Meaning |
-|---|---|
-| `order_id` | Stable internal identifier |
-| `created_at` | Order creation time |
-| `status` | Current order status |
-| `channel` | `instagram` |
-| `conversation_id` | External conversation reference |
-| `customer_name` | Confirmed customer name |
-| `customer_phone` | Normalized phone |
-| `sku` | Confirmed catalogue SKU |
-| `product_name` | Canonical product name |
-| `quantity` | Confirmed quantity |
-| `delivery_city` | City/locality |
-| `delivery_branch` | Branch/address text |
-| `manager_note` | Manual note |
-| `confidence` | Extraction/matching confidence |
-| `updated_at` | Last synchronized update |
-
-The exact client spreadsheet can add mapped columns through configuration without leaking sheet-specific logic into the order domain.
-
-## Task List
-
-### Phase 1: Foundations and risk probes
-
-- [ ] Task 1: Verify Meta and Google access prerequisites.
-- [ ] Task 2: Scaffold and run the portable container stack.
-- [ ] Task 3: Add configuration, health checks, and secret validation.
-
-### Checkpoint: Foundation
-
-- [ ] All containers become healthy from a clean checkout.
-- [ ] Meta webhook challenge succeeds in a test environment.
-- [ ] A tenant owner can authorize the staging Google OAuth client and select only the intended private spreadsheet through Picker.
-- [ ] Review results before building domain features.
-
-### Phase 2: First vertical slice — Instagram message to inbox
-
-- [ ] Task 4: Persist and deduplicate verified Meta webhook events.
-- [ ] Task 5: Normalize Instagram conversations, messages, and media.
-- [ ] Task 6: Display the conversation inbox in the manager UI.
-
-### Checkpoint: Conversation capture
-
-- [ ] A real test message and photo appear once in the web inbox.
-- [ ] Replayed webhook events do not create duplicates.
-- [ ] API, worker, and browser tests pass.
-
-### Phase 3: Second vertical slice — conversation to reviewed order
-
-- [ ] Task 7: Import and search the product catalogue.
-- [ ] Task 8: Detect the confirmed-order trigger.
-- [ ] Task 9: Extract a strict, validated order draft through the OpenAI Responses API.
-- [ ] Task 10: Match product candidates and calculate confidence.
-- [ ] Task 11: Configure approval policy and review only orders routed to `NEEDS_REVIEW`.
-
-### Checkpoint: Reviewed order
-
-- [ ] A representative conversation produces a reviewable order draft.
-- [ ] Unknown or ambiguous products cannot be silently approved by AI.
-- [ ] Manager corrections are audited.
-- [ ] Extraction evaluations meet the agreed acceptance threshold.
-
-### Phase 4 (current first priority): Tenant Google OAuth and Picker
-
-- [ ] Task 20: Configure the AutoSale Google Cloud project and OAuth contract.
-- [ ] Task 21: Persist tenant Google connections and single-use OAuth attempts.
-- [ ] Task 22: Implement OAuth start, callback, reconnect, and safe connection summary.
-- [ ] Task 23: Add durable disconnect and credential cleanup.
-- [ ] Task 24: Select and validate private spreadsheets through Google Picker.
-- [ ] Task 25: Use tenant OAuth for catalogue synchronization.
-- [ ] Task 26: Use tenant OAuth for idempotent order export.
-- [ ] Task 27: Deliver the owner-facing Google connection wizard.
-- [ ] Task 28: Complete staging, verification, migration, and end-to-end acceptance.
-
-Detailed execution steps: `docs/superpowers/plans/2026-09-02-google-sheets-oauth-connection.md`.
-
-### Phase 5: Approved order to Google Sheets
-
-- [ ] Task 12: Configure and validate a Google Sheets destination.
-- [ ] Task 13: Synchronize approved orders idempotently.
-- [ ] Task 14: Surface synchronization state and allow safe retry.
-
-### Checkpoint: Google Sheets export
-
-- [ ] Approval creates exactly one row with the expected mapping.
-- [ ] Updating the order updates the existing row.
-- [ ] API retries and job retries do not duplicate rows.
-- [ ] A revoked credential produces an actionable error without losing the order.
-
-### Phase 6: Operational readiness
-
-- [ ] Task 15: Add audit, structured logs, metrics, and error reporting.
-- [ ] Task 16: Add backup, restore, migration, and deployment procedures.
-- [ ] Task 17: Run end-to-end acceptance and failure testing.
-
-### Checkpoint: MVP complete
-
-- [ ] All focused, integration, and end-to-end tests pass.
-- [ ] Production images build without development dependencies.
-- [ ] The stack is restored on a second clean Docker host from backup.
-- [ ] No production secret exists in the repository or container images.
-- [ ] The client accepts the Instagram-to-Google-Sheets workflow.
-
-## Dependency Graph
-
-```text
-1 Meta/Google access probe
-|\
-| `------------------------------> 12 Sheets configuration
-v
-2 Container stack -> 3 Config/health
-                        |
-                        v
-4 Webhook persistence -> 5 Normalization -> 6 Inbox UI
-                              |
-                              v
-7 Catalogue -> 8 Trigger -> 9 AI extraction -> 10 Matching -> 11 Review
-                                                               |
-                                                               v
-12 Sheets configuration -> 13 Sync -> 14 Sync recovery
-                                         |
-                                         v
-15 Observability -> 16 Operations -> 17 End-to-end acceptance
-```
-
-## Verification Strategy
-
-- Unit tests cover signature validation, normalization, trigger rules, schemas, candidate scoring, field mapping, and idempotency keys.
-- Integration tests use PostgreSQL, Redis, and MinIO containers and mock external Meta, AI, and Google endpoints.
-- Contract fixtures preserve representative Meta webhook payloads and Google Sheets responses.
-- AI evaluation uses an anonymized, versioned dataset of real or representative conversations; outputs are scored per field and for correct SKU selection.
-- Playwright verifies inbox, review, approval, and synchronization status.
-- A staging test uses real Meta and Google test resources before production access.
-
-## Risks and Mitigations
-
-| Risk | Impact | Mitigation |
-|---|---|---|
-| Meta App Review or permissions are delayed | High | Make Task 1 a blocking spike; use a client-owned test account before estimating production launch. |
-| Message media URL expires | High | Queue immediate download and retain checksum plus original metadata. |
-| Trigger phrase produces false positives | High | Require conversation context and completeness checks; unsafe results override the tenant's auto-approval preference and require review. |
-| AI selects the wrong SKU | High | Retrieve deterministic candidates, enforce confidence thresholds, and require review for ambiguity. |
-| Google Sheets rows are duplicated | High | Persist export state and row identity; use an order-level idempotency key and reconciliation job. |
-| User manually changes headers/columns | Medium | Validate configured headers before export and stop with an actionable error. |
-| Google quota or transient outage | Medium | Exponential backoff, queue retry, dead-letter state, and manual retry. |
-| Docker host is lost | High | Automated PostgreSQL and object-storage backups plus tested restore procedure. |
-| Single-client assumptions leak into code | Medium | Keep `tenant_id`, integration interfaces, and credential boundaries from day one. |
-
-## Inputs Required Before Implementation
-
-- Meta Business ownership and Instagram Professional account details.
-- A Meta developer app or authority to create one.
-- Exact confirmation phrases and 50–100 anonymized example conversations for the first evaluation set.
-- Product catalogue with stable SKU, canonical name, variations, aliases, and reference photos where available.
-- Access to create/configure the AutoSale Google Cloud project, a private staging spreadsheet, final catalogue/export tabs, and approval to submit Google OAuth verification materials.
-- Rules for incomplete customer phone, delivery data, multiple products, edits, and cancellations.
-- Target deployment environment: Linux VPS requirements, domain, and backup destination.
-
-## Definition of Done
-
-The MVP is complete only when a real Instagram test conversation can be ingested, reviewed, approved, and reflected exactly once in Google Sheets; all state remains recoverable after container restart; external outages produce visible retryable failures; and the documented backup can restore the system on another Docker host.
-
-## Telegram platform implementation plan
-
-Approved capability map: `CAPABILITY-MAP-telegram-integration.md`. Current module spec: `SPEC-telegram-platform.md`.
-
-### Architecture decisions
-
-- AutoSale operates one optional shared bot configured by the operator; customers never create a bot or submit a token.
-- Telegram webhook updates are accepted only with the configured secret header and persisted through narrow, validated commands rather than as raw payload history.
-- A hashed, expiring, single-use deep-link token binds a Telegram identity or group to the authenticated tenant/user.
-- PostgreSQL delivery rows are authoritative. BullMQ only wakes workers, and a reconciler recovers missed wake-ups and expired leases.
-- Telegram numeric identifiers remain strings, provider errors become bounded safe codes, and personal alerts omit order PII by default.
-- Supplier delivery supports Telegram Business when Telegram permits the target chat and a bot-managed group fallback when it does not.
-
-### Dependency graph
-
-```text
-Shared config and Bot API adapter
-             |
-             v
-Persistence and contracts
-       |             |
-       v             v
-Webhook receiver   Link/summary API
-       \             /
-        v           v
-       Durable delivery worker
-                 |
-                 v
-       Minimal Telegram settings UI
-```
-
-### Phase 1: Provider and persistence foundations
-
-- [x] Task 41: Add optional shared-bot configuration.
-- [x] Task 42: Add a safe Bot API adapter.
-- [x] Task 43: Add tenant-safe Telegram contracts and persistence.
-
-Checkpoint: focused configuration, adapter, contract, and migration tests pass; partial production configuration fails closed.
-
-### Phase 2: Secure linking and delivery
-
-- [x] Task 44: Receive and verify Telegram webhook updates.
-- [x] Task 45: Link and summarize personal or group Telegram destinations.
-- [x] Task 46: Deliver queued Telegram messages durably.
-
-Checkpoint: replayed or ambiguous updates do not duplicate bindings or deliveries; tenant, user, and purpose boundaries are covered by tests.
-
-### Phase 3: User-visible platform slice
-
-- [x] Task 47: Add the minimal Telegram connection card and test notification.
-
-Checkpoint: a member can generate a private deep link, see connected state after Start, send one test alert, and unlink; responsive UI, full tests, typecheck, build, and Docker health pass.
-
-### Sequential versus parallel work
-
-- Tasks 41–43 are sequential because they define shared configuration, the provider adapter, and persistence contracts.
-- After Task 43, webhook validation and authenticated link APIs are logically independent, but this implementation remains sequential to avoid shared-module churn.
-- Supplier dispatch and personal event preferences start only after Task 47 validates the platform slice.
-
-### Risks and mitigations
-
-| Risk | Impact | Mitigation |
-|---|---|---|
-| Bot token or webhook secret leaks | High | Environment-only secrets, redaction, no token API fields, secret-header verification |
-| Queue wake-up is lost | High | Commit delivery first; due-delivery reconciler re-enqueues from PostgreSQL |
-| Telegram retries a webhook | Medium | Provider update ID uniqueness and transactional single-use link consumption |
-| A link binds the wrong tenant or user | High | Short-lived random token, hashed storage, tenant/user/purpose binding, explicit Start |
-| Telegram returns ambiguous network failure | Medium | Stable delivery idempotency key, retry state, provider message ID when known, bounded attempts |
-| Production bot is not configured yet | Medium | Optional startup configuration, explicit unavailable summary, fake provider tests, live acceptance deferred |
-
-### External prerequisite
-
-Implementation and automated verification do not require a real Telegram credential. Live acceptance and production webhook registration require an operator-created AutoSale bot token, bot username, and independently generated webhook secret supplied through `.env`, never committed.
-
-### Supplier dispatch implementation
-
-Approved downstream spec: `SPEC-telegram-supplier-dispatch.md`.
-
-- [x] Task 48: Accept permitted `business_message` updates and observe Business destinations without storing message contents.
-- [x] Task 49: Let an owner select one observed Business chat or bot-managed group as the supplier destination.
-- [x] Task 50: Queue an idempotent, privacy-safe supplier message from an approved order.
-- [x] Task 51: Add supplier configuration and delivery status to Settings and order details.
-- [x] Task 52: Expand the production webhook subscriptions and validate one end-to-end Telegram Business delivery.
-
-### Комплектація замовлень і персональні Telegram-сповіщення
-
-- [x] Task 53: Контракти та additive persistence комплектації.
-- [x] Task 54: Автоматична оцінка залишків і конкурентно безпечні резерви.
-- [x] Task 55: Ручні статуси, передача замовлення та аудит.
-- [x] Task 56: Відправка постачальнику лише потрібних позицій і статуси доставки.
-- [x] Task 57: Інтерфейс комплектації в замовленні й таблиці.
-- [x] Task 58: Персональні налаштування та privacy-safe Telegram-сповіщення.
-- [x] Task 59: Пакетна обробка старих замовлень, метрики та runbook розгортання.
-
-## Operational Dashboard v1 (Tasks 74–82)
-
-Approved source spec: `docs/specs/SPEC-operational-dashboard.md`.
-
-### Overview
-
-Replace the demonstration dashboard with a tenant-scoped operational control center backed by PostgreSQL. The first version provides period KPIs, daily order dynamics, an operational funnel, an actionable review queue, failure counts, and integration health without adding a database migration or charting dependency.
-
-### Architecture decisions
-
-- **One snapshot endpoint:** `GET /api/dashboard?period=7d|30d|90d` returns one internally consistent dashboard response and prevents the web page from coordinating many independent requests.
-- **Contracts first:** the Zod response contract is shared by API and web and represents unavailable comparisons/stages explicitly.
-- **Tenant boundary at entry:** the controller supplies `principal.tenantId`; the client never sends a tenant id and every aggregate, count, and queue query includes it.
-- **Database-side aggregation:** parameterized PostgreSQL aggregation handles timezone-aware daily buckets, unique funnel stages, and the confirmation median. Prisma queries handle bounded queue and integration summaries. Fixed period enums map to server-owned durations; no user input enters SQL fragments.
-- **Current backlog versus period cohort:** period selection changes cohort KPIs, the chart, and funnel. Needs-attention backlog, failures, and integration health remain current operational state and are labelled accordingly.
-- **Server-rendered shell:** the Next.js page reads and validates `searchParams.period`, fetches through the authenticated server API helper, and renders a shareable view. Small client/SVG components provide focus/hover tooltips without moving metric semantics into the browser.
-- **Native visual layer:** reuse AutoSale tokens and implement accessible CSS/SVG charts. No chart/date dependency and no Prisma migration are introduced.
-- **Progressive failure semantics:** missing integrations and empty metric samples render as explicit unavailable/empty states; fabricated fallback numbers are forbidden.
-
-### Dependency graph
-
-```text
-Task 74: dashboard contract
-       |
-       v
-Task 75: tenant-safe aggregation service
-       |
-       v
-Task 76: authenticated API endpoint
-       |
-       v
-Task 77: server page and period routing
-       |
-       +-------------------+------------------+
-       v                   v                  v
-Task 78: KPI/attention  Task 79: charts   Task 80: actions/health
-       \                   |                  /
-        +------------------+-----------------+
-                           v
-                  Task 81: states/a11y polish
-                           |
-                           v
-                  Task 82: browser acceptance
-```
-
-### Phase 1: Trustworthy data foundation
-
-- [x] Task 74: Define and verify the dashboard contract.
-- [x] Task 75: Build tenant-safe operational aggregates.
-- [x] Task 76: Expose the authenticated dashboard endpoint.
-
-#### Checkpoint: Backend snapshot
-
-- [x] Contract, service, and controller tests pass.
-- [x] Empty tenants and DST boundaries return valid responses.
-- [x] Cross-tenant records cannot affect any returned value.
-- [x] API typecheck and build pass.
-
-### Phase 2: Useful dashboard slices
-
-- [x] Task 77: Connect the server-rendered page and period selector.
-- [x] Task 78: Render attention guidance and KPI cards.
-- [x] Task 79: Render accessible order dynamics and operational funnel.
-- [x] Task 80: Render queue, failures, and integration health.
-
-#### Checkpoint: End-to-end dashboard
-
-- [x] Every visible value comes from the API response.
-- [x] 7/30/90-day URLs produce the matching view.
-- [x] Supported action links open truthful filtered destinations.
-- [x] Web tests, locale completeness, typecheck, and production build pass.
-
-### Phase 3: Resilience and acceptance
-
-- [x] Task 81: Add loading, error, empty, keyboard, and responsive states.
-- [x] Task 82: Remove fixture remnants and complete browser acceptance.
-
-#### Checkpoint: Complete
-
-- [x] No demo values or fixture imports remain in the dashboard route.
-- [x] 375 px and desktop layouts have no page-level horizontal overflow.
-- [x] Keyboard navigation, tooltips, reduced motion, and accessible data equivalents work.
-- [x] Focused and repository-wide tests, typechecks, production build, and browser acceptance pass.
-- [x] The implementation is ready for code-quality review and production deployment verification.
-
-### Sequential versus parallel work
-
-- Tasks 74–77 are sequential because each establishes the contract consumed by the next layer.
-- Tasks 78–80 are logically independent after Task 77, but will be implemented sequentially in this worktree to avoid collisions in the dashboard page and global stylesheet.
-- Tasks 81–82 follow feature completion so browser assertions validate the final responsive composition rather than transient layouts.
-
-### Risks and mitigations
-
-| Risk | Impact | Mitigation |
-|---|---|---|
-| A metric looks plausible but uses the wrong cohort or denominator | High | Encode definitions in contract/service tests, return denominators/sample sizes, and centralize calculations in the API. |
-| Tenant data leaks through an aggregate or relation | High | Require `tenantId` in every query, add mixed-tenant fixtures, and never accept tenant identity from the request. |
-| Timezone or DST shifts create missing/double daily buckets | Medium | Generate calendar boundaries in `Europe/Kyiv`, test DST fixtures, and return a complete zero-filled bucket series. |
-| Median or chart queries scan too many application rows | Medium | Aggregate in PostgreSQL, use existing tenant/status/date indexes, cap the queue at five, and inspect query shape before release. |
-| Optional integrations make the funnel misleading | Medium | Return `exportConfigured` and nullable exported count; display unavailable rather than zero when export is not configured. |
-| A dense desktop dashboard becomes unusable on mobile | Medium | Stack sections at narrow widths, keep chart data in an accessible list/table, and add a 375 px Playwright regression. |
-| Existing cumulative plan/task files are mistaken for a fresh project tracker | Low | Continue the repository's established numbering with Tasks 74–82 and link this section to the approved spec. |
-
-### Open questions
-
-None. Financial metrics, source attribution, configurable timezone, arbitrary date ranges, and historical SLA snapshots remain explicitly deferred by the approved spec.
+| Admin monitoring accidentally exposes job or tenant content | High | Fixed response schemas, narrow monitor interfaces and explicit sensitive-field tests |
+| No worker appears as a false incident for an unused queue | Medium | `IDLE` when both worker and backlog are absent; `ATTENTION` only for failures or unserved pending work |
+| Large tenant list becomes unwieldy | Medium | Client-side search/filter/sort for the current slice; pagination remains a measured follow-up |
+| Existing lifecycle actions regress during relocation | High | Reuse the component unchanged and retain its focused tests |
+| Admin mobile navigation diverges from workspace behavior | Medium | Reuse the existing drawer/focus pattern and verify at 390 px |
+
+## Open questions
+
+None block implementation. Historical charts, alert delivery, server-level infrastructure probes and queue mutations are explicitly deferred.

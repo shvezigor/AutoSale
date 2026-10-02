@@ -1,7 +1,21 @@
 import { Prisma, type PrismaClient } from '@autosale/database';
+import type { AdminQueueName, AdminQueueSummary, AdminOperationsSummary, AdminPlatformOverview } from '@autosale/contracts/auth';
+
+type QueueCounts = Pick<AdminQueueSummary, 'waiting' | 'active' | 'delayed' | 'failed' | 'completed'>;
+
+export interface AdminQueueMonitor {
+  name: AdminQueueName;
+  getJobCounts(): Promise<QueueCounts>;
+  getWorkers(): Promise<unknown[]>;
+  getOldestPendingAt(): Promise<Date | null>;
+}
 
 export class AdminService {
-  constructor(private readonly prisma: PrismaClient, private readonly now: () => Date = () => new Date()) {}
+  constructor(
+    private readonly prisma: PrismaClient,
+    private readonly now: () => Date = () => new Date(),
+    private readonly queues: AdminQueueMonitor[] = [],
+  ) {}
 
   async listTenants() {
     const [tenants, orderCounts] = await Promise.all([
@@ -35,6 +49,73 @@ export class AdminService {
       SELECT revoked_count FROM public.api_revoke_sessions(NULL::uuid, NULL::uuid, ${tenantId}::uuid, ${this.now()})
     `;
     return { status, revokedSessions: revoked[0]?.revoked_count ?? 0 };
+  }
+
+  async getTenant(tenantId: string) {
+    return (await this.listTenants()).find((tenant) => tenant.tenantId === tenantId) ?? null;
+  }
+
+  async getOverview(): Promise<AdminPlatformOverview> {
+    const [tenants, operations] = await Promise.all([this.listTenants(), this.getOperations()]);
+    const thirtyDaysAgo = new Date(this.now().getTime() - 30 * 24 * 60 * 60 * 1000);
+    return {
+      status: operations.status,
+      attentionQueueCount: operations.queues.filter((queue) => queue.status === 'ATTENTION').length,
+      updatedAt: operations.updatedAt,
+      metrics: {
+        tenantCount: tenants.length,
+        activeTenantCount: tenants.filter((tenant) => tenant.status === 'ACTIVE').length,
+        blockedTenantCount: tenants.filter((tenant) => tenant.status === 'BLOCKED').length,
+        userCount: tenants.reduce((total, tenant) => total + tenant.userCount, 0),
+        orderCount: tenants.reduce((total, tenant) => total + tenant.orderCount, 0),
+        newTenantCount30Days: tenants.filter((tenant) => new Date(tenant.createdAt) >= thirtyDaysAgo).length,
+      },
+    };
+  }
+
+  async getOperations(): Promise<AdminOperationsSummary> {
+    const queues = await Promise.all(this.queues.map((queue) => inspectQueue(queue)));
+    return {
+      status: queues.some((queue) => queue.status === 'ATTENTION') ? 'DEGRADED' : 'HEALTHY',
+      database: 'HEALTHY',
+      updatedAt: this.now().toISOString(),
+      queues,
+    };
+  }
+}
+
+async function inspectQueue(queue: AdminQueueMonitor): Promise<AdminQueueSummary> {
+  try {
+    const [counts, workers, oldestPendingAt] = await Promise.all([
+      queue.getJobCounts(), queue.getWorkers(), queue.getOldestPendingAt(),
+    ]);
+    const pending = counts.waiting + counts.active + counts.delayed;
+    const status: AdminQueueSummary['status'] = counts.failed > 0 || (pending > 0 && workers.length === 0)
+      ? 'ATTENTION'
+      : workers.length === 0
+        ? 'IDLE'
+        : 'HEALTHY';
+    return {
+      queue: queue.name,
+      status,
+      ...counts,
+      workerCount: workers.length,
+      oldestPendingAt: oldestPendingAt?.toISOString() ?? null,
+      available: true,
+    };
+  } catch {
+    return {
+      queue: queue.name,
+      status: 'ATTENTION',
+      waiting: 0,
+      active: 0,
+      delayed: 0,
+      failed: 0,
+      completed: 0,
+      workerCount: 0,
+      oldestPendingAt: null,
+      available: false,
+    };
   }
 }
 

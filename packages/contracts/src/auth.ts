@@ -38,6 +38,42 @@ export const adminTenantSummarySchema = z.object({
   createdAt: z.string().datetime(),
 }).strict();
 
+export const adminQueueNameSchema = z.enum(['instagram', 'catalogue', 'delivery', 'telegram', 'tenant-lifecycle']);
+
+export const adminQueueSummarySchema = z.object({
+  queue: adminQueueNameSchema,
+  status: z.enum(['HEALTHY', 'IDLE', 'ATTENTION']),
+  waiting: z.number().int().nonnegative(),
+  active: z.number().int().nonnegative(),
+  delayed: z.number().int().nonnegative(),
+  failed: z.number().int().nonnegative(),
+  completed: z.number().int().nonnegative(),
+  workerCount: z.number().int().nonnegative(),
+  oldestPendingAt: z.string().datetime().nullable(),
+  available: z.boolean(),
+}).strict();
+
+export const adminOperationsSummarySchema = z.object({
+  status: z.enum(['HEALTHY', 'DEGRADED']),
+  database: z.literal('HEALTHY'),
+  updatedAt: z.string().datetime(),
+  queues: z.array(adminQueueSummarySchema),
+}).strict();
+
+export const adminPlatformOverviewSchema = z.object({
+  status: z.enum(['HEALTHY', 'DEGRADED']),
+  updatedAt: z.string().datetime(),
+  attentionQueueCount: z.number().int().nonnegative(),
+  metrics: z.object({
+    tenantCount: z.number().int().nonnegative(),
+    activeTenantCount: z.number().int().nonnegative(),
+    blockedTenantCount: z.number().int().nonnegative(),
+    userCount: z.number().int().nonnegative(),
+    orderCount: z.number().int().nonnegative(),
+    newTenantCount30Days: z.number().int().nonnegative(),
+  }).strict(),
+}).strict();
+
 export const publicSessionSchema = z.object({
   userId: z.string().uuid(),
   email: normalizedEmailSchema,
@@ -66,4 +102,8 @@ export type LoginRequest = z.infer<typeof loginRequestSchema>;
 export type InviteMemberRequest = z.infer<typeof inviteMemberRequestSchema>;
 export type AcceptInvitationRequest = z.infer<typeof acceptInvitationRequestSchema>;
 export type AdminTenantSummary = z.infer<typeof adminTenantSummarySchema>;
+export type AdminQueueName = z.infer<typeof adminQueueNameSchema>;
+export type AdminQueueSummary = z.infer<typeof adminQueueSummarySchema>;
+export type AdminOperationsSummary = z.infer<typeof adminOperationsSummarySchema>;
+export type AdminPlatformOverview = z.infer<typeof adminPlatformOverviewSchema>;
 export type PublicSession = z.infer<typeof publicSessionSchema>;

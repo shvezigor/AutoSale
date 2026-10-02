@@ -6,6 +6,7 @@ import { Queue } from 'bullmq';
 
 import { CryptoService } from '../auth/crypto.service.js';
 import { AdminController } from './admin.controller.js';
+import { BullAdminQueueMonitor } from './admin-queue-monitor.js';
 import { AdminService } from './admin.service.js';
 import { AdminStepUpService } from './admin-step-up.service.js';
 import { TenantLifecycleService } from './tenant-lifecycle.service.js';
@@ -14,7 +15,11 @@ import { TenantLifecycleService } from './tenant-lifecycle.service.js';
 export class AdminModule {
   static register(env: ApiEnv): DynamicModule {
     const prisma = createPrismaClient(env.DATABASE_URL);
-    const queue = new Queue('tenant-lifecycle', { connection: queueConnection(env.REDIS_URL) });
+    const connection = queueConnection(env.REDIS_URL);
+    const queue = new Queue('tenant-lifecycle', { connection });
+    const monitoredQueues = (['instagram', 'catalogue', 'delivery', 'telegram'] as const)
+      .map((name) => new BullAdminQueueMonitor(name, new Queue(name, { connection })));
+    monitoredQueues.push(new BullAdminQueueMonitor('tenant-lifecycle', queue));
     const stepUp = new AdminStepUpService(prisma, new CryptoService(), env.AUTH_TOKEN_PEPPER);
     const storage = new S3ObjectStorage({
       endpoint: env.S3_ENDPOINT,
@@ -28,7 +33,7 @@ export class AdminModule {
       module: AdminModule,
       controllers: [AdminController],
       providers: [
-        { provide: AdminService, useValue: new AdminService(prisma) },
+        { provide: AdminService, useValue: new AdminService(prisma, undefined, monitoredQueues) },
         { provide: AdminStepUpService, useValue: stepUp },
         { provide: TenantLifecycleService, useValue: new TenantLifecycleService(
           prisma, queue, stepUp, undefined, undefined, storage,

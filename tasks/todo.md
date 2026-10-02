@@ -1940,3 +1940,16 @@ Reference: [competitive analysis](../docs/research/2026-10-02-chatoryx-competiti
 **Reference:** `docs/product/2026-09-17-sales-aito-monetization.md`
 
 **Estimated scope:** Large
+# Current initiative: Platform administration workspace
+
+- [x] A1 — typed overview/operations contracts and privacy-safe admin API
+- [ ] A2 — responsive localized admin shell
+- [ ] A3 — aggregate overview dashboard
+- [ ] A4 — searchable/filterable/sortable client table
+- [ ] A5 — client detail with safe actions and lifecycle controls
+- [ ] A6 — service and background queue operations page
+- [ ] A7 — responsive, accessibility, security and regression evidence
+
+Checkpoint details and acceptance criteria: `tasks/plan.md`. Canonical behavior: `docs/superpowers/specs/2026-10-02-platform-admin-workspace-design.md`.
+
+---
