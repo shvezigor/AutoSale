@@ -9,7 +9,11 @@ import { ConflictException, NotFoundException, UnauthorizedException } from '@ne
 import type { AdminStepUpService } from './admin-step-up.service.js';
 
 export type TenantLifecycleQueue = {
-  add(name: string, data: { requestId: string; tenantId: string }, options: Record<string, unknown>): Promise<unknown>;
+  add(
+    name: string,
+    data: { requestId: string; tenantId: string } | { runId: string; tenantId: string },
+    options: Record<string, unknown>,
+  ): Promise<unknown>;
 };
 
 type AuditWriter = (prisma: PrismaClient, input: SecurityAuditInput) => Promise<void>;
@@ -31,6 +35,34 @@ type LifecycleRow = {
   cancelled_at?: Date | null;
   requested_at: Date;
   replayed?: boolean;
+};
+
+type RetentionDryRunRow = {
+  run_id: string;
+  tenant_id: string;
+  status: string;
+  summary?: unknown;
+  last_error_code?: string | null;
+  completed_at?: Date | null;
+  requested_at: Date;
+  replayed?: boolean;
+};
+
+export type RetentionDryRunView = {
+  id: string;
+  tenantId: string;
+  status: string;
+  summary: Array<{
+    category: string;
+    policyStatus: string;
+    cutoff: string | null;
+    candidateCount: number | null;
+    oldestCandidateAt: string | null;
+    approximateBytes: number | null;
+  }> | null;
+  lastErrorCode: string | null;
+  completedAt: string | null;
+  requestedAt: string;
 };
 
 export class TenantLifecycleService {
@@ -56,6 +88,48 @@ export class TenantLifecycleService {
     `);
     if (!rows[0]) throw new NotFoundException('TENANT_LIFECYCLE_NOT_FOUND');
     return mapLifecycleRow(rows[0]);
+  }
+
+  async listRetentionDryRuns(actor: AuthPrincipal, tenantId: string): Promise<RetentionDryRunView[]> {
+    const rows = await this.prisma.$queryRaw<RetentionDryRunRow[]>(Prisma.sql`
+      SELECT * FROM public.api_platform_retention_dry_runs(${actor.userId}::uuid, ${tenantId}::uuid)
+    `);
+    return rows.slice(0, 50).map(mapRetentionDryRunRow);
+  }
+
+  async createRetentionDryRun(
+    actor: AuthPrincipal,
+    tenantId: string,
+    idempotencyKey: string,
+  ): Promise<RetentionDryRunView> {
+    const requestHash = createHash('sha256')
+      .update(JSON.stringify({ tenantId, operation: 'RETENTION_DRY_RUN' }))
+      .digest('hex');
+    let rows: RetentionDryRunRow[];
+    try {
+      rows = await this.prisma.$queryRaw<RetentionDryRunRow[]>(Prisma.sql`
+        SELECT * FROM public.api_platform_create_retention_dry_run(
+          ${actor.userId}::uuid, ${tenantId}::uuid, ${idempotencyKey}::uuid, ${requestHash}, ${this.now()}
+        )
+      `);
+    } catch (error) {
+      if (containsCode(error, 'RETENTION_IDEMPOTENCY_CONFLICT')) {
+        throw new ConflictException('RETENTION_IDEMPOTENCY_CONFLICT');
+      }
+      throw error;
+    }
+    const row = rows[0];
+    if (!row) throw new NotFoundException('TENANT_NOT_FOUND');
+    if (!row.replayed) {
+      await this.queue.add('tenant-lifecycle.retention-dry-run', { runId: row.run_id, tenantId: row.tenant_id }, {
+        jobId: `retention-dry-run-${row.run_id}`,
+        attempts: 1,
+        removeOnComplete: 1_000,
+        removeOnFail: 5_000,
+      });
+      await this.writeAudit(actor, row.tenant_id, row.run_id, 'TENANT_RETENTION_DRY_RUN_REQUESTED', row.status);
+    }
+    return mapRetentionDryRunRow(row);
   }
 
   createExport(
@@ -225,6 +299,35 @@ function mapLifecycleRow(row: LifecycleRow): TenantLifecycleRequest {
     lastErrorCode: row.last_error_code ?? null,
     cancelledAt: row.cancelled_at?.toISOString() ?? null,
   };
+}
+
+function mapRetentionDryRunRow(row: RetentionDryRunRow): RetentionDryRunView {
+  return {
+    id: row.run_id,
+    tenantId: row.tenant_id,
+    status: row.status,
+    summary: safeRetentionSummary(row.summary),
+    lastErrorCode: row.last_error_code ?? null,
+    completedAt: row.completed_at?.toISOString() ?? null,
+    requestedAt: row.requested_at.toISOString(),
+  };
+}
+
+function safeRetentionSummary(value: unknown): RetentionDryRunView['summary'] {
+  if (!Array.isArray(value)) return null;
+  return value.slice(0, 20).flatMap((entry) => {
+    if (!entry || typeof entry !== 'object' || Array.isArray(entry)) return [];
+    const item = entry as Record<string, unknown>;
+    if (typeof item.category !== 'string' || typeof item.policyStatus !== 'string') return [];
+    return [{
+      category: item.category.slice(0, 80),
+      policyStatus: item.policyStatus.slice(0, 40),
+      cutoff: typeof item.cutoff === 'string' ? item.cutoff : null,
+      candidateCount: typeof item.candidateCount === 'number' && Number.isSafeInteger(item.candidateCount) ? item.candidateCount : null,
+      oldestCandidateAt: typeof item.oldestCandidateAt === 'string' ? item.oldestCandidateAt : null,
+      approximateBytes: typeof item.approximateBytes === 'number' && Number.isSafeInteger(item.approximateBytes) ? item.approximateBytes : null,
+    }];
+  });
 }
 
 function containsCode(error: unknown, code: string): boolean {

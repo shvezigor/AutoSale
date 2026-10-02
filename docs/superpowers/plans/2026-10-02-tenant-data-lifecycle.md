@@ -657,7 +657,7 @@ git commit -m "feat: stop frozen tenant side effects"
 - Produces: BullMQ job `tenant-lifecycle.retention-dry-run` carrying only `{ runId, tenantId }`.
 - Produces: `POST /api/admin/retention/dry-runs` accepting `{ tenantId }` plus `idempotency-key`, and `GET /api/admin/retention/dry-runs?tenantId=<uuid>` returning bounded summaries.
 
-- [ ] **Step 1: Write failing zero-mutation retention tests**
+- [x] **Step 1: Write failing zero-mutation retention tests**
 
 ```ts
 const result = await processor.process({ runId, tenantId });
@@ -666,13 +666,13 @@ expect(prisma.$executeRaw).not.toHaveBeenCalled();
 expect(JSON.stringify(result.summary)).not.toContain('Fictional customer message');
 ```
 
-- [ ] **Step 2: Run and verify missing processor failures**
+- [x] **Step 2: Run and verify missing processor failures**
 
 Run: `pnpm --filter @autosale/worker test -- retention-policy.spec.ts retention-dry-run.processor.spec.ts && pnpm --filter @autosale/api test -- tenant-lifecycle.service.spec.ts admin.controller.spec.ts`
 
 Expected: FAIL because dry-run contracts and processor are absent.
 
-- [ ] **Step 3: Add explicit launch-baseline policy definitions**
+- [x] **Step 3: Add explicit launch-baseline policy definitions**
 
 ```ts
 export const RETENTION_POLICIES = [
@@ -684,11 +684,11 @@ export const RETENTION_POLICIES = [
 
 Categories whose legal/accounting duration is merchant-specific return `POLICY_NOT_CONFIGURED`; do not infer a cutoff for conversations, orders, payments or delivery/customer data.
 
-- [ ] **Step 4: Implement count-only tenant queries and durable summary**
+- [x] **Step 4: Implement count-only tenant queries and durable summary**
 
 Run each category query inside `withTenantTransaction`, returning only category, cutoff, candidate count, oldest candidate timestamp and approximate bytes when PostgreSQL can safely estimate it. Persist only this summary JSON and safe status/error codes. No candidate IDs or content leave the transaction.
 
-- [ ] **Step 5: Wire API/queue, run tests and commit**
+- [x] **Step 5: Wire API/queue, run tests and commit**
 
 Run the command from Step 2 again.
 

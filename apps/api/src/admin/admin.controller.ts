@@ -1,6 +1,6 @@
 import type { AuthPrincipal } from '@autosale/contracts/auth';
 import { adminReauthRequestSchema, lifecycleMutationRequestSchema } from '@autosale/contracts';
-import { BadRequestException, Body, Controller, Get, Headers, Inject, NotFoundException, Param, ParseUUIDPipe, Post } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Headers, Inject, NotFoundException, Param, ParseUUIDPipe, Post, Query } from '@nestjs/common';
 import { z } from 'zod';
 
 import { CurrentPrincipal, RequirePlatformAdmin } from '../auth/auth.decorators.js';
@@ -9,6 +9,7 @@ import { AdminStepUpService } from './admin-step-up.service.js';
 import { TenantLifecycleService } from './tenant-lifecycle.service.js';
 
 const idempotencyKeySchema = z.string().uuid();
+const retentionDryRunBodySchema = z.object({ tenantId: z.string().uuid() }).strict();
 
 @Controller('api/admin')
 @RequirePlatformAdmin()
@@ -65,6 +66,29 @@ export class AdminController {
     @Param('requestId', new ParseUUIDPipe({ version: '4' })) requestId: string,
   ) {
     return this.lifecycle.detail(principal, requestId);
+  }
+
+  @Get('retention/dry-runs')
+  listRetentionDryRuns(
+    @CurrentPrincipal() principal: AuthPrincipal,
+    @Query('tenantId', new ParseUUIDPipe({ version: '4' })) tenantId: string,
+  ) {
+    return this.lifecycle.listRetentionDryRuns(principal, tenantId);
+  }
+
+  @Post('retention/dry-runs')
+  createRetentionDryRun(
+    @CurrentPrincipal() principal: AuthPrincipal,
+    @Headers('idempotency-key') rawIdempotencyKey: string | undefined,
+    @Body() body: unknown,
+  ) {
+    const parsed = retentionDryRunBodySchema.safeParse(body);
+    if (!parsed.success) throw new BadRequestException('RETENTION_DRY_RUN_INVALID');
+    return this.lifecycle.createRetentionDryRun(
+      principal,
+      parsed.data.tenantId,
+      parseIdempotencyKey(rawIdempotencyKey),
+    );
   }
 
   @Post('tenants/:tenantId/lifecycle-exports')

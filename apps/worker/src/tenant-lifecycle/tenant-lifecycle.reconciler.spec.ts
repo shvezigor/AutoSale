@@ -41,4 +41,16 @@ describe('TenantLifecycleReconciler', () => {
     expect(updateMany.mock.calls[0]![0].data).not.toHaveProperty('exportSha256');
     expect(updateMany.mock.calls[0]![0].data).not.toHaveProperty('exportReadyAt');
   });
+
+  it('recovers a due retention dry-run without putting summary data in the queue', async () => {
+    const prisma = { $queryRaw: vi.fn().mockResolvedValue([{ tenant_id: tenantId, run_id: requestId }]) };
+    const queue = { add: vi.fn().mockResolvedValue(undefined) };
+    const reconciler = new TenantLifecycleReconciler(prisma as never, queue, { delete: vi.fn() } as never, () => new Date('2026-10-02T09:00:00Z'));
+
+    await expect(reconciler.reconcileRetention()).resolves.toEqual({ attempted: 1, enqueued: 1, failed: 0 });
+    expect(queue.add).toHaveBeenCalledWith(
+      'tenant-lifecycle.retention-dry-run', { tenantId, runId: requestId },
+      expect.objectContaining({ jobId: `retention-dry-run-${requestId}`, attempts: 1 }),
+    );
+  });
 });

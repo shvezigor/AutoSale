@@ -121,4 +121,47 @@ describe('TenantLifecycleService', () => {
     expect(storage.head).not.toHaveBeenCalled();
     expect(storage.createSignedDownloadUrl).not.toHaveBeenCalled();
   });
+
+  it('creates, audits and enqueues a retention dry-run exactly once', async () => {
+    const row = {
+      run_id: requestId, tenant_id: tenantId, status: 'REQUESTED', summary: null,
+      last_error_code: null, completed_at: null, requested_at: new Date('2026-10-02T09:00:00Z'), replayed: false,
+    };
+    const prisma = { $queryRaw: vi.fn().mockResolvedValue([row]) };
+    const queue = { add: vi.fn().mockResolvedValue(undefined) };
+    const audit = vi.fn().mockResolvedValue(undefined);
+    const service = new TenantLifecycleService(prisma as never, queue, {} as never, audit);
+
+    await expect(service.createRetentionDryRun(principal, tenantId, idempotencyKey)).resolves.toEqual({
+      id: requestId, tenantId, status: 'REQUESTED', summary: null, lastErrorCode: null,
+      completedAt: null, requestedAt: '2026-10-02T09:00:00.000Z',
+    });
+    expect(queue.add).toHaveBeenCalledWith(
+      'tenant-lifecycle.retention-dry-run', { runId: requestId, tenantId },
+      expect.objectContaining({ jobId: `retention-dry-run-${requestId}`, attempts: 1 }),
+    );
+    expect(audit).toHaveBeenCalledWith(prisma, expect.objectContaining({
+      action: 'TENANT_RETENTION_DRY_RUN_REQUESTED', result: 'SUCCESS',
+    }));
+  });
+
+  it('returns only bounded safe retention summary fields', async () => {
+    const prisma = { $queryRaw: vi.fn().mockResolvedValue([{
+      run_id: requestId, tenant_id: tenantId, status: 'COMPLETED', requested_at: new Date('2026-10-02T09:00:00Z'),
+      completed_at: new Date('2026-10-02T09:01:00Z'), last_error_code: null,
+      summary: [{
+        category: 'RAW_WEBHOOKS', policyStatus: 'DRY_RUN_ONLY', cutoff: '2026-09-02T09:00:00.000Z',
+        candidateCount: 4, oldestCandidateAt: '2026-01-01T00:00:00.000Z', approximateBytes: null,
+        customerMessage: 'must not leave storage',
+      }],
+    }]) };
+    const service = new TenantLifecycleService(prisma as never, { add: vi.fn() } as never, {} as never, vi.fn());
+
+    const result = await service.listRetentionDryRuns(principal, tenantId);
+    expect(result[0]?.summary).toEqual([{
+      category: 'RAW_WEBHOOKS', policyStatus: 'DRY_RUN_ONLY', cutoff: '2026-09-02T09:00:00.000Z',
+      candidateCount: 4, oldestCandidateAt: '2026-01-01T00:00:00.000Z', approximateBytes: null,
+    }]);
+    expect(JSON.stringify(result)).not.toContain('must not leave storage');
+  });
 });

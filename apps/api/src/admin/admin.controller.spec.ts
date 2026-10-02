@@ -73,6 +73,7 @@ describe('AdminController HTTP security', () => {
   let app: INestApplication;
   const csrf = new CsrfService('p'.repeat(32));
   const createDeletion = vi.fn();
+  const createRetentionDryRun = vi.fn();
   const regularUser = { ...principal, userId: '66666666-6666-4666-8666-666666666666', platformRole: 'USER' as const };
 
   beforeEach(async () => {
@@ -80,6 +81,7 @@ describe('AdminController HTTP security', () => {
       if (!args[4]) throw new UnauthorizedException('ADMIN_REAUTH_REQUIRED');
       return { id: requestId };
     });
+    createRetentionDryRun.mockReset().mockResolvedValue({ id: requestId, tenantId, status: 'REQUESTED' });
     const resolve = vi.fn(async (token: string) => token === 'admin' ? principal : token === 'user' ? regularUser : null);
     const moduleRef = await Test.createTestingModule({
       controllers: [AdminController],
@@ -88,6 +90,7 @@ describe('AdminController HTTP security', () => {
         { provide: AdminStepUpService, useValue: { issue: vi.fn(), expiresAt: vi.fn() } },
         { provide: TenantLifecycleService, useValue: {
           createDeletion, list: vi.fn(), detail: vi.fn(), createExport: vi.fn(), cancel: vi.fn(), retry: vi.fn(),
+          createRetentionDryRun, listRetentionDryRuns: vi.fn(),
         } },
         { provide: SessionService, useValue: { resolve } },
         { provide: CsrfService, useValue: csrf },
@@ -120,5 +123,20 @@ describe('AdminController HTTP security', () => {
       .set('Cookie', 'session=admin').set('x-csrf-token', csrf.issue(principal.sessionId))
       .set('x-admin-step-up', 'valid-step-up').set('idempotency-key', idempotencyKey).send(body).expect(201);
     expect(createDeletion).toHaveBeenCalledTimes(2);
+  });
+
+  it('validates and restricts retention dry-run creation to platform admins', async () => {
+    const path = '/api/admin/retention/dry-runs';
+    await request(app.getHttpServer()).post(path).set('idempotency-key', idempotencyKey).send({ tenantId }).expect(401);
+    await request(app.getHttpServer()).post(path)
+      .set('Cookie', 'session=user').set('x-csrf-token', csrf.issue(regularUser.sessionId))
+      .set('idempotency-key', idempotencyKey).send({ tenantId }).expect(403);
+    await request(app.getHttpServer()).post(path)
+      .set('Cookie', 'session=admin').set('x-csrf-token', csrf.issue(principal.sessionId))
+      .set('idempotency-key', idempotencyKey).send({ tenantId: 'invalid' }).expect(400);
+    await request(app.getHttpServer()).post(path)
+      .set('Cookie', 'session=admin').set('x-csrf-token', csrf.issue(principal.sessionId))
+      .set('idempotency-key', idempotencyKey).send({ tenantId }).expect(201);
+    expect(createRetentionDryRun).toHaveBeenCalledWith(principal, tenantId, idempotencyKey);
   });
 });

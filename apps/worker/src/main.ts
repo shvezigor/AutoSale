@@ -1,7 +1,7 @@
 import { Buffer } from 'node:buffer';
 
 import { parseWorkerEnv } from '@autosale/config/worker-env';
-import { shipmentCreateJobSchema, telegramDeliveryJobSchema, tenantLifecycleJobSchema, ukrposhtaTrackingBatchJobSchema } from '@autosale/contracts';
+import { retentionDryRunJobSchema, shipmentCreateJobSchema, telegramDeliveryJobSchema, tenantLifecycleJobSchema, ukrposhtaTrackingBatchJobSchema } from '@autosale/contracts';
 import { createPrismaClient, ProcurementStore, withTenantTransaction } from '@autosale/database';
 import {
   createGoogleSheetsAdapter,
@@ -55,6 +55,7 @@ import { UkrposhtaTrackingService } from './delivery/ukrposhta-tracking.service.
 import { UserAvatarCleanupReconciler } from './profile/user-avatar-cleanup.reconciler.js';
 import { TenantLifecycleProcessor } from './tenant-lifecycle/tenant-lifecycle.processor.js';
 import { TenantLifecycleReconciler } from './tenant-lifecycle/tenant-lifecycle.reconciler.js';
+import { RetentionDryRunProcessor } from './tenant-lifecycle/retention-dry-run.processor.js';
 
 async function bootstrap(): Promise<void> {
   const env = parseWorkerEnv(process.env);
@@ -170,9 +171,40 @@ async function bootstrap(): Promise<void> {
   };
   const tenantLifecycleQueue = new Queue('tenant-lifecycle', { connection: redisConnection });
   const tenantLifecycleProcessor = new TenantLifecycleProcessor(prisma, storage);
+  const retentionDryRunProcessor = new RetentionDryRunProcessor(prisma);
   const tenantLifecycleWorker = new Worker(
     'tenant-lifecycle',
     async (job) => {
+      if (job.name === 'tenant-lifecycle.retention-dry-run') {
+        const parsed = retentionDryRunJobSchema.safeParse(job.data);
+        if (!parsed.success) {
+          metrics.increment('autosale_operations_total', { operation: 'tenant_retention_dry_run', result: 'failure' });
+          throw new Error('RETENTION_DRY_RUN_JOB_INVALID');
+        }
+        const started = performance.now();
+        try {
+          const result = await retentionDryRunProcessor.process(parsed.data);
+          metrics.increment('autosale_operations_total', {
+            operation: 'tenant_retention_dry_run',
+            result: result.status === 'FAILED' ? 'failure' : 'success',
+          });
+          logger.info('tenant_retention_dry_run_completed', {
+            correlationId: 'system:tenant-retention-dry-run', result: result.status,
+          });
+        } catch (error) {
+          metrics.increment('autosale_operations_total', { operation: 'tenant_retention_dry_run', result: 'failure' });
+          logger.warn('tenant_retention_dry_run_failed', {
+            correlationId: 'system:tenant-retention-dry-run',
+            errorCode: error instanceof Error ? error.name : 'UNKNOWN',
+          });
+          throw error;
+        } finally {
+          metrics.observe('autosale_operation_duration_seconds', (performance.now() - started) / 1_000, {
+            operation: 'tenant_retention_dry_run',
+          });
+        }
+        return;
+      }
       if (job.name !== 'tenant-lifecycle.export') return;
       const parsed = tenantLifecycleJobSchema.safeParse(job.data);
       if (!parsed.success) {
@@ -787,11 +819,12 @@ async function bootstrap(): Promise<void> {
     reconcilingTenantLifecycle = true;
     try {
       const queued = await tenantLifecycleReconciler.reconcile();
-      metrics.set('autosale_queue_backlog', queued.attempted, { queue: 'tenant_lifecycle' });
-      if (queued.failed > 0) {
+      const retention = await tenantLifecycleReconciler.reconcileRetention();
+      metrics.set('autosale_queue_backlog', queued.attempted + retention.attempted, { queue: 'tenant_lifecycle' });
+      if (queued.failed + retention.failed > 0) {
         metrics.increment('autosale_operations_total', {
           operation: 'tenant_lifecycle_reconcile', result: 'failure',
-        }, queued.failed);
+        }, queued.failed + retention.failed);
       }
     } catch (error) {
       metrics.increment('autosale_operations_total', { operation: 'tenant_lifecycle_reconcile', result: 'failure' });

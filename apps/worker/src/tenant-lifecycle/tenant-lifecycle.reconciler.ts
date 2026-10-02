@@ -3,10 +3,15 @@ import { withTenantTransaction } from '@autosale/database';
 import type { StreamingObjectStorage } from '@autosale/integrations';
 
 type LifecycleQueue = {
-  add(name: string, data: { tenantId: string; requestId: string }, options: Record<string, unknown>): Promise<unknown>;
+  add(
+    name: string,
+    data: { tenantId: string; requestId: string } | { tenantId: string; runId: string },
+    options: Record<string, unknown>,
+  ): Promise<unknown>;
 };
 
 type DirectoryRow = { tenant_id: string; request_id: string };
+type RetentionDirectoryRow = { tenant_id: string; run_id: string };
 
 export class TenantLifecycleReconciler {
   constructor(
@@ -85,5 +90,29 @@ export class TenantLifecycleReconciler {
       }
     }
     return { attempted: rows.length, deleted, failed };
+  }
+
+  async reconcileRetention(): Promise<{ attempted: number; enqueued: number; failed: number }> {
+    const now = this.now();
+    const rows = await this.prisma.$queryRaw<RetentionDirectoryRow[]>`
+      SELECT tenant_id, run_id
+      FROM worker_due_retention_dry_runs(${now}, 50)
+    `;
+    let enqueued = 0;
+    let failed = 0;
+    for (const row of rows) {
+      try {
+        await this.queue.add('tenant-lifecycle.retention-dry-run', { tenantId: row.tenant_id, runId: row.run_id }, {
+          jobId: `retention-dry-run-${row.run_id}`,
+          attempts: 1,
+          removeOnComplete: 100,
+          removeOnFail: 250,
+        });
+        enqueued += 1;
+      } catch {
+        failed += 1;
+      }
+    }
+    return { attempted: rows.length, enqueued, failed };
   }
 }

@@ -200,6 +200,8 @@ Lifecycle table залишається tenant-protected. Platform API викор
 5. зберігає summary і safe reason codes, але не IDs клієнтів, тексти повідомлень чи адреси;
 6. не ставить delete jobs і не змінює рядки.
 
+Реалізований launch baseline застосовує `DRY_RUN_ONLY` до raw webhooks (30 днів), user notifications (90 днів) і tenant security audit (365 днів). Для conversations/customer data та orders/payments/delivery результат має `POLICY_NOT_CONFIGURED`: worker не обчислює cutoff і не рахує кандидатів, доки строк не визначено конфігурацією та юридичними вимогами merchant. API повертає не більше 50 запусків і відкидає всі невідомі поля summary.
+
 Якщо policy для категорії не налаштована або має неоднозначну legal basis, категорія отримує `POLICY_NOT_CONFIGURED` і пропускається. Відсутність policy ніколи не означає «видалити негайно».
 
 ## Конкурентність, повтори та відновлення
