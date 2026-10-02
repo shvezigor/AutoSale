@@ -1,0 +1,139 @@
+import { Buffer } from 'node:buffer';
+
+import { describe, expect, it, vi } from 'vitest';
+
+import { CredentialCipher } from './credential-cipher.js';
+import { FacebookOAuthService } from './facebook-oauth.service.js';
+
+vi.mock('@autosale/database', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@autosale/database')>();
+  return {
+    ...actual,
+    assertTenantAcceptingMutations: vi.fn().mockResolvedValue(undefined),
+    withTenantTransaction: <T>(
+      prisma: { $transaction: (operation: (transaction: unknown) => Promise<T>) => Promise<T> },
+      _tenantId: string,
+      operation: (transaction: unknown) => Promise<T>,
+    ) => prisma.$transaction(operation),
+  };
+});
+
+const binding = {
+  id: '11111111-1111-4111-8111-111111111111',
+  tenantId: 'tenant-a',
+  userId: 'owner-a',
+  returnPath: '/settings?tab=social',
+};
+
+function fixture() {
+  const cipher = new CredentialCipher(Buffer.alloc(32, 7));
+  let encryptedPageCandidates: string | null = null;
+  let candidateExpiresAt: Date | null = null;
+  let selectedPageId: string | null = null;
+  const transaction: any = {
+    tenant: { findUnique: vi.fn().mockResolvedValue({ status: 'ACTIVE' }) },
+    tenantMembership: {
+      findUnique: vi.fn().mockResolvedValue({
+        role: 'OWNER', status: 'ACTIVE', user: { status: 'ACTIVE' },
+      }),
+    },
+    facebookOAuthAttempt: {
+      updateMany: vi.fn().mockImplementation(async ({ data }: { data: Record<string, unknown> }) => {
+        if ('encryptedPageCandidates' in data) encryptedPageCandidates = data.encryptedPageCandidates as string | null;
+        if ('candidateExpiresAt' in data) candidateExpiresAt = data.candidateExpiresAt as Date | null;
+        if ('selectedPageId' in data) selectedPageId = data.selectedPageId as string | null;
+        return { count: 1 };
+      }),
+      findFirst: vi.fn().mockImplementation(async () => encryptedPageCandidates && candidateExpiresAt && !selectedPageId
+        ? { encryptedPageCandidates }
+        : null),
+      findUnique: vi.fn().mockResolvedValue(binding),
+    },
+    facebookCredentialCleanup: {
+      findMany: vi.fn().mockResolvedValue([]),
+    },
+    securityAuditLog: { create: vi.fn().mockResolvedValue({}) },
+  };
+  const prisma: any = {
+    $transaction: async <T>(callback: (client: typeof transaction) => Promise<T>) => callback(transaction),
+    $queryRaw: vi.fn().mockResolvedValue([]),
+  };
+  const states = { consume: vi.fn().mockResolvedValue(binding), issue: vi.fn() };
+  const pages = [
+    { pageId: 'page-1', pageName: 'Fictional One', pageAccessToken: 'page-token-1', tasks: ['MESSAGING'] },
+    { pageId: 'page-2', pageName: 'Fictional Two', pageAccessToken: 'page-token-2', tasks: ['MESSAGING'] },
+  ];
+  const meta = {
+    getAuthorizationUrl: vi.fn(),
+    exchangeCode: vi.fn().mockResolvedValue({ accessToken: 'user-token', expiresIn: 3_600 }),
+    listEligiblePages: vi.fn().mockResolvedValue(pages),
+    verifyPage: vi.fn(),
+    subscribePage: vi.fn(),
+    unsubscribePage: vi.fn(),
+  };
+  const service = new FacebookOAuthService(
+    prisma,
+    meta as never,
+    states as never,
+    cipher,
+    'https://sales-aito.example',
+    true,
+    () => new Date('2026-10-02T20:00:00.000Z'),
+  );
+  return { service, states, meta, pages, transaction };
+}
+
+describe('FacebookOAuthService', () => {
+  it('consumes state before provider I/O and exposes multiple Pages without tokens', async () => {
+    const { service, states, meta } = fixture();
+
+    const result = await service.completeCallback('code', 'raw-state');
+
+    expect(states.consume.mock.invocationCallOrder[0]).toBeLessThan(meta.exchangeCode.mock.invocationCallOrder[0]!);
+    expect(result).toEqual({
+      kind: 'PAGE_SELECTION_REQUIRED',
+      returnPath: '/settings?tab=social',
+      attemptId: binding.id,
+      pages: [
+        { pageId: 'page-1', pageName: 'Fictional One' },
+        { pageId: 'page-2', pageName: 'Fictional Two' },
+      ],
+    });
+    expect(JSON.stringify(result)).not.toContain('page-token');
+    expect(JSON.stringify(result)).not.toContain('user-token');
+  });
+
+  it('returns safe candidates from encrypted server-side state', async () => {
+    const { service } = fixture();
+    await service.completeCallback('code', 'raw-state');
+
+    await expect(service.getPageCandidates('tenant-a', 'owner-a', binding.id)).resolves.toEqual({
+      attemptId: binding.id,
+      pages: [
+        { pageId: 'page-1', pageName: 'Fictional One' },
+        { pageId: 'page-2', pageName: 'Fictional Two' },
+      ],
+    });
+  });
+
+  it('rejects a Page ID outside the encrypted candidate set before provider access', async () => {
+    const { service, meta } = fixture();
+    await service.completeCallback('code', 'raw-state');
+
+    await expect(service.selectPage('tenant-a', 'owner-a', {
+      attemptId: binding.id,
+      pageId: 'foreign-page',
+    })).rejects.toThrow('FACEBOOK_PAGE_NOT_ELIGIBLE');
+    expect(meta.verifyPage).not.toHaveBeenCalled();
+  });
+
+  it('rejects callbacks whose state owner is no longer active', async () => {
+    const { service, meta, transaction } = fixture();
+    transaction.tenantMembership.findUnique.mockResolvedValue({
+      role: 'MANAGER', status: 'ACTIVE', user: { status: 'ACTIVE' },
+    });
+
+    await expect(service.completeCallback('code', 'raw-state')).rejects.toThrow('Facebook connection failed');
+    expect(meta.exchangeCode).not.toHaveBeenCalled();
+  });
+});

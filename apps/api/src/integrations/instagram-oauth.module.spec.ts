@@ -19,6 +19,7 @@ const env = {
   META_APP_SECRET: 'meta-app-secret-value',
   META_APP_ID: '123456789012345',
   META_GRAPH_API_VERSION: 'v24.0',
+  FACEBOOK_MESSENGER_ENABLED: false,
   INTEGRATION_ENCRYPTION_KEY: Buffer.alloc(32, 7).toString('base64'),
   S3_ENDPOINT: 'http://localhost:9000',
   S3_REGION: 'us-east-1',

@@ -12,6 +12,7 @@ import { AuthModule } from './auth/auth.module.js';
 import { TeamModule } from './team/team.module.js';
 import { AdminModule } from './admin/admin.module.js';
 import { InstagramOAuthModule } from './integrations/instagram-oauth.module.js';
+import { FacebookOAuthModule } from './integrations/facebook-oauth.module.js';
 import { DemoScenarioModule } from './demo/demo-scenario.module.js';
 import { CatalogueModule } from './catalogue/catalogue.module.js';
 import { CatalogueImportModule } from './catalogue-import/catalogue-import.module.js';
@@ -43,6 +44,7 @@ export class AppModule {
         OrderSettingsModule.register(env),
         OrdersModule.register(env),
         InstagramOAuthModule.register(env),
+        FacebookOAuthModule.register(env),
         GoogleOAuthModule.register(env),
         NotificationsModule.register(env),
         TelegramModule.register(env),
