@@ -18,6 +18,10 @@ const copy = {
     clientDetail: {
       back: 'До списку клієнтів', eyebrow: 'Клієнт Sales AITO', owner: 'Власник', users: 'Користувачі', orders: 'Замовлення', created: 'Створено', status: 'Статус', active: 'Активна', blocked: 'Заблокована', accessTitle: 'Доступ організації', accessDescription: 'Блокування завершує активні сесії команди. Дані організації залишаються збереженими.', block: 'Заблокувати організацію', blocking: 'Блокуємо…', unblock: 'Розблокувати організацію', unblocking: 'Розблоковуємо…', blockTitle: 'Заблокувати {name}?', blockDescription: 'Усі активні сесії цієї організації будуть завершені.', blockConfirm: 'Так, заблокувати', unblockTitle: 'Розблокувати {name}?', unblockDescription: 'Команда знову зможе входити до робочого простору.', unblockConfirm: 'Так, розблокувати', mutationFailed: 'Не вдалося змінити доступ. Спробуйте ще раз.', dataTitle: 'Керування даними', dataDescription: 'Експорт і підготовка до видалення із додатковим підтвердженням адміністратора.',
     },
+    operations: {
+      eyebrow: 'Моніторинг', title: 'Операції та черги', description: 'Поточний технічний стан API, бази даних і фонової обробки. Без payload, логів та даних клієнтів.', updated: 'Оновлено {date}', healthy: 'Працює', degraded: 'Потрібна увага', unavailable: 'Недоступно', idle: 'Очікує роботи', apiDescription: 'Адмін API відповідає', databaseDescription: 'Агрегати PostgreSQL доступні', queuesTitle: 'Фонові черги', queuesDescription: 'Лічильники BullMQ і наявність активних воркерів.',
+      columns: { queue: 'Черга', status: 'Стан', waiting: 'Очікує', active: 'В роботі', delayed: 'Відкладено', failed: 'Помилки', completed: 'Завершено', workers: 'Воркери', oldest: 'Найстаріша задача' }, none: '—',
+    },
   },
   en: {
     navigation: { overview: 'Overview', clients: 'Clients', operations: 'Operations', label: 'Administrator navigation' },
@@ -35,6 +39,10 @@ const copy = {
     },
     clientDetail: {
       back: 'Back to clients', eyebrow: 'Sales AITO client', owner: 'Owner', users: 'Users', orders: 'Orders', created: 'Created', status: 'Status', active: 'Active', blocked: 'Blocked', accessTitle: 'Organization access', accessDescription: 'Blocking ends the team’s active sessions. Organization data remains stored.', block: 'Block organization', blocking: 'Blocking…', unblock: 'Unblock organization', unblocking: 'Unblocking…', blockTitle: 'Block {name}?', blockDescription: 'All active sessions for this organization will be ended.', blockConfirm: 'Yes, block', unblockTitle: 'Unblock {name}?', unblockDescription: 'The team will be able to sign in to the workspace again.', unblockConfirm: 'Yes, unblock', mutationFailed: 'Could not change access. Try again.', dataTitle: 'Data management', dataDescription: 'Export and deletion preparation with additional administrator confirmation.',
+    },
+    operations: {
+      eyebrow: 'Monitoring', title: 'Operations and queues', description: 'Current technical state of the API, database and background processing. No payloads, logs or client data.', updated: 'Updated {date}', healthy: 'Operational', degraded: 'Attention required', unavailable: 'Unavailable', idle: 'Idle', apiDescription: 'Admin API is responding', databaseDescription: 'PostgreSQL aggregates are available', queuesTitle: 'Background queues', queuesDescription: 'BullMQ counters and active worker presence.',
+      columns: { queue: 'Queue', status: 'Status', waiting: 'Waiting', active: 'Active', delayed: 'Delayed', failed: 'Failed', completed: 'Completed', workers: 'Workers', oldest: 'Oldest task' }, none: '—',
     },
   },
 } as const;

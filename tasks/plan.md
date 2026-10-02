@@ -73,7 +73,7 @@ A1 contracts + safe API aggregates
 
 ### Phase 4: Operations and release evidence
 
-- [ ] A6: Add the queue/service operations page and safe status presentation.
+- [x] A6: Add the queue/service operations page and safe status presentation.
 - [ ] A7: Complete responsive, accessibility, security and full regression verification; update canonical status.
 
 **Acceptance:** all configured queues are visible with counts, workers and pending age; 390 px layout does not overflow; full tests/typecheck/build pass.
