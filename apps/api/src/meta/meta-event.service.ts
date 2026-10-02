@@ -1,5 +1,12 @@
 import type { RegisterMetaEventInput } from '@autosale/contracts/meta';
-import { Prisma, type PrismaClient, withTenantTransaction } from '@autosale/database';
+import {
+  assertTenantAcceptingMutations,
+  Prisma,
+  type PrismaClient,
+  TenantLifecycleFrozenError,
+  withTenantTransaction,
+} from '@autosale/database';
+import { metrics } from '@autosale/observability';
 
 export class MetaEventService {
   constructor(private readonly prisma: PrismaClient, private readonly now: () => Date = () => new Date()) {}
@@ -31,20 +38,32 @@ export class MetaEventService {
 
   async register(
     input: RegisterMetaEventInput,
-  ): Promise<{ eventId: string; duplicate: boolean; pending: boolean }> {
+  ): Promise<
+    | { eventId: string; duplicate: boolean; pending: boolean }
+    | { eventId: null; duplicate: false; pending: false; frozen: true }
+  > {
     try {
-      const event = await withTenantTransaction(this.prisma, input.tenantId, (transaction) => transaction.webhookEvent.create({
-        data: {
-          tenantId: input.tenantId,
-          provider: 'META',
-          externalEventId: input.externalEventId,
-          payload: redactWebhookSecrets(input.payload) as Prisma.InputJsonObject,
-        },
-        select: { id: true },
-      }));
+      const event = await withTenantTransaction(this.prisma, input.tenantId, async (transaction) => {
+        await assertTenantAcceptingMutations(transaction, input.tenantId, 'META_INBOUND');
+        return transaction.webhookEvent.create({
+          data: {
+            tenantId: input.tenantId,
+            provider: 'META',
+            externalEventId: input.externalEventId,
+            payload: redactWebhookSecrets(input.payload) as Prisma.InputJsonObject,
+          },
+          select: { id: true },
+        });
+      });
 
       return { eventId: event.id, duplicate: false, pending: true };
     } catch (error) {
+      if (error instanceof TenantLifecycleFrozenError) {
+        metrics.increment('autosale_tenant_lifecycle_freeze_rejections_total', {
+          surface: 'META_INBOUND', safe_reason: 'lifecycle_frozen',
+        });
+        return { eventId: null, duplicate: false, pending: false, frozen: true };
+      }
       if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== 'P2002') {
         throw error;
       }

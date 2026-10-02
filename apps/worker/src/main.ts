@@ -413,8 +413,15 @@ async function bootstrap(): Promise<void> {
       const correlationId = typeof job.data.correlationId === 'string' ? job.data.correlationId : job.data.eventId;
       const started = performance.now();
       try {
-        await processor.process(job.data.tenantId, job.data.eventId);
-        metrics.increment('autosale_operations_total', { operation: 'instagram_normalize', result: 'success' });
+        const result = await processor.process(job.data.tenantId, job.data.eventId);
+        metrics.increment('autosale_operations_total', {
+          operation: 'instagram_normalize', result: result === 'IGNORED_FROZEN' ? 'skipped' : 'success',
+        });
+        if (result === 'IGNORED_FROZEN') {
+          metrics.increment('autosale_tenant_lifecycle_freeze_rejections_total', {
+            surface: 'ORDER_RECOGNITION', safe_reason: 'lifecycle_frozen',
+          });
+        }
         logger.info('instagram_normalize_completed', { correlationId, eventId: job.data.eventId, jobId: job.id });
       } catch (error) {
         metrics.increment('autosale_operations_total', { operation: 'instagram_normalize', result: 'failure' });

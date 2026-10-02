@@ -59,6 +59,7 @@ Record at minimum: provider, purpose, data categories, regions, transfer mechani
 - Add Redis authentication/ACL and prevent unrelated containers from reaching privileged queues.
 - Use non-root object-store credentials and explicit bucket policy; tenant prefixes alone are not access control.
 - Keep production logs free of message bodies, customer addresses, access tokens and credentials unless a narrowly scoped incident procedure explicitly requires evidence.
+- During an active lifecycle freeze, verified Meta and Telegram callbacks are acknowledged without retaining new provider/customer payloads. Already queued Instagram normalization is re-checked under tenant context, marked technically complete, and skips messages, media copies and AI order recognition. The only freeze telemetry dimensions are the bounded mutation surface and `lifecycle_frozen`; tenant, request, chat and customer identifiers are forbidden.
 - Maintain an incident process capable of helping controllers meet GDPR breach notification timelines.
 - Treat dependency integrity as a release gate: audit both the production dependency graph and the complete committed lockfile, reject known high/critical vulnerabilities, and verify registry signatures. The 2026-09-30 baseline is clean for both graphs and all 756 installed packages have verified registry signatures.
 - Run quarterly restore tests and cross-tenant isolation tests in CI.

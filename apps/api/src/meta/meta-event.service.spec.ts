@@ -66,6 +66,7 @@ describe('MetaEventService', () => {
       externalEventId: 'm_processed_001',
       payload: { object: 'instagram', entry: [] },
     });
+    if (!first.eventId) throw new Error('Expected a durable event');
     await prisma.webhookEvent.update({
       where: { id: first.eventId },
       data: { status: 'PROCESSED', processedAt: new Date() },
@@ -90,6 +91,7 @@ describe('MetaEventService', () => {
         entry: [{ id: 'account', messaging: [{ appsecret_proof: 'nested-secret' }] }],
       },
     });
+    if (!registered.eventId) throw new Error('Expected a durable event');
 
     const stored = await prisma.webhookEvent.findUniqueOrThrow({
       where: { id: registered.eventId },
@@ -102,5 +104,29 @@ describe('MetaEventService', () => {
       access_token: '[REDACTED]',
       entry: [{ id: 'account', messaging: [{ appsecret_proof: '[REDACTED]' }] }],
     });
+  });
+
+  it('acknowledges but does not retain a Meta event after tenant ingestion is frozen', async () => {
+    const user = await prisma.user.create({
+      data: { email: 'lifecycle-admin@example.test', name: 'Fictional Admin', status: 'ACTIVE', platformRole: 'PLATFORM_ADMIN' },
+    });
+    await prisma.tenantLifecycleRequest.create({ data: {
+      tenantId,
+      kind: 'DELETE',
+      status: 'EXPORTING',
+      reasonCode: 'ADMINISTRATIVE_TEST',
+      requestedByUserId: user.id,
+      idempotencyKey: '11111111-2222-4333-8444-555555555555',
+      requestHash: 'f'.repeat(64),
+      ingestionFrozenAt: new Date(),
+    } });
+    const before = await prisma.webhookEvent.count({ where: { tenantId } });
+
+    await expect(service.register({
+      tenantId,
+      externalEventId: 'm_frozen_001',
+      payload: { object: 'instagram', entry: [] },
+    })).resolves.toEqual({ eventId: null, duplicate: false, pending: false, frozen: true });
+    await expect(prisma.webhookEvent.count({ where: { tenantId } })).resolves.toBe(before);
   });
 });

@@ -27,6 +27,7 @@ describe('TelegramService webhook processing', () => {
   }, 60_000);
 
   beforeEach(async () => {
+    await prisma.tenantLifecycleRequest.deleteMany();
     await prisma.telegramDelivery.deleteMany();
     await prisma.telegramNotificationPreference.deleteMany();
     await prisma.telegramSupplierSetting.deleteMany();
@@ -121,6 +122,34 @@ describe('TelegramService webhook processing', () => {
     await expect(prisma.telegramSupplierSetting.findUnique({ where: { tenantId } }))
       .resolves.toMatchObject({ destinationId: observed!.id, autoDispatch: false });
     expect(JSON.stringify(await prisma.telegramChat.findMany())).not.toContain('Private supplier message');
+  });
+
+  it('acknowledges a business message without tenant writes after ingestion is frozen', async () => {
+    await prisma.telegramBusinessConnection.create({ data: {
+      tenantId, externalConnectionId: 'business-frozen', telegramUserId: '987654321',
+      rights: { can_reply: true }, enabled: true, lastUpdatedAt: new Date(),
+    } });
+    await prisma.tenantLifecycleRequest.create({ data: {
+      tenantId, kind: 'DELETE', status: 'EXPORTING', reasonCode: 'ADMINISTRATIVE_TEST',
+      requestedByUserId: userId, idempotencyKey: '33333333-4444-4555-8666-777777777777',
+      requestHash: 'e'.repeat(64), ingestionFrozenAt: new Date(),
+    } });
+    const service = new TelegramService(prisma);
+
+    await expect(service.handleWebhook({
+      update_id: 107,
+      business_message: {
+        message_id: 44,
+        business_connection_id: 'business-frozen',
+        date: 1_788_000_000,
+        text: 'Customer content must not be stored',
+        chat: { id: 555555555, type: 'private', first_name: 'Frozen', username: 'frozen_customer' },
+      },
+    })).resolves.toBe('IGNORED');
+    await expect(prisma.telegramChat.findFirst({ where: { tenantId, externalChatId: '555555555' } })).resolves.toBeNull();
+    await expect(prisma.telegramSupplierSetting.findUnique({ where: { tenantId } })).resolves.toBeNull();
+    await expect(prisma.telegramWebhookUpdate.findUnique({ where: { updateId: '107' } }))
+      .resolves.toMatchObject({ status: 'IGNORED' });
   });
 
   it('rejects malformed updates before recording a replay marker', async () => {

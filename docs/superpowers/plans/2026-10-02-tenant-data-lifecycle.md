@@ -485,7 +485,7 @@ git commit -m "feat: process tenant lifecycle exports"
 - Consumes: `assertTenantAcceptingMutations(..., 'META_INBOUND' | 'TELEGRAM_INBOUND' | 'ORDER_RECOGNITION')`.
 - Produces: acknowledged-but-not-normalized provider callbacks after the freeze boundary.
 
-- [ ] **Step 1: Write failing callback freeze tests**
+- [x] **Step 1: Write failing callback freeze tests**
 
 ```ts
 await expect(meta.ingest(frozenTenant, signedPayload)).resolves.toEqual({ accepted: true, frozen: true });
@@ -494,17 +494,17 @@ await expect(telegram.receiveBusinessUpdate(frozenTenant, fictionalUpdate)).reso
 expect(messageCreate).not.toHaveBeenCalled();
 ```
 
-- [ ] **Step 2: Run and verify current ingestion still writes**
+- [x] **Step 2: Run and verify current ingestion still writes**
 
 Run: `pnpm --filter @autosale/api test -- meta-event.service.spec.ts telegram.service.spec.ts telegram-webhook.controller.spec.ts && pnpm --filter @autosale/worker test -- instagram.processor.spec.ts`
 
 Expected: FAIL because frozen tenants are not checked.
 
-- [ ] **Step 3: Apply the guard after verified authority and before persistence**
+- [x] **Step 3: Apply the guard after verified authority and before persistence**
 
 Resolve provider authority exactly as today, enter that tenant transaction, and call the guard before creating webhook/message/profile/order records. Return a provider-safe acknowledgement and emit `tenant_lifecycle_freeze_rejections_total{surface,safe_reason}` without body, sender, chat or participant data.
 
-- [ ] **Step 4: Guard delayed Instagram normalization/order recognition**
+- [x] **Step 4: Guard delayed Instagram normalization/order recognition**
 
 Re-read the lifecycle gate at processing time. A queued pre-freeze job that has not created a durable business side effect returns `IGNORED_FROZEN`; a job with a provider-confirmed pre-boundary send may finish its idempotent local finalization but may not enqueue a new downstream order/export/notification.
 
