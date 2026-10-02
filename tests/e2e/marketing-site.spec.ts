@@ -8,8 +8,10 @@ test.describe('Sales AITO marketing site', () => {
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://sales-aito.com/uk');
     await expect(page.locator('link[hreflang="en"]')).toHaveAttribute('href', 'https://sales-aito.com/en');
     await expect(page.getByRole('heading', { level: 1 })).toContainText('Продажі з діалогів');
-    await expect(page.locator('.marketing-hero__visual img')).toHaveJSProperty('complete', true);
-    await expect.poll(() => page.locator('.marketing-hero__visual img').evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0);
+    const heroImage = page.locator('.marketing-hero__visual img');
+    await expect(heroImage).toHaveJSProperty('complete', true);
+    await expect(heroImage).toHaveCSS('object-fit', 'cover');
+    await expect.poll(() => heroImage.evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0);
   });
 
   test('switches to equivalent English content', async ({ page }) => {

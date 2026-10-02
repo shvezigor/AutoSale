@@ -96,8 +96,8 @@ export function HomePage({ locale }: { locale: Locale }) {
               <Link className="marketing-button marketing-button--secondary" href={localizedPath(locale, '/demo')}>{site.bookDemo}</Link>
             </div>
           </div>
-          <div className="marketing-hero__visual">
-            <Image src="/images/sales-aito-ai-operator-hero.png" width={1536} height={1024} priority sizes="(max-width: 800px) 100vw, 55vw" alt="" />
+          <div className="marketing-hero__visual" aria-hidden="true">
+            <Image src="/images/sales-aito-ai-operator-hero.png" fill priority sizes="(max-width: 1000px) 100vw, 1200px" alt="" />
           </div>
         </div>
       </section>

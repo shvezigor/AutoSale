@@ -50,6 +50,7 @@ The chosen visual direction is **Autonomous Command**:
 - restrained violet illumination for AI and orchestration visuals;
 - dense but calm information hierarchy, avoiding generic neon cyberpunk styling;
 - interface fragments, workflow diagrams, and abstract system graphics instead of stock photography;
+- the home hero uses its landscape artwork as one proportional compositional stage behind the copy; responsive crops preserve the source aspect ratio and never stretch the image;
 - motion intensity of approximately 3/10, using opacity and transforms and respecting `prefers-reduced-motion`.
 
 The visual system must remain legible for long-form SEO content and pricing comparisons. The marketing identity may be more expressive than the authenticated workspace, but both must share brand name, typography principles, semantic colors, and core controls.

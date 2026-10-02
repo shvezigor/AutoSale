@@ -4,6 +4,7 @@ Date: 2026-09-17
 
 ## Automated evidence
 
+- [x] 2026-10-02: the home hero renders the 3:2 source artwork with `object-fit: cover`, breakpoint-specific focal positioning and no width/height distortion.
 - [x] 2026-09-23: invalid demo submission Playwright regression passes at 320/768/1024/1440 px: field text, focus, retained values, independent clearing and no horizontal overflow.
 
 - [x] Web typecheck passes.
