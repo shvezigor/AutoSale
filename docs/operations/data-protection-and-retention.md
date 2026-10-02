@@ -27,6 +27,8 @@ The values above are product defaults, not a substitute for merchant policy. Any
 
 ## Tenant export and deletion
 
+The phased technical design is defined in [`Tenant data lifecycle`](../superpowers/specs/2026-10-02-tenant-data-lifecycle-design.md). Its first implementation phase deliberately stops after a checksum-verified export, a separate ingestion freeze for deletion requests and retention dry-run reporting; it cannot physically delete tenant data. The remaining steps below describe the complete launch target and require a later destructive-workflow acceptance gate.
+
 Before general EU availability, implement one operator-owned workflow that:
 
 1. freezes new ingestion for the tenant;
