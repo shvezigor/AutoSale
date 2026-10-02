@@ -98,6 +98,9 @@ export const ukMessages = {
     profileMenu: 'Меню профілю', owner: 'Власник', manager: 'Менеджер', team: 'Команда', signOut: 'Вийти', signingOut: 'Виходимо…',
     profilePhoto: 'Фото профілю {name}', initial: 'Ініціал {initial}', justNow: 'щойно', minutesAgo: '{count} хв тому', hoursAgo: '{count} год тому', daysAgo: '{count} дн тому',
   },
+  search: {
+    label: 'Глобальний пошук', description: 'Клієнти, замовлення і товари', close: 'Закрити пошук', results: 'Результати пошуку', minimum: 'Введіть щонайменше 2 символи', loading: 'Шукаємо…', error: 'Не вдалося виконати пошук', retry: 'Спробувати ще раз', empty: 'Нічого не знайдено', customers: 'Клієнти', orders: 'Замовлення', products: 'Товари', customer: 'Клієнт', priceMissing: 'Ціну не вказано',
+  },
   profile: {
     pageTitle: 'Мій профіль', pageDescription: 'Керуйте особистими даними, фото та безпекою свого акаунта.',
     languageDescription: 'Оберіть мову меню, сторінок і системних повідомлень.',
