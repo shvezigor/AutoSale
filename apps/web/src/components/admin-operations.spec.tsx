@@ -22,4 +22,9 @@ describe('AdminOperations', () => {
     expect(screen.getByText('Недоступно')).toBeInTheDocument();
     expect(screen.queryByText(/redis:\/\/|customerPhone|\+380000/i)).not.toBeInTheDocument();
   });
+
+  it('marks PostgreSQL as needing attention when the safe probe fails', () => {
+    render(<AdminOperations summary={{ status: 'DEGRADED', database: 'ATTENTION', updatedAt: '2026-10-02T12:00:00.000Z', queues: [] }} />);
+    expect(screen.getByLabelText('PostgreSQL')).toHaveTextContent('Потрібна увага');
+  });
 });

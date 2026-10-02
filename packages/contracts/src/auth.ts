@@ -55,7 +55,7 @@ export const adminQueueSummarySchema = z.object({
 
 export const adminOperationsSummarySchema = z.object({
   status: z.enum(['HEALTHY', 'DEGRADED']),
-  database: z.literal('HEALTHY'),
+  database: z.enum(['HEALTHY', 'ATTENTION']),
   updatedAt: z.string().datetime(),
   queues: z.array(adminQueueSummarySchema),
 }).strict();

@@ -79,6 +79,8 @@ type AdminQueueSummary = {
 };
 ```
 
+The operations summary reports PostgreSQL as `HEALTHY` only after a live `SELECT 1` probe. Probe errors are reduced to `ATTENTION`; exception text and connection details are never returned.
+
 No job id, payload, error message, tenant id or customer identifier may be returned by the operations endpoint. A queue is `ATTENTION` when it has failed jobs or pending work without a worker. No worker and no pending work is `IDLE`, not an incident. The platform summary is degraded when at least one queue needs attention.
 
 ## Security and privacy invariants

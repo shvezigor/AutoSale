@@ -64,7 +64,7 @@ describe('AdminService privacy contract', () => {
       getWorkers: vi.fn(),
       getOldestPendingAt: vi.fn(),
     };
-    const service = new AdminService({} as never, () => new Date('2026-10-02T12:00:00Z'), [healthy, unavailable]);
+    const service = new AdminService({} as never, () => new Date('2026-10-02T12:00:00Z'), [healthy, unavailable], async () => undefined);
 
     const result = await service.getOperations();
 
@@ -75,6 +75,13 @@ describe('AdminService privacy contract', () => {
         { queue: 'delivery', status: 'ATTENTION', waiting: 0, active: 0, delayed: 0, failed: 0, completed: 0, workerCount: 0, oldestPendingAt: null, available: false },
       ],
     });
+    expect(JSON.stringify(result)).not.toContain('secret');
+  });
+
+  it('reports a safe degraded state when the database probe fails', async () => {
+    const service = new AdminService({} as never, () => new Date('2026-10-02T12:00:00Z'), [], async () => { throw new Error('postgres://secret@internal'); });
+    const result = await service.getOperations();
+    expect(result).toEqual({ status: 'DEGRADED', database: 'ATTENTION', updatedAt: '2026-10-02T12:00:00.000Z', queues: [] });
     expect(JSON.stringify(result)).not.toContain('secret');
   });
 

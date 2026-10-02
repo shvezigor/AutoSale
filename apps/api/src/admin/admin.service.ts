@@ -15,6 +15,7 @@ export class AdminService {
     private readonly prisma: PrismaClient,
     private readonly now: () => Date = () => new Date(),
     private readonly queues: AdminQueueMonitor[] = [],
+    private readonly databaseProbe?: () => Promise<unknown>,
   ) {}
 
   async listTenants() {
@@ -74,13 +75,26 @@ export class AdminService {
   }
 
   async getOperations(): Promise<AdminOperationsSummary> {
-    const queues = await Promise.all(this.queues.map((queue) => inspectQueue(queue)));
+    const [database, queues] = await Promise.all([
+      this.probeDatabase(),
+      Promise.all(this.queues.map((queue) => inspectQueue(queue))),
+    ]);
     return {
-      status: queues.some((queue) => queue.status === 'ATTENTION') ? 'DEGRADED' : 'HEALTHY',
-      database: 'HEALTHY',
+      status: database === 'ATTENTION' || queues.some((queue) => queue.status === 'ATTENTION') ? 'DEGRADED' : 'HEALTHY',
+      database,
       updatedAt: this.now().toISOString(),
       queues,
     };
+  }
+
+  private async probeDatabase(): Promise<AdminOperationsSummary['database']> {
+    try {
+      if (this.databaseProbe) await this.databaseProbe();
+      else await this.prisma.$queryRaw(Prisma.sql`SELECT 1`);
+      return 'HEALTHY';
+    } catch {
+      return 'ATTENTION';
+    }
   }
 }
 

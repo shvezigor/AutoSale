@@ -48,6 +48,7 @@ describe('authentication contracts', () => {
       status: 'HEALTHY', database: 'HEALTHY', updatedAt,
       queues: [{ queue: 'instagram', status: 'HEALTHY', waiting: 1, active: 0, delayed: 0, failed: 0, completed: 4, workerCount: 1, oldestPendingAt: updatedAt, available: true }],
     }).success).toBe(true);
+    expect(adminOperationsSummarySchema.safeParse({ status: 'DEGRADED', database: 'ATTENTION', updatedAt, queues: [] }).success).toBe(true);
     expect(adminOperationsSummarySchema.safeParse({
       status: 'HEALTHY', database: 'HEALTHY', updatedAt,
       queues: [{ queue: 'instagram', status: 'HEALTHY', waiting: 0, active: 0, delayed: 0, failed: 0, completed: 4, workerCount: 1, oldestPendingAt: null, available: true, jobPayload: { phone: '+380' } }],
