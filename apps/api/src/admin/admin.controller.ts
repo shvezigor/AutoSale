@@ -1,12 +1,23 @@
-import { Controller, Get, Inject, NotFoundException, Param, ParseUUIDPipe, Post } from '@nestjs/common';
+import type { AuthPrincipal } from '@autosale/contracts/auth';
+import { adminReauthRequestSchema, lifecycleMutationRequestSchema } from '@autosale/contracts';
+import { BadRequestException, Body, Controller, Get, Headers, Inject, NotFoundException, Param, ParseUUIDPipe, Post } from '@nestjs/common';
+import { z } from 'zod';
 
-import { RequirePlatformAdmin } from '../auth/auth.decorators.js';
+import { CurrentPrincipal, RequirePlatformAdmin } from '../auth/auth.decorators.js';
 import { AdminService } from './admin.service.js';
+import { AdminStepUpService } from './admin-step-up.service.js';
+import { TenantLifecycleService } from './tenant-lifecycle.service.js';
+
+const idempotencyKeySchema = z.string().uuid();
 
 @Controller('api/admin')
 @RequirePlatformAdmin()
 export class AdminController {
-  constructor(@Inject(AdminService) private readonly admin: AdminService) {}
+  constructor(
+    @Inject(AdminService) private readonly admin: AdminService,
+    @Inject(AdminStepUpService) private readonly stepUp: AdminStepUpService,
+    @Inject(TenantLifecycleService) private readonly lifecycle: TenantLifecycleService,
+  ) {}
 
   @Get('tenants')
   listTenants() { return this.admin.listTenants(); }
@@ -27,4 +38,96 @@ export class AdminController {
     if (!result) throw new NotFoundException('Tenant not found');
     return result;
   }
+
+  @Post('reauth')
+  async reauthenticate(@CurrentPrincipal() principal: AuthPrincipal, @Body() body: unknown) {
+    const parsed = adminReauthRequestSchema.safeParse(body);
+    if (!parsed.success) throw new BadRequestException('ADMIN_REAUTH_INVALID');
+    const stepUpToken = await this.stepUp.issue(
+      principal.userId,
+      principal.sessionId,
+      parsed.data.currentPassword,
+      parsed.data.purpose,
+    );
+    const expiresAt = this.stepUp.expiresAt(stepUpToken);
+    if (!expiresAt) throw new BadRequestException('ADMIN_REAUTH_FAILED');
+    return { stepUpToken, expiresAt };
+  }
+
+  @Get('tenant-lifecycle')
+  listLifecycle(@CurrentPrincipal() principal: AuthPrincipal) {
+    return this.lifecycle.list(principal);
+  }
+
+  @Get('tenant-lifecycle/:requestId')
+  lifecycleDetail(
+    @CurrentPrincipal() principal: AuthPrincipal,
+    @Param('requestId', new ParseUUIDPipe({ version: '4' })) requestId: string,
+  ) {
+    return this.lifecycle.detail(principal, requestId);
+  }
+
+  @Post('tenants/:tenantId/lifecycle-exports')
+  createLifecycleExport(
+    @CurrentPrincipal() principal: AuthPrincipal,
+    @Param('tenantId', new ParseUUIDPipe({ version: '4' })) tenantId: string,
+    @Headers('idempotency-key') rawIdempotencyKey: string | undefined,
+    @Body() body: unknown,
+  ) {
+    return this.lifecycle.createExport(
+      principal,
+      tenantId,
+      parseLifecycleBody(body),
+      parseIdempotencyKey(rawIdempotencyKey),
+    );
+  }
+
+  @Post('tenants/:tenantId/lifecycle-deletions')
+  createLifecycleDeletion(
+    @CurrentPrincipal() principal: AuthPrincipal,
+    @Param('tenantId', new ParseUUIDPipe({ version: '4' })) tenantId: string,
+    @Headers('idempotency-key') rawIdempotencyKey: string | undefined,
+    @Headers('x-admin-step-up') stepUpToken: string | undefined,
+    @Body() body: unknown,
+  ) {
+    return this.lifecycle.createDeletion(
+      principal,
+      tenantId,
+      parseLifecycleBody(body),
+      parseIdempotencyKey(rawIdempotencyKey),
+      stepUpToken ?? '',
+    );
+  }
+
+  @Post('tenant-lifecycle/:requestId/cancel')
+  cancelLifecycle(
+    @CurrentPrincipal() principal: AuthPrincipal,
+    @Param('requestId', new ParseUUIDPipe({ version: '4' })) requestId: string,
+    @Headers('idempotency-key') rawIdempotencyKey: string | undefined,
+  ) {
+    parseIdempotencyKey(rawIdempotencyKey);
+    return this.lifecycle.cancel(principal, requestId);
+  }
+
+  @Post('tenant-lifecycle/:requestId/retry')
+  retryLifecycle(
+    @CurrentPrincipal() principal: AuthPrincipal,
+    @Param('requestId', new ParseUUIDPipe({ version: '4' })) requestId: string,
+    @Headers('idempotency-key') rawIdempotencyKey: string | undefined,
+  ) {
+    parseIdempotencyKey(rawIdempotencyKey);
+    return this.lifecycle.retry(principal, requestId);
+  }
+}
+
+function parseLifecycleBody(body: unknown) {
+  const parsed = lifecycleMutationRequestSchema.safeParse(body);
+  if (!parsed.success) throw new BadRequestException('TENANT_LIFECYCLE_INVALID');
+  return parsed.data;
+}
+
+function parseIdempotencyKey(value: string | undefined): string {
+  const parsed = idempotencyKeySchema.safeParse(value);
+  if (!parsed.success) throw new BadRequestException('IDEMPOTENCY_KEY_INVALID');
+  return parsed.data;
 }

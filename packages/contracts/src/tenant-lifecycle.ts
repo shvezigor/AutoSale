@@ -3,6 +3,21 @@ import { z } from 'zod';
 export const tenantLifecycleKindSchema = z.enum(['EXPORT', 'DELETE']);
 export const tenantLifecycleStatusSchema = z.enum(['REQUESTED', 'EXPORTING', 'EXPORT_READY', 'FAILED', 'CANCELLED']);
 export const tenantLifecycleReasonSchema = z.enum(['CONTROLLER_REQUEST', 'CONTRACT_TERMINATION', 'ADMINISTRATIVE_TEST']);
+export const adminReauthPurposeSchema = z.enum(['TENANT_DELETE_REQUEST']);
+
+export const adminReauthRequestSchema = z.object({
+  currentPassword: z.string().min(1).max(128),
+  purpose: adminReauthPurposeSchema,
+}).strict();
+
+export const adminReauthResponseSchema = z.object({
+  stepUpToken: z.string().min(1),
+  expiresAt: z.string().datetime(),
+}).strict();
+
+export const lifecycleMutationRequestSchema = z.object({
+  reasonCode: tenantLifecycleReasonSchema,
+}).strict();
 
 export const createTenantLifecycleRequestSchema = z.object({
   kind: tenantLifecycleKindSchema,
@@ -42,6 +57,10 @@ export const retentionDryRunJobSchema = z.object({
 export type TenantLifecycleKind = z.infer<typeof tenantLifecycleKindSchema>;
 export type TenantLifecycleStatus = z.infer<typeof tenantLifecycleStatusSchema>;
 export type TenantLifecycleReason = z.infer<typeof tenantLifecycleReasonSchema>;
+export type AdminReauthPurpose = z.infer<typeof adminReauthPurposeSchema>;
+export type AdminReauthRequest = z.infer<typeof adminReauthRequestSchema>;
+export type AdminReauthResponse = z.infer<typeof adminReauthResponseSchema>;
+export type LifecycleMutationRequest = z.infer<typeof lifecycleMutationRequestSchema>;
 export type CreateTenantLifecycleRequest = z.infer<typeof createTenantLifecycleRequestSchema>;
 export type TenantLifecycleRequest = z.infer<typeof tenantLifecycleRequestSchema>;
 export type TenantLifecycleJob = z.infer<typeof tenantLifecycleJobSchema>;

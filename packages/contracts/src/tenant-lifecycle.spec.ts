@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  adminReauthRequestSchema,
   createTenantLifecycleRequestSchema,
+  lifecycleMutationRequestSchema,
   retentionDryRunJobSchema,
   tenantLifecycleJobSchema,
   tenantLifecycleRequestSchema,
@@ -12,6 +14,26 @@ const requestId = '22222222-2222-4222-8222-222222222222';
 const idempotencyKey = '33333333-3333-4333-8333-333333333333';
 
 describe('tenant lifecycle contracts', () => {
+  it('accepts only the bounded administrative reauthentication purpose', () => {
+    expect(adminReauthRequestSchema.parse({
+      currentPassword: 'fictional secure password',
+      purpose: 'TENANT_DELETE_REQUEST',
+    })).toEqual({ currentPassword: 'fictional secure password', purpose: 'TENANT_DELETE_REQUEST' });
+    expect(adminReauthRequestSchema.safeParse({
+      currentPassword: 'fictional secure password',
+      purpose: 'ARBITRARY_ADMIN_ACTION',
+    }).success).toBe(false);
+  });
+
+  it('accepts a bounded lifecycle reason body without routing fields', () => {
+    expect(lifecycleMutationRequestSchema.parse({ reasonCode: 'CONTROLLER_REQUEST' }))
+      .toEqual({ reasonCode: 'CONTROLLER_REQUEST' });
+    expect(lifecycleMutationRequestSchema.safeParse({
+      reasonCode: 'CONTROLLER_REQUEST',
+      tenantId,
+    }).success).toBe(false);
+  });
+
   it('accepts a deletion preparation request with a bounded reason', () => {
     expect(createTenantLifecycleRequestSchema.parse({
       kind: 'DELETE',
