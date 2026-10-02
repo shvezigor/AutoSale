@@ -18,6 +18,7 @@ import { Queue, Worker } from 'bullmq';
 import { metrics, StructuredLogger } from '@autosale/observability';
 
 import { createWorkerHealthServer } from './health-server.js';
+import { FacebookProcessor } from './facebook/facebook.processor.js';
 import { InstagramProcessor } from './instagram/instagram.processor.js';
 import { InstagramAvatarCleanupReconciler } from './instagram/instagram-avatar-cleanup-reconciler.js';
 import { InstagramEventReconciler } from './instagram/instagram-event-reconciler.js';
@@ -144,11 +145,9 @@ async function bootstrap(): Promise<void> {
     },
     telegramAlerts,
   );
-  const processor = new InstagramProcessor(
-    prisma,
-    new MediaCopyService(storage),
-    orderProcessor,
-  );
+  const mediaCopy = new MediaCopyService(storage);
+  const processor = new InstagramProcessor(prisma, mediaCopy, orderProcessor);
+  const facebookProcessor = new FacebookProcessor(prisma, mediaCopy, orderProcessor);
   const profileEnrichment = new InstagramProfileEnrichmentService(
     prisma,
     metaInstagram,
@@ -437,30 +436,30 @@ async function bootstrap(): Promise<void> {
         });
         return;
       }
-      if (
-        job.name !== 'instagram.normalize'
-        || typeof job.data?.tenantId !== 'string'
-        || typeof job.data?.eventId !== 'string'
-      ) return;
+      if (job.name !== 'instagram.normalize' && job.name !== 'facebook.normalize') return;
+      if (typeof job.data?.tenantId !== 'string' || typeof job.data?.eventId !== 'string') return;
+      if (job.name === 'facebook.normalize' && !env.FACEBOOK_MESSENGER_ENABLED) return;
       const correlationId = typeof job.data.correlationId === 'string' ? job.data.correlationId : job.data.eventId;
+      const operation = job.name === 'facebook.normalize' ? 'facebook_normalize' : 'instagram_normalize';
       const started = performance.now();
       try {
-        const result = await processor.process(job.data.tenantId, job.data.eventId);
+        const selectedProcessor = job.name === 'facebook.normalize' ? facebookProcessor : processor;
+        const result = await selectedProcessor.process(job.data.tenantId, job.data.eventId);
         metrics.increment('autosale_operations_total', {
-          operation: 'instagram_normalize', result: result === 'IGNORED_FROZEN' ? 'skipped' : 'success',
+          operation, result: result === 'IGNORED_FROZEN' ? 'skipped' : 'success',
         });
         if (result === 'IGNORED_FROZEN') {
           metrics.increment('autosale_tenant_lifecycle_freeze_rejections_total', {
             surface: 'ORDER_RECOGNITION', safe_reason: 'lifecycle_frozen',
           });
         }
-        logger.info('instagram_normalize_completed', { correlationId, eventId: job.data.eventId, jobId: job.id });
+        logger.info(`${operation}_completed`, { correlationId, eventId: job.data.eventId, jobId: job.id });
       } catch (error) {
-        metrics.increment('autosale_operations_total', { operation: 'instagram_normalize', result: 'failure' });
-        logger.error('instagram_normalize_failed', { correlationId, eventId: job.data.eventId, jobId: job.id, errorCode: error instanceof Error ? error.name : 'UNKNOWN' });
+        metrics.increment('autosale_operations_total', { operation, result: 'failure' });
+        logger.error(`${operation}_failed`, { correlationId, eventId: job.data.eventId, jobId: job.id, errorCode: error instanceof Error ? error.name : 'UNKNOWN' });
         throw error;
       } finally {
-        metrics.observe('autosale_operation_duration_seconds', (performance.now() - started) / 1000, { operation: 'instagram_normalize' });
+        metrics.observe('autosale_operation_duration_seconds', (performance.now() - started) / 1000, { operation });
       }
     },
     {

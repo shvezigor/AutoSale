@@ -2,6 +2,8 @@ import { createHash } from 'node:crypto';
 
 import type { ObjectStorage } from '@autosale/integrations';
 
+import type { SocialChannel } from '../social/normalized-inbound-message.js';
+
 const DEFAULT_MAX_IMAGE_BYTES = 10 * 1024 * 1024;
 const DEFAULT_MAX_VIDEO_BYTES = 25 * 1024 * 1024;
 const DEFAULT_TIMEOUT_MS = 10_000;
@@ -41,7 +43,7 @@ export class MediaCopyService {
     this.timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   }
 
-  async copy(input: { tenantId: string; sourceUrl: string }): Promise<{
+  async copy(input: { tenantId: string; sourceUrl: string; channel?: SocialChannel }): Promise<{
     key: string;
     etag: string;
     checksum: string;
@@ -78,7 +80,8 @@ export class MediaCopyService {
 
       const body = await readWithLimit(response, maxBytes);
       const checksum = createHash('sha256').update(body).digest('hex');
-      const key = `tenants/${input.tenantId}/instagram/sha256/${checksum}.${extension}`;
+      const provider = input.channel === 'FACEBOOK' ? 'facebook' : 'instagram';
+      const key = `tenants/${input.tenantId}/${provider}/sha256/${checksum}.${extension}`;
       const stored = await this.storage.put({ key, body, contentType });
 
       return { ...stored, checksum, contentType };

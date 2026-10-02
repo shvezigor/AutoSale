@@ -1,92 +1,75 @@
 import {
   MalformedSupportedEventError,
-  type AttachmentType,
-  type MessageDirection,
   type NormalizedInboundAttachment,
   type NormalizedInboundMessage,
 } from '../social/normalized-inbound-message.js';
 
-export { MalformedSupportedEventError } from '../social/normalized-inbound-message.js';
-export type { AttachmentType, MessageDirection } from '../social/normalized-inbound-message.js';
-
-export type NormalizedInstagramAttachment = NormalizedInboundAttachment;
-
-export type NormalizedInstagramMessage = NormalizedInboundMessage & { channel: 'INSTAGRAM' };
-
-export function normalizeInstagramEvent(payload: unknown): NormalizedInstagramMessage[] {
-  if (!isRecord(payload) || payload.object !== 'instagram' || !Array.isArray(payload.entry)) {
-    throw new MalformedSupportedEventError('Expected a persisted Instagram webhook payload');
+export function normalizeFacebookEvent(payload: unknown): NormalizedInboundMessage[] {
+  if (!isRecord(payload) || payload.object !== 'page' || !Array.isArray(payload.entry)) {
+    throw new MalformedSupportedEventError('Expected a persisted Facebook Page webhook payload');
   }
 
-  const normalized: NormalizedInstagramMessage[] = [];
-
+  const normalized: NormalizedInboundMessage[] = [];
   for (const entry of payload.entry) {
     if (!isRecord(entry) || !Array.isArray(entry.messaging)) continue;
-
     for (const event of entry.messaging) {
       if (!isRecord(event) || !isRecord(event.message)) continue;
+      if (event.message.is_echo === true) continue;
 
-      const message = event.message;
-      const mid = requiredString(message.mid, 'message.mid');
       const senderId = requiredNestedId(event.sender, 'sender.id');
-      const recipientId = requiredNestedId(event.recipient, 'recipient.id');
-      const direction: MessageDirection = message.is_echo === true ? 'OUTBOUND' : 'INBOUND';
-      const externalConversationId = direction === 'INBOUND' ? senderId : recipientId;
+      requiredNestedId(event.recipient, 'recipient.id');
       const timestamp = typeof event.timestamp === 'number' ? event.timestamp : undefined;
       if (!timestamp || !Number.isFinite(timestamp)) {
         throw new MalformedSupportedEventError('Supported message requires timestamp');
       }
 
       normalized.push({
-        channel: 'INSTAGRAM',
-        externalMessageId: mid,
-        externalConversationId,
-        participantId: externalConversationId,
+        channel: 'FACEBOOK',
+        externalMessageId: requiredString(event.message.mid, 'message.mid'),
+        externalConversationId: senderId,
+        participantId: senderId,
         senderId,
-        direction,
-        text: typeof message.text === 'string' ? message.text : null,
+        direction: 'INBOUND',
+        text: typeof event.message.text === 'string' ? event.message.text : null,
         sourceTimestamp: new Date(timestamp),
-        attachments: normalizeAttachments(message.attachments),
+        attachments: normalizeAttachments(event.message.attachments),
       });
     }
   }
-
   return normalized;
 }
 
-function normalizeAttachments(value: unknown): NormalizedInstagramAttachment[] {
+function normalizeAttachments(value: unknown): NormalizedInboundAttachment[] {
   if (!Array.isArray(value)) return [];
-
   return value.flatMap((attachment) => {
     if (!isRecord(attachment)) return [];
     const providerType = typeof attachment.type === 'string' ? attachment.type : 'unknown';
     const payload = isRecord(attachment.payload) ? attachment.payload : {};
-    const rawUrl = typeof payload.url === 'string'
-      ? payload.url
-      : typeof payload.story_media_url === 'string'
-        ? payload.story_media_url
-        : null;
+    const rawUrl = typeof payload.url === 'string' ? payload.url : null;
 
-    if (providerType === 'image' || providerType === 'ig_post' || providerType === 'story_mention') {
-      return rawUrl && isSafeImageSource(rawUrl)
+    if (providerType === 'image') {
+      return rawUrl && isSafeMediaSource(rawUrl)
         ? [{ type: 'IMAGE' as const, sourceUrl: rawUrl }]
         : [unsupportedAttachment(providerType)];
     }
-
-    if (rawUrl && isSafeWebUrl(rawUrl)) {
+    if (providerType === 'video') {
+      return rawUrl && isSafeWebUrl(rawUrl)
+        ? [{ type: 'VIDEO' as const, sourceUrl: rawUrl }]
+        : [unsupportedAttachment(providerType)];
+    }
+    if ((providerType === 'fallback' || providerType === 'share') && rawUrl && isSafeWebUrl(rawUrl)) {
       return [{ type: 'LINK' as const, sourceUrl: rawUrl }];
     }
-
     return [unsupportedAttachment(providerType)];
   });
 }
 
-function unsupportedAttachment(providerType: string): NormalizedInstagramAttachment {
+function unsupportedAttachment(providerType: string): NormalizedInboundAttachment {
   const safeType = providerType.toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 40) || 'unknown';
-  return { type: 'UNSUPPORTED', sourceUrl: `instagram:${safeType}` };
+  return { type: 'UNSUPPORTED', sourceUrl: `facebook:${safeType}` };
 }
 
-function isSafeImageSource(value: string): boolean {
+function isSafeMediaSource(value: string): boolean {
   return isSafeWebUrl(value) || /^data:image\/(?:jpeg|png|webp);base64,/i.test(value);
 }
 
@@ -100,9 +83,7 @@ function isSafeWebUrl(value: string): boolean {
 }
 
 function requiredNestedId(value: unknown, field: string): string {
-  if (!isRecord(value)) {
-    throw new MalformedSupportedEventError(`Supported message requires ${field}`);
-  }
+  if (!isRecord(value)) throw new MalformedSupportedEventError(`Supported message requires ${field}`);
   return requiredString(value.id, field);
 }
 

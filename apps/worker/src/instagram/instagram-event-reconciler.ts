@@ -4,7 +4,7 @@ interface PendingEventStore {
 
 interface NormalizeQueue {
   add(
-    name: 'instagram.normalize',
+    name: 'instagram.normalize' | 'facebook.normalize',
     data: { tenantId: string; eventId: string; correlationId: string },
     options: { jobId: string; removeOnComplete: true; removeOnFail: true },
   ): Promise<unknown>;
@@ -14,6 +14,7 @@ interface DueInstagramEvent {
   tenant_id: string;
   event_id: string;
   recovery_kind: 'RECEIVED' | 'ATTACHMENT_BACKFILL';
+  job_name: 'instagram.normalize' | 'facebook.normalize';
 }
 
 export class InstagramEventReconciler {
@@ -32,7 +33,7 @@ export class InstagramEventReconciler {
     for (const event of pending) {
       try {
         await this.queue.add(
-          'instagram.normalize',
+          event.job_name,
           {
             tenantId: event.tenant_id,
             eventId: event.event_id,

@@ -5,9 +5,9 @@ import {
   type SocialMediaCopier,
   type SocialOrderTriggerProcessor,
 } from '../social/social-inbound-ingestion.service.js';
-import { normalizeInstagramEvent } from './instagram-normalizer.js';
+import { normalizeFacebookEvent } from './facebook-normalizer.js';
 
-export class InstagramProcessor {
+export class FacebookProcessor {
   private readonly ingestion: SocialInboundIngestionService;
 
   constructor(
@@ -19,6 +19,6 @@ export class InstagramProcessor {
   }
 
   process(tenantId: string, eventId: string): Promise<'PROCESSED' | 'IGNORED_FROZEN'> {
-    return this.ingestion.process(tenantId, eventId, normalizeInstagramEvent);
+    return this.ingestion.process(tenantId, eventId, normalizeFacebookEvent);
   }
 }
