@@ -40,6 +40,7 @@ describe('AdminStepUpService', () => {
 
     expect(service.verify(token, userId, sessionId, 'TENANT_DELETE_REQUEST')).toBe(true);
     expect(service.verify(token, userId, 'different-session', 'TENANT_DELETE_REQUEST')).toBe(false);
+    expect(service.verify(token, userId, sessionId, 'TENANT_EXPORT_DOWNLOAD')).toBe(false);
     clock = new Date(now.getTime() + 5 * 60_000 + 1);
     expect(service.verify(token, userId, sessionId, 'TENANT_DELETE_REQUEST')).toBe(false);
   });

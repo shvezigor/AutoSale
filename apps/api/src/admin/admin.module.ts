@@ -1,5 +1,6 @@
 import type { ApiEnv } from '@autosale/config/api-env';
 import { createPrismaClient } from '@autosale/database';
+import { S3ObjectStorage } from '@autosale/integrations';
 import { DynamicModule, Module } from '@nestjs/common';
 import { Queue } from 'bullmq';
 
@@ -15,13 +16,23 @@ export class AdminModule {
     const prisma = createPrismaClient(env.DATABASE_URL);
     const queue = new Queue('tenant-lifecycle', { connection: queueConnection(env.REDIS_URL) });
     const stepUp = new AdminStepUpService(prisma, new CryptoService(), env.AUTH_TOKEN_PEPPER);
+    const storage = new S3ObjectStorage({
+      endpoint: env.S3_ENDPOINT,
+      region: env.S3_REGION,
+      bucket: env.S3_BUCKET,
+      accessKeyId: env.S3_ACCESS_KEY_ID,
+      secretAccessKey: env.S3_SECRET_ACCESS_KEY,
+      forcePathStyle: true,
+    });
     return {
       module: AdminModule,
       controllers: [AdminController],
       providers: [
         { provide: AdminService, useValue: new AdminService(prisma) },
         { provide: AdminStepUpService, useValue: stepUp },
-        { provide: TenantLifecycleService, useValue: new TenantLifecycleService(prisma, queue, stepUp) },
+        { provide: TenantLifecycleService, useValue: new TenantLifecycleService(
+          prisma, queue, stepUp, undefined, undefined, storage,
+        ) },
       ],
     };
   }

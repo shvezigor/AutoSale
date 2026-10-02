@@ -27,7 +27,9 @@ The values above are product defaults, not a substitute for merchant policy. Any
 
 ## Tenant export and deletion
 
-The phased technical design is defined in [`Tenant data lifecycle`](../superpowers/specs/2026-10-02-tenant-data-lifecycle-design.md). Its first implementation phase deliberately stops after a checksum-verified export, a separate ingestion freeze for deletion requests and retention dry-run reporting; it cannot physically delete tenant data. The remaining steps below describe the complete launch target and require a later destructive-workflow acceptance gate.
+The phased technical design is defined in [`Tenant data lifecycle`](../superpowers/specs/2026-10-02-tenant-data-lifecycle-design.md). Phase one now has the additive lifecycle state model and a fenced, recoverable export worker. It creates a deterministic JSONL ZIP, verifies the uploaded object's size and SHA-256 checksum, keeps it private, and exposes it only to a platform administrator through a purpose-bound reauthentication token and a five-minute signed URL. The artifact expires after seven days; cleanup removes the object and download metadata while retaining checksum and ready-time evidence. BullMQ does not own retries: durable database state, leases and bounded backoff do. Ordinary logs and metric labels exclude tenant/request IDs, object keys and signed URLs.
+
+Deletion requests still cannot physically delete tenant data. Full ingestion freeze coverage and retention dry-run reporting remain incomplete until their dedicated rollout steps pass acceptance. The remaining steps below describe the complete launch target and require a later destructive-workflow acceptance gate.
 
 Before general EU availability, implement one operator-owned workflow that:
 

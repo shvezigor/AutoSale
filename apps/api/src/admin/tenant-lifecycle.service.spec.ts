@@ -40,7 +40,7 @@ describe('TenantLifecycleService', () => {
       principal, tenantId, { reasonCode: 'ADMINISTRATIVE_TEST' }, idempotencyKey, 'valid-token',
     )).resolves.toEqual(expect.objectContaining({ id: requestId, tenantId, kind: 'DELETE', status: 'REQUESTED' }));
     expect(queue.add).toHaveBeenCalledWith('tenant-lifecycle.export', { requestId, tenantId }, expect.objectContaining({
-      jobId: `tenant-lifecycle:${requestId}`,
+      jobId: expect.stringMatching(new RegExp(`^tenant-lifecycle-${requestId}-`)),
     }));
     expect(audit).toHaveBeenCalledWith(prisma, expect.objectContaining({
       tenantId: null, userId: principal.userId, action: 'TENANT_LIFECYCLE_DELETE_REQUESTED', result: 'SUCCESS',
@@ -69,5 +69,56 @@ describe('TenantLifecycleService', () => {
     await expect(service.createDeletion(
       principal, tenantId, { reasonCode: 'ADMINISTRATIVE_TEST' }, idempotencyKey, 'token',
     )).rejects.toEqual(expect.objectContaining<Partial<ConflictException>>({ message: 'LIFECYCLE_IDEMPOTENCY_CONFLICT' }));
+  });
+
+  it('issues a five-minute download only after metadata verification and safe audit', async () => {
+    const checksum = 'c'.repeat(64);
+    const prisma = { $queryRaw: vi.fn().mockResolvedValue([{
+      request_id: requestId, tenant_id: tenantId, kind: 'EXPORT', status: 'EXPORT_READY', reason_code: 'ADMINISTRATIVE_TEST',
+      ingestion_frozen_at: null, export_object_key: 'tenant-lifecycle/private/export.zip', export_sha256: checksum,
+      export_size_bytes: 42n, export_manifest_version: 1, export_ready_at: new Date('2026-10-02T09:00:00Z'),
+      export_expires_at: new Date('2026-10-09T09:00:00Z'), last_error_code: null, cancelled_at: null,
+      requested_at: new Date('2026-10-02T08:59:00Z'),
+    }]) };
+    const storage = {
+      head: vi.fn().mockResolvedValue({ contentLength: 42, contentType: 'application/zip', checksumSha256: Buffer.from(checksum, 'hex').toString('base64') }),
+      createSignedDownloadUrl: vi.fn().mockResolvedValue('https://objects.example.test/download?fictional-signature'),
+    };
+    const audit = vi.fn().mockResolvedValue(undefined);
+    const stepUp = { verify: vi.fn().mockReturnValue(true) };
+    const now = () => new Date('2026-10-02T09:01:00Z');
+    const service = new TenantLifecycleService(prisma as never, { add: vi.fn() } as never, stepUp as never, audit, now, storage as never);
+
+    await expect(service.createDownload(principal, requestId, 'valid-download-step-up')).resolves.toEqual({
+      url: 'https://objects.example.test/download?fictional-signature',
+      expiresAt: '2026-10-02T09:06:00.000Z',
+    });
+    expect(audit).toHaveBeenCalledWith(prisma, expect.objectContaining({
+      action: 'TENANT_LIFECYCLE_DOWNLOAD_ISSUED',
+      metadata: expect.not.objectContaining({ url: expect.anything(), objectKey: expect.anything() }),
+    }));
+  });
+
+  it('does not sign an expired lifecycle artifact', async () => {
+    const prisma = { $queryRaw: vi.fn().mockResolvedValue([{
+      request_id: requestId, tenant_id: tenantId, kind: 'EXPORT', status: 'EXPORT_READY', reason_code: 'ADMINISTRATIVE_TEST',
+      ingestion_frozen_at: null, export_object_key: 'tenant-lifecycle/private/expired.zip', export_sha256: 'e'.repeat(64),
+      export_size_bytes: 42n, export_manifest_version: 1, export_ready_at: new Date('2026-09-25T09:00:00Z'),
+      export_expires_at: new Date('2026-10-02T09:00:00Z'), requested_at: new Date('2026-09-25T08:59:00Z'),
+    }]) };
+    const storage = { head: vi.fn(), createSignedDownloadUrl: vi.fn() };
+    const service = new TenantLifecycleService(
+      prisma as never,
+      { add: vi.fn() } as never,
+      { verify: vi.fn().mockReturnValue(true) } as never,
+      vi.fn(),
+      () => new Date('2026-10-02T09:01:00Z'),
+      storage as never,
+    );
+
+    await expect(service.createDownload(principal, requestId, 'valid-download-step-up'))
+      .rejects.toThrow('TENANT_LIFECYCLE_ARTIFACT_EXPIRED');
+    expect(storage.head).not.toHaveBeenCalled();
+    expect(storage.createSignedDownloadUrl).not.toHaveBeenCalled();
   });
 });

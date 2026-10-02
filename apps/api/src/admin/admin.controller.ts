@@ -118,6 +118,17 @@ export class AdminController {
     parseIdempotencyKey(rawIdempotencyKey);
     return this.lifecycle.retry(principal, requestId);
   }
+
+  @Post('tenant-lifecycle/:requestId/download')
+  downloadLifecycleExport(
+    @CurrentPrincipal() principal: AuthPrincipal,
+    @Param('requestId', new ParseUUIDPipe({ version: '4' })) requestId: string,
+    @Headers('idempotency-key') rawIdempotencyKey: string | undefined,
+    @Headers('x-admin-step-up') stepUpToken: string | undefined,
+  ) {
+    parseIdempotencyKey(rawIdempotencyKey);
+    return this.lifecycle.createDownload(principal, requestId, stepUpToken ?? '');
+  }
 }
 
 function parseLifecycleBody(body: unknown) {

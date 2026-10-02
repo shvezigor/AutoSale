@@ -19,6 +19,10 @@ describe('tenant lifecycle contracts', () => {
       currentPassword: 'fictional secure password',
       purpose: 'TENANT_DELETE_REQUEST',
     })).toEqual({ currentPassword: 'fictional secure password', purpose: 'TENANT_DELETE_REQUEST' });
+    expect(adminReauthRequestSchema.parse({
+      currentPassword: 'fictional secure password',
+      purpose: 'TENANT_EXPORT_DOWNLOAD',
+    })).toEqual({ currentPassword: 'fictional secure password', purpose: 'TENANT_EXPORT_DOWNLOAD' });
     expect(adminReauthRequestSchema.safeParse({
       currentPassword: 'fictional secure password',
       purpose: 'ARBITRARY_ADMIN_ACTION',

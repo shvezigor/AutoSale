@@ -253,7 +253,7 @@ async createDeletion(actor: AuthPrincipal, tenantId: string, input: CreateLifecy
   if (!this.stepUp.verify(stepUp, actor.userId, actor.sessionId, 'TENANT_DELETE_REQUEST')) throw new UnauthorizedException('ADMIN_REAUTH_REQUIRED');
   const requestHash = sha256(JSON.stringify({ tenantId, kind: 'DELETE', reasonCode: input.reasonCode }));
   const row = await this.callCreateFunction(actor.userId, tenantId, 'DELETE', input.reasonCode, key, requestHash);
-  await this.queue.add('tenant-lifecycle.export', { requestId: row.id, tenantId }, { jobId: `tenant-lifecycle:${row.id}`, attempts: 5, backoff: { type: 'exponential', delay: 1_000 } });
+  await this.queue.add('tenant-lifecycle.export', { requestId: row.id, tenantId }, { jobId: `tenant-lifecycle-${row.id}-${timeBucket}`, attempts: 1 });
   return row;
 }
 ```
@@ -407,7 +407,7 @@ git commit -m "feat: build redacted tenant exports"
 - Consumes: job schema, state machine, export writer and object-storage methods.
 - Produces: BullMQ job `tenant-lifecycle.export` and recovery polling through `worker_due_tenant_lifecycle_requests`.
 
-- [ ] **Step 1: Write failing claim/fencing/publish tests**
+- [x] **Step 1: Write failing claim/fencing/publish tests**
 
 ```ts
 await expect(processor.process({ tenantId, requestId })).resolves.toEqual('EXPORT_READY');
@@ -416,13 +416,13 @@ await expect(staleProcessor.process({ tenantId, requestId })).resolves.toEqual('
 expect(storage.delete).toHaveBeenCalledWith(expect.stringContaining(requestId));
 ```
 
-- [ ] **Step 2: Run and observe missing processor failures**
+- [x] **Step 2: Run and observe missing processor failures**
 
 Run: `pnpm --filter @autosale/worker test -- tenant-lifecycle.processor.spec.ts tenant-lifecycle.reconciler.spec.ts`
 
 Expected: FAIL because processor/reconciler modules are absent.
 
-- [ ] **Step 3: Implement idempotent claim, export and publication**
+- [x] **Step 3: Implement idempotent claim, export and publication**
 
 ```ts
 const claimed = await withTenantTransaction(prisma, job.tenantId, tx => tx.tenantLifecycleRequest.updateMany({
@@ -433,19 +433,19 @@ const claimed = await withTenantTransaction(prisma, job.tenantId, tx => tx.tenan
 
 After local archive completion, upload directly to the final private key, verify `head()` size/checksum, then fence the durable `EXPORT_READY` update by request ID, tenant ID, status and lease ID. If durable publication loses the lease, delete the uploaded object. Map failures to bounded codes and exponential `nextAttemptAt`; never persist raw errors.
 
-- [ ] **Step 4: Add recovery and seven-day cleanup**
+- [x] **Step 4: Add recovery and seven-day cleanup**
 
 The reconciler enqueues due `REQUESTED`, retryable `FAILED`, and expired `EXPORTING` rows using versioned `jobId`. Cleanup gets only tenant/request IDs from its worker function, loads metadata under tenant context, deletes the object, and clears object-key/download metadata while retaining checksum and audit timestamps.
 
-- [ ] **Step 5: Add the worker queue and safe metrics**
+- [x] **Step 5: Add the worker queue and safe metrics**
 
 Register queue/worker `tenant-lifecycle` in `main.ts`, concurrency `1`, attempts `1` at BullMQ level because durable retry belongs to the processor. Emit only `operation=tenant_lifecycle_export|tenant_lifecycle_cleanup`, `result`, duration and byte histograms; omit tenant/request/object identifiers from metric labels and ordinary logs.
 
-- [ ] **Step 6: Implement short-lived download issuance**
+- [x] **Step 6: Implement short-lived download issuance**
 
 `TenantLifecycleService.createDownload` must read a ready, unexpired artifact through the bounded platform function, verify the object with `head`, issue a 300-second signed URL, append a security audit event without the URL/key, and return `{ url, expiresAt }` directly to the authenticated admin.
 
-- [ ] **Step 7: Run API/worker tests and commit**
+- [x] **Step 7: Run API/worker tests and commit**
 
 Run: `pnpm --filter @autosale/worker test -- tenant-lifecycle.processor.spec.ts tenant-lifecycle.reconciler.spec.ts && pnpm --filter @autosale/api test -- tenant-lifecycle.service.spec.ts`
 

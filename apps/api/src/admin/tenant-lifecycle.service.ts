@@ -3,6 +3,7 @@ import { createHash } from 'node:crypto';
 import type { AuthPrincipal } from '@autosale/contracts/auth';
 import type { LifecycleMutationRequest, TenantLifecycleKind, TenantLifecycleRequest } from '@autosale/contracts';
 import { Prisma, type PrismaClient, writeSecurityAudit, type SecurityAuditInput } from '@autosale/database';
+import type { StreamingObjectStorage } from '@autosale/integrations';
 import { ConflictException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 
 import type { AdminStepUpService } from './admin-step-up.service.js';
@@ -20,6 +21,7 @@ type LifecycleRow = {
   status: TenantLifecycleRequest['status'];
   reason_code: TenantLifecycleRequest['reasonCode'];
   ingestion_frozen_at: Date | null;
+  export_object_key?: string | null;
   export_sha256?: string | null;
   export_size_bytes?: bigint | number | null;
   export_manifest_version?: number | null;
@@ -38,6 +40,7 @@ export class TenantLifecycleService {
     private readonly stepUp: AdminStepUpService,
     private readonly audit: AuditWriter = writeSecurityAudit,
     private readonly now: () => Date = () => new Date(),
+    private readonly storage?: Pick<StreamingObjectStorage, 'head' | 'createSignedDownloadUrl'>,
   ) {}
 
   async list(actor: AuthPrincipal): Promise<TenantLifecycleRequest[]> {
@@ -100,6 +103,41 @@ export class TenantLifecycleService {
     return { id: rows[0].request_id, tenantId: rows[0].tenant_id, status: rows[0].status };
   }
 
+  async createDownload(
+    actor: AuthPrincipal,
+    requestId: string,
+    stepUpToken: string,
+  ): Promise<{ url: string; expiresAt: string }> {
+    if (!this.stepUp.verify(stepUpToken, actor.userId, actor.sessionId, 'TENANT_EXPORT_DOWNLOAD')) {
+      throw new UnauthorizedException('ADMIN_REAUTH_REQUIRED');
+    }
+    if (!this.storage) throw new ConflictException('TENANT_LIFECYCLE_ARTIFACT_UNAVAILABLE');
+    const rows = await this.prisma.$queryRaw<LifecycleRow[]>(Prisma.sql`
+      SELECT * FROM public.api_platform_tenant_lifecycle_request(${actor.userId}::uuid, ${requestId}::uuid)
+    `);
+    const row = rows[0];
+    if (!row) throw new NotFoundException('TENANT_LIFECYCLE_NOT_FOUND');
+    if (row.status !== 'EXPORT_READY' || !row.export_object_key || !row.export_sha256
+      || row.export_size_bytes === null || row.export_size_bytes === undefined) {
+      throw new ConflictException('TENANT_LIFECYCLE_ARTIFACT_UNAVAILABLE');
+    }
+    const now = this.now();
+    if (!row.export_expires_at || row.export_expires_at.getTime() <= now.getTime()) {
+      throw new ConflictException('TENANT_LIFECYCLE_ARTIFACT_EXPIRED');
+    }
+    const head = await this.storage.head(row.export_object_key);
+    if (head.contentType !== 'application/zip'
+      || head.contentLength !== Number(row.export_size_bytes)
+      || !head.checksumSha256
+      || Buffer.from(head.checksumSha256, 'base64').toString('hex') !== row.export_sha256) {
+      throw new ConflictException('TENANT_LIFECYCLE_ARTIFACT_VERIFICATION_FAILED');
+    }
+    const expiresAt = new Date(now.getTime() + 300_000);
+    const url = await this.storage.createSignedDownloadUrl(row.export_object_key, 300);
+    await this.writeAudit(actor, row.tenant_id, requestId, 'TENANT_LIFECYCLE_DOWNLOAD_ISSUED', row.status);
+    return { url, expiresAt: expiresAt.toISOString() };
+  }
+
   private async create(
     actor: AuthPrincipal,
     tenantId: string,
@@ -142,9 +180,8 @@ export class TenantLifecycleService {
 
   private queueRequest(requestId: string, tenantId: string): Promise<unknown> {
     return this.queue.add('tenant-lifecycle.export', { requestId, tenantId }, {
-      jobId: `tenant-lifecycle:${requestId}`,
-      attempts: 5,
-      backoff: { type: 'exponential', delay: 1_000 },
+      jobId: `tenant-lifecycle-${requestId}-${Math.floor(this.now().getTime() / 5_000)}`,
+      attempts: 1,
       removeOnComplete: 1_000,
       removeOnFail: 5_000,
     });

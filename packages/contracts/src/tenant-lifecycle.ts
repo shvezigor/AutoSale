@@ -3,7 +3,7 @@ import { z } from 'zod';
 export const tenantLifecycleKindSchema = z.enum(['EXPORT', 'DELETE']);
 export const tenantLifecycleStatusSchema = z.enum(['REQUESTED', 'EXPORTING', 'EXPORT_READY', 'FAILED', 'CANCELLED']);
 export const tenantLifecycleReasonSchema = z.enum(['CONTROLLER_REQUEST', 'CONTRACT_TERMINATION', 'ADMINISTRATIVE_TEST']);
-export const adminReauthPurposeSchema = z.enum(['TENANT_DELETE_REQUEST']);
+export const adminReauthPurposeSchema = z.enum(['TENANT_DELETE_REQUEST', 'TENANT_EXPORT_DOWNLOAD']);
 
 export const adminReauthRequestSchema = z.object({
   currentPassword: z.string().min(1).max(128),

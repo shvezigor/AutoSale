@@ -73,7 +73,7 @@ export class AdminStepUpService {
       if (expected.length !== supplied.length || !timingSafeEqual(expected, supplied)) return null;
       const value = JSON.parse(Buffer.from(body, 'base64url').toString('utf8')) as Partial<StepUpPayload>;
       if (typeof value.userId !== 'string' || typeof value.sessionId !== 'string'
-        || value.purpose !== 'TENANT_DELETE_REQUEST' || typeof value.expiresAt !== 'number') return null;
+        || !isPurpose(value.purpose) || typeof value.expiresAt !== 'number') return null;
       return value as StepUpPayload;
     } catch {
       return null;
@@ -83,4 +83,8 @@ export class AdminStepUpService {
   private sign(body: string): string {
     return createHmac('sha256', this.pepper).update(body).digest('base64url');
   }
+}
+
+function isPurpose(value: unknown): value is AdminReauthPurpose {
+  return value === 'TENANT_DELETE_REQUEST' || value === 'TENANT_EXPORT_DOWNLOAD';
 }
