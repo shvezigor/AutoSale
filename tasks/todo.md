@@ -1945,7 +1945,7 @@ Reference: [competitive analysis](../docs/research/2026-10-02-chatoryx-competiti
 - [x] A1 — typed overview/operations contracts and privacy-safe admin API
 - [x] A2 — responsive localized admin shell
 - [x] A3 — aggregate overview dashboard
-- [ ] A4 — searchable/filterable/sortable client table
+- [x] A4 — searchable/filterable/sortable client table
 - [ ] A5 — client detail with safe actions and lifecycle controls
 - [ ] A6 — service and background queue operations page
 - [ ] A7 — responsive, accessibility, security and regression evidence
