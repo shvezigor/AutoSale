@@ -148,7 +148,7 @@ function ResultGroups({ result, items, activeIndex, onActive, onSelect }: { resu
   return <>{groups.filter((group) => group.count > 0).map((group) => <section className="workspace-search-group" key={group.kind} aria-labelledby={`workspace-search-${group.kind}`}>
     <h2 id={`workspace-search-${group.kind}`}>{group.heading}</h2>
     {items.map((item, index) => item.kind === group.kind && <a id={`workspace-search-option-${index}`} className="workspace-search-option" data-active={activeIndex === index} role="option" aria-selected={activeIndex === index} href={item.href} key={item.key} onMouseEnter={() => onActive(index)} onClick={(event) => { event.preventDefault(); onSelect(item); }}>
-      <span className={`workspace-search-type type-${item.kind}`} aria-hidden="true">{item.kind === 'customer' ? 'К' : item.kind === 'order' ? 'З' : 'Т'}</span>
+      <span className={`workspace-search-type type-${item.kind}`} aria-hidden="true">{group.heading.slice(0, 1)}</span>
       <span className="workspace-search-option-copy"><strong>{item.primary}</strong>{item.secondary && <small>{item.secondary}</small>}</span>
       {item.meta && <span className="workspace-search-option-meta">{item.meta}</span>}
     </a>)}
