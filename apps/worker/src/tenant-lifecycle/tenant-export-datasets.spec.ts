@@ -1,8 +1,16 @@
 import { describe, expect, it, vi } from 'vitest';
+import { Prisma } from '@autosale/database';
 
 import { TENANT_EXPORT_DATASETS } from './tenant-export-datasets.js';
 
 describe('tenant export dataset allowlist', () => {
+  it('selects only scalar fields that exist on the tenant model', () => {
+    const dataset = TENANT_EXPORT_DATASETS.find((candidate) => candidate.name === 'tenants')!;
+    const tenantFields = new Set(Object.values(Prisma.TenantScalarFieldEnum));
+
+    expect(dataset.fields.filter((field) => !tenantFields.has(field as never))).toEqual([]);
+  });
+
   it('contains merchant data but excludes secret-bearing persistence categories', () => {
     const names = TENANT_EXPORT_DATASETS.map((dataset) => dataset.name);
     expect(names).toContain('instagram-connections');
