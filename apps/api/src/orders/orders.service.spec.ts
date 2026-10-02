@@ -134,6 +134,23 @@ describe('OrdersService Google Sheets retry', () => {
     expect(result).toEqual({ items: [], page: 2, pageSize: 10, total: 0 });
   });
 
+  it('searches customer fields stored in the order extraction', async () => {
+    const findMany = vi.fn().mockResolvedValue([]);
+    const prisma = transactional({
+      order: { findMany, count: vi.fn().mockResolvedValue(0) },
+      product: { findMany: vi.fn().mockResolvedValue([]) },
+    });
+
+    await new OrdersService(prisma as never).list(tenantA, { search: '0970000000', page: 1, pageSize: 5 });
+
+    const where = findMany.mock.calls[0]?.[0]?.where;
+    expect(where.OR).toEqual(expect.arrayContaining([
+      { extraction: { path: ['customer', 'phone'], string_contains: '0970000000', mode: 'insensitive' } },
+      { extraction: { path: ['customer', 'name'], string_contains: '0970000000', mode: 'insensitive' } },
+      { extraction: { path: ['customer', 'instagramUsername'], string_contains: '0970000000', mode: 'insensitive' } },
+    ]));
+  });
+
   it('uses an exact tenant-scoped payment status result before paginating', async () => {
     const queryRaw = vi.fn().mockResolvedValue([{ id: 'order-paid' }]);
     const findMany = vi.fn().mockResolvedValue([]);

@@ -24,6 +24,7 @@ import { DashboardModule } from './dashboard/dashboard.module.js';
 import { DemoLeadsModule } from './demo-leads/demo-leads.module.js';
 import { CommercialSettingsModule } from './commercial-settings/commercial-settings.module.js';
 import { TenantLifecycleExceptionFilter } from './common/tenant-lifecycle-exception.filter.js';
+import { SearchModule } from './search/search.module.js';
 
 @Module({
   controllers: [HealthController],
@@ -53,6 +54,7 @@ export class AppModule {
         DashboardModule.register(env),
         DemoLeadsModule.register(env),
         CommercialSettingsModule.register(env),
+        SearchModule.register(env),
       ],
       providers: [{ provide: APP_FILTER, useClass: TenantLifecycleExceptionFilter }],
     };
