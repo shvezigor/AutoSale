@@ -1,5 +1,6 @@
 import type { AuthPrincipal } from '@autosale/contracts/auth';
 import { ConflictException, UnauthorizedException } from '@nestjs/common';
+import { Readable } from 'node:stream';
 import { describe, expect, it, vi } from 'vitest';
 
 import { TenantLifecycleService } from './tenant-lifecycle.service.js';
@@ -71,7 +72,7 @@ describe('TenantLifecycleService', () => {
     )).rejects.toEqual(expect.objectContaining<Partial<ConflictException>>({ message: 'LIFECYCLE_IDEMPOTENCY_CONFLICT' }));
   });
 
-  it('issues a five-minute download only after metadata verification and safe audit', async () => {
+  it('streams a verified archive through the authenticated API without exposing object storage', async () => {
     const checksum = 'c'.repeat(64);
     const prisma = { $queryRaw: vi.fn().mockResolvedValue([{
       request_id: requestId, tenant_id: tenantId, kind: 'EXPORT', status: 'EXPORT_READY', reason_code: 'ADMINISTRATIVE_TEST',
@@ -80,9 +81,10 @@ describe('TenantLifecycleService', () => {
       export_expires_at: new Date('2026-10-09T09:00:00Z'), last_error_code: null, cancelled_at: null,
       requested_at: new Date('2026-10-02T08:59:00Z'),
     }]) };
+    const body = Readable.from('fictional archive');
     const storage = {
       head: vi.fn().mockResolvedValue({ contentLength: 42, contentType: 'application/zip', checksumSha256: Buffer.from(checksum, 'hex').toString('base64') }),
-      createSignedDownloadUrl: vi.fn().mockResolvedValue('https://objects.example.test/download?fictional-signature'),
+      getStream: vi.fn().mockResolvedValue({ body, contentLength: 42, contentType: 'application/zip' }),
     };
     const audit = vi.fn().mockResolvedValue(undefined);
     const stepUp = { verify: vi.fn().mockReturnValue(true) };
@@ -90,13 +92,15 @@ describe('TenantLifecycleService', () => {
     const service = new TenantLifecycleService(prisma as never, { add: vi.fn() } as never, stepUp as never, audit, now, storage as never);
 
     await expect(service.createDownload(principal, requestId, 'valid-download-step-up')).resolves.toEqual({
-      url: 'https://objects.example.test/download?fictional-signature',
-      expiresAt: '2026-10-02T09:06:00.000Z',
+      body,
+      contentLength: 42,
+      filename: 'sales-aito-tenant-export.zip',
     });
     expect(audit).toHaveBeenCalledWith(prisma, expect.objectContaining({
       action: 'TENANT_LIFECYCLE_DOWNLOAD_ISSUED',
       metadata: expect.not.objectContaining({ url: expect.anything(), objectKey: expect.anything() }),
     }));
+    expect(storage.getStream).toHaveBeenCalledWith('tenant-lifecycle/private/export.zip');
   });
 
   it('does not sign an expired lifecycle artifact', async () => {
@@ -106,7 +110,7 @@ describe('TenantLifecycleService', () => {
       export_size_bytes: 42n, export_manifest_version: 1, export_ready_at: new Date('2026-09-25T09:00:00Z'),
       export_expires_at: new Date('2026-10-02T09:00:00Z'), requested_at: new Date('2026-09-25T08:59:00Z'),
     }]) };
-    const storage = { head: vi.fn(), createSignedDownloadUrl: vi.fn() };
+    const storage = { head: vi.fn(), getStream: vi.fn() };
     const service = new TenantLifecycleService(
       prisma as never,
       { add: vi.fn() } as never,
@@ -119,7 +123,7 @@ describe('TenantLifecycleService', () => {
     await expect(service.createDownload(principal, requestId, 'valid-download-step-up'))
       .rejects.toThrow('TENANT_LIFECYCLE_ARTIFACT_EXPIRED');
     expect(storage.head).not.toHaveBeenCalled();
-    expect(storage.createSignedDownloadUrl).not.toHaveBeenCalled();
+    expect(storage.getStream).not.toHaveBeenCalled();
   });
 
   it('creates, audits and enqueues a retention dry-run exactly once', async () => {

@@ -142,9 +142,9 @@ Export manifest явно перелічує виключені категорі�
 
 - object key використовує окремий приватний prefix, наприклад `tenant-lifecycle/<tenantId>/<requestId>/export.zip`;
 - bucket/prefix не є публічним;
-- API повертає тільки короткоживучий signed download URL після повторної перевірки platform admin;
+- після повторної перевірки platform admin API звіряє metadata артефакту та stream-ить ZIP через authenticated same-origin response; внутрішній object-storage endpoint і object key не передаються браузеру;
 - базовий строк життя artifact — 7 днів, після чого cleanup видаляє файл і очищає download metadata, зберігаючи checksum та audit result;
-- логи й метрики не містять signed URL, object key, імена клієнтів або вміст експорту.
+- логи й метрики не містять download response, object key, імена клієнтів або вміст експорту.
 
 ## Замороження приймання даних
 
@@ -182,7 +182,7 @@ Authenticated API повторно читає gate всередині тієї �
 - `POST /admin/tenants/:tenantId/lifecycle-deletions` — створити `DELETE`, заморозити приймання і запустити експорт;
 - `POST /admin/tenant-lifecycle/:requestId/cancel` — скасувати до destructive boundary;
 - `POST /admin/tenant-lifecycle/:requestId/retry` — повторити retryable failure;
-- `POST /admin/tenant-lifecycle/:requestId/download` — отримати короткоживучий signed URL;
+- `POST /admin/tenant-lifecycle/:requestId/download` — після короткоживучого step-up підтвердження отримати приватний ZIP як same-origin attachment;
 - `POST /admin/retention/dry-runs` — сформувати retention preview.
 
 Усі mutation endpoints вимагають CSRF, idempotency key, активного `PLATFORM_ADMIN` і свіжої повторної автентифікації для `DELETE`. Вони записують platform security audit із tenant ID, request ID, actor ID, safe reason/status code і часом. Customer content, URL, secrets та archive metadata у security audit не потрапляють.
@@ -265,7 +265,7 @@ Tenant ID, request ID, object key, customer IDs і content допускають�
 - worker повторно читає request під tenant transaction;
 - повтор job не створює другий artifact;
 - частковий upload не публікується;
-- signed URL не зберігається в логах або audit;
+- object-storage endpoint, object key та вміст download response не зберігаються в логах або audit;
 - artifact expiry видаляє object і блокує download.
 
 ### Регресія freeze gate

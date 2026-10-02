@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto';
 import type { AuthPrincipal } from '@autosale/contracts/auth';
 import type { LifecycleMutationRequest, TenantLifecycleKind, TenantLifecycleRequest } from '@autosale/contracts';
 import { Prisma, type PrismaClient, writeSecurityAudit, type SecurityAuditInput } from '@autosale/database';
-import type { StreamingObjectStorage } from '@autosale/integrations';
+import type { StoredObjectStream, StreamingObjectStorage } from '@autosale/integrations';
 import { ConflictException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 
 import type { AdminStepUpService } from './admin-step-up.service.js';
@@ -72,7 +72,7 @@ export class TenantLifecycleService {
     private readonly stepUp: AdminStepUpService,
     private readonly audit: AuditWriter = writeSecurityAudit,
     private readonly now: () => Date = () => new Date(),
-    private readonly storage?: Pick<StreamingObjectStorage, 'head' | 'createSignedDownloadUrl'>,
+    private readonly storage?: Pick<StreamingObjectStorage, 'head' | 'getStream'>,
   ) {}
 
   async list(actor: AuthPrincipal): Promise<TenantLifecycleRequest[]> {
@@ -181,7 +181,7 @@ export class TenantLifecycleService {
     actor: AuthPrincipal,
     requestId: string,
     stepUpToken: string,
-  ): Promise<{ url: string; expiresAt: string }> {
+  ): Promise<{ body: StoredObjectStream['body']; contentLength: number; filename: string }> {
     if (!this.stepUp.verify(stepUpToken, actor.userId, actor.sessionId, 'TENANT_EXPORT_DOWNLOAD')) {
       throw new UnauthorizedException('ADMIN_REAUTH_REQUIRED');
     }
@@ -206,10 +206,16 @@ export class TenantLifecycleService {
       || Buffer.from(head.checksumSha256, 'base64').toString('hex') !== row.export_sha256) {
       throw new ConflictException('TENANT_LIFECYCLE_ARTIFACT_VERIFICATION_FAILED');
     }
-    const expiresAt = new Date(now.getTime() + 300_000);
-    const url = await this.storage.createSignedDownloadUrl(row.export_object_key, 300);
+    const stored = await this.storage.getStream(row.export_object_key);
+    if (stored.contentType !== 'application/zip' || stored.contentLength !== Number(row.export_size_bytes)) {
+      throw new ConflictException('TENANT_LIFECYCLE_ARTIFACT_VERIFICATION_FAILED');
+    }
     await this.writeAudit(actor, row.tenant_id, requestId, 'TENANT_LIFECYCLE_DOWNLOAD_ISSUED', row.status);
-    return { url, expiresAt: expiresAt.toISOString() };
+    return {
+      body: stored.body,
+      contentLength: stored.contentLength,
+      filename: 'sales-aito-tenant-export.zip',
+    };
   }
 
   private async create(

@@ -129,11 +129,20 @@ export function AdminTenantLifecycle({ tenantId, tenantName }: { tenantId: strin
           method: 'POST', headers: { ...idempotencyHeaders(), 'x-admin-step-up': stepUpToken },
         });
         if (!response.ok) throw new Error('download_failed');
-        const { url } = await response.json() as { url: string };
+        const archive = await response.blob();
+        const url = URL.createObjectURL(archive);
         const link = document.createElement('a');
         link.href = url;
+        link.download = 'sales-aito-tenant-export.zip';
         link.rel = 'noopener';
-        link.click();
+        link.hidden = true;
+        document.body.append(link);
+        try {
+          link.click();
+        } finally {
+          link.remove();
+          URL.revokeObjectURL(url);
+        }
       }
       setReauthMode(null);
       setCurrentPassword('');

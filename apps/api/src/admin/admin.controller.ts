@@ -1,6 +1,6 @@
 import type { AuthPrincipal } from '@autosale/contracts/auth';
 import { adminReauthRequestSchema, lifecycleMutationRequestSchema } from '@autosale/contracts';
-import { BadRequestException, Body, Controller, Get, Headers, Inject, NotFoundException, Param, ParseUUIDPipe, Post, Query } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Header, Headers, Inject, NotFoundException, Param, ParseUUIDPipe, Post, Query, StreamableFile } from '@nestjs/common';
 import { z } from 'zod';
 
 import { CurrentPrincipal, RequirePlatformAdmin } from '../auth/auth.decorators.js';
@@ -144,14 +144,21 @@ export class AdminController {
   }
 
   @Post('tenant-lifecycle/:requestId/download')
-  downloadLifecycleExport(
+  @Header('Cache-Control', 'no-store')
+  @Header('X-Content-Type-Options', 'nosniff')
+  async downloadLifecycleExport(
     @CurrentPrincipal() principal: AuthPrincipal,
     @Param('requestId', new ParseUUIDPipe({ version: '4' })) requestId: string,
     @Headers('idempotency-key') rawIdempotencyKey: string | undefined,
     @Headers('x-admin-step-up') stepUpToken: string | undefined,
-  ) {
+  ): Promise<StreamableFile> {
     parseIdempotencyKey(rawIdempotencyKey);
-    return this.lifecycle.createDownload(principal, requestId, stepUpToken ?? '');
+    const archive = await this.lifecycle.createDownload(principal, requestId, stepUpToken ?? '');
+    return new StreamableFile(archive.body, {
+      type: 'application/zip',
+      disposition: `attachment; filename="${archive.filename}"`,
+      length: archive.contentLength,
+    });
   }
 }
 

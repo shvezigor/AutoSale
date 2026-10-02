@@ -34,7 +34,7 @@ Run:
 pnpm exec playwright test tests/e2e/tenant-data-lifecycle.spec.ts
 ```
 
-The scenario creates one export and one temporary `DELETE` preparation for fictional tenant A, confirms tenant B remains mutable, and cancels tenant A's request in `finally`. Keep the generated export private and allow its normal seven-day cleanup. Never store credentials, signed URLs, tenant IDs, archive contents or screenshots containing personal data in Git or CI artifacts.
+The scenario creates one export and one temporary `DELETE` preparation for fictional tenant A, confirms tenant B remains mutable, and cancels tenant A's request in `finally`. Keep the generated export private and allow its normal seven-day cleanup. Never store credentials, download responses, tenant IDs, archive contents or screenshots containing personal data in Git or CI artifacts.
 
 ## Current result
 
