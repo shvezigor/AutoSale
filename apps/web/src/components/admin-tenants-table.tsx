@@ -39,7 +39,7 @@ export function AdminTenantsTable({ tenants }: { tenants: AdminTenantSummary[] }
 }
 
 function SortableHeading({ label, action, active, direction, onClick }: { label: string; action: string; active: boolean; direction: 'asc' | 'desc'; onClick(): void }) {
-  return <th aria-sort={active ? direction === 'asc' ? 'ascending' : 'descending' : 'none'}><button className="admin-sort-button" type="button" aria-label={action} onClick={onClick}>{label}<span aria-hidden="true">{active ? direction === 'asc' ? '↑' : '↓' : '↕'}</span></button></th>;
+  return <th aria-sort={active ? direction === 'asc' ? 'ascending' : 'descending' : 'none'}><button className="text-button admin-sort-button" type="button" aria-label={action} onClick={onClick}>{label}<span aria-hidden="true">{active ? direction === 'asc' ? '↑' : '↓' : '↕'}</span></button></th>;
 }
 
 function compareTenants(left: AdminTenantSummary, right: AdminTenantSummary, key: SortKey, locale: string) {
