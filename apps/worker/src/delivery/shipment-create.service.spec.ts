@@ -78,4 +78,18 @@ describe('ShipmentCreateService', () => {
     await expect(service.process({ shipmentId })).resolves.toBe('UNKNOWN');
     expect(prisma.shipmentAttempt.updateMany).toHaveBeenLastCalledWith(expect.objectContaining({ data: expect.objectContaining({ status: 'UNKNOWN', lastErrorCode: 'NOVA_POSHTA_OUTCOME_UNKNOWN' }) }));
   });
+
+  it('terminally ignores a new provider create when tenant ingestion is frozen', async () => {
+    const { service, prisma, client } = fixture();
+    Object.assign(prisma, {
+      tenantLifecycleRequest: { findFirst: vi.fn().mockResolvedValue({ id: 'delete-request' }) },
+    });
+    Object.assign(prisma.shipment, { updateMany: vi.fn().mockResolvedValue({ count: 1 }) });
+
+    await expect(service.process({ shipmentId })).resolves.toBe('IGNORED_FROZEN');
+    expect(client.createShipment).not.toHaveBeenCalled();
+    expect(prisma.shipmentAttempt.updateMany).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({ status: 'FAILED', lastErrorCode: 'TENANT_LIFECYCLE_FROZEN' }),
+    }));
+  });
 });

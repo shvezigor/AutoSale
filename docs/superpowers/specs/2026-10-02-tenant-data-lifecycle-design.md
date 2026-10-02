@@ -269,6 +269,8 @@ Tenant ID, request ID, object key, customer IDs і content допускають�
 ### Регресія freeze gate
 
 - Instagram, Telegram, catalogue, orders, suppliers, Google Sheets, delivery і notifications не створюють нових business side effects після freeze boundary;
+- queued worker jobs повертають terminal `IGNORED_FROZEN` (із безпечним durable error code там, де є attempt record), не запускають нескінченний retry і не викликають provider mutation;
+- read-only carrier lookup може завершити локальну фіксацію лише вже підтвердженої провайдером операції, але не переходить до нового create/cancel після freeze;
 - provider callback не утворює порожнього повідомлення або замовлення;
 - незалежний адміністративний `BLOCKED` не скидається при cancel lifecycle request;
 - звичайний `EXPORT` не заморожує tenant.

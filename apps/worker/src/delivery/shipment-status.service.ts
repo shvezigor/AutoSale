@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
 import type { ShipmentStatus, ShipmentStatusJob } from '@autosale/contracts';
-import { type PrismaClient, withTenantTransaction } from '@autosale/database';
+import { assertTenantAcceptingMutations, type PrismaClient, TenantLifecycleFrozenError, withTenantTransaction } from '@autosale/database';
 import { NovaPoshtaError, type NovaPoshtaShipmentStatus } from '@autosale/integrations';
 import { resolveShipmentTenant } from './delivery-authority.js';
 
@@ -24,7 +24,7 @@ export class ShipmentStatusService {
     private readonly clientFactory: (apiKey: string) => StatusClient,
     private readonly decrypt: (encrypted: string) => string,
     private readonly now: () => Date = () => new Date(),
-    private readonly ukrposhta?: { cancel(job: ShipmentStatusJob): Promise<'CANCELLED' | 'RETRY' | 'IGNORED'> },
+    private readonly ukrposhta?: { cancel(job: ShipmentStatusJob): Promise<'CANCELLED' | 'RETRY' | 'IGNORED' | 'IGNORED_FROZEN'> },
   ) {}
 
   async process(job: ShipmentStatusJob): Promise<'UPDATED' | 'RETRY' | 'IGNORED'> {
@@ -70,7 +70,7 @@ export class ShipmentStatusService {
     }
   }
 
-  async cancel(job: ShipmentStatusJob): Promise<'CANCELLED' | 'RETRY' | 'IGNORED'> {
+  async cancel(job: ShipmentStatusJob): Promise<'CANCELLED' | 'RETRY' | 'IGNORED' | 'IGNORED_FROZEN'> {
     const now = this.now();
     const leaseId = randomUUID();
     const tenantId = await resolveShipmentTenant(this.prisma, job.shipmentId);
@@ -81,7 +81,23 @@ export class ShipmentStatusService {
     }));
     if (!attempt?.shipment.providerDocumentId || attempt.shipment.status === 'CANCELLED') return 'IGNORED';
     if (attempt.shipment.provider === 'UKRPOSHTA') return this.ukrposhta ? this.ukrposhta.cancel(job) : 'IGNORED';
-    const claimed = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.shipmentAttempt.updateMany({ where: { id: attempt.id, status: attempt.status, leaseId: null }, data: { status: 'PROCESSING', leaseId, leaseExpiresAt: new Date(now.getTime() + LEASE_MS), attempts: { increment: 1 }, lastAttemptAt: now } }));
+    const claimed = await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+      try {
+        await assertTenantAcceptingMutations(transaction, tenantId, 'DELIVERY');
+      } catch (error) {
+        if (!(error instanceof TenantLifecycleFrozenError)) throw error;
+        const owned = await transaction.shipmentAttempt.updateMany({
+          where: { id: attempt.id, status: attempt.status, leaseId: null },
+          data: { status: 'FAILED', completedAt: now, leaseId: null, leaseExpiresAt: null, lastErrorCode: error.code },
+        });
+        if (owned.count === 1) {
+          await transaction.shipment.updateMany({ where: { id: attempt.shipmentId, tenantId }, data: { lastErrorCode: error.code } });
+        }
+        return 'FROZEN' as const;
+      }
+      return transaction.shipmentAttempt.updateMany({ where: { id: attempt.id, status: attempt.status, leaseId: null }, data: { status: 'PROCESSING', leaseId, leaseExpiresAt: new Date(now.getTime() + LEASE_MS), attempts: { increment: 1 }, lastAttemptAt: now } });
+    });
+    if (claimed === 'FROZEN') return 'IGNORED_FROZEN';
     if (claimed.count !== 1) return 'IGNORED';
     try {
       await this.clientFactory(this.decrypt(attempt.shipment.connection.encryptedCredential)).cancelShipment(attempt.shipment.providerDocumentId);

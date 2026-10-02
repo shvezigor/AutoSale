@@ -609,7 +609,7 @@ git commit -m "feat: freeze tenant business mutations"
 - Consumes: the same transaction-local lifecycle guard.
 - Produces: terminal result `IGNORED_FROZEN` for work that has not crossed a provider-confirmed boundary.
 
-- [ ] **Step 1: Write failing pre-provider-call tests**
+- [x] **Step 1: Write failing pre-provider-call tests**
 
 ```ts
 await expect(service.process(job)).resolves.toBe('IGNORED_FROZEN');
@@ -618,17 +618,17 @@ expect(googleSheets.appendOrder).not.toHaveBeenCalled();
 expect(telegram.sendMessage).not.toHaveBeenCalled();
 ```
 
-- [ ] **Step 2: Run the focused worker tests**
+- [x] **Step 2: Run the focused worker tests**
 
 Run: `pnpm --filter @autosale/worker test -- google-catalogue-sync.processor.spec.ts catalogue-mapping.processor.spec.ts shipment-create.service.spec.ts shipment-status.service.spec.ts ukrposhta-shipment.service.spec.ts telegram-delivery.service.spec.ts google-sheets-sync.processor.spec.ts telegram-alert.service.spec.ts`
 
 Expected: FAIL because provider clients are still invoked.
 
-- [ ] **Step 3: Guard immediately before every new provider side effect**
+- [x] **Step 3: Guard immediately before every new provider side effect**
 
 Re-read the gate in the same tenant transaction used to claim work. Allow only local reconciliation of an already provider-confirmed operation identified by existing provider document/message IDs and a `providerCreatedAt`/sent boundary earlier than `ingestionFrozenAt`. Record a safe ignored status instead of retrying forever.
 
-- [ ] **Step 4: Run tests and commit**
+- [x] **Step 4: Run tests and commit**
 
 Run the command from Step 2 again.
 

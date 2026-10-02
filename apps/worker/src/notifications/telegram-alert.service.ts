@@ -1,4 +1,4 @@
-import type { Prisma } from '@autosale/database';
+import { assertTenantAcceptingMutations, type Prisma, TenantLifecycleFrozenError } from '@autosale/database';
 
 export type TelegramAlertEvent = {
   eventId: string;
@@ -29,6 +29,12 @@ export class TelegramAlertService {
   constructor(private readonly appPublicUrl: string) {}
 
   async persist(tx: Prisma.TransactionClient, event: TelegramAlertEvent): Promise<void> {
+    try {
+      await assertTenantAcceptingMutations(tx, event.tenantId, 'NOTIFICATION_SEND');
+    } catch (error) {
+      if (error instanceof TenantLifecycleFrozenError) return;
+      throw error;
+    }
     const [tenant, members, bindings, preferences] = await Promise.all([
       tx.tenant.findUniqueOrThrow({ where: { id: event.tenantId }, select: { id: true, name: true } }),
       tx.tenantMembership.findMany({

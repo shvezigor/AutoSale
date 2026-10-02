@@ -12,6 +12,20 @@ const tenantId = '11111111-1111-4111-8111-111111111111';
 const runId = '22222222-2222-4222-8222-222222222222';
 
 describe('CatalogueMappingProcessor', () => {
+  it('does not call the mapper when tenant ingestion is frozen', async () => {
+    const updateMany = vi.fn().mockResolvedValue({ count: 1 });
+    const prisma = {
+      tenantLifecycleRequest: { findFirst: vi.fn().mockResolvedValue({ id: 'delete-request' }) },
+      catalogueImportRun: { updateMany },
+    };
+    const mapper = { suggest: vi.fn() };
+
+    await expect(new CatalogueMappingProcessor(prisma as never, {} as never, mapper).process({ tenantId, runId }))
+      .resolves.toEqual({ status: 'IGNORED_FROZEN', proposal: null });
+    expect(mapper.suggest).not.toHaveBeenCalled();
+    expect(updateMany).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ status: 'CANCELLED' }) }));
+  });
+
   it('analyses raw upload structure and persists an exact version-2 normalized snapshot', async () => {
     const updateMany = vi.fn().mockResolvedValue({ count: 1 });
     const create = vi.fn().mockResolvedValue({ id: 'mapping-v2' });

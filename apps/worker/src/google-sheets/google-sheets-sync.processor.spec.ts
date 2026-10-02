@@ -68,4 +68,23 @@ describe('GoogleSheetsSyncProcessor', () => {
     expect(oauthSheets).toHaveBeenCalledWith(tenantId, 'connection-a');
     expect(sheets.upsertRow).toHaveBeenCalledOnce();
   });
+
+  it('does not export a row when tenant ingestion is frozen', async () => {
+    const update = vi.fn().mockResolvedValue({});
+    const prisma = {
+      orderExport: { findFirstOrThrow: vi.fn().mockResolvedValue({ id: 'export-1', orderId: 'order-42', tenantId }), update },
+      tenantLifecycleRequest: { findFirst: vi.fn().mockResolvedValue({ id: 'delete-request' }) },
+      $queryRaw: vi.fn(),
+      $transaction: vi.fn(),
+    };
+    prisma.$transaction.mockImplementation(async (run) => run(prisma));
+    const sheets = { upsertRow: vi.fn() };
+
+    await expect(new GoogleSheetsSyncProcessor(prisma as never, sheets as never).process(tenantId, 'export-1'))
+      .resolves.toBe('IGNORED_FROZEN');
+    expect(sheets.upsertRow).not.toHaveBeenCalled();
+    expect(update).toHaveBeenCalledWith(expect.objectContaining({
+      data: { status: 'FAILED', errorSummary: 'TENANT_LIFECYCLE_FROZEN' },
+    }));
+  });
 });

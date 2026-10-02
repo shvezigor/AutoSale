@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
 import { deliverySenderProfileInputSchema, shipmentDraftInputSchema, type ShipmentCreateJob } from '@autosale/contracts';
-import { type PrismaClient, withTenantTransaction } from '@autosale/database';
+import { assertTenantAcceptingMutations, type PrismaClient, TenantLifecycleFrozenError, withTenantTransaction } from '@autosale/database';
 import { NovaPoshtaError, type NovaPoshtaCreatedShipment, type NovaPoshtaShipmentInput, type NovaPoshtaShipmentReference } from '@autosale/integrations';
 import { resolveShipmentTenant } from './delivery-authority.js';
 
@@ -13,7 +13,7 @@ interface ShipmentClient {
   findShipmentByClientRef(clientRef: string): Promise<NovaPoshtaShipmentReference | null>;
 }
 
-export type ShipmentCreateResult = 'CREATED' | 'RETRY' | 'UNKNOWN' | 'FAILED' | 'IGNORED';
+export type ShipmentCreateResult = 'CREATED' | 'RETRY' | 'UNKNOWN' | 'FAILED' | 'IGNORED' | 'IGNORED_FROZEN';
 
 export class ShipmentCreateService {
   constructor(
@@ -44,8 +44,21 @@ export class ShipmentCreateService {
     if (!candidate || candidate.shipment.status !== 'CREATING') return 'IGNORED';
     if (candidate.shipment.provider === 'UKRPOSHTA') return this.ukrposhta ? this.ukrposhta.process(job) : 'IGNORED';
 
-    const claimed = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.shipmentAttempt.updateMany({
-      where: {
+    const claimed = await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+      if (candidate.status !== 'UNKNOWN') {
+        try {
+          await assertTenantAcceptingMutations(transaction, tenantId, 'DELIVERY');
+        } catch (error) {
+          if (!(error instanceof TenantLifecycleFrozenError)) throw error;
+          await transaction.shipmentAttempt.updateMany({
+            where: { id: candidate.id, status: candidate.status },
+            data: { status: 'FAILED', completedAt: startedAt, lastErrorCode: error.code, leaseId: null, leaseExpiresAt: null },
+          });
+          await transaction.shipment.updateMany({ where: { id: candidate.shipment.id, tenantId, status: 'CREATING' }, data: { status: 'FAILED', lastErrorCode: error.code } });
+          return 'FROZEN' as const;
+        }
+      }
+      return transaction.shipmentAttempt.updateMany({ where: {
         id: candidate.id,
         status: candidate.status,
         ...(candidate.leaseId ? { leaseId: candidate.leaseId } : { leaseId: null }),
@@ -53,8 +66,9 @@ export class ShipmentCreateService {
       data: {
         status: 'PROCESSING', leaseId, leaseExpiresAt: new Date(startedAt.getTime() + LEASE_MS),
         lastAttemptAt: startedAt, attempts: { increment: 1 }, lastErrorCode: null,
-      },
-    }));
+      } });
+    });
+    if (claimed === 'FROZEN') return 'IGNORED_FROZEN';
     if (claimed.count !== 1) return 'IGNORED';
 
     const clientRef = `shipment:${candidate.shipment.id}:${candidate.version}`;
@@ -64,6 +78,7 @@ export class ShipmentCreateService {
         const existing = await client.findShipmentByClientRef(clientRef);
         if (existing) return await this.succeed(tenantId, candidate.id, candidate.shipment.id, leaseId, existing, null, startedAt);
       }
+      if (await this.freezeClaimedAttempt(tenantId, candidate.id, candidate.shipment.id, leaseId, startedAt)) return 'IGNORED_FROZEN';
       const created = await client.createShipment(providerInput(candidate.shipment, clientRef));
       return await this.succeed(tenantId, candidate.id, candidate.shipment.id, leaseId, created, created.cost, startedAt);
     } catch (error) {
@@ -77,6 +92,31 @@ export class ShipmentCreateService {
       const code = error instanceof NovaPoshtaError ? `NOVA_POSHTA_${error.code}` : 'SHIPMENT_CREATE_FAILED';
       return await this.finish(tenantId, candidate.id, candidate.shipment.id, leaseId, 'FAILED', code, startedAt, 0);
     }
+  }
+
+  private async freezeClaimedAttempt(
+    tenantId: string,
+    attemptId: string,
+    shipmentId: string,
+    leaseId: string,
+    at: Date,
+  ): Promise<boolean> {
+    return withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+      try {
+        await assertTenantAcceptingMutations(transaction, tenantId, 'DELIVERY');
+        return false;
+      } catch (error) {
+        if (!(error instanceof TenantLifecycleFrozenError)) throw error;
+        const owned = await transaction.shipmentAttempt.updateMany({
+          where: { id: attemptId, status: 'PROCESSING', leaseId },
+          data: { status: 'FAILED', completedAt: at, lastErrorCode: error.code, leaseId: null, leaseExpiresAt: null },
+        });
+        if (owned.count === 1) {
+          await transaction.shipment.updateMany({ where: { id: shipmentId, tenantId, status: 'CREATING' }, data: { status: 'FAILED', lastErrorCode: error.code } });
+        }
+        return true;
+      }
+    });
   }
 
   private async succeed(

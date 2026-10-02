@@ -47,6 +47,28 @@ function fixture(options: { enabled?: boolean; metadata?: object; status?: strin
 }
 
 describe('durable Ukrposhta shipment jobs', () => {
+  it('does not create remote Ukrposhta data when tenant ingestion is frozen', async () => {
+    const { service, prisma, client } = fixture();
+    Object.assign(prisma, { tenantLifecycleRequest: { findFirst: vi.fn().mockResolvedValue({ id: 'delete-request' }) } });
+    Object.assign(prisma.shipment, { updateMany: vi.fn().mockResolvedValue({ count: 1 }) });
+
+    await expect(service.process({ shipmentId: id })).resolves.toBe('IGNORED_FROZEN');
+    expect(client.createAddress).not.toHaveBeenCalled();
+    expect(client.createClient).not.toHaveBeenCalled();
+    expect(client.createShipment).not.toHaveBeenCalled();
+  });
+
+  it('may read lifecycle but does not cancel remotely when tenant ingestion is frozen', async () => {
+    const { service, prisma, shipment, attempt, client } = fixture();
+    shipment.status = 'CREATED'; shipment.providerDocumentId = remoteId; attempt.operation = 'CANCEL';
+    Object.assign(prisma, { tenantLifecycleRequest: { findFirst: vi.fn().mockResolvedValue({ id: 'delete-request' }) } });
+    Object.assign(prisma.shipment, { updateMany: vi.fn().mockResolvedValue({ count: 1 }) });
+
+    await expect(service.cancel({ shipmentId: id })).resolves.toBe('IGNORED_FROZEN');
+    expect(client.getLifecycle).toHaveBeenCalledWith(remoteId);
+    expect(client.cancelShipment).not.toHaveBeenCalled();
+  });
+
   it.each([[400, 'VALIDATION'], [401, 'UNAUTHORIZED'], [404, 'NOT_FOUND'], [429, 'RATE_LIMITED']] as const)('records definitive create HTTP %s as failed without retrying POST', async (status, code) => {
     const { service, shipment, attempt, client } = fixture();
     client.createShipment.mockRejectedValue(new UkrposhtaError(code, status));
