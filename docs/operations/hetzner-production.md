@@ -79,6 +79,22 @@ Complete these items before purchasing a server:
 
 Do not paste any real secret, private key, token, database dump, or customer data into an issue, commit, chat, or runbook.
 
+### Deferred backlog: activate encrypted off-host backups during migration
+
+Decision recorded on 2 October 2026: do not provision or pay for Hetzner Object Storage while production remains on the current host. The scripts and local contract tests are ready, but the real repository setup is intentionally deferred to the Hetzner migration.
+
+Execute this backlog after the target host has been provisioned and before production traffic is switched:
+
+1. Obtain explicit approval for the billable Object Storage resource, then create a private EU/EEA bucket with public access blocked.
+2. Create a dedicated least-privilege backup identity scoped only to the Sales AITO repository prefix. Configure deletion of incomplete multipart uploads and a 30-day ceiling for current and non-current backup objects.
+3. Install a supported Restic release on the operator/backup host. Store its environment file and password outside the checkout with `0600`; keep an independent recovery copy of the repository password.
+4. Manually initialize the verified repository endpoint. Never allow the routine job to create a repository at an unchecked address.
+5. Create a fresh application-consistent local backup, run `infra/scripts/offsite-backup.sh`, then run `restic check --read-data`.
+6. Run `infra/scripts/verify-offsite-restore.sh` from a separate host/VM and record only sanitized evidence in the acceptance checklist.
+7. Enable daily backup and quarterly restore-drill schedules with an alert on non-zero exit or excessive backup age.
+
+The cutover is blocked until the current production dataset has a successful encrypted off-host snapshot and the independent restore drill is green. Follow [`backup-restore.md`](backup-restore.md) and record evidence in [`../acceptance/offsite-backup-restore-checklist.md`](../acceptance/offsite-backup-restore-checklist.md).
+
 ## Phase 2: provision the host
 
 After explicit purchase approval:

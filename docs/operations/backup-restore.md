@@ -25,6 +25,8 @@ BACKUP_ROOT=/srv/autosale-backups RETENTION_DAYS=14 infra/scripts/backup.sh
 
 ## Зашифрована off-host копія
 
+Реальне S3-сховище навмисно не створюється на поточному host. Його підключення відкладено до запланованої міграції на Hetzner і виконується після provisioning нового host, але до production cutover. Детальний backlog, approval gates і порядок виконання зафіксовані в [`hetzner-production.md`](hetzner-production.md#deferred-backlog-activate-encrypted-off-host-backups-during-migration). До успішного encrypted snapshot та незалежної restore-перевірки перемикати production-трафік не можна.
+
 Підтримуваний transport — Restic 0.19.1 або новіший сумісний реліз із приватним S3-compatible repository в EU/EEA. Restic шифрує й автентифікує вміст до відправлення. Bucket повинен блокувати public access, використовувати TLS, окрему least-privilege identity та lifecycle для incomplete multipart uploads. Якщо bucket versioning увімкнено, його non-current versions також мають окремо видалятися не пізніше 30 днів; інакше Restic retention не гарантує фізичне закінчення строку старих версій.
 
 Зберігайте конфігурацію поза checkout, наприклад у `/etc/sales-aito/restic.env` з правами `0600`, а довгу випадкову repository password — в окремому `/etc/sales-aito/restic-password` з правами `0600`. Файл конфігурації містить лише operator-side значення:

@@ -882,6 +882,20 @@
 
 **Estimated scope:** Medium
 
+### Deferred Hetzner migration backlog: activate off-host backups
+
+**Decision (2026-10-02):** Do not provision a paid object-storage repository while production remains on the current host. Execute this backlog item as part of the already planned Hetzner server migration, after the target host is provisioned and before production traffic is switched.
+
+- [ ] Obtain explicit approval before creating any billable Hetzner Object Storage resource.
+- [ ] Create a private EU/EEA bucket, block public access, configure a backup-only identity and a 30-day lifecycle ceiling.
+- [ ] Configure Restic credentials only on the operator/backup host, initialize the repository manually and retain an independent recovery copy of the repository password.
+- [ ] Run a fresh application-consistent backup, encrypted off-host upload, `restic check --read-data` and an isolated restore drill on a separate host/VM.
+- [ ] Enable daily backup and quarterly restore-drill schedules with failure alerts.
+- [ ] Record sanitized evidence in [`docs/acceptance/offsite-backup-restore-checklist.md`](../docs/acceptance/offsite-backup-restore-checklist.md).
+- [ ] Treat a successful off-host backup and independent restore drill as a mandatory cutover gate.
+
+Detailed execution order and safety gates: [`docs/operations/hetzner-production.md`](../docs/operations/hetzner-production.md) and [`docs/operations/backup-restore.md`](../docs/operations/backup-restore.md).
+
 ## Task 17: Run end-to-end acceptance and failure testing
 
 **Description:** Verify the complete Instagram-to-Google-Sheets journey and critical recovery cases against the Definition of Done.

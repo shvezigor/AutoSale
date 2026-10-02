@@ -2,6 +2,12 @@
 
 This checklist is the release evidence for encrypted off-host disaster-recovery copies. Never store repository credentials, repository passwords, decrypted archives, database dumps, bucket names or customer data in Git or CI artifacts.
 
+## Deferred activation decision
+
+- [x] On 2026-10-02 the owner deferred real repository provisioning until the planned Hetzner server migration. No paid Object Storage resource or production credential is required before that migration starts.
+- [ ] During migration, complete repository setup and live acceptance after the target host is provisioned and before production cutover, following [`../operations/hetzner-production.md`](../operations/hetzner-production.md#deferred-backlog-activate-encrypted-off-host-backups-during-migration).
+- [ ] Block production cutover until the current dataset has a successful encrypted off-host snapshot and an independent-host restore drill has passed.
+
 ## Automated evidence
 
 - [x] `infra/scripts/offsite-backup.spec.sh` proves required configuration is fail-closed, incomplete directories are ignored, local SHA-256 failure prevents upload, 30-day retention is applied and success evidence contains no repository address.
@@ -28,4 +34,4 @@ This checklist is the release evidence for encrypted off-host disaster-recovery 
 ## Current result
 
 - [x] Local script contract passed on 2026-10-02 with fictional archives and stubbed provider/DB boundaries.
-- [ ] Real off-host repository provisioning and the first independent-host restore drill remain required before this EU launch gate is complete.
+- [ ] Real off-host repository provisioning and the first independent-host restore drill remain a deferred Hetzner migration gate; this EU launch gate is not complete until both pass.
