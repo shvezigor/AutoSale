@@ -2,6 +2,7 @@ import { getConversation, getConversationOrder } from '../../../../src/api/conve
 import { getServerSession } from '../../../../src/auth/session';
 import { InstagramReplyComposer } from '../../../../src/components/instagram-reply-composer';
 import { ConversationOrderPanel } from '../../../../src/components/conversation-order-panel';
+import { MessageThread } from '../../../../src/components/message-thread';
 import { createTranslator } from '../../../../src/i18n/translator';
 
 export default async function ConversationDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -11,10 +12,17 @@ export default async function ConversationDetailPage({ params }: { params: Promi
   ]);
   const t = createTranslator(session?.locale ?? 'uk');
   const name = conversation.participantName ??
-    (conversation.participantUsername ? `@${conversation.participantUsername}` : t('conversations.instagramCustomer'));
+    (conversation.participantUsername
+      ? `@${conversation.participantUsername}`
+      : conversation.channel === 'FACEBOOK'
+        ? t('conversations.facebookCustomer')
+        : t('conversations.instagramCustomer'));
+  const channelLabel = conversation.channel === 'FACEBOOK'
+    ? t('conversations.channelFacebook')
+    : t('conversations.channelInstagram');
   const accountLabel = conversation.participantName && conversation.participantUsername
-    ? `@${conversation.participantUsername} · Instagram`
-    : 'Instagram';
+    ? `@${conversation.participantUsername} · ${channelLabel}`
+    : channelLabel;
 
   return (
     <div className="conversation-detail-transition" key={id}>
@@ -25,11 +33,18 @@ export default async function ConversationDetailPage({ params }: { params: Promi
             : <span className="avatar large" aria-hidden="true">{name[0]}</span>}
           <span><h2>{name}</h2><small>{accountLabel}</small></span>
         </header>
-        <InstagramReplyComposer
-          canManageSettings={session?.membershipRole === 'OWNER'}
-          initialConversation={conversation}
-          key={conversation.id}
-        />
+        {conversation.channel === 'INSTAGRAM' ? (
+          <InstagramReplyComposer
+            canManageSettings={session?.membershipRole === 'OWNER'}
+            initialConversation={conversation}
+            key={conversation.id}
+          />
+        ) : (
+          <>
+            <div className="thread-scroll"><MessageThread conversation={conversation} /></div>
+            <p className="reply-area">{t('conversations.facebookReadOnly')}</p>
+          </>
+        )}
       </section>
       <ConversationOrderPanel
         conversationId={id}

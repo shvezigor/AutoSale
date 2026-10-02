@@ -265,6 +265,7 @@ html[data-sidebar-state="collapsed"] .authenticated-shell > .primary-nav .nav-it
 .conversation-line { display: flex; justify-content: space-between; gap: 8px; font-size: 14px; }
 .conversation-line time { color: var(--muted); font-size: 11px; }
 .conversation-preview { display: block; margin-top: 5px; color: #858ba3; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.conversation-channel-badge { display: inline-flex; margin-left: 6px; padding: 2px 6px; border-radius: 999px; background: var(--surface-blue); color: var(--accent); font-size: 9px; font-weight: 700; vertical-align: 1px; }
 .dialog-count { padding: 9px 18px 12px; color: var(--muted); font-size: 10px; }
 .empty-list { padding: 28px 20px; color: var(--muted); }
 .conversation-panel { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; min-width: 0; min-height: 0; height: 100%; overflow: hidden; border: 1px solid #eceef4; border-radius: 18px; background: white; box-shadow: var(--shadow-card); }

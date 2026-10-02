@@ -97,12 +97,12 @@ export class ConversationsService {
     return {
       items: page.map((conversation) => ({
         id: conversation.id,
-        channel: 'INSTAGRAM',
+        channel: socialChannel(conversation.channel),
         participantName: participantName(conversation.profile, conversation.displayName),
         participantUsername: conversation.profile?.username ?? null,
         participantAvatarUrl: profileAvatarUrl(conversation.profile),
         lastMessagePreview: conversation.messages[0]?.text
-          ?? attachmentPreview(conversation.messages[0]?.attachments[0]?.type),
+          ?? attachmentPreview(conversation.messages[0]?.attachments[0]?.type, socialChannel(conversation.channel)),
         lastMessageAt: conversation.lastMessageAt.toISOString(),
       })),
       nextCursor:
@@ -142,11 +142,13 @@ export class ConversationsService {
 
     return {
       id: conversation.id,
-      channel: 'INSTAGRAM',
+      channel: socialChannel(conversation.channel),
       participantName: participantName(conversation.profile, conversation.displayName),
       participantUsername: conversation.profile?.username ?? null,
       participantAvatarUrl: profileAvatarUrl(conversation.profile),
-      replyCapability: replyCapability(connection, new Date(), latestInboundAt(conversation.messages)),
+      replyCapability: conversation.channel === 'FACEBOOK'
+        ? { enabled: false, reason: 'CHANNEL_READ_ONLY' }
+        : replyCapability(connection, new Date(), latestInboundAt(conversation.messages)),
       messages: conversation.messages.map((message) => mapMessage(
         message,
         isDeliveryConnectionActive(connection, new Date()),
@@ -156,7 +158,7 @@ export class ConversationsService {
 
   async orderState(tenantId: string, conversationId: string): Promise<ConversationOrderState> {
     const conversation = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.conversation.findFirst({
-      where: { id: conversationId, tenantId, channel: 'INSTAGRAM' },
+      where: { id: conversationId, tenantId },
       include: {
         messages: {
           orderBy: [{ sourceTimestamp: 'desc' }, { id: 'desc' }],
@@ -180,7 +182,7 @@ export class ConversationsService {
 
   async createOrder(tenantId: string, conversationId: string): Promise<ConversationOrderStartResponse> {
     const conversation = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.conversation.findFirst({
-      where: { id: conversationId, tenantId, channel: 'INSTAGRAM' },
+      where: { id: conversationId, tenantId },
       include: {
         messages: {
           orderBy: [{ sourceTimestamp: 'desc' }, { id: 'desc' }],
@@ -467,12 +469,17 @@ function isSafeExternalUrl(value: string): boolean {
   }
 }
 
-function attachmentPreview(type: string | undefined): string | null {
-  if (type === 'IMAGE') return '📷 Instagram';
-  if (type === 'VIDEO') return '🎬 Instagram';
-  if (type === 'LINK') return '🔗 Instagram';
-  if (type) return '📎 Instagram';
+function attachmentPreview(type: string | undefined, channel: 'INSTAGRAM' | 'FACEBOOK'): string | null {
+  const provider = channel === 'FACEBOOK' ? 'Facebook' : 'Instagram';
+  if (type === 'IMAGE') return `📷 ${provider}`;
+  if (type === 'VIDEO') return `🎬 ${provider}`;
+  if (type === 'LINK') return `🔗 ${provider}`;
+  if (type) return `📎 ${provider}`;
   return null;
+}
+
+function socialChannel(value: string): 'INSTAGRAM' | 'FACEBOOK' {
+  return value === 'FACEBOOK' ? 'FACEBOOK' : 'INSTAGRAM';
 }
 
 function isDeliveryErrorCode(value: string | null): value is NonNullable<ConversationMessage['delivery']>['errorCode'] {

@@ -17,8 +17,15 @@ export function ConversationList({ conversations, selectedId }: ConversationList
   return (
     <nav aria-label={t('conversations.listLabel')} className="conversation-list">
       {conversations.map((conversation) => {
+        const channelLabel = conversation.channel === 'FACEBOOK'
+          ? t('conversations.channelFacebook')
+          : t('conversations.channelInstagram');
         const name = conversation.participantName ??
-          (conversation.participantUsername ? `@${conversation.participantUsername}` : t('conversations.instagramCustomer'));
+          (conversation.participantUsername
+            ? `@${conversation.participantUsername}`
+            : conversation.channel === 'FACEBOOK'
+              ? t('conversations.facebookCustomer')
+              : t('conversations.instagramCustomer'));
         return (
           <Link
             className="conversation-row"
@@ -31,7 +38,7 @@ export function ConversationList({ conversations, selectedId }: ConversationList
               : <span className="avatar" aria-hidden="true">{initials(name)}</span>}
             <span className="conversation-copy">
               <span className="conversation-line">
-                <strong>{name}</strong>
+                <strong>{name} <span className="conversation-channel-badge">{channelLabel}</span></strong>
                 <time dateTime={conversation.lastMessageAt}>{formatDate(conversation.lastMessageAt, { hour: '2-digit', minute: '2-digit' })}</time>
               </span>
               <span className="conversation-preview">

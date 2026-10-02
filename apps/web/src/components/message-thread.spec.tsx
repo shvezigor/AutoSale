@@ -77,7 +77,7 @@ describe('MessageThread', () => {
     expect(screen.getAllByRole('img', { name: /вкладення з Instagram/i })).toHaveLength(1);
     expect(screen.getByLabelText('Відео з Instagram')).toHaveAttribute('controls');
     expect(screen.getByText('Не вдалося завантажити вкладення')).toBeVisible();
-    expect(screen.getByRole('link', { name: 'Відкрити матеріал в Instagram' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'Відкрити матеріал у Instagram' })).toHaveAttribute(
       'href',
       'https://www.instagram.com/reel/fictional',
     );
@@ -110,5 +110,13 @@ describe('MessageThread', () => {
     );
     expect(screen.getByRole('link', { name: /instagram\.com/ })).toHaveAttribute('target', '_blank');
     expect(screen.queryByRole('link', { name: /javascript:/ })).not.toBeInTheDocument();
+  });
+
+  it('uses Facebook attachment labels for a Facebook conversation', () => {
+    render(<MessageThread conversation={{ ...detail, channel: 'FACEBOOK' }} />);
+
+    expect(screen.getByRole('link', { name: 'Відкрити матеріал у Facebook' })).toBeVisible();
+    expect(screen.getByText('Непідтримуване вкладення Facebook')).toBeVisible();
+    expect(screen.getByLabelText('Відео з Facebook')).toBeVisible();
   });
 });

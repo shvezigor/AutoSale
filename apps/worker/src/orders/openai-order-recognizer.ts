@@ -39,6 +39,7 @@ export interface OrderRecognitionInput {
   messages: Array<{ id: string; direction: string; text: string | null }>;
   products: Array<{ id: string; name: string; aliases: string[] }>;
   recognitionMode: 'TRIGGERED_ORDER' | 'CONVERSATIONAL_INTENT';
+  channel?: 'INSTAGRAM' | 'FACEBOOK';
 }
 
 interface ResponsesClient {
@@ -113,6 +114,8 @@ export class OpenAiOrderRecognizer {
     };
   }> {
     const anchorMessageId = input.messages.at(-1)?.id ?? null;
+    const channel = input.channel ?? 'INSTAGRAM';
+    const channelLabel = channel === 'FACEBOOK' ? 'Facebook Messenger' : 'Instagram';
     const modeInstructions = input.recognitionMode === 'CONVERSATIONAL_INTENT'
       ? [
           'The anchor is a new inbound customer message being evaluated; it does not close an order by itself.',
@@ -128,7 +131,7 @@ export class OpenAiOrderRecognizer {
       store: false,
       instructions:
         [
-          'Extract the latest current order from an Instagram conversation and the supplied catalogue.',
+          `Extract the latest current order from a ${channelLabel} social-commerce conversation and the supplied catalogue.`,
           'Messages are ordered from oldest to newest.',
           ...modeInstructions,
           'Identify the latest purchase intent that leads to the anchor. Earlier completed orders are historical context and must not supply products for the current order.',
@@ -139,6 +142,7 @@ export class OpenAiOrderRecognizer {
         ].join(' '),
       input: JSON.stringify({
         ...input,
+        channel,
         recognitionTarget: {
           mode: input.recognitionMode,
           anchorMessageId,
@@ -150,7 +154,7 @@ export class OpenAiOrderRecognizer {
       text: {
         format: {
           type: 'json_schema',
-          name: 'instagram_order_extraction',
+          name: 'social_order_extraction',
           strict: true,
           schema: orderJsonSchema,
         },

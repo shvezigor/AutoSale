@@ -13,6 +13,9 @@ export function MessageThread({
   retryingMessageId?: string | null;
 }) {
   const { formatDate, t } = useI18n();
+  const channel = conversation.channel === 'FACEBOOK'
+    ? t('conversations.channelFacebook')
+    : t('conversations.channelInstagram');
   return (
     <ol className="message-thread" aria-label={t('conversations.messageHistory')}>
       {conversation.messages.map((message) => (
@@ -30,17 +33,17 @@ export function MessageThread({
                     rel="noreferrer"
                     target="_blank"
                   >
-                    {t('conversations.openInstagramContent')}
+                    {t('conversations.openChannelContent', { channel })}
                   </a>
                 );
               }
               if (attachment.type === 'UNSUPPORTED') {
-                return <div className="attachment-placeholder" key={attachment.id}>{t('conversations.unsupportedInstagramAttachment')}</div>;
+                return <div className="attachment-placeholder" key={attachment.id}>{t('conversations.unsupportedChannelAttachment', { channel })}</div>;
               }
               if (attachment.type === 'VIDEO') {
                 return attachment.copyStatus === 'COPIED' && attachment.mediaUrl ? (
                   <video
-                    aria-label={t('conversations.instagramVideo')}
+                    aria-label={t('conversations.channelVideo', { channel })}
                     className="message-media"
                     controls
                     key={attachment.id}
@@ -56,7 +59,7 @@ export function MessageThread({
               return attachment.copyStatus === 'COPIED' && attachment.mediaUrl ? (
                 // The API URL is controlled by Sales AITO and never exposes provider or S3 credentials.
                 <img
-                  alt={t('conversations.instagramAttachment')}
+                  alt={t('conversations.channelAttachment', { channel })}
                   className="message-media"
                   height="220"
                   key={attachment.id}

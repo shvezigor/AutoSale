@@ -171,6 +171,55 @@ describe('ConversationsService', () => {
     });
   });
 
+  it('lists Facebook conversations and keeps their reply capability read-only', async () => {
+    const event = await prisma.webhookEvent.create({
+      data: { tenantId, provider: 'META', externalEventId: `facebook-test-${randomUUID()}`, payload: {} },
+    });
+    const conversation = await prisma.conversation.create({
+      data: {
+        tenantId,
+        channel: 'FACEBOOK',
+        externalConversationId: 'fictional-facebook-customer',
+        participantId: 'fictional-facebook-customer',
+        displayName: 'Клієнт Facebook',
+        lastMessageAt: new Date(),
+      },
+    });
+    await prisma.message.create({
+      data: {
+        tenantId,
+        conversationId: conversation.id,
+        rawEventId: event.id,
+        channel: 'FACEBOOK',
+        externalMessageId: 'fictional-facebook-message',
+        direction: 'INBOUND',
+        senderId: 'fictional-facebook-customer',
+        text: 'Тестове повідомлення Facebook',
+        sourceTimestamp: new Date(),
+      },
+    });
+
+    try {
+      const list = await service.list(tenantId, { limit: 20 });
+      const detail = await service.detail(tenantId, conversation.id);
+
+      expect(list.items.find((item) => item.id === conversation.id)).toMatchObject({
+        channel: 'FACEBOOK',
+        participantName: 'Клієнт Facebook',
+      });
+      expect(detail).toMatchObject({
+        channel: 'FACEBOOK',
+        participantName: 'Клієнт Facebook',
+        participantAvatarUrl: null,
+        replyCapability: { enabled: false, reason: 'CHANNEL_READ_ONLY' },
+      });
+    } finally {
+      await prisma.message.deleteMany({ where: { conversationId: conversation.id } });
+      await prisma.conversation.delete({ where: { id: conversation.id } });
+      await prisma.webhookEvent.delete({ where: { id: event.id } });
+    }
+  });
+
   it('returns copied images and videos, safe shared links, and unsupported attachment placeholders', async () => {
     const message = await prisma.message.findFirstOrThrow({
       where: { tenantId, conversationId: newestId },

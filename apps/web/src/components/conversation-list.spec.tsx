@@ -57,6 +57,19 @@ describe('ConversationList', () => {
     expect(screen.getByText('Клієнт Instagram')).toBeVisible();
   });
 
+  it('labels Facebook conversations and uses a channel-specific customer fallback', () => {
+    render(<ConversationList conversations={[{
+      ...fixtureSummary,
+      channel: 'FACEBOOK',
+      participantName: null,
+      participantUsername: null,
+      participantAvatarUrl: null,
+    }]} />);
+
+    expect(screen.getByText('Клієнт Facebook')).toBeVisible();
+    expect(screen.getByText('Facebook')).toBeVisible();
+  });
+
   it('renders an explicit empty state', () => {
     render(<ConversationList conversations={[]} />);
 

@@ -136,7 +136,7 @@ function conversationListOpenApiSchema(): OpenApiSchema {
         required: ['id', 'channel', 'participantName', 'participantUsername', 'participantAvatarUrl', 'lastMessagePreview', 'lastMessageAt'],
         properties: {
           id: { type: 'string', format: 'uuid' },
-          channel: { type: 'string', enum: ['INSTAGRAM'] },
+          channel: { type: 'string', enum: ['INSTAGRAM', 'FACEBOOK'] },
           participantName: { type: 'string', nullable: true },
           participantUsername: { type: 'string', nullable: true },
           participantAvatarUrl: { type: 'string', nullable: true },
@@ -156,7 +156,7 @@ function conversationDetailOpenApiSchema(): OpenApiSchema {
   required: ['id', 'channel', 'participantName', 'participantUsername', 'participantAvatarUrl', 'replyCapability', 'messages'],
   properties: {
     id: { type: 'string', format: 'uuid' },
-    channel: { type: 'string', enum: ['INSTAGRAM'] },
+    channel: { type: 'string', enum: ['INSTAGRAM', 'FACEBOOK'] },
     participantName: { type: 'string', nullable: true },
     participantUsername: { type: 'string', nullable: true },
     participantAvatarUrl: { type: 'string', nullable: true },
@@ -165,7 +165,7 @@ function conversationDetailOpenApiSchema(): OpenApiSchema {
       required: ['enabled', 'reason'],
       properties: {
         enabled: { type: 'boolean' },
-        reason: { type: 'string', nullable: true, enum: ['NOT_CONNECTED', 'RECONNECT_REQUIRED', 'REPLY_WINDOW_EXPIRED'] },
+        reason: { type: 'string', nullable: true, enum: ['NOT_CONNECTED', 'RECONNECT_REQUIRED', 'REPLY_WINDOW_EXPIRED', 'CHANNEL_READ_ONLY'] },
       },
     },
     messages: {

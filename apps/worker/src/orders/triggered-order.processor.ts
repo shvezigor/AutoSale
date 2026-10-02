@@ -1,4 +1,5 @@
 import { materializeCommercialTerms, Prisma, type CommercialLineInput, type PrismaClient, type ProcurementStore, withTenantTransaction } from '@autosale/database';
+import { SOCIAL_ORDER_PROMPT_VERSION } from '@autosale/contracts';
 
 import type { ApprovalMode } from './approval-policy.js';
 import { decideConversationalIntent, type IntentDetectionMode } from './order-intent-policy.js';
@@ -40,7 +41,7 @@ export class TriggeredOrderProcessor {
   }
 
   private async processConversationalIntent(
-    anchor: { id: string; tenantId: string; conversationId: string; rawEventId: string | null; sourceTimestamp: Date },
+    anchor: { id: string; tenantId: string; conversationId: string; rawEventId: string | null; sourceTimestamp: Date; channel: string },
     settings: {
       intentDetectionMode: string;
       autoApprovalThreshold: number;
@@ -80,6 +81,7 @@ export class TriggeredOrderProcessor {
           messages: recentMessages.reverse().map((message) => ({ id: message.id, direction: message.direction, text: message.text })),
           products: products.map((product) => ({ id: product.sku, name: product.name, aliases: stringArray(product.aliases) })),
           recognitionMode: 'CONVERSATIONAL_INTENT',
+          channel: socialChannel(anchor.channel),
         },
         { approvalMode: 'ALWAYS', autoApprovalThreshold: settings.autoApprovalThreshold },
       );
@@ -119,7 +121,7 @@ export class TriggeredOrderProcessor {
             tenantId: anchor.tenantId,
             conversationId: anchor.conversationId,
             triggerMessageId: anchor.id,
-            promptVersion: settings.promptVersion,
+            promptVersion: promptVersionForChannel(anchor.channel, settings.promptVersion),
             status: autoApproved ? 'AUTO_APPROVED' : 'NEEDS_REVIEW',
             extraction: result.order as Prisma.InputJsonObject,
             validationIssues: result.validationIssues,
@@ -256,7 +258,7 @@ export class TriggeredOrderProcessor {
       tenantId: trigger.tenantId,
       conversationId: trigger.conversationId,
       triggerMessageId,
-      promptVersion: settings.promptVersion,
+      promptVersion: promptVersionForChannel(trigger.channel, settings.promptVersion),
     });
     if (order.status !== 'AI_PROCESSING') return order;
 
@@ -294,6 +296,7 @@ export class TriggeredOrderProcessor {
             aliases: stringArray(product.aliases),
           })),
           recognitionMode: 'TRIGGERED_ORDER',
+          channel: socialChannel(trigger.channel),
         },
         {
           approvalMode: settings.approvalMode as ApprovalMode,
@@ -395,6 +398,14 @@ export class TriggeredOrderProcessor {
       }
     });
   }
+}
+
+function socialChannel(value: string): 'INSTAGRAM' | 'FACEBOOK' {
+  return value === 'FACEBOOK' ? 'FACEBOOK' : 'INSTAGRAM';
+}
+
+function promptVersionForChannel(channel: string, configuredVersion: string): string {
+  return channel === 'FACEBOOK' ? SOCIAL_ORDER_PROMPT_VERSION : configuredVersion;
 }
 
 function stringArray(value: Prisma.JsonValue): string[] {
