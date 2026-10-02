@@ -1,4 +1,4 @@
-import { createHash, randomUUID } from 'node:crypto';
+import { createHash } from 'node:crypto';
 
 import { expect, test, type Browser, type Page } from '@playwright/test';
 import JSZip from 'jszip';
@@ -58,15 +58,11 @@ test('admin exports and freezes only the selected fictional tenant', async ({ br
     expect(readyExport.exportSizeBytes).toBeGreaterThan(0);
 
     const downloadStepUp = await reauthenticate(admin, adminPassword!, 'TENANT_EXPORT_DOWNLOAD');
-    const download = await apiMutate<{ url: string; expiresAt: string }>(
+    const archive = await downloadArchive(
       admin,
       `/api/admin/tenant-lifecycle/${readyExport.id}/download`,
-      undefined,
       { 'x-admin-step-up': downloadStepUp },
     );
-    const archiveResponse = await admin.request.get(download.url);
-    expect(archiveResponse.ok()).toBe(true);
-    const archive = await archiveResponse.body();
     expect(archive.byteLength).toBe(readyExport.exportSizeBytes);
     expect(createHash('sha256').update(archive).digest('hex')).toBe(readyExport.exportSha256);
     await expectSafeArchive(archive, sessionA.tenantId!);
@@ -181,6 +177,35 @@ async function reauthenticate(
     purpose,
   });
   return response.stepUpToken;
+}
+
+async function downloadArchive(
+  page: Page,
+  path: string,
+  headers: Record<string, string>,
+): Promise<Buffer> {
+  const response = await page.evaluate(async ({ requestPath, requestHeaders }) => {
+    const csrf = await fetch('/api/auth/csrf', { method: 'POST' });
+    const { token } = await csrf.json() as { token: string };
+    const result = await fetch(requestPath, {
+      method: 'POST',
+      headers: {
+        'x-csrf-token': token,
+        'idempotency-key': crypto.randomUUID(),
+        ...requestHeaders,
+      },
+    });
+    return {
+      status: result.status,
+      contentType: result.headers.get('content-type'),
+      contentDisposition: result.headers.get('content-disposition'),
+      bytes: Array.from(new Uint8Array(await result.arrayBuffer())),
+    };
+  }, { requestPath: path, requestHeaders: headers });
+  expect(response.status, `POST ${path}`).toBeLessThan(300);
+  expect(response.contentType).toContain('application/zip');
+  expect(response.contentDisposition).toContain('attachment');
+  return Buffer.from(response.bytes);
 }
 
 async function waitForLifecycle(
