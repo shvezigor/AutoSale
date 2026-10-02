@@ -1,4 +1,10 @@
-import { type Prisma, type PrismaClient, withTenantTransaction } from '@autosale/database';
+import {
+  assertTenantAcceptingMutations,
+  type Prisma,
+  type PrismaClient,
+  TenantLifecycleFrozenError,
+  withTenantTransaction,
+} from '@autosale/database';
 
 import { MediaCopyError } from './media-copy.service.js';
 import { normalizeInstagramEvent } from './instagram-normalizer.js';
@@ -23,14 +29,30 @@ export class InstagramProcessor {
     private readonly orders?: OrderTriggerProcessor,
   ) {}
 
-  async process(tenantId: string, eventId: string): Promise<void> {
-    const event = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.webhookEvent.findUniqueOrThrow({
-      where: { id: eventId },
-    }));
+  async process(tenantId: string, eventId: string): Promise<'PROCESSED' | 'IGNORED_FROZEN'> {
+    try {
+      await this.processAccepted(tenantId, eventId);
+      return 'PROCESSED';
+    } catch (error) {
+      if (!(error instanceof TenantLifecycleFrozenError)) throw error;
+      await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.webhookEvent.updateMany({
+        where: { id: eventId, tenantId },
+        data: { status: 'PROCESSED', processedAt: new Date() },
+      }));
+      return 'IGNORED_FROZEN';
+    }
+  }
+
+  private async processAccepted(tenantId: string, eventId: string): Promise<void> {
+    const event = await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+      await assertTenantAcceptingMutations(transaction, tenantId, 'ORDER_RECOGNITION');
+      return transaction.webhookEvent.findUniqueOrThrow({ where: { id: eventId } });
+    });
     const messages = normalizeInstagramEvent(event.payload);
 
     for (const normalized of messages) {
       const persisted = await withTenantTransaction(this.prisma, event.tenantId, async (transaction) => {
+        await assertTenantAcceptingMutations(transaction, event.tenantId, 'ORDER_RECOGNITION');
         const profile = await transaction.instagramCustomerProfile.upsert({
           where: {
             tenantId_participantId: {
@@ -174,6 +196,8 @@ export class InstagramProcessor {
 
       for (const attachment of persisted.attachments) {
         try {
+          await withTenantTransaction(this.prisma, event.tenantId, (transaction) =>
+            assertTenantAcceptingMutations(transaction, event.tenantId, 'ORDER_RECOGNITION'));
           const copied = await this.media.copy({
             tenantId: event.tenantId,
             sourceUrl: attachment.originalUrl,
@@ -202,6 +226,8 @@ export class InstagramProcessor {
       }
 
       if (persisted.wasCreated || normalized.direction === 'OUTBOUND') {
+        await withTenantTransaction(this.prisma, event.tenantId, (transaction) =>
+          assertTenantAcceptingMutations(transaction, event.tenantId, 'ORDER_RECOGNITION'));
         await this.orders?.processIfTriggered(event.tenantId, persisted.messageId);
       }
     }

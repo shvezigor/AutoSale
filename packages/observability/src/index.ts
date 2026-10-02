@@ -1,6 +1,12 @@
 const redactedKeys = /token|secret|password|authorization|cookie|phone|email|address|payload|body|api.?key|credential/i;
-const allowedMetricLabels = new Set(['operation', 'result', 'method', 'route', 'status_class', 'provider', 'queue', 'state']);
+const allowedMetricLabels = new Set(['operation', 'result', 'method', 'route', 'status_class', 'provider', 'queue', 'state', 'surface', 'safe_reason']);
 const allowedMetricResults = new Set(['success', 'failure', 'skipped', 'conflict']);
+const allowedMutationSurfaces = new Set([
+  'META_INBOUND', 'TELEGRAM_INBOUND', 'ORDER_RECOGNITION', 'CONVERSATION_REPLY',
+  'ORDER_MUTATION', 'COMMERCIAL_TERMS', 'PAYMENT', 'PROCUREMENT', 'CATALOGUE',
+  'DELIVERY', 'SUPPLIER_SEND', 'SHEETS_EXPORT', 'NOTIFICATION_SEND', 'ACCOUNT_ADMINISTRATION',
+]);
+const allowedSafeReasons = new Set(['lifecycle_frozen']);
 const buckets = [0.05, 0.1, 0.25, 0.5, 1, 2.5, 5];
 
 export class StructuredLogger {
@@ -94,6 +100,8 @@ function validate(name: string, labels: Labels): void {
   if (!/^[a-zA-Z_:][a-zA-Z0-9_:]*$/.test(name)) throw new Error('Invalid metric name');
   for (const label of Object.keys(labels)) if (!allowedMetricLabels.has(label)) throw new Error(`Unsupported metric label: ${label}`);
   if (labels.result && !allowedMetricResults.has(labels.result)) throw new Error('Unsupported metric result');
+  if (labels.surface && !allowedMutationSurfaces.has(labels.surface)) throw new Error('Unsupported metric surface');
+  if (labels.safe_reason && !allowedSafeReasons.has(labels.safe_reason)) throw new Error('Unsupported metric safe reason');
 }
 
 function seriesKey(name: string, labels: Labels): string { return `${name}${formatLabels(labels)}`; }

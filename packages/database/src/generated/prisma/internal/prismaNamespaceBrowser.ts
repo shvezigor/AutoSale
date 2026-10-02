@@ -52,6 +52,8 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   Tenant: 'Tenant',
+  TenantLifecycleRequest: 'TenantLifecycleRequest',
+  TenantRetentionDryRun: 'TenantRetentionDryRun',
   GoogleConnection: 'GoogleConnection',
   GoogleOAuthAttempt: 'GoogleOAuthAttempt',
   GoogleCredentialCleanup: 'GoogleCredentialCleanup',
@@ -134,6 +136,56 @@ export const TenantScalarFieldEnum = {
 } as const
 
 export type TenantScalarFieldEnum = (typeof TenantScalarFieldEnum)[keyof typeof TenantScalarFieldEnum]
+
+
+export const TenantLifecycleRequestScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  kind: 'kind',
+  status: 'status',
+  reasonCode: 'reasonCode',
+  requestedByUserId: 'requestedByUserId',
+  idempotencyKey: 'idempotencyKey',
+  requestHash: 'requestHash',
+  ingestionFrozenAt: 'ingestionFrozenAt',
+  exportObjectKey: 'exportObjectKey',
+  exportSha256: 'exportSha256',
+  exportSizeBytes: 'exportSizeBytes',
+  exportManifestVersion: 'exportManifestVersion',
+  exportReadyAt: 'exportReadyAt',
+  exportExpiresAt: 'exportExpiresAt',
+  leaseId: 'leaseId',
+  leaseExpiresAt: 'leaseExpiresAt',
+  attemptCount: 'attemptCount',
+  nextAttemptAt: 'nextAttemptAt',
+  lastErrorCode: 'lastErrorCode',
+  cancelledAt: 'cancelledAt',
+  cancelledByUserId: 'cancelledByUserId',
+  requestedAt: 'requestedAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TenantLifecycleRequestScalarFieldEnum = (typeof TenantLifecycleRequestScalarFieldEnum)[keyof typeof TenantLifecycleRequestScalarFieldEnum]
+
+
+export const TenantRetentionDryRunScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  status: 'status',
+  requestedByUserId: 'requestedByUserId',
+  idempotencyKey: 'idempotencyKey',
+  requestHash: 'requestHash',
+  summary: 'summary',
+  leaseId: 'leaseId',
+  leaseExpiresAt: 'leaseExpiresAt',
+  nextAttemptAt: 'nextAttemptAt',
+  lastErrorCode: 'lastErrorCode',
+  completedAt: 'completedAt',
+  requestedAt: 'requestedAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TenantRetentionDryRunScalarFieldEnum = (typeof TenantRetentionDryRunScalarFieldEnum)[keyof typeof TenantRetentionDryRunScalarFieldEnum]
 
 
 export const GoogleConnectionScalarFieldEnum = {
@@ -1176,19 +1228,19 @@ export const SortOrder = {
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
-export const JsonNullValueInput = {
-  JsonNull: JsonNull
-} as const
-
-export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
-
-
 export const NullableJsonNullValueInput = {
   DbNull: DbNull,
   JsonNull: JsonNull
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {

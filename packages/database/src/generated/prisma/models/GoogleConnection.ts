@@ -558,10 +558,6 @@ export type EnumGoogleConnectionStatusFieldUpdateOperationsInput = {
   set?: $Enums.GoogleConnectionStatus
 }
 
-export type NullableDateTimeFieldUpdateOperationsInput = {
-  set?: Date | string | null
-}
-
 export type GoogleConnectionCreateNestedManyWithoutConnectedByInput = {
   create?: Prisma.XOR<Prisma.GoogleConnectionCreateWithoutConnectedByInput, Prisma.GoogleConnectionUncheckedCreateWithoutConnectedByInput> | Prisma.GoogleConnectionCreateWithoutConnectedByInput[] | Prisma.GoogleConnectionUncheckedCreateWithoutConnectedByInput[]
   connectOrCreate?: Prisma.GoogleConnectionCreateOrConnectWithoutConnectedByInput | Prisma.GoogleConnectionCreateOrConnectWithoutConnectedByInput[]

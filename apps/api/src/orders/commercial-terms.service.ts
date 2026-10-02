@@ -4,7 +4,7 @@ import type {
   LegalEntitySummary,
   OrderCommercialTermsSummary,
 } from '@autosale/contracts/commercial';
-import { calculateCommercialTerms, materializeCommercialTerms, Prisma, type CommercialLineInput, type PrismaClient, withTenantTransaction } from '@autosale/database';
+import { assertTenantAcceptingMutations, calculateCommercialTerms, materializeCommercialTerms, Prisma, type CommercialLineInput, type PrismaClient, withTenantTransaction } from '@autosale/database';
 import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 
 export class CommercialTermsService {
@@ -50,6 +50,7 @@ export class CommercialTermsService {
       if (!input.initializeLegacy || input.version !== 0) throw new ConflictException('Commercial terms must be initialized from a preview');
       const lines = await this.currentCatalogueLines(tenantId, context.items);
       await withTenantTransaction(this.prisma, tenantId, async (tx) => {
+        await assertTenantAcceptingMutations(tx, tenantId, 'COMMERCIAL_TERMS');
         await this.assertNoActivePayments(tx, tenantId, orderId);
         await materializeCommercialTerms(tx, { tenantId, orderId, actor, lines });
         await this.applySelection(tx, tenantId, orderId, input.legalEntityId, input.bankAccountId, actor);
@@ -62,6 +63,7 @@ export class CommercialTermsService {
     }
     if (current.version !== input.version) throw new ConflictException('Commercial terms changed; reload and try again');
     await withTenantTransaction(this.prisma, tenantId, async (tx) => {
+      await assertTenantAcceptingMutations(tx, tenantId, 'COMMERCIAL_TERMS');
       await this.assertNoActivePayments(tx, tenantId, orderId);
       const selected = await this.validateSelection(tx, tenantId, current.currency, input.legalEntityId, input.bankAccountId);
       const result = await tx.orderCommercialTerms.updateMany({

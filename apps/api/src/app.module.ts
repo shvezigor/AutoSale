@@ -1,5 +1,6 @@
 import type { ApiEnv } from '@autosale/config/api-env';
 import { DynamicModule, Module } from '@nestjs/common';
+import { APP_FILTER } from '@nestjs/core';
 
 import { HealthController } from './health/health.controller.js';
 import { ConversationsModule } from './conversations/conversations.module.js';
@@ -22,6 +23,7 @@ import { DeliveryModule } from './delivery/delivery.module.js';
 import { DashboardModule } from './dashboard/dashboard.module.js';
 import { DemoLeadsModule } from './demo-leads/demo-leads.module.js';
 import { CommercialSettingsModule } from './commercial-settings/commercial-settings.module.js';
+import { TenantLifecycleExceptionFilter } from './common/tenant-lifecycle-exception.filter.js';
 
 @Module({
   controllers: [HealthController],
@@ -52,6 +54,7 @@ export class AppModule {
         DemoLeadsModule.register(env),
         CommercialSettingsModule.register(env),
       ],
+      providers: [{ provide: APP_FILTER, useClass: TenantLifecycleExceptionFilter }],
     };
   }
 }

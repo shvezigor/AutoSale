@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
 import { catalogueStructurePlanSchema, type AmbiguousRowClassification, type CatalogueStructurePlan, type CatalogueTargetField, type RawCatalogueMatrix, type TableStructureProposal } from '@autosale/contracts';
-import { CatalogueImportLeaseLostError, CatalogueSkuOwnershipError, importCatalogueTable, type CatalogueImportCounts, type PrismaClient, withTenantTransaction } from '@autosale/database';
+import { assertTenantAcceptingMutations, CatalogueImportLeaseLostError, CatalogueSkuOwnershipError, importCatalogueTable, type CatalogueImportCounts, type PrismaClient, TenantLifecycleFrozenError, withTenantTransaction } from '@autosale/database';
 import { GoogleOAuthAccessError, GoogleSheetsReadError, GoogleSheetsTableValidationError, googleSheetsStructureFingerprint, type GoogleSheetsAdapter, type GoogleSheetsCell, type ObjectStorage } from '@autosale/integrations';
 import { buildCatalogueStructureProfile } from './catalogue-table-profiler.js';
 import { applyAmbiguousDecisions, normalizeCatalogueRows, type ClassifiedCatalogueRow } from './catalogue-row-classifier.js';
@@ -48,13 +48,25 @@ export class GoogleCatalogueSyncProcessor {
     if (!source?.spreadsheetId || !source.sheetName) throw new Error('Google catalogue source is unavailable');
     const now = new Date();
     const leaseId = randomUUID();
-    const claimed = await withTenantTransaction(this.prisma, input.tenantId, (transaction) => transaction.catalogueSource.updateMany({
-      where: {
+    const claimed = await withTenantTransaction(this.prisma, input.tenantId, async (transaction) => {
+      try {
+        await assertTenantAcceptingMutations(transaction, input.tenantId, 'CATALOGUE');
+      } catch (error) {
+        if (!(error instanceof TenantLifecycleFrozenError)) throw error;
+        await transaction.catalogueSource.updateMany({
+          where: { id: input.sourceId, tenantId: input.tenantId, type: 'GOOGLE_SHEETS' },
+          data: { status: 'PAUSED', lastErrorSummary: error.code, syncLeaseId: null, syncLeaseExpiresAt: null },
+        });
+        return 'FROZEN' as const;
+      }
+      return transaction.catalogueSource.updateMany({ where: {
         id: input.sourceId, tenantId: input.tenantId, type: 'GOOGLE_SHEETS', syncVersion: source.syncVersion,
         OR: [{ syncLeaseId: null }, { syncLeaseExpiresAt: { lte: now } }],
       },
       data: { syncLeaseId: leaseId, syncLeaseExpiresAt: new Date(now.getTime() + SOURCE_LEASE_MS), syncVersion: { increment: 1 } },
-    }));
+      });
+    });
+    if (claimed === 'FROZEN') return { status: 'IGNORED_FROZEN' as const };
     if (claimed.count !== 1) return { status: 'BUSY' as const };
     const syncVersion = source.syncVersion + 1;
     const leaseWhere = { id: input.sourceId, tenantId: input.tenantId, type: 'GOOGLE_SHEETS' as const, syncLeaseId: leaseId, syncVersion };

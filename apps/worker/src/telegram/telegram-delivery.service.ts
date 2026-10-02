@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 
 import type { TelegramDeliveryJob } from '@autosale/contracts';
 import { procurementSummaryFor } from '@autosale/contracts/procurement';
-import { type Prisma, type PrismaClient, withTenantTransaction } from '@autosale/database';
+import { assertTenantAcceptingMutations, type Prisma, type PrismaClient, TenantLifecycleFrozenError, withTenantTransaction } from '@autosale/database';
 import { TelegramBotError } from '@autosale/integrations';
 
 import type { TelegramAlertEvent } from '../notifications/telegram-alert.service.js';
@@ -19,7 +19,7 @@ interface TelegramTextClient {
   }): Promise<{ messageId: string; chatId: string }>;
 }
 
-export type TelegramDeliveryResult = 'SUCCEEDED' | 'RETRY' | 'FAILED' | 'IGNORED';
+export type TelegramDeliveryResult = 'SUCCEEDED' | 'RETRY' | 'FAILED' | 'IGNORED' | 'IGNORED_FROZEN';
 
 export class TelegramDeliveryService {
   constructor(
@@ -35,6 +35,24 @@ export class TelegramDeliveryService {
     const authority = await resolveTelegramDeliveryAuthority(this.prisma, job.deliveryId);
     if (!authority) return 'IGNORED';
     const delivery = await withTenantTransaction(this.prisma, authority.tenantId, async (transaction) => {
+      const pending = await transaction.telegramDelivery.findFirst({
+        where: { tenantId: authority.tenantId, id: job.deliveryId }, select: { purpose: true },
+      });
+      if (!pending) return null;
+      try {
+        await assertTenantAcceptingMutations(
+          transaction,
+          authority.tenantId,
+          pending.purpose === 'SUPPLIER_ORDER' ? 'SUPPLIER_SEND' : 'NOTIFICATION_SEND',
+        );
+      } catch (error) {
+        if (!(error instanceof TenantLifecycleFrozenError)) throw error;
+        await transaction.telegramDelivery.updateMany({
+          where: { tenantId: authority.tenantId, id: job.deliveryId, status: { in: ['PENDING', 'RETRYABLE', 'PROCESSING'] } },
+          data: { status: 'FAILED', lastErrorCode: error.code, completedAt: startedAt, leaseId: null, leaseExpiresAt: null },
+        });
+        return 'FROZEN' as const;
+      }
       const claimed = await transaction.telegramDelivery.updateMany({
         where: {
           tenantId: authority.tenantId,
@@ -60,6 +78,7 @@ export class TelegramDeliveryService {
         include: { destination: true },
       });
     });
+    if (delivery === 'FROZEN') return 'IGNORED_FROZEN';
     if (!delivery) return 'IGNORED';
 
     if (delivery.destination.route === 'BUSINESS' && !delivery.destination.businessConnectionId) {

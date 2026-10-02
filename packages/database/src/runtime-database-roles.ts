@@ -102,6 +102,46 @@ export async function configureRuntimeDatabaseRoles(
         REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC;
       DO $functions$
       BEGIN
+        IF to_regprocedure('public.api_platform_create_tenant_lifecycle_request(uuid,uuid,text,text,uuid,text,timestamp with time zone)') IS NOT NULL THEN
+          GRANT EXECUTE ON FUNCTION public.api_platform_create_tenant_lifecycle_request(uuid, uuid, text, text, uuid, text, timestamp with time zone) TO autosale_api;
+          REVOKE ALL ON FUNCTION public.api_platform_create_tenant_lifecycle_request(uuid, uuid, text, text, uuid, text, timestamp with time zone) FROM autosale_worker;
+        END IF;
+        IF to_regprocedure('public.api_platform_tenant_lifecycle_requests(uuid)') IS NOT NULL THEN
+          GRANT EXECUTE ON FUNCTION public.api_platform_tenant_lifecycle_requests(uuid) TO autosale_api;
+          REVOKE ALL ON FUNCTION public.api_platform_tenant_lifecycle_requests(uuid) FROM autosale_worker;
+        END IF;
+        IF to_regprocedure('public.api_platform_tenant_lifecycle_request(uuid,uuid)') IS NOT NULL THEN
+          GRANT EXECUTE ON FUNCTION public.api_platform_tenant_lifecycle_request(uuid, uuid) TO autosale_api;
+          REVOKE ALL ON FUNCTION public.api_platform_tenant_lifecycle_request(uuid, uuid) FROM autosale_worker;
+        END IF;
+        IF to_regprocedure('public.api_platform_cancel_tenant_lifecycle_request(uuid,uuid,timestamp with time zone)') IS NOT NULL THEN
+          GRANT EXECUTE ON FUNCTION public.api_platform_cancel_tenant_lifecycle_request(uuid, uuid, timestamp with time zone) TO autosale_api;
+          REVOKE ALL ON FUNCTION public.api_platform_cancel_tenant_lifecycle_request(uuid, uuid, timestamp with time zone) FROM autosale_worker;
+        END IF;
+        IF to_regprocedure('public.api_platform_retry_tenant_lifecycle_request(uuid,uuid,timestamp with time zone)') IS NOT NULL THEN
+          GRANT EXECUTE ON FUNCTION public.api_platform_retry_tenant_lifecycle_request(uuid, uuid, timestamp with time zone) TO autosale_api;
+          REVOKE ALL ON FUNCTION public.api_platform_retry_tenant_lifecycle_request(uuid, uuid, timestamp with time zone) FROM autosale_worker;
+        END IF;
+        IF to_regprocedure('public.api_platform_create_retention_dry_run(uuid,uuid,uuid,text,timestamp with time zone)') IS NOT NULL THEN
+          GRANT EXECUTE ON FUNCTION public.api_platform_create_retention_dry_run(uuid, uuid, uuid, text, timestamp with time zone) TO autosale_api;
+          REVOKE ALL ON FUNCTION public.api_platform_create_retention_dry_run(uuid, uuid, uuid, text, timestamp with time zone) FROM autosale_worker;
+        END IF;
+        IF to_regprocedure('public.api_platform_retention_dry_runs(uuid,uuid)') IS NOT NULL THEN
+          GRANT EXECUTE ON FUNCTION public.api_platform_retention_dry_runs(uuid, uuid) TO autosale_api;
+          REVOKE ALL ON FUNCTION public.api_platform_retention_dry_runs(uuid, uuid) FROM autosale_worker;
+        END IF;
+        IF to_regprocedure('public.worker_due_tenant_lifecycle_requests(timestamp with time zone,integer)') IS NOT NULL THEN
+          REVOKE ALL ON FUNCTION public.worker_due_tenant_lifecycle_requests(timestamp with time zone, integer) FROM autosale_api;
+          GRANT EXECUTE ON FUNCTION public.worker_due_tenant_lifecycle_requests(timestamp with time zone, integer) TO autosale_worker;
+        END IF;
+        IF to_regprocedure('public.worker_due_tenant_lifecycle_artifact_cleanups(timestamp with time zone,integer)') IS NOT NULL THEN
+          REVOKE ALL ON FUNCTION public.worker_due_tenant_lifecycle_artifact_cleanups(timestamp with time zone, integer) FROM autosale_api;
+          GRANT EXECUTE ON FUNCTION public.worker_due_tenant_lifecycle_artifact_cleanups(timestamp with time zone, integer) TO autosale_worker;
+        END IF;
+        IF to_regprocedure('public.worker_due_retention_dry_runs(timestamp with time zone,integer)') IS NOT NULL THEN
+          REVOKE ALL ON FUNCTION public.worker_due_retention_dry_runs(timestamp with time zone, integer) FROM autosale_api;
+          GRANT EXECUTE ON FUNCTION public.worker_due_retention_dry_runs(timestamp with time zone, integer) TO autosale_worker;
+        END IF;
         IF to_regprocedure('public.platform_order_counts()') IS NOT NULL THEN
           GRANT EXECUTE ON FUNCTION public.platform_order_counts() TO autosale_api;
           REVOKE ALL ON FUNCTION public.platform_order_counts() FROM autosale_worker;

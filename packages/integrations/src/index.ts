@@ -1,4 +1,10 @@
-export type { ObjectStorage } from './object-storage.js';
+export type {
+  ObjectStorage,
+  PutStreamInput,
+  StoredObjectHead,
+  StoredObjectStream,
+  StreamingObjectStorage,
+} from './object-storage.js';
 export { matrixFromRows } from './catalogue-matrix.js';
 export { CredentialCipher } from './credential-cipher.js';
 export {

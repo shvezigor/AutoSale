@@ -1,5 +1,5 @@
 import type { CatalogueProduct } from '@autosale/contracts';
-import { Prisma, type PrismaClient, withTenantTransaction } from '@autosale/database';
+import { assertTenantAcceptingMutations, Prisma, type PrismaClient, withTenantTransaction } from '@autosale/database';
 import { ConflictException, NotFoundException } from '@nestjs/common';
 
 export type CatalogueListQuery = {
@@ -59,8 +59,10 @@ export class CatalogueService {
 
   async create(tenantId: string, input: CatalogueProductCreate): Promise<CatalogueProduct> {
     try {
-      const row = await withTenantTransaction(this.prisma, tenantId, (transaction) =>
-        transaction.product.create({ data: mapCreate(tenantId, input), select: productSelect }));
+      const row = await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+        await assertTenantAcceptingMutations(transaction, tenantId, 'CATALOGUE');
+        return transaction.product.create({ data: mapCreate(tenantId, input), select: productSelect });
+      });
       return mapProduct(row);
     } catch (error) {
       throwUniqueSkuConflict(error);
@@ -70,6 +72,7 @@ export class CatalogueService {
   async update(tenantId: string, id: string, input: CatalogueProductUpdate): Promise<CatalogueProduct> {
     try {
       return await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+        await assertTenantAcceptingMutations(transaction, tenantId, 'CATALOGUE');
         const result = await transaction.product.updateMany({ where: { id, tenantId }, data: mapUpdate(input) });
         if (result.count !== 1) throw new NotFoundException('Catalogue product not found');
         const row = await transaction.product.findFirst({ where: { id, tenantId }, select: productSelect });
@@ -84,6 +87,7 @@ export class CatalogueService {
 
   async clear(tenantId: string, userId: string): Promise<{ deleted: number }> {
     return withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+      await assertTenantAcceptingMutations(transaction, tenantId, 'CATALOGUE');
       const result = await transaction.product.deleteMany({ where: { tenantId } });
       await transaction.securityAuditLog.create({ data: {
         tenantId,

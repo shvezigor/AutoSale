@@ -1,6 +1,6 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { deliverySenderProfileInputSchema, isUkrposhtaPersonName, shipmentDraftInputSchema, ukrposhtaConnectionInputSchema, type ShipmentCreateJob, type ShipmentStatus, type UkrposhtaConnectionInput } from '@autosale/contracts';
-import { type Prisma, type PrismaClient, withTenantTransaction } from '@autosale/database';
+import { assertTenantAcceptingMutations, type Prisma, type PrismaClient, TenantLifecycleFrozenError, withTenantTransaction } from '@autosale/database';
 import { parseUkrposhtaLocationRef, UkrposhtaError, type UkrposhtaClient, type UkrposhtaLifecycle, type UkrposhtaShipment } from '@autosale/integrations';
 import { resolveShipmentTenant } from './delivery-authority.js';
 
@@ -13,7 +13,7 @@ type Metadata = {
   deleteDispatched?: boolean;
   parcels?: UkrposhtaShipment['parcels']; lifecycle?: UkrposhtaLifecycle;
 };
-type CreateResult = 'CREATED' | 'RETRY' | 'UNKNOWN' | 'FAILED' | 'IGNORED';
+type CreateResult = 'CREATED' | 'RETRY' | 'UNKNOWN' | 'FAILED' | 'IGNORED' | 'IGNORED_FROZEN';
 const leaseMs = 60_000;
 
 export class UkrposhtaShipmentService {
@@ -28,9 +28,10 @@ export class UkrposhtaShipmentService {
   async process(job: ShipmentCreateJob): Promise<CreateResult> {
     const candidate = await this.candidate(job, 'CREATE');
     if (!candidate || candidate.shipment.status !== 'CREATING') return 'IGNORED';
-    const leaseId = await this.claim(candidate);
-    if (!leaseId) return 'IGNORED';
     const metadata = this.metadata(candidate);
+    const leaseId = await this.claim(candidate, !(metadata.createDispatched || candidate.status === 'UNKNOWN'));
+    if (leaseId === 'FROZEN') return 'IGNORED_FROZEN';
+    if (!leaseId) return 'IGNORED';
     try {
       const credentials = this.credentials(candidate, metadata);
       // A dispatched intent stays active even when credentials or rollout configuration change.
@@ -66,16 +67,19 @@ export class UkrposhtaShipmentService {
           metadata[uuidKey] = existing.uuid; metadata[addressKey] = existing.addressId;
         } else {
           if (!metadata[addressKey]) {
+            if (await this.freezeClaimedAttempt(candidate, leaseId)) return 'IGNORED_FROZEN';
             const address = await client.createAddress(role === 'sender' ? senderPostcode : recipientPostcode);
             metadata[addressKey] = address.id;
             await this.checkpoint(candidate, leaseId, metadata);
           }
+          if (await this.freezeClaimedAttempt(candidate, leaseId)) return 'IGNORED_FROZEN';
           const remote = await client.createClient({ ...(role === 'sender' ? senderName : recipientName), phone: role === 'sender' ? sender.contactPhone : draft.recipient.phone, addressId: metadata[addressKey]!, externalId });
           metadata[uuidKey] = remote.uuid;
         }
         await this.checkpoint(candidate, leaseId, metadata);
       }
       // Commit this marker BEFORE POST. No retry path can cross it a second time.
+      if (await this.freezeClaimedAttempt(candidate, leaseId)) return 'IGNORED_FROZEN';
       metadata.createDispatched = true;
       await this.checkpoint(candidate, leaseId, metadata);
       let result: UkrposhtaShipment;
@@ -101,10 +105,11 @@ export class UkrposhtaShipmentService {
     }
   }
 
-  async cancel(job: ShipmentCreateJob): Promise<'CANCELLED' | 'RETRY' | 'IGNORED'> {
+  async cancel(job: ShipmentCreateJob): Promise<'CANCELLED' | 'RETRY' | 'IGNORED' | 'IGNORED_FROZEN'> {
     const candidate = await this.candidate(job, 'CANCEL');
     if (!candidate?.shipment.providerDocumentId || candidate.shipment.status === 'CANCELLED') return 'IGNORED';
-    const leaseId = await this.claim(candidate);
+    const leaseId = await this.claim(candidate, false);
+    if (leaseId === 'FROZEN') return 'IGNORED_FROZEN';
     if (!leaseId) return 'IGNORED';
     const metadata = this.metadata(candidate);
     try {
@@ -115,6 +120,7 @@ export class UkrposhtaShipmentService {
         await this.completeCancellation(candidate, leaseId, metadata, mapLifecycle(lifecycle.status), 'UKRPOSHTA_LIFECYCLE_CONFLICT');
         return 'IGNORED';
       }
+      if (await this.freezeClaimedAttempt(candidate, leaseId)) return 'IGNORED_FROZEN';
       metadata.deleteDispatched = true;
       await this.checkpoint(candidate, leaseId, metadata);
       await client.cancelShipment(candidate.shipment.providerDocumentId);
@@ -141,10 +147,46 @@ export class UkrposhtaShipmentService {
     if (!tenantId) return null;
     return withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.shipmentAttempt.findFirst({ where: { shipmentId: job.shipmentId, operation, shipment: { provider: 'UKRPOSHTA' }, OR: [{ status: { in: ['PENDING', 'RETRYABLE', 'UNKNOWN'] }, nextAttemptAt: { lte: this.now() } }, { status: 'PROCESSING', leaseExpiresAt: { lte: this.now() } }] }, orderBy: { version: 'desc' }, include: { shipment: { include: { connection: true } } } }));
   }
-  private async claim(candidate: Candidate): Promise<string | null> {
+  private async claim(candidate: Candidate, guardNewSideEffect: boolean): Promise<string | null | 'FROZEN'> {
     const leaseId = randomUUID();
-    const result = await withTenantTransaction(this.prisma, candidate.tenantId, (transaction) => transaction.shipmentAttempt.updateMany({ where: { id: candidate.id, tenantId: candidate.tenantId, status: candidate.status, leaseId: candidate.leaseId, ...(candidate.status === 'PROCESSING' ? { leaseExpiresAt: { lte: this.now() } } : {}) }, data: { status: 'PROCESSING', leaseId, leaseExpiresAt: new Date(this.now().getTime() + leaseMs), attempts: { increment: 1 }, lastAttemptAt: this.now() } }));
+    const result = await withTenantTransaction(this.prisma, candidate.tenantId, async (transaction) => {
+      if (guardNewSideEffect) {
+        try {
+          await assertTenantAcceptingMutations(transaction, candidate.tenantId, 'DELIVERY');
+        } catch (error) {
+          if (!(error instanceof TenantLifecycleFrozenError)) throw error;
+          const owned = await transaction.shipmentAttempt.updateMany({
+            where: { id: candidate.id, tenantId: candidate.tenantId, status: candidate.status, leaseId: candidate.leaseId },
+            data: { status: 'FAILED', completedAt: this.now(), leaseId: null, leaseExpiresAt: null, lastErrorCode: error.code },
+          });
+          if (owned.count === 1) {
+            await transaction.shipment.updateMany({ where: { id: candidate.shipmentId, tenantId: candidate.tenantId }, data: { status: 'FAILED', lastErrorCode: error.code } });
+          }
+          return 'FROZEN' as const;
+        }
+      }
+      return transaction.shipmentAttempt.updateMany({ where: { id: candidate.id, tenantId: candidate.tenantId, status: candidate.status, leaseId: candidate.leaseId, ...(candidate.status === 'PROCESSING' ? { leaseExpiresAt: { lte: this.now() } } : {}) }, data: { status: 'PROCESSING', leaseId, leaseExpiresAt: new Date(this.now().getTime() + leaseMs), attempts: { increment: 1 }, lastAttemptAt: this.now() } });
+    });
+    if (result === 'FROZEN') return result;
     return result.count === 1 ? leaseId : null;
+  }
+  private async freezeClaimedAttempt(candidate: Candidate, leaseId: string): Promise<boolean> {
+    return withTenantTransaction(this.prisma, candidate.tenantId, async (transaction) => {
+      try {
+        await assertTenantAcceptingMutations(transaction, candidate.tenantId, 'DELIVERY');
+        return false;
+      } catch (error) {
+        if (!(error instanceof TenantLifecycleFrozenError)) throw error;
+        const owned = await transaction.shipmentAttempt.updateMany({
+          where: { id: candidate.id, tenantId: candidate.tenantId, status: 'PROCESSING', leaseId },
+          data: { status: 'FAILED', completedAt: this.now(), leaseId: null, leaseExpiresAt: null, lastErrorCode: error.code },
+        });
+        if (owned.count === 1) {
+          await transaction.shipment.updateMany({ where: { id: candidate.shipmentId, tenantId: candidate.tenantId }, data: { lastErrorCode: error.code } });
+        }
+        return true;
+      }
+    });
   }
   private metadata(candidate: Candidate): Metadata {
     const value = candidate.shipment.providerMetadata;

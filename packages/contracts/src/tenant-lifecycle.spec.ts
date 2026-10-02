@@ -1,0 +1,100 @@
+import { describe, expect, it } from 'vitest';
+
+import {
+  adminReauthRequestSchema,
+  createTenantLifecycleRequestSchema,
+  lifecycleMutationRequestSchema,
+  retentionDryRunJobSchema,
+  retentionDryRunSchema,
+  tenantLifecycleJobSchema,
+  tenantLifecycleRequestSchema,
+} from './tenant-lifecycle.js';
+
+const tenantId = '11111111-1111-4111-8111-111111111111';
+const requestId = '22222222-2222-4222-8222-222222222222';
+const idempotencyKey = '33333333-3333-4333-8333-333333333333';
+
+describe('tenant lifecycle contracts', () => {
+  it('accepts only the bounded administrative reauthentication purpose', () => {
+    expect(adminReauthRequestSchema.parse({
+      currentPassword: 'fictional secure password',
+      purpose: 'TENANT_DELETE_REQUEST',
+    })).toEqual({ currentPassword: 'fictional secure password', purpose: 'TENANT_DELETE_REQUEST' });
+    expect(adminReauthRequestSchema.parse({
+      currentPassword: 'fictional secure password',
+      purpose: 'TENANT_EXPORT_DOWNLOAD',
+    })).toEqual({ currentPassword: 'fictional secure password', purpose: 'TENANT_EXPORT_DOWNLOAD' });
+    expect(adminReauthRequestSchema.safeParse({
+      currentPassword: 'fictional secure password',
+      purpose: 'ARBITRARY_ADMIN_ACTION',
+    }).success).toBe(false);
+  });
+
+  it('accepts a bounded lifecycle reason body without routing fields', () => {
+    expect(lifecycleMutationRequestSchema.parse({ reasonCode: 'CONTROLLER_REQUEST' }))
+      .toEqual({ reasonCode: 'CONTROLLER_REQUEST' });
+    expect(lifecycleMutationRequestSchema.safeParse({
+      reasonCode: 'CONTROLLER_REQUEST',
+      tenantId,
+    }).success).toBe(false);
+  });
+
+  it('accepts a deletion preparation request with a bounded reason', () => {
+    expect(createTenantLifecycleRequestSchema.parse({
+      kind: 'DELETE',
+      reasonCode: 'CONTROLLER_REQUEST',
+      idempotencyKey,
+    })).toEqual({ kind: 'DELETE', reasonCode: 'CONTROLLER_REQUEST', idempotencyKey });
+  });
+
+  it('rejects unsupported reasons and unrecognized fields', () => {
+    expect(createTenantLifecycleRequestSchema.safeParse({
+      kind: 'DELETE',
+      reasonCode: 'FREE_TEXT_REASON',
+      idempotencyKey,
+      note: 'customer content must not be accepted',
+    }).success).toBe(false);
+  });
+
+  it('parses only routing identifiers from lifecycle and retention jobs', () => {
+    expect(tenantLifecycleJobSchema.parse({ tenantId, requestId })).toEqual({ tenantId, requestId });
+    expect(retentionDryRunJobSchema.parse({ tenantId, runId: requestId })).toEqual({ tenantId, runId: requestId });
+  });
+
+  it('serializes a safe lifecycle response without secrets or signed URLs', () => {
+    const parsed = tenantLifecycleRequestSchema.parse({
+      id: requestId,
+      tenantId,
+      kind: 'EXPORT',
+      status: 'EXPORT_READY',
+      reasonCode: 'ADMINISTRATIVE_TEST',
+      requestedAt: '2026-10-02T09:00:00.000Z',
+      ingestionFrozenAt: null,
+      exportSha256: 'a'.repeat(64),
+      exportSizeBytes: 42,
+      exportManifestVersion: 1,
+      exportReadyAt: '2026-10-02T09:01:00.000Z',
+      exportExpiresAt: '2026-10-09T09:01:00.000Z',
+      lastErrorCode: null,
+      cancelledAt: null,
+    });
+
+    expect(parsed).not.toHaveProperty('exportObjectKey');
+    expect(parsed).not.toHaveProperty('signedUrl');
+  });
+
+  it('rejects customer content in a retention dry-run summary', () => {
+    const base = {
+      id: requestId, tenantId, status: 'COMPLETED', lastErrorCode: null,
+      completedAt: '2026-10-02T09:01:00.000Z', requestedAt: '2026-10-02T09:00:00.000Z',
+    };
+    const safeEntry = {
+      category: 'RAW_WEBHOOKS', policyStatus: 'DRY_RUN_ONLY', cutoff: '2026-09-02T09:00:00.000Z',
+      candidateCount: 4, oldestCandidateAt: '2026-01-01T00:00:00.000Z', approximateBytes: null,
+    };
+    expect(retentionDryRunSchema.parse({ ...base, summary: [safeEntry] }).summary).toEqual([safeEntry]);
+    expect(retentionDryRunSchema.safeParse({
+      ...base, summary: [{ ...safeEntry, customerMessage: 'must never cross the API boundary' }],
+    }).success).toBe(false);
+  });
+});

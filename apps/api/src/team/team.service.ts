@@ -1,4 +1,4 @@
-import { withTenantTransaction, type PrismaClient } from '@autosale/database';
+import { assertTenantAcceptingMutations, withTenantTransaction, type PrismaClient } from '@autosale/database';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 
 import { CryptoService } from '../auth/crypto.service.js';
@@ -36,6 +36,7 @@ export class TeamService {
   async invite(tenantId: string, invitedById: string, rawEmail: string) {
     const email = rawEmail.trim().toLowerCase();
     const result = await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+      await assertTenantAcceptingMutations(transaction, tenantId, 'ACCOUNT_ADMINISTRATION');
       const existing = await transaction.tenantInvitation.findFirst({
         where: { tenantId, email, usedAt: null, revokedAt: null, expiresAt: { gt: this.now() } },
       });
@@ -52,6 +53,7 @@ export class TeamService {
 
   async blockMember(tenantId: string, membershipId: string): Promise<{ blocked: true }> {
     const userId = await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+      await assertTenantAcceptingMutations(transaction, tenantId, 'ACCOUNT_ADMINISTRATION');
       const membership = await transaction.tenantMembership.findFirst({ where: { id: membershipId, tenantId, role: 'MANAGER' }, select: { userId: true } });
       if (!membership) throw new NotFoundException('Team member not found');
       await transaction.tenantMembership.updateMany({ where: { id: membershipId, tenantId, role: 'MANAGER' }, data: { status: 'BLOCKED' } });
@@ -64,10 +66,13 @@ export class TeamService {
   }
 
   async revokeInvitation(tenantId: string, invitationId: string): Promise<{ revoked: true }> {
-    const result = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.tenantInvitation.updateMany({
-      where: { id: invitationId, tenantId, usedAt: null, revokedAt: null },
-      data: { revokedAt: this.now() },
-    }));
+    const result = await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+      await assertTenantAcceptingMutations(transaction, tenantId, 'ACCOUNT_ADMINISTRATION');
+      return transaction.tenantInvitation.updateMany({
+        where: { id: invitationId, tenantId, usedAt: null, revokedAt: null },
+        data: { revokedAt: this.now() },
+      });
+    });
     if (result.count === 0) throw new NotFoundException('Invitation not found');
     return { revoked: true };
   }
@@ -81,6 +86,7 @@ export class TeamService {
     `;
     if (!authority[0]) throw new BadRequestException('Invalid or expired invitation');
     await withTenantTransaction(this.prisma, authority[0].tenant_id, async (tx) => {
+      await assertTenantAcceptingMutations(tx, authority[0]!.tenant_id, 'ACCOUNT_ADMINISTRATION');
       const invitation = await tx.tenantInvitation.findFirst({ where: { id: authority[0]!.invitation_id, tokenHash } });
       if (!invitation || invitation.usedAt || invitation.revokedAt || invitation.expiresAt <= now) {
         throw new BadRequestException('Invalid or expired invitation');

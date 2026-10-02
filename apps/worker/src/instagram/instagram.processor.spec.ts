@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { readFile } from 'node:fs/promises';
+import { readdir, readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
 import { createPrismaClient, Prisma, type PrismaClient } from '@autosale/database';
@@ -19,23 +19,8 @@ describe('InstagramProcessor', () => {
   beforeAll(async () => {
     container = await new PostgreSqlContainer('postgres:17.6-alpine').start();
     const connectionString = container.getConnectionUri();
-    const migrationPaths = [
-      '20260826090000_init_webhook_events',
-      '20260826123000_conversations_messages',
-      '20260826210000_product_catalog',
-      '20260827160000_self_hosted_auth',
-      '20260827170000_tenant_access_status',
-      '20260827230000_instagram_connections',
-      '20260828_meta_instagram_oauth',
-      '20260828150000_instagram_oauth_attempt_guard',
-      '20260829120000_instagram_credential_cleanup_queue',
-      '20260831090000_catalogue_import',
-      '20260831091500_catalogue_tenant_relations',
-      '20260831100000_catalogue_source_object_key',
-      '20260902090000_instagram_customer_profiles',
-      '20260907160000_instagram_outbound_messages',
-      '20260924190000_instagram_attachment_recovery',
-    ];
+    const migrationsRoot = resolve(process.cwd(), '../../packages/database/prisma/migrations');
+    const migrationPaths = (await readdir(migrationsRoot)).filter((name) => name !== 'migration_lock.toml').sort();
     const pool = new pg.Pool({ connectionString });
     for (const migrationPath of migrationPaths) {
       const migration = await readFile(
@@ -467,6 +452,32 @@ describe('InstagramProcessor', () => {
     await expect(prisma.message.findFirstOrThrow({
       where: { conversationId: conversation.id, externalMessageId: 'mid.ambiguous.123' },
     })).resolves.toMatchObject({ rawEventId: event.id, providerMessageId: null });
+  });
+
+  it('marks a queued event processed without business writes when the tenant is frozen', async () => {
+    const payload = await loadFixture('text-message.json');
+    const event = await prisma.webhookEvent.create({
+      data: { tenantId, provider: 'META', externalEventId: 'm_frozen_worker_001', payload: payload as Prisma.InputJsonObject },
+    });
+    const admin = await prisma.user.create({
+      data: { email: 'worker-lifecycle-admin@example.test', name: 'Worker Admin', status: 'ACTIVE', platformRole: 'PLATFORM_ADMIN' },
+    });
+    await prisma.tenantLifecycleRequest.create({ data: {
+      tenantId, kind: 'DELETE', status: 'EXPORT_READY', reasonCode: 'ADMINISTRATIVE_TEST',
+      requestedByUserId: admin.id, idempotencyKey: randomUUID(), requestHash: 'd'.repeat(64),
+      ingestionFrozenAt: new Date(),
+    } });
+    const messagesBefore = await prisma.message.count({ where: { tenantId } });
+    copy.mockClear();
+    processIfTriggered.mockClear();
+
+    await expect(new InstagramProcessor(prisma, { copy }, { processIfTriggered }).process(tenantId, event.id))
+      .resolves.toBe('IGNORED_FROZEN');
+    await expect(prisma.message.count({ where: { tenantId } })).resolves.toBe(messagesBefore);
+    await expect(prisma.webhookEvent.findUniqueOrThrow({ where: { id: event.id } }))
+      .resolves.toMatchObject({ status: 'PROCESSED', processedAt: expect.any(Date) });
+    expect(copy).not.toHaveBeenCalled();
+    expect(processIfTriggered).not.toHaveBeenCalled();
   });
 
   async function seedLocalOutbound(conversationId: string, text: string, timestamp: Date): Promise<string> {

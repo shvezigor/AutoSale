@@ -65,6 +65,17 @@ describe('MetricRegistry', () => {
     expect(output).not.toMatch(/phone|address|chat/i);
   });
 
+  it('accepts only bounded lifecycle freeze dimensions', () => {
+    const localMetrics = new MetricRegistry();
+    localMetrics.increment('autosale_tenant_lifecycle_freeze_rejections_total', {
+      surface: 'META_INBOUND', safe_reason: 'lifecycle_frozen',
+    });
+    expect(localMetrics.render()).toContain('surface="META_INBOUND",safe_reason="lifecycle_frozen"');
+    expect(() => localMetrics.increment('autosale_tenant_lifecycle_freeze_rejections_total', {
+      surface: 'tenant-provided-value', safe_reason: 'lifecycle_frozen',
+    })).toThrow('Unsupported metric surface');
+  });
+
   it('replaces gauges so queue backlog reports current saturation', () => {
     const metrics = new MetricRegistry();
     metrics.set('autosale_queue_backlog', 7, { queue: 'google_sheets' });

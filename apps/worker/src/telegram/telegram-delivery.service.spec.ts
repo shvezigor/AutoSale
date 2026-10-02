@@ -329,6 +329,31 @@ describe('TelegramDeliveryService', () => {
     await expect(prisma.orderItem.findUniqueOrThrow({ where: { id: fixture.linkedItemId } }))
       .resolves.toMatchObject({ procurementStatus: 'SENDING' });
   });
+
+  it('terminally ignores a queued delivery when tenant ingestion is frozen', async () => {
+    const admin = await prisma.user.create({ data: {
+      email: `telegram-frozen-${randomUUID()}@example.test`, name: 'Lifecycle Admin', status: 'ACTIVE', platformRole: 'PLATFORM_ADMIN',
+    } });
+    const request = await prisma.tenantLifecycleRequest.create({ data: {
+      tenantId, kind: 'DELETE', status: 'EXPORT_READY', reasonCode: 'ADMINISTRATIVE_TEST',
+      requestedByUserId: admin.id, idempotencyKey: randomUUID(), requestHash: 'f'.repeat(64), ingestionFrozenAt: now,
+    } });
+    const delivery = await prisma.telegramDelivery.create({ data: {
+      tenantId, destinationId, purpose: 'TEST', idempotencyKey: randomUUID(), messageText: 'Не надсилати', nextAttemptAt: now,
+    } });
+
+    try {
+      await expect(new TelegramDeliveryService(prisma, { sendText }, () => now).process({ deliveryId: delivery.id }))
+        .resolves.toBe('IGNORED_FROZEN');
+      expect(sendText).not.toHaveBeenCalled();
+      await expect(prisma.telegramDelivery.findUniqueOrThrow({ where: { id: delivery.id } })).resolves.toMatchObject({
+        status: 'FAILED', lastErrorCode: 'TENANT_LIFECYCLE_FROZEN', completedAt: now,
+      });
+    } finally {
+      await prisma.tenantLifecycleRequest.delete({ where: { id: request.id } });
+      await prisma.user.delete({ where: { id: admin.id } });
+    }
+  });
 });
 
 async function createSupplierDelivery(

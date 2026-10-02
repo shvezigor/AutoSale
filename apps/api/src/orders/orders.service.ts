@@ -3,6 +3,7 @@ import { procurementSummaryFor } from '@autosale/contracts/procurement';
 import type { ProcurementStatus, ProcurementSummary } from '@autosale/contracts/procurement';
 import {
   InvalidProcurementTransitionError,
+  assertTenantAcceptingMutations,
   materializeCommercialTerms,
   ProcurementItemNotFoundError,
   ProcurementOrderNotReadyError,
@@ -103,6 +104,7 @@ export class OrdersService {
 
   private async ensurePendingExport(tenantId: string, orderId: string): Promise<void> {
     await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+      await assertTenantAcceptingMutations(transaction, tenantId, 'SHEETS_EXPORT');
       const destination = await transaction.googleSheetsDestination.findUnique({ where: { tenantId } });
       if (!destination || destination.status !== 'ACTIVE') return;
       await transaction.orderExport.upsert({
@@ -126,8 +128,10 @@ export class OrdersService {
     if (!record) throw new NotFoundException('Google Sheets export not found');
     if (record.destination.status !== 'ACTIVE') throw new BadRequestException('Google Sheets destination must be active before retry');
     if (record.status !== 'FAILED') throw new BadRequestException('Only failed exports can be retried');
-    const updated = await withTenantTransaction(this.prisma, tenantId, (transaction) =>
-      transaction.orderExport.update({ where: { id: record.id }, data: { status: 'PENDING', errorSummary: null } }));
+    const updated = await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+      await assertTenantAcceptingMutations(transaction, tenantId, 'SHEETS_EXPORT');
+      return transaction.orderExport.update({ where: { id: record.id }, data: { status: 'PENDING', errorSummary: null } });
+    });
     return this.mapExport(updated, true);
   }
 
@@ -177,6 +181,7 @@ export class OrdersService {
       delivery: { city: null, address: null, novaPoshtaBranch: null, ...extraction.delivery, ...input.delivery },
     };
     const updated = await withTenantTransaction(this.prisma, tenantId, async (tx) => {
+      await assertTenantAcceptingMutations(tx, tenantId, 'ORDER_MUTATION');
       if (input.items !== undefined) {
         const activePayments = await tx.orderPayment.count({ where: { tenantId, orderId: id, cancelledAt: null } });
         if (activePayments > 0) throw new ConflictException('Order items are locked after payment');
@@ -270,6 +275,7 @@ export class OrdersService {
       throw new BadRequestException('Order has unresolved validation issues');
     }
     const updated = await withTenantTransaction(this.prisma, tenantId, async (tx) => {
+      await assertTenantAcceptingMutations(tx, tenantId, 'ORDER_MUTATION');
       const order = await tx.order.update({
         where: { id, tenantId },
         data: {

@@ -9,6 +9,8 @@
  * 🟢 You can import this file directly.
  */
 export type * from './models/Tenant.js'
+export type * from './models/TenantLifecycleRequest.js'
+export type * from './models/TenantRetentionDryRun.js'
 export type * from './models/GoogleConnection.js'
 export type * from './models/GoogleOAuthAttempt.js'
 export type * from './models/GoogleCredentialCleanup.js'

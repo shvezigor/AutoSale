@@ -64,6 +64,19 @@ describe('CatalogueService', () => {
     }));
   });
 
+  it('does not create a product while tenant business mutations are frozen', async () => {
+    const create = vi.fn();
+    const service = new CatalogueService({
+      $queryRaw: vi.fn().mockResolvedValue([{ available: true }]),
+      tenantLifecycleRequest: { findFirst: vi.fn().mockResolvedValue({ id: 'freeze-1' }) },
+      product: { create },
+    } as never);
+
+    await expect(service.create('tenant-a', { sku: 'LUNA-01', name: 'Luna' }))
+      .rejects.toThrow('TENANT_LIFECYCLE_FROZEN');
+    expect(create).not.toHaveBeenCalled();
+  });
+
   it('maps a duplicate tenant SKU to a conflict response', async () => {
     const create = vi.fn().mockRejectedValue({ code: 'P2002' });
     const service = new CatalogueService({ product: { create } } as never);

@@ -239,6 +239,22 @@ describe('MetaController', () => {
     expect(add).not.toHaveBeenCalled();
   });
 
+  it('acknowledges a frozen tenant callback without enqueueing normalization', async () => {
+    register.mockResolvedValue({ eventId: null, duplicate: false, pending: false, frozen: true });
+    const sentBody = Buffer.from(JSON.stringify(fixture));
+    const signature = `sha256=${createHmac('sha256', appSecret).update(sentBody).digest('hex')}`;
+
+    await request(app!.getHttpServer())
+      .post('/webhooks/meta')
+      .set('Content-Type', 'application/json')
+      .set('X-Hub-Signature-256', signature)
+      .send(fixture)
+      .expect(200, { received: true });
+
+    expect(register).toHaveBeenCalledOnce();
+    expect(add).not.toHaveBeenCalled();
+  });
+
   it('acknowledges a queue outage and safely re-enqueues the pending event on Meta retry', async () => {
     register
       .mockResolvedValueOnce({ eventId: 'event-1', duplicate: false, pending: true })

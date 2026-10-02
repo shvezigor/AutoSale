@@ -1,4 +1,4 @@
-import { type PrismaClient, withTenantTransaction } from '@autosale/database';
+import { assertTenantAcceptingMutations, type PrismaClient, withTenantTransaction } from '@autosale/database';
 
 import { CredentialCipher } from './credential-cipher.js';
 import type { GoogleOAuthClientPort } from './google-oauth.client.js';
@@ -14,6 +14,7 @@ export class GoogleCredentialCleanupService {
 
   async disconnect(tenantId: string, _actorUserId: string): Promise<{ status: 'DISCONNECTED' | 'DISCONNECTING' }> {
     const cleanup = await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+      await assertTenantAcceptingMutations(transaction, tenantId, 'SHEETS_EXPORT');
       const connection = await transaction.googleConnection.findUnique({
         where: { tenantId },
         select: { credentialGenerationId: true, encryptedRefreshToken: true },

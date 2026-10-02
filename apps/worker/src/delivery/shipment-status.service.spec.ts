@@ -25,4 +25,21 @@ describe('mapNovaPoshtaStatus', () => {
     expect(mapNovaPoshtaStatus('108')).toBe('RETURNED');
     expect(mapNovaPoshtaStatus('new-code')).toBeNull();
   });
+
+  it('does not cancel a Nova Poshta shipment when tenant ingestion is frozen', async () => {
+    const attempt = {
+      id: 'attempt', tenantId: '11111111-1111-4111-8111-111111111111', shipmentId: 'shipment', status: 'PENDING',
+      shipment: { provider: 'NOVA_POSHTA', status: 'CREATED', providerDocumentId: 'document', trackingNumber: 'tracking', connection: { encryptedCredential: 'ciphertext' } },
+    };
+    const prisma = {
+      shipmentAttempt: { findFirst: vi.fn().mockResolvedValue(attempt), updateMany: vi.fn().mockResolvedValue({ count: 1 }) },
+      shipment: { updateMany: vi.fn().mockResolvedValue({ count: 1 }) },
+      tenantLifecycleRequest: { findFirst: vi.fn().mockResolvedValue({ id: 'delete-request' }) },
+    };
+    const cancelShipment = vi.fn();
+    const service = new ShipmentStatusService(prisma as never, () => ({ getShipmentStatus: vi.fn(), cancelShipment }), () => 'secret');
+
+    await expect(service.cancel({ shipmentId: 'shipment' })).resolves.toBe('IGNORED_FROZEN');
+    expect(cancelShipment).not.toHaveBeenCalled();
+  });
 });

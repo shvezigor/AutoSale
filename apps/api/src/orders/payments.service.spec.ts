@@ -44,6 +44,17 @@ describe('PaymentsService', () => {
     expect(metrics.render()).toContain('operation="order_payment_record",result="success"');
   });
 
+  it('does not record a payment while tenant business mutations are frozen', async () => {
+    const create = vi.fn();
+    const service = new PaymentsService(prismaMock({ create, frozen: true }) as never, () => now);
+
+    await expect(service.record(tenantId, orderId, actorId, {
+      amount: '200.00', method: 'CASH', receivedAt: now.toISOString(), bankAccountId: null, carrier: null,
+      note: null, idempotencyKey: payment.idempotencyKey,
+    })).rejects.toThrow('TENANT_LIFECYCLE_FROZEN');
+    expect(create).not.toHaveBeenCalled();
+  });
+
   it('rejects missing orders, incomplete pricing, and future dates', async () => {
     await expect(new PaymentsService(prismaMock({ order: null }) as never, () => now).get(tenantId, orderId)).rejects.toBeInstanceOf(NotFoundException);
     await expect(new PaymentsService(prismaMock({ order: { ...order, commercialTerms: { ...terms, pricingStatus: 'NEEDS_REVIEW' } } }) as never, () => now).get(tenantId, orderId)).rejects.toBeInstanceOf(BadRequestException);
@@ -113,9 +124,11 @@ function prismaMock(options: {
   payments?: typeof payment[];
   updateMany?: ReturnType<typeof vi.fn>;
   firstTransactionError?: Error;
+  frozen?: boolean;
 } = {}) {
   const client = {
     $queryRaw: vi.fn(),
+    tenantLifecycleRequest: { findFirst: vi.fn().mockResolvedValue(options.frozen ? { id: 'freeze-1' } : null) },
     order: { findFirst: vi.fn().mockResolvedValue(options.order === undefined ? order : options.order) },
     tenantBankAccount: { findFirst: vi.fn().mockResolvedValue(options.account === undefined ? { id: accountId } : options.account) },
     orderPayment: {

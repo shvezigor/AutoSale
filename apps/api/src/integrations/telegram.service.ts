@@ -5,7 +5,15 @@ import type {
   TelegramSupplierSettings, TelegramSupplierSettingsUpdate, SupplierOrderPreview,
   TelegramNotificationPreferences,
 } from '@autosale/contracts';
-import { Prisma, setTenantContext, type PrismaClient, withTenantTransaction } from '@autosale/database';
+import {
+  assertTenantAcceptingMutations,
+  Prisma,
+  setTenantContext,
+  type PrismaClient,
+  TenantLifecycleFrozenError,
+  withTenantTransaction,
+} from '@autosale/database';
+import { metrics } from '@autosale/observability';
 import { z } from 'zod';
 
 const userSchema = z.object({
@@ -125,6 +133,7 @@ export class TelegramService {
   async queueTest(tenantId: string, userId: string): Promise<{ deliveryId: string; status: 'PENDING' }> {
     if (!this.options.botUsername || !this.options.queue) throw new Error('Telegram is not configured');
     const delivery = await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+      await assertTenantAcceptingMutations(transaction, tenantId, 'NOTIFICATION_SEND');
       const binding = await transaction.telegramUserBinding.findUnique({
         where: { tenantId_userId: { tenantId, userId } },
         select: { privateChatId: true, revokedAt: true },
@@ -193,6 +202,7 @@ export class TelegramService {
 
   async saveSupplierSettings(tenantId: string, input: TelegramSupplierSettingsUpdate): Promise<TelegramSupplierSettings> {
     await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+      await assertTenantAcceptingMutations(transaction, tenantId, 'SUPPLIER_SEND');
       const destination = await transaction.telegramChat.findFirst({
         where: { id: input.destinationId, tenantId }, select: { id: true, route: true, type: true, businessConnectionId: true },
       });
@@ -263,6 +273,7 @@ export class TelegramService {
   async queueSupplierOrder(tenantId: string, orderId: string): Promise<{ deliveryId: string; status: string }> {
     if (!this.options.botUsername || !this.options.queue) throw new Error('Telegram is not configured');
     const delivery = await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+      await assertTenantAcceptingMutations(transaction, tenantId, 'SUPPLIER_SEND');
       await transaction.$queryRaw(Prisma.sql`
         SELECT "id" FROM "orders"
         WHERE "tenant_id" = ${tenantId}::uuid AND "id" = ${orderId}::uuid
@@ -378,6 +389,17 @@ export class TelegramService {
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') return 'REPLAY';
+      if (error instanceof TenantLifecycleFrozenError) {
+        metrics.increment('autosale_tenant_lifecycle_freeze_rejections_total', {
+          surface: 'TELEGRAM_INBOUND', safe_reason: 'lifecycle_frozen',
+        });
+        await this.prisma.$transaction((transaction) => transaction.telegramWebhookUpdate.upsert({
+          where: { updateId },
+          create: { updateId, status: 'IGNORED', processedAt: this.now() },
+          update: { status: 'IGNORED', processedAt: this.now() },
+        }));
+        return 'IGNORED';
+      }
       throw error;
     }
   }
@@ -400,6 +422,7 @@ export class TelegramService {
     `);
     if (consumed.length !== 1 || !consumed[0]) return 'IGNORED';
     await setTenantContext(transaction, consumed[0].tenant_id);
+    await assertTenantAcceptingMutations(transaction, consumed[0].tenant_id, 'TELEGRAM_INBOUND');
     const attempt = await transaction.telegramLinkAttempt.findUnique({ where: { id: consumed[0].attempt_id } });
     if (!attempt) return 'IGNORED';
 
@@ -433,6 +456,7 @@ export class TelegramService {
     `);
     if (authority.length !== 1 || !authority[0]) return 'IGNORED';
     await setTenantContext(transaction, authority[0].tenant_id);
+    await assertTenantAcceptingMutations(transaction, authority[0].tenant_id, 'TELEGRAM_INBOUND');
     await transaction.telegramBusinessConnection.upsert({
       where: { tenantId_externalConnectionId: { tenantId: authority[0].tenant_id, externalConnectionId: connection.id } },
       create: {
@@ -455,6 +479,7 @@ export class TelegramService {
     `);
     if (authority.length !== 1 || !authority[0]) return 'IGNORED';
     await setTenantContext(transaction, authority[0].tenant_id);
+    await assertTenantAcceptingMutations(transaction, authority[0].tenant_id, 'TELEGRAM_INBOUND');
 
     const displayName = message.chat.title
       ?? [message.chat.first_name, message.chat.last_name].filter(Boolean).join(' ')

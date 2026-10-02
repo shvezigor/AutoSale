@@ -1,7 +1,7 @@
 import { Buffer } from 'node:buffer';
 
 import { parseWorkerEnv } from '@autosale/config/worker-env';
-import { shipmentCreateJobSchema, telegramDeliveryJobSchema, ukrposhtaTrackingBatchJobSchema } from '@autosale/contracts';
+import { retentionDryRunJobSchema, shipmentCreateJobSchema, telegramDeliveryJobSchema, tenantLifecycleJobSchema, ukrposhtaTrackingBatchJobSchema } from '@autosale/contracts';
 import { createPrismaClient, ProcurementStore, withTenantTransaction } from '@autosale/database';
 import {
   createGoogleSheetsAdapter,
@@ -53,6 +53,9 @@ import { ShipmentReconciler } from './delivery/shipment-reconciler.js';
 import { ShipmentStatusService } from './delivery/shipment-status.service.js';
 import { UkrposhtaTrackingService } from './delivery/ukrposhta-tracking.service.js';
 import { UserAvatarCleanupReconciler } from './profile/user-avatar-cleanup.reconciler.js';
+import { TenantLifecycleProcessor } from './tenant-lifecycle/tenant-lifecycle.processor.js';
+import { TenantLifecycleReconciler } from './tenant-lifecycle/tenant-lifecycle.reconciler.js';
+import { RetentionDryRunProcessor } from './tenant-lifecycle/retention-dry-run.processor.js';
 
 async function bootstrap(): Promise<void> {
   const env = parseWorkerEnv(process.env);
@@ -166,6 +169,77 @@ async function bootstrap(): Promise<void> {
     password: redis.password || undefined,
     tls: redis.protocol === 'rediss:' ? {} : undefined,
   };
+  const tenantLifecycleQueue = new Queue('tenant-lifecycle', { connection: redisConnection });
+  const tenantLifecycleProcessor = new TenantLifecycleProcessor(prisma, storage);
+  const retentionDryRunProcessor = new RetentionDryRunProcessor(prisma);
+  const tenantLifecycleWorker = new Worker(
+    'tenant-lifecycle',
+    async (job) => {
+      if (job.name === 'tenant-lifecycle.retention-dry-run') {
+        const parsed = retentionDryRunJobSchema.safeParse(job.data);
+        if (!parsed.success) {
+          metrics.increment('autosale_operations_total', { operation: 'tenant_retention_dry_run', result: 'failure' });
+          throw new Error('RETENTION_DRY_RUN_JOB_INVALID');
+        }
+        const started = performance.now();
+        try {
+          const result = await retentionDryRunProcessor.process(parsed.data);
+          metrics.increment('autosale_operations_total', {
+            operation: 'tenant_retention_dry_run',
+            result: result.status === 'FAILED' ? 'failure' : 'success',
+          });
+          logger.info('tenant_retention_dry_run_completed', {
+            correlationId: 'system:tenant-retention-dry-run', result: result.status,
+          });
+        } catch (error) {
+          metrics.increment('autosale_operations_total', { operation: 'tenant_retention_dry_run', result: 'failure' });
+          logger.warn('tenant_retention_dry_run_failed', {
+            correlationId: 'system:tenant-retention-dry-run',
+            errorCode: error instanceof Error ? error.name : 'UNKNOWN',
+          });
+          throw error;
+        } finally {
+          metrics.observe('autosale_operation_duration_seconds', (performance.now() - started) / 1_000, {
+            operation: 'tenant_retention_dry_run',
+          });
+        }
+        return;
+      }
+      if (job.name !== 'tenant-lifecycle.export') return;
+      const parsed = tenantLifecycleJobSchema.safeParse(job.data);
+      if (!parsed.success) {
+        metrics.increment('autosale_operations_total', { operation: 'tenant_lifecycle_export', result: 'failure' });
+        throw new Error('TENANT_LIFECYCLE_JOB_INVALID');
+      }
+      const started = performance.now();
+      try {
+        const result = await tenantLifecycleProcessor.process(parsed.data);
+        metrics.increment('autosale_operations_total', {
+          operation: 'tenant_lifecycle_export',
+          result: result === 'FAILED' ? 'failure' : 'success',
+        });
+        logger.info('tenant_lifecycle_export_completed', {
+          correlationId: 'system:tenant-lifecycle-export',
+          result,
+        });
+      } catch (error) {
+        metrics.increment('autosale_operations_total', { operation: 'tenant_lifecycle_export', result: 'failure' });
+        logger.warn('tenant_lifecycle_export_failed', {
+          correlationId: 'system:tenant-lifecycle-export',
+          errorCode: error instanceof Error ? error.name : 'UNKNOWN',
+        });
+        throw error;
+      } finally {
+        metrics.observe('autosale_operation_duration_seconds', (performance.now() - started) / 1_000, {
+          operation: 'tenant_lifecycle_export',
+        });
+      }
+    },
+    { connection: redisConnection, concurrency: 1 },
+  );
+  const tenantLifecycleReconciler = new TenantLifecycleReconciler(
+    prisma, tenantLifecycleQueue, storage,
+  );
   const ukrposhtaShipment = new UkrposhtaShipmentService(prisma,
     (credentials) => new UkrposhtaClient({ ...credentials, sandboxShipmentsEnabled: env.UKRPOSHTA_SANDBOX_SHIPMENTS_ENABLED }),
     (encrypted) => credentialCipher.decrypt(encrypted), { enabled: env.UKRPOSHTA_SANDBOX_SHIPMENTS_ENABLED });
@@ -371,8 +445,15 @@ async function bootstrap(): Promise<void> {
       const correlationId = typeof job.data.correlationId === 'string' ? job.data.correlationId : job.data.eventId;
       const started = performance.now();
       try {
-        await processor.process(job.data.tenantId, job.data.eventId);
-        metrics.increment('autosale_operations_total', { operation: 'instagram_normalize', result: 'success' });
+        const result = await processor.process(job.data.tenantId, job.data.eventId);
+        metrics.increment('autosale_operations_total', {
+          operation: 'instagram_normalize', result: result === 'IGNORED_FROZEN' ? 'skipped' : 'success',
+        });
+        if (result === 'IGNORED_FROZEN') {
+          metrics.increment('autosale_tenant_lifecycle_freeze_rejections_total', {
+            surface: 'ORDER_RECOGNITION', safe_reason: 'lifecycle_frozen',
+          });
+        }
         logger.info('instagram_normalize_completed', { correlationId, eventId: job.data.eventId, jobId: job.id });
       } catch (error) {
         metrics.increment('autosale_operations_total', { operation: 'instagram_normalize', result: 'failure' });
@@ -732,6 +813,52 @@ async function bootstrap(): Promise<void> {
     }
   };
   const shipmentReconcileTimer = setInterval(() => void reconcileShipments(), 5_000);
+  let reconcilingTenantLifecycle = false;
+  const reconcileTenantLifecycle = async (): Promise<void> => {
+    if (reconcilingTenantLifecycle) return;
+    reconcilingTenantLifecycle = true;
+    try {
+      const queued = await tenantLifecycleReconciler.reconcile();
+      const retention = await tenantLifecycleReconciler.reconcileRetention();
+      metrics.set('autosale_queue_backlog', queued.attempted + retention.attempted, { queue: 'tenant_lifecycle' });
+      if (queued.failed + retention.failed > 0) {
+        metrics.increment('autosale_operations_total', {
+          operation: 'tenant_lifecycle_reconcile', result: 'failure',
+        }, queued.failed + retention.failed);
+      }
+    } catch (error) {
+      metrics.increment('autosale_operations_total', { operation: 'tenant_lifecycle_reconcile', result: 'failure' });
+      logger.warn('tenant_lifecycle_reconcile_failed', {
+        correlationId: 'system:tenant-lifecycle-reconcile',
+        errorCode: error instanceof Error ? error.name : 'UNKNOWN',
+      });
+    } finally {
+      reconcilingTenantLifecycle = false;
+    }
+  };
+  const tenantLifecycleReconcileTimer = setInterval(() => void reconcileTenantLifecycle(), 5_000);
+  let cleaningTenantLifecycleArtifacts = false;
+  const cleanupTenantLifecycleArtifacts = async (): Promise<void> => {
+    if (cleaningTenantLifecycleArtifacts) return;
+    cleaningTenantLifecycleArtifacts = true;
+    try {
+      const cleanup = await tenantLifecycleReconciler.cleanupExpired();
+      if (cleanup.failed > 0) {
+        metrics.increment('autosale_operations_total', {
+          operation: 'tenant_lifecycle_artifact_cleanup', result: 'failure',
+        }, cleanup.failed);
+      }
+    } catch (error) {
+      metrics.increment('autosale_operations_total', { operation: 'tenant_lifecycle_artifact_cleanup', result: 'failure' });
+      logger.warn('tenant_lifecycle_artifact_cleanup_failed', {
+        correlationId: 'system:tenant-lifecycle-artifact-cleanup',
+        errorCode: error instanceof Error ? error.name : 'UNKNOWN',
+      });
+    } finally {
+      cleaningTenantLifecycleArtifacts = false;
+    }
+  };
+  const tenantLifecycleCleanupTimer = setInterval(() => void cleanupTenantLifecycleArtifacts(), 60_000);
   void pollExports();
   void reconcileCatalogueMappings();
   void reconcileInstagramEvents();
@@ -743,6 +870,8 @@ async function bootstrap(): Promise<void> {
   void reconcileTelegramDeliveries();
   void reconcileProcurementBackfill();
   void reconcileShipments();
+  void reconcileTenantLifecycle();
+  void cleanupTenantLifecycleArtifacts();
   logger.info('service_started', { correlationId: 'system:startup', healthPort: env.HEALTH_PORT });
 
   server.listen(env.HEALTH_PORT, '0.0.0.0');
@@ -759,6 +888,10 @@ async function bootstrap(): Promise<void> {
     if (telegramDeliveryTimer) clearInterval(telegramDeliveryTimer);
     clearInterval(procurementBackfillTimer);
     clearInterval(shipmentReconcileTimer);
+    clearInterval(tenantLifecycleReconcileTimer);
+    clearInterval(tenantLifecycleCleanupTimer);
+    await tenantLifecycleWorker.close();
+    await tenantLifecycleQueue.close();
     await deliveryWorker.close();
     await deliveryQueue.close();
     await telegramWorker?.close();

@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
 import { meestConnectionInputSchema, type MeestConnectionInput, type MeestConnectionSummary, type MeestSenderProfileInput } from '@autosale/contracts';
-import { type PrismaClient, withTenantTransaction } from '@autosale/database';
+import { assertTenantAcceptingMutations, type PrismaClient, withTenantTransaction } from '@autosale/database';
 import type { CredentialCipher, MeestClient } from '@autosale/integrations';
 
 type MeestClientPort = Pick<MeestClient, 'validateCredential' | 'searchCities' | 'searchLocations'>;
@@ -35,12 +35,15 @@ export class MeestConnectionService {
 
   async connect(tenantId: string, userId: string, input: MeestConnectionInput): Promise<MeestConnectionSummary> {
     this.assertEnabled();
+    await withTenantTransaction(this.prisma, tenantId, (transaction) => assertTenantAcceptingMutations(transaction, tenantId, 'DELIVERY'));
     const client = this.clientFactory(input);
     const identity = await client.validateCredential();
     const encryptedCredential = this.cipher.encrypt(JSON.stringify(input));
     const credentialGenerationId = randomUUID();
     const verifiedAt = this.now();
-    const connection = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.deliveryConnection.upsert({
+    const connection = await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+      await assertTenantAcceptingMutations(transaction, tenantId, 'DELIVERY');
+      return transaction.deliveryConnection.upsert({
       where: { tenantId_provider: { tenantId, provider: 'MEEST' } },
       create: {
         tenantId, provider: 'MEEST', status: 'ACTIVE', encryptedCredential, credentialGenerationId,
@@ -51,19 +54,23 @@ export class MeestConnectionService {
         connectedByUserId: userId, lastVerifiedAt: verifiedAt, lastErrorCode: null, disconnectedAt: null,
       },
       include: { senderProfile: true },
-    }));
+      });
+    });
     return safeConnection(connection);
   }
 
   async disconnect(tenantId: string): Promise<MeestConnectionSummary> {
     this.assertEnabled();
-    const result = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.deliveryConnection.updateMany({
+    const result = await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+      await assertTenantAcceptingMutations(transaction, tenantId, 'DELIVERY');
+      return transaction.deliveryConnection.updateMany({
       where: { tenantId, provider: 'MEEST' },
       data: {
         status: 'DISCONNECTED', disconnectedAt: this.now(), encryptedCredential: this.cipher.encrypt(randomUUID()),
         credentialGenerationId: randomUUID(), lastErrorCode: null,
       },
-    }));
+      });
+    });
     if (result.count !== 1) throw new Error('Meest connection not found');
     return {
       provider: 'MEEST', status: 'DISCONNECTED', accountLabel: null, lastVerifiedAt: null,
@@ -93,11 +100,14 @@ export class MeestConnectionService {
     }));
     if (!connection || connection.status !== 'ACTIVE') throw new Error('Active Meest connection required');
     const data = meestSenderProfileData(input);
-    await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.deliverySenderProfile.upsert({
+    await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+      await assertTenantAcceptingMutations(transaction, tenantId, 'DELIVERY');
+      return transaction.deliverySenderProfile.upsert({
       where: { tenantId_connectionId: { tenantId, connectionId: connection.id } },
       create: { tenantId, connectionId: connection.id, ...data },
       update: data,
-    }));
+      });
+    });
     return input;
   }
 

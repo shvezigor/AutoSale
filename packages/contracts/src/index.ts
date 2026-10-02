@@ -13,3 +13,4 @@ export * from './demo-leads.js';
 export * from './commercial.js';
 export * from './payments.js';
 export * from './validation-errors.js';
+export * from './tenant-lifecycle.js';

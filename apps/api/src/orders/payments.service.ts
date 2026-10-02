@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 
 import type { CancelOrderPayment, CashOnDeliveryCarrier, CreateOrderPayment, OrderPaymentRecord, OrderPaymentSummary, PaymentMethod } from '@autosale/contracts/payments';
-import { calculateOrderPaymentSummary, Prisma, type PrismaClient, withTenantTransaction } from '@autosale/database';
+import { assertTenantAcceptingMutations, calculateOrderPaymentSummary, Prisma, type PrismaClient, withTenantTransaction } from '@autosale/database';
 import { metrics, type MetricRegistry } from '@autosale/observability';
 import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 
@@ -51,6 +51,7 @@ export class PaymentsService {
       const requestHash = commandHash(createCommandPayload(orderId, input));
       try {
         await this.serializable(async () => withTenantTransaction(this.prisma, tenantId, async (tx) => {
+          await assertTenantAcceptingMutations(tx, tenantId, 'PAYMENT');
           const order = await readyOrder(tx, tenantId, orderId);
           if (input.method === 'BANK_TRANSFER') {
             const legalEntityId = order.commercialTerms!.legalEntityId;
@@ -95,6 +96,7 @@ export class PaymentsService {
     return this.measure('order_payment_cancel', async () => {
       const requestHash = commandHash({ orderId, paymentId, reason: input.reason });
       await this.serializable(async () => withTenantTransaction(this.prisma, tenantId, async (tx) => {
+        await assertTenantAcceptingMutations(tx, tenantId, 'PAYMENT');
         const payment = await tx.orderPayment.findFirst({ where: { id: paymentId, tenantId, orderId } });
         if (!payment) throw new NotFoundException('Payment not found');
         if (payment.cancelledAt) {

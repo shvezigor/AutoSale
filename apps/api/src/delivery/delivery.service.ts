@@ -1,7 +1,7 @@
 import { createHash, randomUUID } from 'node:crypto';
 
 import { deliverySenderProfileInputSchema, isUkrposhtaPersonName, shipmentCustomerMessageInputSchema, shipmentDraftInputSchema, type ConversationMessage, type DeliveryConnectionInput, type DeliveryConnectionSummary, type DeliverySenderProfileInput, type OutboundMessageInput, type ShipmentCustomerMessageInput, type ShipmentCustomerMessagePreview, type ShipmentDraftInput, type ShipmentOverview, type ShipmentQuote, type ShipmentSummary } from '@autosale/contracts';
-import { type PrismaClient, withTenantTransaction } from '@autosale/database';
+import { assertTenantAcceptingMutations, type PrismaClient, withTenantTransaction } from '@autosale/database';
 import { parseUkrposhtaLocationRef, type CredentialCipher, type NovaPoshtaClient, type NovaPoshtaSenderProfile, type UkrposhtaClient } from '@autosale/integrations';
 import { ukrposhtaConnectionInputSchema, type UkrposhtaConnectionInput } from '@autosale/contracts';
 import { BadRequestException, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
@@ -51,6 +51,8 @@ export class DeliveryService {
 
   async connect(tenantId: string, userId: string, input: DeliveryConnectionInput): Promise<DeliveryConnectionSummary> {
     this.assertEnabled();
+    await withTenantTransaction(this.prisma, tenantId, (transaction) =>
+      assertTenantAcceptingMutations(transaction, tenantId, 'DELIVERY'));
     const client = this.novaPoshtaClient(input.apiKey);
     await client.validateCredential();
     const senders = await client.listSenderProfiles();
@@ -58,7 +60,9 @@ export class DeliveryService {
     const encryptedCredential = this.cipher.encrypt(input.apiKey);
     const credentialGenerationId = randomUUID();
     const verifiedAt = this.now();
-    const connection = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.deliveryConnection.upsert({
+    const connection = await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+      await assertTenantAcceptingMutations(transaction, tenantId, 'DELIVERY');
+      return transaction.deliveryConnection.upsert({
       where: { tenantId_provider: { tenantId, provider: 'NOVA_POSHTA' } },
       create: {
         tenantId,
@@ -81,7 +85,8 @@ export class DeliveryService {
         disconnectedAt: null,
       },
       include: { senderProfile: true },
-    }));
+      });
+    });
     return safeConnection(connection);
   }
 
@@ -106,11 +111,14 @@ export class DeliveryService {
     }));
     if (!connection || connection.status !== 'ACTIVE') throw new Error('Active Nova Poshta connection required');
     const data = senderProfileData(input);
-    await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.deliverySenderProfile.upsert({
-      where: { tenantId_connectionId: { tenantId, connectionId: connection.id } },
-      create: { tenantId, connectionId: connection.id, ...data },
-      update: data,
-    }));
+    await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+      await assertTenantAcceptingMutations(transaction, tenantId, 'DELIVERY');
+      return transaction.deliverySenderProfile.upsert({
+        where: { tenantId_connectionId: { tenantId, connectionId: connection.id } },
+        create: { tenantId, connectionId: connection.id, ...data },
+        update: data,
+      });
+    });
     return input;
   }
 
@@ -177,15 +185,18 @@ export class DeliveryService {
       orderBy: { createdAt: 'desc' },
     }));
     if (existing && existing.status !== 'DRAFT') throw new BadRequestException('SHIPMENT_ALREADY_CREATED');
-    const shipment = existing
-      ? await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.shipment.update({ where: { id: existing.id, tenantId, status: 'DRAFT' }, data: { ...data, ...providerData }, include: { statusEvents: { orderBy: { occurredAt: 'desc' } } } }))
-      : await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.shipment.create({
-          data: {
-            tenantId, orderId, createdByUserId: userId, status: 'DRAFT',
-            ...data, ...providerData, idempotencyKey: `shipment:draft:v1:${orderId}:${randomUUID()}`,
-          },
-          include: { statusEvents: { orderBy: { occurredAt: 'desc' } } },
-        }));
+    const shipment = await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+      await assertTenantAcceptingMutations(transaction, tenantId, 'DELIVERY');
+      return existing
+        ? transaction.shipment.update({ where: { id: existing.id, tenantId, status: 'DRAFT' }, data: { ...data, ...providerData }, include: { statusEvents: { orderBy: { occurredAt: 'desc' } } } })
+        : transaction.shipment.create({
+            data: {
+              tenantId, orderId, createdByUserId: userId, status: 'DRAFT',
+              ...data, ...providerData, idempotencyKey: `shipment:draft:v1:${orderId}:${randomUUID()}`,
+            },
+            include: { statusEvents: { orderBy: { occurredAt: 'desc' } } },
+          });
+    });
     return mapShipmentSummary(shipment);
   }
 
@@ -257,6 +268,7 @@ export class DeliveryService {
 
     try {
       await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+        await assertTenantAcceptingMutations(transaction, tenantId, 'DELIVERY');
         const claimed = await transaction.shipment.updateMany({
           where: { id: active.id, tenantId, status: 'DRAFT', version },
           data: { status: 'CREATING', createdByUserId: userId, idempotencyKey, lastErrorCode: null },
@@ -328,11 +340,14 @@ export class DeliveryService {
       select: { status: true },
     }));
     if (existingAttempt?.status === 'FAILED') throw new BadRequestException('SHIPMENT_CANCELLATION_FAILED');
-    await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.shipmentAttempt.upsert({
-      where: { tenantId_shipmentId_operation_version: { tenantId, shipmentId, operation: 'CANCEL', version } },
-      create: { tenantId, shipmentId, operation: 'CANCEL', version, status: 'PENDING', idempotencyKey, requestHash: shipment.requestHash },
-      update: {},
-    }));
+    await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+      await assertTenantAcceptingMutations(transaction, tenantId, 'DELIVERY');
+      return transaction.shipmentAttempt.upsert({
+        where: { tenantId_shipmentId_operation_version: { tenantId, shipmentId, operation: 'CANCEL', version } },
+        create: { tenantId, shipmentId, operation: 'CANCEL', version, status: 'PENDING', idempotencyKey, requestHash: shipment.requestHash },
+        update: {},
+      });
+    });
     try {
       await this.shipmentQueue?.add('shipment.cancel', { shipmentId }, { jobId: `shipment:cancel:${shipmentId}:${version}`, attempts: 1, removeOnComplete: true, removeOnFail: true });
     } catch { /* durable attempt is reconciled by the worker */ }
@@ -370,16 +385,18 @@ export class DeliveryService {
   async disconnect(tenantId: string): Promise<DeliveryConnectionSummary> {
     this.assertEnabled();
     const disconnectedAt = this.now();
-    const result = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.deliveryConnection.updateMany({
-      where: { tenantId, provider: 'NOVA_POSHTA' },
-      data: {
+    const result = await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+      await assertTenantAcceptingMutations(transaction, tenantId, 'DELIVERY');
+      return transaction.deliveryConnection.updateMany({
+        where: { tenantId, provider: 'NOVA_POSHTA' }, data: {
         status: 'DISCONNECTED',
         disconnectedAt,
         encryptedCredential: this.cipher.encrypt(randomUUID()),
         credentialGenerationId: randomUUID(),
         lastErrorCode: null,
-      },
-    }));
+        },
+      });
+    });
     if (result.count !== 1) throw new Error('Nova Poshta connection not found');
     return {
       provider: 'NOVA_POSHTA',

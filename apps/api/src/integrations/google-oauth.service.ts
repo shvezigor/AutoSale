@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
-import { type PrismaClient, withTenantTransaction } from '@autosale/database';
+import { assertTenantAcceptingMutations, TenantLifecycleFrozenError, type PrismaClient, withTenantTransaction } from '@autosale/database';
 
 import { CredentialCipher } from './credential-cipher.js';
 import type { GoogleOAuthClientPort } from './google-oauth.client.js';
@@ -30,6 +30,7 @@ export class GoogleOAuthService {
   ) {}
 
   async start(tenantId: string, userId: string, returnPath?: string): Promise<{ authorizationUrl: string }> {
+    await withTenantTransaction(this.prisma, tenantId, (transaction) => assertTenantAcceptingMutations(transaction, tenantId, 'SHEETS_EXPORT'));
     const { state } = await this.states.createAttempt({ tenantId, userId, ...(returnPath === undefined ? {} : { returnPath }) });
     return { authorizationUrl: this.client.getAuthorizationUrl({ state, accessType: 'offline' }) };
   }
@@ -64,7 +65,9 @@ export class GoogleOAuthService {
       }
 
       const checkedAt = this.now();
-      await withTenantTransaction(this.prisma, binding.tenantId, (transaction) => transaction.googleConnection.upsert({
+      await withTenantTransaction(this.prisma, binding.tenantId, async (transaction) => {
+        await assertTenantAcceptingMutations(transaction, binding.tenantId, 'SHEETS_EXPORT');
+        return transaction.googleConnection.upsert({
         where: { tenantId: binding.tenantId },
         create: {
           tenantId: binding.tenantId,
@@ -89,10 +92,12 @@ export class GoogleOAuthService {
           lastErrorCode: null,
           disconnectedAt: null,
         },
-      }));
+        });
+      });
       await this.audit(binding.tenantId, binding.userId, 'GOOGLE_CONNECT_COMPLETED', 'SUCCESS');
       return { returnPath: binding.returnPath, summary: await this.summary(binding.tenantId) };
-    } catch {
+    } catch (error) {
+      if (error instanceof TenantLifecycleFrozenError) throw error;
       await this.audit(binding.tenantId, binding.userId, 'GOOGLE_CONNECT_FAILED', 'FAILURE');
       await this.notify({ tenantId: binding.tenantId, userId: binding.userId, type: 'ERROR', category: 'GOOGLE_REAUTHORIZATION_REQUIRED', title: 'Google потребує повторного підключення', actionUrl: '/settings?tab=google' });
       throw new Error(SAFE_FAILURE);

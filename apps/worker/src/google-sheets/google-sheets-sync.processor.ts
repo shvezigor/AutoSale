@@ -1,4 +1,4 @@
-import { type PrismaClient, withTenantTransaction } from '@autosale/database';
+import { assertTenantAcceptingMutations, type PrismaClient, TenantLifecycleFrozenError, withTenantTransaction } from '@autosale/database';
 import type { GoogleSheetsAdapter } from '@autosale/integrations';
 import { WorkerNotificationService } from '../notifications/worker-notification.service.js';
 
@@ -12,15 +12,25 @@ export class GoogleSheetsSyncProcessor {
     private readonly notifications?: WorkerNotificationService,
   ) {}
 
-  async process(tenantId: string, exportId: string): Promise<void> {
+  async process(tenantId: string, exportId: string): Promise<'SUCCEEDED' | 'IGNORED_FROZEN'> {
     const record = await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
       const record = await transaction.orderExport.findFirstOrThrow({ where: { id: exportId, tenantId } });
+      try {
+        await assertTenantAcceptingMutations(transaction, tenantId, 'SHEETS_EXPORT');
+      } catch (error) {
+        if (!(error instanceof TenantLifecycleFrozenError)) throw error;
+        await transaction.orderExport.update({
+          where: { id: exportId }, data: { status: 'FAILED', errorSummary: error.code },
+        });
+        return null;
+      }
       await transaction.orderExport.update({
         where: { id: exportId },
         data: { status: 'PROCESSING', attempts: { increment: 1 }, lastAttemptAt: new Date() },
       });
       return record;
     });
+    if (!record) return 'IGNORED_FROZEN';
     let approvedBy: string | null = null;
     try {
       const context = await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
@@ -57,6 +67,7 @@ export class GoogleSheetsSyncProcessor {
         where: { id: exportId },
         data: { status: 'SUCCEEDED', rowNumber: result.rowNumber, lastSyncedAt: new Date(), errorSummary: null },
       }));
+      return 'SUCCEEDED';
     } catch (error) {
       const summary = error instanceof Error ? error.message.slice(0, 500) : 'Unknown Google Sheets synchronization error';
       await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.orderExport.update({

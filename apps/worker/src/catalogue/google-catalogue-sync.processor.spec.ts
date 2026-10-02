@@ -51,6 +51,17 @@ describe('GoogleCatalogueSyncProcessor', () => {
     vi.useRealTimers();
   });
 
+  it('does not read Google Sheets when tenant ingestion is frozen', async () => {
+    Object.assign(prisma, { tenantLifecycleRequest: { findFirst: vi.fn().mockResolvedValue({ id: 'delete-request' }) } });
+    const processor = new GoogleCatalogueSyncProcessor(prisma as never, sheets as never, storage, importer);
+
+    await expect(processor.process({ tenantId, sourceId })).resolves.toEqual({ status: 'IGNORED_FROZEN' });
+    expect(sheets.readTable).not.toHaveBeenCalled();
+    expect(prisma.catalogueSource.updateMany).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({ status: 'PAUSED', lastErrorSummary: 'TENANT_LIFECYCLE_FROZEN' }),
+    }));
+  });
+
   it('reuses a confirmed mapping when the normalized structure is unchanged', async () => {
     const processor = new GoogleCatalogueSyncProcessor(prisma as never, sheets as never, storage, importer, undefined, notifications);
 
@@ -307,7 +318,7 @@ describe('GoogleCatalogueSyncProcessor', () => {
       : Promise.resolve({ totalRows: 1, validRows: 1, createdRows: 1, updatedRows: 0, skippedRows: 0, failedRows: 0, rowErrors: [] }));
     const firstProcessor = new GoogleCatalogueSyncProcessor(prisma as never, sheets as never, storage, importer);
     const first = firstProcessor.process({ tenantId, sourceId });
-    for (let turn = 0; turn < 20 && importer.importTable.mock.calls.length === 0; turn += 1) await Promise.resolve();
+    for (let turn = 0; turn < 100 && importer.importTable.mock.calls.length === 0; turn += 1) await Promise.resolve();
     expect(importer.importTable).toHaveBeenCalledOnce();
 
     await vi.advanceTimersByTimeAsync(6 * 60_000);

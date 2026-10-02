@@ -1,5 +1,5 @@
 import type { CatalogueMappingProposal, RawCatalogueMatrix, TableStructureProposal } from '@autosale/contracts';
-import { type PrismaClient, withTenantTransaction } from '@autosale/database';
+import { assertTenantAcceptingMutations, type PrismaClient, TenantLifecycleFrozenError, withTenantTransaction } from '@autosale/database';
 import { googleSheetsStructureFingerprint, matrixFromRows, type ObjectStorage } from '@autosale/integrations';
 import { parse as parseCsv } from 'csv-parse/sync';
 import { randomUUID } from 'node:crypto';
@@ -36,11 +36,21 @@ export class CatalogueMappingProcessor {
     private readonly hybrid?: HybridDependencies,
   ) {}
 
-  async process(job: CatalogueMappingJob): Promise<{ status: 'COMPLETED' | 'MAPPING_REVIEW' | 'SKIPPED'; proposal: CatalogueMappingSuggestion['proposal'] | null }> {
+  async process(job: CatalogueMappingJob): Promise<{ status: 'COMPLETED' | 'MAPPING_REVIEW' | 'SKIPPED' | 'IGNORED_FROZEN'; proposal: CatalogueMappingSuggestion['proposal'] | null }> {
     const leaseId = randomUUID();
     const claimedAt = new Date();
-    const claimed = await withTenantTransaction(this.prisma, job.tenantId, (transaction) => transaction.catalogueImportRun.updateMany({
-      where: {
+    const claimed = await withTenantTransaction(this.prisma, job.tenantId, async (transaction) => {
+      try {
+        await assertTenantAcceptingMutations(transaction, job.tenantId, 'CATALOGUE');
+      } catch (error) {
+        if (!(error instanceof TenantLifecycleFrozenError)) throw error;
+        await transaction.catalogueImportRun.updateMany({
+          where: { id: job.runId, tenantId: job.tenantId, status: { in: ['UPLOADED', 'MAPPING'] } },
+          data: { status: 'CANCELLED', mappingLeaseId: null, mappingLeaseExpiresAt: null },
+        });
+        return 'FROZEN' as const;
+      }
+      return transaction.catalogueImportRun.updateMany({ where: {
         id: job.runId, tenantId: job.tenantId,
         OR: [
           { status: 'UPLOADED' },
@@ -48,7 +58,9 @@ export class CatalogueMappingProcessor {
         ],
       },
       data: { status: 'MAPPING', mappingLeaseId: leaseId, mappingLeaseExpiresAt: leaseExpiry(claimedAt) },
-    }));
+      });
+    });
+    if (claimed === 'FROZEN') return { status: 'IGNORED_FROZEN', proposal: null };
     if (claimed.count !== 1) return { status: 'SKIPPED', proposal: null };
 
     let ownsLease = true;

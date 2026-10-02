@@ -55,4 +55,21 @@ describe('TelegramAlertService', () => {
     });
     expect(JSON.stringify([...deliveries.values()][0])).toContain('Мій магазин');
   });
+
+  it('does not create alerts or deliveries when tenant ingestion is frozen', async () => {
+    const tx = {
+      tenantLifecycleRequest: { findFirst: vi.fn().mockResolvedValue({ id: 'delete-request' }) },
+      tenant: { findUniqueOrThrow: vi.fn() },
+      userNotification: { upsert: vi.fn() },
+      telegramDelivery: { upsert: vi.fn() },
+    };
+
+    await new TelegramAlertService('https://sales-aito.com').persist(tx as never, {
+      eventId: 'event-frozen', tenantId: 'tenant-1', orderId: 'order-1', type: 'ORDER_NEEDS_REVIEW',
+    });
+
+    expect(tx.tenant.findUniqueOrThrow).not.toHaveBeenCalled();
+    expect(tx.userNotification.upsert).not.toHaveBeenCalled();
+    expect(tx.telegramDelivery.upsert).not.toHaveBeenCalled();
+  });
 });

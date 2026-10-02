@@ -7,3 +7,4 @@ export * from './order-payments.js';
 export * from './runtime-database-roles.js';
 export * from './security-audit.js';
 export * from './tenant-transaction.js';
+export * from './tenant-lifecycle.js';
