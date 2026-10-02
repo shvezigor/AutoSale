@@ -45,6 +45,36 @@ export const InstagramConnectionStatus = {
 export type InstagramConnectionStatus = (typeof InstagramConnectionStatus)[keyof typeof InstagramConnectionStatus]
 
 
+export const FacebookConnectionStatus = {
+  ACTIVE: 'ACTIVE',
+  REAUTH_REQUIRED: 'REAUTH_REQUIRED',
+  ERROR: 'ERROR',
+  DISCONNECTED: 'DISCONNECTED'
+} as const
+
+export type FacebookConnectionStatus = (typeof FacebookConnectionStatus)[keyof typeof FacebookConnectionStatus]
+
+
+export const FacebookCredentialCleanupOperationStatus = {
+  PENDING: 'PENDING',
+  SUCCEEDED: 'SUCCEEDED',
+  FAILED: 'FAILED'
+} as const
+
+export type FacebookCredentialCleanupOperationStatus = (typeof FacebookCredentialCleanupOperationStatus)[keyof typeof FacebookCredentialCleanupOperationStatus]
+
+
+export const FacebookCredentialCleanupState = {
+  ARMED: 'ARMED',
+  REQUIRED: 'REQUIRED',
+  COMPLETED: 'COMPLETED',
+  CANCELLED: 'CANCELLED',
+  DEAD_LETTER: 'DEAD_LETTER'
+} as const
+
+export type FacebookCredentialCleanupState = (typeof FacebookCredentialCleanupState)[keyof typeof FacebookCredentialCleanupState]
+
+
 export const OutboundDeliveryStatus = {
   PENDING: 'PENDING',
   SENDING: 'SENDING',

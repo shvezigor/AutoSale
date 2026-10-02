@@ -423,6 +423,57 @@ export type EnumInstagramCredentialCleanupOperationStatusWithAggregatesFilter<$P
   _max?: Prisma.NestedEnumInstagramCredentialCleanupOperationStatusFilter<$PrismaModel>
 }
 
+export type EnumFacebookConnectionStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.FacebookConnectionStatus | Prisma.EnumFacebookConnectionStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.FacebookConnectionStatus[] | Prisma.ListEnumFacebookConnectionStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FacebookConnectionStatus[] | Prisma.ListEnumFacebookConnectionStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFacebookConnectionStatusFilter<$PrismaModel> | $Enums.FacebookConnectionStatus
+}
+
+export type EnumFacebookConnectionStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.FacebookConnectionStatus | Prisma.EnumFacebookConnectionStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.FacebookConnectionStatus[] | Prisma.ListEnumFacebookConnectionStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FacebookConnectionStatus[] | Prisma.ListEnumFacebookConnectionStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFacebookConnectionStatusWithAggregatesFilter<$PrismaModel> | $Enums.FacebookConnectionStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumFacebookConnectionStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumFacebookConnectionStatusFilter<$PrismaModel>
+}
+
+export type EnumFacebookCredentialCleanupStateFilter<$PrismaModel = never> = {
+  equals?: $Enums.FacebookCredentialCleanupState | Prisma.EnumFacebookCredentialCleanupStateFieldRefInput<$PrismaModel>
+  in?: $Enums.FacebookCredentialCleanupState[] | Prisma.ListEnumFacebookCredentialCleanupStateFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FacebookCredentialCleanupState[] | Prisma.ListEnumFacebookCredentialCleanupStateFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFacebookCredentialCleanupStateFilter<$PrismaModel> | $Enums.FacebookCredentialCleanupState
+}
+
+export type EnumFacebookCredentialCleanupOperationStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.FacebookCredentialCleanupOperationStatus | Prisma.EnumFacebookCredentialCleanupOperationStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.FacebookCredentialCleanupOperationStatus[] | Prisma.ListEnumFacebookCredentialCleanupOperationStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FacebookCredentialCleanupOperationStatus[] | Prisma.ListEnumFacebookCredentialCleanupOperationStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFacebookCredentialCleanupOperationStatusFilter<$PrismaModel> | $Enums.FacebookCredentialCleanupOperationStatus
+}
+
+export type EnumFacebookCredentialCleanupStateWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.FacebookCredentialCleanupState | Prisma.EnumFacebookCredentialCleanupStateFieldRefInput<$PrismaModel>
+  in?: $Enums.FacebookCredentialCleanupState[] | Prisma.ListEnumFacebookCredentialCleanupStateFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FacebookCredentialCleanupState[] | Prisma.ListEnumFacebookCredentialCleanupStateFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFacebookCredentialCleanupStateWithAggregatesFilter<$PrismaModel> | $Enums.FacebookCredentialCleanupState
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumFacebookCredentialCleanupStateFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumFacebookCredentialCleanupStateFilter<$PrismaModel>
+}
+
+export type EnumFacebookCredentialCleanupOperationStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.FacebookCredentialCleanupOperationStatus | Prisma.EnumFacebookCredentialCleanupOperationStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.FacebookCredentialCleanupOperationStatus[] | Prisma.ListEnumFacebookCredentialCleanupOperationStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FacebookCredentialCleanupOperationStatus[] | Prisma.ListEnumFacebookCredentialCleanupOperationStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFacebookCredentialCleanupOperationStatusWithAggregatesFilter<$PrismaModel> | $Enums.FacebookCredentialCleanupOperationStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumFacebookCredentialCleanupOperationStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumFacebookCredentialCleanupOperationStatusFilter<$PrismaModel>
+}
+
 export type EnumPlatformRoleFilter<$PrismaModel = never> = {
   equals?: $Enums.PlatformRole | Prisma.EnumPlatformRoleFieldRefInput<$PrismaModel>
   in?: $Enums.PlatformRole[] | Prisma.ListEnumPlatformRoleFieldRefInput<$PrismaModel>
@@ -1477,6 +1528,57 @@ export type NestedEnumInstagramCredentialCleanupOperationStatusWithAggregatesFil
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumInstagramCredentialCleanupOperationStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumInstagramCredentialCleanupOperationStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumFacebookConnectionStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.FacebookConnectionStatus | Prisma.EnumFacebookConnectionStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.FacebookConnectionStatus[] | Prisma.ListEnumFacebookConnectionStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FacebookConnectionStatus[] | Prisma.ListEnumFacebookConnectionStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFacebookConnectionStatusFilter<$PrismaModel> | $Enums.FacebookConnectionStatus
+}
+
+export type NestedEnumFacebookConnectionStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.FacebookConnectionStatus | Prisma.EnumFacebookConnectionStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.FacebookConnectionStatus[] | Prisma.ListEnumFacebookConnectionStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FacebookConnectionStatus[] | Prisma.ListEnumFacebookConnectionStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFacebookConnectionStatusWithAggregatesFilter<$PrismaModel> | $Enums.FacebookConnectionStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumFacebookConnectionStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumFacebookConnectionStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumFacebookCredentialCleanupStateFilter<$PrismaModel = never> = {
+  equals?: $Enums.FacebookCredentialCleanupState | Prisma.EnumFacebookCredentialCleanupStateFieldRefInput<$PrismaModel>
+  in?: $Enums.FacebookCredentialCleanupState[] | Prisma.ListEnumFacebookCredentialCleanupStateFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FacebookCredentialCleanupState[] | Prisma.ListEnumFacebookCredentialCleanupStateFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFacebookCredentialCleanupStateFilter<$PrismaModel> | $Enums.FacebookCredentialCleanupState
+}
+
+export type NestedEnumFacebookCredentialCleanupOperationStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.FacebookCredentialCleanupOperationStatus | Prisma.EnumFacebookCredentialCleanupOperationStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.FacebookCredentialCleanupOperationStatus[] | Prisma.ListEnumFacebookCredentialCleanupOperationStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FacebookCredentialCleanupOperationStatus[] | Prisma.ListEnumFacebookCredentialCleanupOperationStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFacebookCredentialCleanupOperationStatusFilter<$PrismaModel> | $Enums.FacebookCredentialCleanupOperationStatus
+}
+
+export type NestedEnumFacebookCredentialCleanupStateWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.FacebookCredentialCleanupState | Prisma.EnumFacebookCredentialCleanupStateFieldRefInput<$PrismaModel>
+  in?: $Enums.FacebookCredentialCleanupState[] | Prisma.ListEnumFacebookCredentialCleanupStateFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FacebookCredentialCleanupState[] | Prisma.ListEnumFacebookCredentialCleanupStateFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFacebookCredentialCleanupStateWithAggregatesFilter<$PrismaModel> | $Enums.FacebookCredentialCleanupState
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumFacebookCredentialCleanupStateFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumFacebookCredentialCleanupStateFilter<$PrismaModel>
+}
+
+export type NestedEnumFacebookCredentialCleanupOperationStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.FacebookCredentialCleanupOperationStatus | Prisma.EnumFacebookCredentialCleanupOperationStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.FacebookCredentialCleanupOperationStatus[] | Prisma.ListEnumFacebookCredentialCleanupOperationStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FacebookCredentialCleanupOperationStatus[] | Prisma.ListEnumFacebookCredentialCleanupOperationStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFacebookCredentialCleanupOperationStatusWithAggregatesFilter<$PrismaModel> | $Enums.FacebookCredentialCleanupOperationStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumFacebookCredentialCleanupOperationStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumFacebookCredentialCleanupOperationStatusFilter<$PrismaModel>
 }
 
 export type NestedEnumPlatformRoleFilter<$PrismaModel = never> = {

@@ -170,6 +170,14 @@ export async function configureRuntimeDatabaseRoles(
           GRANT EXECUTE ON FUNCTION public.api_consume_instagram_oauth_state(text, timestamp with time zone) TO autosale_api;
           REVOKE ALL ON FUNCTION public.api_consume_instagram_oauth_state(text, timestamp with time zone) FROM autosale_worker;
         END IF;
+        IF to_regprocedure('public.api_facebook_tenant_for_page(text)') IS NOT NULL THEN
+          GRANT EXECUTE ON FUNCTION public.api_facebook_tenant_for_page(text) TO autosale_api;
+          REVOKE ALL ON FUNCTION public.api_facebook_tenant_for_page(text) FROM autosale_worker;
+        END IF;
+        IF to_regprocedure('public.api_consume_facebook_oauth_attempt(text,timestamp with time zone)') IS NOT NULL THEN
+          GRANT EXECUTE ON FUNCTION public.api_consume_facebook_oauth_attempt(text, timestamp with time zone) TO autosale_api;
+          REVOKE ALL ON FUNCTION public.api_consume_facebook_oauth_attempt(text, timestamp with time zone) FROM autosale_worker;
+        END IF;
         IF to_regprocedure('public.worker_due_instagram_avatar_cleanups(timestamp with time zone,integer)') IS NOT NULL THEN
           REVOKE ALL ON FUNCTION public.worker_due_instagram_avatar_cleanups(timestamp with time zone, integer) FROM autosale_api;
           GRANT EXECUTE ON FUNCTION public.worker_due_instagram_avatar_cleanups(timestamp with time zone, integer) TO autosale_worker;

@@ -3,6 +3,7 @@ export * from './meta.js';
 export * from './orders.js';
 export * from './auth.js';
 export * from './instagram.js';
+export * from './facebook.js';
 export * from './catalogue.js';
 export * from './telegram.js';
 export * from './procurement.js';

@@ -406,6 +406,9 @@ export const ModelName = {
   InstagramConnection: 'InstagramConnection',
   InstagramOAuthState: 'InstagramOAuthState',
   InstagramCredentialCleanup: 'InstagramCredentialCleanup',
+  FacebookConnection: 'FacebookConnection',
+  FacebookOAuthAttempt: 'FacebookOAuthAttempt',
+  FacebookCredentialCleanup: 'FacebookCredentialCleanup',
   User: 'User',
   UserAvatarCleanup: 'UserAvatarCleanup',
   UserNotification: 'UserNotification',
@@ -469,7 +472,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "tenant" | "tenantLifecycleRequest" | "tenantRetentionDryRun" | "googleConnection" | "googleOAuthAttempt" | "googleCredentialCleanup" | "instagramConnection" | "instagramOAuthState" | "instagramCredentialCleanup" | "user" | "userAvatarCleanup" | "userNotification" | "telegramLinkAttempt" | "telegramUserBinding" | "telegramBusinessConnection" | "telegramChat" | "telegramSupplierSetting" | "telegramWebhookUpdate" | "telegramDelivery" | "googleIdentity" | "googleSignInAttempt" | "tenantMembership" | "session" | "emailVerificationToken" | "passwordResetToken" | "tenantInvitation" | "securityAuditLog" | "webhookEvent" | "conversation" | "instagramCustomerProfile" | "instagramAvatarCleanup" | "message" | "googleSheetsDestination" | "tenantSettings" | "tenantLegalEntity" | "tenantBankAccount" | "order" | "orderCommercialTerms" | "orderPayment" | "orderIntentEvaluation" | "deliveryConnection" | "deliverySenderProfile" | "shipment" | "shipmentAttempt" | "shipmentStatusEvent" | "orderExport" | "auditLog" | "orderItem" | "product" | "inventoryReservation" | "telegramDeliveryItem" | "telegramNotificationPreference" | "catalogueSource" | "catalogueMapping" | "catalogueImportRun" | "attachment" | "demoLead"
+    modelProps: "tenant" | "tenantLifecycleRequest" | "tenantRetentionDryRun" | "googleConnection" | "googleOAuthAttempt" | "googleCredentialCleanup" | "instagramConnection" | "instagramOAuthState" | "instagramCredentialCleanup" | "facebookConnection" | "facebookOAuthAttempt" | "facebookCredentialCleanup" | "user" | "userAvatarCleanup" | "userNotification" | "telegramLinkAttempt" | "telegramUserBinding" | "telegramBusinessConnection" | "telegramChat" | "telegramSupplierSetting" | "telegramWebhookUpdate" | "telegramDelivery" | "googleIdentity" | "googleSignInAttempt" | "tenantMembership" | "session" | "emailVerificationToken" | "passwordResetToken" | "tenantInvitation" | "securityAuditLog" | "webhookEvent" | "conversation" | "instagramCustomerProfile" | "instagramAvatarCleanup" | "message" | "googleSheetsDestination" | "tenantSettings" | "tenantLegalEntity" | "tenantBankAccount" | "order" | "orderCommercialTerms" | "orderPayment" | "orderIntentEvaluation" | "deliveryConnection" | "deliverySenderProfile" | "shipment" | "shipmentAttempt" | "shipmentStatusEvent" | "orderExport" | "auditLog" | "orderItem" | "product" | "inventoryReservation" | "telegramDeliveryItem" | "telegramNotificationPreference" | "catalogueSource" | "catalogueMapping" | "catalogueImportRun" | "attachment" | "demoLead"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1136,6 +1139,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.InstagramCredentialCleanupCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.InstagramCredentialCleanupCountAggregateOutputType> | number
+        }
+      }
+    }
+    FacebookConnection: {
+      payload: Prisma.$FacebookConnectionPayload<ExtArgs>
+      fields: Prisma.FacebookConnectionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.FacebookConnectionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FacebookConnectionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.FacebookConnectionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FacebookConnectionPayload>
+        }
+        findFirst: {
+          args: Prisma.FacebookConnectionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FacebookConnectionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.FacebookConnectionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FacebookConnectionPayload>
+        }
+        findMany: {
+          args: Prisma.FacebookConnectionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FacebookConnectionPayload>[]
+        }
+        create: {
+          args: Prisma.FacebookConnectionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FacebookConnectionPayload>
+        }
+        createMany: {
+          args: Prisma.FacebookConnectionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.FacebookConnectionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FacebookConnectionPayload>[]
+        }
+        delete: {
+          args: Prisma.FacebookConnectionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FacebookConnectionPayload>
+        }
+        update: {
+          args: Prisma.FacebookConnectionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FacebookConnectionPayload>
+        }
+        deleteMany: {
+          args: Prisma.FacebookConnectionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.FacebookConnectionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.FacebookConnectionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FacebookConnectionPayload>[]
+        }
+        upsert: {
+          args: Prisma.FacebookConnectionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FacebookConnectionPayload>
+        }
+        aggregate: {
+          args: Prisma.FacebookConnectionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateFacebookConnection>
+        }
+        groupBy: {
+          args: Prisma.FacebookConnectionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FacebookConnectionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.FacebookConnectionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FacebookConnectionCountAggregateOutputType> | number
+        }
+      }
+    }
+    FacebookOAuthAttempt: {
+      payload: Prisma.$FacebookOAuthAttemptPayload<ExtArgs>
+      fields: Prisma.FacebookOAuthAttemptFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.FacebookOAuthAttemptFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FacebookOAuthAttemptPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.FacebookOAuthAttemptFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FacebookOAuthAttemptPayload>
+        }
+        findFirst: {
+          args: Prisma.FacebookOAuthAttemptFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FacebookOAuthAttemptPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.FacebookOAuthAttemptFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FacebookOAuthAttemptPayload>
+        }
+        findMany: {
+          args: Prisma.FacebookOAuthAttemptFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FacebookOAuthAttemptPayload>[]
+        }
+        create: {
+          args: Prisma.FacebookOAuthAttemptCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FacebookOAuthAttemptPayload>
+        }
+        createMany: {
+          args: Prisma.FacebookOAuthAttemptCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.FacebookOAuthAttemptCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FacebookOAuthAttemptPayload>[]
+        }
+        delete: {
+          args: Prisma.FacebookOAuthAttemptDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FacebookOAuthAttemptPayload>
+        }
+        update: {
+          args: Prisma.FacebookOAuthAttemptUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FacebookOAuthAttemptPayload>
+        }
+        deleteMany: {
+          args: Prisma.FacebookOAuthAttemptDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.FacebookOAuthAttemptUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.FacebookOAuthAttemptUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FacebookOAuthAttemptPayload>[]
+        }
+        upsert: {
+          args: Prisma.FacebookOAuthAttemptUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FacebookOAuthAttemptPayload>
+        }
+        aggregate: {
+          args: Prisma.FacebookOAuthAttemptAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateFacebookOAuthAttempt>
+        }
+        groupBy: {
+          args: Prisma.FacebookOAuthAttemptGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FacebookOAuthAttemptGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.FacebookOAuthAttemptCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FacebookOAuthAttemptCountAggregateOutputType> | number
+        }
+      }
+    }
+    FacebookCredentialCleanup: {
+      payload: Prisma.$FacebookCredentialCleanupPayload<ExtArgs>
+      fields: Prisma.FacebookCredentialCleanupFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.FacebookCredentialCleanupFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FacebookCredentialCleanupPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.FacebookCredentialCleanupFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FacebookCredentialCleanupPayload>
+        }
+        findFirst: {
+          args: Prisma.FacebookCredentialCleanupFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FacebookCredentialCleanupPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.FacebookCredentialCleanupFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FacebookCredentialCleanupPayload>
+        }
+        findMany: {
+          args: Prisma.FacebookCredentialCleanupFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FacebookCredentialCleanupPayload>[]
+        }
+        create: {
+          args: Prisma.FacebookCredentialCleanupCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FacebookCredentialCleanupPayload>
+        }
+        createMany: {
+          args: Prisma.FacebookCredentialCleanupCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.FacebookCredentialCleanupCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FacebookCredentialCleanupPayload>[]
+        }
+        delete: {
+          args: Prisma.FacebookCredentialCleanupDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FacebookCredentialCleanupPayload>
+        }
+        update: {
+          args: Prisma.FacebookCredentialCleanupUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FacebookCredentialCleanupPayload>
+        }
+        deleteMany: {
+          args: Prisma.FacebookCredentialCleanupDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.FacebookCredentialCleanupUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.FacebookCredentialCleanupUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FacebookCredentialCleanupPayload>[]
+        }
+        upsert: {
+          args: Prisma.FacebookCredentialCleanupUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FacebookCredentialCleanupPayload>
+        }
+        aggregate: {
+          args: Prisma.FacebookCredentialCleanupAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateFacebookCredentialCleanup>
+        }
+        groupBy: {
+          args: Prisma.FacebookCredentialCleanupGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FacebookCredentialCleanupGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.FacebookCredentialCleanupCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FacebookCredentialCleanupCountAggregateOutputType> | number
         }
       }
     }
@@ -4908,6 +5133,73 @@ export const InstagramCredentialCleanupScalarFieldEnum = {
 export type InstagramCredentialCleanupScalarFieldEnum = (typeof InstagramCredentialCleanupScalarFieldEnum)[keyof typeof InstagramCredentialCleanupScalarFieldEnum]
 
 
+export const FacebookConnectionScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  externalPageId: 'externalPageId',
+  pageName: 'pageName',
+  status: 'status',
+  encryptedPageAccessToken: 'encryptedPageAccessToken',
+  credentialGenerationId: 'credentialGenerationId',
+  tokenExpiresAt: 'tokenExpiresAt',
+  grantedScopes: 'grantedScopes',
+  connectedByUserId: 'connectedByUserId',
+  lastVerifiedAt: 'lastVerifiedAt',
+  lastErrorCode: 'lastErrorCode',
+  disconnectedAt: 'disconnectedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type FacebookConnectionScalarFieldEnum = (typeof FacebookConnectionScalarFieldEnum)[keyof typeof FacebookConnectionScalarFieldEnum]
+
+
+export const FacebookOAuthAttemptScalarFieldEnum = {
+  id: 'id',
+  tokenHash: 'tokenHash',
+  tenantId: 'tenantId',
+  userId: 'userId',
+  returnPath: 'returnPath',
+  expiresAt: 'expiresAt',
+  usedAt: 'usedAt',
+  encryptedPageCandidates: 'encryptedPageCandidates',
+  candidateExpiresAt: 'candidateExpiresAt',
+  selectedPageId: 'selectedPageId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type FacebookOAuthAttemptScalarFieldEnum = (typeof FacebookOAuthAttemptScalarFieldEnum)[keyof typeof FacebookOAuthAttemptScalarFieldEnum]
+
+
+export const FacebookCredentialCleanupScalarFieldEnum = {
+  id: 'id',
+  credentialGenerationId: 'credentialGenerationId',
+  tenantId: 'tenantId',
+  externalPageId: 'externalPageId',
+  encryptedPageAccessToken: 'encryptedPageAccessToken',
+  source: 'source',
+  state: 'state',
+  callbackResolvedAt: 'callbackResolvedAt',
+  unsubscribeStatus: 'unsubscribeStatus',
+  unsubscribeAttemptedAt: 'unsubscribeAttemptedAt',
+  unsubscribeSucceededAt: 'unsubscribeSucceededAt',
+  attempts: 'attempts',
+  leaseId: 'leaseId',
+  leaseExpiresAt: 'leaseExpiresAt',
+  version: 'version',
+  lastErrorCode: 'lastErrorCode',
+  permanentFailureAt: 'permanentFailureAt',
+  deadLetteredAt: 'deadLetteredAt',
+  deadLetteredByUserId: 'deadLetteredByUserId',
+  terminalAt: 'terminalAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type FacebookCredentialCleanupScalarFieldEnum = (typeof FacebookCredentialCleanupScalarFieldEnum)[keyof typeof FacebookCredentialCleanupScalarFieldEnum]
+
+
 export const UserScalarFieldEnum = {
   id: 'id',
   email: 'email',
@@ -5882,28 +6174,28 @@ export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof Json
  * Reference to a field of type 'String'
  */
 export type StringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'String'>
-
+    
 
 
 /**
  * Reference to a field of type 'String[]'
  */
 export type ListStringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'String[]'>
-
+    
 
 
 /**
  * Reference to a field of type 'AccessStatus'
  */
 export type EnumAccessStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AccessStatus'>
-
+    
 
 
 /**
  * Reference to a field of type 'AccessStatus[]'
  */
 export type ListEnumAccessStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AccessStatus[]'>
-
+    
 
 
 /**
@@ -5959,28 +6251,28 @@ export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'J
  * Reference to a field of type 'QueryMode'
  */
 export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
-
+    
 
 
 /**
  * Reference to a field of type 'GoogleConnectionStatus'
  */
 export type EnumGoogleConnectionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'GoogleConnectionStatus'>
-
+    
 
 
 /**
  * Reference to a field of type 'GoogleConnectionStatus[]'
  */
 export type ListEnumGoogleConnectionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'GoogleConnectionStatus[]'>
-
+    
 
 
 /**
  * Reference to a field of type 'GoogleCredentialCleanupStatus'
  */
 export type EnumGoogleCredentialCleanupStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'GoogleCredentialCleanupStatus'>
-
+    
 
 
 /**
@@ -6029,6 +6321,48 @@ export type EnumInstagramCredentialCleanupOperationStatusFieldRefInput<$PrismaMo
  * Reference to a field of type 'InstagramCredentialCleanupOperationStatus[]'
  */
 export type ListEnumInstagramCredentialCleanupOperationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'InstagramCredentialCleanupOperationStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'FacebookConnectionStatus'
+ */
+export type EnumFacebookConnectionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FacebookConnectionStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'FacebookConnectionStatus[]'
+ */
+export type ListEnumFacebookConnectionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FacebookConnectionStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'FacebookCredentialCleanupState'
+ */
+export type EnumFacebookCredentialCleanupStateFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FacebookCredentialCleanupState'>
+    
+
+
+/**
+ * Reference to a field of type 'FacebookCredentialCleanupState[]'
+ */
+export type ListEnumFacebookCredentialCleanupStateFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FacebookCredentialCleanupState[]'>
+    
+
+
+/**
+ * Reference to a field of type 'FacebookCredentialCleanupOperationStatus'
+ */
+export type EnumFacebookCredentialCleanupOperationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FacebookCredentialCleanupOperationStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'FacebookCredentialCleanupOperationStatus[]'
+ */
+export type ListEnumFacebookCredentialCleanupOperationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FacebookCredentialCleanupOperationStatus[]'>
     
 
 
@@ -6618,6 +6952,9 @@ export type GlobalOmitConfig = {
   instagramConnection?: Prisma.InstagramConnectionOmit
   instagramOAuthState?: Prisma.InstagramOAuthStateOmit
   instagramCredentialCleanup?: Prisma.InstagramCredentialCleanupOmit
+  facebookConnection?: Prisma.FacebookConnectionOmit
+  facebookOAuthAttempt?: Prisma.FacebookOAuthAttemptOmit
+  facebookCredentialCleanup?: Prisma.FacebookCredentialCleanupOmit
   user?: Prisma.UserOmit
   userAvatarCleanup?: Prisma.UserAvatarCleanupOmit
   userNotification?: Prisma.UserNotificationOmit
@@ -6728,3 +7065,4 @@ export type PrismaAction =
  * `PrismaClient` proxy available in interactive transactions.
  */
 export type TransactionClient = Omit<DefaultPrismaClient, runtime.ITXClientDenyList>
+

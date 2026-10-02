@@ -209,6 +209,9 @@ export type TenantWhereInput = {
   instagramConnection?: Prisma.XOR<Prisma.InstagramConnectionNullableScalarRelationFilter, Prisma.InstagramConnectionWhereInput> | null
   instagramOAuthStates?: Prisma.InstagramOAuthStateListRelationFilter
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupListRelationFilter
+  facebookConnection?: Prisma.XOR<Prisma.FacebookConnectionNullableScalarRelationFilter, Prisma.FacebookConnectionWhereInput> | null
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptListRelationFilter
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupListRelationFilter
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileListRelationFilter
   googleConnection?: Prisma.XOR<Prisma.GoogleConnectionNullableScalarRelationFilter, Prisma.GoogleConnectionWhereInput> | null
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptListRelationFilter
@@ -264,6 +267,9 @@ export type TenantOrderByWithRelationInput = {
   instagramConnection?: Prisma.InstagramConnectionOrderByWithRelationInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateOrderByRelationAggregateInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupOrderByRelationAggregateInput
+  facebookConnection?: Prisma.FacebookConnectionOrderByWithRelationInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptOrderByRelationAggregateInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupOrderByRelationAggregateInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileOrderByRelationAggregateInput
   googleConnection?: Prisma.GoogleConnectionOrderByWithRelationInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptOrderByRelationAggregateInput
@@ -322,6 +328,9 @@ export type TenantWhereUniqueInput = Prisma.AtLeast<{
   instagramConnection?: Prisma.XOR<Prisma.InstagramConnectionNullableScalarRelationFilter, Prisma.InstagramConnectionWhereInput> | null
   instagramOAuthStates?: Prisma.InstagramOAuthStateListRelationFilter
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupListRelationFilter
+  facebookConnection?: Prisma.XOR<Prisma.FacebookConnectionNullableScalarRelationFilter, Prisma.FacebookConnectionWhereInput> | null
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptListRelationFilter
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupListRelationFilter
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileListRelationFilter
   googleConnection?: Prisma.XOR<Prisma.GoogleConnectionNullableScalarRelationFilter, Prisma.GoogleConnectionWhereInput> | null
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptListRelationFilter
@@ -401,6 +410,9 @@ export type TenantCreateInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
@@ -456,6 +468,9 @@ export type TenantUncheckedCreateInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
@@ -511,6 +526,9 @@ export type TenantUpdateInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
@@ -566,6 +584,9 @@ export type TenantUncheckedUpdateInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
@@ -785,6 +806,48 @@ export type TenantUpdateOneRequiredWithoutInstagramCredentialCleanupsNestedInput
   upsert?: Prisma.TenantUpsertWithoutInstagramCredentialCleanupsInput
   connect?: Prisma.TenantWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.TenantUpdateToOneWithWhereWithoutInstagramCredentialCleanupsInput, Prisma.TenantUpdateWithoutInstagramCredentialCleanupsInput>, Prisma.TenantUncheckedUpdateWithoutInstagramCredentialCleanupsInput>
+}
+
+export type TenantCreateNestedOneWithoutFacebookConnectionInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutFacebookConnectionInput, Prisma.TenantUncheckedCreateWithoutFacebookConnectionInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutFacebookConnectionInput
+  connect?: Prisma.TenantWhereUniqueInput
+}
+
+export type TenantUpdateOneRequiredWithoutFacebookConnectionNestedInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutFacebookConnectionInput, Prisma.TenantUncheckedCreateWithoutFacebookConnectionInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutFacebookConnectionInput
+  upsert?: Prisma.TenantUpsertWithoutFacebookConnectionInput
+  connect?: Prisma.TenantWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TenantUpdateToOneWithWhereWithoutFacebookConnectionInput, Prisma.TenantUpdateWithoutFacebookConnectionInput>, Prisma.TenantUncheckedUpdateWithoutFacebookConnectionInput>
+}
+
+export type TenantCreateNestedOneWithoutFacebookOAuthAttemptsInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutFacebookOAuthAttemptsInput, Prisma.TenantUncheckedCreateWithoutFacebookOAuthAttemptsInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutFacebookOAuthAttemptsInput
+  connect?: Prisma.TenantWhereUniqueInput
+}
+
+export type TenantUpdateOneRequiredWithoutFacebookOAuthAttemptsNestedInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutFacebookOAuthAttemptsInput, Prisma.TenantUncheckedCreateWithoutFacebookOAuthAttemptsInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutFacebookOAuthAttemptsInput
+  upsert?: Prisma.TenantUpsertWithoutFacebookOAuthAttemptsInput
+  connect?: Prisma.TenantWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TenantUpdateToOneWithWhereWithoutFacebookOAuthAttemptsInput, Prisma.TenantUpdateWithoutFacebookOAuthAttemptsInput>, Prisma.TenantUncheckedUpdateWithoutFacebookOAuthAttemptsInput>
+}
+
+export type TenantCreateNestedOneWithoutFacebookCredentialCleanupsInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutFacebookCredentialCleanupsInput, Prisma.TenantUncheckedCreateWithoutFacebookCredentialCleanupsInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutFacebookCredentialCleanupsInput
+  connect?: Prisma.TenantWhereUniqueInput
+}
+
+export type TenantUpdateOneRequiredWithoutFacebookCredentialCleanupsNestedInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutFacebookCredentialCleanupsInput, Prisma.TenantUncheckedCreateWithoutFacebookCredentialCleanupsInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutFacebookCredentialCleanupsInput
+  upsert?: Prisma.TenantUpsertWithoutFacebookCredentialCleanupsInput
+  connect?: Prisma.TenantWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TenantUpdateToOneWithWhereWithoutFacebookCredentialCleanupsInput, Prisma.TenantUpdateWithoutFacebookCredentialCleanupsInput>, Prisma.TenantUncheckedUpdateWithoutFacebookCredentialCleanupsInput>
 }
 
 export type TenantCreateNestedOneWithoutNotificationsInput = {
@@ -1349,6 +1412,9 @@ export type TenantCreateWithoutLifecycleRequestsInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
@@ -1403,6 +1469,9 @@ export type TenantUncheckedCreateWithoutLifecycleRequestsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
@@ -1473,6 +1542,9 @@ export type TenantUpdateWithoutLifecycleRequestsInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
@@ -1527,6 +1599,9 @@ export type TenantUncheckedUpdateWithoutLifecycleRequestsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
@@ -1581,6 +1656,9 @@ export type TenantCreateWithoutRetentionDryRunsInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
@@ -1635,6 +1713,9 @@ export type TenantUncheckedCreateWithoutRetentionDryRunsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
@@ -1705,6 +1786,9 @@ export type TenantUpdateWithoutRetentionDryRunsInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
@@ -1759,6 +1843,9 @@ export type TenantUncheckedUpdateWithoutRetentionDryRunsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
@@ -1813,6 +1900,9 @@ export type TenantCreateWithoutGoogleConnectionInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupCreateNestedManyWithoutTenantInput
@@ -1867,6 +1957,9 @@ export type TenantUncheckedCreateWithoutGoogleConnectionInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
@@ -1937,6 +2030,9 @@ export type TenantUpdateWithoutGoogleConnectionInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUpdateManyWithoutTenantNestedInput
@@ -1991,6 +2087,9 @@ export type TenantUncheckedUpdateWithoutGoogleConnectionInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
@@ -2045,6 +2144,9 @@ export type TenantCreateWithoutGoogleOAuthAttemptsInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupCreateNestedManyWithoutTenantInput
@@ -2099,6 +2201,9 @@ export type TenantUncheckedCreateWithoutGoogleOAuthAttemptsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
@@ -2169,6 +2274,9 @@ export type TenantUpdateWithoutGoogleOAuthAttemptsInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUpdateManyWithoutTenantNestedInput
@@ -2223,6 +2331,9 @@ export type TenantUncheckedUpdateWithoutGoogleOAuthAttemptsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
@@ -2277,6 +2388,9 @@ export type TenantCreateWithoutGoogleCredentialCleanupsInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
@@ -2331,6 +2445,9 @@ export type TenantUncheckedCreateWithoutGoogleCredentialCleanupsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
@@ -2401,6 +2518,9 @@ export type TenantUpdateWithoutGoogleCredentialCleanupsInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
@@ -2455,6 +2575,9 @@ export type TenantUncheckedUpdateWithoutGoogleCredentialCleanupsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
@@ -2508,6 +2631,9 @@ export type TenantCreateWithoutInstagramConnectionInput = {
   securityAuditLogs?: Prisma.SecurityAuditLogCreateNestedManyWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
@@ -2562,6 +2688,9 @@ export type TenantUncheckedCreateWithoutInstagramConnectionInput = {
   securityAuditLogs?: Prisma.SecurityAuditLogUncheckedCreateNestedManyWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
@@ -2632,6 +2761,9 @@ export type TenantUpdateWithoutInstagramConnectionInput = {
   securityAuditLogs?: Prisma.SecurityAuditLogUpdateManyWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
@@ -2686,6 +2818,9 @@ export type TenantUncheckedUpdateWithoutInstagramConnectionInput = {
   securityAuditLogs?: Prisma.SecurityAuditLogUncheckedUpdateManyWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
@@ -2740,6 +2875,9 @@ export type TenantCreateWithoutInstagramOAuthStatesInput = {
   securityAuditLogs?: Prisma.SecurityAuditLogCreateNestedManyWithoutTenantInput
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
@@ -2794,6 +2932,9 @@ export type TenantUncheckedCreateWithoutInstagramOAuthStatesInput = {
   securityAuditLogs?: Prisma.SecurityAuditLogUncheckedCreateNestedManyWithoutTenantInput
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
@@ -2864,6 +3005,9 @@ export type TenantUpdateWithoutInstagramOAuthStatesInput = {
   securityAuditLogs?: Prisma.SecurityAuditLogUpdateManyWithoutTenantNestedInput
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
@@ -2918,6 +3062,9 @@ export type TenantUncheckedUpdateWithoutInstagramOAuthStatesInput = {
   securityAuditLogs?: Prisma.SecurityAuditLogUncheckedUpdateManyWithoutTenantNestedInput
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
@@ -2972,6 +3119,9 @@ export type TenantCreateWithoutInstagramCredentialCleanupsInput = {
   securityAuditLogs?: Prisma.SecurityAuditLogCreateNestedManyWithoutTenantInput
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
@@ -3026,6 +3176,9 @@ export type TenantUncheckedCreateWithoutInstagramCredentialCleanupsInput = {
   securityAuditLogs?: Prisma.SecurityAuditLogUncheckedCreateNestedManyWithoutTenantInput
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
@@ -3096,6 +3249,9 @@ export type TenantUpdateWithoutInstagramCredentialCleanupsInput = {
   securityAuditLogs?: Prisma.SecurityAuditLogUpdateManyWithoutTenantNestedInput
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
@@ -3150,6 +3306,741 @@ export type TenantUncheckedUpdateWithoutInstagramCredentialCleanupsInput = {
   securityAuditLogs?: Prisma.SecurityAuditLogUncheckedUpdateManyWithoutTenantNestedInput
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
+  googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutTenantNestedInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUncheckedUpdateManyWithoutTenantNestedInput
+  telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedUpdateManyWithoutTenantNestedInput
+  telegramChats?: Prisma.TelegramChatUncheckedUpdateManyWithoutTenantNestedInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedUpdateOneWithoutTenantNestedInput
+  orderItems?: Prisma.OrderItemUncheckedUpdateManyWithoutTenantNestedInput
+  inventoryReservations?: Prisma.InventoryReservationUncheckedUpdateManyWithoutTenantNestedInput
+  telegramDeliveryItems?: Prisma.TelegramDeliveryItemUncheckedUpdateManyWithoutTenantNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutTenantNestedInput
+  deliveryConnections?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutTenantNestedInput
+  deliverySenderProfiles?: Prisma.DeliverySenderProfileUncheckedUpdateManyWithoutTenantNestedInput
+  shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutTenantNestedInput
+  shipmentAttempts?: Prisma.ShipmentAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutTenantNestedInput
+  legalEntities?: Prisma.TenantLegalEntityUncheckedUpdateManyWithoutTenantNestedInput
+  bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
+  orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
+  orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
+}
+
+export type TenantCreateWithoutFacebookConnectionInput = {
+  id?: string
+  key: string
+  name: string
+  status?: $Enums.AccessStatus
+  createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
+  events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
+  conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
+  messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
+  settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
+  products?: Prisma.ProductCreateNestedManyWithoutTenantInput
+  catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
+  catalogueMappings?: Prisma.CatalogueMappingCreateNestedManyWithoutTenantInput
+  catalogueImportRuns?: Prisma.CatalogueImportRunCreateNestedManyWithoutTenantInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationCreateNestedOneWithoutTenantInput
+  orderExports?: Prisma.OrderExportCreateNestedManyWithoutTenantInput
+  memberships?: Prisma.TenantMembershipCreateNestedManyWithoutTenantInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutTenantInput
+  invitations?: Prisma.TenantInvitationCreateNestedManyWithoutTenantInput
+  securityAuditLogs?: Prisma.SecurityAuditLogCreateNestedManyWithoutTenantInput
+  instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
+  instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
+  googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
+  googleCredentialCleanups?: Prisma.GoogleCredentialCleanupCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationCreateNestedManyWithoutTenantInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptCreateNestedManyWithoutTenantInput
+  telegramUserBindings?: Prisma.TelegramUserBindingCreateNestedManyWithoutTenantInput
+  telegramBusinessConnections?: Prisma.TelegramBusinessConnectionCreateNestedManyWithoutTenantInput
+  telegramChats?: Prisma.TelegramChatCreateNestedManyWithoutTenantInput
+  telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingCreateNestedOneWithoutTenantInput
+  orderItems?: Prisma.OrderItemCreateNestedManyWithoutTenantInput
+  inventoryReservations?: Prisma.InventoryReservationCreateNestedManyWithoutTenantInput
+  telegramDeliveryItems?: Prisma.TelegramDeliveryItemCreateNestedManyWithoutTenantInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutTenantInput
+  deliveryConnections?: Prisma.DeliveryConnectionCreateNestedManyWithoutTenantInput
+  deliverySenderProfiles?: Prisma.DeliverySenderProfileCreateNestedManyWithoutTenantInput
+  shipments?: Prisma.ShipmentCreateNestedManyWithoutTenantInput
+  shipmentAttempts?: Prisma.ShipmentAttemptCreateNestedManyWithoutTenantInput
+  shipmentStatusEvents?: Prisma.ShipmentStatusEventCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutTenantInput
+  legalEntities?: Prisma.TenantLegalEntityCreateNestedManyWithoutTenantInput
+  bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
+  orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
+  orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
+}
+
+export type TenantUncheckedCreateWithoutFacebookConnectionInput = {
+  id?: string
+  key: string
+  name: string
+  status?: $Enums.AccessStatus
+  createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
+  events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
+  conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
+  messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
+  settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
+  catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
+  catalogueMappings?: Prisma.CatalogueMappingUncheckedCreateNestedManyWithoutTenantInput
+  catalogueImportRuns?: Prisma.CatalogueImportRunUncheckedCreateNestedManyWithoutTenantInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedCreateNestedOneWithoutTenantInput
+  orderExports?: Prisma.OrderExportUncheckedCreateNestedManyWithoutTenantInput
+  memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutTenantInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutTenantInput
+  invitations?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutTenantInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUncheckedCreateNestedManyWithoutTenantInput
+  instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
+  instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
+  googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutTenantInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedCreateNestedManyWithoutTenantInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUncheckedCreateNestedManyWithoutTenantInput
+  telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedCreateNestedManyWithoutTenantInput
+  telegramChats?: Prisma.TelegramChatUncheckedCreateNestedManyWithoutTenantInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedCreateNestedOneWithoutTenantInput
+  orderItems?: Prisma.OrderItemUncheckedCreateNestedManyWithoutTenantInput
+  inventoryReservations?: Prisma.InventoryReservationUncheckedCreateNestedManyWithoutTenantInput
+  telegramDeliveryItems?: Prisma.TelegramDeliveryItemUncheckedCreateNestedManyWithoutTenantInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutTenantInput
+  deliveryConnections?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutTenantInput
+  deliverySenderProfiles?: Prisma.DeliverySenderProfileUncheckedCreateNestedManyWithoutTenantInput
+  shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutTenantInput
+  shipmentAttempts?: Prisma.ShipmentAttemptUncheckedCreateNestedManyWithoutTenantInput
+  shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutTenantInput
+  legalEntities?: Prisma.TenantLegalEntityUncheckedCreateNestedManyWithoutTenantInput
+  bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
+  orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
+  orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
+}
+
+export type TenantCreateOrConnectWithoutFacebookConnectionInput = {
+  where: Prisma.TenantWhereUniqueInput
+  create: Prisma.XOR<Prisma.TenantCreateWithoutFacebookConnectionInput, Prisma.TenantUncheckedCreateWithoutFacebookConnectionInput>
+}
+
+export type TenantUpsertWithoutFacebookConnectionInput = {
+  update: Prisma.XOR<Prisma.TenantUpdateWithoutFacebookConnectionInput, Prisma.TenantUncheckedUpdateWithoutFacebookConnectionInput>
+  create: Prisma.XOR<Prisma.TenantCreateWithoutFacebookConnectionInput, Prisma.TenantUncheckedCreateWithoutFacebookConnectionInput>
+  where?: Prisma.TenantWhereInput
+}
+
+export type TenantUpdateToOneWithWhereWithoutFacebookConnectionInput = {
+  where?: Prisma.TenantWhereInput
+  data: Prisma.XOR<Prisma.TenantUpdateWithoutFacebookConnectionInput, Prisma.TenantUncheckedUpdateWithoutFacebookConnectionInput>
+}
+
+export type TenantUpdateWithoutFacebookConnectionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
+  conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
+  messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
+  settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
+  products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
+  catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
+  catalogueMappings?: Prisma.CatalogueMappingUpdateManyWithoutTenantNestedInput
+  catalogueImportRuns?: Prisma.CatalogueImportRunUpdateManyWithoutTenantNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUpdateOneWithoutTenantNestedInput
+  orderExports?: Prisma.OrderExportUpdateManyWithoutTenantNestedInput
+  memberships?: Prisma.TenantMembershipUpdateManyWithoutTenantNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutTenantNestedInput
+  invitations?: Prisma.TenantInvitationUpdateManyWithoutTenantNestedInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUpdateManyWithoutTenantNestedInput
+  instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
+  instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
+  googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
+  googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUpdateManyWithoutTenantNestedInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUpdateManyWithoutTenantNestedInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUpdateManyWithoutTenantNestedInput
+  telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUpdateManyWithoutTenantNestedInput
+  telegramChats?: Prisma.TelegramChatUpdateManyWithoutTenantNestedInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUpdateOneWithoutTenantNestedInput
+  orderItems?: Prisma.OrderItemUpdateManyWithoutTenantNestedInput
+  inventoryReservations?: Prisma.InventoryReservationUpdateManyWithoutTenantNestedInput
+  telegramDeliveryItems?: Prisma.TelegramDeliveryItemUpdateManyWithoutTenantNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutTenantNestedInput
+  deliveryConnections?: Prisma.DeliveryConnectionUpdateManyWithoutTenantNestedInput
+  deliverySenderProfiles?: Prisma.DeliverySenderProfileUpdateManyWithoutTenantNestedInput
+  shipments?: Prisma.ShipmentUpdateManyWithoutTenantNestedInput
+  shipmentAttempts?: Prisma.ShipmentAttemptUpdateManyWithoutTenantNestedInput
+  shipmentStatusEvents?: Prisma.ShipmentStatusEventUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutTenantNestedInput
+  legalEntities?: Prisma.TenantLegalEntityUpdateManyWithoutTenantNestedInput
+  bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
+  orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
+  orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
+}
+
+export type TenantUncheckedUpdateWithoutFacebookConnectionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
+  conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
+  messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
+  settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
+  catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
+  catalogueMappings?: Prisma.CatalogueMappingUncheckedUpdateManyWithoutTenantNestedInput
+  catalogueImportRuns?: Prisma.CatalogueImportRunUncheckedUpdateManyWithoutTenantNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedUpdateOneWithoutTenantNestedInput
+  orderExports?: Prisma.OrderExportUncheckedUpdateManyWithoutTenantNestedInput
+  memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutTenantNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutTenantNestedInput
+  invitations?: Prisma.TenantInvitationUncheckedUpdateManyWithoutTenantNestedInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUncheckedUpdateManyWithoutTenantNestedInput
+  instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
+  instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
+  googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutTenantNestedInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUncheckedUpdateManyWithoutTenantNestedInput
+  telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedUpdateManyWithoutTenantNestedInput
+  telegramChats?: Prisma.TelegramChatUncheckedUpdateManyWithoutTenantNestedInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedUpdateOneWithoutTenantNestedInput
+  orderItems?: Prisma.OrderItemUncheckedUpdateManyWithoutTenantNestedInput
+  inventoryReservations?: Prisma.InventoryReservationUncheckedUpdateManyWithoutTenantNestedInput
+  telegramDeliveryItems?: Prisma.TelegramDeliveryItemUncheckedUpdateManyWithoutTenantNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutTenantNestedInput
+  deliveryConnections?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutTenantNestedInput
+  deliverySenderProfiles?: Prisma.DeliverySenderProfileUncheckedUpdateManyWithoutTenantNestedInput
+  shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutTenantNestedInput
+  shipmentAttempts?: Prisma.ShipmentAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutTenantNestedInput
+  legalEntities?: Prisma.TenantLegalEntityUncheckedUpdateManyWithoutTenantNestedInput
+  bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
+  orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
+  orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
+}
+
+export type TenantCreateWithoutFacebookOAuthAttemptsInput = {
+  id?: string
+  key: string
+  name: string
+  status?: $Enums.AccessStatus
+  createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
+  events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
+  conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
+  messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
+  settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
+  products?: Prisma.ProductCreateNestedManyWithoutTenantInput
+  catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
+  catalogueMappings?: Prisma.CatalogueMappingCreateNestedManyWithoutTenantInput
+  catalogueImportRuns?: Prisma.CatalogueImportRunCreateNestedManyWithoutTenantInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationCreateNestedOneWithoutTenantInput
+  orderExports?: Prisma.OrderExportCreateNestedManyWithoutTenantInput
+  memberships?: Prisma.TenantMembershipCreateNestedManyWithoutTenantInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutTenantInput
+  invitations?: Prisma.TenantInvitationCreateNestedManyWithoutTenantInput
+  securityAuditLogs?: Prisma.SecurityAuditLogCreateNestedManyWithoutTenantInput
+  instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
+  instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
+  googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
+  googleCredentialCleanups?: Prisma.GoogleCredentialCleanupCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationCreateNestedManyWithoutTenantInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptCreateNestedManyWithoutTenantInput
+  telegramUserBindings?: Prisma.TelegramUserBindingCreateNestedManyWithoutTenantInput
+  telegramBusinessConnections?: Prisma.TelegramBusinessConnectionCreateNestedManyWithoutTenantInput
+  telegramChats?: Prisma.TelegramChatCreateNestedManyWithoutTenantInput
+  telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingCreateNestedOneWithoutTenantInput
+  orderItems?: Prisma.OrderItemCreateNestedManyWithoutTenantInput
+  inventoryReservations?: Prisma.InventoryReservationCreateNestedManyWithoutTenantInput
+  telegramDeliveryItems?: Prisma.TelegramDeliveryItemCreateNestedManyWithoutTenantInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutTenantInput
+  deliveryConnections?: Prisma.DeliveryConnectionCreateNestedManyWithoutTenantInput
+  deliverySenderProfiles?: Prisma.DeliverySenderProfileCreateNestedManyWithoutTenantInput
+  shipments?: Prisma.ShipmentCreateNestedManyWithoutTenantInput
+  shipmentAttempts?: Prisma.ShipmentAttemptCreateNestedManyWithoutTenantInput
+  shipmentStatusEvents?: Prisma.ShipmentStatusEventCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutTenantInput
+  legalEntities?: Prisma.TenantLegalEntityCreateNestedManyWithoutTenantInput
+  bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
+  orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
+  orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
+}
+
+export type TenantUncheckedCreateWithoutFacebookOAuthAttemptsInput = {
+  id?: string
+  key: string
+  name: string
+  status?: $Enums.AccessStatus
+  createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
+  events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
+  conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
+  messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
+  settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
+  catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
+  catalogueMappings?: Prisma.CatalogueMappingUncheckedCreateNestedManyWithoutTenantInput
+  catalogueImportRuns?: Prisma.CatalogueImportRunUncheckedCreateNestedManyWithoutTenantInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedCreateNestedOneWithoutTenantInput
+  orderExports?: Prisma.OrderExportUncheckedCreateNestedManyWithoutTenantInput
+  memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutTenantInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutTenantInput
+  invitations?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutTenantInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUncheckedCreateNestedManyWithoutTenantInput
+  instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
+  instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
+  googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutTenantInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedCreateNestedManyWithoutTenantInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUncheckedCreateNestedManyWithoutTenantInput
+  telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedCreateNestedManyWithoutTenantInput
+  telegramChats?: Prisma.TelegramChatUncheckedCreateNestedManyWithoutTenantInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedCreateNestedOneWithoutTenantInput
+  orderItems?: Prisma.OrderItemUncheckedCreateNestedManyWithoutTenantInput
+  inventoryReservations?: Prisma.InventoryReservationUncheckedCreateNestedManyWithoutTenantInput
+  telegramDeliveryItems?: Prisma.TelegramDeliveryItemUncheckedCreateNestedManyWithoutTenantInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutTenantInput
+  deliveryConnections?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutTenantInput
+  deliverySenderProfiles?: Prisma.DeliverySenderProfileUncheckedCreateNestedManyWithoutTenantInput
+  shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutTenantInput
+  shipmentAttempts?: Prisma.ShipmentAttemptUncheckedCreateNestedManyWithoutTenantInput
+  shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutTenantInput
+  legalEntities?: Prisma.TenantLegalEntityUncheckedCreateNestedManyWithoutTenantInput
+  bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
+  orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
+  orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
+}
+
+export type TenantCreateOrConnectWithoutFacebookOAuthAttemptsInput = {
+  where: Prisma.TenantWhereUniqueInput
+  create: Prisma.XOR<Prisma.TenantCreateWithoutFacebookOAuthAttemptsInput, Prisma.TenantUncheckedCreateWithoutFacebookOAuthAttemptsInput>
+}
+
+export type TenantUpsertWithoutFacebookOAuthAttemptsInput = {
+  update: Prisma.XOR<Prisma.TenantUpdateWithoutFacebookOAuthAttemptsInput, Prisma.TenantUncheckedUpdateWithoutFacebookOAuthAttemptsInput>
+  create: Prisma.XOR<Prisma.TenantCreateWithoutFacebookOAuthAttemptsInput, Prisma.TenantUncheckedCreateWithoutFacebookOAuthAttemptsInput>
+  where?: Prisma.TenantWhereInput
+}
+
+export type TenantUpdateToOneWithWhereWithoutFacebookOAuthAttemptsInput = {
+  where?: Prisma.TenantWhereInput
+  data: Prisma.XOR<Prisma.TenantUpdateWithoutFacebookOAuthAttemptsInput, Prisma.TenantUncheckedUpdateWithoutFacebookOAuthAttemptsInput>
+}
+
+export type TenantUpdateWithoutFacebookOAuthAttemptsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
+  conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
+  messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
+  settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
+  products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
+  catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
+  catalogueMappings?: Prisma.CatalogueMappingUpdateManyWithoutTenantNestedInput
+  catalogueImportRuns?: Prisma.CatalogueImportRunUpdateManyWithoutTenantNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUpdateOneWithoutTenantNestedInput
+  orderExports?: Prisma.OrderExportUpdateManyWithoutTenantNestedInput
+  memberships?: Prisma.TenantMembershipUpdateManyWithoutTenantNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutTenantNestedInput
+  invitations?: Prisma.TenantInvitationUpdateManyWithoutTenantNestedInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUpdateManyWithoutTenantNestedInput
+  instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
+  instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
+  googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
+  googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUpdateManyWithoutTenantNestedInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUpdateManyWithoutTenantNestedInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUpdateManyWithoutTenantNestedInput
+  telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUpdateManyWithoutTenantNestedInput
+  telegramChats?: Prisma.TelegramChatUpdateManyWithoutTenantNestedInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUpdateOneWithoutTenantNestedInput
+  orderItems?: Prisma.OrderItemUpdateManyWithoutTenantNestedInput
+  inventoryReservations?: Prisma.InventoryReservationUpdateManyWithoutTenantNestedInput
+  telegramDeliveryItems?: Prisma.TelegramDeliveryItemUpdateManyWithoutTenantNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutTenantNestedInput
+  deliveryConnections?: Prisma.DeliveryConnectionUpdateManyWithoutTenantNestedInput
+  deliverySenderProfiles?: Prisma.DeliverySenderProfileUpdateManyWithoutTenantNestedInput
+  shipments?: Prisma.ShipmentUpdateManyWithoutTenantNestedInput
+  shipmentAttempts?: Prisma.ShipmentAttemptUpdateManyWithoutTenantNestedInput
+  shipmentStatusEvents?: Prisma.ShipmentStatusEventUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutTenantNestedInput
+  legalEntities?: Prisma.TenantLegalEntityUpdateManyWithoutTenantNestedInput
+  bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
+  orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
+  orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
+}
+
+export type TenantUncheckedUpdateWithoutFacebookOAuthAttemptsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
+  conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
+  messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
+  settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
+  catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
+  catalogueMappings?: Prisma.CatalogueMappingUncheckedUpdateManyWithoutTenantNestedInput
+  catalogueImportRuns?: Prisma.CatalogueImportRunUncheckedUpdateManyWithoutTenantNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedUpdateOneWithoutTenantNestedInput
+  orderExports?: Prisma.OrderExportUncheckedUpdateManyWithoutTenantNestedInput
+  memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutTenantNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutTenantNestedInput
+  invitations?: Prisma.TenantInvitationUncheckedUpdateManyWithoutTenantNestedInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUncheckedUpdateManyWithoutTenantNestedInput
+  instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
+  instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
+  googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutTenantNestedInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUncheckedUpdateManyWithoutTenantNestedInput
+  telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedUpdateManyWithoutTenantNestedInput
+  telegramChats?: Prisma.TelegramChatUncheckedUpdateManyWithoutTenantNestedInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedUpdateOneWithoutTenantNestedInput
+  orderItems?: Prisma.OrderItemUncheckedUpdateManyWithoutTenantNestedInput
+  inventoryReservations?: Prisma.InventoryReservationUncheckedUpdateManyWithoutTenantNestedInput
+  telegramDeliveryItems?: Prisma.TelegramDeliveryItemUncheckedUpdateManyWithoutTenantNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutTenantNestedInput
+  deliveryConnections?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutTenantNestedInput
+  deliverySenderProfiles?: Prisma.DeliverySenderProfileUncheckedUpdateManyWithoutTenantNestedInput
+  shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutTenantNestedInput
+  shipmentAttempts?: Prisma.ShipmentAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutTenantNestedInput
+  legalEntities?: Prisma.TenantLegalEntityUncheckedUpdateManyWithoutTenantNestedInput
+  bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
+  orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
+  orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
+}
+
+export type TenantCreateWithoutFacebookCredentialCleanupsInput = {
+  id?: string
+  key: string
+  name: string
+  status?: $Enums.AccessStatus
+  createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
+  events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
+  conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
+  messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
+  settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
+  products?: Prisma.ProductCreateNestedManyWithoutTenantInput
+  catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
+  catalogueMappings?: Prisma.CatalogueMappingCreateNestedManyWithoutTenantInput
+  catalogueImportRuns?: Prisma.CatalogueImportRunCreateNestedManyWithoutTenantInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationCreateNestedOneWithoutTenantInput
+  orderExports?: Prisma.OrderExportCreateNestedManyWithoutTenantInput
+  memberships?: Prisma.TenantMembershipCreateNestedManyWithoutTenantInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutTenantInput
+  invitations?: Prisma.TenantInvitationCreateNestedManyWithoutTenantInput
+  securityAuditLogs?: Prisma.SecurityAuditLogCreateNestedManyWithoutTenantInput
+  instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
+  instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
+  googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
+  googleCredentialCleanups?: Prisma.GoogleCredentialCleanupCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationCreateNestedManyWithoutTenantInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptCreateNestedManyWithoutTenantInput
+  telegramUserBindings?: Prisma.TelegramUserBindingCreateNestedManyWithoutTenantInput
+  telegramBusinessConnections?: Prisma.TelegramBusinessConnectionCreateNestedManyWithoutTenantInput
+  telegramChats?: Prisma.TelegramChatCreateNestedManyWithoutTenantInput
+  telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingCreateNestedOneWithoutTenantInput
+  orderItems?: Prisma.OrderItemCreateNestedManyWithoutTenantInput
+  inventoryReservations?: Prisma.InventoryReservationCreateNestedManyWithoutTenantInput
+  telegramDeliveryItems?: Prisma.TelegramDeliveryItemCreateNestedManyWithoutTenantInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutTenantInput
+  deliveryConnections?: Prisma.DeliveryConnectionCreateNestedManyWithoutTenantInput
+  deliverySenderProfiles?: Prisma.DeliverySenderProfileCreateNestedManyWithoutTenantInput
+  shipments?: Prisma.ShipmentCreateNestedManyWithoutTenantInput
+  shipmentAttempts?: Prisma.ShipmentAttemptCreateNestedManyWithoutTenantInput
+  shipmentStatusEvents?: Prisma.ShipmentStatusEventCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutTenantInput
+  legalEntities?: Prisma.TenantLegalEntityCreateNestedManyWithoutTenantInput
+  bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
+  orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
+  orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
+}
+
+export type TenantUncheckedCreateWithoutFacebookCredentialCleanupsInput = {
+  id?: string
+  key: string
+  name: string
+  status?: $Enums.AccessStatus
+  createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
+  events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
+  conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
+  messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
+  settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
+  catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
+  catalogueMappings?: Prisma.CatalogueMappingUncheckedCreateNestedManyWithoutTenantInput
+  catalogueImportRuns?: Prisma.CatalogueImportRunUncheckedCreateNestedManyWithoutTenantInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedCreateNestedOneWithoutTenantInput
+  orderExports?: Prisma.OrderExportUncheckedCreateNestedManyWithoutTenantInput
+  memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutTenantInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutTenantInput
+  invitations?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutTenantInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUncheckedCreateNestedManyWithoutTenantInput
+  instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
+  instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
+  googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutTenantInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedCreateNestedManyWithoutTenantInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUncheckedCreateNestedManyWithoutTenantInput
+  telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedCreateNestedManyWithoutTenantInput
+  telegramChats?: Prisma.TelegramChatUncheckedCreateNestedManyWithoutTenantInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedCreateNestedOneWithoutTenantInput
+  orderItems?: Prisma.OrderItemUncheckedCreateNestedManyWithoutTenantInput
+  inventoryReservations?: Prisma.InventoryReservationUncheckedCreateNestedManyWithoutTenantInput
+  telegramDeliveryItems?: Prisma.TelegramDeliveryItemUncheckedCreateNestedManyWithoutTenantInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutTenantInput
+  deliveryConnections?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutTenantInput
+  deliverySenderProfiles?: Prisma.DeliverySenderProfileUncheckedCreateNestedManyWithoutTenantInput
+  shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutTenantInput
+  shipmentAttempts?: Prisma.ShipmentAttemptUncheckedCreateNestedManyWithoutTenantInput
+  shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutTenantInput
+  legalEntities?: Prisma.TenantLegalEntityUncheckedCreateNestedManyWithoutTenantInput
+  bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
+  orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
+  orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
+}
+
+export type TenantCreateOrConnectWithoutFacebookCredentialCleanupsInput = {
+  where: Prisma.TenantWhereUniqueInput
+  create: Prisma.XOR<Prisma.TenantCreateWithoutFacebookCredentialCleanupsInput, Prisma.TenantUncheckedCreateWithoutFacebookCredentialCleanupsInput>
+}
+
+export type TenantUpsertWithoutFacebookCredentialCleanupsInput = {
+  update: Prisma.XOR<Prisma.TenantUpdateWithoutFacebookCredentialCleanupsInput, Prisma.TenantUncheckedUpdateWithoutFacebookCredentialCleanupsInput>
+  create: Prisma.XOR<Prisma.TenantCreateWithoutFacebookCredentialCleanupsInput, Prisma.TenantUncheckedCreateWithoutFacebookCredentialCleanupsInput>
+  where?: Prisma.TenantWhereInput
+}
+
+export type TenantUpdateToOneWithWhereWithoutFacebookCredentialCleanupsInput = {
+  where?: Prisma.TenantWhereInput
+  data: Prisma.XOR<Prisma.TenantUpdateWithoutFacebookCredentialCleanupsInput, Prisma.TenantUncheckedUpdateWithoutFacebookCredentialCleanupsInput>
+}
+
+export type TenantUpdateWithoutFacebookCredentialCleanupsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
+  conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
+  messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
+  settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
+  products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
+  catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
+  catalogueMappings?: Prisma.CatalogueMappingUpdateManyWithoutTenantNestedInput
+  catalogueImportRuns?: Prisma.CatalogueImportRunUpdateManyWithoutTenantNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUpdateOneWithoutTenantNestedInput
+  orderExports?: Prisma.OrderExportUpdateManyWithoutTenantNestedInput
+  memberships?: Prisma.TenantMembershipUpdateManyWithoutTenantNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutTenantNestedInput
+  invitations?: Prisma.TenantInvitationUpdateManyWithoutTenantNestedInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUpdateManyWithoutTenantNestedInput
+  instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
+  instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
+  googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
+  googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUpdateManyWithoutTenantNestedInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUpdateManyWithoutTenantNestedInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUpdateManyWithoutTenantNestedInput
+  telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUpdateManyWithoutTenantNestedInput
+  telegramChats?: Prisma.TelegramChatUpdateManyWithoutTenantNestedInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUpdateOneWithoutTenantNestedInput
+  orderItems?: Prisma.OrderItemUpdateManyWithoutTenantNestedInput
+  inventoryReservations?: Prisma.InventoryReservationUpdateManyWithoutTenantNestedInput
+  telegramDeliveryItems?: Prisma.TelegramDeliveryItemUpdateManyWithoutTenantNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutTenantNestedInput
+  deliveryConnections?: Prisma.DeliveryConnectionUpdateManyWithoutTenantNestedInput
+  deliverySenderProfiles?: Prisma.DeliverySenderProfileUpdateManyWithoutTenantNestedInput
+  shipments?: Prisma.ShipmentUpdateManyWithoutTenantNestedInput
+  shipmentAttempts?: Prisma.ShipmentAttemptUpdateManyWithoutTenantNestedInput
+  shipmentStatusEvents?: Prisma.ShipmentStatusEventUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutTenantNestedInput
+  legalEntities?: Prisma.TenantLegalEntityUpdateManyWithoutTenantNestedInput
+  bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
+  orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
+  orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
+}
+
+export type TenantUncheckedUpdateWithoutFacebookCredentialCleanupsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
+  conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
+  messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
+  settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
+  catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
+  catalogueMappings?: Prisma.CatalogueMappingUncheckedUpdateManyWithoutTenantNestedInput
+  catalogueImportRuns?: Prisma.CatalogueImportRunUncheckedUpdateManyWithoutTenantNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedUpdateOneWithoutTenantNestedInput
+  orderExports?: Prisma.OrderExportUncheckedUpdateManyWithoutTenantNestedInput
+  memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutTenantNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutTenantNestedInput
+  invitations?: Prisma.TenantInvitationUncheckedUpdateManyWithoutTenantNestedInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUncheckedUpdateManyWithoutTenantNestedInput
+  instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
+  instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
@@ -3205,6 +4096,9 @@ export type TenantCreateWithoutNotificationsInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
@@ -3259,6 +4153,9 @@ export type TenantUncheckedCreateWithoutNotificationsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
@@ -3329,6 +4226,9 @@ export type TenantUpdateWithoutNotificationsInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
@@ -3383,6 +4283,9 @@ export type TenantUncheckedUpdateWithoutNotificationsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
@@ -3437,6 +4340,9 @@ export type TenantCreateWithoutTelegramLinkAttemptsInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
@@ -3491,6 +4397,9 @@ export type TenantUncheckedCreateWithoutTelegramLinkAttemptsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
@@ -3561,6 +4470,9 @@ export type TenantUpdateWithoutTelegramLinkAttemptsInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
@@ -3615,6 +4527,9 @@ export type TenantUncheckedUpdateWithoutTelegramLinkAttemptsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
@@ -3669,6 +4584,9 @@ export type TenantCreateWithoutTelegramUserBindingsInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
@@ -3723,6 +4641,9 @@ export type TenantUncheckedCreateWithoutTelegramUserBindingsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
@@ -3793,6 +4714,9 @@ export type TenantUpdateWithoutTelegramUserBindingsInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
@@ -3847,6 +4771,9 @@ export type TenantUncheckedUpdateWithoutTelegramUserBindingsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
@@ -3901,6 +4828,9 @@ export type TenantCreateWithoutTelegramBusinessConnectionsInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
@@ -3955,6 +4885,9 @@ export type TenantUncheckedCreateWithoutTelegramBusinessConnectionsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
@@ -4025,6 +4958,9 @@ export type TenantUpdateWithoutTelegramBusinessConnectionsInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
@@ -4079,6 +5015,9 @@ export type TenantUncheckedUpdateWithoutTelegramBusinessConnectionsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
@@ -4133,6 +5072,9 @@ export type TenantCreateWithoutTelegramChatsInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
@@ -4187,6 +5129,9 @@ export type TenantUncheckedCreateWithoutTelegramChatsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
@@ -4257,6 +5202,9 @@ export type TenantUpdateWithoutTelegramChatsInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
@@ -4311,6 +5259,9 @@ export type TenantUncheckedUpdateWithoutTelegramChatsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
@@ -4365,6 +5316,9 @@ export type TenantCreateWithoutTelegramSupplierSettingInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
@@ -4419,6 +5373,9 @@ export type TenantUncheckedCreateWithoutTelegramSupplierSettingInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
@@ -4489,6 +5446,9 @@ export type TenantUpdateWithoutTelegramSupplierSettingInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
@@ -4543,6 +5503,9 @@ export type TenantUncheckedUpdateWithoutTelegramSupplierSettingInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
@@ -4597,6 +5560,9 @@ export type TenantCreateWithoutTelegramDeliveriesInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
@@ -4651,6 +5617,9 @@ export type TenantUncheckedCreateWithoutTelegramDeliveriesInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
@@ -4721,6 +5690,9 @@ export type TenantUpdateWithoutTelegramDeliveriesInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
@@ -4775,6 +5747,9 @@ export type TenantUncheckedUpdateWithoutTelegramDeliveriesInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
@@ -4828,6 +5803,9 @@ export type TenantCreateWithoutMembershipsInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
@@ -4882,6 +5860,9 @@ export type TenantUncheckedCreateWithoutMembershipsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
@@ -4952,6 +5933,9 @@ export type TenantUpdateWithoutMembershipsInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
@@ -5006,6 +5990,9 @@ export type TenantUncheckedUpdateWithoutMembershipsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
@@ -5060,6 +6047,9 @@ export type TenantCreateWithoutSessionsInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
@@ -5114,6 +6104,9 @@ export type TenantUncheckedCreateWithoutSessionsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
@@ -5184,6 +6177,9 @@ export type TenantUpdateWithoutSessionsInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
@@ -5238,6 +6234,9 @@ export type TenantUncheckedUpdateWithoutSessionsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
@@ -5292,6 +6291,9 @@ export type TenantCreateWithoutInvitationsInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
@@ -5346,6 +6348,9 @@ export type TenantUncheckedCreateWithoutInvitationsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
@@ -5416,6 +6421,9 @@ export type TenantUpdateWithoutInvitationsInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
@@ -5470,6 +6478,9 @@ export type TenantUncheckedUpdateWithoutInvitationsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
@@ -5524,6 +6535,9 @@ export type TenantCreateWithoutSecurityAuditLogsInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
@@ -5578,6 +6592,9 @@ export type TenantUncheckedCreateWithoutSecurityAuditLogsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
@@ -5648,6 +6665,9 @@ export type TenantUpdateWithoutSecurityAuditLogsInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
@@ -5702,6 +6722,9 @@ export type TenantUncheckedUpdateWithoutSecurityAuditLogsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
@@ -5756,6 +6779,9 @@ export type TenantCreateWithoutEventsInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
@@ -5810,6 +6836,9 @@ export type TenantUncheckedCreateWithoutEventsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
@@ -5880,6 +6909,9 @@ export type TenantUpdateWithoutEventsInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
@@ -5934,6 +6966,9 @@ export type TenantUncheckedUpdateWithoutEventsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
@@ -5988,6 +7023,9 @@ export type TenantCreateWithoutConversationsInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
@@ -6042,6 +7080,9 @@ export type TenantUncheckedCreateWithoutConversationsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
@@ -6112,6 +7153,9 @@ export type TenantUpdateWithoutConversationsInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
@@ -6166,6 +7210,9 @@ export type TenantUncheckedUpdateWithoutConversationsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
@@ -6221,6 +7268,9 @@ export type TenantCreateWithoutInstagramCustomerProfilesInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupCreateNestedManyWithoutTenantInput
@@ -6275,6 +7325,9 @@ export type TenantUncheckedCreateWithoutInstagramCustomerProfilesInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
@@ -6345,6 +7398,9 @@ export type TenantUpdateWithoutInstagramCustomerProfilesInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUpdateManyWithoutTenantNestedInput
@@ -6399,6 +7455,9 @@ export type TenantUncheckedUpdateWithoutInstagramCustomerProfilesInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
   googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
@@ -6452,6 +7511,9 @@ export type TenantCreateWithoutMessagesInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
@@ -6506,6 +7568,9 @@ export type TenantUncheckedCreateWithoutMessagesInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
@@ -6576,6 +7641,9 @@ export type TenantUpdateWithoutMessagesInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
@@ -6630,6 +7698,9 @@ export type TenantUncheckedUpdateWithoutMessagesInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
@@ -6684,6 +7755,9 @@ export type TenantCreateWithoutSheetsDestinationInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
@@ -6738,6 +7812,9 @@ export type TenantUncheckedCreateWithoutSheetsDestinationInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
@@ -6808,6 +7885,9 @@ export type TenantUpdateWithoutSheetsDestinationInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
@@ -6862,6 +7942,9 @@ export type TenantUncheckedUpdateWithoutSheetsDestinationInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
@@ -6916,6 +7999,9 @@ export type TenantCreateWithoutSettingsInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
@@ -6970,6 +8056,9 @@ export type TenantUncheckedCreateWithoutSettingsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
@@ -7040,6 +8129,9 @@ export type TenantUpdateWithoutSettingsInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
@@ -7094,6 +8186,9 @@ export type TenantUncheckedUpdateWithoutSettingsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
@@ -7149,6 +8244,9 @@ export type TenantCreateWithoutLegalEntitiesInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
@@ -7203,6 +8301,9 @@ export type TenantUncheckedCreateWithoutLegalEntitiesInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
@@ -7273,6 +8374,9 @@ export type TenantUpdateWithoutLegalEntitiesInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
@@ -7327,6 +8431,9 @@ export type TenantUncheckedUpdateWithoutLegalEntitiesInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
@@ -7381,6 +8488,9 @@ export type TenantCreateWithoutBankAccountsInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
@@ -7435,6 +8545,9 @@ export type TenantUncheckedCreateWithoutBankAccountsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
@@ -7505,6 +8618,9 @@ export type TenantUpdateWithoutBankAccountsInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
@@ -7559,6 +8675,9 @@ export type TenantUncheckedUpdateWithoutBankAccountsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
@@ -7612,6 +8731,9 @@ export type TenantCreateWithoutOrdersInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
@@ -7666,6 +8788,9 @@ export type TenantUncheckedCreateWithoutOrdersInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
@@ -7736,6 +8861,9 @@ export type TenantUpdateWithoutOrdersInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
@@ -7790,6 +8918,9 @@ export type TenantUncheckedUpdateWithoutOrdersInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
@@ -7845,6 +8976,9 @@ export type TenantCreateWithoutOrderCommercialTermsInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
@@ -7899,6 +9033,9 @@ export type TenantUncheckedCreateWithoutOrderCommercialTermsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
@@ -7969,6 +9106,9 @@ export type TenantUpdateWithoutOrderCommercialTermsInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
@@ -8023,6 +9163,9 @@ export type TenantUncheckedUpdateWithoutOrderCommercialTermsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
@@ -8077,6 +9220,9 @@ export type TenantCreateWithoutOrderPaymentsInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
@@ -8131,6 +9277,9 @@ export type TenantUncheckedCreateWithoutOrderPaymentsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
@@ -8201,6 +9350,9 @@ export type TenantUpdateWithoutOrderPaymentsInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
@@ -8255,6 +9407,9 @@ export type TenantUncheckedUpdateWithoutOrderPaymentsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
@@ -8309,6 +9464,9 @@ export type TenantCreateWithoutOrderIntentEvaluationsInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
@@ -8363,6 +9521,9 @@ export type TenantUncheckedCreateWithoutOrderIntentEvaluationsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
@@ -8433,6 +9594,9 @@ export type TenantUpdateWithoutOrderIntentEvaluationsInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
@@ -8487,6 +9651,9 @@ export type TenantUncheckedUpdateWithoutOrderIntentEvaluationsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
@@ -8541,6 +9708,9 @@ export type TenantCreateWithoutDeliveryConnectionsInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
@@ -8595,6 +9765,9 @@ export type TenantUncheckedCreateWithoutDeliveryConnectionsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
@@ -8665,6 +9838,9 @@ export type TenantUpdateWithoutDeliveryConnectionsInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
@@ -8719,6 +9895,9 @@ export type TenantUncheckedUpdateWithoutDeliveryConnectionsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
@@ -8773,6 +9952,9 @@ export type TenantCreateWithoutDeliverySenderProfilesInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
@@ -8827,6 +10009,9 @@ export type TenantUncheckedCreateWithoutDeliverySenderProfilesInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
@@ -8897,6 +10082,9 @@ export type TenantUpdateWithoutDeliverySenderProfilesInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
@@ -8951,6 +10139,9 @@ export type TenantUncheckedUpdateWithoutDeliverySenderProfilesInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
@@ -9005,6 +10196,9 @@ export type TenantCreateWithoutShipmentsInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
@@ -9059,6 +10253,9 @@ export type TenantUncheckedCreateWithoutShipmentsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
@@ -9129,6 +10326,9 @@ export type TenantUpdateWithoutShipmentsInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
@@ -9183,6 +10383,9 @@ export type TenantUncheckedUpdateWithoutShipmentsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
@@ -9237,6 +10440,9 @@ export type TenantCreateWithoutShipmentAttemptsInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
@@ -9291,6 +10497,9 @@ export type TenantUncheckedCreateWithoutShipmentAttemptsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
@@ -9361,6 +10570,9 @@ export type TenantUpdateWithoutShipmentAttemptsInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
@@ -9415,6 +10627,9 @@ export type TenantUncheckedUpdateWithoutShipmentAttemptsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
@@ -9469,6 +10684,9 @@ export type TenantCreateWithoutShipmentStatusEventsInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
@@ -9523,6 +10741,9 @@ export type TenantUncheckedCreateWithoutShipmentStatusEventsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
@@ -9593,6 +10814,9 @@ export type TenantUpdateWithoutShipmentStatusEventsInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
@@ -9647,6 +10871,9 @@ export type TenantUncheckedUpdateWithoutShipmentStatusEventsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
@@ -9700,6 +10927,9 @@ export type TenantCreateWithoutOrderExportsInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
@@ -9754,6 +10984,9 @@ export type TenantUncheckedCreateWithoutOrderExportsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
@@ -9824,6 +11057,9 @@ export type TenantUpdateWithoutOrderExportsInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
@@ -9878,6 +11114,9 @@ export type TenantUncheckedUpdateWithoutOrderExportsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
@@ -9932,6 +11171,9 @@ export type TenantCreateWithoutAuditLogsInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
@@ -9986,6 +11228,9 @@ export type TenantUncheckedCreateWithoutAuditLogsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
@@ -10056,6 +11301,9 @@ export type TenantUpdateWithoutAuditLogsInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
@@ -10110,6 +11358,9 @@ export type TenantUncheckedUpdateWithoutAuditLogsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
@@ -10165,6 +11416,9 @@ export type TenantCreateWithoutOrderItemsInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
@@ -10219,6 +11473,9 @@ export type TenantUncheckedCreateWithoutOrderItemsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
@@ -10289,6 +11546,9 @@ export type TenantUpdateWithoutOrderItemsInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
@@ -10343,6 +11603,9 @@ export type TenantUncheckedUpdateWithoutOrderItemsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
@@ -10396,6 +11659,9 @@ export type TenantCreateWithoutProductsInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
@@ -10450,6 +11716,9 @@ export type TenantUncheckedCreateWithoutProductsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
@@ -10520,6 +11789,9 @@ export type TenantUpdateWithoutProductsInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
@@ -10574,6 +11846,9 @@ export type TenantUncheckedUpdateWithoutProductsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
@@ -10629,6 +11904,9 @@ export type TenantCreateWithoutInventoryReservationsInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
@@ -10683,6 +11961,9 @@ export type TenantUncheckedCreateWithoutInventoryReservationsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
@@ -10753,6 +12034,9 @@ export type TenantUpdateWithoutInventoryReservationsInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
@@ -10807,6 +12091,9 @@ export type TenantUncheckedUpdateWithoutInventoryReservationsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
@@ -10861,6 +12148,9 @@ export type TenantCreateWithoutTelegramDeliveryItemsInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
@@ -10915,6 +12205,9 @@ export type TenantUncheckedCreateWithoutTelegramDeliveryItemsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
@@ -10985,6 +12278,9 @@ export type TenantUpdateWithoutTelegramDeliveryItemsInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
@@ -11039,6 +12335,9 @@ export type TenantUncheckedUpdateWithoutTelegramDeliveryItemsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
@@ -11093,6 +12392,9 @@ export type TenantCreateWithoutTelegramNotificationPreferencesInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
@@ -11147,6 +12449,9 @@ export type TenantUncheckedCreateWithoutTelegramNotificationPreferencesInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
@@ -11217,6 +12522,9 @@ export type TenantUpdateWithoutTelegramNotificationPreferencesInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
@@ -11271,6 +12579,9 @@ export type TenantUncheckedUpdateWithoutTelegramNotificationPreferencesInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
@@ -11324,6 +12635,9 @@ export type TenantCreateWithoutCatalogueSourcesInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
@@ -11378,6 +12692,9 @@ export type TenantUncheckedCreateWithoutCatalogueSourcesInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
@@ -11448,6 +12765,9 @@ export type TenantUpdateWithoutCatalogueSourcesInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
@@ -11502,6 +12822,9 @@ export type TenantUncheckedUpdateWithoutCatalogueSourcesInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
@@ -11556,6 +12879,9 @@ export type TenantCreateWithoutCatalogueMappingsInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
@@ -11610,6 +12936,9 @@ export type TenantUncheckedCreateWithoutCatalogueMappingsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
@@ -11680,6 +13009,9 @@ export type TenantUpdateWithoutCatalogueMappingsInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
@@ -11734,6 +13066,9 @@ export type TenantUncheckedUpdateWithoutCatalogueMappingsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
@@ -11788,6 +13123,9 @@ export type TenantCreateWithoutCatalogueImportRunsInput = {
   instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
@@ -11842,6 +13180,9 @@ export type TenantUncheckedCreateWithoutCatalogueImportRunsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
   googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
@@ -11912,6 +13253,9 @@ export type TenantUpdateWithoutCatalogueImportRunsInput = {
   instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
@@ -11966,6 +13310,9 @@ export type TenantUncheckedUpdateWithoutCatalogueImportRunsInput = {
   instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
   instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
   instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
   googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
@@ -12017,6 +13364,8 @@ export type TenantCountOutputType = {
   securityAuditLogs: number
   instagramOAuthStates: number
   instagramCredentialCleanups: number
+  facebookOAuthAttempts: number
+  facebookCredentialCleanups: number
   instagramCustomerProfiles: number
   googleOAuthAttempts: number
   googleCredentialCleanups: number
@@ -12061,6 +13410,8 @@ export type TenantCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions
   securityAuditLogs?: boolean | TenantCountOutputTypeCountSecurityAuditLogsArgs
   instagramOAuthStates?: boolean | TenantCountOutputTypeCountInstagramOAuthStatesArgs
   instagramCredentialCleanups?: boolean | TenantCountOutputTypeCountInstagramCredentialCleanupsArgs
+  facebookOAuthAttempts?: boolean | TenantCountOutputTypeCountFacebookOAuthAttemptsArgs
+  facebookCredentialCleanups?: boolean | TenantCountOutputTypeCountFacebookCredentialCleanupsArgs
   instagramCustomerProfiles?: boolean | TenantCountOutputTypeCountInstagramCustomerProfilesArgs
   googleOAuthAttempts?: boolean | TenantCountOutputTypeCountGoogleOAuthAttemptsArgs
   googleCredentialCleanups?: boolean | TenantCountOutputTypeCountGoogleCredentialCleanupsArgs
@@ -12208,6 +13559,20 @@ export type TenantCountOutputTypeCountInstagramOAuthStatesArgs<ExtArgs extends r
  */
 export type TenantCountOutputTypeCountInstagramCredentialCleanupsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.InstagramCredentialCleanupWhereInput
+}
+
+/**
+ * TenantCountOutputType without action
+ */
+export type TenantCountOutputTypeCountFacebookOAuthAttemptsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.FacebookOAuthAttemptWhereInput
+}
+
+/**
+ * TenantCountOutputType without action
+ */
+export type TenantCountOutputTypeCountFacebookCredentialCleanupsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.FacebookCredentialCleanupWhereInput
 }
 
 /**
@@ -12412,6 +13777,9 @@ export type TenantSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   instagramConnection?: boolean | Prisma.Tenant$instagramConnectionArgs<ExtArgs>
   instagramOAuthStates?: boolean | Prisma.Tenant$instagramOAuthStatesArgs<ExtArgs>
   instagramCredentialCleanups?: boolean | Prisma.Tenant$instagramCredentialCleanupsArgs<ExtArgs>
+  facebookConnection?: boolean | Prisma.Tenant$facebookConnectionArgs<ExtArgs>
+  facebookOAuthAttempts?: boolean | Prisma.Tenant$facebookOAuthAttemptsArgs<ExtArgs>
+  facebookCredentialCleanups?: boolean | Prisma.Tenant$facebookCredentialCleanupsArgs<ExtArgs>
   instagramCustomerProfiles?: boolean | Prisma.Tenant$instagramCustomerProfilesArgs<ExtArgs>
   googleConnection?: boolean | Prisma.Tenant$googleConnectionArgs<ExtArgs>
   googleOAuthAttempts?: boolean | Prisma.Tenant$googleOAuthAttemptsArgs<ExtArgs>
@@ -12490,6 +13858,9 @@ export type TenantInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   instagramConnection?: boolean | Prisma.Tenant$instagramConnectionArgs<ExtArgs>
   instagramOAuthStates?: boolean | Prisma.Tenant$instagramOAuthStatesArgs<ExtArgs>
   instagramCredentialCleanups?: boolean | Prisma.Tenant$instagramCredentialCleanupsArgs<ExtArgs>
+  facebookConnection?: boolean | Prisma.Tenant$facebookConnectionArgs<ExtArgs>
+  facebookOAuthAttempts?: boolean | Prisma.Tenant$facebookOAuthAttemptsArgs<ExtArgs>
+  facebookCredentialCleanups?: boolean | Prisma.Tenant$facebookCredentialCleanupsArgs<ExtArgs>
   instagramCustomerProfiles?: boolean | Prisma.Tenant$instagramCustomerProfilesArgs<ExtArgs>
   googleConnection?: boolean | Prisma.Tenant$googleConnectionArgs<ExtArgs>
   googleOAuthAttempts?: boolean | Prisma.Tenant$googleOAuthAttemptsArgs<ExtArgs>
@@ -12544,6 +13915,9 @@ export type $TenantPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     instagramConnection: Prisma.$InstagramConnectionPayload<ExtArgs> | null
     instagramOAuthStates: Prisma.$InstagramOAuthStatePayload<ExtArgs>[]
     instagramCredentialCleanups: Prisma.$InstagramCredentialCleanupPayload<ExtArgs>[]
+    facebookConnection: Prisma.$FacebookConnectionPayload<ExtArgs> | null
+    facebookOAuthAttempts: Prisma.$FacebookOAuthAttemptPayload<ExtArgs>[]
+    facebookCredentialCleanups: Prisma.$FacebookCredentialCleanupPayload<ExtArgs>[]
     instagramCustomerProfiles: Prisma.$InstagramCustomerProfilePayload<ExtArgs>[]
     googleConnection: Prisma.$GoogleConnectionPayload<ExtArgs> | null
     googleOAuthAttempts: Prisma.$GoogleOAuthAttemptPayload<ExtArgs>[]
@@ -12992,6 +14366,9 @@ export interface Prisma__TenantClient<T, Null = never, ExtArgs extends runtime.T
   instagramConnection<T extends Prisma.Tenant$instagramConnectionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$instagramConnectionArgs<ExtArgs>>): Prisma.Prisma__InstagramConnectionClient<runtime.Types.Result.GetResult<Prisma.$InstagramConnectionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   instagramOAuthStates<T extends Prisma.Tenant$instagramOAuthStatesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$instagramOAuthStatesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InstagramOAuthStatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   instagramCredentialCleanups<T extends Prisma.Tenant$instagramCredentialCleanupsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$instagramCredentialCleanupsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InstagramCredentialCleanupPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  facebookConnection<T extends Prisma.Tenant$facebookConnectionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$facebookConnectionArgs<ExtArgs>>): Prisma.Prisma__FacebookConnectionClient<runtime.Types.Result.GetResult<Prisma.$FacebookConnectionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  facebookOAuthAttempts<T extends Prisma.Tenant$facebookOAuthAttemptsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$facebookOAuthAttemptsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FacebookOAuthAttemptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  facebookCredentialCleanups<T extends Prisma.Tenant$facebookCredentialCleanupsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$facebookCredentialCleanupsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FacebookCredentialCleanupPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   instagramCustomerProfiles<T extends Prisma.Tenant$instagramCustomerProfilesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$instagramCustomerProfilesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InstagramCustomerProfilePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   googleConnection<T extends Prisma.Tenant$googleConnectionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$googleConnectionArgs<ExtArgs>>): Prisma.Prisma__GoogleConnectionClient<runtime.Types.Result.GetResult<Prisma.$GoogleConnectionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   googleOAuthAttempts<T extends Prisma.Tenant$googleOAuthAttemptsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$googleOAuthAttemptsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$GoogleOAuthAttemptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -13885,6 +15262,73 @@ export type Tenant$instagramCredentialCleanupsArgs<ExtArgs extends runtime.Types
   take?: number
   skip?: number
   distinct?: Prisma.InstagramCredentialCleanupScalarFieldEnum | Prisma.InstagramCredentialCleanupScalarFieldEnum[]
+}
+
+/**
+ * Tenant.facebookConnection
+ */
+export type Tenant$facebookConnectionArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the FacebookConnection
+   */
+  select?: Prisma.FacebookConnectionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the FacebookConnection
+   */
+  omit?: Prisma.FacebookConnectionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FacebookConnectionInclude<ExtArgs> | null
+  where?: Prisma.FacebookConnectionWhereInput
+}
+
+/**
+ * Tenant.facebookOAuthAttempts
+ */
+export type Tenant$facebookOAuthAttemptsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the FacebookOAuthAttempt
+   */
+  select?: Prisma.FacebookOAuthAttemptSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the FacebookOAuthAttempt
+   */
+  omit?: Prisma.FacebookOAuthAttemptOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FacebookOAuthAttemptInclude<ExtArgs> | null
+  where?: Prisma.FacebookOAuthAttemptWhereInput
+  orderBy?: Prisma.FacebookOAuthAttemptOrderByWithRelationInput | Prisma.FacebookOAuthAttemptOrderByWithRelationInput[]
+  cursor?: Prisma.FacebookOAuthAttemptWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.FacebookOAuthAttemptScalarFieldEnum | Prisma.FacebookOAuthAttemptScalarFieldEnum[]
+}
+
+/**
+ * Tenant.facebookCredentialCleanups
+ */
+export type Tenant$facebookCredentialCleanupsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the FacebookCredentialCleanup
+   */
+  select?: Prisma.FacebookCredentialCleanupSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the FacebookCredentialCleanup
+   */
+  omit?: Prisma.FacebookCredentialCleanupOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FacebookCredentialCleanupInclude<ExtArgs> | null
+  where?: Prisma.FacebookCredentialCleanupWhereInput
+  orderBy?: Prisma.FacebookCredentialCleanupOrderByWithRelationInput | Prisma.FacebookCredentialCleanupOrderByWithRelationInput[]
+  cursor?: Prisma.FacebookCredentialCleanupWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.FacebookCredentialCleanupScalarFieldEnum | Prisma.FacebookCredentialCleanupScalarFieldEnum[]
 }
 
 /**

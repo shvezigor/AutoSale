@@ -272,6 +272,9 @@ export type UserWhereInput = {
   instagramConnections?: Prisma.InstagramConnectionListRelationFilter
   instagramMessagesSent?: Prisma.MessageListRelationFilter
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupListRelationFilter
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptListRelationFilter
+  facebookConnections?: Prisma.FacebookConnectionListRelationFilter
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupListRelationFilter
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptListRelationFilter
   googleConnections?: Prisma.GoogleConnectionListRelationFilter
   googleIdentity?: Prisma.XOR<Prisma.GoogleIdentityNullableScalarRelationFilter, Prisma.GoogleIdentityWhereInput> | null
@@ -313,6 +316,9 @@ export type UserOrderByWithRelationInput = {
   instagramConnections?: Prisma.InstagramConnectionOrderByRelationAggregateInput
   instagramMessagesSent?: Prisma.MessageOrderByRelationAggregateInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupOrderByRelationAggregateInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptOrderByRelationAggregateInput
+  facebookConnections?: Prisma.FacebookConnectionOrderByRelationAggregateInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupOrderByRelationAggregateInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptOrderByRelationAggregateInput
   googleConnections?: Prisma.GoogleConnectionOrderByRelationAggregateInput
   googleIdentity?: Prisma.GoogleIdentityOrderByWithRelationInput
@@ -357,6 +363,9 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   instagramConnections?: Prisma.InstagramConnectionListRelationFilter
   instagramMessagesSent?: Prisma.MessageListRelationFilter
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupListRelationFilter
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptListRelationFilter
+  facebookConnections?: Prisma.FacebookConnectionListRelationFilter
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupListRelationFilter
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptListRelationFilter
   googleConnections?: Prisma.GoogleConnectionListRelationFilter
   googleIdentity?: Prisma.XOR<Prisma.GoogleIdentityNullableScalarRelationFilter, Prisma.GoogleIdentityWhereInput> | null
@@ -440,6 +449,9 @@ export type UserCreateInput = {
   instagramConnections?: Prisma.InstagramConnectionCreateNestedManyWithoutConnectedByInput
   instagramMessagesSent?: Prisma.MessageCreateNestedManyWithoutSentByInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutUserInput
   googleConnections?: Prisma.GoogleConnectionCreateNestedManyWithoutConnectedByInput
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
@@ -481,6 +493,9 @@ export type UserUncheckedCreateInput = {
   instagramConnections?: Prisma.InstagramConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   instagramMessagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSentByInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
   googleConnections?: Prisma.GoogleConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
@@ -522,6 +537,9 @@ export type UserUpdateInput = {
   instagramConnections?: Prisma.InstagramConnectionUpdateManyWithoutConnectedByNestedInput
   instagramMessagesSent?: Prisma.MessageUpdateManyWithoutSentByNestedInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutUserNestedInput
   googleConnections?: Prisma.GoogleConnectionUpdateManyWithoutConnectedByNestedInput
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
@@ -563,6 +581,9 @@ export type UserUncheckedUpdateInput = {
   instagramConnections?: Prisma.InstagramConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   instagramMessagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSentByNestedInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
   googleConnections?: Prisma.GoogleConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
@@ -770,6 +791,52 @@ export type UserUpdateOneWithoutInstagramCleanupsDeadLetteredNestedInput = {
   delete?: Prisma.UserWhereInput | boolean
   connect?: Prisma.UserWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutInstagramCleanupsDeadLetteredInput, Prisma.UserUpdateWithoutInstagramCleanupsDeadLetteredInput>, Prisma.UserUncheckedUpdateWithoutInstagramCleanupsDeadLetteredInput>
+}
+
+export type UserCreateNestedOneWithoutFacebookConnectionsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutFacebookConnectionsInput, Prisma.UserUncheckedCreateWithoutFacebookConnectionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutFacebookConnectionsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutFacebookConnectionsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutFacebookConnectionsInput, Prisma.UserUncheckedCreateWithoutFacebookConnectionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutFacebookConnectionsInput
+  upsert?: Prisma.UserUpsertWithoutFacebookConnectionsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutFacebookConnectionsInput, Prisma.UserUpdateWithoutFacebookConnectionsInput>, Prisma.UserUncheckedUpdateWithoutFacebookConnectionsInput>
+}
+
+export type UserCreateNestedOneWithoutFacebookOAuthAttemptsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutFacebookOAuthAttemptsInput, Prisma.UserUncheckedCreateWithoutFacebookOAuthAttemptsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutFacebookOAuthAttemptsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutFacebookOAuthAttemptsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutFacebookOAuthAttemptsInput, Prisma.UserUncheckedCreateWithoutFacebookOAuthAttemptsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutFacebookOAuthAttemptsInput
+  upsert?: Prisma.UserUpsertWithoutFacebookOAuthAttemptsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutFacebookOAuthAttemptsInput, Prisma.UserUpdateWithoutFacebookOAuthAttemptsInput>, Prisma.UserUncheckedUpdateWithoutFacebookOAuthAttemptsInput>
+}
+
+export type UserCreateNestedOneWithoutFacebookCleanupsDeadLetteredInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutFacebookCleanupsDeadLetteredInput, Prisma.UserUncheckedCreateWithoutFacebookCleanupsDeadLetteredInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutFacebookCleanupsDeadLetteredInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutFacebookCleanupsDeadLetteredNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutFacebookCleanupsDeadLetteredInput, Prisma.UserUncheckedCreateWithoutFacebookCleanupsDeadLetteredInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutFacebookCleanupsDeadLetteredInput
+  upsert?: Prisma.UserUpsertWithoutFacebookCleanupsDeadLetteredInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutFacebookCleanupsDeadLetteredInput, Prisma.UserUpdateWithoutFacebookCleanupsDeadLetteredInput>, Prisma.UserUncheckedUpdateWithoutFacebookCleanupsDeadLetteredInput>
 }
 
 export type EnumPlatformRoleFieldUpdateOperationsInput = {
@@ -1066,6 +1133,9 @@ export type UserCreateWithoutGoogleConnectionsInput = {
   instagramConnections?: Prisma.InstagramConnectionCreateNestedManyWithoutConnectedByInput
   instagramMessagesSent?: Prisma.MessageCreateNestedManyWithoutSentByInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutUserInput
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   notifications?: Prisma.UserNotificationCreateNestedManyWithoutUserInput
@@ -1106,6 +1176,9 @@ export type UserUncheckedCreateWithoutGoogleConnectionsInput = {
   instagramConnections?: Prisma.InstagramConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   instagramMessagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSentByInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutUserInput
@@ -1162,6 +1235,9 @@ export type UserUpdateWithoutGoogleConnectionsInput = {
   instagramConnections?: Prisma.InstagramConnectionUpdateManyWithoutConnectedByNestedInput
   instagramMessagesSent?: Prisma.MessageUpdateManyWithoutSentByNestedInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutUserNestedInput
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   notifications?: Prisma.UserNotificationUpdateManyWithoutUserNestedInput
@@ -1202,6 +1278,9 @@ export type UserUncheckedUpdateWithoutGoogleConnectionsInput = {
   instagramConnections?: Prisma.InstagramConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   instagramMessagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSentByNestedInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutUserNestedInput
@@ -1242,6 +1321,9 @@ export type UserCreateWithoutGoogleOAuthAttemptsInput = {
   instagramConnections?: Prisma.InstagramConnectionCreateNestedManyWithoutConnectedByInput
   instagramMessagesSent?: Prisma.MessageCreateNestedManyWithoutSentByInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
   googleConnections?: Prisma.GoogleConnectionCreateNestedManyWithoutConnectedByInput
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
   notifications?: Prisma.UserNotificationCreateNestedManyWithoutUserInput
@@ -1282,6 +1364,9 @@ export type UserUncheckedCreateWithoutGoogleOAuthAttemptsInput = {
   instagramConnections?: Prisma.InstagramConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   instagramMessagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSentByInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
   googleConnections?: Prisma.GoogleConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
   notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutUserInput
@@ -1338,6 +1423,9 @@ export type UserUpdateWithoutGoogleOAuthAttemptsInput = {
   instagramConnections?: Prisma.InstagramConnectionUpdateManyWithoutConnectedByNestedInput
   instagramMessagesSent?: Prisma.MessageUpdateManyWithoutSentByNestedInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
   googleConnections?: Prisma.GoogleConnectionUpdateManyWithoutConnectedByNestedInput
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
   notifications?: Prisma.UserNotificationUpdateManyWithoutUserNestedInput
@@ -1378,6 +1466,9 @@ export type UserUncheckedUpdateWithoutGoogleOAuthAttemptsInput = {
   instagramConnections?: Prisma.InstagramConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   instagramMessagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSentByNestedInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
   googleConnections?: Prisma.GoogleConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
   notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutUserNestedInput
@@ -1417,6 +1508,9 @@ export type UserCreateWithoutInstagramConnectionsInput = {
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutUserInput
   instagramMessagesSent?: Prisma.MessageCreateNestedManyWithoutSentByInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutUserInput
   googleConnections?: Prisma.GoogleConnectionCreateNestedManyWithoutConnectedByInput
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
@@ -1457,6 +1551,9 @@ export type UserUncheckedCreateWithoutInstagramConnectionsInput = {
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutUserInput
   instagramMessagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSentByInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
   googleConnections?: Prisma.GoogleConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
@@ -1513,6 +1610,9 @@ export type UserUpdateWithoutInstagramConnectionsInput = {
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutUserNestedInput
   instagramMessagesSent?: Prisma.MessageUpdateManyWithoutSentByNestedInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutUserNestedInput
   googleConnections?: Prisma.GoogleConnectionUpdateManyWithoutConnectedByNestedInput
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
@@ -1553,6 +1653,9 @@ export type UserUncheckedUpdateWithoutInstagramConnectionsInput = {
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   instagramMessagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSentByNestedInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
   googleConnections?: Prisma.GoogleConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
@@ -1593,6 +1696,9 @@ export type UserCreateWithoutInstagramOAuthStatesInput = {
   instagramConnections?: Prisma.InstagramConnectionCreateNestedManyWithoutConnectedByInput
   instagramMessagesSent?: Prisma.MessageCreateNestedManyWithoutSentByInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutUserInput
   googleConnections?: Prisma.GoogleConnectionCreateNestedManyWithoutConnectedByInput
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
@@ -1633,6 +1739,9 @@ export type UserUncheckedCreateWithoutInstagramOAuthStatesInput = {
   instagramConnections?: Prisma.InstagramConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   instagramMessagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSentByInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
   googleConnections?: Prisma.GoogleConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
@@ -1689,6 +1798,9 @@ export type UserUpdateWithoutInstagramOAuthStatesInput = {
   instagramConnections?: Prisma.InstagramConnectionUpdateManyWithoutConnectedByNestedInput
   instagramMessagesSent?: Prisma.MessageUpdateManyWithoutSentByNestedInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutUserNestedInput
   googleConnections?: Prisma.GoogleConnectionUpdateManyWithoutConnectedByNestedInput
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
@@ -1729,6 +1841,9 @@ export type UserUncheckedUpdateWithoutInstagramOAuthStatesInput = {
   instagramConnections?: Prisma.InstagramConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   instagramMessagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSentByNestedInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
   googleConnections?: Prisma.GoogleConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
@@ -1769,6 +1884,9 @@ export type UserCreateWithoutInstagramCleanupsDeadLetteredInput = {
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutUserInput
   instagramConnections?: Prisma.InstagramConnectionCreateNestedManyWithoutConnectedByInput
   instagramMessagesSent?: Prisma.MessageCreateNestedManyWithoutSentByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutUserInput
   googleConnections?: Prisma.GoogleConnectionCreateNestedManyWithoutConnectedByInput
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
@@ -1809,6 +1927,9 @@ export type UserUncheckedCreateWithoutInstagramCleanupsDeadLetteredInput = {
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutUserInput
   instagramConnections?: Prisma.InstagramConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   instagramMessagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSentByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
   googleConnections?: Prisma.GoogleConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
@@ -1865,6 +1986,9 @@ export type UserUpdateWithoutInstagramCleanupsDeadLetteredInput = {
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutUserNestedInput
   instagramConnections?: Prisma.InstagramConnectionUpdateManyWithoutConnectedByNestedInput
   instagramMessagesSent?: Prisma.MessageUpdateManyWithoutSentByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutUserNestedInput
   googleConnections?: Prisma.GoogleConnectionUpdateManyWithoutConnectedByNestedInput
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
@@ -1905,6 +2029,573 @@ export type UserUncheckedUpdateWithoutInstagramCleanupsDeadLetteredInput = {
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   instagramConnections?: Prisma.InstagramConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   instagramMessagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSentByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
+  googleConnections?: Prisma.GoogleConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutUserNestedInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedUpdateManyWithoutUserNestedInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUncheckedUpdateManyWithoutUserNestedInput
+  procurementHandOffs?: Prisma.OrderUncheckedUpdateManyWithoutProcurementHandedOffByUserNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
+  deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  shipmentsCreated?: Prisma.ShipmentUncheckedUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCancellerNestedInput
+}
+
+export type UserCreateWithoutFacebookConnectionsInput = {
+  id?: string
+  email: string
+  name: string
+  phone?: string | null
+  locale?: string
+  passwordHash?: string | null
+  emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
+  platformRole?: $Enums.PlatformRole
+  status?: $Enums.AccessStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+  invitationsCreated?: Prisma.TenantInvitationCreateNestedManyWithoutInvitedByInput
+  securityAuditLogs?: Prisma.SecurityAuditLogCreateNestedManyWithoutUserInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutUserInput
+  instagramConnections?: Prisma.InstagramConnectionCreateNestedManyWithoutConnectedByInput
+  instagramMessagesSent?: Prisma.MessageCreateNestedManyWithoutSentByInput
+  instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutUserInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutUserInput
+  googleConnections?: Prisma.GoogleConnectionCreateNestedManyWithoutConnectedByInput
+  googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
+  notifications?: Prisma.UserNotificationCreateNestedManyWithoutUserInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptCreateNestedManyWithoutUserInput
+  telegramUserBindings?: Prisma.TelegramUserBindingCreateNestedManyWithoutUserInput
+  procurementHandOffs?: Prisma.OrderCreateNestedManyWithoutProcurementHandedOffByUserInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutUserInput
+  deliveryConnectionsConnected?: Prisma.DeliveryConnectionCreateNestedManyWithoutConnectedByInput
+  shipmentsCreated?: Prisma.ShipmentCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentCreateNestedManyWithoutCancellerInput
+}
+
+export type UserUncheckedCreateWithoutFacebookConnectionsInput = {
+  id?: string
+  email: string
+  name: string
+  phone?: string | null
+  locale?: string
+  passwordHash?: string | null
+  emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
+  platformRole?: $Enums.PlatformRole
+  status?: $Enums.AccessStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  invitationsCreated?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUncheckedCreateNestedManyWithoutUserInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutUserInput
+  instagramConnections?: Prisma.InstagramConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  instagramMessagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSentByInput
+  instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
+  googleConnections?: Prisma.GoogleConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
+  notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutUserInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedCreateNestedManyWithoutUserInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUncheckedCreateNestedManyWithoutUserInput
+  procurementHandOffs?: Prisma.OrderUncheckedCreateNestedManyWithoutProcurementHandedOffByUserInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
+  deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  shipmentsCreated?: Prisma.ShipmentUncheckedCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCancellerInput
+}
+
+export type UserCreateOrConnectWithoutFacebookConnectionsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutFacebookConnectionsInput, Prisma.UserUncheckedCreateWithoutFacebookConnectionsInput>
+}
+
+export type UserUpsertWithoutFacebookConnectionsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutFacebookConnectionsInput, Prisma.UserUncheckedUpdateWithoutFacebookConnectionsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutFacebookConnectionsInput, Prisma.UserUncheckedCreateWithoutFacebookConnectionsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutFacebookConnectionsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutFacebookConnectionsInput, Prisma.UserUncheckedUpdateWithoutFacebookConnectionsInput>
+}
+
+export type UserUpdateWithoutFacebookConnectionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+  invitationsCreated?: Prisma.TenantInvitationUpdateManyWithoutInvitedByNestedInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUpdateManyWithoutUserNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutUserNestedInput
+  instagramConnections?: Prisma.InstagramConnectionUpdateManyWithoutConnectedByNestedInput
+  instagramMessagesSent?: Prisma.MessageUpdateManyWithoutSentByNestedInput
+  instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutUserNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutUserNestedInput
+  googleConnections?: Prisma.GoogleConnectionUpdateManyWithoutConnectedByNestedInput
+  googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
+  notifications?: Prisma.UserNotificationUpdateManyWithoutUserNestedInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUpdateManyWithoutUserNestedInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUpdateManyWithoutUserNestedInput
+  procurementHandOffs?: Prisma.OrderUpdateManyWithoutProcurementHandedOffByUserNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutUserNestedInput
+  deliveryConnectionsConnected?: Prisma.DeliveryConnectionUpdateManyWithoutConnectedByNestedInput
+  shipmentsCreated?: Prisma.ShipmentUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUpdateManyWithoutCancellerNestedInput
+}
+
+export type UserUncheckedUpdateWithoutFacebookConnectionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+  invitationsCreated?: Prisma.TenantInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUncheckedUpdateManyWithoutUserNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutUserNestedInput
+  instagramConnections?: Prisma.InstagramConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  instagramMessagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSentByNestedInput
+  instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
+  googleConnections?: Prisma.GoogleConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutUserNestedInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedUpdateManyWithoutUserNestedInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUncheckedUpdateManyWithoutUserNestedInput
+  procurementHandOffs?: Prisma.OrderUncheckedUpdateManyWithoutProcurementHandedOffByUserNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
+  deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  shipmentsCreated?: Prisma.ShipmentUncheckedUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCancellerNestedInput
+}
+
+export type UserCreateWithoutFacebookOAuthAttemptsInput = {
+  id?: string
+  email: string
+  name: string
+  phone?: string | null
+  locale?: string
+  passwordHash?: string | null
+  emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
+  platformRole?: $Enums.PlatformRole
+  status?: $Enums.AccessStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+  invitationsCreated?: Prisma.TenantInvitationCreateNestedManyWithoutInvitedByInput
+  securityAuditLogs?: Prisma.SecurityAuditLogCreateNestedManyWithoutUserInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutUserInput
+  instagramConnections?: Prisma.InstagramConnectionCreateNestedManyWithoutConnectedByInput
+  instagramMessagesSent?: Prisma.MessageCreateNestedManyWithoutSentByInput
+  instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
+  facebookConnections?: Prisma.FacebookConnectionCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutUserInput
+  googleConnections?: Prisma.GoogleConnectionCreateNestedManyWithoutConnectedByInput
+  googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
+  notifications?: Prisma.UserNotificationCreateNestedManyWithoutUserInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptCreateNestedManyWithoutUserInput
+  telegramUserBindings?: Prisma.TelegramUserBindingCreateNestedManyWithoutUserInput
+  procurementHandOffs?: Prisma.OrderCreateNestedManyWithoutProcurementHandedOffByUserInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutUserInput
+  deliveryConnectionsConnected?: Prisma.DeliveryConnectionCreateNestedManyWithoutConnectedByInput
+  shipmentsCreated?: Prisma.ShipmentCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentCreateNestedManyWithoutCancellerInput
+}
+
+export type UserUncheckedCreateWithoutFacebookOAuthAttemptsInput = {
+  id?: string
+  email: string
+  name: string
+  phone?: string | null
+  locale?: string
+  passwordHash?: string | null
+  emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
+  platformRole?: $Enums.PlatformRole
+  status?: $Enums.AccessStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  invitationsCreated?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUncheckedCreateNestedManyWithoutUserInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutUserInput
+  instagramConnections?: Prisma.InstagramConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  instagramMessagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSentByInput
+  instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
+  googleConnections?: Prisma.GoogleConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
+  notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutUserInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedCreateNestedManyWithoutUserInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUncheckedCreateNestedManyWithoutUserInput
+  procurementHandOffs?: Prisma.OrderUncheckedCreateNestedManyWithoutProcurementHandedOffByUserInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
+  deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  shipmentsCreated?: Prisma.ShipmentUncheckedCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCancellerInput
+}
+
+export type UserCreateOrConnectWithoutFacebookOAuthAttemptsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutFacebookOAuthAttemptsInput, Prisma.UserUncheckedCreateWithoutFacebookOAuthAttemptsInput>
+}
+
+export type UserUpsertWithoutFacebookOAuthAttemptsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutFacebookOAuthAttemptsInput, Prisma.UserUncheckedUpdateWithoutFacebookOAuthAttemptsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutFacebookOAuthAttemptsInput, Prisma.UserUncheckedCreateWithoutFacebookOAuthAttemptsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutFacebookOAuthAttemptsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutFacebookOAuthAttemptsInput, Prisma.UserUncheckedUpdateWithoutFacebookOAuthAttemptsInput>
+}
+
+export type UserUpdateWithoutFacebookOAuthAttemptsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+  invitationsCreated?: Prisma.TenantInvitationUpdateManyWithoutInvitedByNestedInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUpdateManyWithoutUserNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutUserNestedInput
+  instagramConnections?: Prisma.InstagramConnectionUpdateManyWithoutConnectedByNestedInput
+  instagramMessagesSent?: Prisma.MessageUpdateManyWithoutSentByNestedInput
+  instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutUserNestedInput
+  googleConnections?: Prisma.GoogleConnectionUpdateManyWithoutConnectedByNestedInput
+  googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
+  notifications?: Prisma.UserNotificationUpdateManyWithoutUserNestedInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUpdateManyWithoutUserNestedInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUpdateManyWithoutUserNestedInput
+  procurementHandOffs?: Prisma.OrderUpdateManyWithoutProcurementHandedOffByUserNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutUserNestedInput
+  deliveryConnectionsConnected?: Prisma.DeliveryConnectionUpdateManyWithoutConnectedByNestedInput
+  shipmentsCreated?: Prisma.ShipmentUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUpdateManyWithoutCancellerNestedInput
+}
+
+export type UserUncheckedUpdateWithoutFacebookOAuthAttemptsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+  invitationsCreated?: Prisma.TenantInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUncheckedUpdateManyWithoutUserNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutUserNestedInput
+  instagramConnections?: Prisma.InstagramConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  instagramMessagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSentByNestedInput
+  instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
+  googleConnections?: Prisma.GoogleConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutUserNestedInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedUpdateManyWithoutUserNestedInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUncheckedUpdateManyWithoutUserNestedInput
+  procurementHandOffs?: Prisma.OrderUncheckedUpdateManyWithoutProcurementHandedOffByUserNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
+  deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  shipmentsCreated?: Prisma.ShipmentUncheckedUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCancellerNestedInput
+}
+
+export type UserCreateWithoutFacebookCleanupsDeadLetteredInput = {
+  id?: string
+  email: string
+  name: string
+  phone?: string | null
+  locale?: string
+  passwordHash?: string | null
+  emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
+  platformRole?: $Enums.PlatformRole
+  status?: $Enums.AccessStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+  invitationsCreated?: Prisma.TenantInvitationCreateNestedManyWithoutInvitedByInput
+  securityAuditLogs?: Prisma.SecurityAuditLogCreateNestedManyWithoutUserInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutUserInput
+  instagramConnections?: Prisma.InstagramConnectionCreateNestedManyWithoutConnectedByInput
+  instagramMessagesSent?: Prisma.MessageCreateNestedManyWithoutSentByInput
+  instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionCreateNestedManyWithoutConnectedByInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutUserInput
+  googleConnections?: Prisma.GoogleConnectionCreateNestedManyWithoutConnectedByInput
+  googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
+  notifications?: Prisma.UserNotificationCreateNestedManyWithoutUserInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptCreateNestedManyWithoutUserInput
+  telegramUserBindings?: Prisma.TelegramUserBindingCreateNestedManyWithoutUserInput
+  procurementHandOffs?: Prisma.OrderCreateNestedManyWithoutProcurementHandedOffByUserInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutUserInput
+  deliveryConnectionsConnected?: Prisma.DeliveryConnectionCreateNestedManyWithoutConnectedByInput
+  shipmentsCreated?: Prisma.ShipmentCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentCreateNestedManyWithoutCancellerInput
+}
+
+export type UserUncheckedCreateWithoutFacebookCleanupsDeadLetteredInput = {
+  id?: string
+  email: string
+  name: string
+  phone?: string | null
+  locale?: string
+  passwordHash?: string | null
+  emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
+  platformRole?: $Enums.PlatformRole
+  status?: $Enums.AccessStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  invitationsCreated?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUncheckedCreateNestedManyWithoutUserInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutUserInput
+  instagramConnections?: Prisma.InstagramConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  instagramMessagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSentByInput
+  instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
+  googleConnections?: Prisma.GoogleConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
+  notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutUserInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedCreateNestedManyWithoutUserInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUncheckedCreateNestedManyWithoutUserInput
+  procurementHandOffs?: Prisma.OrderUncheckedCreateNestedManyWithoutProcurementHandedOffByUserInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
+  deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  shipmentsCreated?: Prisma.ShipmentUncheckedCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCancellerInput
+}
+
+export type UserCreateOrConnectWithoutFacebookCleanupsDeadLetteredInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutFacebookCleanupsDeadLetteredInput, Prisma.UserUncheckedCreateWithoutFacebookCleanupsDeadLetteredInput>
+}
+
+export type UserUpsertWithoutFacebookCleanupsDeadLetteredInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutFacebookCleanupsDeadLetteredInput, Prisma.UserUncheckedUpdateWithoutFacebookCleanupsDeadLetteredInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutFacebookCleanupsDeadLetteredInput, Prisma.UserUncheckedCreateWithoutFacebookCleanupsDeadLetteredInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutFacebookCleanupsDeadLetteredInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutFacebookCleanupsDeadLetteredInput, Prisma.UserUncheckedUpdateWithoutFacebookCleanupsDeadLetteredInput>
+}
+
+export type UserUpdateWithoutFacebookCleanupsDeadLetteredInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+  invitationsCreated?: Prisma.TenantInvitationUpdateManyWithoutInvitedByNestedInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUpdateManyWithoutUserNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutUserNestedInput
+  instagramConnections?: Prisma.InstagramConnectionUpdateManyWithoutConnectedByNestedInput
+  instagramMessagesSent?: Prisma.MessageUpdateManyWithoutSentByNestedInput
+  instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUpdateManyWithoutConnectedByNestedInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutUserNestedInput
+  googleConnections?: Prisma.GoogleConnectionUpdateManyWithoutConnectedByNestedInput
+  googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
+  notifications?: Prisma.UserNotificationUpdateManyWithoutUserNestedInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUpdateManyWithoutUserNestedInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUpdateManyWithoutUserNestedInput
+  procurementHandOffs?: Prisma.OrderUpdateManyWithoutProcurementHandedOffByUserNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutUserNestedInput
+  deliveryConnectionsConnected?: Prisma.DeliveryConnectionUpdateManyWithoutConnectedByNestedInput
+  shipmentsCreated?: Prisma.ShipmentUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUpdateManyWithoutCancellerNestedInput
+}
+
+export type UserUncheckedUpdateWithoutFacebookCleanupsDeadLetteredInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+  invitationsCreated?: Prisma.TenantInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUncheckedUpdateManyWithoutUserNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutUserNestedInput
+  instagramConnections?: Prisma.InstagramConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  instagramMessagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSentByNestedInput
+  instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
   googleConnections?: Prisma.GoogleConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
@@ -1946,6 +2637,9 @@ export type UserCreateWithoutAvatarCleanupsInput = {
   instagramConnections?: Prisma.InstagramConnectionCreateNestedManyWithoutConnectedByInput
   instagramMessagesSent?: Prisma.MessageCreateNestedManyWithoutSentByInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutUserInput
   googleConnections?: Prisma.GoogleConnectionCreateNestedManyWithoutConnectedByInput
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
@@ -1986,6 +2680,9 @@ export type UserUncheckedCreateWithoutAvatarCleanupsInput = {
   instagramConnections?: Prisma.InstagramConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   instagramMessagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSentByInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
   googleConnections?: Prisma.GoogleConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
@@ -2042,6 +2739,9 @@ export type UserUpdateWithoutAvatarCleanupsInput = {
   instagramConnections?: Prisma.InstagramConnectionUpdateManyWithoutConnectedByNestedInput
   instagramMessagesSent?: Prisma.MessageUpdateManyWithoutSentByNestedInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutUserNestedInput
   googleConnections?: Prisma.GoogleConnectionUpdateManyWithoutConnectedByNestedInput
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
@@ -2082,6 +2782,9 @@ export type UserUncheckedUpdateWithoutAvatarCleanupsInput = {
   instagramConnections?: Prisma.InstagramConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   instagramMessagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSentByNestedInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
   googleConnections?: Prisma.GoogleConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
@@ -2122,6 +2825,9 @@ export type UserCreateWithoutNotificationsInput = {
   instagramConnections?: Prisma.InstagramConnectionCreateNestedManyWithoutConnectedByInput
   instagramMessagesSent?: Prisma.MessageCreateNestedManyWithoutSentByInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutUserInput
   googleConnections?: Prisma.GoogleConnectionCreateNestedManyWithoutConnectedByInput
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
@@ -2162,6 +2868,9 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   instagramConnections?: Prisma.InstagramConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   instagramMessagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSentByInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
   googleConnections?: Prisma.GoogleConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
@@ -2218,6 +2927,9 @@ export type UserUpdateWithoutNotificationsInput = {
   instagramConnections?: Prisma.InstagramConnectionUpdateManyWithoutConnectedByNestedInput
   instagramMessagesSent?: Prisma.MessageUpdateManyWithoutSentByNestedInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutUserNestedInput
   googleConnections?: Prisma.GoogleConnectionUpdateManyWithoutConnectedByNestedInput
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
@@ -2258,6 +2970,9 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   instagramConnections?: Prisma.InstagramConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   instagramMessagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSentByNestedInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
   googleConnections?: Prisma.GoogleConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
@@ -2298,6 +3013,9 @@ export type UserCreateWithoutTelegramLinkAttemptsInput = {
   instagramConnections?: Prisma.InstagramConnectionCreateNestedManyWithoutConnectedByInput
   instagramMessagesSent?: Prisma.MessageCreateNestedManyWithoutSentByInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutUserInput
   googleConnections?: Prisma.GoogleConnectionCreateNestedManyWithoutConnectedByInput
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
@@ -2338,6 +3056,9 @@ export type UserUncheckedCreateWithoutTelegramLinkAttemptsInput = {
   instagramConnections?: Prisma.InstagramConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   instagramMessagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSentByInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
   googleConnections?: Prisma.GoogleConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
@@ -2394,6 +3115,9 @@ export type UserUpdateWithoutTelegramLinkAttemptsInput = {
   instagramConnections?: Prisma.InstagramConnectionUpdateManyWithoutConnectedByNestedInput
   instagramMessagesSent?: Prisma.MessageUpdateManyWithoutSentByNestedInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutUserNestedInput
   googleConnections?: Prisma.GoogleConnectionUpdateManyWithoutConnectedByNestedInput
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
@@ -2434,6 +3158,9 @@ export type UserUncheckedUpdateWithoutTelegramLinkAttemptsInput = {
   instagramConnections?: Prisma.InstagramConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   instagramMessagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSentByNestedInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
   googleConnections?: Prisma.GoogleConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
@@ -2474,6 +3201,9 @@ export type UserCreateWithoutTelegramUserBindingsInput = {
   instagramConnections?: Prisma.InstagramConnectionCreateNestedManyWithoutConnectedByInput
   instagramMessagesSent?: Prisma.MessageCreateNestedManyWithoutSentByInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutUserInput
   googleConnections?: Prisma.GoogleConnectionCreateNestedManyWithoutConnectedByInput
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
@@ -2514,6 +3244,9 @@ export type UserUncheckedCreateWithoutTelegramUserBindingsInput = {
   instagramConnections?: Prisma.InstagramConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   instagramMessagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSentByInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
   googleConnections?: Prisma.GoogleConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
@@ -2570,6 +3303,9 @@ export type UserUpdateWithoutTelegramUserBindingsInput = {
   instagramConnections?: Prisma.InstagramConnectionUpdateManyWithoutConnectedByNestedInput
   instagramMessagesSent?: Prisma.MessageUpdateManyWithoutSentByNestedInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutUserNestedInput
   googleConnections?: Prisma.GoogleConnectionUpdateManyWithoutConnectedByNestedInput
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
@@ -2610,6 +3346,9 @@ export type UserUncheckedUpdateWithoutTelegramUserBindingsInput = {
   instagramConnections?: Prisma.InstagramConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   instagramMessagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSentByNestedInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
   googleConnections?: Prisma.GoogleConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
@@ -2650,6 +3389,9 @@ export type UserCreateWithoutGoogleIdentityInput = {
   instagramConnections?: Prisma.InstagramConnectionCreateNestedManyWithoutConnectedByInput
   instagramMessagesSent?: Prisma.MessageCreateNestedManyWithoutSentByInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutUserInput
   googleConnections?: Prisma.GoogleConnectionCreateNestedManyWithoutConnectedByInput
   notifications?: Prisma.UserNotificationCreateNestedManyWithoutUserInput
@@ -2690,6 +3432,9 @@ export type UserUncheckedCreateWithoutGoogleIdentityInput = {
   instagramConnections?: Prisma.InstagramConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   instagramMessagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSentByInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
   googleConnections?: Prisma.GoogleConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutUserInput
@@ -2746,6 +3491,9 @@ export type UserUpdateWithoutGoogleIdentityInput = {
   instagramConnections?: Prisma.InstagramConnectionUpdateManyWithoutConnectedByNestedInput
   instagramMessagesSent?: Prisma.MessageUpdateManyWithoutSentByNestedInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutUserNestedInput
   googleConnections?: Prisma.GoogleConnectionUpdateManyWithoutConnectedByNestedInput
   notifications?: Prisma.UserNotificationUpdateManyWithoutUserNestedInput
@@ -2786,6 +3534,9 @@ export type UserUncheckedUpdateWithoutGoogleIdentityInput = {
   instagramConnections?: Prisma.InstagramConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   instagramMessagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSentByNestedInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
   googleConnections?: Prisma.GoogleConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutUserNestedInput
@@ -2825,6 +3576,9 @@ export type UserCreateWithoutMembershipsInput = {
   instagramConnections?: Prisma.InstagramConnectionCreateNestedManyWithoutConnectedByInput
   instagramMessagesSent?: Prisma.MessageCreateNestedManyWithoutSentByInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutUserInput
   googleConnections?: Prisma.GoogleConnectionCreateNestedManyWithoutConnectedByInput
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
@@ -2865,6 +3619,9 @@ export type UserUncheckedCreateWithoutMembershipsInput = {
   instagramConnections?: Prisma.InstagramConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   instagramMessagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSentByInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
   googleConnections?: Prisma.GoogleConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
@@ -2921,6 +3678,9 @@ export type UserUpdateWithoutMembershipsInput = {
   instagramConnections?: Prisma.InstagramConnectionUpdateManyWithoutConnectedByNestedInput
   instagramMessagesSent?: Prisma.MessageUpdateManyWithoutSentByNestedInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutUserNestedInput
   googleConnections?: Prisma.GoogleConnectionUpdateManyWithoutConnectedByNestedInput
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
@@ -2961,6 +3721,9 @@ export type UserUncheckedUpdateWithoutMembershipsInput = {
   instagramConnections?: Prisma.InstagramConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   instagramMessagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSentByNestedInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
   googleConnections?: Prisma.GoogleConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
@@ -3001,6 +3764,9 @@ export type UserCreateWithoutSessionsInput = {
   instagramConnections?: Prisma.InstagramConnectionCreateNestedManyWithoutConnectedByInput
   instagramMessagesSent?: Prisma.MessageCreateNestedManyWithoutSentByInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutUserInput
   googleConnections?: Prisma.GoogleConnectionCreateNestedManyWithoutConnectedByInput
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
@@ -3041,6 +3807,9 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   instagramConnections?: Prisma.InstagramConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   instagramMessagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSentByInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
   googleConnections?: Prisma.GoogleConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
@@ -3097,6 +3866,9 @@ export type UserUpdateWithoutSessionsInput = {
   instagramConnections?: Prisma.InstagramConnectionUpdateManyWithoutConnectedByNestedInput
   instagramMessagesSent?: Prisma.MessageUpdateManyWithoutSentByNestedInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutUserNestedInput
   googleConnections?: Prisma.GoogleConnectionUpdateManyWithoutConnectedByNestedInput
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
@@ -3137,6 +3909,9 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   instagramConnections?: Prisma.InstagramConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   instagramMessagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSentByNestedInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
   googleConnections?: Prisma.GoogleConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
@@ -3177,6 +3952,9 @@ export type UserCreateWithoutEmailVerificationTokensInput = {
   instagramConnections?: Prisma.InstagramConnectionCreateNestedManyWithoutConnectedByInput
   instagramMessagesSent?: Prisma.MessageCreateNestedManyWithoutSentByInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutUserInput
   googleConnections?: Prisma.GoogleConnectionCreateNestedManyWithoutConnectedByInput
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
@@ -3217,6 +3995,9 @@ export type UserUncheckedCreateWithoutEmailVerificationTokensInput = {
   instagramConnections?: Prisma.InstagramConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   instagramMessagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSentByInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
   googleConnections?: Prisma.GoogleConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
@@ -3273,6 +4054,9 @@ export type UserUpdateWithoutEmailVerificationTokensInput = {
   instagramConnections?: Prisma.InstagramConnectionUpdateManyWithoutConnectedByNestedInput
   instagramMessagesSent?: Prisma.MessageUpdateManyWithoutSentByNestedInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutUserNestedInput
   googleConnections?: Prisma.GoogleConnectionUpdateManyWithoutConnectedByNestedInput
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
@@ -3313,6 +4097,9 @@ export type UserUncheckedUpdateWithoutEmailVerificationTokensInput = {
   instagramConnections?: Prisma.InstagramConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   instagramMessagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSentByNestedInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
   googleConnections?: Prisma.GoogleConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
@@ -3353,6 +4140,9 @@ export type UserCreateWithoutPasswordResetTokensInput = {
   instagramConnections?: Prisma.InstagramConnectionCreateNestedManyWithoutConnectedByInput
   instagramMessagesSent?: Prisma.MessageCreateNestedManyWithoutSentByInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutUserInput
   googleConnections?: Prisma.GoogleConnectionCreateNestedManyWithoutConnectedByInput
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
@@ -3393,6 +4183,9 @@ export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
   instagramConnections?: Prisma.InstagramConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   instagramMessagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSentByInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
   googleConnections?: Prisma.GoogleConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
@@ -3449,6 +4242,9 @@ export type UserUpdateWithoutPasswordResetTokensInput = {
   instagramConnections?: Prisma.InstagramConnectionUpdateManyWithoutConnectedByNestedInput
   instagramMessagesSent?: Prisma.MessageUpdateManyWithoutSentByNestedInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutUserNestedInput
   googleConnections?: Prisma.GoogleConnectionUpdateManyWithoutConnectedByNestedInput
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
@@ -3489,6 +4285,9 @@ export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
   instagramConnections?: Prisma.InstagramConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   instagramMessagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSentByNestedInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
   googleConnections?: Prisma.GoogleConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
@@ -3529,6 +4328,9 @@ export type UserCreateWithoutInvitationsCreatedInput = {
   instagramConnections?: Prisma.InstagramConnectionCreateNestedManyWithoutConnectedByInput
   instagramMessagesSent?: Prisma.MessageCreateNestedManyWithoutSentByInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutUserInput
   googleConnections?: Prisma.GoogleConnectionCreateNestedManyWithoutConnectedByInput
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
@@ -3569,6 +4371,9 @@ export type UserUncheckedCreateWithoutInvitationsCreatedInput = {
   instagramConnections?: Prisma.InstagramConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   instagramMessagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSentByInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
   googleConnections?: Prisma.GoogleConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
@@ -3625,6 +4430,9 @@ export type UserUpdateWithoutInvitationsCreatedInput = {
   instagramConnections?: Prisma.InstagramConnectionUpdateManyWithoutConnectedByNestedInput
   instagramMessagesSent?: Prisma.MessageUpdateManyWithoutSentByNestedInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutUserNestedInput
   googleConnections?: Prisma.GoogleConnectionUpdateManyWithoutConnectedByNestedInput
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
@@ -3665,6 +4473,9 @@ export type UserUncheckedUpdateWithoutInvitationsCreatedInput = {
   instagramConnections?: Prisma.InstagramConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   instagramMessagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSentByNestedInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
   googleConnections?: Prisma.GoogleConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
@@ -3705,6 +4516,9 @@ export type UserCreateWithoutSecurityAuditLogsInput = {
   instagramConnections?: Prisma.InstagramConnectionCreateNestedManyWithoutConnectedByInput
   instagramMessagesSent?: Prisma.MessageCreateNestedManyWithoutSentByInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutUserInput
   googleConnections?: Prisma.GoogleConnectionCreateNestedManyWithoutConnectedByInput
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
@@ -3745,6 +4559,9 @@ export type UserUncheckedCreateWithoutSecurityAuditLogsInput = {
   instagramConnections?: Prisma.InstagramConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   instagramMessagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSentByInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
   googleConnections?: Prisma.GoogleConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
@@ -3801,6 +4618,9 @@ export type UserUpdateWithoutSecurityAuditLogsInput = {
   instagramConnections?: Prisma.InstagramConnectionUpdateManyWithoutConnectedByNestedInput
   instagramMessagesSent?: Prisma.MessageUpdateManyWithoutSentByNestedInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutUserNestedInput
   googleConnections?: Prisma.GoogleConnectionUpdateManyWithoutConnectedByNestedInput
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
@@ -3841,6 +4661,9 @@ export type UserUncheckedUpdateWithoutSecurityAuditLogsInput = {
   instagramConnections?: Prisma.InstagramConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   instagramMessagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSentByNestedInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
   googleConnections?: Prisma.GoogleConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
@@ -3881,6 +4704,9 @@ export type UserCreateWithoutInstagramMessagesSentInput = {
   instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutUserInput
   instagramConnections?: Prisma.InstagramConnectionCreateNestedManyWithoutConnectedByInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutUserInput
   googleConnections?: Prisma.GoogleConnectionCreateNestedManyWithoutConnectedByInput
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
@@ -3921,6 +4747,9 @@ export type UserUncheckedCreateWithoutInstagramMessagesSentInput = {
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutUserInput
   instagramConnections?: Prisma.InstagramConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
   googleConnections?: Prisma.GoogleConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
@@ -3977,6 +4806,9 @@ export type UserUpdateWithoutInstagramMessagesSentInput = {
   instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutUserNestedInput
   instagramConnections?: Prisma.InstagramConnectionUpdateManyWithoutConnectedByNestedInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutUserNestedInput
   googleConnections?: Prisma.GoogleConnectionUpdateManyWithoutConnectedByNestedInput
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
@@ -4017,6 +4849,9 @@ export type UserUncheckedUpdateWithoutInstagramMessagesSentInput = {
   instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutUserNestedInput
   instagramConnections?: Prisma.InstagramConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
   googleConnections?: Prisma.GoogleConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
@@ -4058,6 +4893,9 @@ export type UserCreateWithoutProcurementHandOffsInput = {
   instagramConnections?: Prisma.InstagramConnectionCreateNestedManyWithoutConnectedByInput
   instagramMessagesSent?: Prisma.MessageCreateNestedManyWithoutSentByInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutUserInput
   googleConnections?: Prisma.GoogleConnectionCreateNestedManyWithoutConnectedByInput
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
@@ -4098,6 +4936,9 @@ export type UserUncheckedCreateWithoutProcurementHandOffsInput = {
   instagramConnections?: Prisma.InstagramConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   instagramMessagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSentByInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
   googleConnections?: Prisma.GoogleConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
@@ -4154,6 +4995,9 @@ export type UserUpdateWithoutProcurementHandOffsInput = {
   instagramConnections?: Prisma.InstagramConnectionUpdateManyWithoutConnectedByNestedInput
   instagramMessagesSent?: Prisma.MessageUpdateManyWithoutSentByNestedInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutUserNestedInput
   googleConnections?: Prisma.GoogleConnectionUpdateManyWithoutConnectedByNestedInput
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
@@ -4194,6 +5038,9 @@ export type UserUncheckedUpdateWithoutProcurementHandOffsInput = {
   instagramConnections?: Prisma.InstagramConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   instagramMessagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSentByNestedInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
   googleConnections?: Prisma.GoogleConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
@@ -4234,6 +5081,9 @@ export type UserCreateWithoutOrderPaymentsCreatedInput = {
   instagramConnections?: Prisma.InstagramConnectionCreateNestedManyWithoutConnectedByInput
   instagramMessagesSent?: Prisma.MessageCreateNestedManyWithoutSentByInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutUserInput
   googleConnections?: Prisma.GoogleConnectionCreateNestedManyWithoutConnectedByInput
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
@@ -4274,6 +5124,9 @@ export type UserUncheckedCreateWithoutOrderPaymentsCreatedInput = {
   instagramConnections?: Prisma.InstagramConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   instagramMessagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSentByInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
   googleConnections?: Prisma.GoogleConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
@@ -4319,6 +5172,9 @@ export type UserCreateWithoutOrderPaymentsCancelledInput = {
   instagramConnections?: Prisma.InstagramConnectionCreateNestedManyWithoutConnectedByInput
   instagramMessagesSent?: Prisma.MessageCreateNestedManyWithoutSentByInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutUserInput
   googleConnections?: Prisma.GoogleConnectionCreateNestedManyWithoutConnectedByInput
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
@@ -4359,6 +5215,9 @@ export type UserUncheckedCreateWithoutOrderPaymentsCancelledInput = {
   instagramConnections?: Prisma.InstagramConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   instagramMessagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSentByInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
   googleConnections?: Prisma.GoogleConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
@@ -4415,6 +5274,9 @@ export type UserUpdateWithoutOrderPaymentsCreatedInput = {
   instagramConnections?: Prisma.InstagramConnectionUpdateManyWithoutConnectedByNestedInput
   instagramMessagesSent?: Prisma.MessageUpdateManyWithoutSentByNestedInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutUserNestedInput
   googleConnections?: Prisma.GoogleConnectionUpdateManyWithoutConnectedByNestedInput
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
@@ -4455,6 +5317,9 @@ export type UserUncheckedUpdateWithoutOrderPaymentsCreatedInput = {
   instagramConnections?: Prisma.InstagramConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   instagramMessagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSentByNestedInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
   googleConnections?: Prisma.GoogleConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
@@ -4506,6 +5371,9 @@ export type UserUpdateWithoutOrderPaymentsCancelledInput = {
   instagramConnections?: Prisma.InstagramConnectionUpdateManyWithoutConnectedByNestedInput
   instagramMessagesSent?: Prisma.MessageUpdateManyWithoutSentByNestedInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutUserNestedInput
   googleConnections?: Prisma.GoogleConnectionUpdateManyWithoutConnectedByNestedInput
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
@@ -4546,6 +5414,9 @@ export type UserUncheckedUpdateWithoutOrderPaymentsCancelledInput = {
   instagramConnections?: Prisma.InstagramConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   instagramMessagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSentByNestedInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
   googleConnections?: Prisma.GoogleConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
@@ -4586,6 +5457,9 @@ export type UserCreateWithoutDeliveryConnectionsConnectedInput = {
   instagramConnections?: Prisma.InstagramConnectionCreateNestedManyWithoutConnectedByInput
   instagramMessagesSent?: Prisma.MessageCreateNestedManyWithoutSentByInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutUserInput
   googleConnections?: Prisma.GoogleConnectionCreateNestedManyWithoutConnectedByInput
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
@@ -4626,6 +5500,9 @@ export type UserUncheckedCreateWithoutDeliveryConnectionsConnectedInput = {
   instagramConnections?: Prisma.InstagramConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   instagramMessagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSentByInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
   googleConnections?: Prisma.GoogleConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
@@ -4682,6 +5559,9 @@ export type UserUpdateWithoutDeliveryConnectionsConnectedInput = {
   instagramConnections?: Prisma.InstagramConnectionUpdateManyWithoutConnectedByNestedInput
   instagramMessagesSent?: Prisma.MessageUpdateManyWithoutSentByNestedInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutUserNestedInput
   googleConnections?: Prisma.GoogleConnectionUpdateManyWithoutConnectedByNestedInput
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
@@ -4722,6 +5602,9 @@ export type UserUncheckedUpdateWithoutDeliveryConnectionsConnectedInput = {
   instagramConnections?: Prisma.InstagramConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   instagramMessagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSentByNestedInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
   googleConnections?: Prisma.GoogleConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
@@ -4762,6 +5645,9 @@ export type UserCreateWithoutShipmentsCreatedInput = {
   instagramConnections?: Prisma.InstagramConnectionCreateNestedManyWithoutConnectedByInput
   instagramMessagesSent?: Prisma.MessageCreateNestedManyWithoutSentByInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutUserInput
   googleConnections?: Prisma.GoogleConnectionCreateNestedManyWithoutConnectedByInput
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
@@ -4802,6 +5688,9 @@ export type UserUncheckedCreateWithoutShipmentsCreatedInput = {
   instagramConnections?: Prisma.InstagramConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   instagramMessagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSentByInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
   googleConnections?: Prisma.GoogleConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
@@ -4858,6 +5747,9 @@ export type UserUpdateWithoutShipmentsCreatedInput = {
   instagramConnections?: Prisma.InstagramConnectionUpdateManyWithoutConnectedByNestedInput
   instagramMessagesSent?: Prisma.MessageUpdateManyWithoutSentByNestedInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutUserNestedInput
   googleConnections?: Prisma.GoogleConnectionUpdateManyWithoutConnectedByNestedInput
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
@@ -4898,6 +5790,9 @@ export type UserUncheckedUpdateWithoutShipmentsCreatedInput = {
   instagramConnections?: Prisma.InstagramConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   instagramMessagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSentByNestedInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
   googleConnections?: Prisma.GoogleConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
@@ -4938,6 +5833,9 @@ export type UserCreateWithoutTelegramNotificationPreferencesInput = {
   instagramConnections?: Prisma.InstagramConnectionCreateNestedManyWithoutConnectedByInput
   instagramMessagesSent?: Prisma.MessageCreateNestedManyWithoutSentByInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutUserInput
   googleConnections?: Prisma.GoogleConnectionCreateNestedManyWithoutConnectedByInput
   googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
@@ -4978,6 +5876,9 @@ export type UserUncheckedCreateWithoutTelegramNotificationPreferencesInput = {
   instagramConnections?: Prisma.InstagramConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   instagramMessagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSentByInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
   googleConnections?: Prisma.GoogleConnectionUncheckedCreateNestedManyWithoutConnectedByInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
@@ -5034,6 +5935,9 @@ export type UserUpdateWithoutTelegramNotificationPreferencesInput = {
   instagramConnections?: Prisma.InstagramConnectionUpdateManyWithoutConnectedByNestedInput
   instagramMessagesSent?: Prisma.MessageUpdateManyWithoutSentByNestedInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutUserNestedInput
   googleConnections?: Prisma.GoogleConnectionUpdateManyWithoutConnectedByNestedInput
   googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
@@ -5074,6 +5978,9 @@ export type UserUncheckedUpdateWithoutTelegramNotificationPreferencesInput = {
   instagramConnections?: Prisma.InstagramConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   instagramMessagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSentByNestedInput
   instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
   googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
   googleConnections?: Prisma.GoogleConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
   googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
@@ -5104,6 +6011,9 @@ export type UserCountOutputType = {
   instagramConnections: number
   instagramMessagesSent: number
   instagramCleanupsDeadLettered: number
+  facebookOAuthAttempts: number
+  facebookConnections: number
+  facebookCleanupsDeadLettered: number
   googleOAuthAttempts: number
   googleConnections: number
   notifications: number
@@ -5129,6 +6039,9 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   instagramConnections?: boolean | UserCountOutputTypeCountInstagramConnectionsArgs
   instagramMessagesSent?: boolean | UserCountOutputTypeCountInstagramMessagesSentArgs
   instagramCleanupsDeadLettered?: boolean | UserCountOutputTypeCountInstagramCleanupsDeadLetteredArgs
+  facebookOAuthAttempts?: boolean | UserCountOutputTypeCountFacebookOAuthAttemptsArgs
+  facebookConnections?: boolean | UserCountOutputTypeCountFacebookConnectionsArgs
+  facebookCleanupsDeadLettered?: boolean | UserCountOutputTypeCountFacebookCleanupsDeadLetteredArgs
   googleOAuthAttempts?: boolean | UserCountOutputTypeCountGoogleOAuthAttemptsArgs
   googleConnections?: boolean | UserCountOutputTypeCountGoogleConnectionsArgs
   notifications?: boolean | UserCountOutputTypeCountNotificationsArgs
@@ -5221,6 +6134,27 @@ export type UserCountOutputTypeCountInstagramMessagesSentArgs<ExtArgs extends ru
  */
 export type UserCountOutputTypeCountInstagramCleanupsDeadLetteredArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.InstagramCredentialCleanupWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountFacebookOAuthAttemptsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.FacebookOAuthAttemptWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountFacebookConnectionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.FacebookConnectionWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountFacebookCleanupsDeadLetteredArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.FacebookCredentialCleanupWhereInput
 }
 
 /**
@@ -5334,6 +6268,9 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   instagramConnections?: boolean | Prisma.User$instagramConnectionsArgs<ExtArgs>
   instagramMessagesSent?: boolean | Prisma.User$instagramMessagesSentArgs<ExtArgs>
   instagramCleanupsDeadLettered?: boolean | Prisma.User$instagramCleanupsDeadLetteredArgs<ExtArgs>
+  facebookOAuthAttempts?: boolean | Prisma.User$facebookOAuthAttemptsArgs<ExtArgs>
+  facebookConnections?: boolean | Prisma.User$facebookConnectionsArgs<ExtArgs>
+  facebookCleanupsDeadLettered?: boolean | Prisma.User$facebookCleanupsDeadLetteredArgs<ExtArgs>
   googleOAuthAttempts?: boolean | Prisma.User$googleOAuthAttemptsArgs<ExtArgs>
   googleConnections?: boolean | Prisma.User$googleConnectionsArgs<ExtArgs>
   googleIdentity?: boolean | Prisma.User$googleIdentityArgs<ExtArgs>
@@ -5416,6 +6353,9 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   instagramConnections?: boolean | Prisma.User$instagramConnectionsArgs<ExtArgs>
   instagramMessagesSent?: boolean | Prisma.User$instagramMessagesSentArgs<ExtArgs>
   instagramCleanupsDeadLettered?: boolean | Prisma.User$instagramCleanupsDeadLetteredArgs<ExtArgs>
+  facebookOAuthAttempts?: boolean | Prisma.User$facebookOAuthAttemptsArgs<ExtArgs>
+  facebookConnections?: boolean | Prisma.User$facebookConnectionsArgs<ExtArgs>
+  facebookCleanupsDeadLettered?: boolean | Prisma.User$facebookCleanupsDeadLetteredArgs<ExtArgs>
   googleOAuthAttempts?: boolean | Prisma.User$googleOAuthAttemptsArgs<ExtArgs>
   googleConnections?: boolean | Prisma.User$googleConnectionsArgs<ExtArgs>
   googleIdentity?: boolean | Prisma.User$googleIdentityArgs<ExtArgs>
@@ -5447,6 +6387,9 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     instagramConnections: Prisma.$InstagramConnectionPayload<ExtArgs>[]
     instagramMessagesSent: Prisma.$MessagePayload<ExtArgs>[]
     instagramCleanupsDeadLettered: Prisma.$InstagramCredentialCleanupPayload<ExtArgs>[]
+    facebookOAuthAttempts: Prisma.$FacebookOAuthAttemptPayload<ExtArgs>[]
+    facebookConnections: Prisma.$FacebookConnectionPayload<ExtArgs>[]
+    facebookCleanupsDeadLettered: Prisma.$FacebookCredentialCleanupPayload<ExtArgs>[]
     googleOAuthAttempts: Prisma.$GoogleOAuthAttemptPayload<ExtArgs>[]
     googleConnections: Prisma.$GoogleConnectionPayload<ExtArgs>[]
     googleIdentity: Prisma.$GoogleIdentityPayload<ExtArgs> | null
@@ -5881,6 +6824,9 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   instagramConnections<T extends Prisma.User$instagramConnectionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$instagramConnectionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InstagramConnectionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   instagramMessagesSent<T extends Prisma.User$instagramMessagesSentArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$instagramMessagesSentArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   instagramCleanupsDeadLettered<T extends Prisma.User$instagramCleanupsDeadLetteredArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$instagramCleanupsDeadLetteredArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InstagramCredentialCleanupPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  facebookOAuthAttempts<T extends Prisma.User$facebookOAuthAttemptsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$facebookOAuthAttemptsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FacebookOAuthAttemptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  facebookConnections<T extends Prisma.User$facebookConnectionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$facebookConnectionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FacebookConnectionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  facebookCleanupsDeadLettered<T extends Prisma.User$facebookCleanupsDeadLetteredArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$facebookCleanupsDeadLetteredArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FacebookCredentialCleanupPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   googleOAuthAttempts<T extends Prisma.User$googleOAuthAttemptsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$googleOAuthAttemptsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$GoogleOAuthAttemptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   googleConnections<T extends Prisma.User$googleConnectionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$googleConnectionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$GoogleConnectionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   googleIdentity<T extends Prisma.User$googleIdentityArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$googleIdentityArgs<ExtArgs>>): Prisma.Prisma__GoogleIdentityClient<runtime.Types.Result.GetResult<Prisma.$GoogleIdentityPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
@@ -6568,6 +7514,78 @@ export type User$instagramCleanupsDeadLetteredArgs<ExtArgs extends runtime.Types
   take?: number
   skip?: number
   distinct?: Prisma.InstagramCredentialCleanupScalarFieldEnum | Prisma.InstagramCredentialCleanupScalarFieldEnum[]
+}
+
+/**
+ * User.facebookOAuthAttempts
+ */
+export type User$facebookOAuthAttemptsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the FacebookOAuthAttempt
+   */
+  select?: Prisma.FacebookOAuthAttemptSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the FacebookOAuthAttempt
+   */
+  omit?: Prisma.FacebookOAuthAttemptOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FacebookOAuthAttemptInclude<ExtArgs> | null
+  where?: Prisma.FacebookOAuthAttemptWhereInput
+  orderBy?: Prisma.FacebookOAuthAttemptOrderByWithRelationInput | Prisma.FacebookOAuthAttemptOrderByWithRelationInput[]
+  cursor?: Prisma.FacebookOAuthAttemptWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.FacebookOAuthAttemptScalarFieldEnum | Prisma.FacebookOAuthAttemptScalarFieldEnum[]
+}
+
+/**
+ * User.facebookConnections
+ */
+export type User$facebookConnectionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the FacebookConnection
+   */
+  select?: Prisma.FacebookConnectionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the FacebookConnection
+   */
+  omit?: Prisma.FacebookConnectionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FacebookConnectionInclude<ExtArgs> | null
+  where?: Prisma.FacebookConnectionWhereInput
+  orderBy?: Prisma.FacebookConnectionOrderByWithRelationInput | Prisma.FacebookConnectionOrderByWithRelationInput[]
+  cursor?: Prisma.FacebookConnectionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.FacebookConnectionScalarFieldEnum | Prisma.FacebookConnectionScalarFieldEnum[]
+}
+
+/**
+ * User.facebookCleanupsDeadLettered
+ */
+export type User$facebookCleanupsDeadLetteredArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the FacebookCredentialCleanup
+   */
+  select?: Prisma.FacebookCredentialCleanupSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the FacebookCredentialCleanup
+   */
+  omit?: Prisma.FacebookCredentialCleanupOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FacebookCredentialCleanupInclude<ExtArgs> | null
+  where?: Prisma.FacebookCredentialCleanupWhereInput
+  orderBy?: Prisma.FacebookCredentialCleanupOrderByWithRelationInput | Prisma.FacebookCredentialCleanupOrderByWithRelationInput[]
+  cursor?: Prisma.FacebookCredentialCleanupWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.FacebookCredentialCleanupScalarFieldEnum | Prisma.FacebookCredentialCleanupScalarFieldEnum[]
 }
 
 /**

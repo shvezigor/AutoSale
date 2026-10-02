@@ -31,6 +31,7 @@ export const workerEnvSchema = z.object({
   META_APP_ID: z.string().regex(/^\d{5,32}$/),
   META_APP_SECRET: z.string().min(16),
   META_GRAPH_API_VERSION: z.string().regex(/^v\d+\.\d+$/),
+  FACEBOOK_MESSENGER_ENABLED: optionalBoolean,
   GOOGLE_SERVICE_ACCOUNT_FILE: z.preprocess((value) => value === '' ? undefined : value, z.string().min(1).optional()),
   INTEGRATION_ENCRYPTION_KEY: canonicalEncryptionKey,
   GOOGLE_OAUTH_CLIENT_ID: optionalNonEmptyString,

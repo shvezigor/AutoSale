@@ -26,6 +26,7 @@ export const apiEnvSchema = z.object({
   META_APP_SECRET: z.string().min(16),
   META_APP_ID: z.string().regex(/^\d{5,32}$/),
   META_GRAPH_API_VERSION: z.string().regex(/^v\d+\.\d+$/),
+  FACEBOOK_MESSENGER_ENABLED: optionalBoolean,
   INTEGRATION_ENCRYPTION_KEY: z.string().refine(
     isCanonicalIntegrationEncryptionKey,
     'must be canonical base64 encoding of 32 bytes',

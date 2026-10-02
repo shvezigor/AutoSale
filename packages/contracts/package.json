@@ -26,6 +26,14 @@
       "import": "./dist/meta.js",
       "default": "./dist/meta.js"
     },
+    "./facebook": {
+      "react-server": "./src/facebook.ts",
+      "browser": "./src/facebook.ts",
+      "types": "./src/facebook.ts",
+      "development": "./src/facebook.ts",
+      "import": "./dist/facebook.js",
+      "default": "./dist/facebook.js"
+    },
     "./orders": {
       "react-server": "./src/orders.ts",
       "browser": "./src/orders.ts",

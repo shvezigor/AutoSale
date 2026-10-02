@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+export const socialChannelSchema = z.enum(['INSTAGRAM', 'FACEBOOK']);
+
 export const conversationQuerySchema = z.object({
   cursor: z.string().min(1).optional(),
   limit: z.coerce.number().int().min(1).max(50).default(20),
@@ -7,7 +9,7 @@ export const conversationQuerySchema = z.object({
 
 export const conversationSummarySchema = z.object({
   id: z.string().uuid(),
-  channel: z.literal('INSTAGRAM'),
+  channel: socialChannelSchema,
   participantName: z.string().nullable(),
   participantUsername: z.string().nullable(),
   participantAvatarUrl: z.string().nullable(),
@@ -48,7 +50,7 @@ export const outboundMessageInputSchema = z.object({
 
 export const replyCapabilitySchema = z.object({
   enabled: z.boolean(),
-  reason: z.enum(['NOT_CONNECTED', 'RECONNECT_REQUIRED', 'REPLY_WINDOW_EXPIRED']).nullable(),
+  reason: z.enum(['NOT_CONNECTED', 'RECONNECT_REQUIRED', 'REPLY_WINDOW_EXPIRED', 'CHANNEL_READ_ONLY']).nullable(),
 });
 
 export const conversationMessageSchema = z.object({
@@ -63,7 +65,7 @@ export const conversationMessageSchema = z.object({
 
 export const conversationDetailResponseSchema = z.object({
   id: z.string().uuid(),
-  channel: z.literal('INSTAGRAM'),
+  channel: socialChannelSchema,
   participantName: z.string().nullable(),
   participantUsername: z.string().nullable(),
   participantAvatarUrl: z.string().nullable(),

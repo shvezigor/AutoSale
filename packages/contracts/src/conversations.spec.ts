@@ -13,6 +13,39 @@ const profile = {
 };
 
 describe('conversation profile contracts', () => {
+  it('accepts Facebook conversations without widening the channel vocabulary', () => {
+    const facebook = conversationListResponseSchema.parse({
+      items: [{
+        id: '11111111-1111-4111-8111-111111111111',
+        channel: 'FACEBOOK',
+        ...profile,
+        lastMessagePreview: 'Вітаю',
+        lastMessageAt: '2026-10-02T10:00:00.000Z',
+      }],
+      nextCursor: null,
+    });
+
+    expect(facebook.items[0]?.channel).toBe('FACEBOOK');
+    expect(() => conversationListResponseSchema.parse({
+      items: [{ ...facebook.items[0], channel: 'WHATSAPP' }],
+      nextCursor: null,
+    })).toThrow();
+  });
+
+  it('represents the inbound-only Facebook reply capability explicitly', () => {
+    const parsed = conversationDetailResponseSchema.parse({
+      id: '11111111-1111-4111-8111-111111111111',
+      channel: 'FACEBOOK',
+      participantName: 'Олена',
+      participantUsername: null,
+      participantAvatarUrl: null,
+      replyCapability: { enabled: false, reason: 'CHANNEL_READ_ONLY' },
+      messages: [],
+    });
+
+    expect(parsed.replyCapability).toEqual({ enabled: false, reason: 'CHANNEL_READ_ONLY' });
+  });
+
   it('retains additive profile fields in conversation list responses', () => {
     const parsed = conversationListResponseSchema.parse({
       items: [{

@@ -60,6 +60,9 @@ export const ModelName = {
   InstagramConnection: 'InstagramConnection',
   InstagramOAuthState: 'InstagramOAuthState',
   InstagramCredentialCleanup: 'InstagramCredentialCleanup',
+  FacebookConnection: 'FacebookConnection',
+  FacebookOAuthAttempt: 'FacebookOAuthAttempt',
+  FacebookCredentialCleanup: 'FacebookCredentialCleanup',
   User: 'User',
   UserAvatarCleanup: 'UserAvatarCleanup',
   UserNotification: 'UserNotification',
@@ -302,6 +305,73 @@ export const InstagramCredentialCleanupScalarFieldEnum = {
 } as const
 
 export type InstagramCredentialCleanupScalarFieldEnum = (typeof InstagramCredentialCleanupScalarFieldEnum)[keyof typeof InstagramCredentialCleanupScalarFieldEnum]
+
+
+export const FacebookConnectionScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  externalPageId: 'externalPageId',
+  pageName: 'pageName',
+  status: 'status',
+  encryptedPageAccessToken: 'encryptedPageAccessToken',
+  credentialGenerationId: 'credentialGenerationId',
+  tokenExpiresAt: 'tokenExpiresAt',
+  grantedScopes: 'grantedScopes',
+  connectedByUserId: 'connectedByUserId',
+  lastVerifiedAt: 'lastVerifiedAt',
+  lastErrorCode: 'lastErrorCode',
+  disconnectedAt: 'disconnectedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type FacebookConnectionScalarFieldEnum = (typeof FacebookConnectionScalarFieldEnum)[keyof typeof FacebookConnectionScalarFieldEnum]
+
+
+export const FacebookOAuthAttemptScalarFieldEnum = {
+  id: 'id',
+  tokenHash: 'tokenHash',
+  tenantId: 'tenantId',
+  userId: 'userId',
+  returnPath: 'returnPath',
+  expiresAt: 'expiresAt',
+  usedAt: 'usedAt',
+  encryptedPageCandidates: 'encryptedPageCandidates',
+  candidateExpiresAt: 'candidateExpiresAt',
+  selectedPageId: 'selectedPageId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type FacebookOAuthAttemptScalarFieldEnum = (typeof FacebookOAuthAttemptScalarFieldEnum)[keyof typeof FacebookOAuthAttemptScalarFieldEnum]
+
+
+export const FacebookCredentialCleanupScalarFieldEnum = {
+  id: 'id',
+  credentialGenerationId: 'credentialGenerationId',
+  tenantId: 'tenantId',
+  externalPageId: 'externalPageId',
+  encryptedPageAccessToken: 'encryptedPageAccessToken',
+  source: 'source',
+  state: 'state',
+  callbackResolvedAt: 'callbackResolvedAt',
+  unsubscribeStatus: 'unsubscribeStatus',
+  unsubscribeAttemptedAt: 'unsubscribeAttemptedAt',
+  unsubscribeSucceededAt: 'unsubscribeSucceededAt',
+  attempts: 'attempts',
+  leaseId: 'leaseId',
+  leaseExpiresAt: 'leaseExpiresAt',
+  version: 'version',
+  lastErrorCode: 'lastErrorCode',
+  permanentFailureAt: 'permanentFailureAt',
+  deadLetteredAt: 'deadLetteredAt',
+  deadLetteredByUserId: 'deadLetteredByUserId',
+  terminalAt: 'terminalAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type FacebookCredentialCleanupScalarFieldEnum = (typeof FacebookCredentialCleanupScalarFieldEnum)[keyof typeof FacebookCredentialCleanupScalarFieldEnum]
 
 
 export const UserScalarFieldEnum = {

@@ -18,13 +18,14 @@ export type OrderIntentDetection = {
 };
 
 export const INSTAGRAM_ORDER_PROMPT_VERSION = 'instagram-order-v2' as const;
+export const SOCIAL_ORDER_PROMPT_VERSION = 'social-order-v3' as const;
 
 export interface ManagerOrder {
   id: string;
   publicNumber: string;
   status: OrderStatus;
   participantName: string | null;
-  channel: 'INSTAGRAM';
+  channel: 'INSTAGRAM' | 'FACEBOOK';
   overallConfidence: number | null;
   validationIssues: string[];
   intentDetection?: OrderIntentDetection | null;

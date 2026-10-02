@@ -31,11 +31,16 @@ describe('parseApiEnv', () => {
     expect(parseApiEnv({ ...validEnv, UKRPOSHTA_SANDBOX_SHIPMENTS_ENABLED: 'true' }).UKRPOSHTA_SANDBOX_SHIPMENTS_ENABLED).toBe(true);
   });
   it('coerces a valid API environment', () => {
-    expect(parseApiEnv(validEnv)).toEqual({ ...validEnv, PORT: 3001, SMTP_PORT: 587, GOOGLE_SIGN_IN_ENABLED: false, CATALOGUE_AI_STRUCTURE_ANALYSIS: true, NOVA_POSHTA_DELIVERY_ENABLED: false, UKRPOSHTA_SANDBOX_SHIPMENTS_ENABLED: false });
+    expect(parseApiEnv(validEnv)).toEqual({ ...validEnv, PORT: 3001, SMTP_PORT: 587, GOOGLE_SIGN_IN_ENABLED: false, FACEBOOK_MESSENGER_ENABLED: false, CATALOGUE_AI_STRUCTURE_ANALYSIS: true, NOVA_POSHTA_DELIVERY_ENABLED: false, UKRPOSHTA_SANDBOX_SHIPMENTS_ENABLED: false });
   });
 
   it('accepts an explicit Nova Poshta delivery feature flag', () => {
     expect(parseApiEnv({ ...validEnv, NOVA_POSHTA_DELIVERY_ENABLED: 'true' }).NOVA_POSHTA_DELIVERY_ENABLED).toBe(true);
+  });
+
+  it('keeps Facebook Messenger disabled by default and accepts explicit enablement', () => {
+    expect(parseApiEnv(validEnv).FACEBOOK_MESSENGER_ENABLED).toBe(false);
+    expect(parseApiEnv({ ...validEnv, FACEBOOK_MESSENGER_ENABLED: 'true' }).FACEBOOK_MESSENGER_ENABLED).toBe(true);
   });
 
   it('requires a complete Google Sign-In configuration when the feature is enabled', () => {

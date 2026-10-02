@@ -34,6 +34,27 @@ enum InstagramConnectionStatus {
   DISCONNECTED
 }
 
+enum FacebookConnectionStatus {
+  ACTIVE
+  REAUTH_REQUIRED
+  ERROR
+  DISCONNECTED
+}
+
+enum FacebookCredentialCleanupOperationStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+}
+
+enum FacebookCredentialCleanupState {
+  ARMED
+  REQUIRED
+  COMPLETED
+  CANCELLED
+  DEAD_LETTER
+}
+
 enum OutboundDeliveryStatus {
   PENDING
   SENDING
@@ -273,6 +294,9 @@ model Tenant {
   instagramConnection             InstagramConnection?
   instagramOAuthStates            InstagramOAuthState[]
   instagramCredentialCleanups     InstagramCredentialCleanup[]
+  facebookConnection              FacebookConnection?
+  facebookOAuthAttempts           FacebookOAuthAttempt[]
+  facebookCredentialCleanups      FacebookCredentialCleanup[]
   instagramCustomerProfiles       InstagramCustomerProfile[]
   instagramOAuthCurrentAttemptId  String?                          @map("instagram_oauth_current_attempt_id") @db.Uuid
   googleConnection                GoogleConnection?
@@ -492,6 +516,81 @@ model InstagramCredentialCleanup {
   @@map("instagram_credential_cleanups")
 }
 
+model FacebookConnection {
+  id                       String                   @id @default(uuid()) @db.Uuid
+  tenantId                 String                   @unique @map("tenant_id") @db.Uuid
+  externalPageId           String                   @unique @map("external_page_id")
+  pageName                 String?                  @map("page_name")
+  status                   FacebookConnectionStatus @default(ERROR)
+  encryptedPageAccessToken String?                  @map("encrypted_page_access_token")
+  credentialGenerationId   String?                  @unique @map("credential_generation_id") @db.Uuid
+  tokenExpiresAt           DateTime?                @map("token_expires_at")
+  grantedScopes            String?                  @map("granted_scopes")
+  connectedByUserId        String?                  @map("connected_by_user_id") @db.Uuid
+  lastVerifiedAt           DateTime?                @map("last_verified_at")
+  lastErrorCode            String?                  @map("last_error_code")
+  disconnectedAt           DateTime?                @map("disconnected_at")
+  createdAt                DateTime                 @default(now()) @map("created_at")
+  updatedAt                DateTime                 @updatedAt @map("updated_at")
+  tenant                   Tenant                   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  connectedBy              User?                    @relation("FacebookConnectionConnectedBy", fields: [connectedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@map("facebook_connections")
+}
+
+model FacebookOAuthAttempt {
+  id                      String    @id @default(uuid()) @db.Uuid
+  tokenHash               String    @unique @map("token_hash")
+  tenantId                String    @map("tenant_id") @db.Uuid
+  userId                  String    @map("user_id") @db.Uuid
+  returnPath              String    @default("/settings?tab=social") @map("return_path")
+  expiresAt               DateTime  @map("expires_at")
+  usedAt                  DateTime? @map("used_at")
+  encryptedPageCandidates String?   @map("encrypted_page_candidates")
+  candidateExpiresAt      DateTime? @map("candidate_expires_at")
+  selectedPageId          String?   @map("selected_page_id")
+  createdAt               DateTime  @default(now()) @map("created_at")
+  updatedAt               DateTime  @updatedAt @map("updated_at")
+  tenant                  Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user                    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, usedAt])
+  @@index([expiresAt, usedAt])
+  @@map("facebook_oauth_attempts")
+}
+
+model FacebookCredentialCleanup {
+  id                       String                                   @id @default(uuid()) @db.Uuid
+  credentialGenerationId   String                                   @unique @map("credential_generation_id") @db.Uuid
+  tenantId                 String                                   @map("tenant_id") @db.Uuid
+  externalPageId           String                                   @map("external_page_id")
+  encryptedPageAccessToken String                                   @map("encrypted_page_access_token")
+  source                   String                                   @default("DISCONNECT")
+  state                    FacebookCredentialCleanupState           @default(ARMED)
+  callbackResolvedAt       DateTime?                                @map("callback_resolved_at")
+  unsubscribeStatus        FacebookCredentialCleanupOperationStatus @default(PENDING) @map("unsubscribe_status")
+  unsubscribeAttemptedAt   DateTime?                                @map("unsubscribe_attempted_at")
+  unsubscribeSucceededAt   DateTime?                                @map("unsubscribe_succeeded_at")
+  attempts                 Int                                      @default(0)
+  leaseId                  String?                                  @map("lease_id") @db.Uuid
+  leaseExpiresAt           DateTime?                                @map("lease_expires_at")
+  version                  Int                                      @default(0)
+  lastErrorCode            String?                                  @map("last_error_code")
+  permanentFailureAt       DateTime?                                @map("permanent_failure_at")
+  deadLetteredAt           DateTime?                                @map("dead_lettered_at")
+  deadLetteredByUserId     String?                                  @map("dead_lettered_by_user_id") @db.Uuid
+  terminalAt               DateTime?                                @map("terminal_at")
+  createdAt                DateTime                                 @default(now()) @map("created_at")
+  updatedAt                DateTime                                 @updatedAt @map("updated_at")
+  tenant                   Tenant                                   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  deadLetteredBy           User?                                    @relation("FacebookCleanupDeadLetteredBy", fields: [deadLetteredByUserId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, terminalAt])
+  @@index([leaseExpiresAt])
+  @@map("facebook_credential_cleanups")
+}
+
 model User {
   id                              String                           @id @default(uuid()) @db.Uuid
   email                           String                           @unique
@@ -518,6 +617,9 @@ model User {
   instagramConnections            InstagramConnection[]            @relation("InstagramConnectionConnectedBy")
   instagramMessagesSent           Message[]                        @relation("InstagramMessageSender")
   instagramCleanupsDeadLettered   InstagramCredentialCleanup[]     @relation("InstagramCleanupDeadLetteredBy")
+  facebookOAuthAttempts           FacebookOAuthAttempt[]
+  facebookConnections             FacebookConnection[]             @relation("FacebookConnectionConnectedBy")
+  facebookCleanupsDeadLettered    FacebookCredentialCleanup[]      @relation("FacebookCleanupDeadLetteredBy")
   googleOAuthAttempts             GoogleOAuthAttempt[]
   googleConnections               GoogleConnection[]               @relation("GoogleConnectionConnectedBy")
   googleIdentity                  GoogleIdentity?
@@ -977,8 +1079,8 @@ model GoogleSheetsDestination {
   tenant          Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   exports         OrderExport[]
 
-  @@index([credentialRef])
   @@unique([tenantId, id])
+  @@index([credentialRef])
   @@map("google_sheets_destinations")
 }
 
@@ -1043,37 +1145,37 @@ model TenantBankAccount {
 }
 
 model Order {
-  id                         String             @id @default(uuid()) @db.Uuid
-  publicNumber               String             @unique @default(dbgenerated()) @map("public_number")
-  tenantId                   String             @map("tenant_id") @db.Uuid
-  conversationId             String             @map("conversation_id") @db.Uuid
-  triggerMessageId           String             @unique @map("trigger_message_id") @db.Uuid
-  status                     String             @default("AI_PROCESSING")
+  id                         String                 @id @default(uuid()) @db.Uuid
+  publicNumber               String                 @unique @default(dbgenerated()) @map("public_number")
+  tenantId                   String                 @map("tenant_id") @db.Uuid
+  conversationId             String                 @map("conversation_id") @db.Uuid
+  triggerMessageId           String                 @unique @map("trigger_message_id") @db.Uuid
+  status                     String                 @default("AI_PROCESSING")
   extraction                 Json?
-  validationIssues           Json?              @map("validation_issues")
-  overallConfidence          Float?             @map("overall_confidence")
-  sortProduct                String             @default("") @map("sort_product")
-  sortCustomer               String             @default("") @map("sort_customer")
-  sortProcurement            String             @default("UNASSESSED") @map("sort_procurement")
-  aiResponseId               String?            @map("ai_response_id")
-  aiModel                    String?            @map("ai_model")
-  promptVersion              String             @map("prompt_version")
-  inputTokens                Int?               @map("input_tokens")
-  outputTokens               Int?               @map("output_tokens")
-  approvedAt                 DateTime?          @map("approved_at")
-  approvedBy                 String?            @map("approved_by")
-  procurementHandedOffAt     DateTime?          @map("procurement_handed_off_at")
-  procurementHandedOffBy     String?            @map("procurement_handed_off_by") @db.Uuid
-  supplierDispatchVersion    Int                @default(0) @map("supplier_dispatch_version")
-  createdAt                  DateTime           @default(now()) @map("created_at")
-  updatedAt                  DateTime           @updatedAt @map("updated_at")
-  tenant                     Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  conversation               Conversation       @relation(fields: [tenantId, conversationId], references: [tenantId, id], onDelete: Cascade)
-  triggerMessage             Message            @relation("OrderTriggerMessage", fields: [tenantId, triggerMessageId], references: [tenantId, id], onDelete: Restrict)
-  items                      OrderItem[]        @relation("TenantOrderItems")
+  validationIssues           Json?                  @map("validation_issues")
+  overallConfidence          Float?                 @map("overall_confidence")
+  sortProduct                String                 @default("") @map("sort_product")
+  sortCustomer               String                 @default("") @map("sort_customer")
+  sortProcurement            String                 @default("UNASSESSED") @map("sort_procurement")
+  aiResponseId               String?                @map("ai_response_id")
+  aiModel                    String?                @map("ai_model")
+  promptVersion              String                 @map("prompt_version")
+  inputTokens                Int?                   @map("input_tokens")
+  outputTokens               Int?                   @map("output_tokens")
+  approvedAt                 DateTime?              @map("approved_at")
+  approvedBy                 String?                @map("approved_by")
+  procurementHandedOffAt     DateTime?              @map("procurement_handed_off_at")
+  procurementHandedOffBy     String?                @map("procurement_handed_off_by") @db.Uuid
+  supplierDispatchVersion    Int                    @default(0) @map("supplier_dispatch_version")
+  createdAt                  DateTime               @default(now()) @map("created_at")
+  updatedAt                  DateTime               @updatedAt @map("updated_at")
+  tenant                     Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  conversation               Conversation           @relation(fields: [tenantId, conversationId], references: [tenantId, id], onDelete: Cascade)
+  triggerMessage             Message                @relation("OrderTriggerMessage", fields: [tenantId, triggerMessageId], references: [tenantId, id], onDelete: Restrict)
+  items                      OrderItem[]            @relation("TenantOrderItems")
   auditLogs                  AuditLog[]
   exports                    OrderExport[]
-  procurementHandedOffByUser User?              @relation("OrderProcurementHandedOffBy", fields: [procurementHandedOffBy], references: [id], onDelete: SetNull)
+  procurementHandedOffByUser User?                  @relation("OrderProcurementHandedOffBy", fields: [procurementHandedOffBy], references: [id], onDelete: SetNull)
   telegramDeliveries         TelegramDelivery[]
   shipments                  Shipment[]
   intentEvaluation           OrderIntentEvaluation?
@@ -1152,29 +1254,29 @@ model OrderPayment {
 }
 
 model OrderIntentEvaluation {
-  id                String    @id @default(uuid()) @db.Uuid
-  tenantId          String    @map("tenant_id") @db.Uuid
-  conversationId    String    @map("conversation_id") @db.Uuid
-  anchorMessageId   String    @unique @map("anchor_message_id") @db.Uuid
-  orderId           String?   @unique @map("order_id") @db.Uuid
-  mode              String
-  status            String    @default("PROCESSING")
-  reason            String?
-  attempts          Int       @default(1)
-  aiResponseId      String?   @map("ai_response_id")
-  aiModel           String?   @map("ai_model")
-  inputTokens       Int?      @map("input_tokens")
-  outputTokens      Int?      @map("output_tokens")
-  latencyMs         Int?      @map("latency_ms")
-  leaseExpiresAt    DateTime? @map("lease_expires_at")
-  lastErrorCode     String?   @map("last_error_code")
-  completedAt       DateTime? @map("completed_at")
-  createdAt         DateTime  @default(now()) @map("created_at")
-  updatedAt         DateTime  @updatedAt @map("updated_at")
-  tenant            Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  conversation      Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  anchorMessage     Message   @relation(fields: [anchorMessageId], references: [id], onDelete: Restrict)
-  order             Order?    @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  id              String       @id @default(uuid()) @db.Uuid
+  tenantId        String       @map("tenant_id") @db.Uuid
+  conversationId  String       @map("conversation_id") @db.Uuid
+  anchorMessageId String       @unique @map("anchor_message_id") @db.Uuid
+  orderId         String?      @unique @map("order_id") @db.Uuid
+  mode            String
+  status          String       @default("PROCESSING")
+  reason          String?
+  attempts        Int          @default(1)
+  aiResponseId    String?      @map("ai_response_id")
+  aiModel         String?      @map("ai_model")
+  inputTokens     Int?         @map("input_tokens")
+  outputTokens    Int?         @map("output_tokens")
+  latencyMs       Int?         @map("latency_ms")
+  leaseExpiresAt  DateTime?    @map("lease_expires_at")
+  lastErrorCode   String?      @map("last_error_code")
+  completedAt     DateTime?    @map("completed_at")
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
+  tenant          Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  conversation    Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  anchorMessage   Message      @relation(fields: [anchorMessageId], references: [id], onDelete: Restrict)
+  order           Order?       @relation(fields: [orderId], references: [id], onDelete: SetNull)
 
   @@index([tenantId, status, createdAt])
   @@index([conversationId, createdAt])
@@ -1220,17 +1322,17 @@ model DeliverySenderProfile {
   originBuilding               String?                 @map("origin_building")
   originFlat                   String?                 @map("origin_flat")
   originLabel                  String?                 @map("origin_label")
-  payer                        ShipmentPayer            @default(SENDER)
-  defaultWeightKg              Decimal                  @map("default_weight_kg") @db.Decimal(8, 3)
-  defaultLengthCm              Decimal                  @map("default_length_cm") @db.Decimal(8, 2)
-  defaultWidthCm               Decimal                  @map("default_width_cm") @db.Decimal(8, 2)
-  defaultHeightCm              Decimal                  @map("default_height_cm") @db.Decimal(8, 2)
-  suggestCustomerNotification  Boolean                  @default(true) @map("suggest_customer_notification")
-  customerNotificationTemplate String                   @map("customer_notification_template")
-  createdAt                    DateTime                 @default(now()) @map("created_at")
-  updatedAt                    DateTime                 @updatedAt @map("updated_at")
-  tenant                       Tenant                   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  connection                   DeliveryConnection       @relation(fields: [tenantId, connectionId], references: [tenantId, id], onDelete: Cascade)
+  payer                        ShipmentPayer           @default(SENDER)
+  defaultWeightKg              Decimal                 @map("default_weight_kg") @db.Decimal(8, 3)
+  defaultLengthCm              Decimal                 @map("default_length_cm") @db.Decimal(8, 2)
+  defaultWidthCm               Decimal                 @map("default_width_cm") @db.Decimal(8, 2)
+  defaultHeightCm              Decimal                 @map("default_height_cm") @db.Decimal(8, 2)
+  suggestCustomerNotification  Boolean                 @default(true) @map("suggest_customer_notification")
+  customerNotificationTemplate String                  @map("customer_notification_template")
+  createdAt                    DateTime                @default(now()) @map("created_at")
+  updatedAt                    DateTime                @updatedAt @map("updated_at")
+  tenant                       Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  connection                   DeliveryConnection      @relation(fields: [tenantId, connectionId], references: [tenantId, id], onDelete: Cascade)
 
   @@unique([tenantId, connectionId])
   @@index([tenantId])
@@ -1238,45 +1340,45 @@ model DeliverySenderProfile {
 }
 
 model Shipment {
-  id                    String                  @id @default(uuid()) @db.Uuid
-  tenantId              String                  @map("tenant_id") @db.Uuid
-  orderId               String                  @map("order_id") @db.Uuid
-  connectionId          String                  @map("connection_id") @db.Uuid
-  createdByUserId       String?                 @map("created_by_user_id") @db.Uuid
-  provider              DeliveryProvider
-  status                ShipmentStatus          @default(DRAFT)
-  senderSnapshot        Json                    @map("sender_snapshot")
-  recipientSnapshot     Json                    @map("recipient_snapshot")
-  destinationSnapshot   Json                    @map("destination_snapshot")
-  parcels               Json
-  payer                 ShipmentPayer
-  declaredValue         Decimal                 @map("declared_value") @db.Decimal(12, 2)
-  codAmount             Decimal?                @map("cod_amount") @db.Decimal(12, 2)
-  description           String
-  providerDocumentId    String?                 @map("provider_document_id")
-  providerMetadata      Json?                   @map("provider_metadata")
-  trackingNumber        String?                 @map("tracking_number")
-  cost                  Decimal?                @db.Decimal(12, 2)
-  currency              String                  @default("UAH") @db.VarChar(3)
-  version               Int                     @default(1)
-  idempotencyKey        String                  @map("idempotency_key")
-  requestHash           String                  @map("request_hash")
-  lastProviderCode      String?                 @map("last_provider_code")
-  lastErrorCode         String?                 @map("last_error_code")
-  nextStatusCheckAt     DateTime?               @map("next_status_check_at")
-  lastStatusCheckedAt   DateTime?               @map("last_status_checked_at")
-  providerCreatedAt     DateTime?               @map("provider_created_at")
-  acceptedAt            DateTime?               @map("accepted_at")
-  deliveredAt           DateTime?               @map("delivered_at")
-  cancelledAt           DateTime?               @map("cancelled_at")
-  createdAt             DateTime                @default(now()) @map("created_at")
-  updatedAt             DateTime                @updatedAt @map("updated_at")
-  tenant                Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  order                 Order                   @relation(fields: [tenantId, orderId], references: [tenantId, id], onDelete: Restrict)
-  connection            DeliveryConnection      @relation(fields: [tenantId, connectionId], references: [tenantId, id], onDelete: Restrict)
-  createdBy             User?                   @relation("ShipmentCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
-  attempts              ShipmentAttempt[]
-  statusEvents          ShipmentStatusEvent[]
+  id                  String                @id @default(uuid()) @db.Uuid
+  tenantId            String                @map("tenant_id") @db.Uuid
+  orderId             String                @map("order_id") @db.Uuid
+  connectionId        String                @map("connection_id") @db.Uuid
+  createdByUserId     String?               @map("created_by_user_id") @db.Uuid
+  provider            DeliveryProvider
+  status              ShipmentStatus        @default(DRAFT)
+  senderSnapshot      Json                  @map("sender_snapshot")
+  recipientSnapshot   Json                  @map("recipient_snapshot")
+  destinationSnapshot Json                  @map("destination_snapshot")
+  parcels             Json
+  payer               ShipmentPayer
+  declaredValue       Decimal               @map("declared_value") @db.Decimal(12, 2)
+  codAmount           Decimal?              @map("cod_amount") @db.Decimal(12, 2)
+  description         String
+  providerDocumentId  String?               @map("provider_document_id")
+  providerMetadata    Json?                 @map("provider_metadata")
+  trackingNumber      String?               @map("tracking_number")
+  cost                Decimal?              @db.Decimal(12, 2)
+  currency            String                @default("UAH") @db.VarChar(3)
+  version             Int                   @default(1)
+  idempotencyKey      String                @map("idempotency_key")
+  requestHash         String                @map("request_hash")
+  lastProviderCode    String?               @map("last_provider_code")
+  lastErrorCode       String?               @map("last_error_code")
+  nextStatusCheckAt   DateTime?             @map("next_status_check_at")
+  lastStatusCheckedAt DateTime?             @map("last_status_checked_at")
+  providerCreatedAt   DateTime?             @map("provider_created_at")
+  acceptedAt          DateTime?             @map("accepted_at")
+  deliveredAt         DateTime?             @map("delivered_at")
+  cancelledAt         DateTime?             @map("cancelled_at")
+  createdAt           DateTime              @default(now()) @map("created_at")
+  updatedAt           DateTime              @updatedAt @map("updated_at")
+  tenant              Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  order               Order                 @relation(fields: [tenantId, orderId], references: [tenantId, id], onDelete: Restrict)
+  connection          DeliveryConnection    @relation(fields: [tenantId, connectionId], references: [tenantId, id], onDelete: Restrict)
+  createdBy           User?                 @relation("ShipmentCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  attempts            ShipmentAttempt[]
+  statusEvents        ShipmentStatusEvent[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, idempotencyKey])
@@ -1602,24 +1704,24 @@ model Attachment {
 }
 
 model DemoLead {
-  id                   String                     @id @default(uuid()) @db.Uuid
-  idempotencyKey       String                     @unique @map("idempotency_key")
-  name                 String
-  company              String
-  email                String?
-  phone                String?
-  orderVolume          String                     @map("order_volume")
-  note                 String?
-  locale               String
-  consentVersion       String                     @default("2026-09-17") @map("consent_version")
-  consentedAt          DateTime                   @default(now()) @map("consented_at")
-  lifecycleStatus      DemoLeadLifecycleStatus    @default(NEW) @map("lifecycle_status")
-  notificationStatus   DemoLeadNotificationStatus @default(PENDING) @map("notification_status")
-  notificationAttempts Int                        @default(0) @map("notification_attempts")
-  notifiedAt           DateTime?                  @map("notified_at")
-  lastNotificationError String?                   @map("last_notification_error")
-  createdAt            DateTime                   @default(now()) @map("created_at")
-  updatedAt            DateTime                   @updatedAt @map("updated_at")
+  id                    String                     @id @default(uuid()) @db.Uuid
+  idempotencyKey        String                     @unique @map("idempotency_key")
+  name                  String
+  company               String
+  email                 String?
+  phone                 String?
+  orderVolume           String                     @map("order_volume")
+  note                  String?
+  locale                String
+  consentVersion        String                     @default("2026-09-17") @map("consent_version")
+  consentedAt           DateTime                   @default(now()) @map("consented_at")
+  lifecycleStatus       DemoLeadLifecycleStatus    @default(NEW) @map("lifecycle_status")
+  notificationStatus    DemoLeadNotificationStatus @default(PENDING) @map("notification_status")
+  notificationAttempts  Int                        @default(0) @map("notification_attempts")
+  notifiedAt            DateTime?                  @map("notified_at")
+  lastNotificationError String?                    @map("last_notification_error")
+  createdAt             DateTime                   @default(now()) @map("created_at")
+  updatedAt             DateTime                   @updatedAt @map("updated_at")
 
   @@index([lifecycleStatus, createdAt])
   @@index([notificationStatus, createdAt])
