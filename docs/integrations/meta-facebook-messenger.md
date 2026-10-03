@@ -54,7 +54,9 @@ tokens or provider response bodies. `FACEBOOK_PAGE_VERIFICATION_FAILED`
 identifies failure while verifying the selected Page and
 `FACEBOOK_SUBSCRIPTION_FAILED` identifies failure while subscribing that Page
 to the `messages` webhook. Use these codes for controlled troubleshooting;
-never add OAuth codes, access tokens or raw Meta payloads to logs.
+the operational warning may additionally include only the Meta stage, HTTP
+status and numeric provider code/subcode. Never add OAuth codes, access tokens
+or raw Meta payloads to logs.
 
 ## Controlled acceptance
 

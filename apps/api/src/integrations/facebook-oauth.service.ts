@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import type { FacebookConnectionSummary, FacebookPageCandidate, FacebookPageSelectionInput } from '@autosale/contracts/facebook';
 import { assertTenantAcceptingMutations, type Prisma, type PrismaClient, withTenantTransaction } from '@autosale/database';
 import { FACEBOOK_PAGE_SCOPES, MetaFacebookError, type MetaFacebookClient, type MetaFacebookPage } from '@autosale/integrations';
+import { Logger } from '@nestjs/common';
 
 import { CredentialCipher } from './credential-cipher.js';
 import { FacebookOAuthStateService, type FacebookOAuthBinding } from './facebook-oauth-state.service.js';
@@ -39,6 +40,7 @@ export type FacebookCallbackResult =
   | { kind: 'PAGE_SELECTION_REQUIRED'; returnPath: string; attemptId: string; pages: FacebookPageCandidate[] };
 
 export class FacebookOAuthService {
+  private readonly logger = new Logger(FacebookOAuthService.name);
   private readonly callbackUri: string;
 
   constructor(
@@ -129,6 +131,17 @@ export class FacebookOAuthService {
         const summary = await this.activatePage(binding, pages[0]!);
         return { kind: 'CONNECTED', returnPath: binding.returnPath, summary };
       } catch (error) {
+        if (error instanceof MetaFacebookError) {
+          this.logger.warn({
+            event: 'facebook_callback_activation_failed',
+            tenantId: binding.tenantId,
+            responseStage: error.responseStage,
+            providerStatus: error.status,
+            providerCode: error.providerCode,
+            providerSubcode: error.errorSubcode,
+            providerTransient: error.isTransient,
+          });
+        }
         await this.auditBestEffort(
           binding,
           'FACEBOOK_CALLBACK_FAILED',
