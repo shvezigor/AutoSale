@@ -2,6 +2,8 @@ import { Buffer } from 'node:buffer';
 
 import { describe, expect, it, vi } from 'vitest';
 
+import { MetaFacebookError } from '@autosale/integrations';
+
 import { CredentialCipher } from './credential-cipher.js';
 import { FacebookOAuthService } from './facebook-oauth.service.js';
 
@@ -135,5 +137,21 @@ describe('FacebookOAuthService', () => {
 
     await expect(service.completeCallback('code', 'raw-state')).rejects.toThrow('Facebook connection failed');
     expect(meta.exchangeCode).not.toHaveBeenCalled();
+  });
+
+  it('records the provider stage when automatic Page activation fails', async () => {
+    const { service, meta, pages, transaction } = fixture();
+    meta.listEligiblePages.mockResolvedValue([pages[0]]);
+    meta.verifyPage.mockRejectedValue(new MetaFacebookError(403, 10, false, null, 'PAGE'));
+
+    await expect(service.completeCallback('code', 'raw-state')).rejects.toThrow('Facebook connection failed');
+
+    expect(transaction.securityAuditLog.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        action: 'FACEBOOK_CALLBACK_FAILED',
+        result: 'FAILURE',
+        metadata: { errorCode: 'FACEBOOK_PAGE_VERIFICATION_FAILED' },
+      }),
+    });
   });
 });

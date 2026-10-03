@@ -49,6 +49,13 @@ single-use and hashed. Candidate Page tokens live encrypted for at most ten
 minutes; the selected Page token remains encrypted and never reaches the
 browser, normal logs or metrics.
 
+Callback failures are recorded as safe stage-level audit codes without Page
+tokens or provider response bodies. `FACEBOOK_PAGE_VERIFICATION_FAILED`
+identifies failure while verifying the selected Page and
+`FACEBOOK_SUBSCRIPTION_FAILED` identifies failure while subscribing that Page
+to the `messages` webhook. Use these codes for controlled troubleshooting;
+never add OAuth codes, access tokens or raw Meta payloads to logs.
+
 ## Controlled acceptance
 
 Use a fictional or dedicated test Page and retain only status/count/timestamp

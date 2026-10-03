@@ -125,8 +125,18 @@ export class FacebookOAuthService {
       throw safeFailure();
     }
     if (pages.length === 1) {
-      const summary = await this.activatePage(binding, pages[0]!);
-      return { kind: 'CONNECTED', returnPath: binding.returnPath, summary };
+      try {
+        const summary = await this.activatePage(binding, pages[0]!);
+        return { kind: 'CONNECTED', returnPath: binding.returnPath, summary };
+      } catch (error) {
+        await this.auditBestEffort(
+          binding,
+          'FACEBOOK_CALLBACK_FAILED',
+          'FAILURE',
+          activationFailureCode(error),
+        );
+        throw safeFailure();
+      }
     }
 
     const candidateExpiresAt = new Date(this.now().getTime() + CANDIDATE_TTL_MS);
@@ -254,9 +264,9 @@ export class FacebookOAuthService {
     let verified: { pageId: string; pageName: string };
     try {
       verified = await this.meta.verifyPage(candidate.pageId, candidate.pageAccessToken);
-    } catch {
+    } catch (error) {
       await this.clearCandidates(binding.tenantId, binding.id);
-      throw safeFailure();
+      throw error;
     }
 
     const activatedAt = this.now();
@@ -619,6 +629,21 @@ function providerFailureCode(error: unknown): string {
     return 'FACEBOOK_REQUIRED_SCOPES_MISSING';
   }
   return 'FACEBOOK_PROVIDER_FAILED';
+}
+
+function activationFailureCode(error: unknown): string {
+  if (error instanceof MetaFacebookError) {
+    if (error.responseStage === 'PAGE') return 'FACEBOOK_PAGE_VERIFICATION_FAILED';
+    if (error.responseStage === 'SUBSCRIBE') return 'FACEBOOK_SUBSCRIPTION_FAILED';
+    return providerFailureCode(error);
+  }
+  if (error instanceof Error && error.message === 'FACEBOOK_PAGE_ALREADY_CONNECTED') {
+    return 'FACEBOOK_PAGE_ALREADY_CONNECTED';
+  }
+  if (error instanceof Error && error.message === 'FACEBOOK_DISCONNECT_REQUIRED') {
+    return 'FACEBOOK_DISCONNECT_REQUIRED';
+  }
+  return 'FACEBOOK_ACTIVATION_FAILED';
 }
 
 function ensureTrailingSlash(value: string): string {
