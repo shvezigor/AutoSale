@@ -54,21 +54,35 @@ describe('MetaFacebookClient', () => {
     expect(init?.headers).toBeUndefined();
   });
 
-  it('returns only Pages that expose the messaging task', async () => {
+  it('returns only Pages that expose a classic or new Page Experience messaging task', async () => {
     const fetchFn = vi.fn<typeof fetch>().mockResolvedValue(response({
       data: [
         { id: 'page-1', name: 'Fictional Shop', access_token: 'page-token-1', tasks: ['MESSAGING', 'ANALYZE'] },
-        { id: 'page-2', name: 'Fictional Catalog', access_token: 'page-token-2', tasks: ['ANALYZE'] },
+        {
+          id: 'page-2',
+          name: 'Fictional New Page',
+          access_token: 'page-token-2',
+          tasks: ['PROFILE_PLUS_MESSAGING', 'PROFILE_PLUS_ANALYZE'],
+        },
+        { id: 'page-3', name: 'Fictional Catalog', access_token: 'page-token-3', tasks: ['ANALYZE'] },
       ],
     }));
     const client = new MetaFacebookClient({ ...config, fetch: fetchFn });
 
-    await expect(client.listEligiblePages('user-token')).resolves.toEqual([{
-      pageId: 'page-1',
-      pageName: 'Fictional Shop',
-      pageAccessToken: 'page-token-1',
-      tasks: ['ANALYZE', 'MESSAGING'],
-    }]);
+    await expect(client.listEligiblePages('user-token')).resolves.toEqual([
+      {
+        pageId: 'page-1',
+        pageName: 'Fictional Shop',
+        pageAccessToken: 'page-token-1',
+        tasks: ['ANALYZE', 'MESSAGING'],
+      },
+      {
+        pageId: 'page-2',
+        pageName: 'Fictional New Page',
+        pageAccessToken: 'page-token-2',
+        tasks: ['PROFILE_PLUS_ANALYZE', 'PROFILE_PLUS_MESSAGING'],
+      },
+    ]);
     const [requestUrl, init] = fetchFn.mock.calls[0] ?? [];
     expect(String(requestUrl)).toBe('https://graph.facebook.com/v24.0/me/accounts?fields=id%2Cname%2Caccess_token%2Ctasks');
     expect(String(requestUrl)).not.toContain('user-token');

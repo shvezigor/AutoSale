@@ -26,8 +26,10 @@ Use the shared Sales AITO Meta application and configure:
   because the inbound Messenger slice does not read Page posts or engagement;
 - the Page `messages` webhook subscription.
 
-The connecting owner must have a Page task that permits messaging. Live
-messages from people without an app/Page role require the applicable Meta
+The connecting owner must have a Page task that permits messaging. Page
+discovery accepts both Meta's classic `MESSAGING` task and the New Pages
+Experience `PROFILE_PLUS_MESSAGING` task; other Page tasks remain ineligible.
+Live messages from people without an app/Page role require the applicable Meta
 Advanced Access/App Review approval. Provider requirements can change; verify
 the current [Messenger Platform documentation](https://developers.facebook.com/docs/messenger-platform/)
 before production enablement.

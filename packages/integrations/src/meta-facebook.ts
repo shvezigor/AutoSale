@@ -121,7 +121,8 @@ export class MetaFacebookClient {
         tasks: [...new Set(entry.tasks)].sort(),
       };
     });
-    return pages.filter((page) => page.tasks.includes('MESSAGING'));
+    return pages.filter((page) =>
+      page.tasks.includes('MESSAGING') || page.tasks.includes('PROFILE_PLUS_MESSAGING'));
   }
 
   async verifyPage(pageId: string, pageAccessToken: string): Promise<{ pageId: string; pageName: string }> {
