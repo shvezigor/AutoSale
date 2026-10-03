@@ -41,7 +41,8 @@ before production enablement.
 2. Open **Settings -> Social networks / customers -> Facebook** as an owner.
 3. Choose **Connect Facebook** and authorize the requested Page permissions.
 4. If more than one eligible Page exists, select one. Sales AITO activates it
-   only after identity verification and webhook subscription succeed.
+   only after the Page token resolves its own identity through Graph `/me`,
+   that identity matches the selected Page, and webhook subscription succeeds.
 5. Return to Settings and verify the safe Page name and active status.
 
 Managers see connection status without mutation controls. OAuth state is

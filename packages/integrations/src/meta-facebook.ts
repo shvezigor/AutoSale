@@ -126,7 +126,7 @@ export class MetaFacebookClient {
 
   async verifyPage(pageId: string, pageAccessToken: string): Promise<{ pageId: string; pageName: string }> {
     assertPageId(pageId);
-    const url = this.graphUrl(pageId);
+    const url = this.graphUrl('me');
     url.searchParams.set('fields', 'id,name');
     const payload = await this.requestJson(url, this.authorized(pageAccessToken), 'PAGE');
     if (!isRecord(payload) || payload.id !== pageId || !isNonEmptyString(payload.name)) {

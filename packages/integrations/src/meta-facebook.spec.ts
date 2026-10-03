@@ -95,6 +95,9 @@ describe('MetaFacebookClient', () => {
       pageId: 'page-1',
       pageName: 'Fictional Shop',
     });
+    expect(fetchFn.mock.calls[0]?.[0]?.toString()).toBe(
+      'https://graph.facebook.com/v24.0/me?fields=id%2Cname',
+    );
     expect(fetchFn.mock.calls[0]?.[1]).toMatchObject({ headers: { authorization: 'Bearer page-token' } });
   });
 
