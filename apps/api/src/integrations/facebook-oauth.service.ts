@@ -147,6 +147,7 @@ export class FacebookOAuthService {
           'FACEBOOK_CALLBACK_FAILED',
           'FAILURE',
           activationFailureCode(error),
+          error instanceof MetaFacebookError ? error : undefined,
         );
         throw safeFailure();
       }
@@ -555,6 +556,7 @@ export class FacebookOAuthService {
     action: string,
     result: 'SUCCESS' | 'FAILURE',
     errorCode?: string,
+    providerError?: MetaFacebookError,
   ): Promise<unknown> {
     return client.securityAuditLog.create({
       data: {
@@ -563,7 +565,16 @@ export class FacebookOAuthService {
         actor: 'USER',
         action,
         result,
-        metadata: errorCode ? { errorCode } : {},
+        metadata: {
+          ...(errorCode ? { errorCode } : {}),
+          ...(providerError ? {
+            providerStage: providerError.responseStage,
+            providerStatus: providerError.status,
+            providerCode: providerError.providerCode,
+            providerSubcode: providerError.errorSubcode,
+            providerTransient: providerError.isTransient,
+          } : {}),
+        },
       },
     });
   }
@@ -573,9 +584,10 @@ export class FacebookOAuthService {
     action: string,
     result: 'SUCCESS' | 'FAILURE',
     errorCode?: string,
+    providerError?: MetaFacebookError,
   ): Promise<void> {
     await withTenantTransaction(this.prisma, binding.tenantId, (transaction) =>
-      this.recordAudit(transaction, binding, action, result, errorCode)).catch(() => undefined);
+      this.recordAudit(transaction, binding, action, result, errorCode, providerError)).catch(() => undefined);
   }
 
   private assertEnabled(): void {

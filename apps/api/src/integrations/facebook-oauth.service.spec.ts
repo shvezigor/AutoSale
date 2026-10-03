@@ -150,7 +150,14 @@ describe('FacebookOAuthService', () => {
       data: expect.objectContaining({
         action: 'FACEBOOK_CALLBACK_FAILED',
         result: 'FAILURE',
-        metadata: { errorCode: 'FACEBOOK_PAGE_VERIFICATION_FAILED' },
+        metadata: {
+          errorCode: 'FACEBOOK_PAGE_VERIFICATION_FAILED',
+          providerStage: 'PAGE',
+          providerStatus: 403,
+          providerCode: 10,
+          providerSubcode: null,
+          providerTransient: false,
+        },
       }),
     });
   });
