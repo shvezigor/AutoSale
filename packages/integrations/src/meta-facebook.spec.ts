@@ -30,7 +30,6 @@ describe('MetaFacebookClient', () => {
     expect(url.searchParams.get('scope')?.split(',').sort()).toEqual([
       'pages_manage_metadata',
       'pages_messaging',
-      'pages_read_engagement',
       'pages_show_list',
     ]);
   });

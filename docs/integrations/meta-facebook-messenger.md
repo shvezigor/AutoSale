@@ -21,8 +21,9 @@ Use the shared Sales AITO Meta application and configure:
 - dedicated `FACEBOOK_APP_ID` and `FACEBOOK_APP_SECRET` from the Meta app's
   Facebook Login/Messenger configuration. Do not reuse the Instagram Login
   product credentials stored in `META_APP_ID` / `META_APP_SECRET`;
-- permissions `pages_show_list`, `pages_manage_metadata`,
-  `pages_read_engagement` and `pages_messaging`;
+- permissions `pages_show_list`, `pages_manage_metadata` and
+  `pages_messaging`; `pages_read_engagement` is intentionally not requested
+  because the inbound Messenger slice does not read Page posts or engagement;
 - the Page `messages` webhook subscription.
 
 The connecting owner must have a Page task that permits messaging. Live

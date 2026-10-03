@@ -43,7 +43,7 @@ Facebook conversations therefore expose a read-only reply capability with reason
 
 Facebook Messenger uses Facebook Login and a Page access token. It cannot reuse the current Instagram Login token, whose authorization host, scopes and Graph base URL are Instagram-specific.
 
-The implementation requests only the Page permissions needed for this slice: `pages_show_list`, `pages_manage_metadata`, `pages_read_engagement` and `pages_messaging`. A connecting person must have a Page task that permits messaging. Production conversations with people who do not have an app or Page role require the relevant Meta Advanced Access/App Review approval.
+The implementation requests only the Page permissions needed for this slice: `pages_show_list`, `pages_manage_metadata` and `pages_messaging`. It deliberately omits `pages_read_engagement` because private Messenger ingestion does not read Page posts or engagement. A connecting person must have a Page task that permits messaging. Production conversations with people who do not have an app or Page role require the relevant Meta Advanced Access/App Review approval.
 
 The Graph API version remains centrally configured by `META_GRAPH_API_VERSION`. Provider responses are untrusted and are parsed by strict boundary schemas. Access tokens, signed callback material and raw provider errors never enter browser responses, metrics or ordinary logs.
 

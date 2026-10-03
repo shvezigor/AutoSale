@@ -44,6 +44,7 @@ export {
   type MetaInstagramUserProfile,
 } from './meta-instagram.js';
 export {
+  FACEBOOK_PAGE_SCOPES,
   MetaFacebookClient,
   MetaFacebookError,
   type MetaFacebookAuthorizationInput,

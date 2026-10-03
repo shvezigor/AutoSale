@@ -29,10 +29,9 @@ export interface MetaFacebookPage {
 
 export type MetaFacebookResponseStage = 'TOKEN' | 'PAGES' | 'PAGE' | 'SUBSCRIBE' | 'UNSUBSCRIBE';
 
-const FACEBOOK_PAGE_SCOPES = [
+export const FACEBOOK_PAGE_SCOPES = [
   'pages_manage_metadata',
   'pages_messaging',
-  'pages_read_engagement',
   'pages_show_list',
 ] as const;
 

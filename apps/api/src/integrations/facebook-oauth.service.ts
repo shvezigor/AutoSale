@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 
 import type { FacebookConnectionSummary, FacebookPageCandidate, FacebookPageSelectionInput } from '@autosale/contracts/facebook';
 import { assertTenantAcceptingMutations, type Prisma, type PrismaClient, withTenantTransaction } from '@autosale/database';
-import { MetaFacebookError, type MetaFacebookClient, type MetaFacebookPage } from '@autosale/integrations';
+import { FACEBOOK_PAGE_SCOPES, MetaFacebookError, type MetaFacebookClient, type MetaFacebookPage } from '@autosale/integrations';
 
 import { CredentialCipher } from './credential-cipher.js';
 import { FacebookOAuthStateService, type FacebookOAuthBinding } from './facebook-oauth-state.service.js';
@@ -281,7 +281,7 @@ export class FacebookOAuthService {
           encryptedPageAccessToken,
           credentialGenerationId,
           tokenExpiresAt: null,
-          grantedScopes: 'pages_manage_metadata,pages_messaging,pages_read_engagement,pages_show_list',
+          grantedScopes: FACEBOOK_PAGE_SCOPES.join(','),
           connectedByUserId: binding.userId,
         },
         update: {
@@ -291,7 +291,7 @@ export class FacebookOAuthService {
           encryptedPageAccessToken,
           credentialGenerationId,
           tokenExpiresAt: null,
-          grantedScopes: 'pages_manage_metadata,pages_messaging,pages_read_engagement,pages_show_list',
+          grantedScopes: FACEBOOK_PAGE_SCOPES.join(','),
           connectedByUserId: binding.userId,
           lastErrorCode: null,
           disconnectedAt: null,
