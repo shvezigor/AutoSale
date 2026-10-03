@@ -9,6 +9,12 @@ may invoke the existing order-recognition flow. It does not send Facebook
 replies, import history, process comments/Marketplace, or connect personal
 Messenger accounts.
 
+Production onboarding of Pages owned by customer business portfolios is
+blocked until the business portfolio that owns the Sales AITO Meta app passes
+Meta Business Verification and the app receives the applicable App Review /
+Advanced Access approvals. Verification of a customer's business portfolio
+does not replace verification and review of the Sales AITO app owner.
+
 ## Meta application configuration
 
 Use the shared Sales AITO Meta application and configure:
@@ -33,6 +39,31 @@ Live messages from people without an app/Page role require the applicable Meta
 Advanced Access/App Review approval. Provider requirements can change; verify
 the current [Messenger Platform documentation](https://developers.facebook.com/docs/messenger-platform/)
 before production enablement.
+
+Meta Standard Access is suitable only for controlled development with app-role
+users and assets eligible for that app. A Page merely shared to the app owner's
+portfolio by a partner business can still be visible in the authorization UI
+while remaining absent from Graph `/me/accounts`; do not treat the OAuth asset
+picker as proof that the Page is API-eligible. For a pre-review live test, use a
+dedicated fictional Page owned directly by the same business portfolio as the
+Meta app. This test does not prove that external customer Pages can connect.
+
+### Business verification evidence
+
+Meta verifies the registered business behind the app-owner portfolio rather
+than the legal form implied by the product name. A registered sole proprietor
+may attempt verification using current official evidence that matches the
+legal name and official address or phone number. Meta currently lists business
+registration/licence documents, government-issued business tax documents,
+business bank statements and limited-purpose utility bills as supported
+evidence. Provider acceptance remains case-specific; never promise approval.
+
+The current Meta help list does not include Ukrainian among supported document
+languages. Ukrainian evidence therefore needs an English translation carrying
+the official stamp of a translation agency. Keep the portfolio's legal details
+aligned with the evidence; a similarly named company discovered in public
+sources must not be selected when it is not the app owner's legal business.
+See [Meta's accepted business verification documents](https://www.facebook.com/business/help/159334372093366).
 
 ## Owner flow
 
