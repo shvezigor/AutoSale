@@ -1,7 +1,15 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
 
 export class MetaSignatureService {
-  constructor(private readonly appSecret: string) {}
+  private readonly appSecrets: readonly string[];
+
+  constructor(appSecrets: string | readonly string[]) {
+    this.appSecrets = [...new Set(typeof appSecrets === 'string' ? [appSecrets] : appSecrets)];
+
+    if (this.appSecrets.length === 0) {
+      throw new Error('At least one Meta app secret is required');
+    }
+  }
 
   verify(rawBody: Buffer, header: string): boolean {
     if (!header.startsWith('sha256=')) {
@@ -13,9 +21,11 @@ export class MetaSignatureService {
       return false;
     }
 
-    const expected = createHmac('sha256', this.appSecret).update(rawBody).digest();
     const supplied = Buffer.from(suppliedHex, 'hex');
 
-    return supplied.length === expected.length && timingSafeEqual(supplied, expected);
+    return this.appSecrets.reduce((matched, appSecret) => {
+      const expected = createHmac('sha256', appSecret).update(rawBody).digest();
+      return (supplied.length === expected.length && timingSafeEqual(supplied, expected)) || matched;
+    }, false);
   }
 }

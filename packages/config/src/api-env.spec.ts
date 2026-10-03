@@ -40,7 +40,34 @@ describe('parseApiEnv', () => {
 
   it('keeps Facebook Messenger disabled by default and accepts explicit enablement', () => {
     expect(parseApiEnv(validEnv).FACEBOOK_MESSENGER_ENABLED).toBe(false);
-    expect(parseApiEnv({ ...validEnv, FACEBOOK_MESSENGER_ENABLED: 'true' }).FACEBOOK_MESSENGER_ENABLED).toBe(true);
+    expect(parseApiEnv({
+      ...validEnv,
+      FACEBOOK_MESSENGER_ENABLED: 'true',
+      FACEBOOK_APP_ID: '987654321098765',
+      FACEBOOK_APP_SECRET: 'facebook-app-secret-value',
+    }).FACEBOOK_MESSENGER_ENABLED).toBe(true);
+  });
+
+  it('requires dedicated Facebook credentials when Messenger is enabled', () => {
+    expect(() => parseApiEnv({
+      ...validEnv,
+      FACEBOOK_MESSENGER_ENABLED: 'true',
+    })).toThrow(/dedicated Facebook app ID and app secret/i);
+  });
+
+  it('rejects a partial Facebook OAuth configuration even while disabled', () => {
+    expect(() => parseApiEnv({
+      ...validEnv,
+      FACEBOOK_APP_ID: '987654321098765',
+    })).toThrow(/Facebook OAuth configuration/i);
+  });
+
+  it('rejects a short Facebook app secret', () => {
+    expect(() => parseApiEnv({
+      ...validEnv,
+      FACEBOOK_APP_ID: '987654321098765',
+      FACEBOOK_APP_SECRET: 'too-short',
+    })).toThrow();
   });
 
   it('requires a complete Google Sign-In configuration when the feature is enabled', () => {

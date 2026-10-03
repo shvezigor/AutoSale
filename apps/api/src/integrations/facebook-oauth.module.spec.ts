@@ -19,6 +19,8 @@ const env = parseApiEnv({
   META_APP_ID: '123456789012345',
   META_GRAPH_API_VERSION: 'v24.0',
   FACEBOOK_MESSENGER_ENABLED: 'true',
+  FACEBOOK_APP_ID: '987654321098765',
+  FACEBOOK_APP_SECRET: 'facebook-app-secret-value',
   INTEGRATION_ENCRYPTION_KEY: Buffer.alloc(32, 7).toString('base64'),
   S3_ENDPOINT: 'http://localhost:9000',
   S3_REGION: 'us-east-1',

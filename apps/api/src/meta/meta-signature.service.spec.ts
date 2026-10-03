@@ -16,6 +16,15 @@ describe('MetaSignatureService', () => {
     expect(service.verify(body, signature)).toBe(true);
   });
 
+  it('accepts signatures from either configured Meta product credential', () => {
+    const facebookSecret = 'facebook-app-secret-value';
+    const serviceWithProducts = new MetaSignatureService([secret, facebookSecret]);
+    const body = Buffer.from('{"object":"page"}');
+    const signature = `sha256=${createHmac('sha256', facebookSecret).update(body).digest('hex')}`;
+
+    expect(serviceWithProducts.verify(body, signature)).toBe(true);
+  });
+
   it.each([
     '',
     'sha1=00',

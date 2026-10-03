@@ -22,7 +22,12 @@ export class MetaModule {
         },
         {
           provide: MetaSignatureService,
-          useValue: new MetaSignatureService(env.META_APP_SECRET),
+          useValue: new MetaSignatureService([
+            env.META_APP_SECRET,
+            ...(env.FACEBOOK_MESSENGER_ENABLED && env.FACEBOOK_APP_SECRET
+              ? [env.FACEBOOK_APP_SECRET]
+              : []),
+          ]),
         },
         {
           provide: MetaEventService,

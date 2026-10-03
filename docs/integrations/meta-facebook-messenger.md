@@ -16,8 +16,11 @@ Use the shared Sales AITO Meta application and configure:
 - Facebook Login redirect URI:
   `<APP_PUBLIC_URL>/api/integrations/facebook/callback`;
 - Messenger webhook callback: `<APP_PUBLIC_URL>/webhooks/meta`;
-- the same `META_VERIFY_TOKEN`, `META_APP_SECRET`, `META_APP_ID` and
-  `META_GRAPH_API_VERSION` used by the deployed API/worker;
+- the shared `META_VERIFY_TOKEN` and `META_GRAPH_API_VERSION` used by the
+  deployed API/worker;
+- dedicated `FACEBOOK_APP_ID` and `FACEBOOK_APP_SECRET` from the Meta app's
+  Facebook Login/Messenger configuration. Do not reuse the Instagram Login
+  product credentials stored in `META_APP_ID` / `META_APP_SECRET`;
 - permissions `pages_show_list`, `pages_manage_metadata`,
   `pages_read_engagement` and `pages_messaging`;
 - the Page `messages` webhook subscription.
@@ -30,8 +33,10 @@ before production enablement.
 
 ## Owner flow
 
-1. Enable `FACEBOOK_MESSENGER_ENABLED=true` in API and worker only for the
-   controlled environment, restart both and confirm health.
+1. Set the dedicated Facebook credentials, then enable
+   `FACEBOOK_MESSENGER_ENABLED=true` in API and worker only for the controlled
+   environment. Restart both and confirm health. The API deliberately refuses
+   to start with the feature enabled and missing/partial Facebook credentials.
 2. Open **Settings -> Social networks / customers -> Facebook** as an owner.
 3. Choose **Connect Facebook** and authorize the requested Page permissions.
 4. If more than one eligible Page exists, select one. Sales AITO activates it

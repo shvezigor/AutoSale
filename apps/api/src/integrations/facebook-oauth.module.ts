@@ -13,13 +13,17 @@ import { FacebookOAuthStateService } from './facebook-oauth-state.service.js';
 @Module({})
 export class FacebookOAuthModule {
   static register(env: ApiEnv): DynamicModule {
+    if (env.FACEBOOK_MESSENGER_ENABLED && (!env.FACEBOOK_APP_ID || !env.FACEBOOK_APP_SECRET)) {
+      throw new Error('Facebook Messenger requires dedicated Facebook app credentials');
+    }
+
     const prisma = createPrismaClient(env.DATABASE_URL);
     const lifecycle = new FacebookOAuthPrismaLifecycle(prisma);
     const service = new FacebookOAuthService(
       prisma,
       new MetaFacebookClient({
-        appId: env.META_APP_ID,
-        appSecret: env.META_APP_SECRET,
+        appId: env.FACEBOOK_APP_ID ?? 'facebook-disabled',
+        appSecret: env.FACEBOOK_APP_SECRET ?? 'facebook-disabled',
         graphVersion: env.META_GRAPH_API_VERSION,
       }),
       new FacebookOAuthStateService(prisma),

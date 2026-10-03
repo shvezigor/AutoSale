@@ -57,7 +57,7 @@ Primary references verified on 2026-10-02:
 
 Use a hybrid extension:
 
-1. Keep Facebook authorization and credential lifecycle separate from Instagram because the providers issue different token types and permissions.
+1. Keep Facebook authorization and credential lifecycle separate from Instagram because the providers issue different token types, permissions and product credentials. Facebook OAuth and Page webhook signatures use dedicated `FACEBOOK_APP_ID` / `FACEBOOK_APP_SECRET`; Instagram continues to use `META_APP_ID` / `META_APP_SECRET`.
 2. Extend the current Meta webhook boundary to route verified Instagram and Page entries by object type.
 3. Convert both providers into one internal `NormalizedInboundMessage` contract.
 4. Move shared conversation/message/attachment persistence and order triggering behind a provider-neutral ingestion service.
@@ -161,7 +161,7 @@ The inbox and settings must have no horizontal overflow at 390 px, work with key
 - Every Facebook connection, OAuth attempt, cleanup, webhook, conversation, message and attachment relation is tenant-scoped and covered by RLS/transaction-context tests.
 - OAuth state is single-use, hashed, short-lived and consumed before external I/O.
 - Page candidate tokens and the selected Page token are encrypted with the existing integration encryption facility.
-- Raw callbacks are signature-verified before registration and sanitized before persistence.
+- Raw callbacks are signature-verified before registration against the matching Instagram or Facebook product secret and sanitized before persistence.
 - Provider payloads, tokens, customer text, Page-scoped user IDs and personal profile data are prohibited metric labels.
 - Frozen tenants acknowledge valid Meta callbacks without creating business side effects, consistent with the existing lifecycle contract.
 - Disconnect, reconnect, callback races and duplicate callbacks cannot reactivate a superseded credential or create duplicate messages/orders.

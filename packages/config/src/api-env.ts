@@ -9,6 +9,14 @@ const isCanonicalIntegrationEncryptionKey = (value: string): boolean => {
 };
 
 const optionalNonEmptyString = z.preprocess((value) => value === '' ? undefined : value, z.string().min(1).optional());
+const optionalNumericId = z.preprocess(
+  (value) => value === '' ? undefined : value,
+  z.string().regex(/^\d{5,32}$/).optional(),
+);
+const optionalSecret = z.preprocess(
+  (value) => value === '' ? undefined : value,
+  z.string().min(16).optional(),
+);
 const optionalUrl = z.preprocess((value) => value === '' ? undefined : value, z.string().url().optional());
 const optionalBoolean = z.preprocess(
   (value) => value === undefined || value === '' ? undefined : value === true || value === 'true',
@@ -27,6 +35,8 @@ export const apiEnvSchema = z.object({
   META_APP_ID: z.string().regex(/^\d{5,32}$/),
   META_GRAPH_API_VERSION: z.string().regex(/^v\d+\.\d+$/),
   FACEBOOK_MESSENGER_ENABLED: optionalBoolean,
+  FACEBOOK_APP_ID: optionalNumericId,
+  FACEBOOK_APP_SECRET: optionalSecret,
   INTEGRATION_ENCRYPTION_KEY: z.string().refine(
     isCanonicalIntegrationEncryptionKey,
     'must be canonical base64 encoding of 32 bytes',
@@ -68,6 +78,23 @@ export const apiEnvSchema = z.object({
     z.string().min(32).max(256).regex(/^[A-Za-z0-9_-]+$/).optional(),
   ),
 }).superRefine((environment, context) => {
+  const facebookCredentials = [environment.FACEBOOK_APP_ID, environment.FACEBOOK_APP_SECRET];
+  const configuredFacebookCredentials = facebookCredentials.filter((value) => value !== undefined);
+
+  if (configuredFacebookCredentials.length > 0 && configuredFacebookCredentials.length !== facebookCredentials.length) {
+    context.addIssue({
+      code: 'custom',
+      message: 'Facebook OAuth configuration must include app ID and app secret',
+    });
+  }
+
+  if (environment.FACEBOOK_MESSENGER_ENABLED && configuredFacebookCredentials.length !== facebookCredentials.length) {
+    context.addIssue({
+      code: 'custom',
+      message: 'Facebook Messenger requires dedicated Facebook app ID and app secret',
+    });
+  }
+
   const googleOAuthValues = [
     environment.GOOGLE_OAUTH_CLIENT_ID,
     environment.GOOGLE_OAUTH_CLIENT_SECRET,
