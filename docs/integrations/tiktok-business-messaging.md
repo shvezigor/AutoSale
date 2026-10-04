@@ -4,10 +4,14 @@
 
 TikTok Business Messaging inbound is implemented behind
 `TIKTOK_BUSINESS_MESSAGING_ENABLED=false` and remains **Validation pending**.
-The current slice receives new direct messages, normalizes supported text,
+The current inbound slice receives new direct messages, normalizes supported text,
 image, video and shared-post content into the shared inbox, and may invoke the
-existing order-recognition flow. It does not send replies, import message
-history, process comments or connect personal TikTok accounts.
+existing order-recognition flow. Outbound foundations now define the provider
+send contract and accept tenant-safe, idempotent manual replies into durable
+local `PENDING` state while pinning them to the current credential generation.
+The worker delivery/reconciliation path and composer UI are still incomplete,
+so this is not yet an end-to-end send capability. The integration does not
+import message history, process comments or connect personal TikTok accounts.
 
 Provider access, business/account eligibility and regional availability are
 decided by TikTok. A Ukrainian FOP may apply using the documents offered by
@@ -62,8 +66,9 @@ OAuth codes, signatures, raw payloads or customer content in logs or evidence.
 5. Confirm it appears once in **Conversations** with the TikTok label.
 
 Managers can read the connection state but cannot connect or disconnect an
-account. TikTok conversations are explicitly read-only in Slice A; the UI must
-not render the Instagram reply composer or imply that a reply was sent.
+account. Until Slice B worker delivery and UI acceptance are complete, TikTok
+conversations remain read-only in the production UI and must not imply that a
+reply was sent.
 
 ## Health, refresh and recovery
 
@@ -112,5 +117,6 @@ event rows manually. Re-enable only after API/worker health, migrations and the
 automated suite pass.
 
 Do not claim general availability until TikTok grants the required access and
-all inbound live checks pass. Outbound replies are a separate future slice and
-have a separate acceptance gate.
+all inbound live checks pass. Outbound replies remain behind a separate
+acceptance gate until durable worker delivery, UI and controlled live checks
+are complete.

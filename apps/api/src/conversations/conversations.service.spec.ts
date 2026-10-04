@@ -220,7 +220,7 @@ describe('ConversationsService', () => {
     }
   });
 
-  it('lists TikTok attachments with a provider preview and keeps replies read-only', async () => {
+  it('lists TikTok attachments with a provider preview and requires a reply connection', async () => {
     const event = await prisma.webhookEvent.create({
       data: { tenantId, provider: 'TIKTOK', externalEventId: `tiktok-test-${randomUUID()}`, payload: {} },
     });
@@ -244,7 +244,7 @@ describe('ConversationsService', () => {
       });
       await expect(service.detail(tenantId, conversation.id)).resolves.toMatchObject({
         channel: 'TIKTOK', participantUsername: null, participantAvatarUrl: null,
-        replyCapability: { enabled: false, reason: 'CHANNEL_READ_ONLY' },
+        replyCapability: { enabled: false, reason: 'NOT_CONNECTED' },
       });
     } finally {
       await prisma.attachment.deleteMany({ where: { messageId: message.id } });
@@ -329,6 +329,128 @@ describe('ConversationsService', () => {
       { tenantId, messageId: first.id },
       { jobId: first.id, attempts: 1, removeOnComplete: true, removeOnFail: true },
     );
+  });
+
+  it('accepts one idempotent TikTok reply and routes it to the TikTok worker', async () => {
+    const event = await prisma.webhookEvent.create({
+      data: { tenantId, provider: 'TIKTOK', externalEventId: `tiktok-send-${randomUUID()}`, payload: {} },
+    });
+    const conversation = await prisma.conversation.create({ data: {
+      tenantId, channel: 'TIKTOK', externalConversationId: `fictional-tiktok-conversation-${randomUUID()}`,
+      participantId: 'fictional-tiktok-customer', displayName: 'Клієнт TikTok', lastMessageAt: new Date(),
+    } });
+    await prisma.message.create({ data: {
+      tenantId, conversationId: conversation.id, rawEventId: event.id, channel: 'TIKTOK',
+      externalMessageId: `fictional-tiktok-inbound-${randomUUID()}`, direction: 'INBOUND',
+      senderId: 'fictional-tiktok-customer', text: 'Чи є товар?', sourceTimestamp: new Date(),
+    } });
+    const generationId = randomUUID();
+    await prisma.tikTokConnection.create({ data: {
+      tenantId, externalAccountId: `fictional-tiktok-business-${randomUUID()}`, status: 'ACTIVE',
+      capabilities: { receiveMessages: true, sendText: true, sendImage: false },
+      encryptedAccessToken: 'encrypted-access', encryptedRefreshToken: 'encrypted-refresh',
+      credentialGenerationId: generationId,
+      tokenExpiresAt: new Date(Date.now() - 60_000),
+      refreshTokenExpiresAt: new Date(Date.now() + 86_400_000),
+    } });
+    const idempotencyKey = randomUUID();
+
+    try {
+      const detail = await service.detail(tenantId, conversation.id);
+      const first = await service.send(tenantId, actorUserId, conversation.id, {
+        text: '  Ваше замовлення прийнято.  ', idempotencyKey,
+      });
+      const replay = await service.send(tenantId, actorUserId, conversation.id, {
+        text: 'Ваше замовлення прийнято.', idempotencyKey,
+      });
+
+      expect(detail.replyCapability).toEqual({ enabled: true, reason: null });
+      expect(first).toMatchObject({
+        direction: 'OUTBOUND', senderId: expect.stringContaining('fictional-tiktok-business-'),
+        text: 'Ваше замовлення прийнято.',
+        delivery: { status: 'PENDING', attempts: 0, errorCode: null, retryAllowed: false },
+      });
+      expect(replay.id).toBe(first.id);
+      await expect(prisma.message.count({ where: { tenantId, clientIdempotencyKey: idempotencyKey } })).resolves.toBe(1);
+      expect(queue.add).toHaveBeenCalledTimes(1);
+      expect(queue.add).toHaveBeenCalledWith(
+        'tiktok.message.send',
+        { tenantId, messageId: first.id },
+        { jobId: first.id, attempts: 1, removeOnComplete: true, removeOnFail: true },
+      );
+      const stored = await prisma.message.findUniqueOrThrow({ where: { id: first.id } });
+      expect(stored.deliveryCredentialGenerationId).toBe(generationId);
+    } finally {
+      await prisma.message.deleteMany({ where: { conversationId: conversation.id } });
+      await prisma.conversation.delete({ where: { id: conversation.id } });
+      await prisma.webhookEvent.delete({ where: { id: event.id } });
+      await prisma.tikTokConnection.deleteMany({ where: { tenantId } });
+    }
+  });
+
+  it('explains and rejects TikTok replies without outbound capability', async () => {
+    const conversation = await prisma.conversation.create({ data: {
+      tenantId, channel: 'TIKTOK', externalConversationId: `fictional-inbound-only-${randomUUID()}`,
+      participantId: 'fictional-tiktok-customer', lastMessageAt: new Date(),
+    } });
+    await prisma.tikTokConnection.create({ data: {
+      tenantId, externalAccountId: `fictional-inbound-only-business-${randomUUID()}`, status: 'INBOUND_ONLY',
+      capabilities: { receiveMessages: true, sendText: false, sendImage: false },
+      encryptedAccessToken: 'encrypted-access', encryptedRefreshToken: 'encrypted-refresh',
+      credentialGenerationId: randomUUID(), tokenExpiresAt: new Date(Date.now() + 60_000),
+      refreshTokenExpiresAt: new Date(Date.now() + 86_400_000),
+    } });
+
+    try {
+      await expect(service.detail(tenantId, conversation.id)).resolves.toMatchObject({
+        replyCapability: { enabled: false, reason: 'TIKTOK_CAPABILITY_UNAVAILABLE' },
+      });
+      await expect(service.send(tenantId, actorUserId, conversation.id, {
+        text: 'Вітаю', idempotencyKey: randomUUID(),
+      })).rejects.toBeInstanceOf(BadRequestException);
+      expect(queue.add).not.toHaveBeenCalled();
+    } finally {
+      await prisma.message.deleteMany({ where: { conversationId: conversation.id } });
+      await prisma.conversation.delete({ where: { id: conversation.id } });
+      await prisma.tikTokConnection.deleteMany({ where: { tenantId } });
+    }
+  });
+
+  it('retries a safely rate-limited TikTok reply on the TikTok queue', async () => {
+    const conversation = await prisma.conversation.create({ data: {
+      tenantId, channel: 'TIKTOK', externalConversationId: `fictional-tiktok-retry-${randomUUID()}`,
+      participantId: 'fictional-tiktok-customer', lastMessageAt: new Date(),
+    } });
+    const generationId = randomUUID();
+    await prisma.tikTokConnection.create({ data: {
+      tenantId, externalAccountId: `fictional-tiktok-retry-business-${randomUUID()}`, status: 'ACTIVE',
+      capabilities: { receiveMessages: true, sendText: true, sendImage: false },
+      encryptedAccessToken: 'encrypted-access', encryptedRefreshToken: 'encrypted-refresh',
+      credentialGenerationId: generationId, tokenExpiresAt: new Date(Date.now() + 60_000),
+      refreshTokenExpiresAt: new Date(Date.now() + 86_400_000),
+    } });
+    const message = await prisma.message.create({ data: {
+      tenantId, conversationId: conversation.id, rawEventId: null, channel: 'TIKTOK',
+      externalMessageId: `local:${randomUUID()}`, direction: 'OUTBOUND', senderId: 'fictional-business',
+      text: 'Повторити', sourceTimestamp: new Date(), clientIdempotencyKey: randomUUID(),
+      sentByUserId: actorUserId, deliveryStatus: 'FAILED', deliveryAttempts: 1,
+      deliveryErrorCode: 'TIKTOK_RATE_LIMITED',
+      deliveryCredentialGenerationId: generationId,
+    } });
+
+    try {
+      const result = await service.retry(tenantId, actorUserId, conversation.id, message.id);
+      expect(result.delivery).toEqual({ status: 'PENDING', attempts: 1, errorCode: null, retryAllowed: false });
+      expect(queue.add).toHaveBeenCalledWith(
+        'tiktok.message.send',
+        { tenantId, messageId: message.id },
+        { jobId: message.id, attempts: 1, removeOnComplete: true, removeOnFail: true },
+      );
+    } finally {
+      await prisma.message.deleteMany({ where: { conversationId: conversation.id } });
+      await prisma.conversation.delete({ where: { id: conversation.id } });
+      await prisma.tikTokConnection.deleteMany({ where: { tenantId } });
+    }
   });
 
   it('keeps an accepted reply durable when queue wake-up fails', async () => {

@@ -121,6 +121,8 @@ git commit -m "feat: send TikTok conversation replies"
 ### Task 3: Accept channel-aware manual replies in the conversation API
 
 **Files:**
+- Modify: `packages/database/prisma/schema.prisma`
+- Create: `packages/database/prisma/migrations/*_tiktok_outbound_generation/migration.sql`
 - Modify: `apps/api/src/conversations/conversations.service.ts`
 - Modify: `apps/api/src/conversations/conversations.service.spec.ts`
 - Modify: `apps/api/src/conversations/conversations.module.ts`
@@ -130,7 +132,7 @@ git commit -m "feat: send TikTok conversation replies"
 - Consumes existing `POST /api/conversations/:id/messages` and retry route without adding a TikTok-only controller.
 - Produces queue job `tiktok.message.send` for TikTok conversations and retains `instagram.message.send` for Instagram.
 
-- [ ] **Step 1: Write failing API tests for capability, idempotency, and routing**
+- [x] **Step 1: Write failing API tests for capability, idempotency, and routing**
 
 ```ts
 const reply = await service.send(tenantId, managerId, tikTokConversationId, {
@@ -145,23 +147,23 @@ expect(queue.add).toHaveBeenCalledWith(
 );
 ```
 
-Test inbound-only disabled capability, stale token, forbidden tenant, lifecycle freeze, duplicate same input returning one message, idempotency-key conflict, per-actor acceptance rate limit, and TikTok-specific retry eligibility.
+Test inbound-only disabled capability, missing/non-refreshable credentials, forbidden tenant, lifecycle freeze, duplicate same input returning one message, idempotency-key conflict, per-actor acceptance rate limit, and TikTok-specific retry eligibility.
 
-- [ ] **Step 2: Run focused API tests and verify failure**
+- [x] **Step 2: Run focused API tests and verify failure**
 
 Run: `pnpm --filter @autosale/api test -- conversations.service.spec.ts conversations.controller.spec.ts`
 Expected: FAIL because send/retry currently accepts only Instagram.
 
-- [ ] **Step 3: Implement exhaustive channel strategy selection**
+- [x] **Step 3: Implement exhaustive channel strategy selection**
 
-Load the connection appropriate to `conversation.channel`. For TikTok require `status = ACTIVE`, unexpired encrypted access token, and capability `sendText = true`. Persist `channel: 'TIKTOK'`, sender external account ID, local external message ID, idempotency key, actor, `PENDING`, and next attempt in the same tenant transaction. Enqueue only after commit.
+Load the connection appropriate to `conversation.channel`. For TikTok require `status = ACTIVE`, encrypted access and refresh credentials, a non-expired refresh token, a current credential generation, and capability `sendText = true`; the worker refreshes a short-lived access token when necessary. Persist `channel: 'TIKTOK'`, sender external account ID, credential generation, local external message ID, idempotency key, actor, `PENDING`, and next attempt in the same tenant transaction. Enqueue only after commit.
 
-- [ ] **Step 4: Run focused API tests**
+- [x] **Step 4: Run focused API tests**
 
 Run: `pnpm --filter @autosale/api test -- conversations.service.spec.ts conversations.controller.spec.ts`
 Expected: PASS.
 
-- [ ] **Step 5: Commit API acceptance**
+- [x] **Step 5: Commit API acceptance**
 
 ```bash
 git add apps/api/src/conversations

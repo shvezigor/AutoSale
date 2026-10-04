@@ -36,12 +36,27 @@ export interface InstagramMessageQueue {
     data: { tenantId: string; messageId: string },
     options: { jobId: string; attempts: 1; removeOnComplete: true; removeOnFail: true },
   ): Promise<unknown>;
+  add(
+    name: 'tiktok.message.send',
+    data: { tenantId: string; messageId: string },
+    options: { jobId: string; attempts: 1; removeOnComplete: true; removeOnFail: true },
+  ): Promise<unknown>;
 }
 
 interface DeliveryConnection {
   status: string;
   encryptedAccessToken: string | null;
   tokenExpiresAt: Date | null;
+}
+
+interface TikTokDeliveryConnection {
+  status: string;
+  capabilities: unknown;
+  encryptedAccessToken: string | null;
+  encryptedRefreshToken: string | null;
+  credentialGenerationId: string | null;
+  refreshTokenExpiresAt: Date | null;
+  externalAccountId: string;
 }
 
 export class ConversationsService {
@@ -114,7 +129,7 @@ export class ConversationsService {
   }
 
   async detail(tenantId: string, id: string): Promise<ConversationDetailResponse> {
-    const [conversation, connection] = await withTenantTransaction(this.prisma, tenantId, (transaction) => Promise.all([
+    const [conversation, instagramConnection, tikTokConnection] = await withTenantTransaction(this.prisma, tenantId, (transaction) => Promise.all([
       transaction.conversation.findFirst({
         where: { id, tenantId },
         include: {
@@ -135,24 +150,32 @@ export class ConversationsService {
         },
       }),
       transaction.instagramConnection.findUnique({ where: { tenantId } }),
+      transaction.tikTokConnection.findUnique({ where: { tenantId } }),
     ]));
 
     if (!conversation) {
       throw new NotFoundException('Conversation not found');
     }
 
+    const channel = socialChannel(conversation.channel);
+    const now = new Date();
+    const connectionActive = channel === 'INSTAGRAM'
+      ? isDeliveryConnectionActive(instagramConnection, now)
+      : channel === 'TIKTOK' && tikTokReplyCapability(tikTokConnection, now).enabled;
     return {
       id: conversation.id,
-      channel: socialChannel(conversation.channel),
+      channel,
       participantName: participantName(conversation.profile, conversation.displayName),
       participantUsername: conversation.profile?.username ?? null,
       participantAvatarUrl: profileAvatarUrl(conversation.profile),
-      replyCapability: conversation.channel !== 'INSTAGRAM'
-        ? { enabled: false, reason: 'CHANNEL_READ_ONLY' }
-        : replyCapability(connection, new Date(), latestInboundAt(conversation.messages)),
+      replyCapability: channel === 'INSTAGRAM'
+        ? replyCapability(instagramConnection, now, latestInboundAt(conversation.messages))
+        : channel === 'TIKTOK'
+          ? tikTokReplyCapability(tikTokConnection, now)
+          : { enabled: false, reason: 'CHANNEL_READ_ONLY' },
       messages: conversation.messages.map((message) => mapMessage(
         message,
-        isDeliveryConnectionActive(connection, new Date()),
+        connectionActive,
       )),
     };
   }
@@ -228,7 +251,7 @@ export class ConversationsService {
     const result = await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
       await assertTenantAcceptingMutations(transaction, tenantId, 'CONVERSATION_REPLY');
       const conversation = await transaction.conversation.findFirst({
-        where: { id: conversationId, tenantId, channel: 'INSTAGRAM' },
+        where: { id: conversationId, tenantId, channel: { in: ['INSTAGRAM', 'TIKTOK'] } },
         include: {
           messages: {
             where: { direction: 'INBOUND' },
@@ -239,13 +262,26 @@ export class ConversationsService {
         },
       });
       if (!conversation) throw new NotFoundException('Conversation not found');
-
-      const connection = await transaction.instagramConnection.findUnique({ where: { tenantId } });
-      if (!isDeliveryConnectionActive(connection, now)) {
-        throw new BadRequestException('Instagram connection is not ready for replies');
-      }
-      if (metaInstagramReplyMode(conversation.messages[0]?.sourceTimestamp ?? null, now) === 'EXPIRED') {
-        throw new BadRequestException('Instagram reply window expired');
+      const channel = replyChannel(conversation.channel);
+      let senderId: string;
+      let credentialGenerationId: string | null = null;
+      if (channel === 'INSTAGRAM') {
+        const connection = await transaction.instagramConnection.findUnique({ where: { tenantId } });
+        if (!isDeliveryConnectionActive(connection, now)) {
+          throw new BadRequestException('Instagram connection is not ready for replies');
+        }
+        if (metaInstagramReplyMode(conversation.messages[0]?.sourceTimestamp ?? null, now) === 'EXPIRED') {
+          throw new BadRequestException('Instagram reply window expired');
+        }
+        senderId = connection.externalAccountId;
+      } else {
+        const connection = await transaction.tikTokConnection.findUnique({ where: { tenantId } });
+        const capability = tikTokReplyCapability(connection, now);
+        if (!capability.enabled || !connection?.credentialGenerationId) {
+          throw new BadRequestException('TikTok connection is not ready for replies');
+        }
+        senderId = connection.externalAccountId;
+        credentialGenerationId = connection.credentialGenerationId;
       }
 
       const existing = await transaction.message.findFirst({
@@ -269,7 +305,7 @@ export class ConversationsService {
       });
       if (acceptedInWindow >= 30) {
         throw new HttpException(
-          'Instagram reply rate limit exceeded',
+          'Conversation reply rate limit exceeded',
           HttpStatus.TOO_MANY_REQUESTS,
         );
       }
@@ -281,15 +317,16 @@ export class ConversationsService {
           tenantId,
           conversationId,
           rawEventId: null,
-          channel: 'INSTAGRAM',
+          channel,
           externalMessageId: `local:${messageId}`,
           direction: 'OUTBOUND',
-          senderId: connection.externalAccountId,
+          senderId,
           text,
           sourceTimestamp: now,
           clientIdempotencyKey: input.idempotencyKey,
           sentByUserId: actorUserId,
           deliveryStatus: 'PENDING',
+          deliveryCredentialGenerationId: credentialGenerationId,
           nextDeliveryAttemptAt: now,
         },
         include: { attachments: { orderBy: { createdAt: 'asc' } } },
@@ -301,7 +338,7 @@ export class ConversationsService {
       return { message, created: true, connectionActive: true };
     });
 
-    if (result.created) await this.enqueue(tenantId, result.message.id);
+    if (result.created) await this.enqueue(replyChannel(result.message.channel), tenantId, result.message.id);
     return mapMessage(result.message, result.connectionActive);
   }
 
@@ -315,22 +352,32 @@ export class ConversationsService {
     const message = await withTenantTransaction(this.prisma, tenantId, async (transaction) => {
       await assertTenantAcceptingMutations(transaction, tenantId, 'CONVERSATION_REPLY');
       const conversation = await transaction.conversation.findFirst({
-        where: { id: conversationId, tenantId, channel: 'INSTAGRAM' },
+        where: { id: conversationId, tenantId, channel: { in: ['INSTAGRAM', 'TIKTOK'] } },
       });
       if (!conversation) throw new NotFoundException('Conversation not found');
-
-      const connection = await transaction.instagramConnection.findUnique({ where: { tenantId } });
-      if (!isDeliveryConnectionActive(connection, now)) {
-        throw new BadRequestException('Instagram connection is not ready for replies');
+      const channel = replyChannel(conversation.channel);
+      let credentialGenerationId: string | null = null;
+      if (channel === 'INSTAGRAM') {
+        const connection = await transaction.instagramConnection.findUnique({ where: { tenantId } });
+        if (!isDeliveryConnectionActive(connection, now)) {
+          throw new BadRequestException('Instagram connection is not ready for replies');
+        }
+      } else {
+        const connection = await transaction.tikTokConnection.findUnique({ where: { tenantId } });
+        if (!tikTokReplyCapability(connection, now).enabled || !connection?.credentialGenerationId) {
+          throw new BadRequestException('TikTok connection is not ready for replies');
+        }
+        credentialGenerationId = connection.credentialGenerationId;
       }
 
       const existing = await transaction.message.findFirst({
-        where: { id: messageId, tenantId, conversationId, direction: 'OUTBOUND' },
+        where: { id: messageId, tenantId, conversationId, channel, direction: 'OUTBOUND' },
       });
       if (
         !existing ||
         existing.deliveryStatus !== 'FAILED' ||
-        existing.deliveryErrorCode !== 'INSTAGRAM_RATE_LIMITED'
+        existing.deliveryErrorCode !== (channel === 'INSTAGRAM' ? 'INSTAGRAM_RATE_LIMITED' : 'TIKTOK_RATE_LIMITED') ||
+        (channel === 'TIKTOK' && existing.deliveryCredentialGenerationId !== credentialGenerationId)
       ) {
         throw new BadRequestException('Message cannot be safely retried');
       }
@@ -348,19 +395,25 @@ export class ConversationsService {
       });
     });
 
-    await this.enqueue(tenantId, message.id);
+    await this.enqueue(replyChannel(message.channel), tenantId, message.id);
     return mapMessage(message, true);
   }
 
-  private async enqueue(tenantId: string, messageId: string): Promise<void> {
+  private async enqueue(channel: 'INSTAGRAM' | 'TIKTOK', tenantId: string, messageId: string): Promise<void> {
     try {
-      await this.queue.add(
-        'instagram.message.send',
-        { tenantId, messageId },
-        { jobId: messageId, attempts: 1, removeOnComplete: true, removeOnFail: true },
-      );
+      const options = {
+        jobId: messageId,
+        attempts: 1 as const,
+        removeOnComplete: true as const,
+        removeOnFail: true as const,
+      };
+      if (channel === 'INSTAGRAM') {
+        await this.queue.add('instagram.message.send', { tenantId, messageId }, options);
+      } else {
+        await this.queue.add('tiktok.message.send', { tenantId, messageId }, options);
+      }
     } catch {
-      this.logger.warn({ event: 'instagram_reply_queue_wakeup_failed', tenantId, messageId });
+      this.logger.warn({ event: 'social_reply_queue_wakeup_failed', channel, tenantId, messageId });
     }
   }
 }
@@ -379,6 +432,32 @@ function replyCapability(
     enabled: false,
     reason: connection ? 'RECONNECT_REQUIRED' : 'NOT_CONNECTED',
   };
+}
+
+function tikTokReplyCapability(
+  connection: TikTokDeliveryConnection | null,
+  now: Date,
+): ConversationDetailResponse['replyCapability'] {
+  if (!connection) return { enabled: false, reason: 'NOT_CONNECTED' };
+  if (connection.status === 'INBOUND_ONLY' || !tikTokSendTextCapability(connection.capabilities)) {
+    return { enabled: false, reason: 'TIKTOK_CAPABILITY_UNAVAILABLE' };
+  }
+  if (
+    connection.status !== 'ACTIVE' ||
+    !connection.encryptedAccessToken ||
+    !connection.encryptedRefreshToken ||
+    !connection.credentialGenerationId ||
+    !(connection.refreshTokenExpiresAt instanceof Date) ||
+    connection.refreshTokenExpiresAt.getTime() <= now.getTime()
+  ) {
+    return { enabled: false, reason: 'RECONNECT_REQUIRED' };
+  }
+  return { enabled: true, reason: null };
+}
+
+function tikTokSendTextCapability(value: unknown): boolean {
+  return typeof value === 'object' && value !== null &&
+    'sendText' in value && value.sendText === true;
 }
 
 function latestInboundAt(messages: Array<{ direction: string; sourceTimestamp: Date }>): Date | null {
@@ -410,7 +489,8 @@ function mapMessage(message: {
   const isOutbound = message.direction === 'OUTBOUND';
   const retryAllowed = connectionActive &&
     message.deliveryStatus === 'FAILED' &&
-    message.deliveryErrorCode === 'INSTAGRAM_RATE_LIMITED';
+    (message.deliveryErrorCode === 'INSTAGRAM_RATE_LIMITED' ||
+      message.deliveryErrorCode === 'TIKTOK_RATE_LIMITED');
   return {
     id: message.id,
     direction: isOutbound ? 'OUTBOUND' : 'INBOUND',
@@ -504,7 +584,22 @@ function isDeliveryErrorCode(value: string | null): value is NonNullable<Convers
     value === 'INSTAGRAM_SEND_FAILED' ||
     value === 'INSTAGRAM_DELIVERY_UNKNOWN' ||
     value === 'INSTAGRAM_REPLY_WINDOW_EXPIRED' ||
-    value === 'INSTAGRAM_HUMAN_AGENT_UNAVAILABLE';
+    value === 'INSTAGRAM_HUMAN_AGENT_UNAVAILABLE' ||
+    value === 'TIKTOK_RECONNECT_REQUIRED' ||
+    value === 'TIKTOK_RATE_LIMITED' ||
+    value === 'TIKTOK_SEND_FAILED' ||
+    value === 'TIKTOK_DELIVERY_UNKNOWN' ||
+    value === 'TIKTOK_REPLY_NOT_PERMITTED';
+}
+
+function replyChannel(value: string): 'INSTAGRAM' | 'TIKTOK' {
+  switch (value) {
+    case 'INSTAGRAM':
+    case 'TIKTOK':
+      return value;
+    default:
+      throw new Error('Unsupported reply channel');
+  }
 }
 
 function participantName(

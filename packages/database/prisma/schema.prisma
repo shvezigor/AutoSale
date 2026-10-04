@@ -1157,6 +1157,7 @@ model Message {
   nextDeliveryAttemptAt  DateTime?               @map("next_delivery_attempt_at")
   lastDeliveryAttemptAt  DateTime?               @map("last_delivery_attempt_at")
   deliveryErrorCode      String?                 @map("delivery_error_code")
+  deliveryCredentialGenerationId String?         @map("delivery_credential_generation_id") @db.Uuid
   createdAt              DateTime                @default(now()) @map("created_at")
   tenant                 Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   conversation           Conversation            @relation(fields: [tenantId, conversationId], references: [tenantId, id], onDelete: Cascade)
@@ -1170,6 +1171,7 @@ model Message {
   @@unique([tenantId, id])
   @@index([conversationId, sourceTimestamp])
   @@index([deliveryStatus, nextDeliveryAttemptAt])
+  @@index([tenantId, deliveryCredentialGenerationId])
   @@map("messages")
 }
 

@@ -33,6 +33,9 @@
 
 ## Separate outbound gate
 
+- [x] Reply and delivery contracts distinguish capability, policy, reconnect, rate-limit, failure and unknown outcomes.
+- [x] Provider send boundary uses the documented conversation-recipient request and validates the returned message ID.
+- [x] API acceptance is tenant-safe and idempotent, routes only eligible TikTok conversations and pins each reply to the active credential generation.
 - [ ] TikTok has granted the required send capability for the app/account/region.
 - [ ] Conversation-specific eligibility is checked immediately before send.
 - [ ] One manual text reply is accepted and delivered exactly once.

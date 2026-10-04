@@ -228,5 +228,8 @@ describe('ConversationsController', () => {
     const response = document.paths['/api/conversations']?.get?.responses?.['200'];
     expect(JSON.stringify(response)).toContain('participantAvatarUrl');
     expect(JSON.stringify(response)).toContain('participantUsername');
+    const detailResponse = document.paths['/api/conversations/{id}']?.get?.responses?.['200'];
+    expect(JSON.stringify(detailResponse)).toContain('TIKTOK_CAPABILITY_UNAVAILABLE');
+    expect(JSON.stringify(detailResponse)).toContain('TIKTOK_REPLY_NOT_PERMITTED');
   });
 });

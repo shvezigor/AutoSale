@@ -165,7 +165,7 @@ function conversationDetailOpenApiSchema(): OpenApiSchema {
       required: ['enabled', 'reason'],
       properties: {
         enabled: { type: 'boolean' },
-        reason: { type: 'string', nullable: true, enum: ['NOT_CONNECTED', 'RECONNECT_REQUIRED', 'REPLY_WINDOW_EXPIRED', 'CHANNEL_READ_ONLY'] },
+        reason: { type: 'string', nullable: true, enum: ['NOT_CONNECTED', 'RECONNECT_REQUIRED', 'REPLY_WINDOW_EXPIRED', 'CHANNEL_READ_ONLY', 'TIKTOK_CAPABILITY_UNAVAILABLE', 'TIKTOK_REPLY_NOT_PERMITTED'] },
       },
     },
     messages: {
