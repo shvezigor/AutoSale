@@ -16,10 +16,14 @@ export default async function ConversationDetailPage({ params }: { params: Promi
       ? `@${conversation.participantUsername}`
       : conversation.channel === 'FACEBOOK'
         ? t('conversations.facebookCustomer')
-        : t('conversations.instagramCustomer'));
+        : conversation.channel === 'TIKTOK'
+          ? t('conversations.tiktokCustomer')
+          : t('conversations.instagramCustomer'));
   const channelLabel = conversation.channel === 'FACEBOOK'
     ? t('conversations.channelFacebook')
-    : t('conversations.channelInstagram');
+    : conversation.channel === 'TIKTOK'
+      ? t('conversations.channelTikTok')
+      : t('conversations.channelInstagram');
   const accountLabel = conversation.participantName && conversation.participantUsername
     ? `@${conversation.participantUsername} · ${channelLabel}`
     : channelLabel;
@@ -42,7 +46,7 @@ export default async function ConversationDetailPage({ params }: { params: Promi
         ) : (
           <>
             <div className="thread-scroll"><MessageThread conversation={conversation} /></div>
-            <p className="reply-area">{t('conversations.facebookReadOnly')}</p>
+            <p className="reply-area">{conversation.channel === 'TIKTOK' ? t('conversations.tiktokReadOnly') : t('conversations.facebookReadOnly')}</p>
           </>
         )}
       </section>

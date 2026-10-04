@@ -19,13 +19,17 @@ export function ConversationList({ conversations, selectedId }: ConversationList
       {conversations.map((conversation) => {
         const channelLabel = conversation.channel === 'FACEBOOK'
           ? t('conversations.channelFacebook')
-          : t('conversations.channelInstagram');
+          : conversation.channel === 'TIKTOK'
+            ? t('conversations.channelTikTok')
+            : t('conversations.channelInstagram');
         const name = conversation.participantName ??
           (conversation.participantUsername
             ? `@${conversation.participantUsername}`
             : conversation.channel === 'FACEBOOK'
               ? t('conversations.facebookCustomer')
-              : t('conversations.instagramCustomer'));
+              : conversation.channel === 'TIKTOK'
+                ? t('conversations.tiktokCustomer')
+                : t('conversations.instagramCustomer'));
         return (
           <Link
             className="conversation-row"

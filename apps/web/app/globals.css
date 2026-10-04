@@ -267,6 +267,7 @@ html[data-sidebar-state="collapsed"] .authenticated-shell > .primary-nav .nav-it
 .conversation-preview { display: block; margin-top: 5px; color: #858ba3; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .conversation-channel-badge { display: inline-flex; margin-left: 6px; padding: 2px 6px; border-radius: 999px; background: var(--surface-blue); color: var(--accent); font-size: 9px; font-weight: 700; vertical-align: 1px; }
 .channel-facebook { background: #e8f1ff; color: #1877f2; }
+.channel-tiktok { background: #eef0f6; color: #10131f; }
 .facebook-page-selection { display: grid; gap: 14px; margin-top: 18px; }
 .dialog-count { padding: 9px 18px 12px; color: var(--muted); font-size: 10px; }
 .empty-list { padding: 28px 20px; color: var(--muted); }
@@ -423,6 +424,7 @@ button:disabled { opacity: .72; cursor: not-allowed; }
 .delivery-carrier-mark.carrier-meest { background: #edf4ff; color: #1764b7; }
 .delivery-carrier-mark.carrier-ukrposhta { background: #fff7d8; color: #2c568b; }
 .delivery-carrier-mark.channel-instagram { background: #fff0f5; color: #c52f69; }
+.delivery-carrier-mark.channel-tiktok { background: #eef0f6; color: #10131f; }
 .delivery-carrier-mark.channel-telegram { background: #eaf6ff; color: #1688c9; }
 .delivery-carrier-mark.data-catalogue { background: #edf7f1; color: #237349; }
 .delivery-carrier-mark.data-orders-export { background: #eef3ff; color: #315fb5; }

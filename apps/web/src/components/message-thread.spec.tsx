@@ -119,4 +119,11 @@ describe('MessageThread', () => {
     expect(screen.getByText('Непідтримуване вкладення Facebook')).toBeVisible();
     expect(screen.getByLabelText('Відео з Facebook')).toBeVisible();
   });
+
+  it('uses TikTok attachment labels for a TikTok conversation', () => {
+    render(<MessageThread conversation={{ ...detail, channel: 'TIKTOK' }} />);
+    expect(screen.getByRole('link', { name: 'Відкрити матеріал у TikTok' })).toBeVisible();
+    expect(screen.getByText('Непідтримуване вкладення TikTok')).toBeVisible();
+    expect(screen.getByLabelText('Відео з TikTok')).toBeVisible();
+  });
 });

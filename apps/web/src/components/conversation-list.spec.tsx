@@ -70,6 +70,15 @@ describe('ConversationList', () => {
     expect(screen.getByText('Facebook')).toBeVisible();
   });
 
+  it('labels TikTok conversations and uses a channel-specific customer fallback', () => {
+    render(<ConversationList conversations={[{
+      ...fixtureSummary, channel: 'TIKTOK', participantName: null,
+      participantUsername: null, participantAvatarUrl: null,
+    }]} />);
+    expect(screen.getByText('Клієнт TikTok')).toBeVisible();
+    expect(screen.getByText('TikTok')).toBeVisible();
+  });
+
   it('renders an explicit empty state', () => {
     render(<ConversationList conversations={[]} />);
 

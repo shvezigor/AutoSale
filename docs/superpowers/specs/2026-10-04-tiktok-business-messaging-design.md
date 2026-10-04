@@ -1,7 +1,7 @@
 # TikTok Business Messaging channel design
 
 **Date:** 2026-10-04
-**Status:** Implementation in progress; backend contracts, tenant-safe persistence, provider client/OAuth, shared webhook reconciliation, signed durable ingestion, authenticated media copying, conversation reads, and provider-neutral order recognition are implemented, while workspace UI and live provider validation remain incomplete
+**Status:** Slice A implemented behind a disabled-by-default flag, including tenant-safe OAuth, signed durable ingestion, authenticated media, order recognition, settings/onboarding, and inbox presentation; provider approval, region eligibility, live validation, and Slice B outbound delivery remain incomplete
 **Owner:** Sales AITO social channels
 
 ## 1. Purpose

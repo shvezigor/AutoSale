@@ -10,6 +10,7 @@ const localizedUiFiles = [
   '../components/catalogue-import-wizard.tsx',
   '../components/catalogue-source-settings.tsx',
   '../components/instagram-settings-form.tsx',
+  '../components/tiktok-settings-form.tsx',
   '../components/delivery-settings-card.tsx',
   '../components/meest-settings-card.tsx',
   '../components/ukrposhta-settings-card.tsx',

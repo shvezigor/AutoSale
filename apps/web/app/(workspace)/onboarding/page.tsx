@@ -17,6 +17,7 @@ type OnboardingStep = {
 type CatalogueSource = { status?: string };
 type InstagramSummary = { status?: string };
 type FacebookSummary = { status?: string };
+type TikTokSummary = { status?: string };
 type OrderSettings = { intentDetectionMode?: string; approvalMode?: string };
 type DeliveryConnection = { status?: string; senderProfile?: unknown };
 type DeliverySummary = { connections?: DeliveryConnection[] };
@@ -116,10 +117,11 @@ function step(id: string, title: string, description: string, href: string, requ
 }
 
 async function loadOnboardingSnapshot() {
-  const [catalogue, instagram, facebook, orders, delivery, meest, ukrposhta, supplier, telegram, legalEntities, bankAccounts] = await Promise.all([
+  const [catalogue, instagram, facebook, tiktok, orders, delivery, meest, ukrposhta, supplier, telegram, legalEntities, bankAccounts] = await Promise.all([
     safeApiJson<CatalogueSource[]>('/api/catalogue/sources'),
     safeApiJson<InstagramSummary>('/api/integrations/instagram'),
     safeApiJson<FacebookSummary>('/api/integrations/facebook'),
+    safeApiJson<TikTokSummary>('/api/integrations/tiktok'),
     safeApiJson<OrderSettings>('/api/settings/orders'),
     safeApiJson<DeliverySummary>('/api/integrations/delivery'),
     safeApiJson<SingleDeliverySummary>('/api/integrations/delivery/meest'),
@@ -138,7 +140,7 @@ async function loadOnboardingSnapshot() {
   const selectedSupplier = supplier?.selectedDestinationId;
   return {
     catalogueReady: (catalogue ?? []).some((source) => source.status === 'ACTIVE'),
-    salesChannelReady: instagram?.status === 'ACTIVE' || facebook?.status === 'ACTIVE',
+    salesChannelReady: instagram?.status === 'ACTIVE' || facebook?.status === 'ACTIVE' || tiktok?.status === 'ACTIVE' || tiktok?.status === 'INBOUND_ONLY',
     orderRulesReady: Boolean(orders?.intentDetectionMode && orders?.approvalMode),
     deliveryReady: deliveryConnections.some((connection) => connection.status === 'ACTIVE' && connection.senderProfile),
     supplierReady: Boolean(selectedSupplier && supplier?.destinations?.some((destination) => destination.id === selectedSupplier)),

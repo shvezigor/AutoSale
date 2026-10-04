@@ -75,6 +75,12 @@ describe('OnboardingPage', () => {
     expect(within(screen.getByTestId('onboarding-step-channel')).getByText('Готово')).toBeVisible();
   });
 
+  it('accepts an inbound-only TikTok account as the required sales channel', async () => {
+    mockOnboardingResponses({ catalogueReady: true, instagramReady: false, tiktokReady: true });
+    render(await OnboardingPage());
+    expect(screen.getByText('3 із 3 обов’язкових кроків готові')).toBeInTheDocument();
+  });
+
   it('renders the full checklist in English', async () => {
     getServerSession.mockResolvedValue({ ...ownerSession, locale: 'en' });
     mockOnboardingResponses({ catalogueReady: false, instagramReady: false });
@@ -92,11 +98,13 @@ function mockOnboardingResponses({
   catalogueReady,
   instagramReady,
   facebookReady = false,
+  tiktokReady = false,
   supplierReady = false,
 }: {
   catalogueReady: boolean;
   instagramReady: boolean;
   facebookReady?: boolean;
+  tiktokReady?: boolean;
   supplierReady?: boolean;
 }) {
   const destinationId = 'f4d8d792-34d1-4e93-a436-662919cd204c';
@@ -104,6 +112,7 @@ function mockOnboardingResponses({
     catalogueReady ? [{ id: 'source-1', status: 'ACTIVE' }] : [],
     { status: instagramReady ? 'ACTIVE' : 'NOT_CONNECTED' },
     { status: facebookReady ? 'ACTIVE' : 'NOT_CONNECTED' },
+    { status: tiktokReady ? 'INBOUND_ONLY' : 'NOT_CONNECTED' },
     { intentDetectionMode: 'AI_SUGGESTION', approvalMode: 'ON_LOW_CONFIDENCE' },
     { enabled: true, connections: [] },
     { enabled: true, connection: null },

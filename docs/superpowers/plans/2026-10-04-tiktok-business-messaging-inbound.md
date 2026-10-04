@@ -476,7 +476,7 @@ git commit -m "feat: expose TikTok conversations to order recognition"
 - Consumes: `GET /api/integrations/tiktok` summary and owner mutation routes.
 - Produces: third collapsed social-channel row and TikTok-labelled conversations.
 
-- [ ] **Step 1: Add failing UI tests**
+- [x] **Step 1: Add failing UI tests**
 
 ```tsx
 expect(screen.getByRole('button', { name: /TikTok/i })).toHaveAttribute('aria-expanded', 'false');
@@ -487,21 +487,21 @@ expect(screen.getByText(/Лише отримання повідомлень/i)).
 
 Test owner/manager differences, connected count `0 із 3`, inbound-only status, reconnect/disconnect loading states, mobile no-overflow, channel badge, and localized errors.
 
-- [ ] **Step 2: Run focused web tests and verify failure**
+- [x] **Step 2: Run focused web tests and verify failure**
 
 Run: `pnpm --filter @autosale/web test -- tiktok-settings-form.spec.tsx social-channel-hub.spec.tsx conversation-list.spec.tsx message-thread.spec.tsx page.spec.tsx completeness.spec.ts`
 Expected: FAIL because the TikTok row and translations do not exist.
 
-- [ ] **Step 3: Implement the collapsed settings row and inbox badge**
+- [x] **Step 3: Implement the collapsed settings row and inbox badge**
 
 Use `LoadingButton` for authorize/disconnect, `primary-button` for connect, `danger-button` for confirmed disconnect, and text-based capability/status descriptions. Preserve all rows collapsed on initial render. Update onboarding readiness so any active Instagram, Facebook, or TikTok inbound connection satisfies the sales-channel step.
 
-- [ ] **Step 4: Run focused web tests**
+- [x] **Step 4: Run focused web tests**
 
 Run: `pnpm --filter @autosale/web test -- tiktok-settings-form.spec.tsx social-channel-hub.spec.tsx conversation-list.spec.tsx message-thread.spec.tsx page.spec.tsx completeness.spec.ts`
 Expected: PASS.
 
-- [ ] **Step 5: Commit the UI increment**
+- [x] **Step 5: Commit the UI increment**
 
 ```bash
 git add apps/web

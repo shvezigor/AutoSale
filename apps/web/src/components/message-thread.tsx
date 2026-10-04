@@ -15,7 +15,9 @@ export function MessageThread({
   const { formatDate, t } = useI18n();
   const channel = conversation.channel === 'FACEBOOK'
     ? t('conversations.channelFacebook')
-    : t('conversations.channelInstagram');
+    : conversation.channel === 'TIKTOK'
+      ? t('conversations.channelTikTok')
+      : t('conversations.channelInstagram');
   return (
     <ol className="message-thread" aria-label={t('conversations.messageHistory')}>
       {conversation.messages.map((message) => (
