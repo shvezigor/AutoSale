@@ -16,6 +16,13 @@
 - [x] Inbox/list/detail/onboarding render TikTok without changing Instagram or Facebook behavior.
 - [x] Slice A remains independently usable in inbound-only mode when outbound capability is unavailable.
 - [x] Fictional opt-in browser acceptance verifies signed duplicate delivery and inbox rendering.
+- [x] Audited platform-admin controls can pause OAuth, inbound persistence, outbound acceptance and provider calls without deleting tenant state; the deployment flag remains the hard ceiling and database lookup fails closed.
+
+## Production rollout evidence
+
+- [x] Commit `a896fff` was deployed on 2026-10-04 after backup `20261004T113237Z`; the TikTok schema migrations completed and API, web and worker became healthy.
+- [x] The owner-facing production settings row is collapsed by default, truthfully reports TikTok as deployment-unavailable, remains usable at 390×844 and emits no browser console warnings/errors.
+- [ ] Run the authenticated platform-admin browser mutation scenario with isolated `E2E_ADMIN_*` credentials; tenant-owner access must continue to redirect away from `/admin/integrations`.
 
 ## Live inbound gate
 

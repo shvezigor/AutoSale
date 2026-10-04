@@ -31,6 +31,8 @@
 - [x] 2026-10-04: TikTok inbound Slice A покритий tenant-safe OAuth, encrypted credential lifecycle, app-level signed webhook, durable deduplication, text/image/video/shared-post normalization, authenticated media copy, token refresh, order triggering та inbox/settings тестами.
 - [x] 2026-10-04: opt-in TikTok inbound browser acceptance використовує лише fictional payload і перевіряє повторну signed delivery, рівно одне повідомлення, TikTok label та правдиву reply capability; без підключеного ізольованого test account сценарій безпечно пропускається.
 - [x] 2026-10-04: manual TikTok replies покриті capability/window contracts, локальною idempotency, generation-fenced API/worker delivery, безпечним reconciliation, shared Instagram/TikTok composer і opt-in outbound browser scenario.
+- [x] 2026-10-04: Facebook/TikTok runtime gates мають audited platform-admin API та UI, fail-closed database state, deployment-flag hard ceiling і worker re-check перед provider side effect. Повний набір із 1 943 тестів, typecheck і production build пройшли; opt-in admin browser mutation без ізольованих `E2E_ADMIN_*` доступів безпечно пропущено.
+- [x] 2026-10-04: коміт `a896fff` розгорнуто вручну після application-consistent backup `20261004T113237Z`; п’ять pending social-channel міграцій застосовано, API/web/worker і залежності healthy, `/`, `/login` та `/health/live` повертають 200. Owner-facing production UI коректно розрізняє active Instagram, platform-paused Facebook і deployment-unavailable TikTok, лишається collapsed by default на 390×844 та не має console warnings/errors.
 
 ## Потребує зовнішніх тестових доступів
 
