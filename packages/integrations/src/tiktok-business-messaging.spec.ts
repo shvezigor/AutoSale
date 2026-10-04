@@ -184,6 +184,97 @@ describe('TikTokBusinessMessagingClient', () => {
     expect(fetchFn.mock.calls[0]?.[1]?.headers).toEqual({ 'content-type': 'application/json' });
   });
 
+  it('sends a bounded text reply to an existing TikTok conversation', async () => {
+    const fetchFn = vi.fn<typeof fetch>().mockResolvedValue(success({
+      message_id: 'fictional-provider-message',
+    }));
+    const client = new TikTokBusinessMessagingClient({ ...config, fetch: fetchFn });
+
+    await expect(client.sendText({
+      accessToken: 'fictional-access-token',
+      accountId: 'fictional-business-id',
+      conversationId: 'fictional-conversation-id',
+      text: 'Дякуємо, замовлення прийнято.',
+    })).resolves.toEqual({ messageId: 'fictional-provider-message' });
+
+    expect(fetchFn).toHaveBeenCalledTimes(1);
+    const [requestUrl, init] = fetchFn.mock.calls[0] ?? [];
+    expect(requestUrl?.toString()).toBe(
+      'https://business-api.tiktok.com/open_api/v1.3/business/message/send/',
+    );
+    expect(init?.method).toBe('POST');
+    expect(init?.headers).toEqual({
+      'Access-Token': 'fictional-access-token',
+      'content-type': 'application/json',
+    });
+    expect(JSON.parse(String(init?.body))).toEqual({
+      business_id: 'fictional-business-id',
+      recipient_type: 'CONVERSATION',
+      recipient: 'fictional-conversation-id',
+      message_type: 'TEXT',
+      text: { body: 'Дякуємо, замовлення прийнято.' },
+    });
+    expect(init?.signal).toBeInstanceOf(AbortSignal);
+  });
+
+  it('rejects invalid send input before contacting TikTok', async () => {
+    const fetchFn = vi.fn<typeof fetch>();
+    const client = new TikTokBusinessMessagingClient({ ...config, fetch: fetchFn });
+    const valid = {
+      accessToken: 'fictional-access-token',
+      accountId: 'fictional-business-id',
+      conversationId: 'fictional-conversation-id',
+      text: 'Вітаю',
+    };
+
+    await expect(client.sendText({ ...valid, text: 'x'.repeat(1001) })).rejects.toThrow('Invalid TikTok message text');
+    await expect(client.sendText({ ...valid, conversationId: '' })).rejects.toThrow('Invalid TikTok conversation id');
+    await expect(client.sendText({ ...valid, accountId: 'bad\naccount' })).rejects.toThrow('Invalid TikTok account id');
+    expect(fetchFn).not.toHaveBeenCalled();
+  });
+
+  it('classifies rate-limit, auth, policy, malformed, and ambiguous TikTok sends', async () => {
+    const input = {
+      accessToken: 'fictional-access-token',
+      accountId: 'fictional-business-id',
+      conversationId: 'fictional-conversation-id',
+      text: 'Вітаю',
+    };
+    const errors: Array<{ response: Response | Error; expected: Partial<TikTokBusinessMessagingError> }> = [
+      {
+        response: jsonResponse({ code: 0, request_id: 'rate-request', data: {} }, 429),
+        expected: { stage: 'MESSAGE_SEND', status: 429, retryable: true },
+      },
+      {
+        response: jsonResponse({ code: 40105, request_id: 'auth-request', data: {} }, 401),
+        expected: { stage: 'MESSAGE_SEND', status: 401, providerCode: 40105, retryable: false },
+      },
+      {
+        response: jsonResponse({ code: 40001, request_id: 'policy-request', data: {} }),
+        expected: { stage: 'MESSAGE_SEND', status: 200, providerCode: 40001, retryable: false },
+      },
+      {
+        response: success({}),
+        expected: { stage: 'MESSAGE_SEND', status: 200, retryable: false },
+      },
+      {
+        response: new Error('network body and token must stay redacted'),
+        expected: { stage: 'MESSAGE_SEND', status: null, retryable: true },
+      },
+    ];
+
+    for (const scenario of errors) {
+      const fetchFn = scenario.response instanceof Response
+        ? vi.fn<typeof fetch>().mockResolvedValue(scenario.response)
+        : vi.fn<typeof fetch>().mockRejectedValue(scenario.response);
+      const client = new TikTokBusinessMessagingClient({ ...config, fetch: fetchFn });
+      const error = await client.sendText(input).catch((failure: unknown) => failure);
+      expect(error).toMatchObject(scenario.expected);
+      expect(String(error)).not.toContain(input.accessToken);
+      expect(String(error)).not.toContain(input.text);
+    }
+  });
+
   it('rejects a token inspection identity mismatch', async () => {
     const client = new TikTokBusinessMessagingClient({
       ...config,

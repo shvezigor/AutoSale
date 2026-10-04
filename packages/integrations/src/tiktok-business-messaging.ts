@@ -57,12 +57,20 @@ export interface TikTokDirectMessageWebhook {
   callbackUrl: string;
 }
 
+export interface TikTokTextMessageInput {
+  accessToken: string;
+  accountId: string;
+  conversationId: string;
+  text: string;
+}
+
 export type TikTokBusinessMessagingStage =
   | 'TOKEN'
   | 'TOKEN_REFRESH'
   | 'TOKEN_REVOKE'
   | 'TOKEN_INFO'
   | 'ACCOUNT'
+  | 'MESSAGE_SEND'
   | 'MEDIA_URL'
   | 'MEDIA_DOWNLOAD'
   | 'WEBHOOK_GET'
@@ -225,6 +233,30 @@ export class TikTokBusinessMessagingClient {
       sendText: canSend,
       sendImage: canSend,
     };
+  }
+
+  async sendText(input: TikTokTextMessageInput): Promise<{ messageId: string }> {
+    if (!isNonEmptyString(input.accessToken)) throw new Error('Invalid TikTok access token');
+    assertProviderId(input.accountId, 'account');
+    assertProviderId(input.conversationId, 'conversation');
+    const text = input.text.trim();
+    if (text.length === 0 || text.length > 1_000) throw new Error('Invalid TikTok message text');
+
+    const data = await this.requestEnvelope(this.apiUrl('business/message/send/'), {
+      method: 'POST',
+      headers: { 'Access-Token': input.accessToken, 'content-type': 'application/json' },
+      body: JSON.stringify({
+        business_id: input.accountId,
+        recipient_type: 'CONVERSATION',
+        recipient: input.conversationId,
+        message_type: 'TEXT',
+        text: { body: text },
+      }),
+    }, 'MESSAGE_SEND');
+    if (!isRecord(data) || !isNonEmptyString(data.message_id)) {
+      throw malformed('MESSAGE_SEND');
+    }
+    return { messageId: data.message_id };
   }
 
   async downloadMedia(

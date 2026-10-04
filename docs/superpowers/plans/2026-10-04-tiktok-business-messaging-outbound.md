@@ -84,7 +84,7 @@ git commit -m "feat: add TikTok reply delivery contracts"
 - Produces `sendText(input: { accessToken: string; accountId: string; conversationId: string; text: string }): Promise<{ messageId: string }>`.
 - Produces typed retryability for rate limit, auth failure, permanent policy/capability rejection, timeout, and ambiguous response.
 
-- [ ] **Step 1: Write failing send tests**
+- [x] **Step 1: Write failing send tests**
 
 ```ts
 await expect(client.sendText({
@@ -97,21 +97,21 @@ await expect(client.sendText({
 
 Assert authorization headers, strict response parsing, request timeout, provider request ID capture, 429 retryability, expired-token classification, permanent permission rejection, and ambiguous 5xx/network outcomes.
 
-- [ ] **Step 2: Run the client test and verify failure**
+- [x] **Step 2: Run the client test and verify failure**
 
 Run: `pnpm --filter @autosale/integrations test -- tiktok-business-messaging.spec.ts`
 Expected: FAIL because `sendText` does not exist.
 
-- [ ] **Step 3: Implement the send boundary**
+- [x] **Step 3: Implement the send boundary**
 
 Use the official `POST /business/message/send/` conversation request shape available to the approved app. Send only text in this slice, cap input at the public contract's 1000 characters, and never log the token or message body. TikTok does not accept the Sales AITO idempotency key; keep that key at the API/persistence boundary and never automatically repeat an ambiguous provider send. Return only the provider message ID.
 
-- [ ] **Step 4: Run the client test**
+- [x] **Step 4: Run the client test**
 
 Run: `pnpm --filter @autosale/integrations test -- tiktok-business-messaging.spec.ts`
 Expected: PASS.
 
-- [ ] **Step 5: Commit provider sending**
+- [x] **Step 5: Commit provider sending**
 
 ```bash
 git add packages/integrations/src/tiktok-business-messaging.ts packages/integrations/src/tiktok-business-messaging.spec.ts
