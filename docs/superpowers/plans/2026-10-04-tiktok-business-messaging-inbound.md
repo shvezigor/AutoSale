@@ -56,7 +56,7 @@
 
 **Interfaces:**
 - Produces: `TikTokConnectionSummary`, `TikTokCapabilities`, and `socialChannelSchema` containing `TIKTOK`.
-- Produces environment fields `TIKTOK_BUSINESS_MESSAGING_ENABLED`, `TIKTOK_CLIENT_ID`, and `TIKTOK_CLIENT_SECRET` in API and worker configuration.
+- Produces environment fields `TIKTOK_BUSINESS_MESSAGING_ENABLED`, `TIKTOK_CLIENT_ID`, and `TIKTOK_CLIENT_SECRET` in API and worker configuration, plus the provider-generated `TIKTOK_AUTHORIZATION_URL` in API configuration only.
 
 - [ ] **Step 1: Write failing contract and environment tests**
 

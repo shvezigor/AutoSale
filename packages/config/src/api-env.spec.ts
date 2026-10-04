@@ -77,6 +77,7 @@ describe('parseApiEnv', () => {
       TIKTOK_BUSINESS_MESSAGING_ENABLED: 'true',
       TIKTOK_CLIENT_ID: 'fictional-tiktok-client',
       TIKTOK_CLIENT_SECRET: 'fictional-tiktok-client-secret',
+      TIKTOK_AUTHORIZATION_URL: 'https://business-api.tiktok.com/portal/auth?app_id=fictional',
     });
     expect(parsed.TIKTOK_BUSINESS_MESSAGING_ENABLED).toBe(true);
   });
@@ -86,6 +87,22 @@ describe('parseApiEnv', () => {
       ...validEnv,
       TIKTOK_BUSINESS_MESSAGING_ENABLED: 'true',
     })).toThrow(/TikTok Business Messaging requires/i);
+  });
+
+  it('requires the provider-generated TikTok account-holder authorization URL', () => {
+    expect(() => parseApiEnv({
+      ...validEnv,
+      TIKTOK_BUSINESS_MESSAGING_ENABLED: 'true',
+      TIKTOK_CLIENT_ID: 'fictional-tiktok-client',
+      TIKTOK_CLIENT_SECRET: 'fictional-tiktok-client-secret',
+    })).toThrow(/authorization URL/i);
+
+    expect(() => parseApiEnv({
+      ...validEnv,
+      TIKTOK_CLIENT_ID: 'fictional-tiktok-client',
+      TIKTOK_CLIENT_SECRET: 'fictional-tiktok-client-secret',
+      TIKTOK_AUTHORIZATION_URL: 'https://example.invalid/not-tiktok',
+    })).toThrow();
   });
 
   it('rejects a partial TikTok configuration even while disabled', () => {

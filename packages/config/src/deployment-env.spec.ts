@@ -26,5 +26,6 @@ describe('deployment environment contract', () => {
     expect(compose.match(/TIKTOK_BUSINESS_MESSAGING_ENABLED: \$\{TIKTOK_BUSINESS_MESSAGING_ENABLED:-false\}/g)).toHaveLength(2);
     expect(compose.match(/TIKTOK_CLIENT_ID: \$\{TIKTOK_CLIENT_ID:-\}/g)).toHaveLength(2);
     expect(compose.match(/TIKTOK_CLIENT_SECRET: \$\{TIKTOK_CLIENT_SECRET:-\}/g)).toHaveLength(2);
+    expect(compose.match(/TIKTOK_AUTHORIZATION_URL: \$\{TIKTOK_AUTHORIZATION_URL:-\}/g)).toHaveLength(1);
   });
 });

@@ -18,6 +18,13 @@ const optionalSecret = z.preprocess(
   z.string().min(16).optional(),
 );
 const optionalUrl = z.preprocess((value) => value === '' ? undefined : value, z.string().url().optional());
+const optionalTikTokAuthorizationUrl = z.preprocess(
+  (value) => value === '' ? undefined : value,
+  z.string().url().refine((value) => {
+    const url = new URL(value);
+    return url.protocol === 'https:' && ['business-api.tiktok.com', 'ads.tiktok.com'].includes(url.hostname);
+  }, 'must be a provider-generated TikTok HTTPS authorization URL').optional(),
+);
 const optionalBoolean = z.preprocess(
   (value) => value === undefined || value === '' ? undefined : value === true || value === 'true',
   z.boolean().default(false),
@@ -40,6 +47,7 @@ export const apiEnvSchema = z.object({
   TIKTOK_BUSINESS_MESSAGING_ENABLED: optionalBoolean,
   TIKTOK_CLIENT_ID: optionalNonEmptyString,
   TIKTOK_CLIENT_SECRET: optionalSecret,
+  TIKTOK_AUTHORIZATION_URL: optionalTikTokAuthorizationUrl,
   INTEGRATION_ENCRYPTION_KEY: z.string().refine(
     isCanonicalIntegrationEncryptionKey,
     'must be canonical base64 encoding of 32 bytes',
@@ -98,20 +106,24 @@ export const apiEnvSchema = z.object({
     });
   }
 
-  const tikTokCredentials = [environment.TIKTOK_CLIENT_ID, environment.TIKTOK_CLIENT_SECRET];
+  const tikTokCredentials = [
+    environment.TIKTOK_CLIENT_ID,
+    environment.TIKTOK_CLIENT_SECRET,
+    environment.TIKTOK_AUTHORIZATION_URL,
+  ];
   const configuredTikTokCredentials = tikTokCredentials.filter((value) => value !== undefined);
 
   if (configuredTikTokCredentials.length > 0 && configuredTikTokCredentials.length !== tikTokCredentials.length) {
     context.addIssue({
       code: 'custom',
-      message: 'TikTok configuration must include client ID and client secret',
+      message: 'TikTok configuration must include client ID, client secret, and authorization URL',
     });
   }
 
   if (environment.TIKTOK_BUSINESS_MESSAGING_ENABLED && configuredTikTokCredentials.length !== tikTokCredentials.length) {
     context.addIssue({
       code: 'custom',
-      message: 'TikTok Business Messaging requires client ID and client secret',
+      message: 'TikTok Business Messaging requires client ID, client secret, and authorization URL',
     });
   }
 
