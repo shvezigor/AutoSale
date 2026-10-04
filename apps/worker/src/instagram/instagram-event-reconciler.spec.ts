@@ -19,9 +19,11 @@ describe('InstagramEventReconciler', () => {
       },
     ]);
     const add = vi.fn().mockResolvedValue(undefined);
-    const reconciler = new InstagramEventReconciler({ $queryRaw: queryRaw } as never, { add } as never);
+    const reconciler = new InstagramEventReconciler(
+      { $queryRaw: queryRaw } as never, { add } as never, async () => true,
+    );
 
-    await expect(reconciler.reconcile()).resolves.toEqual({ attempted: 2, failed: 0 });
+    await expect(reconciler.reconcile()).resolves.toEqual({ attempted: 2, failed: 0, skipped: 0 });
     expect(queryRaw).toHaveBeenCalledOnce();
     expect(add).toHaveBeenNthCalledWith(
       1,
@@ -57,9 +59,11 @@ describe('InstagramEventReconciler', () => {
       job_name: 'facebook.normalize',
     }]);
     const add = vi.fn().mockResolvedValue(undefined);
-    const reconciler = new InstagramEventReconciler({ $queryRaw: queryRaw } as never, { add } as never);
+    const reconciler = new InstagramEventReconciler(
+      { $queryRaw: queryRaw } as never, { add } as never, async () => true,
+    );
 
-    await expect(reconciler.reconcile()).resolves.toEqual({ attempted: 1, failed: 0 });
+    await expect(reconciler.reconcile()).resolves.toEqual({ attempted: 1, failed: 0, skipped: 0 });
     expect(add).toHaveBeenCalledWith(
       'facebook.normalize',
       { tenantId: 'tenant-facebook', eventId: 'event-facebook', correlationId: 'event-facebook' },
@@ -67,20 +71,21 @@ describe('InstagramEventReconciler', () => {
     );
   });
 
-  it('queues TikTok events only when the feature is enabled', async () => {
-    const queryRaw = vi.fn().mockResolvedValue([{
-      tenant_id: 'tenant-tiktok', event_id: 'event-tiktok', recovery_kind: 'RECEIVED', job_name: 'tiktok.normalize',
-    }]);
+  it('skips paused Facebook and TikTok events while still recovering Instagram', async () => {
+    const queryRaw = vi.fn().mockResolvedValue([
+      { tenant_id: 'tenant-instagram', event_id: 'event-instagram', recovery_kind: 'RECEIVED', job_name: 'instagram.normalize' },
+      { tenant_id: 'tenant-facebook', event_id: 'event-facebook', recovery_kind: 'RECEIVED', job_name: 'facebook.normalize' },
+      { tenant_id: 'tenant-tiktok', event_id: 'event-tiktok', recovery_kind: 'RECEIVED', job_name: 'tiktok.normalize' },
+    ]);
     const add = vi.fn().mockResolvedValue(undefined);
-    await new InstagramEventReconciler({ $queryRaw: queryRaw } as never, { add } as never).reconcile();
-    expect(add).not.toHaveBeenCalled();
+    const enabled = vi.fn().mockResolvedValue(false);
 
-    await new InstagramEventReconciler({ $queryRaw: queryRaw } as never, { add } as never, true).reconcile();
-    expect(add).toHaveBeenCalledWith(
-      'tiktok.normalize',
-      { tenantId: 'tenant-tiktok', eventId: 'event-tiktok', correlationId: 'event-tiktok' },
-      { jobId: 'event-tiktok', removeOnComplete: true, removeOnFail: true },
-    );
+    await expect(new InstagramEventReconciler(
+      { $queryRaw: queryRaw } as never, { add } as never, enabled,
+    ).reconcile()).resolves.toEqual({ attempted: 3, failed: 0, skipped: 2 });
+    expect(add).toHaveBeenCalledOnce();
+    expect(add).toHaveBeenCalledWith('instagram.normalize', expect.objectContaining({ eventId: 'event-instagram' }), expect.anything());
+    expect(enabled).toHaveBeenCalledTimes(2);
   });
 
   it('continues after one queue failure so another event can recover', async () => {
@@ -89,9 +94,11 @@ describe('InstagramEventReconciler', () => {
       { tenant_id: 'tenant-2', event_id: 'event-2', recovery_kind: 'RECEIVED', job_name: 'instagram.normalize' },
     ]);
     const add = vi.fn().mockRejectedValueOnce(new Error('redis unavailable')).mockResolvedValueOnce(undefined);
-    const reconciler = new InstagramEventReconciler({ $queryRaw: queryRaw } as never, { add } as never);
+    const reconciler = new InstagramEventReconciler(
+      { $queryRaw: queryRaw } as never, { add } as never, async () => true,
+    );
 
-    await expect(reconciler.reconcile()).resolves.toEqual({ attempted: 2, failed: 1 });
+    await expect(reconciler.reconcile()).resolves.toEqual({ attempted: 2, failed: 1, skipped: 0 });
     expect(add).toHaveBeenCalledTimes(2);
   });
 });

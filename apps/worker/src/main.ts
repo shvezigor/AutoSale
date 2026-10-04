@@ -2,7 +2,7 @@ import { Buffer } from 'node:buffer';
 
 import { parseWorkerEnv } from '@autosale/config/worker-env';
 import { retentionDryRunJobSchema, shipmentCreateJobSchema, telegramDeliveryJobSchema, tenantLifecycleJobSchema, ukrposhtaTrackingBatchJobSchema } from '@autosale/contracts';
-import { createPrismaClient, ProcurementStore, withTenantTransaction } from '@autosale/database';
+import { createPrismaClient, PlatformChannelGate, ProcurementStore, withTenantTransaction } from '@autosale/database';
 import {
   createGoogleSheetsAdapter,
   CredentialCipher,
@@ -69,6 +69,12 @@ async function bootstrap(): Promise<void> {
   const logger = new StructuredLogger('worker');
   const server = createWorkerHealthServer();
   const prisma = createPrismaClient(env.DATABASE_URL);
+  const platformChannelDeployment = {
+    FACEBOOK_MESSENGER: env.FACEBOOK_MESSENGER_ENABLED,
+    TIKTOK_BUSINESS_MESSAGING: env.TIKTOK_BUSINESS_MESSAGING_ENABLED
+      && Boolean(env.TIKTOK_CLIENT_ID && env.TIKTOK_CLIENT_SECRET),
+  } as const;
+  const platformChannels = new PlatformChannelGate(prisma, platformChannelDeployment);
   const storage = new S3ObjectStorage({
     endpoint: env.S3_ENDPOINT,
     region: env.S3_REGION,
@@ -154,7 +160,7 @@ async function bootstrap(): Promise<void> {
   const mediaCopy = new MediaCopyService(storage);
   const processor = new InstagramProcessor(prisma, mediaCopy, orderProcessor);
   const facebookProcessor = new FacebookProcessor(prisma, mediaCopy, orderProcessor);
-  const tikTokClient = env.TIKTOK_BUSINESS_MESSAGING_ENABLED
+  const tikTokClient = platformChannelDeployment.TIKTOK_BUSINESS_MESSAGING
     ? new TikTokBusinessMessagingClient({
         clientId: env.TIKTOK_CLIENT_ID!,
         clientSecret: env.TIKTOK_CLIENT_SECRET!,
@@ -391,7 +397,7 @@ async function bootstrap(): Promise<void> {
     )
     : undefined;
   const tikTokMessageDelivery = tikTokClient && tikTokTokenService
-    ? new TikTokMessageDeliveryService(prisma, tikTokClient, tikTokTokenService)
+    ? new TikTokMessageDeliveryService(prisma, tikTokClient, tikTokTokenService, platformChannels)
     : undefined;
   const telegramQueue = telegramDelivery
     ? new Queue('telegram', { connection: redisConnection })
@@ -513,8 +519,14 @@ async function bootstrap(): Promise<void> {
       }
       if (job.name !== 'instagram.normalize' && job.name !== 'facebook.normalize' && job.name !== 'tiktok.normalize') return;
       if (typeof job.data?.tenantId !== 'string' || typeof job.data?.eventId !== 'string') return;
-      if (job.name === 'facebook.normalize' && !env.FACEBOOK_MESSENGER_ENABLED) return;
-      if (job.name === 'tiktok.normalize' && (!env.TIKTOK_BUSINESS_MESSAGING_ENABLED || !tikTokProcessor)) return;
+      if (
+        job.name === 'facebook.normalize'
+        && !await platformChannels.isEnabled('FACEBOOK_MESSENGER')
+      ) return;
+      if (
+        job.name === 'tiktok.normalize'
+        && (!tikTokProcessor || !await platformChannels.isEnabled('TIKTOK_BUSINESS_MESSAGING'))
+      ) return;
       const correlationId = typeof job.data.correlationId === 'string' ? job.data.correlationId : job.data.eventId;
       const operation = job.name === 'facebook.normalize'
         ? 'facebook_normalize'
@@ -571,7 +583,7 @@ async function bootstrap(): Promise<void> {
   const instagramProfileReconciler = new InstagramProfileReconciler(prisma, instagramProfileQueue);
   const instagramMessageReconciler = new InstagramMessageReconciler(prisma, instagramProfileQueue);
   const tikTokMessageReconciler = tikTokMessageDelivery
-    ? new TikTokMessageReconciler(prisma, instagramProfileQueue)
+    ? new TikTokMessageReconciler(prisma, instagramProfileQueue, platformChannels)
     : undefined;
   const instagramAvatarCleanupReconciler = new InstagramAvatarCleanupReconciler(prisma, storage);
   const instagramQueue = new Queue('instagram', {
@@ -592,7 +604,7 @@ async function bootstrap(): Promise<void> {
   const instagramReconciler = new InstagramEventReconciler(
     prisma,
     instagramQueue,
-    env.TIKTOK_BUSINESS_MESSAGING_ENABLED,
+    (key) => platformChannels.isEnabled(key),
   );
   const catalogueWorker = new Worker(
     'catalogue',
@@ -730,6 +742,11 @@ async function bootstrap(): Promise<void> {
     try {
       const result = await instagramReconciler.reconcile();
       metrics.set('autosale_queue_backlog', result.attempted, { queue: 'instagram' });
+      if (result.skipped > 0) {
+        metrics.increment('autosale_operations_total', {
+          operation: 'social_event_reconcile', result: 'skipped',
+        }, result.skipped);
+      }
       if (result.failed > 0) {
         metrics.increment('autosale_operations_total', { operation: 'instagram_event_reconcile', result: 'failure' });
       }

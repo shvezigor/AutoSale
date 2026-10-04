@@ -20,6 +20,7 @@ describe('TikTokMessageDeliveryService', () => {
   const now = new Date('2026-10-04T09:00:00.000Z');
   const sendText = vi.fn();
   const getFreshAccessToken = vi.fn();
+  const isEnabled = vi.fn();
 
   beforeAll(async () => {
     container = await new PostgreSqlContainer('postgres:17.6-alpine').start();
@@ -45,6 +46,7 @@ describe('TikTokMessageDeliveryService', () => {
   beforeEach(async () => {
     sendText.mockReset().mockResolvedValue({ messageId: `fictional-provider-${randomUUID()}` });
     getFreshAccessToken.mockReset().mockResolvedValue('fictional-fresh-access-token');
+    isEnabled.mockReset().mockResolvedValue(true);
     generationId = randomUUID();
     await prisma.tikTokConnection.upsert({
       where: { tenantId },
@@ -91,6 +93,18 @@ describe('TikTokMessageDeliveryService', () => {
     });
     await expect(service().process({ tenantId, messageId })).resolves.toBe('IGNORED');
     expect(sendText).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not lease or contact TikTok while the platform channel is paused', async () => {
+    const messageId = await seedMessage();
+    isEnabled.mockResolvedValueOnce(false);
+
+    await expect(service().process({ tenantId, messageId })).resolves.toBe('IGNORED_DISABLED');
+    expect(getFreshAccessToken).not.toHaveBeenCalled();
+    expect(sendText).not.toHaveBeenCalled();
+    await expect(prisma.message.findUniqueOrThrow({ where: { id: messageId } })).resolves.toMatchObject({
+      deliveryStatus: 'PENDING', deliveryAttempts: 0, deliveryLeaseId: null,
+    });
   });
 
   it('refuses a stale credential generation before contacting TikTok', async () => {
@@ -244,7 +258,9 @@ describe('TikTokMessageDeliveryService', () => {
     await expect(service().process({ tenantId, messageId: staleId })).resolves.toBe('IGNORED');
     expect(sendText).toHaveBeenCalledTimes(1);
 
-    const reconciler = new TikTokMessageReconciler(prisma, { add: vi.fn().mockResolvedValue(undefined) }, () => now);
+    const reconciler = new TikTokMessageReconciler(
+      prisma, { add: vi.fn().mockResolvedValue(undefined) }, { isEnabled }, () => now,
+    );
     await expect(reconciler.reconcile()).resolves.toMatchObject({ markedUnknown: 1 });
     await expect(prisma.message.findUniqueOrThrow({ where: { id: staleId } })).resolves.toMatchObject({
       deliveryStatus: 'UNKNOWN', deliveryErrorCode: 'TIKTOK_DELIVERY_UNKNOWN',
@@ -253,7 +269,9 @@ describe('TikTokMessageDeliveryService', () => {
   });
 
   function service(): TikTokMessageDeliveryService {
-    return new TikTokMessageDeliveryService(prisma, { sendText }, { getFreshAccessToken }, () => new Date(now));
+    return new TikTokMessageDeliveryService(
+      prisma, { sendText }, { getFreshAccessToken }, { isEnabled }, () => new Date(now),
+    );
   }
 
   async function seedMessage(overrides: {

@@ -17,22 +17,33 @@ interface DueInstagramEvent {
   job_name: 'instagram.normalize' | 'facebook.normalize' | 'tiktok.normalize';
 }
 
+type ControlledChannel = 'FACEBOOK_MESSENGER' | 'TIKTOK_BUSINESS_MESSAGING';
+
 export class InstagramEventReconciler {
   constructor(
     private readonly store: PendingEventStore,
     private readonly queue: NormalizeQueue,
-    private readonly tikTokEnabled = false,
+    private readonly isChannelEnabled: (key: ControlledChannel) => Promise<boolean>,
   ) {}
 
-  async reconcile(): Promise<{ attempted: number; failed: number }> {
+  async reconcile(): Promise<{ attempted: number; failed: number; skipped: number }> {
     const pending = await this.store.$queryRaw<DueInstagramEvent[]>`
       SELECT tenant_id, event_id, recovery_kind
       FROM public.worker_due_instagram_events(100)
     `;
     let failed = 0;
+    let skipped = 0;
 
     for (const event of pending) {
-      if (event.job_name === 'tiktok.normalize' && !this.tikTokEnabled) continue;
+      const key = event.job_name === 'facebook.normalize'
+        ? 'FACEBOOK_MESSENGER'
+        : event.job_name === 'tiktok.normalize'
+          ? 'TIKTOK_BUSINESS_MESSAGING'
+          : null;
+      if (key && !await this.isChannelEnabled(key)) {
+        skipped += 1;
+        continue;
+      }
       try {
         await this.queue.add(
           event.job_name,
@@ -54,6 +65,6 @@ export class InstagramEventReconciler {
       }
     }
 
-    return { attempted: pending.length, failed };
+    return { attempted: pending.length, failed, skipped };
   }
 }

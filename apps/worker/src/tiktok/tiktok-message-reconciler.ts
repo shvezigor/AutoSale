@@ -1,4 +1,4 @@
-import type { PrismaClient } from '@autosale/database';
+import type { PlatformChannelGate, PrismaClient } from '@autosale/database';
 
 interface TikTokMessageQueue {
   add(
@@ -12,6 +12,7 @@ export class TikTokMessageReconciler {
   constructor(
     private readonly prisma: PrismaClient,
     private readonly queue: TikTokMessageQueue,
+    private readonly channelGate: Pick<PlatformChannelGate, 'isEnabled'>,
     private readonly now: () => Date = () => new Date(),
   ) {}
 
@@ -20,6 +21,9 @@ export class TikTokMessageReconciler {
     const unknown = await this.prisma.$queryRaw<Array<{ marked_unknown: number | bigint }>>`
       SELECT public.worker_mark_stale_tiktok_messages_unknown(${now}, 50) AS marked_unknown
     `;
+    if (!await this.channelGate.isEnabled('TIKTOK_BUSINESS_MESSAGING')) {
+      return { attempted: 0, queued: 0, markedUnknown: Number(unknown[0]?.marked_unknown ?? 0) };
+    }
     const messages = await this.prisma.$queryRaw<Array<{ tenant_id: string; message_id: string }>>`
       SELECT tenant_id, message_id
       FROM public.worker_due_tiktok_messages(${now}, 50)

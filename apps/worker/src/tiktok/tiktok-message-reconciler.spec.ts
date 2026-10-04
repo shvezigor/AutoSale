@@ -15,6 +15,7 @@ describe('TikTokMessageReconciler', () => {
     await expect(new TikTokMessageReconciler(
       { $queryRaw: query } as never,
       { add },
+      { isEnabled: vi.fn().mockResolvedValue(true) },
       () => new Date('2026-10-04T09:00:00.000Z'),
     ).reconcile()).resolves.toEqual({ attempted: 2, queued: 2, markedUnknown: 2 });
 
@@ -30,7 +31,20 @@ describe('TikTokMessageReconciler', () => {
       .mockResolvedValueOnce([{ tenant_id: 'tenant-a', message_id: 'message-a' }]);
 
     await expect(new TikTokMessageReconciler(
-      { $queryRaw: query } as never, { add },
+      { $queryRaw: query } as never, { add }, { isEnabled: vi.fn().mockResolvedValue(true) },
     ).reconcile()).resolves.toEqual({ attempted: 1, queued: 0, markedUnknown: 0 });
+  });
+
+  it('still fences stale sends but does not query or enqueue pending work while paused', async () => {
+    const add = vi.fn();
+    const query = vi.fn().mockResolvedValueOnce([{ marked_unknown: 3 }]);
+
+    await expect(new TikTokMessageReconciler(
+      { $queryRaw: query } as never,
+      { add },
+      { isEnabled: vi.fn().mockResolvedValue(false) },
+    ).reconcile()).resolves.toEqual({ attempted: 0, queued: 0, markedUnknown: 3 });
+    expect(query).toHaveBeenCalledOnce();
+    expect(add).not.toHaveBeenCalled();
   });
 });

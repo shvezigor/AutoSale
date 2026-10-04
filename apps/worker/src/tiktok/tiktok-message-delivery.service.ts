@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 
 import {
   assertTenantAcceptingMutations,
+  type PlatformChannelGate,
   type PrismaClient,
   TenantLifecycleFrozenError,
   withTenantTransaction,
@@ -24,6 +25,7 @@ export type TikTokMessageDeliveryResult =
   | 'FAILED'
   | 'UNKNOWN'
   | 'IGNORED'
+  | 'IGNORED_DISABLED'
   | 'IGNORED_FROZEN';
 
 interface TikTokTextClient {
@@ -53,10 +55,12 @@ export class TikTokMessageDeliveryService {
     private readonly prisma: PrismaClient,
     private readonly client: TikTokTextClient,
     private readonly tokens: TikTokAccessTokens,
+    private readonly channelGate: Pick<PlatformChannelGate, 'isEnabled'>,
     private readonly now: () => Date = () => new Date(),
   ) {}
 
   async process(job: TikTokMessageDeliveryJob): Promise<TikTokMessageDeliveryResult> {
+    if (!await this.channelGate.isEnabled('TIKTOK_BUSINESS_MESSAGING')) return 'IGNORED_DISABLED';
     const startedAt = this.now();
     const leaseId = randomUUID();
     let claimed: { count: number };
