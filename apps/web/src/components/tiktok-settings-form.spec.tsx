@@ -5,7 +5,7 @@ import type { TikTokConnectionSummary } from '../../../../packages/contracts/src
 import { TikTokSettingsForm } from './tiktok-settings-form';
 
 const disconnected: TikTokConnectionSummary = {
-  status: 'NOT_CONNECTED', accountId: null, displayName: null, capabilities: null,
+  status: 'NOT_CONNECTED', platformAvailability: 'AVAILABLE', accountId: null, displayName: null, capabilities: null,
   tokenExpiresAt: null, lastVerifiedAt: null, lastErrorCode: null, cleanupStatus: 'NONE',
 };
 

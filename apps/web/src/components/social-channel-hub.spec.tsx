@@ -13,11 +13,13 @@ const instagram = {
 };
 const facebook = {
   status: 'NOT_CONNECTED' as const,
+  platformAvailability: 'AVAILABLE' as const,
   pageId: null, pageName: null, tokenExpiresAt: null, lastVerifiedAt: null,
   lastErrorCode: null, cleanupStatus: 'NONE' as const, cleanupErrorCode: null,
 };
 const tiktok = {
   status: 'NOT_CONNECTED' as const,
+  platformAvailability: 'AVAILABLE' as const,
   accountId: null, displayName: null, capabilities: null, tokenExpiresAt: null,
   lastVerifiedAt: null, lastErrorCode: null, cleanupStatus: 'NONE' as const,
 };

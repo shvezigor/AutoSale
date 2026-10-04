@@ -18,6 +18,7 @@ type AdminShellSession = { name: string; email: string };
 const items = [
   { href: '/admin', key: 'overview' as const, Icon: OverviewIcon },
   { href: '/admin/tenants', key: 'clients' as const, Icon: ClientsIcon },
+  { href: '/admin/integrations', key: 'integrations' as const, Icon: IntegrationsIcon },
   { href: '/admin/operations', key: 'operations' as const, Icon: OperationsIcon },
 ];
 
@@ -81,4 +82,5 @@ function AdminNavigation({ pathname, label, onNavigate }: { pathname: string; la
 function MenuIcon() { return <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" /></svg>; }
 function OverviewIcon(props: SVGProps<SVGSVGElement>) { return <svg aria-hidden="true" viewBox="0 0 24 24" {...props}><rect x="3" y="3" width="7" height="7" rx="2" /><rect x="14" y="3" width="7" height="7" rx="2" /><rect x="3" y="14" width="7" height="7" rx="2" /><rect x="14" y="14" width="7" height="7" rx="2" /></svg>; }
 function ClientsIcon(props: SVGProps<SVGSVGElement>) { return <svg aria-hidden="true" viewBox="0 0 24 24" {...props}><circle cx="9" cy="8" r="3" /><path d="M3 20a6 6 0 0 1 12 0M16 5.5a3 3 0 0 1 0 5M18 20a6 6 0 0 0-2.5-5" /></svg>; }
+function IntegrationsIcon(props: SVGProps<SVGSVGElement>) { return <svg aria-hidden="true" viewBox="0 0 24 24" {...props}><path d="M8 12h8M6.5 8.5l-2-2a2.1 2.1 0 0 1 3-3l2 2M17.5 8.5l2-2a2.1 2.1 0 0 0-3-3l-2 2M6.5 15.5l-2 2a2.1 2.1 0 0 0 3 3l2-2M17.5 15.5l2 2a2.1 2.1 0 0 1-3 3l-2-2" /></svg>; }
 function OperationsIcon(props: SVGProps<SVGSVGElement>) { return <svg aria-hidden="true" viewBox="0 0 24 24" {...props}><path d="M4 18V9M10 18V4M16 18v-6M22 18H2" /><circle cx="4" cy="7" r="1.5" /><circle cx="10" cy="2" r="1.5" /><circle cx="16" cy="10" r="1.5" /></svg>; }

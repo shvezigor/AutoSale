@@ -689,6 +689,16 @@ button:disabled { opacity: .72; cursor: not-allowed; }
 
 @media (max-width: 760px) { .admin-service-grid { grid-template-columns: minmax(0,1fr); }.admin-queue-panel { padding: 0; border: 0; background: transparent; box-shadow: none; }.admin-queue-panel > header { padding: 0 2px; }.admin-queue-table td:first-child { padding-top: 0; } }
 
+.admin-integrations-error { margin: 0 0 14px !important; }
+.admin-integration-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; }
+.admin-integration-card { display: grid; grid-template-columns: 48px minmax(0,1fr) auto; align-items: center; gap: 15px; min-width: 0; padding: 20px; border: 1px solid var(--border); border-radius: 17px; background: #fff; box-shadow: var(--shadow-card); }
+.admin-integration-mark { display: grid; width: 48px; height: 48px; place-items: center; border-radius: 14px; background: var(--accent-soft); color: var(--accent); font-size: 20px; font-weight: 850; }
+.admin-integration-card.state-deployment_unavailable .admin-integration-mark { background: #f0f1f6; color: var(--muted); }
+.admin-integration-copy { min-width: 0; }.admin-integration-copy h2 { margin: 0; font-size: 15px; }.admin-integration-copy p { margin: 5px 0 0; color: var(--muted); font-size: 11px; line-height: 1.5; }.admin-integration-copy small { display: block; margin-top: 9px; color: var(--warning); font-size: 10px; line-height: 1.4; }
+.admin-integration-control { display: grid; justify-items: end; gap: 12px; }.admin-integration-control .loading-button { min-width: 106px; }
+@media (max-width: 900px) { .admin-integration-grid { grid-template-columns: minmax(0,1fr); } }
+@media (max-width: 520px) { .admin-integration-card { grid-template-columns: 42px minmax(0,1fr); align-items: start; padding: 16px; }.admin-integration-mark { width: 42px; height: 42px; }.admin-integration-control { grid-column: 1 / -1; grid-template-columns: minmax(0,1fr); justify-items: start; width: 100%; }.admin-integration-control .loading-button { width: 100%; } }
+
 .admin-page { width: min(1280px,100%); margin: 0 auto; }
 .admin-page-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 24px; }
 .admin-eyebrow { color: var(--accent); font-size: 10px; font-weight: 850; letter-spacing: .09em; text-transform: uppercase; }

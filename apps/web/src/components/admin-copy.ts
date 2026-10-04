@@ -2,7 +2,7 @@ import type { AppLocale } from '../i18n/locales';
 
 const copy = {
   uk: {
-    navigation: { overview: 'Огляд', clients: 'Клієнти', operations: 'Операції', label: 'Навігація адміністратора' },
+    navigation: { overview: 'Огляд', clients: 'Клієнти', integrations: 'Інтеграції', operations: 'Операції', label: 'Навігація адміністратора' },
     shell: { context: 'Адміністрування платформи', openMenu: 'Відкрити меню', closeMenu: 'Закрити меню', logout: 'Вийти', loggingOut: 'Виходимо…' },
     dashboard: {
       eyebrow: 'Стан системи', title: 'Огляд платформи', description: 'Ключові показники клієнтів і фонової обробки без доступу до бізнес-даних.',
@@ -22,9 +22,15 @@ const copy = {
       eyebrow: 'Моніторинг', title: 'Операції та черги', description: 'Поточний технічний стан API, бази даних і фонової обробки. Без payload, логів та даних клієнтів.', updated: 'Оновлено {date}', healthy: 'Працює', degraded: 'Потрібна увага', unavailable: 'Недоступно', idle: 'Очікує роботи', apiDescription: 'Адмін API відповідає', databaseDescription: 'Агрегати PostgreSQL доступні', queuesTitle: 'Фонові черги', queuesDescription: 'Лічильники BullMQ і наявність активних воркерів.',
       columns: { queue: 'Черга', status: 'Стан', waiting: 'Очікує', active: 'В роботі', delayed: 'Відкладено', failed: 'Помилки', completed: 'Завершено', workers: 'Воркери', oldest: 'Найстаріша задача' }, none: '—',
     },
+    integrations: {
+      eyebrow: 'Канали платформи', title: 'Інтеграції каналів', description: 'Керуйте доступністю Facebook Messenger і TikTok для всіх клієнтів без видалення їхніх підключень і даних.',
+      channels: { FACEBOOK_MESSENGER: { name: 'Facebook Messenger', description: 'Вхідні та вихідні повідомлення бізнес-сторінок.' }, TIKTOK_BUSINESS_MESSAGING: { name: 'TikTok', description: 'Повідомлення TikTok Business Messaging.' } },
+      states: { ACTIVE: 'Активний', ADMIN_DISABLED: 'Вимкнено адміністратором', DEPLOYMENT_UNAVAILABLE: 'Недоступно в цьому розгортанні' },
+      enable: 'Увімкнути', disable: 'Вимкнути', enabling: 'Вмикаємо…', disabling: 'Вимикаємо…', unavailableHint: 'Спочатку налаштуйте інтеграцію на сервері.', confirmTitle: 'Вимкнути {channel}?', confirmDescription: 'Нові повідомлення та відповіді зупиняться. Наявні дані залишаться збереженими. Повідомлення, отримані під час паузи, можуть не відновитися.', confirm: 'Так, вимкнути', mutationFailed: 'Не вдалося оновити канал. Спробуйте ще раз.',
+    },
   },
   en: {
-    navigation: { overview: 'Overview', clients: 'Clients', operations: 'Operations', label: 'Administrator navigation' },
+    navigation: { overview: 'Overview', clients: 'Clients', integrations: 'Integrations', operations: 'Operations', label: 'Administrator navigation' },
     shell: { context: 'Platform administration', openMenu: 'Open menu', closeMenu: 'Close menu', logout: 'Log out', loggingOut: 'Logging out…' },
     dashboard: {
       eyebrow: 'System state', title: 'Platform overview', description: 'Key client and background-processing indicators without access to business data.',
@@ -43,6 +49,12 @@ const copy = {
     operations: {
       eyebrow: 'Monitoring', title: 'Operations and queues', description: 'Current technical state of the API, database and background processing. No payloads, logs or client data.', updated: 'Updated {date}', healthy: 'Operational', degraded: 'Attention required', unavailable: 'Unavailable', idle: 'Idle', apiDescription: 'Admin API is responding', databaseDescription: 'PostgreSQL aggregates are available', queuesTitle: 'Background queues', queuesDescription: 'BullMQ counters and active worker presence.',
       columns: { queue: 'Queue', status: 'Status', waiting: 'Waiting', active: 'Active', delayed: 'Delayed', failed: 'Failed', completed: 'Completed', workers: 'Workers', oldest: 'Oldest task' }, none: '—',
+    },
+    integrations: {
+      eyebrow: 'Platform channels', title: 'Channel integrations', description: 'Control Facebook Messenger and TikTok availability for every client without deleting their connections or data.',
+      channels: { FACEBOOK_MESSENGER: { name: 'Facebook Messenger', description: 'Inbound and outbound business Page messages.' }, TIKTOK_BUSINESS_MESSAGING: { name: 'TikTok', description: 'TikTok Business Messaging conversations.' } },
+      states: { ACTIVE: 'Active', ADMIN_DISABLED: 'Disabled by administrator', DEPLOYMENT_UNAVAILABLE: 'Unavailable in this deployment' },
+      enable: 'Enable', disable: 'Disable', enabling: 'Enabling…', disabling: 'Disabling…', unavailableHint: 'Configure the server integration before enabling this channel.', confirmTitle: 'Disable {channel}?', confirmDescription: 'New messages and replies will stop. Existing data will remain stored. Messages received while paused may not be recoverable.', confirm: 'Yes, disable', mutationFailed: 'Could not update the channel. Try again.',
     },
   },
 } as const;

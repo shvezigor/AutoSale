@@ -7,6 +7,7 @@ import { FacebookSettingsForm } from './facebook-settings-form';
 
 const initial = {
   status: 'NOT_CONNECTED' as const,
+  platformAvailability: 'AVAILABLE' as const,
   pageId: null,
   pageName: null,
   tokenExpiresAt: null,

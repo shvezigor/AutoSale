@@ -31,4 +31,11 @@ describe('button style contract', () => {
     expect(source).toContain("className = ''");
     expect(source).toContain("|| 'primary-button'");
   });
+
+  it('uses shared variants for platform integration mutations', () => {
+    const source = readFileSync(resolve(__dirname, 'admin-integrations.tsx'), 'utf8');
+    expect(source).toContain("'danger-button'");
+    expect(source).toContain("'primary-button'");
+    expect(source).toContain('<LoadingButton');
+  });
 });
