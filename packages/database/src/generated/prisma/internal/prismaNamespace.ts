@@ -409,6 +409,9 @@ export const ModelName = {
   FacebookConnection: 'FacebookConnection',
   FacebookOAuthAttempt: 'FacebookOAuthAttempt',
   FacebookCredentialCleanup: 'FacebookCredentialCleanup',
+  TikTokConnection: 'TikTokConnection',
+  TikTokOAuthAttempt: 'TikTokOAuthAttempt',
+  TikTokCredentialCleanup: 'TikTokCredentialCleanup',
   User: 'User',
   UserAvatarCleanup: 'UserAvatarCleanup',
   UserNotification: 'UserNotification',
@@ -472,7 +475,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "tenant" | "tenantLifecycleRequest" | "tenantRetentionDryRun" | "googleConnection" | "googleOAuthAttempt" | "googleCredentialCleanup" | "instagramConnection" | "instagramOAuthState" | "instagramCredentialCleanup" | "facebookConnection" | "facebookOAuthAttempt" | "facebookCredentialCleanup" | "user" | "userAvatarCleanup" | "userNotification" | "telegramLinkAttempt" | "telegramUserBinding" | "telegramBusinessConnection" | "telegramChat" | "telegramSupplierSetting" | "telegramWebhookUpdate" | "telegramDelivery" | "googleIdentity" | "googleSignInAttempt" | "tenantMembership" | "session" | "emailVerificationToken" | "passwordResetToken" | "tenantInvitation" | "securityAuditLog" | "webhookEvent" | "conversation" | "instagramCustomerProfile" | "instagramAvatarCleanup" | "message" | "googleSheetsDestination" | "tenantSettings" | "tenantLegalEntity" | "tenantBankAccount" | "order" | "orderCommercialTerms" | "orderPayment" | "orderIntentEvaluation" | "deliveryConnection" | "deliverySenderProfile" | "shipment" | "shipmentAttempt" | "shipmentStatusEvent" | "orderExport" | "auditLog" | "orderItem" | "product" | "inventoryReservation" | "telegramDeliveryItem" | "telegramNotificationPreference" | "catalogueSource" | "catalogueMapping" | "catalogueImportRun" | "attachment" | "demoLead"
+    modelProps: "tenant" | "tenantLifecycleRequest" | "tenantRetentionDryRun" | "googleConnection" | "googleOAuthAttempt" | "googleCredentialCleanup" | "instagramConnection" | "instagramOAuthState" | "instagramCredentialCleanup" | "facebookConnection" | "facebookOAuthAttempt" | "facebookCredentialCleanup" | "tikTokConnection" | "tikTokOAuthAttempt" | "tikTokCredentialCleanup" | "user" | "userAvatarCleanup" | "userNotification" | "telegramLinkAttempt" | "telegramUserBinding" | "telegramBusinessConnection" | "telegramChat" | "telegramSupplierSetting" | "telegramWebhookUpdate" | "telegramDelivery" | "googleIdentity" | "googleSignInAttempt" | "tenantMembership" | "session" | "emailVerificationToken" | "passwordResetToken" | "tenantInvitation" | "securityAuditLog" | "webhookEvent" | "conversation" | "instagramCustomerProfile" | "instagramAvatarCleanup" | "message" | "googleSheetsDestination" | "tenantSettings" | "tenantLegalEntity" | "tenantBankAccount" | "order" | "orderCommercialTerms" | "orderPayment" | "orderIntentEvaluation" | "deliveryConnection" | "deliverySenderProfile" | "shipment" | "shipmentAttempt" | "shipmentStatusEvent" | "orderExport" | "auditLog" | "orderItem" | "product" | "inventoryReservation" | "telegramDeliveryItem" | "telegramNotificationPreference" | "catalogueSource" | "catalogueMapping" | "catalogueImportRun" | "attachment" | "demoLead"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1361,6 +1364,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.FacebookCredentialCleanupCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.FacebookCredentialCleanupCountAggregateOutputType> | number
+        }
+      }
+    }
+    TikTokConnection: {
+      payload: Prisma.$TikTokConnectionPayload<ExtArgs>
+      fields: Prisma.TikTokConnectionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TikTokConnectionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TikTokConnectionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TikTokConnectionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TikTokConnectionPayload>
+        }
+        findFirst: {
+          args: Prisma.TikTokConnectionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TikTokConnectionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TikTokConnectionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TikTokConnectionPayload>
+        }
+        findMany: {
+          args: Prisma.TikTokConnectionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TikTokConnectionPayload>[]
+        }
+        create: {
+          args: Prisma.TikTokConnectionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TikTokConnectionPayload>
+        }
+        createMany: {
+          args: Prisma.TikTokConnectionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TikTokConnectionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TikTokConnectionPayload>[]
+        }
+        delete: {
+          args: Prisma.TikTokConnectionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TikTokConnectionPayload>
+        }
+        update: {
+          args: Prisma.TikTokConnectionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TikTokConnectionPayload>
+        }
+        deleteMany: {
+          args: Prisma.TikTokConnectionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TikTokConnectionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TikTokConnectionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TikTokConnectionPayload>[]
+        }
+        upsert: {
+          args: Prisma.TikTokConnectionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TikTokConnectionPayload>
+        }
+        aggregate: {
+          args: Prisma.TikTokConnectionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTikTokConnection>
+        }
+        groupBy: {
+          args: Prisma.TikTokConnectionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TikTokConnectionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TikTokConnectionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TikTokConnectionCountAggregateOutputType> | number
+        }
+      }
+    }
+    TikTokOAuthAttempt: {
+      payload: Prisma.$TikTokOAuthAttemptPayload<ExtArgs>
+      fields: Prisma.TikTokOAuthAttemptFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TikTokOAuthAttemptFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TikTokOAuthAttemptPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TikTokOAuthAttemptFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TikTokOAuthAttemptPayload>
+        }
+        findFirst: {
+          args: Prisma.TikTokOAuthAttemptFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TikTokOAuthAttemptPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TikTokOAuthAttemptFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TikTokOAuthAttemptPayload>
+        }
+        findMany: {
+          args: Prisma.TikTokOAuthAttemptFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TikTokOAuthAttemptPayload>[]
+        }
+        create: {
+          args: Prisma.TikTokOAuthAttemptCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TikTokOAuthAttemptPayload>
+        }
+        createMany: {
+          args: Prisma.TikTokOAuthAttemptCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TikTokOAuthAttemptCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TikTokOAuthAttemptPayload>[]
+        }
+        delete: {
+          args: Prisma.TikTokOAuthAttemptDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TikTokOAuthAttemptPayload>
+        }
+        update: {
+          args: Prisma.TikTokOAuthAttemptUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TikTokOAuthAttemptPayload>
+        }
+        deleteMany: {
+          args: Prisma.TikTokOAuthAttemptDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TikTokOAuthAttemptUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TikTokOAuthAttemptUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TikTokOAuthAttemptPayload>[]
+        }
+        upsert: {
+          args: Prisma.TikTokOAuthAttemptUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TikTokOAuthAttemptPayload>
+        }
+        aggregate: {
+          args: Prisma.TikTokOAuthAttemptAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTikTokOAuthAttempt>
+        }
+        groupBy: {
+          args: Prisma.TikTokOAuthAttemptGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TikTokOAuthAttemptGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TikTokOAuthAttemptCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TikTokOAuthAttemptCountAggregateOutputType> | number
+        }
+      }
+    }
+    TikTokCredentialCleanup: {
+      payload: Prisma.$TikTokCredentialCleanupPayload<ExtArgs>
+      fields: Prisma.TikTokCredentialCleanupFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TikTokCredentialCleanupFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TikTokCredentialCleanupPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TikTokCredentialCleanupFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TikTokCredentialCleanupPayload>
+        }
+        findFirst: {
+          args: Prisma.TikTokCredentialCleanupFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TikTokCredentialCleanupPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TikTokCredentialCleanupFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TikTokCredentialCleanupPayload>
+        }
+        findMany: {
+          args: Prisma.TikTokCredentialCleanupFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TikTokCredentialCleanupPayload>[]
+        }
+        create: {
+          args: Prisma.TikTokCredentialCleanupCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TikTokCredentialCleanupPayload>
+        }
+        createMany: {
+          args: Prisma.TikTokCredentialCleanupCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TikTokCredentialCleanupCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TikTokCredentialCleanupPayload>[]
+        }
+        delete: {
+          args: Prisma.TikTokCredentialCleanupDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TikTokCredentialCleanupPayload>
+        }
+        update: {
+          args: Prisma.TikTokCredentialCleanupUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TikTokCredentialCleanupPayload>
+        }
+        deleteMany: {
+          args: Prisma.TikTokCredentialCleanupDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TikTokCredentialCleanupUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TikTokCredentialCleanupUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TikTokCredentialCleanupPayload>[]
+        }
+        upsert: {
+          args: Prisma.TikTokCredentialCleanupUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TikTokCredentialCleanupPayload>
+        }
+        aggregate: {
+          args: Prisma.TikTokCredentialCleanupAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTikTokCredentialCleanup>
+        }
+        groupBy: {
+          args: Prisma.TikTokCredentialCleanupGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TikTokCredentialCleanupGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TikTokCredentialCleanupCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TikTokCredentialCleanupCountAggregateOutputType> | number
         }
       }
     }
@@ -5200,6 +5425,79 @@ export const FacebookCredentialCleanupScalarFieldEnum = {
 export type FacebookCredentialCleanupScalarFieldEnum = (typeof FacebookCredentialCleanupScalarFieldEnum)[keyof typeof FacebookCredentialCleanupScalarFieldEnum]
 
 
+export const TikTokConnectionScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  externalAccountId: 'externalAccountId',
+  displayName: 'displayName',
+  status: 'status',
+  capabilities: 'capabilities',
+  encryptedAccessToken: 'encryptedAccessToken',
+  encryptedRefreshToken: 'encryptedRefreshToken',
+  credentialGenerationId: 'credentialGenerationId',
+  tokenExpiresAt: 'tokenExpiresAt',
+  refreshTokenExpiresAt: 'refreshTokenExpiresAt',
+  grantedScopes: 'grantedScopes',
+  connectedByUserId: 'connectedByUserId',
+  lastVerifiedAt: 'lastVerifiedAt',
+  lastErrorCode: 'lastErrorCode',
+  refreshLeaseId: 'refreshLeaseId',
+  refreshLeaseExpiresAt: 'refreshLeaseExpiresAt',
+  disconnectedAt: 'disconnectedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TikTokConnectionScalarFieldEnum = (typeof TikTokConnectionScalarFieldEnum)[keyof typeof TikTokConnectionScalarFieldEnum]
+
+
+export const TikTokOAuthAttemptScalarFieldEnum = {
+  id: 'id',
+  tokenHash: 'tokenHash',
+  tenantId: 'tenantId',
+  userId: 'userId',
+  returnPath: 'returnPath',
+  expiresAt: 'expiresAt',
+  usedAt: 'usedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TikTokOAuthAttemptScalarFieldEnum = (typeof TikTokOAuthAttemptScalarFieldEnum)[keyof typeof TikTokOAuthAttemptScalarFieldEnum]
+
+
+export const TikTokCredentialCleanupScalarFieldEnum = {
+  id: 'id',
+  credentialGenerationId: 'credentialGenerationId',
+  tenantId: 'tenantId',
+  externalAccountId: 'externalAccountId',
+  encryptedAccessToken: 'encryptedAccessToken',
+  encryptedRefreshToken: 'encryptedRefreshToken',
+  source: 'source',
+  state: 'state',
+  callbackResolvedAt: 'callbackResolvedAt',
+  webhookDeleteStatus: 'webhookDeleteStatus',
+  webhookDeleteAttemptedAt: 'webhookDeleteAttemptedAt',
+  webhookDeleteSucceededAt: 'webhookDeleteSucceededAt',
+  revokeStatus: 'revokeStatus',
+  revokeAttemptedAt: 'revokeAttemptedAt',
+  revokeSucceededAt: 'revokeSucceededAt',
+  attempts: 'attempts',
+  leaseId: 'leaseId',
+  leaseExpiresAt: 'leaseExpiresAt',
+  version: 'version',
+  lastErrorCode: 'lastErrorCode',
+  permanentFailureAt: 'permanentFailureAt',
+  deadLetteredAt: 'deadLetteredAt',
+  deadLetteredByUserId: 'deadLetteredByUserId',
+  terminalAt: 'terminalAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TikTokCredentialCleanupScalarFieldEnum = (typeof TikTokCredentialCleanupScalarFieldEnum)[keyof typeof TikTokCredentialCleanupScalarFieldEnum]
+
+
 export const UserScalarFieldEnum = {
   id: 'id',
   email: 'email',
@@ -6367,6 +6665,48 @@ export type ListEnumFacebookCredentialCleanupOperationStatusFieldRefInput<$Prism
 
 
 /**
+ * Reference to a field of type 'TikTokConnectionStatus'
+ */
+export type EnumTikTokConnectionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TikTokConnectionStatus'>
+
+
+
+/**
+ * Reference to a field of type 'TikTokConnectionStatus[]'
+ */
+export type ListEnumTikTokConnectionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TikTokConnectionStatus[]'>
+
+
+
+/**
+ * Reference to a field of type 'TikTokCredentialCleanupState'
+ */
+export type EnumTikTokCredentialCleanupStateFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TikTokCredentialCleanupState'>
+
+
+
+/**
+ * Reference to a field of type 'TikTokCredentialCleanupState[]'
+ */
+export type ListEnumTikTokCredentialCleanupStateFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TikTokCredentialCleanupState[]'>
+
+
+
+/**
+ * Reference to a field of type 'TikTokCredentialCleanupOperationStatus'
+ */
+export type EnumTikTokCredentialCleanupOperationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TikTokCredentialCleanupOperationStatus'>
+
+
+
+/**
+ * Reference to a field of type 'TikTokCredentialCleanupOperationStatus[]'
+ */
+export type ListEnumTikTokCredentialCleanupOperationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TikTokCredentialCleanupOperationStatus[]'>
+
+
+
+/**
  * Reference to a field of type 'PlatformRole'
  */
 export type EnumPlatformRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PlatformRole'>
@@ -6955,6 +7295,9 @@ export type GlobalOmitConfig = {
   facebookConnection?: Prisma.FacebookConnectionOmit
   facebookOAuthAttempt?: Prisma.FacebookOAuthAttemptOmit
   facebookCredentialCleanup?: Prisma.FacebookCredentialCleanupOmit
+  tikTokConnection?: Prisma.TikTokConnectionOmit
+  tikTokOAuthAttempt?: Prisma.TikTokOAuthAttemptOmit
+  tikTokCredentialCleanup?: Prisma.TikTokCredentialCleanupOmit
   user?: Prisma.UserOmit
   userAvatarCleanup?: Prisma.UserAvatarCleanupOmit
   userNotification?: Prisma.UserNotificationOmit
@@ -7065,4 +7408,3 @@ export type PrismaAction =
  * `PrismaClient` proxy available in interactive transactions.
  */
 export type TransactionClient = Omit<DefaultPrismaClient, runtime.ITXClientDenyList>
-

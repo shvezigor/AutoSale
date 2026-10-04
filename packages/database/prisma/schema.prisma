@@ -55,6 +55,28 @@ enum FacebookCredentialCleanupState {
   DEAD_LETTER
 }
 
+enum TikTokConnectionStatus {
+  ACTIVE
+  INBOUND_ONLY
+  REAUTH_REQUIRED
+  ERROR
+  DISCONNECTED
+}
+
+enum TikTokCredentialCleanupOperationStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+}
+
+enum TikTokCredentialCleanupState {
+  ARMED
+  REQUIRED
+  COMPLETED
+  CANCELLED
+  DEAD_LETTER
+}
+
 enum OutboundDeliveryStatus {
   PENDING
   SENDING
@@ -297,6 +319,9 @@ model Tenant {
   facebookConnection              FacebookConnection?
   facebookOAuthAttempts           FacebookOAuthAttempt[]
   facebookCredentialCleanups      FacebookCredentialCleanup[]
+  tikTokConnection                TikTokConnection?
+  tikTokOAuthAttempts             TikTokOAuthAttempt[]
+  tikTokCredentialCleanups        TikTokCredentialCleanup[]
   instagramCustomerProfiles       InstagramCustomerProfile[]
   instagramOAuthCurrentAttemptId  String?                          @map("instagram_oauth_current_attempt_id") @db.Uuid
   googleConnection                GoogleConnection?
@@ -591,6 +616,89 @@ model FacebookCredentialCleanup {
   @@map("facebook_credential_cleanups")
 }
 
+model TikTokConnection {
+  id                       String                  @id @default(uuid()) @db.Uuid
+  tenantId                 String                  @unique @map("tenant_id") @db.Uuid
+  externalAccountId        String                  @unique @map("external_account_id")
+  displayName              String?                 @map("display_name")
+  status                   TikTokConnectionStatus  @default(ERROR)
+  capabilities             Json?
+  encryptedAccessToken     String?                 @map("encrypted_access_token")
+  encryptedRefreshToken    String?                 @map("encrypted_refresh_token")
+  credentialGenerationId   String?                 @unique @map("credential_generation_id") @db.Uuid
+  tokenExpiresAt           DateTime?               @map("token_expires_at")
+  refreshTokenExpiresAt    DateTime?               @map("refresh_token_expires_at")
+  grantedScopes            String?                 @map("granted_scopes")
+  connectedByUserId        String?                 @map("connected_by_user_id") @db.Uuid
+  lastVerifiedAt           DateTime?               @map("last_verified_at")
+  lastErrorCode            String?                 @map("last_error_code")
+  refreshLeaseId           String?                 @map("refresh_lease_id") @db.Uuid
+  refreshLeaseExpiresAt    DateTime?               @map("refresh_lease_expires_at")
+  disconnectedAt           DateTime?               @map("disconnected_at")
+  createdAt                DateTime                 @default(now()) @map("created_at")
+  updatedAt                DateTime                 @updatedAt @map("updated_at")
+  tenant                   Tenant                   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  connectedBy              User?                    @relation("TikTokConnectionConnectedBy", fields: [connectedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([refreshLeaseExpiresAt])
+  @@map("tiktok_connections")
+}
+
+model TikTokOAuthAttempt {
+  id         String    @id @default(uuid()) @db.Uuid
+  tokenHash  String    @unique @map("token_hash")
+  tenantId   String    @map("tenant_id") @db.Uuid
+  userId     String    @map("user_id") @db.Uuid
+  returnPath String    @default("/settings?tab=social") @map("return_path")
+  expiresAt  DateTime  @map("expires_at")
+  usedAt     DateTime? @map("used_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+  tenant     Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  membership TenantMembership @relation("TikTokOAuthAttemptMembership", fields: [userId, tenantId], references: [userId, tenantId], onDelete: Cascade)
+
+  @@index([tenantId, usedAt])
+  @@index([expiresAt, usedAt])
+  @@map("tiktok_oauth_attempts")
+}
+
+model TikTokCredentialCleanup {
+  id                       String                                  @id @default(uuid()) @db.Uuid
+  credentialGenerationId   String                                  @unique @map("credential_generation_id") @db.Uuid
+  tenantId                 String                                  @map("tenant_id") @db.Uuid
+  externalAccountId        String                                  @map("external_account_id")
+  encryptedAccessToken     String                                  @map("encrypted_access_token")
+  encryptedRefreshToken    String?                                 @map("encrypted_refresh_token")
+  source                   String                                  @default("DISCONNECT")
+  state                    TikTokCredentialCleanupState            @default(ARMED)
+  callbackResolvedAt       DateTime?                               @map("callback_resolved_at")
+  webhookDeleteStatus      TikTokCredentialCleanupOperationStatus @default(PENDING) @map("webhook_delete_status")
+  webhookDeleteAttemptedAt DateTime?                               @map("webhook_delete_attempted_at")
+  webhookDeleteSucceededAt DateTime?                               @map("webhook_delete_succeeded_at")
+  revokeStatus             TikTokCredentialCleanupOperationStatus @default(PENDING) @map("revoke_status")
+  revokeAttemptedAt        DateTime?                               @map("revoke_attempted_at")
+  revokeSucceededAt        DateTime?                               @map("revoke_succeeded_at")
+  attempts                 Int                                     @default(0)
+  leaseId                  String?                                 @map("lease_id") @db.Uuid
+  leaseExpiresAt           DateTime?                               @map("lease_expires_at")
+  version                  Int                                     @default(0)
+  lastErrorCode            String?                                 @map("last_error_code")
+  permanentFailureAt       DateTime?                               @map("permanent_failure_at")
+  deadLetteredAt           DateTime?                               @map("dead_lettered_at")
+  deadLetteredByUserId     String?                                 @map("dead_lettered_by_user_id") @db.Uuid
+  terminalAt               DateTime?                               @map("terminal_at")
+  createdAt                DateTime                                @default(now()) @map("created_at")
+  updatedAt                DateTime                                @updatedAt @map("updated_at")
+  tenant                   Tenant                                  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  deadLetteredBy           User?                                   @relation("TikTokCleanupDeadLetteredBy", fields: [deadLetteredByUserId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, terminalAt])
+  @@index([leaseExpiresAt])
+  @@map("tiktok_credential_cleanups")
+}
+
 model User {
   id                              String                           @id @default(uuid()) @db.Uuid
   email                           String                           @unique
@@ -620,6 +728,9 @@ model User {
   facebookOAuthAttempts           FacebookOAuthAttempt[]
   facebookConnections             FacebookConnection[]             @relation("FacebookConnectionConnectedBy")
   facebookCleanupsDeadLettered    FacebookCredentialCleanup[]      @relation("FacebookCleanupDeadLetteredBy")
+  tikTokOAuthAttempts             TikTokOAuthAttempt[]
+  tikTokConnections               TikTokConnection[]                @relation("TikTokConnectionConnectedBy")
+  tikTokCleanupsDeadLettered      TikTokCredentialCleanup[]         @relation("TikTokCleanupDeadLetteredBy")
   googleOAuthAttempts             GoogleOAuthAttempt[]
   googleConnections               GoogleConnection[]               @relation("GoogleConnectionConnectedBy")
   googleIdentity                  GoogleIdentity?
@@ -852,6 +963,7 @@ model TenantMembership {
   updatedAt DateTime       @updatedAt @map("updated_at")
   user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   tenant    Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tikTokOAuthAttempts TikTokOAuthAttempt[] @relation("TikTokOAuthAttemptMembership")
 
   @@unique([userId, tenantId])
   @@index([tenantId, status])

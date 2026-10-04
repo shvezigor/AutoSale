@@ -75,6 +75,37 @@ export const FacebookCredentialCleanupState = {
 export type FacebookCredentialCleanupState = (typeof FacebookCredentialCleanupState)[keyof typeof FacebookCredentialCleanupState]
 
 
+export const TikTokConnectionStatus = {
+  ACTIVE: 'ACTIVE',
+  INBOUND_ONLY: 'INBOUND_ONLY',
+  REAUTH_REQUIRED: 'REAUTH_REQUIRED',
+  ERROR: 'ERROR',
+  DISCONNECTED: 'DISCONNECTED'
+} as const
+
+export type TikTokConnectionStatus = (typeof TikTokConnectionStatus)[keyof typeof TikTokConnectionStatus]
+
+
+export const TikTokCredentialCleanupOperationStatus = {
+  PENDING: 'PENDING',
+  SUCCEEDED: 'SUCCEEDED',
+  FAILED: 'FAILED'
+} as const
+
+export type TikTokCredentialCleanupOperationStatus = (typeof TikTokCredentialCleanupOperationStatus)[keyof typeof TikTokCredentialCleanupOperationStatus]
+
+
+export const TikTokCredentialCleanupState = {
+  ARMED: 'ARMED',
+  REQUIRED: 'REQUIRED',
+  COMPLETED: 'COMPLETED',
+  CANCELLED: 'CANCELLED',
+  DEAD_LETTER: 'DEAD_LETTER'
+} as const
+
+export type TikTokCredentialCleanupState = (typeof TikTokCredentialCleanupState)[keyof typeof TikTokCredentialCleanupState]
+
+
 export const OutboundDeliveryStatus = {
   PENDING: 'PENDING',
   SENDING: 'SENDING',

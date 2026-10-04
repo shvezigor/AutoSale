@@ -24,7 +24,7 @@ export * as $Enums from './enums.js'
 export * from "./enums.js"
 /**
  * ## Prisma Client
- * 
+ *
  * Type-safe database client for TypeScript
  * @example
  * ```
@@ -34,7 +34,7 @@ export * from "./enums.js"
  * // Fetch zero or more Tenants
  * const tenants = await prisma.tenant.findMany()
  * ```
- * 
+ *
  * Read more in our [docs](https://pris.ly/d/client).
  */
 export const PrismaClient = $Class.getPrismaClientClass()
@@ -43,7 +43,7 @@ export { Prisma }
 
 /**
  * Model Tenant
- * 
+ *
  */
 export type Tenant = Prisma.TenantModel
 /**
@@ -101,6 +101,21 @@ export type FacebookOAuthAttempt = Prisma.FacebookOAuthAttemptModel
  * 
  */
 export type FacebookCredentialCleanup = Prisma.FacebookCredentialCleanupModel
+/**
+ * Model TikTokConnection
+ *
+ */
+export type TikTokConnection = Prisma.TikTokConnectionModel
+/**
+ * Model TikTokOAuthAttempt
+ *
+ */
+export type TikTokOAuthAttempt = Prisma.TikTokOAuthAttemptModel
+/**
+ * Model TikTokCredentialCleanup
+ *
+ */
+export type TikTokCredentialCleanup = Prisma.TikTokCredentialCleanupModel
 /**
  * Model User
  * 

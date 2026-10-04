@@ -474,6 +474,57 @@ export type EnumFacebookCredentialCleanupOperationStatusWithAggregatesFilter<$Pr
   _max?: Prisma.NestedEnumFacebookCredentialCleanupOperationStatusFilter<$PrismaModel>
 }
 
+export type EnumTikTokConnectionStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.TikTokConnectionStatus | Prisma.EnumTikTokConnectionStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.TikTokConnectionStatus[] | Prisma.ListEnumTikTokConnectionStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.TikTokConnectionStatus[] | Prisma.ListEnumTikTokConnectionStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumTikTokConnectionStatusFilter<$PrismaModel> | $Enums.TikTokConnectionStatus
+}
+
+export type EnumTikTokConnectionStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.TikTokConnectionStatus | Prisma.EnumTikTokConnectionStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.TikTokConnectionStatus[] | Prisma.ListEnumTikTokConnectionStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.TikTokConnectionStatus[] | Prisma.ListEnumTikTokConnectionStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumTikTokConnectionStatusWithAggregatesFilter<$PrismaModel> | $Enums.TikTokConnectionStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumTikTokConnectionStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumTikTokConnectionStatusFilter<$PrismaModel>
+}
+
+export type EnumTikTokCredentialCleanupStateFilter<$PrismaModel = never> = {
+  equals?: $Enums.TikTokCredentialCleanupState | Prisma.EnumTikTokCredentialCleanupStateFieldRefInput<$PrismaModel>
+  in?: $Enums.TikTokCredentialCleanupState[] | Prisma.ListEnumTikTokCredentialCleanupStateFieldRefInput<$PrismaModel>
+  notIn?: $Enums.TikTokCredentialCleanupState[] | Prisma.ListEnumTikTokCredentialCleanupStateFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumTikTokCredentialCleanupStateFilter<$PrismaModel> | $Enums.TikTokCredentialCleanupState
+}
+
+export type EnumTikTokCredentialCleanupOperationStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.TikTokCredentialCleanupOperationStatus | Prisma.EnumTikTokCredentialCleanupOperationStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.TikTokCredentialCleanupOperationStatus[] | Prisma.ListEnumTikTokCredentialCleanupOperationStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.TikTokCredentialCleanupOperationStatus[] | Prisma.ListEnumTikTokCredentialCleanupOperationStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumTikTokCredentialCleanupOperationStatusFilter<$PrismaModel> | $Enums.TikTokCredentialCleanupOperationStatus
+}
+
+export type EnumTikTokCredentialCleanupStateWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.TikTokCredentialCleanupState | Prisma.EnumTikTokCredentialCleanupStateFieldRefInput<$PrismaModel>
+  in?: $Enums.TikTokCredentialCleanupState[] | Prisma.ListEnumTikTokCredentialCleanupStateFieldRefInput<$PrismaModel>
+  notIn?: $Enums.TikTokCredentialCleanupState[] | Prisma.ListEnumTikTokCredentialCleanupStateFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumTikTokCredentialCleanupStateWithAggregatesFilter<$PrismaModel> | $Enums.TikTokCredentialCleanupState
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumTikTokCredentialCleanupStateFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumTikTokCredentialCleanupStateFilter<$PrismaModel>
+}
+
+export type EnumTikTokCredentialCleanupOperationStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.TikTokCredentialCleanupOperationStatus | Prisma.EnumTikTokCredentialCleanupOperationStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.TikTokCredentialCleanupOperationStatus[] | Prisma.ListEnumTikTokCredentialCleanupOperationStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.TikTokCredentialCleanupOperationStatus[] | Prisma.ListEnumTikTokCredentialCleanupOperationStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumTikTokCredentialCleanupOperationStatusWithAggregatesFilter<$PrismaModel> | $Enums.TikTokCredentialCleanupOperationStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumTikTokCredentialCleanupOperationStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumTikTokCredentialCleanupOperationStatusFilter<$PrismaModel>
+}
+
 export type EnumPlatformRoleFilter<$PrismaModel = never> = {
   equals?: $Enums.PlatformRole | Prisma.EnumPlatformRoleFieldRefInput<$PrismaModel>
   in?: $Enums.PlatformRole[] | Prisma.ListEnumPlatformRoleFieldRefInput<$PrismaModel>
@@ -1579,6 +1630,57 @@ export type NestedEnumFacebookCredentialCleanupOperationStatusWithAggregatesFilt
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumFacebookCredentialCleanupOperationStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumFacebookCredentialCleanupOperationStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumTikTokConnectionStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.TikTokConnectionStatus | Prisma.EnumTikTokConnectionStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.TikTokConnectionStatus[] | Prisma.ListEnumTikTokConnectionStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.TikTokConnectionStatus[] | Prisma.ListEnumTikTokConnectionStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumTikTokConnectionStatusFilter<$PrismaModel> | $Enums.TikTokConnectionStatus
+}
+
+export type NestedEnumTikTokConnectionStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.TikTokConnectionStatus | Prisma.EnumTikTokConnectionStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.TikTokConnectionStatus[] | Prisma.ListEnumTikTokConnectionStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.TikTokConnectionStatus[] | Prisma.ListEnumTikTokConnectionStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumTikTokConnectionStatusWithAggregatesFilter<$PrismaModel> | $Enums.TikTokConnectionStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumTikTokConnectionStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumTikTokConnectionStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumTikTokCredentialCleanupStateFilter<$PrismaModel = never> = {
+  equals?: $Enums.TikTokCredentialCleanupState | Prisma.EnumTikTokCredentialCleanupStateFieldRefInput<$PrismaModel>
+  in?: $Enums.TikTokCredentialCleanupState[] | Prisma.ListEnumTikTokCredentialCleanupStateFieldRefInput<$PrismaModel>
+  notIn?: $Enums.TikTokCredentialCleanupState[] | Prisma.ListEnumTikTokCredentialCleanupStateFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumTikTokCredentialCleanupStateFilter<$PrismaModel> | $Enums.TikTokCredentialCleanupState
+}
+
+export type NestedEnumTikTokCredentialCleanupOperationStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.TikTokCredentialCleanupOperationStatus | Prisma.EnumTikTokCredentialCleanupOperationStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.TikTokCredentialCleanupOperationStatus[] | Prisma.ListEnumTikTokCredentialCleanupOperationStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.TikTokCredentialCleanupOperationStatus[] | Prisma.ListEnumTikTokCredentialCleanupOperationStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumTikTokCredentialCleanupOperationStatusFilter<$PrismaModel> | $Enums.TikTokCredentialCleanupOperationStatus
+}
+
+export type NestedEnumTikTokCredentialCleanupStateWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.TikTokCredentialCleanupState | Prisma.EnumTikTokCredentialCleanupStateFieldRefInput<$PrismaModel>
+  in?: $Enums.TikTokCredentialCleanupState[] | Prisma.ListEnumTikTokCredentialCleanupStateFieldRefInput<$PrismaModel>
+  notIn?: $Enums.TikTokCredentialCleanupState[] | Prisma.ListEnumTikTokCredentialCleanupStateFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumTikTokCredentialCleanupStateWithAggregatesFilter<$PrismaModel> | $Enums.TikTokCredentialCleanupState
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumTikTokCredentialCleanupStateFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumTikTokCredentialCleanupStateFilter<$PrismaModel>
+}
+
+export type NestedEnumTikTokCredentialCleanupOperationStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.TikTokCredentialCleanupOperationStatus | Prisma.EnumTikTokCredentialCleanupOperationStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.TikTokCredentialCleanupOperationStatus[] | Prisma.ListEnumTikTokCredentialCleanupOperationStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.TikTokCredentialCleanupOperationStatus[] | Prisma.ListEnumTikTokCredentialCleanupOperationStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumTikTokCredentialCleanupOperationStatusWithAggregatesFilter<$PrismaModel> | $Enums.TikTokCredentialCleanupOperationStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumTikTokCredentialCleanupOperationStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumTikTokCredentialCleanupOperationStatusFilter<$PrismaModel>
 }
 
 export type NestedEnumPlatformRoleFilter<$PrismaModel = never> = {

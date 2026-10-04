@@ -200,6 +200,7 @@ export type TenantMembershipWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"TenantMembership"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
+  tikTokOAuthAttempts?: Prisma.TikTokOAuthAttemptListRelationFilter
 }
 
 export type TenantMembershipOrderByWithRelationInput = {
@@ -212,6 +213,7 @@ export type TenantMembershipOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
   tenant?: Prisma.TenantOrderByWithRelationInput
+  tikTokOAuthAttempts?: Prisma.TikTokOAuthAttemptOrderByRelationAggregateInput
 }
 
 export type TenantMembershipWhereUniqueInput = Prisma.AtLeast<{
@@ -228,6 +230,7 @@ export type TenantMembershipWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"TenantMembership"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
+  tikTokOAuthAttempts?: Prisma.TikTokOAuthAttemptListRelationFilter
 }, "id" | "userId_tenantId">
 
 export type TenantMembershipOrderByWithAggregationInput = {
@@ -264,6 +267,7 @@ export type TenantMembershipCreateInput = {
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutMembershipsInput
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
+  tikTokOAuthAttempts?: Prisma.TikTokOAuthAttemptCreateNestedManyWithoutMembershipInput
 }
 
 export type TenantMembershipUncheckedCreateInput = {
@@ -274,6 +278,7 @@ export type TenantMembershipUncheckedCreateInput = {
   status?: $Enums.AccessStatus
   createdAt?: Date | string
   updatedAt?: Date | string
+  tikTokOAuthAttempts?: Prisma.TikTokOAuthAttemptUncheckedCreateNestedManyWithoutMembershipInput
 }
 
 export type TenantMembershipUpdateInput = {
@@ -284,6 +289,7 @@ export type TenantMembershipUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutMembershipsNestedInput
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
+  tikTokOAuthAttempts?: Prisma.TikTokOAuthAttemptUpdateManyWithoutMembershipNestedInput
 }
 
 export type TenantMembershipUncheckedUpdateInput = {
@@ -294,6 +300,7 @@ export type TenantMembershipUncheckedUpdateInput = {
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tikTokOAuthAttempts?: Prisma.TikTokOAuthAttemptUncheckedUpdateManyWithoutMembershipNestedInput
 }
 
 export type TenantMembershipCreateManyInput = {
@@ -332,6 +339,11 @@ export type TenantMembershipListRelationFilter = {
 
 export type TenantMembershipOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type TenantMembershipScalarRelationFilter = {
+  is?: Prisma.TenantMembershipWhereInput
+  isNot?: Prisma.TenantMembershipWhereInput
 }
 
 export type TenantMembershipUserIdTenantIdCompoundUniqueInput = {
@@ -411,6 +423,20 @@ export type TenantMembershipUncheckedUpdateManyWithoutTenantNestedInput = {
   deleteMany?: Prisma.TenantMembershipScalarWhereInput | Prisma.TenantMembershipScalarWhereInput[]
 }
 
+export type TenantMembershipCreateNestedOneWithoutTikTokOAuthAttemptsInput = {
+  create?: Prisma.XOR<Prisma.TenantMembershipCreateWithoutTikTokOAuthAttemptsInput, Prisma.TenantMembershipUncheckedCreateWithoutTikTokOAuthAttemptsInput>
+  connectOrCreate?: Prisma.TenantMembershipCreateOrConnectWithoutTikTokOAuthAttemptsInput
+  connect?: Prisma.TenantMembershipWhereUniqueInput
+}
+
+export type TenantMembershipUpdateOneRequiredWithoutTikTokOAuthAttemptsNestedInput = {
+  create?: Prisma.XOR<Prisma.TenantMembershipCreateWithoutTikTokOAuthAttemptsInput, Prisma.TenantMembershipUncheckedCreateWithoutTikTokOAuthAttemptsInput>
+  connectOrCreate?: Prisma.TenantMembershipCreateOrConnectWithoutTikTokOAuthAttemptsInput
+  upsert?: Prisma.TenantMembershipUpsertWithoutTikTokOAuthAttemptsInput
+  connect?: Prisma.TenantMembershipWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TenantMembershipUpdateToOneWithWhereWithoutTikTokOAuthAttemptsInput, Prisma.TenantMembershipUpdateWithoutTikTokOAuthAttemptsInput>, Prisma.TenantMembershipUncheckedUpdateWithoutTikTokOAuthAttemptsInput>
+}
+
 export type TenantMembershipCreateNestedManyWithoutUserInput = {
   create?: Prisma.XOR<Prisma.TenantMembershipCreateWithoutUserInput, Prisma.TenantMembershipUncheckedCreateWithoutUserInput> | Prisma.TenantMembershipCreateWithoutUserInput[] | Prisma.TenantMembershipUncheckedCreateWithoutUserInput[]
   connectOrCreate?: Prisma.TenantMembershipCreateOrConnectWithoutUserInput | Prisma.TenantMembershipCreateOrConnectWithoutUserInput[]
@@ -464,6 +490,7 @@ export type TenantMembershipCreateWithoutTenantInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutMembershipsInput
+  tikTokOAuthAttempts?: Prisma.TikTokOAuthAttemptCreateNestedManyWithoutMembershipInput
 }
 
 export type TenantMembershipUncheckedCreateWithoutTenantInput = {
@@ -473,6 +500,7 @@ export type TenantMembershipUncheckedCreateWithoutTenantInput = {
   status?: $Enums.AccessStatus
   createdAt?: Date | string
   updatedAt?: Date | string
+  tikTokOAuthAttempts?: Prisma.TikTokOAuthAttemptUncheckedCreateNestedManyWithoutMembershipInput
 }
 
 export type TenantMembershipCreateOrConnectWithoutTenantInput = {
@@ -514,6 +542,62 @@ export type TenantMembershipScalarWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"TenantMembership"> | Date | string
 }
 
+export type TenantMembershipCreateWithoutTikTokOAuthAttemptsInput = {
+  id?: string
+  role: $Enums.MembershipRole
+  status?: $Enums.AccessStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  user: Prisma.UserCreateNestedOneWithoutMembershipsInput
+  tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
+}
+
+export type TenantMembershipUncheckedCreateWithoutTikTokOAuthAttemptsInput = {
+  id?: string
+  userId: string
+  tenantId: string
+  role: $Enums.MembershipRole
+  status?: $Enums.AccessStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type TenantMembershipCreateOrConnectWithoutTikTokOAuthAttemptsInput = {
+  where: Prisma.TenantMembershipWhereUniqueInput
+  create: Prisma.XOR<Prisma.TenantMembershipCreateWithoutTikTokOAuthAttemptsInput, Prisma.TenantMembershipUncheckedCreateWithoutTikTokOAuthAttemptsInput>
+}
+
+export type TenantMembershipUpsertWithoutTikTokOAuthAttemptsInput = {
+  update: Prisma.XOR<Prisma.TenantMembershipUpdateWithoutTikTokOAuthAttemptsInput, Prisma.TenantMembershipUncheckedUpdateWithoutTikTokOAuthAttemptsInput>
+  create: Prisma.XOR<Prisma.TenantMembershipCreateWithoutTikTokOAuthAttemptsInput, Prisma.TenantMembershipUncheckedCreateWithoutTikTokOAuthAttemptsInput>
+  where?: Prisma.TenantMembershipWhereInput
+}
+
+export type TenantMembershipUpdateToOneWithWhereWithoutTikTokOAuthAttemptsInput = {
+  where?: Prisma.TenantMembershipWhereInput
+  data: Prisma.XOR<Prisma.TenantMembershipUpdateWithoutTikTokOAuthAttemptsInput, Prisma.TenantMembershipUncheckedUpdateWithoutTikTokOAuthAttemptsInput>
+}
+
+export type TenantMembershipUpdateWithoutTikTokOAuthAttemptsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneRequiredWithoutMembershipsNestedInput
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
+}
+
+export type TenantMembershipUncheckedUpdateWithoutTikTokOAuthAttemptsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumMembershipRoleFieldUpdateOperationsInput | $Enums.MembershipRole
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 export type TenantMembershipCreateWithoutUserInput = {
   id?: string
   role: $Enums.MembershipRole
@@ -521,6 +605,7 @@ export type TenantMembershipCreateWithoutUserInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
+  tikTokOAuthAttempts?: Prisma.TikTokOAuthAttemptCreateNestedManyWithoutMembershipInput
 }
 
 export type TenantMembershipUncheckedCreateWithoutUserInput = {
@@ -530,6 +615,7 @@ export type TenantMembershipUncheckedCreateWithoutUserInput = {
   status?: $Enums.AccessStatus
   createdAt?: Date | string
   updatedAt?: Date | string
+  tikTokOAuthAttempts?: Prisma.TikTokOAuthAttemptUncheckedCreateNestedManyWithoutMembershipInput
 }
 
 export type TenantMembershipCreateOrConnectWithoutUserInput = {
@@ -574,6 +660,7 @@ export type TenantMembershipUpdateWithoutTenantInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutMembershipsNestedInput
+  tikTokOAuthAttempts?: Prisma.TikTokOAuthAttemptUpdateManyWithoutMembershipNestedInput
 }
 
 export type TenantMembershipUncheckedUpdateWithoutTenantInput = {
@@ -583,6 +670,7 @@ export type TenantMembershipUncheckedUpdateWithoutTenantInput = {
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tikTokOAuthAttempts?: Prisma.TikTokOAuthAttemptUncheckedUpdateManyWithoutMembershipNestedInput
 }
 
 export type TenantMembershipUncheckedUpdateManyWithoutTenantInput = {
@@ -610,6 +698,7 @@ export type TenantMembershipUpdateWithoutUserInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
+  tikTokOAuthAttempts?: Prisma.TikTokOAuthAttemptUpdateManyWithoutMembershipNestedInput
 }
 
 export type TenantMembershipUncheckedUpdateWithoutUserInput = {
@@ -619,6 +708,7 @@ export type TenantMembershipUncheckedUpdateWithoutUserInput = {
   status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tikTokOAuthAttempts?: Prisma.TikTokOAuthAttemptUncheckedUpdateManyWithoutMembershipNestedInput
 }
 
 export type TenantMembershipUncheckedUpdateManyWithoutUserInput = {
@@ -631,6 +721,35 @@ export type TenantMembershipUncheckedUpdateManyWithoutUserInput = {
 }
 
 
+/**
+ * Count Type TenantMembershipCountOutputType
+ */
+
+export type TenantMembershipCountOutputType = {
+  tikTokOAuthAttempts: number
+}
+
+export type TenantMembershipCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  tikTokOAuthAttempts?: boolean | TenantMembershipCountOutputTypeCountTikTokOAuthAttemptsArgs
+}
+
+/**
+ * TenantMembershipCountOutputType without action
+ */
+export type TenantMembershipCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TenantMembershipCountOutputType
+   */
+  select?: Prisma.TenantMembershipCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * TenantMembershipCountOutputType without action
+ */
+export type TenantMembershipCountOutputTypeCountTikTokOAuthAttemptsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TikTokOAuthAttemptWhereInput
+}
+
 
 export type TenantMembershipSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -642,6 +761,8 @@ export type TenantMembershipSelect<ExtArgs extends runtime.Types.Extensions.Inte
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
+  tikTokOAuthAttempts?: boolean | Prisma.TenantMembership$tikTokOAuthAttemptsArgs<ExtArgs>
+  _count?: boolean | Prisma.TenantMembershipCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["tenantMembership"]>
 
 export type TenantMembershipSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -682,6 +803,8 @@ export type TenantMembershipOmit<ExtArgs extends runtime.Types.Extensions.Intern
 export type TenantMembershipInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
+  tikTokOAuthAttempts?: boolean | Prisma.TenantMembership$tikTokOAuthAttemptsArgs<ExtArgs>
+  _count?: boolean | Prisma.TenantMembershipCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type TenantMembershipIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -697,6 +820,7 @@ export type $TenantMembershipPayload<ExtArgs extends runtime.Types.Extensions.In
   objects: {
     user: Prisma.$UserPayload<ExtArgs>
     tenant: Prisma.$TenantPayload<ExtArgs>
+    tikTokOAuthAttempts: Prisma.$TikTokOAuthAttemptPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1102,6 +1226,7 @@ export interface Prisma__TenantMembershipClient<T, Null = never, ExtArgs extends
   readonly [Symbol.toStringTag]: "PrismaPromise"
   user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   tenant<T extends Prisma.TenantDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TenantDefaultArgs<ExtArgs>>): Prisma.Prisma__TenantClient<runtime.Types.Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  tikTokOAuthAttempts<T extends Prisma.TenantMembership$tikTokOAuthAttemptsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TenantMembership$tikTokOAuthAttemptsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TikTokOAuthAttemptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1536,6 +1661,30 @@ export type TenantMembershipDeleteManyArgs<ExtArgs extends runtime.Types.Extensi
    * Limit how many TenantMemberships to delete.
    */
   limit?: number
+}
+
+/**
+ * TenantMembership.tikTokOAuthAttempts
+ */
+export type TenantMembership$tikTokOAuthAttemptsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TikTokOAuthAttempt
+   */
+  select?: Prisma.TikTokOAuthAttemptSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the TikTokOAuthAttempt
+   */
+  omit?: Prisma.TikTokOAuthAttemptOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TikTokOAuthAttemptInclude<ExtArgs> | null
+  where?: Prisma.TikTokOAuthAttemptWhereInput
+  orderBy?: Prisma.TikTokOAuthAttemptOrderByWithRelationInput | Prisma.TikTokOAuthAttemptOrderByWithRelationInput[]
+  cursor?: Prisma.TikTokOAuthAttemptWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TikTokOAuthAttemptScalarFieldEnum | Prisma.TikTokOAuthAttemptScalarFieldEnum[]
 }
 
 /**

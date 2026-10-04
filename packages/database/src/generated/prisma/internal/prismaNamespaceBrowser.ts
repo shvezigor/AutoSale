@@ -63,6 +63,9 @@ export const ModelName = {
   FacebookConnection: 'FacebookConnection',
   FacebookOAuthAttempt: 'FacebookOAuthAttempt',
   FacebookCredentialCleanup: 'FacebookCredentialCleanup',
+  TikTokConnection: 'TikTokConnection',
+  TikTokOAuthAttempt: 'TikTokOAuthAttempt',
+  TikTokCredentialCleanup: 'TikTokCredentialCleanup',
   User: 'User',
   UserAvatarCleanup: 'UserAvatarCleanup',
   UserNotification: 'UserNotification',
@@ -372,6 +375,79 @@ export const FacebookCredentialCleanupScalarFieldEnum = {
 } as const
 
 export type FacebookCredentialCleanupScalarFieldEnum = (typeof FacebookCredentialCleanupScalarFieldEnum)[keyof typeof FacebookCredentialCleanupScalarFieldEnum]
+
+
+export const TikTokConnectionScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  externalAccountId: 'externalAccountId',
+  displayName: 'displayName',
+  status: 'status',
+  capabilities: 'capabilities',
+  encryptedAccessToken: 'encryptedAccessToken',
+  encryptedRefreshToken: 'encryptedRefreshToken',
+  credentialGenerationId: 'credentialGenerationId',
+  tokenExpiresAt: 'tokenExpiresAt',
+  refreshTokenExpiresAt: 'refreshTokenExpiresAt',
+  grantedScopes: 'grantedScopes',
+  connectedByUserId: 'connectedByUserId',
+  lastVerifiedAt: 'lastVerifiedAt',
+  lastErrorCode: 'lastErrorCode',
+  refreshLeaseId: 'refreshLeaseId',
+  refreshLeaseExpiresAt: 'refreshLeaseExpiresAt',
+  disconnectedAt: 'disconnectedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TikTokConnectionScalarFieldEnum = (typeof TikTokConnectionScalarFieldEnum)[keyof typeof TikTokConnectionScalarFieldEnum]
+
+
+export const TikTokOAuthAttemptScalarFieldEnum = {
+  id: 'id',
+  tokenHash: 'tokenHash',
+  tenantId: 'tenantId',
+  userId: 'userId',
+  returnPath: 'returnPath',
+  expiresAt: 'expiresAt',
+  usedAt: 'usedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TikTokOAuthAttemptScalarFieldEnum = (typeof TikTokOAuthAttemptScalarFieldEnum)[keyof typeof TikTokOAuthAttemptScalarFieldEnum]
+
+
+export const TikTokCredentialCleanupScalarFieldEnum = {
+  id: 'id',
+  credentialGenerationId: 'credentialGenerationId',
+  tenantId: 'tenantId',
+  externalAccountId: 'externalAccountId',
+  encryptedAccessToken: 'encryptedAccessToken',
+  encryptedRefreshToken: 'encryptedRefreshToken',
+  source: 'source',
+  state: 'state',
+  callbackResolvedAt: 'callbackResolvedAt',
+  webhookDeleteStatus: 'webhookDeleteStatus',
+  webhookDeleteAttemptedAt: 'webhookDeleteAttemptedAt',
+  webhookDeleteSucceededAt: 'webhookDeleteSucceededAt',
+  revokeStatus: 'revokeStatus',
+  revokeAttemptedAt: 'revokeAttemptedAt',
+  revokeSucceededAt: 'revokeSucceededAt',
+  attempts: 'attempts',
+  leaseId: 'leaseId',
+  leaseExpiresAt: 'leaseExpiresAt',
+  version: 'version',
+  lastErrorCode: 'lastErrorCode',
+  permanentFailureAt: 'permanentFailureAt',
+  deadLetteredAt: 'deadLetteredAt',
+  deadLetteredByUserId: 'deadLetteredByUserId',
+  terminalAt: 'terminalAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TikTokCredentialCleanupScalarFieldEnum = (typeof TikTokCredentialCleanupScalarFieldEnum)[keyof typeof TikTokCredentialCleanupScalarFieldEnum]
 
 
 export const UserScalarFieldEnum = {
