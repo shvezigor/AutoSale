@@ -9,6 +9,7 @@ describe('TikTok Business Messaging contracts', () => {
   it('accepts an active connection with explicit capabilities', () => {
     const parsed = tikTokConnectionSummarySchema.parse({
       status: 'ACTIVE',
+      platformAvailability: 'AVAILABLE',
       accountId: 'fictional-tiktok-account',
       displayName: 'Fictional Shop',
       capabilities: {
@@ -29,6 +30,7 @@ describe('TikTok Business Messaging contracts', () => {
   it('represents an inbound-only account without implying reply access', () => {
     const parsed = tikTokConnectionSummarySchema.parse({
       status: 'INBOUND_ONLY',
+      platformAvailability: 'ADMIN_DISABLED',
       accountId: 'fictional-tiktok-account',
       displayName: 'Fictional Shop',
       capabilities: {
@@ -43,11 +45,13 @@ describe('TikTok Business Messaging contracts', () => {
     });
 
     expect(parsed.capabilities?.sendText).toBe(false);
+    expect(parsed.platformAvailability).toBe('ADMIN_DISABLED');
   });
 
   it('rejects unknown capability fields and invalid statuses', () => {
     expect(() => tikTokConnectionSummarySchema.parse({
       status: 'CONNECTED',
+      platformAvailability: 'UNKNOWN',
       accountId: null,
       displayName: null,
       capabilities: { receiveMessages: true, sendText: false, sendImage: false, sendVideo: true },

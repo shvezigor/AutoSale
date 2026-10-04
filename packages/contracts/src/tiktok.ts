@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { platformIntegrationAvailabilitySchema } from './auth.js';
+
 export const tikTokConnectionStatusSchema = z.enum([
   'NOT_CONNECTED',
   'ACTIVE',
@@ -19,6 +21,7 @@ export const tikTokCapabilitiesSchema = z.object({
 
 export const tikTokConnectionSummarySchema = z.object({
   status: tikTokConnectionStatusSchema,
+  platformAvailability: platformIntegrationAvailabilitySchema,
   accountId: z.string().min(1).max(128).nullable(),
   displayName: z.string().min(1).max(255).nullable(),
   capabilities: tikTokCapabilitiesSchema.nullable(),

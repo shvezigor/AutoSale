@@ -74,6 +74,36 @@ export const adminPlatformOverviewSchema = z.object({
   }).strict(),
 }).strict();
 
+export const adminIntegrationKeySchema = z.enum([
+  'FACEBOOK_MESSENGER',
+  'TIKTOK_BUSINESS_MESSAGING',
+]);
+
+export const adminIntegrationStateSchema = z.enum([
+  'ACTIVE',
+  'ADMIN_DISABLED',
+  'DEPLOYMENT_UNAVAILABLE',
+]);
+
+export const platformIntegrationAvailabilitySchema = z.enum([
+  'AVAILABLE',
+  'ADMIN_DISABLED',
+  'DEPLOYMENT_UNAVAILABLE',
+]);
+
+export const adminIntegrationControlSchema = z.object({
+  key: adminIntegrationKeySchema,
+  deploymentAvailable: z.boolean(),
+  runtimeEnabled: z.boolean(),
+  effectiveEnabled: z.boolean(),
+  state: adminIntegrationStateSchema,
+  updatedAt: z.string().datetime().nullable(),
+}).strict();
+
+export const adminIntegrationListSchema = z.array(adminIntegrationControlSchema).length(2);
+
+export const adminIntegrationUpdateSchema = z.object({ enabled: z.boolean() }).strict();
+
 export const publicSessionSchema = z.object({
   userId: z.string().uuid(),
   email: normalizedEmailSchema,
@@ -106,4 +136,9 @@ export type AdminQueueName = z.infer<typeof adminQueueNameSchema>;
 export type AdminQueueSummary = z.infer<typeof adminQueueSummarySchema>;
 export type AdminOperationsSummary = z.infer<typeof adminOperationsSummarySchema>;
 export type AdminPlatformOverview = z.infer<typeof adminPlatformOverviewSchema>;
+export type AdminIntegrationKey = z.infer<typeof adminIntegrationKeySchema>;
+export type AdminIntegrationState = z.infer<typeof adminIntegrationStateSchema>;
+export type PlatformIntegrationAvailability = z.infer<typeof platformIntegrationAvailabilitySchema>;
+export type AdminIntegrationControl = z.infer<typeof adminIntegrationControlSchema>;
+export type AdminIntegrationUpdate = z.infer<typeof adminIntegrationUpdateSchema>;
 export type PublicSession = z.infer<typeof publicSessionSchema>;

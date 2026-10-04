@@ -2,6 +2,9 @@ import { describe, expect, it } from 'vitest';
 
 import {
   acceptInvitationRequestSchema,
+  adminIntegrationControlSchema,
+  adminIntegrationListSchema,
+  adminIntegrationUpdateSchema,
   adminOperationsSummarySchema,
   adminPlatformOverviewSchema,
   adminTenantSummarySchema,
@@ -53,5 +56,31 @@ describe('authentication contracts', () => {
       status: 'HEALTHY', database: 'HEALTHY', updatedAt,
       queues: [{ queue: 'instagram', status: 'HEALTHY', waiting: 0, active: 0, delayed: 0, failed: 0, completed: 4, workerCount: 1, oldestPendingAt: null, available: true, jobPayload: { phone: '+380' } }],
     }).success).toBe(false);
+  });
+
+  it('accepts only the closed privacy-safe platform integration controls', () => {
+    const facebook = {
+      key: 'FACEBOOK_MESSENGER',
+      deploymentAvailable: true,
+      runtimeEnabled: true,
+      effectiveEnabled: true,
+      state: 'ACTIVE',
+      updatedAt: '2026-10-04T10:00:00.000Z',
+    } as const;
+    const tiktok = {
+      key: 'TIKTOK_BUSINESS_MESSAGING',
+      deploymentAvailable: false,
+      runtimeEnabled: false,
+      effectiveEnabled: false,
+      state: 'DEPLOYMENT_UNAVAILABLE',
+      updatedAt: null,
+    } as const;
+
+    expect(adminIntegrationControlSchema.parse(facebook)).toEqual(facebook);
+    expect(adminIntegrationListSchema.parse([facebook, tiktok])).toEqual([facebook, tiktok]);
+    expect(adminIntegrationUpdateSchema.parse({ enabled: false })).toEqual({ enabled: false });
+    expect(() => adminIntegrationControlSchema.parse({ ...facebook, secret: 'never-return-this' })).toThrow();
+    expect(() => adminIntegrationControlSchema.parse({ ...facebook, key: 'INSTAGRAM' })).toThrow();
+    expect(() => adminIntegrationUpdateSchema.parse({ enabled: true, key: 'FACEBOOK_MESSENGER' })).toThrow();
   });
 });

@@ -10,6 +10,7 @@ describe('Facebook Messenger contracts', () => {
   it('keeps the connection summary token-free and closed', () => {
     const parsed = facebookConnectionSummarySchema.parse({
       status: 'ACTIVE',
+      platformAvailability: 'AVAILABLE',
       pageId: 'fictional-page-1',
       pageName: 'Fictional Shop',
       tokenExpiresAt: null,
@@ -22,6 +23,7 @@ describe('Facebook Messenger contracts', () => {
     expect(parsed.pageName).toBe('Fictional Shop');
     expect(Object.keys(parsed)).not.toContain('accessToken');
     expect(() => facebookConnectionSummarySchema.parse({ ...parsed, accessToken: 'secret' })).toThrow();
+    expect(() => facebookConnectionSummarySchema.parse({ ...parsed, platformAvailability: 'UNKNOWN' })).toThrow();
   });
 
   it('validates safe Page candidates and an exact selection input', () => {

@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { platformIntegrationAvailabilitySchema } from './auth.js';
+
 export const facebookConnectionStatusSchema = z.enum([
   'NOT_CONNECTED',
   'ACTIVE',
@@ -22,6 +24,7 @@ export const facebookPageSelectionInputSchema = z.object({
 
 export const facebookConnectionSummarySchema = z.object({
   status: facebookConnectionStatusSchema,
+  platformAvailability: platformIntegrationAvailabilitySchema,
   pageId: z.string().nullable(),
   pageName: z.string().nullable(),
   tokenExpiresAt: z.string().datetime().nullable(),
