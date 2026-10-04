@@ -1883,7 +1883,7 @@ Status: commercial terms were implemented on 2026-09-19 and manual audited payme
 Reference: [competitive analysis](../docs/research/2026-10-02-chatoryx-competitive-analysis.md). Owner: product; status: proposed validation, no new runtime functionality.
 
 - [ ] P0: Complete existing Instagram and shipment live acceptance and measure a full conversation-to-fulfillment pilot; retain current deployment gates.
-- [ ] P1: Specify catalogue-grounded AI reply drafts with manager confirmation using existing conversation and durable delivery modules; preserve order, stock and payment invariants.
+- [x] P1 design: specify catalogue-grounded AI reply drafts with manager confirmation using existing conversation and durable delivery modules; preserve order, stock and payment invariants. Canonical design: [`catalogue-grounded AI reply drafts`](../docs/superpowers/specs/2026-10-04-catalogue-grounded-ai-reply-drafts-design.md). Implementation and pilot evidence remain pending.
 - [ ] Validate with 5 consenting stores over 14 days: target 30% less median manager time, 70% factually unchanged draft acceptance and zero critical factual, privacy or duplicate-send incidents. These are proposed targets, not results.
 - [ ] P2: After draft evidence, specify opt-in bounded automatic replies, provider-window enforcement and explicit human handoff; never use HUMAN_AGENT for AI.
 - [ ] Validate photo/post lookup, customer Telegram and payment links before implementation; defer unlimited AI and simultaneous channel expansion.
