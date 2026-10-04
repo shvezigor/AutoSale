@@ -1,7 +1,7 @@
 # TikTok Business Messaging channel design
 
 **Date:** 2026-10-04
-**Status:** Approved design; implementation not started
+**Status:** Implementation in progress; contracts, tenant-safe persistence, strict provider client, and owner OAuth lifecycle are implemented, while the shared app webhook, message ingestion, UI, and live validation remain incomplete
 **Owner:** Sales AITO social channels
 
 ## 1. Purpose
@@ -123,6 +123,8 @@ Only owners may connect, reconnect, or disconnect. Managers receive a read-only 
 TikTok uses its own public callback route, for example `POST /webhooks/tiktok`. Exact challenge and signature fields are implemented from the provider contract available to the approved app; they are not inferred from Meta behavior.
 
 Business Messaging webhook subscriptions are developer-app resources: Sales AITO owns one `DIRECT_MESSAGE` subscription for the production callback, not one subscription per merchant account. Deployment/startup verification creates or reconciles that shared subscription. Merchant OAuth activation only verifies that this platform-level prerequisite is healthy; merchant disconnect never deletes it.
+
+Until that deployment-level reconciler is implemented and reports healthy, the OAuth module fails activation closed after safely revoking the newly issued merchant token. This prevents a workspace from appearing connected while its messages cannot reach Sales AITO.
 
 Processing order:
 

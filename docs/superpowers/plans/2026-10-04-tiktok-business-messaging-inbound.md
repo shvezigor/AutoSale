@@ -238,7 +238,7 @@ git commit -m "feat: add TikTok business messaging client"
 - Produces routes `GET /api/integrations/tiktok`, `POST /authorize`, `GET /callback`, `DELETE /connection`, and `POST /cleanup/retry`.
 - Produces `TikTokOAuthService.getSummary(tenantId)`, `authorize(tenantId,userId,returnPath)`, `completeCallback(code,state)`, and `disconnect(tenantId,userId)`.
 
-- [ ] **Step 1: Write failing state, authorization, callback, and controller tests**
+- [x] **Step 1: Write failing state, authorization, callback, and controller tests**
 
 ```ts
 await expect(service.authorize(tenantId, ownerId, '/settings?tab=social')).resolves.toEqual({
@@ -254,16 +254,16 @@ expect(await prisma.tikTokConnection.findUnique({ where: { tenantId } }))
 
 Also cover manager denial, replayed/expired state, missing inbound capability, account already owned by another tenant, callback race, encrypted credentials, unhealthy deployment-level webhook configuration, and merchant credential cleanup. Assert that disconnect never mutates the shared webhook subscription.
 
-- [ ] **Step 2: Run focused API tests and verify failure**
+- [x] **Step 2: Run focused API tests and verify failure**
 
 Run: `pnpm --filter @autosale/api test -- tiktok-oauth-state.service.spec.ts tiktok-oauth.service.spec.ts tiktok-oauth.controller.spec.ts tiktok-oauth.module.spec.ts`
 Expected: FAIL because the module is missing.
 
-- [ ] **Step 3: Implement owner-only OAuth and activation**
+- [x] **Step 3: Implement owner-only OAuth and activation**
 
 Reuse `CredentialCipher`, `assertTenantAcceptingMutations`, authenticated principal/role guards, safe return-path rules, cleanup leasing, and transaction patterns from Facebook without sharing provider credentials or Page-selection logic. Inspect the token and bind its `creator_id` to the returned `open_id`; use granted `message.list.read/manage/send` scopes for account-level readiness. Set `ACTIVE` when inbound scopes and the send scope are available; set `INBOUND_ONLY` when inbound scopes are available but send is not. Actual send eligibility is conversation-specific and is checked only when sending. Do not persist an active connection unless the deployment-level webhook health check succeeds. Merchant disconnect revokes only merchant credentials and must not delete the shared webhook subscription.
 
-- [ ] **Step 4: Run focused API tests**
+- [x] **Step 4: Run focused API tests**
 
 Run: `pnpm --filter @autosale/api test -- tiktok-oauth-state.service.spec.ts tiktok-oauth.service.spec.ts tiktok-oauth.controller.spec.ts tiktok-oauth.module.spec.ts`
 Expected: PASS.
