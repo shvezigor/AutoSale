@@ -55,7 +55,7 @@ export function SocialChannelHub({ instagram, facebook, tiktok, facebookSelectio
         <button id="social-channel-facebook" className="delivery-carrier-trigger" type="button" aria-expanded={facebookExpanded} aria-controls="social-channel-facebook-panel" onClick={() => setOpen(facebookExpanded ? null : 'facebook')}>
           <span className="delivery-carrier-mark channel-facebook" aria-hidden="true">FB</span>
           <span className="delivery-carrier-copy"><strong>Facebook</strong><small>{t('facebookSettings.description')}</small></span>
-          <span className={`connection-status status-${facebookConnection.status.toLowerCase()}`}>{facebookStatus(facebookConnection.status, t)}</span>
+          <span className={`connection-status status-${facebookConnection.platformAvailability === 'AVAILABLE' ? facebookConnection.status.toLowerCase() : 'pending'}`}>{facebookAvailabilityStatus(facebookConnection, t)}</span>
           <svg className="delivery-carrier-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m6 8 4 4 4-4" /></svg>
         </button>
         {facebookExpanded && <div id="social-channel-facebook-panel" className="delivery-carrier-panel" role="region" aria-labelledby="social-channel-facebook">
@@ -66,7 +66,7 @@ export function SocialChannelHub({ instagram, facebook, tiktok, facebookSelectio
         <button id="social-channel-tiktok" className="delivery-carrier-trigger" type="button" aria-expanded={tikTokExpanded} aria-controls="social-channel-tiktok-panel" onClick={() => setOpen(tikTokExpanded ? null : 'tiktok')}>
           <span className="delivery-carrier-mark channel-tiktok" aria-hidden="true">TT</span>
           <span className="delivery-carrier-copy"><strong>TikTok</strong><small>{t('tiktokSettings.description')}</small></span>
-          <span className={`connection-status status-${tikTokConnection.status.toLowerCase()}`}>{tikTokStatus(tikTokConnection.status, t)}</span>
+          <span className={`connection-status status-${tikTokConnection.platformAvailability === 'AVAILABLE' ? tikTokConnection.status.toLowerCase() : 'pending'}`}>{tikTokAvailabilityStatus(tikTokConnection, t)}</span>
           <svg className="delivery-carrier-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m6 8 4 4 4-4" /></svg>
         </button>
         {tikTokExpanded && <div id="social-channel-tiktok-panel" className="delivery-carrier-panel" role="region" aria-labelledby="social-channel-tiktok">
@@ -85,4 +85,16 @@ function facebookStatus(status: FacebookConnectionSummary['status'], t: ReturnTy
     ERROR: t('facebookSettings.statusError'),
     DISCONNECTED: t('facebookSettings.statusDisconnected'),
   })[status];
+}
+
+function facebookAvailabilityStatus(connection: FacebookConnectionSummary, t: ReturnType<typeof useI18n>['t']): string {
+  if (connection.platformAvailability === 'ADMIN_DISABLED') return t('facebookSettings.platformPausedShort');
+  if (connection.platformAvailability === 'DEPLOYMENT_UNAVAILABLE') return t('facebookSettings.platformUnavailableShort');
+  return facebookStatus(connection.status, t);
+}
+
+function tikTokAvailabilityStatus(connection: TikTokConnectionSummary, t: ReturnType<typeof useI18n>['t']): string {
+  if (connection.platformAvailability === 'ADMIN_DISABLED') return t('tiktokSettings.platformPausedShort');
+  if (connection.platformAvailability === 'DEPLOYMENT_UNAVAILABLE') return t('tiktokSettings.platformUnavailableShort');
+  return tikTokStatus(connection.status, t);
 }

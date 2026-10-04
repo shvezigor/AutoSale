@@ -37,6 +37,7 @@ export function FacebookSettingsForm({
   const [pending, setPending] = useState<PendingAction>(null);
   const selectionFormRef = useRef<HTMLFormElement>(null);
   const isOwner = membershipRole === 'OWNER';
+  const platformAvailable = connection.platformAvailability === 'AVAILABLE';
 
   function updateConnection(next: FacebookConnectionSummary) {
     setConnection(next);
@@ -126,6 +127,7 @@ export function FacebookSettingsForm({
   return <section className={`settings-card facebook-connection-card ${embedded ? 'is-embedded' : ''}`} aria-busy={pending !== null || undefined} aria-label={embedded ? 'Facebook' : undefined}>
     {!embedded && <div className="settings-card-heading"><div><h2>Facebook</h2><p>{t('facebookSettings.description')}</p></div><span className={`connection-status status-${connection.status.toLowerCase()}`}>{status}</span></div>}
     {embedded && <div className="delivery-panel-section-heading"><span>{t('facebookSettings.connectionSection')}</span><p>{t('facebookSettings.connectionSectionDescription')}</p></div>}
+    {!platformAvailable && <p className="settings-platform-notice" role="status">{connection.platformAvailability === 'ADMIN_DISABLED' ? t('facebookSettings.platformPaused') : t('facebookSettings.platformUnavailable')}</p>}
 
     <dl className="instagram-connection-details">
       <div><dt>{t('facebookSettings.page')}</dt><dd>{connection.pageName ?? t('facebookSettings.notConnected')}</dd></div>
@@ -135,7 +137,7 @@ export function FacebookSettingsForm({
 
     {membershipRole === 'MANAGER' && <p className="sheets-hint">{t('facebookSettings.managerReadonly')}</p>}
 
-    {isOwner && selection && selection.pages.length > 0 && connection.status !== 'ACTIVE' ? <form className="facebook-page-selection" noValidate onSubmit={(event) => void selectPage(event)} ref={selectionFormRef}>
+    {isOwner && platformAvailable && selection && selection.pages.length > 0 && connection.status !== 'ACTIVE' ? <form className="facebook-page-selection" noValidate onSubmit={(event) => void selectPage(event)} ref={selectionFormRef}>
       <FormField id="facebook-page" label={t('facebookSettings.pageLabel')} error={errors.pageId} required>
         <select
           data-field="pageId"
@@ -157,7 +159,7 @@ export function FacebookSettingsForm({
       {connection.cleanupStatus === 'PENDING' || connection.cleanupStatus === 'FAILED' ? (
         <LoadingButton className="secondary-button" onClick={() => void retryCleanup()} pending={pending === 'cleanup'} type="button">{t('facebookSettings.retryCleanup')}</LoadingButton>
       ) : null}
-      {connection.status !== 'ACTIVE' && !selection ? (
+      {platformAvailable && connection.status !== 'ACTIVE' && !selection ? (
         <LoadingButton className="primary-button" onClick={() => void connect()} pending={pending === 'connect'} pendingLabel={t('facebookSettings.connecting')} type="button">{t('facebookSettings.connect')}</LoadingButton>
       ) : null}
       {connection.status === 'ACTIVE' ? (

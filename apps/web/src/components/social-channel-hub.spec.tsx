@@ -1,5 +1,5 @@
-import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
 
@@ -24,7 +24,15 @@ const tiktok = {
   lastVerifiedAt: null, lastErrorCode: null, cleanupStatus: 'NONE' as const,
 };
 
+afterEach(cleanup);
+
 describe('SocialChannelHub', () => {
+  it('surfaces a platform pause in the collapsed channel row', () => {
+    render(<SocialChannelHub instagram={instagram} facebook={{ ...facebook, platformAvailability: 'ADMIN_DISABLED' }} tiktok={tiktok} membershipRole="OWNER" />);
+
+    expect(screen.getByRole('button', { name: /Facebook.*Призупинено платформою/ })).toBeVisible();
+  });
+
   it('keeps both channels collapsed and opens only Facebook on click', () => {
     render(<SocialChannelHub instagram={instagram} facebook={facebook} tiktok={tiktok} membershipRole="OWNER" />);
     const instagramButton = screen.getByRole('button', { name: /Instagram.*Активне/ });

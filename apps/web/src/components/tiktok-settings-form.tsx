@@ -29,6 +29,7 @@ export function TikTokSettingsForm({
   const [formError, setFormError] = useState<string | null>(null);
   const isOwner = membershipRole === 'OWNER';
   const connected = connection.status === 'ACTIVE' || connection.status === 'INBOUND_ONLY';
+  const platformAvailable = connection.platformAvailability === 'AVAILABLE';
 
   function updateConnection(next: TikTokConnectionSummary) {
     setConnection(next);
@@ -91,6 +92,7 @@ export function TikTokSettingsForm({
   return <section className={`settings-card tiktok-connection-card ${embedded ? 'is-embedded' : ''}`} aria-busy={pending !== null || undefined} aria-label={embedded ? 'TikTok' : undefined}>
     {!embedded && <div className="settings-card-heading"><div><h2>TikTok</h2><p>{t('tiktokSettings.description')}</p></div><span className={`connection-status status-${connection.status.toLowerCase()}`}>{status}</span></div>}
     {embedded && <div className="delivery-panel-section-heading"><span>{t('tiktokSettings.connectionSection')}</span><p>{t('tiktokSettings.connectionSectionDescription')}</p></div>}
+    {!platformAvailable && <p className="settings-platform-notice" role="status">{connection.platformAvailability === 'ADMIN_DISABLED' ? t('tiktokSettings.platformPaused') : t('tiktokSettings.platformUnavailable')}</p>}
     <dl className="instagram-connection-details">
       <div><dt>{t('tiktokSettings.account')}</dt><dd>{connection.displayName ?? t('tiktokSettings.notConnected')}</dd></div>
       <div><dt>{t('tiktokSettings.lastCheck')}</dt><dd>{connection.lastVerifiedAt ? formatDate(connection.lastVerifiedAt) : t('tiktokSettings.neverChecked')}</dd></div>
@@ -100,7 +102,7 @@ export function TikTokSettingsForm({
     {membershipRole === 'MANAGER' ? <p className="sheets-hint">{t('tiktokSettings.managerReadonly')}</p> : null}
     {isOwner ? <div className="settings-actions">
       {connection.cleanupStatus === 'PENDING' || connection.cleanupStatus === 'FAILED' ? <LoadingButton className="secondary-button" onClick={() => void retryCleanup()} pending={pending === 'cleanup'} type="button">{t('tiktokSettings.retryCleanup')}</LoadingButton> : null}
-      {!connected ? <LoadingButton className="primary-button" onClick={() => void connect()} pending={pending === 'connect'} pendingLabel={t('tiktokSettings.connecting')} type="button">{connection.status === 'REAUTH_REQUIRED' ? t('tiktokSettings.reconnect') : t('tiktokSettings.connect')}</LoadingButton> : null}
+      {platformAvailable && !connected ? <LoadingButton className="primary-button" onClick={() => void connect()} pending={pending === 'connect'} pendingLabel={t('tiktokSettings.connecting')} type="button">{connection.status === 'REAUTH_REQUIRED' ? t('tiktokSettings.reconnect') : t('tiktokSettings.connect')}</LoadingButton> : null}
       {connected ? <LoadingButton className="danger-button" onClick={() => void disconnect()} pending={pending === 'disconnect'} type="button">{t('tiktokSettings.disconnect')}</LoadingButton> : null}
     </div> : null}
     {formError ? <p className="save-error" role="alert">{formError}</p> : null}
