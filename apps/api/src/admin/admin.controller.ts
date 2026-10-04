@@ -1,10 +1,16 @@
 import type { AuthPrincipal } from '@autosale/contracts/auth';
-import { adminReauthRequestSchema, lifecycleMutationRequestSchema } from '@autosale/contracts';
-import { BadRequestException, Body, Controller, Get, Header, Headers, Inject, NotFoundException, Param, ParseUUIDPipe, Post, Query, StreamableFile } from '@nestjs/common';
+import {
+  adminIntegrationKeySchema,
+  adminIntegrationUpdateSchema,
+  adminReauthRequestSchema,
+  lifecycleMutationRequestSchema,
+} from '@autosale/contracts';
+import { BadRequestException, Body, ConflictException, Controller, Get, Header, Headers, Inject, NotFoundException, Param, ParseUUIDPipe, Patch, Post, Query, StreamableFile } from '@nestjs/common';
 import { z } from 'zod';
 
 import { CurrentPrincipal, RequirePlatformAdmin } from '../auth/auth.decorators.js';
 import { AdminService } from './admin.service.js';
+import { AdminIntegrationService, AdminIntegrationUnavailableError } from './admin-integration.service.js';
 import { AdminStepUpService } from './admin-step-up.service.js';
 import { TenantLifecycleService } from './tenant-lifecycle.service.js';
 
@@ -18,7 +24,30 @@ export class AdminController {
     @Inject(AdminService) private readonly admin: AdminService,
     @Inject(AdminStepUpService) private readonly stepUp: AdminStepUpService,
     @Inject(TenantLifecycleService) private readonly lifecycle: TenantLifecycleService,
+    @Inject(AdminIntegrationService) private readonly integrations: AdminIntegrationService,
   ) {}
+
+  @Get('integrations')
+  listIntegrations() { return this.integrations.list(); }
+
+  @Patch('integrations/:key')
+  async updateIntegration(
+    @CurrentPrincipal() principal: AuthPrincipal,
+    @Param('key') rawKey: string,
+    @Body() body: unknown,
+  ) {
+    const key = adminIntegrationKeySchema.safeParse(rawKey);
+    const input = adminIntegrationUpdateSchema.safeParse(body);
+    if (!key.success || !input.success) throw new BadRequestException('ADMIN_INTEGRATION_INVALID');
+    try {
+      return await this.integrations.update(principal.userId, key.data, input.data);
+    } catch (error) {
+      if (error instanceof AdminIntegrationUnavailableError) {
+        throw new ConflictException('CHANNEL_DEPLOYMENT_UNAVAILABLE');
+      }
+      throw error;
+    }
+  }
 
   @Get('tenants')
   listTenants() { return this.admin.listTenants(); }

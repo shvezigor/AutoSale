@@ -6,6 +6,7 @@ import { Queue } from 'bullmq';
 
 import { CryptoService } from '../auth/crypto.service.js';
 import { AdminController } from './admin.controller.js';
+import { AdminIntegrationService } from './admin-integration.service.js';
 import { BullAdminQueueMonitor } from './admin-queue-monitor.js';
 import { AdminService } from './admin.service.js';
 import { AdminStepUpService } from './admin-step-up.service.js';
@@ -21,6 +22,12 @@ export class AdminModule {
       .map((name) => new BullAdminQueueMonitor(name, new Queue(name, { connection })));
     monitoredQueues.push(new BullAdminQueueMonitor('tenant-lifecycle', queue));
     const stepUp = new AdminStepUpService(prisma, new CryptoService(), env.AUTH_TOKEN_PEPPER);
+    const integrationDeployment = {
+      FACEBOOK_MESSENGER: env.FACEBOOK_MESSENGER_ENABLED
+        && Boolean(env.FACEBOOK_APP_ID && env.FACEBOOK_APP_SECRET),
+      TIKTOK_BUSINESS_MESSAGING: env.TIKTOK_BUSINESS_MESSAGING_ENABLED
+        && Boolean(env.TIKTOK_CLIENT_ID && env.TIKTOK_CLIENT_SECRET && env.TIKTOK_AUTHORIZATION_URL),
+    } as const;
     const storage = new S3ObjectStorage({
       endpoint: env.S3_ENDPOINT,
       region: env.S3_REGION,
@@ -34,6 +41,7 @@ export class AdminModule {
       controllers: [AdminController],
       providers: [
         { provide: AdminService, useValue: new AdminService(prisma, undefined, monitoredQueues) },
+        { provide: AdminIntegrationService, useValue: new AdminIntegrationService(prisma, integrationDeployment) },
         { provide: AdminStepUpService, useValue: stepUp },
         { provide: TenantLifecycleService, useValue: new TenantLifecycleService(
           prisma, queue, stepUp, undefined, undefined, storage,

@@ -9,6 +9,7 @@ import { AuthGuard } from '../auth/auth.guard.js';
 import { CsrfService } from '../auth/csrf.service.js';
 import { SessionService } from '../auth/session.service.js';
 import { AdminController } from './admin.controller.js';
+import { AdminIntegrationService, AdminIntegrationUnavailableError } from './admin-integration.service.js';
 import { AdminService } from './admin.service.js';
 import { AdminStepUpService } from './admin-step-up.service.js';
 import { TenantLifecycleService } from './tenant-lifecycle.service.js';
@@ -34,7 +35,7 @@ describe('AdminController', () => {
       getTenant: vi.fn().mockResolvedValue(tenant),
       setTenantStatus: vi.fn().mockResolvedValue({ status: 'BLOCKED', revokedSessions: 2 }),
     };
-    const controller = new AdminController(service as never, {} as never, {} as never);
+    const controller = new AdminController(service as never, {} as never, {} as never, {} as never);
 
     await expect(controller.listTenants()).resolves.toEqual([]);
     await expect(controller.overview()).resolves.toBe(overview);
@@ -45,7 +46,7 @@ describe('AdminController', () => {
   });
 
   it('returns not found for an unknown aggregate tenant', async () => {
-    const controller = new AdminController({ getTenant: vi.fn().mockResolvedValue(null) } as never, {} as never, {} as never);
+    const controller = new AdminController({ getTenant: vi.fn().mockResolvedValue(null) } as never, {} as never, {} as never, {} as never);
     await expect(controller.tenant(tenantId)).rejects.toThrow('Tenant not found');
   });
 
@@ -54,7 +55,7 @@ describe('AdminController', () => {
       issue: vi.fn().mockResolvedValue('signed-step-up-token'),
       expiresAt: vi.fn().mockReturnValue('2026-10-02T09:05:00.000Z'),
     };
-    const controller = new AdminController({} as never, stepUp as never, {} as never);
+    const controller = new AdminController({} as never, stepUp as never, {} as never, {} as never);
 
     await expect(controller.reauthenticate(principal, {
       currentPassword: 'fictional secure password', purpose: 'TENANT_DELETE_REQUEST',
@@ -66,7 +67,7 @@ describe('AdminController', () => {
 
   it('passes validated routing headers to deletion orchestration', async () => {
     const lifecycle = { createDeletion: vi.fn().mockResolvedValue({ id: requestId }) };
-    const controller = new AdminController({} as never, {} as never, lifecycle as never);
+    const controller = new AdminController({} as never, {} as never, lifecycle as never, {} as never);
 
     await expect(controller.createLifecycleDeletion(
       principal, tenantId, idempotencyKey, 'step-up', { reasonCode: 'ADMINISTRATIVE_TEST' },
@@ -78,11 +79,29 @@ describe('AdminController', () => {
 
   it('rejects malformed lifecycle bodies and idempotency keys before orchestration', () => {
     const lifecycle = { createExport: vi.fn() };
-    const controller = new AdminController({} as never, {} as never, lifecycle as never);
+    const controller = new AdminController({} as never, {} as never, lifecycle as never, {} as never);
 
     expect(() => controller.createLifecycleExport(principal, tenantId, 'not-a-uuid', { reasonCode: 'FREE_TEXT' }))
       .toThrow();
     expect(lifecycle.createExport).not.toHaveBeenCalled();
+  });
+
+  it('maps deployment-unavailable enable attempts to a safe conflict', async () => {
+    const integrations = {
+      update: vi.fn().mockRejectedValue(new AdminIntegrationUnavailableError('FACEBOOK_MESSENGER')),
+    };
+    const controller = new AdminController({} as never, {} as never, {} as never, integrations as never);
+
+    await expect(controller.updateIntegration(
+      principal,
+      'FACEBOOK_MESSENGER',
+      { enabled: true },
+    )).rejects.toMatchObject({ message: 'CHANNEL_DEPLOYMENT_UNAVAILABLE' });
+    expect(integrations.update).toHaveBeenCalledWith(
+      principal.userId,
+      'FACEBOOK_MESSENGER',
+      { enabled: true },
+    );
   });
 });
 
@@ -104,6 +123,13 @@ describe('AdminController HTTP security', () => {
       controllers: [AdminController],
       providers: [
         { provide: AdminService, useValue: { listTenants: vi.fn(), setTenantStatus: vi.fn() } },
+        { provide: AdminIntegrationService, useValue: {
+          list: vi.fn().mockResolvedValue([]),
+          update: vi.fn().mockResolvedValue({
+            key: 'FACEBOOK_MESSENGER', deploymentAvailable: true, runtimeEnabled: false,
+            effectiveEnabled: false, state: 'ADMIN_DISABLED', updatedAt: '2026-10-04T10:00:00.000Z',
+          }),
+        } },
         { provide: AdminStepUpService, useValue: { issue: vi.fn(), expiresAt: vi.fn() } },
         { provide: TenantLifecycleService, useValue: {
           createDeletion, list: vi.fn(), detail: vi.fn(), createExport: vi.fn(), cancel: vi.fn(), retry: vi.fn(),
@@ -155,5 +181,23 @@ describe('AdminController HTTP security', () => {
       .set('Cookie', 'session=admin').set('x-csrf-token', csrf.issue(principal.sessionId))
       .set('idempotency-key', idempotencyKey).send({ tenantId }).expect(201);
     expect(createRetentionDryRun).toHaveBeenCalledWith(principal, tenantId, idempotencyKey);
+  });
+
+  it('protects integration state and strictly validates keys and mutation bodies', async () => {
+    const path = '/api/admin/integrations/FACEBOOK_MESSENGER';
+    await request(app.getHttpServer()).get('/api/admin/integrations').expect(401);
+    await request(app.getHttpServer()).get('/api/admin/integrations')
+      .set('Cookie', 'session=user').expect(403);
+    await request(app.getHttpServer()).get('/api/admin/integrations')
+      .set('Cookie', 'session=admin').expect(200);
+    await request(app.getHttpServer()).patch(path)
+      .set('Cookie', 'session=admin').set('x-csrf-token', csrf.issue(principal.sessionId))
+      .send({ enabled: false, secret: 'must-not-pass' }).expect(400);
+    await request(app.getHttpServer()).patch('/api/admin/integrations/UNKNOWN')
+      .set('Cookie', 'session=admin').set('x-csrf-token', csrf.issue(principal.sessionId))
+      .send({ enabled: false }).expect(400);
+    await request(app.getHttpServer()).patch(path)
+      .set('Cookie', 'session=admin').set('x-csrf-token', csrf.issue(principal.sessionId))
+      .send({ enabled: false }).expect(200);
   });
 });
