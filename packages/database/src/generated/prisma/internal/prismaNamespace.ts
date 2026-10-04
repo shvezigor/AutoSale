@@ -430,6 +430,7 @@ export const ModelName = {
   PasswordResetToken: 'PasswordResetToken',
   TenantInvitation: 'TenantInvitation',
   SecurityAuditLog: 'SecurityAuditLog',
+  PlatformFeatureFlag: 'PlatformFeatureFlag',
   WebhookEvent: 'WebhookEvent',
   Conversation: 'Conversation',
   InstagramCustomerProfile: 'InstagramCustomerProfile',
@@ -475,7 +476,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "tenant" | "tenantLifecycleRequest" | "tenantRetentionDryRun" | "googleConnection" | "googleOAuthAttempt" | "googleCredentialCleanup" | "instagramConnection" | "instagramOAuthState" | "instagramCredentialCleanup" | "facebookConnection" | "facebookOAuthAttempt" | "facebookCredentialCleanup" | "tikTokConnection" | "tikTokOAuthAttempt" | "tikTokCredentialCleanup" | "user" | "userAvatarCleanup" | "userNotification" | "telegramLinkAttempt" | "telegramUserBinding" | "telegramBusinessConnection" | "telegramChat" | "telegramSupplierSetting" | "telegramWebhookUpdate" | "telegramDelivery" | "googleIdentity" | "googleSignInAttempt" | "tenantMembership" | "session" | "emailVerificationToken" | "passwordResetToken" | "tenantInvitation" | "securityAuditLog" | "webhookEvent" | "conversation" | "instagramCustomerProfile" | "instagramAvatarCleanup" | "message" | "googleSheetsDestination" | "tenantSettings" | "tenantLegalEntity" | "tenantBankAccount" | "order" | "orderCommercialTerms" | "orderPayment" | "orderIntentEvaluation" | "deliveryConnection" | "deliverySenderProfile" | "shipment" | "shipmentAttempt" | "shipmentStatusEvent" | "orderExport" | "auditLog" | "orderItem" | "product" | "inventoryReservation" | "telegramDeliveryItem" | "telegramNotificationPreference" | "catalogueSource" | "catalogueMapping" | "catalogueImportRun" | "attachment" | "demoLead"
+    modelProps: "tenant" | "tenantLifecycleRequest" | "tenantRetentionDryRun" | "googleConnection" | "googleOAuthAttempt" | "googleCredentialCleanup" | "instagramConnection" | "instagramOAuthState" | "instagramCredentialCleanup" | "facebookConnection" | "facebookOAuthAttempt" | "facebookCredentialCleanup" | "tikTokConnection" | "tikTokOAuthAttempt" | "tikTokCredentialCleanup" | "user" | "userAvatarCleanup" | "userNotification" | "telegramLinkAttempt" | "telegramUserBinding" | "telegramBusinessConnection" | "telegramChat" | "telegramSupplierSetting" | "telegramWebhookUpdate" | "telegramDelivery" | "googleIdentity" | "googleSignInAttempt" | "tenantMembership" | "session" | "emailVerificationToken" | "passwordResetToken" | "tenantInvitation" | "securityAuditLog" | "platformFeatureFlag" | "webhookEvent" | "conversation" | "instagramCustomerProfile" | "instagramAvatarCleanup" | "message" | "googleSheetsDestination" | "tenantSettings" | "tenantLegalEntity" | "tenantBankAccount" | "order" | "orderCommercialTerms" | "orderPayment" | "orderIntentEvaluation" | "deliveryConnection" | "deliverySenderProfile" | "shipment" | "shipmentAttempt" | "shipmentStatusEvent" | "orderExport" | "auditLog" | "orderItem" | "product" | "inventoryReservation" | "telegramDeliveryItem" | "telegramNotificationPreference" | "catalogueSource" | "catalogueMapping" | "catalogueImportRun" | "attachment" | "demoLead"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2918,6 +2919,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.SecurityAuditLogCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.SecurityAuditLogCountAggregateOutputType> | number
+        }
+      }
+    }
+    PlatformFeatureFlag: {
+      payload: Prisma.$PlatformFeatureFlagPayload<ExtArgs>
+      fields: Prisma.PlatformFeatureFlagFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PlatformFeatureFlagFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformFeatureFlagPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PlatformFeatureFlagFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformFeatureFlagPayload>
+        }
+        findFirst: {
+          args: Prisma.PlatformFeatureFlagFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformFeatureFlagPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PlatformFeatureFlagFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformFeatureFlagPayload>
+        }
+        findMany: {
+          args: Prisma.PlatformFeatureFlagFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformFeatureFlagPayload>[]
+        }
+        create: {
+          args: Prisma.PlatformFeatureFlagCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformFeatureFlagPayload>
+        }
+        createMany: {
+          args: Prisma.PlatformFeatureFlagCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PlatformFeatureFlagCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformFeatureFlagPayload>[]
+        }
+        delete: {
+          args: Prisma.PlatformFeatureFlagDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformFeatureFlagPayload>
+        }
+        update: {
+          args: Prisma.PlatformFeatureFlagUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformFeatureFlagPayload>
+        }
+        deleteMany: {
+          args: Prisma.PlatformFeatureFlagDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PlatformFeatureFlagUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PlatformFeatureFlagUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformFeatureFlagPayload>[]
+        }
+        upsert: {
+          args: Prisma.PlatformFeatureFlagUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PlatformFeatureFlagPayload>
+        }
+        aggregate: {
+          args: Prisma.PlatformFeatureFlagAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePlatformFeatureFlag>
+        }
+        groupBy: {
+          args: Prisma.PlatformFeatureFlagGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PlatformFeatureFlagGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PlatformFeatureFlagCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PlatformFeatureFlagCountAggregateOutputType> | number
         }
       }
     }
@@ -5771,6 +5846,17 @@ export const SecurityAuditLogScalarFieldEnum = {
 export type SecurityAuditLogScalarFieldEnum = (typeof SecurityAuditLogScalarFieldEnum)[keyof typeof SecurityAuditLogScalarFieldEnum]
 
 
+export const PlatformFeatureFlagScalarFieldEnum = {
+  key: 'key',
+  enabled: 'enabled',
+  updatedByUserId: 'updatedByUserId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PlatformFeatureFlagScalarFieldEnum = (typeof PlatformFeatureFlagScalarFieldEnum)[keyof typeof PlatformFeatureFlagScalarFieldEnum]
+
+
 export const WebhookEventScalarFieldEnum = {
   id: 'id',
   tenantId: 'tenantId',
@@ -7314,6 +7400,7 @@ export type GlobalOmitConfig = {
   passwordResetToken?: Prisma.PasswordResetTokenOmit
   tenantInvitation?: Prisma.TenantInvitationOmit
   securityAuditLog?: Prisma.SecurityAuditLogOmit
+  platformFeatureFlag?: Prisma.PlatformFeatureFlagOmit
   webhookEvent?: Prisma.WebhookEventOmit
   conversation?: Prisma.ConversationOmit
   instagramCustomerProfile?: Prisma.InstagramCustomerProfileOmit

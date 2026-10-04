@@ -100,6 +100,16 @@ export async function configureRuntimeDatabaseRoles(
         GRANT SELECT ON SEQUENCES TO autosale_backup;
       ALTER DEFAULT PRIVILEGES IN SCHEMA public
         REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC;
+      DO $platform_flags$
+      BEGIN
+        IF to_regclass('public.platform_feature_flags') IS NOT NULL THEN
+          REVOKE INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER
+            ON TABLE public.platform_feature_flags FROM autosale_worker, autosale_backup;
+          GRANT SELECT ON TABLE public.platform_feature_flags TO autosale_worker, autosale_backup;
+          GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.platform_feature_flags TO autosale_api;
+        END IF;
+      END
+      $platform_flags$;
       DO $functions$
       BEGIN
         IF to_regprocedure('public.api_platform_create_tenant_lifecycle_request(uuid,uuid,text,text,uuid,text,timestamp with time zone)') IS NOT NULL THEN

@@ -741,6 +741,7 @@ model User {
   avatarCleanups                  UserAvatarCleanup[]
   orderPaymentsCreated            OrderPayment[]                   @relation("OrderPaymentCreatedBy")
   orderPaymentsCancelled          OrderPayment[]                   @relation("OrderPaymentCancelledBy")
+  platformFeatureFlagsUpdated     PlatformFeatureFlag[]            @relation("PlatformFeatureFlagUpdatedBy")
 
   @@index([status])
   @@map("users")
@@ -1045,6 +1046,17 @@ model SecurityAuditLog {
   @@index([tenantId, createdAt])
   @@index([userId, createdAt])
   @@map("security_audit_logs")
+}
+
+model PlatformFeatureFlag {
+  key             String   @id
+  enabled         Boolean  @default(false)
+  updatedByUserId String?  @map("updated_by_user_id") @db.Uuid
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  updatedBy       User?    @relation("PlatformFeatureFlagUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: SetNull)
+
+  @@map("platform_feature_flags")
 }
 
 model WebhookEvent {

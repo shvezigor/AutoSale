@@ -84,6 +84,7 @@ export const ModelName = {
   PasswordResetToken: 'PasswordResetToken',
   TenantInvitation: 'TenantInvitation',
   SecurityAuditLog: 'SecurityAuditLog',
+  PlatformFeatureFlag: 'PlatformFeatureFlag',
   WebhookEvent: 'WebhookEvent',
   Conversation: 'Conversation',
   InstagramCustomerProfile: 'InstagramCustomerProfile',
@@ -721,6 +722,17 @@ export const SecurityAuditLogScalarFieldEnum = {
 } as const
 
 export type SecurityAuditLogScalarFieldEnum = (typeof SecurityAuditLogScalarFieldEnum)[keyof typeof SecurityAuditLogScalarFieldEnum]
+
+
+export const PlatformFeatureFlagScalarFieldEnum = {
+  key: 'key',
+  enabled: 'enabled',
+  updatedByUserId: 'updatedByUserId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PlatformFeatureFlagScalarFieldEnum = (typeof PlatformFeatureFlagScalarFieldEnum)[keyof typeof PlatformFeatureFlagScalarFieldEnum]
 
 
 export const WebhookEventScalarFieldEnum = {
