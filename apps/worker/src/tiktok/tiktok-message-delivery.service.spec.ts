@@ -137,6 +137,26 @@ describe('TikTokMessageDeliveryService', () => {
     }
   });
 
+  it('rechecks capability after token refresh immediately before provider contact', async () => {
+    const messageId = await seedMessage();
+    getFreshAccessToken.mockImplementationOnce(async () => {
+      await prisma.tikTokConnection.update({
+        where: { tenantId },
+        data: {
+          status: 'INBOUND_ONLY',
+          capabilities: { receiveMessages: true, sendText: false, sendImage: false },
+        },
+      });
+      return 'fictional-fresh-access-token';
+    });
+
+    await expect(service().process({ tenantId, messageId })).resolves.toBe('FAILED');
+    expect(sendText).not.toHaveBeenCalled();
+    await expect(prisma.message.findUniqueOrThrow({ where: { id: messageId } })).resolves.toMatchObject({
+      deliveryStatus: 'FAILED', deliveryErrorCode: 'TIKTOK_REPLY_NOT_PERMITTED',
+    });
+  });
+
   it('schedules bounded retries only for an explicit provider rate limit', async () => {
     const retryId = await seedMessage();
     sendText.mockRejectedValueOnce(new TikTokBusinessMessagingError('MESSAGE_SEND', 429, 40100, 'fictional-request', true));

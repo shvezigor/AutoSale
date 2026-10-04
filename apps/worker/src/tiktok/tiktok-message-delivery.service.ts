@@ -39,6 +39,15 @@ interface TikTokAccessTokens {
   getFreshAccessToken(tenantId: string, credentialGenerationId: string, now: Date): Promise<string>;
 }
 
+interface CurrentTikTokConnection {
+  status: string;
+  capabilities: unknown;
+  encryptedAccessToken: string | null;
+  encryptedRefreshToken: string | null;
+  credentialGenerationId: string | null;
+  externalAccountId: string;
+}
+
 export class TikTokMessageDeliveryService {
   constructor(
     private readonly prisma: PrismaClient,
@@ -152,11 +161,73 @@ export class TikTokMessageDeliveryService {
       return 'FAILED';
     }
 
+    let currentConnection: CurrentTikTokConnection | null;
+    let currentLastInboundAt: Date | null;
+    try {
+      [currentConnection, currentLastInboundAt] = await withTenantTransaction(
+        this.prisma,
+        job.tenantId,
+        async (transaction) => {
+          await assertTenantAcceptingMutations(transaction, job.tenantId, 'CONVERSATION_REPLY');
+          const [latestConnection, currentMessage] = await Promise.all([
+            transaction.tikTokConnection.findUnique({ where: { tenantId: job.tenantId } }),
+            transaction.message.findFirst({
+              where: {
+                id: job.messageId,
+                tenantId: job.tenantId,
+                channel: 'TIKTOK',
+                deliveryStatus: 'SENDING',
+                deliveryLeaseId: leaseId,
+              },
+              select: {
+                conversation: {
+                  select: {
+                    messages: {
+                      where: { direction: 'INBOUND' },
+                      orderBy: [{ sourceTimestamp: 'desc' }, { id: 'desc' }],
+                      take: 1,
+                      select: { sourceTimestamp: true },
+                    },
+                  },
+                },
+              },
+            }),
+          ]);
+          return [latestConnection, currentMessage?.conversation.messages[0]?.sourceTimestamp ?? null] as const;
+        },
+      );
+    } catch (error) {
+      if (!(error instanceof TenantLifecycleFrozenError)) throw error;
+      await this.finish(job, leaseId, 'FAILED', 'TIKTOK_SEND_FAILED', null);
+      return 'IGNORED_FROZEN';
+    }
+    if (
+      !currentConnection ||
+      currentConnection.credentialGenerationId !== generationId ||
+      !currentConnection.encryptedAccessToken ||
+      !currentConnection.encryptedRefreshToken
+    ) {
+      await this.finish(job, leaseId, 'FAILED', 'TIKTOK_RECONNECT_REQUIRED', null);
+      return 'FAILED';
+    }
+    if (
+      currentConnection.status === 'INBOUND_ONLY' ||
+      !canSendText(currentConnection.capabilities) ||
+      !withinReplyWindow(currentLastInboundAt, this.now())
+    ) {
+      await this.finish(job, leaseId, 'FAILED', 'TIKTOK_REPLY_NOT_PERMITTED', null);
+      return 'FAILED';
+    }
+    if (currentConnection.status !== 'ACTIVE') {
+      await this.finish(job, leaseId, 'FAILED', 'TIKTOK_RECONNECT_REQUIRED', null);
+      return 'FAILED';
+    }
+
     let sent: { messageId: string };
     try {
       sent = await this.client.sendText({
         accessToken,
-        accountId: connection.externalAccountId,
+        accountId: currentConnection.externalAccountId,
         conversationId: message.conversation.externalConversationId,
         text: message.text,
       });
