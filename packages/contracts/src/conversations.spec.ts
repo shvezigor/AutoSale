@@ -4,6 +4,8 @@ import * as conversationContracts from './conversations.js';
 import {
   conversationDetailResponseSchema,
   conversationListResponseSchema,
+  outboundDeliverySchema,
+  replyCapabilitySchema,
 } from './conversations.js';
 
 const profile = {
@@ -115,6 +117,31 @@ describe('conversation profile contracts', () => {
 
     expect(parsed.replyCapability).toEqual({ enabled: true, reason: null });
     expect(parsed.messages[0]?.delivery).toEqual({ status: 'PENDING', attempts: 0, errorCode: null, retryAllowed: false });
+  });
+
+  it('accepts bounded TikTok reply capability and delivery errors', () => {
+    expect(replyCapabilitySchema.parse({
+      enabled: false,
+      reason: 'TIKTOK_CAPABILITY_UNAVAILABLE',
+    })).toEqual({ enabled: false, reason: 'TIKTOK_CAPABILITY_UNAVAILABLE' });
+
+    expect(outboundDeliverySchema.parse({
+      status: 'FAILED',
+      attempts: 1,
+      errorCode: 'TIKTOK_RATE_LIMITED',
+      retryAllowed: true,
+    }).errorCode).toBe('TIKTOK_RATE_LIMITED');
+
+    for (const errorCode of [
+      'TIKTOK_RECONNECT_REQUIRED',
+      'TIKTOK_SEND_FAILED',
+      'TIKTOK_DELIVERY_UNKNOWN',
+      'TIKTOK_REPLY_NOT_PERMITTED',
+    ]) {
+      expect(outboundDeliverySchema.parse({
+        status: 'FAILED', attempts: 1, errorCode, retryAllowed: false,
+      }).errorCode).toBe(errorCode);
+    }
   });
 
   it('retains expired reply-window capability and delivery errors', () => {

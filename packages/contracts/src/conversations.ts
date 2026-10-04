@@ -40,6 +40,11 @@ export const outboundDeliverySchema = z.object({
     'INSTAGRAM_DELIVERY_UNKNOWN',
     'INSTAGRAM_REPLY_WINDOW_EXPIRED',
     'INSTAGRAM_HUMAN_AGENT_UNAVAILABLE',
+    'TIKTOK_RECONNECT_REQUIRED',
+    'TIKTOK_RATE_LIMITED',
+    'TIKTOK_SEND_FAILED',
+    'TIKTOK_DELIVERY_UNKNOWN',
+    'TIKTOK_REPLY_NOT_PERMITTED',
   ]).nullable(),
   retryAllowed: z.boolean(),
 });
@@ -51,7 +56,14 @@ export const outboundMessageInputSchema = z.object({
 
 export const replyCapabilitySchema = z.object({
   enabled: z.boolean(),
-  reason: z.enum(['NOT_CONNECTED', 'RECONNECT_REQUIRED', 'REPLY_WINDOW_EXPIRED', 'CHANNEL_READ_ONLY']).nullable(),
+  reason: z.enum([
+    'NOT_CONNECTED',
+    'RECONNECT_REQUIRED',
+    'REPLY_WINDOW_EXPIRED',
+    'CHANNEL_READ_ONLY',
+    'TIKTOK_CAPABILITY_UNAVAILABLE',
+    'TIKTOK_REPLY_NOT_PERMITTED',
+  ]).nullable(),
 });
 
 export const conversationMessageSchema = z.object({

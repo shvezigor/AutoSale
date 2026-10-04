@@ -41,7 +41,7 @@
 - Produces reply reasons `TIKTOK_CAPABILITY_UNAVAILABLE` and `TIKTOK_REPLY_NOT_PERMITTED`.
 - Produces delivery errors `TIKTOK_RECONNECT_REQUIRED`, `TIKTOK_RATE_LIMITED`, `TIKTOK_SEND_FAILED`, `TIKTOK_DELIVERY_UNKNOWN`, and `TIKTOK_REPLY_NOT_PERMITTED`.
 
-- [ ] **Step 1: Write failing schema tests**
+- [x] **Step 1: Write failing schema tests**
 
 ```ts
 expect(replyCapabilitySchema.parse({
@@ -53,21 +53,21 @@ expect(outboundDeliverySchema.parse({
 }).errorCode).toBe('TIKTOK_RATE_LIMITED');
 ```
 
-- [ ] **Step 2: Run the contract test and verify failure**
+- [x] **Step 2: Run the contract test and verify failure**
 
 Run: `pnpm --filter @autosale/contracts test -- conversations.spec.ts`
 Expected: FAIL because TikTok reply codes are rejected.
 
-- [ ] **Step 3: Add the explicit union members without weakening schemas**
+- [x] **Step 3: Add the explicit union members without weakening schemas**
 
 Do not replace enums with arbitrary strings. Preserve all Instagram error values unchanged.
 
-- [ ] **Step 4: Run the contract test**
+- [x] **Step 4: Run the contract test**
 
 Run: `pnpm --filter @autosale/contracts test -- conversations.spec.ts`
 Expected: PASS.
 
-- [ ] **Step 5: Commit contract changes**
+- [x] **Step 5: Commit contract changes**
 
 ```bash
 git add packages/contracts/src/conversations.ts packages/contracts/src/conversations.spec.ts
@@ -81,7 +81,7 @@ git commit -m "feat: add TikTok reply delivery contracts"
 - Modify: `packages/integrations/src/tiktok-business-messaging.spec.ts`
 
 **Interfaces:**
-- Produces `sendText(input: { accessToken: string; conversationId: string; text: string; idempotencyKey: string }): Promise<{ messageId: string }>`.
+- Produces `sendText(input: { accessToken: string; accountId: string; conversationId: string; text: string }): Promise<{ messageId: string }>`.
 - Produces typed retryability for rate limit, auth failure, permanent policy/capability rejection, timeout, and ambiguous response.
 
 - [ ] **Step 1: Write failing send tests**
@@ -89,9 +89,9 @@ git commit -m "feat: add TikTok reply delivery contracts"
 ```ts
 await expect(client.sendText({
   accessToken: 'fictional-token',
+  accountId: 'fictional-business-account',
   conversationId: 'fictional-conversation',
   text: 'Дякуємо, замовлення прийнято.',
-  idempotencyKey: '00000000-0000-4000-8000-000000000001',
 })).resolves.toEqual({ messageId: 'fictional-provider-message' });
 ```
 
@@ -104,7 +104,7 @@ Expected: FAIL because `sendText` does not exist.
 
 - [ ] **Step 3: Implement the send boundary**
 
-Use the official conversation send endpoint and request shape available to the approved app. Send only text in this slice, cap input at the public contract's 1000 characters, and never log the token or message body. Return only the provider message ID.
+Use the official `POST /business/message/send/` conversation request shape available to the approved app. Send only text in this slice, cap input at the public contract's 1000 characters, and never log the token or message body. TikTok does not accept the Sales AITO idempotency key; keep that key at the API/persistence boundary and never automatically repeat an ambiguous provider send. Return only the provider message ID.
 
 - [ ] **Step 4: Run the client test**
 
