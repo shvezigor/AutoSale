@@ -20,7 +20,7 @@ test.beforeEach(async ({ page }) => {
   await expect(page).not.toHaveURL(/\/login/);
 });
 
-test('duplicate signed TikTok webhook creates one read-only inbox message', async ({ page }) => {
+test('duplicate signed TikTok webhook creates one inbox message with truthful reply capability', async ({ page }) => {
   const messageId = `fictional-tiktok-e2e-${Date.now()}`;
   const marker = `Хочу замовити Fictional Product ${messageId}`;
   const timestamp = Date.now();
@@ -64,13 +64,23 @@ test('duplicate signed TikTok webhook creates one read-only inbox message', asyn
     messages: Array<{ text?: string | null }>;
   };
   expect(detail.channel).toBe('TIKTOK');
-  expect(detail.replyCapability).toEqual({ enabled: false, reason: 'CHANNEL_READ_ONLY' });
+  expect(
+    detail.replyCapability.enabled || [
+      'NOT_CONNECTED',
+      'RECONNECT_REQUIRED',
+      'TIKTOK_CAPABILITY_UNAVAILABLE',
+      'TIKTOK_REPLY_NOT_PERMITTED',
+    ].includes(detail.replyCapability.reason ?? ''),
+  ).toBe(true);
   expect(detail.messages.filter((message) => message.text === marker)).toHaveLength(1);
 
   await page.goto(`/conversations/${conversationId}`);
   await expect(page.getByText(marker)).toBeVisible();
   await expect(page.getByText('TikTok', { exact: true })).toBeVisible();
-  await expect(page.getByText(/TikTok replies are currently|Відповіді у TikTok поки/)).toBeVisible();
+  const composer = page.getByRole('textbox', { name: /Відповідь|Reply/ });
+  await expect(composer).toBeVisible();
+  if (detail.replyCapability.enabled) await expect(composer).toBeEnabled();
+  else await expect(composer).toBeDisabled();
 });
 
 async function deliverBody(request: APIRequestContext, body: Buffer): Promise<void> {

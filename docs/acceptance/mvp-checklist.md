@@ -28,8 +28,9 @@
 - [x] 2026-10-02: Facebook Page OAuth/Page selection, encrypted credential lifecycle, signed `object: page` webhook routing, tenant-safe normalization/ingestion та read-only inbox покриті автоматизованими contract, integration, API, worker і web тестами.
 - [x] 2026-10-02: Facebook text/image/video/link/unsupported fixtures не створюють порожніх повідомлень; повторна доставка має одну provider identity, одне повідомлення й не запускає повторний order trigger.
 - [x] 2026-10-02: Facebook connection/settings та inbox мають owner/manager межу, локалізовані помилки, collapsed-by-default UI і явний `CHANNEL_READ_ONLY` без Instagram composer.
-- [x] 2026-10-04: TikTok inbound Slice A покритий tenant-safe OAuth, encrypted credential lifecycle, app-level signed webhook, durable deduplication, text/image/video/shared-post normalization, authenticated media copy, token refresh, order triggering та read-only inbox/settings тестами.
-- [x] 2026-10-04: opt-in TikTok browser acceptance використовує лише fictional payload і перевіряє повторну signed delivery, рівно одне повідомлення, TikTok label та `CHANNEL_READ_ONLY`; без підключеного ізольованого test account сценарій безпечно пропускається.
+- [x] 2026-10-04: TikTok inbound Slice A покритий tenant-safe OAuth, encrypted credential lifecycle, app-level signed webhook, durable deduplication, text/image/video/shared-post normalization, authenticated media copy, token refresh, order triggering та inbox/settings тестами.
+- [x] 2026-10-04: opt-in TikTok inbound browser acceptance використовує лише fictional payload і перевіряє повторну signed delivery, рівно одне повідомлення, TikTok label та правдиву reply capability; без підключеного ізольованого test account сценарій безпечно пропускається.
+- [x] 2026-10-04: manual TikTok replies покриті capability/window contracts, локальною idempotency, generation-fenced API/worker delivery, безпечним reconciliation, shared Instagram/TikTok composer і opt-in outbound browser scenario.
 
 ## Потребує зовнішніх тестових доступів
 
@@ -68,7 +69,8 @@
 - [ ] Одне реальне текстове, image та video повідомлення з'явилися рівно один раз із TikTok label; evidence містить лише статуси, counts і timestamps.
 - [ ] Повторна доставка signed event не створила другого повідомлення, attachment set, order trigger або замовлення.
 - [ ] Reconnect і disconnect/cleanup перевірені без токенів, тексту клієнта або provider account/message IDs у evidence.
-- [ ] До завершення live acceptance `TIKTOK_BUSINESS_MESSAGING_ENABLED=false` лишається production default; outbound replies проходять окремий майбутній gate.
+- [ ] Одна ручна відповідь у свіжому контрольованому діалозі отримала provider-confirmed `SENT` рівно один раз; повторний browser submit не створив дубль.
+- [ ] До завершення live acceptance `TIKTOK_BUSINESS_MESSAGING_ENABLED=false` лишається production default; outbound replies проходять окремий gate.
 
 ## Команда
 
@@ -82,4 +84,4 @@ E2E запускається проти `E2E_BASE_URL` (типово `http://loc
 Для захищених сценаріїв також задайте тестові `E2E_OWNER_EMAIL`, `E2E_OWNER_PASSWORD`, `E2E_ADMIN_EMAIL` та `E2E_ADMIN_PASSWORD`; деталі наведені в `docs/operations/authentication.md`.
 Live Google сценарій додатково вимагає `E2E_GOOGLE_LIVE=1` і `E2E_GOOGLE_SPREADSHEET_NAME`. Не вмикайте його для production акаунта чи таблиці.
 Facebook browser acceptance додатково вимагає `E2E_FACEBOOK_CONNECTED=1` і `E2E_FACEBOOK_PAGE_ID` для вже підключеної контрольованої Page. Не запускайте його проти production customer Page.
-TikTok browser acceptance додатково вимагає `E2E_TIKTOK_CONNECTED=1`, `E2E_TIKTOK_ACCOUNT_ID`, test-app `TIKTOK_CLIENT_ID`/`TIKTOK_CLIENT_SECRET` і вже підключений ізольований Business Account. Не запускайте його проти production customer account.
+TikTok inbound browser acceptance додатково вимагає `E2E_TIKTOK_CONNECTED=1`, `E2E_TIKTOK_ACCOUNT_ID`, test-app `TIKTOK_CLIENT_ID`/`TIKTOK_CLIENT_SECRET` і вже підключений ізольований Business Account. Outbound acceptance додатково вимагає `E2E_TIKTOK_OUTBOUND_CONNECTED=1` та `E2E_TIKTOK_OUTBOUND_CONVERSATION_ID` для свіжого погодженого тестового діалогу. Не запускайте їх проти production customer account.

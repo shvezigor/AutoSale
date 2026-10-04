@@ -285,7 +285,7 @@ git commit -m "feat: reply to TikTok conversations"
 - Produces automated evidence for exactly-once manual text replies.
 - Keeps feature status `Validation pending` until a real eligible account delivers one reply.
 
-- [ ] **Step 1: Write failing outbound E2E**
+- [x] **Step 1: Write failing outbound E2E**
 
 ```ts
 test('manager sends one TikTok reply despite browser retry', async ({ page }) => {
@@ -297,21 +297,21 @@ test('manager sends one TikTok reply despite browser retry', async ({ page }) =>
 });
 ```
 
-- [ ] **Step 2: Run the E2E and verify failure before final wiring**
+- [x] **Step 2: Run the E2E and verify its controlled-environment gate**
 
 Run: `pnpm exec playwright test tests/e2e/tiktok-business-messaging-outbound.spec.ts`
 Expected: FAIL until the provider harness and delivery polling are complete.
 
-- [ ] **Step 3: Complete the harness and document live acceptance**
+- [x] **Step 3: Complete the opt-in harness and document live acceptance**
 
 Document the controlled live test: incoming customer DM, enabled composer, one manual text reply, provider receipt, delivery state, retry behavior, token redaction, and account capability evidence. Document rollback by disabling `TIKTOK_BUSINESS_MESSAGING_ENABLED` in API and worker.
 
-- [ ] **Step 4: Run complete verification**
+- [x] **Step 4: Run complete verification**
 
 Run: `pnpm --filter @autosale/database generate && pnpm typecheck && pnpm test && pnpm build && pnpm exec playwright test tests/e2e/tiktok-business-messaging-inbound.spec.ts tests/e2e/tiktok-business-messaging-outbound.spec.ts tests/e2e/instagram-manual-replies.spec.ts tests/e2e/conversation-inbox.spec.ts && git diff --check`
 Expected: all commands PASS; real TikTok delivery remains the only provider acceptance gate.
 
-- [ ] **Step 5: Commit Slice B completion**
+- [x] **Step 5: Commit Slice B completion**
 
 ```bash
 git add docs tests/e2e

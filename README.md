@@ -24,7 +24,7 @@ Currently implemented areas include:
 - operational dashboard, notifications, observability, backup and restore.
 - tenant-isolated lifecycle exports, deletion-request freeze controls and non-destructive retention previews for platform operators.
 
-Facebook Page Messenger inbound is implemented but remains in controlled validation until Meta access and live Page acceptance pass. Threads, TikTok, Viber, email services and additional business integrations are planned extensions of the provider-neutral conversation and order model. Pricing is published as a hypothesis, while automated billing and subscription enforcement remain planned. See the [feature map](docs/features/README.md) for evidence-based status.
+Facebook Page Messenger inbound and TikTok Business Messaging inbound/manual replies are implemented behind disabled-by-default flags, but remain in controlled validation until provider access and live acceptance pass. Threads, Viber, email services and additional business integrations are planned extensions of the provider-neutral conversation and order model. Pricing is published as a hypothesis, while automated billing and subscription enforcement remain planned. See the [feature map](docs/features/README.md) for evidence-based status.
 
 ## System flow
 

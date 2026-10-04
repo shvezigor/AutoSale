@@ -40,6 +40,7 @@
 - [x] Known-safe rejections use bounded retry; timeout, 5xx and expired in-flight leases become `UNKNOWN` without automatic resend.
 - [x] Shared Instagram/TikTok composer uses localized capability guidance, shared buttons, accessible validation and preserves the draft after failure.
 - [x] Browser retry of unchanged text reuses the same local idempotency key; editing the draft starts a new logical send.
+- [x] Opt-in browser acceptance covers a controlled eligible conversation, double-submit, one visible message and provider-confirmed `SENT` state.
 - [ ] TikTok has granted the required send capability for the app/account/region.
 - [x] Conversation-specific eligibility is checked immediately before send.
 - [ ] One manual text reply is accepted and delivered exactly once.

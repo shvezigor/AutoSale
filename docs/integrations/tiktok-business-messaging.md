@@ -104,8 +104,12 @@ Use a dedicated fictional/test Business Account. The opt-in browser test needs
 `E2E_TIKTOK_CONNECTED=1`, `E2E_TIKTOK_ACCOUNT_ID`, fictional owner credentials,
 and the same test-app ID/secret used by the isolated stack. It posts a signed
 fictional event twice and proves that the shared inbox stores one TikTok
-message with tenant-safe reply capability. It must never target a production
-customer account.
+message with tenant-safe reply capability. The separate outbound test needs
+`E2E_TIKTOK_OUTBOUND_CONNECTED=1` and
+`E2E_TIKTOK_OUTBOUND_CONVERSATION_ID` for a recent controlled conversation
+whose customer has consented to the test. It double-submits one uniquely marked
+draft and requires exactly one local message with provider-confirmed `SENT`
+state. These tests must never target a production customer account.
 
 The live checks and safe evidence rules are maintained in
 [`tiktok-business-messaging-checklist.md`](../acceptance/tiktok-business-messaging-checklist.md).
