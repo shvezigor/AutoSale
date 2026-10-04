@@ -36,8 +36,10 @@
 - [x] Reply and delivery contracts distinguish capability, policy, reconnect, rate-limit, failure and unknown outcomes.
 - [x] Provider send boundary uses the documented conversation-recipient request and validates the returned message ID.
 - [x] API acceptance is tenant-safe and idempotent, routes only eligible TikTok conversations and pins each reply to the active credential generation.
+- [x] Worker delivery rechecks the current generation, send capability and 48-hour reply window immediately before provider contact.
+- [x] Known-safe rejections use bounded retry; timeout, 5xx and expired in-flight leases become `UNKNOWN` without automatic resend.
 - [ ] TikTok has granted the required send capability for the app/account/region.
-- [ ] Conversation-specific eligibility is checked immediately before send.
+- [x] Conversation-specific eligibility is checked immediately before send.
 - [ ] One manual text reply is accepted and delivered exactly once.
 - [ ] Transient/ambiguous results reconcile before any retry can contact TikTok again.
 - [ ] Permanent rejection produces a localized safe reason and no optimistic `SENT` state.

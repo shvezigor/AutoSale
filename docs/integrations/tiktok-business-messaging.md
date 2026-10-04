@@ -9,8 +9,12 @@ image, video and shared-post content into the shared inbox, and may invoke the
 existing order-recognition flow. Outbound foundations now define the provider
 send contract and accept tenant-safe, idempotent manual replies into durable
 local `PENDING` state while pinning them to the current credential generation.
-The worker delivery/reconciliation path and composer UI are still incomplete,
-so this is not yet an end-to-end send capability. The integration does not
+The worker now refreshes the pinned generation, rechecks outbound capability
+and the 48-hour conversation window, then settles the durable delivery state.
+Known-safe provider rejections may be retried within a fixed bound; timeouts,
+5xx responses and expired in-flight leases become `UNKNOWN` and are never
+automatically resent. The composer UI is still incomplete, so this is not yet
+an end-to-end user capability. The integration does not
 import message history, process comments or connect personal TikTok accounts.
 
 Provider access, business/account eligibility and regional availability are
@@ -66,7 +70,7 @@ OAuth codes, signatures, raw payloads or customer content in logs or evidence.
 5. Confirm it appears once in **Conversations** with the TikTok label.
 
 Managers can read the connection state but cannot connect or disconnect an
-account. Until Slice B worker delivery and UI acceptance are complete, TikTok
+account. Until Slice B UI and controlled acceptance are complete, TikTok
 conversations remain read-only in the production UI and must not imply that a
 reply was sent.
 
@@ -118,5 +122,4 @@ automated suite pass.
 
 Do not claim general availability until TikTok grants the required access and
 all inbound live checks pass. Outbound replies remain behind a separate
-acceptance gate until durable worker delivery, UI and controlled live checks
-are complete.
+acceptance gate until the UI and controlled live checks are complete.

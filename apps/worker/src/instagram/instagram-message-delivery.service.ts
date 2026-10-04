@@ -44,6 +44,7 @@ export class InstagramMessageDeliveryService {
       where: {
         id: job.messageId,
         tenantId: job.tenantId,
+        channel: 'INSTAGRAM',
         direction: 'OUTBOUND',
         AND: [
           {

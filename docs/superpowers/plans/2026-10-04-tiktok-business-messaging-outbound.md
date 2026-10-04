@@ -184,7 +184,7 @@ git commit -m "feat: accept idempotent TikTok manual replies"
 - Produces delivery transitions `PENDING -> SENDING -> SENT|FAILED|UNKNOWN` and provider message ID.
 - Produces reconciliation wakeups with the original `messageId` job ID.
 
-- [ ] **Step 1: Write failing delivery state-machine tests**
+- [x] **Step 1: Write failing delivery state-machine tests**
 
 ```ts
 await delivery.process({ tenantId, messageId });
@@ -198,21 +198,21 @@ expect(await prisma.message.findUnique({ where: { id: messageId } })).toMatchObj
 
 Cover duplicate worker delivery, active lease exclusion, stale credential generation, token refresh serialization, 429 safe retry, permanent permission failure, ambiguous timeout to `UNKNOWN`, tenant freeze, crash after provider acceptance, and reconciliation without duplicate send.
 
-- [ ] **Step 2: Run focused worker tests and verify failure**
+- [x] **Step 2: Run focused worker tests and verify failure**
 
 Run: `pnpm --filter @autosale/worker test -- tiktok-message-delivery.service.spec.ts tiktok-message-reconciler.spec.ts`
 Expected: FAIL because the delivery service is missing.
 
-- [ ] **Step 3: Implement claim/send/settle and reconciliation**
+- [x] **Step 3: Implement claim/send/settle and reconciliation**
 
 Claim by tenant, message ID, `channel = TIKTOK`, current status, and expired/no lease. Decrypt only inside the worker operation. Recheck connection generation and capability immediately before sending. Map typed client failures to the contract error enum. Retry only when another send cannot duplicate an unknown provider result; otherwise reconcile or require manager action.
 
-- [ ] **Step 4: Run focused worker tests**
+- [x] **Step 4: Run focused worker tests**
 
 Run: `pnpm --filter @autosale/worker test -- tiktok-message-delivery.service.spec.ts tiktok-message-reconciler.spec.ts`
 Expected: PASS.
 
-- [ ] **Step 5: Commit durable outbound delivery**
+- [x] **Step 5: Commit durable outbound delivery**
 
 ```bash
 git add apps/worker/src/tiktok apps/worker/src/main.ts

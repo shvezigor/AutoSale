@@ -43,6 +43,8 @@ export interface InstagramMessageQueue {
   ): Promise<unknown>;
 }
 
+const TIKTOK_REPLY_WINDOW_MS = 48 * 60 * 60_000;
+
 interface DeliveryConnection {
   status: string;
   encryptedAccessToken: string | null;
@@ -159,9 +161,10 @@ export class ConversationsService {
 
     const channel = socialChannel(conversation.channel);
     const now = new Date();
+    const lastInboundAt = latestInboundAt(conversation.messages);
     const connectionActive = channel === 'INSTAGRAM'
       ? isDeliveryConnectionActive(instagramConnection, now)
-      : channel === 'TIKTOK' && tikTokReplyCapability(tikTokConnection, now).enabled;
+      : channel === 'TIKTOK' && tikTokReplyCapability(tikTokConnection, now, lastInboundAt).enabled;
     return {
       id: conversation.id,
       channel,
@@ -169,9 +172,9 @@ export class ConversationsService {
       participantUsername: conversation.profile?.username ?? null,
       participantAvatarUrl: profileAvatarUrl(conversation.profile),
       replyCapability: channel === 'INSTAGRAM'
-        ? replyCapability(instagramConnection, now, latestInboundAt(conversation.messages))
+        ? replyCapability(instagramConnection, now, lastInboundAt)
         : channel === 'TIKTOK'
-          ? tikTokReplyCapability(tikTokConnection, now)
+          ? tikTokReplyCapability(tikTokConnection, now, lastInboundAt)
           : { enabled: false, reason: 'CHANNEL_READ_ONLY' },
       messages: conversation.messages.map((message) => mapMessage(
         message,
@@ -276,7 +279,11 @@ export class ConversationsService {
         senderId = connection.externalAccountId;
       } else {
         const connection = await transaction.tikTokConnection.findUnique({ where: { tenantId } });
-        const capability = tikTokReplyCapability(connection, now);
+        const capability = tikTokReplyCapability(
+          connection,
+          now,
+          conversation.messages[0]?.sourceTimestamp ?? null,
+        );
         if (!capability.enabled || !connection?.credentialGenerationId) {
           throw new BadRequestException('TikTok connection is not ready for replies');
         }
@@ -353,6 +360,14 @@ export class ConversationsService {
       await assertTenantAcceptingMutations(transaction, tenantId, 'CONVERSATION_REPLY');
       const conversation = await transaction.conversation.findFirst({
         where: { id: conversationId, tenantId, channel: { in: ['INSTAGRAM', 'TIKTOK'] } },
+        include: {
+          messages: {
+            where: { direction: 'INBOUND' },
+            orderBy: [{ sourceTimestamp: 'desc' }, { id: 'desc' }],
+            take: 1,
+            select: { sourceTimestamp: true },
+          },
+        },
       });
       if (!conversation) throw new NotFoundException('Conversation not found');
       const channel = replyChannel(conversation.channel);
@@ -364,7 +379,11 @@ export class ConversationsService {
         }
       } else {
         const connection = await transaction.tikTokConnection.findUnique({ where: { tenantId } });
-        if (!tikTokReplyCapability(connection, now).enabled || !connection?.credentialGenerationId) {
+        if (!tikTokReplyCapability(
+          connection,
+          now,
+          conversation.messages[0]?.sourceTimestamp ?? null,
+        ).enabled || !connection?.credentialGenerationId) {
           throw new BadRequestException('TikTok connection is not ready for replies');
         }
         credentialGenerationId = connection.credentialGenerationId;
@@ -437,6 +456,7 @@ function replyCapability(
 function tikTokReplyCapability(
   connection: TikTokDeliveryConnection | null,
   now: Date,
+  lastInboundAt: Date | null,
 ): ConversationDetailResponse['replyCapability'] {
   if (!connection) return { enabled: false, reason: 'NOT_CONNECTED' };
   if (connection.status === 'INBOUND_ONLY' || !tikTokSendTextCapability(connection.capabilities)) {
@@ -451,6 +471,9 @@ function tikTokReplyCapability(
     connection.refreshTokenExpiresAt.getTime() <= now.getTime()
   ) {
     return { enabled: false, reason: 'RECONNECT_REQUIRED' };
+  }
+  if (!(lastInboundAt instanceof Date) || now.getTime() - lastInboundAt.getTime() > TIKTOK_REPLY_WINDOW_MS) {
+    return { enabled: false, reason: 'TIKTOK_REPLY_NOT_PERMITTED' };
   }
   return { enabled: true, reason: null };
 }

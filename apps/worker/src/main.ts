@@ -59,6 +59,8 @@ import { TenantLifecycleProcessor } from './tenant-lifecycle/tenant-lifecycle.pr
 import { TenantLifecycleReconciler } from './tenant-lifecycle/tenant-lifecycle.reconciler.js';
 import { RetentionDryRunProcessor } from './tenant-lifecycle/retention-dry-run.processor.js';
 import { TikTokMediaCopyService } from './tiktok/tiktok-media-copy.service.js';
+import { TikTokMessageDeliveryService } from './tiktok/tiktok-message-delivery.service.js';
+import { TikTokMessageReconciler } from './tiktok/tiktok-message-reconciler.js';
 import { TikTokProcessor } from './tiktok/tiktok.processor.js';
 import { TikTokTokenService } from './tiktok/tiktok-token.service.js';
 
@@ -388,6 +390,9 @@ async function bootstrap(): Promise<void> {
       { connection: redisConnection, concurrency: 4 },
     )
     : undefined;
+  const tikTokMessageDelivery = tikTokClient && tikTokTokenService
+    ? new TikTokMessageDeliveryService(prisma, tikTokClient, tikTokTokenService)
+    : undefined;
   const telegramQueue = telegramDelivery
     ? new Queue('telegram', { connection: redisConnection })
     : undefined;
@@ -445,6 +450,48 @@ async function bootstrap(): Promise<void> {
             'autosale_operation_duration_seconds',
             (performance.now() - started) / 1000,
             { operation: 'instagram_message_send' },
+          );
+        }
+        return;
+      }
+      if (
+        job.name === 'tiktok.message.send' &&
+        typeof job.data?.tenantId === 'string' &&
+        typeof job.data?.messageId === 'string'
+      ) {
+        if (!env.TIKTOK_BUSINESS_MESSAGING_ENABLED || !tikTokMessageDelivery) return;
+        const started = performance.now();
+        try {
+          const result = await tikTokMessageDelivery.process({
+            tenantId: job.data.tenantId,
+            messageId: job.data.messageId,
+          });
+          metrics.increment('autosale_operations_total', {
+            operation: 'tiktok_message_send',
+            result: result === 'SENT' || result === 'IGNORED' || result === 'IGNORED_FROZEN' || result === 'RETRY'
+              ? 'success'
+              : 'failure',
+          });
+          logger.info('tiktok_message_send_completed', {
+            correlationId: job.data.messageId,
+            messageId: job.data.messageId,
+            result,
+          });
+        } catch (error) {
+          metrics.increment('autosale_operations_total', {
+            operation: 'tiktok_message_send', result: 'failure',
+          });
+          logger.warn('tiktok_message_send_failed', {
+            correlationId: job.data.messageId,
+            messageId: job.data.messageId,
+            errorCode: error instanceof Error ? error.name : 'UNKNOWN',
+          });
+          throw error;
+        } finally {
+          metrics.observe(
+            'autosale_operation_duration_seconds',
+            (performance.now() - started) / 1000,
+            { operation: 'tiktok_message_send' },
           );
         }
         return;
@@ -523,6 +570,9 @@ async function bootstrap(): Promise<void> {
   });
   const instagramProfileReconciler = new InstagramProfileReconciler(prisma, instagramProfileQueue);
   const instagramMessageReconciler = new InstagramMessageReconciler(prisma, instagramProfileQueue);
+  const tikTokMessageReconciler = tikTokMessageDelivery
+    ? new TikTokMessageReconciler(prisma, instagramProfileQueue)
+    : undefined;
   const instagramAvatarCleanupReconciler = new InstagramAvatarCleanupReconciler(prisma, storage);
   const instagramQueue = new Queue('instagram', {
     connection: {
@@ -735,6 +785,37 @@ async function bootstrap(): Promise<void> {
     }
   };
   const instagramMessageReconcileTimer = setInterval(() => void reconcileInstagramMessages(), 5_000);
+  let reconcilingTikTokMessages = false;
+  const reconcileTikTokMessages = async (): Promise<void> => {
+    if (!tikTokMessageReconciler || reconcilingTikTokMessages) return;
+    reconcilingTikTokMessages = true;
+    try {
+      const result = await tikTokMessageReconciler.reconcile();
+      metrics.set('autosale_queue_backlog', result.attempted, { queue: 'tiktok_message' });
+      metrics.increment('autosale_operations_total', {
+        operation: 'tiktok_message_reconcile',
+        result: result.queued === result.attempted ? 'success' : 'failure',
+      });
+      if (result.markedUnknown > 0) {
+        logger.warn('tiktok_message_stale_delivery_unknown', {
+          correlationId: 'system:tiktok-message', count: result.markedUnknown,
+        });
+      }
+    } catch (error) {
+      metrics.increment('autosale_operations_total', {
+        operation: 'tiktok_message_reconcile', result: 'failure',
+      });
+      logger.warn('tiktok_message_reconcile_failed', {
+        correlationId: 'system:tiktok-message',
+        errorCode: error instanceof Error ? error.name : 'UNKNOWN',
+      });
+    } finally {
+      reconcilingTikTokMessages = false;
+    }
+  };
+  const tikTokMessageReconcileTimer = tikTokMessageReconciler
+    ? setInterval(() => void reconcileTikTokMessages(), 5_000)
+    : undefined;
   let schedulingCatalogueSources = false;
   const scheduleCatalogueSources = async (): Promise<void> => {
     if (schedulingCatalogueSources) return;
@@ -900,6 +981,7 @@ async function bootstrap(): Promise<void> {
   void reconcileInstagramEvents();
   void reconcileInstagramProfiles();
   void reconcileInstagramMessages();
+  void reconcileTikTokMessages();
   void scheduleCatalogueSources();
   void reconcileNotificationRetention();
   void reconcileUserAvatars();
@@ -918,6 +1000,7 @@ async function bootstrap(): Promise<void> {
     clearInterval(instagramReconcileTimer);
     clearInterval(instagramProfileReconcileTimer);
     clearInterval(instagramMessageReconcileTimer);
+    if (tikTokMessageReconcileTimer) clearInterval(tikTokMessageReconcileTimer);
     clearInterval(catalogueScheduleTimer);
     clearInterval(notificationRetentionTimer);
     clearInterval(userAvatarCleanupTimer);

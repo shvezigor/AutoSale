@@ -380,6 +380,17 @@ describe('ConversationsService', () => {
       );
       const stored = await prisma.message.findUniqueOrThrow({ where: { id: first.id } });
       expect(stored.deliveryCredentialGenerationId).toBe(generationId);
+
+      await prisma.message.updateMany({
+        where: { tenantId, conversationId: conversation.id, direction: 'INBOUND' },
+        data: { sourceTimestamp: new Date(Date.now() - 49 * 60 * 60_000) },
+      });
+      await expect(service.detail(tenantId, conversation.id)).resolves.toMatchObject({
+        replyCapability: { enabled: false, reason: 'TIKTOK_REPLY_NOT_PERMITTED' },
+      });
+      await expect(service.send(tenantId, actorUserId, conversation.id, {
+        text: 'Запізніла відповідь', idempotencyKey: randomUUID(),
+      })).rejects.toBeInstanceOf(BadRequestException);
     } finally {
       await prisma.message.deleteMany({ where: { conversationId: conversation.id } });
       await prisma.conversation.delete({ where: { id: conversation.id } });
@@ -429,6 +440,14 @@ describe('ConversationsService', () => {
       credentialGenerationId: generationId, tokenExpiresAt: new Date(Date.now() + 60_000),
       refreshTokenExpiresAt: new Date(Date.now() + 86_400_000),
     } });
+    const inboundEvent = await prisma.webhookEvent.create({ data: {
+      tenantId, provider: 'TIKTOK', externalEventId: `fictional-tiktok-retry-event-${randomUUID()}`, payload: {},
+    } });
+    await prisma.message.create({ data: {
+      tenantId, conversationId: conversation.id, rawEventId: inboundEvent.id, channel: 'TIKTOK',
+      externalMessageId: `fictional-tiktok-retry-inbound-${randomUUID()}`, direction: 'INBOUND',
+      senderId: 'fictional-tiktok-customer', text: 'Повторіть відповідь', sourceTimestamp: new Date(),
+    } });
     const message = await prisma.message.create({ data: {
       tenantId, conversationId: conversation.id, rawEventId: null, channel: 'TIKTOK',
       externalMessageId: `local:${randomUUID()}`, direction: 'OUTBOUND', senderId: 'fictional-business',
@@ -449,6 +468,7 @@ describe('ConversationsService', () => {
     } finally {
       await prisma.message.deleteMany({ where: { conversationId: conversation.id } });
       await prisma.conversation.delete({ where: { id: conversation.id } });
+      await prisma.webhookEvent.delete({ where: { id: inboundEvent.id } });
       await prisma.tikTokConnection.deleteMany({ where: { tenantId } });
     }
   });

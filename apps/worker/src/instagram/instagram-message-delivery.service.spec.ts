@@ -261,6 +261,16 @@ describe('InstagramMessageDeliveryService', () => {
     expect(sendText).toHaveBeenCalledTimes(1);
   });
 
+  it('never claims an outbound message owned by another social channel', async () => {
+    const messageId = await seedMessage({ channel: 'TIKTOK' });
+
+    await expect(service().process({ tenantId, messageId })).resolves.toBe('IGNORED');
+    expect(sendText).not.toHaveBeenCalled();
+    await expect(prisma.message.findUniqueOrThrow({ where: { id: messageId } })).resolves.toMatchObject({
+      deliveryStatus: 'PENDING', deliveryAttempts: 0,
+    });
+  });
+
   function service(): InstagramMessageDeliveryService {
     return new InstagramMessageDeliveryService(
       prisma,
@@ -271,7 +281,11 @@ describe('InstagramMessageDeliveryService', () => {
     );
   }
 
-  async function seedMessage(overrides: { deliveryAttempts?: number; sentByUserId?: string } = {}): Promise<string> {
+  async function seedMessage(overrides: {
+    deliveryAttempts?: number;
+    sentByUserId?: string;
+    channel?: 'INSTAGRAM' | 'TIKTOK';
+  } = {}): Promise<string> {
     const id = randomUUID();
     await prisma.message.create({
       data: {
@@ -279,7 +293,7 @@ describe('InstagramMessageDeliveryService', () => {
         tenantId,
         conversationId,
         rawEventId: null,
-        channel: 'INSTAGRAM',
+        channel: overrides.channel ?? 'INSTAGRAM',
         externalMessageId: `local:${id}`,
         direction: 'OUTBOUND',
         senderId: 'instagram-shop',
