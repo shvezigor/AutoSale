@@ -16,7 +16,7 @@ TikTok is a separate provider. It must not reuse Meta credentials, webhook verif
 - **Verified Business Account** is a TikTok business-verification state based on provider-accepted registration documents. TikTok may require it for Business Messaging capabilities.
 - **TikTok Business Center** manages business assets, users, and access.
 - **Sales AITO developer app** is the single TikTok for Business application operated by Sales AITO. It requests Business Messaging API access and passes TikTok's security/privacy review once for the platform.
-- **Account capability** is TikTok's runtime result describing which messaging operations a connected account may use. Product behavior follows this result rather than assuming that every Business Account has identical access.
+- **Messaging readiness** combines granted account-holder OAuth scopes with TikTok's conversation-specific capability result. Product behavior never assumes that every Business Account or conversation has identical send access.
 
 The owner of Sales AITO is responsible for registering the developer app, configuring production URLs, and completing provider review. Each merchant remains responsible for signing in, accepting TikTok terms, authorizing its account, and supplying its own legal documents when TikTok requires business verification. Sales AITO never asks a merchant to paste an access token.
 
@@ -99,16 +99,16 @@ The merchant clicks `Connect TikTok`, signs in on TikTok, chooses the eligible a
 
 ### 6.2 Callback and activation
 
-The callback consumes OAuth state before external I/O, exchanges the authorization code server-side, validates granted scopes, encrypts credentials, resolves the authorized TikTok account, and calls the account-capability endpoint.
+The callback consumes OAuth state before external I/O, exchanges the authorization code server-side, validates granted scopes, encrypts credentials, resolves the authorized TikTok account, and verifies the token's `creator_id` against the returned `open_id`.
 
 Activation succeeds only after:
 
 1. the account identity is verified against the token;
-2. the required inbound capability is present;
+2. the required inbound scopes are present;
 3. the deployment-level Business Messaging webhook configuration is healthy;
 4. the connection is atomically stored as active.
 
-Missing optional outbound capability does not block inbound activation. It produces an inbound-only state with an explicit localized explanation. Missing inbound capability fails safely with `TIKTOK_ACCOUNT_NOT_ELIGIBLE`.
+Missing optional outbound scope does not block inbound activation. It produces an inbound-only state with an explicit localized explanation. Missing inbound scopes fail safely with `TIKTOK_ACCOUNT_NOT_ELIGIBLE`. A send scope is not sufficient proof that a particular conversation accepts a reply; the outbound adapter checks TikTok's conversation-specific capability endpoint immediately before delivery.
 
 ### 6.3 Token refresh, reconnect, and disconnect
 

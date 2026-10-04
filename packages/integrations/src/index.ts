@@ -55,6 +55,19 @@ export {
   type MetaFacebookUserToken,
 } from './meta-facebook.js';
 export {
+  TikTokBusinessMessagingClient,
+  TikTokBusinessMessagingError,
+  type TikTokAccountToken,
+  type TikTokAuthorizationInput,
+  type TikTokBusinessAccount,
+  type TikTokBusinessMessagingClientConfig,
+  type TikTokBusinessMessagingStage,
+  type TikTokCodeExchangeInput,
+  type TikTokDownloadedMedia,
+  type TikTokMediaDownloadInput,
+  type TikTokMediaType,
+} from './tiktok-business-messaging.js';
+export {
   TelegramBotClient,
   TelegramBotError,
   type TelegramBotClientConfig,

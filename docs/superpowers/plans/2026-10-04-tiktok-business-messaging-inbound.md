@@ -177,7 +177,7 @@ git commit -m "feat: persist tenant-scoped TikTok connections"
 - Modify: `packages/integrations/src/index.ts`
 
 **Interfaces:**
-- Produces: `TikTokBusinessMessagingClient` with `getAuthorizationUrl`, `exchangeCode`, `refreshToken`, `revokeToken`, `getAccount`, `getCapabilities`, and `downloadMedia`.
+- Produces: `TikTokBusinessMessagingClient` with `getAuthorizationUrl`, `exchangeCode`, `refreshToken`, `revokeToken`, `getAccount`, scope-derived `getCapabilities`, and `downloadMedia`. Conversation-specific send capability is checked later by the outbound adapter and is not treated as an account-wide OAuth property.
 - Produces a separate deployment-scoped webhook configuration boundary. It is reconciled once for the Sales AITO developer app and is never created or deleted during merchant connect/disconnect.
 - Produces: `TikTokBusinessMessagingError` with `stage`, HTTP status, provider code, request ID, and retryability.
 
@@ -191,7 +191,7 @@ const client = new TikTokBusinessMessagingClient({
 });
 expect(client.getAuthorizationUrl({ state: 'opaque-state', redirectUri: 'https://sales-aito.test/api/integrations/tiktok/callback' }))
   .toContain('state=opaque-state');
-await expect(client.getCapabilities('token')).resolves.toEqual({
+await expect(client.getCapabilities('token', 'fictional-account')).resolves.toEqual({
   receiveMessages: true,
   sendText: false,
   sendImage: false,
@@ -261,7 +261,7 @@ Expected: FAIL because the module is missing.
 
 - [ ] **Step 3: Implement owner-only OAuth and activation**
 
-Reuse `CredentialCipher`, `assertTenantAcceptingMutations`, authenticated principal/role guards, safe return-path rules, cleanup leasing, and transaction patterns from Facebook without sharing provider credentials or Page-selection logic. Set `ACTIVE` when receive and text-send are available; set `INBOUND_ONLY` when receive is available but send is not. Do not persist an active connection unless the deployment-level webhook health check succeeds. Merchant disconnect revokes only merchant credentials and must not delete the shared webhook subscription.
+Reuse `CredentialCipher`, `assertTenantAcceptingMutations`, authenticated principal/role guards, safe return-path rules, cleanup leasing, and transaction patterns from Facebook without sharing provider credentials or Page-selection logic. Inspect the token and bind its `creator_id` to the returned `open_id`; use granted `message.list.read/manage/send` scopes for account-level readiness. Set `ACTIVE` when inbound scopes and the send scope are available; set `INBOUND_ONLY` when inbound scopes are available but send is not. Actual send eligibility is conversation-specific and is checked only when sending. Do not persist an active connection unless the deployment-level webhook health check succeeds. Merchant disconnect revokes only merchant credentials and must not delete the shared webhook subscription.
 
 - [ ] **Step 4: Run focused API tests**
 
