@@ -65,11 +65,14 @@ OAuth codes, signatures, raw payloads or customer content in logs or evidence.
 
 ## Workspace owner flow
 
-1. Open **Settings -> Social networks / customers -> TikTok**.
-2. Choose **Connect TikTok** and complete authorization on TikTok.
-3. Return to Sales AITO and confirm the safe account label and inbound status.
-4. Send a new controlled direct message to the authorized Business Account.
-5. Confirm it appears once in **Conversations** with the TikTok label.
+1. After deployment configuration is healthy, a platform administrator enables
+   **TikTok** in **Admin -> Integrations**. The deployment flag remains a hard
+   safety ceiling and cannot be overridden in the browser.
+2. Open **Settings -> Social networks / customers -> TikTok**.
+3. Choose **Connect TikTok** and complete authorization on TikTok.
+4. Return to Sales AITO and confirm the safe account label and inbound status.
+5. Send a new controlled direct message to the authorized Business Account.
+6. Confirm it appears once in **Conversations** with the TikTok label.
 
 Managers can read the connection state but cannot connect or disconnect an
 account. When TikTok does not grant send capability, requires reconnect, or the
@@ -116,11 +119,22 @@ The live checks and safe evidence rules are maintained in
 
 ## Disable and rollback
 
-Set `TIKTOK_BUSINESS_MESSAGING_ENABLED=false` in both API and worker and restart
-them. This stops authorization and TikTok processing without deleting stored
-conversations. Keep the provider webhook configured while diagnosing only if
-the API remains able to authenticate and safely acknowledge callbacks; remove
-or disable it in the TikTok console when the API endpoint is being retired.
+For an operational pause, disable **TikTok** in **Admin -> Integrations**.
+Authorization, signed-event persistence, new outbound acceptance and provider
+sends stop without deleting account access, conversations or messages. Signed
+callbacks continue to be acknowledged safely, but events received only during
+the pause are not guaranteed to be replayed. Pending outbound work is not
+claimed and does not consume an attempt; an expired `SENDING` lease is still
+fenced as `UNKNOWN` before the pause check and is never automatically resent.
+
+For a deployment emergency, set `TIKTOK_BUSINESS_MESSAGING_ENABLED=false` in
+both API and worker and restart them. Keep the provider webhook configured while
+diagnosing only if the API remains able to authenticate and safely acknowledge
+callbacks; remove or disable it in the TikTok console when the API endpoint is
+being retired. To recover, restore and verify server configuration, set the
+deployment flag to true, restart and confirm API/worker health, then enable the
+runtime control in **Admin -> Integrations**. Reconciliation resumes eligible
+pending work but never blindly retries `UNKNOWN` delivery.
 
 For one tenant, disconnect the account in Settings and allow any durable
 cleanup operation to finish before reconnecting. Do not delete connection or

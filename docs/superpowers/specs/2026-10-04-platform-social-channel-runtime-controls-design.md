@@ -1,6 +1,6 @@
 # Platform social-channel runtime controls
 
-**Status:** approved design, implementation pending
+**Status:** implemented; isolated live browser mutation acceptance pending
 
 **Actor:** Sales AITO platform administrator
 
@@ -200,6 +200,13 @@ The disable confirmation states that existing data and connections are retained,
 5. Verify inbound and outbound behavior with a clearly fictional/test account, then monitor safe telemetry.
 
 The production deploy remains manual until the documented automated Hetzner deployment is commissioned. No credential is stored in Git or entered through this admin page.
+
+## Verification evidence
+
+- Shared contracts, database fail-closed behavior, role grants, audited admin mutations, API boundaries and worker pause behavior are covered by package tests.
+- The admin and tenant interfaces are covered in Ukrainian and English, including confirmation, duplicate-submit protection, retained connection identity, unavailable deployment state and responsive layout contracts.
+- `tests/e2e/admin-integrations.spec.ts` covers desktop, 390 x 844 mobile, keyboard focus, confirmation cancellation, enable/disable and state restoration. It is deliberately opt-in through `E2E_ADMIN_CHANNEL_CONTROLS_LIVE=1` because it mutates installation-wide state. The current local run discovered the scenario successfully and skipped it because isolated platform-admin credentials were not configured.
+- Provider approval and controlled live message acceptance remain separate launch gates; implementation does not imply Facebook or TikTok general availability.
 
 ## Success criteria
 

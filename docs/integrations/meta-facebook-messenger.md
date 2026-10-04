@@ -71,12 +71,15 @@ See [Meta's accepted business verification documents](https://www.facebook.com/b
    `FACEBOOK_MESSENGER_ENABLED=true` in API and worker only for the controlled
    environment. Restart both and confirm health. The API deliberately refuses
    to start with the feature enabled and missing/partial Facebook credentials.
-2. Open **Settings -> Social networks / customers -> Facebook** as an owner.
-3. Choose **Connect Facebook** and authorize the requested Page permissions.
-4. If more than one eligible Page exists, select one. Sales AITO activates it
+2. As a platform administrator, open **Admin -> Integrations** and enable
+   **Facebook Messenger**. The deployment flag is a hard ceiling: the browser
+   cannot enable a deployment whose app configuration is unavailable.
+3. Open **Settings -> Social networks / customers -> Facebook** as an owner.
+4. Choose **Connect Facebook** and authorize the requested Page permissions.
+5. If more than one eligible Page exists, select one. Sales AITO activates it
    only after the Page token resolves its own identity through Graph `/me`,
    that identity matches the selected Page, and webhook subscription succeeds.
-5. Return to Settings and verify the safe Page name and active status.
+6. Return to Settings and verify the safe Page name and active status.
 
 Managers see connection status without mutation controls. OAuth state is
 single-use and hashed. Candidate Page tokens live encrypted for at most ten
@@ -119,11 +122,20 @@ never target a production customer Page.
 
 ## Rollback and recovery
 
-Set `FACEBOOK_MESSENGER_ENABLED=false` in both API and worker and restart them.
-This stops new Facebook connection and ingestion work without deleting stored
-conversations. A signed callback may still be acknowledged safely while the
-feature is disabled. For a single tenant, disconnect the Page from Settings;
-if Meta unsubscribe has an unknown outcome, allow the recorded cleanup job to
-finish before reconnecting.
+For an operational pause, first disable **Facebook Messenger** in **Admin ->
+Integrations**. Existing encrypted credentials, Page identity, conversations
+and messages remain stored. New OAuth activation and Facebook event persistence
+stop immediately; correctly signed callbacks are still acknowledged to avoid
+provider retry storms. Events received only during the pause are not guaranteed
+to be replayed. The Facebook gate is applied after Meta event classification,
+so Instagram ingestion on the shared endpoint remains independent.
+
+For a deployment emergency, set `FACEBOOK_MESSENGER_ENABLED=false` in API and
+worker and restart them. To recover, restore and verify the dedicated server
+configuration first, set the deployment flag to true, restart and confirm
+health, then enable the runtime control in **Admin -> Integrations**. For a
+single tenant, disconnect the Page from Settings; this cleanup action remains
+available during a platform pause. If Meta unsubscribe has an unknown outcome,
+allow the recorded cleanup job to finish before reconnecting.
 
 Do not claim general availability until all live checklist items are complete.
