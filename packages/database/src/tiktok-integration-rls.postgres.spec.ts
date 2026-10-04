@@ -105,6 +105,22 @@ describe('TikTok Business Messaging integration row-level security', () => {
       SELECT * FROM public.api_consume_tiktok_oauth_attempt(${'hash-tenant-b'}, ${new Date('2026-10-04T12:00:00.000Z')})
     `).rejects.toMatchObject({ code: 'P2010' });
   });
+
+  it('keeps shared app webhook lifecycle out of tenant credential cleanup records', async () => {
+    const columns = await admin.query<{ column_name: string }>(`
+      SELECT column_name
+      FROM information_schema.columns
+      WHERE table_schema = 'public'
+        AND table_name = 'tiktok_credential_cleanups'
+      ORDER BY column_name
+    `);
+
+    expect(columns.rows.map(({ column_name }) => column_name)).not.toEqual(expect.arrayContaining([
+      'webhook_delete_status',
+      'webhook_delete_attempted_at',
+      'webhook_delete_succeeded_at',
+    ]));
+  });
 });
 
 async function seedTenantIntegration(

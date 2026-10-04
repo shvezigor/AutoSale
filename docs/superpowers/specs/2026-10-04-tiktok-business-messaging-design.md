@@ -37,7 +37,7 @@ The approved capability is delivered in two ordered slices behind one disabled-b
 - owner-only TikTok account authorization;
 - encrypted access and refresh token storage;
 - capability check before activation;
-- Business Messaging webhook registration and verified callback handling;
+- verified callback handling through the single Business Messaging webhook subscription owned by the Sales AITO developer app;
 - durable and idempotent ingestion of inbound text, image, video, link, and unsupported attachments;
 - provider-neutral persistence into the existing conversation, message, attachment, and order-trigger flow with channel `TIKTOK`;
 - TikTok-labelled conversations in the existing desktop and mobile inbox;
@@ -105,7 +105,7 @@ Activation succeeds only after:
 
 1. the account identity is verified against the token;
 2. the required inbound capability is present;
-3. the webhook configuration is created or confirmed;
+3. the deployment-level Business Messaging webhook configuration is healthy;
 4. the connection is atomically stored as active.
 
 Missing optional outbound capability does not block inbound activation. It produces an inbound-only state with an explicit localized explanation. Missing inbound capability fails safely with `TIKTOK_ACCOUNT_NOT_ELIGIBLE`.
@@ -114,13 +114,15 @@ Missing optional outbound capability does not block inbound activation. It produ
 
 Access-token refresh is server-side and serialized per connection generation. A refresh failure fences outbound work and moves the connection to `RECONNECT_REQUIRED` without deleting already stored conversations.
 
-Disconnect fences the credential generation first, removes the provider webhook configuration when possible, revokes/destroys credentials, and records unresolved cleanup for retry. Reconnect cannot reactivate superseded credentials or allow old queued sends to use a new connection generation.
+Disconnect fences the credential generation first, revokes/destroys only that merchant's credentials, and records unresolved credential cleanup for retry. It must never delete or modify the shared developer-app webhook subscription. Reconnect cannot reactivate superseded credentials or allow old queued sends to use a new connection generation.
 
 Only owners may connect, reconnect, or disconnect. Managers receive a read-only connection and capability summary.
 
 ## 7. Webhook and inbound processing
 
 TikTok uses its own public callback route, for example `POST /webhooks/tiktok`. Exact challenge and signature fields are implemented from the provider contract available to the approved app; they are not inferred from Meta behavior.
+
+Business Messaging webhook subscriptions are developer-app resources: Sales AITO owns one `DIRECT_MESSAGE` subscription for the production callback, not one subscription per merchant account. Deployment/startup verification creates or reconciles that shared subscription. Merchant OAuth activation only verifies that this platform-level prerequisite is healthy; merchant disconnect never deletes it.
 
 Processing order:
 
@@ -193,7 +195,7 @@ Add tenant-scoped models equivalent in lifecycle guarantees, not copied naming, 
 
 - `TikTokConnection`: external account identity, encrypted credentials, expiry, capability snapshot, credential generation, status, health, and connected actor;
 - `TikTokOAuthAttempt`: hashed state, tenant/user binding, expiry, consumption state, and safe return path;
-- `TikTokCleanupOperation`: webhook/revocation cleanup state and retry metadata.
+- `TikTokCleanupOperation`: merchant credential revocation cleanup state and retry metadata. Shared webhook lifecycle does not belong to this tenant-scoped record.
 
 Existing provider-neutral `Conversation`, `Message`, `Attachment`, `WebhookEvent`, and outbound delivery records remain canonical and gain `TIKTOK` channel support. Every new relation is tenant-scoped and covered by RLS/transaction-context tests.
 
@@ -236,7 +238,7 @@ Provider outages and unknown failures remain form- or operation-level errors. Ra
 Implementation follows test-first, scoped increments and must include:
 
 - contracts accepting `TIKTOK` while retaining Instagram and Facebook payloads;
-- strict provider-client tests for authorization, token exchange/refresh/revoke, account identity, capability, webhook configuration, conversation/message retrieval, media upload/download, and sending;
+- strict provider-client tests for authorization, token exchange/refresh/revoke, account identity, capability, app-level webhook configuration, conversation/message retrieval, media upload/download, and sending;
 - OAuth owner/manager, state replay, expiry, missing scope, account collision, refresh race, reconnect, and cleanup tests;
 - official or provider-console webhook fixtures for challenge, signature, duplicate registration, malformed supported events, and tenant isolation;
 - normalizer coverage for text, link, image, video, mixed payload, unsupported attachment, echo/outbound event, and missing media;

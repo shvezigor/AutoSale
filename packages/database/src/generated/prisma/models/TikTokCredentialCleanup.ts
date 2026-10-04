@@ -46,9 +46,6 @@ export type TikTokCredentialCleanupMinAggregateOutputType = {
   source: string | null
   state: $Enums.TikTokCredentialCleanupState | null
   callbackResolvedAt: Date | null
-  webhookDeleteStatus: $Enums.TikTokCredentialCleanupOperationStatus | null
-  webhookDeleteAttemptedAt: Date | null
-  webhookDeleteSucceededAt: Date | null
   revokeStatus: $Enums.TikTokCredentialCleanupOperationStatus | null
   revokeAttemptedAt: Date | null
   revokeSucceededAt: Date | null
@@ -75,9 +72,6 @@ export type TikTokCredentialCleanupMaxAggregateOutputType = {
   source: string | null
   state: $Enums.TikTokCredentialCleanupState | null
   callbackResolvedAt: Date | null
-  webhookDeleteStatus: $Enums.TikTokCredentialCleanupOperationStatus | null
-  webhookDeleteAttemptedAt: Date | null
-  webhookDeleteSucceededAt: Date | null
   revokeStatus: $Enums.TikTokCredentialCleanupOperationStatus | null
   revokeAttemptedAt: Date | null
   revokeSucceededAt: Date | null
@@ -104,9 +98,6 @@ export type TikTokCredentialCleanupCountAggregateOutputType = {
   source: number
   state: number
   callbackResolvedAt: number
-  webhookDeleteStatus: number
-  webhookDeleteAttemptedAt: number
-  webhookDeleteSucceededAt: number
   revokeStatus: number
   revokeAttemptedAt: number
   revokeSucceededAt: number
@@ -145,9 +136,6 @@ export type TikTokCredentialCleanupMinAggregateInputType = {
   source?: true
   state?: true
   callbackResolvedAt?: true
-  webhookDeleteStatus?: true
-  webhookDeleteAttemptedAt?: true
-  webhookDeleteSucceededAt?: true
   revokeStatus?: true
   revokeAttemptedAt?: true
   revokeSucceededAt?: true
@@ -174,9 +162,6 @@ export type TikTokCredentialCleanupMaxAggregateInputType = {
   source?: true
   state?: true
   callbackResolvedAt?: true
-  webhookDeleteStatus?: true
-  webhookDeleteAttemptedAt?: true
-  webhookDeleteSucceededAt?: true
   revokeStatus?: true
   revokeAttemptedAt?: true
   revokeSucceededAt?: true
@@ -203,9 +188,6 @@ export type TikTokCredentialCleanupCountAggregateInputType = {
   source?: true
   state?: true
   callbackResolvedAt?: true
-  webhookDeleteStatus?: true
-  webhookDeleteAttemptedAt?: true
-  webhookDeleteSucceededAt?: true
   revokeStatus?: true
   revokeAttemptedAt?: true
   revokeSucceededAt?: true
@@ -319,9 +301,6 @@ export type TikTokCredentialCleanupGroupByOutputType = {
   source: string
   state: $Enums.TikTokCredentialCleanupState
   callbackResolvedAt: Date | null
-  webhookDeleteStatus: $Enums.TikTokCredentialCleanupOperationStatus
-  webhookDeleteAttemptedAt: Date | null
-  webhookDeleteSucceededAt: Date | null
   revokeStatus: $Enums.TikTokCredentialCleanupOperationStatus
   revokeAttemptedAt: Date | null
   revokeSucceededAt: Date | null
@@ -371,9 +350,6 @@ export type TikTokCredentialCleanupWhereInput = {
   source?: Prisma.StringFilter<"TikTokCredentialCleanup"> | string
   state?: Prisma.EnumTikTokCredentialCleanupStateFilter<"TikTokCredentialCleanup"> | $Enums.TikTokCredentialCleanupState
   callbackResolvedAt?: Prisma.DateTimeNullableFilter<"TikTokCredentialCleanup"> | Date | string | null
-  webhookDeleteStatus?: Prisma.EnumTikTokCredentialCleanupOperationStatusFilter<"TikTokCredentialCleanup"> | $Enums.TikTokCredentialCleanupOperationStatus
-  webhookDeleteAttemptedAt?: Prisma.DateTimeNullableFilter<"TikTokCredentialCleanup"> | Date | string | null
-  webhookDeleteSucceededAt?: Prisma.DateTimeNullableFilter<"TikTokCredentialCleanup"> | Date | string | null
   revokeStatus?: Prisma.EnumTikTokCredentialCleanupOperationStatusFilter<"TikTokCredentialCleanup"> | $Enums.TikTokCredentialCleanupOperationStatus
   revokeAttemptedAt?: Prisma.DateTimeNullableFilter<"TikTokCredentialCleanup"> | Date | string | null
   revokeSucceededAt?: Prisma.DateTimeNullableFilter<"TikTokCredentialCleanup"> | Date | string | null
@@ -402,9 +378,6 @@ export type TikTokCredentialCleanupOrderByWithRelationInput = {
   source?: Prisma.SortOrder
   state?: Prisma.SortOrder
   callbackResolvedAt?: Prisma.SortOrderInput | Prisma.SortOrder
-  webhookDeleteStatus?: Prisma.SortOrder
-  webhookDeleteAttemptedAt?: Prisma.SortOrderInput | Prisma.SortOrder
-  webhookDeleteSucceededAt?: Prisma.SortOrderInput | Prisma.SortOrder
   revokeStatus?: Prisma.SortOrder
   revokeAttemptedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   revokeSucceededAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -436,9 +409,6 @@ export type TikTokCredentialCleanupWhereUniqueInput = Prisma.AtLeast<{
   source?: Prisma.StringFilter<"TikTokCredentialCleanup"> | string
   state?: Prisma.EnumTikTokCredentialCleanupStateFilter<"TikTokCredentialCleanup"> | $Enums.TikTokCredentialCleanupState
   callbackResolvedAt?: Prisma.DateTimeNullableFilter<"TikTokCredentialCleanup"> | Date | string | null
-  webhookDeleteStatus?: Prisma.EnumTikTokCredentialCleanupOperationStatusFilter<"TikTokCredentialCleanup"> | $Enums.TikTokCredentialCleanupOperationStatus
-  webhookDeleteAttemptedAt?: Prisma.DateTimeNullableFilter<"TikTokCredentialCleanup"> | Date | string | null
-  webhookDeleteSucceededAt?: Prisma.DateTimeNullableFilter<"TikTokCredentialCleanup"> | Date | string | null
   revokeStatus?: Prisma.EnumTikTokCredentialCleanupOperationStatusFilter<"TikTokCredentialCleanup"> | $Enums.TikTokCredentialCleanupOperationStatus
   revokeAttemptedAt?: Prisma.DateTimeNullableFilter<"TikTokCredentialCleanup"> | Date | string | null
   revokeSucceededAt?: Prisma.DateTimeNullableFilter<"TikTokCredentialCleanup"> | Date | string | null
@@ -467,9 +437,6 @@ export type TikTokCredentialCleanupOrderByWithAggregationInput = {
   source?: Prisma.SortOrder
   state?: Prisma.SortOrder
   callbackResolvedAt?: Prisma.SortOrderInput | Prisma.SortOrder
-  webhookDeleteStatus?: Prisma.SortOrder
-  webhookDeleteAttemptedAt?: Prisma.SortOrderInput | Prisma.SortOrder
-  webhookDeleteSucceededAt?: Prisma.SortOrderInput | Prisma.SortOrder
   revokeStatus?: Prisma.SortOrder
   revokeAttemptedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   revokeSucceededAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -504,9 +471,6 @@ export type TikTokCredentialCleanupScalarWhereWithAggregatesInput = {
   source?: Prisma.StringWithAggregatesFilter<"TikTokCredentialCleanup"> | string
   state?: Prisma.EnumTikTokCredentialCleanupStateWithAggregatesFilter<"TikTokCredentialCleanup"> | $Enums.TikTokCredentialCleanupState
   callbackResolvedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"TikTokCredentialCleanup"> | Date | string | null
-  webhookDeleteStatus?: Prisma.EnumTikTokCredentialCleanupOperationStatusWithAggregatesFilter<"TikTokCredentialCleanup"> | $Enums.TikTokCredentialCleanupOperationStatus
-  webhookDeleteAttemptedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"TikTokCredentialCleanup"> | Date | string | null
-  webhookDeleteSucceededAt?: Prisma.DateTimeNullableWithAggregatesFilter<"TikTokCredentialCleanup"> | Date | string | null
   revokeStatus?: Prisma.EnumTikTokCredentialCleanupOperationStatusWithAggregatesFilter<"TikTokCredentialCleanup"> | $Enums.TikTokCredentialCleanupOperationStatus
   revokeAttemptedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"TikTokCredentialCleanup"> | Date | string | null
   revokeSucceededAt?: Prisma.DateTimeNullableWithAggregatesFilter<"TikTokCredentialCleanup"> | Date | string | null
@@ -532,9 +496,6 @@ export type TikTokCredentialCleanupCreateInput = {
   source?: string
   state?: $Enums.TikTokCredentialCleanupState
   callbackResolvedAt?: Date | string | null
-  webhookDeleteStatus?: $Enums.TikTokCredentialCleanupOperationStatus
-  webhookDeleteAttemptedAt?: Date | string | null
-  webhookDeleteSucceededAt?: Date | string | null
   revokeStatus?: $Enums.TikTokCredentialCleanupOperationStatus
   revokeAttemptedAt?: Date | string | null
   revokeSucceededAt?: Date | string | null
@@ -562,9 +523,6 @@ export type TikTokCredentialCleanupUncheckedCreateInput = {
   source?: string
   state?: $Enums.TikTokCredentialCleanupState
   callbackResolvedAt?: Date | string | null
-  webhookDeleteStatus?: $Enums.TikTokCredentialCleanupOperationStatus
-  webhookDeleteAttemptedAt?: Date | string | null
-  webhookDeleteSucceededAt?: Date | string | null
   revokeStatus?: $Enums.TikTokCredentialCleanupOperationStatus
   revokeAttemptedAt?: Date | string | null
   revokeSucceededAt?: Date | string | null
@@ -590,9 +548,6 @@ export type TikTokCredentialCleanupUpdateInput = {
   source?: Prisma.StringFieldUpdateOperationsInput | string
   state?: Prisma.EnumTikTokCredentialCleanupStateFieldUpdateOperationsInput | $Enums.TikTokCredentialCleanupState
   callbackResolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  webhookDeleteStatus?: Prisma.EnumTikTokCredentialCleanupOperationStatusFieldUpdateOperationsInput | $Enums.TikTokCredentialCleanupOperationStatus
-  webhookDeleteAttemptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  webhookDeleteSucceededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   revokeStatus?: Prisma.EnumTikTokCredentialCleanupOperationStatusFieldUpdateOperationsInput | $Enums.TikTokCredentialCleanupOperationStatus
   revokeAttemptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   revokeSucceededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -620,9 +575,6 @@ export type TikTokCredentialCleanupUncheckedUpdateInput = {
   source?: Prisma.StringFieldUpdateOperationsInput | string
   state?: Prisma.EnumTikTokCredentialCleanupStateFieldUpdateOperationsInput | $Enums.TikTokCredentialCleanupState
   callbackResolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  webhookDeleteStatus?: Prisma.EnumTikTokCredentialCleanupOperationStatusFieldUpdateOperationsInput | $Enums.TikTokCredentialCleanupOperationStatus
-  webhookDeleteAttemptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  webhookDeleteSucceededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   revokeStatus?: Prisma.EnumTikTokCredentialCleanupOperationStatusFieldUpdateOperationsInput | $Enums.TikTokCredentialCleanupOperationStatus
   revokeAttemptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   revokeSucceededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -649,9 +601,6 @@ export type TikTokCredentialCleanupCreateManyInput = {
   source?: string
   state?: $Enums.TikTokCredentialCleanupState
   callbackResolvedAt?: Date | string | null
-  webhookDeleteStatus?: $Enums.TikTokCredentialCleanupOperationStatus
-  webhookDeleteAttemptedAt?: Date | string | null
-  webhookDeleteSucceededAt?: Date | string | null
   revokeStatus?: $Enums.TikTokCredentialCleanupOperationStatus
   revokeAttemptedAt?: Date | string | null
   revokeSucceededAt?: Date | string | null
@@ -677,9 +626,6 @@ export type TikTokCredentialCleanupUpdateManyMutationInput = {
   source?: Prisma.StringFieldUpdateOperationsInput | string
   state?: Prisma.EnumTikTokCredentialCleanupStateFieldUpdateOperationsInput | $Enums.TikTokCredentialCleanupState
   callbackResolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  webhookDeleteStatus?: Prisma.EnumTikTokCredentialCleanupOperationStatusFieldUpdateOperationsInput | $Enums.TikTokCredentialCleanupOperationStatus
-  webhookDeleteAttemptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  webhookDeleteSucceededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   revokeStatus?: Prisma.EnumTikTokCredentialCleanupOperationStatusFieldUpdateOperationsInput | $Enums.TikTokCredentialCleanupOperationStatus
   revokeAttemptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   revokeSucceededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -705,9 +651,6 @@ export type TikTokCredentialCleanupUncheckedUpdateManyInput = {
   source?: Prisma.StringFieldUpdateOperationsInput | string
   state?: Prisma.EnumTikTokCredentialCleanupStateFieldUpdateOperationsInput | $Enums.TikTokCredentialCleanupState
   callbackResolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  webhookDeleteStatus?: Prisma.EnumTikTokCredentialCleanupOperationStatusFieldUpdateOperationsInput | $Enums.TikTokCredentialCleanupOperationStatus
-  webhookDeleteAttemptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  webhookDeleteSucceededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   revokeStatus?: Prisma.EnumTikTokCredentialCleanupOperationStatusFieldUpdateOperationsInput | $Enums.TikTokCredentialCleanupOperationStatus
   revokeAttemptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   revokeSucceededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -744,9 +687,6 @@ export type TikTokCredentialCleanupCountOrderByAggregateInput = {
   source?: Prisma.SortOrder
   state?: Prisma.SortOrder
   callbackResolvedAt?: Prisma.SortOrder
-  webhookDeleteStatus?: Prisma.SortOrder
-  webhookDeleteAttemptedAt?: Prisma.SortOrder
-  webhookDeleteSucceededAt?: Prisma.SortOrder
   revokeStatus?: Prisma.SortOrder
   revokeAttemptedAt?: Prisma.SortOrder
   revokeSucceededAt?: Prisma.SortOrder
@@ -778,9 +718,6 @@ export type TikTokCredentialCleanupMaxOrderByAggregateInput = {
   source?: Prisma.SortOrder
   state?: Prisma.SortOrder
   callbackResolvedAt?: Prisma.SortOrder
-  webhookDeleteStatus?: Prisma.SortOrder
-  webhookDeleteAttemptedAt?: Prisma.SortOrder
-  webhookDeleteSucceededAt?: Prisma.SortOrder
   revokeStatus?: Prisma.SortOrder
   revokeAttemptedAt?: Prisma.SortOrder
   revokeSucceededAt?: Prisma.SortOrder
@@ -807,9 +744,6 @@ export type TikTokCredentialCleanupMinOrderByAggregateInput = {
   source?: Prisma.SortOrder
   state?: Prisma.SortOrder
   callbackResolvedAt?: Prisma.SortOrder
-  webhookDeleteStatus?: Prisma.SortOrder
-  webhookDeleteAttemptedAt?: Prisma.SortOrder
-  webhookDeleteSucceededAt?: Prisma.SortOrder
   revokeStatus?: Prisma.SortOrder
   revokeAttemptedAt?: Prisma.SortOrder
   revokeSucceededAt?: Prisma.SortOrder
@@ -932,9 +866,6 @@ export type TikTokCredentialCleanupCreateWithoutTenantInput = {
   source?: string
   state?: $Enums.TikTokCredentialCleanupState
   callbackResolvedAt?: Date | string | null
-  webhookDeleteStatus?: $Enums.TikTokCredentialCleanupOperationStatus
-  webhookDeleteAttemptedAt?: Date | string | null
-  webhookDeleteSucceededAt?: Date | string | null
   revokeStatus?: $Enums.TikTokCredentialCleanupOperationStatus
   revokeAttemptedAt?: Date | string | null
   revokeSucceededAt?: Date | string | null
@@ -960,9 +891,6 @@ export type TikTokCredentialCleanupUncheckedCreateWithoutTenantInput = {
   source?: string
   state?: $Enums.TikTokCredentialCleanupState
   callbackResolvedAt?: Date | string | null
-  webhookDeleteStatus?: $Enums.TikTokCredentialCleanupOperationStatus
-  webhookDeleteAttemptedAt?: Date | string | null
-  webhookDeleteSucceededAt?: Date | string | null
   revokeStatus?: $Enums.TikTokCredentialCleanupOperationStatus
   revokeAttemptedAt?: Date | string | null
   revokeSucceededAt?: Date | string | null
@@ -1018,9 +946,6 @@ export type TikTokCredentialCleanupScalarWhereInput = {
   source?: Prisma.StringFilter<"TikTokCredentialCleanup"> | string
   state?: Prisma.EnumTikTokCredentialCleanupStateFilter<"TikTokCredentialCleanup"> | $Enums.TikTokCredentialCleanupState
   callbackResolvedAt?: Prisma.DateTimeNullableFilter<"TikTokCredentialCleanup"> | Date | string | null
-  webhookDeleteStatus?: Prisma.EnumTikTokCredentialCleanupOperationStatusFilter<"TikTokCredentialCleanup"> | $Enums.TikTokCredentialCleanupOperationStatus
-  webhookDeleteAttemptedAt?: Prisma.DateTimeNullableFilter<"TikTokCredentialCleanup"> | Date | string | null
-  webhookDeleteSucceededAt?: Prisma.DateTimeNullableFilter<"TikTokCredentialCleanup"> | Date | string | null
   revokeStatus?: Prisma.EnumTikTokCredentialCleanupOperationStatusFilter<"TikTokCredentialCleanup"> | $Enums.TikTokCredentialCleanupOperationStatus
   revokeAttemptedAt?: Prisma.DateTimeNullableFilter<"TikTokCredentialCleanup"> | Date | string | null
   revokeSucceededAt?: Prisma.DateTimeNullableFilter<"TikTokCredentialCleanup"> | Date | string | null
@@ -1046,9 +971,6 @@ export type TikTokCredentialCleanupCreateWithoutDeadLetteredByInput = {
   source?: string
   state?: $Enums.TikTokCredentialCleanupState
   callbackResolvedAt?: Date | string | null
-  webhookDeleteStatus?: $Enums.TikTokCredentialCleanupOperationStatus
-  webhookDeleteAttemptedAt?: Date | string | null
-  webhookDeleteSucceededAt?: Date | string | null
   revokeStatus?: $Enums.TikTokCredentialCleanupOperationStatus
   revokeAttemptedAt?: Date | string | null
   revokeSucceededAt?: Date | string | null
@@ -1075,9 +997,6 @@ export type TikTokCredentialCleanupUncheckedCreateWithoutDeadLetteredByInput = {
   source?: string
   state?: $Enums.TikTokCredentialCleanupState
   callbackResolvedAt?: Date | string | null
-  webhookDeleteStatus?: $Enums.TikTokCredentialCleanupOperationStatus
-  webhookDeleteAttemptedAt?: Date | string | null
-  webhookDeleteSucceededAt?: Date | string | null
   revokeStatus?: $Enums.TikTokCredentialCleanupOperationStatus
   revokeAttemptedAt?: Date | string | null
   revokeSucceededAt?: Date | string | null
@@ -1128,9 +1047,6 @@ export type TikTokCredentialCleanupCreateManyTenantInput = {
   source?: string
   state?: $Enums.TikTokCredentialCleanupState
   callbackResolvedAt?: Date | string | null
-  webhookDeleteStatus?: $Enums.TikTokCredentialCleanupOperationStatus
-  webhookDeleteAttemptedAt?: Date | string | null
-  webhookDeleteSucceededAt?: Date | string | null
   revokeStatus?: $Enums.TikTokCredentialCleanupOperationStatus
   revokeAttemptedAt?: Date | string | null
   revokeSucceededAt?: Date | string | null
@@ -1156,9 +1072,6 @@ export type TikTokCredentialCleanupUpdateWithoutTenantInput = {
   source?: Prisma.StringFieldUpdateOperationsInput | string
   state?: Prisma.EnumTikTokCredentialCleanupStateFieldUpdateOperationsInput | $Enums.TikTokCredentialCleanupState
   callbackResolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  webhookDeleteStatus?: Prisma.EnumTikTokCredentialCleanupOperationStatusFieldUpdateOperationsInput | $Enums.TikTokCredentialCleanupOperationStatus
-  webhookDeleteAttemptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  webhookDeleteSucceededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   revokeStatus?: Prisma.EnumTikTokCredentialCleanupOperationStatusFieldUpdateOperationsInput | $Enums.TikTokCredentialCleanupOperationStatus
   revokeAttemptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   revokeSucceededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1184,9 +1097,6 @@ export type TikTokCredentialCleanupUncheckedUpdateWithoutTenantInput = {
   source?: Prisma.StringFieldUpdateOperationsInput | string
   state?: Prisma.EnumTikTokCredentialCleanupStateFieldUpdateOperationsInput | $Enums.TikTokCredentialCleanupState
   callbackResolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  webhookDeleteStatus?: Prisma.EnumTikTokCredentialCleanupOperationStatusFieldUpdateOperationsInput | $Enums.TikTokCredentialCleanupOperationStatus
-  webhookDeleteAttemptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  webhookDeleteSucceededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   revokeStatus?: Prisma.EnumTikTokCredentialCleanupOperationStatusFieldUpdateOperationsInput | $Enums.TikTokCredentialCleanupOperationStatus
   revokeAttemptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   revokeSucceededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1212,9 +1122,6 @@ export type TikTokCredentialCleanupUncheckedUpdateManyWithoutTenantInput = {
   source?: Prisma.StringFieldUpdateOperationsInput | string
   state?: Prisma.EnumTikTokCredentialCleanupStateFieldUpdateOperationsInput | $Enums.TikTokCredentialCleanupState
   callbackResolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  webhookDeleteStatus?: Prisma.EnumTikTokCredentialCleanupOperationStatusFieldUpdateOperationsInput | $Enums.TikTokCredentialCleanupOperationStatus
-  webhookDeleteAttemptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  webhookDeleteSucceededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   revokeStatus?: Prisma.EnumTikTokCredentialCleanupOperationStatusFieldUpdateOperationsInput | $Enums.TikTokCredentialCleanupOperationStatus
   revokeAttemptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   revokeSucceededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1241,9 +1148,6 @@ export type TikTokCredentialCleanupCreateManyDeadLetteredByInput = {
   source?: string
   state?: $Enums.TikTokCredentialCleanupState
   callbackResolvedAt?: Date | string | null
-  webhookDeleteStatus?: $Enums.TikTokCredentialCleanupOperationStatus
-  webhookDeleteAttemptedAt?: Date | string | null
-  webhookDeleteSucceededAt?: Date | string | null
   revokeStatus?: $Enums.TikTokCredentialCleanupOperationStatus
   revokeAttemptedAt?: Date | string | null
   revokeSucceededAt?: Date | string | null
@@ -1268,9 +1172,6 @@ export type TikTokCredentialCleanupUpdateWithoutDeadLetteredByInput = {
   source?: Prisma.StringFieldUpdateOperationsInput | string
   state?: Prisma.EnumTikTokCredentialCleanupStateFieldUpdateOperationsInput | $Enums.TikTokCredentialCleanupState
   callbackResolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  webhookDeleteStatus?: Prisma.EnumTikTokCredentialCleanupOperationStatusFieldUpdateOperationsInput | $Enums.TikTokCredentialCleanupOperationStatus
-  webhookDeleteAttemptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  webhookDeleteSucceededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   revokeStatus?: Prisma.EnumTikTokCredentialCleanupOperationStatusFieldUpdateOperationsInput | $Enums.TikTokCredentialCleanupOperationStatus
   revokeAttemptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   revokeSucceededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1297,9 +1198,6 @@ export type TikTokCredentialCleanupUncheckedUpdateWithoutDeadLetteredByInput = {
   source?: Prisma.StringFieldUpdateOperationsInput | string
   state?: Prisma.EnumTikTokCredentialCleanupStateFieldUpdateOperationsInput | $Enums.TikTokCredentialCleanupState
   callbackResolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  webhookDeleteStatus?: Prisma.EnumTikTokCredentialCleanupOperationStatusFieldUpdateOperationsInput | $Enums.TikTokCredentialCleanupOperationStatus
-  webhookDeleteAttemptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  webhookDeleteSucceededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   revokeStatus?: Prisma.EnumTikTokCredentialCleanupOperationStatusFieldUpdateOperationsInput | $Enums.TikTokCredentialCleanupOperationStatus
   revokeAttemptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   revokeSucceededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1325,9 +1223,6 @@ export type TikTokCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByInput
   source?: Prisma.StringFieldUpdateOperationsInput | string
   state?: Prisma.EnumTikTokCredentialCleanupStateFieldUpdateOperationsInput | $Enums.TikTokCredentialCleanupState
   callbackResolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  webhookDeleteStatus?: Prisma.EnumTikTokCredentialCleanupOperationStatusFieldUpdateOperationsInput | $Enums.TikTokCredentialCleanupOperationStatus
-  webhookDeleteAttemptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  webhookDeleteSucceededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   revokeStatus?: Prisma.EnumTikTokCredentialCleanupOperationStatusFieldUpdateOperationsInput | $Enums.TikTokCredentialCleanupOperationStatus
   revokeAttemptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   revokeSucceededAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1355,9 +1250,6 @@ export type TikTokCredentialCleanupSelect<ExtArgs extends runtime.Types.Extensio
   source?: boolean
   state?: boolean
   callbackResolvedAt?: boolean
-  webhookDeleteStatus?: boolean
-  webhookDeleteAttemptedAt?: boolean
-  webhookDeleteSucceededAt?: boolean
   revokeStatus?: boolean
   revokeAttemptedAt?: boolean
   revokeSucceededAt?: boolean
@@ -1386,9 +1278,6 @@ export type TikTokCredentialCleanupSelectCreateManyAndReturn<ExtArgs extends run
   source?: boolean
   state?: boolean
   callbackResolvedAt?: boolean
-  webhookDeleteStatus?: boolean
-  webhookDeleteAttemptedAt?: boolean
-  webhookDeleteSucceededAt?: boolean
   revokeStatus?: boolean
   revokeAttemptedAt?: boolean
   revokeSucceededAt?: boolean
@@ -1417,9 +1306,6 @@ export type TikTokCredentialCleanupSelectUpdateManyAndReturn<ExtArgs extends run
   source?: boolean
   state?: boolean
   callbackResolvedAt?: boolean
-  webhookDeleteStatus?: boolean
-  webhookDeleteAttemptedAt?: boolean
-  webhookDeleteSucceededAt?: boolean
   revokeStatus?: boolean
   revokeAttemptedAt?: boolean
   revokeSucceededAt?: boolean
@@ -1448,9 +1334,6 @@ export type TikTokCredentialCleanupSelectScalar = {
   source?: boolean
   state?: boolean
   callbackResolvedAt?: boolean
-  webhookDeleteStatus?: boolean
-  webhookDeleteAttemptedAt?: boolean
-  webhookDeleteSucceededAt?: boolean
   revokeStatus?: boolean
   revokeAttemptedAt?: boolean
   revokeSucceededAt?: boolean
@@ -1467,7 +1350,7 @@ export type TikTokCredentialCleanupSelectScalar = {
   updatedAt?: boolean
 }
 
-export type TikTokCredentialCleanupOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "credentialGenerationId" | "tenantId" | "externalAccountId" | "encryptedAccessToken" | "encryptedRefreshToken" | "source" | "state" | "callbackResolvedAt" | "webhookDeleteStatus" | "webhookDeleteAttemptedAt" | "webhookDeleteSucceededAt" | "revokeStatus" | "revokeAttemptedAt" | "revokeSucceededAt" | "attempts" | "leaseId" | "leaseExpiresAt" | "version" | "lastErrorCode" | "permanentFailureAt" | "deadLetteredAt" | "deadLetteredByUserId" | "terminalAt" | "createdAt" | "updatedAt", ExtArgs["result"]["tikTokCredentialCleanup"]>
+export type TikTokCredentialCleanupOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "credentialGenerationId" | "tenantId" | "externalAccountId" | "encryptedAccessToken" | "encryptedRefreshToken" | "source" | "state" | "callbackResolvedAt" | "revokeStatus" | "revokeAttemptedAt" | "revokeSucceededAt" | "attempts" | "leaseId" | "leaseExpiresAt" | "version" | "lastErrorCode" | "permanentFailureAt" | "deadLetteredAt" | "deadLetteredByUserId" | "terminalAt" | "createdAt" | "updatedAt", ExtArgs["result"]["tikTokCredentialCleanup"]>
 export type TikTokCredentialCleanupInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   deadLetteredBy?: boolean | Prisma.TikTokCredentialCleanup$deadLetteredByArgs<ExtArgs>
@@ -1497,9 +1380,6 @@ export type $TikTokCredentialCleanupPayload<ExtArgs extends runtime.Types.Extens
     source: string
     state: $Enums.TikTokCredentialCleanupState
     callbackResolvedAt: Date | null
-    webhookDeleteStatus: $Enums.TikTokCredentialCleanupOperationStatus
-    webhookDeleteAttemptedAt: Date | null
-    webhookDeleteSucceededAt: Date | null
     revokeStatus: $Enums.TikTokCredentialCleanupOperationStatus
     revokeAttemptedAt: Date | null
     revokeSucceededAt: Date | null
@@ -1948,9 +1828,6 @@ export interface TikTokCredentialCleanupFieldRefs {
   readonly source: Prisma.FieldRef<"TikTokCredentialCleanup", 'String'>
   readonly state: Prisma.FieldRef<"TikTokCredentialCleanup", 'TikTokCredentialCleanupState'>
   readonly callbackResolvedAt: Prisma.FieldRef<"TikTokCredentialCleanup", 'DateTime'>
-  readonly webhookDeleteStatus: Prisma.FieldRef<"TikTokCredentialCleanup", 'TikTokCredentialCleanupOperationStatus'>
-  readonly webhookDeleteAttemptedAt: Prisma.FieldRef<"TikTokCredentialCleanup", 'DateTime'>
-  readonly webhookDeleteSucceededAt: Prisma.FieldRef<"TikTokCredentialCleanup", 'DateTime'>
   readonly revokeStatus: Prisma.FieldRef<"TikTokCredentialCleanup", 'TikTokCredentialCleanupOperationStatus'>
   readonly revokeAttemptedAt: Prisma.FieldRef<"TikTokCredentialCleanup", 'DateTime'>
   readonly revokeSucceededAt: Prisma.FieldRef<"TikTokCredentialCleanup", 'DateTime'>

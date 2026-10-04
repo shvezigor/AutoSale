@@ -177,7 +177,8 @@ git commit -m "feat: persist tenant-scoped TikTok connections"
 - Modify: `packages/integrations/src/index.ts`
 
 **Interfaces:**
-- Produces: `TikTokBusinessMessagingClient` with `getAuthorizationUrl`, `exchangeCode`, `refreshToken`, `revokeToken`, `getAccount`, `getCapabilities`, `createWebhook`, `deleteWebhook`, and `downloadMedia`.
+- Produces: `TikTokBusinessMessagingClient` with `getAuthorizationUrl`, `exchangeCode`, `refreshToken`, `revokeToken`, `getAccount`, `getCapabilities`, and `downloadMedia`.
+- Produces a separate deployment-scoped webhook configuration boundary. It is reconciled once for the Sales AITO developer app and is never created or deleted during merchant connect/disconnect.
 - Produces: `TikTokBusinessMessagingError` with `stage`, HTTP status, provider code, request ID, and retryability.
 
 - [ ] **Step 1: Write failing client tests with fictional responses**
@@ -206,7 +207,7 @@ Expected: FAIL because the client is missing.
 
 - [ ] **Step 3: Implement one strict boundary client**
 
-Use `https://business-api.tiktok.com/` as the API origin, `AbortSignal.timeout(10_000)`, `Authorization: Bearer <token>` only where required by the approved API contract, and Zod/explicit guards for every response. Keep endpoint construction private so a provider version update changes one file. Never include response bodies or tokens in thrown error messages.
+Use `https://business-api.tiktok.com/` as the API origin, `AbortSignal.timeout(10_000)`, the documented `Access-Token: <token>` header for authorized API for Business requests, and Zod/explicit guards for every response. OAuth token endpoints remain unauthenticated requests carrying app credentials in the JSON body. Keep endpoint construction private so a provider version update changes one file. Never include response bodies or tokens in thrown error messages.
 
 - [ ] **Step 4: Run the integration package tests**
 
@@ -246,12 +247,12 @@ await expect(service.authorize(tenantId, ownerId, '/settings?tab=social')).resol
 await expect(service.completeCallback('fictional-code', state)).resolves.toMatchObject({
   redirectPath: '/settings?tab=social&tiktok=connected',
 });
-expect(client.createWebhook).toHaveBeenCalledTimes(1);
+expect(appWebhookHealth.assertHealthy).toHaveBeenCalledTimes(1);
 expect(await prisma.tikTokConnection.findUnique({ where: { tenantId } }))
   .toMatchObject({ externalAccountId: 'fictional-account', status: 'INBOUND_ONLY' });
 ```
 
-Also cover manager denial, replayed/expired state, missing inbound capability, account already owned by another tenant, callback race, encrypted credentials, failed webhook setup, and disconnect cleanup.
+Also cover manager denial, replayed/expired state, missing inbound capability, account already owned by another tenant, callback race, encrypted credentials, unhealthy deployment-level webhook configuration, and merchant credential cleanup. Assert that disconnect never mutates the shared webhook subscription.
 
 - [ ] **Step 2: Run focused API tests and verify failure**
 
@@ -260,7 +261,7 @@ Expected: FAIL because the module is missing.
 
 - [ ] **Step 3: Implement owner-only OAuth and activation**
 
-Reuse `CredentialCipher`, `assertTenantAcceptingMutations`, authenticated principal/role guards, safe return-path rules, cleanup leasing, and transaction patterns from Facebook without sharing provider credentials or Page-selection logic. Set `ACTIVE` when receive and text-send are available; set `INBOUND_ONLY` when receive is available but send is not. Do not persist an active connection until webhook registration succeeds.
+Reuse `CredentialCipher`, `assertTenantAcceptingMutations`, authenticated principal/role guards, safe return-path rules, cleanup leasing, and transaction patterns from Facebook without sharing provider credentials or Page-selection logic. Set `ACTIVE` when receive and text-send are available; set `INBOUND_ONLY` when receive is available but send is not. Do not persist an active connection unless the deployment-level webhook health check succeeds. Merchant disconnect revokes only merchant credentials and must not delete the shared webhook subscription.
 
 - [ ] **Step 4: Run focused API tests**
 
