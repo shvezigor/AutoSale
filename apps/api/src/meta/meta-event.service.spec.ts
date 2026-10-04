@@ -8,6 +8,15 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { MetaEventService } from './meta-event.service.js';
 
+function channelGate(enabled: boolean) {
+  return {
+    getControl: async () => ({
+      key: 'FACEBOOK_MESSENGER', deploymentAvailable: true, runtimeEnabled: enabled,
+      effectiveEnabled: enabled, state: enabled ? 'ACTIVE' : 'ADMIN_DISABLED', updatedAt: null,
+    }),
+  } as never;
+}
+
 describe('MetaEventService', () => {
   let container: StartedPostgreSqlContainer;
   let prisma: PrismaClient;
@@ -30,7 +39,7 @@ describe('MetaEventService', () => {
       data: { key: 'default', name: 'Test Tenant' },
     });
     tenantId = tenant.id;
-    service = new MetaEventService(prisma);
+    service = new MetaEventService(prisma, channelGate(false));
   }, 60_000);
 
   afterAll(async () => {
@@ -40,7 +49,9 @@ describe('MetaEventService', () => {
 
   it('rejects and transitions an expired active Instagram connection before webhook processing', async () => {
     const connection = await prisma.instagramConnection.create({ data: { tenantId, externalAccountId: '17841400000000000', status: 'ACTIVE', tokenExpiresAt: new Date('2026-08-28T11:59:59.999Z') } });
-    const expiredService = new MetaEventService(prisma, () => new Date('2026-08-28T12:00:00.000Z'));
+    const expiredService = new MetaEventService(
+      prisma, channelGate(false), () => new Date('2026-08-28T12:00:00.000Z'),
+    );
     await expect(expiredService.resolveTenant('INSTAGRAM', connection.externalAccountId)).resolves.toBeNull();
     await expect(prisma.instagramConnection.findUniqueOrThrow({ where: { id: connection.id } })).resolves.toMatchObject({ status: 'REAUTH_REQUIRED', lastErrorCode: 'META_TOKEN_EXPIRED' });
   });
@@ -54,7 +65,9 @@ describe('MetaEventService', () => {
         status: 'ACTIVE',
       },
     });
-    const enabledService = new MetaEventService(prisma, () => new Date('2026-10-02T12:00:00.000Z'), true);
+    const enabledService = new MetaEventService(
+      prisma, channelGate(true), () => new Date('2026-10-02T12:00:00.000Z'),
+    );
 
     await expect(enabledService.resolveTenant('FACEBOOK', connection.externalPageId)).resolves.toBe(tenantId);
     await expect(service.resolveTenant('FACEBOOK', connection.externalPageId)).resolves.toBeNull();

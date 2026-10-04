@@ -3,6 +3,15 @@ import { assertTenantAcceptingMutations, Prisma, TenantLifecycleFrozenError } fr
 
 import { TikTokEventService } from './tiktok-event.service.js';
 
+function channelGate(enabled = true) {
+  return {
+    getControl: vi.fn().mockResolvedValue({
+      key: 'TIKTOK_BUSINESS_MESSAGING', deploymentAvailable: true, runtimeEnabled: enabled,
+      effectiveEnabled: enabled, state: enabled ? 'ACTIVE' : 'ADMIN_DISABLED', updatedAt: null,
+    }),
+  } as never;
+}
+
 vi.mock('@autosale/database', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@autosale/database')>();
   return {
@@ -14,6 +23,14 @@ vi.mock('@autosale/database', async (importOriginal) => {
 });
 
 describe('TikTokEventService', () => {
+  it('stops before tenant resolution when the platform channel is paused', async () => {
+    const prisma = { $queryRaw: vi.fn() };
+    const service = new TikTokEventService(prisma as never, channelGate(false));
+
+    await expect(service.resolveTenant('fictional-account')).resolves.toBeNull();
+    expect(prisma.$queryRaw).not.toHaveBeenCalled();
+  });
+
   it('resolves only an active or inbound-only unexpired account mapping', async () => {
     const connection = {
       tenantId: 'tenant-a', status: 'INBOUND_ONLY', tokenExpiresAt: new Date('2026-10-05T00:00:00.000Z'),
@@ -28,7 +45,9 @@ describe('TikTokEventService', () => {
       $queryRaw: vi.fn().mockResolvedValue([{ tenant_id: 'tenant-a' }]),
       $transaction: async (operation: any) => operation(transaction),
     };
-    const service = new TikTokEventService(prisma, () => new Date('2026-10-04T20:00:00.000Z'));
+    const service = new TikTokEventService(
+      prisma, channelGate(), () => new Date('2026-10-04T20:00:00.000Z'),
+    );
     await expect(service.resolveTenant('fictional-account')).resolves.toBe('tenant-a');
 
     connection.tokenExpiresAt = new Date('2026-10-04T19:59:59.000Z');
@@ -39,7 +58,7 @@ describe('TikTokEventService', () => {
   it('stores a sanitized TikTok event and returns the durable id', async () => {
     const create = vi.fn().mockResolvedValue({ id: 'event-a' });
     const prisma: any = { $transaction: async (operation: any) => operation({ webhookEvent: { create } }) };
-    const service = new TikTokEventService(prisma);
+    const service = new TikTokEventService(prisma, channelGate());
     await expect(service.register({
       tenantId: 'tenant-a', externalEventId: 'tiktok:message-a',
       payload: { event: 'im_receive_msg', access_token: 'must-not-remain' },
@@ -58,7 +77,7 @@ describe('TikTokEventService', () => {
       },
     };
     const prisma: any = { $transaction: async (operation: any) => operation(transaction) };
-    const service = new TikTokEventService(prisma);
+    const service = new TikTokEventService(prisma, channelGate());
 
     await expect(service.register({
       tenantId: 'tenant-a', externalEventId: 'tiktok:message-a', payload: { event: 'im_receive_msg' },
@@ -69,7 +88,7 @@ describe('TikTokEventService', () => {
     vi.mocked(assertTenantAcceptingMutations).mockRejectedValueOnce(new TenantLifecycleFrozenError('META_INBOUND'));
     const create = vi.fn();
     const prisma: any = { $transaction: async (operation: any) => operation({ webhookEvent: { create } }) };
-    const service = new TikTokEventService(prisma);
+    const service = new TikTokEventService(prisma, channelGate());
 
     await expect(service.register({
       tenantId: 'tenant-a', externalEventId: 'tiktok:message-frozen', payload: { content: 'customer content' },

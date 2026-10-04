@@ -1,9 +1,10 @@
 import type { ApiEnv } from '@autosale/config/api-env';
 import { INSTAGRAM_ORDER_PROMPT_VERSION } from '@autosale/contracts';
-import { createPrismaClient, withTenantTransaction } from '@autosale/database';
+import { createPrismaClient, PlatformChannelGate, withTenantTransaction } from '@autosale/database';
 import { DynamicModule, Module } from '@nestjs/common';
 
 import { QueueModule } from '../queue/queue.module.js';
+import { platformChannelDeployment } from '../integrations/platform-channel-deployment.js';
 import { MetaEventService } from './meta-event.service.js';
 import { META_WEBHOOK_CONFIG, MetaController } from './meta.controller.js';
 import { MetaSignatureService } from './meta-signature.service.js';
@@ -58,7 +59,10 @@ export class MetaModule {
                 },
               }),
             );
-            return new MetaEventService(prisma, undefined, env.FACEBOOK_MESSENGER_ENABLED);
+            return new MetaEventService(
+              prisma,
+              new PlatformChannelGate(prisma, platformChannelDeployment(env)),
+            );
           },
         },
       ],

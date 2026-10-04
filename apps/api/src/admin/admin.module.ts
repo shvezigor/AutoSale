@@ -5,6 +5,7 @@ import { DynamicModule, Module } from '@nestjs/common';
 import { Queue } from 'bullmq';
 
 import { CryptoService } from '../auth/crypto.service.js';
+import { platformChannelDeployment } from '../integrations/platform-channel-deployment.js';
 import { AdminController } from './admin.controller.js';
 import { AdminIntegrationService } from './admin-integration.service.js';
 import { BullAdminQueueMonitor } from './admin-queue-monitor.js';
@@ -22,12 +23,7 @@ export class AdminModule {
       .map((name) => new BullAdminQueueMonitor(name, new Queue(name, { connection })));
     monitoredQueues.push(new BullAdminQueueMonitor('tenant-lifecycle', queue));
     const stepUp = new AdminStepUpService(prisma, new CryptoService(), env.AUTH_TOKEN_PEPPER);
-    const integrationDeployment = {
-      FACEBOOK_MESSENGER: env.FACEBOOK_MESSENGER_ENABLED
-        && Boolean(env.FACEBOOK_APP_ID && env.FACEBOOK_APP_SECRET),
-      TIKTOK_BUSINESS_MESSAGING: env.TIKTOK_BUSINESS_MESSAGING_ENABLED
-        && Boolean(env.TIKTOK_CLIENT_ID && env.TIKTOK_CLIENT_SECRET && env.TIKTOK_AUTHORIZATION_URL),
-    } as const;
+    const integrationDeployment = platformChannelDeployment(env);
     const storage = new S3ObjectStorage({
       endpoint: env.S3_ENDPOINT,
       region: env.S3_REGION,

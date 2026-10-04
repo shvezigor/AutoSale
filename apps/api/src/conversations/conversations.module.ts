@@ -1,10 +1,11 @@
 import type { ApiEnv } from '@autosale/config/api-env';
-import { createPrismaClient } from '@autosale/database';
+import { createPrismaClient, PlatformChannelGate } from '@autosale/database';
 import { DynamicModule, Module } from '@nestjs/common';
 
 import { ConversationsController } from './conversations.controller.js';
 import { ConversationsService, type InstagramMessageQueue } from './conversations.service.js';
 import { INSTAGRAM_QUEUE, QueueModule } from '../queue/queue.module.js';
+import { platformChannelDeployment } from '../integrations/platform-channel-deployment.js';
 
 @Module({})
 export class ConversationsModule {
@@ -17,8 +18,14 @@ export class ConversationsModule {
         {
           provide: ConversationsService,
           inject: [INSTAGRAM_QUEUE],
-          useFactory: (queue: InstagramMessageQueue) =>
-            new ConversationsService(createPrismaClient(env.DATABASE_URL), queue),
+          useFactory: (queue: InstagramMessageQueue) => {
+            const prisma = createPrismaClient(env.DATABASE_URL);
+            return new ConversationsService(
+              prisma,
+              queue,
+              new PlatformChannelGate(prisma, platformChannelDeployment(env)),
+            );
+          },
         },
       ],
     };

@@ -2,6 +2,7 @@ import type { RegisterMetaEventInput } from '@autosale/contracts/meta';
 import {
   assertTenantAcceptingMutations,
   Prisma,
+  type PlatformChannelGate,
   type PrismaClient,
   TenantLifecycleFrozenError,
   withTenantTransaction,
@@ -11,8 +12,8 @@ import { metrics } from '@autosale/observability';
 export class MetaEventService {
   constructor(
     private readonly prisma: PrismaClient,
+    private readonly channelGate: PlatformChannelGate,
     private readonly now: () => Date = () => new Date(),
-    private readonly facebookMessengerEnabled = false,
   ) {}
 
   async resolveTenant(
@@ -45,7 +46,13 @@ export class MetaEventService {
   }
 
   private async resolveFacebookTenant(externalPageId: string): Promise<string | null> {
-    if (!this.facebookMessengerEnabled) return null;
+    const control = await this.channelGate.getControl('FACEBOOK_MESSENGER');
+    if (!control.effectiveEnabled) {
+      metrics.increment('autosale_platform_channel_ignored_total', {
+        provider: 'facebook', state: control.state.toLowerCase(),
+      });
+      return null;
+    }
     const authority = await this.prisma.$queryRaw<Array<{ tenant_id: string }>>`
       SELECT tenant_id FROM public.api_facebook_tenant_for_page(${externalPageId})
     `;

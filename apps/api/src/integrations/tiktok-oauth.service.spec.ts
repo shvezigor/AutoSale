@@ -99,6 +99,13 @@ function fixture() {
     revokeToken: vi.fn().mockResolvedValue(undefined),
   };
   const webhookHealth = { assertHealthy: vi.fn().mockResolvedValue(undefined) };
+  const gate = {
+    assertEnabled: vi.fn().mockResolvedValue(undefined),
+    getControl: vi.fn().mockResolvedValue({
+      key: 'TIKTOK_BUSINESS_MESSAGING', deploymentAvailable: true, runtimeEnabled: true,
+      effectiveEnabled: true, state: 'ACTIVE', updatedAt: null,
+    }),
+  };
   const service = new TikTokOAuthService(
     prisma,
     client as never,
@@ -106,13 +113,21 @@ function fixture() {
     cipher,
     webhookHealth,
     'https://sales-aito.example',
-    true,
+    gate as never,
     () => new Date('2026-10-04T20:00:00.000Z'),
   );
-  return { service, states, client, webhookHealth, transaction, prisma, cipher, cleanups, getConnection: () => connection };
+  return { service, states, client, webhookHealth, transaction, prisma, cipher, cleanups, gate, getConnection: () => connection };
 }
 
 describe('TikTokOAuthService', () => {
+  it('checks the fresh platform gate before issuing authorization state', async () => {
+    const { service, states, gate } = fixture();
+    gate.assertEnabled.mockRejectedValueOnce(new Error('disabled'));
+
+    await expect(service.authorize('tenant-a', 'owner-a')).rejects.toThrow('disabled');
+    expect(states.issue).not.toHaveBeenCalled();
+  });
+
   it('creates an authorization URL from one-time state and the provider-generated URL', async () => {
     const { service, states, client } = fixture();
     await expect(service.authorize('tenant-a', 'owner-a', '/settings?tab=social')).resolves.toEqual({
@@ -136,6 +151,31 @@ describe('TikTokOAuthService', () => {
     expect(stored.encryptedAccessToken).not.toContain('access-token');
     expect(cipher.decrypt(stored.encryptedAccessToken)).toBe('access-token');
     expect(cipher.decrypt(stored.encryptedRefreshToken)).toBe('refresh-token');
+  });
+
+  it('rechecks the gate before activating callback credentials', async () => {
+    const { service, gate, client, getConnection } = fixture();
+    gate.assertEnabled
+      .mockResolvedValueOnce(undefined)
+      .mockRejectedValueOnce(new Error('paused during callback'));
+
+    await expect(service.completeCallback('fictional-code', 'opaque-state'))
+      .rejects.toThrow('TikTok connection failed');
+    expect(getConnection()).toBeNull();
+    expect(client.revokeToken).toHaveBeenCalledWith('access-token');
+  });
+
+  it('keeps connected account details visible while reporting an admin pause', async () => {
+    const { service, gate } = fixture();
+    await service.completeCallback('fictional-code', 'opaque-state');
+    gate.getControl.mockResolvedValueOnce({
+      key: 'TIKTOK_BUSINESS_MESSAGING', deploymentAvailable: true, runtimeEnabled: false,
+      effectiveEnabled: false, state: 'ADMIN_DISABLED', updatedAt: null,
+    });
+
+    await expect(service.getSummary('tenant-a')).resolves.toMatchObject({
+      status: 'INBOUND_ONLY', accountId: 'fictional-account', platformAvailability: 'ADMIN_DISABLED',
+    });
   });
 
   it('refuses activation without inbound scopes and revokes the newly issued token', async () => {
@@ -176,9 +216,10 @@ describe('TikTokOAuthService', () => {
   });
 
   it('disconnects by revoking only merchant credentials and never mutates the shared webhook', async () => {
-    const { service, client, webhookHealth, getConnection } = fixture();
+    const { service, client, webhookHealth, gate, getConnection } = fixture();
     await service.completeCallback('fictional-code', 'opaque-state');
     webhookHealth.assertHealthy.mockClear();
+    gate.assertEnabled.mockRejectedValue(new Error('globally paused'));
 
     await expect(service.disconnect('tenant-a', 'owner-a')).resolves.toMatchObject({ status: 'DISCONNECTED' });
     expect(client.revokeToken).toHaveBeenCalledWith('access-token');

@@ -1,7 +1,7 @@
 import { Buffer } from 'node:buffer';
 
 import type { ApiEnv } from '@autosale/config/api-env';
-import { createPrismaClient, type PrismaClient } from '@autosale/database';
+import { createPrismaClient, PlatformChannelGate, type PrismaClient } from '@autosale/database';
 import { TikTokBusinessMessagingClient } from '@autosale/integrations';
 import { DynamicModule, Module, type OnApplicationShutdown } from '@nestjs/common';
 
@@ -9,6 +9,7 @@ import { CredentialCipher } from './credential-cipher.js';
 import { TikTokOAuthController } from './tiktok-oauth.controller.js';
 import { TikTokOAuthService } from './tiktok-oauth.service.js';
 import { TikTokOAuthStateService } from './tiktok-oauth-state.service.js';
+import { platformChannelDeployment } from './platform-channel-deployment.js';
 import { TikTokAppWebhookService } from '../tiktok/tiktok-app-webhook.service.js';
 
 @Module({})
@@ -34,7 +35,7 @@ export class TikTokOAuthModule {
       new CredentialCipher(Buffer.from(env.INTEGRATION_ENCRYPTION_KEY, 'base64')),
       appWebhook,
       env.APP_PUBLIC_URL,
-      enabled,
+      new PlatformChannelGate(prisma, platformChannelDeployment(env)),
     );
 
     return {

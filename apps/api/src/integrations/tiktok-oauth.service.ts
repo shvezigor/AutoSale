@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
 import type { TikTokCapabilities, TikTokConnectionSummary } from '@autosale/contracts/tiktok';
-import { assertTenantAcceptingMutations, type Prisma, type PrismaClient, withTenantTransaction } from '@autosale/database';
+import { assertTenantAcceptingMutations, type PlatformChannelGate, type Prisma, type PrismaClient, withTenantTransaction } from '@autosale/database';
 import { TikTokBusinessMessagingError, type TikTokBusinessMessagingClient } from '@autosale/integrations';
 
 import { CredentialCipher } from './credential-cipher.js';
@@ -51,21 +51,23 @@ export class TikTokOAuthService {
     private readonly cipher: CredentialCipher,
     private readonly appWebhookHealth: TikTokAppWebhookHealth,
     appPublicUrl: string,
-    private readonly enabled: boolean,
+    private readonly channelGate: PlatformChannelGate,
     private readonly now: () => Date = () => new Date(),
   ) {
     this.callbackUri = new URL(CALLBACK_PATH, ensureTrailingSlash(appPublicUrl)).toString();
   }
 
   async getSummary(tenantId: string): Promise<TikTokConnectionSummary> {
-    const [connection, cleanup] = await Promise.all([
+    const [connection, cleanup, control] = await Promise.all([
       withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.tikTokConnection.findUnique({
         where: { tenantId },
         select: SAFE_CONNECTION_SELECT,
       })),
       this.getCleanupStatus(tenantId),
+      this.channelGate.getControl('TIKTOK_BUSINESS_MESSAGING'),
     ]);
-    if (!connection) return emptySummary(cleanup);
+    const platformAvailability = toPlatformAvailability(control.state);
+    if (!connection) return emptySummary(cleanup, platformAvailability);
 
     const expired = (connection.status === 'ACTIVE' || connection.status === 'INBOUND_ONLY') &&
       connection.tokenExpiresAt !== null && connection.tokenExpiresAt <= this.now();
@@ -75,11 +77,11 @@ export class TikTokOAuthService {
         data: { status: 'REAUTH_REQUIRED', lastErrorCode: 'TIKTOK_TOKEN_EXPIRED' },
       })).catch(() => undefined);
     }
-    return toSummary(connection, cleanup, expired);
+    return toSummary(connection, cleanup, expired, platformAvailability);
   }
 
   async authorize(tenantId: string, userId: string, returnPath?: string): Promise<{ authorizationUrl: string }> {
-    this.assertEnabled();
+    await this.channelGate.assertEnabled('TIKTOK_BUSINESS_MESSAGING');
     await withTenantTransaction(this.prisma, tenantId, (transaction) =>
       assertTenantAcceptingMutations(transaction, tenantId, 'META_INBOUND'));
     const state = await this.states.issue({ tenantId, userId, ...(returnPath === undefined ? {} : { returnPath }) });
@@ -87,7 +89,7 @@ export class TikTokOAuthService {
   }
 
   async completeCallback(code: string | undefined, rawState: string): Promise<TikTokCallbackResult> {
-    this.assertEnabled();
+    await this.channelGate.assertEnabled('TIKTOK_BUSINESS_MESSAGING');
     let binding: TikTokOAuthBinding;
     try {
       binding = await this.states.consume(rawState);
@@ -208,6 +210,7 @@ export class TikTokOAuthService {
     displayName: string,
     capabilities: TikTokCapabilities,
   ): Promise<TikTokConnectionSummary> {
+    await this.channelGate.assertEnabled('TIKTOK_BUSINESS_MESSAGING');
     const activatedAt = this.now();
     const credentialGenerationId = randomUUID();
     const encryptedAccessToken = this.cipher.encrypt(token.accessToken);
@@ -279,7 +282,7 @@ export class TikTokOAuthService {
       await this.recordAudit(transaction, binding, 'TIKTOK_CONNECTED', 'SUCCESS');
       return connection;
     });
-    return toSummary(active, 'NONE');
+    return toSummary(active, 'NONE', false, 'AVAILABLE');
   }
 
   private async assertNoConnectedCredentials(tenantId: string): Promise<void> {
@@ -450,18 +453,17 @@ export class TikTokOAuthService {
       )).catch(() => undefined);
   }
 
-  private assertEnabled(): void {
-    if (!this.enabled) throw new Error('TikTok Business Messaging integration is disabled');
-  }
 }
 
 function toSummary(
   connection: SafeConnectionRow,
   cleanupStatus: 'NONE' | 'PENDING' | 'FAILED',
   expired = false,
+  platformAvailability: TikTokConnectionSummary['platformAvailability'] = 'AVAILABLE',
 ): TikTokConnectionSummary {
   return {
     status: expired ? 'REAUTH_REQUIRED' : connection.status,
+    platformAvailability,
     accountId: connection.externalAccountId,
     displayName: connection.displayName,
     capabilities: parseCapabilities(connection.capabilities),
@@ -472,9 +474,13 @@ function toSummary(
   };
 }
 
-function emptySummary(cleanupStatus: 'NONE' | 'PENDING' | 'FAILED'): TikTokConnectionSummary {
+function emptySummary(
+  cleanupStatus: 'NONE' | 'PENDING' | 'FAILED',
+  platformAvailability: TikTokConnectionSummary['platformAvailability'] = 'AVAILABLE',
+): TikTokConnectionSummary {
   return {
     status: 'NOT_CONNECTED',
+    platformAvailability,
     accountId: null,
     displayName: null,
     capabilities: null,
@@ -483,6 +489,12 @@ function emptySummary(cleanupStatus: 'NONE' | 'PENDING' | 'FAILED'): TikTokConne
     lastErrorCode: null,
     cleanupStatus,
   };
+}
+
+function toPlatformAvailability(
+  state: 'ACTIVE' | 'ADMIN_DISABLED' | 'DEPLOYMENT_UNAVAILABLE',
+): TikTokConnectionSummary['platformAvailability'] {
+  return state === 'ACTIVE' ? 'AVAILABLE' : state;
 }
 
 function parseCapabilities(value: Prisma.JsonValue | null): TikTokCapabilities | null {

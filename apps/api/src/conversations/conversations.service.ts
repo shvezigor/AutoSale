@@ -10,7 +10,13 @@ import type {
   OutboundMessageInput,
   SocialChannel,
 } from '@autosale/contracts/conversations';
-import { assertTenantAcceptingMutations, type PrismaClient, withTenantTransaction } from '@autosale/database';
+import {
+  assertTenantAcceptingMutations,
+  PlatformChannelDisabledError,
+  type PlatformChannelGate,
+  type PrismaClient,
+  withTenantTransaction,
+} from '@autosale/database';
 import { metaInstagramReplyMode } from '@autosale/integrations';
 import {
   BadRequestException,
@@ -67,6 +73,7 @@ export class ConversationsService {
   constructor(
     private readonly prisma: PrismaClient,
     private readonly queue: InstagramMessageQueue,
+    private readonly channelGate: PlatformChannelGate,
   ) {}
 
   async list(tenantId: string, query: ConversationQuery): Promise<ConversationListResponse> {
@@ -266,6 +273,7 @@ export class ConversationsService {
       });
       if (!conversation) throw new NotFoundException('Conversation not found');
       const channel = replyChannel(conversation.channel);
+      await this.assertChannelEnabled(channel);
       let senderId: string;
       let credentialGenerationId: string | null = null;
       if (channel === 'INSTAGRAM') {
@@ -371,6 +379,7 @@ export class ConversationsService {
       });
       if (!conversation) throw new NotFoundException('Conversation not found');
       const channel = replyChannel(conversation.channel);
+      await this.assertChannelEnabled(channel);
       let credentialGenerationId: string | null = null;
       if (channel === 'INSTAGRAM') {
         const connection = await transaction.instagramConnection.findUnique({ where: { tenantId } });
@@ -433,6 +442,18 @@ export class ConversationsService {
       }
     } catch {
       this.logger.warn({ event: 'social_reply_queue_wakeup_failed', channel, tenantId, messageId });
+    }
+  }
+
+  private async assertChannelEnabled(channel: 'INSTAGRAM' | 'TIKTOK'): Promise<void> {
+    if (channel === 'INSTAGRAM') return;
+    try {
+      await this.channelGate.assertEnabled('TIKTOK_BUSINESS_MESSAGING');
+    } catch (error) {
+      if (error instanceof PlatformChannelDisabledError) {
+        throw new BadRequestException('TIKTOK_CHANNEL_DISABLED');
+      }
+      throw error;
     }
   }
 }

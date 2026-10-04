@@ -1,5 +1,5 @@
 import type { ApiEnv } from '@autosale/config/api-env';
-import { createPrismaClient, type PrismaClient } from '@autosale/database';
+import { createPrismaClient, PlatformChannelGate, type PrismaClient } from '@autosale/database';
 import { CredentialCipher, MeestClient, NovaPoshtaClient, UkrposhtaClient } from '@autosale/integrations';
 import { DynamicModule, Module, type OnApplicationShutdown } from '@nestjs/common';
 import { Queue } from 'bullmq';
@@ -10,6 +10,7 @@ import { DeliveryLocationService } from './delivery-location.service.js';
 import { MeestConnectionService } from './meest-connection.service.js';
 import { UkrposhtaConnectionService } from './ukrposhta-connection.service.js';
 import { ConversationsService } from '../conversations/conversations.service.js';
+import { platformChannelDeployment } from '../integrations/platform-channel-deployment.js';
 
 @Module({})
 export class DeliveryModule {
@@ -18,7 +19,11 @@ export class DeliveryModule {
     const cipher = new CredentialCipher(Buffer.from(env.INTEGRATION_ENCRYPTION_KEY, 'base64'));
     const shipmentQueue = new Queue('delivery', { connection: queueConnection(env.REDIS_URL) });
     const instagramQueue = new Queue('instagram', { connection: queueConnection(env.REDIS_URL) });
-    const instagramOutbound = new ConversationsService(prisma, instagramQueue);
+    const instagramOutbound = new ConversationsService(
+      prisma,
+      instagramQueue,
+      new PlatformChannelGate(prisma, platformChannelDeployment(env)),
+    );
     const service = new DeliveryService(
       prisma,
       cipher,

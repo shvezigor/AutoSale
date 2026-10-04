@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { readFile, readdir } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
-import { createPrismaClient, type PrismaClient } from '@autosale/database';
+import { createPrismaClient, PlatformChannelDisabledError, type PrismaClient } from '@autosale/database';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { PostgreSqlContainer, type StartedPostgreSqlContainer } from '@testcontainers/postgresql';
 import pg from 'pg';
@@ -20,6 +20,7 @@ describe('ConversationsService', () => {
   let newestId: string;
   let usernameOnlyId: string;
   const queue = { add: vi.fn() };
+  const channelGate = { assertEnabled: vi.fn().mockResolvedValue(undefined) };
 
   beforeAll(async () => {
     container = await new PostgreSqlContainer('postgres:17.6-alpine').start();
@@ -59,7 +60,7 @@ describe('ConversationsService', () => {
         tokenExpiresAt: new Date('2099-01-01T00:00:00.000Z'),
       },
     });
-    service = new ConversationsService(prisma, queue);
+    service = new ConversationsService(prisma, queue, channelGate as never);
 
     const event = await prisma.webhookEvent.create({
       data: { tenantId, provider: 'META', externalEventId: 'seed-a', payload: {} },
@@ -128,6 +129,7 @@ describe('ConversationsService', () => {
 
   beforeEach(() => {
     queue.add.mockReset().mockResolvedValue(undefined);
+    channelGate.assertEnabled.mockReset().mockResolvedValue(undefined);
   });
 
   it('orders newest first, isolates the tenant, and paginates by cursor', async () => {
@@ -381,6 +383,16 @@ describe('ConversationsService', () => {
       const stored = await prisma.message.findUniqueOrThrow({ where: { id: first.id } });
       expect(stored.deliveryCredentialGenerationId).toBe(generationId);
 
+      const beforeDisabledAttempt = await prisma.message.count({ where: { conversationId: conversation.id } });
+      channelGate.assertEnabled.mockRejectedValueOnce(
+        new PlatformChannelDisabledError('TIKTOK_BUSINESS_MESSAGING'),
+      );
+      await expect(service.send(tenantId, actorUserId, conversation.id, {
+        text: 'Не має бути збережено', idempotencyKey: randomUUID(),
+      })).rejects.toMatchObject({ message: 'TIKTOK_CHANNEL_DISABLED' });
+      await expect(prisma.message.count({ where: { conversationId: conversation.id } }))
+        .resolves.toBe(beforeDisabledAttempt);
+
       await prisma.message.updateMany({
         where: { tenantId, conversationId: conversation.id, direction: 'INBOUND' },
         data: { sourceTimestamp: new Date(Date.now() - 49 * 60 * 60_000) },
@@ -458,6 +470,14 @@ describe('ConversationsService', () => {
     } });
 
     try {
+      channelGate.assertEnabled.mockRejectedValueOnce(
+        new PlatformChannelDisabledError('TIKTOK_BUSINESS_MESSAGING'),
+      );
+      await expect(service.retry(tenantId, actorUserId, conversation.id, message.id))
+        .rejects.toMatchObject({ message: 'TIKTOK_CHANNEL_DISABLED' });
+      await expect(prisma.message.findUniqueOrThrow({ where: { id: message.id } }))
+        .resolves.toMatchObject({ deliveryStatus: 'FAILED', deliveryErrorCode: 'TIKTOK_RATE_LIMITED' });
+
       const result = await service.retry(tenantId, actorUserId, conversation.id, message.id);
       expect(result.delivery).toEqual({ status: 'PENDING', attempts: 1, errorCode: null, retryAllowed: false });
       expect(queue.add).toHaveBeenCalledWith(

@@ -1,8 +1,9 @@
 import type { ApiEnv } from '@autosale/config/api-env';
-import { createPrismaClient, type PrismaClient } from '@autosale/database';
+import { createPrismaClient, PlatformChannelGate, type PrismaClient } from '@autosale/database';
 import { DynamicModule, Module, type OnApplicationShutdown } from '@nestjs/common';
 
 import { QueueModule } from '../queue/queue.module.js';
+import { platformChannelDeployment } from '../integrations/platform-channel-deployment.js';
 import { TikTokEventService } from './tiktok-event.service.js';
 import { TikTokSignatureService } from './tiktok-signature.service.js';
 import { TIKTOK_WEBHOOK_CONFIG, TikTokWebhookController } from './tiktok-webhook.controller.js';
@@ -28,7 +29,13 @@ export class TikTokModule {
           provide: TikTokSignatureService,
           useValue: new TikTokSignatureService(env.TIKTOK_CLIENT_SECRET ?? 'tiktok-disabled'),
         },
-        { provide: TikTokEventService, useValue: new TikTokEventService(prisma) },
+        {
+          provide: TikTokEventService,
+          useValue: new TikTokEventService(
+            prisma,
+            new PlatformChannelGate(prisma, platformChannelDeployment(env)),
+          ),
+        },
         { provide: TikTokWebhookPrismaLifecycle, useValue: lifecycle },
       ],
     };

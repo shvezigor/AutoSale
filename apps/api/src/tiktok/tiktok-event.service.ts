@@ -1,5 +1,6 @@
 import {
   assertTenantAcceptingMutations,
+  type PlatformChannelGate,
   Prisma,
   type PrismaClient,
   TenantLifecycleFrozenError,
@@ -16,10 +17,18 @@ export interface RegisterTikTokEventInput {
 export class TikTokEventService {
   constructor(
     private readonly prisma: PrismaClient,
+    private readonly channelGate: PlatformChannelGate,
     private readonly now: () => Date = () => new Date(),
   ) {}
 
   async resolveTenant(externalAccountId: string): Promise<string | null> {
+    const control = await this.channelGate.getControl('TIKTOK_BUSINESS_MESSAGING');
+    if (!control.effectiveEnabled) {
+      metrics.increment('autosale_platform_channel_ignored_total', {
+        provider: 'tiktok', state: control.state.toLowerCase(),
+      });
+      return null;
+    }
     const authority = await this.prisma.$queryRaw<Array<{ tenant_id: string }>>`
       SELECT tenant_id FROM public.api_tiktok_tenant_for_account(${externalAccountId})
     `;

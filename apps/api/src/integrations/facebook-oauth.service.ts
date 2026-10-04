@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
 import type { FacebookConnectionSummary, FacebookPageCandidate, FacebookPageSelectionInput } from '@autosale/contracts/facebook';
-import { assertTenantAcceptingMutations, type Prisma, type PrismaClient, withTenantTransaction } from '@autosale/database';
+import { assertTenantAcceptingMutations, type PlatformChannelGate, type Prisma, type PrismaClient, withTenantTransaction } from '@autosale/database';
 import { FACEBOOK_PAGE_SCOPES, MetaFacebookError, type MetaFacebookClient, type MetaFacebookPage } from '@autosale/integrations';
 import { Logger } from '@nestjs/common';
 
@@ -49,21 +49,23 @@ export class FacebookOAuthService {
     private readonly states: FacebookOAuthStateService,
     private readonly cipher: CredentialCipher,
     appPublicUrl: string,
-    private readonly enabled: boolean,
+    private readonly channelGate: PlatformChannelGate,
     private readonly now: () => Date = () => new Date(),
   ) {
     this.callbackUri = new URL(CALLBACK_PATH, ensureTrailingSlash(appPublicUrl)).toString();
   }
 
   async getSummary(tenantId: string): Promise<FacebookConnectionSummary> {
-    const [connection, cleanup] = await Promise.all([
+    const [connection, cleanup, control] = await Promise.all([
       withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.facebookConnection.findUnique({
         where: { tenantId },
         select: SAFE_CONNECTION_SELECT,
       })),
       this.getCleanupSummary(tenantId),
+      this.channelGate.getControl('FACEBOOK_MESSENGER'),
     ]);
-    if (!connection) return emptySummary(cleanup);
+    const platformAvailability = toPlatformAvailability(control.state);
+    if (!connection) return emptySummary(cleanup, platformAvailability);
 
     const expired = connection.status === 'ACTIVE' &&
       connection.tokenExpiresAt !== null &&
@@ -74,11 +76,11 @@ export class FacebookOAuthService {
         data: { status: 'REAUTH_REQUIRED', lastErrorCode: 'FACEBOOK_TOKEN_EXPIRED' },
       })).catch(() => undefined);
     }
-    return toSummary(connection, cleanup, expired);
+    return toSummary(connection, cleanup, expired, platformAvailability);
   }
 
   async authorize(tenantId: string, userId: string, returnPath?: string): Promise<{ authorizationUrl: string }> {
-    this.assertEnabled();
+    await this.channelGate.assertEnabled('FACEBOOK_MESSENGER');
     await withTenantTransaction(this.prisma, tenantId, (transaction) =>
       assertTenantAcceptingMutations(transaction, tenantId, 'META_INBOUND'));
     const state = await this.states.issue({ tenantId, userId, ...(returnPath === undefined ? {} : { returnPath }) });
@@ -92,7 +94,7 @@ export class FacebookOAuthService {
     rawState: string,
     authorizationDenied = false,
   ): Promise<FacebookCallbackResult> {
-    this.assertEnabled();
+    await this.channelGate.assertEnabled('FACEBOOK_MESSENGER');
     let binding: FacebookOAuthBinding;
     try {
       binding = await this.states.consume(rawState);
@@ -154,6 +156,7 @@ export class FacebookOAuthService {
     }
 
     const candidateExpiresAt = new Date(this.now().getTime() + CANDIDATE_TTL_MS);
+    await this.channelGate.assertEnabled('FACEBOOK_MESSENGER');
     await withTenantTransaction(this.prisma, binding.tenantId, async (transaction) => {
       const updated = await transaction.facebookOAuthAttempt.updateMany({
         where: { id: binding.id, tenantId: binding.tenantId, userId: binding.userId, usedAt: { not: null } },
@@ -188,7 +191,7 @@ export class FacebookOAuthService {
     userId: string,
     input: FacebookPageSelectionInput,
   ): Promise<FacebookConnectionSummary> {
-    this.assertEnabled();
+    await this.channelGate.assertEnabled('FACEBOOK_MESSENGER');
     const pages = await this.readCandidates(tenantId, userId, input.attemptId);
     const selected = pages.find((page) => page.pageId === input.pageId);
     if (!selected) throw new Error('FACEBOOK_PAGE_NOT_ELIGIBLE');
@@ -272,6 +275,7 @@ export class FacebookOAuthService {
     binding: FacebookOAuthBinding,
     candidate: StoredPageCandidate,
   ): Promise<FacebookConnectionSummary> {
+    await this.channelGate.assertEnabled('FACEBOOK_MESSENGER');
     const existingTenantId = await this.resolvePageTenant(candidate.pageId);
     if (existingTenantId && existingTenantId !== binding.tenantId) throw new Error('FACEBOOK_PAGE_ALREADY_CONNECTED');
 
@@ -377,7 +381,7 @@ export class FacebookOAuthService {
       await this.recordAudit(transaction, binding, 'FACEBOOK_CONNECTED', 'SUCCESS');
       return connection;
     });
-    return toSummary(active, noCleanup());
+    return toSummary(active, noCleanup(), false, 'AVAILABLE');
   }
 
   private async readCandidates(tenantId: string, userId: string, attemptId: string): Promise<StoredPageCandidate[]> {
@@ -590,9 +594,6 @@ export class FacebookOAuthService {
       this.recordAudit(transaction, binding, action, result, errorCode, providerError)).catch(() => undefined);
   }
 
-  private assertEnabled(): void {
-    if (!this.enabled) throw new Error('Facebook Messenger integration is disabled');
-  }
 }
 
 function publicCandidates(pages: StoredPageCandidate[]): FacebookPageCandidate[] {
@@ -611,9 +612,11 @@ function toSummary(
   connection: SafeConnectionRow,
   cleanup: CleanupSummary = noCleanup(),
   expired = false,
+  platformAvailability: FacebookConnectionSummary['platformAvailability'] = 'AVAILABLE',
 ): FacebookConnectionSummary {
   return {
     status: expired ? 'REAUTH_REQUIRED' : connection.status,
+    platformAvailability,
     pageId: connection.externalPageId,
     pageName: connection.pageName,
     tokenExpiresAt: connection.tokenExpiresAt?.toISOString() ?? null,
@@ -624,9 +627,13 @@ function toSummary(
   };
 }
 
-function emptySummary(cleanup: CleanupSummary = noCleanup()): FacebookConnectionSummary {
+function emptySummary(
+  cleanup: CleanupSummary = noCleanup(),
+  platformAvailability: FacebookConnectionSummary['platformAvailability'] = 'AVAILABLE',
+): FacebookConnectionSummary {
   return {
     status: 'NOT_CONNECTED',
+    platformAvailability,
     pageId: null,
     pageName: null,
     tokenExpiresAt: null,
@@ -635,6 +642,12 @@ function emptySummary(cleanup: CleanupSummary = noCleanup()): FacebookConnection
     cleanupStatus: cleanup.status,
     cleanupErrorCode: cleanup.errorCode,
   };
+}
+
+function toPlatformAvailability(
+  state: 'ACTIVE' | 'ADMIN_DISABLED' | 'DEPLOYMENT_UNAVAILABLE',
+): FacebookConnectionSummary['platformAvailability'] {
+  return state === 'ACTIVE' ? 'AVAILABLE' : state;
 }
 
 function noCleanup(): { status: 'NONE'; errorCode: null } {

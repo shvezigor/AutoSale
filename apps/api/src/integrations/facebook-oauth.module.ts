@@ -1,7 +1,7 @@
 import { Buffer } from 'node:buffer';
 
 import type { ApiEnv } from '@autosale/config/api-env';
-import { createPrismaClient, type PrismaClient } from '@autosale/database';
+import { createPrismaClient, PlatformChannelGate, type PrismaClient } from '@autosale/database';
 import { MetaFacebookClient } from '@autosale/integrations';
 import { DynamicModule, Module, type OnApplicationShutdown } from '@nestjs/common';
 
@@ -9,6 +9,7 @@ import { CredentialCipher } from './credential-cipher.js';
 import { FacebookOAuthController } from './facebook-oauth.controller.js';
 import { FacebookOAuthService } from './facebook-oauth.service.js';
 import { FacebookOAuthStateService } from './facebook-oauth-state.service.js';
+import { platformChannelDeployment } from './platform-channel-deployment.js';
 
 @Module({})
 export class FacebookOAuthModule {
@@ -29,7 +30,7 @@ export class FacebookOAuthModule {
       new FacebookOAuthStateService(prisma),
       new CredentialCipher(Buffer.from(env.INTEGRATION_ENCRYPTION_KEY, 'base64')),
       env.APP_PUBLIC_URL,
-      env.FACEBOOK_MESSENGER_ENABLED,
+      new PlatformChannelGate(prisma, platformChannelDeployment(env)),
     );
 
     return {

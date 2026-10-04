@@ -32,6 +32,7 @@ function fixture() {
   let encryptedPageCandidates: string | null = null;
   let candidateExpiresAt: Date | null = null;
   let selectedPageId: string | null = null;
+  let connection: Record<string, unknown> | null = null;
   const transaction: any = {
     tenant: { findUnique: vi.fn().mockResolvedValue({ status: 'ACTIVE' }) },
     tenantMembership: {
@@ -54,6 +55,10 @@ function fixture() {
     facebookCredentialCleanup: {
       findMany: vi.fn().mockResolvedValue([]),
     },
+    facebookConnection: {
+      findUnique: vi.fn().mockImplementation(async () => connection),
+      updateMany: vi.fn().mockResolvedValue({ count: 0 }),
+    },
     securityAuditLog: { create: vi.fn().mockResolvedValue({}) },
   };
   const prisma: any = {
@@ -73,19 +78,53 @@ function fixture() {
     subscribePage: vi.fn(),
     unsubscribePage: vi.fn(),
   };
+  const gate = {
+    assertEnabled: vi.fn().mockResolvedValue(undefined),
+    getControl: vi.fn().mockResolvedValue({
+      key: 'FACEBOOK_MESSENGER', deploymentAvailable: true, runtimeEnabled: true,
+      effectiveEnabled: true, state: 'ACTIVE', updatedAt: null,
+    }),
+  };
   const service = new FacebookOAuthService(
     prisma,
     meta as never,
     states as never,
     cipher,
     'https://sales-aito.example',
-    true,
+    gate as never,
     () => new Date('2026-10-02T20:00:00.000Z'),
   );
-  return { service, states, meta, pages, transaction };
+  return {
+    service, states, meta, pages, transaction, gate,
+    setConnection: (value: Record<string, unknown>) => { connection = value; },
+  };
 }
 
 describe('FacebookOAuthService', () => {
+  it('checks the fresh platform gate before issuing authorization state', async () => {
+    const { service, states, gate } = fixture();
+    gate.assertEnabled.mockRejectedValueOnce(new Error('disabled'));
+
+    await expect(service.authorize('tenant-a', 'owner-a')).rejects.toThrow('disabled');
+    expect(states.issue).not.toHaveBeenCalled();
+  });
+
+  it('keeps connected Page details visible while reporting an admin pause', async () => {
+    const { service, gate, setConnection } = fixture();
+    setConnection({
+      externalPageId: 'fictional-page', pageName: 'Fictional Page', status: 'ACTIVE',
+      tokenExpiresAt: null, lastVerifiedAt: new Date('2026-10-04T10:00:00.000Z'), lastErrorCode: null,
+    });
+    gate.getControl.mockResolvedValueOnce({
+      key: 'FACEBOOK_MESSENGER', deploymentAvailable: true, runtimeEnabled: false,
+      effectiveEnabled: false, state: 'ADMIN_DISABLED', updatedAt: null,
+    });
+
+    await expect(service.getSummary('tenant-a')).resolves.toMatchObject({
+      status: 'ACTIVE', pageId: 'fictional-page', platformAvailability: 'ADMIN_DISABLED',
+    });
+  });
+
   it('consumes state before provider I/O and exposes multiple Pages without tokens', async () => {
     const { service, states, meta } = fixture();
 
@@ -103,6 +142,16 @@ describe('FacebookOAuthService', () => {
     });
     expect(JSON.stringify(result)).not.toContain('page-token');
     expect(JSON.stringify(result)).not.toContain('user-token');
+  });
+
+  it('rechecks the gate before retaining callback Page candidates', async () => {
+    const { service, gate, transaction } = fixture();
+    gate.assertEnabled
+      .mockResolvedValueOnce(undefined)
+      .mockRejectedValueOnce(new Error('paused during callback'));
+
+    await expect(service.completeCallback('code', 'raw-state')).rejects.toThrow('paused during callback');
+    expect(transaction.facebookOAuthAttempt.updateMany).not.toHaveBeenCalled();
   });
 
   it('returns safe candidates from encrypted server-side state', async () => {
