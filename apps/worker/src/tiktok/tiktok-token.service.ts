@@ -40,9 +40,19 @@ export class TikTokTokenService {
             tenantId,
             credentialGenerationId,
             status: { in: ['ACTIVE', 'INBOUND_ONLY'] },
-            OR: [
-              { refreshLeaseId: null, refreshLeaseExpiresAt: null },
-              { refreshLeaseExpiresAt: { lte: now } },
+            AND: [
+              {
+                OR: [
+                  { tokenExpiresAt: null },
+                  { tokenExpiresAt: { lte: new Date(now.getTime() + REFRESH_AHEAD_MS) } },
+                ],
+              },
+              {
+                OR: [
+                  { refreshLeaseId: null, refreshLeaseExpiresAt: null },
+                  { refreshLeaseExpiresAt: { lte: now } },
+                ],
+              },
             ],
           },
           data: { refreshLeaseId: leaseId, refreshLeaseExpiresAt: new Date(now.getTime() + REFRESH_LEASE_MS) },
