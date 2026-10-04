@@ -117,4 +117,23 @@ describe('OpenAiOrderRecognizer', () => {
       },
     });
   });
+
+  it('uses a provider-neutral TikTok prompt label', async () => {
+    const create = vi.fn().mockResolvedValue({
+      id: 'resp_tiktok', model: 'gpt-5.4-mini',
+      output_text: JSON.stringify({
+        isOrder: false, anchorHasExplicitPurchaseIntent: false,
+        customer: { name: null, phone: null, instagramUsername: null },
+        delivery: { city: null, address: null, novaPoshtaBranch: null },
+        items: [], missingFields: [], overallConfidence: 0,
+      }),
+    });
+    const recognizer = new OpenAiOrderRecognizer({ responses: { create } }, 'gpt-5.4-mini');
+    await recognizer.recognize({
+      messages: [{ id: 'tiktok-message', direction: 'INBOUND', text: 'Вітаю' }],
+      products: [], recognitionMode: 'CONVERSATIONAL_INTENT', channel: 'TIKTOK',
+    });
+    expect((create.mock.calls[0]?.[0] as { instructions: string }).instructions)
+      .toContain('TikTok social-commerce conversation');
+  });
 });

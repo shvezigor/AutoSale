@@ -419,7 +419,7 @@ git commit -m "feat: process TikTok messages and order triggers"
 - Produces: list/detail DTOs with TikTok, attachment previews, and inbound-slice reply capability `{ enabled: false, reason: 'CHANNEL_READ_ONLY' }`.
 - Produces: provider-neutral prompt label `TikTok` while preserving prior prompt versions for historical Instagram events.
 
-- [ ] **Step 1: Add failing TikTok list/detail and order tests**
+- [x] **Step 1: Add failing TikTok list/detail and order tests**
 
 ```ts
 expect((await service.list(tenantId, { limit: 20 })).items[0]).toMatchObject({
@@ -431,21 +431,21 @@ expect((await service.detail(tenantId, conversationId)).replyCapability)
 expect(recognizer).toHaveBeenCalledWith(expect.objectContaining({ channel: 'TIKTOK' }));
 ```
 
-- [ ] **Step 2: Run focused conversation/order tests and verify failure**
+- [x] **Step 2: Run focused conversation/order tests and verify failure**
 
 Run: `pnpm --filter @autosale/api test -- conversations.service.spec.ts && pnpm --filter @autosale/worker test -- openai-order-recognizer.spec.ts triggered-order.processor.spec.ts`
 Expected: FAIL because the social channel coercion defaults TikTok to Instagram.
 
-- [ ] **Step 3: Replace binary channel branching with exhaustive helpers**
+- [x] **Step 3: Replace binary channel branching with exhaustive helpers**
 
 Use an exhaustive `SocialChannel` mapping for preview labels, prompt labels, and reply capability. Do not attach an `InstagramCustomerProfile` to TikTok; use `Conversation.displayName` until a provider-neutral profile model is intentionally designed.
 
-- [ ] **Step 4: Run focused tests**
+- [x] **Step 4: Run focused tests**
 
 Run: `pnpm --filter @autosale/api test -- conversations.service.spec.ts && pnpm --filter @autosale/worker test -- openai-order-recognizer.spec.ts triggered-order.processor.spec.ts`
 Expected: PASS.
 
-- [ ] **Step 5: Commit conversation/order support**
+- [x] **Step 5: Commit conversation/order support**
 
 ```bash
 git add apps/api/src/conversations apps/worker/src/orders

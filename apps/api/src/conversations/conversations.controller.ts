@@ -136,7 +136,7 @@ function conversationListOpenApiSchema(): OpenApiSchema {
         required: ['id', 'channel', 'participantName', 'participantUsername', 'participantAvatarUrl', 'lastMessagePreview', 'lastMessageAt'],
         properties: {
           id: { type: 'string', format: 'uuid' },
-          channel: { type: 'string', enum: ['INSTAGRAM', 'FACEBOOK'] },
+          channel: { type: 'string', enum: ['INSTAGRAM', 'FACEBOOK', 'TIKTOK'] },
           participantName: { type: 'string', nullable: true },
           participantUsername: { type: 'string', nullable: true },
           participantAvatarUrl: { type: 'string', nullable: true },
@@ -156,7 +156,7 @@ function conversationDetailOpenApiSchema(): OpenApiSchema {
   required: ['id', 'channel', 'participantName', 'participantUsername', 'participantAvatarUrl', 'replyCapability', 'messages'],
   properties: {
     id: { type: 'string', format: 'uuid' },
-    channel: { type: 'string', enum: ['INSTAGRAM', 'FACEBOOK'] },
+    channel: { type: 'string', enum: ['INSTAGRAM', 'FACEBOOK', 'TIKTOK'] },
     participantName: { type: 'string', nullable: true },
     participantUsername: { type: 'string', nullable: true },
     participantAvatarUrl: { type: 'string', nullable: true },

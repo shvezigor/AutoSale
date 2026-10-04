@@ -39,7 +39,7 @@ export interface OrderRecognitionInput {
   messages: Array<{ id: string; direction: string; text: string | null }>;
   products: Array<{ id: string; name: string; aliases: string[] }>;
   recognitionMode: 'TRIGGERED_ORDER' | 'CONVERSATIONAL_INTENT';
-  channel?: 'INSTAGRAM' | 'FACEBOOK';
+  channel?: 'INSTAGRAM' | 'FACEBOOK' | 'TIKTOK';
 }
 
 interface ResponsesClient {
@@ -115,7 +115,7 @@ export class OpenAiOrderRecognizer {
   }> {
     const anchorMessageId = input.messages.at(-1)?.id ?? null;
     const channel = input.channel ?? 'INSTAGRAM';
-    const channelLabel = channel === 'FACEBOOK' ? 'Facebook Messenger' : 'Instagram';
+    const channelLabel = socialChannelLabel(channel);
     const modeInstructions = input.recognitionMode === 'CONVERSATIONAL_INTENT'
       ? [
           'The anchor is a new inbound customer message being evaluated; it does not close an order by itself.',
@@ -174,6 +174,14 @@ export class OpenAiOrderRecognizer {
     } catch {
       throw new Error('OpenAI returned an invalid order extraction');
     }
+  }
+}
+
+function socialChannelLabel(channel: NonNullable<OrderRecognitionInput['channel']>): string {
+  switch (channel) {
+    case 'INSTAGRAM': return 'Instagram';
+    case 'FACEBOOK': return 'Facebook Messenger';
+    case 'TIKTOK': return 'TikTok';
   }
 }
 

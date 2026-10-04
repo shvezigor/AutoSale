@@ -25,7 +25,7 @@ export interface ManagerOrder {
   publicNumber: string;
   status: OrderStatus;
   participantName: string | null;
-  channel: 'INSTAGRAM' | 'FACEBOOK';
+  channel: 'INSTAGRAM' | 'FACEBOOK' | 'TIKTOK';
   overallConfidence: number | null;
   validationIssues: string[];
   intentDetection?: OrderIntentDetection | null;

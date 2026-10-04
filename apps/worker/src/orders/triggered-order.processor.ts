@@ -400,12 +400,19 @@ export class TriggeredOrderProcessor {
   }
 }
 
-function socialChannel(value: string): 'INSTAGRAM' | 'FACEBOOK' {
-  return value === 'FACEBOOK' ? 'FACEBOOK' : 'INSTAGRAM';
+function socialChannel(value: string): 'INSTAGRAM' | 'FACEBOOK' | 'TIKTOK' {
+  switch (value) {
+    case 'INSTAGRAM':
+    case 'FACEBOOK':
+    case 'TIKTOK':
+      return value;
+    default:
+      throw new Error('Unsupported social channel');
+  }
 }
 
 function promptVersionForChannel(channel: string, configuredVersion: string): string {
-  return channel === 'FACEBOOK' ? SOCIAL_ORDER_PROMPT_VERSION : configuredVersion;
+  return channel === 'INSTAGRAM' ? configuredVersion : SOCIAL_ORDER_PROMPT_VERSION;
 }
 
 function stringArray(value: Prisma.JsonValue): string[] {

@@ -8,6 +8,7 @@ import type {
   ConversationOrderState,
   ConversationQuery,
   OutboundMessageInput,
+  SocialChannel,
 } from '@autosale/contracts/conversations';
 import { assertTenantAcceptingMutations, type PrismaClient, withTenantTransaction } from '@autosale/database';
 import { metaInstagramReplyMode } from '@autosale/integrations';
@@ -146,7 +147,7 @@ export class ConversationsService {
       participantName: participantName(conversation.profile, conversation.displayName),
       participantUsername: conversation.profile?.username ?? null,
       participantAvatarUrl: profileAvatarUrl(conversation.profile),
-      replyCapability: conversation.channel === 'FACEBOOK'
+      replyCapability: conversation.channel !== 'INSTAGRAM'
         ? { enabled: false, reason: 'CHANNEL_READ_ONLY' }
         : replyCapability(connection, new Date(), latestInboundAt(conversation.messages)),
       messages: conversation.messages.map((message) => mapMessage(
@@ -469,8 +470,8 @@ function isSafeExternalUrl(value: string): boolean {
   }
 }
 
-function attachmentPreview(type: string | undefined, channel: 'INSTAGRAM' | 'FACEBOOK'): string | null {
-  const provider = channel === 'FACEBOOK' ? 'Facebook' : 'Instagram';
+function attachmentPreview(type: string | undefined, channel: SocialChannel): string | null {
+  const provider = channelLabel(channel);
   if (type === 'IMAGE') return `📷 ${provider}`;
   if (type === 'VIDEO') return `🎬 ${provider}`;
   if (type === 'LINK') return `🔗 ${provider}`;
@@ -478,8 +479,23 @@ function attachmentPreview(type: string | undefined, channel: 'INSTAGRAM' | 'FAC
   return null;
 }
 
-function socialChannel(value: string): 'INSTAGRAM' | 'FACEBOOK' {
-  return value === 'FACEBOOK' ? 'FACEBOOK' : 'INSTAGRAM';
+function socialChannel(value: string): SocialChannel {
+  switch (value) {
+    case 'INSTAGRAM':
+    case 'FACEBOOK':
+    case 'TIKTOK':
+      return value;
+    default:
+      throw new Error('Unsupported social channel');
+  }
+}
+
+function channelLabel(channel: SocialChannel): 'Instagram' | 'Facebook' | 'TikTok' {
+  switch (channel) {
+    case 'INSTAGRAM': return 'Instagram';
+    case 'FACEBOOK': return 'Facebook';
+    case 'TIKTOK': return 'TikTok';
+  }
 }
 
 function isDeliveryErrorCode(value: string | null): value is NonNullable<ConversationMessage['delivery']>['errorCode'] {

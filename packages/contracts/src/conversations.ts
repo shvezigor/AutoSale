@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 export const socialChannelSchema = z.enum(['INSTAGRAM', 'FACEBOOK', 'TIKTOK']);
+export type SocialChannel = z.infer<typeof socialChannelSchema>;
 
 export const conversationQuerySchema = z.object({
   cursor: z.string().min(1).optional(),

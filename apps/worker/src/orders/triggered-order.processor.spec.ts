@@ -371,4 +371,44 @@ describe('TriggeredOrderProcessor', () => {
       recognitionMode: 'CONVERSATIONAL_INTENT',
     }));
   });
+
+  it('uses the social prompt version and TikTok source for a TikTok order', async () => {
+    const tenant = await prisma.tenant.create({ data: { key: 'tiktok-order', name: 'TikTok Order' } });
+    await prisma.tenantSettings.create({ data: {
+      tenantId: tenant.id, intentDetectionMode: 'AI_SUGGESTION', approvalMode: 'NEVER',
+      autoApprovalThreshold: 0.9, promptVersion: 'instagram-order-v2', triggerPhrases: [],
+    } });
+    const event = await prisma.webhookEvent.create({
+      data: { tenantId: tenant.id, provider: 'TIKTOK', externalEventId: 'tiktok-order-event', payload: {} },
+    });
+    const conversation = await prisma.conversation.create({ data: {
+      tenantId: tenant.id, channel: 'TIKTOK', externalConversationId: 'fictional-tiktok-customer',
+      participantId: 'fictional-tiktok-customer', lastMessageAt: new Date('2026-10-04T09:00:00Z'),
+    } });
+    const anchor = await prisma.message.create({ data: {
+      tenantId: tenant.id, conversationId: conversation.id, rawEventId: event.id, channel: 'TIKTOK',
+      externalMessageId: 'tiktok-order-message', direction: 'INBOUND', senderId: 'fictional-tiktok-customer',
+      text: 'Хочу замовити тестовий товар', sourceTimestamp: new Date('2026-10-04T09:00:00Z'),
+    } });
+    const recognize = vi.fn().mockResolvedValue({
+      order: {
+        isOrder: true, anchorHasExplicitPurchaseIntent: true,
+        customer: { name: null, phone: null, instagramUsername: null },
+        delivery: { city: null, address: null, novaPoshtaBranch: null },
+        items: [{ catalogId: null, originalText: 'тестовий товар', quantity: 1, color: null, size: null, confidence: 0.7 }],
+        missingFields: ['customer.phone'], overallConfidence: 0.7,
+      },
+      metadata: { responseId: 'resp-tiktok', model: 'gpt-5.4-mini', inputTokens: 30, outputTokens: 20 },
+    });
+    const processor = new TriggeredOrderProcessor(
+      prisma, new OrderRecognitionService({ recognize }), { assessApprovedOrder: vi.fn() } as never,
+    );
+    const order = await processor.processIfTriggered(tenant.id, anchor.id);
+    expect(order).toMatchObject({ status: 'NEEDS_REVIEW' });
+    await expect(prisma.order.findUniqueOrThrow({ where: { id: order!.id } }))
+      .resolves.toMatchObject({ promptVersion: 'social-order-v3' });
+    expect(recognize).toHaveBeenCalledWith(expect.objectContaining({
+      channel: 'TIKTOK', recognitionMode: 'CONVERSATIONAL_INTENT',
+    }));
+  });
 });

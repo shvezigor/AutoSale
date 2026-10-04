@@ -220,6 +220,40 @@ describe('ConversationsService', () => {
     }
   });
 
+  it('lists TikTok attachments with a provider preview and keeps replies read-only', async () => {
+    const event = await prisma.webhookEvent.create({
+      data: { tenantId, provider: 'TIKTOK', externalEventId: `tiktok-test-${randomUUID()}`, payload: {} },
+    });
+    const conversation = await prisma.conversation.create({ data: {
+      tenantId, channel: 'TIKTOK', externalConversationId: 'fictional-tiktok-customer',
+      participantId: 'fictional-tiktok-customer', displayName: 'Клієнт TikTok', lastMessageAt: new Date(),
+    } });
+    const message = await prisma.message.create({ data: {
+      tenantId, conversationId: conversation.id, rawEventId: event.id, channel: 'TIKTOK',
+      externalMessageId: 'fictional-tiktok-message', direction: 'INBOUND',
+      senderId: 'fictional-tiktok-customer', text: null, sourceTimestamp: new Date(),
+    } });
+    await prisma.attachment.create({ data: {
+      messageId: message.id, type: 'IMAGE', originalUrl: 'tiktok-media:fictional', copyStatus: 'COPIED',
+    } });
+
+    try {
+      const list = await service.list(tenantId, { limit: 20 });
+      expect(list.items.find((item) => item.id === conversation.id)).toMatchObject({
+        channel: 'TIKTOK', participantName: 'Клієнт TikTok', lastMessagePreview: '📷 TikTok',
+      });
+      await expect(service.detail(tenantId, conversation.id)).resolves.toMatchObject({
+        channel: 'TIKTOK', participantUsername: null, participantAvatarUrl: null,
+        replyCapability: { enabled: false, reason: 'CHANNEL_READ_ONLY' },
+      });
+    } finally {
+      await prisma.attachment.deleteMany({ where: { messageId: message.id } });
+      await prisma.message.deleteMany({ where: { conversationId: conversation.id } });
+      await prisma.conversation.delete({ where: { id: conversation.id } });
+      await prisma.webhookEvent.delete({ where: { id: event.id } });
+    }
+  });
+
   it('returns copied images and videos, safe shared links, and unsupported attachment placeholders', async () => {
     const message = await prisma.message.findFirstOrThrow({
       where: { tenantId, conversationId: newestId },

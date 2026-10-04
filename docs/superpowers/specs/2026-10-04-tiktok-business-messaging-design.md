@@ -1,7 +1,7 @@
 # TikTok Business Messaging channel design
 
 **Date:** 2026-10-04
-**Status:** Implementation in progress; contracts, tenant-safe persistence, provider client, OAuth, shared webhook reconciliation, signature verification, durable callback registration, worker normalization, authenticated media copying, and idempotent order-trigger ingestion are implemented, while UI and live provider validation remain incomplete
+**Status:** Implementation in progress; backend contracts, tenant-safe persistence, provider client/OAuth, shared webhook reconciliation, signed durable ingestion, authenticated media copying, conversation reads, and provider-neutral order recognition are implemented, while workspace UI and live provider validation remain incomplete
 **Owner:** Sales AITO social channels
 
 ## 1. Purpose
@@ -154,6 +154,8 @@ Inbound representation:
 TikTok display names and avatars are optional enrichment. Their absence cannot block message ingestion, order recognition, or rendering.
 
 Media references persisted with the webhook contain provider identifiers, never access tokens. The worker obtains a current access token from the tenant-scoped encrypted connection. A database refresh lease permits only one concurrent refresh for a credential generation; rotated access and refresh tokens are encrypted and replaced atomically. Permanent refresh rejection moves the connection to `REAUTH_REQUIRED`.
+
+Until outbound delivery is implemented, TikTok conversations are exposed with `replyCapability = { enabled: false, reason: 'CHANNEL_READ_ONLY' }`. TikTok inbound messages may still enter the same explicit-intent order-recognition policy as Instagram and Facebook, using the provider-neutral `social-order-v3` prompt version.
 
 ## 9. Outbound delivery rules
 
