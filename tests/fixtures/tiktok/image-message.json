@@ -1,0 +1,7 @@
+{
+  "client_key": "fictional-tiktok-client",
+  "event": "im_receive_msg",
+  "create_time": 1780000001,
+  "user_openid": "fictional-business-account",
+  "content": "{\"from\":\"fictional_customer\",\"to\":\"fictional_shop\",\"unique_identifier\":\"fictional-customer-id\",\"from_user\":{\"id\":\"fictional-customer-id\",\"role\":\"personal_account\"},\"to_user\":{\"id\":\"fictional-business-account\",\"role\":\"business_account\"},\"conversation_id\":\"fictional-conversation-001\",\"message_id\":\"fictional-message-image-001\",\"timestamp\":1780000001000,\"type\":\"image\",\"image\":{\"media_id\":\"fictional-image-media-id\"},\"scene_type\":0,\"is_follower\":true,\"message_tag\":{\"source\":\"APP\"}}"
+}

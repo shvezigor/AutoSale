@@ -1,0 +1,7 @@
+{
+  "client_key": "fictional-tiktok-client",
+  "event": "im_receive_msg",
+  "create_time": 1780000003,
+  "user_openid": "fictional-business-account",
+  "content": "{\"from\":\"fictional_customer\",\"to\":\"fictional_shop\",\"unique_identifier\":\"fictional-customer-id\",\"from_user\":{\"id\":\"fictional-customer-id\",\"role\":\"personal_account\"},\"to_user\":{\"id\":\"fictional-business-account\",\"role\":\"business_account\"},\"conversation_id\":\"fictional-conversation-001\",\"message_id\":\"fictional-message-link-001\",\"timestamp\":1780000003000,\"type\":\"share_post\",\"share_post\":{\"embed_url\":\"https://www.tiktok.com/@fictional/video/7000000000000000000\",\"video_id\":\"7000000000000000000\"},\"scene_type\":0,\"is_follower\":true,\"message_tag\":{\"source\":\"APP\"}}"
+}

@@ -36,6 +36,35 @@ function tokenData(overrides: Record<string, unknown> = {}): Record<string, unkn
 }
 
 describe('TikTokBusinessMessagingClient', () => {
+  it('reads and reconciles the one app-level DIRECT_MESSAGE webhook', async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(jsonResponse({
+        code: 0, message: 'OK', request_id: 'request-list',
+        data: { app_id: 'fictional-tiktok-client', event_type: 'DIRECT_MESSAGE' },
+      }))
+      .mockResolvedValueOnce(jsonResponse({
+        code: 0, message: 'OK', request_id: 'request-update',
+        data: {
+          app_id: 'fictional-tiktok-client', event_type: 'DIRECT_MESSAGE',
+          callback_url: 'https://sales-aito.example/webhooks/tiktok',
+        },
+      }));
+    const client = new TikTokBusinessMessagingClient({ ...config, fetch: fetchMock });
+
+    await expect(client.getDirectMessageWebhook()).resolves.toBeNull();
+    await expect(client.updateDirectMessageWebhook('https://sales-aito.example/webhooks/tiktok')).resolves.toEqual({
+      callbackUrl: 'https://sales-aito.example/webhooks/tiktok',
+    });
+
+    expect(String(fetchMock.mock.calls[0]?.[0])).toContain('business/webhook/list/');
+    expect(String(fetchMock.mock.calls[0]?.[0])).toContain('event_type=DIRECT_MESSAGE');
+    expect(JSON.parse(String(fetchMock.mock.calls[1]?.[1]?.body))).toEqual({
+      app_id: 'fictional-tiktok-client',
+      secret: 'fictional-tiktok-client-secret',
+      event_type: 'DIRECT_MESSAGE',
+      callback_url: 'https://sales-aito.example/webhooks/tiktok',
+    });
+  });
   it('adds one-time state to the provider-generated account-holder authorization URL', () => {
     const client = new TikTokBusinessMessagingClient(config);
     const url = new URL(client.getAuthorizationUrl({ state: 'opaque-state' }));

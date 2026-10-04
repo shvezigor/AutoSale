@@ -292,11 +292,11 @@ git commit -m "feat: connect TikTok business accounts"
 - Create: `tests/fixtures/tiktok/link-message.json`
 
 **Interfaces:**
-- Produces public TikTok challenge/callback route from `TikTokModule`.
+- Produces the public signed POST callback route from `TikTokModule`; the current API for Business configuration contract has no Meta-style GET challenge.
 - Produces BullMQ job `tiktok.normalize` with `{ tenantId, eventId, correlationId }` and `jobId = eventId`.
 - Produces webhook event keys `tiktok:<provider-event-id>` or `tiktok:sha256:<digest>`.
 
-- [ ] **Step 1: Add failing challenge, signature, routing, and duplicate tests**
+- [x] **Step 1: Add failing signature, routing, and duplicate tests**
 
 ```ts
 await request(app.getHttpServer())
@@ -314,21 +314,21 @@ expect(await prisma.webhookEvent.count({ where: { tenantId, provider: 'TIKTOK' }
 
 Test invalid signature before persistence, unknown account acknowledgment, duplicate callback exactly once, frozen tenant no-op, malformed supported event, and broker failure leaving `RECEIVED` for reconciliation.
 
-- [ ] **Step 2: Run focused webhook tests and verify failure**
+- [x] **Step 2: Run focused webhook tests and verify failure**
 
 Run: `pnpm --filter @autosale/api test -- tiktok-signature.service.spec.ts tiktok-event.service.spec.ts tiktok-webhook.controller.spec.ts`
 Expected: FAIL because the TikTok webhook boundary is missing.
 
-- [ ] **Step 3: Implement exact raw-body verification and durable registration**
+- [x] **Step 3: Implement exact raw-body verification and durable registration**
 
-Follow the signature/challenge fields published for the approved TikTok app. Verify before JSON parsing, resolve tenant with `api_tiktok_tenant_for_account`, sanitize the stored payload, insert under the unique tenant/provider/external-event key, then enqueue. Return a successful provider acknowledgment for authentic duplicates and lifecycle-frozen tenants.
+Follow the current API for Business signature contract: there is no Meta-style GET challenge. Verify `TikTok-Signature` against the exact raw body before JSON parsing, resolve tenant with `api_tiktok_tenant_for_account`, sanitize the stored payload, insert under the unique tenant/provider/external-event key, then enqueue. Return a successful provider acknowledgment for authentic duplicates and lifecycle-frozen tenants.
 
-- [ ] **Step 4: Run focused webhook tests**
+- [x] **Step 4: Run focused webhook tests**
 
 Run: `pnpm --filter @autosale/api test -- tiktok-signature.service.spec.ts tiktok-event.service.spec.ts tiktok-webhook.controller.spec.ts`
 Expected: PASS.
 
-- [ ] **Step 5: Commit webhook ingestion**
+- [x] **Step 5: Commit webhook ingestion**
 
 ```bash
 git add apps/api/src/tiktok apps/api/src/app.module.ts tests/fixtures/tiktok

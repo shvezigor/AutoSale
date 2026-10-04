@@ -21,6 +21,7 @@ const guardedSources = [
   ['src/integrations/google-credential-cleanup.service.ts', ['SHEETS_EXPORT']],
   ['src/integrations/instagram-oauth.service.ts', ['META_INBOUND']],
   ['src/integrations/tiktok-oauth.service.ts', ['META_INBOUND']],
+  ['src/tiktok/tiktok-event.service.ts', ['META_INBOUND']],
   ['src/team/team.service.ts', ['ACCOUNT_ADMINISTRATION']],
   ['src/settings/order-settings.service.ts', ['ORDER_MUTATION']],
   ['src/commercial-settings/commercial-settings.service.ts', ['COMMERCIAL_TERMS']],

@@ -53,6 +53,10 @@ export interface TikTokDownloadedMedia {
   contentLength: number | null;
 }
 
+export interface TikTokDirectMessageWebhook {
+  callbackUrl: string;
+}
+
 export type TikTokBusinessMessagingStage =
   | 'TOKEN'
   | 'TOKEN_REFRESH'
@@ -60,7 +64,9 @@ export type TikTokBusinessMessagingStage =
   | 'TOKEN_INFO'
   | 'ACCOUNT'
   | 'MEDIA_URL'
-  | 'MEDIA_DOWNLOAD';
+  | 'MEDIA_DOWNLOAD'
+  | 'WEBHOOK_GET'
+  | 'WEBHOOK_UPDATE';
 
 export class TikTokBusinessMessagingError extends Error {
   constructor(
@@ -97,6 +103,43 @@ export class TikTokBusinessMessagingClient {
     const url = new URL(this.authorizationUrl);
     url.searchParams.set('state', input.state);
     return url.toString();
+  }
+
+  async getDirectMessageWebhook(): Promise<TikTokDirectMessageWebhook | null> {
+    const url = this.apiUrl('business/webhook/list/');
+    url.searchParams.set('app_id', this.config.clientId);
+    url.searchParams.set('secret', this.config.clientSecret);
+    url.searchParams.set('event_type', 'DIRECT_MESSAGE');
+    const data = await this.requestEnvelope(url, { method: 'GET' }, 'WEBHOOK_GET');
+    if (!isRecord(data) || data.app_id !== this.config.clientId || data.event_type !== 'DIRECT_MESSAGE') {
+      throw malformed('WEBHOOK_GET');
+    }
+    if (data.callback_url === undefined) return null;
+    if (!isHttpsUrl(data.callback_url)) throw malformed('WEBHOOK_GET');
+    return { callbackUrl: data.callback_url };
+  }
+
+  async updateDirectMessageWebhook(callbackUrl: string): Promise<TikTokDirectMessageWebhook> {
+    if (!isHttpsUrl(callbackUrl)) throw new Error('Invalid TikTok webhook callback URL');
+    const data = await this.requestEnvelope(this.apiUrl('business/webhook/update/'), {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        app_id: this.config.clientId,
+        secret: this.config.clientSecret,
+        event_type: 'DIRECT_MESSAGE',
+        callback_url: callbackUrl,
+      }),
+    }, 'WEBHOOK_UPDATE');
+    if (
+      !isRecord(data) ||
+      data.app_id !== this.config.clientId ||
+      data.event_type !== 'DIRECT_MESSAGE' ||
+      data.callback_url !== callbackUrl
+    ) {
+      throw malformed('WEBHOOK_UPDATE');
+    }
+    return { callbackUrl };
   }
 
   async exchangeCode(input: TikTokCodeExchangeInput): Promise<TikTokAccountToken> {
