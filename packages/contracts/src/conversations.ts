@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const socialChannelSchema = z.enum(['INSTAGRAM', 'FACEBOOK']);
+export const socialChannelSchema = z.enum(['INSTAGRAM', 'FACEBOOK', 'TIKTOK']);
 
 export const conversationQuerySchema = z.object({
   cursor: z.string().min(1).optional(),

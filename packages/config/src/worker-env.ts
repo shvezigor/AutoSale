@@ -32,6 +32,12 @@ export const workerEnvSchema = z.object({
   META_APP_SECRET: z.string().min(16),
   META_GRAPH_API_VERSION: z.string().regex(/^v\d+\.\d+$/),
   FACEBOOK_MESSENGER_ENABLED: optionalBoolean,
+  TIKTOK_BUSINESS_MESSAGING_ENABLED: optionalBoolean,
+  TIKTOK_CLIENT_ID: optionalNonEmptyString,
+  TIKTOK_CLIENT_SECRET: z.preprocess(
+    (value) => value === '' ? undefined : value,
+    z.string().min(16).optional(),
+  ),
   GOOGLE_SERVICE_ACCOUNT_FILE: z.preprocess((value) => value === '' ? undefined : value, z.string().min(1).optional()),
   INTEGRATION_ENCRYPTION_KEY: canonicalEncryptionKey,
   GOOGLE_OAUTH_CLIENT_ID: optionalNonEmptyString,
@@ -51,6 +57,15 @@ export const workerEnvSchema = z.object({
 }).superRefine((environment, context) => {
   if ((environment.GOOGLE_OAUTH_CLIENT_ID === undefined) !== (environment.GOOGLE_OAUTH_CLIENT_SECRET === undefined)) {
     context.addIssue({ code: 'custom', message: 'Google OAuth worker configuration must include client ID and client secret' });
+  }
+
+  const tikTokCredentials = [environment.TIKTOK_CLIENT_ID, environment.TIKTOK_CLIENT_SECRET];
+  const configuredTikTokCredentials = tikTokCredentials.filter((value) => value !== undefined);
+  if (configuredTikTokCredentials.length > 0 && configuredTikTokCredentials.length !== tikTokCredentials.length) {
+    context.addIssue({ code: 'custom', message: 'TikTok configuration must include client ID and client secret' });
+  }
+  if (environment.TIKTOK_BUSINESS_MESSAGING_ENABLED && configuredTikTokCredentials.length !== tikTokCredentials.length) {
+    context.addIssue({ code: 'custom', message: 'TikTok Business Messaging requires client ID and client secret' });
   }
 
   const telegramValues = [

@@ -34,6 +34,14 @@
       "import": "./dist/facebook.js",
       "default": "./dist/facebook.js"
     },
+    "./tiktok": {
+      "react-server": "./src/tiktok.ts",
+      "browser": "./src/tiktok.ts",
+      "types": "./src/tiktok.ts",
+      "development": "./src/tiktok.ts",
+      "import": "./dist/tiktok.js",
+      "default": "./dist/tiktok.js"
+    },
     "./orders": {
       "react-server": "./src/orders.ts",
       "browser": "./src/orders.ts",

@@ -31,7 +31,7 @@ describe('parseApiEnv', () => {
     expect(parseApiEnv({ ...validEnv, UKRPOSHTA_SANDBOX_SHIPMENTS_ENABLED: 'true' }).UKRPOSHTA_SANDBOX_SHIPMENTS_ENABLED).toBe(true);
   });
   it('coerces a valid API environment', () => {
-    expect(parseApiEnv(validEnv)).toEqual({ ...validEnv, PORT: 3001, SMTP_PORT: 587, GOOGLE_SIGN_IN_ENABLED: false, FACEBOOK_MESSENGER_ENABLED: false, CATALOGUE_AI_STRUCTURE_ANALYSIS: true, NOVA_POSHTA_DELIVERY_ENABLED: false, UKRPOSHTA_SANDBOX_SHIPMENTS_ENABLED: false });
+    expect(parseApiEnv(validEnv)).toEqual({ ...validEnv, PORT: 3001, SMTP_PORT: 587, GOOGLE_SIGN_IN_ENABLED: false, FACEBOOK_MESSENGER_ENABLED: false, TIKTOK_BUSINESS_MESSAGING_ENABLED: false, CATALOGUE_AI_STRUCTURE_ANALYSIS: true, NOVA_POSHTA_DELIVERY_ENABLED: false, UKRPOSHTA_SANDBOX_SHIPMENTS_ENABLED: false });
   });
 
   it('accepts an explicit Nova Poshta delivery feature flag', () => {
@@ -68,6 +68,31 @@ describe('parseApiEnv', () => {
       FACEBOOK_APP_ID: '987654321098765',
       FACEBOOK_APP_SECRET: 'too-short',
     })).toThrow();
+  });
+
+  it('keeps TikTok Business Messaging disabled by default and accepts complete enablement', () => {
+    expect(parseApiEnv(validEnv).TIKTOK_BUSINESS_MESSAGING_ENABLED).toBe(false);
+    const parsed = parseApiEnv({
+      ...validEnv,
+      TIKTOK_BUSINESS_MESSAGING_ENABLED: 'true',
+      TIKTOK_CLIENT_ID: 'fictional-tiktok-client',
+      TIKTOK_CLIENT_SECRET: 'fictional-tiktok-client-secret',
+    });
+    expect(parsed.TIKTOK_BUSINESS_MESSAGING_ENABLED).toBe(true);
+  });
+
+  it('requires complete TikTok credentials when Business Messaging is enabled', () => {
+    expect(() => parseApiEnv({
+      ...validEnv,
+      TIKTOK_BUSINESS_MESSAGING_ENABLED: 'true',
+    })).toThrow(/TikTok Business Messaging requires/i);
+  });
+
+  it('rejects a partial TikTok configuration even while disabled', () => {
+    expect(() => parseApiEnv({
+      ...validEnv,
+      TIKTOK_CLIENT_ID: 'fictional-tiktok-client',
+    })).toThrow(/TikTok configuration/i);
   });
 
   it('requires a complete Google Sign-In configuration when the feature is enabled', () => {

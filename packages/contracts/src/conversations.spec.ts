@@ -13,6 +13,21 @@ const profile = {
 };
 
 describe('conversation profile contracts', () => {
+  it('accepts TikTok as a bounded social channel', () => {
+    const tiktok = conversationListResponseSchema.parse({
+      items: [{
+        id: '11111111-1111-4111-8111-111111111111',
+        channel: 'TIKTOK',
+        ...profile,
+        lastMessagePreview: 'Вітаю з TikTok',
+        lastMessageAt: '2026-10-04T10:00:00.000Z',
+      }],
+      nextCursor: null,
+    });
+
+    expect(tiktok.items[0]?.channel).toBe('TIKTOK');
+  });
+
   it('accepts Facebook conversations without widening the channel vocabulary', () => {
     const facebook = conversationListResponseSchema.parse({
       items: [{

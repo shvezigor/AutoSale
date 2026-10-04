@@ -37,6 +37,9 @@ export const apiEnvSchema = z.object({
   FACEBOOK_MESSENGER_ENABLED: optionalBoolean,
   FACEBOOK_APP_ID: optionalNumericId,
   FACEBOOK_APP_SECRET: optionalSecret,
+  TIKTOK_BUSINESS_MESSAGING_ENABLED: optionalBoolean,
+  TIKTOK_CLIENT_ID: optionalNonEmptyString,
+  TIKTOK_CLIENT_SECRET: optionalSecret,
   INTEGRATION_ENCRYPTION_KEY: z.string().refine(
     isCanonicalIntegrationEncryptionKey,
     'must be canonical base64 encoding of 32 bytes',
@@ -92,6 +95,23 @@ export const apiEnvSchema = z.object({
     context.addIssue({
       code: 'custom',
       message: 'Facebook Messenger requires dedicated Facebook app ID and app secret',
+    });
+  }
+
+  const tikTokCredentials = [environment.TIKTOK_CLIENT_ID, environment.TIKTOK_CLIENT_SECRET];
+  const configuredTikTokCredentials = tikTokCredentials.filter((value) => value !== undefined);
+
+  if (configuredTikTokCredentials.length > 0 && configuredTikTokCredentials.length !== tikTokCredentials.length) {
+    context.addIssue({
+      code: 'custom',
+      message: 'TikTok configuration must include client ID and client secret',
+    });
+  }
+
+  if (environment.TIKTOK_BUSINESS_MESSAGING_ENABLED && configuredTikTokCredentials.length !== tikTokCredentials.length) {
+    context.addIssue({
+      code: 'custom',
+      message: 'TikTok Business Messaging requires client ID and client secret',
     });
   }
 

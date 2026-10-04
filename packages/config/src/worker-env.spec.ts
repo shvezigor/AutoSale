@@ -30,7 +30,7 @@ describe('parseWorkerEnv', () => {
     expect(parseWorkerEnv({ ...validEnv, UKRPOSHTA_SANDBOX_SHIPMENTS_ENABLED: 'true' }).UKRPOSHTA_SANDBOX_SHIPMENTS_ENABLED).toBe(true);
   });
   it('accepts a complete worker environment', () => {
-    expect(parseWorkerEnv(validEnv)).toEqual({ ...validEnv, HEALTH_PORT: 3002, FACEBOOK_MESSENGER_ENABLED: false, CATALOGUE_AI_STRUCTURE_ANALYSIS: true, NOVA_POSHTA_DELIVERY_ENABLED: false, UKRPOSHTA_SANDBOX_SHIPMENTS_ENABLED: false });
+    expect(parseWorkerEnv(validEnv)).toEqual({ ...validEnv, HEALTH_PORT: 3002, FACEBOOK_MESSENGER_ENABLED: false, TIKTOK_BUSINESS_MESSAGING_ENABLED: false, CATALOGUE_AI_STRUCTURE_ANALYSIS: true, NOVA_POSHTA_DELIVERY_ENABLED: false, UKRPOSHTA_SANDBOX_SHIPMENTS_ENABLED: false });
   });
 
   it('accepts an explicit Nova Poshta delivery feature flag', () => {
@@ -40,6 +40,28 @@ describe('parseWorkerEnv', () => {
   it('keeps Facebook Messenger disabled by default and accepts explicit enablement', () => {
     expect(parseWorkerEnv(validEnv).FACEBOOK_MESSENGER_ENABLED).toBe(false);
     expect(parseWorkerEnv({ ...validEnv, FACEBOOK_MESSENGER_ENABLED: 'true' }).FACEBOOK_MESSENGER_ENABLED).toBe(true);
+  });
+
+  it('requires TikTok credentials when Business Messaging is enabled', () => {
+    expect(parseWorkerEnv(validEnv).TIKTOK_BUSINESS_MESSAGING_ENABLED).toBe(false);
+    expect(() => parseWorkerEnv({
+      ...validEnv,
+      TIKTOK_BUSINESS_MESSAGING_ENABLED: 'true',
+    })).toThrow(/TikTok Business Messaging requires/i);
+
+    expect(parseWorkerEnv({
+      ...validEnv,
+      TIKTOK_BUSINESS_MESSAGING_ENABLED: 'true',
+      TIKTOK_CLIENT_ID: 'fictional-tiktok-client',
+      TIKTOK_CLIENT_SECRET: 'fictional-tiktok-client-secret',
+    }).TIKTOK_BUSINESS_MESSAGING_ENABLED).toBe(true);
+  });
+
+  it('rejects partial TikTok worker credentials while disabled', () => {
+    expect(() => parseWorkerEnv({
+      ...validEnv,
+      TIKTOK_CLIENT_SECRET: 'fictional-tiktok-client-secret',
+    })).toThrow(/TikTok configuration/i);
   });
 
   it('enables hybrid catalogue analysis by default and accepts an explicit rollback', () => {
