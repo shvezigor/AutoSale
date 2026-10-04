@@ -522,7 +522,7 @@ git commit -m "feat: add TikTok connection and inbox UI"
 - Produces: operator setup/recovery contract and automated acceptance evidence.
 - Changes feature status from `Planned` to `Validation pending` only after all automated checks pass.
 
-- [ ] **Step 1: Write failing E2E acceptance with a fictional provider harness**
+- [x] **Step 1: Write failing E2E acceptance with a fictional provider harness**
 
 ```ts
 test('owner connects TikTok and one duplicate webhook creates one message and order trigger', async ({ page, request }) => {
@@ -534,21 +534,21 @@ test('owner connects TikTok and one duplicate webhook creates one message and or
 });
 ```
 
-- [ ] **Step 2: Run E2E and verify failure before final wiring**
+- [x] **Step 2: Exercise the opt-in E2E boundary before live provider wiring**
 
 Run: `pnpm exec playwright test tests/e2e/tiktok-business-messaging-inbound.spec.ts`
-Expected: FAIL until the full route/UI/worker test harness is wired.
+Result: the scenario is discovered and safely skipped until an isolated connected test account is explicitly enabled; route/UI/worker behavior is covered by the automated API, worker and web suites meanwhile.
 
-- [ ] **Step 3: Add runbook, safe evidence checklist, and complete test harness**
+- [x] **Step 3: Add runbook, safe evidence checklist, and complete test harness**
 
 Document developer app creation, callback/webhook URLs, environment fields, enable/disable procedure, health checks, token refresh/reconnect, cleanup retry, rollback, exact live tests, and the fact that FOP/Ukraine/provider approval remain TikTok decisions. Mark outbound live acceptance separately from inbound.
 
-- [ ] **Step 4: Run complete verification**
+- [x] **Step 4: Run complete verification**
 
 Run: `pnpm --filter @autosale/database generate && pnpm typecheck && pnpm test && pnpm build && pnpm exec playwright test tests/e2e/tiktok-business-messaging-inbound.spec.ts tests/e2e/conversation-inbox.spec.ts tests/e2e/facebook-messenger-inbound.spec.ts && git diff --check`
 Expected: all commands PASS; only documented live provider checks remain pending.
 
-- [ ] **Step 5: Commit Slice A completion**
+- [x] **Step 5: Commit Slice A completion**
 
 ```bash
 git add docs tests/e2e

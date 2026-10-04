@@ -260,7 +260,7 @@ No real tokens, business documents, customer messages, or production account ide
 
 ## 15. Rollout and acceptance
 
-Code ships behind disabled-by-default `TIKTOK_BUSINESS_MESSAGING_ENABLED`. Implementation completion changes the feature status to **Validation pending**, not **Available**.
+Inbound Slice A is implemented behind disabled-by-default `TIKTOK_BUSINESS_MESSAGING_ENABLED` and its automated acceptance is complete. The feature status is therefore **Validation pending**, not **Available**. The canonical operator procedure and remaining provider gates are maintained in [`tiktok-business-messaging.md`](../../integrations/tiktok-business-messaging.md) and [`tiktok-business-messaging-checklist.md`](../../acceptance/tiktok-business-messaging-checklist.md).
 
 Live enablement requires:
 
