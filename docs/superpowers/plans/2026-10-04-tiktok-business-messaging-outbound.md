@@ -236,7 +236,7 @@ git commit -m "feat: deliver and reconcile TikTok replies"
 - Consumes `ConversationDetailResponse.replyCapability` and existing send/retry API.
 - Produces one channel-aware composer for Instagram and TikTok while Facebook remains read-only.
 
-- [ ] **Step 1: Write failing TikTok composer tests**
+- [x] **Step 1: Write failing TikTok composer tests**
 
 ```tsx
 render(<SocialReplyComposer conversation={tikTokConversation} />);
@@ -250,21 +250,21 @@ expect(fetchMock).toHaveBeenCalledWith(
 
 Test `LoadingButton`, generated UUID idempotency key reused after uncertain browser failure, disabled inbound-only reason, reconnect reason, pending/sent/failed rendering, safe retry visibility, Ukrainian/English copy, keyboard submission, and 390 px layout.
 
-- [ ] **Step 2: Run focused web tests and verify failure**
+- [x] **Step 2: Run focused web tests and verify failure**
 
 Run: `pnpm --filter @autosale/web test -- social-reply-composer.spec.tsx message-thread.spec.tsx completeness.spec.ts`
 Expected: FAIL because TikTok is rendered read-only.
 
-- [ ] **Step 3: Extract the shared composer and add TikTok copy**
+- [x] **Step 3: Extract the shared composer and add TikTok copy**
 
 Retain `instagram-reply-composer.tsx` as a compatibility export or migrate all imports in the same commit. Use shared button classes only. Keep form-level provider/permission/outage errors and preserve typed text after a failed send.
 
-- [ ] **Step 4: Run focused web tests**
+- [x] **Step 4: Run focused web tests**
 
 Run: `pnpm --filter @autosale/web test -- social-reply-composer.spec.tsx message-thread.spec.tsx completeness.spec.ts`
 Expected: PASS.
 
-- [ ] **Step 5: Commit reply UI**
+- [x] **Step 5: Commit reply UI**
 
 ```bash
 git add apps/web

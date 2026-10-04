@@ -1,7 +1,7 @@
 # TikTok Business Messaging channel design
 
 **Date:** 2026-10-04
-**Status:** Slice A implemented behind a disabled-by-default flag, including tenant-safe OAuth, signed durable ingestion, authenticated media, order recognition, settings/onboarding, and inbox presentation; provider approval, region eligibility, live validation, and Slice B outbound delivery remain incomplete
+**Status:** Slice A and the automated Slice B implementation are available behind a disabled-by-default flag, including tenant-safe OAuth, signed durable ingestion, authenticated media, order recognition, settings/onboarding, inbox presentation, manual text composition and durable outbound delivery; automated end-to-end evidence, provider approval, region eligibility and controlled live validation remain incomplete
 **Owner:** Sales AITO social channels
 
 ## 1. Purpose
@@ -155,7 +155,7 @@ TikTok display names and avatars are optional enrichment. Their absence cannot b
 
 Media references persisted with the webhook contain provider identifiers, never access tokens. The worker obtains a current access token from the tenant-scoped encrypted connection. A database refresh lease permits only one concurrent refresh for a credential generation; rotated access and refresh tokens are encrypted and replaced atomically. Permanent refresh rejection moves the connection to `REAUTH_REQUIRED`.
 
-Until outbound delivery is implemented, TikTok conversations are exposed with `replyCapability = { enabled: false, reason: 'CHANNEL_READ_ONLY' }`. TikTok inbound messages may still enter the same explicit-intent order-recognition policy as Instagram and Facebook, using the provider-neutral `social-order-v3` prompt version.
+TikTok conversations expose a server-derived reply capability. Eligible conversations receive the shared manual composer; inbound-only, reconnect-required and expired-window states receive a disabled composer with a typed localized reason. TikTok inbound messages may still enter the same explicit-intent order-recognition policy as Instagram and Facebook, using the provider-neutral `social-order-v3` prompt version.
 
 ## 9. Outbound delivery rules
 

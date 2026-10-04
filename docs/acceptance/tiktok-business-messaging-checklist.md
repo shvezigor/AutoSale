@@ -14,7 +14,7 @@
 - [x] Permanent refresh rejection requires reconnect instead of silently dropping messages.
 - [x] Settings are collapsed by default, owner mutations are role-gated and managers are read-only.
 - [x] Inbox/list/detail/onboarding render TikTok without changing Instagram or Facebook behavior.
-- [x] Slice A exposes `CHANNEL_READ_ONLY` and no outbound composer.
+- [x] Slice A remains independently usable in inbound-only mode when outbound capability is unavailable.
 - [x] Fictional opt-in browser acceptance verifies signed duplicate delivery and inbox rendering.
 
 ## Live inbound gate
@@ -38,12 +38,14 @@
 - [x] API acceptance is tenant-safe and idempotent, routes only eligible TikTok conversations and pins each reply to the active credential generation.
 - [x] Worker delivery rechecks the current generation, send capability and 48-hour reply window immediately before provider contact.
 - [x] Known-safe rejections use bounded retry; timeout, 5xx and expired in-flight leases become `UNKNOWN` without automatic resend.
+- [x] Shared Instagram/TikTok composer uses localized capability guidance, shared buttons, accessible validation and preserves the draft after failure.
+- [x] Browser retry of unchanged text reuses the same local idempotency key; editing the draft starts a new logical send.
 - [ ] TikTok has granted the required send capability for the app/account/region.
 - [x] Conversation-specific eligibility is checked immediately before send.
 - [ ] One manual text reply is accepted and delivered exactly once.
 - [ ] Transient/ambiguous results reconcile before any retry can contact TikTok again.
 - [ ] Permanent rejection produces a localized safe reason and no optimistic `SENT` state.
 
-Outbound remains out of scope for Slice A. Its unchecked items do not block an
-inbound-only pilot, but the UI must continue to say that TikTok replies are not
-available.
+Outbound remains a separate gate from Slice A. Its unchecked items do not block
+an inbound-only pilot; the UI must truthfully disable replies and explain the
+specific capability, reconnect or conversation-window reason.

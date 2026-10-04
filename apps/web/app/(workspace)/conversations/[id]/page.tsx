@@ -1,6 +1,6 @@
 import { getConversation, getConversationOrder } from '../../../../src/api/conversations';
 import { getServerSession } from '../../../../src/auth/session';
-import { InstagramReplyComposer } from '../../../../src/components/instagram-reply-composer';
+import { SocialReplyComposer } from '../../../../src/components/social-reply-composer';
 import { ConversationOrderPanel } from '../../../../src/components/conversation-order-panel';
 import { MessageThread } from '../../../../src/components/message-thread';
 import { createTranslator } from '../../../../src/i18n/translator';
@@ -37,8 +37,8 @@ export default async function ConversationDetailPage({ params }: { params: Promi
             : <span className="avatar large" aria-hidden="true">{name[0]}</span>}
           <span><h2>{name}</h2><small>{accountLabel}</small></span>
         </header>
-        {conversation.channel === 'INSTAGRAM' ? (
-          <InstagramReplyComposer
+        {conversation.channel !== 'FACEBOOK' ? (
+          <SocialReplyComposer
             canManageSettings={session?.membershipRole === 'OWNER'}
             initialConversation={conversation}
             key={conversation.id}
@@ -46,7 +46,7 @@ export default async function ConversationDetailPage({ params }: { params: Promi
         ) : (
           <>
             <div className="thread-scroll"><MessageThread conversation={conversation} /></div>
-            <p className="reply-area">{conversation.channel === 'TIKTOK' ? t('conversations.tiktokReadOnly') : t('conversations.facebookReadOnly')}</p>
+            <p className="reply-area">{t('conversations.facebookReadOnly')}</p>
           </>
         )}
       </section>

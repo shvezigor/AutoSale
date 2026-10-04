@@ -126,4 +126,20 @@ describe('MessageThread', () => {
     expect(screen.getByText('Непідтримуване вкладення TikTok')).toBeVisible();
     expect(screen.getByLabelText('Відео з TikTok')).toBeVisible();
   });
+
+  it('shows TikTok-specific delivery failures and the shared retry action', () => {
+    const failed = {
+      ...detail.messages[1]!,
+      delivery: {
+        status: 'FAILED' as const,
+        attempts: 2,
+        errorCode: 'TIKTOK_RATE_LIMITED' as const,
+        retryAllowed: true,
+      },
+    };
+    render(<MessageThread conversation={{ ...detail, channel: 'TIKTOK', messages: [failed] }} onRetry={vi.fn()} />);
+
+    expect(screen.getByText('TikTok тимчасово обмежив надсилання')).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Повторити надсилання' })).toHaveClass('text-button');
+  });
 });

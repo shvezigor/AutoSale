@@ -13,8 +13,10 @@ The worker now refreshes the pinned generation, rechecks outbound capability
 and the 48-hour conversation window, then settles the durable delivery state.
 Known-safe provider rejections may be retried within a fixed bound; timeouts,
 5xx responses and expired in-flight leases become `UNKNOWN` and are never
-automatically resent. The composer UI is still incomplete, so this is not yet
-an end-to-end user capability. The integration does not
+automatically resent. The shared conversation composer now enables manual text
+replies only when the API reports that the specific TikTok conversation is
+eligible. It preserves the draft and reuses the same local idempotency key after
+an uncertain browser failure. The integration does not
 import message history, process comments or connect personal TikTok accounts.
 
 Provider access, business/account eligibility and regional availability are
@@ -70,9 +72,10 @@ OAuth codes, signatures, raw payloads or customer content in logs or evidence.
 5. Confirm it appears once in **Conversations** with the TikTok label.
 
 Managers can read the connection state but cannot connect or disconnect an
-account. Until Slice B UI and controlled acceptance are complete, TikTok
-conversations remain read-only in the production UI and must not imply that a
-reply was sent.
+account. When TikTok does not grant send capability, requires reconnect, or the
+48-hour reply window is closed, the conversation shows a disabled composer with
+a precise localized reason. The UI never implies that a reply was sent before
+provider confirmation.
 
 ## Health, refresh and recovery
 
@@ -101,7 +104,7 @@ Use a dedicated fictional/test Business Account. The opt-in browser test needs
 `E2E_TIKTOK_CONNECTED=1`, `E2E_TIKTOK_ACCOUNT_ID`, fictional owner credentials,
 and the same test-app ID/secret used by the isolated stack. It posts a signed
 fictional event twice and proves that the shared inbox stores one TikTok
-message with read-only reply capability. It must never target a production
+message with tenant-safe reply capability. It must never target a production
 customer account.
 
 The live checks and safe evidence rules are maintained in
@@ -122,4 +125,4 @@ automated suite pass.
 
 Do not claim general availability until TikTok grants the required access and
 all inbound live checks pass. Outbound replies remain behind a separate
-acceptance gate until the UI and controlled live checks are complete.
+acceptance gate until automated end-to-end and controlled live checks are complete.

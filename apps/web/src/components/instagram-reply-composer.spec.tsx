@@ -67,10 +67,10 @@ describe('InstagramReplyComposer', () => {
     const field = screen.getByRole('textbox', { name: 'Відповідь' });
     fireEvent.change(field, { target: { value: ' ' } });
     fireEvent.click(screen.getByRole('button', { name: 'Надіслати' }));
-    expect(screen.getByText('Заповніть це поле.', { selector: '#instagram-reply-error' })).toBeInTheDocument();
+    expect(screen.getByText('Заповніть це поле.', { selector: '#social-reply-error' })).toBeInTheDocument();
     fireEvent.change(field, { target: { value: 'x'.repeat(1_001) } });
     fireEvent.click(screen.getByRole('button', { name: 'Надіслати' }));
-    expect(screen.getByText('Введіть не більше 1000 символів.', { selector: '#instagram-reply-error' })).toBeInTheDocument();
+    expect(screen.getByText('Введіть не більше 1000 символів.', { selector: '#social-reply-error' })).toBeInTheDocument();
     fireEvent.keyDown(field, { key: 'Enter', shiftKey: true });
     expect(api.sendConversationMessage).not.toHaveBeenCalled();
   });

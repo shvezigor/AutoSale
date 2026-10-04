@@ -78,14 +78,14 @@ export function MessageThread({
             <footer className="message-meta">
               {message.delivery ? (
                 <span className={`delivery-status delivery-${message.delivery.status.toLowerCase()}`} aria-live="polite">
-                  {deliveryLabel(message.delivery.status, message.delivery.errorCode, t)}
+                  {deliveryLabel(message.delivery.status, message.delivery.errorCode, conversation.channel, t)}
                 </span>
               ) : null}
               <time dateTime={message.sourceTimestamp}>{formatDate(message.sourceTimestamp, { hour: '2-digit', minute: '2-digit' })}</time>
             </footer>
             {message.delivery?.status === 'FAILED' && message.delivery.retryAllowed && onRetry ? (
               <button
-                className="message-retry"
+                className="message-retry text-button"
                 disabled={retryingMessageId === message.id}
                 onClick={() => onRetry(message.id)}
                 type="button"
@@ -130,6 +130,7 @@ function messageText(text: string) {
 function deliveryLabel(
   status: NonNullable<ConversationDetailResponse['messages'][number]['delivery']>['status'],
   errorCode: NonNullable<ConversationDetailResponse['messages'][number]['delivery']>['errorCode'],
+  channel: ConversationDetailResponse['channel'],
   t: ReturnType<typeof useI18n>['t'],
 ) {
   if (status === 'PENDING' || status === 'SENDING') return t('conversations.sending');
@@ -139,5 +140,10 @@ function deliveryLabel(
   if (errorCode === 'INSTAGRAM_RATE_LIMITED') return t('conversations.rateLimited');
   if (errorCode === 'INSTAGRAM_REPLY_WINDOW_EXPIRED') return t('conversations.replyWindowExpiredShort');
   if (errorCode === 'INSTAGRAM_HUMAN_AGENT_UNAVAILABLE') return t('conversations.humanAgentUnavailableShort');
+  if (errorCode === 'TIKTOK_RECONNECT_REQUIRED') return t('conversations.tiktokReconnectRequired');
+  if (errorCode === 'TIKTOK_RATE_LIMITED') return t('conversations.tiktokRateLimited');
+  if (errorCode === 'TIKTOK_REPLY_NOT_PERMITTED') return t('conversations.tiktokReplyWindowExpiredShort');
+  if (errorCode === 'TIKTOK_DELIVERY_UNKNOWN') return t('conversations.deliveryUnknown');
+  if (errorCode === 'TIKTOK_SEND_FAILED' && channel === 'TIKTOK') return t('conversations.tiktokSendFailed');
   return t('conversations.sendFailed');
 }
