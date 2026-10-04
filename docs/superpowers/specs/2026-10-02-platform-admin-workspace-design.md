@@ -24,6 +24,7 @@ In this capability, a **client** means a Sales AITO tenant organization. It neve
 - A client table with sequential numbering, search, status filtering, sorting and a clickable row plus an explicit **View** action.
 - A client-detail page with organization identity, owner email, member/order aggregates, status, creation date, block/unblock control and the existing data-lifecycle controls.
 - An operations page with API/database reachability and BullMQ queue counts, worker presence, backlog age and safe status labels.
+- An integrations page for privacy-safe global provider availability and runtime controls, specified separately in the social-channel runtime-control design.
 - Ukrainian and English interface copy selected from the signed-in administrator's locale.
 - Responsive, keyboard-accessible states and shared Sales AITO button variants.
 
@@ -43,6 +44,7 @@ In this capability, a **client** means a Sales AITO tenant organization. It neve
 | `/admin/tenants` | Clients | Searchable, sortable organization table |
 | `/admin/tenants/:tenantId` | — | Privacy-safe organization detail and existing administrative actions |
 | `/admin/operations` | Operations | Service and background queue diagnostics |
+| `/admin/integrations` | Integrations | Global Facebook and TikTok availability and runtime controls |
 
 The shell header identifies the platform-administrator context and offers logout. The admin navigation is separate from tenant navigation and does not expose workspace search or tenant notifications.
 
@@ -185,7 +187,8 @@ Use shared `primary-button`, `secondary-button`, `danger-button`, `text-button` 
 5. `/admin/operations` lists all configured queues with numeric counts, worker presence, oldest pending age and a safe status.
 6. No page contains tenant conversations, contacts, addresses, attachments, order contents, raw job information or tenant-workspace links.
 7. Desktop and 390 px mobile layouts have no unintended horizontal overflow and preserve keyboard navigation.
-8. Focused tests, full typecheck, production build and relevant browser acceptance pass.
+8. `/admin/integrations` follows the separate runtime-control design and never exposes provider credentials or tenant integration data.
+9. Focused tests, full typecheck, production build and relevant browser acceptance pass.
 
 ## Open questions
 
