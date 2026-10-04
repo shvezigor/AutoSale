@@ -4,7 +4,7 @@ interface PendingEventStore {
 
 interface NormalizeQueue {
   add(
-    name: 'instagram.normalize' | 'facebook.normalize',
+    name: 'instagram.normalize' | 'facebook.normalize' | 'tiktok.normalize',
     data: { tenantId: string; eventId: string; correlationId: string },
     options: { jobId: string; removeOnComplete: true; removeOnFail: true },
   ): Promise<unknown>;
@@ -14,13 +14,14 @@ interface DueInstagramEvent {
   tenant_id: string;
   event_id: string;
   recovery_kind: 'RECEIVED' | 'ATTACHMENT_BACKFILL';
-  job_name: 'instagram.normalize' | 'facebook.normalize';
+  job_name: 'instagram.normalize' | 'facebook.normalize' | 'tiktok.normalize';
 }
 
 export class InstagramEventReconciler {
   constructor(
     private readonly store: PendingEventStore,
     private readonly queue: NormalizeQueue,
+    private readonly tikTokEnabled = false,
   ) {}
 
   async reconcile(): Promise<{ attempted: number; failed: number }> {
@@ -31,6 +32,7 @@ export class InstagramEventReconciler {
     let failed = 0;
 
     for (const event of pending) {
+      if (event.job_name === 'tiktok.normalize' && !this.tikTokEnabled) continue;
       try {
         await this.queue.add(
           event.job_name,

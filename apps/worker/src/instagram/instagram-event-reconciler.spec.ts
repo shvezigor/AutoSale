@@ -67,6 +67,22 @@ describe('InstagramEventReconciler', () => {
     );
   });
 
+  it('queues TikTok events only when the feature is enabled', async () => {
+    const queryRaw = vi.fn().mockResolvedValue([{
+      tenant_id: 'tenant-tiktok', event_id: 'event-tiktok', recovery_kind: 'RECEIVED', job_name: 'tiktok.normalize',
+    }]);
+    const add = vi.fn().mockResolvedValue(undefined);
+    await new InstagramEventReconciler({ $queryRaw: queryRaw } as never, { add } as never).reconcile();
+    expect(add).not.toHaveBeenCalled();
+
+    await new InstagramEventReconciler({ $queryRaw: queryRaw } as never, { add } as never, true).reconcile();
+    expect(add).toHaveBeenCalledWith(
+      'tiktok.normalize',
+      { tenantId: 'tenant-tiktok', eventId: 'event-tiktok', correlationId: 'event-tiktok' },
+      { jobId: 'event-tiktok', removeOnComplete: true, removeOnFail: true },
+    );
+  });
+
   it('continues after one queue failure so another event can recover', async () => {
     const queryRaw = vi.fn().mockResolvedValue([
       { tenant_id: 'tenant-1', event_id: 'event-1', recovery_kind: 'RECEIVED', job_name: 'instagram.normalize' },

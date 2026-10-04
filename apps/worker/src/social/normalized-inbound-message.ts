@@ -1,4 +1,4 @@
-export type SocialChannel = 'INSTAGRAM' | 'FACEBOOK';
+export type SocialChannel = 'INSTAGRAM' | 'FACEBOOK' | 'TIKTOK';
 export type MessageDirection = 'INBOUND' | 'OUTBOUND';
 export type AttachmentType = 'IMAGE' | 'VIDEO' | 'LINK' | 'UNSUPPORTED';
 

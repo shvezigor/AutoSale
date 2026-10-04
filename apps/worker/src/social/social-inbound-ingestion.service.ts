@@ -202,7 +202,7 @@ export class SocialInboundIngestionService {
           const copied = await this.media.copy({
             tenantId: event.tenantId,
             sourceUrl: attachment.originalUrl,
-            ...(normalized.channel === 'FACEBOOK' ? { channel: normalized.channel } : {}),
+            ...(normalized.channel === 'INSTAGRAM' ? {} : { channel: normalized.channel }),
           });
           await withTenantTransaction(this.prisma, event.tenantId, (transaction) => transaction.attachment.update({
             where: { id: attachment.id },

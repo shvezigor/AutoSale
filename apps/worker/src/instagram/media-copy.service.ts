@@ -80,7 +80,11 @@ export class MediaCopyService {
 
       const body = await readWithLimit(response, maxBytes);
       const checksum = createHash('sha256').update(body).digest('hex');
-      const provider = input.channel === 'FACEBOOK' ? 'facebook' : 'instagram';
+      const provider = input.channel === 'FACEBOOK'
+        ? 'facebook'
+        : input.channel === 'TIKTOK'
+          ? 'tiktok'
+          : 'instagram';
       const key = `tenants/${input.tenantId}/${provider}/sha256/${checksum}.${extension}`;
       const stored = await this.storage.put({ key, body, contentType });
 

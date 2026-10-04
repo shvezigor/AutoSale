@@ -109,6 +109,20 @@ describe('Instagram event, profile, and attachment row-level security', () => {
       SELECT * FROM public.worker_due_instagram_profiles(${new Date('2099-01-01T00:00:00.000Z')}, 100)
     `).rejects.toMatchObject({ code: 'P2010' });
   });
+
+  it('routes a durable TikTok event to the TikTok normalizer without exposing its payload', async () => {
+    const tikTokEventId = '99999999-9999-4999-8999-999999999999';
+    await admin.query(`INSERT INTO webhook_events
+      (id, tenant_id, provider, external_event_id, payload, status)
+      VALUES ($1, $2, 'TIKTOK', 'tiktok:fictional-message', '{"fictional":true}'::jsonb, 'RECEIVED')`,
+    [tikTokEventId, tenantA]);
+
+    await expect(worker.$queryRaw<Array<{ tenant_id: string; event_id: string; job_name: string }>>`
+      SELECT tenant_id, event_id, job_name
+      FROM public.worker_due_instagram_events(100)
+      WHERE event_id = ${tikTokEventId}::uuid
+    `).resolves.toEqual([{ tenant_id: tenantA, event_id: tikTokEventId, job_name: 'tiktok.normalize' }]);
+  });
 });
 
 async function seedTenantAssets(

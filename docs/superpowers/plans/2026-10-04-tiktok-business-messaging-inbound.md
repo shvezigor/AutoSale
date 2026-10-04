@@ -345,6 +345,8 @@ git commit -m "feat: ingest signed TikTok messaging webhooks"
 - Create: `apps/worker/src/tiktok/tiktok-normalizer.spec.ts`
 - Create: `apps/worker/src/tiktok/tiktok-token.service.ts`
 - Create: `apps/worker/src/tiktok/tiktok-token.service.spec.ts`
+- Create: `apps/worker/src/tiktok/tiktok-media-copy.service.ts`
+- Create: `apps/worker/src/tiktok/tiktok-media-copy.service.spec.ts`
 - Create: `apps/worker/src/tiktok/tiktok.processor.ts`
 - Create: `apps/worker/src/tiktok/tiktok.processor.spec.ts`
 - Modify: `apps/worker/src/instagram/media-copy.service.ts`
@@ -352,6 +354,8 @@ git commit -m "feat: ingest signed TikTok messaging webhooks"
 - Modify: `apps/worker/src/instagram/instagram-event-reconciler.ts`
 - Modify: `apps/worker/src/instagram/instagram-event-reconciler.spec.ts`
 - Modify: `apps/worker/src/main.ts`
+- Create: `packages/database/prisma/migrations/20261004101500_tiktok_event_recovery/migration.sql`
+- Modify: `packages/database/src/instagram-assets-rls.postgres.spec.ts`
 
 **Interfaces:**
 - Consumes: queue job `tiktok.normalize` and durable `WebhookEvent`.
@@ -359,7 +363,7 @@ git commit -m "feat: ingest signed TikTok messaging webhooks"
 - Produces controlled media keys under `tenants/<tenantId>/tiktok/sha256/<checksum>.<ext>`.
 - Produces `TikTokTokenService.getFreshAccessToken(tenantId, credentialGenerationId, now)` with a database lease so concurrent media jobs perform at most one refresh.
 
-- [ ] **Step 1: Write failing normalizer, processor, and duplicate-delivery tests**
+- [x] **Step 1: Write failing normalizer, processor, and duplicate-delivery tests**
 
 ```ts
 expect(normalizeTikTokEvent(fixture)).toEqual([expect.objectContaining({
@@ -379,21 +383,21 @@ Cover text, image, video, link, mixed content, unsupported payload, missing medi
 
 Add token tests proving that a valid token is reused, a near-expiry token is refreshed once under concurrency, the new access/refresh tokens are encrypted atomically, a superseded credential generation cannot be updated, and permanent refresh rejection marks the connection `REAUTH_REQUIRED`.
 
-- [ ] **Step 2: Run focused worker tests and verify failure**
+- [x] **Step 2: Run focused worker tests and verify failure**
 
 Run: `pnpm --filter @autosale/worker test -- tiktok-normalizer.spec.ts tiktok-token.service.spec.ts tiktok.processor.spec.ts social-inbound-ingestion.service.spec.ts media-copy.service.spec.ts instagram-event-reconciler.spec.ts`
 Expected: FAIL because the TikTok channel and processor are missing.
 
-- [ ] **Step 3: Implement TikTok normalization and shared processing**
+- [x] **Step 3: Implement TikTok normalization and shared processing**
 
 Keep provider field interpretation inside `tiktok-normalizer.ts`. Extend shared channel unions and provider storage naming without changing existing Instagram/Facebook semantics. Obtain a fresh token through `TikTokTokenService` before authenticated media download instead of trusting temporary URLs blindly. Register `tiktok.normalize` in worker dispatch and reconciliation only when the feature flag is enabled.
 
-- [ ] **Step 4: Run focused worker tests**
+- [x] **Step 4: Run focused worker tests**
 
 Run: `pnpm --filter @autosale/worker test -- tiktok-normalizer.spec.ts tiktok-token.service.spec.ts tiktok.processor.spec.ts social-inbound-ingestion.service.spec.ts media-copy.service.spec.ts instagram-event-reconciler.spec.ts`
 Expected: PASS.
 
-- [ ] **Step 5: Commit worker ingestion**
+- [x] **Step 5: Commit worker ingestion**
 
 ```bash
 git add apps/worker/src

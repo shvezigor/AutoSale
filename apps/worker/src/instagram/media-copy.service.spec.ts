@@ -66,6 +66,20 @@ describe('MediaCopyService', () => {
     expect(result.contentType).toBe('video/mp4');
   });
 
+  it('uses a TikTok-scoped content-addressed key for TikTok media', async () => {
+    fetchMedia.mockResolvedValue(new Response(Uint8Array.from([4, 5, 6]), {
+      headers: { 'Content-Type': 'image/jpeg' },
+    }));
+    put.mockImplementation(async (input: { key: string }) => ({ key: input.key, etag: 'etag' }));
+    const service = new MediaCopyService(storage, fetchMedia);
+
+    await service.copy({ tenantId: 'tenant-1', sourceUrl: 'https://provider.test/media', channel: 'TIKTOK' });
+
+    expect(put).toHaveBeenCalledWith(expect.objectContaining({
+      key: expect.stringMatching(/^tenants\/tenant-1\/tiktok\/sha256\//),
+    }));
+  });
+
   it('allows a copied MP4 to exceed the stricter image byte ceiling', async () => {
     fetchMedia.mockResolvedValue(
       new Response(Uint8Array.from([0, 0, 0, 24]), {

@@ -1,7 +1,7 @@
 # TikTok Business Messaging channel design
 
 **Date:** 2026-10-04
-**Status:** Implementation in progress; contracts, tenant-safe persistence, strict provider client, owner OAuth lifecycle, shared app-webhook reconciliation, signature verification, and durable callback registration are implemented, while worker normalization, UI, and live validation remain incomplete
+**Status:** Implementation in progress; contracts, tenant-safe persistence, provider client, OAuth, shared webhook reconciliation, signature verification, durable callback registration, worker normalization, authenticated media copying, and idempotent order-trigger ingestion are implemented, while UI and live provider validation remain incomplete
 **Owner:** Sales AITO social channels
 
 ## 1. Purpose
@@ -129,7 +129,7 @@ At application startup, the deployment-level reconciler reads the current `DIREC
 Processing order:
 
 1. Read the exact raw request body.
-2. Verify TikTok's challenge/signature contract before business persistence.
+2. Verify TikTok's timestamped signature contract before business persistence.
 3. Resolve the tenant only from the authoritative external TikTok account ID mapped to an active connection.
 4. Persist a sanitized `WebhookEvent` using a TikTok namespace and provider event/message identifier, or a deterministic digest fallback.
 5. Queue provider-specific normalization with at-least-once delivery.
@@ -146,12 +146,14 @@ Inbound representation:
 
 - text is preserved as customer content;
 - HTTP(S) links remain safe clickable links;
-- supported images and videos are copied to controlled object storage before temporary provider URLs expire;
+- supported images and videos are fetched through TikTok's authenticated media-download API and copied to controlled object storage;
 - mixed text and media remain one provider message with visible text and attachments;
 - unsupported, unavailable, or failed media never becomes an empty bubble; it receives a localized placeholder and safe processing state;
 - provider identifiers are scoped to channel and connected account.
 
 TikTok display names and avatars are optional enrichment. Their absence cannot block message ingestion, order recognition, or rendering.
+
+Media references persisted with the webhook contain provider identifiers, never access tokens. The worker obtains a current access token from the tenant-scoped encrypted connection. A database refresh lease permits only one concurrent refresh for a credential generation; rotated access and refresh tokens are encrypted and replaced atomically. Permanent refresh rejection moves the connection to `REAUTH_REQUIRED`.
 
 ## 9. Outbound delivery rules
 

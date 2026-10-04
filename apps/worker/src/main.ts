@@ -10,6 +10,7 @@ import {
   GoogleSheetsAdapter,
   MetaInstagramClient,
   S3ObjectStorage,
+  TikTokBusinessMessagingClient,
   TelegramBotClient,
   NovaPoshtaClient,
   UkrposhtaStatusTrackingClient,
@@ -57,6 +58,9 @@ import { UserAvatarCleanupReconciler } from './profile/user-avatar-cleanup.recon
 import { TenantLifecycleProcessor } from './tenant-lifecycle/tenant-lifecycle.processor.js';
 import { TenantLifecycleReconciler } from './tenant-lifecycle/tenant-lifecycle.reconciler.js';
 import { RetentionDryRunProcessor } from './tenant-lifecycle/retention-dry-run.processor.js';
+import { TikTokMediaCopyService } from './tiktok/tiktok-media-copy.service.js';
+import { TikTokProcessor } from './tiktok/tiktok.processor.js';
+import { TikTokTokenService } from './tiktok/tiktok-token.service.js';
 
 async function bootstrap(): Promise<void> {
   const env = parseWorkerEnv(process.env);
@@ -148,6 +152,30 @@ async function bootstrap(): Promise<void> {
   const mediaCopy = new MediaCopyService(storage);
   const processor = new InstagramProcessor(prisma, mediaCopy, orderProcessor);
   const facebookProcessor = new FacebookProcessor(prisma, mediaCopy, orderProcessor);
+  const tikTokClient = env.TIKTOK_BUSINESS_MESSAGING_ENABLED
+    ? new TikTokBusinessMessagingClient({
+        clientId: env.TIKTOK_CLIENT_ID!,
+        clientSecret: env.TIKTOK_CLIENT_SECRET!,
+        authorizationUrl: 'https://business-api.tiktok.com/',
+      })
+    : undefined;
+  const tikTokTokenService = tikTokClient
+    ? new TikTokTokenService(prisma, tikTokClient, credentialCipher)
+    : undefined;
+  const tikTokProcessor = tikTokClient && tikTokTokenService
+    ? new TikTokProcessor(
+        prisma,
+        new TikTokMediaCopyService(storage, tikTokClient, tikTokTokenService, (tenantId) =>
+          withTenantTransaction(prisma, tenantId, (transaction) => transaction.tikTokConnection.findFirst({
+            where: { tenantId, status: { in: ['ACTIVE', 'INBOUND_ONLY'] } },
+            select: { externalAccountId: true, credentialGenerationId: true },
+          })).then((connection) => connection?.credentialGenerationId ? {
+            externalAccountId: connection.externalAccountId,
+            credentialGenerationId: connection.credentialGenerationId,
+          } : null)),
+        orderProcessor,
+      )
+    : undefined;
   const profileEnrichment = new InstagramProfileEnrichmentService(
     prisma,
     metaInstagram,
@@ -436,14 +464,19 @@ async function bootstrap(): Promise<void> {
         });
         return;
       }
-      if (job.name !== 'instagram.normalize' && job.name !== 'facebook.normalize') return;
+      if (job.name !== 'instagram.normalize' && job.name !== 'facebook.normalize' && job.name !== 'tiktok.normalize') return;
       if (typeof job.data?.tenantId !== 'string' || typeof job.data?.eventId !== 'string') return;
       if (job.name === 'facebook.normalize' && !env.FACEBOOK_MESSENGER_ENABLED) return;
+      if (job.name === 'tiktok.normalize' && (!env.TIKTOK_BUSINESS_MESSAGING_ENABLED || !tikTokProcessor)) return;
       const correlationId = typeof job.data.correlationId === 'string' ? job.data.correlationId : job.data.eventId;
-      const operation = job.name === 'facebook.normalize' ? 'facebook_normalize' : 'instagram_normalize';
+      const operation = job.name === 'facebook.normalize'
+        ? 'facebook_normalize'
+        : job.name === 'tiktok.normalize' ? 'tiktok_normalize' : 'instagram_normalize';
       const started = performance.now();
       try {
-        const selectedProcessor = job.name === 'facebook.normalize' ? facebookProcessor : processor;
+        const selectedProcessor = job.name === 'facebook.normalize'
+          ? facebookProcessor
+          : job.name === 'tiktok.normalize' ? tikTokProcessor! : processor;
         const result = await selectedProcessor.process(job.data.tenantId, job.data.eventId);
         metrics.increment('autosale_operations_total', {
           operation, result: result === 'IGNORED_FROZEN' ? 'skipped' : 'success',
@@ -506,7 +539,11 @@ async function bootstrap(): Promise<void> {
       removeOnFail: true,
     },
   });
-  const instagramReconciler = new InstagramEventReconciler(prisma, instagramQueue);
+  const instagramReconciler = new InstagramEventReconciler(
+    prisma,
+    instagramQueue,
+    env.TIKTOK_BUSINESS_MESSAGING_ENABLED,
+  );
   const catalogueWorker = new Worker(
     'catalogue',
     async (job) => {
