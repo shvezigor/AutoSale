@@ -91,7 +91,7 @@ describe('AutomaticReplyDraftScheduler', () => {
     const later = await prisma.message.create({ data: {
       tenantId: input.tenantId, conversationId: input.conversationId, rawEventId: input.eventId,
       channel: 'INSTAGRAM', externalMessageId: randomUUID(), direction: 'INBOUND',
-      senderId: 'fictional-customer', text: 'And what colors?', sourceTimestamp: new Date('2020-01-01T00:00:00Z'),
+      senderId: 'fictional-customer', text: 'And what colors?', sourceTimestamp: new Date('2030-01-01T00:00:00Z'),
     } });
 
     expect(await scheduler.schedule(input.tenantId, later.id)).toBe('SCHEDULED');
@@ -100,6 +100,22 @@ describe('AutomaticReplyDraftScheduler', () => {
       { anchorMessageId: input.messageId, status: 'STALE' },
       { anchorMessageId: later.id, status: 'QUEUED' },
     ]);
+  });
+
+  it('does not restart the countdown for an out-of-order older provider message', async () => {
+    const input = await seed();
+    const add = vi.fn().mockResolvedValue(undefined);
+    const scheduler = new AutomaticReplyDraftScheduler(prisma, { add }, () => new Date('2026-10-05T12:00:00.000Z'));
+    expect(await scheduler.schedule(input.tenantId, input.messageId)).toBe('SCHEDULED');
+    const older = await prisma.message.create({ data: {
+      tenantId: input.tenantId, conversationId: input.conversationId, rawEventId: input.eventId,
+      channel: 'INSTAGRAM', externalMessageId: randomUUID(), direction: 'INBOUND',
+      senderId: 'fictional-customer', text: 'Delayed old message', sourceTimestamp: new Date('2020-01-01T00:00:00Z'),
+    } });
+
+    expect(await scheduler.schedule(input.tenantId, older.id)).toBe('SKIPPED');
+    expect(await prisma.aiReplyDraft.count({ where: { tenantId: input.tenantId } })).toBe(1);
+    expect(add).toHaveBeenCalledOnce();
   });
 
   it.each([

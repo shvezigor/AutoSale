@@ -45,7 +45,7 @@ export class AutomaticReplyDraftScheduler {
 
         const latest = await tx.message.findFirst({
           where: { tenantId, conversationId: message.conversationId, direction: 'INBOUND' },
-          orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+          orderBy: [{ sourceTimestamp: 'desc' }, { id: 'desc' }],
           select: { id: true },
         });
         if (latest?.id !== message.id) return null;

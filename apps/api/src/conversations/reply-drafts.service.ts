@@ -32,7 +32,7 @@ export class ReplyDraftsService {
       if (!style?.enabled) throw new ConflictException('AI drafts are disabled');
       const anchor = await tx.message.findFirst({
         where: { tenantId, conversationId, direction: 'INBOUND' },
-        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+        orderBy: [{ sourceTimestamp: 'desc' }, { id: 'desc' }],
         select: { id: true },
       });
       if (!anchor) throw new ConflictException('Conversation has no inbound message');
@@ -72,7 +72,7 @@ export class ReplyDraftsService {
       draft = await withTenantTransaction(this.prisma, tenantId, async (tx) => {
         const anchor = await tx.message.findFirst({
           where: { tenantId, conversationId, direction: 'INBOUND' },
-          orderBy: [{ createdAt: 'desc' }, { id: 'desc' }], select: { id: true },
+          orderBy: [{ sourceTimestamp: 'desc' }, { id: 'desc' }], select: { id: true },
         });
         if (!anchor) return null;
         return tx.aiReplyDraft.findFirst({
