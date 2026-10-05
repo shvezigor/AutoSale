@@ -22,9 +22,13 @@ interface DraftGenerator {
 }
 
 export class ReplyDraftProcessor {
-  constructor(private readonly prisma: PrismaClient, private readonly generator: DraftGenerator) {}
+  constructor(
+    private readonly prisma: PrismaClient,
+    private readonly generator: DraftGenerator,
+    private readonly now: () => Date = () => new Date(),
+  ) {}
 
-  async process(rawJob: unknown): Promise<'READY' | 'BLOCKED' | 'STALE' | 'FAILED' | 'SKIPPED'> {
+  async process(rawJob: unknown): Promise<'READY' | 'BLOCKED' | 'STALE' | 'FAILED' | 'SKIPPED' | 'DEFERRED'> {
     const { tenantId, draftId } = replyDraftJobSchema.parse(rawJob);
     const leaseId = randomUUID();
     let context;
@@ -33,7 +37,10 @@ export class ReplyDraftProcessor {
         await assertTenantAcceptingMutations(tx, tenantId, 'CONVERSATION_REPLY');
         const draft = await tx.aiReplyDraft.findFirst({ where: { id: draftId, tenantId } });
         if (!draft || !['QUEUED', 'PROCESSING'].includes(draft.status) || draft.attempts >= 3) return null;
-        const now = new Date();
+        const now = this.now();
+        if (draft.status === 'QUEUED' && draft.availableAt > now) {
+          return { outcome: 'DEFERRED' as const };
+        }
         if (draft.status === 'PROCESSING' && (draft.modelRequestStartedAt || !draft.leaseExpiresAt || draft.leaseExpiresAt > now)) return null;
         const claimed = await tx.aiReplyDraft.updateMany({
           where: {
@@ -83,6 +90,7 @@ export class ReplyDraftProcessor {
           data: { sourceSnapshot: sources as unknown as Prisma.InputJsonValue },
         });
         return {
+          outcome: 'PROCESS' as const,
           conversationId: draft.conversationId, anchorMessageId: draft.anchorMessageId,
           style: { companyName: style.companyName, tone: style.tone as ReplyGeneratorInput['style']['tone'],
             addressForm: style.addressForm as ReplyGeneratorInput['style']['addressForm'],
@@ -95,6 +103,7 @@ export class ReplyDraftProcessor {
       throw error;
     }
     if (!context) return 'SKIPPED';
+    if (context.outcome === 'DEFERRED') return 'DEFERRED';
 
     const started = await withTenantTransaction(this.prisma, tenantId, (tx) => tx.aiReplyDraft.updateMany({
       where: { id: draftId, tenantId, leaseId, status: 'PROCESSING', modelRequestStartedAt: null },

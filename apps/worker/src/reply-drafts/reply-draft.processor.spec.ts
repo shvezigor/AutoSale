@@ -78,6 +78,25 @@ describe('ReplyDraftProcessor', () => {
     });
   });
 
+  it('does not claim or spend an automatic draft before its quiet period ends', async () => {
+    const seedData = await seed();
+    const availableAt = new Date('2026-10-05T12:00:10.000Z');
+    await prisma.aiReplyDraft.update({
+      where: { id: seedData.draftId },
+      data: { triggerSource: 'AUTOMATIC', availableAt, createdByUserId: null },
+    });
+    const generate = generator(seedData.productId);
+
+    expect(await new ReplyDraftProcessor(
+      prisma,
+      { generate },
+      () => new Date('2026-10-05T12:00:09.999Z'),
+    ).process({ tenantId: seedData.tenantId, draftId: seedData.draftId })).toBe('DEFERRED');
+    expect(generate).not.toHaveBeenCalled();
+    expect(await prisma.aiReplyDraft.findUniqueOrThrow({ where: { id: seedData.draftId } }))
+      .toMatchObject({ status: 'QUEUED', attempts: 0, availableAt });
+  });
+
   it('marks a changed product stale after model generation', async () => {
     const seedData = await seed();
     const generate = generator(seedData.productId).mockImplementation(async () => {

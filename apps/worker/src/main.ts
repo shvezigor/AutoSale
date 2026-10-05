@@ -66,6 +66,7 @@ import { TikTokTokenService } from './tiktok/tiktok-token.service.js';
 import { createOpenAiReplyDraftGenerator } from './reply-drafts/openai-reply-draft-generator.js';
 import { ReplyDraftProcessor } from './reply-drafts/reply-draft.processor.js';
 import { ReplyDraftReconciler } from './reply-drafts/reply-draft.reconciler.js';
+import { AutomaticReplyDraftScheduler } from './reply-drafts/automatic-reply-draft.scheduler.js';
 
 async function bootstrap(): Promise<void> {
   const env = parseWorkerEnv(process.env);
@@ -160,9 +161,19 @@ async function bootstrap(): Promise<void> {
     },
     telegramAlerts,
   );
+  const redis = new URL(env.REDIS_URL);
+  const redisConnection = {
+    host: redis.hostname,
+    port: Number(redis.port || 6379),
+    username: redis.username || undefined,
+    password: redis.password || undefined,
+    tls: redis.protocol === 'rediss:' ? {} : undefined,
+  };
+  const replyDraftQueue = new Queue('ai-replies', { connection: redisConnection });
+  const automaticReplyDraftScheduler = new AutomaticReplyDraftScheduler(prisma, replyDraftQueue);
   const mediaCopy = new MediaCopyService(storage);
-  const processor = new InstagramProcessor(prisma, mediaCopy, orderProcessor);
-  const facebookProcessor = new FacebookProcessor(prisma, mediaCopy, orderProcessor);
+  const processor = new InstagramProcessor(prisma, mediaCopy, orderProcessor, automaticReplyDraftScheduler);
+  const facebookProcessor = new FacebookProcessor(prisma, mediaCopy, orderProcessor, automaticReplyDraftScheduler);
   const tikTokClient = platformChannelDeployment.TIKTOK_BUSINESS_MESSAGING
     ? new TikTokBusinessMessagingClient({
         clientId: env.TIKTOK_CLIENT_ID!,
@@ -185,6 +196,7 @@ async function bootstrap(): Promise<void> {
             credentialGenerationId: connection.credentialGenerationId,
           } : null)),
         orderProcessor,
+        automaticReplyDraftScheduler,
       )
     : undefined;
   const profileEnrichment = new InstagramProfileEnrichmentService(
@@ -199,15 +211,6 @@ async function bootstrap(): Promise<void> {
     credentialCipher,
     orderProcessor,
   );
-  const redis = new URL(env.REDIS_URL);
-  const redisConnection = {
-    host: redis.hostname,
-    port: Number(redis.port || 6379),
-    username: redis.username || undefined,
-    password: redis.password || undefined,
-    tls: redis.protocol === 'rediss:' ? {} : undefined,
-  };
-  const replyDraftQueue = new Queue('ai-replies', { connection: redisConnection });
   const replyDraftProcessor = new ReplyDraftProcessor(prisma,
     createOpenAiReplyDraftGenerator(env.OPENAI_API_KEY, env.OPENAI_MODEL));
   const replyDraftReconciler = new ReplyDraftReconciler(prisma, replyDraftQueue);
@@ -218,7 +221,7 @@ async function bootstrap(): Promise<void> {
       const result = await replyDraftProcessor.process(job.data);
       metrics.increment('autosale_operations_total', {
         operation: 'ai_reply_draft_generate',
-        result: result === 'READY' || result === 'SKIPPED' ? 'success' : 'failure',
+        result: result === 'READY' || result === 'SKIPPED' || result === 'DEFERRED' ? 'success' : 'failure',
       });
       metrics.observe('autosale_operation_duration_seconds', (performance.now() - started) / 1_000,
         { operation: 'ai_reply_draft_generate' });
