@@ -15,7 +15,8 @@ Before marking the automatic slice available, prove all of the following in auto
 - existing or deliberately cleared manager text is preserved; the ready draft remains visible but is not silently inserted;
 - sending still requires an explicit manager action and creates one linked outbound message;
 - disabling the tenant switch prevents scheduling and generation while ordinary manual replies continue to work.
-- ungrounded or malformed automatic model output never reaches the editor; a localized fact-free clarification is offered instead, while a provider outage and equivalent manual retry remain visibly failed or blocked.
+- ungrounded or malformed automatic model output never reaches the editor; a localized fact-free clarification is offered instead, while a provider outage and equivalent manual retry remain visibly failed or blocked;
+- a ready draft for the latest inbound message remains visible and fills an untouched editor even if newer retries for that same message failed.
 
 ## Automated evidence
 

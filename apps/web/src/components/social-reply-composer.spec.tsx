@@ -75,6 +75,36 @@ describe('SocialReplyComposer', () => {
       expect.objectContaining({ text: 'Який товар вас цікавить?', draftId: draft.id })));
   });
 
+  it('prefers a ready automatic draft over newer failed attempts for the same inbound message', async () => {
+    const inbound = { ...pendingMessage, id: '33333333-3333-4333-8333-333333333333',
+      direction: 'INBOUND' as const, text: 'Чи є товар?', delivery: null };
+    const ready = {
+      id: '55555555-5555-4555-8555-555555555555', conversationId: conversation.id,
+      anchorMessageId: inbound.id, triggerSource: 'AUTOMATIC' as const,
+      availableAt: '2026-10-05T10:00:10.000Z', status: 'READY' as const, outcome: 'CLARIFY' as const,
+      generatedText: 'Уточніть, будь ласка, який саме товар вас цікавить.', finalText: null, sources: [], errorCode: null,
+      createdAt: '2026-10-05T10:00:00.000Z', updatedAt: '2026-10-05T10:00:11.000Z',
+    };
+    const blocked = {
+      ...ready,
+      id: '66666666-6666-4666-8666-666666666666',
+      triggerSource: 'MANUAL' as const,
+      status: 'BLOCKED' as const,
+      outcome: null,
+      generatedText: null,
+      errorCode: 'UNGROUNDED_CLAIM' as const,
+      createdAt: '2026-10-05T10:01:00.000Z',
+      updatedAt: '2026-10-05T10:01:01.000Z',
+    };
+    api.refreshConversation.mockResolvedValue({ ...conversation, messages: [inbound], replyDrafts: [blocked, ready] });
+
+    renderComposer({ ...conversation, messages: [inbound], replyDrafts: [blocked, ready] }, false, 'uk', true);
+
+    expect((await screen.findAllByText(ready.generatedText))[0]).toBeVisible();
+    expect(screen.getByRole('textbox', { name: 'Відповідь' })).toHaveValue(ready.generatedText);
+    expect(screen.queryByRole('button', { name: 'Спробувати ще раз' })).not.toBeInTheDocument();
+  });
+
   it('never replaces or reinserts text after the manager touched the editor', async () => {
     const inbound = { ...pendingMessage, id: '33333333-3333-4333-8333-333333333333',
       direction: 'INBOUND' as const, text: 'Чи є товар?', delivery: null };

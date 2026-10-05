@@ -169,6 +169,8 @@ The existing conversation composer adds:
 
 The manager's typed text is never erased by polling, a generation failure or a stale result. Clearing or editing an automatically inserted draft counts as manager interaction and the same draft is not inserted again. Buttons use shared variants and `LoadingButton`; errors follow the field-validation contract. Desktop, 390 px mobile, keyboard and screen-reader behavior are required.
 
+When several attempts share the latest inbound anchor, the interface prefers an available `READY` draft over newer blocked or failed retries. An unsuccessful retry therefore cannot hide a previously safe, usable draft for the same customer message.
+
 ## 11. Security, privacy and observability
 
 - Every operation is tenant-scoped and lifecycle-aware.

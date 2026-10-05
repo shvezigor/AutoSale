@@ -54,7 +54,8 @@ export function SocialReplyComposer({
   const copyOnly = conversation.channel === 'FACEBOOK';
   const latestInbound = [...conversation.messages].reverse().find((message) => message.direction === 'INBOUND');
   const drafts = conversation.replyDrafts ?? [];
-  const currentDraft = drafts.find((draft) => draft.anchorMessageId === latestInbound?.id) ?? null;
+  const anchoredDrafts = drafts.filter((draft) => draft.anchorMessageId === latestInbound?.id);
+  const currentDraft = anchoredDrafts.find((draft) => draft.status === 'READY') ?? anchoredDrafts[0] ?? null;
   const appliedDraft = drafts.find((draft) => draft.id === selectedDraftId);
   const draftReady = currentDraft?.status === 'READY';
   const draftBusy = currentDraft?.status === 'QUEUED' || currentDraft?.status === 'PROCESSING';
