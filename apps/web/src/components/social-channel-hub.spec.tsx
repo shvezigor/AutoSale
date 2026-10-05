@@ -27,10 +27,17 @@ const tiktok = {
 afterEach(cleanup);
 
 describe('SocialChannelHub', () => {
-  it('surfaces a platform pause in the collapsed channel row', () => {
-    render(<SocialChannelHub instagram={instagram} facebook={{ ...facebook, platformAvailability: 'ADMIN_DISABLED' }} tiktok={tiktok} membershipRole="OWNER" />);
+  it('hides channels unavailable to tenants and counts only visible channels', () => {
+    render(<SocialChannelHub
+      instagram={instagram}
+      facebook={{ ...facebook, platformAvailability: 'ADMIN_DISABLED' }}
+      tiktok={{ ...tiktok, platformAvailability: 'DEPLOYMENT_UNAVAILABLE' }}
+      membershipRole="OWNER"
+    />);
 
-    expect(screen.getByRole('button', { name: /Facebook.*Призупинено платформою/ })).toBeVisible();
+    expect(screen.queryByRole('button', { name: /Facebook/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /TikTok/ })).not.toBeInTheDocument();
+    expect(screen.getByText('1 із 1')).toBeVisible();
   });
 
   it('keeps both channels collapsed and opens only Facebook on click', () => {

@@ -29,6 +29,12 @@ export function SocialChannelHub({ instagram, facebook, tiktok, facebookSelectio
   const expanded = open === 'instagram';
   const facebookExpanded = open === 'facebook';
   const tikTokExpanded = open === 'tiktok';
+  const facebookVisible = facebookConnection.platformAvailability === 'AVAILABLE';
+  const tikTokVisible = tikTokConnection.platformAvailability === 'AVAILABLE';
+  const visibleChannelCount = 1 + Number(facebookVisible) + Number(tikTokVisible);
+  const connectedChannelCount = Number(connection.status === 'ACTIVE')
+    + Number(facebookVisible && facebookConnection.status === 'ACTIVE')
+    + Number(tikTokVisible && (tikTokConnection.status === 'ACTIVE' || tikTokConnection.status === 'INBOUND_ONLY'));
   const status = ({ NOT_CONNECTED: t('settings.notConnected'), LEGACY: t('settings.reconnectRequired'), ACTIVE: t('settings.active'), REAUTH_REQUIRED: t('settings.reconnectRequired'), ERROR: t('settings.connectionError'), DISCONNECTED: t('settings.disabled') })[connection.status];
   const buttonId = 'social-channel-instagram';
   const panelId = `${buttonId}-panel`;
@@ -36,7 +42,7 @@ export function SocialChannelHub({ instagram, facebook, tiktok, facebookSelectio
   return <div className="delivery-carrier-hub social-channel-hub" aria-label={t('settings.salesChannels')}>
     <div className="delivery-hub-summary">
       <span>{t('settings.connected')}</span>
-      <strong>{t('settings.connectedCount', { connected: Number(connection.status === 'ACTIVE') + Number(facebookConnection.status === 'ACTIVE') + Number(tikTokConnection.status === 'ACTIVE' || tikTokConnection.status === 'INBOUND_ONLY'), total: 3 })}</strong>
+      <strong>{t('settings.connectedCount', { connected: connectedChannelCount, total: visibleChannelCount })}</strong>
       <p>{t('settings.openChannel')}</p>
     </div>
     <div className="delivery-carrier-list">
@@ -51,28 +57,28 @@ export function SocialChannelHub({ instagram, facebook, tiktok, facebookSelectio
           <InstagramSettingsForm embedded initial={connection} membershipRole={membershipRole} onConnectionChange={setConnection} />
         </div>}
       </section>
-      <section className={`delivery-carrier ${facebookExpanded ? 'is-open' : ''}`}>
+      {facebookVisible && <section className={`delivery-carrier ${facebookExpanded ? 'is-open' : ''}`}>
         <button id="social-channel-facebook" className="delivery-carrier-trigger" type="button" aria-expanded={facebookExpanded} aria-controls="social-channel-facebook-panel" onClick={() => setOpen(facebookExpanded ? null : 'facebook')}>
           <span className="delivery-carrier-mark channel-facebook" aria-hidden="true">FB</span>
           <span className="delivery-carrier-copy"><strong>Facebook</strong><small>{t('facebookSettings.description')}</small></span>
-          <span className={`connection-status status-${facebookConnection.platformAvailability === 'AVAILABLE' ? facebookConnection.status.toLowerCase() : 'pending'}`}>{facebookAvailabilityStatus(facebookConnection, t)}</span>
+          <span className={`connection-status status-${facebookConnection.status.toLowerCase()}`}>{facebookStatus(facebookConnection.status, t)}</span>
           <svg className="delivery-carrier-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m6 8 4 4 4-4" /></svg>
         </button>
         {facebookExpanded && <div id="social-channel-facebook-panel" className="delivery-carrier-panel" role="region" aria-labelledby="social-channel-facebook">
           <FacebookSettingsForm embedded initial={facebookConnection} membershipRole={membershipRole} selection={facebookSelection} onConnectionChange={setFacebookConnection} />
         </div>}
-      </section>
-      <section className={`delivery-carrier ${tikTokExpanded ? 'is-open' : ''}`}>
+      </section>}
+      {tikTokVisible && <section className={`delivery-carrier ${tikTokExpanded ? 'is-open' : ''}`}>
         <button id="social-channel-tiktok" className="delivery-carrier-trigger" type="button" aria-expanded={tikTokExpanded} aria-controls="social-channel-tiktok-panel" onClick={() => setOpen(tikTokExpanded ? null : 'tiktok')}>
           <span className="delivery-carrier-mark channel-tiktok" aria-hidden="true">TT</span>
           <span className="delivery-carrier-copy"><strong>TikTok</strong><small>{t('tiktokSettings.description')}</small></span>
-          <span className={`connection-status status-${tikTokConnection.platformAvailability === 'AVAILABLE' ? tikTokConnection.status.toLowerCase() : 'pending'}`}>{tikTokAvailabilityStatus(tikTokConnection, t)}</span>
+          <span className={`connection-status status-${tikTokConnection.status.toLowerCase()}`}>{tikTokStatus(tikTokConnection.status, t)}</span>
           <svg className="delivery-carrier-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m6 8 4 4 4-4" /></svg>
         </button>
         {tikTokExpanded && <div id="social-channel-tiktok-panel" className="delivery-carrier-panel" role="region" aria-labelledby="social-channel-tiktok">
           <TikTokSettingsForm embedded initial={tikTokConnection} membershipRole={membershipRole} onConnectionChange={setTikTokConnection} />
         </div>}
-      </section>
+      </section>}
     </div>
   </div>;
 }
@@ -85,16 +91,4 @@ function facebookStatus(status: FacebookConnectionSummary['status'], t: ReturnTy
     ERROR: t('facebookSettings.statusError'),
     DISCONNECTED: t('facebookSettings.statusDisconnected'),
   })[status];
-}
-
-function facebookAvailabilityStatus(connection: FacebookConnectionSummary, t: ReturnType<typeof useI18n>['t']): string {
-  if (connection.platformAvailability === 'ADMIN_DISABLED') return t('facebookSettings.platformPausedShort');
-  if (connection.platformAvailability === 'DEPLOYMENT_UNAVAILABLE') return t('facebookSettings.platformUnavailableShort');
-  return facebookStatus(connection.status, t);
-}
-
-function tikTokAvailabilityStatus(connection: TikTokConnectionSummary, t: ReturnType<typeof useI18n>['t']): string {
-  if (connection.platformAvailability === 'ADMIN_DISABLED') return t('tiktokSettings.platformPausedShort');
-  if (connection.platformAvailability === 'DEPLOYMENT_UNAVAILABLE') return t('tiktokSettings.platformUnavailableShort');
-  return tikTokStatus(connection.status, t);
 }

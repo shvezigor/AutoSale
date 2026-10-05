@@ -119,7 +119,7 @@ The effective state must be checked as close as possible to every external or du
 
 - A disabled channel cannot start OAuth, finish a new OAuth connection or select a provider account/Page.
 - Existing encrypted credentials and tenant connection rows remain intact.
-- Tenant settings render a localized **Temporarily unavailable** state and disable connection actions while preserving existing connection information.
+- Tenant settings omit channels whose effective platform availability is disabled or unavailable. Existing connection information remains preserved in storage and becomes visible again after the platform channel is enabled.
 - A callback already in flight after an administrator disables the channel fails safely without persisting new credentials.
 
 ### Webhooks and inbound messages
@@ -188,7 +188,7 @@ The disable confirmation states that existing data and connections are retained,
 - Webhook tests prove signatures/handshakes still work, disabled provider events create no business side effects, and disabling Facebook does not affect Instagram.
 - API and worker tests prove no provider call occurs while disabled, queued work remains recoverable and ambiguous deliveries are not resent.
 - Admin component tests cover loading, confirmation, localized states, keyboard use, focus, mobile layout and shared button variants.
-- Tenant settings tests cover the unavailable state without exposing platform configuration.
+- Tenant settings tests prove disabled and deployment-unavailable channels are omitted and excluded from visible-channel counts without exposing platform configuration.
 - Full typecheck, production build and regression tests remain mandatory.
 
 ## Deployment sequence

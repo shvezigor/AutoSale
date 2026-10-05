@@ -128,8 +128,8 @@ describe('SettingsPage', () => {
         cleanupAbandonEligible: false,
         }),
       })
-      .mockResolvedValueOnce({ ok: true, json: async () => ({ status: 'NOT_CONNECTED', pageId: null, pageName: null, tokenExpiresAt: null, lastVerifiedAt: null, lastErrorCode: null, cleanupStatus: 'NONE', cleanupErrorCode: null }) })
-      .mockResolvedValueOnce({ ok: true, json: async () => ({ status: 'INBOUND_ONLY', accountId: 'fictional-tiktok', displayName: 'Fictional TikTok', capabilities: { receiveMessages: true, sendText: false, sendImage: false }, tokenExpiresAt: null, lastVerifiedAt: null, lastErrorCode: null, cleanupStatus: 'NONE' }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ status: 'NOT_CONNECTED', platformAvailability: 'AVAILABLE', pageId: null, pageName: null, tokenExpiresAt: null, lastVerifiedAt: null, lastErrorCode: null, cleanupStatus: 'NONE', cleanupErrorCode: null }) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ status: 'INBOUND_ONLY', platformAvailability: 'AVAILABLE', accountId: 'fictional-tiktok', displayName: 'Fictional TikTok', capabilities: { receiveMessages: true, sendText: false, sendImage: false }, tokenExpiresAt: null, lastVerifiedAt: null, lastErrorCode: null, cleanupStatus: 'NONE' }) })
       .mockResolvedValueOnce({
         ok: true,
         json: async () => ({ status: 'ACTIVE', email: null, grantedScopes: [], connectedAt: null, lastVerifiedAt: null, lastErrorCode: null }),
