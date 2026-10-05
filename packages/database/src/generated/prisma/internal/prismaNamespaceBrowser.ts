@@ -892,6 +892,8 @@ export const AiReplyDraftScalarFieldEnum = {
   anchorMessageId: 'anchorMessageId',
   createdByUserId: 'createdByUserId',
   idempotencyKey: 'idempotencyKey',
+  triggerSource: 'triggerSource',
+  availableAt: 'availableAt',
   status: 'status',
   outcome: 'outcome',
   generatedText: 'generatedText',

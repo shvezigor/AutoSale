@@ -6162,6 +6162,8 @@ export const AiReplyDraftScalarFieldEnum = {
   anchorMessageId: 'anchorMessageId',
   createdByUserId: 'createdByUserId',
   idempotencyKey: 'idempotencyKey',
+  triggerSource: 'triggerSource',
+  availableAt: 'availableAt',
   status: 'status',
   outcome: 'outcome',
   generatedText: 'generatedText',
@@ -7117,6 +7119,20 @@ export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, '
  * Reference to a field of type 'Float[]'
  */
 export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
+
+
+
+/**
+ * Reference to a field of type 'AiReplyDraftTriggerSource'
+ */
+export type EnumAiReplyDraftTriggerSourceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AiReplyDraftTriggerSource'>
+
+
+
+/**
+ * Reference to a field of type 'AiReplyDraftTriggerSource[]'
+ */
+export type ListEnumAiReplyDraftTriggerSourceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AiReplyDraftTriggerSource[]'>
     
 
 
@@ -7720,4 +7736,3 @@ export type PrismaAction =
  * `PrismaClient` proxy available in interactive transactions.
  */
 export type TransactionClient = Omit<DefaultPrismaClient, runtime.ITXClientDenyList>
-

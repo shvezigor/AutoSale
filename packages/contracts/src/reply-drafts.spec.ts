@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   createReplyDraftSchema,
+  replyDraftSummarySchema,
   replyDraftSourceSchema,
   replyStylePatchSchema,
   replyStyleSchema,
@@ -49,5 +50,26 @@ describe('reply draft contracts', () => {
   it('keeps manual send valid and accepts an optional reviewed draft identity', () => {
     expect(outboundMessageInputSchema.safeParse({ text: 'Hello', idempotencyKey: draftId }).success).toBe(true);
     expect(outboundMessageInputSchema.safeParse({ text: 'Hello', idempotencyKey: draftId, draftId }).success).toBe(true);
+  });
+
+  it('exposes safe automatic scheduling metadata', () => {
+    const automatic = {
+      id: draftId,
+      conversationId: '33333333-3333-4333-8333-333333333333',
+      anchorMessageId: '44444444-4444-4444-8444-444444444444',
+      status: 'QUEUED',
+      outcome: null,
+      generatedText: null,
+      finalText: null,
+      sources: [],
+      errorCode: null,
+      triggerSource: 'AUTOMATIC',
+      availableAt: '2026-10-05T14:00:10.000Z',
+      createdAt: '2026-10-05T14:00:00.000Z',
+      updatedAt: '2026-10-05T14:00:00.000Z',
+    };
+
+    expect(replyDraftSummarySchema.parse(automatic).triggerSource).toBe('AUTOMATIC');
+    expect(replyDraftSummarySchema.safeParse({ ...automatic, triggerSource: 'ROBOT' }).success).toBe(false);
   });
 });

@@ -47,6 +47,8 @@ export type AiReplyDraftMinAggregateOutputType = {
   anchorMessageId: string | null
   createdByUserId: string | null
   idempotencyKey: string | null
+  triggerSource: $Enums.AiReplyDraftTriggerSource | null
+  availableAt: Date | null
   status: $Enums.AiReplyDraftStatus | null
   outcome: $Enums.AiReplyDraftOutcome | null
   generatedText: string | null
@@ -75,6 +77,8 @@ export type AiReplyDraftMaxAggregateOutputType = {
   anchorMessageId: string | null
   createdByUserId: string | null
   idempotencyKey: string | null
+  triggerSource: $Enums.AiReplyDraftTriggerSource | null
+  availableAt: Date | null
   status: $Enums.AiReplyDraftStatus | null
   outcome: $Enums.AiReplyDraftOutcome | null
   generatedText: string | null
@@ -103,6 +107,8 @@ export type AiReplyDraftCountAggregateOutputType = {
   anchorMessageId: number
   createdByUserId: number
   idempotencyKey: number
+  triggerSource: number
+  availableAt: number
   status: number
   outcome: number
   generatedText: number
@@ -148,6 +154,8 @@ export type AiReplyDraftMinAggregateInputType = {
   anchorMessageId?: true
   createdByUserId?: true
   idempotencyKey?: true
+  triggerSource?: true
+  availableAt?: true
   status?: true
   outcome?: true
   generatedText?: true
@@ -176,6 +184,8 @@ export type AiReplyDraftMaxAggregateInputType = {
   anchorMessageId?: true
   createdByUserId?: true
   idempotencyKey?: true
+  triggerSource?: true
+  availableAt?: true
   status?: true
   outcome?: true
   generatedText?: true
@@ -204,6 +214,8 @@ export type AiReplyDraftCountAggregateInputType = {
   anchorMessageId?: true
   createdByUserId?: true
   idempotencyKey?: true
+  triggerSource?: true
+  availableAt?: true
   status?: true
   outcome?: true
   generatedText?: true
@@ -318,8 +330,10 @@ export type AiReplyDraftGroupByOutputType = {
   tenantId: string
   conversationId: string
   anchorMessageId: string
-  createdByUserId: string
+  createdByUserId: string | null
   idempotencyKey: string
+  triggerSource: $Enums.AiReplyDraftTriggerSource
+  availableAt: Date
   status: $Enums.AiReplyDraftStatus
   outcome: $Enums.AiReplyDraftOutcome | null
   generatedText: string | null
@@ -370,8 +384,10 @@ export type AiReplyDraftWhereInput = {
   tenantId?: Prisma.UuidFilter<"AiReplyDraft"> | string
   conversationId?: Prisma.UuidFilter<"AiReplyDraft"> | string
   anchorMessageId?: Prisma.UuidFilter<"AiReplyDraft"> | string
-  createdByUserId?: Prisma.UuidFilter<"AiReplyDraft"> | string
+  createdByUserId?: Prisma.UuidNullableFilter<"AiReplyDraft"> | string | null
   idempotencyKey?: Prisma.UuidFilter<"AiReplyDraft"> | string
+  triggerSource?: Prisma.EnumAiReplyDraftTriggerSourceFilter<"AiReplyDraft"> | $Enums.AiReplyDraftTriggerSource
+  availableAt?: Prisma.DateTimeFilter<"AiReplyDraft"> | Date | string
   status?: Prisma.EnumAiReplyDraftStatusFilter<"AiReplyDraft"> | $Enums.AiReplyDraftStatus
   outcome?: Prisma.EnumAiReplyDraftOutcomeNullableFilter<"AiReplyDraft"> | $Enums.AiReplyDraftOutcome | null
   generatedText?: Prisma.StringNullableFilter<"AiReplyDraft"> | string | null
@@ -395,7 +411,7 @@ export type AiReplyDraftWhereInput = {
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
   conversation?: Prisma.XOR<Prisma.ConversationScalarRelationFilter, Prisma.ConversationWhereInput>
   anchorMessage?: Prisma.XOR<Prisma.MessageScalarRelationFilter, Prisma.MessageWhereInput>
-  createdBy?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  createdBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   outboundMessage?: Prisma.XOR<Prisma.MessageNullableScalarRelationFilter, Prisma.MessageWhereInput> | null
 }
 
@@ -404,8 +420,10 @@ export type AiReplyDraftOrderByWithRelationInput = {
   tenantId?: Prisma.SortOrder
   conversationId?: Prisma.SortOrder
   anchorMessageId?: Prisma.SortOrder
-  createdByUserId?: Prisma.SortOrder
+  createdByUserId?: Prisma.SortOrderInput | Prisma.SortOrder
   idempotencyKey?: Prisma.SortOrder
+  triggerSource?: Prisma.SortOrder
+  availableAt?: Prisma.SortOrder
   status?: Prisma.SortOrder
   outcome?: Prisma.SortOrderInput | Prisma.SortOrder
   generatedText?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -444,8 +462,10 @@ export type AiReplyDraftWhereUniqueInput = Prisma.AtLeast<{
   tenantId?: Prisma.UuidFilter<"AiReplyDraft"> | string
   conversationId?: Prisma.UuidFilter<"AiReplyDraft"> | string
   anchorMessageId?: Prisma.UuidFilter<"AiReplyDraft"> | string
-  createdByUserId?: Prisma.UuidFilter<"AiReplyDraft"> | string
+  createdByUserId?: Prisma.UuidNullableFilter<"AiReplyDraft"> | string | null
   idempotencyKey?: Prisma.UuidFilter<"AiReplyDraft"> | string
+  triggerSource?: Prisma.EnumAiReplyDraftTriggerSourceFilter<"AiReplyDraft"> | $Enums.AiReplyDraftTriggerSource
+  availableAt?: Prisma.DateTimeFilter<"AiReplyDraft"> | Date | string
   status?: Prisma.EnumAiReplyDraftStatusFilter<"AiReplyDraft"> | $Enums.AiReplyDraftStatus
   outcome?: Prisma.EnumAiReplyDraftOutcomeNullableFilter<"AiReplyDraft"> | $Enums.AiReplyDraftOutcome | null
   generatedText?: Prisma.StringNullableFilter<"AiReplyDraft"> | string | null
@@ -469,7 +489,7 @@ export type AiReplyDraftWhereUniqueInput = Prisma.AtLeast<{
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
   conversation?: Prisma.XOR<Prisma.ConversationScalarRelationFilter, Prisma.ConversationWhereInput>
   anchorMessage?: Prisma.XOR<Prisma.MessageScalarRelationFilter, Prisma.MessageWhereInput>
-  createdBy?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  createdBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   outboundMessage?: Prisma.XOR<Prisma.MessageNullableScalarRelationFilter, Prisma.MessageWhereInput> | null
 }, "id" | "tenantId_id" | "tenantId_outboundMessageId" | "tenantId_conversationId_anchorMessageId_idempotencyKey">
 
@@ -478,8 +498,10 @@ export type AiReplyDraftOrderByWithAggregationInput = {
   tenantId?: Prisma.SortOrder
   conversationId?: Prisma.SortOrder
   anchorMessageId?: Prisma.SortOrder
-  createdByUserId?: Prisma.SortOrder
+  createdByUserId?: Prisma.SortOrderInput | Prisma.SortOrder
   idempotencyKey?: Prisma.SortOrder
+  triggerSource?: Prisma.SortOrder
+  availableAt?: Prisma.SortOrder
   status?: Prisma.SortOrder
   outcome?: Prisma.SortOrderInput | Prisma.SortOrder
   generatedText?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -515,8 +537,10 @@ export type AiReplyDraftScalarWhereWithAggregatesInput = {
   tenantId?: Prisma.UuidWithAggregatesFilter<"AiReplyDraft"> | string
   conversationId?: Prisma.UuidWithAggregatesFilter<"AiReplyDraft"> | string
   anchorMessageId?: Prisma.UuidWithAggregatesFilter<"AiReplyDraft"> | string
-  createdByUserId?: Prisma.UuidWithAggregatesFilter<"AiReplyDraft"> | string
+  createdByUserId?: Prisma.UuidNullableWithAggregatesFilter<"AiReplyDraft"> | string | null
   idempotencyKey?: Prisma.UuidWithAggregatesFilter<"AiReplyDraft"> | string
+  triggerSource?: Prisma.EnumAiReplyDraftTriggerSourceWithAggregatesFilter<"AiReplyDraft"> | $Enums.AiReplyDraftTriggerSource
+  availableAt?: Prisma.DateTimeWithAggregatesFilter<"AiReplyDraft"> | Date | string
   status?: Prisma.EnumAiReplyDraftStatusWithAggregatesFilter<"AiReplyDraft"> | $Enums.AiReplyDraftStatus
   outcome?: Prisma.EnumAiReplyDraftOutcomeNullableWithAggregatesFilter<"AiReplyDraft"> | $Enums.AiReplyDraftOutcome | null
   generatedText?: Prisma.StringNullableWithAggregatesFilter<"AiReplyDraft"> | string | null
@@ -542,6 +566,8 @@ export type AiReplyDraftScalarWhereWithAggregatesInput = {
 export type AiReplyDraftCreateInput = {
   id?: string
   idempotencyKey: string
+  triggerSource?: $Enums.AiReplyDraftTriggerSource
+  availableAt?: Date | string
   status?: $Enums.AiReplyDraftStatus
   outcome?: $Enums.AiReplyDraftOutcome | null
   generatedText?: string | null
@@ -564,7 +590,7 @@ export type AiReplyDraftCreateInput = {
   tenant: Prisma.TenantCreateNestedOneWithoutReplyDraftsInput
   conversation: Prisma.ConversationCreateNestedOneWithoutReplyDraftsInput
   anchorMessage: Prisma.MessageCreateNestedOneWithoutAnchoredReplyDraftsInput
-  createdBy: Prisma.UserCreateNestedOneWithoutReplyDraftsCreatedInput
+  createdBy?: Prisma.UserCreateNestedOneWithoutReplyDraftsCreatedInput
   outboundMessage?: Prisma.MessageCreateNestedOneWithoutUsedReplyDraftInput
 }
 
@@ -573,8 +599,10 @@ export type AiReplyDraftUncheckedCreateInput = {
   tenantId: string
   conversationId: string
   anchorMessageId: string
-  createdByUserId: string
+  createdByUserId?: string | null
   idempotencyKey: string
+  triggerSource?: $Enums.AiReplyDraftTriggerSource
+  availableAt?: Date | string
   status?: $Enums.AiReplyDraftStatus
   outcome?: $Enums.AiReplyDraftOutcome | null
   generatedText?: string | null
@@ -600,6 +628,8 @@ export type AiReplyDraftUncheckedCreateInput = {
 export type AiReplyDraftUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  triggerSource?: Prisma.EnumAiReplyDraftTriggerSourceFieldUpdateOperationsInput | $Enums.AiReplyDraftTriggerSource
+  availableAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumAiReplyDraftStatusFieldUpdateOperationsInput | $Enums.AiReplyDraftStatus
   outcome?: Prisma.NullableEnumAiReplyDraftOutcomeFieldUpdateOperationsInput | $Enums.AiReplyDraftOutcome | null
   generatedText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -622,7 +652,7 @@ export type AiReplyDraftUpdateInput = {
   tenant?: Prisma.TenantUpdateOneRequiredWithoutReplyDraftsNestedInput
   conversation?: Prisma.ConversationUpdateOneRequiredWithoutReplyDraftsNestedInput
   anchorMessage?: Prisma.MessageUpdateOneRequiredWithoutAnchoredReplyDraftsNestedInput
-  createdBy?: Prisma.UserUpdateOneRequiredWithoutReplyDraftsCreatedNestedInput
+  createdBy?: Prisma.UserUpdateOneWithoutReplyDraftsCreatedNestedInput
   outboundMessage?: Prisma.MessageUpdateOneWithoutUsedReplyDraftNestedInput
 }
 
@@ -631,8 +661,10 @@ export type AiReplyDraftUncheckedUpdateInput = {
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   conversationId?: Prisma.StringFieldUpdateOperationsInput | string
   anchorMessageId?: Prisma.StringFieldUpdateOperationsInput | string
-  createdByUserId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  triggerSource?: Prisma.EnumAiReplyDraftTriggerSourceFieldUpdateOperationsInput | $Enums.AiReplyDraftTriggerSource
+  availableAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumAiReplyDraftStatusFieldUpdateOperationsInput | $Enums.AiReplyDraftStatus
   outcome?: Prisma.NullableEnumAiReplyDraftOutcomeFieldUpdateOperationsInput | $Enums.AiReplyDraftOutcome | null
   generatedText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -660,8 +692,10 @@ export type AiReplyDraftCreateManyInput = {
   tenantId: string
   conversationId: string
   anchorMessageId: string
-  createdByUserId: string
+  createdByUserId?: string | null
   idempotencyKey: string
+  triggerSource?: $Enums.AiReplyDraftTriggerSource
+  availableAt?: Date | string
   status?: $Enums.AiReplyDraftStatus
   outcome?: $Enums.AiReplyDraftOutcome | null
   generatedText?: string | null
@@ -687,6 +721,8 @@ export type AiReplyDraftCreateManyInput = {
 export type AiReplyDraftUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  triggerSource?: Prisma.EnumAiReplyDraftTriggerSourceFieldUpdateOperationsInput | $Enums.AiReplyDraftTriggerSource
+  availableAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumAiReplyDraftStatusFieldUpdateOperationsInput | $Enums.AiReplyDraftStatus
   outcome?: Prisma.NullableEnumAiReplyDraftOutcomeFieldUpdateOperationsInput | $Enums.AiReplyDraftOutcome | null
   generatedText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -713,8 +749,10 @@ export type AiReplyDraftUncheckedUpdateManyInput = {
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   conversationId?: Prisma.StringFieldUpdateOperationsInput | string
   anchorMessageId?: Prisma.StringFieldUpdateOperationsInput | string
-  createdByUserId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  triggerSource?: Prisma.EnumAiReplyDraftTriggerSourceFieldUpdateOperationsInput | $Enums.AiReplyDraftTriggerSource
+  availableAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumAiReplyDraftStatusFieldUpdateOperationsInput | $Enums.AiReplyDraftStatus
   outcome?: Prisma.NullableEnumAiReplyDraftOutcomeFieldUpdateOperationsInput | $Enums.AiReplyDraftOutcome | null
   generatedText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -776,6 +814,8 @@ export type AiReplyDraftCountOrderByAggregateInput = {
   anchorMessageId?: Prisma.SortOrder
   createdByUserId?: Prisma.SortOrder
   idempotencyKey?: Prisma.SortOrder
+  triggerSource?: Prisma.SortOrder
+  availableAt?: Prisma.SortOrder
   status?: Prisma.SortOrder
   outcome?: Prisma.SortOrder
   generatedText?: Prisma.SortOrder
@@ -812,6 +852,8 @@ export type AiReplyDraftMaxOrderByAggregateInput = {
   anchorMessageId?: Prisma.SortOrder
   createdByUserId?: Prisma.SortOrder
   idempotencyKey?: Prisma.SortOrder
+  triggerSource?: Prisma.SortOrder
+  availableAt?: Prisma.SortOrder
   status?: Prisma.SortOrder
   outcome?: Prisma.SortOrder
   generatedText?: Prisma.SortOrder
@@ -840,6 +882,8 @@ export type AiReplyDraftMinOrderByAggregateInput = {
   anchorMessageId?: Prisma.SortOrder
   createdByUserId?: Prisma.SortOrder
   idempotencyKey?: Prisma.SortOrder
+  triggerSource?: Prisma.SortOrder
+  availableAt?: Prisma.SortOrder
   status?: Prisma.SortOrder
   outcome?: Prisma.SortOrder
   generatedText?: Prisma.SortOrder
@@ -1068,6 +1112,10 @@ export type AiReplyDraftUncheckedUpdateOneWithoutOutboundMessageNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.AiReplyDraftUpdateToOneWithWhereWithoutOutboundMessageInput, Prisma.AiReplyDraftUpdateWithoutOutboundMessageInput>, Prisma.AiReplyDraftUncheckedUpdateWithoutOutboundMessageInput>
 }
 
+export type EnumAiReplyDraftTriggerSourceFieldUpdateOperationsInput = {
+  set?: $Enums.AiReplyDraftTriggerSource
+}
+
 export type EnumAiReplyDraftStatusFieldUpdateOperationsInput = {
   set?: $Enums.AiReplyDraftStatus
 }
@@ -1079,6 +1127,8 @@ export type NullableEnumAiReplyDraftOutcomeFieldUpdateOperationsInput = {
 export type AiReplyDraftCreateWithoutTenantInput = {
   id?: string
   idempotencyKey: string
+  triggerSource?: $Enums.AiReplyDraftTriggerSource
+  availableAt?: Date | string
   status?: $Enums.AiReplyDraftStatus
   outcome?: $Enums.AiReplyDraftOutcome | null
   generatedText?: string | null
@@ -1100,7 +1150,7 @@ export type AiReplyDraftCreateWithoutTenantInput = {
   usedAt?: Date | string | null
   conversation: Prisma.ConversationCreateNestedOneWithoutReplyDraftsInput
   anchorMessage: Prisma.MessageCreateNestedOneWithoutAnchoredReplyDraftsInput
-  createdBy: Prisma.UserCreateNestedOneWithoutReplyDraftsCreatedInput
+  createdBy?: Prisma.UserCreateNestedOneWithoutReplyDraftsCreatedInput
   outboundMessage?: Prisma.MessageCreateNestedOneWithoutUsedReplyDraftInput
 }
 
@@ -1108,8 +1158,10 @@ export type AiReplyDraftUncheckedCreateWithoutTenantInput = {
   id?: string
   conversationId: string
   anchorMessageId: string
-  createdByUserId: string
+  createdByUserId?: string | null
   idempotencyKey: string
+  triggerSource?: $Enums.AiReplyDraftTriggerSource
+  availableAt?: Date | string
   status?: $Enums.AiReplyDraftStatus
   outcome?: $Enums.AiReplyDraftOutcome | null
   generatedText?: string | null
@@ -1166,8 +1218,10 @@ export type AiReplyDraftScalarWhereInput = {
   tenantId?: Prisma.UuidFilter<"AiReplyDraft"> | string
   conversationId?: Prisma.UuidFilter<"AiReplyDraft"> | string
   anchorMessageId?: Prisma.UuidFilter<"AiReplyDraft"> | string
-  createdByUserId?: Prisma.UuidFilter<"AiReplyDraft"> | string
+  createdByUserId?: Prisma.UuidNullableFilter<"AiReplyDraft"> | string | null
   idempotencyKey?: Prisma.UuidFilter<"AiReplyDraft"> | string
+  triggerSource?: Prisma.EnumAiReplyDraftTriggerSourceFilter<"AiReplyDraft"> | $Enums.AiReplyDraftTriggerSource
+  availableAt?: Prisma.DateTimeFilter<"AiReplyDraft"> | Date | string
   status?: Prisma.EnumAiReplyDraftStatusFilter<"AiReplyDraft"> | $Enums.AiReplyDraftStatus
   outcome?: Prisma.EnumAiReplyDraftOutcomeNullableFilter<"AiReplyDraft"> | $Enums.AiReplyDraftOutcome | null
   generatedText?: Prisma.StringNullableFilter<"AiReplyDraft"> | string | null
@@ -1193,6 +1247,8 @@ export type AiReplyDraftScalarWhereInput = {
 export type AiReplyDraftCreateWithoutCreatedByInput = {
   id?: string
   idempotencyKey: string
+  triggerSource?: $Enums.AiReplyDraftTriggerSource
+  availableAt?: Date | string
   status?: $Enums.AiReplyDraftStatus
   outcome?: $Enums.AiReplyDraftOutcome | null
   generatedText?: string | null
@@ -1224,6 +1280,8 @@ export type AiReplyDraftUncheckedCreateWithoutCreatedByInput = {
   conversationId: string
   anchorMessageId: string
   idempotencyKey: string
+  triggerSource?: $Enums.AiReplyDraftTriggerSource
+  availableAt?: Date | string
   status?: $Enums.AiReplyDraftStatus
   outcome?: $Enums.AiReplyDraftOutcome | null
   generatedText?: string | null
@@ -1275,6 +1333,8 @@ export type AiReplyDraftUpdateManyWithWhereWithoutCreatedByInput = {
 export type AiReplyDraftCreateWithoutConversationInput = {
   id?: string
   idempotencyKey: string
+  triggerSource?: $Enums.AiReplyDraftTriggerSource
+  availableAt?: Date | string
   status?: $Enums.AiReplyDraftStatus
   outcome?: $Enums.AiReplyDraftOutcome | null
   generatedText?: string | null
@@ -1296,15 +1356,17 @@ export type AiReplyDraftCreateWithoutConversationInput = {
   usedAt?: Date | string | null
   tenant: Prisma.TenantCreateNestedOneWithoutReplyDraftsInput
   anchorMessage: Prisma.MessageCreateNestedOneWithoutAnchoredReplyDraftsInput
-  createdBy: Prisma.UserCreateNestedOneWithoutReplyDraftsCreatedInput
+  createdBy?: Prisma.UserCreateNestedOneWithoutReplyDraftsCreatedInput
   outboundMessage?: Prisma.MessageCreateNestedOneWithoutUsedReplyDraftInput
 }
 
 export type AiReplyDraftUncheckedCreateWithoutConversationInput = {
   id?: string
   anchorMessageId: string
-  createdByUserId: string
+  createdByUserId?: string | null
   idempotencyKey: string
+  triggerSource?: $Enums.AiReplyDraftTriggerSource
+  availableAt?: Date | string
   status?: $Enums.AiReplyDraftStatus
   outcome?: $Enums.AiReplyDraftOutcome | null
   generatedText?: string | null
@@ -1356,6 +1418,8 @@ export type AiReplyDraftUpdateManyWithWhereWithoutConversationInput = {
 export type AiReplyDraftCreateWithoutAnchorMessageInput = {
   id?: string
   idempotencyKey: string
+  triggerSource?: $Enums.AiReplyDraftTriggerSource
+  availableAt?: Date | string
   status?: $Enums.AiReplyDraftStatus
   outcome?: $Enums.AiReplyDraftOutcome | null
   generatedText?: string | null
@@ -1377,15 +1441,17 @@ export type AiReplyDraftCreateWithoutAnchorMessageInput = {
   usedAt?: Date | string | null
   tenant: Prisma.TenantCreateNestedOneWithoutReplyDraftsInput
   conversation: Prisma.ConversationCreateNestedOneWithoutReplyDraftsInput
-  createdBy: Prisma.UserCreateNestedOneWithoutReplyDraftsCreatedInput
+  createdBy?: Prisma.UserCreateNestedOneWithoutReplyDraftsCreatedInput
   outboundMessage?: Prisma.MessageCreateNestedOneWithoutUsedReplyDraftInput
 }
 
 export type AiReplyDraftUncheckedCreateWithoutAnchorMessageInput = {
   id?: string
   conversationId: string
-  createdByUserId: string
+  createdByUserId?: string | null
   idempotencyKey: string
+  triggerSource?: $Enums.AiReplyDraftTriggerSource
+  availableAt?: Date | string
   status?: $Enums.AiReplyDraftStatus
   outcome?: $Enums.AiReplyDraftOutcome | null
   generatedText?: string | null
@@ -1421,6 +1487,8 @@ export type AiReplyDraftCreateManyAnchorMessageInputEnvelope = {
 export type AiReplyDraftCreateWithoutOutboundMessageInput = {
   id?: string
   idempotencyKey: string
+  triggerSource?: $Enums.AiReplyDraftTriggerSource
+  availableAt?: Date | string
   status?: $Enums.AiReplyDraftStatus
   outcome?: $Enums.AiReplyDraftOutcome | null
   generatedText?: string | null
@@ -1443,15 +1511,17 @@ export type AiReplyDraftCreateWithoutOutboundMessageInput = {
   tenant: Prisma.TenantCreateNestedOneWithoutReplyDraftsInput
   conversation: Prisma.ConversationCreateNestedOneWithoutReplyDraftsInput
   anchorMessage: Prisma.MessageCreateNestedOneWithoutAnchoredReplyDraftsInput
-  createdBy: Prisma.UserCreateNestedOneWithoutReplyDraftsCreatedInput
+  createdBy?: Prisma.UserCreateNestedOneWithoutReplyDraftsCreatedInput
 }
 
 export type AiReplyDraftUncheckedCreateWithoutOutboundMessageInput = {
   id?: string
   conversationId: string
   anchorMessageId: string
-  createdByUserId: string
+  createdByUserId?: string | null
   idempotencyKey: string
+  triggerSource?: $Enums.AiReplyDraftTriggerSource
+  availableAt?: Date | string
   status?: $Enums.AiReplyDraftStatus
   outcome?: $Enums.AiReplyDraftOutcome | null
   generatedText?: string | null
@@ -1508,6 +1578,8 @@ export type AiReplyDraftUpdateToOneWithWhereWithoutOutboundMessageInput = {
 export type AiReplyDraftUpdateWithoutOutboundMessageInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  triggerSource?: Prisma.EnumAiReplyDraftTriggerSourceFieldUpdateOperationsInput | $Enums.AiReplyDraftTriggerSource
+  availableAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumAiReplyDraftStatusFieldUpdateOperationsInput | $Enums.AiReplyDraftStatus
   outcome?: Prisma.NullableEnumAiReplyDraftOutcomeFieldUpdateOperationsInput | $Enums.AiReplyDraftOutcome | null
   generatedText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1530,15 +1602,17 @@ export type AiReplyDraftUpdateWithoutOutboundMessageInput = {
   tenant?: Prisma.TenantUpdateOneRequiredWithoutReplyDraftsNestedInput
   conversation?: Prisma.ConversationUpdateOneRequiredWithoutReplyDraftsNestedInput
   anchorMessage?: Prisma.MessageUpdateOneRequiredWithoutAnchoredReplyDraftsNestedInput
-  createdBy?: Prisma.UserUpdateOneRequiredWithoutReplyDraftsCreatedNestedInput
+  createdBy?: Prisma.UserUpdateOneWithoutReplyDraftsCreatedNestedInput
 }
 
 export type AiReplyDraftUncheckedUpdateWithoutOutboundMessageInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   conversationId?: Prisma.StringFieldUpdateOperationsInput | string
   anchorMessageId?: Prisma.StringFieldUpdateOperationsInput | string
-  createdByUserId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  triggerSource?: Prisma.EnumAiReplyDraftTriggerSourceFieldUpdateOperationsInput | $Enums.AiReplyDraftTriggerSource
+  availableAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumAiReplyDraftStatusFieldUpdateOperationsInput | $Enums.AiReplyDraftStatus
   outcome?: Prisma.NullableEnumAiReplyDraftOutcomeFieldUpdateOperationsInput | $Enums.AiReplyDraftOutcome | null
   generatedText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1564,8 +1638,10 @@ export type AiReplyDraftCreateManyTenantInput = {
   id?: string
   conversationId: string
   anchorMessageId: string
-  createdByUserId: string
+  createdByUserId?: string | null
   idempotencyKey: string
+  triggerSource?: $Enums.AiReplyDraftTriggerSource
+  availableAt?: Date | string
   status?: $Enums.AiReplyDraftStatus
   outcome?: $Enums.AiReplyDraftOutcome | null
   generatedText?: string | null
@@ -1591,6 +1667,8 @@ export type AiReplyDraftCreateManyTenantInput = {
 export type AiReplyDraftUpdateWithoutTenantInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  triggerSource?: Prisma.EnumAiReplyDraftTriggerSourceFieldUpdateOperationsInput | $Enums.AiReplyDraftTriggerSource
+  availableAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumAiReplyDraftStatusFieldUpdateOperationsInput | $Enums.AiReplyDraftStatus
   outcome?: Prisma.NullableEnumAiReplyDraftOutcomeFieldUpdateOperationsInput | $Enums.AiReplyDraftOutcome | null
   generatedText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1612,7 +1690,7 @@ export type AiReplyDraftUpdateWithoutTenantInput = {
   usedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   conversation?: Prisma.ConversationUpdateOneRequiredWithoutReplyDraftsNestedInput
   anchorMessage?: Prisma.MessageUpdateOneRequiredWithoutAnchoredReplyDraftsNestedInput
-  createdBy?: Prisma.UserUpdateOneRequiredWithoutReplyDraftsCreatedNestedInput
+  createdBy?: Prisma.UserUpdateOneWithoutReplyDraftsCreatedNestedInput
   outboundMessage?: Prisma.MessageUpdateOneWithoutUsedReplyDraftNestedInput
 }
 
@@ -1620,8 +1698,10 @@ export type AiReplyDraftUncheckedUpdateWithoutTenantInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   conversationId?: Prisma.StringFieldUpdateOperationsInput | string
   anchorMessageId?: Prisma.StringFieldUpdateOperationsInput | string
-  createdByUserId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  triggerSource?: Prisma.EnumAiReplyDraftTriggerSourceFieldUpdateOperationsInput | $Enums.AiReplyDraftTriggerSource
+  availableAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumAiReplyDraftStatusFieldUpdateOperationsInput | $Enums.AiReplyDraftStatus
   outcome?: Prisma.NullableEnumAiReplyDraftOutcomeFieldUpdateOperationsInput | $Enums.AiReplyDraftOutcome | null
   generatedText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1648,8 +1728,10 @@ export type AiReplyDraftUncheckedUpdateManyWithoutTenantInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   conversationId?: Prisma.StringFieldUpdateOperationsInput | string
   anchorMessageId?: Prisma.StringFieldUpdateOperationsInput | string
-  createdByUserId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  triggerSource?: Prisma.EnumAiReplyDraftTriggerSourceFieldUpdateOperationsInput | $Enums.AiReplyDraftTriggerSource
+  availableAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumAiReplyDraftStatusFieldUpdateOperationsInput | $Enums.AiReplyDraftStatus
   outcome?: Prisma.NullableEnumAiReplyDraftOutcomeFieldUpdateOperationsInput | $Enums.AiReplyDraftOutcome | null
   generatedText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1678,6 +1760,8 @@ export type AiReplyDraftCreateManyCreatedByInput = {
   conversationId: string
   anchorMessageId: string
   idempotencyKey: string
+  triggerSource?: $Enums.AiReplyDraftTriggerSource
+  availableAt?: Date | string
   status?: $Enums.AiReplyDraftStatus
   outcome?: $Enums.AiReplyDraftOutcome | null
   generatedText?: string | null
@@ -1703,6 +1787,8 @@ export type AiReplyDraftCreateManyCreatedByInput = {
 export type AiReplyDraftUpdateWithoutCreatedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  triggerSource?: Prisma.EnumAiReplyDraftTriggerSourceFieldUpdateOperationsInput | $Enums.AiReplyDraftTriggerSource
+  availableAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumAiReplyDraftStatusFieldUpdateOperationsInput | $Enums.AiReplyDraftStatus
   outcome?: Prisma.NullableEnumAiReplyDraftOutcomeFieldUpdateOperationsInput | $Enums.AiReplyDraftOutcome | null
   generatedText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1734,6 +1820,8 @@ export type AiReplyDraftUncheckedUpdateWithoutCreatedByInput = {
   conversationId?: Prisma.StringFieldUpdateOperationsInput | string
   anchorMessageId?: Prisma.StringFieldUpdateOperationsInput | string
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  triggerSource?: Prisma.EnumAiReplyDraftTriggerSourceFieldUpdateOperationsInput | $Enums.AiReplyDraftTriggerSource
+  availableAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumAiReplyDraftStatusFieldUpdateOperationsInput | $Enums.AiReplyDraftStatus
   outcome?: Prisma.NullableEnumAiReplyDraftOutcomeFieldUpdateOperationsInput | $Enums.AiReplyDraftOutcome | null
   generatedText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1762,6 +1850,8 @@ export type AiReplyDraftUncheckedUpdateManyWithoutCreatedByInput = {
   conversationId?: Prisma.StringFieldUpdateOperationsInput | string
   anchorMessageId?: Prisma.StringFieldUpdateOperationsInput | string
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  triggerSource?: Prisma.EnumAiReplyDraftTriggerSourceFieldUpdateOperationsInput | $Enums.AiReplyDraftTriggerSource
+  availableAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumAiReplyDraftStatusFieldUpdateOperationsInput | $Enums.AiReplyDraftStatus
   outcome?: Prisma.NullableEnumAiReplyDraftOutcomeFieldUpdateOperationsInput | $Enums.AiReplyDraftOutcome | null
   generatedText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1787,8 +1877,10 @@ export type AiReplyDraftUncheckedUpdateManyWithoutCreatedByInput = {
 export type AiReplyDraftCreateManyConversationInput = {
   id?: string
   anchorMessageId: string
-  createdByUserId: string
+  createdByUserId?: string | null
   idempotencyKey: string
+  triggerSource?: $Enums.AiReplyDraftTriggerSource
+  availableAt?: Date | string
   status?: $Enums.AiReplyDraftStatus
   outcome?: $Enums.AiReplyDraftOutcome | null
   generatedText?: string | null
@@ -1814,6 +1906,8 @@ export type AiReplyDraftCreateManyConversationInput = {
 export type AiReplyDraftUpdateWithoutConversationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  triggerSource?: Prisma.EnumAiReplyDraftTriggerSourceFieldUpdateOperationsInput | $Enums.AiReplyDraftTriggerSource
+  availableAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumAiReplyDraftStatusFieldUpdateOperationsInput | $Enums.AiReplyDraftStatus
   outcome?: Prisma.NullableEnumAiReplyDraftOutcomeFieldUpdateOperationsInput | $Enums.AiReplyDraftOutcome | null
   generatedText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1835,15 +1929,17 @@ export type AiReplyDraftUpdateWithoutConversationInput = {
   usedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tenant?: Prisma.TenantUpdateOneRequiredWithoutReplyDraftsNestedInput
   anchorMessage?: Prisma.MessageUpdateOneRequiredWithoutAnchoredReplyDraftsNestedInput
-  createdBy?: Prisma.UserUpdateOneRequiredWithoutReplyDraftsCreatedNestedInput
+  createdBy?: Prisma.UserUpdateOneWithoutReplyDraftsCreatedNestedInput
   outboundMessage?: Prisma.MessageUpdateOneWithoutUsedReplyDraftNestedInput
 }
 
 export type AiReplyDraftUncheckedUpdateWithoutConversationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   anchorMessageId?: Prisma.StringFieldUpdateOperationsInput | string
-  createdByUserId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  triggerSource?: Prisma.EnumAiReplyDraftTriggerSourceFieldUpdateOperationsInput | $Enums.AiReplyDraftTriggerSource
+  availableAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumAiReplyDraftStatusFieldUpdateOperationsInput | $Enums.AiReplyDraftStatus
   outcome?: Prisma.NullableEnumAiReplyDraftOutcomeFieldUpdateOperationsInput | $Enums.AiReplyDraftOutcome | null
   generatedText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1869,8 +1965,10 @@ export type AiReplyDraftUncheckedUpdateWithoutConversationInput = {
 export type AiReplyDraftUncheckedUpdateManyWithoutConversationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   anchorMessageId?: Prisma.StringFieldUpdateOperationsInput | string
-  createdByUserId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  triggerSource?: Prisma.EnumAiReplyDraftTriggerSourceFieldUpdateOperationsInput | $Enums.AiReplyDraftTriggerSource
+  availableAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumAiReplyDraftStatusFieldUpdateOperationsInput | $Enums.AiReplyDraftStatus
   outcome?: Prisma.NullableEnumAiReplyDraftOutcomeFieldUpdateOperationsInput | $Enums.AiReplyDraftOutcome | null
   generatedText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1896,8 +1994,10 @@ export type AiReplyDraftUncheckedUpdateManyWithoutConversationInput = {
 export type AiReplyDraftCreateManyAnchorMessageInput = {
   id?: string
   conversationId: string
-  createdByUserId: string
+  createdByUserId?: string | null
   idempotencyKey: string
+  triggerSource?: $Enums.AiReplyDraftTriggerSource
+  availableAt?: Date | string
   status?: $Enums.AiReplyDraftStatus
   outcome?: $Enums.AiReplyDraftOutcome | null
   generatedText?: string | null
@@ -1923,6 +2023,8 @@ export type AiReplyDraftCreateManyAnchorMessageInput = {
 export type AiReplyDraftUpdateWithoutAnchorMessageInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  triggerSource?: Prisma.EnumAiReplyDraftTriggerSourceFieldUpdateOperationsInput | $Enums.AiReplyDraftTriggerSource
+  availableAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumAiReplyDraftStatusFieldUpdateOperationsInput | $Enums.AiReplyDraftStatus
   outcome?: Prisma.NullableEnumAiReplyDraftOutcomeFieldUpdateOperationsInput | $Enums.AiReplyDraftOutcome | null
   generatedText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1944,15 +2046,17 @@ export type AiReplyDraftUpdateWithoutAnchorMessageInput = {
   usedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tenant?: Prisma.TenantUpdateOneRequiredWithoutReplyDraftsNestedInput
   conversation?: Prisma.ConversationUpdateOneRequiredWithoutReplyDraftsNestedInput
-  createdBy?: Prisma.UserUpdateOneRequiredWithoutReplyDraftsCreatedNestedInput
+  createdBy?: Prisma.UserUpdateOneWithoutReplyDraftsCreatedNestedInput
   outboundMessage?: Prisma.MessageUpdateOneWithoutUsedReplyDraftNestedInput
 }
 
 export type AiReplyDraftUncheckedUpdateWithoutAnchorMessageInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   conversationId?: Prisma.StringFieldUpdateOperationsInput | string
-  createdByUserId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  triggerSource?: Prisma.EnumAiReplyDraftTriggerSourceFieldUpdateOperationsInput | $Enums.AiReplyDraftTriggerSource
+  availableAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumAiReplyDraftStatusFieldUpdateOperationsInput | $Enums.AiReplyDraftStatus
   outcome?: Prisma.NullableEnumAiReplyDraftOutcomeFieldUpdateOperationsInput | $Enums.AiReplyDraftOutcome | null
   generatedText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1978,8 +2082,10 @@ export type AiReplyDraftUncheckedUpdateWithoutAnchorMessageInput = {
 export type AiReplyDraftUncheckedUpdateManyWithoutAnchorMessageInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   conversationId?: Prisma.StringFieldUpdateOperationsInput | string
-  createdByUserId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  triggerSource?: Prisma.EnumAiReplyDraftTriggerSourceFieldUpdateOperationsInput | $Enums.AiReplyDraftTriggerSource
+  availableAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumAiReplyDraftStatusFieldUpdateOperationsInput | $Enums.AiReplyDraftStatus
   outcome?: Prisma.NullableEnumAiReplyDraftOutcomeFieldUpdateOperationsInput | $Enums.AiReplyDraftOutcome | null
   generatedText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2011,6 +2117,8 @@ export type AiReplyDraftSelect<ExtArgs extends runtime.Types.Extensions.Internal
   anchorMessageId?: boolean
   createdByUserId?: boolean
   idempotencyKey?: boolean
+  triggerSource?: boolean
+  availableAt?: boolean
   status?: boolean
   outcome?: boolean
   generatedText?: boolean
@@ -2034,7 +2142,7 @@ export type AiReplyDraftSelect<ExtArgs extends runtime.Types.Extensions.Internal
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
   anchorMessage?: boolean | Prisma.MessageDefaultArgs<ExtArgs>
-  createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  createdBy?: boolean | Prisma.AiReplyDraft$createdByArgs<ExtArgs>
   outboundMessage?: boolean | Prisma.AiReplyDraft$outboundMessageArgs<ExtArgs>
 }, ExtArgs["result"]["aiReplyDraft"]>
 
@@ -2045,6 +2153,8 @@ export type AiReplyDraftSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   anchorMessageId?: boolean
   createdByUserId?: boolean
   idempotencyKey?: boolean
+  triggerSource?: boolean
+  availableAt?: boolean
   status?: boolean
   outcome?: boolean
   generatedText?: boolean
@@ -2068,7 +2178,7 @@ export type AiReplyDraftSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
   anchorMessage?: boolean | Prisma.MessageDefaultArgs<ExtArgs>
-  createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  createdBy?: boolean | Prisma.AiReplyDraft$createdByArgs<ExtArgs>
   outboundMessage?: boolean | Prisma.AiReplyDraft$outboundMessageArgs<ExtArgs>
 }, ExtArgs["result"]["aiReplyDraft"]>
 
@@ -2079,6 +2189,8 @@ export type AiReplyDraftSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   anchorMessageId?: boolean
   createdByUserId?: boolean
   idempotencyKey?: boolean
+  triggerSource?: boolean
+  availableAt?: boolean
   status?: boolean
   outcome?: boolean
   generatedText?: boolean
@@ -2102,7 +2214,7 @@ export type AiReplyDraftSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
   anchorMessage?: boolean | Prisma.MessageDefaultArgs<ExtArgs>
-  createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  createdBy?: boolean | Prisma.AiReplyDraft$createdByArgs<ExtArgs>
   outboundMessage?: boolean | Prisma.AiReplyDraft$outboundMessageArgs<ExtArgs>
 }, ExtArgs["result"]["aiReplyDraft"]>
 
@@ -2113,6 +2225,8 @@ export type AiReplyDraftSelectScalar = {
   anchorMessageId?: boolean
   createdByUserId?: boolean
   idempotencyKey?: boolean
+  triggerSource?: boolean
+  availableAt?: boolean
   status?: boolean
   outcome?: boolean
   generatedText?: boolean
@@ -2135,26 +2249,26 @@ export type AiReplyDraftSelectScalar = {
   usedAt?: boolean
 }
 
-export type AiReplyDraftOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "conversationId" | "anchorMessageId" | "createdByUserId" | "idempotencyKey" | "status" | "outcome" | "generatedText" | "finalText" | "sourceSnapshot" | "promptVersion" | "schemaVersion" | "modelVersion" | "providerLatencyMs" | "inputTokens" | "outputTokens" | "leaseId" | "leaseExpiresAt" | "modelRequestStartedAt" | "attempts" | "errorCode" | "outboundMessageId" | "createdAt" | "updatedAt" | "usedAt", ExtArgs["result"]["aiReplyDraft"]>
+export type AiReplyDraftOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "conversationId" | "anchorMessageId" | "createdByUserId" | "idempotencyKey" | "triggerSource" | "availableAt" | "status" | "outcome" | "generatedText" | "finalText" | "sourceSnapshot" | "promptVersion" | "schemaVersion" | "modelVersion" | "providerLatencyMs" | "inputTokens" | "outputTokens" | "leaseId" | "leaseExpiresAt" | "modelRequestStartedAt" | "attempts" | "errorCode" | "outboundMessageId" | "createdAt" | "updatedAt" | "usedAt", ExtArgs["result"]["aiReplyDraft"]>
 export type AiReplyDraftInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
   anchorMessage?: boolean | Prisma.MessageDefaultArgs<ExtArgs>
-  createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  createdBy?: boolean | Prisma.AiReplyDraft$createdByArgs<ExtArgs>
   outboundMessage?: boolean | Prisma.AiReplyDraft$outboundMessageArgs<ExtArgs>
 }
 export type AiReplyDraftIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
   anchorMessage?: boolean | Prisma.MessageDefaultArgs<ExtArgs>
-  createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  createdBy?: boolean | Prisma.AiReplyDraft$createdByArgs<ExtArgs>
   outboundMessage?: boolean | Prisma.AiReplyDraft$outboundMessageArgs<ExtArgs>
 }
 export type AiReplyDraftIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   conversation?: boolean | Prisma.ConversationDefaultArgs<ExtArgs>
   anchorMessage?: boolean | Prisma.MessageDefaultArgs<ExtArgs>
-  createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  createdBy?: boolean | Prisma.AiReplyDraft$createdByArgs<ExtArgs>
   outboundMessage?: boolean | Prisma.AiReplyDraft$outboundMessageArgs<ExtArgs>
 }
 
@@ -2164,7 +2278,7 @@ export type $AiReplyDraftPayload<ExtArgs extends runtime.Types.Extensions.Intern
     tenant: Prisma.$TenantPayload<ExtArgs>
     conversation: Prisma.$ConversationPayload<ExtArgs>
     anchorMessage: Prisma.$MessagePayload<ExtArgs>
-    createdBy: Prisma.$UserPayload<ExtArgs>
+    createdBy: Prisma.$UserPayload<ExtArgs> | null
     outboundMessage: Prisma.$MessagePayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -2172,8 +2286,10 @@ export type $AiReplyDraftPayload<ExtArgs extends runtime.Types.Extensions.Intern
     tenantId: string
     conversationId: string
     anchorMessageId: string
-    createdByUserId: string
+    createdByUserId: string | null
     idempotencyKey: string
+    triggerSource: $Enums.AiReplyDraftTriggerSource
+    availableAt: Date
     status: $Enums.AiReplyDraftStatus
     outcome: $Enums.AiReplyDraftOutcome | null
     generatedText: string | null
@@ -2591,7 +2707,7 @@ export interface Prisma__AiReplyDraftClient<T, Null = never, ExtArgs extends run
   tenant<T extends Prisma.TenantDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TenantDefaultArgs<ExtArgs>>): Prisma.Prisma__TenantClient<runtime.Types.Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   conversation<T extends Prisma.ConversationDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ConversationDefaultArgs<ExtArgs>>): Prisma.Prisma__ConversationClient<runtime.Types.Result.GetResult<Prisma.$ConversationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   anchorMessage<T extends Prisma.MessageDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MessageDefaultArgs<ExtArgs>>): Prisma.Prisma__MessageClient<runtime.Types.Result.GetResult<Prisma.$MessagePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-  createdBy<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  createdBy<T extends Prisma.AiReplyDraft$createdByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AiReplyDraft$createdByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   outboundMessage<T extends Prisma.AiReplyDraft$outboundMessageArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AiReplyDraft$outboundMessageArgs<ExtArgs>>): Prisma.Prisma__MessageClient<runtime.Types.Result.GetResult<Prisma.$MessagePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -2628,6 +2744,8 @@ export interface AiReplyDraftFieldRefs {
   readonly anchorMessageId: Prisma.FieldRef<"AiReplyDraft", 'String'>
   readonly createdByUserId: Prisma.FieldRef<"AiReplyDraft", 'String'>
   readonly idempotencyKey: Prisma.FieldRef<"AiReplyDraft", 'String'>
+  readonly triggerSource: Prisma.FieldRef<"AiReplyDraft", 'AiReplyDraftTriggerSource'>
+  readonly availableAt: Prisma.FieldRef<"AiReplyDraft", 'DateTime'>
   readonly status: Prisma.FieldRef<"AiReplyDraft", 'AiReplyDraftStatus'>
   readonly outcome: Prisma.FieldRef<"AiReplyDraft", 'AiReplyDraftOutcome'>
   readonly generatedText: Prisma.FieldRef<"AiReplyDraft", 'String'>
@@ -3046,6 +3164,25 @@ export type AiReplyDraftDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.
    * Limit how many AiReplyDrafts to delete.
    */
   limit?: number
+}
+
+/**
+ * AiReplyDraft.createdBy
+ */
+export type AiReplyDraft$createdByArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
 }
 
 /**

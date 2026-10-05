@@ -6,6 +6,7 @@ export const replyDraftStatusSchema = z.enum([
   'QUEUED', 'PROCESSING', 'READY', 'USED', 'STALE', 'BLOCKED', 'FAILED',
 ]);
 export const replyDraftOutcomeSchema = z.enum(['ANSWER', 'CLARIFY', 'HANDOFF']);
+export const replyDraftTriggerSourceSchema = z.enum(['MANUAL', 'AUTOMATIC']);
 
 export const replyStyleSchema = z.strictObject({
   tenantId: z.uuid(),
@@ -46,6 +47,8 @@ export const replyDraftSummarySchema = z.object({
   id: z.uuid(),
   conversationId: z.uuid(),
   anchorMessageId: z.uuid(),
+  triggerSource: replyDraftTriggerSourceSchema,
+  availableAt: z.iso.datetime(),
   status: replyDraftStatusSchema,
   outcome: replyDraftOutcomeSchema.nullable(),
   generatedText: z.string().max(2000).nullable(),
@@ -65,4 +68,5 @@ export type ReplyStylePatch = z.infer<typeof replyStylePatchSchema>;
 export type CreateReplyDraftInput = z.infer<typeof createReplyDraftSchema>;
 export type ReplyDraftJob = z.infer<typeof replyDraftJobSchema>;
 export type ReplyDraftSource = z.infer<typeof replyDraftSourceSchema>;
+export type ReplyDraftTriggerSource = z.infer<typeof replyDraftTriggerSourceSchema>;
 export type ReplyDraftSummary = z.infer<typeof replyDraftSummarySchema>;

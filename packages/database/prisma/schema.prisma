@@ -155,6 +155,11 @@ enum AiReplyDraftOutcome {
   HANDOFF
 }
 
+enum AiReplyDraftTriggerSource {
+  MANUAL
+  AUTOMATIC
+}
+
 enum NotificationType {
   SUCCESS
   ERROR
@@ -1264,8 +1269,10 @@ model AiReplyDraft {
   tenantId               String               @map("tenant_id") @db.Uuid
   conversationId         String               @map("conversation_id") @db.Uuid
   anchorMessageId        String               @map("anchor_message_id") @db.Uuid
-  createdByUserId        String               @map("created_by_user_id") @db.Uuid
+  createdByUserId        String?              @map("created_by_user_id") @db.Uuid
   idempotencyKey         String               @map("idempotency_key") @db.Uuid
+  triggerSource          AiReplyDraftTriggerSource @default(MANUAL) @map("trigger_source")
+  availableAt            DateTime             @default(now()) @map("available_at")
   status                 AiReplyDraftStatus   @default(QUEUED)
   outcome                AiReplyDraftOutcome?
   generatedText          String?              @map("generated_text")
@@ -1289,13 +1296,14 @@ model AiReplyDraft {
   tenant                 Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   conversation           Conversation         @relation(fields: [tenantId, conversationId], references: [tenantId, id], onDelete: Cascade)
   anchorMessage          Message              @relation("AiReplyDraftAnchor", fields: [tenantId, anchorMessageId], references: [tenantId, id], onDelete: Restrict)
-  createdBy              User                 @relation("AiReplyDraftCreator", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  createdBy              User?                @relation("AiReplyDraftCreator", fields: [createdByUserId], references: [id], onDelete: Restrict)
   outboundMessage        Message?             @relation("AiReplyDraftOutbound", fields: [tenantId, outboundMessageId], references: [tenantId, id], onDelete: Restrict)
 
   @@unique([tenantId, id])
   @@unique([tenantId, outboundMessageId])
   @@unique([tenantId, conversationId, anchorMessageId, idempotencyKey])
   @@index([status, leaseExpiresAt])
+  @@index([status, availableAt])
   @@index([tenantId, conversationId, createdAt(sort: Desc)])
   @@map("ai_reply_drafts")
 }

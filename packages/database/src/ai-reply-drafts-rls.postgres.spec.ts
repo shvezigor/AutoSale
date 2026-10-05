@@ -23,7 +23,9 @@ describe('AI reply draft tenant isolation', () => {
   let admin: pg.Pool;
   let api: PrismaClient;
   let worker: PrismaClient;
-  const identities = new Map<string, { conversationId: string; anchorId: string; userId: string; draftId: string }>();
+  const identities = new Map<string, {
+    conversationId: string; anchorId: string; userId: string; draftId: string; automaticDraftId: string;
+  }>();
 
   beforeAll(async () => {
     container = await new PostgreSqlContainer('postgres:17.6-alpine').start();
@@ -33,8 +35,11 @@ describe('AI reply draft tenant isolation', () => {
       if (name !== 'migration_lock.toml') await admin.query(await readFile(resolve(root, name, 'migration.sql'), 'utf8'));
     }
     for (const [tenantId, suffix] of [[tenantA, 'alpha'], [tenantB, 'beta']] as const) {
-      const [userId, conversationId, anchorId, draftId] = Array.from({ length: 4 }, randomUUID);
-      identities.set(tenantId, { userId: userId!, conversationId: conversationId!, anchorId: anchorId!, draftId: draftId! });
+      const [userId, conversationId, anchorId, draftId, automaticDraftId] = Array.from({ length: 5 }, randomUUID);
+      identities.set(tenantId, {
+        userId: userId!, conversationId: conversationId!, anchorId: anchorId!, draftId: draftId!,
+        automaticDraftId: automaticDraftId!,
+      });
       await admin.query('INSERT INTO tenants (id, key, name) VALUES ($1, $2, $3)', [tenantId, suffix, `Fictional ${suffix}`]);
       await admin.query("INSERT INTO users (id, email, name, status, updated_at) VALUES ($1, $2, $3, 'ACTIVE', NOW())", [userId, `${suffix}@example.invalid`, `Fictional ${suffix}`]);
       await admin.query(`INSERT INTO conversations (id, tenant_id, channel, external_conversation_id, participant_id, last_message_at, updated_at)
@@ -50,6 +55,11 @@ describe('AI reply draft tenant isolation', () => {
       await admin.query(`INSERT INTO ai_reply_drafts
         (id, tenant_id, conversation_id, anchor_message_id, created_by_user_id, idempotency_key, updated_at)
         VALUES ($1, $2, $3, $4, $5, $6, NOW())`, [draftId, tenantId, conversationId, anchorId, userId, randomUUID()]);
+      await admin.query(`INSERT INTO ai_reply_drafts
+        (id, tenant_id, conversation_id, anchor_message_id, created_by_user_id, idempotency_key,
+         trigger_source, available_at, status, updated_at)
+        VALUES ($1, $2, $3, $4, NULL, $4, 'AUTOMATIC', NOW() + INTERVAL '10 seconds', 'STALE', NOW())`,
+      [automaticDraftId, tenantId, conversationId, anchorId]);
     }
     await configureRuntimeDatabaseRoles(container.getConnectionUri(), { apiPassword, workerPassword, backupPassword });
     const runtimeUrl = (username: string, password: string) => {
@@ -73,7 +83,10 @@ describe('AI reply draft tenant isolation', () => {
     await expect(api.tenantReplyStyle.findMany()).resolves.toEqual([]);
     await expect(api.aiReplyDraft.findMany()).resolves.toEqual([]);
     await expect(withTenantTransaction(api, tenantA, (tx) => tx.aiReplyDraft.findMany({ select: { tenantId: true } })))
-      .resolves.toEqual([{ tenantId: tenantA }]);
+      .resolves.toEqual([{ tenantId: tenantA }, { tenantId: tenantA }]);
+    await expect(withTenantTransaction(api, tenantB, (tx) => tx.aiReplyDraft.findFirst({
+      where: { id: identities.get(tenantA)!.automaticDraftId },
+    }))).resolves.toBeNull();
     await expect(withTenantTransaction(api, tenantA, (tx) => tx.tenantReplyStyle.findMany({ select: { tenantId: true } })))
       .resolves.toEqual([{ tenantId: tenantA }]);
     await expect(withTenantTransaction(api, tenantA, (tx) => tx.aiReplyDraft.update({
@@ -99,13 +112,13 @@ describe('AI reply draft tenant isolation', () => {
   });
 
   it('limits worker discovery to identifiers and denies API execution', async () => {
-    const due = await worker.$queryRaw<Array<{ tenant_id: string; draft_id: string }>>`
-      SELECT tenant_id, draft_id FROM public.worker_due_ai_reply_drafts(${new Date('2099-01-01T00:00:00Z')}, 50)
+    const due = await worker.$queryRaw<Array<{ tenant_id: string; draft_id: string; available_at: Date }>>`
+      SELECT tenant_id, draft_id, available_at FROM public.worker_due_ai_reply_drafts(${new Date('2099-01-01T00:00:00Z')}, 50)
     `;
     expect(due.map((row) => row.tenant_id).sort()).toEqual([tenantA, tenantB]);
-    expect(Object.keys(due[0]!).sort()).toEqual(['draft_id', 'tenant_id']);
+    expect(Object.keys(due[0]!).sort()).toEqual(['available_at', 'draft_id', 'tenant_id']);
     await expect(api.$queryRaw`
-      SELECT tenant_id, draft_id FROM public.worker_due_ai_reply_drafts(${new Date('2099-01-01T00:00:00Z')}, 50)
+      SELECT tenant_id, draft_id, available_at FROM public.worker_due_ai_reply_drafts(${new Date('2099-01-01T00:00:00Z')}, 50)
     `).rejects.toMatchObject({ code: 'P2010' });
   });
 

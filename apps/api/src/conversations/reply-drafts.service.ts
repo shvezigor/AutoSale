@@ -100,6 +100,7 @@ export class ReplyDraftsService {
 
 export function toReplyDraftSummary(row: {
   id: string; conversationId: string; anchorMessageId: string;
+  triggerSource: string; availableAt: Date;
   status: string; outcome: string | null; generatedText: string | null; finalText: string | null;
   sourceSnapshot: unknown; errorCode: string | null; createdAt: Date; updatedAt: Date;
 }): ReplyDraftSummary {
@@ -109,6 +110,7 @@ export function toReplyDraftSummary(row: {
   ].includes(row.errorCode ?? '') ? row.errorCode : null;
   return replyDraftSummarySchema.parse({
     id: row.id, conversationId: row.conversationId, anchorMessageId: row.anchorMessageId,
+    triggerSource: row.triggerSource, availableAt: row.availableAt.toISOString(),
     status: row.status, outcome: row.outcome, generatedText: row.generatedText,
     finalText: row.finalText, sources: row.sourceSnapshot ?? [], errorCode: safeError,
     createdAt: row.createdAt.toISOString(), updatedAt: row.updatedAt.toISOString(),

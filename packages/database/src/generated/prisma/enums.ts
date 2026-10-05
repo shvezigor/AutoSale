@@ -214,6 +214,14 @@ export const AiReplyDraftOutcome = {
 export type AiReplyDraftOutcome = (typeof AiReplyDraftOutcome)[keyof typeof AiReplyDraftOutcome]
 
 
+export const AiReplyDraftTriggerSource = {
+  MANUAL: 'MANUAL',
+  AUTOMATIC: 'AUTOMATIC'
+} as const
+
+export type AiReplyDraftTriggerSource = (typeof AiReplyDraftTriggerSource)[keyof typeof AiReplyDraftTriggerSource]
+
+
 export const NotificationType = {
   SUCCESS: 'SUCCESS',
   ERROR: 'ERROR',
