@@ -331,14 +331,25 @@ export class ConversationsService {
       }
 
       if (input.draftId) {
+        const style = await transaction.tenantReplyStyle.findUnique({
+          where: { tenantId }, select: { enabled: true },
+        });
+        if (!style?.enabled) throw new ConflictException('AI drafts are disabled');
         const draft = await transaction.aiReplyDraft.findFirst({
           where: { id: input.draftId, tenantId, conversationId },
         });
-        if (!draft || draft.status !== 'READY' || draft.anchorMessageId !== anchorMessageId) {
+        if (!draft || draft.status !== 'READY') {
           throw new ConflictException('AI draft is no longer ready for this conversation');
         }
+        if (draft.anchorMessageId !== anchorMessageId) {
+          await transaction.aiReplyDraft.update({ where: { id: draft.id }, data: { status: 'STALE', errorCode: 'NEW_MESSAGE' } });
+          return { stale: true as const, reason: 'NEW_MESSAGE' as const };
+        }
         const sources = replyDraftSourceSchema.array().max(8).safeParse(draft.sourceSnapshot);
-        if (!sources.success) throw new ConflictException('AI draft sources are unavailable');
+        if (!sources.success) {
+          await transaction.aiReplyDraft.update({ where: { id: draft.id }, data: { status: 'STALE', errorCode: 'SOURCE_CHANGED' } });
+          return { stale: true as const, reason: 'SOURCE_CHANGED' as const };
+        }
         if (sources.data.length) {
           const products = await transaction.product.findMany({
             where: { tenantId, id: { in: sources.data.map((source) => source.productId) } },
@@ -348,7 +359,10 @@ export class ConversationsService {
           if (sources.data.some((source) => {
             const product = byId.get(source.productId);
             return !product?.active || product.updatedAt.toISOString() !== source.updatedAt;
-          })) throw new ConflictException('AI draft catalogue sources have changed');
+          })) {
+            await transaction.aiReplyDraft.update({ where: { id: draft.id }, data: { status: 'STALE', errorCode: 'SOURCE_CHANGED' } });
+            return { stale: true as const, reason: 'SOURCE_CHANGED' as const };
+          }
         }
       }
 
@@ -405,6 +419,7 @@ export class ConversationsService {
       return { message, created: true, connectionActive: true };
     });
 
+    if ('stale' in result) throw new ConflictException(`AI draft is stale: ${result.reason}`);
     if (result.created) await this.enqueue(replyChannel(result.message.channel), tenantId, result.message.id);
     return mapMessage(result.message, result.connectionActive);
   }

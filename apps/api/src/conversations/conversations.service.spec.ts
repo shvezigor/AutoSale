@@ -51,6 +51,9 @@ describe('ConversationsService', () => {
     await prisma.tenantMembership.create({
       data: { tenantId, userId: actorUserId, role: 'MANAGER', status: 'ACTIVE' },
     });
+    await prisma.tenantReplyStyle.create({ data: {
+      tenantId, enabled: true, companyName: 'Fictional Shop', tone: 'NEUTRAL', addressForm: 'FORMAL_YOU',
+    } });
     await prisma.instagramConnection.create({
       data: {
         tenantId,
@@ -388,6 +391,9 @@ describe('ConversationsService', () => {
         text: 'Відповідь', idempotencyKey, draftId: draft.id,
       })).rejects.toBeInstanceOf(ConflictException);
       await expect(prisma.message.count({ where: { tenantId, clientIdempotencyKey: idempotencyKey } })).resolves.toBe(0);
+      await expect(prisma.aiReplyDraft.findUniqueOrThrow({ where: { id: draft.id } })).resolves.toMatchObject({
+        status: 'STALE', errorCode: 'NEW_MESSAGE',
+      });
     } finally {
       await prisma.aiReplyDraft.delete({ where: { id: draft.id } });
       await prisma.message.delete({ where: { id: newInbound.id } });
@@ -416,9 +422,35 @@ describe('ConversationsService', () => {
         text: 'Sample reply', idempotencyKey, draftId: draft.id,
       })).rejects.toBeInstanceOf(ConflictException);
       await expect(prisma.message.count({ where: { tenantId, clientIdempotencyKey: idempotencyKey } })).resolves.toBe(0);
+      await expect(prisma.aiReplyDraft.findUniqueOrThrow({ where: { id: draft.id } })).resolves.toMatchObject({
+        status: 'STALE', errorCode: 'SOURCE_CHANGED',
+      });
     } finally {
       await prisma.aiReplyDraft.delete({ where: { id: draft.id } });
       await prisma.product.delete({ where: { id: product.id } });
+    }
+  });
+
+  it('disabling AI drafts blocks use without affecting manual replies', async () => {
+    const anchor = await prisma.message.findFirstOrThrow({
+      where: { tenantId, conversationId: newestId, direction: 'INBOUND' },
+    });
+    const draft = await prisma.aiReplyDraft.create({ data: {
+      tenantId, conversationId: newestId, anchorMessageId: anchor.id,
+      createdByUserId: actorUserId, idempotencyKey: randomUUID(), status: 'READY', sourceSnapshot: [],
+    } });
+    await prisma.tenantReplyStyle.update({ where: { tenantId }, data: { enabled: false } });
+    try {
+      await expect(service.send(tenantId, actorUserId, newestId, {
+        text: 'Draft reply', idempotencyKey: randomUUID(), draftId: draft.id,
+      })).rejects.toBeInstanceOf(ConflictException);
+      const manual = await service.send(tenantId, actorUserId, newestId, {
+        text: 'Manual reply', idempotencyKey: randomUUID(),
+      });
+      expect(manual.text).toBe('Manual reply');
+    } finally {
+      await prisma.tenantReplyStyle.update({ where: { tenantId }, data: { enabled: true } });
+      await prisma.aiReplyDraft.delete({ where: { id: draft.id } });
     }
   });
 

@@ -45,6 +45,7 @@ describe('SettingsPage', () => {
       .mockResolvedValueOnce({ ok: true, json: async () => ({ enabled: true, connection: null }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ([]) })
       .mockResolvedValueOnce({ ok: true, json: async () => ([]) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ tenantId: '1f713392-fdbc-4e3c-9824-db207934bff4', enabled: false, companyName: '', tone: 'NEUTRAL', addressForm: 'FORMAL_YOU', guidance: '' }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ businessConnected: true, selectedDestinationId: null, autoDispatch: false, destinations: [] }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ approvalMode: 'REVIEW', minimumConfidence: 0.8, promptVersion: 'v1' }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ spreadsheetId: null, sheetName: 'Orders', status: 'NOT_CONFIGURED', requiredHeaders: ['order_id'], lastValidatedAt: null, errorSummary: null }) })
@@ -142,11 +143,12 @@ describe('SettingsPage', () => {
       .mockResolvedValueOnce({ ok: true, json: async () => ({ enabled: true, connection: null }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ({ enabled: true, connection: null }) })
       .mockResolvedValueOnce({ ok: true, json: async () => ([{ id: 'entity-1', displayName: 'AutoSale', legalName: 'ТОВ Авто Сейл', type: 'COMPANY', registrationId: '12345678', active: true, isDefault: true }]) })
-      .mockResolvedValueOnce({ ok: true, json: async () => ([{ id: 'account-1', legalEntityId: 'entity-1', label: 'Основний', maskedIban: 'UA12••••3456', bankName: 'Тест Банк', currency: 'UAH', active: true, isDefault: true }]) });
+      .mockResolvedValueOnce({ ok: true, json: async () => ([{ id: 'account-1', legalEntityId: 'entity-1', label: 'Основний', maskedIban: 'UA12••••3456', bankName: 'Тест Банк', currency: 'UAH', active: true, isDefault: true }]) })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ tenantId: '1f713392-fdbc-4e3c-9824-db207934bff4', enabled: false, companyName: '', tone: 'NEUTRAL', addressForm: 'FORMAL_YOU', guidance: '' }) });
 
     render(await WorkspaceLayout({ children: await SettingsPage() }));
 
-    expect(authenticatedApiFetch).toHaveBeenCalledTimes(11);
+    expect(authenticatedApiFetch).toHaveBeenCalledTimes(12);
     expect(screen.getByRole('tab', { name: /Дані/ })).toHaveAttribute('aria-selected', 'true');
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/integrations/instagram');
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/integrations/facebook');
@@ -159,6 +161,7 @@ describe('SettingsPage', () => {
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/integrations/delivery/ukrposhta');
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/settings/legal-entities');
     expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/settings/bank-accounts');
+    expect(authenticatedApiFetch).toHaveBeenCalledWith('/api/settings/reply-style');
     fireEvent.click(screen.getByRole('tab', { name: /Соцмережі \/ клієнти/ }));
     expect(screen.getByRole('button', { name: /Instagram.*Активне/ })).toHaveAttribute('aria-expanded', 'false');
     expect(screen.getByRole('button', { name: /Facebook.*Не підключено/ })).toHaveAttribute('aria-expanded', 'false');

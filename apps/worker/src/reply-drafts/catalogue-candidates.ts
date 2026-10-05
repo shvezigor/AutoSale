@@ -37,9 +37,9 @@ export function selectCatalogueCandidates(
       const aliases = Array.isArray(product.aliases)
         ? product.aliases.filter((value): value is string => typeof value === 'string').map(normalize)
         : [];
-      const exactSku = sku.length >= 3 && query.includes(sku);
-      const exactName = name.length >= 5 && query.includes(name);
-      const aliasMatch = aliases.some((alias) => alias.length >= 4 && query.includes(alias));
+      const exactSku = sku.length >= 3 && containsWholeTerm(query, sku);
+      const exactName = name.length >= 5 && containsWholeTerm(query, name);
+      const aliasMatch = aliases.some((alias) => alias.length >= 4 && containsWholeTerm(query, alias));
       const searchable = [product.name, ...aliases, product.brand, product.category, product.color, product.size]
         .filter((value): value is string => typeof value === 'string').join(' ');
       const overlap = [...tokens(normalize(searchable))].filter((token) => words.has(token)).length;
@@ -85,4 +85,9 @@ function normalize(value: string): string {
 
 function tokens(value: string): Set<string> {
   return new Set(value.split(/[^\p{L}\p{N}]+/u).filter((token) => token.length >= 3));
+}
+
+function containsWholeTerm(query: string, term: string): boolean {
+  const escaped = term.replace(/[.*+?^${}()|[\]\\]/gu, '\\$&');
+  return new RegExp(`(^|[^\\p{L}\\p{N}])${escaped}(?=$|[^\\p{L}\\p{N}])`, 'u').test(query);
 }

@@ -19,6 +19,11 @@ describe('selectCatalogueCandidates', () => {
     expect(result.map((item) => item.sku)).toEqual(['DOOR-1']);
   });
 
+  it('does not confuse a short SKU with a longer SKU sharing its prefix', () => {
+    const result = selectCatalogueCandidates([product(1), product(10)], tenantId, 'Do you have DOOR-10?', [], 8);
+    expect(result.map((item) => item.sku)).toEqual(['DOOR-10']);
+  });
+
   it('returns at most eight stable, safe snapshots with explicit stock', () => {
     const result = selectCatalogueCandidates(Array.from({ length: 12 }, (_, index) => product(index + 1)),
       tenantId, 'Fictional door', [], 8);

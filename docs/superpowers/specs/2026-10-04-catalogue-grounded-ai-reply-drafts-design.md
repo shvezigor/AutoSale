@@ -1,7 +1,7 @@
 # Catalogue-grounded AI reply drafts — design
 
 **Date:** 2026-10-04  
-**Status:** Approved design; implementation planned  
+**Status:** Implemented behind a tenant switch; live provider validation pending
 **Owner:** Sales AITO conversations and AI
 
 ## 1. Purpose
@@ -16,11 +16,13 @@ The first release is provider-neutral for Instagram, Facebook and TikTok convers
 2. The API binds the request to the latest inbound message and durably creates one queued draft.
 3. A worker loads bounded conversation context, the tenant communication style and tenant-scoped active catalogue candidates.
 4. The worker creates and validates an `ANSWER`, `CLARIFY` or `HANDOFF` result.
-5. The ready text appears in the existing reply editor with visible product sources.
+5. The ready text appears in a preview with visible product sources. The manager explicitly inserts it into the existing reply editor; typed text is never silently replaced.
 6. The manager may edit the entire text.
 7. Instagram or eligible TikTok conversations use the existing durable send action with the draft identity. Facebook offers **Copy reply** and explains that sending still happens in Meta.
 
 Generation is manual. A new inbound message makes an older unused draft stale and requires a fresh generation. No draft is sent automatically.
+
+Implementation notes (2026-10-05): the owner-controlled switch and communication profile live under **Settings → Social / customers → AI reply style** and are disabled by default. A manager may view but not edit that profile. The worker currently ranks at most the first 2,000 active products in SKU order per generation; this is a controlled-pilot ceiling, not a scale guarantee. Retrieval for larger catalogues must be redesigned and measured before general availability. See the [acceptance checklist](../../acceptance/ai-reply-drafts-checklist.md) for live provider, privacy and UX validation.
 
 ## 3. Communication style
 

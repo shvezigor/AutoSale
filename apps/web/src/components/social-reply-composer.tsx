@@ -43,7 +43,7 @@ export function SocialReplyComposer({
     initialConversation.messages.map((message) => [message.id, message.delivery?.status ?? null]),
   ));
   const toast = useToast();
-  const { t } = useI18n();
+  const { t, formatDate } = useI18n();
   const trimmedText = text.trim();
   const channel = conversation.channel === 'TIKTOK'
     ? t('conversations.channelTikTok')
@@ -235,7 +235,12 @@ export function SocialReplyComposer({
           {currentDraft?.status === 'READY' && currentDraft.generatedText && <div className="reply-draft-result">
             <p>{currentDraft.generatedText}</p>
             {currentDraft.sources.length > 0 && <div className="reply-draft-sources"><small>{t('conversations.replyDraftSources')}</small>
-              <ul>{currentDraft.sources.map((source) => <li key={source.productId}>{source.name} · {source.sku}</li>)}</ul>
+              <ul>{currentDraft.sources.map((source) => <li key={source.productId}>
+                <strong>{source.name}</strong> · {source.sku}
+                {source.price && source.currency ? <> · {t('conversations.replyDraftPrice')}: {source.price} {source.currency}</> : null}
+                {source.stockQuantity !== null ? <> · {t('conversations.replyDraftStock')}: {source.stockQuantity}</> : null}
+                <small> · {t('conversations.replyDraftSourceUpdated')}: {formatDate(source.updatedAt)}</small>
+              </li>)}</ul>
             </div>}
             <button className="secondary-button" type="button" onClick={() => applyDraft(currentDraft)}>
               {t('conversations.replyDraftUse')}
