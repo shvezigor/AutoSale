@@ -10,6 +10,7 @@ import type {
   OutboundMessageInput,
   SocialChannel,
 } from '@autosale/contracts/conversations';
+import { replyDraftSourceSchema } from '@autosale/contracts/reply-drafts';
 import {
   assertTenantAcceptingMutations,
   PlatformChannelDisabledError,
@@ -21,6 +22,7 @@ import { metaInstagramReplyMode } from '@autosale/integrations';
 import { toReplyDraftSummary } from './reply-drafts.service.js';
 import {
   BadRequestException,
+  ConflictException,
   HttpException,
   HttpStatus,
   Logger,
@@ -273,11 +275,13 @@ export class ConversationsService {
             where: { direction: 'INBOUND' },
             orderBy: [{ sourceTimestamp: 'desc' }, { id: 'desc' }],
             take: 1,
-            select: { sourceTimestamp: true },
+            select: { id: true, sourceTimestamp: true },
           },
         },
       });
       if (!conversation) throw new NotFoundException('Conversation not found');
+      const anchorMessageId = conversation.messages[0]?.id;
+      if (input.draftId && !anchorMessageId) throw new ConflictException('AI draft has no current inbound message');
       const channel = replyChannel(conversation.channel);
       await this.assertChannelEnabled(channel);
       let senderId: string;
@@ -287,8 +291,12 @@ export class ConversationsService {
         if (!isDeliveryConnectionActive(connection, now)) {
           throw new BadRequestException('Instagram connection is not ready for replies');
         }
-        if (metaInstagramReplyMode(conversation.messages[0]?.sourceTimestamp ?? null, now) === 'EXPIRED') {
+        const replyMode = metaInstagramReplyMode(conversation.messages[0]?.sourceTimestamp ?? null, now);
+        if (replyMode === 'EXPIRED') {
           throw new BadRequestException('Instagram reply window expired');
+        }
+        if (input.draftId && replyMode !== 'STANDARD') {
+          throw new ConflictException('AI draft requires the standard Instagram reply window');
         }
         senderId = connection.externalAccountId;
       } else {
@@ -313,7 +321,35 @@ export class ConversationsService {
         if (existing.conversationId !== conversationId || existing.text !== text) {
           throw new BadRequestException('Idempotency key was already used');
         }
+        const linkedDraft = await transaction.aiReplyDraft.findFirst({
+          where: { tenantId, outboundMessageId: existing.id }, select: { id: true },
+        });
+        if ((linkedDraft?.id ?? null) !== (input.draftId ?? null)) {
+          throw new BadRequestException('Idempotency key was already used for another reply');
+        }
         return { message: existing, created: false, connectionActive: true };
+      }
+
+      if (input.draftId) {
+        const draft = await transaction.aiReplyDraft.findFirst({
+          where: { id: input.draftId, tenantId, conversationId },
+        });
+        if (!draft || draft.status !== 'READY' || draft.anchorMessageId !== anchorMessageId) {
+          throw new ConflictException('AI draft is no longer ready for this conversation');
+        }
+        const sources = replyDraftSourceSchema.array().max(8).safeParse(draft.sourceSnapshot);
+        if (!sources.success) throw new ConflictException('AI draft sources are unavailable');
+        if (sources.data.length) {
+          const products = await transaction.product.findMany({
+            where: { tenantId, id: { in: sources.data.map((source) => source.productId) } },
+            select: { id: true, active: true, updatedAt: true },
+          });
+          const byId = new Map(products.map((product) => [product.id, product]));
+          if (sources.data.some((source) => {
+            const product = byId.get(source.productId);
+            return !product?.active || product.updatedAt.toISOString() !== source.updatedAt;
+          })) throw new ConflictException('AI draft catalogue sources have changed');
+        }
       }
 
       const acceptedInWindow = await transaction.message.count({
@@ -352,6 +388,16 @@ export class ConversationsService {
         },
         include: { attachments: { orderBy: { createdAt: 'asc' } } },
       });
+      if (input.draftId) {
+        const used = await transaction.aiReplyDraft.updateMany({
+          where: {
+            id: input.draftId, tenantId, conversationId, status: 'READY',
+            anchorMessageId: anchorMessageId!,
+          },
+          data: { status: 'USED', finalText: text, outboundMessageId: message.id, usedAt: now },
+        });
+        if (used.count !== 1) throw new ConflictException('AI draft was already used or changed');
+      }
       await transaction.conversation.update({
         where: { id: conversationId },
         data: { lastMessageAt: now },

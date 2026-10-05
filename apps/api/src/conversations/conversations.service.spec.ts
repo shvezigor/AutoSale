@@ -3,7 +3,7 @@ import { readFile, readdir } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
 import { createPrismaClient, PlatformChannelDisabledError, type PrismaClient } from '@autosale/database';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 import { PostgreSqlContainer, type StartedPostgreSqlContainer } from '@testcontainers/postgresql';
 import pg from 'pg';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -331,6 +331,67 @@ describe('ConversationsService', () => {
       { tenantId, messageId: first.id },
       { jobId: first.id, attempts: 1, removeOnComplete: true, removeOnFail: true },
     );
+  });
+
+  it('atomically links a reviewed AI draft to one outbound message', async () => {
+    const anchor = await prisma.message.findFirstOrThrow({
+      where: { tenantId, conversationId: newestId, direction: 'INBOUND' },
+    });
+    const draft = await prisma.aiReplyDraft.create({ data: {
+      tenantId, conversationId: newestId, anchorMessageId: anchor.id,
+      createdByUserId: actorUserId, idempotencyKey: randomUUID(), status: 'READY',
+      generatedText: 'Вітаю!', sourceSnapshot: [],
+    } });
+    const idempotencyKey = randomUUID();
+    try {
+      const first = await service.send(tenantId, actorUserId, newestId, {
+        text: 'Вітаю, чим допомогти?', idempotencyKey, draftId: draft.id,
+      });
+      const replay = await service.send(tenantId, actorUserId, newestId, {
+        text: 'Вітаю, чим допомогти?', idempotencyKey, draftId: draft.id,
+      });
+      expect(replay.id).toBe(first.id);
+      await expect(prisma.aiReplyDraft.findUniqueOrThrow({ where: { id: draft.id } })).resolves.toMatchObject({
+        status: 'USED', finalText: 'Вітаю, чим допомогти?', outboundMessageId: first.id,
+      });
+      await expect(service.send(tenantId, actorUserId, newestId, {
+        text: 'Інший текст', idempotencyKey: randomUUID(), draftId: draft.id,
+      })).rejects.toBeInstanceOf(ConflictException);
+      await expect(service.send(tenantId, actorUserId, newestId, {
+        text: 'Вітаю, чим допомогти?', idempotencyKey,
+      })).rejects.toBeInstanceOf(BadRequestException);
+      await expect(prisma.message.count({ where: { tenantId, clientIdempotencyKey: idempotencyKey } })).resolves.toBe(1);
+      expect(queue.add).toHaveBeenCalledTimes(1);
+    } finally {
+      await prisma.aiReplyDraft.delete({ where: { id: draft.id } });
+    }
+  });
+
+  it('rejects a stale draft without creating an outbound message', async () => {
+    const anchor = await prisma.message.findFirstOrThrow({
+      where: { tenantId, conversationId: newestId, direction: 'INBOUND' },
+    });
+    const draft = await prisma.aiReplyDraft.create({ data: {
+      tenantId, conversationId: newestId, anchorMessageId: anchor.id,
+      createdByUserId: actorUserId, idempotencyKey: randomUUID(), status: 'READY',
+      sourceSnapshot: [],
+    } });
+    const newInbound = await prisma.message.create({ data: {
+      tenantId, conversationId: newestId, rawEventId: anchor.rawEventId,
+      channel: 'INSTAGRAM', externalMessageId: `fictional-new-inbound-${randomUUID()}`,
+      direction: 'INBOUND', senderId: 'fictional-customer', text: 'Нове запитання',
+      sourceTimestamp: new Date(Date.now() + 1_000),
+    } });
+    const idempotencyKey = randomUUID();
+    try {
+      await expect(service.send(tenantId, actorUserId, newestId, {
+        text: 'Відповідь', idempotencyKey, draftId: draft.id,
+      })).rejects.toBeInstanceOf(ConflictException);
+      await expect(prisma.message.count({ where: { tenantId, clientIdempotencyKey: idempotencyKey } })).resolves.toBe(0);
+    } finally {
+      await prisma.aiReplyDraft.delete({ where: { id: draft.id } });
+      await prisma.message.delete({ where: { id: newInbound.id } });
+    }
   });
 
   it('accepts one idempotent TikTok reply and routes it to the TikTok worker', async () => {
