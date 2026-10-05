@@ -8,6 +8,7 @@ import pg from 'pg';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import { ReplyDraftProcessor } from './reply-draft.processor.js';
+import { ReplyModelInvalidResponseError } from './openai-reply-draft-generator.js';
 
 describe('ReplyDraftProcessor', () => {
   let container: StartedPostgreSqlContainer;
@@ -171,6 +172,27 @@ describe('ReplyDraftProcessor', () => {
       .process({ tenantId: seedData.tenantId, draftId: seedData.draftId })).toBe('READY');
     expect(await prisma.aiReplyDraft.findUniqueOrThrow({ where: { id: seedData.draftId } })).toMatchObject({
       status: 'READY', outcome: 'CLARIFY',
+      generatedText: 'Уточніть, будь ласка, який саме товар або модель вас цікавить.',
+      errorCode: null,
+    });
+  });
+
+  it('replaces an invalid automatic model response with a fact-free clarification', async () => {
+    const seedData = await seed();
+    await prisma.aiReplyDraft.update({
+      where: { id: seedData.draftId },
+      data: { triggerSource: 'AUTOMATIC', createdByUserId: null },
+    });
+    await prisma.message.update({
+      where: { id: seedData.anchorId },
+      data: { text: 'Добрий день, ви двері продаєте?' },
+    });
+    const generate = vi.fn().mockRejectedValue(new ReplyModelInvalidResponseError());
+
+    expect(await new ReplyDraftProcessor(prisma, { generate })
+      .process({ tenantId: seedData.tenantId, draftId: seedData.draftId })).toBe('READY');
+    expect(await prisma.aiReplyDraft.findUniqueOrThrow({ where: { id: seedData.draftId } })).toMatchObject({
+      status: 'READY', outcome: 'CLARIFY', modelVersion: 'safe-fallback',
       generatedText: 'Уточніть, будь ласка, який саме товар або модель вас цікавить.',
       errorCode: null,
     });

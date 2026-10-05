@@ -148,7 +148,7 @@ The ten-second interval is measured from durable persistence of the newest inbou
 
 Provider timeout, invalid structured output or temporary provider outage ends the attempt as `FAILED`; the system does not automatically spend another model request. The manager may explicitly retry, which creates a new audited attempt while preserving the failed record.
 
-If an automatically triggered model result fails factual grounding, the unsafe model text is still discarded. Instead of leaving the manager with a dead-end blocked panel, the worker stores a localized, fact-free `CLARIFY` draft asking which exact product or model the customer means. This fallback is limited to automatic preparation, contains no catalogue, availability, price, delivery or payment claims, and is never sent automatically. Explicit manual retries keep the original strict blocked behavior so an operator can see that the requested generation did not pass validation.
+If an automatically triggered model result fails factual grounding or does not match the strict structured-response schema, the unsafe or malformed model text is discarded. Instead of leaving the manager with a dead-end blocked panel, the worker stores a localized, fact-free `CLARIFY` draft asking which exact product or model the customer means. This fallback is limited to automatic preparation, contains no catalogue, availability, price, delivery or payment claims, and is never sent automatically. A provider outage still remains `FAILED`; explicit manual retries keep the original strict blocked/failed behavior so an operator can see that the requested generation did not pass validation.
 
 Before storing `READY`, the worker rechecks that the anchor remains the latest inbound message and that source products have not changed. Before use, the API repeats those checks. A mismatch produces `STALE`, preserves the draft for audit and requires regeneration.
 
@@ -197,7 +197,7 @@ Automated verification covers:
 - null versus zero stock, missing currency and stale price;
 - invalid product references and unsupported factual claims;
 - provider timeout, invalid schema and explicit manager retry;
-- deterministic fact-free clarification when an automatic model result fails factual grounding, while manual unsafe retries remain blocked;
+- deterministic fact-free clarification when an automatic model result fails factual grounding or structured parsing, while provider outages and manual unsafe retries remain strict;
 - new inbound messages during generation and before use;
 - editor value preservation, source display, Facebook copy-only behavior and channel-specific send capability;
 - one linked durable outbound message after double submit;

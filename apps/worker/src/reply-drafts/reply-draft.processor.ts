@@ -92,6 +92,7 @@ export class ReplyDraftProcessor {
         return {
           outcome: 'PROCESS' as const,
           conversationId: draft.conversationId, anchorMessageId: draft.anchorMessageId,
+          triggerSource: draft.triggerSource,
           style: { companyName: style.companyName, tone: style.tone as ReplyGeneratorInput['style']['tone'],
             addressForm: style.addressForm as ReplyGeneratorInput['style']['addressForm'],
             guidance: buildSafeReplyInput(style.guidance, []).latestInbound },
@@ -120,10 +121,17 @@ export class ReplyDraftProcessor {
         sources: context.sources,
       });
     } catch (error) {
-      await this.finish(tenantId, draftId, leaseId, {
-        status: 'FAILED', errorCode: error instanceof ReplyModelInvalidResponseError ? 'INVALID_RESPONSE' : 'PROVIDER_UNAVAILABLE',
-      });
-      return 'FAILED';
+      if (error instanceof ReplyModelInvalidResponseError && context.triggerSource === 'AUTOMATIC') {
+        generated = {
+          reply: safeAutomaticClarification(context.safe.latestInbound),
+          metadata: { model: 'safe-fallback', latencyMs: 0, inputTokens: 0, outputTokens: 0 },
+        };
+      } else {
+        await this.finish(tenantId, draftId, leaseId, {
+          status: 'FAILED', errorCode: error instanceof ReplyModelInvalidResponseError ? 'INVALID_RESPONSE' : 'PROVIDER_UNAVAILABLE',
+        });
+        return 'FAILED';
+      }
     }
 
     const result = await withTenantTransaction(this.prisma, tenantId, async (tx) => {
