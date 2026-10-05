@@ -4,6 +4,7 @@ import {
   SocialInboundIngestionService,
   type SocialMediaCopier,
   type SocialOrderTriggerProcessor,
+  type SocialReplyDraftScheduler,
 } from '../social/social-inbound-ingestion.service.js';
 import { normalizeTikTokEvent } from './tiktok-normalizer.js';
 
@@ -14,8 +15,9 @@ export class TikTokProcessor {
     prisma: PrismaClient,
     media: SocialMediaCopier,
     orders?: SocialOrderTriggerProcessor,
+    replyDrafts?: SocialReplyDraftScheduler,
   ) {
-    this.ingestion = new SocialInboundIngestionService(prisma, media, orders);
+    this.ingestion = new SocialInboundIngestionService(prisma, media, orders, replyDrafts);
   }
 
   process(tenantId: string, eventId: string): Promise<'PROCESSED' | 'IGNORED_FROZEN'> {

@@ -15,6 +15,7 @@ describe('InstagramProcessor', () => {
   let tenantId: string;
   const copy = vi.fn();
   const processIfTriggered = vi.fn();
+  const scheduleReplyDraft = vi.fn();
 
   beforeAll(async () => {
     container = await new PostgreSqlContainer('postgres:17.6-alpine').start();
@@ -53,13 +54,21 @@ describe('InstagramProcessor', () => {
         payload: payload as Prisma.InputJsonObject,
       },
     });
-    const processor = new InstagramProcessor(prisma, { copy });
+    const processor = new InstagramProcessor(
+      prisma,
+      { copy },
+      undefined,
+      { schedule: scheduleReplyDraft },
+    );
 
     await processor.process(tenantId, event.id);
     await processor.process(tenantId, event.id);
 
     expect(await prisma.conversation.count()).toBe(1);
     expect(await prisma.message.count()).toBe(1);
+    const message = await prisma.message.findFirstOrThrow({ where: { tenantId, externalMessageId: 'm_text_001' } });
+    expect(scheduleReplyDraft).toHaveBeenNthCalledWith(1, tenantId, message.id);
+    expect(scheduleReplyDraft).toHaveBeenNthCalledWith(2, tenantId, message.id);
     expect(await prisma.instagramCustomerProfile.count({
       where: { tenantId, participantId: 'ig-user-100' },
     })).toBe(1);

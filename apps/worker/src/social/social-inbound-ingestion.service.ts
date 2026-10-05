@@ -22,11 +22,16 @@ export interface SocialOrderTriggerProcessor {
   processIfTriggered(tenantId: string, messageId: string): Promise<unknown>;
 }
 
+export interface SocialReplyDraftScheduler {
+  schedule(tenantId: string, messageId: string): Promise<unknown>;
+}
+
 export class SocialInboundIngestionService {
   constructor(
     private readonly prisma: PrismaClient,
     private readonly media: SocialMediaCopier,
     private readonly orders?: SocialOrderTriggerProcessor,
+    private readonly replyDrafts?: SocialReplyDraftScheduler,
   ) {}
 
   async process(
@@ -194,6 +199,10 @@ export class SocialInboundIngestionService {
           }),
         };
       });
+
+      if (normalized.direction === 'INBOUND') {
+        await this.replyDrafts?.schedule(event.tenantId, persisted.messageId);
+      }
 
       for (const attachment of persisted.attachments) {
         try {
