@@ -1,26 +1,29 @@
 # Catalogue-grounded AI reply drafts — design
 
 **Date:** 2026-10-04  
-**Status:** Implemented behind a tenant switch; live provider validation pending
+**Updated:** 2026-10-05
+**Status:** Manual generation implemented behind a tenant switch; automatic preparation approved for implementation; live provider validation pending
 **Owner:** Sales AITO conversations and AI
 
 ## 1. Purpose
 
-Let an owner or manager request an editable AI reply draft for the current customer conversation. The draft must use only tenant-owned catalogue facts and the tenant's communication style, expose its product sources, and remain a manager-controlled aid rather than an automatic message sender.
+Prepare an editable AI reply draft after a customer finishes a short block of inbound messages. The draft must use only tenant-owned catalogue facts and the tenant's communication style, expose its product sources, and remain a manager-controlled aid rather than an automatic message sender. The system may prepare and place text in an untouched editor, but only a manager may send it.
 
 The first release is provider-neutral for Instagram, Facebook and TikTok conversations. It reuses the existing conversation, catalogue and durable outbound-delivery boundaries. Instagram and an eligible TikTok conversation may send the edited text through the existing delivery flow. Facebook remains copy-only until a separate outbound transport is approved and implemented.
 
 ## 2. Approved user flow
 
-1. A manager opens a conversation and selects **Create AI draft**.
-2. The API binds the request to the latest inbound message and durably creates one queued draft.
-3. A worker loads bounded conversation context, the tenant communication style and tenant-scoped active catalogue candidates.
+1. Each newly persisted inbound message starts or restarts a durable ten-second quiet-period countdown for that tenant and conversation.
+2. When ten seconds pass without a newer inbound message, the worker binds one system-triggered draft to the latest inbound message. Its bounded recent context includes the preceding messages in the customer block.
+3. A worker loads that context, the tenant communication style and tenant-scoped active catalogue candidates.
 4. The worker creates and validates an `ANSWER`, `CLARIFY` or `HANDOFF` result.
-5. The ready text appears in a preview with visible product sources. The manager explicitly inserts it into the existing reply editor; typed text is never silently replaced.
-6. The manager may edit the entire text.
+5. The ready text appears with visible product sources and is placed in the ordinary reply editor only when that editor is still untouched. Text already entered by a manager is never silently replaced; in that case the ready draft remains available through **Use in editor**.
+6. The manager may edit the entire text and explicitly sends it.
 7. Instagram or eligible TikTok conversations use the existing durable send action with the draft identity. Facebook offers **Copy reply** and explains that sending still happens in Meta.
 
-Generation is manual. A new inbound message makes an older unused draft stale and requires a fresh generation. No draft is sent automatically.
+A new inbound message makes an older unused draft stale and restarts the quiet-period countdown. Duplicate provider events and out-of-order older events do not restart it or create another active draft. No draft is ever sent automatically. A manual retry remains available after a safe generation failure; normal successful use requires no **Create AI draft** action.
+
+Automatic scheduling occurs only while the tenant reply-style switch is enabled. A block with no usable text is not sent to the model because image understanding is outside this release; the conversation remains available for manual review.
 
 Implementation notes (2026-10-05): the owner-controlled switch and communication profile live under **Settings → Social / customers → AI reply style** and are disabled by default. A manager may view but not edit that profile. The worker currently ranks at most the first 2,000 active products in SKU order per generation; this is a controlled-pilot ceiling, not a scale guarantee. Retrieval for larger catalogues must be redesigned and measured before general availability. See the [acceptance checklist](../../acceptance/ai-reply-drafts-checklist.md) for live provider, privacy and UX validation.
 
@@ -40,20 +43,23 @@ The UI owns this profile under **Settings → Social / customers → AI reply st
 
 ## 4. Chosen architecture
 
-Use a durable asynchronous generation flow.
+Use the existing durable asynchronous generation flow with an inbound debounce stage.
 
-1. The API validates membership, conversation ownership, tenant lifecycle and an idempotency key.
-2. It stores a queued draft before dispatching a BullMQ wake-up.
-3. PostgreSQL is the source of truth; a bounded outbox scan recovers a missed Redis dispatch.
-4. The worker leases one draft, loads all required data inside the job tenant context, performs bounded deterministic catalogue retrieval, then calls the AI provider.
-5. A strict structured response is validated against the candidate set and persisted.
-6. The conversation detail API returns safe draft state and sources. It never returns prompts, customer identifiers outside the existing conversation contract, model internals or credentials.
-7. When a supported channel sends an edited draft, the existing message transaction links the outbound message to that draft and marks the draft used.
+1. The provider-neutral social inbound ingestion boundary acts only after a new inbound message is durably persisted. It never schedules from outbound echoes or duplicate webhook deliveries.
+2. When the tenant reply-style switch is enabled and the latest block has usable text, the same tenant context marks older active drafts stale and stores a system-triggered `QUEUED` draft for the latest inbound anchor with `availableAt = persistedAt + 10 seconds`.
+3. After commit, it adds a delayed `ai-replies.generate` job. PostgreSQL remains the source of truth; reconciliation dispatches only queued rows whose `availableAt` has passed, so a missed Redis wake-up is recoverable without bypassing the quiet period.
+4. A newer inbound message creates a newer scheduled row and stales the previous one. An older delayed job becomes a no-op. Before model spend, the worker verifies that the draft is active, its anchor is still the latest inbound message and the quiet period has elapsed.
+5. The worker leases one draft, loads all required data inside the job tenant context, performs bounded deterministic catalogue retrieval, then calls the AI provider.
+6. A strict structured response is validated against the candidate set and persisted. The existing post-generation anchor and catalogue rechecks remain mandatory.
+7. The conversation detail API returns safe draft state and sources. It never returns prompts, customer identifiers outside the existing conversation contract, model internals or credentials.
+8. When a supported channel sends an edited draft, the existing message transaction links the outbound message to that draft and marks the draft used.
 
 Rejected alternatives:
 
 - **Synchronous generation in the request:** exposes the browser to provider latency and makes timeout/idempotency handling weaker.
-- **Generate after every inbound message:** wastes provider spend and removes the agreed manager control.
+- **Generate immediately after every inbound message:** produces multiple drafts for one customer thought and wastes provider spend.
+- **Browser-only debounce:** fails when no manager has the conversation open and is not a durable automation boundary.
+- **Periodic conversation scanning without a durable scheduled row:** adds database load and makes recovery and exact ownership harder to audit.
 - **A separate AI chat or delivery pipeline:** duplicates tenant, conversation, catalogue and exactly-once delivery invariants.
 - **Send the complete catalogue to the model:** increases cost, disclosure and selection ambiguity.
 
@@ -92,7 +98,10 @@ The worker excludes phone numbers, delivery addresses, payment details and other
 ### `AiReplyDraft`
 
 - tenant, conversation and anchor inbound message relations;
-- creator user and client idempotency key;
+- trigger source: `MANUAL` or `AUTOMATIC`;
+- optional creator user for manager-triggered retries; system-triggered drafts must not impersonate an owner or manager;
+- client idempotency key for manual requests and a deterministic automatic key derived from the tenant, conversation and inbound anchor;
+- `availableAt` timestamp for the quiet-period deadline;
 - lifecycle status: `QUEUED`, `PROCESSING`, `READY`, `USED`, `STALE`, `BLOCKED` or `FAILED`;
 - outcome: `ANSWER`, `CLARIFY` or `HANDOFF` when available;
 - generated text and final used text;
@@ -125,13 +134,17 @@ All relations use tenant-composite constraints and row-level security. Tenant ex
 - replays the same logical draft for the same tenant, conversation, anchor and key;
 - returns the durable queued/current record.
 
+This endpoint remains for explicit retry and recovery. Ordinary automatic preparation is initiated by durable inbound ingestion, not by the browser and not by an unauthenticated HTTP callback.
+
 Conversation detail returns current draft summaries and source labels. A focused draft endpoint may be added only if polling the conversation payload proves wasteful.
 
 The existing outbound message endpoint gains an optional tenant-bound `draftId`. When present, it atomically records the manager's final text and links the created outbound message. A stale, failed, blocked, already used or cross-conversation draft is rejected. A message without `draftId` remains a normal manual reply.
 
 ## 9. Lifecycle, recovery and concurrency
 
-Only one active generation is allowed per tenant, conversation and anchor message. Browser double-clicks and request retries cannot create duplicate provider calls. Workers claim drafts with expiring leases; an expired `PROCESSING` lease is recoverable with bounded attempts.
+Only one active generation is allowed per tenant, conversation and anchor message. Browser double-clicks, duplicate webhooks, delayed-job retries and reconciliation cannot create duplicate provider calls. Workers claim drafts with expiring leases; an expired `PROCESSING` lease is recoverable with bounded attempts.
+
+The ten-second interval is measured from durable persistence of the newest inbound message, not from browser polling or an untrusted provider timestamp. A delayed job that runs early must reschedule for the remaining interval without calling the model. An out-of-order event whose source message is not the latest inbound anchor is persisted for history but does not replace the pending anchor. If a newer message arrives after model work starts, the final anchor recheck makes the result stale; it is never offered for sending.
 
 Provider timeout, invalid structured output or temporary provider outage ends the attempt as `FAILED`; the system does not automatically spend another model request. The manager may explicitly retry, which creates a new audited attempt while preserving the failed record.
 
@@ -141,8 +154,10 @@ Before storing `READY`, the worker rechecks that the anchor remains the latest i
 
 The existing conversation composer adds:
 
-- **Create AI draft** when no current generation exists;
-- stable queued/processing feedback without blocking conversation navigation;
+- stable quiet-period, queued and processing feedback without blocking conversation navigation;
+- no generation button during the normal success path;
+- automatic insertion into an untouched editor exactly once per ready draft;
+- **Use in editor** when the manager already entered text, plus a confirmation before replacement;
 - **Retry** for a safe generation failure;
 - a source list showing product name and SKU, with price/stock freshness where used;
 - a clear warning for stale or blocked results;
@@ -150,7 +165,7 @@ The existing conversation composer adds:
 - normal **Send** for supported reply-capable channels;
 - **Copy reply** for Facebook with explicit manual-send guidance.
 
-The manager's typed text is never erased by polling, a generation failure or a stale result. A ready draft may fill an untouched editor; if the manager already typed, the UI asks before replacing it. Buttons use shared variants and `LoadingButton`; errors follow the field-validation contract. Desktop, 390 px mobile, keyboard and screen-reader behavior are required.
+The manager's typed text is never erased by polling, a generation failure or a stale result. Clearing or editing an automatically inserted draft counts as manager interaction and the same draft is not inserted again. Buttons use shared variants and `LoadingButton`; errors follow the field-validation contract. Desktop, 390 px mobile, keyboard and screen-reader behavior are required.
 
 ## 11. Security, privacy and observability
 
@@ -159,6 +174,7 @@ The manager's typed text is never erased by polling, a generation failure or a s
 - Logs and metrics include IDs, controlled statuses, latency, model version and token counts, never customer text, generated text, custom guidance, product descriptions, personal data, prompts or raw provider failures.
 - Model credentials remain worker-only.
 - Rate limits apply per tenant and actor, with a separate tenant concurrency cap.
+- Automatic generation has tenant and conversation ceilings separate from manual actor limits; duplicate and superseded scheduled rows never consume a model request.
 - Draft generation cannot create an order, reserve inventory, modify price, record payment, create shipment or contact a provider.
 - AI-authored text never uses Instagram's manual-only `HUMAN_AGENT` exception. If the channel requires that exception, the draft may be copied but cannot be sent through AI-draft use.
 - Manager edits are authoritative manual content and remain auditable as the final used text.
@@ -182,6 +198,10 @@ Automated verification covers:
 - new inbound messages during generation and before use;
 - editor value preservation, source display, Facebook copy-only behavior and channel-specific send capability;
 - one linked durable outbound message after double submit;
+- ten-second debounce across message bursts, duplicate webhooks and out-of-order events;
+- recovery of a missed delayed job without early generation or duplicate model spend;
+- system attribution for automatic drafts and user attribution for manual retries;
+- automatic editor insertion only while untouched, without reinsertion after manager edits or clearing;
 - regression protection for order recognition, inventory, payment, shipment and ordinary manual replies.
 
 Controlled pilot evidence must use consenting stores and privacy-minimized metrics. Proposed success targets remain hypotheses: at least 70% of drafts accepted without factual correction, 30% lower median active manager time and zero critical factual, privacy or duplicate-send incidents. A critical incident disables the tenant flag and returns the workspace to manual replies.
@@ -190,7 +210,7 @@ Controlled pilot evidence must use consenting stores and privacy-minimized metri
 
 The first release does not include:
 
-- automatic or scheduled customer replies;
+- automatic or scheduled sending of customer replies;
 - Facebook outbound API delivery;
 - image understanding or product-by-photo search;
 - discounts, delivery dates, payment promises or policy answers;

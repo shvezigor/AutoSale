@@ -1,6 +1,20 @@
 # Catalogue-grounded AI reply drafts — acceptance
 
-Status: **automated verification complete; live validation pending**. Do not enable this capability for a production tenant until a consenting owner completes the controlled pilot below. The tenant switch defaults off. Disabling it blocks new generation and draft-linked sending while ordinary manual replies remain available.
+Status: **manual-generation automated verification complete; automatic ten-second preparation approved but not yet implemented; live validation pending**. Do not enable this capability for a production tenant until a consenting owner completes the controlled pilot below. The tenant switch defaults off. Disabling it blocks new generation and draft-linked sending while ordinary manual replies remain available.
+
+## Automatic-preparation acceptance gate
+
+Before marking the automatic slice available, prove all of the following in automated tests and in a real browser:
+
+- one inbound message produces one system-attributed draft only after ten seconds of quiet;
+- several inbound messages inside the interval move the deadline and produce one draft grounded in the complete recent block;
+- duplicate and out-of-order provider events do not restart the deadline or spend another model request;
+- a missed delayed queue wake-up is recovered from PostgreSQL without early or duplicate generation;
+- a newer inbound message safely stales queued, processing or ready work for the older anchor;
+- a ready draft fills an untouched editor once, survives page reload through persisted draft state, and is not reinserted after a manager edits or clears it;
+- existing manager text is preserved and the draft remains available through **Use in editor**;
+- sending still requires an explicit manager action and creates one linked outbound message;
+- disabling the tenant switch prevents scheduling and generation while ordinary manual replies continue to work.
 
 ## Automated evidence
 
