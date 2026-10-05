@@ -18,7 +18,7 @@ export class ReplyStyleService {
   get(tenantId: string): Promise<ReplyStyle> {
     return withTenantTransaction(this.prisma, tenantId, async (tx) => {
       const existing = await tx.tenantReplyStyle.findUnique({ where: { tenantId } });
-      return replyStyleSchema.parse(existing ?? defaults(tenantId));
+      return existing ? toReplyStyle(existing) : defaults(tenantId);
     });
   }
 
@@ -26,7 +26,9 @@ export class ReplyStyleService {
     return withTenantTransaction(this.prisma, tenantId, async (tx) => {
       await assertTenantAcceptingMutations(tx, tenantId, 'ACCOUNT_ADMINISTRATION');
       const existing = await tx.tenantReplyStyle.findUnique({ where: { tenantId } });
-      const merged = replyStyleSchema.safeParse({ ...defaults(tenantId), ...existing, ...patch, tenantId });
+      const merged = replyStyleSchema.safeParse({
+        ...defaults(tenantId), ...(existing ? toReplyStyle(existing) : {}), ...patch, tenantId,
+      });
       if (!merged.success) throw validationBadRequest(merged.error, issueCodes);
       if (merged.data.enabled && !merged.data.companyName.trim()) {
         throw new BadRequestException({
@@ -41,9 +43,27 @@ export class ReplyStyleService {
         create: { tenantId, ...data },
         update: data,
       });
-      return replyStyleSchema.parse(saved);
+      return toReplyStyle(saved);
     });
   }
+}
+
+function toReplyStyle(value: {
+  tenantId: string;
+  enabled: boolean;
+  companyName: string;
+  tone: string;
+  addressForm: string;
+  guidance: string;
+}): ReplyStyle {
+  return replyStyleSchema.parse({
+    tenantId: value.tenantId,
+    enabled: value.enabled,
+    companyName: value.companyName,
+    tone: value.tone,
+    addressForm: value.addressForm,
+    guidance: value.guidance,
+  });
 }
 
 function defaults(tenantId: string): ReplyStyle {

@@ -14,6 +14,24 @@ describe('ReplyStyleService', () => {
     expect(findUnique).toHaveBeenCalledWith({ where: { tenantId } });
   });
 
+  it('returns an existing public reply style without Prisma storage metadata', async () => {
+    const savedAt = new Date('2026-10-05T12:30:31.000Z');
+    const existing = {
+      id: '22222222-2222-4222-8222-222222222222', tenantId, enabled: true,
+      companyName: 'Fictional Shop', tone: 'FRIENDLY', addressForm: 'FORMAL_YOU', guidance: '',
+      createdAt: savedAt, updatedAt: savedAt,
+    };
+    const prisma = { $transaction: (run: (tx: unknown) => unknown) => run({
+      $queryRaw: vi.fn().mockResolvedValue([{ available: true }]),
+      tenantReplyStyle: { findUnique: vi.fn().mockResolvedValue(existing) },
+    }) };
+
+    await expect(new ReplyStyleService(prisma as never).get(tenantId)).resolves.toEqual({
+      tenantId, enabled: true, companyName: 'Fictional Shop', tone: 'FRIENDLY',
+      addressForm: 'FORMAL_YOU', guidance: '',
+    });
+  });
+
   it('requires a company name before enabling', async () => {
     const upsert = vi.fn();
     const prisma = { $transaction: (run: (tx: unknown) => unknown) => run({
@@ -35,5 +53,25 @@ describe('ReplyStyleService', () => {
     expect(upsert).toHaveBeenCalledWith(expect.objectContaining({
       where: { tenantId }, update: expect.objectContaining({ enabled: true, companyName: 'Fictional Shop' }),
     }));
+  });
+
+  it('returns the public reply style after Prisma adds storage metadata', async () => {
+    const savedAt = new Date('2026-10-05T12:30:31.000Z');
+    const saved = {
+      id: '22222222-2222-4222-8222-222222222222', tenantId, enabled: true,
+      companyName: 'Fictional Shop', tone: 'FRIENDLY', addressForm: 'FORMAL_YOU', guidance: '',
+      createdAt: savedAt, updatedAt: savedAt,
+    };
+    const prisma = { $transaction: (run: (tx: unknown) => unknown) => run({
+      $queryRaw: vi.fn().mockResolvedValue([{ available: true }]),
+      tenantReplyStyle: { findUnique: vi.fn().mockResolvedValue(null), upsert: vi.fn().mockResolvedValue(saved) },
+    }) };
+
+    await expect(new ReplyStyleService(prisma as never).update(tenantId, {
+      enabled: true, companyName: 'Fictional Shop', tone: 'FRIENDLY',
+    })).resolves.toEqual({
+      tenantId, enabled: true, companyName: 'Fictional Shop', tone: 'FRIENDLY',
+      addressForm: 'FORMAL_YOU', guidance: '',
+    });
   });
 });

@@ -8,6 +8,7 @@ Status: **automated verification complete; live validation pending**. Do not ena
 - API rejects AI-draft use outside Instagram's standard 24-hour window; a separate manager-authored manual reply retains its existing eligibility.
 - Worker logs only draft IDs and controlled metadata. The source snapshot, generated text and manager's final text are tenant-scoped and included in the tenant export lifecycle.
 - Admin queue health includes the `ai_replies` queue; reconciliation revives eligible queued jobs and fails expired possibly-spent calls without a second provider charge.
+- Reply-style reads and saves return only the public settings contract after Prisma persistence; storage metadata cannot invalidate the response and roll back an otherwise valid owner update.
 
 ## Controlled live pilot
 
