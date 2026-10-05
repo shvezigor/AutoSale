@@ -18,6 +18,7 @@ import {
   withTenantTransaction,
 } from '@autosale/database';
 import { metaInstagramReplyMode } from '@autosale/integrations';
+import { toReplyDraftSummary } from './reply-drafts.service.js';
 import {
   BadRequestException,
   HttpException,
@@ -138,7 +139,7 @@ export class ConversationsService {
   }
 
   async detail(tenantId: string, id: string): Promise<ConversationDetailResponse> {
-    const [conversation, instagramConnection, tikTokConnection] = await withTenantTransaction(this.prisma, tenantId, (transaction) => Promise.all([
+    const [conversation, instagramConnection, tikTokConnection, replyDrafts] = await withTenantTransaction(this.prisma, tenantId, (transaction) => Promise.all([
       transaction.conversation.findFirst({
         where: { id, tenantId },
         include: {
@@ -160,6 +161,10 @@ export class ConversationsService {
       }),
       transaction.instagramConnection.findUnique({ where: { tenantId } }),
       transaction.tikTokConnection.findUnique({ where: { tenantId } }),
+      transaction.aiReplyDraft.findMany({
+        where: { tenantId, conversationId: id },
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }], take: 5,
+      }),
     ]));
 
     if (!conversation) {
@@ -187,6 +192,7 @@ export class ConversationsService {
         message,
         connectionActive,
       )),
+      replyDrafts: replyDrafts.map(toReplyDraftSummary),
     };
   }
 

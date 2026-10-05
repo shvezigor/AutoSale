@@ -4,6 +4,7 @@ import { Queue } from 'bullmq';
 export const SOCIAL_INBOUND_QUEUE = Symbol('SOCIAL_INBOUND_QUEUE');
 export const INSTAGRAM_NORMALIZE_QUEUE = Symbol('INSTAGRAM_NORMALIZE_QUEUE');
 export const INSTAGRAM_QUEUE = Symbol('INSTAGRAM_QUEUE');
+export const AI_REPLY_QUEUE = Symbol('AI_REPLY_QUEUE');
 
 @Module({})
 export class QueueModule {
@@ -40,8 +41,25 @@ export class QueueModule {
           provide: INSTAGRAM_QUEUE,
           useExisting: SOCIAL_INBOUND_QUEUE,
         },
+        {
+          provide: AI_REPLY_QUEUE,
+          useFactory: () => new Queue('ai-replies', {
+            connection: {
+              host: url.hostname,
+              port: Number(url.port || 6379),
+              username: url.username || undefined,
+              password: url.password || undefined,
+              tls: url.protocol === 'rediss:' ? {} : undefined,
+            },
+            defaultJobOptions: {
+              attempts: 1,
+              removeOnComplete: 1_000,
+              removeOnFail: 5_000,
+            },
+          }),
+        },
       ],
-      exports: [SOCIAL_INBOUND_QUEUE, INSTAGRAM_NORMALIZE_QUEUE, INSTAGRAM_QUEUE],
+      exports: [SOCIAL_INBOUND_QUEUE, INSTAGRAM_NORMALIZE_QUEUE, INSTAGRAM_QUEUE, AI_REPLY_QUEUE],
     };
   }
 }
