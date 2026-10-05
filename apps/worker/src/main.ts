@@ -63,6 +63,9 @@ import { TikTokMessageDeliveryService } from './tiktok/tiktok-message-delivery.s
 import { TikTokMessageReconciler } from './tiktok/tiktok-message-reconciler.js';
 import { TikTokProcessor } from './tiktok/tiktok.processor.js';
 import { TikTokTokenService } from './tiktok/tiktok-token.service.js';
+import { createOpenAiReplyDraftGenerator } from './reply-drafts/openai-reply-draft-generator.js';
+import { ReplyDraftProcessor } from './reply-drafts/reply-draft.processor.js';
+import { ReplyDraftReconciler } from './reply-drafts/reply-draft.reconciler.js';
 
 async function bootstrap(): Promise<void> {
   const env = parseWorkerEnv(process.env);
@@ -204,6 +207,31 @@ async function bootstrap(): Promise<void> {
     password: redis.password || undefined,
     tls: redis.protocol === 'rediss:' ? {} : undefined,
   };
+  const replyDraftQueue = new Queue('ai-replies', { connection: redisConnection });
+  const replyDraftProcessor = new ReplyDraftProcessor(prisma,
+    createOpenAiReplyDraftGenerator(env.OPENAI_API_KEY, env.OPENAI_MODEL));
+  const replyDraftReconciler = new ReplyDraftReconciler(prisma, replyDraftQueue);
+  const replyDraftWorker = new Worker('ai-replies', async (job) => {
+    if (job.name !== 'ai-replies.generate') return;
+    const started = performance.now();
+    try {
+      const result = await replyDraftProcessor.process(job.data);
+      metrics.increment('autosale_operations_total', {
+        operation: 'ai_reply_draft_generate',
+        result: result === 'READY' || result === 'SKIPPED' ? 'success' : 'failure',
+      });
+      metrics.observe('autosale_operation_duration_seconds', (performance.now() - started) / 1_000,
+        { operation: 'ai_reply_draft_generate' });
+      logger.info('ai_reply_draft_completed', { correlationId: String(job.data?.draftId ?? 'unknown'), result });
+    } catch (error) {
+      metrics.increment('autosale_operations_total', { operation: 'ai_reply_draft_generate', result: 'failure' });
+      logger.warn('ai_reply_draft_failed', {
+        correlationId: String(job.data?.draftId ?? 'unknown'),
+        errorCode: error instanceof Error ? error.name : 'UNKNOWN',
+      });
+      throw error;
+    }
+  }, { connection: redisConnection, concurrency: 2 });
   const tenantLifecycleQueue = new Queue('tenant-lifecycle', { connection: redisConnection });
   const tenantLifecycleProcessor = new TenantLifecycleProcessor(prisma, storage);
   const retentionDryRunProcessor = new RetentionDryRunProcessor(prisma);
@@ -993,6 +1021,28 @@ async function bootstrap(): Promise<void> {
     }
   };
   const tenantLifecycleCleanupTimer = setInterval(() => void cleanupTenantLifecycleArtifacts(), 60_000);
+  let reconcilingReplyDrafts = false;
+  const reconcileReplyDrafts = async (): Promise<void> => {
+    if (reconcilingReplyDrafts) return;
+    reconcilingReplyDrafts = true;
+    try {
+      const result = await replyDraftReconciler.reconcile();
+      metrics.set('autosale_queue_backlog', result.attempted, { queue: 'ai_replies' });
+      if (result.expiredFailed > 0) {
+        metrics.increment('autosale_operations_total', {
+          operation: 'ai_reply_draft_expired', result: 'failure',
+        }, result.expiredFailed);
+      }
+    } catch (error) {
+      metrics.increment('autosale_operations_total', { operation: 'ai_reply_draft_reconcile', result: 'failure' });
+      logger.warn('ai_reply_draft_reconcile_failed', {
+        correlationId: 'system:ai-reply-drafts', errorCode: error instanceof Error ? error.name : 'UNKNOWN',
+      });
+    } finally {
+      reconcilingReplyDrafts = false;
+    }
+  };
+  const replyDraftReconcileTimer = setInterval(() => void reconcileReplyDrafts(), 5_000);
   void pollExports();
   void reconcileCatalogueMappings();
   void reconcileInstagramEvents();
@@ -1007,6 +1057,7 @@ async function bootstrap(): Promise<void> {
   void reconcileShipments();
   void reconcileTenantLifecycle();
   void cleanupTenantLifecycleArtifacts();
+  void reconcileReplyDrafts();
   logger.info('service_started', { correlationId: 'system:startup', healthPort: env.HEALTH_PORT });
 
   server.listen(env.HEALTH_PORT, '0.0.0.0');
@@ -1026,6 +1077,9 @@ async function bootstrap(): Promise<void> {
     clearInterval(shipmentReconcileTimer);
     clearInterval(tenantLifecycleReconcileTimer);
     clearInterval(tenantLifecycleCleanupTimer);
+    clearInterval(replyDraftReconcileTimer);
+    await replyDraftWorker.close();
+    await replyDraftQueue.close();
     await tenantLifecycleWorker.close();
     await tenantLifecycleQueue.close();
     await deliveryWorker.close();

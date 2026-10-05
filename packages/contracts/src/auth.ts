@@ -38,7 +38,7 @@ export const adminTenantSummarySchema = z.object({
   createdAt: z.string().datetime(),
 }).strict();
 
-export const adminQueueNameSchema = z.enum(['instagram', 'catalogue', 'delivery', 'telegram', 'tenant-lifecycle']);
+export const adminQueueNameSchema = z.enum(['instagram', 'catalogue', 'delivery', 'telegram', 'tenant-lifecycle', 'ai-replies']);
 
 export const adminQueueSummarySchema = z.object({
   queue: adminQueueNameSchema,

@@ -108,4 +108,24 @@ describe('AI reply draft tenant isolation', () => {
       SELECT tenant_id, draft_id FROM public.worker_due_ai_reply_drafts(${new Date('2099-01-01T00:00:00Z')}, 50)
     `).rejects.toMatchObject({ code: 'P2010' });
   });
+
+  it('fails an expired possible model call without redispatching it', async () => {
+    const draftId = identities.get(tenantA)!.draftId;
+    await withTenantTransaction(api, tenantA, (tx) => tx.aiReplyDraft.update({
+      where: { id: draftId }, data: {
+        status: 'PROCESSING', attempts: 1, leaseId: randomUUID(),
+        leaseExpiresAt: new Date('2026-10-01T00:00:00Z'),
+        modelRequestStartedAt: new Date('2026-10-01T00:00:00Z'),
+      },
+    }));
+    const changed = await worker.$queryRaw<Array<{ worker_fail_expired_ai_reply_drafts: number }>>`
+      SELECT public.worker_fail_expired_ai_reply_drafts(${new Date('2026-10-05T00:00:00Z')}, 50)
+    `;
+    expect(changed[0]?.worker_fail_expired_ai_reply_drafts).toBe(1);
+    const due = await worker.$queryRaw<Array<{ draft_id: string }>>`
+      SELECT draft_id FROM public.worker_due_ai_reply_drafts(${new Date('2026-10-05T00:00:00Z')}, 50)
+    `;
+    expect(due.some((row) => row.draft_id === draftId)).toBe(false);
+    expect((await withTenantTransaction(api, tenantA, (tx) => tx.aiReplyDraft.findUnique({ where: { id: draftId } })))?.status).toBe('FAILED');
+  });
 });

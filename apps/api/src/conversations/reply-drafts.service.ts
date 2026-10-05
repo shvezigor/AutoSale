@@ -46,11 +46,14 @@ export class ReplyDraftsService {
       if (active) return active;
 
       const since = new Date(Date.now() - 60_000);
-      const [actorCount, tenantCount] = await Promise.all([
+      const [actorCount, tenantCount, activeTenantCount] = await Promise.all([
         tx.aiReplyDraft.count({ where: { tenantId, createdByUserId: actorUserId, createdAt: { gte: since } } }),
         tx.aiReplyDraft.count({ where: { tenantId, createdAt: { gte: since } } }),
+        tx.aiReplyDraft.count({ where: { tenantId, status: { in: ['QUEUED', 'PROCESSING'] } } }),
       ]);
-      if (actorCount >= 5 || tenantCount >= 30) throw new HttpException('AI draft rate limit exceeded', HttpStatus.TOO_MANY_REQUESTS);
+      if (actorCount >= 5 || tenantCount >= 30 || activeTenantCount >= 3) {
+        throw new HttpException('AI draft rate limit exceeded', HttpStatus.TOO_MANY_REQUESTS);
+      }
 
       return tx.aiReplyDraft.create({
         data: { id: randomUUID(), tenantId, conversationId, anchorMessageId: anchor.id, createdByUserId: actorUserId, idempotencyKey },

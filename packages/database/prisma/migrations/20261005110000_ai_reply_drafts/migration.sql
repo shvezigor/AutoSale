@@ -93,8 +93,9 @@ AS $function$
   FROM public."ai_reply_drafts" AS draft
   JOIN public."tenant_reply_styles" AS style ON style."tenant_id" = draft."tenant_id" AND style."enabled" = TRUE
   WHERE (
-    draft."status" = 'QUEUED'
-    OR (draft."status" = 'PROCESSING' AND draft."lease_expires_at" <= p_now AND draft."model_request_started_at" IS NULL)
+    (draft."status" = 'QUEUED' AND draft."attempts" < 3)
+    OR (draft."status" = 'PROCESSING' AND draft."lease_expires_at" <= p_now
+      AND draft."model_request_started_at" IS NULL AND draft."attempts" < 3)
   )
   AND NOT EXISTS (
     SELECT 1 FROM public."tenant_lifecycle_requests" AS lifecycle
@@ -108,13 +109,45 @@ AS $function$
 $function$;
 
 REVOKE ALL ON FUNCTION public.worker_due_ai_reply_drafts(timestamp with time zone, integer) FROM PUBLIC;
+
+CREATE FUNCTION public.worker_fail_expired_ai_reply_drafts(p_now timestamp with time zone, p_limit integer)
+RETURNS integer
+LANGUAGE plpgsql
+VOLATILE
+SECURITY DEFINER
+SET search_path = pg_catalog, public
+AS $function$
+DECLARE changed integer;
+BEGIN
+  WITH expired AS (
+    SELECT draft."id"
+    FROM public."ai_reply_drafts" AS draft
+    WHERE (draft."status" = 'PROCESSING' AND draft."lease_expires_at" <= p_now
+      AND (draft."model_request_started_at" IS NOT NULL OR draft."attempts" >= 3))
+      OR (draft."status" = 'QUEUED' AND draft."attempts" >= 3)
+    ORDER BY draft."lease_expires_at", draft."id"
+    LIMIT LEAST(GREATEST(COALESCE(p_limit, 1), 1), 100)
+    FOR UPDATE SKIP LOCKED
+  )
+  UPDATE public."ai_reply_drafts" AS draft
+  SET "status" = 'FAILED', "error_code" = 'PROVIDER_UNAVAILABLE',
+      "lease_id" = NULL, "lease_expires_at" = NULL, "updated_at" = p_now
+  FROM expired WHERE draft."id" = expired."id";
+  GET DIAGNOSTICS changed = ROW_COUNT;
+  RETURN changed;
+END
+$function$;
+
+REVOKE ALL ON FUNCTION public.worker_fail_expired_ai_reply_drafts(timestamp with time zone, integer) FROM PUBLIC;
 DO $grants$
 BEGIN
   IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'autosale_api') THEN
     REVOKE ALL ON FUNCTION public.worker_due_ai_reply_drafts(timestamp with time zone, integer) FROM autosale_api;
+    REVOKE ALL ON FUNCTION public.worker_fail_expired_ai_reply_drafts(timestamp with time zone, integer) FROM autosale_api;
   END IF;
   IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'autosale_worker') THEN
     GRANT EXECUTE ON FUNCTION public.worker_due_ai_reply_drafts(timestamp with time zone, integer) TO autosale_worker;
+    GRANT EXECUTE ON FUNCTION public.worker_fail_expired_ai_reply_drafts(timestamp with time zone, integer) TO autosale_worker;
   END IF;
 END
 $grants$;

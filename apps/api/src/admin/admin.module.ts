@@ -19,7 +19,7 @@ export class AdminModule {
     const prisma = createPrismaClient(env.DATABASE_URL);
     const connection = queueConnection(env.REDIS_URL);
     const queue = new Queue('tenant-lifecycle', { connection });
-    const monitoredQueues = (['instagram', 'catalogue', 'delivery', 'telegram'] as const)
+    const monitoredQueues = (['instagram', 'catalogue', 'delivery', 'telegram', 'ai-replies'] as const)
       .map((name) => new BullAdminQueueMonitor(name, new Queue(name, { connection })));
     monitoredQueues.push(new BullAdminQueueMonitor('tenant-lifecycle', queue));
     const stepUp = new AdminStepUpService(prisma, new CryptoService(), env.AUTH_TOKEN_PEPPER);

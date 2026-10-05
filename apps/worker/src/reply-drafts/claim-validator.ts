@@ -25,6 +25,7 @@ export function validateReplyDraft(value: unknown, sources: readonly ReplyDraftS
   if (!parsed.success) return blocked();
   const reply = parsed.data;
   const byId = new Map(sources.map((source) => [source.productId, source]));
+  if (reply.outcome === 'ANSWER' && (sources.length === 0 || reply.claims.length === 0)) return blocked();
   if (reply.productIds.some((id) => !byId.has(id))) return blocked();
   if (/\b(discount|delivery|payment|shipping|refund|guaranteed)\b|знижк|доставк|оплат|повернен|гарант/iu.test(reply.text)) return blocked();
 
