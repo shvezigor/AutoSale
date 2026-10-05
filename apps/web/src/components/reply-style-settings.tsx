@@ -66,17 +66,17 @@ export function ReplyStyleSettings({ initial, canEdit }: { initial: ReplyStyle; 
       <h2 id="reply-style-title">{t('settings.replyStyleTitle')}</h2>
       <p>{t('settings.replyStyleDescription')}</p>
     </div></div>
-    <form onSubmit={(event) => void save(event)}>
-      <div className="settings-subsection">
-        <label><input type="checkbox" checked={style.enabled} disabled={!canEdit || saving}
-          onChange={(event) => change('enabled', event.target.checked)} /> {t('settings.replyEnable')}</label>
+    <form className="reply-style-form" onSubmit={(event) => void save(event)}>
+      <div className="settings-subsection reply-style-toggle-section">
+        <label className="reply-style-toggle"><input type="checkbox" checked={style.enabled} disabled={!canEdit || saving}
+          onChange={(event) => change('enabled', event.target.checked)} /> <span>{t('settings.replyEnable')}</span></label>
       </div>
       <div className="reply-style-fields">
-        <FormField id="reply-company-name" label={t('settings.replyCompany')} error={errors.companyName}>
+        <FormField id="reply-company-name" className="reply-style-field" label={t('settings.replyCompany')} error={errors.companyName}>
           <input ref={companyRef} value={style.companyName} maxLength={121} disabled={!canEdit || saving}
             onChange={(event) => change('companyName', event.target.value)} />
         </FormField>
-        <FormField id="reply-tone" label={t('settings.replyTone')}>
+        <FormField id="reply-tone" className="reply-style-field" label={t('settings.replyTone')}>
           <select value={style.tone} disabled={!canEdit || saving}
             onChange={(event) => change('tone', event.target.value as ReplyStyle['tone'])}>
             <option value="FRIENDLY">{t('settings.replyToneFriendly')}</option>
@@ -84,14 +84,14 @@ export function ReplyStyleSettings({ initial, canEdit }: { initial: ReplyStyle; 
             <option value="FORMAL">{t('settings.replyToneFormal')}</option>
           </select>
         </FormField>
-        <FormField id="reply-address-form" label={t('settings.replyAddress')}>
+        <FormField id="reply-address-form" className="reply-style-field" label={t('settings.replyAddress')}>
           <select value={style.addressForm} disabled={!canEdit || saving}
             onChange={(event) => change('addressForm', event.target.value as ReplyStyle['addressForm'])}>
             <option value="FORMAL_YOU">{t('settings.replyAddressFormal')}</option>
             <option value="INFORMAL_YOU">{t('settings.replyAddressInformal')}</option>
           </select>
         </FormField>
-        <FormField id="reply-guidance" label={t('settings.replyGuidance')} error={errors.guidance}
+        <FormField id="reply-guidance" className="reply-style-field reply-style-field-wide" label={t('settings.replyGuidance')} error={errors.guidance}
           hint={t('settings.replyGuidanceHint')}>
           <textarea ref={guidanceRef} value={style.guidance} maxLength={501} rows={3} disabled={!canEdit || saving}
             onChange={(event) => change('guidance', event.target.value)} />

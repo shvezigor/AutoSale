@@ -36,7 +36,7 @@ Add a tenant-owned communication profile containing:
 
 Owners may update the profile. Managers may read and use it but cannot change it. Custom guidance affects wording only; it cannot override catalogue truth, privacy rules, provider restrictions or system safety instructions.
 
-The UI owns this profile under **Settings -> Orders -> AI reply style** as a collapsed-by-default row. The draft follows the language of the latest inbound customer message and does not mention AI unless the manager adds that text.
+The UI owns this profile under **Settings → Social / customers → AI reply style** as a collapsed-by-default row. Its editable controls use the shared workspace field dimensions, borders, focus and validation states; the enable control is presented as a full-width settings toggle, and the form collapses to one column on mobile. The draft follows the language of the latest inbound customer message and does not mention AI unless the manager adds that text.
 
 ## 4. Chosen architecture
 

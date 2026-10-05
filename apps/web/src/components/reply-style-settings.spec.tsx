@@ -22,7 +22,11 @@ describe('ReplyStyleSettings', () => {
     vi.stubGlobal('fetch', fetchMock);
     render(<I18nProvider locale="en" authenticated><ReplyStyleSettings initial={initial} canEdit /></I18nProvider>);
     fireEvent.click(screen.getByRole('button', { name: /AI reply style/ }));
-    fireEvent.click(screen.getByRole('checkbox', { name: 'Enable AI reply drafts' }));
+    const toggle = screen.getByRole('checkbox', { name: 'Enable AI reply drafts' });
+    expect(toggle.closest('label')).toHaveClass('reply-style-toggle');
+    expect(screen.getByLabelText('Company name in replies').closest('.form-field')).toHaveClass('reply-style-field');
+    expect(screen.getByLabelText('Additional guidance').closest('.form-field')).toHaveClass('reply-style-field-wide');
+    fireEvent.click(toggle);
     fireEvent.click(screen.getByRole('button', { name: 'Save settings' }));
     expect(screen.getByText('Enter a company name to enable drafts.')).toBeVisible();
     expect(screen.getByLabelText('Company name in replies')).toHaveAttribute('aria-invalid', 'true');
