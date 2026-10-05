@@ -144,6 +144,38 @@ describe('ReplyDraftProcessor', () => {
     });
   });
 
+  it('replaces an ungrounded automatic response with a fact-free clarification', async () => {
+    const seedData = await seed();
+    await prisma.aiReplyDraft.update({
+      where: { id: seedData.draftId },
+      data: { triggerSource: 'AUTOMATIC', createdByUserId: null },
+    });
+    await prisma.message.update({
+      where: { id: seedData.anchorId },
+      data: { text: 'Добрий день, ви двері продаєте?' },
+    });
+    const generate = vi.fn().mockResolvedValue({
+      reply: {
+        outcome: 'ANSWER',
+        text: 'Так, ми продаємо двері. Яка модель вас цікавить?',
+        productIds: [seedData.productId],
+        claims: [{
+          start: 17, end: 22, text: 'двері', type: 'NAME', field: 'name',
+          productId: seedData.productId,
+        }],
+      },
+      metadata: { model: 'fictional-model', latencyMs: 10, inputTokens: 20, outputTokens: 10 },
+    });
+
+    expect(await new ReplyDraftProcessor(prisma, { generate })
+      .process({ tenantId: seedData.tenantId, draftId: seedData.draftId })).toBe('READY');
+    expect(await prisma.aiReplyDraft.findUniqueOrThrow({ where: { id: seedData.draftId } })).toMatchObject({
+      status: 'READY', outcome: 'CLARIFY',
+      generatedText: 'Уточніть, будь ласка, який саме товар або модель вас цікавить.',
+      errorCode: null,
+    });
+  });
+
   it('does not call the model after the owner disables drafting', async () => {
     const seedData = await seed();
     await prisma.tenantReplyStyle.update({ where: { tenantId: seedData.tenantId }, data: { enabled: false } });

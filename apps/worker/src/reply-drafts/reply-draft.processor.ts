@@ -157,7 +157,12 @@ export class ReplyDraftProcessor {
             leaseId: null, leaseExpiresAt: null } });
         return 'STALE' as const;
       }
-      const validated = validateReplyDraft(generated.reply, context.sources);
+      const checked = validateReplyDraft(generated.reply, context.sources);
+      const validated = checked.ok
+        ? checked
+        : current.triggerSource === 'AUTOMATIC'
+          ? { ok: true as const, reply: safeAutomaticClarification(context.safe.latestInbound) }
+          : checked;
       await tx.aiReplyDraft.updateMany({
         where: { id: draftId, tenantId, leaseId, status: 'PROCESSING' },
         data: {
@@ -183,6 +188,18 @@ export class ReplyDraftProcessor {
       data: { ...data, leaseId: null, leaseExpiresAt: null },
     }));
   }
+}
+
+function safeAutomaticClarification(latestInbound: string) {
+  const ukrainian = /[\u0400-\u04FF]/u.test(latestInbound);
+  return {
+    outcome: 'CLARIFY' as const,
+    text: ukrainian
+      ? 'Уточніть, будь ласка, який саме товар або модель вас цікавить.'
+      : 'Please clarify which product or model you are interested in.',
+    productIds: [],
+    claims: [],
+  };
 }
 
 function sourcesCurrent(sources: readonly ReplyDraftSource[], products: readonly { id: string; active: boolean; updatedAt: Date }[]): boolean {
