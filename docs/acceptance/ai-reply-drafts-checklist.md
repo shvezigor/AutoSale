@@ -15,7 +15,7 @@ Before marking the automatic slice available, prove all of the following in auto
 - existing or deliberately cleared manager text is preserved; the ready draft remains visible but is not silently inserted;
 - sending still requires an explicit manager action and creates one linked outbound message;
 - disabling the tenant switch prevents scheduling and generation while ordinary manual replies continue to work.
-- ungrounded or malformed automatic model output never reaches the editor; a localized fact-free clarification is offered instead, while a provider outage and equivalent manual retry remain visibly failed or blocked;
+- ungrounded or malformed automatic model output never reaches the editor; an explicit model-options request receives deterministic exact catalogue variants when primary-name matches exist, otherwise a localized fact-free clarification is offered, while a provider outage and equivalent manual retry remain visibly failed or blocked;
 - a ready draft for the latest inbound message remains visible and fills an untouched editor even if newer retries for that same message failed.
 
 ## Automated evidence
@@ -23,6 +23,7 @@ Before marking the automatic slice available, prove all of the following in auto
 - Contract, DB/RLS, API, worker and web component tests cover tenant isolation, owner-only editing, idempotent generation, bounded catalogue candidates, structured claim validation, worker lease recovery, stale messages/sources, one linked outbound message and Facebook copy-only behavior.
 - API rejects AI-draft use outside Instagram's standard 24-hour window; a separate manager-authored manual reply retains its existing eligibility.
 - Worker logs only draft IDs and controlled metadata. The source snapshot, generated text and manager's final text are tenant-scoped and included in the tenant export lifecycle.
+- Catalogue retrieval and processor tests prove explicit model-options requests exclude compatibility-only parenthetical matches and build verified exact-name option lists.
 - Admin queue health includes the `ai_replies` queue; reconciliation revives eligible queued jobs and fails expired possibly-spent calls without a second provider charge.
 - Reply-style reads and saves return only the public settings contract after Prisma persistence; storage metadata cannot invalidate the response and roll back an otherwise valid owner update.
 

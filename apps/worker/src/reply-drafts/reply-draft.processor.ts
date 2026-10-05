@@ -6,8 +6,8 @@ import {
   type PrismaClient, withTenantTransaction,
 } from '@autosale/database';
 
-import { selectCatalogueCandidates } from './catalogue-candidates.js';
-import { validateReplyDraft } from './claim-validator.js';
+import { selectCatalogueCandidates, selectRequestedModelSources } from './catalogue-candidates.js';
+import { validateReplyDraft, type GeneratedReply } from './claim-validator.js';
 import { buildSafeReplyInput } from './input-sanitizer.js';
 import {
   REPLY_DRAFT_PROMPT_VERSION, REPLY_DRAFT_SCHEMA_VERSION,
@@ -123,7 +123,7 @@ export class ReplyDraftProcessor {
     } catch (error) {
       if (error instanceof ReplyModelInvalidResponseError && context.triggerSource === 'AUTOMATIC') {
         generated = {
-          reply: safeAutomaticClarification(context.safe.latestInbound),
+          reply: safeAutomaticResponse(context.safe.latestInbound, context.safe.recentContext, context.sources),
           metadata: { model: 'safe-fallback', latencyMs: 0, inputTokens: 0, outputTokens: 0 },
         };
       } else {
@@ -166,10 +166,15 @@ export class ReplyDraftProcessor {
         return 'STALE' as const;
       }
       const checked = validateReplyDraft(generated.reply, context.sources);
+      const catalogueOptions = current.triggerSource === 'AUTOMATIC'
+        ? safeAutomaticCatalogueOptions(context.safe.latestInbound, context.safe.recentContext, context.sources)
+        : null;
       const validated = checked.ok
-        ? checked
+        ? catalogueOptions && checked.reply.outcome === 'CLARIFY' && checked.reply.productIds.length === 0
+          ? { ok: true as const, reply: catalogueOptions }
+          : checked
         : current.triggerSource === 'AUTOMATIC'
-          ? { ok: true as const, reply: safeAutomaticClarification(context.safe.latestInbound) }
+          ? { ok: true as const, reply: catalogueOptions ?? safeAutomaticClarification(context.safe.latestInbound) }
           : checked;
       await tx.aiReplyDraft.updateMany({
         where: { id: draftId, tenantId, leaseId, status: 'PROCESSING' },
@@ -208,6 +213,45 @@ function safeAutomaticClarification(latestInbound: string) {
     productIds: [],
     claims: [],
   };
+}
+
+function safeAutomaticResponse(
+  latestInbound: string,
+  recentContext: readonly string[],
+  sources: readonly ReplyDraftSource[],
+): GeneratedReply {
+  return safeAutomaticCatalogueOptions(latestInbound, recentContext, sources)
+    ?? safeAutomaticClarification(latestInbound);
+}
+
+function safeAutomaticCatalogueOptions(
+  latestInbound: string,
+  recentContext: readonly string[],
+  sources: readonly ReplyDraftSource[],
+): GeneratedReply | null {
+  const options = selectRequestedModelSources(sources, latestInbound, recentContext);
+  if (options.length === 0) return null;
+  const ukrainian = /[\u0400-\u04FF]/u.test(latestInbound);
+  let text = ukrainian
+    ? options.length === 1 ? 'Знайшов у каталозі такий варіант:\n' : 'Можу запропонувати такі варіанти:\n'
+    : options.length === 1 ? 'I found this catalogue option:\n' : 'I can offer these options:\n';
+  const claims: GeneratedReply['claims'] = [];
+  for (const source of options) {
+    text += '• ';
+    const start = text.length;
+    text += source.name;
+    claims.push({
+      start, end: text.length, text: source.name, type: 'NAME', field: 'name', productId: source.productId,
+    });
+    text += '\n';
+  }
+  text += ukrainian
+    ? options.length === 1 ? 'Цей варіант вам підходить?' : 'Який варіант вам підходить?'
+    : options.length === 1 ? 'Does this option work for you?' : 'Which option works for you?';
+  const reply: GeneratedReply = {
+    outcome: 'ANSWER', text, productIds: options.map((source) => source.productId), claims,
+  };
+  return validateReplyDraft(reply, sources).ok ? reply : null;
 }
 
 function sourcesCurrent(sources: readonly ReplyDraftSource[], products: readonly { id: string; active: boolean; updatedAt: Date }[]): boolean {

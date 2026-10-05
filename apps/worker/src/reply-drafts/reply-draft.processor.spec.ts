@@ -198,6 +198,53 @@ describe('ReplyDraftProcessor', () => {
     });
   });
 
+  it('offers exact catalogue variants when an automatic answer for a requested model is unsafe', async () => {
+    const seedData = await seed();
+    await prisma.aiReplyDraft.update({
+      where: { id: seedData.draftId },
+      data: { triggerSource: 'AUTOMATIC', createdByUserId: null },
+    });
+    await prisma.message.create({ data: {
+      tenantId: seedData.tenantId, conversationId: seedData.conversationId, rawEventId: seedData.eventId,
+      channel: 'INSTAGRAM', externalMessageId: randomUUID(), direction: 'INBOUND',
+      senderId: 'fictional-customer', text: 'А які варіанти дверей можете запропонувати?',
+      sourceTimestamp: new Date('2026-10-05T09:59:00.000Z'),
+    } });
+    await prisma.message.update({
+      where: { id: seedData.anchorId },
+      data: { text: 'Вхідні двері, модель Регіон', sourceTimestamp: new Date('2026-10-05T10:00:00.000Z') },
+    });
+    await prisma.product.update({
+      where: { id: seedData.productId },
+      data: { sku: 'REGION-860', name: '860х2050 Регіон (плівка мат)' },
+    });
+    const second = await prisma.product.create({ data: {
+      tenantId: seedData.tenantId, sku: 'REGION-960', name: '960х2050 Регіон VINARIT',
+      aliases: [], price: null, currency: null, stockQuantity: null,
+    } });
+    await prisma.product.create({ data: {
+      tenantId: seedData.tenantId, sku: 'LOCK-REGION', name: 'Додатковий замок (Регіон, Колізей)',
+      aliases: [], price: null, currency: null, stockQuantity: null,
+    } });
+    const generate = vi.fn().mockResolvedValue({
+      reply: { outcome: 'ANSWER', text: 'Знижка 50%', productIds: [seedData.productId, second.id], claims: [] },
+      metadata: { model: 'fictional-model', latencyMs: 10, inputTokens: 20, outputTokens: 10 },
+    });
+
+    expect(await new ReplyDraftProcessor(prisma, { generate })
+      .process({ tenantId: seedData.tenantId, draftId: seedData.draftId })).toBe('READY');
+    expect(await prisma.aiReplyDraft.findUniqueOrThrow({ where: { id: seedData.draftId } })).toMatchObject({
+      status: 'READY', outcome: 'ANSWER',
+      generatedText: [
+        'Можу запропонувати такі варіанти:',
+        '• 860х2050 Регіон (плівка мат)',
+        '• 960х2050 Регіон VINARIT',
+        'Який варіант вам підходить?',
+      ].join('\n'),
+      errorCode: null,
+    });
+  });
+
   it('does not call the model after the owner disables drafting', async () => {
     const seedData = await seed();
     await prisma.tenantReplyStyle.update({ where: { tenantId: seedData.tenantId }, data: { enabled: false } });

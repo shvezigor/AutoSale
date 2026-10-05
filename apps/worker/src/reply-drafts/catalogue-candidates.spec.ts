@@ -49,4 +49,14 @@ describe('selectCatalogueCandidates', () => {
       'Is it available?', ['I mean DOOR-2'], 8);
     expect(result[0]?.sku).toBe('DOOR-2');
   });
+
+  it('keeps catalogue items whose primary name matches an explicitly requested model', () => {
+    const result = selectCatalogueCandidates([
+      product(1, { name: '860х2050 Регіон (плівка мат)' }),
+      product(2, { name: '960х2050 Регіон VINARIT' }),
+      product(3, { name: 'Додатковий замок (Регіон, Колізей)' }),
+    ], tenantId, 'Вхідні двері, модель Регіон', ['Які варіанти можете запропонувати?'], 8);
+
+    expect(result.map((item) => item.sku)).toEqual(['DOOR-1', 'DOOR-2']);
+  });
 });
