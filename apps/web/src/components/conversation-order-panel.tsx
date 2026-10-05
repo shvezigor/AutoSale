@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 
 import { createConversationOrder, refreshConversationOrder } from '../api/conversation-replies';
+import { LoadingButton } from './loading-button';
 import { useToast } from './toast-provider';
 import { useI18n } from '../i18n/i18n-provider';
 
@@ -90,9 +91,14 @@ export function ConversationOrderPanel({
           <p>{creating
             ? t('conversations.creatingDescription')
             : t('conversations.createDescription')}</p>
-          <button onClick={() => void create()} type="button" disabled={creating}>
-            {creating ? t('conversations.creating') : t('conversations.createOrder')}
-          </button>
+          <LoadingButton
+            onClick={() => void create()}
+            type="button"
+            pending={creating}
+            pendingLabel={t('conversations.creating')}
+          >
+            {t('conversations.createOrder')}
+          </LoadingButton>
         </div>
       )}
       <section className="customer-data"><h3>{t('conversations.customerData')}</h3><dl><div><dt>{t('conversations.channel')}</dt><dd>Instagram</dd></div><div><dt>{t('conversations.name')}</dt><dd>{customerName}</dd></div>{customerUsername && <div><dt>Username</dt><dd>@{customerUsername}</dd></div>}</dl></section>

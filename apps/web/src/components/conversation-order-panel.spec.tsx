@@ -45,7 +45,9 @@ describe('ConversationOrderPanel', () => {
       initialState={{ order: null }}
     /></ToastProvider></I18nProvider>);
     expect(screen.getByRole('heading', { name: 'Order information' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Create order' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Create order' })).toHaveClass(
+      'loading-button', 'primary-button',
+    );
     expect(screen.getByText('Олена')).toBeInTheDocument();
   });
 });
