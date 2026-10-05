@@ -2,7 +2,7 @@
 
 **Date:** 2026-10-04  
 **Updated:** 2026-10-05
-**Status:** Manual generation implemented behind a tenant switch; automatic preparation approved for implementation; live provider validation pending
+**Status:** Automatic preparation implemented behind a tenant switch; full browser and live provider validation pending
 **Owner:** Sales AITO conversations and AI
 
 ## 1. Purpose
@@ -17,7 +17,7 @@ The first release is provider-neutral for Instagram, Facebook and TikTok convers
 2. When ten seconds pass without a newer inbound message, the worker binds one system-triggered draft to the latest inbound message. Its bounded recent context includes the preceding messages in the customer block.
 3. A worker loads that context, the tenant communication style and tenant-scoped active catalogue candidates.
 4. The worker creates and validates an `ANSWER`, `CLARIFY` or `HANDOFF` result.
-5. The ready text appears with visible product sources and is placed in the ordinary reply editor only when that editor is still untouched. Text already entered by a manager is never silently replaced; in that case the ready draft remains available through **Use in editor**.
+5. The ready text appears with visible product sources and is placed in the ordinary reply editor only when that editor is still untouched. Text already entered or cleared by a manager is never silently replaced; in that case the ready draft remains visible but is not inserted.
 6. The manager may edit the entire text and explicitly sends it.
 7. Instagram or eligible TikTok conversations use the existing durable send action with the draft identity. Facebook offers **Copy reply** and explains that sending still happens in Meta.
 
@@ -45,7 +45,7 @@ The UI owns this profile under **Settings → Social / customers → AI reply st
 
 Use the existing durable asynchronous generation flow with an inbound debounce stage.
 
-1. The provider-neutral social inbound ingestion boundary acts only after a new inbound message is durably persisted. It never schedules from outbound echoes or duplicate webhook deliveries.
+1. The provider-neutral social inbound ingestion boundary acts only after an inbound message resolves to a durable row. It never schedules from outbound echoes; a duplicate webhook replays the same deterministic automatic draft so a missed queue wake-up can recover without another row or model call.
 2. When the tenant reply-style switch is enabled and the latest block has usable text, the same tenant context marks older active drafts stale and stores a system-triggered `QUEUED` draft for the latest inbound anchor with `availableAt = persistedAt + 10 seconds`.
 3. After commit, it adds a delayed `ai-replies.generate` job. PostgreSQL remains the source of truth; reconciliation dispatches only queued rows whose `availableAt` has passed, so a missed Redis wake-up is recoverable without bypassing the quiet period.
 4. A newer inbound message creates a newer scheduled row and stales the previous one. An older delayed job becomes a no-op. Before model spend, the worker verifies that the draft is active, its anchor is still the latest inbound message and the quiet period has elapsed.
@@ -157,7 +157,7 @@ The existing conversation composer adds:
 - stable quiet-period, queued and processing feedback without blocking conversation navigation;
 - no generation button during the normal success path;
 - automatic insertion into an untouched editor exactly once per ready draft;
-- **Use in editor** when the manager already entered text, plus a confirmation before replacement;
+- visible ready-draft context without insertion when the manager already touched the editor;
 - **Retry** for a safe generation failure;
 - a source list showing product name and SKU, with price/stock freshness where used;
 - a clear warning for stale or blocked results;

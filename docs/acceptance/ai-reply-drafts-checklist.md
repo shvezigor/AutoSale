@@ -1,6 +1,6 @@
 # Catalogue-grounded AI reply drafts — acceptance
 
-Status: **manual-generation automated verification complete; automatic ten-second preparation approved but not yet implemented; live validation pending**. Do not enable this capability for a production tenant until a consenting owner completes the controlled pilot below. The tenant switch defaults off. Disabling it blocks new generation and draft-linked sending while ordinary manual replies remain available.
+Status: **automatic ten-second preparation implemented; full browser and live validation pending**. Do not enable this capability for a production tenant until a consenting owner completes the controlled pilot below. The tenant switch defaults off. Disabling it blocks new generation and draft-linked sending while ordinary manual replies remain available.
 
 ## Automatic-preparation acceptance gate
 
@@ -12,7 +12,7 @@ Before marking the automatic slice available, prove all of the following in auto
 - a missed delayed queue wake-up is recovered from PostgreSQL without early or duplicate generation;
 - a newer inbound message safely stales queued, processing or ready work for the older anchor;
 - a ready draft fills an untouched editor once, survives page reload through persisted draft state, and is not reinserted after a manager edits or clears it;
-- existing manager text is preserved and the draft remains available through **Use in editor**;
+- existing or deliberately cleared manager text is preserved; the ready draft remains visible but is not silently inserted;
 - sending still requires an explicit manager action and creates one linked outbound message;
 - disabling the tenant switch prevents scheduling and generation while ordinary manual replies continue to work.
 
@@ -28,7 +28,7 @@ Before marking the automatic slice available, prove all of the following in auto
 
 1. Deploy the migration and worker with the existing worker-only `OPENAI_API_KEY` and `OPENAI_MODEL`; confirm API, web, worker and `ai_replies` queue are healthy. Do not paste credentials into screenshots or tickets.
 2. In a fictional or consenting tenant with a small catalogue, set a company name and communication style under **Settings → Social / customers → AI reply style**, then enable drafts.
-3. For Instagram and an eligible TikTok conversation, request a draft, review its source products and text, edit it, then explicitly send once. Confirm one outbound message, one `USED` draft and the exact final text in the audit record.
+3. For Instagram and an eligible TikTok conversation, send a short inbound block, wait for automatic preparation, review the source products and text, edit it, then explicitly send once. Confirm one outbound message, one `USED` draft and the exact final text in the audit record.
 4. For Facebook, verify the draft can be reviewed and copied, but no Facebook API send action appears.
 5. Change or deactivate a product and send a new inbound message while a draft is pending. Confirm the old draft becomes `STALE`, the editor's typed text survives polling, and no outbound message is created from it.
 6. Confirm missing stock, missing currency, ambiguous products, an unsupported promise, model timeout and provider outage result in safe clarification/handoff or a visible failure, never an unverified product promise.
