@@ -20,6 +20,14 @@
       "import": "./dist/conversations.js",
       "default": "./dist/conversations.js"
     },
+    "./reply-drafts": {
+      "react-server": "./src/reply-drafts.ts",
+      "browser": "./src/reply-drafts.ts",
+      "types": "./src/reply-drafts.ts",
+      "development": "./src/reply-drafts.ts",
+      "import": "./dist/reply-drafts.js",
+      "default": "./dist/reply-drafts.js"
+    },
     "./meta": {
       "types": "./src/meta.ts",
       "development": "./src/meta.ts",

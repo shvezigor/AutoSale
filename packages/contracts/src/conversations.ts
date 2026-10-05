@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { replyDraftSummarySchema } from './reply-drafts.js';
 
 export const socialChannelSchema = z.enum(['INSTAGRAM', 'FACEBOOK', 'TIKTOK']);
 export type SocialChannel = z.infer<typeof socialChannelSchema>;
@@ -52,6 +53,7 @@ export const outboundDeliverySchema = z.object({
 export const outboundMessageInputSchema = z.object({
   text: z.string().trim().min(1).max(1000),
   idempotencyKey: z.string().uuid(),
+  draftId: z.string().uuid().optional(),
 });
 
 export const replyCapabilitySchema = z.object({
@@ -84,6 +86,7 @@ export const conversationDetailResponseSchema = z.object({
   participantAvatarUrl: z.string().nullable(),
   replyCapability: replyCapabilitySchema,
   messages: z.array(conversationMessageSchema),
+  replyDrafts: z.array(replyDraftSummarySchema).optional(),
 });
 
 export const conversationOrderSummarySchema = z.object({
