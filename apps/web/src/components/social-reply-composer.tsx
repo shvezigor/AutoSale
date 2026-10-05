@@ -3,7 +3,6 @@
 import type { ConversationDetailResponse, ConversationMessage } from '../../../../packages/contracts/src/conversations';
 import Link from 'next/link';
 import { type FormEvent, type KeyboardEvent, useEffect, useRef, useState } from 'react';
-import type { ReplyDraftSummary } from '../../../../packages/contracts/src/reply-drafts';
 
 import { createConversationReplyDraft, refreshConversation, retryConversationMessage, sendConversationMessage } from '../api/conversation-replies';
 import { useI18n } from '../i18n/i18n-provider';
@@ -39,6 +38,10 @@ export function SocialReplyComposer({
   const keepThreadAtBottom = useRef(true);
   const pendingSubmission = useRef<PendingSubmission | null>(null);
   const pendingDraftRequest = useRef<string | null>(null);
+  const editorTouched = useRef(false);
+  const autoFilledDraftId = useRef<string | null>(null);
+  const offeredDraftIds = useRef(new Set<string>());
+  const activeConversationId = useRef(initialConversation.id);
   const deliveryStatuses = useRef(new Map(
     initialConversation.messages.map((message) => [message.id, message.delivery?.status ?? null]),
   ));
@@ -98,6 +101,8 @@ export function SocialReplyComposer({
       pendingSubmission.current = null;
       setSelectedDraftId(null);
       setText('');
+      editorTouched.current = false;
+      autoFilledDraftId.current = null;
       window.requestAnimationFrame(() => textareaRef.current?.focus());
     } catch {
       toast.show({ type: 'error', title: t('conversations.messageSendFailed'), message: t('conversations.messagePreserved') });
@@ -120,16 +125,6 @@ export function SocialReplyComposer({
     finally { setGeneratingDraft(false); }
   }
 
-  function applyDraft(draft: ReplyDraftSummary) {
-    if (!draft.generatedText || draft.status !== 'READY') return;
-    if (text.trim() && text !== draft.generatedText && !window.confirm(t('conversations.replyDraftReplaceConfirm'))) return;
-    setText(draft.generatedText);
-    setTextError(null);
-    setSelectedDraftId(draft.id);
-    pendingSubmission.current = null;
-    textareaRef.current?.focus();
-  }
-
   function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
     if (event.key !== 'Enter' || event.shiftKey || event.nativeEvent.isComposing) return;
     event.preventDefault();
@@ -149,6 +144,17 @@ export function SocialReplyComposer({
   }
 
   useEffect(() => {
+    if (activeConversationId.current !== initialConversation.id) {
+      activeConversationId.current = initialConversation.id;
+      setText('');
+      setTextError(null);
+      setSelectedDraftId(null);
+      pendingSubmission.current = null;
+      pendingDraftRequest.current = null;
+      editorTouched.current = false;
+      autoFilledDraftId.current = null;
+      offeredDraftIds.current.clear();
+    }
     setConversation(initialConversation);
     deliveryStatuses.current = new Map(
       initialConversation.messages.map((message) => [message.id, message.delivery?.status ?? null]),
@@ -159,10 +165,27 @@ export function SocialReplyComposer({
     if (!selectedDraftId) return;
     const selected = conversation.replyDrafts?.find((draft) => draft.id === selectedDraftId);
     if (!selected || selected.status !== 'READY' || selected.anchorMessageId !== latestInbound?.id) {
+      if (!editorTouched.current && autoFilledDraftId.current === selectedDraftId && text === selected?.generatedText) {
+        setText('');
+      }
+      autoFilledDraftId.current = null;
       setSelectedDraftId(null);
       pendingSubmission.current = null;
     }
-  }, [conversation.replyDrafts, latestInbound?.id, selectedDraftId]);
+  }, [conversation.replyDrafts, latestInbound?.id, selectedDraftId, text]);
+
+  useEffect(() => {
+    if (!draftsEnabled || currentDraft?.status !== 'READY' || !currentDraft.generatedText) return;
+    if (offeredDraftIds.current.has(currentDraft.id)) return;
+    offeredDraftIds.current.add(currentDraft.id);
+    if (editorTouched.current || text !== '') return;
+    setText(currentDraft.generatedText);
+    setTextError(null);
+    setSelectedDraftId(currentDraft.id);
+    pendingSubmission.current = null;
+    autoFilledDraftId.current = currentDraft.id;
+    window.requestAnimationFrame(() => textareaRef.current?.focus());
+  }, [currentDraft, draftsEnabled, text]);
 
   useEffect(() => {
     let cancelled = false;
@@ -226,10 +249,12 @@ export function SocialReplyComposer({
         {draftsEnabled && <section className="reply-draft-panel" aria-label={t('conversations.replyDraftTitle')}>
           <div className="reply-draft-panel-heading"><div><strong>{t('conversations.replyDraftTitle')}</strong>
             <small>{t('conversations.replyDraftManualNote')}</small></div>
-            <LoadingButton className="secondary-button" type="button" pending={generatingDraft}
-              disabled={!latestInbound || draftBusy || generatingDraft} onClick={() => void generateDraft()}>
-              {t('conversations.replyDraftGenerate')}
-            </LoadingButton></div>
+            {currentDraft && ['BLOCKED', 'FAILED'].includes(currentDraft.status) &&
+              <LoadingButton className="secondary-button" type="button" pending={generatingDraft}
+                disabled={!latestInbound || generatingDraft} onClick={() => void generateDraft()}>
+                {t('conversations.replyDraftGenerate')}
+              </LoadingButton>}
+          </div>
           {draftBusy && <p role="status">{t('conversations.replyDraftWorking')}</p>}
           {draftError && <p role="alert">{draftError}</p>}
           {currentDraft?.status === 'READY' && currentDraft.generatedText && <div className="reply-draft-result">
@@ -242,9 +267,6 @@ export function SocialReplyComposer({
                 <small> · {t('conversations.replyDraftSourceUpdated')}: {formatDate(source.updatedAt)}</small>
               </li>)}</ul>
             </div>}
-            <button className="secondary-button" type="button" onClick={() => applyDraft(currentDraft)}>
-              {t('conversations.replyDraftUse')}
-            </button>
           </div>}
           {currentDraft && ['STALE', 'BLOCKED', 'FAILED'].includes(currentDraft.status) &&
             <p role="status">{t('conversations.replyDraftUnavailable')}</p>}
@@ -267,6 +289,8 @@ export function SocialReplyComposer({
             id="social-reply"
             onChange={(event) => {
               const nextText = event.target.value;
+              editorTouched.current = true;
+              autoFilledDraftId.current = null;
               if (pendingSubmission.current?.text !== nextText.trim()) pendingSubmission.current = null;
               setText(nextText);
               setTextError(null);

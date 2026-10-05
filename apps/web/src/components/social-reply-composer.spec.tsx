@@ -52,28 +52,57 @@ function renderComposer(initialConversation = conversation, canManageSettings = 
 }
 
 describe('SocialReplyComposer', () => {
-  it('generates a draft, applies it without sending, and links it on explicit send', async () => {
+  it('automatically fills a ready draft without sending and links it on explicit send', async () => {
     const inbound = { ...pendingMessage, id: '33333333-3333-4333-8333-333333333333',
       direction: 'INBOUND' as const, text: 'Чи є товар?', delivery: null };
     const draft = {
       id: '55555555-5555-4555-8555-555555555555', conversationId: conversation.id,
-      anchorMessageId: inbound.id, status: 'READY' as const, outcome: 'CLARIFY' as const,
+      anchorMessageId: inbound.id, triggerSource: 'AUTOMATIC' as const,
+      availableAt: '2026-10-05T10:00:00.000Z', status: 'READY' as const, outcome: 'CLARIFY' as const,
       generatedText: 'Який товар вас цікавить?', finalText: null, sources: [], errorCode: null,
       createdAt: '2026-10-05T10:00:00.000Z', updatedAt: '2026-10-05T10:00:00.000Z',
     };
-    api.createConversationReplyDraft.mockResolvedValue(draft);
     api.sendConversationMessage.mockResolvedValue(pendingMessage);
     api.refreshConversation.mockResolvedValue({ ...conversation, messages: [inbound], replyDrafts: [draft] });
-    renderComposer({ ...conversation, messages: [inbound] }, false, 'uk', true);
+    renderComposer({ ...conversation, messages: [inbound], replyDrafts: [draft] }, false, 'uk', true);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Створити чернетку' }));
-    expect(await screen.findByText('Який товар вас цікавить?')).toBeVisible();
+    expect((await screen.findAllByText('Який товар вас цікавить?'))[0]).toBeVisible();
     expect(api.sendConversationMessage).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole('button', { name: 'Вставити в редактор' }));
     expect(screen.getByRole('textbox', { name: 'Відповідь' })).toHaveValue('Який товар вас цікавить?');
+    expect(api.createConversationReplyDraft).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole('button', { name: 'Надіслати' }));
     await waitFor(() => expect(api.sendConversationMessage).toHaveBeenCalledWith(conversation.id,
       expect.objectContaining({ text: 'Який товар вас цікавить?', draftId: draft.id })));
+  });
+
+  it('never replaces or reinserts text after the manager touched the editor', async () => {
+    const inbound = { ...pendingMessage, id: '33333333-3333-4333-8333-333333333333',
+      direction: 'INBOUND' as const, text: 'Чи є товар?', delivery: null };
+    const queued = {
+      id: '55555555-5555-4555-8555-555555555555', conversationId: conversation.id,
+      anchorMessageId: inbound.id, triggerSource: 'AUTOMATIC' as const,
+      availableAt: '2026-10-05T10:00:10.000Z', status: 'QUEUED' as const, outcome: null,
+      generatedText: null, finalText: null, sources: [], errorCode: null,
+      createdAt: '2026-10-05T10:00:00.000Z', updatedAt: '2026-10-05T10:00:00.000Z',
+    };
+    const ready = { ...queued, status: 'READY' as const, outcome: 'CLARIFY' as const,
+      generatedText: 'Автоматична відповідь', updatedAt: '2026-10-05T10:00:11.000Z' };
+    const { rerender } = renderComposer({ ...conversation, messages: [inbound], replyDrafts: [queued] }, false, 'uk', true);
+    const editor = screen.getByRole('textbox', { name: 'Відповідь' });
+    fireEvent.change(editor, { target: { value: 'Мій текст' } });
+    fireEvent.change(editor, { target: { value: '' } });
+
+    rerender(
+      <I18nProvider locale="uk" authenticated>
+        <ToastProvider>
+          <SocialReplyComposer canManageSettings={false}
+            initialConversation={{ ...conversation, messages: [inbound], replyDrafts: [ready] }} draftsEnabled />
+        </ToastProvider>
+      </I18nProvider>,
+    );
+
+    await screen.findByText('Автоматична відповідь');
+    expect(editor).toHaveValue('');
   });
 
   it('offers copy-only draft handling for Facebook without an API send', async () => {
