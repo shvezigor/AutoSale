@@ -17,7 +17,7 @@ export const replyStyleSchema = z.strictObject({
 });
 
 export const replyStylePatchSchema = replyStyleSchema.omit({ tenantId: true }).partial()
-  .refine((value) => !value.enabled || Boolean(value.companyName?.trim()), {
+  .refine((value) => !value.enabled || value.companyName === undefined || Boolean(value.companyName.trim()), {
     path: ['companyName'],
     message: 'COMPANY_NAME_REQUIRED',
   });

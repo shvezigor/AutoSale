@@ -6,6 +6,8 @@ import { CredentialCipher, createGoogleSheetsAdapter, GoogleOAuthTokenProvider, 
 import { DynamicModule, Module } from '@nestjs/common';
 
 import { OrderSettingsController } from './order-settings.controller.js';
+import { ReplyStyleController } from './reply-style.controller.js';
+import { ReplyStyleService } from './reply-style.service.js';
 import { OrderSettingsService } from './order-settings.service.js';
 import { GoogleSheetsSettingsController } from './google-sheets-settings.controller.js';
 import { GoogleSheetsSettingsService } from './google-sheets-settings.service.js';
@@ -17,8 +19,12 @@ export class OrderSettingsModule {
   static register(env: ApiEnv): DynamicModule {
     return {
       module: OrderSettingsModule,
-      controllers: [OrderSettingsController, GoogleSheetsSettingsController],
+      controllers: [OrderSettingsController, GoogleSheetsSettingsController, ReplyStyleController],
       providers: [
+        {
+          provide: ReplyStyleService,
+          useFactory: () => new ReplyStyleService(createPrismaClient(env.DATABASE_URL)),
+        },
         {
           provide: OrderSettingsService,
           useFactory: () =>
