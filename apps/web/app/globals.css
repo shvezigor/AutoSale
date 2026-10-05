@@ -388,6 +388,11 @@ button:disabled { opacity: .72; cursor: not-allowed; }
 .approval-option strong, .approval-option small { display: block; }
 .approval-option strong { font-size: 14px; }.approval-option small { margin-top: 5px; color: var(--muted); line-height: 1.45; font-size: 12px; }
 .settings-actions { display: flex; align-items: center; gap: 15px; padding-top: 4px; }
+.reply-style-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 20px 0; }
+.reply-style-fields .form-field:last-child { grid-column: 1 / -1; }
+.reply-style-fields :is(input, select, textarea) { width: 100%; }
+.settings-form-notice { margin: 0 0 12px; color: var(--muted); }
+@media (max-width: 720px) { .reply-style-fields { grid-template-columns: 1fr; } }
 .settings-actions button { border: 0; border-radius: 8px; padding: 11px 18px; background: var(--accent); color: white; font-size: 13px; font-weight: 650; }
 .settings-control { display: inline-flex; min-height: 42px; align-items: center; justify-content: center; gap: 8px; border-radius: 9px; padding: 0 16px; font: inherit; font-size: 13px; font-weight: 700; line-height: 1.2; text-decoration: none; white-space: nowrap; cursor: pointer; transition: border-color .16s ease, background-color .16s ease, color .16s ease, box-shadow .16s ease; }
 .settings-control-primary { border: 1px solid var(--accent); background: var(--accent); color: #fff; }

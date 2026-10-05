@@ -22,6 +22,8 @@ import type { CommercialSettingsSummary } from '../../../../../packages/contract
 import { CommercialSettingsHub } from '../../../src/components/commercial-settings-hub';
 import type { FacebookConnectionSummary, FacebookPageCandidate } from '../../../../../packages/contracts/src/facebook';
 import type { TikTokConnectionSummary } from '../../../../../packages/contracts/src/tiktok';
+import type { ReplyStyle } from '../../../../../packages/contracts/src/reply-drafts';
+import { ReplyStyleSettings } from '../../../src/components/reply-style-settings';
 
 export const dynamic = 'force-dynamic';
 
@@ -47,7 +49,7 @@ export default async function SettingsPage({ searchParams = Promise.resolve({}) 
             : requestedTab === 'delivery'
               ? 'delivery'
               : requestedTab === 'payments' ? 'payments' : 'data';
-  const [instagramResponse, facebookResponse, tiktokResponse, googleResponse, telegramResponse, telegramPreferencesResponse, deliveryResponse, meestResponse, ukrposhtaResponse, legalEntitiesResponse, bankAccountsResponse] = await Promise.all([
+  const [instagramResponse, facebookResponse, tiktokResponse, googleResponse, telegramResponse, telegramPreferencesResponse, deliveryResponse, meestResponse, ukrposhtaResponse, legalEntitiesResponse, bankAccountsResponse, replyStyleResponse] = await Promise.all([
     authenticatedApiFetch('/api/integrations/instagram'),
     authenticatedApiFetch('/api/integrations/facebook'),
     authenticatedApiFetch('/api/integrations/tiktok'),
@@ -59,8 +61,9 @@ export default async function SettingsPage({ searchParams = Promise.resolve({}) 
     authenticatedApiFetch('/api/integrations/delivery/ukrposhta'),
     authenticatedApiFetch('/api/settings/legal-entities'),
     authenticatedApiFetch('/api/settings/bank-accounts'),
+    authenticatedApiFetch('/api/settings/reply-style'),
   ]);
-  if (!instagramResponse.ok || !facebookResponse.ok || !tiktokResponse.ok || !googleResponse.ok || !telegramResponse.ok || !telegramPreferencesResponse.ok || !deliveryResponse.ok || !meestResponse.ok || !ukrposhtaResponse.ok || !legalEntitiesResponse.ok || !bankAccountsResponse.ok) throw new Error('Не вдалося завантажити налаштування');
+  if (!instagramResponse.ok || !facebookResponse.ok || !tiktokResponse.ok || !googleResponse.ok || !telegramResponse.ok || !telegramPreferencesResponse.ok || !deliveryResponse.ok || !meestResponse.ok || !ukrposhtaResponse.ok || !legalEntitiesResponse.ok || !bankAccountsResponse.ok || !replyStyleResponse.ok) throw new Error('Не вдалося завантажити налаштування');
   const instagram = (await instagramResponse.json()) as InstagramConnectionSummary;
   const facebook = (await facebookResponse.json()) as FacebookConnectionSummary;
   const tiktok = (await tiktokResponse.json()) as TikTokConnectionSummary;
@@ -74,10 +77,11 @@ export default async function SettingsPage({ searchParams = Promise.resolve({}) 
     legalEntities: await legalEntitiesResponse.json(),
     bankAccounts: await bankAccountsResponse.json(),
   };
+  const replyStyle = await replyStyleResponse.json() as ReplyStyle;
   const facebookSelection = session.membershipRole === 'OWNER' && facebookResult === 'select-page' && facebookAttemptId
     ? await loadFacebookSelection(facebookAttemptId)
     : null;
-  if (session.membershipRole === 'MANAGER') return <SettingsLayout t={t} google={google} instagram={instagram} facebook={facebook} tiktok={tiktok} facebookSelection={null} telegram={telegram} telegramPreferences={telegramPreferences} delivery={delivery} meest={meest} ukrposhta={ukrposhta} commercialSettings={commercialSettings} initialTab={initialTab} pickerAction={pickerAction} session={session} />;
+  if (session.membershipRole === 'MANAGER') return <SettingsLayout t={t} google={google} instagram={instagram} facebook={facebook} tiktok={tiktok} facebookSelection={null} telegram={telegram} telegramPreferences={telegramPreferences} delivery={delivery} meest={meest} ukrposhta={ukrposhta} commercialSettings={commercialSettings} replyStyle={replyStyle} initialTab={initialTab} pickerAction={pickerAction} session={session} />;
 
   const [supplierResponse, response, sheetsResponse, catalogueSourcesResponse] = await Promise.all([
     authenticatedApiFetch('/api/integrations/telegram/supplier'),
@@ -95,7 +99,7 @@ export default async function SettingsPage({ searchParams = Promise.resolve({}) 
     if (!sourceResponse.ok) throw new Error('Не вдалося завантажити джерело каталогу');
     return await sourceResponse.json() as CatalogueSourceConfiguration;
   }));
-  return <SettingsLayout t={t} google={google} instagram={instagram} facebook={facebook} tiktok={tiktok} facebookSelection={facebookSelection} telegram={telegram} telegramPreferences={telegramPreferences} delivery={delivery} meest={meest} ukrposhta={ukrposhta} commercialSettings={commercialSettings} supplier={supplier} initialTab={initialTab} pickerAction={pickerAction} session={session} settings={settings} sheets={sheets} catalogueSources={catalogueSources} catalogueConfigurations={catalogueConfigurations} />;
+  return <SettingsLayout t={t} google={google} instagram={instagram} facebook={facebook} tiktok={tiktok} facebookSelection={facebookSelection} telegram={telegram} telegramPreferences={telegramPreferences} delivery={delivery} meest={meest} ukrposhta={ukrposhta} commercialSettings={commercialSettings} replyStyle={replyStyle} supplier={supplier} initialTab={initialTab} pickerAction={pickerAction} session={session} settings={settings} sheets={sheets} catalogueSources={catalogueSources} catalogueConfigurations={catalogueConfigurations} />;
 }
 
 function SettingsLayout({
@@ -111,6 +115,7 @@ function SettingsLayout({
   meest,
   ukrposhta,
   commercialSettings,
+  replyStyle,
   supplier,
   initialTab,
   pickerAction,
@@ -132,6 +137,7 @@ function SettingsLayout({
   meest: MeestSettingsSummary;
   ukrposhta: UkrposhtaSettingsSummary;
   commercialSettings: CommercialSettingsSummary;
+  replyStyle: ReplyStyle;
   supplier?: TelegramSupplierConfiguration;
   initialTab: SettingsTabId;
   pickerAction: string;
@@ -153,7 +159,7 @@ function SettingsLayout({
     {
       id: 'social' as const,
       label: t('settings.socialTab'), description: t('settings.socialTabDescription'),
-      content: <section className="settings-section"><div className="settings-section-heading"><h2>{t('settings.socialTitle')}</h2><p>{t('settings.socialDescription')}</p></div><SocialChannelHub instagram={instagram} facebook={facebook} tiktok={tiktok} facebookSelection={facebookSelection} membershipRole={session.membershipRole} /></section>,
+      content: <section className="settings-section"><div className="settings-section-heading"><h2>{t('settings.socialTitle')}</h2><p>{t('settings.socialDescription')}</p></div><SocialChannelHub instagram={instagram} facebook={facebook} tiktok={tiktok} facebookSelection={facebookSelection} membershipRole={session.membershipRole} /><ReplyStyleSettings initial={replyStyle} canEdit={!isManager} /></section>,
     },
     ...(settings ? [{
       id: 'orders' as const,
