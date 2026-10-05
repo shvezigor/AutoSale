@@ -15,7 +15,8 @@ function harness(options: { enabled?: boolean; anchor?: string | null; queueFail
   const key = randomUUID();
   const draft = {
     id: randomUUID(), tenantId, conversationId, anchorMessageId: anchorId, createdByUserId: actorId,
-    idempotencyKey: key, status: 'QUEUED', outcome: null, generatedText: null,
+    idempotencyKey: key, triggerSource: 'MANUAL', availableAt: now,
+    status: 'QUEUED', outcome: null, generatedText: null,
     finalText: null, sourceSnapshot: null, errorCode: null, createdAt: now, updatedAt: now,
   };
   const create = vi.fn().mockResolvedValue(draft);
@@ -32,7 +33,7 @@ function harness(options: { enabled?: boolean; anchor?: string | null; queueFail
   };
   const prisma = { $transaction: (fn: (tx: unknown) => unknown) => fn(transaction) };
   const queue = { add: options.queueFails ? vi.fn().mockRejectedValue(new Error('fictional outage')) : vi.fn().mockResolvedValue({}) };
-  return { service: new ReplyDraftsService(prisma as never, queue), transaction, queue, draft, create, key };
+  return { service: new ReplyDraftsService(prisma as never, queue, () => now), transaction, queue, draft, create, key };
 }
 
 describe('ReplyDraftsService', () => {
@@ -41,7 +42,9 @@ describe('ReplyDraftsService', () => {
     const summary = await service.create(tenantId, actorId, conversationId, key);
     expect(create).toHaveBeenCalledOnce();
     expect(summary.status).toBe('QUEUED');
-    expect(queue.add).toHaveBeenCalledWith('ai-replies.generate', { tenantId, draftId: summary.id }, expect.objectContaining({ attempts: 1 }));
+    expect(queue.add).toHaveBeenCalledWith('ai-replies.generate', { tenantId, draftId: summary.id }, expect.objectContaining({
+      attempts: 1, delay: 0,
+    }));
   });
 
   it('replays an existing request without inserting another row', async () => {
@@ -49,6 +52,21 @@ describe('ReplyDraftsService', () => {
     const { service, create } = harness({ existing });
     expect((await service.create(tenantId, actorId, conversationId, existing.idempotencyKey)).id).toBe(existing.id);
     expect(create).not.toHaveBeenCalled();
+  });
+
+  it('reuses an active automatic draft and preserves its remaining quiet period', async () => {
+    const existing = {
+      ...harness().draft,
+      createdByUserId: null,
+      triggerSource: 'AUTOMATIC',
+      availableAt: new Date(now.getTime() + 4_000),
+      idempotencyKey: anchorId,
+    };
+    const { service, create, queue } = harness({ existing });
+
+    expect((await service.create(tenantId, actorId, conversationId, randomUUID())).id).toBe(existing.id);
+    expect(create).not.toHaveBeenCalled();
+    expect(queue.add).toHaveBeenCalledWith('ai-replies.generate', expect.any(Object), expect.objectContaining({ delay: 4_000 }));
   });
 
   it('leaves the committed draft queued when Redis wake-up fails', async () => {

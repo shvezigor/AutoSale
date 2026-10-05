@@ -8,14 +8,18 @@ export interface ReplyDraftQueue {
   add(
     name: 'ai-replies.generate',
     data: { tenantId: string; draftId: string },
-    options: { jobId: string; attempts: 1; removeOnComplete: true; removeOnFail: true },
+    options: { jobId: string; delay: number; attempts: 1; removeOnComplete: true; removeOnFail: true },
   ): Promise<unknown>;
 }
 
 export class ReplyDraftsService {
   private readonly logger = new Logger(ReplyDraftsService.name);
 
-  constructor(private readonly prisma: PrismaClient, private readonly queue: ReplyDraftQueue) {}
+  constructor(
+    private readonly prisma: PrismaClient,
+    private readonly queue: ReplyDraftQueue,
+    private readonly now: () => Date = () => new Date(),
+  ) {}
 
   async create(tenantId: string, actorUserId: string, conversationId: string, idempotencyKey: string): Promise<ReplyDraftSummary> {
     let draft;
@@ -28,7 +32,7 @@ export class ReplyDraftsService {
       if (!style?.enabled) throw new ConflictException('AI drafts are disabled');
       const anchor = await tx.message.findFirst({
         where: { tenantId, conversationId, direction: 'INBOUND' },
-        orderBy: [{ sourceTimestamp: 'desc' }, { id: 'desc' }],
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
         select: { id: true },
       });
       if (!anchor) throw new ConflictException('Conversation has no inbound message');
@@ -45,7 +49,8 @@ export class ReplyDraftsService {
       });
       if (active) return active;
 
-      const since = new Date(Date.now() - 60_000);
+      const now = this.now();
+      const since = new Date(now.getTime() - 60_000);
       const [actorCount, tenantCount, activeTenantCount] = await Promise.all([
         tx.aiReplyDraft.count({ where: { tenantId, createdByUserId: actorUserId, createdAt: { gte: since } } }),
         tx.aiReplyDraft.count({ where: { tenantId, createdAt: { gte: since } } }),
@@ -56,7 +61,10 @@ export class ReplyDraftsService {
       }
 
       return tx.aiReplyDraft.create({
-        data: { id: randomUUID(), tenantId, conversationId, anchorMessageId: anchor.id, createdByUserId: actorUserId, idempotencyKey },
+        data: {
+          id: randomUUID(), tenantId, conversationId, anchorMessageId: anchor.id,
+          createdByUserId: actorUserId, idempotencyKey, triggerSource: 'MANUAL', availableAt: now,
+        },
       });
       });
     } catch (error) {
@@ -64,7 +72,7 @@ export class ReplyDraftsService {
       draft = await withTenantTransaction(this.prisma, tenantId, async (tx) => {
         const anchor = await tx.message.findFirst({
           where: { tenantId, conversationId, direction: 'INBOUND' },
-          orderBy: [{ sourceTimestamp: 'desc' }, { id: 'desc' }], select: { id: true },
+          orderBy: [{ createdAt: 'desc' }, { id: 'desc' }], select: { id: true },
         });
         if (!anchor) return null;
         return tx.aiReplyDraft.findFirst({
@@ -81,7 +89,11 @@ export class ReplyDraftsService {
     if (draft.status === 'QUEUED') {
       try {
         await this.queue.add('ai-replies.generate', { tenantId, draftId: draft.id }, {
-          jobId: `ai-reply-${draft.id}`, attempts: 1, removeOnComplete: true, removeOnFail: true,
+          jobId: `ai-reply-${draft.id}`,
+          delay: Math.max(0, draft.availableAt.getTime() - this.now().getTime()),
+          attempts: 1,
+          removeOnComplete: true,
+          removeOnFail: true,
         });
       } catch {
         this.logger.warn(`AI reply queue wake-up failed for draft ${draft.id}`);
