@@ -21,3 +21,11 @@ Never commit `.env`, credentials, OAuth tokens, database dumps, runtime PID/toke
 - User-editable forms must show localized errors next to the invalid field after submit, mark it with `aria-invalid`/`aria-describedby`, focus the first invalid control, preserve entered values, and clear only the edited field's error. Use shared `FormField`, `FieldError`, and `form-validation.ts` helpers.
 - Keep permission, conflict, provider outage, and unknown server failures at form level. Never display raw API/Zod messages or credentials.
 - Forms without independently invalid inputs may use `data-validation-context="non-field"` only when listed with a reason in `form-validation-contract.spec.ts`. Update the test and `docs/frontend/design-system.md` when adding such an exception.
+
+## Browser verification rule
+
+- Code-level tests alone are not sufficient for user-facing functionality or backend changes with user-visible effects. After implementation and deployment, verify the complete affected flow in a real browser against the environment where the change is expected to work.
+- Browser verification must cover the primary success path, relevant validation and error states, persisted state after a reload when data is saved, and the visible downstream result on every affected screen.
+- Automated tests and browser acceptance verification are both required; neither replaces the other. If credentials, provider approval, or an unavailable test account blocks browser verification, record the exact unverified step and do not claim full completion.
+- Use fictional or explicitly authorized test-account data. Do not send real customer messages, trigger external-provider side effects, or perform destructive actions unless the user has explicitly authorized them.
+- For material UI changes, capture evidence of the final browser state, including a screenshot when visual behavior matters.
