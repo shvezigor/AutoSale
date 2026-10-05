@@ -3,6 +3,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const api = vi.hoisted(() => ({
+  createConversationReplyDraft: vi.fn(),
   refreshConversation: vi.fn(),
   retryConversationMessage: vi.fn(),
   sendConversationMessage: vi.fn(),
@@ -40,17 +41,52 @@ afterEach(() => {
   Object.values(api).forEach((mock) => mock.mockReset());
 });
 
-function renderComposer(initialConversation = conversation, canManageSettings = false, locale: 'uk' | 'en' = 'uk') {
+function renderComposer(initialConversation = conversation, canManageSettings = false, locale: 'uk' | 'en' = 'uk', draftsEnabled = false) {
   return render(
     <I18nProvider locale={locale} authenticated>
       <ToastProvider>
-        <SocialReplyComposer canManageSettings={canManageSettings} initialConversation={initialConversation} />
+        <SocialReplyComposer canManageSettings={canManageSettings} initialConversation={initialConversation} draftsEnabled={draftsEnabled} />
       </ToastProvider>
     </I18nProvider>,
   );
 }
 
 describe('SocialReplyComposer', () => {
+  it('generates a draft, applies it without sending, and links it on explicit send', async () => {
+    const inbound = { ...pendingMessage, id: '33333333-3333-4333-8333-333333333333',
+      direction: 'INBOUND' as const, text: 'Чи є товар?', delivery: null };
+    const draft = {
+      id: '55555555-5555-4555-8555-555555555555', conversationId: conversation.id,
+      anchorMessageId: inbound.id, status: 'READY' as const, outcome: 'CLARIFY' as const,
+      generatedText: 'Який товар вас цікавить?', finalText: null, sources: [], errorCode: null,
+      createdAt: '2026-10-05T10:00:00.000Z', updatedAt: '2026-10-05T10:00:00.000Z',
+    };
+    api.createConversationReplyDraft.mockResolvedValue(draft);
+    api.sendConversationMessage.mockResolvedValue(pendingMessage);
+    api.refreshConversation.mockResolvedValue({ ...conversation, messages: [inbound], replyDrafts: [draft] });
+    renderComposer({ ...conversation, messages: [inbound] }, false, 'uk', true);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Створити чернетку' }));
+    expect(await screen.findByText('Який товар вас цікавить?')).toBeVisible();
+    expect(api.sendConversationMessage).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'Вставити в редактор' }));
+    expect(screen.getByRole('textbox', { name: 'Відповідь' })).toHaveValue('Який товар вас цікавить?');
+    fireEvent.click(screen.getByRole('button', { name: 'Надіслати' }));
+    await waitFor(() => expect(api.sendConversationMessage).toHaveBeenCalledWith(conversation.id,
+      expect.objectContaining({ text: 'Який товар вас цікавить?', draftId: draft.id })));
+  });
+
+  it('offers copy-only draft handling for Facebook without an API send', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    vi.stubGlobal('navigator', { clipboard: { writeText } });
+    renderComposer({ ...conversation, channel: 'FACEBOOK',
+      replyCapability: { enabled: false, reason: 'CHANNEL_READ_ONLY' } }, false, 'en', true);
+    fireEvent.change(screen.getByRole('textbox', { name: 'Reply' }), { target: { value: 'Hello there' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Copy text' }));
+    await waitFor(() => expect(writeText).toHaveBeenCalledWith('Hello there'));
+    expect(api.sendConversationMessage).not.toHaveBeenCalled();
+  });
+
   it('sends a TikTok reply and reuses the same idempotency key after an uncertain browser failure', async () => {
     vi.stubGlobal('crypto', { randomUUID: () => '44444444-4444-4444-8444-444444444444' });
     api.sendConversationMessage

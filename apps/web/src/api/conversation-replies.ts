@@ -12,6 +12,7 @@ import {
   type OutboundMessageInput,
 } from '../../../../packages/contracts/src/conversations';
 import { mutatingFetch } from '../auth/csrf-fetch';
+import { replyDraftSummarySchema, type ReplyDraftSummary } from '../../../../packages/contracts/src/reply-drafts';
 
 export class ConversationReplyApiError extends Error {
   constructor(
@@ -63,6 +64,19 @@ export async function sendConversationMessage(
       body: JSON.stringify(input),
     }),
     conversationMessageSchema.parse,
+  );
+}
+
+export async function createConversationReplyDraft(
+  conversationId: string,
+  idempotencyKey: string,
+): Promise<ReplyDraftSummary> {
+  return parseResponse(
+    await mutatingFetch(`/api/conversations/${encodeURIComponent(conversationId)}/reply-drafts`, {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ idempotencyKey }),
+    }),
+    replyDraftSummarySchema.parse,
   );
 }
 

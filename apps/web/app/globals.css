@@ -298,6 +298,16 @@ html[data-sidebar-state="collapsed"] .authenticated-shell > .primary-nav .nav-it
 .attachment-placeholder { margin: 6px 0 8px; padding: 12px; border: 1px dashed var(--border); border-radius: 8px; color: var(--muted); font-size: 12px; }
 .attachment-failure { margin: 6px 0; padding: 12px; border: 1px dashed #d5a1a1; border-radius: 8px; color: #9b3333; font-size: 12px; }
 .reply-area { position: relative; z-index: 2; margin: 0; padding: 10px 22px 20px; border-top: 1px solid var(--border); background: rgba(255,255,255,.98); }
+.reply-draft-panel { display: grid; gap: 8px; max-height: min(34vh, 260px); overflow: auto; margin-bottom: 10px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; background: #f8faff; font-size: 12px; }
+.reply-draft-panel-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.reply-draft-panel-heading > div { display: grid; gap: 3px; min-width: 0; }
+.reply-draft-panel-heading small, .reply-draft-sources small { color: var(--muted); }
+.reply-draft-panel-heading .loading-button { flex-shrink: 0; }
+.reply-draft-result { display: grid; gap: 8px; }
+.reply-draft-result p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.reply-draft-sources ul { margin: 4px 0 0; padding-left: 18px; }
+.reply-draft-result > button { justify-self: start; }
+@media (max-width: 720px) { .reply-draft-panel-heading { align-items: stretch; flex-direction: column; }.reply-draft-panel-heading .loading-button { width: 100%; } }
 .reply-guidance { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 8px; padding: 10px 12px; border-radius: 9px; background: #fff7e8; color: #72500b; font-size: 12px; }
 .reply-guidance a { color: var(--accent); font-weight: 700; }
 .social-reply-composer { padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px; background: white; box-shadow: 0 5px 18px rgba(28, 46, 76, .06); }

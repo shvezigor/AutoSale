@@ -394,6 +394,34 @@ describe('ConversationsService', () => {
     }
   });
 
+  it('rejects a draft when its catalogue source changed', async () => {
+    const anchor = await prisma.message.findFirstOrThrow({
+      where: { tenantId, conversationId: newestId, direction: 'INBOUND' },
+    });
+    const product = await prisma.product.create({ data: {
+      tenantId, sku: `FICTIONAL-${randomUUID()}`, name: 'Fictional sample product', aliases: [],
+      active: true, price: '100.00', currency: 'UAH', stockQuantity: 2,
+    } });
+    const draft = await prisma.aiReplyDraft.create({ data: {
+      tenantId, conversationId: newestId, anchorMessageId: anchor.id,
+      createdByUserId: actorUserId, idempotencyKey: randomUUID(), status: 'READY',
+      sourceSnapshot: [{ productId: product.id, sku: product.sku, name: product.name,
+        variants: {}, price: '100.00', currency: 'UAH', stockQuantity: 2,
+        updatedAt: product.updatedAt.toISOString() }],
+    } });
+    const idempotencyKey = randomUUID();
+    try {
+      await prisma.product.update({ where: { id: product.id }, data: { active: false } });
+      await expect(service.send(tenantId, actorUserId, newestId, {
+        text: 'Sample reply', idempotencyKey, draftId: draft.id,
+      })).rejects.toBeInstanceOf(ConflictException);
+      await expect(prisma.message.count({ where: { tenantId, clientIdempotencyKey: idempotencyKey } })).resolves.toBe(0);
+    } finally {
+      await prisma.aiReplyDraft.delete({ where: { id: draft.id } });
+      await prisma.product.delete({ where: { id: product.id } });
+    }
+  });
+
   it('accepts one idempotent TikTok reply and routes it to the TikTok worker', async () => {
     const event = await prisma.webhookEvent.create({
       data: { tenantId, provider: 'TIKTOK', externalEventId: `tiktok-send-${randomUUID()}`, payload: {} },
@@ -638,6 +666,40 @@ describe('ConversationsService', () => {
         where: { tenantId },
         data: { status: 'ACTIVE' },
       });
+    }
+  });
+
+  it('keeps a human-agent reply manual and rejects AI drafts after the standard 24-hour window', async () => {
+    const event = await prisma.webhookEvent.create({ data: {
+      tenantId, provider: 'META', externalEventId: `fictional-human-agent-${randomUUID()}`, payload: {},
+    } });
+    const conversation = await prisma.conversation.create({ data: {
+      tenantId, channel: 'INSTAGRAM', externalConversationId: `fictional-human-agent-${randomUUID()}`,
+      participantId: 'fictional-human-agent-customer', lastMessageAt: new Date(Date.now() - 2 * 86_400_000),
+    } });
+    const anchor = await prisma.message.create({ data: {
+      tenantId, conversationId: conversation.id, rawEventId: event.id, channel: 'INSTAGRAM',
+      externalMessageId: `fictional-human-agent-message-${randomUUID()}`, direction: 'INBOUND',
+      senderId: 'fictional-human-agent-customer', text: 'Old question',
+      sourceTimestamp: new Date(Date.now() - 2 * 86_400_000),
+    } });
+    const draft = await prisma.aiReplyDraft.create({ data: {
+      tenantId, conversationId: conversation.id, anchorMessageId: anchor.id,
+      createdByUserId: actorUserId, idempotencyKey: randomUUID(), status: 'READY', sourceSnapshot: [],
+    } });
+    try {
+      await expect(service.send(tenantId, actorUserId, conversation.id, {
+        text: 'Draft response', idempotencyKey: randomUUID(), draftId: draft.id,
+      })).rejects.toBeInstanceOf(ConflictException);
+      const manual = await service.send(tenantId, actorUserId, conversation.id, {
+        text: 'Manual response', idempotencyKey: randomUUID(),
+      });
+      expect(manual.text).toBe('Manual response');
+    } finally {
+      await prisma.aiReplyDraft.delete({ where: { id: draft.id } });
+      await prisma.message.deleteMany({ where: { conversationId: conversation.id } });
+      await prisma.conversation.delete({ where: { id: conversation.id } });
+      await prisma.webhookEvent.delete({ where: { id: event.id } });
     }
   });
 

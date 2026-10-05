@@ -3,8 +3,9 @@
 import type { ConversationDetailResponse, ConversationMessage } from '../../../../packages/contracts/src/conversations';
 import Link from 'next/link';
 import { type FormEvent, type KeyboardEvent, useEffect, useRef, useState } from 'react';
+import type { ReplyDraftSummary } from '../../../../packages/contracts/src/reply-drafts';
 
-import { refreshConversation, retryConversationMessage, sendConversationMessage } from '../api/conversation-replies';
+import { createConversationReplyDraft, refreshConversation, retryConversationMessage, sendConversationMessage } from '../api/conversation-replies';
 import { useI18n } from '../i18n/i18n-provider';
 import { FieldError } from './form-field';
 import { LoadingButton } from './loading-button';
@@ -13,25 +14,31 @@ import { useToast } from './toast-provider';
 
 const MAX_MESSAGE_LENGTH = 1_000;
 const POLL_INTERVAL_MS = 2_000;
-type PendingSubmission = { text: string; idempotencyKey: string };
+type PendingSubmission = { text: string; idempotencyKey: string; draftId?: string };
 
 export function SocialReplyComposer({
   initialConversation,
   canManageSettings,
+  draftsEnabled = false,
 }: {
   initialConversation: ConversationDetailResponse;
   canManageSettings: boolean;
+  draftsEnabled?: boolean;
 }) {
   const [conversation, setConversation] = useState(initialConversation);
   const [text, setText] = useState('');
   const [textError, setTextError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [retryingMessageId, setRetryingMessageId] = useState<string | null>(null);
+  const [generatingDraft, setGeneratingDraft] = useState(false);
+  const [draftError, setDraftError] = useState<string | null>(null);
+  const [selectedDraftId, setSelectedDraftId] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const threadRef = useRef<HTMLDivElement>(null);
   const refreshInFlight = useRef(false);
   const keepThreadAtBottom = useRef(true);
   const pendingSubmission = useRef<PendingSubmission | null>(null);
+  const pendingDraftRequest = useRef<string | null>(null);
   const deliveryStatuses = useRef(new Map(
     initialConversation.messages.map((message) => [message.id, message.delivery?.status ?? null]),
   ));
@@ -40,7 +47,14 @@ export function SocialReplyComposer({
   const trimmedText = text.trim();
   const channel = conversation.channel === 'TIKTOK'
     ? t('conversations.channelTikTok')
-    : t('conversations.channelInstagram');
+    : conversation.channel === 'FACEBOOK' ? t('conversations.channelFacebook') : t('conversations.channelInstagram');
+  const copyOnly = conversation.channel === 'FACEBOOK';
+  const latestInbound = [...conversation.messages].reverse().find((message) => message.direction === 'INBOUND');
+  const drafts = conversation.replyDrafts ?? [];
+  const currentDraft = drafts.find((draft) => draft.anchorMessageId === latestInbound?.id) ?? null;
+  const appliedDraft = drafts.find((draft) => draft.id === selectedDraftId);
+  const draftReady = currentDraft?.status === 'READY';
+  const draftBusy = currentDraft?.status === 'QUEUED' || currentDraft?.status === 'PROCESSING';
 
   function mergeMessage(message: ConversationMessage) {
     setConversation((current) => {
@@ -55,7 +69,7 @@ export function SocialReplyComposer({
 
   async function submit(event?: FormEvent) {
     event?.preventDefault();
-    if (!conversation.replyCapability.enabled || submitting) return;
+    if ((!conversation.replyCapability.enabled && !copyOnly) || submitting) return;
     const error = !trimmedText ? t('validation.required')
       : trimmedText.length > MAX_MESSAGE_LENGTH ? t('validation.tooLong', { count: MAX_MESSAGE_LENGTH }) : null;
     if (error) {
@@ -64,15 +78,25 @@ export function SocialReplyComposer({
       return;
     }
     setTextError(null);
+    if (copyOnly) {
+      try {
+        await navigator.clipboard.writeText(trimmedText);
+        toast.show({ type: 'success', title: t('conversations.replyDraftCopied') });
+      } catch {
+        toast.show({ type: 'error', title: t('conversations.replyDraftCopyFailed') });
+      }
+      return;
+    }
     setSubmitting(true);
-    const submission = pendingSubmission.current?.text === trimmedText
+    const submission = pendingSubmission.current?.text === trimmedText && pendingSubmission.current.draftId === (selectedDraftId ?? undefined)
       ? pendingSubmission.current
-      : { text: trimmedText, idempotencyKey: crypto.randomUUID() };
+      : { text: trimmedText, idempotencyKey: crypto.randomUUID(), ...(selectedDraftId ? { draftId: selectedDraftId } : {}) };
     pendingSubmission.current = submission;
     try {
       const message = await sendConversationMessage(conversation.id, submission);
       mergeMessage(message);
       pendingSubmission.current = null;
+      setSelectedDraftId(null);
       setText('');
       window.requestAnimationFrame(() => textareaRef.current?.focus());
     } catch {
@@ -80,6 +104,30 @@ export function SocialReplyComposer({
     } finally {
       setSubmitting(false);
     }
+  }
+
+  async function generateDraft() {
+    if (generatingDraft || draftBusy || !latestInbound) return;
+    setGeneratingDraft(true);
+    setDraftError(null);
+    const key = pendingDraftRequest.current ?? crypto.randomUUID();
+    pendingDraftRequest.current = key;
+    try {
+      const draft = await createConversationReplyDraft(conversation.id, key);
+      setConversation((current) => ({ ...current, replyDrafts: [draft, ...(current.replyDrafts ?? []).filter((item) => item.id !== draft.id)] }));
+      pendingDraftRequest.current = null;
+    } catch { setDraftError(t('conversations.replyDraftFailed')); }
+    finally { setGeneratingDraft(false); }
+  }
+
+  function applyDraft(draft: ReplyDraftSummary) {
+    if (!draft.generatedText || draft.status !== 'READY') return;
+    if (text.trim() && text !== draft.generatedText && !window.confirm(t('conversations.replyDraftReplaceConfirm'))) return;
+    setText(draft.generatedText);
+    setTextError(null);
+    setSelectedDraftId(draft.id);
+    pendingSubmission.current = null;
+    textareaRef.current?.focus();
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
@@ -106,6 +154,15 @@ export function SocialReplyComposer({
       initialConversation.messages.map((message) => [message.id, message.delivery?.status ?? null]),
     );
   }, [initialConversation]);
+
+  useEffect(() => {
+    if (!selectedDraftId) return;
+    const selected = conversation.replyDrafts?.find((draft) => draft.id === selectedDraftId);
+    if (!selected || selected.status !== 'READY' || selected.anchorMessageId !== latestInbound?.id) {
+      setSelectedDraftId(null);
+      pendingSubmission.current = null;
+    }
+  }, [conversation.replyDrafts, latestInbound?.id, selectedDraftId]);
 
   useEffect(() => {
     let cancelled = false;
@@ -146,7 +203,7 @@ export function SocialReplyComposer({
     if (thread) thread.scrollTop = thread.scrollHeight;
   }, [conversation.messages.length]);
 
-  const disabledReason = !conversation.replyCapability.enabled
+  const disabledReason = !copyOnly && !conversation.replyCapability.enabled
     ? replyDisabledText(conversation.channel, conversation.replyCapability.reason, t)
     : null;
 
@@ -166,6 +223,29 @@ export function SocialReplyComposer({
         <MessageThread conversation={conversation} onRetry={(messageId) => void retry(messageId)} retryingMessageId={retryingMessageId} />
       </div>
       <div className="reply-area">
+        {draftsEnabled && <section className="reply-draft-panel" aria-label={t('conversations.replyDraftTitle')}>
+          <div className="reply-draft-panel-heading"><div><strong>{t('conversations.replyDraftTitle')}</strong>
+            <small>{t('conversations.replyDraftManualNote')}</small></div>
+            <LoadingButton className="secondary-button" type="button" pending={generatingDraft}
+              disabled={!latestInbound || draftBusy || generatingDraft} onClick={() => void generateDraft()}>
+              {t('conversations.replyDraftGenerate')}
+            </LoadingButton></div>
+          {draftBusy && <p role="status">{t('conversations.replyDraftWorking')}</p>}
+          {draftError && <p role="alert">{draftError}</p>}
+          {currentDraft?.status === 'READY' && currentDraft.generatedText && <div className="reply-draft-result">
+            <p>{currentDraft.generatedText}</p>
+            {currentDraft.sources.length > 0 && <div className="reply-draft-sources"><small>{t('conversations.replyDraftSources')}</small>
+              <ul>{currentDraft.sources.map((source) => <li key={source.productId}>{source.name} · {source.sku}</li>)}</ul>
+            </div>}
+            <button className="secondary-button" type="button" onClick={() => applyDraft(currentDraft)}>
+              {t('conversations.replyDraftUse')}
+            </button>
+          </div>}
+          {currentDraft && ['STALE', 'BLOCKED', 'FAILED'].includes(currentDraft.status) &&
+            <p role="status">{t('conversations.replyDraftUnavailable')}</p>}
+          {appliedDraft && <p className="reply-draft-applied" role="status">{t('conversations.replyDraftApplied')}</p>}
+        </section>}
+        {copyOnly && <p className="reply-guidance" role="status">{t('conversations.facebookReadOnly')}</p>}
         {disabledReason ? (
           <div className="reply-guidance" role="status">
             <span>{disabledReason}</span>
@@ -178,7 +258,7 @@ export function SocialReplyComposer({
             aria-describedby={textError ? 'social-reply-hint social-reply-error' : 'social-reply-hint'}
             aria-invalid={Boolean(textError)}
             aria-label={t('conversations.reply')}
-            disabled={!conversation.replyCapability.enabled}
+            disabled={!conversation.replyCapability.enabled && !copyOnly}
             id="social-reply"
             onChange={(event) => {
               const nextText = event.target.value;
@@ -195,8 +275,8 @@ export function SocialReplyComposer({
           <FieldError id="social-reply-error" message={textError} />
           <div className="reply-composer-actions">
             <small id="social-reply-hint">{text.length >= 900 ? `${text.length}/${MAX_MESSAGE_LENGTH}` : t('conversations.newLineHint')}</small>
-            <LoadingButton disabled={!conversation.replyCapability.enabled || submitting} pending={submitting} pendingLabel={t('conversations.sending')} type="submit">
-              {t('conversations.send')}
+            <LoadingButton disabled={(!conversation.replyCapability.enabled && !copyOnly) || submitting} pending={submitting} pendingLabel={t('conversations.sending')} type="submit">
+              {copyOnly ? t('conversations.replyDraftCopy') : t('conversations.send')}
             </LoadingButton>
           </div>
         </form>

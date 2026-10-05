@@ -2,14 +2,18 @@ import { getConversation, getConversationOrder } from '../../../../src/api/conve
 import { getServerSession } from '../../../../src/auth/session';
 import { SocialReplyComposer } from '../../../../src/components/social-reply-composer';
 import { ConversationOrderPanel } from '../../../../src/components/conversation-order-panel';
-import { MessageThread } from '../../../../src/components/message-thread';
 import { createTranslator } from '../../../../src/i18n/translator';
+import { authenticatedApiFetch } from '../../../../src/auth/session';
+import { replyStyleSchema } from '../../../../../../packages/contracts/src/reply-drafts';
 
 export default async function ConversationDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [conversation, orderState, session] = await Promise.all([
-    getConversation(id), getConversationOrder(id), getServerSession(),
+  const [conversation, orderState, session, replyStyleResponse] = await Promise.all([
+    getConversation(id), getConversationOrder(id), getServerSession(), authenticatedApiFetch('/api/settings/reply-style'),
   ]);
+  const replyStyle = replyStyleResponse.ok
+    ? replyStyleSchema.safeParse(await replyStyleResponse.json()) : null;
+  const draftsEnabled = replyStyle?.success === true && replyStyle.data.enabled;
   const t = createTranslator(session?.locale ?? 'uk');
   const name = conversation.participantName ??
     (conversation.participantUsername
@@ -37,18 +41,12 @@ export default async function ConversationDetailPage({ params }: { params: Promi
             : <span className="avatar large" aria-hidden="true">{name[0]}</span>}
           <span><h2>{name}</h2><small>{accountLabel}</small></span>
         </header>
-        {conversation.channel !== 'FACEBOOK' ? (
-          <SocialReplyComposer
-            canManageSettings={session?.membershipRole === 'OWNER'}
-            initialConversation={conversation}
-            key={conversation.id}
-          />
-        ) : (
-          <>
-            <div className="thread-scroll"><MessageThread conversation={conversation} /></div>
-            <p className="reply-area">{t('conversations.facebookReadOnly')}</p>
-          </>
-        )}
+        <SocialReplyComposer
+          canManageSettings={session?.membershipRole === 'OWNER'}
+          draftsEnabled={draftsEnabled}
+          initialConversation={conversation}
+          key={conversation.id}
+        />
       </section>
       <ConversationOrderPanel
         conversationId={id}

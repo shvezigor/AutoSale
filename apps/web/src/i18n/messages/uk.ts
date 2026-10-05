@@ -118,6 +118,7 @@ export const ukMessages = {
     signOutAccount: 'Вийти з акаунта', signOutFailed: 'Не вдалося вийти з акаунта',
   },
   conversations: {
+    replyDraftTitle: 'AI-чернетка відповіді', replyDraftManualNote: 'Перевірте текст і джерела перед відправленням.', replyDraftGenerate: 'Створити чернетку', replyDraftWorking: 'Готуємо чернетку…', replyDraftFailed: 'Не вдалося створити чернетку. Спробуйте ще раз.', replyDraftSources: 'Джерела з каталогу', replyDraftUse: 'Вставити в редактор', replyDraftUnavailable: 'Чернетка вже неактуальна або не пройшла перевірку. Створіть нову.', replyDraftApplied: 'Чернетку вставлено. Перевірте й за потреби відредагуйте.', replyDraftReplaceConfirm: 'Замінити вже введений текст чернеткою?', replyDraftCopy: 'Копіювати текст', replyDraftCopied: 'Текст скопійовано', replyDraftCopyFailed: 'Не вдалося скопіювати текст',
     title: 'Діалоги', search: 'Пошук у діалогах', listLabel: 'Список діалогів', emptyList: 'Діалогів поки немає', total: 'Усього діалогів: {count}',
     instagramCustomer: 'Клієнт Instagram', facebookCustomer: 'Клієнт Facebook', tiktokCustomer: 'Клієнт TikTok', channelInstagram: 'Instagram', channelFacebook: 'Facebook', channelTikTok: 'TikTok', instagramAttachment: 'Вкладення з Instagram', instagramVideo: 'Відео з Instagram', channelAttachment: 'Вкладення з {channel}', channelVideo: 'Відео з {channel}', profilePhoto: 'Фото профілю {name}',
     selectTitle: 'Оберіть діалог', selectDescription: 'Повідомлення клієнта з’являться тут.', orderInformation: 'Інформація про замовлення',
