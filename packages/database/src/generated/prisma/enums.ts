@@ -192,6 +192,28 @@ export const CatalogueImportStatus = {
 export type CatalogueImportStatus = (typeof CatalogueImportStatus)[keyof typeof CatalogueImportStatus]
 
 
+export const AiReplyDraftStatus = {
+  QUEUED: 'QUEUED',
+  PROCESSING: 'PROCESSING',
+  READY: 'READY',
+  USED: 'USED',
+  STALE: 'STALE',
+  BLOCKED: 'BLOCKED',
+  FAILED: 'FAILED'
+} as const
+
+export type AiReplyDraftStatus = (typeof AiReplyDraftStatus)[keyof typeof AiReplyDraftStatus]
+
+
+export const AiReplyDraftOutcome = {
+  ANSWER: 'ANSWER',
+  CLARIFY: 'CLARIFY',
+  HANDOFF: 'HANDOFF'
+} as const
+
+export type AiReplyDraftOutcome = (typeof AiReplyDraftOutcome)[keyof typeof AiReplyDraftOutcome]
+
+
 export const NotificationType = {
   SUCCESS: 'SUCCESS',
   ERROR: 'ERROR',

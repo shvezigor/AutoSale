@@ -104,6 +104,17 @@ export const TENANT_EXPORT_DATASETS: readonly TenantExportDataset[] = [
     ...identityFields, intentDetectionMode: true, approvalMode: true,
     autoApprovalThreshold: true, promptVersion: true, triggerPhrases: true, updatedAt: true,
   }),
+  dataset('tenant-reply-styles', 'tenantReplyStyle', {
+    ...identityFields, enabled: true, companyName: true, tone: true,
+    addressForm: true, guidance: true, updatedAt: true,
+  }),
+  dataset('ai-reply-drafts', 'aiReplyDraft', {
+    ...identityFields, conversationId: true, anchorMessageId: true, createdByUserId: true,
+    status: true, outcome: true, generatedText: true, finalText: true,
+    sourceSnapshot: true, promptVersion: true, schemaVersion: true, modelVersion: true,
+    providerLatencyMs: true, inputTokens: true, outputTokens: true,
+    errorCode: true, outboundMessageId: true, usedAt: true, updatedAt: true,
+  }),
   dataset('memberships', 'tenantMembership', {
     ...identityFields, userId: true, role: true, status: true, updatedAt: true,
     user: { select: { id: true, email: true, name: true, phone: true, locale: true, status: true, createdAt: true } },

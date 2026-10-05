@@ -41,4 +41,12 @@ describe('tenant export dataset allowlist', () => {
     expect(rows[0]).not.toHaveProperty('credentialGenerationId');
     expect(findMany.mock.calls[0]![0].select).not.toHaveProperty('encryptedAccessToken');
   });
+
+  it('includes reply style and auditable drafts without hidden model payloads', () => {
+    const style = TENANT_EXPORT_DATASETS.find((candidate) => candidate.name === 'tenant-reply-styles')!;
+    const drafts = TENANT_EXPORT_DATASETS.find((candidate) => candidate.name === 'ai-reply-drafts')!;
+    expect(style.fields).toEqual(expect.arrayContaining(['enabled', 'companyName', 'tone', 'addressForm', 'guidance']));
+    expect(drafts.fields).toEqual(expect.arrayContaining(['status', 'generatedText', 'finalText', 'sourceSnapshot']));
+    expect(drafts.fields).not.toEqual(expect.arrayContaining(['rawProviderResponse', 'promptText', 'leaseId', 'idempotencyKey']));
+  });
 });

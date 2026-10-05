@@ -752,6 +752,40 @@ export type FloatWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedFloatFilter<$PrismaModel>
 }
 
+export type EnumAiReplyDraftStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.AiReplyDraftStatus | Prisma.EnumAiReplyDraftStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.AiReplyDraftStatus[] | Prisma.ListEnumAiReplyDraftStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AiReplyDraftStatus[] | Prisma.ListEnumAiReplyDraftStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAiReplyDraftStatusFilter<$PrismaModel> | $Enums.AiReplyDraftStatus
+}
+
+export type EnumAiReplyDraftOutcomeNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.AiReplyDraftOutcome | Prisma.EnumAiReplyDraftOutcomeFieldRefInput<$PrismaModel> | null
+  in?: $Enums.AiReplyDraftOutcome[] | Prisma.ListEnumAiReplyDraftOutcomeFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.AiReplyDraftOutcome[] | Prisma.ListEnumAiReplyDraftOutcomeFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumAiReplyDraftOutcomeNullableFilter<$PrismaModel> | $Enums.AiReplyDraftOutcome | null
+}
+
+export type EnumAiReplyDraftStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.AiReplyDraftStatus | Prisma.EnumAiReplyDraftStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.AiReplyDraftStatus[] | Prisma.ListEnumAiReplyDraftStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AiReplyDraftStatus[] | Prisma.ListEnumAiReplyDraftStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAiReplyDraftStatusWithAggregatesFilter<$PrismaModel> | $Enums.AiReplyDraftStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumAiReplyDraftStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumAiReplyDraftStatusFilter<$PrismaModel>
+}
+
+export type EnumAiReplyDraftOutcomeNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.AiReplyDraftOutcome | Prisma.EnumAiReplyDraftOutcomeFieldRefInput<$PrismaModel> | null
+  in?: $Enums.AiReplyDraftOutcome[] | Prisma.ListEnumAiReplyDraftOutcomeFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.AiReplyDraftOutcome[] | Prisma.ListEnumAiReplyDraftOutcomeFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumAiReplyDraftOutcomeNullableWithAggregatesFilter<$PrismaModel> | $Enums.AiReplyDraftOutcome | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumAiReplyDraftOutcomeNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumAiReplyDraftOutcomeNullableFilter<$PrismaModel>
+}
+
 export type EnumLegalEntityTypeFilter<$PrismaModel = never> = {
   equals?: $Enums.LegalEntityType | Prisma.EnumLegalEntityTypeFieldRefInput<$PrismaModel>
   in?: $Enums.LegalEntityType[] | Prisma.ListEnumLegalEntityTypeFieldRefInput<$PrismaModel>
@@ -1870,6 +1904,40 @@ export type NestedFloatWithAggregatesFilter<$PrismaModel = never> = {
   _sum?: Prisma.NestedFloatFilter<$PrismaModel>
   _min?: Prisma.NestedFloatFilter<$PrismaModel>
   _max?: Prisma.NestedFloatFilter<$PrismaModel>
+}
+
+export type NestedEnumAiReplyDraftStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.AiReplyDraftStatus | Prisma.EnumAiReplyDraftStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.AiReplyDraftStatus[] | Prisma.ListEnumAiReplyDraftStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AiReplyDraftStatus[] | Prisma.ListEnumAiReplyDraftStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAiReplyDraftStatusFilter<$PrismaModel> | $Enums.AiReplyDraftStatus
+}
+
+export type NestedEnumAiReplyDraftOutcomeNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.AiReplyDraftOutcome | Prisma.EnumAiReplyDraftOutcomeFieldRefInput<$PrismaModel> | null
+  in?: $Enums.AiReplyDraftOutcome[] | Prisma.ListEnumAiReplyDraftOutcomeFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.AiReplyDraftOutcome[] | Prisma.ListEnumAiReplyDraftOutcomeFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumAiReplyDraftOutcomeNullableFilter<$PrismaModel> | $Enums.AiReplyDraftOutcome | null
+}
+
+export type NestedEnumAiReplyDraftStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.AiReplyDraftStatus | Prisma.EnumAiReplyDraftStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.AiReplyDraftStatus[] | Prisma.ListEnumAiReplyDraftStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AiReplyDraftStatus[] | Prisma.ListEnumAiReplyDraftStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAiReplyDraftStatusWithAggregatesFilter<$PrismaModel> | $Enums.AiReplyDraftStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumAiReplyDraftStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumAiReplyDraftStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumAiReplyDraftOutcomeNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.AiReplyDraftOutcome | Prisma.EnumAiReplyDraftOutcomeFieldRefInput<$PrismaModel> | null
+  in?: $Enums.AiReplyDraftOutcome[] | Prisma.ListEnumAiReplyDraftOutcomeFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.AiReplyDraftOutcome[] | Prisma.ListEnumAiReplyDraftOutcomeFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumAiReplyDraftOutcomeNullableWithAggregatesFilter<$PrismaModel> | $Enums.AiReplyDraftOutcome | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumAiReplyDraftOutcomeNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumAiReplyDraftOutcomeNullableFilter<$PrismaModel>
 }
 
 export type NestedEnumLegalEntityTypeFilter<$PrismaModel = never> = {

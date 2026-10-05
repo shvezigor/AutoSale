@@ -194,6 +194,8 @@ export type TenantWhereInput = {
   conversations?: Prisma.ConversationListRelationFilter
   messages?: Prisma.MessageListRelationFilter
   settings?: Prisma.XOR<Prisma.TenantSettingsNullableScalarRelationFilter, Prisma.TenantSettingsWhereInput> | null
+  replyStyle?: Prisma.XOR<Prisma.TenantReplyStyleNullableScalarRelationFilter, Prisma.TenantReplyStyleWhereInput> | null
+  replyDrafts?: Prisma.AiReplyDraftListRelationFilter
   orders?: Prisma.OrderListRelationFilter
   products?: Prisma.ProductListRelationFilter
   catalogueSources?: Prisma.CatalogueSourceListRelationFilter
@@ -255,6 +257,8 @@ export type TenantOrderByWithRelationInput = {
   conversations?: Prisma.ConversationOrderByRelationAggregateInput
   messages?: Prisma.MessageOrderByRelationAggregateInput
   settings?: Prisma.TenantSettingsOrderByWithRelationInput
+  replyStyle?: Prisma.TenantReplyStyleOrderByWithRelationInput
+  replyDrafts?: Prisma.AiReplyDraftOrderByRelationAggregateInput
   orders?: Prisma.OrderOrderByRelationAggregateInput
   products?: Prisma.ProductOrderByRelationAggregateInput
   catalogueSources?: Prisma.CatalogueSourceOrderByRelationAggregateInput
@@ -319,6 +323,8 @@ export type TenantWhereUniqueInput = Prisma.AtLeast<{
   conversations?: Prisma.ConversationListRelationFilter
   messages?: Prisma.MessageListRelationFilter
   settings?: Prisma.XOR<Prisma.TenantSettingsNullableScalarRelationFilter, Prisma.TenantSettingsWhereInput> | null
+  replyStyle?: Prisma.XOR<Prisma.TenantReplyStyleNullableScalarRelationFilter, Prisma.TenantReplyStyleWhereInput> | null
+  replyDrafts?: Prisma.AiReplyDraftListRelationFilter
   orders?: Prisma.OrderListRelationFilter
   products?: Prisma.ProductListRelationFilter
   catalogueSources?: Prisma.CatalogueSourceListRelationFilter
@@ -404,6 +410,8 @@ export type TenantCreateInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -465,6 +473,8 @@ export type TenantUncheckedCreateInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -526,6 +536,8 @@ export type TenantUpdateInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -587,6 +599,8 @@ export type TenantUncheckedUpdateInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -1155,6 +1169,34 @@ export type TenantUpdateOneRequiredWithoutSettingsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.TenantUpdateToOneWithWhereWithoutSettingsInput, Prisma.TenantUpdateWithoutSettingsInput>, Prisma.TenantUncheckedUpdateWithoutSettingsInput>
 }
 
+export type TenantCreateNestedOneWithoutReplyStyleInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutReplyStyleInput, Prisma.TenantUncheckedCreateWithoutReplyStyleInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutReplyStyleInput
+  connect?: Prisma.TenantWhereUniqueInput
+}
+
+export type TenantUpdateOneRequiredWithoutReplyStyleNestedInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutReplyStyleInput, Prisma.TenantUncheckedCreateWithoutReplyStyleInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutReplyStyleInput
+  upsert?: Prisma.TenantUpsertWithoutReplyStyleInput
+  connect?: Prisma.TenantWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TenantUpdateToOneWithWhereWithoutReplyStyleInput, Prisma.TenantUpdateWithoutReplyStyleInput>, Prisma.TenantUncheckedUpdateWithoutReplyStyleInput>
+}
+
+export type TenantCreateNestedOneWithoutReplyDraftsInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutReplyDraftsInput, Prisma.TenantUncheckedCreateWithoutReplyDraftsInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutReplyDraftsInput
+  connect?: Prisma.TenantWhereUniqueInput
+}
+
+export type TenantUpdateOneRequiredWithoutReplyDraftsNestedInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutReplyDraftsInput, Prisma.TenantUncheckedCreateWithoutReplyDraftsInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutReplyDraftsInput
+  upsert?: Prisma.TenantUpsertWithoutReplyDraftsInput
+  connect?: Prisma.TenantWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TenantUpdateToOneWithWhereWithoutReplyDraftsInput, Prisma.TenantUpdateWithoutReplyDraftsInput>, Prisma.TenantUncheckedUpdateWithoutReplyDraftsInput>
+}
+
 export type TenantCreateNestedOneWithoutLegalEntitiesInput = {
   create?: Prisma.XOR<Prisma.TenantCreateWithoutLegalEntitiesInput, Prisma.TenantUncheckedCreateWithoutLegalEntitiesInput>
   connectOrCreate?: Prisma.TenantCreateOrConnectWithoutLegalEntitiesInput
@@ -1460,6 +1502,8 @@ export type TenantCreateWithoutLifecycleRequestsInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -1520,6 +1564,8 @@ export type TenantUncheckedCreateWithoutLifecycleRequestsInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -1596,6 +1642,8 @@ export type TenantUpdateWithoutLifecycleRequestsInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -1656,6 +1704,8 @@ export type TenantUncheckedUpdateWithoutLifecycleRequestsInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -1716,6 +1766,8 @@ export type TenantCreateWithoutRetentionDryRunsInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -1776,6 +1828,8 @@ export type TenantUncheckedCreateWithoutRetentionDryRunsInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -1852,6 +1906,8 @@ export type TenantUpdateWithoutRetentionDryRunsInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -1912,6 +1968,8 @@ export type TenantUncheckedUpdateWithoutRetentionDryRunsInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -1972,6 +2030,8 @@ export type TenantCreateWithoutGoogleConnectionInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -2032,6 +2092,8 @@ export type TenantUncheckedCreateWithoutGoogleConnectionInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -2108,6 +2170,8 @@ export type TenantUpdateWithoutGoogleConnectionInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -2168,6 +2232,8 @@ export type TenantUncheckedUpdateWithoutGoogleConnectionInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -2228,6 +2294,8 @@ export type TenantCreateWithoutGoogleOAuthAttemptsInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -2288,6 +2356,8 @@ export type TenantUncheckedCreateWithoutGoogleOAuthAttemptsInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -2364,6 +2434,8 @@ export type TenantUpdateWithoutGoogleOAuthAttemptsInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -2424,6 +2496,8 @@ export type TenantUncheckedUpdateWithoutGoogleOAuthAttemptsInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -2484,6 +2558,8 @@ export type TenantCreateWithoutGoogleCredentialCleanupsInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -2544,6 +2620,8 @@ export type TenantUncheckedCreateWithoutGoogleCredentialCleanupsInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -2620,6 +2698,8 @@ export type TenantUpdateWithoutGoogleCredentialCleanupsInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -2680,6 +2760,8 @@ export type TenantUncheckedUpdateWithoutGoogleCredentialCleanupsInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -2740,6 +2822,8 @@ export type TenantCreateWithoutInstagramConnectionInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -2800,6 +2884,8 @@ export type TenantUncheckedCreateWithoutInstagramConnectionInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -2876,6 +2962,8 @@ export type TenantUpdateWithoutInstagramConnectionInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -2936,6 +3024,8 @@ export type TenantUncheckedUpdateWithoutInstagramConnectionInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -2996,6 +3086,8 @@ export type TenantCreateWithoutInstagramOAuthStatesInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -3056,6 +3148,8 @@ export type TenantUncheckedCreateWithoutInstagramOAuthStatesInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -3132,6 +3226,8 @@ export type TenantUpdateWithoutInstagramOAuthStatesInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -3192,6 +3288,8 @@ export type TenantUncheckedUpdateWithoutInstagramOAuthStatesInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -3252,6 +3350,8 @@ export type TenantCreateWithoutInstagramCredentialCleanupsInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -3312,6 +3412,8 @@ export type TenantUncheckedCreateWithoutInstagramCredentialCleanupsInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -3388,6 +3490,8 @@ export type TenantUpdateWithoutInstagramCredentialCleanupsInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -3448,6 +3552,8 @@ export type TenantUncheckedUpdateWithoutInstagramCredentialCleanupsInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -3508,6 +3614,8 @@ export type TenantCreateWithoutFacebookConnectionInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -3568,6 +3676,8 @@ export type TenantUncheckedCreateWithoutFacebookConnectionInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -3644,6 +3754,8 @@ export type TenantUpdateWithoutFacebookConnectionInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -3704,6 +3816,8 @@ export type TenantUncheckedUpdateWithoutFacebookConnectionInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -3764,6 +3878,8 @@ export type TenantCreateWithoutFacebookOAuthAttemptsInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -3824,6 +3940,8 @@ export type TenantUncheckedCreateWithoutFacebookOAuthAttemptsInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -3900,6 +4018,8 @@ export type TenantUpdateWithoutFacebookOAuthAttemptsInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -3960,6 +4080,8 @@ export type TenantUncheckedUpdateWithoutFacebookOAuthAttemptsInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -4020,6 +4142,8 @@ export type TenantCreateWithoutFacebookCredentialCleanupsInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -4080,6 +4204,8 @@ export type TenantUncheckedCreateWithoutFacebookCredentialCleanupsInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -4156,6 +4282,8 @@ export type TenantUpdateWithoutFacebookCredentialCleanupsInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -4216,6 +4344,8 @@ export type TenantUncheckedUpdateWithoutFacebookCredentialCleanupsInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -4276,6 +4406,8 @@ export type TenantCreateWithoutTikTokConnectionInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -4336,6 +4468,8 @@ export type TenantUncheckedCreateWithoutTikTokConnectionInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -4412,6 +4546,8 @@ export type TenantUpdateWithoutTikTokConnectionInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -4472,6 +4608,8 @@ export type TenantUncheckedUpdateWithoutTikTokConnectionInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -4532,6 +4670,8 @@ export type TenantCreateWithoutTikTokOAuthAttemptsInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -4592,6 +4732,8 @@ export type TenantUncheckedCreateWithoutTikTokOAuthAttemptsInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -4668,6 +4810,8 @@ export type TenantUpdateWithoutTikTokOAuthAttemptsInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -4728,6 +4872,8 @@ export type TenantUncheckedUpdateWithoutTikTokOAuthAttemptsInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -4788,6 +4934,8 @@ export type TenantCreateWithoutTikTokCredentialCleanupsInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -4848,6 +4996,8 @@ export type TenantUncheckedCreateWithoutTikTokCredentialCleanupsInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -4924,6 +5074,8 @@ export type TenantUpdateWithoutTikTokCredentialCleanupsInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -4984,6 +5136,8 @@ export type TenantUncheckedUpdateWithoutTikTokCredentialCleanupsInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -5044,6 +5198,8 @@ export type TenantCreateWithoutNotificationsInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -5104,6 +5260,8 @@ export type TenantUncheckedCreateWithoutNotificationsInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -5180,6 +5338,8 @@ export type TenantUpdateWithoutNotificationsInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -5240,6 +5400,8 @@ export type TenantUncheckedUpdateWithoutNotificationsInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -5300,6 +5462,8 @@ export type TenantCreateWithoutTelegramLinkAttemptsInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -5360,6 +5524,8 @@ export type TenantUncheckedCreateWithoutTelegramLinkAttemptsInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -5436,6 +5602,8 @@ export type TenantUpdateWithoutTelegramLinkAttemptsInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -5496,6 +5664,8 @@ export type TenantUncheckedUpdateWithoutTelegramLinkAttemptsInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -5556,6 +5726,8 @@ export type TenantCreateWithoutTelegramUserBindingsInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -5616,6 +5788,8 @@ export type TenantUncheckedCreateWithoutTelegramUserBindingsInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -5692,6 +5866,8 @@ export type TenantUpdateWithoutTelegramUserBindingsInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -5752,6 +5928,8 @@ export type TenantUncheckedUpdateWithoutTelegramUserBindingsInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -5812,6 +5990,8 @@ export type TenantCreateWithoutTelegramBusinessConnectionsInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -5872,6 +6052,8 @@ export type TenantUncheckedCreateWithoutTelegramBusinessConnectionsInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -5948,6 +6130,8 @@ export type TenantUpdateWithoutTelegramBusinessConnectionsInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -6008,6 +6192,8 @@ export type TenantUncheckedUpdateWithoutTelegramBusinessConnectionsInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -6068,6 +6254,8 @@ export type TenantCreateWithoutTelegramChatsInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -6128,6 +6316,8 @@ export type TenantUncheckedCreateWithoutTelegramChatsInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -6204,6 +6394,8 @@ export type TenantUpdateWithoutTelegramChatsInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -6264,6 +6456,8 @@ export type TenantUncheckedUpdateWithoutTelegramChatsInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -6324,6 +6518,8 @@ export type TenantCreateWithoutTelegramSupplierSettingInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -6384,6 +6580,8 @@ export type TenantUncheckedCreateWithoutTelegramSupplierSettingInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -6460,6 +6658,8 @@ export type TenantUpdateWithoutTelegramSupplierSettingInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -6520,6 +6720,8 @@ export type TenantUncheckedUpdateWithoutTelegramSupplierSettingInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -6580,6 +6782,8 @@ export type TenantCreateWithoutTelegramDeliveriesInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -6640,6 +6844,8 @@ export type TenantUncheckedCreateWithoutTelegramDeliveriesInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -6716,6 +6922,8 @@ export type TenantUpdateWithoutTelegramDeliveriesInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -6776,6 +6984,8 @@ export type TenantUncheckedUpdateWithoutTelegramDeliveriesInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -6836,6 +7046,8 @@ export type TenantCreateWithoutMembershipsInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -6896,6 +7108,8 @@ export type TenantUncheckedCreateWithoutMembershipsInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -6972,6 +7186,8 @@ export type TenantUpdateWithoutMembershipsInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -7032,6 +7248,8 @@ export type TenantUncheckedUpdateWithoutMembershipsInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -7092,6 +7310,8 @@ export type TenantCreateWithoutSessionsInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -7152,6 +7372,8 @@ export type TenantUncheckedCreateWithoutSessionsInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -7228,6 +7450,8 @@ export type TenantUpdateWithoutSessionsInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -7288,6 +7512,8 @@ export type TenantUncheckedUpdateWithoutSessionsInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -7348,6 +7574,8 @@ export type TenantCreateWithoutInvitationsInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -7408,6 +7636,8 @@ export type TenantUncheckedCreateWithoutInvitationsInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -7484,6 +7714,8 @@ export type TenantUpdateWithoutInvitationsInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -7544,6 +7776,8 @@ export type TenantUncheckedUpdateWithoutInvitationsInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -7604,6 +7838,8 @@ export type TenantCreateWithoutSecurityAuditLogsInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -7664,6 +7900,8 @@ export type TenantUncheckedCreateWithoutSecurityAuditLogsInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -7740,6 +7978,8 @@ export type TenantUpdateWithoutSecurityAuditLogsInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -7800,6 +8040,8 @@ export type TenantUncheckedUpdateWithoutSecurityAuditLogsInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -7859,6 +8101,8 @@ export type TenantCreateWithoutEventsInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -7919,6 +8163,8 @@ export type TenantUncheckedCreateWithoutEventsInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -7995,6 +8241,8 @@ export type TenantUpdateWithoutEventsInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -8055,6 +8303,8 @@ export type TenantUncheckedUpdateWithoutEventsInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -8115,6 +8365,8 @@ export type TenantCreateWithoutConversationsInput = {
   events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -8175,6 +8427,8 @@ export type TenantUncheckedCreateWithoutConversationsInput = {
   events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -8251,6 +8505,8 @@ export type TenantUpdateWithoutConversationsInput = {
   events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -8311,6 +8567,8 @@ export type TenantUncheckedUpdateWithoutConversationsInput = {
   events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -8372,6 +8630,8 @@ export type TenantCreateWithoutInstagramCustomerProfilesInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -8432,6 +8692,8 @@ export type TenantUncheckedCreateWithoutInstagramCustomerProfilesInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -8508,6 +8770,8 @@ export type TenantUpdateWithoutInstagramCustomerProfilesInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -8568,6 +8832,8 @@ export type TenantUncheckedUpdateWithoutInstagramCustomerProfilesInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -8627,6 +8893,8 @@ export type TenantCreateWithoutMessagesInput = {
   events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -8687,6 +8955,8 @@ export type TenantUncheckedCreateWithoutMessagesInput = {
   events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -8763,6 +9033,8 @@ export type TenantUpdateWithoutMessagesInput = {
   events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -8823,6 +9095,8 @@ export type TenantUncheckedUpdateWithoutMessagesInput = {
   events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -8884,6 +9158,8 @@ export type TenantCreateWithoutSheetsDestinationInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -8944,6 +9220,8 @@ export type TenantUncheckedCreateWithoutSheetsDestinationInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -9020,6 +9298,8 @@ export type TenantUpdateWithoutSheetsDestinationInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -9080,6 +9360,8 @@ export type TenantUncheckedUpdateWithoutSheetsDestinationInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -9139,6 +9421,8 @@ export type TenantCreateWithoutSettingsInput = {
   events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -9199,6 +9483,8 @@ export type TenantUncheckedCreateWithoutSettingsInput = {
   events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -9275,6 +9561,8 @@ export type TenantUpdateWithoutSettingsInput = {
   events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -9335,6 +9623,536 @@ export type TenantUncheckedUpdateWithoutSettingsInput = {
   events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
+  catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
+  catalogueMappings?: Prisma.CatalogueMappingUncheckedUpdateManyWithoutTenantNestedInput
+  catalogueImportRuns?: Prisma.CatalogueImportRunUncheckedUpdateManyWithoutTenantNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedUpdateOneWithoutTenantNestedInput
+  orderExports?: Prisma.OrderExportUncheckedUpdateManyWithoutTenantNestedInput
+  memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutTenantNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutTenantNestedInput
+  invitations?: Prisma.TenantInvitationUncheckedUpdateManyWithoutTenantNestedInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUncheckedUpdateManyWithoutTenantNestedInput
+  instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
+  instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  tikTokConnection?: Prisma.TikTokConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  tikTokOAuthAttempts?: Prisma.TikTokOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  tikTokCredentialCleanups?: Prisma.TikTokCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
+  googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutTenantNestedInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUncheckedUpdateManyWithoutTenantNestedInput
+  telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedUpdateManyWithoutTenantNestedInput
+  telegramChats?: Prisma.TelegramChatUncheckedUpdateManyWithoutTenantNestedInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedUpdateOneWithoutTenantNestedInput
+  orderItems?: Prisma.OrderItemUncheckedUpdateManyWithoutTenantNestedInput
+  inventoryReservations?: Prisma.InventoryReservationUncheckedUpdateManyWithoutTenantNestedInput
+  telegramDeliveryItems?: Prisma.TelegramDeliveryItemUncheckedUpdateManyWithoutTenantNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutTenantNestedInput
+  deliveryConnections?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutTenantNestedInput
+  deliverySenderProfiles?: Prisma.DeliverySenderProfileUncheckedUpdateManyWithoutTenantNestedInput
+  shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutTenantNestedInput
+  shipmentAttempts?: Prisma.ShipmentAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutTenantNestedInput
+  legalEntities?: Prisma.TenantLegalEntityUncheckedUpdateManyWithoutTenantNestedInput
+  bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
+  orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
+  orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
+}
+
+export type TenantCreateWithoutReplyStyleInput = {
+  id?: string
+  key: string
+  name: string
+  status?: $Enums.AccessStatus
+  createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
+  events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
+  conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
+  messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
+  settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
+  products?: Prisma.ProductCreateNestedManyWithoutTenantInput
+  catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
+  catalogueMappings?: Prisma.CatalogueMappingCreateNestedManyWithoutTenantInput
+  catalogueImportRuns?: Prisma.CatalogueImportRunCreateNestedManyWithoutTenantInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationCreateNestedOneWithoutTenantInput
+  orderExports?: Prisma.OrderExportCreateNestedManyWithoutTenantInput
+  memberships?: Prisma.TenantMembershipCreateNestedManyWithoutTenantInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutTenantInput
+  invitations?: Prisma.TenantInvitationCreateNestedManyWithoutTenantInput
+  securityAuditLogs?: Prisma.SecurityAuditLogCreateNestedManyWithoutTenantInput
+  instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
+  instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
+  tikTokConnection?: Prisma.TikTokConnectionCreateNestedOneWithoutTenantInput
+  tikTokOAuthAttempts?: Prisma.TikTokOAuthAttemptCreateNestedManyWithoutTenantInput
+  tikTokCredentialCleanups?: Prisma.TikTokCredentialCleanupCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
+  googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
+  googleCredentialCleanups?: Prisma.GoogleCredentialCleanupCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationCreateNestedManyWithoutTenantInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptCreateNestedManyWithoutTenantInput
+  telegramUserBindings?: Prisma.TelegramUserBindingCreateNestedManyWithoutTenantInput
+  telegramBusinessConnections?: Prisma.TelegramBusinessConnectionCreateNestedManyWithoutTenantInput
+  telegramChats?: Prisma.TelegramChatCreateNestedManyWithoutTenantInput
+  telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingCreateNestedOneWithoutTenantInput
+  orderItems?: Prisma.OrderItemCreateNestedManyWithoutTenantInput
+  inventoryReservations?: Prisma.InventoryReservationCreateNestedManyWithoutTenantInput
+  telegramDeliveryItems?: Prisma.TelegramDeliveryItemCreateNestedManyWithoutTenantInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutTenantInput
+  deliveryConnections?: Prisma.DeliveryConnectionCreateNestedManyWithoutTenantInput
+  deliverySenderProfiles?: Prisma.DeliverySenderProfileCreateNestedManyWithoutTenantInput
+  shipments?: Prisma.ShipmentCreateNestedManyWithoutTenantInput
+  shipmentAttempts?: Prisma.ShipmentAttemptCreateNestedManyWithoutTenantInput
+  shipmentStatusEvents?: Prisma.ShipmentStatusEventCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutTenantInput
+  legalEntities?: Prisma.TenantLegalEntityCreateNestedManyWithoutTenantInput
+  bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
+  orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
+  orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
+}
+
+export type TenantUncheckedCreateWithoutReplyStyleInput = {
+  id?: string
+  key: string
+  name: string
+  status?: $Enums.AccessStatus
+  createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
+  events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
+  conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
+  messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
+  settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
+  catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
+  catalogueMappings?: Prisma.CatalogueMappingUncheckedCreateNestedManyWithoutTenantInput
+  catalogueImportRuns?: Prisma.CatalogueImportRunUncheckedCreateNestedManyWithoutTenantInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedCreateNestedOneWithoutTenantInput
+  orderExports?: Prisma.OrderExportUncheckedCreateNestedManyWithoutTenantInput
+  memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutTenantInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutTenantInput
+  invitations?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutTenantInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUncheckedCreateNestedManyWithoutTenantInput
+  instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
+  instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  tikTokConnection?: Prisma.TikTokConnectionUncheckedCreateNestedOneWithoutTenantInput
+  tikTokOAuthAttempts?: Prisma.TikTokOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  tikTokCredentialCleanups?: Prisma.TikTokCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
+  googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutTenantInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedCreateNestedManyWithoutTenantInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUncheckedCreateNestedManyWithoutTenantInput
+  telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedCreateNestedManyWithoutTenantInput
+  telegramChats?: Prisma.TelegramChatUncheckedCreateNestedManyWithoutTenantInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedCreateNestedOneWithoutTenantInput
+  orderItems?: Prisma.OrderItemUncheckedCreateNestedManyWithoutTenantInput
+  inventoryReservations?: Prisma.InventoryReservationUncheckedCreateNestedManyWithoutTenantInput
+  telegramDeliveryItems?: Prisma.TelegramDeliveryItemUncheckedCreateNestedManyWithoutTenantInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutTenantInput
+  deliveryConnections?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutTenantInput
+  deliverySenderProfiles?: Prisma.DeliverySenderProfileUncheckedCreateNestedManyWithoutTenantInput
+  shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutTenantInput
+  shipmentAttempts?: Prisma.ShipmentAttemptUncheckedCreateNestedManyWithoutTenantInput
+  shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutTenantInput
+  legalEntities?: Prisma.TenantLegalEntityUncheckedCreateNestedManyWithoutTenantInput
+  bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
+  orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
+  orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
+}
+
+export type TenantCreateOrConnectWithoutReplyStyleInput = {
+  where: Prisma.TenantWhereUniqueInput
+  create: Prisma.XOR<Prisma.TenantCreateWithoutReplyStyleInput, Prisma.TenantUncheckedCreateWithoutReplyStyleInput>
+}
+
+export type TenantUpsertWithoutReplyStyleInput = {
+  update: Prisma.XOR<Prisma.TenantUpdateWithoutReplyStyleInput, Prisma.TenantUncheckedUpdateWithoutReplyStyleInput>
+  create: Prisma.XOR<Prisma.TenantCreateWithoutReplyStyleInput, Prisma.TenantUncheckedCreateWithoutReplyStyleInput>
+  where?: Prisma.TenantWhereInput
+}
+
+export type TenantUpdateToOneWithWhereWithoutReplyStyleInput = {
+  where?: Prisma.TenantWhereInput
+  data: Prisma.XOR<Prisma.TenantUpdateWithoutReplyStyleInput, Prisma.TenantUncheckedUpdateWithoutReplyStyleInput>
+}
+
+export type TenantUpdateWithoutReplyStyleInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
+  conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
+  messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
+  settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
+  products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
+  catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
+  catalogueMappings?: Prisma.CatalogueMappingUpdateManyWithoutTenantNestedInput
+  catalogueImportRuns?: Prisma.CatalogueImportRunUpdateManyWithoutTenantNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUpdateOneWithoutTenantNestedInput
+  orderExports?: Prisma.OrderExportUpdateManyWithoutTenantNestedInput
+  memberships?: Prisma.TenantMembershipUpdateManyWithoutTenantNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutTenantNestedInput
+  invitations?: Prisma.TenantInvitationUpdateManyWithoutTenantNestedInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUpdateManyWithoutTenantNestedInput
+  instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
+  instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
+  tikTokConnection?: Prisma.TikTokConnectionUpdateOneWithoutTenantNestedInput
+  tikTokOAuthAttempts?: Prisma.TikTokOAuthAttemptUpdateManyWithoutTenantNestedInput
+  tikTokCredentialCleanups?: Prisma.TikTokCredentialCleanupUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
+  googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
+  googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUpdateManyWithoutTenantNestedInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUpdateManyWithoutTenantNestedInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUpdateManyWithoutTenantNestedInput
+  telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUpdateManyWithoutTenantNestedInput
+  telegramChats?: Prisma.TelegramChatUpdateManyWithoutTenantNestedInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUpdateOneWithoutTenantNestedInput
+  orderItems?: Prisma.OrderItemUpdateManyWithoutTenantNestedInput
+  inventoryReservations?: Prisma.InventoryReservationUpdateManyWithoutTenantNestedInput
+  telegramDeliveryItems?: Prisma.TelegramDeliveryItemUpdateManyWithoutTenantNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutTenantNestedInput
+  deliveryConnections?: Prisma.DeliveryConnectionUpdateManyWithoutTenantNestedInput
+  deliverySenderProfiles?: Prisma.DeliverySenderProfileUpdateManyWithoutTenantNestedInput
+  shipments?: Prisma.ShipmentUpdateManyWithoutTenantNestedInput
+  shipmentAttempts?: Prisma.ShipmentAttemptUpdateManyWithoutTenantNestedInput
+  shipmentStatusEvents?: Prisma.ShipmentStatusEventUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutTenantNestedInput
+  legalEntities?: Prisma.TenantLegalEntityUpdateManyWithoutTenantNestedInput
+  bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
+  orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
+  orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
+}
+
+export type TenantUncheckedUpdateWithoutReplyStyleInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
+  conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
+  messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
+  settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
+  catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
+  catalogueMappings?: Prisma.CatalogueMappingUncheckedUpdateManyWithoutTenantNestedInput
+  catalogueImportRuns?: Prisma.CatalogueImportRunUncheckedUpdateManyWithoutTenantNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedUpdateOneWithoutTenantNestedInput
+  orderExports?: Prisma.OrderExportUncheckedUpdateManyWithoutTenantNestedInput
+  memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutTenantNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutTenantNestedInput
+  invitations?: Prisma.TenantInvitationUncheckedUpdateManyWithoutTenantNestedInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUncheckedUpdateManyWithoutTenantNestedInput
+  instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
+  instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  tikTokConnection?: Prisma.TikTokConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  tikTokOAuthAttempts?: Prisma.TikTokOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  tikTokCredentialCleanups?: Prisma.TikTokCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
+  googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutTenantNestedInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUncheckedUpdateManyWithoutTenantNestedInput
+  telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedUpdateManyWithoutTenantNestedInput
+  telegramChats?: Prisma.TelegramChatUncheckedUpdateManyWithoutTenantNestedInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedUpdateOneWithoutTenantNestedInput
+  orderItems?: Prisma.OrderItemUncheckedUpdateManyWithoutTenantNestedInput
+  inventoryReservations?: Prisma.InventoryReservationUncheckedUpdateManyWithoutTenantNestedInput
+  telegramDeliveryItems?: Prisma.TelegramDeliveryItemUncheckedUpdateManyWithoutTenantNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutTenantNestedInput
+  deliveryConnections?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutTenantNestedInput
+  deliverySenderProfiles?: Prisma.DeliverySenderProfileUncheckedUpdateManyWithoutTenantNestedInput
+  shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutTenantNestedInput
+  shipmentAttempts?: Prisma.ShipmentAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutTenantNestedInput
+  legalEntities?: Prisma.TenantLegalEntityUncheckedUpdateManyWithoutTenantNestedInput
+  bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
+  orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
+  orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
+}
+
+export type TenantCreateWithoutReplyDraftsInput = {
+  id?: string
+  key: string
+  name: string
+  status?: $Enums.AccessStatus
+  createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
+  events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
+  conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
+  messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
+  settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
+  products?: Prisma.ProductCreateNestedManyWithoutTenantInput
+  catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
+  catalogueMappings?: Prisma.CatalogueMappingCreateNestedManyWithoutTenantInput
+  catalogueImportRuns?: Prisma.CatalogueImportRunCreateNestedManyWithoutTenantInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationCreateNestedOneWithoutTenantInput
+  orderExports?: Prisma.OrderExportCreateNestedManyWithoutTenantInput
+  memberships?: Prisma.TenantMembershipCreateNestedManyWithoutTenantInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutTenantInput
+  invitations?: Prisma.TenantInvitationCreateNestedManyWithoutTenantInput
+  securityAuditLogs?: Prisma.SecurityAuditLogCreateNestedManyWithoutTenantInput
+  instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
+  instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
+  tikTokConnection?: Prisma.TikTokConnectionCreateNestedOneWithoutTenantInput
+  tikTokOAuthAttempts?: Prisma.TikTokOAuthAttemptCreateNestedManyWithoutTenantInput
+  tikTokCredentialCleanups?: Prisma.TikTokCredentialCleanupCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
+  googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
+  googleCredentialCleanups?: Prisma.GoogleCredentialCleanupCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationCreateNestedManyWithoutTenantInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptCreateNestedManyWithoutTenantInput
+  telegramUserBindings?: Prisma.TelegramUserBindingCreateNestedManyWithoutTenantInput
+  telegramBusinessConnections?: Prisma.TelegramBusinessConnectionCreateNestedManyWithoutTenantInput
+  telegramChats?: Prisma.TelegramChatCreateNestedManyWithoutTenantInput
+  telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingCreateNestedOneWithoutTenantInput
+  orderItems?: Prisma.OrderItemCreateNestedManyWithoutTenantInput
+  inventoryReservations?: Prisma.InventoryReservationCreateNestedManyWithoutTenantInput
+  telegramDeliveryItems?: Prisma.TelegramDeliveryItemCreateNestedManyWithoutTenantInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutTenantInput
+  deliveryConnections?: Prisma.DeliveryConnectionCreateNestedManyWithoutTenantInput
+  deliverySenderProfiles?: Prisma.DeliverySenderProfileCreateNestedManyWithoutTenantInput
+  shipments?: Prisma.ShipmentCreateNestedManyWithoutTenantInput
+  shipmentAttempts?: Prisma.ShipmentAttemptCreateNestedManyWithoutTenantInput
+  shipmentStatusEvents?: Prisma.ShipmentStatusEventCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutTenantInput
+  legalEntities?: Prisma.TenantLegalEntityCreateNestedManyWithoutTenantInput
+  bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
+  orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
+  orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
+}
+
+export type TenantUncheckedCreateWithoutReplyDraftsInput = {
+  id?: string
+  key: string
+  name: string
+  status?: $Enums.AccessStatus
+  createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
+  events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
+  conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
+  messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
+  settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
+  catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
+  catalogueMappings?: Prisma.CatalogueMappingUncheckedCreateNestedManyWithoutTenantInput
+  catalogueImportRuns?: Prisma.CatalogueImportRunUncheckedCreateNestedManyWithoutTenantInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedCreateNestedOneWithoutTenantInput
+  orderExports?: Prisma.OrderExportUncheckedCreateNestedManyWithoutTenantInput
+  memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutTenantInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutTenantInput
+  invitations?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutTenantInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUncheckedCreateNestedManyWithoutTenantInput
+  instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
+  instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  tikTokConnection?: Prisma.TikTokConnectionUncheckedCreateNestedOneWithoutTenantInput
+  tikTokOAuthAttempts?: Prisma.TikTokOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  tikTokCredentialCleanups?: Prisma.TikTokCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
+  googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutTenantInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedCreateNestedManyWithoutTenantInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUncheckedCreateNestedManyWithoutTenantInput
+  telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedCreateNestedManyWithoutTenantInput
+  telegramChats?: Prisma.TelegramChatUncheckedCreateNestedManyWithoutTenantInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedCreateNestedOneWithoutTenantInput
+  orderItems?: Prisma.OrderItemUncheckedCreateNestedManyWithoutTenantInput
+  inventoryReservations?: Prisma.InventoryReservationUncheckedCreateNestedManyWithoutTenantInput
+  telegramDeliveryItems?: Prisma.TelegramDeliveryItemUncheckedCreateNestedManyWithoutTenantInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutTenantInput
+  deliveryConnections?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutTenantInput
+  deliverySenderProfiles?: Prisma.DeliverySenderProfileUncheckedCreateNestedManyWithoutTenantInput
+  shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutTenantInput
+  shipmentAttempts?: Prisma.ShipmentAttemptUncheckedCreateNestedManyWithoutTenantInput
+  shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutTenantInput
+  legalEntities?: Prisma.TenantLegalEntityUncheckedCreateNestedManyWithoutTenantInput
+  bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
+  orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
+  orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
+}
+
+export type TenantCreateOrConnectWithoutReplyDraftsInput = {
+  where: Prisma.TenantWhereUniqueInput
+  create: Prisma.XOR<Prisma.TenantCreateWithoutReplyDraftsInput, Prisma.TenantUncheckedCreateWithoutReplyDraftsInput>
+}
+
+export type TenantUpsertWithoutReplyDraftsInput = {
+  update: Prisma.XOR<Prisma.TenantUpdateWithoutReplyDraftsInput, Prisma.TenantUncheckedUpdateWithoutReplyDraftsInput>
+  create: Prisma.XOR<Prisma.TenantCreateWithoutReplyDraftsInput, Prisma.TenantUncheckedCreateWithoutReplyDraftsInput>
+  where?: Prisma.TenantWhereInput
+}
+
+export type TenantUpdateToOneWithWhereWithoutReplyDraftsInput = {
+  where?: Prisma.TenantWhereInput
+  data: Prisma.XOR<Prisma.TenantUpdateWithoutReplyDraftsInput, Prisma.TenantUncheckedUpdateWithoutReplyDraftsInput>
+}
+
+export type TenantUpdateWithoutReplyDraftsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
+  conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
+  messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
+  settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
+  products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
+  catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
+  catalogueMappings?: Prisma.CatalogueMappingUpdateManyWithoutTenantNestedInput
+  catalogueImportRuns?: Prisma.CatalogueImportRunUpdateManyWithoutTenantNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUpdateOneWithoutTenantNestedInput
+  orderExports?: Prisma.OrderExportUpdateManyWithoutTenantNestedInput
+  memberships?: Prisma.TenantMembershipUpdateManyWithoutTenantNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutTenantNestedInput
+  invitations?: Prisma.TenantInvitationUpdateManyWithoutTenantNestedInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUpdateManyWithoutTenantNestedInput
+  instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
+  instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
+  tikTokConnection?: Prisma.TikTokConnectionUpdateOneWithoutTenantNestedInput
+  tikTokOAuthAttempts?: Prisma.TikTokOAuthAttemptUpdateManyWithoutTenantNestedInput
+  tikTokCredentialCleanups?: Prisma.TikTokCredentialCleanupUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
+  googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
+  googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUpdateManyWithoutTenantNestedInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUpdateManyWithoutTenantNestedInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUpdateManyWithoutTenantNestedInput
+  telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUpdateManyWithoutTenantNestedInput
+  telegramChats?: Prisma.TelegramChatUpdateManyWithoutTenantNestedInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUpdateOneWithoutTenantNestedInput
+  orderItems?: Prisma.OrderItemUpdateManyWithoutTenantNestedInput
+  inventoryReservations?: Prisma.InventoryReservationUpdateManyWithoutTenantNestedInput
+  telegramDeliveryItems?: Prisma.TelegramDeliveryItemUpdateManyWithoutTenantNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutTenantNestedInput
+  deliveryConnections?: Prisma.DeliveryConnectionUpdateManyWithoutTenantNestedInput
+  deliverySenderProfiles?: Prisma.DeliverySenderProfileUpdateManyWithoutTenantNestedInput
+  shipments?: Prisma.ShipmentUpdateManyWithoutTenantNestedInput
+  shipmentAttempts?: Prisma.ShipmentAttemptUpdateManyWithoutTenantNestedInput
+  shipmentStatusEvents?: Prisma.ShipmentStatusEventUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutTenantNestedInput
+  legalEntities?: Prisma.TenantLegalEntityUpdateManyWithoutTenantNestedInput
+  bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
+  orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
+  orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
+}
+
+export type TenantUncheckedUpdateWithoutReplyDraftsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
+  conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
+  messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
+  settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -9396,6 +10214,8 @@ export type TenantCreateWithoutLegalEntitiesInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -9456,6 +10276,8 @@ export type TenantUncheckedCreateWithoutLegalEntitiesInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -9532,6 +10354,8 @@ export type TenantUpdateWithoutLegalEntitiesInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -9592,6 +10416,8 @@ export type TenantUncheckedUpdateWithoutLegalEntitiesInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -9652,6 +10478,8 @@ export type TenantCreateWithoutBankAccountsInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -9712,6 +10540,8 @@ export type TenantUncheckedCreateWithoutBankAccountsInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -9788,6 +10618,8 @@ export type TenantUpdateWithoutBankAccountsInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -9848,6 +10680,8 @@ export type TenantUncheckedUpdateWithoutBankAccountsInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -9908,6 +10742,8 @@ export type TenantCreateWithoutOrdersInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
   catalogueMappings?: Prisma.CatalogueMappingCreateNestedManyWithoutTenantInput
@@ -9968,6 +10804,8 @@ export type TenantUncheckedCreateWithoutOrdersInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
   catalogueMappings?: Prisma.CatalogueMappingUncheckedCreateNestedManyWithoutTenantInput
@@ -10044,6 +10882,8 @@ export type TenantUpdateWithoutOrdersInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
   catalogueMappings?: Prisma.CatalogueMappingUpdateManyWithoutTenantNestedInput
@@ -10104,6 +10944,8 @@ export type TenantUncheckedUpdateWithoutOrdersInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
   catalogueMappings?: Prisma.CatalogueMappingUncheckedUpdateManyWithoutTenantNestedInput
@@ -10164,6 +11006,8 @@ export type TenantCreateWithoutOrderCommercialTermsInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -10224,6 +11068,8 @@ export type TenantUncheckedCreateWithoutOrderCommercialTermsInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -10300,6 +11146,8 @@ export type TenantUpdateWithoutOrderCommercialTermsInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -10360,6 +11208,8 @@ export type TenantUncheckedUpdateWithoutOrderCommercialTermsInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -10420,6 +11270,8 @@ export type TenantCreateWithoutOrderPaymentsInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -10480,6 +11332,8 @@ export type TenantUncheckedCreateWithoutOrderPaymentsInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -10556,6 +11410,8 @@ export type TenantUpdateWithoutOrderPaymentsInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -10616,6 +11472,8 @@ export type TenantUncheckedUpdateWithoutOrderPaymentsInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -10676,6 +11534,8 @@ export type TenantCreateWithoutOrderIntentEvaluationsInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -10736,6 +11596,8 @@ export type TenantUncheckedCreateWithoutOrderIntentEvaluationsInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -10812,6 +11674,8 @@ export type TenantUpdateWithoutOrderIntentEvaluationsInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -10872,6 +11736,8 @@ export type TenantUncheckedUpdateWithoutOrderIntentEvaluationsInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -10932,6 +11798,8 @@ export type TenantCreateWithoutDeliveryConnectionsInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -10992,6 +11860,8 @@ export type TenantUncheckedCreateWithoutDeliveryConnectionsInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -11068,6 +11938,8 @@ export type TenantUpdateWithoutDeliveryConnectionsInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -11128,6 +12000,8 @@ export type TenantUncheckedUpdateWithoutDeliveryConnectionsInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -11188,6 +12062,8 @@ export type TenantCreateWithoutDeliverySenderProfilesInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -11248,6 +12124,8 @@ export type TenantUncheckedCreateWithoutDeliverySenderProfilesInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -11324,6 +12202,8 @@ export type TenantUpdateWithoutDeliverySenderProfilesInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -11384,6 +12264,8 @@ export type TenantUncheckedUpdateWithoutDeliverySenderProfilesInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -11444,6 +12326,8 @@ export type TenantCreateWithoutShipmentsInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -11504,6 +12388,8 @@ export type TenantUncheckedCreateWithoutShipmentsInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -11580,6 +12466,8 @@ export type TenantUpdateWithoutShipmentsInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -11640,6 +12528,8 @@ export type TenantUncheckedUpdateWithoutShipmentsInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -11700,6 +12590,8 @@ export type TenantCreateWithoutShipmentAttemptsInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -11760,6 +12652,8 @@ export type TenantUncheckedCreateWithoutShipmentAttemptsInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -11836,6 +12730,8 @@ export type TenantUpdateWithoutShipmentAttemptsInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -11896,6 +12792,8 @@ export type TenantUncheckedUpdateWithoutShipmentAttemptsInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -11956,6 +12854,8 @@ export type TenantCreateWithoutShipmentStatusEventsInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -12016,6 +12916,8 @@ export type TenantUncheckedCreateWithoutShipmentStatusEventsInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -12092,6 +12994,8 @@ export type TenantUpdateWithoutShipmentStatusEventsInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -12152,6 +13056,8 @@ export type TenantUncheckedUpdateWithoutShipmentStatusEventsInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -12212,6 +13118,8 @@ export type TenantCreateWithoutOrderExportsInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -12272,6 +13180,8 @@ export type TenantUncheckedCreateWithoutOrderExportsInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -12348,6 +13258,8 @@ export type TenantUpdateWithoutOrderExportsInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -12408,6 +13320,8 @@ export type TenantUncheckedUpdateWithoutOrderExportsInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -12468,6 +13382,8 @@ export type TenantCreateWithoutAuditLogsInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -12528,6 +13444,8 @@ export type TenantUncheckedCreateWithoutAuditLogsInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -12604,6 +13522,8 @@ export type TenantUpdateWithoutAuditLogsInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -12664,6 +13584,8 @@ export type TenantUncheckedUpdateWithoutAuditLogsInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -12724,6 +13646,8 @@ export type TenantCreateWithoutOrderItemsInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -12784,6 +13708,8 @@ export type TenantUncheckedCreateWithoutOrderItemsInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -12860,6 +13786,8 @@ export type TenantUpdateWithoutOrderItemsInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -12920,6 +13848,8 @@ export type TenantUncheckedUpdateWithoutOrderItemsInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -12980,6 +13910,8 @@ export type TenantCreateWithoutProductsInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
   catalogueMappings?: Prisma.CatalogueMappingCreateNestedManyWithoutTenantInput
@@ -13040,6 +13972,8 @@ export type TenantUncheckedCreateWithoutProductsInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
   catalogueMappings?: Prisma.CatalogueMappingUncheckedCreateNestedManyWithoutTenantInput
@@ -13116,6 +14050,8 @@ export type TenantUpdateWithoutProductsInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
   catalogueMappings?: Prisma.CatalogueMappingUpdateManyWithoutTenantNestedInput
@@ -13176,6 +14112,8 @@ export type TenantUncheckedUpdateWithoutProductsInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
   catalogueMappings?: Prisma.CatalogueMappingUncheckedUpdateManyWithoutTenantNestedInput
@@ -13236,6 +14174,8 @@ export type TenantCreateWithoutInventoryReservationsInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -13296,6 +14236,8 @@ export type TenantUncheckedCreateWithoutInventoryReservationsInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -13372,6 +14314,8 @@ export type TenantUpdateWithoutInventoryReservationsInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -13432,6 +14376,8 @@ export type TenantUncheckedUpdateWithoutInventoryReservationsInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -13492,6 +14438,8 @@ export type TenantCreateWithoutTelegramDeliveryItemsInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -13552,6 +14500,8 @@ export type TenantUncheckedCreateWithoutTelegramDeliveryItemsInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -13628,6 +14578,8 @@ export type TenantUpdateWithoutTelegramDeliveryItemsInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -13688,6 +14640,8 @@ export type TenantUncheckedUpdateWithoutTelegramDeliveryItemsInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -13748,6 +14702,8 @@ export type TenantCreateWithoutTelegramNotificationPreferencesInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -13808,6 +14764,8 @@ export type TenantUncheckedCreateWithoutTelegramNotificationPreferencesInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -13884,6 +14842,8 @@ export type TenantUpdateWithoutTelegramNotificationPreferencesInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -13944,6 +14904,8 @@ export type TenantUncheckedUpdateWithoutTelegramNotificationPreferencesInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -14004,6 +14966,8 @@ export type TenantCreateWithoutCatalogueSourcesInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueMappings?: Prisma.CatalogueMappingCreateNestedManyWithoutTenantInput
@@ -14064,6 +15028,8 @@ export type TenantUncheckedCreateWithoutCatalogueSourcesInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueMappings?: Prisma.CatalogueMappingUncheckedCreateNestedManyWithoutTenantInput
@@ -14140,6 +15106,8 @@ export type TenantUpdateWithoutCatalogueSourcesInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueMappings?: Prisma.CatalogueMappingUpdateManyWithoutTenantNestedInput
@@ -14200,6 +15168,8 @@ export type TenantUncheckedUpdateWithoutCatalogueSourcesInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueMappings?: Prisma.CatalogueMappingUncheckedUpdateManyWithoutTenantNestedInput
@@ -14260,6 +15230,8 @@ export type TenantCreateWithoutCatalogueMappingsInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -14320,6 +15292,8 @@ export type TenantUncheckedCreateWithoutCatalogueMappingsInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -14396,6 +15370,8 @@ export type TenantUpdateWithoutCatalogueMappingsInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -14456,6 +15432,8 @@ export type TenantUncheckedUpdateWithoutCatalogueMappingsInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -14516,6 +15494,8 @@ export type TenantCreateWithoutCatalogueImportRunsInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -14576,6 +15556,8 @@ export type TenantUncheckedCreateWithoutCatalogueImportRunsInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -14652,6 +15634,8 @@ export type TenantUpdateWithoutCatalogueImportRunsInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -14712,6 +15696,8 @@ export type TenantUncheckedUpdateWithoutCatalogueImportRunsInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -14770,6 +15756,7 @@ export type TenantCountOutputType = {
   events: number
   conversations: number
   messages: number
+  replyDrafts: number
   orders: number
   products: number
   catalogueSources: number
@@ -14818,6 +15805,7 @@ export type TenantCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions
   events?: boolean | TenantCountOutputTypeCountEventsArgs
   conversations?: boolean | TenantCountOutputTypeCountConversationsArgs
   messages?: boolean | TenantCountOutputTypeCountMessagesArgs
+  replyDrafts?: boolean | TenantCountOutputTypeCountReplyDraftsArgs
   orders?: boolean | TenantCountOutputTypeCountOrdersArgs
   products?: boolean | TenantCountOutputTypeCountProductsArgs
   catalogueSources?: boolean | TenantCountOutputTypeCountCatalogueSourcesArgs
@@ -14891,6 +15879,13 @@ export type TenantCountOutputTypeCountConversationsArgs<ExtArgs extends runtime.
  */
 export type TenantCountOutputTypeCountMessagesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.MessageWhereInput
+}
+
+/**
+ * TenantCountOutputType without action
+ */
+export type TenantCountOutputTypeCountReplyDraftsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AiReplyDraftWhereInput
 }
 
 /**
@@ -15199,6 +16194,8 @@ export type TenantSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   conversations?: boolean | Prisma.Tenant$conversationsArgs<ExtArgs>
   messages?: boolean | Prisma.Tenant$messagesArgs<ExtArgs>
   settings?: boolean | Prisma.Tenant$settingsArgs<ExtArgs>
+  replyStyle?: boolean | Prisma.Tenant$replyStyleArgs<ExtArgs>
+  replyDrafts?: boolean | Prisma.Tenant$replyDraftsArgs<ExtArgs>
   orders?: boolean | Prisma.Tenant$ordersArgs<ExtArgs>
   products?: boolean | Prisma.Tenant$productsArgs<ExtArgs>
   catalogueSources?: boolean | Prisma.Tenant$catalogueSourcesArgs<ExtArgs>
@@ -15283,6 +16280,8 @@ export type TenantInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   conversations?: boolean | Prisma.Tenant$conversationsArgs<ExtArgs>
   messages?: boolean | Prisma.Tenant$messagesArgs<ExtArgs>
   settings?: boolean | Prisma.Tenant$settingsArgs<ExtArgs>
+  replyStyle?: boolean | Prisma.Tenant$replyStyleArgs<ExtArgs>
+  replyDrafts?: boolean | Prisma.Tenant$replyDraftsArgs<ExtArgs>
   orders?: boolean | Prisma.Tenant$ordersArgs<ExtArgs>
   products?: boolean | Prisma.Tenant$productsArgs<ExtArgs>
   catalogueSources?: boolean | Prisma.Tenant$catalogueSourcesArgs<ExtArgs>
@@ -15343,6 +16342,8 @@ export type $TenantPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     conversations: Prisma.$ConversationPayload<ExtArgs>[]
     messages: Prisma.$MessagePayload<ExtArgs>[]
     settings: Prisma.$TenantSettingsPayload<ExtArgs> | null
+    replyStyle: Prisma.$TenantReplyStylePayload<ExtArgs> | null
+    replyDrafts: Prisma.$AiReplyDraftPayload<ExtArgs>[]
     orders: Prisma.$OrderPayload<ExtArgs>[]
     products: Prisma.$ProductPayload<ExtArgs>[]
     catalogueSources: Prisma.$CatalogueSourcePayload<ExtArgs>[]
@@ -15797,6 +16798,8 @@ export interface Prisma__TenantClient<T, Null = never, ExtArgs extends runtime.T
   conversations<T extends Prisma.Tenant$conversationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$conversationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConversationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   messages<T extends Prisma.Tenant$messagesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$messagesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   settings<T extends Prisma.Tenant$settingsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$settingsArgs<ExtArgs>>): Prisma.Prisma__TenantSettingsClient<runtime.Types.Result.GetResult<Prisma.$TenantSettingsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  replyStyle<T extends Prisma.Tenant$replyStyleArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$replyStyleArgs<ExtArgs>>): Prisma.Prisma__TenantReplyStyleClient<runtime.Types.Result.GetResult<Prisma.$TenantReplyStylePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  replyDrafts<T extends Prisma.Tenant$replyDraftsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$replyDraftsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AiReplyDraftPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   orders<T extends Prisma.Tenant$ordersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$ordersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   products<T extends Prisma.Tenant$productsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$productsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   catalogueSources<T extends Prisma.Tenant$catalogueSourcesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$catalogueSourcesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CatalogueSourcePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -16361,6 +17364,49 @@ export type Tenant$settingsArgs<ExtArgs extends runtime.Types.Extensions.Interna
    */
   include?: Prisma.TenantSettingsInclude<ExtArgs> | null
   where?: Prisma.TenantSettingsWhereInput
+}
+
+/**
+ * Tenant.replyStyle
+ */
+export type Tenant$replyStyleArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TenantReplyStyle
+   */
+  select?: Prisma.TenantReplyStyleSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the TenantReplyStyle
+   */
+  omit?: Prisma.TenantReplyStyleOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TenantReplyStyleInclude<ExtArgs> | null
+  where?: Prisma.TenantReplyStyleWhereInput
+}
+
+/**
+ * Tenant.replyDrafts
+ */
+export type Tenant$replyDraftsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AiReplyDraft
+   */
+  select?: Prisma.AiReplyDraftSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AiReplyDraft
+   */
+  omit?: Prisma.AiReplyDraftOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AiReplyDraftInclude<ExtArgs> | null
+  where?: Prisma.AiReplyDraftWhereInput
+  orderBy?: Prisma.AiReplyDraftOrderByWithRelationInput | Prisma.AiReplyDraftOrderByWithRelationInput[]
+  cursor?: Prisma.AiReplyDraftWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AiReplyDraftScalarFieldEnum | Prisma.AiReplyDraftScalarFieldEnum[]
 }
 
 /**

@@ -227,6 +227,7 @@ export type ConversationWhereInput = {
   messages?: Prisma.MessageListRelationFilter
   orders?: Prisma.OrderListRelationFilter
   orderIntentEvaluations?: Prisma.OrderIntentEvaluationListRelationFilter
+  replyDrafts?: Prisma.AiReplyDraftListRelationFilter
 }
 
 export type ConversationOrderByWithRelationInput = {
@@ -245,6 +246,7 @@ export type ConversationOrderByWithRelationInput = {
   messages?: Prisma.MessageOrderByRelationAggregateInput
   orders?: Prisma.OrderOrderByRelationAggregateInput
   orderIntentEvaluations?: Prisma.OrderIntentEvaluationOrderByRelationAggregateInput
+  replyDrafts?: Prisma.AiReplyDraftOrderByRelationAggregateInput
 }
 
 export type ConversationWhereUniqueInput = Prisma.AtLeast<{
@@ -268,6 +270,7 @@ export type ConversationWhereUniqueInput = Prisma.AtLeast<{
   messages?: Prisma.MessageListRelationFilter
   orders?: Prisma.OrderListRelationFilter
   orderIntentEvaluations?: Prisma.OrderIntentEvaluationListRelationFilter
+  replyDrafts?: Prisma.AiReplyDraftListRelationFilter
 }, "id" | "tenantId_channel_externalConversationId" | "tenantId_id">
 
 export type ConversationOrderByWithAggregationInput = {
@@ -316,6 +319,7 @@ export type ConversationCreateInput = {
   messages?: Prisma.MessageCreateNestedManyWithoutConversationInput
   orders?: Prisma.OrderCreateNestedManyWithoutConversationInput
   orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutConversationInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutConversationInput
 }
 
 export type ConversationUncheckedCreateInput = {
@@ -332,6 +336,7 @@ export type ConversationUncheckedCreateInput = {
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutConversationInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutConversationInput
   orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutConversationInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutConversationInput
 }
 
 export type ConversationUpdateInput = {
@@ -348,6 +353,7 @@ export type ConversationUpdateInput = {
   messages?: Prisma.MessageUpdateManyWithoutConversationNestedInput
   orders?: Prisma.OrderUpdateManyWithoutConversationNestedInput
   orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutConversationNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutConversationNestedInput
 }
 
 export type ConversationUncheckedUpdateInput = {
@@ -364,6 +370,7 @@ export type ConversationUncheckedUpdateInput = {
   messages?: Prisma.MessageUncheckedUpdateManyWithoutConversationNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutConversationNestedInput
   orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutConversationNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutConversationNestedInput
 }
 
 export type ConversationCreateManyInput = {
@@ -566,6 +573,20 @@ export type ConversationUpdateOneRequiredWithoutMessagesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ConversationUpdateToOneWithWhereWithoutMessagesInput, Prisma.ConversationUpdateWithoutMessagesInput>, Prisma.ConversationUncheckedUpdateWithoutMessagesInput>
 }
 
+export type ConversationCreateNestedOneWithoutReplyDraftsInput = {
+  create?: Prisma.XOR<Prisma.ConversationCreateWithoutReplyDraftsInput, Prisma.ConversationUncheckedCreateWithoutReplyDraftsInput>
+  connectOrCreate?: Prisma.ConversationCreateOrConnectWithoutReplyDraftsInput
+  connect?: Prisma.ConversationWhereUniqueInput
+}
+
+export type ConversationUpdateOneRequiredWithoutReplyDraftsNestedInput = {
+  create?: Prisma.XOR<Prisma.ConversationCreateWithoutReplyDraftsInput, Prisma.ConversationUncheckedCreateWithoutReplyDraftsInput>
+  connectOrCreate?: Prisma.ConversationCreateOrConnectWithoutReplyDraftsInput
+  upsert?: Prisma.ConversationUpsertWithoutReplyDraftsInput
+  connect?: Prisma.ConversationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ConversationUpdateToOneWithWhereWithoutReplyDraftsInput, Prisma.ConversationUpdateWithoutReplyDraftsInput>, Prisma.ConversationUncheckedUpdateWithoutReplyDraftsInput>
+}
+
 export type ConversationCreateNestedOneWithoutOrdersInput = {
   create?: Prisma.XOR<Prisma.ConversationCreateWithoutOrdersInput, Prisma.ConversationUncheckedCreateWithoutOrdersInput>
   connectOrCreate?: Prisma.ConversationCreateOrConnectWithoutOrdersInput
@@ -607,6 +628,7 @@ export type ConversationCreateWithoutTenantInput = {
   messages?: Prisma.MessageCreateNestedManyWithoutConversationInput
   orders?: Prisma.OrderCreateNestedManyWithoutConversationInput
   orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutConversationInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutConversationInput
 }
 
 export type ConversationUncheckedCreateWithoutTenantInput = {
@@ -622,6 +644,7 @@ export type ConversationUncheckedCreateWithoutTenantInput = {
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutConversationInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutConversationInput
   orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutConversationInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutConversationInput
 }
 
 export type ConversationCreateOrConnectWithoutTenantInput = {
@@ -679,6 +702,7 @@ export type ConversationCreateWithoutProfileInput = {
   messages?: Prisma.MessageCreateNestedManyWithoutConversationInput
   orders?: Prisma.OrderCreateNestedManyWithoutConversationInput
   orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutConversationInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutConversationInput
 }
 
 export type ConversationUncheckedCreateWithoutProfileInput = {
@@ -693,6 +717,7 @@ export type ConversationUncheckedCreateWithoutProfileInput = {
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutConversationInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutConversationInput
   orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutConversationInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutConversationInput
 }
 
 export type ConversationCreateOrConnectWithoutProfileInput = {
@@ -734,6 +759,7 @@ export type ConversationCreateWithoutMessagesInput = {
   profile?: Prisma.InstagramCustomerProfileCreateNestedOneWithoutConversationsInput
   orders?: Prisma.OrderCreateNestedManyWithoutConversationInput
   orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutConversationInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutConversationInput
 }
 
 export type ConversationUncheckedCreateWithoutMessagesInput = {
@@ -749,6 +775,7 @@ export type ConversationUncheckedCreateWithoutMessagesInput = {
   updatedAt?: Date | string
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutConversationInput
   orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutConversationInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutConversationInput
 }
 
 export type ConversationCreateOrConnectWithoutMessagesInput = {
@@ -780,6 +807,7 @@ export type ConversationUpdateWithoutMessagesInput = {
   profile?: Prisma.InstagramCustomerProfileUpdateOneWithoutConversationsNestedInput
   orders?: Prisma.OrderUpdateManyWithoutConversationNestedInput
   orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutConversationNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutConversationNestedInput
 }
 
 export type ConversationUncheckedUpdateWithoutMessagesInput = {
@@ -793,6 +821,87 @@ export type ConversationUncheckedUpdateWithoutMessagesInput = {
   lastMessageAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutConversationNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutConversationNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutConversationNestedInput
+}
+
+export type ConversationCreateWithoutReplyDraftsInput = {
+  id?: string
+  channel: string
+  externalConversationId: string
+  participantId: string
+  displayName?: string | null
+  lastMessageAt: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tenant: Prisma.TenantCreateNestedOneWithoutConversationsInput
+  profile?: Prisma.InstagramCustomerProfileCreateNestedOneWithoutConversationsInput
+  messages?: Prisma.MessageCreateNestedManyWithoutConversationInput
+  orders?: Prisma.OrderCreateNestedManyWithoutConversationInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutConversationInput
+}
+
+export type ConversationUncheckedCreateWithoutReplyDraftsInput = {
+  id?: string
+  tenantId: string
+  channel: string
+  externalConversationId: string
+  participantId: string
+  profileId?: string | null
+  displayName?: string | null
+  lastMessageAt: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  messages?: Prisma.MessageUncheckedCreateNestedManyWithoutConversationInput
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutConversationInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutConversationInput
+}
+
+export type ConversationCreateOrConnectWithoutReplyDraftsInput = {
+  where: Prisma.ConversationWhereUniqueInput
+  create: Prisma.XOR<Prisma.ConversationCreateWithoutReplyDraftsInput, Prisma.ConversationUncheckedCreateWithoutReplyDraftsInput>
+}
+
+export type ConversationUpsertWithoutReplyDraftsInput = {
+  update: Prisma.XOR<Prisma.ConversationUpdateWithoutReplyDraftsInput, Prisma.ConversationUncheckedUpdateWithoutReplyDraftsInput>
+  create: Prisma.XOR<Prisma.ConversationCreateWithoutReplyDraftsInput, Prisma.ConversationUncheckedCreateWithoutReplyDraftsInput>
+  where?: Prisma.ConversationWhereInput
+}
+
+export type ConversationUpdateToOneWithWhereWithoutReplyDraftsInput = {
+  where?: Prisma.ConversationWhereInput
+  data: Prisma.XOR<Prisma.ConversationUpdateWithoutReplyDraftsInput, Prisma.ConversationUncheckedUpdateWithoutReplyDraftsInput>
+}
+
+export type ConversationUpdateWithoutReplyDraftsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  channel?: Prisma.StringFieldUpdateOperationsInput | string
+  externalConversationId?: Prisma.StringFieldUpdateOperationsInput | string
+  participantId?: Prisma.StringFieldUpdateOperationsInput | string
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastMessageAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutConversationsNestedInput
+  profile?: Prisma.InstagramCustomerProfileUpdateOneWithoutConversationsNestedInput
+  messages?: Prisma.MessageUpdateManyWithoutConversationNestedInput
+  orders?: Prisma.OrderUpdateManyWithoutConversationNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutConversationNestedInput
+}
+
+export type ConversationUncheckedUpdateWithoutReplyDraftsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  channel?: Prisma.StringFieldUpdateOperationsInput | string
+  externalConversationId?: Prisma.StringFieldUpdateOperationsInput | string
+  participantId?: Prisma.StringFieldUpdateOperationsInput | string
+  profileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastMessageAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  messages?: Prisma.MessageUncheckedUpdateManyWithoutConversationNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutConversationNestedInput
   orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutConversationNestedInput
 }
@@ -810,6 +919,7 @@ export type ConversationCreateWithoutOrdersInput = {
   profile?: Prisma.InstagramCustomerProfileCreateNestedOneWithoutConversationsInput
   messages?: Prisma.MessageCreateNestedManyWithoutConversationInput
   orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutConversationInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutConversationInput
 }
 
 export type ConversationUncheckedCreateWithoutOrdersInput = {
@@ -825,6 +935,7 @@ export type ConversationUncheckedCreateWithoutOrdersInput = {
   updatedAt?: Date | string
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutConversationInput
   orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutConversationInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutConversationInput
 }
 
 export type ConversationCreateOrConnectWithoutOrdersInput = {
@@ -856,6 +967,7 @@ export type ConversationUpdateWithoutOrdersInput = {
   profile?: Prisma.InstagramCustomerProfileUpdateOneWithoutConversationsNestedInput
   messages?: Prisma.MessageUpdateManyWithoutConversationNestedInput
   orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutConversationNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutConversationNestedInput
 }
 
 export type ConversationUncheckedUpdateWithoutOrdersInput = {
@@ -871,6 +983,7 @@ export type ConversationUncheckedUpdateWithoutOrdersInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   messages?: Prisma.MessageUncheckedUpdateManyWithoutConversationNestedInput
   orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutConversationNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutConversationNestedInput
 }
 
 export type ConversationCreateWithoutOrderIntentEvaluationsInput = {
@@ -886,6 +999,7 @@ export type ConversationCreateWithoutOrderIntentEvaluationsInput = {
   profile?: Prisma.InstagramCustomerProfileCreateNestedOneWithoutConversationsInput
   messages?: Prisma.MessageCreateNestedManyWithoutConversationInput
   orders?: Prisma.OrderCreateNestedManyWithoutConversationInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutConversationInput
 }
 
 export type ConversationUncheckedCreateWithoutOrderIntentEvaluationsInput = {
@@ -901,6 +1015,7 @@ export type ConversationUncheckedCreateWithoutOrderIntentEvaluationsInput = {
   updatedAt?: Date | string
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutConversationInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutConversationInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutConversationInput
 }
 
 export type ConversationCreateOrConnectWithoutOrderIntentEvaluationsInput = {
@@ -932,6 +1047,7 @@ export type ConversationUpdateWithoutOrderIntentEvaluationsInput = {
   profile?: Prisma.InstagramCustomerProfileUpdateOneWithoutConversationsNestedInput
   messages?: Prisma.MessageUpdateManyWithoutConversationNestedInput
   orders?: Prisma.OrderUpdateManyWithoutConversationNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutConversationNestedInput
 }
 
 export type ConversationUncheckedUpdateWithoutOrderIntentEvaluationsInput = {
@@ -947,6 +1063,7 @@ export type ConversationUncheckedUpdateWithoutOrderIntentEvaluationsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   messages?: Prisma.MessageUncheckedUpdateManyWithoutConversationNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutConversationNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutConversationNestedInput
 }
 
 export type ConversationCreateManyTenantInput = {
@@ -974,6 +1091,7 @@ export type ConversationUpdateWithoutTenantInput = {
   messages?: Prisma.MessageUpdateManyWithoutConversationNestedInput
   orders?: Prisma.OrderUpdateManyWithoutConversationNestedInput
   orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutConversationNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutConversationNestedInput
 }
 
 export type ConversationUncheckedUpdateWithoutTenantInput = {
@@ -989,6 +1107,7 @@ export type ConversationUncheckedUpdateWithoutTenantInput = {
   messages?: Prisma.MessageUncheckedUpdateManyWithoutConversationNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutConversationNestedInput
   orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutConversationNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutConversationNestedInput
 }
 
 export type ConversationUncheckedUpdateManyWithoutTenantInput = {
@@ -1027,6 +1146,7 @@ export type ConversationUpdateWithoutProfileInput = {
   messages?: Prisma.MessageUpdateManyWithoutConversationNestedInput
   orders?: Prisma.OrderUpdateManyWithoutConversationNestedInput
   orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutConversationNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutConversationNestedInput
 }
 
 export type ConversationUncheckedUpdateWithoutProfileInput = {
@@ -1041,6 +1161,7 @@ export type ConversationUncheckedUpdateWithoutProfileInput = {
   messages?: Prisma.MessageUncheckedUpdateManyWithoutConversationNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutConversationNestedInput
   orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutConversationNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutConversationNestedInput
 }
 
 export type ConversationUncheckedUpdateManyWithoutProfileInput = {
@@ -1063,12 +1184,14 @@ export type ConversationCountOutputType = {
   messages: number
   orders: number
   orderIntentEvaluations: number
+  replyDrafts: number
 }
 
 export type ConversationCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   messages?: boolean | ConversationCountOutputTypeCountMessagesArgs
   orders?: boolean | ConversationCountOutputTypeCountOrdersArgs
   orderIntentEvaluations?: boolean | ConversationCountOutputTypeCountOrderIntentEvaluationsArgs
+  replyDrafts?: boolean | ConversationCountOutputTypeCountReplyDraftsArgs
 }
 
 /**
@@ -1102,6 +1225,13 @@ export type ConversationCountOutputTypeCountOrderIntentEvaluationsArgs<ExtArgs e
   where?: Prisma.OrderIntentEvaluationWhereInput
 }
 
+/**
+ * ConversationCountOutputType without action
+ */
+export type ConversationCountOutputTypeCountReplyDraftsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AiReplyDraftWhereInput
+}
+
 
 export type ConversationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1119,6 +1249,7 @@ export type ConversationSelect<ExtArgs extends runtime.Types.Extensions.Internal
   messages?: boolean | Prisma.Conversation$messagesArgs<ExtArgs>
   orders?: boolean | Prisma.Conversation$ordersArgs<ExtArgs>
   orderIntentEvaluations?: boolean | Prisma.Conversation$orderIntentEvaluationsArgs<ExtArgs>
+  replyDrafts?: boolean | Prisma.Conversation$replyDraftsArgs<ExtArgs>
   _count?: boolean | Prisma.ConversationCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["conversation"]>
 
@@ -1172,6 +1303,7 @@ export type ConversationInclude<ExtArgs extends runtime.Types.Extensions.Interna
   messages?: boolean | Prisma.Conversation$messagesArgs<ExtArgs>
   orders?: boolean | Prisma.Conversation$ordersArgs<ExtArgs>
   orderIntentEvaluations?: boolean | Prisma.Conversation$orderIntentEvaluationsArgs<ExtArgs>
+  replyDrafts?: boolean | Prisma.Conversation$replyDraftsArgs<ExtArgs>
   _count?: boolean | Prisma.ConversationCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ConversationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1191,6 +1323,7 @@ export type $ConversationPayload<ExtArgs extends runtime.Types.Extensions.Intern
     messages: Prisma.$MessagePayload<ExtArgs>[]
     orders: Prisma.$OrderPayload<ExtArgs>[]
     orderIntentEvaluations: Prisma.$OrderIntentEvaluationPayload<ExtArgs>[]
+    replyDrafts: Prisma.$AiReplyDraftPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1602,6 +1735,7 @@ export interface Prisma__ConversationClient<T, Null = never, ExtArgs extends run
   messages<T extends Prisma.Conversation$messagesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Conversation$messagesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   orders<T extends Prisma.Conversation$ordersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Conversation$ordersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   orderIntentEvaluations<T extends Prisma.Conversation$orderIntentEvaluationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Conversation$orderIntentEvaluationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderIntentEvaluationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  replyDrafts<T extends Prisma.Conversation$replyDraftsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Conversation$replyDraftsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AiReplyDraftPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2130,6 +2264,30 @@ export type Conversation$orderIntentEvaluationsArgs<ExtArgs extends runtime.Type
   take?: number
   skip?: number
   distinct?: Prisma.OrderIntentEvaluationScalarFieldEnum | Prisma.OrderIntentEvaluationScalarFieldEnum[]
+}
+
+/**
+ * Conversation.replyDrafts
+ */
+export type Conversation$replyDraftsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AiReplyDraft
+   */
+  select?: Prisma.AiReplyDraftSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AiReplyDraft
+   */
+  omit?: Prisma.AiReplyDraftOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AiReplyDraftInclude<ExtArgs> | null
+  where?: Prisma.AiReplyDraftWhereInput
+  orderBy?: Prisma.AiReplyDraftOrderByWithRelationInput | Prisma.AiReplyDraftOrderByWithRelationInput[]
+  cursor?: Prisma.AiReplyDraftWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AiReplyDraftScalarFieldEnum | Prisma.AiReplyDraftScalarFieldEnum[]
 }
 
 /**

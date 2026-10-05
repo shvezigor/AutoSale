@@ -139,6 +139,22 @@ enum CatalogueImportStatus {
   CANCELLED
 }
 
+enum AiReplyDraftStatus {
+  QUEUED
+  PROCESSING
+  READY
+  USED
+  STALE
+  BLOCKED
+  FAILED
+}
+
+enum AiReplyDraftOutcome {
+  ANSWER
+  CLARIFY
+  HANDOFF
+}
+
 enum NotificationType {
   SUCCESS
   ERROR
@@ -301,6 +317,8 @@ model Tenant {
   conversations                   Conversation[]
   messages                        Message[]
   settings                        TenantSettings?
+  replyStyle                      TenantReplyStyle?
+  replyDrafts                     AiReplyDraft[]
   orders                          Order[]
   products                        Product[]
   catalogueSources                CatalogueSource[]
@@ -742,6 +760,7 @@ model User {
   orderPaymentsCreated            OrderPayment[]                   @relation("OrderPaymentCreatedBy")
   orderPaymentsCancelled          OrderPayment[]                   @relation("OrderPaymentCancelledBy")
   platformFeatureFlagsUpdated     PlatformFeatureFlag[]            @relation("PlatformFeatureFlagUpdatedBy")
+  replyDraftsCreated              AiReplyDraft[]                   @relation("AiReplyDraftCreator")
 
   @@index([status])
   @@map("users")
@@ -1093,6 +1112,7 @@ model Conversation {
   messages               Message[]
   orders                 Order[]
   orderIntentEvaluations OrderIntentEvaluation[]
+  replyDrafts             AiReplyDraft[]
 
   @@unique([tenantId, channel, externalConversationId])
   @@unique([tenantId, id])
@@ -1178,6 +1198,8 @@ model Message {
   attachments            Attachment[]
   triggeredOrders        Order[]                 @relation("OrderTriggerMessage")
   orderIntentEvaluation  OrderIntentEvaluation?
+  anchoredReplyDrafts    AiReplyDraft[]          @relation("AiReplyDraftAnchor")
+  usedReplyDraft         AiReplyDraft?           @relation("AiReplyDraftOutbound")
 
   @@unique([tenantId, channel, externalMessageId])
   @@unique([tenantId, id])
@@ -1220,6 +1242,62 @@ model TenantSettings {
   tenant                Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@map("tenant_settings")
+}
+
+model TenantReplyStyle {
+  id           String   @id @default(uuid()) @db.Uuid
+  tenantId     String   @unique @map("tenant_id") @db.Uuid
+  enabled      Boolean  @default(false)
+  companyName  String   @default("") @map("company_name")
+  tone         String   @default("NEUTRAL")
+  addressForm  String   @default("FORMAL_YOU") @map("address_form")
+  guidance     String   @default("")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@map("tenant_reply_styles")
+}
+
+model AiReplyDraft {
+  id                     String               @id @default(uuid()) @db.Uuid
+  tenantId               String               @map("tenant_id") @db.Uuid
+  conversationId         String               @map("conversation_id") @db.Uuid
+  anchorMessageId        String               @map("anchor_message_id") @db.Uuid
+  createdByUserId        String               @map("created_by_user_id") @db.Uuid
+  idempotencyKey         String               @map("idempotency_key") @db.Uuid
+  status                 AiReplyDraftStatus   @default(QUEUED)
+  outcome                AiReplyDraftOutcome?
+  generatedText          String?              @map("generated_text")
+  finalText              String?              @map("final_text")
+  sourceSnapshot         Json?                @map("source_snapshot")
+  promptVersion          String?              @map("prompt_version")
+  schemaVersion          String?              @map("schema_version")
+  modelVersion           String?              @map("model_version")
+  providerLatencyMs      Int?                 @map("provider_latency_ms")
+  inputTokens            Int?                 @map("input_tokens")
+  outputTokens           Int?                 @map("output_tokens")
+  leaseId                String?              @map("lease_id") @db.Uuid
+  leaseExpiresAt         DateTime?            @map("lease_expires_at")
+  modelRequestStartedAt  DateTime?            @map("model_request_started_at")
+  attempts               Int                  @default(0)
+  errorCode              String?              @map("error_code")
+  outboundMessageId      String?              @map("outbound_message_id") @db.Uuid
+  createdAt              DateTime             @default(now()) @map("created_at")
+  updatedAt              DateTime             @updatedAt @map("updated_at")
+  usedAt                 DateTime?            @map("used_at")
+  tenant                 Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  conversation           Conversation         @relation(fields: [tenantId, conversationId], references: [tenantId, id], onDelete: Cascade)
+  anchorMessage          Message              @relation("AiReplyDraftAnchor", fields: [tenantId, anchorMessageId], references: [tenantId, id], onDelete: Restrict)
+  createdBy              User                 @relation("AiReplyDraftCreator", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  outboundMessage        Message?             @relation("AiReplyDraftOutbound", fields: [tenantId, outboundMessageId], references: [tenantId, id], onDelete: Restrict)
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, outboundMessageId])
+  @@unique([tenantId, conversationId, anchorMessageId, idempotencyKey])
+  @@index([status, leaseExpiresAt])
+  @@index([tenantId, conversationId, createdAt(sort: Desc)])
+  @@map("ai_reply_drafts")
 }
 
 model TenantLegalEntity {
