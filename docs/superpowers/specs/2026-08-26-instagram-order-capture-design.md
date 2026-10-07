@@ -234,6 +234,15 @@ The first frontend contains:
 - approve/cancel actions;
 - Google Sheets export status and safe retry.
 
+On desktop, the conversation workspace is bounded to the viewport below the
+global header: the conversation list, message history, reply composer, and
+order rail reach the bottom of the visible workspace without creating document
+scroll. Only the conversation list, message history, and explicitly bounded
+detail panels may scroll internally. Visually hidden message metadata must stay
+positioned inside its message bubble so long histories cannot enlarge the page.
+The mobile conversation detail follows the same invariant while occupying the
+available viewport below the mobile header.
+
 Approval is blocked until required customer fields, at least one valid SKU, and positive quantities are present. Every correction and status change produces an audit event.
 
 An approved or automatically approved order may still be corrected until external fulfillment begins. Saving such a correction releases active stock reservations, clears the previous procurement decision, moves the order back to `NEEDS_REVIEW`, and requires approval again. Corrections are blocked after supplier handoff/dispatch or shipment creation. Reapproval updates the existing Google Sheets row rather than appending another order.
