@@ -31,6 +31,7 @@ Before marking the automatic slice available, prove all of the following in auto
 - Focused worker, API and web acceptance runs on 7 October 2026 passed 10 files / 50 tests. They include the active-generation race (a newer inbound message stales the processing draft), disabling before execution (the model is not called), quiet-period scheduling, duplicate/out-of-order delivery, reconciliation, safe-output validation and the manager-controlled composer.
 - The Instagram text-plus-attachment regression is automated: a later attachment-only row leaves the textual anchor current both before and during generation, while a genuinely newer textual message still stales old work.
 - The sequential-editor regression is automated: stale-draft cleanup may clear an older untouched auto-fill, but it cannot mark the newer ready draft as already offered before that replacement can be inserted. Manager-touched text remains protected.
+- Server-render and hydration coverage proves that a persisted ready draft wins over Chrome restoring an older empty textarea during a page reload; the controlled editor is remounted once after hydration without changing saved data or sending a message.
 
 ## Production-browser evidence
 

@@ -40,6 +40,7 @@ export function SocialReplyComposer({
   const [retryingMessageId, setRetryingMessageId] = useState<string | null>(null);
   const [generatingDraft, setGeneratingDraft] = useState(false);
   const [draftError, setDraftError] = useState<string | null>(null);
+  const [editorHydrated, setEditorHydrated] = useState(false);
   const [selectedDraftId, setSelectedDraftId] = useState<string | null>(() => initialReadyDraft?.id ?? null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const threadRef = useRef<HTMLDivElement>(null);
@@ -140,6 +141,10 @@ export function SocialReplyComposer({
     event.preventDefault();
     void submit();
   }
+
+  useEffect(() => {
+    setEditorHydrated(true);
+  }, []);
 
   async function retry(messageId: string) {
     if (retryingMessageId) return;
@@ -297,11 +302,13 @@ export function SocialReplyComposer({
           </div>}
           <label className="sr-only" htmlFor="social-reply">{t('conversations.reply')}</label>
           <textarea
+            autoComplete="off"
             aria-describedby={textError ? 'social-reply-hint social-reply-error' : 'social-reply-hint'}
             aria-invalid={Boolean(textError)}
             aria-label={t('conversations.reply')}
             disabled={!conversation.replyCapability.enabled && !copyOnly}
             id="social-reply"
+            key={editorHydrated ? 'client-editor' : 'server-editor'}
             onChange={(event) => {
               const nextText = event.target.value;
               editorTouched.current = true;
