@@ -15,6 +15,12 @@ const initial: ReplyStyle = {
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
 describe('ReplyStyleSettings', () => {
+  it('explains that drafts are prepared automatically after the quiet period', () => {
+    render(<I18nProvider locale="uk" authenticated><ReplyStyleSettings initial={initial} canEdit /></I18nProvider>);
+
+    expect(screen.getByText('Чернетка автоматично готується після 10 секунд тиші й не надсилається без вашої дії.')).toBeVisible();
+  });
+
   it('validates company name beside its field and saves the enabled style', async () => {
     const fetchMock = vi.fn()
       .mockResolvedValueOnce({ ok: true, json: async () => ({ token: 'csrf-token' }) })
