@@ -9,6 +9,7 @@ Before marking the automatic slice available, prove all of the following in auto
 - one inbound message produces one system-attributed draft only after ten seconds of quiet;
 - several inbound messages inside the interval move the deadline and produce one draft grounded in the complete recent block;
 - duplicate and out-of-order provider events do not restart the deadline or spend another model request;
+- a later attachment-only provider event does not stale the pending or processing draft for the latest textual message;
 - a missed delayed queue wake-up is recovered from PostgreSQL without early or duplicate generation;
 - a newer inbound message safely stales queued, processing or ready work for the older anchor;
 - a ready draft fills an untouched editor once, survives page reload through persisted draft state, and is not reinserted after a manager edits or clears it;
@@ -27,6 +28,7 @@ Before marking the automatic slice available, prove all of the following in auto
 - Admin queue health includes the `ai_replies` queue; reconciliation revives eligible queued jobs and fails expired possibly-spent calls without a second provider charge.
 - Reply-style reads and saves return only the public settings contract after Prisma persistence; storage metadata cannot invalidate the response and roll back an otherwise valid owner update.
 - Focused worker, API and web acceptance runs on 7 October 2026 passed 10 files / 50 tests. They include the active-generation race (a newer inbound message stales the processing draft), disabling before execution (the model is not called), quiet-period scheduling, duplicate/out-of-order delivery, reconciliation, safe-output validation and the manager-controlled composer.
+- The Instagram text-plus-attachment regression is automated: a later attachment-only row leaves the textual anchor current both before and during generation, while a genuinely newer textual message still stales old work.
 
 ## Production-browser evidence
 

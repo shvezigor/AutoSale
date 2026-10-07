@@ -82,6 +82,24 @@ describe('AutomaticReplyDraftScheduler', () => {
     expect(await prisma.aiReplyDraft.count({ where: { tenantId: input.tenantId } })).toBe(1);
   });
 
+  it('keeps a text draft current when a later attachment-only message arrives', async () => {
+    const input = await seed();
+    const add = vi.fn().mockResolvedValue(undefined);
+    const scheduler = new AutomaticReplyDraftScheduler(
+      prisma, { add }, () => new Date('2026-10-05T12:00:00.000Z'),
+    );
+    expect(await scheduler.schedule(input.tenantId, input.messageId)).toBe('SCHEDULED');
+    await prisma.message.create({ data: {
+      tenantId: input.tenantId, conversationId: input.conversationId, rawEventId: input.eventId,
+      channel: 'INSTAGRAM', externalMessageId: randomUUID(), direction: 'INBOUND',
+      senderId: 'fictional-customer', text: null, sourceTimestamp: new Date('2030-01-01T00:00:00Z'),
+    } });
+
+    expect(await scheduler.schedule(input.tenantId, input.messageId)).toBe('REPLAYED');
+    await expect(prisma.aiReplyDraft.findFirstOrThrow({ where: { tenantId: input.tenantId } }))
+      .resolves.toMatchObject({ anchorMessageId: input.messageId, status: 'QUEUED' });
+  });
+
   it('makes the older draft stale when a later inbound message is persisted', async () => {
     const input = await seed();
     const scheduler = new AutomaticReplyDraftScheduler(

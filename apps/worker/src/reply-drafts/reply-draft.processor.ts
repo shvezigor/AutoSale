@@ -59,7 +59,12 @@ export class ReplyDraftProcessor {
           return null;
         }
         const anchor = await tx.message.findFirst({
-          where: { tenantId, conversationId: draft.conversationId, direction: 'INBOUND' },
+          where: {
+            tenantId,
+            conversationId: draft.conversationId,
+            direction: 'INBOUND',
+            text: { not: null },
+          },
           orderBy: [{ sourceTimestamp: 'desc' }, { id: 'desc' }],
           select: { id: true, text: true },
         });
@@ -152,7 +157,12 @@ export class ReplyDraftProcessor {
         return 'BLOCKED' as const;
       }
       const latest = await tx.message.findFirst({
-        where: { tenantId, conversationId: context.conversationId, direction: 'INBOUND' },
+        where: {
+          tenantId,
+          conversationId: context.conversationId,
+          direction: 'INBOUND',
+          text: { not: null },
+        },
         orderBy: [{ sourceTimestamp: 'desc' }, { id: 'desc' }], select: { id: true },
       });
       const currentProducts = await tx.product.findMany({

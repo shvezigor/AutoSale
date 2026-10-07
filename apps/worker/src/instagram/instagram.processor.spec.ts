@@ -81,6 +81,27 @@ describe('InstagramProcessor', () => {
     });
   });
 
+  it('retries idempotent order recognition when the same inbound text event is delivered again', async () => {
+    processIfTriggered.mockReset()
+      .mockRejectedValueOnce(new Prisma.PrismaClientKnownRequestError('fictional conflict', {
+        code: 'P2034', clientVersion: 'test',
+      }))
+      .mockResolvedValueOnce(null);
+    const payload = await loadFixture('text-message.json');
+    const event = await prisma.webhookEvent.create({ data: {
+      tenantId, provider: 'META', externalEventId: `retry-${randomUUID()}`,
+      payload: payload as Prisma.InputJsonObject,
+    } });
+    const processor = new InstagramProcessor(prisma, { copy }, { processIfTriggered });
+
+    await expect(processor.process(tenantId, event.id)).rejects.toMatchObject({ code: 'P2034' });
+    await expect(processor.process(tenantId, event.id)).resolves.toBe('PROCESSED');
+
+    const message = await prisma.message.findFirstOrThrow({ where: { tenantId, externalMessageId: 'm_text_001' } });
+    expect(processIfTriggered).toHaveBeenNthCalledWith(1, tenantId, message.id);
+    expect(processIfTriggered).toHaveBeenNthCalledWith(2, tenantId, message.id);
+  });
+
   it('copies an image after its message is durable', async () => {
     const payload = await loadFixture('image-message.json');
     const event = await prisma.webhookEvent.create({

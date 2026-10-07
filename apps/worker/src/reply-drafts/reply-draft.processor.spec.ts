@@ -133,6 +133,25 @@ describe('ReplyDraftProcessor', () => {
     expect(await new ReplyDraftProcessor(prisma, { generate }).process({ tenantId: seedData.tenantId, draftId: seedData.draftId })).toBe('STALE');
   });
 
+  it('keeps the draft ready if only a later attachment-only message arrives during generation', async () => {
+    const seedData = await seed();
+    const generate = generator(seedData.productId).mockImplementation(async () => {
+      await prisma.message.create({ data: {
+        tenantId: seedData.tenantId, conversationId: seedData.conversationId, rawEventId: seedData.eventId,
+        channel: 'INSTAGRAM', externalMessageId: randomUUID(), direction: 'INBOUND',
+        senderId: 'fictional-customer', text: null,
+        sourceTimestamp: new Date(Date.now() + 60_000),
+      } });
+      return {
+        reply: { outcome: 'CLARIFY', text: 'Яку модель?', productIds: [], claims: [] },
+        metadata: { model: 'fictional-model', latencyMs: 10, inputTokens: 20, outputTokens: 10 },
+      };
+    });
+
+    expect(await new ReplyDraftProcessor(prisma, { generate })
+      .process({ tenantId: seedData.tenantId, draftId: seedData.draftId })).toBe('READY');
+  });
+
   it('blocks an ungrounded model response without exposing its text', async () => {
     const seedData = await seed();
     const generate = vi.fn().mockResolvedValue({

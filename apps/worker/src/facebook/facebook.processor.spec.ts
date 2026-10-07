@@ -35,7 +35,7 @@ describe('FacebookProcessor', () => {
     await container?.stop();
   });
 
-  it('persists and triggers the same inbound Page message exactly once', async () => {
+  it('persists the same inbound Page message once and safely re-enters idempotent order recognition', async () => {
     const event = await createEvent('facebook-text-message.json', 'facebook:mid.facebook.text.001');
     const processor = new FacebookProcessor(prisma, { copy }, { processIfTriggered });
 
@@ -50,7 +50,9 @@ describe('FacebookProcessor', () => {
     });
     await expect(prisma.message.count({ where: { tenantId, channel: 'FACEBOOK' } })).resolves.toBe(1);
     await expect(prisma.instagramCustomerProfile.count({ where: { tenantId } })).resolves.toBe(0);
-    expect(processIfTriggered).toHaveBeenCalledTimes(1);
+    const message = await prisma.message.findFirstOrThrow({ where: { tenantId, channel: 'FACEBOOK' } });
+    expect(processIfTriggered).toHaveBeenNthCalledWith(1, tenantId, message.id);
+    expect(processIfTriggered).toHaveBeenNthCalledWith(2, tenantId, message.id);
   });
 
   it('copies Page image attachments into a Facebook-scoped media key', async () => {

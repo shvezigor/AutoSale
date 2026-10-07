@@ -236,7 +236,10 @@ export class SocialInboundIngestionService {
         }
       }
 
-      if (persisted.wasCreated || (normalized.channel === 'INSTAGRAM' && normalized.direction === 'OUTBOUND')) {
+      const shouldEvaluateOrder = normalized.direction === 'INBOUND'
+        ? Boolean(normalized.text?.trim())
+        : persisted.wasCreated || normalized.channel === 'INSTAGRAM';
+      if (shouldEvaluateOrder) {
         await withTenantTransaction(this.prisma, event.tenantId, (transaction) =>
           assertTenantAcceptingMutations(transaction, event.tenantId, 'ORDER_RECOGNITION'));
         await this.orders?.processIfTriggered(event.tenantId, persisted.messageId);

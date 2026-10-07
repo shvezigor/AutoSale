@@ -44,7 +44,12 @@ export class AutomaticReplyDraftScheduler {
         if (!style?.enabled) return null;
 
         const latest = await tx.message.findFirst({
-          where: { tenantId, conversationId: message.conversationId, direction: 'INBOUND' },
+          where: {
+            tenantId,
+            conversationId: message.conversationId,
+            direction: 'INBOUND',
+            text: { not: null },
+          },
           orderBy: [{ sourceTimestamp: 'desc' }, { id: 'desc' }],
           select: { id: true },
         });

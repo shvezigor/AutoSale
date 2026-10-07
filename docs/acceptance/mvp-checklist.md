@@ -9,6 +9,7 @@
 - [x] Підписаний Meta fixture приймається webhook endpoint.
 - [x] Текст і фото з’являються в одному Instagram-діалозі.
 - [x] Повторна доставка того самого Meta event створює рівно одне повідомлення.
+- [x] Повторна доставка inbound text повторно входить в idempotent order-intent boundary, щоб retryable failure відновився без дубльованого замовлення; attachment-only подія не запускає order recognition.
 - [x] Менеджер відкриває AI-сформоване замовлення та бачить товар і Sheets status.
 - [x] Backup відновлює conversation, order, attachment і MinIO object у чистий Compose namespace.
 - [x] API, worker і web проходять health checks після restore.
@@ -26,9 +27,9 @@
 - [x] 2026-09-11: mobile regression на 390×844 підтверджує відсутність горизонтального overflow, стабільну ширину кнопки під час loading, sticky actions, праве розташування toast і повернення focus після закриття drawer.
 - [x] 2026-09-11: production migration `20260910180000_delivery_foundation` застосована; API, web, worker, PostgreSQL, Redis і MinIO healthy, `https://sales-aito.com/login` повертає 200, а delivery feature flag увімкнений після health-check.
 - [x] 2026-10-02: Facebook Page OAuth/Page selection, encrypted credential lifecycle, signed `object: page` webhook routing, tenant-safe normalization/ingestion та read-only inbox покриті автоматизованими contract, integration, API, worker і web тестами.
-- [x] 2026-10-02: Facebook text/image/video/link/unsupported fixtures не створюють порожніх повідомлень; повторна доставка має одну provider identity, одне повідомлення й не запускає повторний order trigger.
+- [x] 2026-10-02: Facebook text/image/video/link/unsupported fixtures не створюють порожніх повідомлень; повторна доставка має одну provider identity й одне повідомлення, а повторний вхід у idempotent order-intent boundary не створює другого замовлення.
 - [x] 2026-10-02: Facebook connection/settings та inbox мають owner/manager межу, локалізовані помилки, collapsed-by-default UI і явний `CHANNEL_READ_ONLY` без Instagram composer.
-- [x] 2026-10-04: TikTok inbound Slice A покритий tenant-safe OAuth, encrypted credential lifecycle, app-level signed webhook, durable deduplication, text/image/video/shared-post normalization, authenticated media copy, token refresh, order triggering та inbox/settings тестами.
+- [x] 2026-10-04: TikTok inbound Slice A покритий tenant-safe OAuth, encrypted credential lifecycle, app-level signed webhook, durable deduplication, text/image/video/shared-post normalization, authenticated media copy, token refresh, idempotent retryable order triggering та inbox/settings тестами.
 - [x] 2026-10-04: opt-in TikTok inbound browser acceptance використовує лише fictional payload і перевіряє повторну signed delivery, рівно одне повідомлення, TikTok label та правдиву reply capability; без підключеного ізольованого test account сценарій безпечно пропускається.
 - [x] 2026-10-04: manual TikTok replies покриті capability/window contracts, локальною idempotency, generation-fenced API/worker delivery, безпечним reconciliation, shared Instagram/TikTok composer і opt-in outbound browser scenario.
 - [x] 2026-10-04: Facebook/TikTok runtime gates мають audited platform-admin API та UI, fail-closed database state, deployment-flag hard ceiling і worker re-check перед provider side effect. Повний набір із 1 943 тестів, typecheck і production build пройшли; opt-in admin browser mutation без ізольованих `E2E_ADMIN_*` доступів безпечно пропущено.

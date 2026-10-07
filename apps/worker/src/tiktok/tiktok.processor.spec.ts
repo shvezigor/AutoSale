@@ -42,7 +42,7 @@ describe('TikTokProcessor', () => {
     await container?.stop();
   });
 
-  it('persists and triggers the same inbound message exactly once', async () => {
+  it('persists the same inbound message once and safely re-enters idempotent order recognition', async () => {
     const event = await createEvent('text-message.json', 'tiktok:fictional-message-text-001');
     const processor = new TikTokProcessor(prisma, { copy }, { processIfTriggered });
     await processor.process(tenantId, event.id);
@@ -52,7 +52,9 @@ describe('TikTokProcessor', () => {
     await expect(prisma.conversation.findFirstOrThrow({ where: { tenantId } })).resolves.toMatchObject({
       channel: 'TIKTOK', externalConversationId: 'fictional-conversation-001', profileId: null,
     });
-    expect(processIfTriggered).toHaveBeenCalledTimes(1);
+    const message = await prisma.message.findFirstOrThrow({ where: { tenantId, channel: 'TIKTOK' } });
+    expect(processIfTriggered).toHaveBeenNthCalledWith(1, tenantId, message.id);
+    expect(processIfTriggered).toHaveBeenNthCalledWith(2, tenantId, message.id);
   });
 
   it('copies media through the TikTok authenticated copier and remains idempotent', async () => {
