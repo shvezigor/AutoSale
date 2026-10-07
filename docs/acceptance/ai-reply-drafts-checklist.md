@@ -1,6 +1,6 @@
 # Catalogue-grounded AI reply drafts — acceptance
 
-Status: **automatic ten-second preparation implemented; full browser and live validation pending**. Do not enable this capability for a production tenant until a consenting owner completes the controlled pilot below. The tenant switch defaults off. Disabling it blocks new generation and draft-linked sending while ordinary manual replies remain available.
+Status: **automatic ten-second preparation implemented; partial production-browser evidence recorded; remaining live validation pending**. Do not enable this capability for a production tenant until a consenting owner completes the controlled pilot below. The tenant switch defaults off. Disabling it blocks new generation and draft-linked sending while ordinary manual replies remain available.
 
 ## Automatic-preparation acceptance gate
 
@@ -26,6 +26,12 @@ Before marking the automatic slice available, prove all of the following in auto
 - Catalogue retrieval and processor tests prove explicit model-options requests exclude compatibility-only parenthetical matches and build verified exact-name option lists.
 - Admin queue health includes the `ai_replies` queue; reconciliation revives eligible queued jobs and fails expired possibly-spent calls without a second provider charge.
 - Reply-style reads and saves return only the public settings contract after Prisma persistence; storage metadata cannot invalidate the response and roll back an otherwise valid owner update.
+
+## Production-browser evidence
+
+- On 5 October 2026, a consenting test tenant received an automatic draft for an explicit model-options request. The production worker returned a grounded `ANSWER` containing only the three primary-name `Регіон` catalogue variants; compatibility-only accessory matches were absent. After a reload, the same ready text and the three safe catalogue sources were visible and the untouched reply editor contained the ready draft.
+- The manager later explicitly sent that draft. A follow-up browser review on 7 October 2026 showed exactly one sent outbound message. The tenant-scoped audit row was `USED`, linked to exactly one outbound message, and its final text matched the generated text. No automated send occurred.
+- This evidence covers the exact-options fallback, persisted ready state after reload, untouched-editor insertion and one explicitly sent linked outbound. It does not yet cover preservation after manager editing or clearing, multi-message debounce timing, stale-draft behavior, disabled-switch behavior, Facebook copy-only behavior or eligible TikTok delivery in a live browser.
 
 ## Controlled live pilot
 

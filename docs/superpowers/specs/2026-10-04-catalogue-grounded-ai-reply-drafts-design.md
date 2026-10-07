@@ -2,7 +2,7 @@
 
 **Date:** 2026-10-04  
 **Updated:** 2026-10-05
-**Status:** Automatic preparation implemented behind a tenant switch; full browser and live provider validation pending
+**Status:** Automatic preparation implemented behind a tenant switch; partial production-browser evidence recorded; remaining live provider validation pending
 **Owner:** Sales AITO conversations and AI
 
 ## 1. Purpose
