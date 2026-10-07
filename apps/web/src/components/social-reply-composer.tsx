@@ -40,7 +40,6 @@ export function SocialReplyComposer({
   const [retryingMessageId, setRetryingMessageId] = useState<string | null>(null);
   const [generatingDraft, setGeneratingDraft] = useState(false);
   const [draftError, setDraftError] = useState<string | null>(null);
-  const [editorHydrated, setEditorHydrated] = useState(false);
   const [selectedDraftId, setSelectedDraftId] = useState<string | null>(() => initialReadyDraft?.id ?? null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const threadRef = useRef<HTMLDivElement>(null);
@@ -49,6 +48,7 @@ export function SocialReplyComposer({
   const pendingSubmission = useRef<PendingSubmission | null>(null);
   const pendingDraftRequest = useRef<string | null>(null);
   const editorTouched = useRef(false);
+  const restoringInitialDraft = useRef(Boolean(initialReadyDraft));
   const autoFilledDraftId = useRef<string | null>(initialReadyDraft?.id ?? null);
   const offeredDraftIds = useRef(new Set<string>(initialReadyDraft ? [initialReadyDraft.id] : []));
   const activeConversationId = useRef(initialConversation.id);
@@ -143,7 +143,17 @@ export function SocialReplyComposer({
   }
 
   useEffect(() => {
-    setEditorHydrated(true);
+    const timer = window.setTimeout(() => {
+      const generatedText = initialReadyDraft?.generatedText;
+      if (generatedText && restoringInitialDraft.current) {
+        setText(generatedText);
+        if (textareaRef.current && textareaRef.current.value !== generatedText) {
+          textareaRef.current.value = generatedText;
+        }
+      }
+      restoringInitialDraft.current = false;
+    }, 150);
+    return () => window.clearTimeout(timer);
   }, []);
 
   async function retry(messageId: string) {
@@ -308,9 +318,9 @@ export function SocialReplyComposer({
             aria-label={t('conversations.reply')}
             disabled={!conversation.replyCapability.enabled && !copyOnly}
             id="social-reply"
-            key={editorHydrated ? 'client-editor' : 'server-editor'}
             onChange={(event) => {
               const nextText = event.target.value;
+              if (restoringInitialDraft.current && initialReadyDraft && nextText === '') return;
               editorTouched.current = true;
               autoFilledDraftId.current = null;
               if (pendingSubmission.current?.text !== nextText.trim()) pendingSubmission.current = null;

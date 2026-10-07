@@ -97,17 +97,19 @@ describe('SocialReplyComposer', () => {
     const container = document.createElement('div');
     container.innerHTML = renderToStaticMarkup(element);
     document.body.append(container);
-    const serverEditor = container.querySelector('textarea');
-    expect(serverEditor).not.toBeNull();
-    serverEditor!.value = '';
-
     const root = hydrateRoot(container, element);
-    await act(async () => {});
-
-    expect(container.querySelector('textarea')).not.toBe(serverEditor);
-    expect(container.querySelector('textarea')).toHaveValue(draft.generatedText);
-    await act(async () => root.unmount());
-    container.remove();
+    try {
+      await act(async () => {});
+      const hydratedEditor = container.querySelector('textarea');
+      expect(hydratedEditor).not.toBeNull();
+      hydratedEditor!.value = '';
+      expect(hydratedEditor).toHaveValue('');
+      await act(async () => new Promise((resolve) => window.setTimeout(resolve, 200)));
+      expect(container.querySelector('textarea')).toHaveValue(draft.generatedText);
+    } finally {
+      await act(async () => root.unmount());
+      container.remove();
+    }
   });
 
   it('automatically fills a ready draft without sending and links it on explicit send', async () => {
