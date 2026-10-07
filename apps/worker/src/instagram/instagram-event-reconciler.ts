@@ -28,7 +28,7 @@ export class InstagramEventReconciler {
 
   async reconcile(): Promise<{ attempted: number; failed: number; skipped: number }> {
     const pending = await this.store.$queryRaw<DueInstagramEvent[]>`
-      SELECT tenant_id, event_id, recovery_kind
+      SELECT tenant_id, event_id, recovery_kind, job_name
       FROM public.worker_due_instagram_events(100)
     `;
     let failed = 0;

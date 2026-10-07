@@ -25,6 +25,7 @@ describe('InstagramEventReconciler', () => {
 
     await expect(reconciler.reconcile()).resolves.toEqual({ attempted: 2, failed: 0, skipped: 0 });
     expect(queryRaw).toHaveBeenCalledOnce();
+    expect((queryRaw.mock.calls[0]?.[0] as TemplateStringsArray).join('')).toContain('job_name');
     expect(add).toHaveBeenNthCalledWith(
       1,
       'instagram.normalize',

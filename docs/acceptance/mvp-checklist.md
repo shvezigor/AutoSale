@@ -10,6 +10,7 @@
 - [x] Текст і фото з’являються в одному Instagram-діалозі.
 - [x] Повторна доставка того самого Meta event створює рівно одне повідомлення.
 - [x] Повторна доставка inbound text повторно входить в idempotent order-intent boundary, щоб retryable failure відновився без дубльованого замовлення; attachment-only подія не запускає order recognition.
+- [x] Worker recovery читає `job_name` з bounded discovery function і повертає незавершені Instagram/Facebook/TikTok events у правильну provider queue.
 - [x] Менеджер відкриває AI-сформоване замовлення та бачить товар і Sheets status.
 - [x] Backup відновлює conversation, order, attachment і MinIO object у чистий Compose namespace.
 - [x] API, worker і web проходять health checks після restore.
