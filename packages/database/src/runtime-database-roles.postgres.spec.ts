@@ -54,6 +54,12 @@ describe('runtime database role provisioning', () => {
       await api.query('INSERT INTO tenants (id, key, name) VALUES ($1, $2, $3)', [tenantId, 'role-test', 'Fictional Role Test']);
       await expect(worker.query('SELECT name FROM tenants WHERE id = $1', [tenantId]))
         .resolves.toMatchObject({ rows: [{ name: 'Fictional Role Test' }] });
+      await expect(api.query("SELECT public.autosale_order_prefix('Fictional Shop') AS prefix"))
+        .resolves.toMatchObject({ rows: [{ prefix: 'FS' }] });
+      await expect(worker.query("SELECT public.autosale_order_prefix('Fictional Shop') AS prefix"))
+        .resolves.toMatchObject({ rows: [{ prefix: 'FS' }] });
+      await expect(backup.query("SELECT public.autosale_order_prefix('Fictional Shop') AS prefix"))
+        .rejects.toMatchObject({ code: '42501' });
 
       await expect(api.query('CREATE TABLE forbidden_api_ddl (id integer)')).rejects.toMatchObject({ code: '42501' });
       await expect(worker.query('ALTER TABLE tenants ADD COLUMN forbidden_worker_ddl text')).rejects.toMatchObject({ code: '42501' });

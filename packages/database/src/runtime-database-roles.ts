@@ -112,6 +112,10 @@ export async function configureRuntimeDatabaseRoles(
       $platform_flags$;
       DO $functions$
       BEGIN
+        IF to_regprocedure('public.autosale_order_prefix(text)') IS NOT NULL THEN
+          GRANT EXECUTE ON FUNCTION public.autosale_order_prefix(text) TO autosale_api, autosale_worker;
+          REVOKE ALL ON FUNCTION public.autosale_order_prefix(text) FROM autosale_backup;
+        END IF;
         IF to_regprocedure('public.api_platform_create_tenant_lifecycle_request(uuid,uuid,text,text,uuid,text,timestamp with time zone)') IS NOT NULL THEN
           GRANT EXECUTE ON FUNCTION public.api_platform_create_tenant_lifecycle_request(uuid, uuid, text, text, uuid, text, timestamp with time zone) TO autosale_api;
           REVOKE ALL ON FUNCTION public.api_platform_create_tenant_lifecycle_request(uuid, uuid, text, text, uuid, text, timestamp with time zone) FROM autosale_worker;
