@@ -163,7 +163,7 @@ The existing conversation composer adds:
 
 - stable quiet-period, queued and processing feedback without blocking conversation navigation;
 - no generation button during the normal success path;
-- automatic insertion into an untouched editor exactly once per ready draft;
+- automatic insertion into an untouched editor exactly once per ready draft, including the initial server-rendered conversation state so the draft is present before client polling;
 - when a newer inbound message receives a ready draft, it replaces an older untouched automatic editor value; the older value is cleared first without consuming or losing the newer draft;
 - no separate full-size ready-draft card: an automatically inserted draft is shown only in the ordinary reply editor, with a compact status and collapsed catalogue sources;
 - visible ready-draft context in a compact collapsed disclosure without insertion when the manager already touched the editor;

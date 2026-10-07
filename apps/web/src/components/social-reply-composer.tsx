@@ -24,14 +24,23 @@ export function SocialReplyComposer({
   canManageSettings: boolean;
   draftsEnabled?: boolean;
 }) {
+  const initialLatestInbound = [...initialConversation.messages].reverse()
+    .find((message) => message.direction === 'INBOUND');
+  const initialReadyDraft = draftsEnabled
+    ? initialConversation.replyDrafts?.find((draft) => (
+      draft.anchorMessageId === initialLatestInbound?.id
+      && draft.status === 'READY'
+      && Boolean(draft.generatedText)
+    )) ?? null
+    : null;
   const [conversation, setConversation] = useState(initialConversation);
-  const [text, setText] = useState('');
+  const [text, setText] = useState(() => initialReadyDraft?.generatedText ?? '');
   const [textError, setTextError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [retryingMessageId, setRetryingMessageId] = useState<string | null>(null);
   const [generatingDraft, setGeneratingDraft] = useState(false);
   const [draftError, setDraftError] = useState<string | null>(null);
-  const [selectedDraftId, setSelectedDraftId] = useState<string | null>(null);
+  const [selectedDraftId, setSelectedDraftId] = useState<string | null>(() => initialReadyDraft?.id ?? null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const threadRef = useRef<HTMLDivElement>(null);
   const refreshInFlight = useRef(false);
@@ -39,8 +48,8 @@ export function SocialReplyComposer({
   const pendingSubmission = useRef<PendingSubmission | null>(null);
   const pendingDraftRequest = useRef<string | null>(null);
   const editorTouched = useRef(false);
-  const autoFilledDraftId = useRef<string | null>(null);
-  const offeredDraftIds = useRef(new Set<string>());
+  const autoFilledDraftId = useRef<string | null>(initialReadyDraft?.id ?? null);
+  const offeredDraftIds = useRef(new Set<string>(initialReadyDraft ? [initialReadyDraft.id] : []));
   const activeConversationId = useRef(initialConversation.id);
   const deliveryStatuses = useRef(new Map(
     initialConversation.messages.map((message) => [message.id, message.delivery?.status ?? null]),

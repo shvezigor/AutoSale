@@ -12,7 +12,7 @@ Before marking the automatic slice available, prove all of the following in auto
 - a later attachment-only provider event does not stale the pending or processing draft for the latest textual message;
 - a missed delayed queue wake-up is recovered from PostgreSQL without early or duplicate generation;
 - a newer inbound message safely stales queued, processing or ready work for the older anchor;
-- a ready draft fills an untouched editor once, survives page reload through persisted draft state, and is not reinserted after a manager edits or clears it;
+- a ready draft fills an untouched editor in the initial server-rendered state, survives page reload through persisted draft state, and is not reinserted after a manager edits or clears it;
 - a ready draft for a newer inbound message replaces the prior untouched automatic editor value without being lost during stale-draft cleanup;
 - existing or deliberately cleared manager text is preserved; the ready draft remains visible but is not silently inserted;
 - sending still requires an explicit manager action and creates one linked outbound message;

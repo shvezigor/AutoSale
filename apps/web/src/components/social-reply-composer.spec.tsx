@@ -1,5 +1,6 @@
 import type { ConversationDetailResponse } from '../../../../packages/contracts/src/conversations';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const api = vi.hoisted(() => ({
@@ -52,6 +53,30 @@ function renderComposer(initialConversation = conversation, canManageSettings = 
 }
 
 describe('SocialReplyComposer', () => {
+  it('includes the latest ready draft in the initial server-rendered editor', () => {
+    const inbound = { ...pendingMessage, id: '33333333-3333-4333-8333-333333333333',
+      direction: 'INBOUND' as const, text: 'Покажіть моделі Регіон', delivery: null };
+    const draft = {
+      id: '55555555-5555-4555-8555-555555555555', conversationId: conversation.id,
+      anchorMessageId: inbound.id, triggerSource: 'AUTOMATIC' as const,
+      availableAt: '2026-10-05T10:00:10.000Z', status: 'READY' as const, outcome: 'ANSWER' as const,
+      generatedText: 'Можу запропонувати моделі Регіон.', finalText: null, sources: [], errorCode: null,
+      createdAt: '2026-10-05T10:00:00.000Z', updatedAt: '2026-10-05T10:00:11.000Z',
+    };
+
+    const markup = renderToStaticMarkup(
+      <I18nProvider locale="uk" authenticated>
+        <ToastProvider>
+          <SocialReplyComposer canManageSettings={false}
+            initialConversation={{ ...conversation, messages: [inbound], replyDrafts: [draft] }} draftsEnabled />
+        </ToastProvider>
+      </I18nProvider>,
+    );
+
+    expect(markup).toContain('<textarea');
+    expect(markup).toContain('>Можу запропонувати моделі Регіон.</textarea>');
+  });
+
   it('automatically fills a ready draft without sending and links it on explicit send', async () => {
     const inbound = { ...pendingMessage, id: '33333333-3333-4333-8333-333333333333',
       direction: 'INBOUND' as const, text: 'Чи є товар?', delivery: null };
