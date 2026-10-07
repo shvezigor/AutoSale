@@ -298,22 +298,26 @@ html[data-sidebar-state="collapsed"] .authenticated-shell > .primary-nav .nav-it
 .message-attachment-link:hover { text-decoration: underline; }
 .attachment-placeholder { margin: 6px 0 8px; padding: 12px; border: 1px dashed var(--border); border-radius: 8px; color: var(--muted); font-size: 12px; }
 .attachment-failure { margin: 6px 0; padding: 12px; border: 1px dashed #d5a1a1; border-radius: 8px; color: #9b3333; font-size: 12px; }
-.reply-area { position: relative; z-index: 2; margin: 0; padding: 10px 22px 20px; border-top: 1px solid var(--border); background: rgba(255,255,255,.98); }
-.reply-draft-panel { display: grid; gap: 8px; max-height: min(34vh, 260px); overflow: auto; margin-bottom: 10px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; background: #f8faff; font-size: 12px; }
-.reply-draft-panel-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.reply-draft-panel-heading > div { display: grid; gap: 3px; min-width: 0; }
-.reply-draft-panel-heading small, .reply-draft-sources small { color: var(--muted); }
-.reply-draft-panel-heading .loading-button { flex-shrink: 0; }
-.reply-draft-result { display: grid; gap: 8px; }
-.reply-draft-result p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
-.reply-draft-sources ul { margin: 4px 0 0; padding-left: 18px; }
-.reply-draft-result > button { justify-self: start; }
-@media (max-width: 720px) { .reply-draft-panel-heading { align-items: stretch; flex-direction: column; }.reply-draft-panel-heading .loading-button { width: 100%; } }
+.reply-area { position: relative; z-index: 2; max-height: min(60dvh, 520px); overflow-y: auto; overscroll-behavior: contain; margin: 0; padding: 10px 22px 20px; border-top: 1px solid var(--border); background: rgba(255,255,255,.98); }
+.reply-draft-inline:empty { display: none; }
+.reply-draft-inline { margin-bottom: 8px; font-size: 11px; }
+.reply-draft-inline p { margin: 0; color: var(--muted); line-height: 1.45; }
+.reply-draft-inline-state { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.reply-draft-inline-state .loading-button { flex-shrink: 0; }
+.reply-draft-applied { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.reply-draft-applied > p { min-width: 0; }
+.reply-draft-available, .reply-draft-sources { min-width: 0; }
+.reply-draft-available > summary, .reply-draft-sources > summary { color: var(--accent); cursor: pointer; font-weight: 700; }
+.reply-draft-available[open] { display: grid; gap: 7px; padding: 8px 0; }
+.reply-draft-available > p { white-space: pre-wrap; overflow-wrap: anywhere; }
+.reply-draft-sources ul { margin: 6px 0 0; padding-left: 18px; color: var(--ink); }
+.reply-draft-sources li { margin-top: 4px; line-height: 1.45; overflow-wrap: anywhere; }
+.reply-draft-sources small { color: var(--muted); }
 .reply-guidance { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 8px; padding: 10px 12px; border-radius: 9px; background: #fff7e8; color: #72500b; font-size: 12px; }
 .reply-guidance a { color: var(--accent); font-weight: 700; }
-.social-reply-composer { padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px; background: white; box-shadow: 0 5px 18px rgba(28, 46, 76, .06); }
+.social-reply-composer { display: grid; padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px; background: white; box-shadow: 0 5px 18px rgba(28, 46, 76, .06); }
 .social-reply-composer:focus-within { border-color: #9bbdec; box-shadow: 0 0 0 3px rgba(30, 102, 217, .1); }
-.social-reply-composer textarea { display: block; width: 100%; min-height: 46px; max-height: 150px; resize: vertical; border: 0; outline: 0; background: transparent; color: var(--text); font: inherit; font-size: 13px; line-height: 1.45; }
+.social-reply-composer textarea { display: block; width: 100%; min-height: 72px; max-height: min(50dvh, 420px); resize: vertical; border: 0; outline: 0; background: transparent; color: var(--text); font: inherit; font-size: 13px; line-height: 1.45; }
 .social-reply-composer textarea::placeholder { color: #9aa4b4; }
 .reply-composer-actions { display: flex; align-items: center; justify-content: space-between; min-height: 38px; gap: 12px; }
 .reply-composer-actions small { color: var(--muted); font-size: 10px; }

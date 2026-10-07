@@ -23,4 +23,11 @@ describe('conversation viewport contract', () => {
 
     expect(css).toContain('.conversation-panel { position: fixed; inset: 72px 0 0; z-index: 2; height: auto;');
   });
+
+  it('lets the reply editor grow vertically without forcing document scrolling', () => {
+    const css = readFileSync(resolve(__dirname, '../../app/globals.css'), 'utf8');
+
+    expect(css).toMatch(/\.social-reply-composer textarea\s*\{[^}]*min-height:\s*72px[^}]*max-height:\s*min\(50dvh,\s*420px\)[^}]*resize:\s*vertical/s);
+    expect(css).toMatch(/\.reply-area\s*\{[^}]*max-height:\s*min\(60dvh,\s*520px\)[^}]*overflow-y:\s*auto/s);
+  });
 });

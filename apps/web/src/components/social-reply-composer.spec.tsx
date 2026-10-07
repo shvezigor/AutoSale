@@ -59,16 +59,29 @@ describe('SocialReplyComposer', () => {
       id: '55555555-5555-4555-8555-555555555555', conversationId: conversation.id,
       anchorMessageId: inbound.id, triggerSource: 'AUTOMATIC' as const,
       availableAt: '2026-10-05T10:00:00.000Z', status: 'READY' as const, outcome: 'CLARIFY' as const,
-      generatedText: 'Який товар вас цікавить?', finalText: null, sources: [], errorCode: null,
+      generatedText: 'Який товар вас цікавить?', finalText: null, sources: [{
+        productId: '77777777-7777-4777-8777-777777777777',
+        sku: 'AUTO-TEST-001',
+        name: 'Тестові двері Регіон',
+        variants: {},
+        price: '2420',
+        currency: 'UAH',
+        stockQuantity: 3,
+        updatedAt: '2026-10-05T09:00:00.000Z',
+      }], errorCode: null,
       createdAt: '2026-10-05T10:00:00.000Z', updatedAt: '2026-10-05T10:00:00.000Z',
     };
     api.sendConversationMessage.mockResolvedValue(pendingMessage);
     api.refreshConversation.mockResolvedValue({ ...conversation, messages: [inbound], replyDrafts: [draft] });
     renderComposer({ ...conversation, messages: [inbound], replyDrafts: [draft] }, false, 'uk', true);
 
-    expect((await screen.findAllByText('Який товар вас цікавить?'))[0]).toBeVisible();
+    const editor = await screen.findByRole('textbox', { name: 'Відповідь' });
+    expect(editor).toHaveValue('Який товар вас цікавить?');
+    expect(screen.queryByText('Який товар вас цікавить?', { selector: 'p' })).not.toBeInTheDocument();
+    expect(screen.getByText(/Чернетку автоматично додано/)).toBeVisible();
+    const sources = screen.getByText('Джерела з каталогу (1)').closest('details');
+    expect(sources).not.toHaveAttribute('open');
     expect(api.sendConversationMessage).not.toHaveBeenCalled();
-    expect(screen.getByRole('textbox', { name: 'Відповідь' })).toHaveValue('Який товар вас цікавить?');
     expect(api.createConversationReplyDraft).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole('button', { name: 'Надіслати' }));
     await waitFor(() => expect(api.sendConversationMessage).toHaveBeenCalledWith(conversation.id,

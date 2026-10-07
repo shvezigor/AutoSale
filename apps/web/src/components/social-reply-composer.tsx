@@ -247,32 +247,6 @@ export function SocialReplyComposer({
         <MessageThread conversation={conversation} onRetry={(messageId) => void retry(messageId)} retryingMessageId={retryingMessageId} />
       </div>
       <div className="reply-area">
-        {draftsEnabled && <section className="reply-draft-panel" aria-label={t('conversations.replyDraftTitle')}>
-          <div className="reply-draft-panel-heading"><div><strong>{t('conversations.replyDraftTitle')}</strong>
-            <small>{t('conversations.replyDraftManualNote')}</small></div>
-            {currentDraft && ['BLOCKED', 'FAILED'].includes(currentDraft.status) &&
-              <LoadingButton className="secondary-button" type="button" pending={generatingDraft}
-                disabled={!latestInbound || generatingDraft} onClick={() => void generateDraft()}>
-                {t('conversations.replyDraftGenerate')}
-              </LoadingButton>}
-          </div>
-          {draftBusy && <p role="status">{t('conversations.replyDraftWorking')}</p>}
-          {draftError && <p role="alert">{draftError}</p>}
-          {currentDraft?.status === 'READY' && currentDraft.generatedText && <div className="reply-draft-result">
-            <p>{currentDraft.generatedText}</p>
-            {currentDraft.sources.length > 0 && <div className="reply-draft-sources"><small>{t('conversations.replyDraftSources')}</small>
-              <ul>{currentDraft.sources.map((source) => <li key={source.productId}>
-                <strong>{source.name}</strong> · {source.sku}
-                {source.price && source.currency ? <> · {t('conversations.replyDraftPrice')}: {source.price} {source.currency}</> : null}
-                {source.stockQuantity !== null ? <> · {t('conversations.replyDraftStock')}: {source.stockQuantity}</> : null}
-                <small> · {t('conversations.replyDraftSourceUpdated')}: {formatDate(source.updatedAt)}</small>
-              </li>)}</ul>
-            </div>}
-          </div>}
-          {currentDraft && ['STALE', 'BLOCKED', 'FAILED'].includes(currentDraft.status) &&
-            <p role="status">{t('conversations.replyDraftUnavailable')}</p>}
-          {appliedDraft && <p className="reply-draft-applied" role="status">{t('conversations.replyDraftApplied')}</p>}
-        </section>}
         {copyOnly && <p className="reply-guidance" role="status">{t('conversations.facebookReadOnly')}</p>}
         {disabledReason ? (
           <div className="reply-guidance" role="status">
@@ -281,6 +255,29 @@ export function SocialReplyComposer({
           </div>
         ) : null}
         <form className="social-reply-composer" onSubmit={(event) => void submit(event)}>
+          {draftsEnabled && <div className="reply-draft-inline" aria-label={t('conversations.replyDraftTitle')}>
+            {draftBusy && <p role="status">{t('conversations.replyDraftWorking')}</p>}
+            {draftError && <p role="alert">{draftError}</p>}
+            {currentDraft && ['STALE', 'BLOCKED', 'FAILED'].includes(currentDraft.status) && <div className="reply-draft-inline-state">
+              <p role="status">{t('conversations.replyDraftUnavailable')}</p>
+              {['BLOCKED', 'FAILED'].includes(currentDraft.status) && <LoadingButton className="secondary-button" type="button"
+                pending={generatingDraft} disabled={!latestInbound || generatingDraft} onClick={() => void generateDraft()}>
+                {t('conversations.replyDraftGenerate')}
+              </LoadingButton>}
+            </div>}
+            {currentDraft?.status === 'READY' && currentDraft.generatedText && !appliedDraft && <details className="reply-draft-available">
+              <summary>{t('conversations.replyDraftTitle')}</summary>
+              <p>{currentDraft.generatedText}</p>
+              {renderDraftSources(currentDraft.sources, t, formatDate)}
+            </details>}
+            {appliedDraft && <div className="reply-draft-applied">
+              <p role="status">{t('conversations.replyDraftApplied')}</p>
+              {appliedDraft.sources.length > 0 && <details className="reply-draft-sources">
+                <summary>{t('conversations.replyDraftSources')} ({appliedDraft.sources.length})</summary>
+                {renderDraftSourceList(appliedDraft.sources, t, formatDate)}
+              </details>}
+            </div>}
+          </div>}
           <label className="sr-only" htmlFor="social-reply">{t('conversations.reply')}</label>
           <textarea
             aria-describedby={textError ? 'social-reply-hint social-reply-error' : 'social-reply-hint'}
@@ -313,6 +310,33 @@ export function SocialReplyComposer({
       </div>
     </>
   );
+}
+
+type ReplyDraftSource = NonNullable<ConversationDetailResponse['replyDrafts']>[number]['sources'][number];
+
+function renderDraftSources(
+  sources: ReplyDraftSource[],
+  t: ReturnType<typeof useI18n>['t'],
+  formatDate: ReturnType<typeof useI18n>['formatDate'],
+) {
+  if (sources.length === 0) return null;
+  return <div className="reply-draft-sources">
+    <strong>{t('conversations.replyDraftSources')}</strong>
+    {renderDraftSourceList(sources, t, formatDate)}
+  </div>;
+}
+
+function renderDraftSourceList(
+  sources: ReplyDraftSource[],
+  t: ReturnType<typeof useI18n>['t'],
+  formatDate: ReturnType<typeof useI18n>['formatDate'],
+) {
+  return <ul>{sources.map((source) => <li key={source.productId}>
+    <strong>{source.name}</strong> · {source.sku}
+    {source.price && source.currency ? <> · {t('conversations.replyDraftPrice')}: {source.price} {source.currency}</> : null}
+    {source.stockQuantity !== null ? <> · {t('conversations.replyDraftStock')}: {source.stockQuantity}</> : null}
+    <small> · {t('conversations.replyDraftSourceUpdated')}: {formatDate(source.updatedAt)}</small>
+  </li>)}</ul>;
 }
 
 function replyDisabledText(

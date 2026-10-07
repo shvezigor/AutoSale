@@ -159,11 +159,13 @@ The existing conversation composer adds:
 - stable quiet-period, queued and processing feedback without blocking conversation navigation;
 - no generation button during the normal success path;
 - automatic insertion into an untouched editor exactly once per ready draft;
-- visible ready-draft context without insertion when the manager already touched the editor;
+- no separate full-size ready-draft card: an automatically inserted draft is shown only in the ordinary reply editor, with a compact status and collapsed catalogue sources;
+- visible ready-draft context in a compact collapsed disclosure without insertion when the manager already touched the editor;
 - **Retry** for a safe generation failure;
 - a source list showing product name and SKU, with price/stock freshness where used;
 - a clear warning for stale or blocked results;
 - editable draft text in the ordinary reply field;
+- a vertically resizable reply field bounded to the conversation viewport, so enlarging the editor reduces the internally scrollable message history without introducing document scroll;
 - normal **Send** for supported reply-capable channels;
 - **Copy reply** for Facebook with explicit manual-send guidance.
 
