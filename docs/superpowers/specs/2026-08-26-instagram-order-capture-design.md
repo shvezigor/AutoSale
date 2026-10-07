@@ -243,6 +243,12 @@ positioned inside its message bubble so long histories cannot enlarge the page.
 The mobile conversation detail follows the same invariant while occupying the
 available viewport below the mobile header.
 
+The order rail resolves the newest order for the conversation rather than
+assuming that the newest provider message is the order trigger. This keeps an
+already-created order visible when Meta appends a separate attachment-only
+message after the customer text. A manager-initiated recognition run anchors
+to the newest inbound message with text and ignores attachment-only rows.
+
 Approval is blocked until required customer fields, at least one valid SKU, and positive quantities are present. Every correction and status change produces an audit event.
 
 An approved or automatically approved order may still be corrected until external fulfillment begins. Saving such a correction releases active stock reservations, clears the previous procurement decision, moves the order back to `NEEDS_REVIEW`, and requires approval again. Corrections are blocked after supplier handoff/dispatch or shipment creation. Reapproval updates the existing Google Sheets row rather than appending another order.

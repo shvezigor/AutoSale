@@ -641,9 +641,9 @@ describe('ConversationsService', () => {
     expect(queue.add).not.toHaveBeenCalled();
   });
 
-  it('queues AI recognition for the latest message when a manager creates an order manually', async () => {
+  it('queues AI recognition for the latest inbound text when a manager creates an order manually', async () => {
     const latest = await prisma.message.findFirstOrThrow({
-      where: { tenantId, conversationId: newestId },
+      where: { tenantId, conversationId: newestId, direction: 'INBOUND', text: { not: null } },
       orderBy: [{ sourceTimestamp: 'desc' }, { id: 'desc' }],
     });
 
@@ -659,7 +659,7 @@ describe('ConversationsService', () => {
 
   it('returns the existing latest order without queueing a duplicate recognition', async () => {
     const latest = await prisma.message.findFirstOrThrow({
-      where: { tenantId, conversationId: newestId },
+      where: { tenantId, conversationId: newestId, direction: 'INBOUND', text: { not: null } },
       orderBy: [{ sourceTimestamp: 'desc' }, { id: 'desc' }],
     });
     const existing = await prisma.order.create({
@@ -679,6 +679,94 @@ describe('ConversationsService', () => {
       expect(queue.add).not.toHaveBeenCalled();
     } finally {
       await prisma.order.delete({ where: { id: existing.id } });
+    }
+  });
+
+  it('keeps an order visible when Instagram appends an attachment-only message', async () => {
+    const sourceEvent = await prisma.webhookEvent.findFirstOrThrow({
+      where: { tenantId, externalEventId: 'seed-a' },
+    });
+    const trigger = await prisma.message.create({ data: {
+      tenantId,
+      conversationId: newestId,
+      rawEventId: sourceEvent.id,
+      channel: 'INSTAGRAM',
+      externalMessageId: `fictional-order-trigger-${randomUUID()}`,
+      direction: 'INBOUND',
+      senderId: 'fictional-customer',
+      text: 'Хочу замовити тестовий товар',
+      sourceTimestamp: new Date(Date.now() + 1_000),
+    } });
+    const existing = await prisma.order.create({ data: {
+      tenantId,
+      conversationId: newestId,
+      triggerMessageId: trigger.id,
+      status: 'NEEDS_REVIEW',
+      promptVersion: 'instagram-order-v1',
+    } });
+    const attachmentOnly = await prisma.message.create({ data: {
+      tenantId,
+      conversationId: newestId,
+      rawEventId: sourceEvent.id,
+      channel: 'INSTAGRAM',
+      externalMessageId: `fictional-order-attachment-${randomUUID()}`,
+      direction: 'INBOUND',
+      senderId: 'fictional-customer',
+      text: null,
+      sourceTimestamp: new Date(Date.now() + 2_000),
+    } });
+
+    try {
+      await expect(service.orderState(tenantId, newestId)).resolves.toEqual({
+        order: { id: existing.id, status: 'NEEDS_REVIEW' },
+      });
+      await expect(service.createOrder(tenantId, newestId)).resolves.toEqual({
+        orderId: existing.id,
+        queued: false,
+      });
+      expect(queue.add).not.toHaveBeenCalled();
+    } finally {
+      await prisma.order.delete({ where: { id: existing.id } });
+      await prisma.message.deleteMany({ where: { id: { in: [trigger.id, attachmentOnly.id] } } });
+    }
+  });
+
+  it('anchors manual recognition to the latest inbound text instead of an attachment-only message', async () => {
+    const sourceEvent = await prisma.webhookEvent.findFirstOrThrow({
+      where: { tenantId, externalEventId: 'seed-a' },
+    });
+    const trigger = await prisma.message.create({ data: {
+      tenantId,
+      conversationId: newestId,
+      rawEventId: sourceEvent.id,
+      channel: 'INSTAGRAM',
+      externalMessageId: `fictional-manual-trigger-${randomUUID()}`,
+      direction: 'INBOUND',
+      senderId: 'fictional-customer',
+      text: 'Оформіть тестове замовлення',
+      sourceTimestamp: new Date(Date.now() + 3_000),
+    } });
+    const attachmentOnly = await prisma.message.create({ data: {
+      tenantId,
+      conversationId: newestId,
+      rawEventId: sourceEvent.id,
+      channel: 'INSTAGRAM',
+      externalMessageId: `fictional-manual-attachment-${randomUUID()}`,
+      direction: 'INBOUND',
+      senderId: 'fictional-customer',
+      text: null,
+      sourceTimestamp: new Date(Date.now() + 4_000),
+    } });
+
+    try {
+      await expect(service.createOrder(tenantId, newestId)).resolves.toEqual({ orderId: null, queued: true });
+      expect(queue.add).toHaveBeenCalledWith(
+        'instagram.order.create',
+        { tenantId, triggerMessageId: trigger.id },
+        { jobId: `manual-order-${trigger.id}`, attempts: 1, removeOnComplete: true, removeOnFail: true },
+      );
+    } finally {
+      await prisma.message.deleteMany({ where: { id: { in: [trigger.id, attachmentOnly.id] } } });
     }
   });
 

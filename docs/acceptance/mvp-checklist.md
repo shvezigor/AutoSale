@@ -12,6 +12,7 @@
 - [x] Повторна доставка inbound text повторно входить в idempotent order-intent boundary, щоб retryable failure відновився без дубльованого замовлення; attachment-only подія не запускає order recognition.
 - [x] Worker recovery читає `job_name` з bounded discovery function і повертає незавершені Instagram/Facebook/TikTok events у правильну provider queue.
 - [x] Runtime API/worker roles мають мінімальний `EXECUTE` grant для `autosale_order_prefix(text)`, тому trigger короткого номера не блокує створення замовлення; backup role лишається без execute-доступу.
+- [x] Окреме attachment-only повідомлення після тексту не приховує створене замовлення в чаті; ручний запуск розпізнавання використовує останній вхідний текст.
 - [x] Менеджер відкриває AI-сформоване замовлення та бачить товар і Sheets status.
 - [x] Backup відновлює conversation, order, attachment і MinIO object у чистий Compose namespace.
 - [x] API, worker і web проходять health checks після restore.

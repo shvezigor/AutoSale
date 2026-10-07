@@ -201,19 +201,12 @@ export class ConversationsService {
   async orderState(tenantId: string, conversationId: string): Promise<ConversationOrderState> {
     const conversation = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.conversation.findFirst({
       where: { id: conversationId, tenantId },
-      include: {
-        messages: {
-          orderBy: [{ sourceTimestamp: 'desc' }, { id: 'desc' }],
-          take: 1,
-          select: { id: true },
-        },
-      },
+      select: { id: true },
     }));
     if (!conversation) throw new NotFoundException('Conversation not found');
-    const latestMessage = conversation.messages[0];
-    if (!latestMessage) return { order: null };
     const order = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.order.findFirst({
-      where: { triggerMessageId: latestMessage.id, tenantId, conversationId },
+      where: { tenantId, conversationId },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
       select: { id: true, status: true },
     }));
     return { order: order ? {
@@ -227,6 +220,7 @@ export class ConversationsService {
       where: { id: conversationId, tenantId },
       include: {
         messages: {
+          where: { direction: 'INBOUND', text: { not: null } },
           orderBy: [{ sourceTimestamp: 'desc' }, { id: 'desc' }],
           take: 1,
           select: { id: true },
