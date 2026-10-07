@@ -13,6 +13,7 @@ Before marking the automatic slice available, prove all of the following in auto
 - a missed delayed queue wake-up is recovered from PostgreSQL without early or duplicate generation;
 - a newer inbound message safely stales queued, processing or ready work for the older anchor;
 - a ready draft fills an untouched editor once, survives page reload through persisted draft state, and is not reinserted after a manager edits or clears it;
+- a ready draft for a newer inbound message replaces the prior untouched automatic editor value without being lost during stale-draft cleanup;
 - existing or deliberately cleared manager text is preserved; the ready draft remains visible but is not silently inserted;
 - sending still requires an explicit manager action and creates one linked outbound message;
 - disabling the tenant switch prevents scheduling and generation while ordinary manual replies continue to work.
@@ -29,6 +30,7 @@ Before marking the automatic slice available, prove all of the following in auto
 - Reply-style reads and saves return only the public settings contract after Prisma persistence; storage metadata cannot invalidate the response and roll back an otherwise valid owner update.
 - Focused worker, API and web acceptance runs on 7 October 2026 passed 10 files / 50 tests. They include the active-generation race (a newer inbound message stales the processing draft), disabling before execution (the model is not called), quiet-period scheduling, duplicate/out-of-order delivery, reconciliation, safe-output validation and the manager-controlled composer.
 - The Instagram text-plus-attachment regression is automated: a later attachment-only row leaves the textual anchor current both before and during generation, while a genuinely newer textual message still stales old work.
+- The sequential-editor regression is automated: stale-draft cleanup may clear an older untouched auto-fill, but it cannot mark the newer ready draft as already offered before that replacement can be inserted. Manager-touched text remains protected.
 
 ## Production-browser evidence
 

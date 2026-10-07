@@ -148,6 +148,38 @@ describe('SocialReplyComposer', () => {
     expect(editor).toHaveValue('');
   });
 
+  it('replaces an untouched automatic draft when a newer inbound message receives a ready draft', async () => {
+    const firstInbound = { ...pendingMessage, id: '33333333-3333-4333-8333-333333333333',
+      direction: 'INBOUND' as const, text: 'Покажіть товар', delivery: null };
+    const secondInbound = { ...firstInbound, id: '44444444-4444-4444-8444-444444444444',
+      text: 'Покажіть моделі Регіон', sourceTimestamp: '2026-10-04T09:01:00.000Z' };
+    const firstDraft = {
+      id: '55555555-5555-4555-8555-555555555555', conversationId: conversation.id,
+      anchorMessageId: firstInbound.id, triggerSource: 'AUTOMATIC' as const,
+      availableAt: '2026-10-05T10:00:10.000Z', status: 'READY' as const, outcome: 'CLARIFY' as const,
+      generatedText: 'Який товар вас цікавить?', finalText: null, sources: [], errorCode: null,
+      createdAt: '2026-10-05T10:00:00.000Z', updatedAt: '2026-10-05T10:00:11.000Z',
+    };
+    const secondDraft = { ...firstDraft, id: '66666666-6666-4666-8666-666666666666',
+      anchorMessageId: secondInbound.id, outcome: 'ANSWER' as const,
+      generatedText: 'Можу запропонувати моделі Регіон.', createdAt: '2026-10-05T10:01:00.000Z',
+      updatedAt: '2026-10-05T10:01:11.000Z' };
+    const { rerender } = renderComposer({ ...conversation, messages: [firstInbound], replyDrafts: [firstDraft] }, false, 'uk', true);
+    const editor = await screen.findByRole('textbox', { name: 'Відповідь' });
+    expect(editor).toHaveValue(firstDraft.generatedText);
+
+    rerender(
+      <I18nProvider locale="uk" authenticated>
+        <ToastProvider>
+          <SocialReplyComposer canManageSettings={false}
+            initialConversation={{ ...conversation, messages: [firstInbound, secondInbound], replyDrafts: [secondDraft, firstDraft] }} draftsEnabled />
+        </ToastProvider>
+      </I18nProvider>,
+    );
+
+    await waitFor(() => expect(editor).toHaveValue(secondDraft.generatedText));
+  });
+
   it('offers copy-only draft handling for Facebook without an API send', async () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
     vi.stubGlobal('navigator', { clipboard: { writeText } });

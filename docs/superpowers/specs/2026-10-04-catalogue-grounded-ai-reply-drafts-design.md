@@ -164,6 +164,7 @@ The existing conversation composer adds:
 - stable quiet-period, queued and processing feedback without blocking conversation navigation;
 - no generation button during the normal success path;
 - automatic insertion into an untouched editor exactly once per ready draft;
+- when a newer inbound message receives a ready draft, it replaces an older untouched automatic editor value; the older value is cleared first without consuming or losing the newer draft;
 - no separate full-size ready-draft card: an automatically inserted draft is shown only in the ordinary reply editor, with a compact status and collapsed catalogue sources;
 - visible ready-draft context in a compact collapsed disclosure without insertion when the manager already touched the editor;
 - **Retry** for a safe generation failure;
@@ -215,6 +216,7 @@ Automated verification covers:
 - recovery of a missed delayed job without early generation or duplicate model spend;
 - system attribution for automatic drafts and user attribution for manual retries;
 - automatic editor insertion only while untouched, without reinsertion after manager edits or clearing;
+- sequential ready drafts replace an older untouched auto-fill while preserving any manager-touched text;
 - regression protection for order recognition, inventory, payment, shipment and ordinary manual replies.
 
 Controlled pilot evidence must use consenting stores and privacy-minimized metrics. Proposed success targets remain hypotheses: at least 70% of drafts accepted without factual correction, 30% lower median active manager time and zero critical factual, privacy or duplicate-send incidents. A critical incident disables the tenant flag and returns the workspace to manual replies.

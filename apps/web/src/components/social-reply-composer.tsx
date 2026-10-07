@@ -178,6 +178,14 @@ export function SocialReplyComposer({
   useEffect(() => {
     if (!draftsEnabled || currentDraft?.status !== 'READY' || !currentDraft.generatedText) return;
     if (offeredDraftIds.current.has(currentDraft.id)) return;
+    const replacingUntouchedAutoFill = Boolean(
+      selectedDraftId
+      && appliedDraft
+      && selectedDraftId !== currentDraft.id
+      && !editorTouched.current
+      && text === appliedDraft.generatedText,
+    );
+    if (replacingUntouchedAutoFill) return;
     offeredDraftIds.current.add(currentDraft.id);
     if (editorTouched.current || text !== '') return;
     setText(currentDraft.generatedText);
@@ -186,7 +194,7 @@ export function SocialReplyComposer({
     pendingSubmission.current = null;
     autoFilledDraftId.current = currentDraft.id;
     window.requestAnimationFrame(() => textareaRef.current?.focus());
-  }, [currentDraft, draftsEnabled, text]);
+  }, [appliedDraft, currentDraft, draftsEnabled, selectedDraftId, text]);
 
   useEffect(() => {
     let cancelled = false;
