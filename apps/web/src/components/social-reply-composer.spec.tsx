@@ -10,10 +10,17 @@ const api = vi.hoisted(() => ({
   retryConversationMessage: vi.fn(),
   sendConversationMessage: vi.fn(),
 }));
-vi.mock('../api/conversation-replies', () => api);
+const ConversationReplyApiErrorMock = vi.hoisted(() => class ConversationReplyApiError extends Error {
+  constructor(message: string, public readonly status?: number) {
+    super(message);
+    this.name = 'ConversationReplyApiError';
+  }
+});
+vi.mock('../api/conversation-replies', () => ({ ...api, ConversationReplyApiError: ConversationReplyApiErrorMock }));
 vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
 
 import { I18nProvider } from '../i18n/i18n-provider';
+import { ConversationReplyApiError } from '../api/conversation-replies';
 import { SocialReplyComposer } from './social-reply-composer';
 import { ToastProvider } from './toast-provider';
 
@@ -146,6 +153,39 @@ describe('SocialReplyComposer', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Надіслати' }));
     await waitFor(() => expect(api.sendConversationMessage).toHaveBeenCalledWith(conversation.id,
       expect.objectContaining({ text: 'Який товар вас цікавить?', draftId: draft.id })));
+  });
+
+  it('preserves a stale submitted draft but requires a manager edit before another send', async () => {
+    const inbound = { ...pendingMessage, id: '33333333-3333-4333-8333-333333333333',
+      direction: 'INBOUND' as const, text: 'Покажіть моделі Регіон', delivery: null };
+    const draft = {
+      id: '55555555-5555-4555-8555-555555555555', conversationId: conversation.id,
+      anchorMessageId: inbound.id, triggerSource: 'AUTOMATIC' as const,
+      availableAt: '2026-10-05T10:00:00.000Z', status: 'READY' as const, outcome: 'ANSWER' as const,
+      generatedText: 'Можу запропонувати моделі Регіон.', finalText: null, sources: [], errorCode: null,
+      createdAt: '2026-10-05T10:00:00.000Z', updatedAt: '2026-10-05T10:00:00.000Z',
+    };
+    const staleDraft = { ...draft, status: 'STALE' as const, errorCode: 'SOURCE_CHANGED' as const,
+      updatedAt: '2026-10-05T10:01:00.000Z' };
+    api.sendConversationMessage.mockRejectedValueOnce(new ConversationReplyApiError('conflict', 409));
+    api.refreshConversation.mockResolvedValue({ ...conversation, messages: [inbound], replyDrafts: [staleDraft] });
+    renderComposer({ ...conversation, messages: [inbound], replyDrafts: [draft] }, false, 'uk', true);
+
+    const editor = await screen.findByRole('textbox', { name: 'Відповідь' });
+    fireEvent.click(screen.getByRole('button', { name: 'Надіслати' }));
+
+    await screen.findAllByText(/Чернетка більше неактуальна/);
+    expect(editor).toHaveValue(draft.generatedText);
+    fireEvent.click(screen.getByRole('button', { name: 'Надіслати' }));
+    expect(api.sendConversationMessage).toHaveBeenCalledTimes(1);
+
+    fireEvent.change(editor, { target: { value: `${draft.generatedText} Перевірено.` } });
+    api.sendConversationMessage.mockResolvedValueOnce(pendingMessage);
+    fireEvent.click(screen.getByRole('button', { name: 'Надіслати' }));
+    await waitFor(() => expect(api.sendConversationMessage).toHaveBeenCalledTimes(2));
+    expect(api.sendConversationMessage).toHaveBeenLastCalledWith(conversation.id, {
+      text: `${draft.generatedText} Перевірено.`, idempotencyKey: expect.any(String),
+    });
   });
 
   it('prefers a ready automatic draft over newer failed attempts for the same inbound message', async () => {

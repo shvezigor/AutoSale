@@ -4,7 +4,7 @@ import type { ConversationDetailResponse, ConversationMessage } from '../../../.
 import Link from 'next/link';
 import { type FormEvent, type KeyboardEvent, useEffect, useRef, useState } from 'react';
 
-import { createConversationReplyDraft, refreshConversation, retryConversationMessage, sendConversationMessage } from '../api/conversation-replies';
+import { ConversationReplyApiError, createConversationReplyDraft, refreshConversation, retryConversationMessage, sendConversationMessage } from '../api/conversation-replies';
 import { useI18n } from '../i18n/i18n-provider';
 import { FieldError } from './form-field';
 import { LoadingButton } from './loading-button';
@@ -36,6 +36,7 @@ export function SocialReplyComposer({
   const [conversation, setConversation] = useState(initialConversation);
   const [text, setText] = useState(() => initialReadyDraft?.generatedText ?? '');
   const [textError, setTextError] = useState<string | null>(null);
+  const [draftReviewRequired, setDraftReviewRequired] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [retryingMessageId, setRetryingMessageId] = useState<string | null>(null);
   const [generatingDraft, setGeneratingDraft] = useState(false);
@@ -84,6 +85,11 @@ export function SocialReplyComposer({
   async function submit(event?: FormEvent) {
     event?.preventDefault();
     if ((!conversation.replyCapability.enabled && !copyOnly) || submitting) return;
+    if (draftReviewRequired) {
+      setTextError(t('conversations.replyDraftReviewRequired'));
+      textareaRef.current?.focus();
+      return;
+    }
     const error = !trimmedText ? t('validation.required')
       : trimmedText.length > MAX_MESSAGE_LENGTH ? t('validation.tooLong', { count: MAX_MESSAGE_LENGTH }) : null;
     if (error) {
@@ -112,11 +118,30 @@ export function SocialReplyComposer({
       pendingSubmission.current = null;
       setSelectedDraftId(null);
       setText('');
+      setDraftReviewRequired(false);
       editorTouched.current = false;
       autoFilledDraftId.current = null;
       window.requestAnimationFrame(() => textareaRef.current?.focus());
-    } catch {
-      toast.show({ type: 'error', title: t('conversations.messageSendFailed'), message: t('conversations.messagePreserved') });
+    } catch (error) {
+      if (submission.draftId && error instanceof ConversationReplyApiError && error.status === 409) {
+        const reviewMessage = t('conversations.replyDraftReviewRequired');
+        setText(submission.text);
+        setTextError(reviewMessage);
+        setDraftReviewRequired(true);
+        setSelectedDraftId(null);
+        pendingSubmission.current = null;
+        editorTouched.current = true;
+        autoFilledDraftId.current = null;
+        try {
+          setConversation(await refreshConversation(conversation.id));
+        } catch {
+          // The draft-linked send is still blocked locally until the manager edits the preserved text.
+        }
+        textareaRef.current?.focus();
+        toast.show({ type: 'error', title: t('conversations.messageSendFailed'), message: reviewMessage });
+      } else {
+        toast.show({ type: 'error', title: t('conversations.messageSendFailed'), message: t('conversations.messagePreserved') });
+      }
     } finally {
       setSubmitting(false);
     }
@@ -173,6 +198,7 @@ export function SocialReplyComposer({
       activeConversationId.current = initialConversation.id;
       setText('');
       setTextError(null);
+      setDraftReviewRequired(false);
       setSelectedDraftId(null);
       pendingSubmission.current = null;
       pendingDraftRequest.current = null;
@@ -323,6 +349,7 @@ export function SocialReplyComposer({
               if (restoringInitialDraft.current && initialReadyDraft && nextText === '') return;
               editorTouched.current = true;
               autoFilledDraftId.current = null;
+              setDraftReviewRequired(false);
               if (pendingSubmission.current?.text !== nextText.trim()) pendingSubmission.current = null;
               setText(nextText);
               setTextError(null);
