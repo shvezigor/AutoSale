@@ -1,7 +1,7 @@
 # Catalogue-grounded AI reply drafts — design
 
 **Date:** 2026-10-04  
-**Updated:** 2026-10-05
+**Updated:** 2026-10-07
 **Status:** Automatic preparation implemented behind a tenant switch; partial production-browser evidence recorded; remaining live provider validation pending
 **Owner:** Sales AITO conversations and AI
 
