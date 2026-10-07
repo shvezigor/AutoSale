@@ -150,6 +150,11 @@ Provider timeout, invalid structured output or temporary provider outage ends th
 
 If an automatically triggered model result fails factual grounding or does not match the strict structured-response schema, the unsafe or malformed model text is discarded. For a customer block that explicitly asks for options and names a model, deterministic retrieval keeps products whose primary catalogue name contains that model; references found only inside a parenthetical compatibility list do not qualify. The worker then constructs an `ANSWER` from up to four exact source names with its own exhaustive claim offsets. If no such grounded options exist, it stores a localized, fact-free `CLARIFY` draft asking which exact product or model the customer means. Both fallbacks are limited to automatic preparation and are never sent automatically; neither may add inferred availability, price, delivery or payment claims. A provider outage still remains `FAILED`; explicit manual retries keep the original strict blocked/failed behavior so an operator can see that the requested generation did not pass validation.
 
+Ukrainian model extraction accepts both the direct form (`модель Регіон`) and
+the natural product-type form (`моделі дверей Регіон`). In the latter form the
+intermediate product-type word is not treated as the model name; the named
+catalogue token still drives exact primary-name filtering.
+
 Before storing `READY`, the worker rechecks that the anchor remains the latest inbound message and that source products have not changed. Before use, the API repeats those checks. A mismatch produces `STALE`, preserves the draft for audit and requires regeneration.
 
 ## 10. UI behavior

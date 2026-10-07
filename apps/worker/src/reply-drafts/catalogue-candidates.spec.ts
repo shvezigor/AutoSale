@@ -59,4 +59,14 @@ describe('selectCatalogueCandidates', () => {
 
     expect(result.map((item) => item.sku)).toEqual(['DOOR-1', 'DOOR-2']);
   });
+
+  it('recognizes a named model after the natural plural phrase "models of doors"', () => {
+    const result = selectCatalogueCandidates([
+      product(1, { name: '860х2050 Регіон (плівка мат)' }),
+      product(2, { name: '960х2050 Регіон VINARIT' }),
+      product(3, { name: '860х2050 Авангард VINARIT' }),
+    ], tenantId, 'Які ще моделі дверей Регіон є в наявності?', [], 8);
+
+    expect(result.map((item) => item.sku)).toEqual(['DOOR-1', 'DOOR-2']);
+  });
 });

@@ -119,8 +119,12 @@ function requestedModelTokens(latestInbound: string, recentContext: readonly str
 }
 
 function modelTokensIn(value: string): string[] {
-  const matches = normalize(value).matchAll(/(?:модел(?:ь|і|ю|я)?|model)\s*[:—-]?\s*([\p{L}\p{N}][\p{L}\p{N}._-]*)/giu);
-  return [...new Set([...matches].map((match) => normalize(match[1] ?? '')).filter((token) => token.length >= 2))];
+  const normalized = normalize(value);
+  const direct = normalized.matchAll(/(?:модел(?:ь|і|ю|я)?|model)\s*[:—-]?\s*([\p{L}\p{N}][\p{L}\p{N}._-]*)/giu);
+  const afterProductType = normalized.matchAll(/(?:модел(?:ь|і|ю|я)?)\s*[:—-]?\s*[\p{L}\p{N}][\p{L}\p{N}._-]*\s+([\p{L}\p{N}][\p{L}\p{N}._-]*)/giu);
+  return [...new Set([...direct, ...afterProductType]
+    .map((match) => normalize(match[1] ?? ''))
+    .filter((token) => token.length >= 2))];
 }
 
 function asksForOptions(latestInbound: string, recentContext: readonly string[]): boolean {

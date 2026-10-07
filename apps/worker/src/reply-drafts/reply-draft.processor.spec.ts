@@ -231,7 +231,7 @@ describe('ReplyDraftProcessor', () => {
     } });
     await prisma.message.update({
       where: { id: seedData.anchorId },
-      data: { text: 'Вхідні двері, модель Регіон', sourceTimestamp: new Date('2026-10-05T10:00:00.000Z') },
+      data: { text: 'Які ще моделі дверей Регіон є в наявності?', sourceTimestamp: new Date('2026-10-05T10:00:00.000Z') },
     });
     await prisma.product.update({
       where: { id: seedData.productId },
