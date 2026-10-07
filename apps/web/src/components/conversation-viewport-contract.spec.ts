@@ -6,6 +6,7 @@ describe('conversation viewport contract', () => {
   it('keeps the workspace fixed to the viewport and scrolls only the internal lists', () => {
     const css = readFileSync(resolve(__dirname, '../../app/globals.css'), 'utf8');
 
+    expect(css).toMatch(/html:has\(\.app-shell-content\),\s*body:has\(\.app-shell-content\)\s*\{[^}]*height:\s*100%[^}]*overflow:\s*hidden/s);
     expect(css).toMatch(/\.workspace-route-transition > \.app-shell-content\s*\{[^}]*height:\s*calc\(100dvh - 72px\)[^}]*overflow:\s*hidden/s);
     expect(css).toMatch(/\.thread-scroll\s*\{[^}]*overflow-y:\s*auto/s);
     expect(css).toMatch(/\.conversation-list\s*\{[^}]*overflow-y:\s*auto/s);
@@ -15,5 +16,11 @@ describe('conversation viewport contract', () => {
     const css = readFileSync(resolve(__dirname, '../../app/globals.css'), 'utf8');
 
     expect(css).toMatch(/\.message-bubble\s*\{[^}]*position:\s*relative/s);
+  });
+
+  it('fits the mobile conversation panel below the current workspace header', () => {
+    const css = readFileSync(resolve(__dirname, '../../app/globals.css'), 'utf8');
+
+    expect(css).toContain('.conversation-panel { position: fixed; inset: 72px 0 0; z-index: 2; height: auto;');
   });
 });
