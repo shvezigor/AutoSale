@@ -65,7 +65,9 @@ Rejected alternatives:
 
 ## 5. Catalogue retrieval and factual grounding
 
-Catalogue retrieval is deterministic and tenant-scoped. It considers only active products and uses the latest inbound message plus a bounded recent context to find candidate SKU, name, alias, brand, category, colour, size and attributes. The worker passes only the top bounded candidates to the model.
+Catalogue retrieval is deterministic and tenant-scoped. It considers only active products and uses the latest inbound message plus a bounded recent context to find candidate SKU, name, alias, brand, category, colour and size. Selected variant attributes are included in source snapshots but do not currently drive candidate ranking. The worker passes only the top bounded candidates to the model.
+
+The current worker reads only the first 2,000 active products in SKU order. This is a controlled-pilot ceiling and can omit a relevant product. The approved but not yet implemented [indexed retrieval design](2026-10-12-scalable-ai-catalogue-retrieval-design.md) replaces that blind prefix with tenant-scoped, bounded candidate recall while preserving this feature's ranker, eight-source prompt limit and factual validation. Large-catalogue readiness remains pending measured implementation and acceptance.
 
 Allowed product facts are:
 
