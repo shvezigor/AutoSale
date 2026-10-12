@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { selectCatalogueCandidates } from './catalogue-candidates.js';
+import { selectCatalogueCandidates, selectRequestedModelSources } from './catalogue-candidates.js';
 
 const tenantId = '11111111-1111-4111-8111-111111111111';
 const product = (id: number, overrides: Record<string, unknown> = {}) => ({
@@ -68,5 +68,18 @@ describe('selectCatalogueCandidates', () => {
     ], tenantId, 'Які ще моделі дверей Регіон є в наявності?', [], 8);
 
     expect(result.map((item) => item.sku)).toEqual(['DOOR-1', 'DOOR-2']);
+  });
+
+  it('offers the requested model and size from a natural two-message options request', () => {
+    const latestInbound = 'потрібен розмір 860х2050';
+    const recentContext = ['покажіть двері Регіон'];
+    const sources = selectCatalogueCandidates([
+      product(1, { name: '860х2050 Регіон (плівка мат)', size: '860х2050' }),
+      product(2, { name: '960х2050 Регіон VINARIT', size: '960х2050' }),
+      product(3, { name: '860х2050 Авангард VINARIT', size: '860х2050' }),
+    ], tenantId, latestInbound, recentContext, 8);
+
+    expect(selectRequestedModelSources(sources, latestInbound, recentContext).map((item) => item.sku))
+      .toEqual(['DOOR-1']);
   });
 });

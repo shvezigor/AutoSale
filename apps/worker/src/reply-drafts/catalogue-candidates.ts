@@ -67,13 +67,35 @@ export function selectRequestedModelSources(
   limit = 4,
 ): ReplyDraftSource[] {
   if (!asksForOptions(latestInbound, recentContext)) return [];
+  const query = normalize(`${latestInbound} ${recentContext.slice(-3).join(' ')}`);
   const requestedModels = requestedModelTokens(latestInbound, recentContext);
-  if (requestedModels.length === 0) return [];
+  const modelTerms = requestedModels.length > 0 ? requestedModels : inferredModelTokens(sources, query);
+  if (modelTerms.length === 0) return [];
+  const requestedDimensions = dimensions(query);
   return sources.filter((source) => {
     const name = normalize(source.name);
     const primaryName = name.split('(', 1)[0] ?? name;
-    return requestedModels.some((model) => containsWholeTerm(primaryName, model));
+    const matchesModel = modelTerms.some((model) => containsWholeTerm(primaryName, model));
+    const sourceDimensions = dimensions(`${name} ${Object.values(source.variants).join(' ')}`);
+    return matchesModel && (requestedDimensions.length === 0
+      || requestedDimensions.some((dimension) => sourceDimensions.includes(dimension)));
   }).slice(0, Math.min(Math.max(limit, 0), 4));
+}
+
+function inferredModelTokens(sources: readonly ReplyDraftSource[], query: string): string[] {
+  const names = sources.map((source) => normalize(source.name).split('(', 1)[0] ?? '');
+  const matches = [...tokens(query)]
+    .filter((token) => !/\d/u.test(token))
+    .map((token) => ({ token, count: names.filter((name) => containsWholeTerm(name, token)).length }))
+    .filter(({ count }) => count > 0);
+  if (matches.length === 0) return [];
+  const mostSpecificCount = Math.min(...matches.map(({ count }) => count));
+  return matches.filter(({ count }) => count === mostSpecificCount).map(({ token }) => token);
+}
+
+function dimensions(value: string): string[] {
+  return [...new Set([...normalize(value).matchAll(/\b\d{2,4}\s*[xх×]\s*\d{2,4}\b/giu)]
+    .map((match) => (match[0] ?? '').replace(/\s+/gu, '').replace(/[х×]/gu, 'x')))];
 }
 
 function snapshot(product: CatalogueCandidateInput): ReplyDraftSource {
