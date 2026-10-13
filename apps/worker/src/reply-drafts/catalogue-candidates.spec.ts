@@ -82,6 +82,18 @@ describe('selectCatalogueCandidates', () => {
     expect(selectRequestedModelSources(sources, latestInbound, recentContext).map((item) => item.sku))
       .toEqual(['DOOR-1']);
   });
+
+  it('keeps availability intent from an earlier message when the latest message only gives a size', () => {
+    const latestInbound = 'Цікавить 860х2050';
+    const recentContext = ['Які двері Регіон є в наявності?'];
+    const sources = selectCatalogueCandidates([
+      product(1, { name: '860х2050 Вигаданий Регіон А', size: '860х2050', stockQuantity: 3 }),
+      product(2, { name: '960х2050 Вигаданий Регіон Б', size: '960х2050', stockQuantity: null }),
+    ], tenantId, latestInbound, recentContext, 8);
+
+    expect(selectRequestedModelSources(sources, latestInbound, recentContext).map((item) => item.sku))
+      .toEqual(['DOOR-1']);
+  });
 });
 
 describe('extractCatalogueSearchIntent', () => {

@@ -179,5 +179,11 @@ function modelTokensIn(value: string): string[] {
 
 function asksForOptions(latestInbound: string, recentContext: readonly string[]): boolean {
   const text = normalize(`${latestInbound} ${recentContext.slice(-3).join(' ')}`);
-  return /варіант|асортимент|запропон|покаж|(?:^|\s)види?(?:\s|$)|options?|choices?|assortment|offer|show/iu.test(text);
+  return asksForConfirmedAvailability(latestInbound, recentContext)
+    || /варіант|асортимент|запропон|покаж|(?:^|\s)види?(?:\s|$)|options?|choices?|assortment|offer|show/iu.test(text);
+}
+
+export function asksForConfirmedAvailability(latestInbound: string, recentContext: readonly string[]): boolean {
+  const text = normalize(`${latestInbound} ${recentContext.slice(-3).join(' ')}`);
+  return /наявн|залишк|є\s+(?:зараз\s+)?(?:у\s+вас|в\s+продажу)|in stock|availability|available|stock left/iu.test(text);
 }

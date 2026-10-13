@@ -232,7 +232,7 @@ describe('ReplyDraftProcessor', () => {
     } });
     await prisma.message.update({
       where: { id: seedData.anchorId },
-      data: { text: 'Які ще моделі дверей Регіон є в наявності?', sourceTimestamp: new Date('2026-10-05T10:00:00.000Z') },
+      data: { text: 'Які ще моделі дверей Регіон можете показати?', sourceTimestamp: new Date('2026-10-05T10:00:00.000Z') },
     });
     await prisma.product.update({
       where: { id: seedData.productId },
@@ -262,6 +262,144 @@ describe('ReplyDraftProcessor', () => {
         'Який варіант вам підходить?',
       ].join('\n'),
       errorCode: null,
+    });
+  });
+
+  it('offers only confirmed-stock variants after an availability question when the model response is unsafe', async () => {
+    const seedData = await seed();
+    await prisma.aiReplyDraft.update({
+      where: { id: seedData.draftId },
+      data: { triggerSource: 'AUTOMATIC', createdByUserId: null },
+    });
+    await prisma.message.update({
+      where: { id: seedData.anchorId },
+      data: { text: 'Які варіанти дверей Регіон є в наявності?' },
+    });
+    await prisma.product.update({
+      where: { id: seedData.productId },
+      data: { sku: 'TEST-REGION-860', name: '860х2050 Вигаданий Регіон А', stockQuantity: 3 },
+    });
+    await prisma.product.create({ data: {
+      tenantId: seedData.tenantId, sku: 'TEST-REGION-960', name: '960х2050 Вигаданий Регіон Б',
+      aliases: [], price: null, currency: null, stockQuantity: null,
+    } });
+    const generate = vi.fn().mockResolvedValue({
+      reply: { outcome: 'ANSWER', text: 'Знижка 50%', productIds: [], claims: [] },
+      metadata: { model: 'fictional-model', latencyMs: 10, inputTokens: 20, outputTokens: 10 },
+    });
+
+    expect(await new ReplyDraftProcessor(prisma, { generate })
+      .process({ tenantId: seedData.tenantId, draftId: seedData.draftId })).toBe('READY');
+    const draft = await prisma.aiReplyDraft.findUniqueOrThrow({ where: { id: seedData.draftId } });
+    expect(draft).toMatchObject({ status: 'READY', outcome: 'ANSWER' });
+    expect(draft.generatedText).toContain('860х2050 Вигаданий Регіон А');
+    expect(draft.generatedText).not.toContain('960х2050 Вигаданий Регіон Б');
+  });
+
+  it('replaces a grounded model option list that offers an unknown-stock variant as available', async () => {
+    const seedData = await seed();
+    await prisma.aiReplyDraft.update({
+      where: { id: seedData.draftId },
+      data: { triggerSource: 'AUTOMATIC', createdByUserId: null },
+    });
+    await prisma.message.update({
+      where: { id: seedData.anchorId },
+      data: { text: 'Які варіанти дверей Регіон є в наявності?' },
+    });
+    await prisma.product.update({
+      where: { id: seedData.productId },
+      data: { sku: 'TEST-REGION-860', name: '860х2050 Вигаданий Регіон А', stockQuantity: 3 },
+    });
+    const unknown = await prisma.product.create({ data: {
+      tenantId: seedData.tenantId, sku: 'TEST-REGION-960', name: '960х2050 Вигаданий Регіон Б',
+      aliases: [], price: null, currency: null, stockQuantity: null,
+    } });
+    const firstName = '860х2050 Вигаданий Регіон А';
+    const secondName = '960х2050 Вигаданий Регіон Б';
+    const text = `${firstName}\n${secondName}`;
+    const generate = vi.fn().mockResolvedValue({
+      reply: {
+        outcome: 'ANSWER', text, productIds: [seedData.productId, unknown.id],
+        claims: [
+          { start: 0, end: firstName.length, text: firstName, type: 'NAME', field: 'name', productId: seedData.productId },
+          { start: firstName.length + 1, end: text.length, text: secondName, type: 'NAME', field: 'name', productId: unknown.id },
+        ],
+      },
+      metadata: { model: 'fictional-model', latencyMs: 10, inputTokens: 20, outputTokens: 10 },
+    });
+
+    expect(await new ReplyDraftProcessor(prisma, { generate })
+      .process({ tenantId: seedData.tenantId, draftId: seedData.draftId })).toBe('READY');
+    const draft = await prisma.aiReplyDraft.findUniqueOrThrow({ where: { id: seedData.draftId } });
+    expect(draft.generatedText).toContain('860х2050 Вигаданий Регіон А');
+    expect(draft.generatedText).not.toContain('960х2050 Вигаданий Регіон Б');
+  });
+
+  it('answers a stock question without an options keyword from a confirmed-stock variant', async () => {
+    const seedData = await seed();
+    await prisma.aiReplyDraft.update({ where: { id: seedData.draftId },
+      data: { triggerSource: 'AUTOMATIC', createdByUserId: null } });
+    await prisma.message.update({ where: { id: seedData.anchorId },
+      data: { text: 'Що з дверей Регіон є в наявності?' } });
+    await prisma.product.update({ where: { id: seedData.productId },
+      data: { sku: 'TEST-REGION-860', name: '860х2050 Вигаданий Регіон А', stockQuantity: 3 } });
+    const generate = vi.fn().mockRejectedValue(new ReplyModelInvalidResponseError());
+
+    expect(await new ReplyDraftProcessor(prisma, { generate })
+      .process({ tenantId: seedData.tenantId, draftId: seedData.draftId })).toBe('READY');
+    const draft = await prisma.aiReplyDraft.findUniqueOrThrow({ where: { id: seedData.draftId } });
+    expect(draft.outcome).toBe('ANSWER');
+    expect(draft.generatedText).toContain('860х2050 Вигаданий Регіон А — в наявності');
+  });
+
+  it('asks for a stock check rather than offering zero- or unknown-stock variants', async () => {
+    const seedData = await seed();
+    await prisma.aiReplyDraft.update({ where: { id: seedData.draftId },
+      data: { triggerSource: 'AUTOMATIC', createdByUserId: null } });
+    await prisma.message.update({ where: { id: seedData.anchorId },
+      data: { text: 'Які варіанти дверей Регіон є в наявності?' } });
+    await prisma.product.update({ where: { id: seedData.productId },
+      data: { sku: 'TEST-REGION-860', name: '860х2050 Вигаданий Регіон А', stockQuantity: 0 } });
+    await prisma.product.create({ data: {
+      tenantId: seedData.tenantId, sku: 'TEST-REGION-960', name: '960х2050 Вигаданий Регіон Б',
+      aliases: [], price: null, currency: null, stockQuantity: null,
+    } });
+    const generate = vi.fn().mockRejectedValue(new ReplyModelInvalidResponseError());
+
+    expect(await new ReplyDraftProcessor(prisma, { generate })
+      .process({ tenantId: seedData.tenantId, draftId: seedData.draftId })).toBe('READY');
+    const draft = await prisma.aiReplyDraft.findUniqueOrThrow({ where: { id: seedData.draftId } });
+    expect(draft.outcome).toBe('CLARIFY');
+    expect(draft.generatedText).toContain('потрібно додатково перевірити залишок');
+    expect(draft.generatedText).not.toContain('Регіон');
+  });
+
+  it('blocks a manual AI retry that offers a zero-stock product in response to a stock question', async () => {
+    const seedData = await seed();
+    await prisma.message.update({ where: { id: seedData.anchorId },
+      data: { text: 'Чи є DOOR-7 в наявності?' } });
+    const generate = generator(seedData.productId);
+
+    expect(await new ReplyDraftProcessor(prisma, { generate })
+      .process({ tenantId: seedData.tenantId, draftId: seedData.draftId })).toBe('BLOCKED');
+    expect(await prisma.aiReplyDraft.findUniqueOrThrow({ where: { id: seedData.draftId } })).toMatchObject({
+      status: 'BLOCKED', generatedText: null, errorCode: 'UNGROUNDED_CLAIM',
+    });
+  });
+
+  it('keeps a fact-free manual clarification for a stock question', async () => {
+    const seedData = await seed();
+    await prisma.message.update({ where: { id: seedData.anchorId },
+      data: { text: 'Чи є DOOR-7 в наявності?' } });
+    const generate = vi.fn().mockResolvedValue({
+      reply: { outcome: 'CLARIFY', text: 'Я уточню залишок.', productIds: [], claims: [] },
+      metadata: { model: 'fictional-model', latencyMs: 10, inputTokens: 20, outputTokens: 10 },
+    });
+
+    expect(await new ReplyDraftProcessor(prisma, { generate })
+      .process({ tenantId: seedData.tenantId, draftId: seedData.draftId })).toBe('READY');
+    expect(await prisma.aiReplyDraft.findUniqueOrThrow({ where: { id: seedData.draftId } })).toMatchObject({
+      status: 'READY', outcome: 'CLARIFY', generatedText: 'Я уточню залишок.',
     });
   });
 

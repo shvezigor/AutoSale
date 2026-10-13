@@ -6,7 +6,7 @@ import {
   type PrismaClient, withTenantTransaction,
 } from '@autosale/database';
 
-import { selectCatalogueCandidates, selectRequestedModelSources } from './catalogue-candidates.js';
+import { asksForConfirmedAvailability, selectCatalogueCandidates, selectRequestedModelSources } from './catalogue-candidates.js';
 import { CatalogueRetrievalError, retrieveCatalogueCandidates } from './catalogue-retrieval.js';
 import { validateReplyDraft, type GeneratedReply } from './claim-validator.js';
 import { buildSafeReplyInput } from './input-sanitizer.js';
@@ -236,15 +236,27 @@ export class ReplyDraftProcessor {
         return 'STALE' as const;
       }
       const checked = validateReplyDraft(generated.reply, sources);
+      const asksAboutStock = asksForConfirmedAvailability(context.safe.latestInbound, context.safe.recentContext);
       const catalogueOptions = current.triggerSource === 'AUTOMATIC'
         ? safeAutomaticCatalogueOptions(context.safe.latestInbound, context.safe.recentContext, sources)
         : null;
+      const safeFallback = catalogueOptions ?? (asksAboutStock
+        ? safeAutomaticStockClarification(context.safe.latestInbound)
+        : safeAutomaticClarification(context.safe.latestInbound));
+      const modelOffersUnconfirmedStock = asksAboutStock && checked.ok && checked.reply.outcome === 'ANSWER'
+        && (checked.reply.productIds.length === 0 || checked.reply.productIds.some((id) =>
+          !sources.some((source) => source.productId === id && source.stockQuantity !== null && source.stockQuantity > 0)));
+      const needsStockSafeFallback = asksAboutStock && checked.ok
+        && (checked.reply.outcome !== 'ANSWER' || modelOffersUnconfirmedStock);
       const validated = checked.ok
-        ? catalogueOptions && checked.reply.outcome === 'CLARIFY' && checked.reply.productIds.length === 0
-          ? { ok: true as const, reply: catalogueOptions }
+        ? modelOffersUnconfirmedStock && current.triggerSource !== 'AUTOMATIC'
+          ? { ok: false as const, code: 'UNGROUNDED_CLAIM' as const }
+          : current.triggerSource === 'AUTOMATIC' && (needsStockSafeFallback
+            || (catalogueOptions && checked.reply.outcome === 'CLARIFY' && checked.reply.productIds.length === 0))
+          ? { ok: true as const, reply: safeFallback }
           : checked
         : current.triggerSource === 'AUTOMATIC'
-          ? { ok: true as const, reply: catalogueOptions ?? safeAutomaticClarification(context.safe.latestInbound) }
+          ? { ok: true as const, reply: safeFallback }
           : checked;
       await tx.aiReplyDraft.updateMany({
         where: { id: draftId, tenantId, leaseId, status: 'PROCESSING' },
@@ -285,13 +297,27 @@ function safeAutomaticClarification(latestInbound: string) {
   };
 }
 
+function safeAutomaticStockClarification(latestInbound: string) {
+  const ukrainian = /[\u0400-\u04FF]/u.test(latestInbound);
+  return {
+    outcome: 'CLARIFY' as const,
+    text: ukrainian
+      ? 'Щоб відповісти точно, потрібно додатково перевірити залишок. Я уточню й напишу вам.'
+      : 'I need to verify the current stock before answering. I will check and get back to you.',
+    productIds: [],
+    claims: [],
+  };
+}
+
 function safeAutomaticResponse(
   latestInbound: string,
   recentContext: readonly string[],
   sources: readonly ReplyDraftSource[],
 ): GeneratedReply {
   return safeAutomaticCatalogueOptions(latestInbound, recentContext, sources)
-    ?? safeAutomaticClarification(latestInbound);
+    ?? (asksForConfirmedAvailability(latestInbound, recentContext)
+      ? safeAutomaticStockClarification(latestInbound)
+      : safeAutomaticClarification(latestInbound));
 }
 
 function safeAutomaticCatalogueOptions(
@@ -299,7 +325,11 @@ function safeAutomaticCatalogueOptions(
   recentContext: readonly string[],
   sources: readonly ReplyDraftSource[],
 ): GeneratedReply | null {
-  const options = selectRequestedModelSources(sources, latestInbound, recentContext);
+  const asksAboutStock = asksForConfirmedAvailability(latestInbound, recentContext);
+  const eligibleSources = asksAboutStock
+    ? sources.filter((source) => source.stockQuantity !== null && source.stockQuantity > 0)
+    : sources;
+  const options = selectRequestedModelSources(eligibleSources, latestInbound, recentContext);
   if (options.length === 0) return null;
   const ukrainian = /[\u0400-\u04FF]/u.test(latestInbound);
   let text = ukrainian
@@ -313,6 +343,16 @@ function safeAutomaticCatalogueOptions(
     claims.push({
       start, end: text.length, text: source.name, type: 'NAME', field: 'name', productId: source.productId,
     });
+    if (asksAboutStock) {
+      text += ' — ';
+      const availability = ukrainian ? 'в наявності' : 'in stock';
+      const availabilityStart = text.length;
+      text += availability;
+      claims.push({
+        start: availabilityStart, end: text.length, text: availability,
+        type: 'AVAILABILITY', field: 'stockQuantity', productId: source.productId,
+      });
+    }
     text += '\n';
   }
   text += ukrainian
