@@ -61,6 +61,23 @@ function renderComposer(initialConversation = conversation, canManageSettings = 
 }
 
 describe('SocialReplyComposer', () => {
+  it.each([
+    ['CATALOGUE_MODEL_OVERFLOW', 'uk', 'Знайдено забагато варіантів моделі. Уточніть запит клієнта.'],
+    ['CATALOGUE_RETRIEVAL_FAILED', 'en', 'Catalogue search is temporarily unavailable. Try again later.'],
+  ] as const)('shows a localized %s draft failure without raw database details', (errorCode, locale, expected) => {
+    const inbound = { ...pendingMessage, id: '33333333-3333-4333-8333-333333333333',
+      direction: 'INBOUND' as const, text: 'Покажіть модель Регіон', delivery: null };
+    const draft = {
+      id: '55555555-5555-4555-8555-555555555555', conversationId: conversation.id,
+      anchorMessageId: inbound.id, triggerSource: 'MANUAL' as const,
+      availableAt: '2026-10-05T10:00:10.000Z',
+      status: errorCode === 'CATALOGUE_MODEL_OVERFLOW' ? 'BLOCKED' as const : 'FAILED' as const,
+      outcome: null, generatedText: null, finalText: null, sources: [], errorCode,
+      createdAt: '2026-10-05T10:00:00.000Z', updatedAt: '2026-10-05T10:00:11.000Z',
+    };
+    renderComposer({ ...conversation, messages: [inbound], replyDrafts: [draft] }, false, locale, true);
+    expect(screen.getByText(expected)).toBeVisible();
+  });
   it('includes the latest ready draft in the initial server-rendered editor', () => {
     const inbound = { ...pendingMessage, id: '33333333-3333-4333-8333-333333333333',
       direction: 'INBOUND' as const, text: 'Покажіть моделі Регіон', delivery: null };

@@ -9,6 +9,7 @@ import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import { ReplyDraftProcessor } from './reply-draft.processor.js';
 import { ReplyModelInvalidResponseError } from './openai-reply-draft-generator.js';
+import { CatalogueRetrievalError } from './catalogue-retrieval.js';
 
 describe('ReplyDraftProcessor', () => {
   let container: StartedPostgreSqlContainer;
@@ -271,5 +272,65 @@ describe('ReplyDraftProcessor', () => {
     expect(await new ReplyDraftProcessor(prisma, { generate }).process({ tenantId: seedData.tenantId, draftId: seedData.draftId })).toBe('SKIPPED');
     expect(generate).not.toHaveBeenCalled();
     expect((await prisma.aiReplyDraft.findUniqueOrThrow({ where: { id: seedData.draftId } })).status).toBe('BLOCKED');
+  });
+
+  it('grounds a draft in a product beyond the old 2,000-SKU prefix', async () => {
+    const seedData = await seed();
+    await prisma.$executeRaw`
+      INSERT INTO products (id, tenant_id, sku, name, aliases, active, updated_at)
+      SELECT gen_random_uuid(), ${seedData.tenantId}::uuid, 'MID-' || lpad(n::text, 5, '0'),
+        'Fictional generic door ' || n::text, '[]'::jsonb, true, now()
+      FROM generate_series(1, 2000) AS n
+    `;
+    const last = await prisma.product.create({ data: { tenantId: seedData.tenantId,
+      sku: 'ZZZ-REGION-1', name: 'Fictional Region door', aliases: [], stockQuantity: null,
+      price: '2400.00', currency: null } });
+    await prisma.message.update({ where: { id: seedData.anchorId }, data: { text: 'ZZZ-REGION-1?' } });
+    const generate = vi.fn().mockResolvedValue({
+      reply: { outcome: 'CLARIFY', text: 'Which door?', productIds: [], claims: [] },
+      metadata: { model: 'fictional-model', latencyMs: 10, inputTokens: 20, outputTokens: 10 },
+    });
+    expect(await new ReplyDraftProcessor(prisma, { generate }).process({
+      tenantId: seedData.tenantId, draftId: seedData.draftId,
+    })).toBe('READY');
+    const draft = await prisma.aiReplyDraft.findUniqueOrThrow({ where: { id: seedData.draftId } });
+    expect(JSON.stringify(draft.sourceSnapshot)).toContain(last.id);
+    expect(JSON.stringify(draft.sourceSnapshot)).not.toContain('2400.00');
+  });
+
+  it.each(['AUTOMATIC', 'MANUAL'] as const)('does not call the model after %s model-family overflow', async (triggerSource) => {
+    const seedData = await seed();
+    await prisma.message.update({ where: { id: seedData.anchorId }, data: { text: 'Покажіть модель Регіон' } });
+    await prisma.$executeRaw`
+      INSERT INTO products (id, tenant_id, sku, name, aliases, active, updated_at)
+      SELECT gen_random_uuid(), ${seedData.tenantId}::uuid, 'REGION-' || lpad(n::text, 3, '0'),
+        'Регіон варіант ' || n::text, '[]'::jsonb, true, now()
+      FROM generate_series(1, 65) AS n
+    `;
+    await prisma.aiReplyDraft.update({ where: { id: seedData.draftId },
+      data: { triggerSource, ...(triggerSource === 'AUTOMATIC' ? { createdByUserId: null } : {}) } });
+    const generate = vi.fn();
+    expect(await new ReplyDraftProcessor(prisma, { generate }).process({
+      tenantId: seedData.tenantId, draftId: seedData.draftId,
+    })).toBe(triggerSource === 'AUTOMATIC' ? 'READY' : 'BLOCKED');
+    expect(generate).not.toHaveBeenCalled();
+    expect(await prisma.aiReplyDraft.findUniqueOrThrow({ where: { id: seedData.draftId } })).toMatchObject({
+      status: triggerSource === 'AUTOMATIC' ? 'READY' : 'BLOCKED',
+      outcome: triggerSource === 'AUTOMATIC' ? 'CLARIFY' : null,
+      errorCode: triggerSource === 'AUTOMATIC' ? null : 'CATALOGUE_MODEL_OVERFLOW',
+      modelRequestStartedAt: null, sourceSnapshot: [],
+    });
+  });
+
+  it('durably fails a catalogue retrieval exception after a committed claim', async () => {
+    const seedData = await seed();
+    const generate = vi.fn();
+    const processor = new ReplyDraftProcessor(prisma, { generate }, () => new Date(),
+      async () => { throw new CatalogueRetrievalError(); });
+    expect(await processor.process({ tenantId: seedData.tenantId, draftId: seedData.draftId })).toBe('FAILED');
+    expect(generate).not.toHaveBeenCalled();
+    expect(await prisma.aiReplyDraft.findUniqueOrThrow({ where: { id: seedData.draftId } })).toMatchObject({
+      status: 'FAILED', errorCode: 'CATALOGUE_RETRIEVAL_FAILED', attempts: 1, leaseId: null,
+    });
   });
 });

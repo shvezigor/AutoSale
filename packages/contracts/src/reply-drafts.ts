@@ -58,6 +58,7 @@ export const replyDraftSummarySchema = z.object({
     'NO_SAFE_CANDIDATES', 'UNGROUNDED_CLAIM', 'SOURCE_CHANGED',
     'NEW_MESSAGE', 'PROVIDER_UNAVAILABLE', 'INVALID_RESPONSE',
     'FEATURE_DISABLED', 'TENANT_FROZEN',
+    'CATALOGUE_MODEL_OVERFLOW', 'CATALOGUE_RETRIEVAL_FAILED',
   ]).nullable(),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),

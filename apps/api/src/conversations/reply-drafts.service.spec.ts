@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { describe, expect, it, vi } from 'vitest';
 
-import { ReplyDraftsService } from './reply-drafts.service.js';
+import { ReplyDraftsService, toReplyDraftSummary } from './reply-drafts.service.js';
 
 const tenantId = '11111111-1111-4111-8111-111111111111';
 const conversationId = '22222222-2222-4222-8222-222222222222';
@@ -37,6 +37,13 @@ function harness(options: { enabled?: boolean; anchor?: string | null; queueFail
 }
 
 describe('ReplyDraftsService', () => {
+  it.each(['CATALOGUE_MODEL_OVERFLOW', 'CATALOGUE_RETRIEVAL_FAILED'])(
+    'passes the safe %s draft status code to the client', (errorCode) => {
+      const summary = toReplyDraftSummary({ ...harness().draft,
+        status: errorCode === 'CATALOGUE_MODEL_OVERFLOW' ? 'BLOCKED' : 'FAILED', errorCode });
+      expect(summary.errorCode).toBe(errorCode);
+    },
+  );
   it('creates a durable draft before waking the queue', async () => {
     const { service, create, queue, key } = harness();
     const summary = await service.create(tenantId, actorId, conversationId, key);

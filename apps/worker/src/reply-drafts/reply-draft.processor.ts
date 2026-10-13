@@ -7,6 +7,7 @@ import {
 } from '@autosale/database';
 
 import { selectCatalogueCandidates, selectRequestedModelSources } from './catalogue-candidates.js';
+import { CatalogueRetrievalError, retrieveCatalogueCandidates } from './catalogue-retrieval.js';
 import { validateReplyDraft, type GeneratedReply } from './claim-validator.js';
 import { buildSafeReplyInput } from './input-sanitizer.js';
 import {
@@ -26,6 +27,7 @@ export class ReplyDraftProcessor {
     private readonly prisma: PrismaClient,
     private readonly generator: DraftGenerator,
     private readonly now: () => Date = () => new Date(),
+    private readonly retrieveCandidates: typeof retrieveCatalogueCandidates = retrieveCatalogueCandidates,
   ) {}
 
   async process(rawJob: unknown): Promise<'READY' | 'BLOCKED' | 'STALE' | 'FAILED' | 'SKIPPED' | 'DEFERRED'> {
@@ -81,19 +83,6 @@ export class ReplyDraftProcessor {
           select: { text: true },
         });
         const safe = buildSafeReplyInput(anchor.text ?? '', recent.reverse().map((message) => message.text ?? ''));
-        const products = await tx.product.findMany({
-          where: { tenantId, active: true }, orderBy: [{ sku: 'asc' }, { id: 'asc' }], take: 2_000,
-          select: {
-            id: true, tenantId: true, sku: true, name: true, aliases: true,
-            brand: true, category: true, color: true, size: true, attributes: true,
-            price: true, currency: true, stockQuantity: true, active: true, updatedAt: true,
-          },
-        });
-        const sources = selectCatalogueCandidates(products, tenantId, safe.latestInbound, safe.recentContext);
-        await tx.aiReplyDraft.updateMany({
-          where: { id: draftId, tenantId, leaseId, status: 'PROCESSING' },
-          data: { sourceSnapshot: sources as unknown as Prisma.InputJsonValue },
-        });
         return {
           outcome: 'PROCESS' as const,
           conversationId: draft.conversationId, anchorMessageId: draft.anchorMessageId,
@@ -101,7 +90,7 @@ export class ReplyDraftProcessor {
           style: { companyName: style.companyName, tone: style.tone as ReplyGeneratorInput['style']['tone'],
             addressForm: style.addressForm as ReplyGeneratorInput['style']['addressForm'],
             guidance: buildSafeReplyInput(style.guidance, []).latestInbound },
-          sources, safe,
+          safe,
         };
       });
     } catch (error) {
@@ -110,6 +99,77 @@ export class ReplyDraftProcessor {
     }
     if (!context) return 'SKIPPED';
     if (context.outcome === 'DEFERRED') return 'DEFERRED';
+
+    let recalled;
+    try {
+      recalled = await withTenantTransaction(this.prisma, tenantId, async (tx) => {
+        await assertTenantAcceptingMutations(tx, tenantId, 'CONVERSATION_REPLY');
+        const current = await tx.aiReplyDraft.findFirst({
+          where: { id: draftId, tenantId, leaseId, status: 'PROCESSING' },
+          select: { id: true },
+        });
+        if (!current) return { outcome: 'SKIPPED' as const };
+        const latest = await tx.message.findFirst({
+          where: { tenantId, conversationId: context.conversationId, direction: 'INBOUND', text: { not: null } },
+          orderBy: [{ sourceTimestamp: 'desc' }, { id: 'desc' }], select: { id: true },
+        });
+        if (latest?.id !== context.anchorMessageId) {
+          await tx.aiReplyDraft.updateMany({ where: { id: draftId, tenantId, leaseId, status: 'PROCESSING' },
+            data: { status: 'STALE', errorCode: 'NEW_MESSAGE', leaseId: null, leaseExpiresAt: null } });
+          return { outcome: 'STALE' as const };
+        }
+        const enabled = await tx.tenantReplyStyle.findUnique({ where: { tenantId }, select: { enabled: true } });
+        if (!enabled?.enabled) {
+          await tx.aiReplyDraft.updateMany({ where: { id: draftId, tenantId, leaseId, status: 'PROCESSING' },
+            data: { status: 'BLOCKED', errorCode: 'FEATURE_DISABLED', leaseId: null, leaseExpiresAt: null } });
+          return { outcome: 'BLOCKED' as const };
+        }
+        const candidateResult = await this.retrieveCandidates(
+          tx, tenantId, context.safe.latestInbound, context.safe.recentContext,
+        );
+        if (candidateResult.modelOverflow) {
+          const automatic = context.triggerSource === 'AUTOMATIC';
+          const clarification = safeAutomaticClarification(context.safe.latestInbound);
+          await tx.aiReplyDraft.updateMany({
+            where: { id: draftId, tenantId, leaseId, status: 'PROCESSING' },
+            data: {
+              status: automatic ? 'READY' : 'BLOCKED', outcome: automatic ? 'CLARIFY' : null,
+              generatedText: automatic ? clarification.text : null,
+              sourceSnapshot: [], errorCode: automatic ? null : 'CATALOGUE_MODEL_OVERFLOW',
+              promptVersion: automatic ? REPLY_DRAFT_PROMPT_VERSION : null,
+              schemaVersion: automatic ? REPLY_DRAFT_SCHEMA_VERSION : null,
+              modelVersion: automatic ? 'safe-fallback' : null,
+              providerLatencyMs: automatic ? 0 : null,
+              inputTokens: automatic ? 0 : null, outputTokens: automatic ? 0 : null,
+              leaseId: null, leaseExpiresAt: null,
+            },
+          });
+          return { outcome: automatic ? 'READY' as const : 'BLOCKED' as const };
+        }
+        const sources = selectCatalogueCandidates(candidateResult.products, tenantId,
+          context.safe.latestInbound, context.safe.recentContext);
+        await tx.aiReplyDraft.updateMany({
+          where: { id: draftId, tenantId, leaseId, status: 'PROCESSING' },
+          data: { sourceSnapshot: sources as unknown as Prisma.InputJsonValue },
+        });
+        return { outcome: 'PROCESS' as const, sources };
+      });
+    } catch (error) {
+      if (error instanceof CatalogueRetrievalError) {
+        await this.finish(tenantId, draftId, leaseId, { status: 'FAILED', errorCode: 'CATALOGUE_RETRIEVAL_FAILED' });
+        return 'FAILED';
+      }
+      if (error instanceof TenantLifecycleFrozenError) {
+        await withTenantTransaction(this.prisma, tenantId, (tx) => tx.aiReplyDraft.updateMany({
+          where: { id: draftId, tenantId, leaseId, status: 'PROCESSING' },
+          data: { status: 'BLOCKED', errorCode: 'TENANT_FROZEN', leaseId: null, leaseExpiresAt: null },
+        }));
+        return 'BLOCKED';
+      }
+      throw error;
+    }
+    if (recalled.outcome !== 'PROCESS') return recalled.outcome;
+    const sources = recalled.sources;
 
     const started = await withTenantTransaction(this.prisma, tenantId, (tx) => tx.aiReplyDraft.updateMany({
       where: { id: draftId, tenantId, leaseId, status: 'PROCESSING', modelRequestStartedAt: null },
@@ -123,12 +183,12 @@ export class ReplyDraftProcessor {
         latestInbound: context.safe.latestInbound,
         recentContext: context.safe.recentContext,
         style: context.style,
-        sources: context.sources,
+        sources,
       });
     } catch (error) {
       if (error instanceof ReplyModelInvalidResponseError && context.triggerSource === 'AUTOMATIC') {
         generated = {
-          reply: safeAutomaticResponse(context.safe.latestInbound, context.safe.recentContext, context.sources),
+          reply: safeAutomaticResponse(context.safe.latestInbound, context.safe.recentContext, sources),
           metadata: { model: 'safe-fallback', latencyMs: 0, inputTokens: 0, outputTokens: 0 },
         };
       } else {
@@ -166,18 +226,18 @@ export class ReplyDraftProcessor {
         orderBy: [{ sourceTimestamp: 'desc' }, { id: 'desc' }], select: { id: true },
       });
       const currentProducts = await tx.product.findMany({
-        where: { tenantId, id: { in: context.sources.map((source) => source.productId) } },
+        where: { tenantId, id: { in: sources.map((source) => source.productId) } },
         select: { id: true, updatedAt: true, active: true },
       });
-      if (latest?.id !== context.anchorMessageId || !sourcesCurrent(context.sources, currentProducts)) {
+      if (latest?.id !== context.anchorMessageId || !sourcesCurrent(sources, currentProducts)) {
         await tx.aiReplyDraft.updateMany({ where: { id: draftId, tenantId, leaseId, status: 'PROCESSING' },
           data: { status: 'STALE', errorCode: latest?.id !== context.anchorMessageId ? 'NEW_MESSAGE' : 'SOURCE_CHANGED',
             leaseId: null, leaseExpiresAt: null } });
         return 'STALE' as const;
       }
-      const checked = validateReplyDraft(generated.reply, context.sources);
+      const checked = validateReplyDraft(generated.reply, sources);
       const catalogueOptions = current.triggerSource === 'AUTOMATIC'
-        ? safeAutomaticCatalogueOptions(context.safe.latestInbound, context.safe.recentContext, context.sources)
+        ? safeAutomaticCatalogueOptions(context.safe.latestInbound, context.safe.recentContext, sources)
         : null;
       const validated = checked.ok
         ? catalogueOptions && checked.reply.outcome === 'CLARIFY' && checked.reply.productIds.length === 0
@@ -205,7 +265,7 @@ export class ReplyDraftProcessor {
   }
 
   private async finish(tenantId: string, draftId: string, leaseId: string,
-    data: { status: 'FAILED'; errorCode: 'INVALID_RESPONSE' | 'PROVIDER_UNAVAILABLE' }): Promise<void> {
+    data: { status: 'FAILED'; errorCode: 'INVALID_RESPONSE' | 'PROVIDER_UNAVAILABLE' | 'CATALOGUE_RETRIEVAL_FAILED' }): Promise<void> {
     await withTenantTransaction(this.prisma, tenantId, (tx) => tx.aiReplyDraft.updateMany({
       where: { id: draftId, tenantId, leaseId, status: 'PROCESSING' },
       data: { ...data, leaseId: null, leaseExpiresAt: null },

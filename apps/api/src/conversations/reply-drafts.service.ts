@@ -119,6 +119,7 @@ export function toReplyDraftSummary(row: {
   const safeError = [
     'NO_SAFE_CANDIDATES', 'UNGROUNDED_CLAIM', 'SOURCE_CHANGED', 'NEW_MESSAGE',
     'PROVIDER_UNAVAILABLE', 'INVALID_RESPONSE', 'FEATURE_DISABLED', 'TENANT_FROZEN',
+    'CATALOGUE_MODEL_OVERFLOW', 'CATALOGUE_RETRIEVAL_FAILED',
   ].includes(row.errorCode ?? '') ? row.errorCode : null;
   return replyDraftSummarySchema.parse({
     id: row.id, conversationId: row.conversationId, anchorMessageId: row.anchorMessageId,

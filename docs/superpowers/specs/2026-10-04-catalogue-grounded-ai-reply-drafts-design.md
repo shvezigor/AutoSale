@@ -1,7 +1,7 @@
 # Catalogue-grounded AI reply drafts — design
 
 **Date:** 2026-10-04  
-**Updated:** 2026-10-07
+**Updated:** 2026-10-13
 **Status:** Automatic preparation implemented behind a tenant switch; partial production-browser evidence recorded; remaining live provider validation pending
 **Owner:** Sales AITO conversations and AI
 
@@ -25,7 +25,7 @@ A new inbound message makes an older unused draft stale and restarts the quiet-p
 
 Automatic scheduling occurs only while the tenant reply-style switch is enabled. A block with no usable text is not sent to the model because image understanding is outside this release; the conversation remains available for manual review.
 
-Implementation notes (2026-10-05): the owner-controlled switch and communication profile live under **Settings → Social / customers → AI reply style** and are disabled by default. A manager may view but not edit that profile. The worker currently ranks at most the first 2,000 active products in SKU order per generation; this is a controlled-pilot ceiling, not a scale guarantee. Retrieval for larger catalogues must be redesigned and measured before general availability. See the [acceptance checklist](../../acceptance/ai-reply-drafts-checklist.md) for live provider, privacy and UX validation.
+Implementation notes (2026-10-13): the owner-controlled switch and communication profile live under **Settings → Social / customers → AI reply style** and are disabled by default. A manager may view but not edit that profile. Indexed tenant-scoped catalogue recall replaces the former first-2,000-SKU ceiling; bounded PostgreSQL results still pass through the same deterministic ranker and at most eight factual sources. The local 50,000-product benchmark meets its recorded retrieval gate, but production rollout, browser acceptance and the live-provider pilot remain separate gates. See the [scalable retrieval design](2026-10-12-scalable-ai-catalogue-retrieval-design.md) and [acceptance checklist](../../acceptance/ai-reply-drafts-checklist.md).
 
 ## 3. Communication style
 
@@ -49,7 +49,7 @@ Use the existing durable asynchronous generation flow with an inbound debounce s
 2. When the tenant reply-style switch is enabled and the latest block has usable text, the same tenant context marks older active drafts stale and stores a system-triggered `QUEUED` draft for the latest inbound anchor with `availableAt = persistedAt + 10 seconds`.
 3. After commit, it adds a delayed `ai-replies.generate` job. PostgreSQL remains the source of truth; reconciliation dispatches only queued rows whose `availableAt` has passed, so a missed Redis wake-up is recoverable without bypassing the quiet period.
 4. A newer inbound message creates a newer scheduled row and stales the previous one. An older delayed job becomes a no-op. Before model spend, the worker verifies that the draft is active, its anchor is still the latest inbound message and the quiet period has elapsed.
-5. The worker leases one draft, loads all required data inside the job tenant context, performs bounded deterministic catalogue retrieval, then calls the AI provider.
+5. The worker commits the draft lease and safe context first, then performs bounded indexed catalogue recall in a second tenant transaction. Only a successful bounded result reaches the existing ranker and AI provider. A retrieval failure durably fails the leased draft with a safe code rather than reverting to the old SKU prefix.
 6. A strict structured response is validated against the candidate set and persisted. The existing post-generation anchor and catalogue rechecks remain mandatory.
 7. The conversation detail API returns safe draft state and sources. It never returns prompts, customer identifiers outside the existing conversation contract, model internals or credentials.
 8. When a supported channel sends an edited draft, the existing message transaction links the outbound message to that draft and marks the draft used.
@@ -67,7 +67,7 @@ Rejected alternatives:
 
 Catalogue retrieval is deterministic and tenant-scoped. It considers only active products and uses the latest inbound message plus a bounded recent context to find candidate SKU, name, alias, brand, category, colour and size. Selected variant attributes are included in source snapshots but do not currently drive candidate ranking. The worker passes only the top bounded candidates to the model.
 
-The current worker reads only the first 2,000 active products in SKU order. This is a controlled-pilot ceiling and can omit a relevant product. The approved but not yet implemented [indexed retrieval design](2026-10-12-scalable-ai-catalogue-retrieval-design.md) replaces that blind prefix with tenant-scoped, bounded candidate recall while preserving this feature's ranker, eight-source prompt limit and factual validation. Large-catalogue readiness remains pending measured implementation and acceptance.
+The [indexed retrieval implementation](2026-10-12-scalable-ai-catalogue-retrieval-design.md) searches tenant-owned active products beyond the former first-2,000-SKU prefix. Exact SKU and explicit model passes precede bounded general full-text recall; the existing ranker, eight-source prompt limit and factual validation remain unchanged. More than 64 variants of an explicit model cannot be presented as an exhaustive option set: automatic preparation produces a fact-free `CLARIFY` without an AI call, while a manual retry becomes `BLOCKED` with `CATALOGUE_MODEL_OVERFLOW`. A catalogue query failure becomes durable `FAILED` with `CATALOGUE_RETRIEVAL_FAILED`; API and UI show only localized safe status text. Neither case sends a customer message. Large-catalogue production readiness still requires migration-first rollout and browser/provider acceptance.
 
 Allowed product facts are:
 
