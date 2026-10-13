@@ -78,7 +78,7 @@ Allowed product facts are:
 
 `stockQuantity = 0` means out of stock. `stockQuantity = null` means unknown and must never be presented as available or unavailable. Missing currency makes price unavailable for a factual reply. Discounts, delivery promises, payment terms and other commercial claims are outside the first release.
 
-When an inbound block explicitly asks what is in stock, automatic drafting treats it as an availability request even without an “options” keyword. Only variants with `stockQuantity > 0` may be offered as available; each positive availability phrase has a source-linked claim. A structurally valid model answer referencing any zero- or unknown-stock variant is replaced by the same stock-safe automatic fallback; the same answer on a strict manual AI retry becomes `BLOCKED`, while a fact-free manual clarification remains valid. If no confirmed-positive variant can be offered automatically, the draft asks for an additional stock check without presenting any variant as available. Ordinary assortment requests may still show catalogue variants with unknown stock, but cannot assert their availability. The manager still reviews freshness and explicitly sends any reply.
+When an inbound block explicitly asks what is in stock, automatic drafting treats it as an availability request even without an “options” keyword. Only variants with `stockQuantity > 0` may be offered as available; each positive availability phrase has a source-linked claim. A structurally valid model answer referencing any zero- or unknown-stock variant is replaced by the same stock-safe automatic fallback; the same answer on a strict manual AI retry becomes `BLOCKED`, while a fact-free manual clarification remains valid. If no confirmed-positive variant can be offered automatically, the draft says the current stock requires checking without presenting any variant as available or promising a later message: no automatic follow-up exists. Ordinary assortment requests may still show catalogue variants with unknown stock, but cannot assert their availability. The manager still reviews freshness and explicitly sends any reply.
 
 The structured AI result includes outcome, reply text, referenced product IDs and an exhaustive claim manifest whose spans identify every SKU, variant, price, currency, stock or availability statement in the draft. Every referenced ID must belong to the supplied candidate set. The validator rejects uncovered numbers, currencies, stock/availability language and prohibited commercial promise language, then compares every manifest claim with a generation-time source snapshot. If the result cannot be proven from allowed facts, it becomes `BLOCKED` with a safe reason instead of a ready draft. Ambiguous product selection produces a clarifying question; absence of a safe response produces handoff guidance.
 
@@ -210,7 +210,7 @@ Automated verification covers:
 - prompt injection attempts in customer text and custom guidance;
 - exact and ambiguous product matching;
 - current, changed and deleted product facts;
-- null versus zero stock, missing currency and stale price;
+- null versus zero stock, missing currency and stale price, including a stock-check fallback that does not promise an automatic follow-up;
 - invalid product references and unsupported factual claims;
 - provider timeout, invalid schema and explicit manager retry;
 - deterministic fact-free clarification when an automatic model result fails factual grounding or structured parsing, while provider outages and manual unsafe retries remain strict;

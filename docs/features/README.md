@@ -44,6 +44,8 @@ Indexed, bounded tenant-scoped AI catalogue recall is implemented and deployed t
 
 The deployed AI draft worker now treats explicit stock questions as availability requests: automatic model and fallback replies offer only variants with confirmed positive stock, while unknown or zero stock leads to a stock-check clarification when no safe option remains. Worker regressions, release health checks and the [live Instagram browser stock check](../acceptance/ai-reply-drafts-checklist.md) passed on 13 October 2026: the newly prepared draft offered only the confirmed-stock variant and persisted after reload. The broader controlled pilot remains open.
 
+When no stock can be confirmed, the stock-check draft does not promise a later message; follow-up remains a manager action, not an automated workflow. See the [AI reply draft design](../superpowers/specs/2026-10-04-catalogue-grounded-ai-reply-drafts-design.md) for the contract and the [acceptance checklist](../acceptance/ai-reply-drafts-checklist.md) for rollout status.
+
 ## How to add or change a feature
 
 1. Search this index and the repository for equivalent behavior.

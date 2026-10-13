@@ -352,7 +352,7 @@ describe('ReplyDraftProcessor', () => {
     expect(draft.generatedText).toContain('860х2050 Вигаданий Регіон А — в наявності');
   });
 
-  it('asks for a stock check rather than offering zero- or unknown-stock variants', async () => {
+  it('asks for a stock check without promising a follow-up or offering unconfirmed variants', async () => {
     const seedData = await seed();
     await prisma.aiReplyDraft.update({ where: { id: seedData.draftId },
       data: { triggerSource: 'AUTOMATIC', createdByUserId: null } });
@@ -372,6 +372,25 @@ describe('ReplyDraftProcessor', () => {
     expect(draft.outcome).toBe('CLARIFY');
     expect(draft.generatedText).toContain('потрібно додатково перевірити залишок');
     expect(draft.generatedText).not.toContain('Регіон');
+    expect(draft.generatedText).not.toMatch(/(?:я|ми)\s+.*(?:напиш|повідом|зв.?яж)/iu);
+  });
+
+  it('does not promise an English follow-up when stock is unconfirmed', async () => {
+    const seedData = await seed();
+    await prisma.aiReplyDraft.update({ where: { id: seedData.draftId },
+      data: { triggerSource: 'AUTOMATIC', createdByUserId: null } });
+    await prisma.message.update({ where: { id: seedData.anchorId },
+      data: { text: 'Which Fictional Region doors are in stock?' } });
+    await prisma.product.update({ where: { id: seedData.productId },
+      data: { name: 'Fictional Region door', stockQuantity: 0 } });
+    const generate = vi.fn().mockRejectedValue(new ReplyModelInvalidResponseError());
+
+    expect(await new ReplyDraftProcessor(prisma, { generate })
+      .process({ tenantId: seedData.tenantId, draftId: seedData.draftId })).toBe('READY');
+    const draft = await prisma.aiReplyDraft.findUniqueOrThrow({ where: { id: seedData.draftId } });
+    expect(draft.outcome).toBe('CLARIFY');
+    expect(draft.generatedText).toMatch(/stock|availability/i);
+    expect(draft.generatedText).not.toMatch(/(?:I|we)\s+(?:will|['’]ll)\s+(?:check|follow|get back|write)/i);
   });
 
   it('blocks a manual AI retry that offers a zero-stock product in response to a stock question', async () => {

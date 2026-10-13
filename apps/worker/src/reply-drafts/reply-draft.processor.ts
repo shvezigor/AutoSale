@@ -302,8 +302,8 @@ function safeAutomaticStockClarification(latestInbound: string) {
   return {
     outcome: 'CLARIFY' as const,
     text: ukrainian
-      ? 'Щоб відповісти точно, потрібно додатково перевірити залишок. Я уточню й напишу вам.'
-      : 'I need to verify the current stock before answering. I will check and get back to you.',
+      ? 'Поки що не можу підтвердити наявність: потрібно додатково перевірити залишок.'
+      : 'I cannot confirm availability yet; the current stock needs to be checked.',
     productIds: [],
     claims: [],
   };
