@@ -1,6 +1,6 @@
 # Scalable tenant-scoped catalogue retrieval for AI reply drafts
 
-Status: **user-approved design; implementation planned, not implemented** (13 October 2026). The step-by-step implementation and verification plan is [`2026-10-13-scalable-ai-catalogue-retrieval.md`](../plans/2026-10-13-scalable-ai-catalogue-retrieval.md).
+Status: **user-approved design; implementation in progress, not deployed** (13 October 2026). The step-by-step implementation and verification plan is [`2026-10-13-scalable-ai-catalogue-retrieval.md`](../plans/2026-10-13-scalable-ai-catalogue-retrieval.md).
 
 ## Problem and scope
 
@@ -37,6 +37,18 @@ Use a PostgreSQL GIN index on a `simple`-configuration text-search expression ov
 - Retrieval failure ends as `FAILED`; an overflowed explicit model family is handled as specified above; no ungrounded source is invented and no message is sent.
 
 ## Measurement and acceptance
+
+### Pre-retrieval-code benchmark (isolated fictional database, 13 October 2026)
+
+The opt-in `catalogue-retrieval.bench.spec.ts` used PostgreSQL 17.6-alpine in Testcontainers on Windows/Docker Desktop (AMD Ryzen 7 5700X, 32 GiB host RAM). Each fixture was analyzed after insertion, with five warmups and 30 warm-cache samples per query, on the same host and process. The old 2,000-SKU prefix was verified to miss the 2,001st product. The correctness-matched baseline transferred all active product columns for every tenant row; the indexed SQL prototype transferred one row for selective SKU/model/name/alias queries and at most 128 for a broad query. No production/customer data was used.
+
+| Active products | Full-scan p50 / p95, rows | Exact SKU indexed p95, rows | Model/name/alias indexed p95, rows | Broad indexed p95, rows |
+|---:|---:|---:|---:|---:|
+| 2,001 | 10.02 / 16.84 ms, 2,001 | 0.67 ms, 1 | 1.15 / 1.01 / 1.09 ms, 1 | 2.21 ms, 128 |
+| 10,000 | 41.23 / 51.91 ms, 10,000 | 0.65 ms, 1 | 1.75 / 2.46 / 1.90 ms, 1 | 5.62 ms, 128 |
+| 50,000 | 195.46 / 227.26 ms, 50,000 | 0.80 ms, 1 | 3.00 / 4.10 / 2.87 ms, 1 | 25.67 ms, 128 |
+
+`EXPLAIN (ANALYZE, BUFFERS)` used `products_ai_search_sku_idx` for the 50,000-row exact lookup (4 shared-hit blocks, 0 reads) and `products_ai_search_fts_idx` for model/name/alias (319–321 shared-hit blocks, 0 reads). The broad query used the GIN index with 1,277 shared-hit blocks, 0 reads. These figures are warm-cache local evidence, not a production SLA. Before implementing worker retrieval, the acceptance gate is fixed at **p95 ≤170 ms on the 50,000-row fixture across all five query cases**, at least 25% below the measured 227.26 ms full-scan p95, with ≤200 hydrated rows and the relevant last product present in each selective result. Repeat on the same host/fixture/cache method after integrating the actual repository; if the difference falls within measurement noise, do not claim a performance improvement.
 
 Before implementation, capture the current result and retrieval time on the same fictional fixtures used after the change: 2,001 products with the relevant SKU last, and representative 10,000- and 50,000-product catalogues with exact SKU, named-model, alias and broad queries. The current 2,000-row prefix is a correctness-failing reference, not a fair performance baseline; compare indexed retrieval against a correctness-matched full scan over the same fixture. Record p50/p95 of the retrieval stage, rows returned to the worker, and `EXPLAIN (ANALYZE, BUFFERS)` for indexed queries. Use the same PostgreSQL version, fixture, hardware and warm/cold-cache method for before/after comparison; do not claim a performance win inside measurement noise.
 
