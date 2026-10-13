@@ -2,7 +2,7 @@
 
 **Date:** 2026-10-04  
 **Updated:** 2026-10-13
-**Status:** Automatic preparation implemented behind a tenant switch; post-deployment new-draft and send-time stale-guard browser acceptance passed; controlled-pilot validation pending
+**Status:** Automatic preparation implemented behind a tenant switch; post-deployment new-draft, send-time stale-guard and post-24-hour copy-only browser acceptance passed; manual `HUMAN_AGENT` delivery and controlled-pilot validation pending
 **Owner:** Sales AITO conversations and AI
 
 ## 1. Purpose
