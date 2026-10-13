@@ -27,6 +27,8 @@ Search terms are derived from the already sanitized, bounded customer context: a
 
 Use a PostgreSQL GIN index on a `simple`-configuration text-search expression over the named fields, plus an indexed case-insensitive exact-SKU lookup and the existing tenant/active boundary. These indexes are computed from product columns rather than maintained by a second table or trigger. The migration must be additive, with migration applied before the new worker. It must not write search terms, customer text, generated replies or prompts to application logs. A database retrieval error ends generation as `FAILED` with a safe code; it must not silently fall back to the old first-2,000 scan and present an incomplete answer. For an overflowed explicit model family, automatic preparation produces a fact-free `CLARIFY` draft and manual retry visibly blocks instead of spending a model call on incomplete options.
 
+Explicit models in recent context are extracted from each of the last three messages independently, so a model name cannot accidentally absorb the first word of the next message.
+
 ## Correctness and failure handling
 
 - The product after SKU position 2,000 must be retrievable when the query names its SKU, explicit model, full product name or exact alias, without relying on its sort position or losing it to generic single-token matches.

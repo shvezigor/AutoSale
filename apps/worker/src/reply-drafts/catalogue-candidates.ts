@@ -20,6 +20,30 @@ export interface CatalogueCandidateInput {
 
 const variantKeys = new Set(['material', 'finish', 'dimension', 'width', 'height', 'variant', 'матеріал', 'покриття', 'розмір']);
 
+export interface CatalogueSearchIntent {
+  query: string;
+  tokens: string[];
+  exactTerms: string[];
+  explicitModels: string[];
+  asksForOptions: boolean;
+}
+
+export function extractCatalogueSearchIntent(
+  latestInbound: string,
+  recentContext: readonly string[],
+): CatalogueSearchIntent {
+  const query = normalize(`${latestInbound} ${recentContext.slice(-3).join(' ')}`);
+  return {
+    query,
+    tokens: [...tokens(query)].filter((term) => term.length <= 64).slice(0, 12),
+    exactTerms: [...new Set(query.match(/[\p{L}\p{N}][\p{L}\p{N}._-]*/gu) ?? [])]
+      .filter((term) => term.length >= 3 && term.length <= 64).slice(0, 12),
+    explicitModels: requestedModelTokens(latestInbound, recentContext)
+      .filter((term) => term.length <= 64),
+    asksForOptions: asksForOptions(latestInbound, recentContext),
+  };
+}
+
 export function selectCatalogueCandidates(
   products: readonly CatalogueCandidateInput[],
   tenantId: string,
@@ -137,7 +161,7 @@ function containsWholeTerm(query: string, term: string): boolean {
 
 function requestedModelTokens(latestInbound: string, recentContext: readonly string[]): string[] {
   const latest = modelTokensIn(latestInbound);
-  return latest.length > 0 ? latest : modelTokensIn(recentContext.slice(-3).join(' '));
+  return latest.length > 0 ? latest : [...new Set(recentContext.slice(-3).flatMap(modelTokensIn))];
 }
 
 function modelTokensIn(value: string): string[] {

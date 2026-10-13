@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { selectCatalogueCandidates, selectRequestedModelSources } from './catalogue-candidates.js';
+import { extractCatalogueSearchIntent, selectCatalogueCandidates, selectRequestedModelSources } from './catalogue-candidates.js';
 
 const tenantId = '11111111-1111-4111-8111-111111111111';
 const product = (id: number, overrides: Record<string, unknown> = {}) => ({
@@ -81,5 +81,39 @@ describe('selectCatalogueCandidates', () => {
 
     expect(selectRequestedModelSources(sources, latestInbound, recentContext).map((item) => item.sku))
       .toEqual(['DOOR-1']);
+  });
+});
+
+describe('extractCatalogueSearchIntent', () => {
+  it('keeps a bounded exact SKU and the latest explicit model', () => {
+    const intent = extractCatalogueSearchIntent('Покажіть модель Регіон, SKU DOOR-7', ['модель Авангард']);
+    expect(intent.explicitModels).toEqual(['регіон']);
+    expect(intent.exactTerms).toContain('door-7');
+    expect(intent.asksForOptions).toBe(true);
+  });
+
+  it('falls back to only the last three contextual messages for an explicit model', () => {
+    const intent = extractCatalogueSearchIntent('Який розмір?', [
+      'модель Перший', 'модель Регіон', 'Потрібні двері', '860х2050',
+    ]);
+    expect(intent.explicitModels).toEqual(['регіон']);
+    expect(intent.query).not.toContain('перший');
+  });
+
+  it('caps distinct tokens and drops overlong terms instead of truncating them', () => {
+    const longTerm = 'x'.repeat(65);
+    const intent = extractCatalogueSearchIntent(
+      `${longTerm} ${Array.from({ length: 13 }, (_, index) => `term${index}`).join(' ')} TERM0`, [],
+    );
+    expect(intent.tokens).toHaveLength(12);
+    expect(intent.tokens).not.toContain(longTerm);
+    expect(intent.exactTerms).not.toContain(longTerm.slice(0, 64));
+    expect(intent.tokens.filter((term) => term === 'term0')).toHaveLength(1);
+  });
+
+  it('returns no searchable terms for punctuation and whitespace', () => {
+    expect(extractCatalogueSearchIntent(' ? !! ', [])).toMatchObject({
+      tokens: [], exactTerms: [], explicitModels: [], asksForOptions: false,
+    });
   });
 });
