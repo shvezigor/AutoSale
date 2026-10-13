@@ -58,6 +58,7 @@ export const outboundMessageInputSchema = z.object({
 
 export const replyCapabilitySchema = z.object({
   enabled: z.boolean(),
+  aiDraftSendAllowed: z.boolean(),
   reason: z.enum([
     'NOT_CONNECTED',
     'RECONNECT_REQUIRED',

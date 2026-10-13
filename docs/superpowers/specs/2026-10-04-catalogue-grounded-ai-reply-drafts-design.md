@@ -177,6 +177,7 @@ The existing conversation composer adds:
 - a vertically resizable reply field bounded to the conversation viewport, so enlarging the editor reduces the internally scrollable message history without introducing document scroll;
 - normal **Send** for supported reply-capable channels;
 - **Copy reply** for Facebook with explicit manual-send guidance.
+- When Instagram's standard 24-hour window closes but its manual `HUMAN_AGENT` window is still open, the conversation capability keeps manual replies enabled while explicitly setting `aiDraftSendAllowed = false`. A linked AI draft remains reviewable in the editor, but the action changes to **Copy text** and explains why it cannot be sent through Sales AITO. **Write manually** clears the linked draft and opens a fresh editor for an independently authored manual response. The API remains the authority for the time boundary and still rejects a draft-linked send if the window changes between refresh and submit.
 
 The manager's typed text is never erased by polling, a generation failure or a stale result. Clearing or editing an automatically inserted draft counts as manager interaction and the same draft is not inserted again. Buttons use shared variants and `LoadingButton`; errors follow the field-validation contract. Desktop, 390 px mobile, keyboard and screen-reader behavior are required.
 

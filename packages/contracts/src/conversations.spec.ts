@@ -56,11 +56,11 @@ describe('conversation profile contracts', () => {
       participantName: 'Олена',
       participantUsername: null,
       participantAvatarUrl: null,
-      replyCapability: { enabled: false, reason: 'CHANNEL_READ_ONLY' },
+      replyCapability: { enabled: false, aiDraftSendAllowed: false, reason: 'CHANNEL_READ_ONLY' },
       messages: [],
     });
 
-    expect(parsed.replyCapability).toEqual({ enabled: false, reason: 'CHANNEL_READ_ONLY' });
+    expect(parsed.replyCapability).toEqual({ enabled: false, aiDraftSendAllowed: false, reason: 'CHANNEL_READ_ONLY' });
   });
 
   it('retains additive profile fields in conversation list responses', () => {
@@ -85,7 +85,7 @@ describe('conversation profile contracts', () => {
       participantName: null,
       participantUsername: null,
       participantAvatarUrl: null,
-      replyCapability: { enabled: false, reason: 'NOT_CONNECTED' },
+      replyCapability: { enabled: false, aiDraftSendAllowed: false, reason: 'NOT_CONNECTED' },
       messages: [],
     });
 
@@ -103,7 +103,7 @@ describe('conversation profile contracts', () => {
       participantName: 'Олена',
       participantUsername: 'olena',
       participantAvatarUrl: null,
-      replyCapability: { enabled: true, reason: null },
+      replyCapability: { enabled: true, aiDraftSendAllowed: true, reason: null },
       messages: [{
         id: '22222222-2222-4222-8222-222222222222',
         direction: 'OUTBOUND',
@@ -115,15 +115,16 @@ describe('conversation profile contracts', () => {
       }],
     });
 
-    expect(parsed.replyCapability).toEqual({ enabled: true, reason: null });
+    expect(parsed.replyCapability).toEqual({ enabled: true, aiDraftSendAllowed: true, reason: null });
     expect(parsed.messages[0]?.delivery).toEqual({ status: 'PENDING', attempts: 0, errorCode: null, retryAllowed: false });
   });
 
   it('accepts bounded TikTok reply capability and delivery errors', () => {
     expect(replyCapabilitySchema.parse({
       enabled: false,
+      aiDraftSendAllowed: false,
       reason: 'TIKTOK_CAPABILITY_UNAVAILABLE',
-    })).toEqual({ enabled: false, reason: 'TIKTOK_CAPABILITY_UNAVAILABLE' });
+    })).toEqual({ enabled: false, aiDraftSendAllowed: false, reason: 'TIKTOK_CAPABILITY_UNAVAILABLE' });
 
     expect(outboundDeliverySchema.parse({
       status: 'FAILED',
@@ -151,7 +152,7 @@ describe('conversation profile contracts', () => {
       participantName: 'Олена',
       participantUsername: 'olena',
       participantAvatarUrl: null,
-      replyCapability: { enabled: false, reason: 'REPLY_WINDOW_EXPIRED' },
+      replyCapability: { enabled: false, aiDraftSendAllowed: false, reason: 'REPLY_WINDOW_EXPIRED' },
       messages: [{
         id: '22222222-2222-4222-8222-222222222222',
         direction: 'OUTBOUND',
@@ -170,6 +171,20 @@ describe('conversation profile contracts', () => {
     expect(parsed.messages[0]?.delivery?.errorCode).toBe('INSTAGRAM_HUMAN_AGENT_UNAVAILABLE');
   });
 
+  it('distinguishes manual reply eligibility from AI-draft sending', () => {
+    const parsed = conversationDetailResponseSchema.parse({
+      id: '11111111-1111-4111-8111-111111111111',
+      channel: 'INSTAGRAM',
+      participantName: 'Fictional customer',
+      participantUsername: null,
+      participantAvatarUrl: null,
+      replyCapability: { enabled: true, reason: null, aiDraftSendAllowed: false },
+      messages: [],
+    });
+
+    expect(parsed.replyCapability).toEqual({ enabled: true, reason: null, aiDraftSendAllowed: false });
+  });
+
   it('retains image, video, link, and unsupported Instagram attachments', () => {
     const parsed = conversationDetailResponseSchema.parse({
       id: '11111111-1111-4111-8111-111111111111',
@@ -177,7 +192,7 @@ describe('conversation profile contracts', () => {
       participantName: 'Олена',
       participantUsername: 'olena',
       participantAvatarUrl: null,
-      replyCapability: { enabled: true, reason: null },
+      replyCapability: { enabled: true, aiDraftSendAllowed: true, reason: null },
       messages: [{
         id: '22222222-2222-4222-8222-222222222222',
         direction: 'INBOUND',

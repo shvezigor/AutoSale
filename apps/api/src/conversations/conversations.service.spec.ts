@@ -487,7 +487,7 @@ describe('ConversationsService', () => {
         text: 'Ваше замовлення прийнято.', idempotencyKey,
       });
 
-      expect(detail.replyCapability).toEqual({ enabled: true, reason: null });
+      expect(detail.replyCapability).toEqual({ enabled: true, aiDraftSendAllowed: true, reason: null });
       expect(first).toMatchObject({
         direction: 'OUTBOUND', senderId: expect.stringContaining('fictional-tiktok-business-'),
         text: 'Ваше замовлення прийнято.',
@@ -808,6 +808,8 @@ describe('ConversationsService', () => {
       createdByUserId: actorUserId, idempotencyKey: randomUUID(), status: 'READY', sourceSnapshot: [],
     } });
     try {
+      const detail = await service.detail(tenantId, conversation.id);
+      expect(detail.replyCapability).toMatchObject({ enabled: true, reason: null, aiDraftSendAllowed: false });
       await expect(service.send(tenantId, actorUserId, conversation.id, {
         text: 'Draft response', idempotencyKey: randomUUID(), draftId: draft.id,
       })).rejects.toBeInstanceOf(ConflictException);
@@ -851,7 +853,7 @@ describe('ConversationsService', () => {
     });
 
     const detail = await service.detail(tenantId, staleConversation.id);
-    expect(detail.replyCapability).toEqual({ enabled: false, reason: 'REPLY_WINDOW_EXPIRED' });
+    expect(detail.replyCapability).toEqual({ enabled: false, aiDraftSendAllowed: false, reason: 'REPLY_WINDOW_EXPIRED' });
     await expect(service.send(tenantId, actorUserId, staleConversation.id, {
       text: 'Вітаю',
       idempotencyKey: randomUUID(),

@@ -73,7 +73,7 @@ describe('ConversationsController', () => {
       participantName: 'Олена',
       participantUsername: 'olena',
       participantAvatarUrl: '/api/media/instagram-profiles/profile/avatar?v=v1',
-      replyCapability: { enabled: true, reason: null },
+      replyCapability: { enabled: true, aiDraftSendAllowed: true, reason: null },
       messages: [],
     });
     send.mockReset().mockResolvedValue(outboundMessage);

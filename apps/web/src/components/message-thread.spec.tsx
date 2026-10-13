@@ -12,7 +12,7 @@ const detail: ConversationDetailResponse = {
   participantName: 'Олена',
   participantUsername: 'olena',
   participantAvatarUrl: null,
-  replyCapability: { enabled: true, reason: null },
+  replyCapability: { enabled: true, aiDraftSendAllowed: true, reason: null },
   messages: [
     {
       id: '22222222-2222-4222-8222-222222222222',

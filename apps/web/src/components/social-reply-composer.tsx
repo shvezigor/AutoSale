@@ -63,6 +63,8 @@ export function SocialReplyComposer({
     ? t('conversations.channelTikTok')
     : conversation.channel === 'FACEBOOK' ? t('conversations.channelFacebook') : t('conversations.channelInstagram');
   const copyOnly = conversation.channel === 'FACEBOOK';
+  const draftCopyOnly = conversation.channel === 'INSTAGRAM' && Boolean(selectedDraftId)
+    && !conversation.replyCapability.aiDraftSendAllowed;
   const latestInbound = [...conversation.messages].reverse().find((message) => message.direction === 'INBOUND');
   const drafts = conversation.replyDrafts ?? [];
   const anchoredDrafts = drafts.filter((draft) => draft.anchorMessageId === latestInbound?.id);
@@ -84,7 +86,7 @@ export function SocialReplyComposer({
 
   async function submit(event?: FormEvent) {
     event?.preventDefault();
-    if ((!conversation.replyCapability.enabled && !copyOnly) || submitting) return;
+    if ((!conversation.replyCapability.enabled && !copyOnly && !draftCopyOnly) || submitting) return;
     if (draftReviewRequired) {
       setTextError(t('conversations.replyDraftReviewRequired'));
       textareaRef.current?.focus();
@@ -98,7 +100,7 @@ export function SocialReplyComposer({
       return;
     }
     setTextError(null);
-    if (copyOnly) {
+    if (copyOnly || draftCopyOnly) {
       try {
         await navigator.clipboard.writeText(trimmedText);
         toast.show({ type: 'success', title: t('conversations.replyDraftCopied') });
@@ -165,6 +167,17 @@ export function SocialReplyComposer({
     if (event.key !== 'Enter' || event.shiftKey || event.nativeEvent.isComposing) return;
     event.preventDefault();
     void submit();
+  }
+
+  function startManualReply() {
+    setText('');
+    setTextError(null);
+    setSelectedDraftId(null);
+    setDraftReviewRequired(false);
+    pendingSubmission.current = null;
+    editorTouched.current = true;
+    autoFilledDraftId.current = null;
+    textareaRef.current?.focus();
   }
 
   useEffect(() => {
@@ -306,6 +319,7 @@ export function SocialReplyComposer({
       </div>
       <div className="reply-area">
         {copyOnly && <p className="reply-guidance" role="status">{t('conversations.facebookReadOnly')}</p>}
+        {draftCopyOnly && <p className="reply-guidance" role="status">{t('conversations.replyDraftManualWindow')}</p>}
         {disabledReason ? (
           <div className="reply-guidance" role="status">
             <span>{disabledReason}</span>
@@ -369,8 +383,11 @@ export function SocialReplyComposer({
           <FieldError id="social-reply-error" message={textError} />
           <div className="reply-composer-actions">
             <small id="social-reply-hint">{text.length >= 900 ? `${text.length}/${MAX_MESSAGE_LENGTH}` : t('conversations.newLineHint')}</small>
-            <LoadingButton disabled={(!conversation.replyCapability.enabled && !copyOnly) || submitting} pending={submitting} pendingLabel={t('conversations.sending')} type="submit">
-              {copyOnly ? t('conversations.replyDraftCopy') : t('conversations.send')}
+            {draftCopyOnly && <button className="secondary-button" onClick={startManualReply} type="button">
+              {t('conversations.replyDraftStartManual')}
+            </button>}
+            <LoadingButton disabled={(!conversation.replyCapability.enabled && !copyOnly && !draftCopyOnly) || submitting} pending={submitting} pendingLabel={t('conversations.sending')} type="submit">
+              {copyOnly || draftCopyOnly ? t('conversations.replyDraftCopy') : t('conversations.send')}
             </LoadingButton>
           </div>
         </form>

@@ -30,7 +30,7 @@ const conversation: ConversationDetailResponse = {
   participantName: 'Fictional TikTok Customer',
   participantUsername: 'fictional.customer',
   participantAvatarUrl: null,
-  replyCapability: { enabled: true, reason: null },
+  replyCapability: { enabled: true, aiDraftSendAllowed: true, reason: null },
   messages: [],
 };
 
@@ -172,6 +172,44 @@ describe('SocialReplyComposer', () => {
       expect.objectContaining({ text: 'Який товар вас цікавить?', draftId: draft.id })));
   });
 
+  it('offers copy and a fresh manual editor when an Instagram AI draft is outside the standard window', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    vi.stubGlobal('navigator', { clipboard: { writeText } });
+    const inbound = { ...pendingMessage, id: '33333333-3333-4333-8333-333333333333',
+      direction: 'INBOUND' as const, text: 'Fictional question', delivery: null };
+    const draft = {
+      id: '55555555-5555-4555-8555-555555555555', conversationId: conversation.id,
+      anchorMessageId: inbound.id, triggerSource: 'AUTOMATIC' as const,
+      availableAt: '2026-10-05T10:00:10.000Z', status: 'READY' as const, outcome: 'CLARIFY' as const,
+      generatedText: 'Який товар вас цікавить?', finalText: null, sources: [], errorCode: null,
+      createdAt: '2026-10-05T10:00:00.000Z', updatedAt: '2026-10-05T10:00:11.000Z',
+    };
+    const oldConversation = { ...conversation, channel: 'INSTAGRAM' as const,
+      replyCapability: { enabled: true, reason: null, aiDraftSendAllowed: false },
+      messages: [inbound], replyDrafts: [draft] };
+    api.sendConversationMessage.mockResolvedValue(pendingMessage);
+    renderComposer(oldConversation, false, 'uk', true);
+
+    const editor = screen.getByRole('textbox', { name: 'Відповідь' });
+    expect(editor).toHaveValue(draft.generatedText);
+    expect(screen.getByText(/AI-чернетку не можна надсилати після 24 годин/)).toBeVisible();
+    expect(screen.queryByRole('button', { name: 'Надіслати' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Копіювати текст' })).toBeVisible();
+    expect(api.sendConversationMessage).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Копіювати текст' }));
+    await waitFor(() => expect(writeText).toHaveBeenCalledWith(draft.generatedText));
+    expect(api.sendConversationMessage).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Написати вручну' }));
+    expect(editor).toHaveValue('');
+    fireEvent.change(editor, { target: { value: 'Ручна відповідь після перевірки.' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Надіслати' }));
+    await waitFor(() => expect(api.sendConversationMessage).toHaveBeenCalledWith(conversation.id,
+      expect.objectContaining({ text: 'Ручна відповідь після перевірки.' })));
+    expect(api.sendConversationMessage.mock.calls[0]?.[1]).not.toHaveProperty('draftId');
+  });
+
   it('preserves a stale submitted draft but requires a manager edit before another send', async () => {
     const inbound = { ...pendingMessage, id: '33333333-3333-4333-8333-333333333333',
       direction: 'INBOUND' as const, text: 'Покажіть моделі Регіон', delivery: null };
@@ -301,7 +339,7 @@ describe('SocialReplyComposer', () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
     vi.stubGlobal('navigator', { clipboard: { writeText } });
     renderComposer({ ...conversation, channel: 'FACEBOOK',
-      replyCapability: { enabled: false, reason: 'CHANNEL_READ_ONLY' } }, false, 'en', true);
+      replyCapability: { enabled: false, aiDraftSendAllowed: false, reason: 'CHANNEL_READ_ONLY' } }, false, 'en', true);
     fireEvent.change(screen.getByRole('textbox', { name: 'Reply' }), { target: { value: 'Hello there' } });
     fireEvent.click(screen.getByRole('button', { name: 'Copy text' }));
     await waitFor(() => expect(writeText).toHaveBeenCalledWith('Hello there'));
@@ -337,7 +375,7 @@ describe('SocialReplyComposer', () => {
   it('explains unavailable TikTok sending and links owners to channel settings', () => {
     renderComposer({
       ...conversation,
-      replyCapability: { enabled: false, reason: 'TIKTOK_CAPABILITY_UNAVAILABLE' },
+      replyCapability: { enabled: false, aiDraftSendAllowed: false, reason: 'TIKTOK_CAPABILITY_UNAVAILABLE' },
     }, true);
 
     expect(screen.getByRole('textbox', { name: 'Відповідь' })).toBeDisabled();
@@ -348,7 +386,7 @@ describe('SocialReplyComposer', () => {
   it('shows reconnect and reply-window guidance in English', () => {
     const { rerender } = renderComposer({
       ...conversation,
-      replyCapability: { enabled: false, reason: 'RECONNECT_REQUIRED' },
+      replyCapability: { enabled: false, aiDraftSendAllowed: false, reason: 'RECONNECT_REQUIRED' },
     }, false, 'en');
     expect(screen.getByText(/reconnect TikTok/i)).toBeVisible();
 
@@ -359,7 +397,7 @@ describe('SocialReplyComposer', () => {
             canManageSettings={false}
             initialConversation={{
               ...conversation,
-              replyCapability: { enabled: false, reason: 'TIKTOK_REPLY_NOT_PERMITTED' },
+              replyCapability: { enabled: false, aiDraftSendAllowed: false, reason: 'TIKTOK_REPLY_NOT_PERMITTED' },
             }}
           />
         </ToastProvider>

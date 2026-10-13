@@ -189,7 +189,7 @@ export class ConversationsService {
         ? replyCapability(instagramConnection, now, lastInboundAt)
         : channel === 'TIKTOK'
           ? tikTokReplyCapability(tikTokConnection, now, lastInboundAt)
-          : { enabled: false, reason: 'CHANNEL_READ_ONLY' },
+          : { enabled: false, aiDraftSendAllowed: false, reason: 'CHANNEL_READ_ONLY' },
       messages: conversation.messages.map((message) => mapMessage(
         message,
         connectionActive,
@@ -525,12 +525,14 @@ function replyCapability(
   lastInboundAt: Date | null,
 ): ConversationDetailResponse['replyCapability'] {
   if (isDeliveryConnectionActive(connection, now)) {
-    return metaInstagramReplyMode(lastInboundAt, now) === 'EXPIRED'
-      ? { enabled: false, reason: 'REPLY_WINDOW_EXPIRED' }
-      : { enabled: true, reason: null };
+    const mode = metaInstagramReplyMode(lastInboundAt, now);
+    return mode === 'EXPIRED'
+      ? { enabled: false, aiDraftSendAllowed: false, reason: 'REPLY_WINDOW_EXPIRED' }
+      : { enabled: true, aiDraftSendAllowed: mode === 'STANDARD', reason: null };
   }
   return {
     enabled: false,
+    aiDraftSendAllowed: false,
     reason: connection ? 'RECONNECT_REQUIRED' : 'NOT_CONNECTED',
   };
 }
@@ -540,9 +542,9 @@ function tikTokReplyCapability(
   now: Date,
   lastInboundAt: Date | null,
 ): ConversationDetailResponse['replyCapability'] {
-  if (!connection) return { enabled: false, reason: 'NOT_CONNECTED' };
+  if (!connection) return { enabled: false, aiDraftSendAllowed: false, reason: 'NOT_CONNECTED' };
   if (connection.status === 'INBOUND_ONLY' || !tikTokSendTextCapability(connection.capabilities)) {
-    return { enabled: false, reason: 'TIKTOK_CAPABILITY_UNAVAILABLE' };
+    return { enabled: false, aiDraftSendAllowed: false, reason: 'TIKTOK_CAPABILITY_UNAVAILABLE' };
   }
   if (
     connection.status !== 'ACTIVE' ||
@@ -552,12 +554,12 @@ function tikTokReplyCapability(
     !(connection.refreshTokenExpiresAt instanceof Date) ||
     connection.refreshTokenExpiresAt.getTime() <= now.getTime()
   ) {
-    return { enabled: false, reason: 'RECONNECT_REQUIRED' };
+    return { enabled: false, aiDraftSendAllowed: false, reason: 'RECONNECT_REQUIRED' };
   }
   if (!(lastInboundAt instanceof Date) || now.getTime() - lastInboundAt.getTime() > TIKTOK_REPLY_WINDOW_MS) {
-    return { enabled: false, reason: 'TIKTOK_REPLY_NOT_PERMITTED' };
+    return { enabled: false, aiDraftSendAllowed: false, reason: 'TIKTOK_REPLY_NOT_PERMITTED' };
   }
-  return { enabled: true, reason: null };
+  return { enabled: true, aiDraftSendAllowed: true, reason: null };
 }
 
 function tikTokSendTextCapability(value: unknown): boolean {

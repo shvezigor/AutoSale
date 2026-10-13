@@ -27,7 +27,7 @@ const conversation: ConversationDetailResponse = {
   participantName: 'Олена',
   participantUsername: 'olena',
   participantAvatarUrl: null,
-  replyCapability: { enabled: true, reason: null },
+  replyCapability: { enabled: true, aiDraftSendAllowed: true, reason: null },
   messages: [],
 };
 
@@ -142,7 +142,7 @@ describe('InstagramReplyComposer', () => {
   it('shows connection guidance and disables replies', () => {
     renderComposer({
       ...conversation,
-      replyCapability: { enabled: false, reason: 'RECONNECT_REQUIRED' },
+      replyCapability: { enabled: false, aiDraftSendAllowed: false, reason: 'RECONNECT_REQUIRED' },
     }, true);
     expect(screen.getByRole('textbox', { name: 'Відповідь' })).toBeDisabled();
     expect(screen.getByRole('link', { name: /Instagram/i })).toHaveAttribute('href', '/settings?tab=social');
@@ -151,7 +151,7 @@ describe('InstagramReplyComposer', () => {
   it('tells a manager to contact the owner without exposing owner settings action', () => {
     renderComposer({
       ...conversation,
-      replyCapability: { enabled: false, reason: 'NOT_CONNECTED' },
+      replyCapability: { enabled: false, aiDraftSendAllowed: false, reason: 'NOT_CONNECTED' },
     });
     expect(screen.getByText(/спочатку підключіть Instagram/i)).toBeVisible();
     expect(screen.queryByRole('link', { name: /Instagram/i })).not.toBeInTheDocument();
@@ -160,7 +160,7 @@ describe('InstagramReplyComposer', () => {
   it('explains that an expired conversation must be reopened by the customer', () => {
     renderComposer({
       ...conversation,
-      replyCapability: { enabled: false, reason: 'REPLY_WINDOW_EXPIRED' },
+      replyCapability: { enabled: false, aiDraftSendAllowed: false, reason: 'REPLY_WINDOW_EXPIRED' },
     });
     expect(screen.getByRole('textbox', { name: 'Відповідь' })).toBeDisabled();
     expect(screen.getByText(/клієнт має написати нове повідомлення/i)).toBeVisible();

@@ -162,9 +162,10 @@ function conversationDetailOpenApiSchema(): OpenApiSchema {
     participantAvatarUrl: { type: 'string', nullable: true },
     replyCapability: {
       type: 'object',
-      required: ['enabled', 'reason'],
+      required: ['enabled', 'aiDraftSendAllowed', 'reason'],
       properties: {
         enabled: { type: 'boolean' },
+        aiDraftSendAllowed: { type: 'boolean' },
         reason: { type: 'string', nullable: true, enum: ['NOT_CONNECTED', 'RECONNECT_REQUIRED', 'REPLY_WINDOW_EXPIRED', 'CHANNEL_READ_ONLY', 'TIKTOK_CAPABILITY_UNAVAILABLE', 'TIKTOK_REPLY_NOT_PERMITTED'] },
       },
     },
