@@ -29,6 +29,8 @@ Use a PostgreSQL GIN index on a `simple`-configuration text-search expression ov
 
 Explicit models in recent context are extracted from each of the last three messages independently, so a model name cannot accidentally absorb the first word of the next message.
 
+The indexed recall implementation excludes common Ukrainian/English request words from its twelve-token search budget. If a natural phrase yields several possible model terms (for example, `моделі дверей Регіон`), it checks each bounded term separately and uses the smallest nonempty primary-name family; this avoids treating a generic product type as the named model. Exact SKU or a resolved explicit model skips generic recall. General recall first tries all searchable terms together, then falls back to a bounded coverage-ranked OR search only when the AND pass is empty. The final in-memory ranker and factual source snapshots are unchanged.
+
 ## Correctness and failure handling
 
 - The product after SKU position 2,000 must be retrievable when the query names its SKU, explicit model, full product name or exact alias, without relying on its sort position or losing it to generic single-token matches.
@@ -51,6 +53,20 @@ The opt-in `catalogue-retrieval.bench.spec.ts` used PostgreSQL 17.6-alpine in Te
 | 50,000 | 195.46 / 227.26 ms, 50,000 | 0.80 ms, 1 | 3.00 / 4.10 / 2.87 ms, 1 | 25.67 ms, 128 |
 
 `EXPLAIN (ANALYZE, BUFFERS)` used `products_ai_search_sku_idx` for the 50,000-row exact lookup (4 shared-hit blocks, 0 reads) and `products_ai_search_fts_idx` for model/name/alias (319–321 shared-hit blocks, 0 reads). The broad query used the GIN index with 1,277 shared-hit blocks, 0 reads. These figures are warm-cache local evidence, not a production SLA. Before implementing worker retrieval, the acceptance gate is fixed at **p95 ≤170 ms on the 50,000-row fixture across all five query cases**, at least 25% below the measured 227.26 ms full-scan p95, with ≤200 hydrated rows and the relevant last product present in each selective result. Repeat on the same host/fixture/cache method after integrating the actual repository; if the difference falls within measurement noise, do not claim a performance improvement.
+
+### Repository measurement after indexed recall code
+
+The same opt-in benchmark now includes the actual `retrieveCatalogueCandidates` function inside `withTenantTransaction`, including bounded ID recall and product hydration. On the 50,000-row fictional fixture, 30 warm-cache samples after five warmups yielded:
+
+| Case | Repository p50 / p95 | Hydrated rows |
+|---|---:|---:|
+| Exact SKU | 2.78 / 3.40 ms | 1 |
+| Explicit model | 5.31 / 5.92 ms | 1 |
+| Full name | 8.72 / 12.51 ms | 1 |
+| Exact alias | 8.41 / 11.83 ms | 1 |
+| Broad single word | 76.33 / 93.08 ms | 128 |
+
+All five cases met the previously fixed 170 ms p95 gate and the selective cases returned the last product. The correctness-matched full scan in this repeat was 206.91 / 223.87 ms (p50/p95) and transferred 50,000 rows. Small-fixture broad-query timings (14.09 ms p95 indexed repository versus 15.00 ms p95 full scan at 2,001 rows) are too close to measurement noise to support a speed claim. The above remains isolated local evidence, not a production latency guarantee; worker integration and production-browser acceptance are separate gates.
 
 Before implementation, capture the current result and retrieval time on the same fictional fixtures used after the change: 2,001 products with the relevant SKU last, and representative 10,000- and 50,000-product catalogues with exact SKU, named-model, alias and broad queries. The current 2,000-row prefix is a correctness-failing reference, not a fair performance baseline; compare indexed retrieval against a correctness-matched full scan over the same fixture. Record p50/p95 of the retrieval stage, rows returned to the worker, and `EXPLAIN (ANALYZE, BUFFERS)` for indexed queries. Use the same PostgreSQL version, fixture, hardware and warm/cold-cache method for before/after comparison; do not claim a performance win inside measurement noise.
 

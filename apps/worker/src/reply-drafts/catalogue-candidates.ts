@@ -19,6 +19,10 @@ export interface CatalogueCandidateInput {
 }
 
 const variantKeys = new Set(['material', 'finish', 'dimension', 'width', 'height', 'variant', 'матеріал', 'покриття', 'розмір']);
+const searchStopwords = new Set([
+  'чи', 'доступна', 'доступний', 'покажіть', 'покажи', 'які', 'можете', 'будь', 'ласка',
+  'please', 'show', 'what', 'which', 'have', 'you', 'can', 'the', 'are', 'available',
+]);
 
 export interface CatalogueSearchIntent {
   query: string;
@@ -35,11 +39,11 @@ export function extractCatalogueSearchIntent(
   const query = normalize(`${latestInbound} ${recentContext.slice(-3).join(' ')}`);
   return {
     query,
-    tokens: [...tokens(query)].filter((term) => term.length <= 64).slice(0, 12),
+    tokens: [...tokens(query)].filter((term) => term.length <= 64 && !searchStopwords.has(term)).slice(0, 12),
     exactTerms: [...new Set(query.match(/[\p{L}\p{N}][\p{L}\p{N}._-]*/gu) ?? [])]
-      .filter((term) => term.length >= 3 && term.length <= 64).slice(0, 12),
+      .filter((term) => term.length >= 3 && term.length <= 64 && !searchStopwords.has(term)).slice(0, 12),
     explicitModels: requestedModelTokens(latestInbound, recentContext)
-      .filter((term) => term.length <= 64),
+      .filter((term) => term.length <= 64).slice(0, 4),
     asksForOptions: asksForOptions(latestInbound, recentContext),
   };
 }

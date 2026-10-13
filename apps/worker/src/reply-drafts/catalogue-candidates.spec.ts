@@ -116,4 +116,9 @@ describe('extractCatalogueSearchIntent', () => {
       tokens: [], exactTerms: [], explicitModels: [], asksForOptions: false,
     });
   });
+
+  it('does not spend the term budget on common Ukrainian and English request words', () => {
+    const intent = extractCatalogueSearchIntent('Чи доступна Коронна серія Регіон? Please show', []);
+    expect(intent.tokens).toEqual(['коронна', 'серія', 'регіон']);
+  });
 });

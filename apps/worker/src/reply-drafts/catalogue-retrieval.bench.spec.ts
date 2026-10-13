@@ -3,9 +3,12 @@ import { readdir, readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { performance } from 'node:perf_hooks';
 
+import { createPrismaClient, withTenantTransaction, type PrismaClient } from '@autosale/database';
 import { PostgreSqlContainer } from '@testcontainers/postgresql';
 import pg from 'pg';
 import { expect, it } from 'vitest';
+
+import { retrieveCatalogueCandidates } from './catalogue-retrieval.js';
 
 const searchVector = `to_tsvector('simple',
   coalesce(sku, '') || ' ' || coalesce(name, '') || ' ' ||
@@ -19,6 +22,7 @@ type QueryCase = {
   label: string;
   sql: string;
   term: string;
+  inbound: string;
   mustFindLast: boolean;
 };
 
@@ -37,6 +41,20 @@ async function sample(pool: pg.Pool, sql: string, params: readonly string[]): Pr
     const result = await pool.query(sql, [...params]);
     const elapsed = performance.now() - started;
     rows = result.rowCount ?? 0;
+    if (iteration >= 5) times.push(elapsed);
+  }
+  return { p50Ms: percentile(times, 0.5), p95Ms: percentile(times, 0.95), rows };
+}
+
+async function sampleRepository(prisma: PrismaClient, tenantId: string, inbound: string): Promise<Sample> {
+  const times: number[] = [];
+  let rows = 0;
+  for (let iteration = 0; iteration < 35; iteration += 1) {
+    const started = performance.now();
+    const result = await withTenantTransaction(prisma, tenantId, (tx) =>
+      retrieveCatalogueCandidates(tx, tenantId, inbound, []));
+    const elapsed = performance.now() - started;
+    rows = result.products.length;
     if (iteration >= 5) times.push(elapsed);
   }
   return { p50Ms: percentile(times, 0.5), p95Ms: percentile(times, 0.95), rows };
@@ -64,6 +82,7 @@ const benchmark = process.env.RUN_CATALOGUE_BENCH === '1' ? it : it.skip;
 benchmark('compares indexed recall with a correctness-matched full scan on fictional catalogues', async () => {
   const container = await new PostgreSqlContainer('postgres:17.6-alpine').start();
   const pool = new pg.Pool({ connectionString: container.getConnectionUri(), max: 2 });
+  let prisma: PrismaClient | undefined;
   try {
     const migrations = resolve(process.cwd(), '../../packages/database/prisma/migrations');
     for (const name of (await readdir(migrations)).sort()) {
@@ -73,6 +92,7 @@ benchmark('compares indexed recall with a correctness-matched full scan on ficti
     }
     const version = (await pool.query<{ server_version: string }>('SHOW server_version')).rows[0]?.server_version;
     expect(version).toContain('17.6');
+    prisma = createPrismaClient(container.getConnectionUri());
 
     for (const count of [2_001, 10_000, 50_000]) {
       const tenantId = randomUUID();
@@ -96,23 +116,23 @@ benchmark('compares indexed recall with a correctness-matched full scan on ficti
       const fullScan = `SELECT ${productFields} FROM products
         WHERE tenant_id = $1::uuid AND active = true ORDER BY sku COLLATE "C", id`;
       const cases: QueryCase[] = [
-        { label: 'exact_sku', term: lastSku.toLowerCase(), mustFindLast: true,
+        { label: 'exact_sku', term: lastSku.toLowerCase(), inbound: `Do you have ${lastSku}?`, mustFindLast: true,
           sql: `SELECT ${productFields} FROM products WHERE tenant_id = $1::uuid AND active = true
             AND lower(sku) = $2 ORDER BY sku COLLATE "C", id LIMIT 8` },
-        { label: 'model', term: 'region', mustFindLast: true,
+        { label: 'model', term: 'region', inbound: 'Show model Region', mustFindLast: true,
           sql: `SELECT ${productFields} FROM products WHERE tenant_id = $1::uuid AND active = true
             AND ${searchVector} @@ to_tsquery('simple', $2)
             AND lower(split_part(name, '(', 1)) LIKE '%region%'
             ORDER BY sku COLLATE "C", id LIMIT 65` },
-        { label: 'name', term: 'region & special', mustFindLast: true,
+        { label: 'name', term: 'region & special', inbound: 'Fictional Region special door', mustFindLast: true,
           sql: `SELECT ${productFields} FROM products WHERE tenant_id = $1::uuid AND active = true
             AND ${searchVector} @@ to_tsquery('simple', $2)
             ORDER BY sku COLLATE "C", id LIMIT 128` },
-        { label: 'alias', term: 'crown & collection', mustFindLast: true,
+        { label: 'alias', term: 'crown & collection', inbound: 'Fictional Crown collection', mustFindLast: true,
           sql: `SELECT ${productFields} FROM products WHERE tenant_id = $1::uuid AND active = true
             AND ${searchVector} @@ to_tsquery('simple', $2)
             ORDER BY sku COLLATE "C", id LIMIT 128` },
-        { label: 'broad', term: 'fictional', mustFindLast: false,
+        { label: 'broad', term: 'fictional', inbound: 'Fictional', mustFindLast: false,
           sql: `SELECT ${productFields} FROM products WHERE tenant_id = $1::uuid AND active = true
             AND ${searchVector} @@ to_tsquery('simple', $2)
             ORDER BY sku COLLATE "C", id LIMIT 128` },
@@ -120,6 +140,9 @@ benchmark('compares indexed recall with a correctness-matched full scan on ficti
       const baseline = await sample(pool, fullScan, [tenantId]);
       for (const queryCase of cases) {
         const indexed = await sample(pool, queryCase.sql, [tenantId, queryCase.term]);
+        const repository = await sampleRepository(prisma, tenantId, queryCase.inbound);
+        expect(repository.rows).toBeLessThanOrEqual(200);
+        if (count === 50_000) expect(repository.p95Ms).toBeLessThanOrEqual(170);
         const matching = await pool.query<{ sku: string }>(queryCase.sql, [tenantId, queryCase.term]);
         if (queryCase.mustFindLast) expect(matching.rows.some((row) => row.sku === lastSku)).toBe(true);
         const explanation = await pool.query<{ 'QUERY PLAN': [{ Plan: unknown }] }>(
@@ -127,11 +150,12 @@ benchmark('compares indexed recall with a correctness-matched full scan on ficti
         const plan = explanation.rows[0]?.['QUERY PLAN']?.[0]?.Plan;
         // Only aggregate fictional-fixture timings and plan-node names are emitted.
         console.info(JSON.stringify({ catalogueSize: count, case: queryCase.label, postgres: version,
-          warmup: 5, samples: 30, baseline, indexed,
+          warmup: 5, samples: 30, baseline, indexed, repository,
           planNodes: planNodes(plan), buffers: planMetrics(plan) }));
       }
     }
   } finally {
+    await prisma?.$disconnect();
     await pool.end();
     await container.stop();
   }
