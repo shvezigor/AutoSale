@@ -40,7 +40,7 @@ This is the routing index for product functionality. It is intentionally compact
 | Email services and additional business integrations | Planned | Product backlog and future provider specs | No production implementation yet. |
 | Paid subscriptions and billing | Planned | [`monetization hypothesis`](../product/2026-09-17-sales-aito-monetization.md) | Pricing is published; billing/subscription enforcement is not implemented. Trial: one month. Proposed plans: Start 599 UAH, Growth 1999 UAH, Scale 2999 UAH. |
 
-Indexed, bounded tenant-scoped AI catalogue recall is implemented on the feature branch with [fictional-fixture benchmark evidence](../superpowers/specs/2026-10-12-scalable-ai-catalogue-retrieval-design.md) and safe overflow/retrieval-failure outcomes. Its [implementation plan](../superpowers/plans/2026-10-13-scalable-ai-catalogue-retrieval.md) retains migration-first rollout, browser acceptance and the controlled pilot as open gates.
+Indexed, bounded tenant-scoped AI catalogue recall is implemented with [fictional-fixture benchmark evidence](../superpowers/specs/2026-10-12-scalable-ai-catalogue-retrieval-design.md) and safe overflow/retrieval-failure outcomes. Its [implementation plan](../superpowers/plans/2026-10-13-scalable-ai-catalogue-retrieval.md) retains migration-first rollout, browser acceptance and the controlled pilot as open gates.
 
 ## How to add or change a feature
 

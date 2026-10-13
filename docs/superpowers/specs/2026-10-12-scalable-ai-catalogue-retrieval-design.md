@@ -1,10 +1,10 @@
 # Scalable tenant-scoped catalogue retrieval for AI reply drafts
 
-Status: **user-approved design; implementation in progress, not deployed** (13 October 2026). The step-by-step implementation and verification plan is [`2026-10-13-scalable-ai-catalogue-retrieval.md`](../plans/2026-10-13-scalable-ai-catalogue-retrieval.md).
+Status: **implemented and automated-test verified on a short-lived branch; production deployment and browser acceptance pending** (13 October 2026). The step-by-step implementation and verification plan is [`2026-10-13-scalable-ai-catalogue-retrieval.md`](../plans/2026-10-13-scalable-ai-catalogue-retrieval.md).
 
 ## Problem and scope
 
-`ReplyDraftProcessor` currently loads the first 2,000 active products in SKU order and ranks them in memory. A relevant product after that boundary is invisible to both the model and the deterministic options fallback. Raising the limit would move more catalogue data through every draft job and make latency and memory proportional to the entire tenant catalogue.
+The previous `ReplyDraftProcessor` loaded the first 2,000 active products in SKU order and ranked them in memory. A relevant product after that boundary was invisible to both the model and the deterministic options fallback. Raising the limit would have moved more catalogue data through every draft job and made latency and memory proportional to the entire tenant catalogue.
 
 This design changes only candidate retrieval for existing manual and automatic AI reply drafts. The quiet period, one-draft-per-anchor lifecycle, eight-source prompt limit, claim validator, source snapshot, send-time freshness check, explicit manager send, and provider-specific reply windows stay unchanged. It does not add customer-visible autonomous sending, an external search service, or catalogue edits.
 
@@ -16,7 +16,7 @@ This design changes only candidate retrieval for existing manual and automatic A
 
 ## Retrieval boundary
 
-Introduce a focused repository function called by `ReplyDraftProcessor` inside its existing `withTenantTransaction`. It receives the tenant ID, sanitized latest inbound text and at most three recent text messages. It returns a bounded set of active `Product` rows for the existing `selectCatalogueCandidates` ranker. It must not create a second draft pipeline or change the ranker's score or factual snapshot contract.
+The focused `retrieveCatalogueCandidates` repository runs inside a separate `withTenantTransaction` after the processor commits its draft claim. It receives the tenant ID, sanitized latest inbound text and at most three recent text messages. It returns a bounded set of active `Product` rows for the existing `selectCatalogueCandidates` ranker. This is not a second draft pipeline and does not change the ranker's score or factual snapshot contract.
 
 The database search has two ordered recall passes:
 
@@ -68,7 +68,7 @@ The same opt-in benchmark now includes the actual `retrieveCatalogueCandidates` 
 
 All five cases met the previously fixed 170 ms p95 gate and the selective cases returned the last product. The correctness-matched full scan in this repeat was 206.91 / 223.87 ms (p50/p95) and transferred 50,000 rows. Small-fixture broad-query timings (14.09 ms p95 indexed repository versus 15.00 ms p95 full scan at 2,001 rows) are too close to measurement noise to support a speed claim. The above remains isolated local evidence, not a production latency guarantee; worker integration and production-browser acceptance are separate gates.
 
-Before implementation, capture the current result and retrieval time on the same fictional fixtures used after the change: 2,001 products with the relevant SKU last, and representative 10,000- and 50,000-product catalogues with exact SKU, named-model, alias and broad queries. The current 2,000-row prefix is a correctness-failing reference, not a fair performance baseline; compare indexed retrieval against a correctness-matched full scan over the same fixture. Record p50/p95 of the retrieval stage, rows returned to the worker, and `EXPLAIN (ANALYZE, BUFFERS)` for indexed queries. Use the same PostgreSQL version, fixture, hardware and warm/cold-cache method for before/after comparison; do not claim a performance win inside measurement noise.
+The recorded before/after fixture uses 2,001, 10,000 and 50,000 fictional products. The previous 2,000-row prefix is a correctness-failing reference, not a fair performance baseline; the repository benchmark compares indexed retrieval with a correctness-matched full scan on the same PostgreSQL version, host and warm-cache method. The 50,000-row measurements above prove the local gate only; they are not a production latency guarantee.
 
 Acceptance requires the formerly invisible product to appear in the verified eight-source set; the source result and claim-validator tests must remain green; retrieval must never materialize an entire large catalogue in the worker. The implementation plan will set a concrete latency gate from the measured baseline before code changes. A 50,000-product test is a scaling fixture, not a promise of unlimited catalogue size. Add automated tests for term extraction, retrieval precedence, tenant isolation/RLS, exact options, broad-query limits, snapshot freshness and failure handling. After deployment, verify a normal draft through the browser in the consenting test account, including persisted editor state after reload; the synthetic >2,000-row case stays in isolated test data, not in the production account.
 

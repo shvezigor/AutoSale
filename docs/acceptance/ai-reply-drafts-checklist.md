@@ -34,6 +34,16 @@ Before marking the automatic slice available, prove all of the following in auto
 - The sequential-editor regression is automated: stale-draft cleanup may clear an older untouched auto-fill, but it cannot mark the newer ready draft as already offered before that replacement can be inserted. Manager-touched text remains protected.
 - Server-render and hydration coverage proves that a persisted ready draft wins over Chrome restoring an older empty textarea during a page reload; the controlled editor is synchronized once after hydration without changing saved data or sending a message.
 - Composer coverage proves that a send-time `409` for a linked draft preserves the attempted text, focuses a localized field error and blocks an unchanged second send. Editing the preserved text explicitly converts the next attempt into an ordinary manager-authored reply without the stale draft link.
+- On 13 October 2026, the scalable retrieval integration passed worker 66 files / 354 tests (one opt-in benchmark skipped), database 37 files / 167 tests, API 109 files / 681 tests and web 99 files / 469 tests with at most two Vitest workers; workspace typecheck and production build passed. The isolated 2,001-product fixture retrieves a formerly invisible SKU into the persisted source snapshot. PostgreSQL tests cover later-position SKU/model/name/alias matches, tenant RLS and bounded broad recall. Processor tests prove that a >64-variant explicit model yields fact-free automatic clarification or visible manual block without a model request, and that a query failure becomes a durable safe `FAILED` state rather than a prefix-scan fallback. API and web tests prove only localized safe status codes are exposed. The 50,000-product fictional benchmark and its limits are recorded in the [retrieval design](../superpowers/specs/2026-10-12-scalable-ai-catalogue-retrieval-design.md).
+
+## Scalable-retrieval release gate (13 October 2026)
+
+- [x] Additive active-tenant SKU/full-text indexes, bounded candidate recall, unchanged final ranker/grounding and isolated scale evidence.
+- [x] Automated tenant isolation, model overflow, retrieval failure and no-model-call safety paths; API/web safe error presentation.
+- [ ] Apply the new indexes to the live database before starting the new worker; record backup and deployed commit.
+- [ ] In a consenting test account, verify a normal new draft appears in an untouched editor, survives reload and shows collapsed catalogue sources; capture the final browser state.
+- [ ] In the same environment, verify a product edit makes a linked draft stale at send time without creating an outbound message. Do not send a real customer message for this check.
+- [ ] Inspect post-deploy queue backlog, draft failures/latency, index presence and privacy-minimized logs. Synthetic 50,000-product fixtures stay isolated, never in the live tenant.
 
 ## Production browser and runtime evidence
 
