@@ -1,6 +1,6 @@
 # Scalable tenant-scoped catalogue retrieval for AI reply drafts
 
-Status: **implemented and automated-test verified on a short-lived branch; production deployment and browser acceptance pending** (13 October 2026). The step-by-step implementation and verification plan is [`2026-10-13-scalable-ai-catalogue-retrieval.md`](../plans/2026-10-13-scalable-ai-catalogue-retrieval.md).
+Status: **deployed to the current Docker-host production site; new-draft browser acceptance and controlled pilot pending** (13 October 2026). The step-by-step implementation and verification plan is [`2026-10-13-scalable-ai-catalogue-retrieval.md`](../plans/2026-10-13-scalable-ai-catalogue-retrieval.md).
 
 ## Problem and scope
 

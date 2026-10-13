@@ -40,10 +40,12 @@ Before marking the automatic slice available, prove all of the following in auto
 
 - [x] Additive active-tenant SKU/full-text indexes, bounded candidate recall, unchanged final ranker/grounding and isolated scale evidence.
 - [x] Automated tenant isolation, model overflow, retrieval failure and no-model-call safety paths; API/web safe error presentation.
-- [ ] Apply the new indexes to the live database before starting the new worker; record backup and deployed commit.
+- [x] At 10:28 UTC on 13 October 2026, manually deployed tested code commit `32ba9e7` to the current Windows/Docker production host. Before rollout, backup `20261013T101807Z` passed SHA-256, MinIO archive and PostgreSQL dump-directory checks; a verified second copy was placed on drive D:. The migration completed before API/web/worker restart, and both `products_ai_search_sku_idx` and `products_ai_search_fts_idx` are present. All runtime services became healthy; public `/health/live` and `/login` returned 200. Worker `ai_replies` backlog was 0 and no error-level worker log lines were observed in the ten-minute check. This is not a Hetzner cutover or an independently hosted off-site backup.
 - [ ] In a consenting test account, verify a normal new draft appears in an untouched editor, survives reload and shows collapsed catalogue sources; capture the final browser state.
 - [ ] In the same environment, verify a product edit makes a linked draft stale at send time without creating an outbound message. Do not send a real customer message for this check.
-- [ ] Inspect post-deploy queue backlog, draft failures/latency, index presence and privacy-minimized logs. Synthetic 50,000-product fixtures stay isolated, never in the live tenant.
+- [ ] Continue post-deploy observation of draft failures and latency during a controlled new-draft browser test. Index presence, initial queue backlog and error-level log count passed; the synthetic 50,000-product fixtures stayed isolated and were never imported into the live tenant.
+
+The authenticated browser could reload an existing test conversation and display its already-stale draft/status after deployment, but it had no fresh inbound anchor or ready draft. No customer message was sent for this smoke check. Therefore the new-draft editor/reload/source path and post-change send-time stale guard remain explicitly unverified in this release; the previous browser evidence below does not replace a post-deployment check of the new retrieval path. A first backup attempt left `.incomplete-20261013T101755Z` under the local backup directory after Git Bash translated MinIO's `/source` path incorrectly; its removal was blocked by the execution policy, so operators should securely clean up that exact partial directory after confirming the complete backup.
 
 ## Production browser and runtime evidence
 
