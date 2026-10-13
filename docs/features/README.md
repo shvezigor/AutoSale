@@ -42,7 +42,7 @@ This is the routing index for product functionality. It is intentionally compact
 
 Indexed, bounded tenant-scoped AI catalogue recall is implemented and deployed to the current production Docker host with [fictional-fixture benchmark evidence](../superpowers/specs/2026-10-12-scalable-ai-catalogue-retrieval-design.md) and safe overflow/retrieval-failure outcomes. Post-deployment test-account browser checks passed both the new-draft editor/reload/collapsed-source gate and the send-time stale-source guard without an outbound message. The [acceptance checklist](../acceptance/ai-reply-drafts-checklist.md) retains the controlled pilot and other provider scenarios as open gates; the migration and initial runtime health check have passed.
 
-The AI draft worker now treats explicit stock questions as availability requests: automatic model and fallback replies offer only variants with confirmed positive stock, while unknown or zero stock leads to a stock-check clarification when no safe option remains. This is covered by worker regressions; the [live browser stock gate](../acceptance/ai-reply-drafts-checklist.md) remains open until the deployed flow is rechecked.
+The deployed AI draft worker now treats explicit stock questions as availability requests: automatic model and fallback replies offer only variants with confirmed positive stock, while unknown or zero stock leads to a stock-check clarification when no safe option remains. This is covered by worker regressions and release health checks; the [live browser stock gate](../acceptance/ai-reply-drafts-checklist.md) remains open until a new inbound test message verifies the persisted draft.
 
 ## How to add or change a feature
 
