@@ -40,6 +40,8 @@ This is the routing index for product functionality. It is intentionally compact
 | Email services and additional business integrations | Planned | Product backlog and future provider specs | No production implementation yet. |
 | Paid subscriptions and billing | Planned | [`monetization hypothesis`](../product/2026-09-17-sales-aito-monetization.md) | Pricing is published; billing/subscription enforcement is not implemented. Trial: one month. Proposed plans: Start 599 UAH, Growth 1999 UAH, Scale 2999 UAH. |
 
+The scalable AI catalogue-retrieval design is approved but not yet implemented; its [implementation plan](../superpowers/plans/2026-10-13-scalable-ai-catalogue-retrieval.md) defines the indexed recall, scale benchmark, safety regressions and browser acceptance for the AI reply-draft capability above.
+
 ## How to add or change a feature
 
 1. Search this index and the repository for equivalent behavior.

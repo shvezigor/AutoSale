@@ -1,6 +1,6 @@
 # Scalable tenant-scoped catalogue retrieval for AI reply drafts
 
-Status: **user-approved direction; written design awaiting review; not implemented** (12 October 2026).
+Status: **user-approved design; implementation planned, not implemented** (13 October 2026). The step-by-step implementation and verification plan is [`2026-10-13-scalable-ai-catalogue-retrieval.md`](../plans/2026-10-13-scalable-ai-catalogue-retrieval.md).
 
 ## Problem and scope
 
