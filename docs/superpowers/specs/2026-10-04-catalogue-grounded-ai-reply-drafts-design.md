@@ -2,7 +2,7 @@
 
 **Date:** 2026-10-04  
 **Updated:** 2026-10-13
-**Status:** Automatic preparation implemented behind a tenant switch; partial production-browser evidence recorded; remaining live provider validation pending
+**Status:** Automatic preparation implemented behind a tenant switch; post-deployment new-draft browser acceptance passed; remaining send-time and controlled-pilot validation pending
 **Owner:** Sales AITO conversations and AI
 
 ## 1. Purpose
@@ -25,7 +25,7 @@ A new inbound message makes an older unused draft stale and restarts the quiet-p
 
 Automatic scheduling occurs only while the tenant reply-style switch is enabled. A block with no usable text is not sent to the model because image understanding is outside this release; the conversation remains available for manual review.
 
-Implementation notes (2026-10-13): the owner-controlled switch and communication profile live under **Settings → Social / customers → AI reply style** and are disabled by default. A manager may view but not edit that profile. Indexed tenant-scoped catalogue recall replaces the former first-2,000-SKU ceiling; bounded PostgreSQL results still pass through the same deterministic ranker and at most eight factual sources. The local 50,000-product benchmark meets its recorded retrieval gate, and the migration-first production rollout passed; new-draft browser acceptance and the live-provider pilot remain separate gates. See the [scalable retrieval design](2026-10-12-scalable-ai-catalogue-retrieval-design.md) and [acceptance checklist](../../acceptance/ai-reply-drafts-checklist.md).
+Implementation notes (2026-10-13): the owner-controlled switch and communication profile live under **Settings → Social / customers → AI reply style** and are disabled by default. A manager may view but not edit that profile. Indexed tenant-scoped catalogue recall replaces the former first-2,000-SKU ceiling; bounded PostgreSQL results still pass through the same deterministic ranker and at most eight factual sources. The local 50,000-product benchmark meets its recorded retrieval gate, the migration-first production rollout passed, and a new draft survived an authenticated browser reload in the untouched editor with sources collapsed. The post-change send-time stale guard and the controlled live-provider pilot remain separate gates. See the [scalable retrieval design](2026-10-12-scalable-ai-catalogue-retrieval-design.md) and [acceptance checklist](../../acceptance/ai-reply-drafts-checklist.md).
 
 ## 3. Communication style
 

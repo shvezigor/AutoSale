@@ -1,6 +1,6 @@
 # Scalable tenant-scoped catalogue retrieval for AI reply drafts
 
-Status: **deployed to the current Docker-host production site; new-draft browser acceptance and controlled pilot pending** (13 October 2026). The step-by-step implementation and verification plan is [`2026-10-13-scalable-ai-catalogue-retrieval.md`](../plans/2026-10-13-scalable-ai-catalogue-retrieval.md).
+Status: **deployed to the current Docker-host production site; new-draft browser acceptance passed; send-time stale guard and controlled pilot pending** (13 October 2026). The step-by-step implementation and verification plan is [`2026-10-13-scalable-ai-catalogue-retrieval.md`](../plans/2026-10-13-scalable-ai-catalogue-retrieval.md).
 
 ## Problem and scope
 
@@ -71,6 +71,8 @@ All five cases met the previously fixed 170 ms p95 gate and the selective cases 
 The recorded before/after fixture uses 2,001, 10,000 and 50,000 fictional products. The previous 2,000-row prefix is a correctness-failing reference, not a fair performance baseline; the repository benchmark compares indexed retrieval with a correctness-matched full scan on the same PostgreSQL version, host and warm-cache method. The 50,000-row measurements above prove the local gate only; they are not a production latency guarantee.
 
 Acceptance requires the formerly invisible product to appear in the verified eight-source set; the source result and claim-validator tests must remain green; retrieval must never materialize an entire large catalogue in the worker. The implementation plan will set a concrete latency gate from the measured baseline before code changes. A 50,000-product test is a scaling fixture, not a promise of unlimited catalogue size. Add automated tests for term extraction, retrieval precedence, tenant isolation/RLS, exact options, broad-query limits, snapshot freshness and failure handling. After deployment, verify a normal draft through the browser in the consenting test account, including persisted editor state after reload; the synthetic >2,000-row case stays in isolated test data, not in the production account.
+
+The post-deployment test-account browser check on 13 October 2026 passed the new-draft editor/reload/source gate: two inbound messages within four seconds staled the first queued draft without a model attempt, then produced one `READY`/`ANSWER` draft for the second anchor. A real browser reload retained its size-matched reply in the untouched editor with eight catalogue sources collapsed. The provider call took 4,047 ms; no outbound message was created. This isolated observation does not establish a latency SLA, prove the post-change send-time stale guard, or complete the controlled pilot. Detailed evidence and remaining gates stay in the [acceptance checklist](../../acceptance/ai-reply-drafts-checklist.md).
 
 ## Rollout and rollback
 
