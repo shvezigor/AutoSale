@@ -9,3 +9,4 @@ export * from './runtime-database-roles.js';
 export * from './security-audit.js';
 export * from './tenant-transaction.js';
 export * from './tenant-lifecycle.js';
+export * from './demo-lead-notifications.js';

@@ -49,6 +49,9 @@ export type DemoLeadMinAggregateOutputType = {
   lifecycleStatus: $Enums.DemoLeadLifecycleStatus | null
   notificationStatus: $Enums.DemoLeadNotificationStatus | null
   notificationAttempts: number | null
+  notificationNextAttemptAt: Date | null
+  notificationLeaseId: string | null
+  notificationLeaseExpiresAt: Date | null
   notifiedAt: Date | null
   lastNotificationError: string | null
   createdAt: Date | null
@@ -70,6 +73,9 @@ export type DemoLeadMaxAggregateOutputType = {
   lifecycleStatus: $Enums.DemoLeadLifecycleStatus | null
   notificationStatus: $Enums.DemoLeadNotificationStatus | null
   notificationAttempts: number | null
+  notificationNextAttemptAt: Date | null
+  notificationLeaseId: string | null
+  notificationLeaseExpiresAt: Date | null
   notifiedAt: Date | null
   lastNotificationError: string | null
   createdAt: Date | null
@@ -91,6 +97,9 @@ export type DemoLeadCountAggregateOutputType = {
   lifecycleStatus: number
   notificationStatus: number
   notificationAttempts: number
+  notificationNextAttemptAt: number
+  notificationLeaseId: number
+  notificationLeaseExpiresAt: number
   notifiedAt: number
   lastNotificationError: number
   createdAt: number
@@ -122,6 +131,9 @@ export type DemoLeadMinAggregateInputType = {
   lifecycleStatus?: true
   notificationStatus?: true
   notificationAttempts?: true
+  notificationNextAttemptAt?: true
+  notificationLeaseId?: true
+  notificationLeaseExpiresAt?: true
   notifiedAt?: true
   lastNotificationError?: true
   createdAt?: true
@@ -143,6 +155,9 @@ export type DemoLeadMaxAggregateInputType = {
   lifecycleStatus?: true
   notificationStatus?: true
   notificationAttempts?: true
+  notificationNextAttemptAt?: true
+  notificationLeaseId?: true
+  notificationLeaseExpiresAt?: true
   notifiedAt?: true
   lastNotificationError?: true
   createdAt?: true
@@ -164,6 +179,9 @@ export type DemoLeadCountAggregateInputType = {
   lifecycleStatus?: true
   notificationStatus?: true
   notificationAttempts?: true
+  notificationNextAttemptAt?: true
+  notificationLeaseId?: true
+  notificationLeaseExpiresAt?: true
   notifiedAt?: true
   lastNotificationError?: true
   createdAt?: true
@@ -272,6 +290,9 @@ export type DemoLeadGroupByOutputType = {
   lifecycleStatus: $Enums.DemoLeadLifecycleStatus
   notificationStatus: $Enums.DemoLeadNotificationStatus
   notificationAttempts: number
+  notificationNextAttemptAt: Date | null
+  notificationLeaseId: string | null
+  notificationLeaseExpiresAt: Date | null
   notifiedAt: Date | null
   lastNotificationError: string | null
   createdAt: Date
@@ -316,6 +337,9 @@ export type DemoLeadWhereInput = {
   lifecycleStatus?: Prisma.EnumDemoLeadLifecycleStatusFilter<"DemoLead"> | $Enums.DemoLeadLifecycleStatus
   notificationStatus?: Prisma.EnumDemoLeadNotificationStatusFilter<"DemoLead"> | $Enums.DemoLeadNotificationStatus
   notificationAttempts?: Prisma.IntFilter<"DemoLead"> | number
+  notificationNextAttemptAt?: Prisma.DateTimeNullableFilter<"DemoLead"> | Date | string | null
+  notificationLeaseId?: Prisma.UuidNullableFilter<"DemoLead"> | string | null
+  notificationLeaseExpiresAt?: Prisma.DateTimeNullableFilter<"DemoLead"> | Date | string | null
   notifiedAt?: Prisma.DateTimeNullableFilter<"DemoLead"> | Date | string | null
   lastNotificationError?: Prisma.StringNullableFilter<"DemoLead"> | string | null
   createdAt?: Prisma.DateTimeFilter<"DemoLead"> | Date | string
@@ -337,6 +361,9 @@ export type DemoLeadOrderByWithRelationInput = {
   lifecycleStatus?: Prisma.SortOrder
   notificationStatus?: Prisma.SortOrder
   notificationAttempts?: Prisma.SortOrder
+  notificationNextAttemptAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  notificationLeaseId?: Prisma.SortOrderInput | Prisma.SortOrder
+  notificationLeaseExpiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
   notifiedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   lastNotificationError?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -361,6 +388,9 @@ export type DemoLeadWhereUniqueInput = Prisma.AtLeast<{
   lifecycleStatus?: Prisma.EnumDemoLeadLifecycleStatusFilter<"DemoLead"> | $Enums.DemoLeadLifecycleStatus
   notificationStatus?: Prisma.EnumDemoLeadNotificationStatusFilter<"DemoLead"> | $Enums.DemoLeadNotificationStatus
   notificationAttempts?: Prisma.IntFilter<"DemoLead"> | number
+  notificationNextAttemptAt?: Prisma.DateTimeNullableFilter<"DemoLead"> | Date | string | null
+  notificationLeaseId?: Prisma.UuidNullableFilter<"DemoLead"> | string | null
+  notificationLeaseExpiresAt?: Prisma.DateTimeNullableFilter<"DemoLead"> | Date | string | null
   notifiedAt?: Prisma.DateTimeNullableFilter<"DemoLead"> | Date | string | null
   lastNotificationError?: Prisma.StringNullableFilter<"DemoLead"> | string | null
   createdAt?: Prisma.DateTimeFilter<"DemoLead"> | Date | string
@@ -382,6 +412,9 @@ export type DemoLeadOrderByWithAggregationInput = {
   lifecycleStatus?: Prisma.SortOrder
   notificationStatus?: Prisma.SortOrder
   notificationAttempts?: Prisma.SortOrder
+  notificationNextAttemptAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  notificationLeaseId?: Prisma.SortOrderInput | Prisma.SortOrder
+  notificationLeaseExpiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
   notifiedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   lastNotificationError?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -411,6 +444,9 @@ export type DemoLeadScalarWhereWithAggregatesInput = {
   lifecycleStatus?: Prisma.EnumDemoLeadLifecycleStatusWithAggregatesFilter<"DemoLead"> | $Enums.DemoLeadLifecycleStatus
   notificationStatus?: Prisma.EnumDemoLeadNotificationStatusWithAggregatesFilter<"DemoLead"> | $Enums.DemoLeadNotificationStatus
   notificationAttempts?: Prisma.IntWithAggregatesFilter<"DemoLead"> | number
+  notificationNextAttemptAt?: Prisma.DateTimeNullableWithAggregatesFilter<"DemoLead"> | Date | string | null
+  notificationLeaseId?: Prisma.UuidNullableWithAggregatesFilter<"DemoLead"> | string | null
+  notificationLeaseExpiresAt?: Prisma.DateTimeNullableWithAggregatesFilter<"DemoLead"> | Date | string | null
   notifiedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"DemoLead"> | Date | string | null
   lastNotificationError?: Prisma.StringNullableWithAggregatesFilter<"DemoLead"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"DemoLead"> | Date | string
@@ -432,6 +468,9 @@ export type DemoLeadCreateInput = {
   lifecycleStatus?: $Enums.DemoLeadLifecycleStatus
   notificationStatus?: $Enums.DemoLeadNotificationStatus
   notificationAttempts?: number
+  notificationNextAttemptAt?: Date | string | null
+  notificationLeaseId?: string | null
+  notificationLeaseExpiresAt?: Date | string | null
   notifiedAt?: Date | string | null
   lastNotificationError?: string | null
   createdAt?: Date | string
@@ -453,6 +492,9 @@ export type DemoLeadUncheckedCreateInput = {
   lifecycleStatus?: $Enums.DemoLeadLifecycleStatus
   notificationStatus?: $Enums.DemoLeadNotificationStatus
   notificationAttempts?: number
+  notificationNextAttemptAt?: Date | string | null
+  notificationLeaseId?: string | null
+  notificationLeaseExpiresAt?: Date | string | null
   notifiedAt?: Date | string | null
   lastNotificationError?: string | null
   createdAt?: Date | string
@@ -474,6 +516,9 @@ export type DemoLeadUpdateInput = {
   lifecycleStatus?: Prisma.EnumDemoLeadLifecycleStatusFieldUpdateOperationsInput | $Enums.DemoLeadLifecycleStatus
   notificationStatus?: Prisma.EnumDemoLeadNotificationStatusFieldUpdateOperationsInput | $Enums.DemoLeadNotificationStatus
   notificationAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  notificationNextAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notificationLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notificationLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastNotificationError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -495,6 +540,9 @@ export type DemoLeadUncheckedUpdateInput = {
   lifecycleStatus?: Prisma.EnumDemoLeadLifecycleStatusFieldUpdateOperationsInput | $Enums.DemoLeadLifecycleStatus
   notificationStatus?: Prisma.EnumDemoLeadNotificationStatusFieldUpdateOperationsInput | $Enums.DemoLeadNotificationStatus
   notificationAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  notificationNextAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notificationLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notificationLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastNotificationError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -516,6 +564,9 @@ export type DemoLeadCreateManyInput = {
   lifecycleStatus?: $Enums.DemoLeadLifecycleStatus
   notificationStatus?: $Enums.DemoLeadNotificationStatus
   notificationAttempts?: number
+  notificationNextAttemptAt?: Date | string | null
+  notificationLeaseId?: string | null
+  notificationLeaseExpiresAt?: Date | string | null
   notifiedAt?: Date | string | null
   lastNotificationError?: string | null
   createdAt?: Date | string
@@ -537,6 +588,9 @@ export type DemoLeadUpdateManyMutationInput = {
   lifecycleStatus?: Prisma.EnumDemoLeadLifecycleStatusFieldUpdateOperationsInput | $Enums.DemoLeadLifecycleStatus
   notificationStatus?: Prisma.EnumDemoLeadNotificationStatusFieldUpdateOperationsInput | $Enums.DemoLeadNotificationStatus
   notificationAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  notificationNextAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notificationLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notificationLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastNotificationError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -558,6 +612,9 @@ export type DemoLeadUncheckedUpdateManyInput = {
   lifecycleStatus?: Prisma.EnumDemoLeadLifecycleStatusFieldUpdateOperationsInput | $Enums.DemoLeadLifecycleStatus
   notificationStatus?: Prisma.EnumDemoLeadNotificationStatusFieldUpdateOperationsInput | $Enums.DemoLeadNotificationStatus
   notificationAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  notificationNextAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notificationLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notificationLeaseExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lastNotificationError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -579,6 +636,9 @@ export type DemoLeadCountOrderByAggregateInput = {
   lifecycleStatus?: Prisma.SortOrder
   notificationStatus?: Prisma.SortOrder
   notificationAttempts?: Prisma.SortOrder
+  notificationNextAttemptAt?: Prisma.SortOrder
+  notificationLeaseId?: Prisma.SortOrder
+  notificationLeaseExpiresAt?: Prisma.SortOrder
   notifiedAt?: Prisma.SortOrder
   lastNotificationError?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -604,6 +664,9 @@ export type DemoLeadMaxOrderByAggregateInput = {
   lifecycleStatus?: Prisma.SortOrder
   notificationStatus?: Prisma.SortOrder
   notificationAttempts?: Prisma.SortOrder
+  notificationNextAttemptAt?: Prisma.SortOrder
+  notificationLeaseId?: Prisma.SortOrder
+  notificationLeaseExpiresAt?: Prisma.SortOrder
   notifiedAt?: Prisma.SortOrder
   lastNotificationError?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -625,6 +688,9 @@ export type DemoLeadMinOrderByAggregateInput = {
   lifecycleStatus?: Prisma.SortOrder
   notificationStatus?: Prisma.SortOrder
   notificationAttempts?: Prisma.SortOrder
+  notificationNextAttemptAt?: Prisma.SortOrder
+  notificationLeaseId?: Prisma.SortOrder
+  notificationLeaseExpiresAt?: Prisma.SortOrder
   notifiedAt?: Prisma.SortOrder
   lastNotificationError?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -660,6 +726,9 @@ export type DemoLeadSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   lifecycleStatus?: boolean
   notificationStatus?: boolean
   notificationAttempts?: boolean
+  notificationNextAttemptAt?: boolean
+  notificationLeaseId?: boolean
+  notificationLeaseExpiresAt?: boolean
   notifiedAt?: boolean
   lastNotificationError?: boolean
   createdAt?: boolean
@@ -681,6 +750,9 @@ export type DemoLeadSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   lifecycleStatus?: boolean
   notificationStatus?: boolean
   notificationAttempts?: boolean
+  notificationNextAttemptAt?: boolean
+  notificationLeaseId?: boolean
+  notificationLeaseExpiresAt?: boolean
   notifiedAt?: boolean
   lastNotificationError?: boolean
   createdAt?: boolean
@@ -702,6 +774,9 @@ export type DemoLeadSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   lifecycleStatus?: boolean
   notificationStatus?: boolean
   notificationAttempts?: boolean
+  notificationNextAttemptAt?: boolean
+  notificationLeaseId?: boolean
+  notificationLeaseExpiresAt?: boolean
   notifiedAt?: boolean
   lastNotificationError?: boolean
   createdAt?: boolean
@@ -723,13 +798,16 @@ export type DemoLeadSelectScalar = {
   lifecycleStatus?: boolean
   notificationStatus?: boolean
   notificationAttempts?: boolean
+  notificationNextAttemptAt?: boolean
+  notificationLeaseId?: boolean
+  notificationLeaseExpiresAt?: boolean
   notifiedAt?: boolean
   lastNotificationError?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type DemoLeadOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "idempotencyKey" | "name" | "company" | "email" | "phone" | "orderVolume" | "note" | "locale" | "consentVersion" | "consentedAt" | "lifecycleStatus" | "notificationStatus" | "notificationAttempts" | "notifiedAt" | "lastNotificationError" | "createdAt" | "updatedAt", ExtArgs["result"]["demoLead"]>
+export type DemoLeadOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "idempotencyKey" | "name" | "company" | "email" | "phone" | "orderVolume" | "note" | "locale" | "consentVersion" | "consentedAt" | "lifecycleStatus" | "notificationStatus" | "notificationAttempts" | "notificationNextAttemptAt" | "notificationLeaseId" | "notificationLeaseExpiresAt" | "notifiedAt" | "lastNotificationError" | "createdAt" | "updatedAt", ExtArgs["result"]["demoLead"]>
 
 export type $DemoLeadPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "DemoLead"
@@ -749,6 +827,9 @@ export type $DemoLeadPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     lifecycleStatus: $Enums.DemoLeadLifecycleStatus
     notificationStatus: $Enums.DemoLeadNotificationStatus
     notificationAttempts: number
+    notificationNextAttemptAt: Date | null
+    notificationLeaseId: string | null
+    notificationLeaseExpiresAt: Date | null
     notifiedAt: Date | null
     lastNotificationError: string | null
     createdAt: Date
@@ -1190,6 +1271,9 @@ export interface DemoLeadFieldRefs {
   readonly lifecycleStatus: Prisma.FieldRef<"DemoLead", 'DemoLeadLifecycleStatus'>
   readonly notificationStatus: Prisma.FieldRef<"DemoLead", 'DemoLeadNotificationStatus'>
   readonly notificationAttempts: Prisma.FieldRef<"DemoLead", 'Int'>
+  readonly notificationNextAttemptAt: Prisma.FieldRef<"DemoLead", 'DateTime'>
+  readonly notificationLeaseId: Prisma.FieldRef<"DemoLead", 'String'>
+  readonly notificationLeaseExpiresAt: Prisma.FieldRef<"DemoLead", 'DateTime'>
   readonly notifiedAt: Prisma.FieldRef<"DemoLead", 'DateTime'>
   readonly lastNotificationError: Prisma.FieldRef<"DemoLead", 'String'>
   readonly createdAt: Prisma.FieldRef<"DemoLead", 'DateTime'>

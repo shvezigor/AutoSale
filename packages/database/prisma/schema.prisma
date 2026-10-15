@@ -1927,6 +1927,9 @@ model DemoLead {
   lifecycleStatus       DemoLeadLifecycleStatus    @default(NEW) @map("lifecycle_status")
   notificationStatus    DemoLeadNotificationStatus @default(PENDING) @map("notification_status")
   notificationAttempts  Int                        @default(0) @map("notification_attempts")
+  notificationNextAttemptAt DateTime?               @map("notification_next_attempt_at")
+  notificationLeaseId       String?                 @map("notification_lease_id") @db.Uuid
+  notificationLeaseExpiresAt DateTime?              @map("notification_lease_expires_at")
   notifiedAt            DateTime?                  @map("notified_at")
   lastNotificationError String?                    @map("last_notification_error")
   createdAt             DateTime                   @default(now()) @map("created_at")
@@ -1934,5 +1937,6 @@ model DemoLead {
 
   @@index([lifecycleStatus, createdAt])
   @@index([notificationStatus, createdAt])
+  @@index([notificationStatus, notificationNextAttemptAt])
   @@map("demo_leads")
 }
