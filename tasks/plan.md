@@ -14,8 +14,8 @@ Close every reachable safety and browser gate in the [AI reply draft acceptance 
 
 ### P2 — Verify reachable live Instagram draft paths
 
-- [ ] In the consenting test-account conversation, send only specifically confirmed inbound test messages for missing-currency and ambiguous/promise requests; observe one inbound and one safe ready/failed draft per message, then reload and verify persistence and no unintended outbound.
-- The first approved missing-currency question exposed stale stock-intent carry-over; a focused test-first worker fix is green (374 tests, one skipped; typecheck/build green). Release `d966db5` was manually deployed with validated backup and healthy runtime checks. One fresh owner-approved price question then produced a safe price-check draft after the quiet period and preserved it after browser reload; neither the historical incorrect draft nor the new draft was sent. A separate owner-approved ambiguous entrance-door question produced a persisted clarification instead of an arbitrary single-product recommendation. The approved next-day shipping question exposed an irrelevant generic fallback despite no unsafe promise; a focused test-first shipping-specific clarification passed 376 worker tests (one skipped), typecheck and build. Release `c385405` was manually deployed with a verified backup and healthy services/queue; repeat the live case with new exact-message consent.
+- [x] In the consenting test-account conversation, send only specifically confirmed inbound test messages for missing-currency and ambiguous/promise requests; observe one inbound and one safe ready/failed draft per message, then reload and verify persistence and no unintended outbound.
+- The first approved missing-currency question exposed stale stock-intent carry-over; a focused test-first worker fix is green (374 tests, one skipped; typecheck/build green). Release `d966db5` was manually deployed with validated backup and healthy runtime checks. One fresh owner-approved price question then produced a safe price-check draft after the quiet period and preserved it after browser reload; neither the historical incorrect draft nor the new draft was sent. A separate owner-approved ambiguous entrance-door question produced a persisted clarification instead of an arbitrary single-product recommendation. The approved next-day shipping question exposed an irrelevant generic fallback despite no unsafe promise; a focused test-first shipping-specific clarification passed 376 worker tests (one skipped), typecheck and build. Release `c385405` was manually deployed with a verified backup and healthy services/queue. A separately approved post-release Instagram question produced the safe dispatch-time clarification after the quiet period, preserved it after reload and created no outbound reply.
 - Acceptance: no ungrounded monetary or commercial promise is displayed; the editor and source disclosure accurately represent each result.
 - Verification: real Instagram and Sales AITO browser evidence, plus read-only runtime health. Depends on P1 and action-time user confirmation for each batch of exact Instagram text. Scope: medium.
 
@@ -27,14 +27,14 @@ Close every reachable safety and browser gate in the [AI reply draft acceptance 
 
 ### P4 — Publish evidence and release
 
-- [x] Update canonical feature documentation, index, acceptance and backlog to distinguish closed gates from external prerequisites; if code changed, back up and manually deploy tested `master`, then verify public health, queues and browser behavior. Releases `8a28bed` and `d966db5` were merged/pushed and manually deployed after validated backups; public health and `ai_replies` backlog were healthy. The historical error state was verified in the browser; the fresh P2 acceptance remains separately open.
+- [x] Update canonical feature documentation, index, acceptance and backlog to distinguish closed gates from external prerequisites; if code changed, back up and manually deploy tested `master`, then verify public health, queues and browser behavior. Releases through `c385405` were merged/pushed and manually deployed after validated backups; public health and `ai_replies` backlog were healthy. The fresh P2 price, ambiguous-product and shipping-promise acceptance checks passed; provider-failure and wider pilot gates remain open.
 - Acceptance: no full-pilot claim while a live provider gate remains open; scoped branch merged/pushed and removed; unrelated `artifacts/` untouched.
 - Verification: diff check, tests, deployment and browser evidence as applicable. Depends on P1–P3. Scope: medium.
 
 ### Checkpoints
 
 - [x] After P1: tests/typecheck/build pass with fictional fixtures.
-- [ ] After P2: each approved test-account message and resulting draft is visible after reload, with no unapproved customer reply. The missing-currency price and ambiguous-product cases passed; the unsupported-promise live case needs a fresh post-deployment inbound check.
+- [x] After P2: approved missing-currency price, ambiguous-product and shipping-promise test-account messages each produced a safe draft visible after reload; none caused an unapproved customer reply.
 - [x] After P4: `master` matches origin, production release is healthy if changed, and residual provider gates are explicit.
 
 ## Risks and stop conditions
