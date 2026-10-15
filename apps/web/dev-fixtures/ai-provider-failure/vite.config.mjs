@@ -31,7 +31,12 @@ const conversation = {
     outcome: null,
     generatedText: null,
     finalText: null,
-    sources: [],
+    sources: [{
+      productId: '77777777-7777-4777-8777-777777777777',
+      sku: 'DOOR-7', name: 'Вигадані двері', variants: {},
+      price: '1500', currency: 'UAH', stockQuantity: 3,
+      updatedAt: '2026-10-05T09:00:00.000Z',
+    }],
     errorCode: 'PROVIDER_UNAVAILABLE',
     createdAt: '2026-10-05T10:00:00.000Z',
     updatedAt: '2026-10-05T10:00:11.000Z',

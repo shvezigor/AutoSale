@@ -66,6 +66,8 @@ An [isolated, fictional browser fixture](../../apps/web/dev-fixtures/ai-provider
 
 A fictional-data API conversation-detail regression now verifies that a persisted `PROVIDER_UNAVAILABLE` draft reaches the tenant UI contract without generated text or outbound work, and the worker timeout regression asserts the same one-attempt/no-outbound boundary. This is not a live provider-outage browser result; the **Validation pending** status remains.
 
+An isolated test also connects the actual provider adapter, worker and conversation-detail API through temporary PostgreSQL with a fictional rejecting provider. It confirms that already retrieved tenant catalogue sources may remain on the failed audit/API record, while no reply text or outbound message is produced; the local browser fixture mirrors this shape. The production-provider gate remains open.
+
 ## How to add or change a feature
 
 1. Search this index and the repository for equivalent behavior.
