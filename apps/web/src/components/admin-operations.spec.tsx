@@ -9,6 +9,7 @@ describe('AdminOperations', () => {
   it('shows service and queue health using counts only', () => {
     render(<AdminOperations summary={{
       status: 'DEGRADED', database: 'HEALTHY', updatedAt: '2026-10-02T12:00:00.000Z',
+      demoLeadNotifications: { due: 2, exhausted: 1 },
       queues: [
         { queue: 'instagram', status: 'ATTENTION', waiting: 3, active: 0, delayed: 1, failed: 2, completed: 8, workerCount: 0, oldestPendingAt: '2026-10-02T11:00:00.000Z', available: true },
         { queue: 'telegram', status: 'IDLE', waiting: 0, active: 0, delayed: 0, failed: 0, completed: 0, workerCount: 0, oldestPendingAt: null, available: false },
@@ -20,11 +21,14 @@ describe('AdminOperations', () => {
     expect(screen.getByText('PostgreSQL')).toBeInTheDocument();
     expect(screen.getByText('Instagram')).toBeInTheDocument();
     expect(screen.getByText('Недоступно')).toBeInTheDocument();
+    expect(screen.getByText('Сповіщення про демозаявки')).toBeInTheDocument();
+    expect(screen.getByText('Потребують відправлення: 2')).toBeInTheDocument();
+    expect(screen.getByText('Вичерпано спроби: 1')).toBeInTheDocument();
     expect(screen.queryByText(/redis:\/\/|customerPhone|\+380000/i)).not.toBeInTheDocument();
   });
 
   it('marks PostgreSQL as needing attention when the safe probe fails', () => {
-    render(<AdminOperations summary={{ status: 'DEGRADED', database: 'ATTENTION', updatedAt: '2026-10-02T12:00:00.000Z', queues: [] }} />);
+    render(<AdminOperations summary={{ status: 'DEGRADED', database: 'ATTENTION', updatedAt: '2026-10-02T12:00:00.000Z', demoLeadNotifications: { due: 0, exhausted: 0 }, queues: [] }} />);
     expect(screen.getByLabelText('PostgreSQL')).toHaveTextContent('Потрібна увага');
   });
 });

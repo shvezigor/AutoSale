@@ -1,4 +1,4 @@
-import { Prisma, type PrismaClient } from '@autosale/database';
+import { DemoLeadNotificationStore, Prisma, type PrismaClient } from '@autosale/database';
 import type { AdminQueueName, AdminQueueSummary, AdminOperationsSummary, AdminPlatformOverview } from '@autosale/contracts/auth';
 
 type QueueCounts = Pick<AdminQueueSummary, 'waiting' | 'active' | 'delayed' | 'failed' | 'completed'>;
@@ -16,6 +16,7 @@ export class AdminService {
     private readonly now: () => Date = () => new Date(),
     private readonly queues: AdminQueueMonitor[] = [],
     private readonly databaseProbe?: () => Promise<unknown>,
+    private readonly demoLeadNotifications: Pick<DemoLeadNotificationStore, 'counts'> = new DemoLeadNotificationStore(prisma),
   ) {}
 
   async listTenants() {
@@ -75,14 +76,17 @@ export class AdminService {
   }
 
   async getOperations(): Promise<AdminOperationsSummary> {
-    const [database, queues] = await Promise.all([
+    const [databaseProbe, queues, notificationCounts] = await Promise.all([
       this.probeDatabase(),
       Promise.all(this.queues.map((queue) => inspectQueue(queue))),
+      this.demoLeadNotifications.counts().catch(() => null),
     ]);
+    const database = databaseProbe === 'ATTENTION' || !notificationCounts ? 'ATTENTION' : 'HEALTHY';
     return {
       status: database === 'ATTENTION' || queues.some((queue) => queue.status === 'ATTENTION') ? 'DEGRADED' : 'HEALTHY',
       database,
       updatedAt: this.now().toISOString(),
+      demoLeadNotifications: notificationCounts ?? { due: 0, exhausted: 0 },
       queues,
     };
   }

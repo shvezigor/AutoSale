@@ -43,7 +43,7 @@ describe('AdminService privacy contract', () => {
       getWorkers: vi.fn().mockResolvedValue([{ id: 'worker-1' }]),
       getOldestPendingAt: vi.fn().mockResolvedValue(new Date('2026-10-01T12:00:00Z')),
     }];
-    const service = new AdminService({ $queryRaw: queryRaw } as never, () => new Date('2026-10-02T12:00:00Z'), queues);
+    const service = new AdminService({ $queryRaw: queryRaw } as never, () => new Date('2026-10-02T12:00:00Z'), queues, undefined, { counts: vi.fn().mockResolvedValue({ due: 2, exhausted: 1 }) } as never);
 
     await expect(service.getOverview()).resolves.toEqual({
       status: 'DEGRADED', attentionQueueCount: 1, updatedAt: '2026-10-02T12:00:00.000Z',
@@ -64,12 +64,13 @@ describe('AdminService privacy contract', () => {
       getWorkers: vi.fn(),
       getOldestPendingAt: vi.fn(),
     };
-    const service = new AdminService({} as never, () => new Date('2026-10-02T12:00:00Z'), [healthy, unavailable], async () => undefined);
+    const service = new AdminService({} as never, () => new Date('2026-10-02T12:00:00Z'), [healthy, unavailable], async () => undefined, { counts: vi.fn().mockResolvedValue({ due: 2, exhausted: 1 }) } as never);
 
     const result = await service.getOperations();
 
     expect(result).toEqual({
       status: 'DEGRADED', database: 'HEALTHY', updatedAt: '2026-10-02T12:00:00.000Z',
+      demoLeadNotifications: { due: 2, exhausted: 1 },
       queues: [
         { queue: 'catalogue', status: 'IDLE', waiting: 0, active: 0, delayed: 0, failed: 0, completed: 3, workerCount: 0, oldestPendingAt: null, available: true },
         { queue: 'delivery', status: 'ATTENTION', waiting: 0, active: 0, delayed: 0, failed: 0, completed: 0, workerCount: 0, oldestPendingAt: null, available: false },
@@ -79,9 +80,9 @@ describe('AdminService privacy contract', () => {
   });
 
   it('reports a safe degraded state when the database probe fails', async () => {
-    const service = new AdminService({} as never, () => new Date('2026-10-02T12:00:00Z'), [], async () => { throw new Error('postgres://secret@internal'); });
+    const service = new AdminService({} as never, () => new Date('2026-10-02T12:00:00Z'), [], async () => { throw new Error('postgres://secret@internal'); }, { counts: vi.fn().mockRejectedValue(new Error('postgres://secret@internal')) } as never);
     const result = await service.getOperations();
-    expect(result).toEqual({ status: 'DEGRADED', database: 'ATTENTION', updatedAt: '2026-10-02T12:00:00.000Z', queues: [] });
+    expect(result).toEqual({ status: 'DEGRADED', database: 'ATTENTION', updatedAt: '2026-10-02T12:00:00.000Z', demoLeadNotifications: { due: 0, exhausted: 0 }, queues: [] });
     expect(JSON.stringify(result)).not.toContain('secret');
   });
 

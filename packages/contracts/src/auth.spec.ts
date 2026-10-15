@@ -49,13 +49,16 @@ describe('authentication contracts', () => {
     }).success).toBe(true);
     expect(adminOperationsSummarySchema.safeParse({
       status: 'HEALTHY', database: 'HEALTHY', updatedAt,
+      demoLeadNotifications: { due: 2, exhausted: 1 },
       queues: [{ queue: 'instagram', status: 'HEALTHY', waiting: 1, active: 0, delayed: 0, failed: 0, completed: 4, workerCount: 1, oldestPendingAt: updatedAt, available: true }],
     }).success).toBe(true);
-    expect(adminOperationsSummarySchema.safeParse({ status: 'DEGRADED', database: 'ATTENTION', updatedAt, queues: [] }).success).toBe(true);
+    expect(adminOperationsSummarySchema.safeParse({ status: 'DEGRADED', database: 'ATTENTION', updatedAt, demoLeadNotifications: { due: 0, exhausted: 0 }, queues: [] }).success).toBe(true);
     expect(adminOperationsSummarySchema.safeParse({
       status: 'HEALTHY', database: 'HEALTHY', updatedAt,
+      demoLeadNotifications: { due: 0, exhausted: 0 },
       queues: [{ queue: 'instagram', status: 'HEALTHY', waiting: 0, active: 0, delayed: 0, failed: 0, completed: 4, workerCount: 1, oldestPendingAt: null, available: true, jobPayload: { phone: '+380' } }],
     }).success).toBe(false);
+    expect(adminOperationsSummarySchema.safeParse({ status: 'HEALTHY', database: 'HEALTHY', updatedAt, queues: [] }).success).toBe(false);
   });
 
   it('accepts only the closed privacy-safe platform integration controls', () => {

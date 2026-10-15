@@ -38,7 +38,7 @@ export const adminTenantSummarySchema = z.object({
   createdAt: z.string().datetime(),
 }).strict();
 
-export const adminQueueNameSchema = z.enum(['instagram', 'catalogue', 'delivery', 'telegram', 'tenant-lifecycle', 'ai-replies']);
+export const adminQueueNameSchema = z.enum(['instagram', 'catalogue', 'delivery', 'telegram', 'tenant-lifecycle', 'ai-replies', 'demo-leads']);
 
 export const adminQueueSummarySchema = z.object({
   queue: adminQueueNameSchema,
@@ -57,6 +57,7 @@ export const adminOperationsSummarySchema = z.object({
   status: z.enum(['HEALTHY', 'DEGRADED']),
   database: z.enum(['HEALTHY', 'ATTENTION']),
   updatedAt: z.string().datetime(),
+  demoLeadNotifications: z.object({ due: z.number().int().nonnegative(), exhausted: z.number().int().nonnegative() }).strict(),
   queues: z.array(adminQueueSummarySchema),
 }).strict();
 

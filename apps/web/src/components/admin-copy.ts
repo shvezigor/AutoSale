@@ -10,7 +10,7 @@ const copy = {
       metrics: { clients: 'Усі клієнти', active: 'Активні', blocked: 'Заблоковані', users: 'Користувачі', orders: 'Замовлення', newClients: 'Нові за 30 днів' },
       clientsAction: 'Переглянути клієнтів', operationsTitle: 'Фонові процеси', operationsDescription: 'Черги, які зараз впливають на автоматичну обробку.', operationsAction: 'Відкрити моніторинг', allQueuesHealthy: 'Черги працюють без активних інцидентів.', waiting: 'Очікує: {count}', failed: 'Помилки: {count}', workers: 'Воркери: {count}', attention: 'Потребує уваги',
     },
-    queues: { instagram: 'Instagram', catalogue: 'Каталог', delivery: 'Доставка', telegram: 'Telegram', 'tenant-lifecycle': 'Життєвий цикл даних', 'ai-replies': 'AI-чернетки' },
+    queues: { instagram: 'Instagram', catalogue: 'Каталог', delivery: 'Доставка', telegram: 'Telegram', 'tenant-lifecycle': 'Життєвий цикл даних', 'ai-replies': 'AI-чернетки', 'demo-leads': 'Демозаявки' },
     clients: {
       eyebrow: 'Клієнти Sales AITO', title: 'Організації', description: 'Загальна неконфіденційна інформація, доступ і агрегати використання.', searchPlaceholder: 'Назва або email власника', statusLabel: 'Статус', allStatuses: 'Усі статуси', active: 'Активна', blocked: 'Заблокована', empty: 'Нічого не знайдено',
       columns: { number: '№', organization: 'Організація', owner: 'Власник', users: 'Користувачі', orders: 'Замовлення', status: 'Статус', created: 'Створено', action: 'Дія' }, view: 'Переглянути', sortName: 'Сортувати за назвою', sortUsers: 'Сортувати за користувачами', sortOrders: 'Сортувати за замовленнями', sortDate: 'Сортувати за датою', total: 'Усього: {count}',
@@ -20,6 +20,7 @@ const copy = {
     },
     operations: {
       eyebrow: 'Моніторинг', title: 'Операції та черги', description: 'Поточний технічний стан API, бази даних і фонової обробки. Без payload, логів та даних клієнтів.', updated: 'Оновлено {date}', healthy: 'Працює', degraded: 'Потрібна увага', unavailable: 'Недоступно', idle: 'Очікує роботи', apiDescription: 'Адмін API відповідає', databaseDescription: 'Агрегати PostgreSQL доступні', queuesTitle: 'Фонові черги', queuesDescription: 'Лічильники BullMQ і наявність активних воркерів.',
+      demoLeadsTitle: 'Сповіщення про демозаявки', demoLeadsDue: 'Потребують відправлення: {count}', demoLeadsExhausted: 'Вичерпано спроби: {count}',
       columns: { queue: 'Черга', status: 'Стан', waiting: 'Очікує', active: 'В роботі', delayed: 'Відкладено', failed: 'Помилки', completed: 'Завершено', workers: 'Воркери', oldest: 'Найстаріша задача' }, none: '—',
     },
     integrations: {
@@ -38,7 +39,7 @@ const copy = {
       metrics: { clients: 'All clients', active: 'Active', blocked: 'Blocked', users: 'Users', orders: 'Orders', newClients: 'New in 30 days' },
       clientsAction: 'View clients', operationsTitle: 'Background processes', operationsDescription: 'Queues currently affecting automated processing.', operationsAction: 'Open monitoring', allQueuesHealthy: 'Queues have no active incidents.', waiting: 'Waiting: {count}', failed: 'Failed: {count}', workers: 'Workers: {count}', attention: 'Attention required',
     },
-    queues: { instagram: 'Instagram', catalogue: 'Catalogue', delivery: 'Delivery', telegram: 'Telegram', 'tenant-lifecycle': 'Data lifecycle', 'ai-replies': 'AI drafts' },
+    queues: { instagram: 'Instagram', catalogue: 'Catalogue', delivery: 'Delivery', telegram: 'Telegram', 'tenant-lifecycle': 'Data lifecycle', 'ai-replies': 'AI drafts', 'demo-leads': 'Demo requests' },
     clients: {
       eyebrow: 'Sales AITO clients', title: 'Organizations', description: 'General non-confidential information, access and usage aggregates.', searchPlaceholder: 'Name or owner email', statusLabel: 'Status', allStatuses: 'All statuses', active: 'Active', blocked: 'Blocked', empty: 'Nothing found',
       columns: { number: '#', organization: 'Organization', owner: 'Owner', users: 'Users', orders: 'Orders', status: 'Status', created: 'Created', action: 'Action' }, view: 'View', sortName: 'Sort by name', sortUsers: 'Sort by users', sortOrders: 'Sort by orders', sortDate: 'Sort by date', total: 'Total: {count}',
@@ -48,6 +49,7 @@ const copy = {
     },
     operations: {
       eyebrow: 'Monitoring', title: 'Operations and queues', description: 'Current technical state of the API, database and background processing. No payloads, logs or client data.', updated: 'Updated {date}', healthy: 'Operational', degraded: 'Attention required', unavailable: 'Unavailable', idle: 'Idle', apiDescription: 'Admin API is responding', databaseDescription: 'PostgreSQL aggregates are available', queuesTitle: 'Background queues', queuesDescription: 'BullMQ counters and active worker presence.',
+      demoLeadsTitle: 'Demo request notifications', demoLeadsDue: 'Due for delivery: {count}', demoLeadsExhausted: 'Attempts exhausted: {count}',
       columns: { queue: 'Queue', status: 'Status', waiting: 'Waiting', active: 'Active', delayed: 'Delayed', failed: 'Failed', completed: 'Completed', workers: 'Workers', oldest: 'Oldest task' }, none: '—',
     },
     integrations: {

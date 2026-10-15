@@ -7,7 +7,8 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "auth:bootstrap-admin": "node dist/cli/bootstrap-auth.js admin",
-    "auth:adopt-tenant": "node dist/cli/bootstrap-auth.js adopt"
+    "auth:adopt-tenant": "node dist/cli/bootstrap-auth.js adopt",
+    "demo-lead:requeue": "node dist/cli/requeue-demo-lead.js"
   },
   "dependencies": {
     "@autosale/config": "workspace:*",

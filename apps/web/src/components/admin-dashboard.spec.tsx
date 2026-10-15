@@ -14,6 +14,7 @@ describe('AdminDashboard privacy', () => {
       }}
       operations={{
         status: 'DEGRADED', database: 'HEALTHY', updatedAt: '2026-10-02T12:00:00.000Z',
+        demoLeadNotifications: { due: 0, exhausted: 0 },
         queues: [
           { queue: 'instagram', status: 'ATTENTION', waiting: 3, active: 0, delayed: 0, failed: 1, completed: 8, workerCount: 0, oldestPendingAt: '2026-10-02T11:00:00.000Z', available: true },
           { queue: 'catalogue', status: 'HEALTHY', waiting: 0, active: 1, delayed: 0, failed: 0, completed: 4, workerCount: 1, oldestPendingAt: null, available: true },
