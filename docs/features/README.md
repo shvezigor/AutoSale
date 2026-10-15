@@ -64,6 +64,8 @@ The 15 October provider-failure UI release (`ed50796`, web image built from `b55
 
 An [isolated, fictional browser fixture](../../apps/web/dev-fixtures/ai-provider-failure/README.md) additionally verifies the actual composer UI for a persisted `PROVIDER_UNAVAILABLE` result, field validation, reload and one explicit retry without contacting production or a provider. It does not change the **Validation pending** status or close the controlled live-outage gate.
 
+A fictional-data API conversation-detail regression now verifies that a persisted `PROVIDER_UNAVAILABLE` draft reaches the tenant UI contract without generated text or outbound work, and the worker timeout regression asserts the same one-attempt/no-outbound boundary. This is not a live provider-outage browser result; the **Validation pending** status remains.
+
 ## How to add or change a feature
 
 1. Search this index and the repository for equivalent behavior.

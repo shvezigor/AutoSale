@@ -370,6 +370,35 @@ describe('ConversationsService', () => {
     }
   });
 
+  it('exposes a persisted provider failure without unsafe draft text or disabling manual replies', async () => {
+    const anchor = await prisma.message.findFirstOrThrow({
+      where: { tenantId, conversationId: newestId, direction: 'INBOUND' },
+    });
+    const draft = await prisma.aiReplyDraft.create({ data: {
+      tenantId, conversationId: newestId, anchorMessageId: anchor.id,
+      createdByUserId: null, idempotencyKey: randomUUID(), triggerSource: 'AUTOMATIC',
+      status: 'FAILED', attempts: 1, errorCode: 'PROVIDER_UNAVAILABLE', generatedText: null,
+      sourceSnapshot: [],
+    } });
+    try {
+      const outboundBefore = await prisma.message.count({ where: {
+        tenantId, conversationId: newestId, direction: 'OUTBOUND',
+      } });
+      const detail = await service.detail(tenantId, newestId);
+      expect(detail.replyDrafts?.find((item) => item.id === draft.id)).toMatchObject({
+        triggerSource: 'AUTOMATIC', status: 'FAILED', errorCode: 'PROVIDER_UNAVAILABLE',
+        generatedText: null, finalText: null, sources: [],
+      });
+      expect(detail.replyCapability).toMatchObject({ enabled: true });
+      await expect(prisma.message.count({ where: {
+        tenantId, conversationId: newestId, direction: 'OUTBOUND',
+      } })).resolves.toBe(outboundBefore);
+      expect(queue.add).not.toHaveBeenCalled();
+    } finally {
+      await prisma.aiReplyDraft.delete({ where: { id: draft.id } });
+    }
+  });
+
   it('rejects a stale draft without creating an outbound message', async () => {
     const anchor = await prisma.message.findFirstOrThrow({
       where: { tenantId, conversationId: newestId, direction: 'INBOUND' },

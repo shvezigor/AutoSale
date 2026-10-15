@@ -131,7 +131,7 @@ describe('ReplyDraftProcessor', () => {
     expect(generate).toHaveBeenCalledOnce();
     expect(await prisma.aiReplyDraft.findUniqueOrThrow({ where: { id: seedData.draftId } })).toMatchObject({
       status: 'FAILED', errorCode: 'PROVIDER_UNAVAILABLE', attempts: 1,
-      leaseId: null,
+      leaseId: null, generatedText: null, outboundMessageId: null,
     });
   });
 
