@@ -331,11 +331,13 @@ export function SocialReplyComposer({
             {draftBusy && <p role="status">{t('conversations.replyDraftWorking')}</p>}
             {draftError && <p role="alert">{draftError}</p>}
             {currentDraft && ['STALE', 'BLOCKED', 'FAILED'].includes(currentDraft.status) && <div className="reply-draft-inline-state">
-              <p role="status">{currentDraft.errorCode === 'CATALOGUE_MODEL_OVERFLOW'
-                ? t('conversations.replyDraftModelOverflow')
-                : currentDraft.errorCode === 'CATALOGUE_RETRIEVAL_FAILED'
-                  ? t('conversations.replyDraftCatalogueUnavailable')
-                  : t('conversations.replyDraftUnavailable')}</p>
+              <p role="status">{currentDraft.errorCode === 'PROVIDER_UNAVAILABLE'
+                ? t('conversations.replyDraftProviderUnavailable')
+                : currentDraft.errorCode === 'CATALOGUE_MODEL_OVERFLOW'
+                  ? t('conversations.replyDraftModelOverflow')
+                  : currentDraft.errorCode === 'CATALOGUE_RETRIEVAL_FAILED'
+                    ? t('conversations.replyDraftCatalogueUnavailable')
+                    : t('conversations.replyDraftUnavailable')}</p>
               {['BLOCKED', 'FAILED'].includes(currentDraft.status)
                 && currentDraft.errorCode !== 'CATALOGUE_MODEL_OVERFLOW'
                 && <LoadingButton className="secondary-button" type="button"

@@ -64,6 +64,8 @@ describe('SocialReplyComposer', () => {
   it.each([
     ['CATALOGUE_MODEL_OVERFLOW', 'uk', 'Знайдено забагато варіантів моделі. Уточніть запит клієнта.'],
     ['CATALOGUE_RETRIEVAL_FAILED', 'en', 'Catalogue search is temporarily unavailable. Try again later.'],
+    ['PROVIDER_UNAVAILABLE', 'uk', 'AI-сервіс тимчасово недоступний. Спробуйте пізніше або дайте відповідь вручну.'],
+    ['PROVIDER_UNAVAILABLE', 'en', 'The AI service is temporarily unavailable. Try again later or reply manually.'],
   ] as const)('shows a localized %s draft failure without raw database details', (errorCode, locale, expected) => {
     const inbound = { ...pendingMessage, id: '33333333-3333-4333-8333-333333333333',
       direction: 'INBOUND' as const, text: 'Покажіть модель Регіон', delivery: null };
@@ -77,6 +79,10 @@ describe('SocialReplyComposer', () => {
     };
     renderComposer({ ...conversation, messages: [inbound], replyDrafts: [draft] }, false, locale, true);
     expect(screen.getByText(expected)).toBeVisible();
+    if (errorCode === 'PROVIDER_UNAVAILABLE') {
+      expect(screen.getByRole('textbox', { name: locale === 'uk' ? 'Відповідь' : 'Reply' })).toBeEnabled();
+      expect(api.createConversationReplyDraft).not.toHaveBeenCalled();
+    }
   });
   it('includes the latest ready draft in the initial server-rendered editor', () => {
     const inbound = { ...pendingMessage, id: '33333333-3333-4333-8333-333333333333',

@@ -184,7 +184,7 @@ The existing conversation composer adds:
 - when a newer inbound message receives a ready draft, it replaces an older untouched automatic editor value; the older value is cleared first without consuming or losing the newer draft;
 - no separate full-size ready-draft card: an automatically inserted draft is shown only in the ordinary reply editor, with a compact status and collapsed catalogue sources;
 - visible ready-draft context in a compact collapsed disclosure without insertion when the manager already touched the editor;
-- **Retry** for a safe generation failure;
+- **Retry** for a safe generation failure; a persisted `PROVIDER_UNAVAILABLE` result has a specific localized temporary-service message with manual-reply guidance rather than a misleading stale-draft warning. Viewing the failure never triggers an automatic retry, and the ordinary manual editor remains available.
 - a source list showing product name and SKU, with price/stock freshness where used;
 - a clear warning for stale or blocked results;
 - editable draft text in the ordinary reply field;
