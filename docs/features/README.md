@@ -58,6 +58,8 @@ A live price question for an exact SKU with missing currency exposed stale stock
 
 Release `d966db5` was manually deployed on 15 October 2026 after verified backup; public health, core services and the AI-draft queue passed checks. The running worker contains the new price-intent rule, and a fresh post-release price-question draft was verified in the browser after reload. This closes only the missing-currency/price-intent gate, not the controlled pilot.
 
+The 15 October provider-failure UI release (`ed50796`, web image built from `b55f8af`) has passing localized component tests, web suite, typecheck and build. The manually updated web container is healthy, and an existing test-account draft persisted after browser reload. No live provider outage was induced or observed; that browser acceptance gate remains open in the [checklist](../acceptance/ai-reply-drafts-checklist.md).
+
 ## How to add or change a feature
 
 1. Search this index and the repository for equivalent behavior.
