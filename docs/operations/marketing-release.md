@@ -42,11 +42,14 @@ Roll back application containers first. The demo lead table is additive and can 
 
 ## Deployment record
 
-### 2026-10-15 retry candidate (not yet a production release)
+### 2026-10-16 durable demo-notification rollout
 
-- The isolated branch passed 2,100 automated tests (one pre-existing skipped test), monorepo typecheck, production build, and quiet Compose validation. The pre-release hardening also keeps unconfigured worker startup in standby without consuming due leads or attempts.
+- Deployed and pushed `master` commit `ed43c046623fe28f897660f9b11da9db2b1dc497` to the current Windows Docker/Cloudflare host. Fresh application-consistent backup: `backups/20261015T201645Z`; its manifest was checksum-verified, and the PostgreSQL dump and MinIO archive were readable. A separate partial backup at `backups/.incomplete-20261015T201626Z` from the first attempt was retained for manual private cleanup; it must not be published.
+- The isolated branch passed 2,100 automated tests (one pre-existing skipped test), monorepo typecheck, production build, and quiet Compose validation. The pre-release hardening keeps unconfigured worker startup in standby without consuming due leads or attempts.
 - A loopback-only SMTP sink accepted one fictional lead notification with the stable Message-ID. Database tests cover atomic claims, bounded delays, expiration and migration backfill; API/worker tests cover queue failures and safe aggregates.
-- No live production SMTP recipient or browser acceptance is claimed here. Record the deployed master SHA, fresh backup ID, browser evidence and authorized internal mailbox result after rollout.
+- Migration `20261015_demo_lead_notification_retries` finished successfully. API, web, worker, PostgreSQL, Redis and MinIO were healthy after deployment, and public `/health/live` returned HTTP 200.
+- In the deployed Ukrainian demo form, blank submission showed localized field errors and focused the first invalid control. One clearly fictional browser-submitted lead displayed “Заявку отримано”. After reload the public form reset, while a read-only database aggregate still showed exactly one `PENDING` lead with zero attempts. No contacts were displayed in the diagnostic output.
+- The current host has no `SMTP_*` or `DEMO_LEAD_EMAIL` values. Therefore the live worker intentionally leaves the lead due; no production email delivery has been verified. The browser session available for acceptance redirected `/admin/operations` to the workspace dashboard, so the count-only platform-admin view also remains unverified in a platform-admin session.
 
 ### 2026-09-17
 

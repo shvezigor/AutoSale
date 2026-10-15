@@ -30,9 +30,11 @@ Original acceptance date: 2026-09-17. Release status reconciled on 2026-10-15 ag
 - [x] Deploy the integrated marketing release to the production host on 2026-09-18; the initial 2026-09-17 build was rolled back before the corrected release.
 - [x] Apply migration `20260917150000_demo_leads` in production, as recorded in the release runbook.
 - [ ] Configure `DEMO_LEAD_EMAIL` and SMTP, then verify a real internal notification.
-- [x] A worker started without SMTP configuration defers due leads without claiming them or spending an attempt; unit checks cover processor and reconciliation standby. Live environment verification remains open.
+- [x] A worker started without SMTP configuration defers due leads without claiming them or spending an attempt. Unit checks cover processor and reconciliation standby; the 2026-10-16 production browser submission persisted as one `PENDING` lead with zero attempts after reload.
 - [ ] For the retry rollout, prove with a controlled local SMTP sink that a saved fictional lead is sent once, transient failures retry with bounded delays, terminal failures stop, and Redis/worker restart recovery does not resend `SENT` rows.
-- [ ] In a real browser against the deployed environment, verify localized demo submission/validation, a reload-safe result, and count-only admin operations; capture UI evidence. Do not count the configured SMTP recipient as verified until an authorized internal test email is observed.
+- [x] In a real browser against the deployed environment, verify localized blank-submit errors and first-invalid focus, submit one clearly fictional lead, and observe the success state; completed 2026-10-16 with screenshot evidence in the release session.
+- [x] Reload the public demo page and verify the submitted lead persists in the database without another notification attempt. The public success message itself is intentionally transient; the form resets on reload, while the database aggregate remained at one `PENDING` lead with zero attempts.
+- [ ] Verify count-only demo notification metrics in a platform-admin browser session. The available session redirected `/admin/operations` to `/dashboard`, so this browser check is not complete.
 - [ ] Inspect and confirm the canonical Cloudflare Tunnel hostname-to-proxy configuration. The 2026-09-18 HTTPS 200 route checks prove public reachability, but the release record does not document this configuration inspection.
 - [ ] Verify Google Search Console and Bing Webmaster Tools, then submit the sitemap.
 - [ ] Record production Core Web Vitals after deployment.
