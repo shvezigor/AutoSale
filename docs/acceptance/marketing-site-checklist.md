@@ -1,6 +1,6 @@
 # Marketing site acceptance record
 
-Date: 2026-09-17
+Original acceptance date: 2026-09-17. Release status reconciled on 2026-10-15 against the [production marketing release record](../operations/marketing-release.md).
 
 ## Automated evidence
 
@@ -27,9 +27,9 @@ Date: 2026-09-17
 
 ## External launch prerequisites
 
-- [ ] Deploy the branch to the production host.
-- [ ] Apply the database migration in production.
+- [x] Deploy the integrated marketing release to the production host on 2026-09-18; the initial 2026-09-17 build was rolled back before the corrected release.
+- [x] Apply migration `20260917150000_demo_leads` in production, as recorded in the release runbook.
 - [ ] Configure `DEMO_LEAD_EMAIL` and SMTP, then verify a real internal notification.
-- [ ] Confirm Cloudflare routes the canonical hostname to the current proxy.
+- [ ] Inspect and confirm the canonical Cloudflare Tunnel hostname-to-proxy configuration. The 2026-09-18 HTTPS 200 route checks prove public reachability, but the release record does not document this configuration inspection.
 - [ ] Verify Google Search Console and Bing Webmaster Tools, then submit the sitemap.
 - [ ] Record production Core Web Vitals after deployment.

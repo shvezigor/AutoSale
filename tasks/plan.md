@@ -133,7 +133,7 @@ A1 contracts + safe API aggregates
 
 - [x] All spec success criteria are met.
 - [x] Canonical feature index reports evidence-based status.
-- [ ] Scoped commits are merged to `master`, pushed and the feature branch is removed.
+- [x] Platform-admin commits through `be19082` are ancestors of pushed `master`, and no platform-admin branch remains in current local or remote refs. The [canonical design](../docs/superpowers/specs/2026-10-02-platform-admin-workspace-design.md) records the verified release status.
 
 ## Risks and mitigations
 

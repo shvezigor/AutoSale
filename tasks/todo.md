@@ -13,7 +13,9 @@
 - [ ] Distributed demo notification retry worker and operator lead-management UI remain follow-up product work.
 - [ ] First-party conversion analytics remain deferred until the event storage and privacy policy are approved.
 
-## Current Initiative: Public Marketing Website
+## Historical implementation breakdown: Public Marketing Website
+
+This M1–M18 checklist is the original implementation plan, not the current live-work queue. The bilingual site and demo-lead migration were deployed on 18 September 2026; see the [marketing release record](../docs/operations/marketing-release.md) and [feature index](../docs/features/README.md). Its unchecked template boxes have not been individually reconciled and must not be counted as outstanding product implementation by themselves. Current open marketing work is listed in the status summary above and the shared backlog below: SMTP/internal notification, search-engine submission, production Core Web Vitals, distributed demo-notification retry and operator lead management, and privacy-approved conversion analytics. In particular, M13's distributed retry and M16's event tracking remain follow-up work rather than completed parts of the released site.
 
 ### M1: Lock the existing route and metadata baseline
 
