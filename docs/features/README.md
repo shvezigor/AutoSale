@@ -60,6 +60,8 @@ Release `d966db5` was manually deployed on 15 October 2026 after verified backup
 
 The 15 October provider-failure UI release (`ed50796`, web image built from `b55f8af`) has passing localized component tests, web suite, typecheck and build. The manually updated web container is healthy, and an existing test-account draft persisted after browser reload. No live provider outage was induced or observed; that browser acceptance gate remains open in the [checklist](../acceptance/ai-reply-drafts-checklist.md).
 
+An [isolated, fictional browser fixture](../../apps/web/dev-fixtures/ai-provider-failure/README.md) additionally verifies the actual composer UI for a persisted `PROVIDER_UNAVAILABLE` result, field validation, reload and one explicit retry without contacting production or a provider. It does not change the **Validation pending** status or close the controlled live-outage gate.
+
 ## How to add or change a feature
 
 1. Search this index and the repository for equivalent behavior.

@@ -1,0 +1,5 @@
+body { margin: 0; }
+.fixture-page { width: min(960px, calc(100% - 32px)); margin: 28px auto; }
+.fixture-label { color: var(--muted); font-size: 12px; }
+.fixture-conversation { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; height: min(660px, calc(100dvh - 95px)); min-height: 360px; overflow: hidden; border: 1px solid var(--border); border-radius: 16px; background: white; }
+.fixture-header { padding: 18px 22px; border-bottom: 1px solid var(--border); font-weight: 700; }
