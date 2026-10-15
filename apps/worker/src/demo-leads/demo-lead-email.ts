@@ -38,9 +38,9 @@ export function classifyDemoLeadEmailError(error: unknown): { code: DemoLeadFail
 export function createDemoLeadEmailSender(
   env: SmtpSettings,
   transportFactory: (options: TransportOptions) => Transport = (options) => nodemailer.createTransport(options),
-): { send(lead: DemoLeadNotificationClaim): Promise<void>; close(): void } {
+): { configured: boolean; send(lead: DemoLeadNotificationClaim): Promise<void>; close(): void } {
   if (!env.SMTP_HOST || !env.SMTP_USER || !env.SMTP_PASSWORD || !env.SMTP_FROM || !env.DEMO_LEAD_EMAIL) {
-    return { async send() { throw new DemoLeadEmailError('NOT_CONFIGURED', true); }, close() {} };
+    return { configured: false, async send() { throw new DemoLeadEmailError('NOT_CONFIGURED', true); }, close() {} };
   }
   const transport = transportFactory({
     host: env.SMTP_HOST,
@@ -54,7 +54,7 @@ export function createDemoLeadEmailSender(
     greetingTimeout: 20_000,
     socketTimeout: 60_000,
   });
-  return { close() { transport.close?.(); }, async send(lead) {
+  return { configured: true, close() { transport.close?.(); }, async send(lead) {
     const result = await transport.sendMail({
       from: env.SMTP_FROM!,
       to: env.DEMO_LEAD_EMAIL!,

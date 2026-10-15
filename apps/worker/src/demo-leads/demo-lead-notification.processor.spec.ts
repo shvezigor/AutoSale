@@ -6,6 +6,18 @@ import { DemoLeadNotificationProcessor } from './demo-lead-notification.processo
 const claim = { id: '00000000-0000-4000-8000-000000000001', leaseId: 'lease-1', attempt: 1 };
 
 describe('DemoLeadNotificationProcessor', () => {
+  it('leaves a due lead unclaimed while SMTP settings are incomplete', async () => {
+    const store = { claim: vi.fn(), markSent: vi.fn(), markFailed: vi.fn() };
+    const sender = { configured: false, send: vi.fn() };
+    const queue = { add: vi.fn() };
+    const processor = new DemoLeadNotificationProcessor(store as never, sender, queue as never);
+
+    expect(await processor.process({ leadId: claim.id })).toBe('DEFERRED');
+    expect(store.claim).not.toHaveBeenCalled();
+    expect(sender.send).not.toHaveBeenCalled();
+    expect(queue.add).not.toHaveBeenCalled();
+  });
+
   it('sends a claimed lead exactly once and ignores a completed replay', async () => {
     const store = { claim: vi.fn().mockResolvedValueOnce(claim).mockResolvedValueOnce(null), markSent: vi.fn().mockResolvedValue(true) };
     const sender = { send: vi.fn().mockResolvedValue(undefined) };

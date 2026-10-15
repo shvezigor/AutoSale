@@ -11,12 +11,13 @@ interface DemoLeadQueue {
 export class DemoLeadNotificationProcessor {
   constructor(
     private readonly store: Pick<DemoLeadNotificationStore, 'claim' | 'markSent' | 'markFailed'>,
-    private readonly sender: { send(lead: DemoLeadNotificationClaim): Promise<void> },
+    private readonly sender: { configured?: boolean; send(lead: DemoLeadNotificationClaim): Promise<void> },
     private readonly queue: DemoLeadQueue,
     private readonly now: () => Date = () => new Date(),
   ) {}
 
-  async process(job: { leadId: string }): Promise<'SENT' | 'RETRY_SCHEDULED' | 'TERMINAL' | 'SKIPPED'> {
+  async process(job: { leadId: string }): Promise<'SENT' | 'RETRY_SCHEDULED' | 'TERMINAL' | 'SKIPPED' | 'DEFERRED'> {
+    if (this.sender.configured === false) return 'DEFERRED';
     const claim = await this.store.claim(job.leadId);
     if (!claim) return 'SKIPPED';
     try {

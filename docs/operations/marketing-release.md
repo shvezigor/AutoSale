@@ -15,7 +15,7 @@ CLOUDFLARE_TUNNEL_TOKEN=...
 
 `DEMO_LEAD_EMAIL` is the internal recipient of demo notifications. The worker needs the `SMTP_*` values and `DEMO_LEAD_EMAIL`; the API retains SMTP configuration for authentication mail only. A demo lead is committed to PostgreSQL before an ID-only BullMQ wake-up job is queued. The HTTP response does not wait for SMTP, and a Redis outage does not lose a committed lead.
 
-After the new release, the worker claims a due lead with a two-minute lease and makes at most four SMTP attempts. Retryable failures wait 1, 5, then 15 minutes. Missing SMTP settings and explicit SMTP 5xx rejection stop immediately; an ambiguous timeout remains retryable. A five-second bounded reconciliation scan restores due jobs after Redis/worker failure. `SENT` is terminal. The platform operations page exposes only due/exhausted counts and queue health, never lead contacts. SMTP acceptance can be ambiguous if the worker dies before marking `SENT`; every attempt uses the same Message-ID, but this does not guarantee exactly-once physical email.
+After the new release, the worker claims a due lead with a two-minute lease and makes at most four SMTP attempts. Retryable failures wait 1, 5, then 15 minutes. If any required SMTP setting or `DEMO_LEAD_EMAIL` is absent at startup, the worker leaves due leads unclaimed and pauses demo reconciliation; setting the values requires a worker restart, after which reconciliation resumes. This standby state does not constitute successful email delivery. Explicit SMTP 5xx rejection stops immediately; an ambiguous timeout remains retryable. A five-second bounded reconciliation scan restores due jobs after Redis/worker failure when configured. `SENT` is terminal. The platform operations page exposes only due/exhausted counts and queue health, never lead contacts. SMTP acceptance can be ambiguous if the worker dies before marking `SENT`; every attempt uses the same Message-ID, but this does not guarantee exactly-once physical email.
 
 After correcting a terminal failure, an operator with approved database access may requeue exactly one lead using its UUID (never a contact value):
 
@@ -33,7 +33,7 @@ The command only changes a terminal `FAILED` row without an active lease; it can
 4. Deploy the tested API before the new worker from the same commit. Do not start the new worker while an old API instance can still send demo email inline; the old worker simply ignores the new queue while PostgreSQL retains the lead. Deploy web and proxy after health checks.
 5. Verify the Cloudflare Tunnel route points `sales-aito.com` to the proxy service.
 6. Run the public endpoint checks from `docs/operations/search-indexing.md`.
-7. Submit one test demo lead with an approved internal test contact and confirm both the database record and notification email.
+7. If SMTP is still unconfigured, verify a fictional test lead remains due with zero consumed attempts and configure SMTP before claiming delivery works. Once configured, restart the worker, submit one approved internal test lead and confirm both the database record and notification email.
 8. Complete Search Console and Bing verification.
 
 ## Rollback
@@ -44,7 +44,7 @@ Roll back application containers first. The demo lead table is additive and can 
 
 ### 2026-10-15 retry candidate (not yet a production release)
 
-- The isolated branch passed 2,096 automated tests (one pre-existing skipped test), monorepo typecheck, production build, and quiet Compose validation.
+- The isolated branch passed 2,100 automated tests (one pre-existing skipped test), monorepo typecheck, production build, and quiet Compose validation. The pre-release hardening also keeps unconfigured worker startup in standby without consuming due leads or attempts.
 - A loopback-only SMTP sink accepted one fictional lead notification with the stable Message-ID. Database tests cover atomic claims, bounded delays, expiration and migration backfill; API/worker tests cover queue failures and safe aggregates.
 - No live production SMTP recipient or browser acceptance is claimed here. Record the deployed master SHA, fresh backup ID, browser evidence and authorized internal mailbox result after rollout.
 

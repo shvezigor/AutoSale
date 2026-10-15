@@ -39,6 +39,7 @@ describe('demo lead email sender', () => {
 
   it('never treats missing SMTP configuration as a successful send', async () => {
     const sender = createDemoLeadEmailSender({ SMTP_PORT: 587 });
+    expect(sender.configured).toBe(false);
     await expect(sender.send(lead)).rejects.toMatchObject({ code: 'NOT_CONFIGURED', terminal: true });
   });
 

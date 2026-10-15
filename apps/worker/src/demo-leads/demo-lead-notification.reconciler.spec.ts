@@ -6,6 +6,17 @@ const first = '00000000-0000-4000-8000-000000000001';
 const second = '00000000-0000-4000-8000-000000000002';
 
 describe('DemoLeadNotificationReconciler', () => {
+  it('does not enqueue due rows repeatedly while SMTP is unconfigured', async () => {
+    const store = { finalizeExpiredLeases: vi.fn(), listDue: vi.fn() };
+    const queue = { add: vi.fn() };
+    const reconciler = new DemoLeadNotificationReconciler(store as never, queue as never, undefined, false);
+
+    expect(await reconciler.reconcile()).toEqual({ attempted: 0, enqueued: 0, failed: 0 });
+    expect(store.finalizeExpiredLeases).not.toHaveBeenCalled();
+    expect(store.listDue).not.toHaveBeenCalled();
+    expect(queue.add).not.toHaveBeenCalled();
+  });
+
   it('queues due IDs only with a bounded scan after finalizing expired last attempts', async () => {
     const events: string[] = [];
     const store = {

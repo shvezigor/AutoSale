@@ -179,7 +179,7 @@ async function bootstrap(): Promise<void> {
   const demoLeadProcessor = new DemoLeadNotificationProcessor(
     demoLeadStore, demoLeadSender, demoLeadQueue,
   );
-  const demoLeadReconciler = new DemoLeadNotificationReconciler(demoLeadStore, demoLeadQueue);
+  const demoLeadReconciler = new DemoLeadNotificationReconciler(demoLeadStore, demoLeadQueue, undefined, demoLeadSender.configured);
   const demoLeadJobSchema = z.object({ leadId: z.uuid() }).strict();
   const demoLeadWorker = new Worker('demo-leads', async (job) => {
     if (job.name !== 'demo-lead.notify') return;
@@ -189,7 +189,7 @@ async function bootstrap(): Promise<void> {
     try {
       const result = await demoLeadProcessor.process(parsed.data);
       metrics.increment('autosale_operations_total', {
-        operation: 'demo_lead_notify', result: result === 'SENT' || result === 'SKIPPED' ? 'success' : 'failure',
+        operation: 'demo_lead_notify', result: result === 'DEFERRED' ? 'skipped' : result === 'SENT' || result === 'SKIPPED' ? 'success' : 'failure',
       });
       logger.info('demo_lead_notify_completed', { correlationId: parsed.data.leadId, result });
     } catch (error) {
