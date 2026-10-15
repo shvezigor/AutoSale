@@ -15,7 +15,7 @@ Close every reachable safety and browser gate in the [AI reply draft acceptance 
 ### P2 — Verify reachable live Instagram draft paths
 
 - [ ] In the consenting test-account conversation, send only specifically confirmed inbound test messages for missing-currency and ambiguous/promise requests; observe one inbound and one safe ready/failed draft per message, then reload and verify persistence and no unintended outbound.
-- The first approved missing-currency question exposed stale stock-intent carry-over; a focused test-first worker fix is green (374 tests, one skipped; typecheck/build green). Release `d966db5` was manually deployed with validated backup and healthy runtime checks. One fresh owner-approved price question then produced a safe price-check draft after the quiet period and preserved it after browser reload; neither the historical incorrect draft nor the new draft was sent. Continue with ambiguity/promise checks when exact test texts are approved.
+- The first approved missing-currency question exposed stale stock-intent carry-over; a focused test-first worker fix is green (374 tests, one skipped; typecheck/build green). Release `d966db5` was manually deployed with validated backup and healthy runtime checks. One fresh owner-approved price question then produced a safe price-check draft after the quiet period and preserved it after browser reload; neither the historical incorrect draft nor the new draft was sent. A separate owner-approved ambiguous entrance-door question produced a persisted clarification instead of an arbitrary single-product recommendation. Continue with the unsupported-promise check when its exact test text is approved.
 - Acceptance: no ungrounded monetary or commercial promise is displayed; the editor and source disclosure accurately represent each result.
 - Verification: real Instagram and Sales AITO browser evidence, plus read-only runtime health. Depends on P1 and action-time user confirmation for each batch of exact Instagram text. Scope: medium.
 
@@ -34,7 +34,7 @@ Close every reachable safety and browser gate in the [AI reply draft acceptance 
 ### Checkpoints
 
 - [x] After P1: tests/typecheck/build pass with fictional fixtures.
-- [ ] After P2: each approved test-account message and resulting draft is visible after reload, with no unapproved customer reply. The missing-currency price case passed; ambiguous-product and unsupported-promise live cases remain.
+- [ ] After P2: each approved test-account message and resulting draft is visible after reload, with no unapproved customer reply. The missing-currency price and ambiguous-product cases passed; the unsupported-promise live case remains.
 - [x] After P4: `master` matches origin, production release is healthy if changed, and residual provider gates are explicit.
 
 ## Risks and stop conditions
