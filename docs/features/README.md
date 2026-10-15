@@ -48,6 +48,8 @@ When no stock can be confirmed, the stock-check draft does not promise a later m
 
 The 15 October 2026 pilot hardening adds `apps/worker/src/reply-drafts/{claim-validator,catalogue-candidates,reply-draft.processor}.ts` guards against ungrounded shipping commitments and an arbitrary single-product answer to an ambiguous request with multiple candidates. Fictional worker regressions cover these boundaries, missing currency and a single-attempt provider timeout; the feature remains **Validation pending** until the remaining live browser/provider gates in the acceptance checklist pass.
 
+The 15 October 2026 deployment of `8a28bed` passed health and queue checks. A consented browser test of a separately authored Instagram manual reply after 24 hours returned the durable `INSTAGRAM_HUMAN_AGENT_UNAVAILABLE` error; the AI draft remained copy-only. This reconfirms the Meta App Review prerequisite rather than successful seven-day delivery. Facebook copy-only and TikTok eligibility have passing focused contracts but no eligible live test account in the current workspace. See the [AI draft acceptance checklist](../acceptance/ai-reply-drafts-checklist.md) and [Meta review runbook](../integrations/meta-app-review.md).
+
 ## How to add or change a feature
 
 1. Search this index and the repository for equivalent behavior.

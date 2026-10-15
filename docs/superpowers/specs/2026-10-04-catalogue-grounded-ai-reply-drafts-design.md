@@ -2,7 +2,7 @@
 
 **Date:** 2026-10-04  
 **Updated:** 2026-10-15
-**Status:** Automatic preparation implemented behind a tenant switch; post-deployment new-draft, stock-safe availability, send-time stale-guard and post-24-hour copy-only browser acceptance passed; manual `HUMAN_AGENT` delivery and controlled-pilot validation pending
+**Status:** Automatic preparation implemented behind a tenant switch; post-deployment new-draft, stock-safe availability, send-time stale-guard and post-24-hour copy-only browser acceptance passed; manual `HUMAN_AGENT` delivery remains blocked by Meta App Review, and controlled-pilot validation is pending
 **Owner:** Sales AITO conversations and AI
 
 ## 1. Purpose
@@ -10,6 +10,8 @@
 Prepare an editable AI reply draft after a customer finishes a short block of inbound messages. The draft must use only tenant-owned catalogue facts and the tenant's communication style, expose its product sources, and remain a manager-controlled aid rather than an automatic message sender. The system may prepare and place text in an untouched editor, but only a manager may send it.
 
 The first release is provider-neutral for Instagram, Facebook and TikTok conversations. It reuses the existing conversation, catalogue and durable outbound-delivery boundaries. Instagram and an eligible TikTok conversation may send the edited text through the existing delivery flow. Facebook remains copy-only until a separate outbound transport is approved and implemented.
+
+On 15 October 2026, release `8a28bed` passed the worker suite, typecheck/build, manual deployment, public health and queue checks. An owner-authorized browser attempt to send a separately authored manual Instagram reply after 24 hours returned `INSTAGRAM_HUMAN_AGENT_UNAVAILABLE`; the failed status persisted after reload and the linked AI draft stayed copy-only. This is an expected provider-permission gate, not evidence of seven-day delivery. The current workspace has no eligible Facebook/TikTok live test account, so their browser gates remain open despite focused API, web, worker and contract coverage.
 
 ## 2. Approved user flow
 

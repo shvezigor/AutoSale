@@ -20,13 +20,13 @@ Close every reachable safety and browser gate in the [AI reply draft acceptance 
 
 ### P3 — Audit provider-dependent gates without inventing eligibility
 
-- [ ] Check the existing Facebook copy-only and TikTok eligibility contracts and UI tests; determine whether a permitted test account exists. Audit the Instagram 24-hour to seven-day `HUMAN_AGENT` path against existing tests and the live test conversation's age.
+- [x] Check the existing Facebook copy-only and TikTok eligibility contracts and UI tests; determine whether a permitted test account exists. Audit the Instagram 24-hour to seven-day `HUMAN_AGENT` path against existing tests and the live test conversation's age. The current workspace exposes Instagram only; no eligible Facebook/TikTok live account is available. A consented manual Instagram attempt after 24 hours returned durable `INSTAGRAM_HUMAN_AGENT_UNAVAILABLE`, pending Meta App Review.
 - Acceptance: record which paths are verified and which need a real eligible account or elapsed reply window; do not send to unrelated customers or manipulate production clocks/provider credentials.
 - Verification: focused API/web/worker tests and safe browser read-only checks where possible. Depends on none. Scope: medium.
 
 ### P4 — Publish evidence and release
 
-- [ ] Update canonical feature documentation, index, acceptance and backlog to distinguish closed gates from external prerequisites; if code changed, back up and manually deploy tested `master`, then verify public health, queues and browser behavior.
+- [ ] Update canonical feature documentation, index, acceptance and backlog to distinguish closed gates from external prerequisites; if code changed, back up and manually deploy tested `master`, then verify public health, queues and browser behavior. Code release `8a28bed` was merged/pushed and manually deployed after validated backup `20261015T075440Z`; public health and `ai_replies` backlog were healthy. Final evidence/cleanup remains.
 - Acceptance: no full-pilot claim while a live provider gate remains open; scoped branch merged/pushed and removed; unrelated `artifacts/` untouched.
 - Verification: diff check, tests, deployment and browser evidence as applicable. Depends on P1–P3. Scope: medium.
 
