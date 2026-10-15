@@ -1,25 +1,58 @@
+import { Prisma } from '@autosale/database';
 import { describe, expect, it, vi } from 'vitest';
 
 import { DemoLeadsService } from './demo-leads.service.js';
 
-const input = { name: 'Olena', company: 'Store', email: 'owner@example.com', phone: '', orderVolume: '50_TO_300', note: '', locale: 'en', privacyConsent: true } as const;
+const input = { name: 'Fictional Olena', company: 'Example Store', email: 'lead@example.test', phone: '', orderVolume: '50_TO_300', note: '', locale: 'en', privacyConsent: true } as const;
+const lead = { id: '00000000-0000-4000-8000-000000000001', idempotencyKey: 'fictional-key', notificationStatus: 'PENDING' };
 
 describe('DemoLeadsService', () => {
-  it('persists the lead before notifying and marks delivery sent', async () => {
+  it('persists before adding an ID-only job and leaves delivery to the worker', async () => {
     const events: string[] = [];
-    const lead = { id: 'lead-1', idempotencyKey: 'key', name: input.name, company: input.company, email: input.email, phone: null, orderVolume: input.orderVolume, note: null, locale: input.locale, notificationStatus: 'PENDING' };
-    const prisma = { demoLead: { create: vi.fn(async () => { events.push('persist'); return lead; }), update: vi.fn(async () => { events.push('status'); return lead; }) } };
-    const notifier = { send: vi.fn(async () => { events.push('notify'); }) };
-    const service = new DemoLeadsService(prisma as never, notifier);
-    await expect(service.create(input, 'key')).resolves.toEqual({ id: 'lead-1', accepted: true });
-    expect(events).toEqual(['persist', 'notify', 'status']);
-    expect(prisma.demoLead.update).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ notificationStatus: 'SENT' }) }));
+    const prisma = { demoLead: { create: vi.fn(async () => { events.push('persist'); return lead; }), update: vi.fn() } };
+    const queue = { add: vi.fn(async (_name: string, _data: { leadId: string }) => { events.push('enqueue'); }) };
+    const service = new DemoLeadsService(prisma as never, queue as never);
+
+    await expect(service.create(input, 'fictional-key')).resolves.toEqual({ id: lead.id, accepted: true });
+    expect(events).toEqual(['persist', 'enqueue']);
+    expect(prisma.demoLead.create).toHaveBeenCalledWith({ data: expect.objectContaining({
+      notificationNextAttemptAt: expect.any(Date), name: input.name, email: input.email,
+    }) });
+    expect(queue.add).toHaveBeenCalledWith('demo-lead.notify', { leadId: lead.id }, expect.objectContaining({ attempts: 1 }));
+    expect(JSON.stringify(queue.add.mock.calls[0]![1])).toBe(JSON.stringify({ leadId: lead.id }));
+    expect(prisma.demoLead.update).not.toHaveBeenCalled();
   });
-  it('keeps an accepted durable lead when notification fails', async () => {
-    const lead = { id: 'lead-2', idempotencyKey: 'key', name: input.name, company: input.company, email: input.email, phone: null, orderVolume: input.orderVolume, note: null, locale: input.locale, notificationStatus: 'PENDING' };
-    const prisma = { demoLead: { create: vi.fn().mockResolvedValue(lead), update: vi.fn().mockResolvedValue(lead) } };
-    const service = new DemoLeadsService(prisma as never, { send: vi.fn().mockRejectedValue(new Error('smtp')) });
-    await expect(service.create(input, 'key')).resolves.toEqual({ id: 'lead-2', accepted: true });
-    expect(prisma.demoLead.update).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ notificationStatus: 'FAILED', lastNotificationError: 'DELIVERY_FAILED' }) }));
+
+  it('accepts the saved lead when Redis is unavailable', async () => {
+    const prisma = { demoLead: { create: vi.fn().mockResolvedValue(lead), update: vi.fn() } };
+    const queue = { add: vi.fn().mockRejectedValue(new Error('Redis unavailable')) };
+    const service = new DemoLeadsService(prisma as never, queue as never);
+
+    await expect(service.create(input, 'fictional-key')).resolves.toEqual({ id: lead.id, accepted: true });
+    expect(prisma.demoLead.update).not.toHaveBeenCalled();
+  });
+
+  it('returns an existing idempotent lead without another queue job', async () => {
+    const prisma = { demoLead: {
+      create: vi.fn().mockRejectedValue(new Prisma.PrismaClientKnownRequestError('duplicate', { code: 'P2002', clientVersion: '7.10.0' })),
+      findUniqueOrThrow: vi.fn().mockResolvedValue({ ...lead, notificationStatus: 'SENT' }),
+    } };
+    const queue = { add: vi.fn() };
+    const service = new DemoLeadsService(prisma as never, queue as never);
+
+    await expect(service.create(input, 'fictional-key')).resolves.toEqual({ id: lead.id, accepted: true });
+    expect(queue.add).not.toHaveBeenCalled();
+  });
+
+  it('does not requeue a terminal failed lead on an idempotent replay', async () => {
+    const prisma = { demoLead: {
+      create: vi.fn().mockRejectedValue(new Prisma.PrismaClientKnownRequestError('duplicate', { code: 'P2002', clientVersion: '7.10.0' })),
+      findUniqueOrThrow: vi.fn().mockResolvedValue({ ...lead, notificationStatus: 'FAILED', notificationNextAttemptAt: null }),
+    } };
+    const queue = { add: vi.fn() };
+    const service = new DemoLeadsService(prisma as never, queue as never);
+
+    await expect(service.create(input, 'fictional-key')).resolves.toEqual({ id: lead.id, accepted: true });
+    expect(queue.add).not.toHaveBeenCalled();
   });
 });
