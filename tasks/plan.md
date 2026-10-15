@@ -1,4 +1,50 @@
-# Current Implementation Plan: Platform Administration Workspace
+# Current Implementation Plan: AI Reply Draft Controlled Pilot
+
+## Goal and ownership
+
+Close every reachable safety and browser gate in the [AI reply draft acceptance checklist](../docs/acceptance/ai-reply-drafts-checklist.md) without turning manager-reviewed drafts into autonomous sends. Reuse the existing reply-draft processor, claim validator, conversation composer and provider adapters. The owner authorizes test-account changes, but each concrete Instagram message still requires action-time confirmation. Do not send a customer reply unless that exact text and recipient are confirmed.
+
+## Ordered pilot tasks
+
+### P1 — Verify remaining factual and failure boundaries
+
+- [x] Add focused fictional-data regressions for missing currency, ambiguous product identity, unsupported commercial promises, model timeout and provider outage, fixing the observed shipping-promise and arbitrary-single-product defects in the existing worker boundary.
+- Acceptance: no unsupported price, product, discount, delivery or availability claim reaches a ready draft; provider failure remains visible and does not spend a second model call.
+- Verification: focused worker tests, full worker suite, typecheck and build. Depends on none. Likely files: reply-draft processor/validator specs and, only if necessary, their existing implementations. Scope: medium.
+
+### P2 — Verify reachable live Instagram draft paths
+
+- [ ] In the consenting test-account conversation, send only specifically confirmed inbound test messages for missing-currency and ambiguous/promise requests; observe one inbound and one safe ready/failed draft per message, then reload and verify persistence and no unintended outbound.
+- Acceptance: no ungrounded monetary or commercial promise is displayed; the editor and source disclosure accurately represent each result.
+- Verification: real Instagram and Sales AITO browser evidence, plus read-only runtime health. Depends on P1 and action-time user confirmation for each batch of exact Instagram text. Scope: medium.
+
+### P3 — Audit provider-dependent gates without inventing eligibility
+
+- [ ] Check the existing Facebook copy-only and TikTok eligibility contracts and UI tests; determine whether a permitted test account exists. Audit the Instagram 24-hour to seven-day `HUMAN_AGENT` path against existing tests and the live test conversation's age.
+- Acceptance: record which paths are verified and which need a real eligible account or elapsed reply window; do not send to unrelated customers or manipulate production clocks/provider credentials.
+- Verification: focused API/web/worker tests and safe browser read-only checks where possible. Depends on none. Scope: medium.
+
+### P4 — Publish evidence and release
+
+- [ ] Update canonical feature documentation, index, acceptance and backlog to distinguish closed gates from external prerequisites; if code changed, back up and manually deploy tested `master`, then verify public health, queues and browser behavior.
+- Acceptance: no full-pilot claim while a live provider gate remains open; scoped branch merged/pushed and removed; unrelated `artifacts/` untouched.
+- Verification: diff check, tests, deployment and browser evidence as applicable. Depends on P1–P3. Scope: medium.
+
+### Checkpoints
+
+- [x] After P1: tests/typecheck/build pass with fictional fixtures.
+- [ ] After P2: the exact test-account message and resulting draft are visible after reload, with no unapproved customer reply.
+- [ ] After P4: `master` matches origin, production release is healthy if changed, and residual provider gates are explicit.
+
+## Risks and stop conditions
+
+- Instagram sends are externally visible: require the owner's confirmation of exact sender, recipient and text at the moment of sending.
+- A production provider outage must not be induced by disabling live credentials or queues; exercise it in isolated tests.
+- Facebook/TikTok eligibility and the `HUMAN_AGENT` interval may be unavailable today. In that case preserve a truthful validation-pending status and specify the precise missing prerequisite.
+
+---
+
+# Previous Implementation Plan: Platform Administration Workspace
 
 ## Overview
 

@@ -28,6 +28,7 @@ export function validateReplyDraft(value: unknown, sources: readonly ReplyDraftS
   if (reply.outcome === 'ANSWER' && (sources.length === 0 || reply.claims.length === 0)) return blocked();
   if (reply.productIds.some((id) => !byId.has(id))) return blocked();
   if (/\b(discount|delivery|payment|shipping|refund|guaranteed)\b|знижк|доставк|оплат|повернен|гарант/iu.test(reply.text)) return blocked();
+  if (/(?:відправимо|відправлю|надішлемо|надішлю|вишлемо|вишлю|доставимо|доставлю|привеземо|привезу)(?!\p{L})|\b(?:we|i)(?:\s+will|['’]ll)\s+(?:ship|deliver)\b/iu.test(reply.text)) return blocked();
 
   const spans: Array<[number, number]> = [];
   for (const claim of reply.claims) {

@@ -119,6 +119,22 @@ describe('ReplyDraftProcessor', () => {
     expect((await prisma.aiReplyDraft.findUniqueOrThrow({ where: { id: seedData.draftId } })).errorCode).toBe('PROVIDER_UNAVAILABLE');
   });
 
+  it.each(['AUTOMATIC', 'MANUAL'] as const)('persists a %s provider timeout as a single failed attempt', async (triggerSource) => {
+    const seedData = await seed();
+    await prisma.aiReplyDraft.update({ where: { id: seedData.draftId },
+      data: { triggerSource, ...(triggerSource === 'AUTOMATIC' ? { createdByUserId: null } : {}) } });
+    const generate = vi.fn().mockRejectedValue(new Error('fictional provider timeout'));
+    const processor = new ReplyDraftProcessor(prisma, { generate });
+
+    expect(await processor.process({ tenantId: seedData.tenantId, draftId: seedData.draftId })).toBe('FAILED');
+    expect(await processor.process({ tenantId: seedData.tenantId, draftId: seedData.draftId })).toBe('SKIPPED');
+    expect(generate).toHaveBeenCalledOnce();
+    expect(await prisma.aiReplyDraft.findUniqueOrThrow({ where: { id: seedData.draftId } })).toMatchObject({
+      status: 'FAILED', errorCode: 'PROVIDER_UNAVAILABLE', attempts: 1,
+      leaseId: null,
+    });
+  });
+
   it('marks the draft stale if a new customer message arrives during generation', async () => {
     const seedData = await seed();
     const generate = generator(seedData.productId).mockImplementation(async () => {
@@ -215,6 +231,32 @@ describe('ReplyDraftProcessor', () => {
       status: 'READY', outcome: 'CLARIFY', modelVersion: 'safe-fallback',
       generatedText: 'Уточніть, будь ласка, який саме товар або модель вас цікавить.',
       errorCode: null,
+    });
+  });
+
+  it('does not turn an ambiguous automatic product question into an arbitrary product recommendation', async () => {
+    const seedData = await seed();
+    await prisma.aiReplyDraft.update({ where: { id: seedData.draftId },
+      data: { triggerSource: 'AUTOMATIC', createdByUserId: null } });
+    await prisma.message.update({ where: { id: seedData.anchorId },
+      data: { text: 'Мені потрібні двері.' } });
+    const name = 'Вигадані двері А';
+    await prisma.product.update({ where: { id: seedData.productId }, data: { name } });
+    await prisma.product.create({ data: {
+      tenantId: seedData.tenantId, sku: 'DOOR-8', name: 'Вигадані двері Б', aliases: [],
+    } });
+    const generate = vi.fn().mockResolvedValue({
+      reply: { outcome: 'ANSWER', text: name, productIds: [seedData.productId], claims: [
+        { start: 0, end: name.length, text: name, type: 'NAME', field: 'name', productId: seedData.productId },
+      ] },
+      metadata: { model: 'fictional-model', latencyMs: 10, inputTokens: 20, outputTokens: 10 },
+    });
+
+    expect(await new ReplyDraftProcessor(prisma, { generate })
+      .process({ tenantId: seedData.tenantId, draftId: seedData.draftId })).toBe('READY');
+    expect(await prisma.aiReplyDraft.findUniqueOrThrow({ where: { id: seedData.draftId } })).toMatchObject({
+      status: 'READY', outcome: 'CLARIFY',
+      generatedText: 'Уточніть, будь ласка, який саме товар або модель вас цікавить.',
     });
   });
 

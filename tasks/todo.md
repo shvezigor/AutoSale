@@ -1955,3 +1955,12 @@ Reference: [competitive analysis](../docs/research/2026-10-02-chatoryx-competiti
 Checkpoint details and acceptance criteria: `tasks/plan.md`. Canonical behavior: `docs/superpowers/specs/2026-10-02-platform-admin-workspace-design.md`.
 
 ---
+
+# Current initiative: AI reply draft controlled pilot
+
+- [x] P1 — verify missing-currency, ambiguous-product, unsupported-promise, timeout and provider-outage boundaries with fictional regression tests; fix the demonstrated shipping-promise and arbitrary-single-product defects.
+- [ ] P2 — complete specifically approved Instagram test-account browser checks for the reachable factual-safety scenarios and verify persisted draft/no unintended outbound.
+- [ ] P3 — audit Facebook copy-only, TikTok eligibility and Instagram `HUMAN_AGENT` evidence; list external prerequisites for any live gate that cannot be run safely.
+- [ ] P4 — publish evidence in the canonical spec, feature index and acceptance checklist; manually release only changed application code, then verify and clean the merged branch.
+
+Acceptance criteria, dependencies, verification and stop conditions: `tasks/plan.md`. The feature remains **Validation pending** until every live provider gate in `docs/acceptance/ai-reply-drafts-checklist.md` is evidenced.

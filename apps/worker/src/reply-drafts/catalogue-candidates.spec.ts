@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { extractCatalogueSearchIntent, selectCatalogueCandidates, selectRequestedModelSources } from './catalogue-candidates.js';
+import { extractCatalogueSearchIntent, hasExactProductReference, selectCatalogueCandidates, selectRequestedModelSources } from './catalogue-candidates.js';
 
 const tenantId = '11111111-1111-4111-8111-111111111111';
 const product = (id: number, overrides: Record<string, unknown> = {}) => ({
@@ -11,6 +11,14 @@ const product = (id: number, overrides: Record<string, unknown> = {}) => ({
 });
 
 describe('selectCatalogueCandidates', () => {
+  it('requires an exact SKU or full product name to treat a reference as unambiguous', () => {
+    const [source] = selectCatalogueCandidates([product(1)], tenantId, 'DOOR-1', [], 8);
+    expect(source).toBeDefined();
+    expect(hasExactProductReference(source!, 'Які двері?', [])).toBe(false);
+    expect(hasExactProductReference(source!, 'Мені потрібен DOOR-10', [])).toBe(false);
+    expect(hasExactProductReference(source!, 'Мені потрібен DOOR-1', [])).toBe(true);
+    expect(hasExactProductReference(source!, 'Яка ціна?', ['Fictional door 1'])).toBe(true);
+  });
   it('prioritizes exact SKU and excludes foreign or inactive products', () => {
     const result = selectCatalogueCandidates([
       product(1), product(2, { tenantId: '22222222-2222-4222-8222-222222222222' }),

@@ -46,6 +46,8 @@ The deployed AI draft worker now treats explicit stock questions as availability
 
 When no stock can be confirmed, the stock-check draft does not promise a later message; follow-up remains a manager action, not an automated workflow. The post-release authorized Instagram test for an exact SKU with unknown stock showed the safe clarification in the editor and persisted after reload, with no reply sent. See the [AI reply draft design](../superpowers/specs/2026-10-04-catalogue-grounded-ai-reply-drafts-design.md) for the contract and the [acceptance checklist](../acceptance/ai-reply-drafts-checklist.md) for rollout status.
 
+The 15 October 2026 pilot hardening adds `apps/worker/src/reply-drafts/{claim-validator,catalogue-candidates,reply-draft.processor}.ts` guards against ungrounded shipping commitments and an arbitrary single-product answer to an ambiguous request with multiple candidates. Fictional worker regressions cover these boundaries, missing currency and a single-attempt provider timeout; the feature remains **Validation pending** until the remaining live browser/provider gates in the acceptance checklist pass.
+
 ## How to add or change a feature
 
 1. Search this index and the repository for equivalent behavior.

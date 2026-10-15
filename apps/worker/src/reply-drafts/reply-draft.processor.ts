@@ -6,7 +6,7 @@ import {
   type PrismaClient, withTenantTransaction,
 } from '@autosale/database';
 
-import { asksForConfirmedAvailability, selectCatalogueCandidates, selectRequestedModelSources } from './catalogue-candidates.js';
+import { asksForConfirmedAvailability, hasExactProductReference, selectCatalogueCandidates, selectRequestedModelSources } from './catalogue-candidates.js';
 import { CatalogueRetrievalError, retrieveCatalogueCandidates } from './catalogue-retrieval.js';
 import { validateReplyDraft, type GeneratedReply } from './claim-validator.js';
 import { buildSafeReplyInput } from './input-sanitizer.js';
@@ -248,10 +248,15 @@ export class ReplyDraftProcessor {
           !sources.some((source) => source.productId === id && source.stockQuantity !== null && source.stockQuantity > 0)));
       const needsStockSafeFallback = asksAboutStock && checked.ok
         && (checked.reply.outcome !== 'ANSWER' || modelOffersUnconfirmedStock);
+      const arbitrarySingleProduct = current.triggerSource === 'AUTOMATIC' && checked.ok
+        && checked.reply.outcome === 'ANSWER' && catalogueOptions === null
+        && sources.length > 1 && checked.reply.productIds.length === 1
+        && !sources.some((source) => source.productId === checked.reply.productIds[0]
+          && hasExactProductReference(source, context.safe.latestInbound, context.safe.recentContext));
       const validated = checked.ok
         ? modelOffersUnconfirmedStock && current.triggerSource !== 'AUTOMATIC'
           ? { ok: false as const, code: 'UNGROUNDED_CLAIM' as const }
-          : current.triggerSource === 'AUTOMATIC' && (needsStockSafeFallback
+          : current.triggerSource === 'AUTOMATIC' && (needsStockSafeFallback || arbitrarySingleProduct
             || (catalogueOptions && checked.reply.outcome === 'CLARIFY' && checked.reply.productIds.length === 0))
           ? { ok: true as const, reply: safeFallback }
           : checked

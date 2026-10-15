@@ -1,7 +1,7 @@
 # Catalogue-grounded AI reply drafts — design
 
 **Date:** 2026-10-04  
-**Updated:** 2026-10-13
+**Updated:** 2026-10-15
 **Status:** Automatic preparation implemented behind a tenant switch; post-deployment new-draft, stock-safe availability, send-time stale-guard and post-24-hour copy-only browser acceptance passed; manual `HUMAN_AGENT` delivery and controlled-pilot validation pending
 **Owner:** Sales AITO conversations and AI
 
@@ -28,6 +28,8 @@ Automatic scheduling occurs only while the tenant reply-style switch is enabled.
 Implementation notes (2026-10-13): the owner-controlled switch and communication profile live under **Settings → Social / customers → AI reply style** and are disabled by default. A manager may view but not edit that profile. Indexed tenant-scoped catalogue recall replaces the former first-2,000-SKU ceiling; bounded PostgreSQL results still pass through the same deterministic ranker and at most eight factual sources. The local 50,000-product benchmark meets its recorded retrieval gate, the migration-first production rollout passed, and a new draft survived an authenticated browser reload in the untouched editor with sources collapsed. In the same test account, a source-product edit made the linked draft stale at send time: the UI preserved the attempted text, no outbound row was created, and the product was restored. After the stock-safe worker rollout, one authorized availability question arrived through Instagram and automatically produced a draft offering only the variant with confirmed positive stock; the unknown-stock variant was omitted and the draft persisted after reload. No reply was sent in that check. The controlled live-provider pilot remains open. See the [scalable retrieval design](2026-10-12-scalable-ai-catalogue-retrieval-design.md) and [acceptance checklist](../../acceptance/ai-reply-drafts-checklist.md).
 
 Post-release unknown-stock acceptance (2026-10-13): one owner-authorized Instagram test message named an exact SKU with no recorded stock quantity. The automatic draft cited that one SKU, clarified that availability could not be confirmed without a stock check, made no later-contact promise and persisted in the editor after reload. No reply was sent. This closes that specific browser gate; missing currency, ambiguous products, provider failures and the wider controlled pilot remain open in the [acceptance checklist](../../acceptance/ai-reply-drafts-checklist.md).
+
+Pilot hardening (2026-10-15): the worker now rejects fact-free Ukrainian/English first-person shipping commitments such as “Відправимо завтра” and “We will ship tomorrow”; the automatic path discards that model text and uses the existing safe catalogue-options or clarification fallback. When a vague inbound request matches multiple catalogue candidates, a structurally grounded model `ANSWER` naming just one candidate is also replaced with a clarification unless that exact candidate's SKU or full name appears in the bounded customer block. This prevents an arbitrary one-product recommendation while retaining exact-product replies and requested-model options. Fictional regressions cover missing currency, ambiguous selection, unsupported promises, provider timeout and outage; no new provider send path was added. Live browser validation of these remaining scenarios and the multi-provider pilot remains pending.
 
 ## 3. Communication style
 

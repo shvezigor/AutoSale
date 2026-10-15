@@ -32,6 +32,24 @@ describe('validateReplyDraft', () => {
     }
   });
 
+  it.each(['Відправимо завтра.', 'We will ship tomorrow.', "We'll ship tomorrow.", 'I’ll deliver tomorrow.'])(
+    'blocks an unsupported shipping-date promise without catalogue claims: %s', (text) => {
+      expect(validateReplyDraft({ outcome: 'CLARIFY', text, productIds: [], claims: [] }, source).ok).toBe(false);
+    },
+  );
+
+  it('does not treat an ordinary request to the buyer as a shipping promise', () => {
+    expect(validateReplyDraft({ outcome: 'CLARIFY', text: 'Надішліть, будь ласка, фото.', productIds: [], claims: [] }, source).ok).toBe(true);
+  });
+
+  it('blocks a price claim when the source has no currency', () => {
+    const text = 'Ціна 1500.00';
+    expect(validateReplyDraft({
+      outcome: 'ANSWER', text, productIds: [productId],
+      claims: [claim(text, '1500.00', 'PRICE', 'price')],
+    }, [{ ...source[0]!, currency: null }]).ok).toBe(false);
+  });
+
   it('blocks unknown products and claims about unknown stock', () => {
     const text = 'Є в наявності';
     const result: GeneratedReply = {

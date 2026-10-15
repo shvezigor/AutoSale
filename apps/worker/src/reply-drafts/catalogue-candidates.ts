@@ -110,6 +110,16 @@ export function selectRequestedModelSources(
   }).slice(0, Math.min(Math.max(limit, 0), 4));
 }
 
+export function hasExactProductReference(
+  source: ReplyDraftSource,
+  latestInbound: string,
+  recentContext: readonly string[],
+): boolean {
+  const query = normalize(`${latestInbound} ${recentContext.slice(-3).join(' ')}`);
+  return containsWholeTerm(query, normalize(source.sku))
+    || containsWholeTerm(query, normalize(source.name));
+}
+
 function inferredModelTokens(sources: readonly ReplyDraftSource[], query: string): string[] {
   const names = sources.map((source) => normalize(source.name).split('(', 1)[0] ?? '');
   const matches = [...tokens(query)]
