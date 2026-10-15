@@ -417,6 +417,31 @@ describe('ReplyDraftProcessor', () => {
     expect(draft.generatedText).not.toMatch(/(?:я|ми)\s+.*(?:напиш|повідом|зв.?яж)/iu);
   });
 
+  it('asks to verify price rather than stale stock when the latest exact-SKU question lacks currency', async () => {
+    const seedData = await seed();
+    await prisma.aiReplyDraft.update({ where: { id: seedData.draftId },
+      data: { triggerSource: 'AUTOMATIC', createdByUserId: null } });
+    await prisma.product.update({ where: { id: seedData.productId },
+      data: { price: '1500.00', currency: null, stockQuantity: null } });
+    await prisma.message.update({ where: { id: seedData.anchorId },
+      data: { text: 'Яка ціна DOOR-7?' } });
+    await prisma.message.create({ data: {
+      tenantId: seedData.tenantId, conversationId: seedData.conversationId, rawEventId: seedData.eventId,
+      channel: 'INSTAGRAM', externalMessageId: randomUUID(), direction: 'INBOUND',
+      senderId: 'fictional-customer', text: 'Чи є DOOR-7 в наявності?',
+      sourceTimestamp: new Date(Date.now() - 60_000),
+    } });
+    const generate = vi.fn().mockRejectedValue(new ReplyModelInvalidResponseError());
+
+    expect(await new ReplyDraftProcessor(prisma, { generate })
+      .process({ tenantId: seedData.tenantId, draftId: seedData.draftId })).toBe('READY');
+    const draft = await prisma.aiReplyDraft.findUniqueOrThrow({ where: { id: seedData.draftId } });
+    expect(draft.outcome).toBe('CLARIFY');
+    expect(draft.generatedText).toMatch(/цін/u);
+    expect(draft.generatedText).not.toMatch(/залишок|наявність|1500|UAH|грн/iu);
+    expect(draft.outboundMessageId).toBeNull();
+  });
+
   it('does not promise an English follow-up when stock is unconfirmed', async () => {
     const seedData = await seed();
     await prisma.aiReplyDraft.update({ where: { id: seedData.draftId },

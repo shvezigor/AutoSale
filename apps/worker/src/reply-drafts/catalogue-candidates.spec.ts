@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { extractCatalogueSearchIntent, hasExactProductReference, selectCatalogueCandidates, selectRequestedModelSources } from './catalogue-candidates.js';
+import { asksForConfirmedAvailability, extractCatalogueSearchIntent, hasExactProductReference, selectCatalogueCandidates, selectRequestedModelSources } from './catalogue-candidates.js';
 
 const tenantId = '11111111-1111-4111-8111-111111111111';
 const product = (id: number, overrides: Record<string, unknown> = {}) => ({
@@ -101,6 +101,14 @@ describe('selectCatalogueCandidates', () => {
 
     expect(selectRequestedModelSources(sources, latestInbound, recentContext).map((item) => item.sku))
       .toEqual(['DOOR-1']);
+  });
+
+  it('does not carry an old availability request into a new explicit price question', () => {
+    const latestInbound = 'Яка ціна DOOR-1?';
+    const recentContext = ['Чи є DOOR-1 в наявності?'];
+
+    expect(asksForConfirmedAvailability(latestInbound, recentContext)).toBe(false);
+    expect(extractCatalogueSearchIntent(latestInbound, recentContext).asksForOptions).toBe(false);
   });
 });
 

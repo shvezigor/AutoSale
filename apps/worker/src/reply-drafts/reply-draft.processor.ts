@@ -6,7 +6,7 @@ import {
   type PrismaClient, withTenantTransaction,
 } from '@autosale/database';
 
-import { asksForConfirmedAvailability, hasExactProductReference, selectCatalogueCandidates, selectRequestedModelSources } from './catalogue-candidates.js';
+import { asksForConfirmedAvailability, asksForPrice, hasExactProductReference, selectCatalogueCandidates, selectRequestedModelSources } from './catalogue-candidates.js';
 import { CatalogueRetrievalError, retrieveCatalogueCandidates } from './catalogue-retrieval.js';
 import { validateReplyDraft, type GeneratedReply } from './claim-validator.js';
 import { buildSafeReplyInput } from './input-sanitizer.js';
@@ -237,10 +237,13 @@ export class ReplyDraftProcessor {
       }
       const checked = validateReplyDraft(generated.reply, sources);
       const asksAboutStock = asksForConfirmedAvailability(context.safe.latestInbound, context.safe.recentContext);
+      const priceNeedsCheck = needsPriceCheck(context.safe.latestInbound, context.safe.recentContext, sources);
       const catalogueOptions = current.triggerSource === 'AUTOMATIC'
         ? safeAutomaticCatalogueOptions(context.safe.latestInbound, context.safe.recentContext, sources)
         : null;
-      const safeFallback = catalogueOptions ?? (asksAboutStock
+      const safeFallback = catalogueOptions ?? (priceNeedsCheck
+        ? safeAutomaticPriceClarification(context.safe.latestInbound)
+        : asksAboutStock
         ? safeAutomaticStockClarification(context.safe.latestInbound)
         : safeAutomaticClarification(context.safe.latestInbound));
       const modelOffersUnconfirmedStock = asksAboutStock && checked.ok && checked.reply.outcome === 'ANSWER'
@@ -256,7 +259,7 @@ export class ReplyDraftProcessor {
       const validated = checked.ok
         ? modelOffersUnconfirmedStock && current.triggerSource !== 'AUTOMATIC'
           ? { ok: false as const, code: 'UNGROUNDED_CLAIM' as const }
-          : current.triggerSource === 'AUTOMATIC' && (needsStockSafeFallback || arbitrarySingleProduct
+          : current.triggerSource === 'AUTOMATIC' && (priceNeedsCheck || needsStockSafeFallback || arbitrarySingleProduct
             || (catalogueOptions && checked.reply.outcome === 'CLARIFY' && checked.reply.productIds.length === 0))
           ? { ok: true as const, reply: safeFallback }
           : checked
@@ -314,13 +317,32 @@ function safeAutomaticStockClarification(latestInbound: string) {
   };
 }
 
+function safeAutomaticPriceClarification(latestInbound: string) {
+  const ukrainian = /[\u0400-\u04FF]/u.test(latestInbound);
+  return {
+    outcome: 'CLARIFY' as const,
+    text: ukrainian
+      ? 'Поки що не можу підтвердити ціну цього товару: її потрібно перевірити.'
+      : 'I cannot confirm this product’s price yet; it needs to be checked.',
+    productIds: [],
+    claims: [],
+  };
+}
+
+function needsPriceCheck(latestInbound: string, recentContext: readonly string[], sources: readonly ReplyDraftSource[]): boolean {
+  return asksForPrice(latestInbound) && sources.some((source) => source.price === null
+    && hasExactProductReference(source, latestInbound, recentContext));
+}
+
 function safeAutomaticResponse(
   latestInbound: string,
   recentContext: readonly string[],
   sources: readonly ReplyDraftSource[],
 ): GeneratedReply {
   return safeAutomaticCatalogueOptions(latestInbound, recentContext, sources)
-    ?? (asksForConfirmedAvailability(latestInbound, recentContext)
+    ?? (needsPriceCheck(latestInbound, recentContext, sources)
+      ? safeAutomaticPriceClarification(latestInbound)
+      : asksForConfirmedAvailability(latestInbound, recentContext)
       ? safeAutomaticStockClarification(latestInbound)
       : safeAutomaticClarification(latestInbound));
 }

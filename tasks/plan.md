@@ -15,6 +15,7 @@ Close every reachable safety and browser gate in the [AI reply draft acceptance 
 ### P2 — Verify reachable live Instagram draft paths
 
 - [ ] In the consenting test-account conversation, send only specifically confirmed inbound test messages for missing-currency and ambiguous/promise requests; observe one inbound and one safe ready/failed draft per message, then reload and verify persistence and no unintended outbound.
+- The first approved missing-currency question exposed stale stock-intent carry-over; a focused test-first worker fix is green (374 tests, one skipped; typecheck/build green). Re-deploy and repeat the price question with fresh consent before continuing to ambiguity/promise checks. The original incorrect draft was not sent.
 - Acceptance: no ungrounded monetary or commercial promise is displayed; the editor and source disclosure accurately represent each result.
 - Verification: real Instagram and Sales AITO browser evidence, plus read-only runtime health. Depends on P1 and action-time user confirmation for each batch of exact Instagram text. Scope: medium.
 
