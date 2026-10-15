@@ -16,6 +16,10 @@ export class DemoLeadsModule {
       username: url.username || undefined,
       password: url.password || undefined,
       tls: url.protocol === 'rediss:' ? {} : undefined,
+      enableOfflineQueue: false,
+      maxRetriesPerRequest: 1,
+      connectTimeout: 1_500,
+      commandTimeout: 1_500,
     } });
     return { module: DemoLeadsModule, controllers: [DemoLeadsController], providers: [{ provide: DemoLeadsService, useFactory: () => new DemoLeadsService(createPrismaClient(env.DATABASE_URL), queue) }] };
   }

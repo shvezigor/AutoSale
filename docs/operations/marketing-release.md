@@ -13,14 +13,24 @@ SMTP_FROM=Sales AITO <no-reply@sales-aito.com>
 CLOUDFLARE_TUNNEL_TOKEN=...
 ```
 
-`DEMO_LEAD_EMAIL` is the internal recipient of demo notifications. A demo lead is committed to PostgreSQL before email delivery. A delivery failure leaves the lead with `FAILED` notification status for operator recovery.
+`DEMO_LEAD_EMAIL` is the internal recipient of demo notifications. The worker needs the `SMTP_*` values and `DEMO_LEAD_EMAIL`; the API retains SMTP configuration for authentication mail only. A demo lead is committed to PostgreSQL before an ID-only BullMQ wake-up job is queued. The HTTP response does not wait for SMTP, and a Redis outage does not lose a committed lead.
+
+After the new release, the worker claims a due lead with a two-minute lease and makes at most four SMTP attempts. Retryable failures wait 1, 5, then 15 minutes. Missing SMTP settings and explicit SMTP 5xx rejection stop immediately; an ambiguous timeout remains retryable. A five-second bounded reconciliation scan restores due jobs after Redis/worker failure. `SENT` is terminal. The platform operations page exposes only due/exhausted counts and queue health, never lead contacts. SMTP acceptance can be ambiguous if the worker dies before marking `SENT`; every attempt uses the same Message-ID, but this does not guarantee exactly-once physical email.
+
+After correcting a terminal failure, an operator with approved database access may requeue exactly one lead using its UUID (never a contact value):
+
+```sh
+docker compose exec api node dist/cli/requeue-demo-lead.js <lead-uuid> --confirm-id <same-lead-uuid>
+```
+
+The command only changes a terminal `FAILED` row without an active lease; it cannot requeue `SENT`. The output contains the lead UUID and result only. Do not paste contact details or raw SMTP errors into support tickets or logs.
 
 ## Deployment order
 
 1. Back up PostgreSQL.
 2. Build all images and validate `docker compose config`.
-3. Run the migration containing `20260917150000_demo_leads`.
-4. Deploy API, worker, web, and proxy services.
+3. Run the additive migration containing `20261015_demo_lead_notification_retries`; backfill only non-`SENT` rows with fewer than four attempts.
+4. Deploy the tested API before the new worker from the same commit. Do not start the new worker while an old API instance can still send demo email inline; the old worker simply ignores the new queue while PostgreSQL retains the lead. Deploy web and proxy after health checks.
 5. Verify the Cloudflare Tunnel route points `sales-aito.com` to the proxy service.
 6. Run the public endpoint checks from `docs/operations/search-indexing.md`.
 7. Submit one test demo lead with an approved internal test contact and confirm both the database record and notification email.
@@ -31,6 +41,12 @@ CLOUDFLARE_TUNNEL_TOKEN=...
 Roll back application containers first. The demo lead table is additive and can remain in place during an application rollback. Do not drop it while leads may contain unresolved business contacts.
 
 ## Deployment record
+
+### 2026-10-15 retry candidate (not yet a production release)
+
+- The isolated branch passed 2,096 automated tests (one pre-existing skipped test), monorepo typecheck, production build, and quiet Compose validation.
+- A loopback-only SMTP sink accepted one fictional lead notification with the stable Message-ID. Database tests cover atomic claims, bounded delays, expiration and migration backfill; API/worker tests cover queue failures and safe aggregates.
+- No live production SMTP recipient or browser acceptance is claimed here. Record the deployed master SHA, fresh backup ID, browser evidence and authorized internal mailbox result after rollout.
 
 ### 2026-09-17
 

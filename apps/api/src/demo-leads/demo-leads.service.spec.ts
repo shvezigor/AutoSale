@@ -32,6 +32,13 @@ describe('DemoLeadsService', () => {
     expect(prisma.demoLead.update).not.toHaveBeenCalled();
   });
 
+  it('does not wait indefinitely for a stalled Redis enqueue', async () => {
+    const prisma = { demoLead: { create: vi.fn().mockResolvedValue(lead) } };
+    const queue = { add: vi.fn().mockReturnValue(new Promise(() => undefined)) };
+    const service = new DemoLeadsService(prisma as never, queue as never, 5);
+    await expect(service.create(input, 'fictional-key')).resolves.toEqual({ id: lead.id, accepted: true });
+  });
+
   it('returns an existing idempotent lead without another queue job', async () => {
     const prisma = { demoLead: {
       create: vi.fn().mockRejectedValue(new Prisma.PrismaClientKnownRequestError('duplicate', { code: 'P2002', clientVersion: '7.10.0' })),

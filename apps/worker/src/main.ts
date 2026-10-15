@@ -175,8 +175,9 @@ async function bootstrap(): Promise<void> {
   };
   const demoLeadQueue = new Queue('demo-leads', { connection: redisConnection });
   const demoLeadStore = new DemoLeadNotificationStore(prisma);
+  const demoLeadSender = createDemoLeadEmailSender(env);
   const demoLeadProcessor = new DemoLeadNotificationProcessor(
-    demoLeadStore, createDemoLeadEmailSender(env), demoLeadQueue,
+    demoLeadStore, demoLeadSender, demoLeadQueue,
   );
   const demoLeadReconciler = new DemoLeadNotificationReconciler(demoLeadStore, demoLeadQueue);
   const demoLeadJobSchema = z.object({ leadId: z.uuid() }).strict();
@@ -1146,6 +1147,7 @@ async function bootstrap(): Promise<void> {
     clearInterval(replyDraftReconcileTimer);
     await replyDraftWorker.close();
     await demoLeadWorker.close();
+    demoLeadSender.close();
     await demoLeadQueue.close();
     await replyDraftQueue.close();
     await tenantLifecycleWorker.close();

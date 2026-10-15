@@ -3,7 +3,11 @@ import { Prisma, type PrismaClient } from '@autosale/database';
 import type { Queue } from 'bullmq';
 
 export class DemoLeadsService {
-  constructor(private readonly prisma: PrismaClient, private readonly queue: Pick<Queue, 'add'>) {}
+  constructor(
+    private readonly prisma: PrismaClient,
+    private readonly queue: Pick<Queue, 'add'>,
+    private readonly enqueueTimeoutMs = 1_500,
+  ) {}
 
   async create(input: DemoLeadInput, idempotencyKey: string): Promise<{ id: string; accepted: true }> {
     let lead;
@@ -16,13 +20,25 @@ export class DemoLeadsService {
 
     if (lead.notificationStatus === 'PENDING' || (lead.notificationStatus === 'FAILED' && lead.notificationNextAttemptAt !== null)) {
       try {
-        await this.queue.add('demo-lead.notify', { leadId: lead.id }, {
+        await enqueueWithin(this.queue.add('demo-lead.notify', { leadId: lead.id }, {
           jobId: `demo-lead-${lead.id}`, attempts: 1, removeOnComplete: 100, removeOnFail: 250,
-        });
+        }), this.enqueueTimeoutMs);
       } catch {
         // The committed PostgreSQL row remains authoritative; the worker reconciler restores a missed job.
       }
     }
     return { id: lead.id, accepted: true };
+  }
+}
+
+async function enqueueWithin<T>(operation: Promise<T>, timeoutMs: number): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([operation, new Promise<never>((_resolve, reject) => {
+      timer = setTimeout(() => reject(new Error('DEMO_LEAD_QUEUE_TIMEOUT')), timeoutMs);
+      timer.unref?.();
+    })]);
+  } finally {
+    if (timer) clearTimeout(timer);
   }
 }

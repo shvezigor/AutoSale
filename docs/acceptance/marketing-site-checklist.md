@@ -30,6 +30,8 @@ Original acceptance date: 2026-09-17. Release status reconciled on 2026-10-15 ag
 - [x] Deploy the integrated marketing release to the production host on 2026-09-18; the initial 2026-09-17 build was rolled back before the corrected release.
 - [x] Apply migration `20260917150000_demo_leads` in production, as recorded in the release runbook.
 - [ ] Configure `DEMO_LEAD_EMAIL` and SMTP, then verify a real internal notification.
+- [ ] For the retry rollout, prove with a controlled local SMTP sink that a saved fictional lead is sent once, transient failures retry with bounded delays, terminal failures stop, and Redis/worker restart recovery does not resend `SENT` rows.
+- [ ] In a real browser against the deployed environment, verify localized demo submission/validation, a reload-safe result, and count-only admin operations; capture UI evidence. Do not count the configured SMTP recipient as verified until an authorized internal test email is observed.
 - [ ] Inspect and confirm the canonical Cloudflare Tunnel hostname-to-proxy configuration. The 2026-09-18 HTTPS 200 route checks prove public reachability, but the release record does not document this configuration inspection.
 - [ ] Verify Google Search Console and Bing Webmaster Tools, then submit the sitemap.
 - [ ] Record production Core Web Vitals after deployment.

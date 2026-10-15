@@ -1,6 +1,6 @@
 # Durable demo-lead notification retries
 
-Status: design approved in chat on 15 October 2026; implementation and acceptance pending.
+Status: design approved in chat on 15 October 2026; implementation in `codex/demo-lead-notification-retry`, isolated and live acceptance pending.
 
 ## Problem and outcome
 

@@ -10,7 +10,7 @@
 - [x] Production build, unit/API tests, raw-HTML checks, and responsive browser E2E pass locally.
 - [x] Production deployment, demo-lead migration, public route checks, and container health verification completed on `sales-aito.com`.
 - [ ] SMTP recipient configuration, a real internal demo notification, Search Console/Bing submission, and production Core Web Vitals remain launch operations.
-- [ ] Distributed demo notification retry worker and operator lead-management UI remain follow-up product work.
+- [ ] Distributed demo notification retries: implementation is on `codex/demo-lead-notification-retry`; isolated SMTP/browser acceptance and production rollout remain. Operator lead-management UI is a separate follow-up.
 - [ ] First-party conversion analytics remain deferred until the event storage and privacy policy are approved.
 
 ## Historical implementation breakdown: Public Marketing Website
