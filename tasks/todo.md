@@ -1896,7 +1896,7 @@ Reference: [competitive analysis](../docs/research/2026-10-02-chatoryx-competiti
 
 ### Backlog: Complete demo lead operations
 
-- [ ] Add bounded BullMQ retry with backoff for `FAILED` demo notifications.
+- [ ] Add bounded BullMQ retry with backoff for `FAILED` demo notifications. Approved design: [`durable demo-lead notification retries`](../docs/superpowers/specs/2026-10-15-demo-lead-notification-retries-design.md); implementation and acceptance pending.
 - [ ] Add distributed public rate limiting and abuse protection for demo submissions.
 - [ ] Add a privacy-safe platform-admin lead queue with lifecycle transitions and audit history.
 - [ ] Define retention, deletion, and export procedures for demo contact data.
