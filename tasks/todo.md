@@ -1961,6 +1961,6 @@ Checkpoint details and acceptance criteria: `tasks/plan.md`. Canonical behavior:
 - [x] P1 — verify missing-currency, ambiguous-product, unsupported-promise, timeout and provider-outage boundaries with fictional regression tests; fix the demonstrated shipping-promise and arbitrary-single-product defects.
 - [ ] P2 — complete specifically approved Instagram test-account browser checks for the reachable factual-safety scenarios and verify persisted draft/no unintended outbound.
 - [x] P3 — audit Facebook copy-only, TikTok eligibility and Instagram `HUMAN_AGENT` evidence; focused API/web/worker tests pass, but there is no eligible Facebook/TikTok live account and Meta rejects manual `HUMAN_AGENT` pending App Review.
-- [ ] P4 — publish evidence in the canonical spec, feature index and acceptance checklist; manually release only changed application code, then verify and clean the merged branch.
+- [x] P4 — publish evidence in the canonical spec, feature index and acceptance checklist; manually deploy the tested releases, verify health/queue and clean merged branches. Fresh P2 and external provider-browser gates remain open without a full-pilot claim.
 
 Acceptance criteria, dependencies, verification and stop conditions: `tasks/plan.md`. The feature remains **Validation pending** until every live provider gate in `docs/acceptance/ai-reply-drafts-checklist.md` is evidenced.

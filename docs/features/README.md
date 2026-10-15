@@ -52,6 +52,8 @@ The 15 October 2026 deployment of `8a28bed` passed health and queue checks. A co
 
 A live price question for an exact SKU with missing currency exposed stale stock-intent carry-over from earlier conversation context. The worker regression now gives the newest explicit price request priority and prepares a fact-free price-check clarification for an exact product whose safe price snapshot is incomplete. Post-deployment browser confirmation remains required; the feature status stays **Validation pending**.
 
+Release `d966db5` was manually deployed on 15 October 2026 after verified backup; public health, core services and the AI-draft queue passed checks. The running worker contains the new price-intent rule. No fresh post-release price-question draft has yet been verified in a browser, so this release does not close the controlled pilot.
+
 ## How to add or change a feature
 
 1. Search this index and the repository for equivalent behavior.
