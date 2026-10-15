@@ -1959,7 +1959,7 @@ Checkpoint details and acceptance criteria: `tasks/plan.md`. Canonical behavior:
 # Current initiative: AI reply draft controlled pilot
 
 - [x] P1 — verify missing-currency, ambiguous-product, unsupported-promise, timeout and provider-outage boundaries with fictional regression tests; fix the demonstrated shipping-promise and arbitrary-single-product defects.
-- [ ] P2 — owner-approved missing-currency price and ambiguous entrance-door questions each passed in Instagram and Sales AITO: one inbound, a safe automatic draft persisted after reload, and no reply sent. Complete the specifically approved unsupported-promise browser check without unintended outbound.
+- [ ] P2 — owner-approved missing-currency price and ambiguous entrance-door questions passed in Instagram and Sales AITO. A next-day shipping-guarantee question revealed an irrelevant generic clarification (no unsafe promise or outbound); a shipping-specific automatic fallback now passes 376 worker tests (one skipped), typecheck and build. Deploy and obtain fresh exact-message consent for post-release browser acceptance.
 - [x] P3 — audit Facebook copy-only, TikTok eligibility and Instagram `HUMAN_AGENT` evidence; focused API/web/worker tests pass, but there is no eligible Facebook/TikTok live account and Meta rejects manual `HUMAN_AGENT` pending App Review.
 - [x] P4 — publish evidence in the canonical spec, feature index and acceptance checklist; manually deploy the tested releases, verify health/queue and clean merged branches. Fresh P2 and external provider-browser gates remain open without a full-pilot claim.
 

@@ -236,12 +236,15 @@ export class ReplyDraftProcessor {
         return 'STALE' as const;
       }
       const checked = validateReplyDraft(generated.reply, sources);
+      const shippingNeedsCheck = asksForUnverifiedShippingDate(context.safe.latestInbound);
       const asksAboutStock = asksForConfirmedAvailability(context.safe.latestInbound, context.safe.recentContext);
       const priceNeedsCheck = needsPriceCheck(context.safe.latestInbound, context.safe.recentContext, sources);
-      const catalogueOptions = current.triggerSource === 'AUTOMATIC'
+      const catalogueOptions = current.triggerSource === 'AUTOMATIC' && !shippingNeedsCheck
         ? safeAutomaticCatalogueOptions(context.safe.latestInbound, context.safe.recentContext, sources)
         : null;
-      const safeFallback = catalogueOptions ?? (priceNeedsCheck
+      const safeFallback = shippingNeedsCheck
+        ? safeAutomaticShippingClarification(context.safe.latestInbound)
+        : catalogueOptions ?? (priceNeedsCheck
         ? safeAutomaticPriceClarification(context.safe.latestInbound)
         : asksAboutStock
         ? safeAutomaticStockClarification(context.safe.latestInbound)
@@ -259,7 +262,7 @@ export class ReplyDraftProcessor {
       const validated = checked.ok
         ? modelOffersUnconfirmedStock && current.triggerSource !== 'AUTOMATIC'
           ? { ok: false as const, code: 'UNGROUNDED_CLAIM' as const }
-          : current.triggerSource === 'AUTOMATIC' && (priceNeedsCheck || needsStockSafeFallback || arbitrarySingleProduct
+          : current.triggerSource === 'AUTOMATIC' && (shippingNeedsCheck || priceNeedsCheck || needsStockSafeFallback || arbitrarySingleProduct
             || (catalogueOptions && checked.reply.outcome === 'CLARIFY' && checked.reply.productIds.length === 0))
           ? { ok: true as const, reply: safeFallback }
           : checked
@@ -294,6 +297,7 @@ export class ReplyDraftProcessor {
 }
 
 function safeAutomaticClarification(latestInbound: string) {
+  if (asksForUnverifiedShippingDate(latestInbound)) return safeAutomaticShippingClarification(latestInbound);
   const ukrainian = /[\u0400-\u04FF]/u.test(latestInbound);
   return {
     outcome: 'CLARIFY' as const,
@@ -303,6 +307,23 @@ function safeAutomaticClarification(latestInbound: string) {
     productIds: [],
     claims: [],
   };
+}
+
+function safeAutomaticShippingClarification(latestInbound: string) {
+  const ukrainian = /[\u0400-\u04FF]/u.test(latestInbound);
+  return {
+    outcome: 'CLARIFY' as const,
+    text: ukrainian
+      ? 'Термін відправлення поки що не підтверджений. Його потрібно уточнити.'
+      : 'I cannot confirm the dispatch date yet; it needs to be checked.',
+    productIds: [],
+    claims: [],
+  };
+}
+
+function asksForUnverifiedShippingDate(latestInbound: string): boolean {
+  return /відправ\p{L}*|достав\p{L}*|привез\p{L}*|ship\p{L}*|deliver\p{L}*|dispatch\p{L}*/iu.test(latestInbound)
+    && /завтра|сьогодні|коли|термін|строк|дат\p{L}*|гарант\p{L}*|tomorrow|today|when|date|guarantee|promise|next day/iu.test(latestInbound);
 }
 
 function safeAutomaticStockClarification(latestInbound: string) {
@@ -339,7 +360,9 @@ function safeAutomaticResponse(
   recentContext: readonly string[],
   sources: readonly ReplyDraftSource[],
 ): GeneratedReply {
-  return safeAutomaticCatalogueOptions(latestInbound, recentContext, sources)
+  return asksForUnverifiedShippingDate(latestInbound)
+    ? safeAutomaticShippingClarification(latestInbound)
+    : safeAutomaticCatalogueOptions(latestInbound, recentContext, sources)
     ?? (needsPriceCheck(latestInbound, recentContext, sources)
       ? safeAutomaticPriceClarification(latestInbound)
       : asksForConfirmedAvailability(latestInbound, recentContext)

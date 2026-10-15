@@ -442,6 +442,32 @@ describe('ReplyDraftProcessor', () => {
     expect(draft.outboundMessageId).toBeNull();
   });
 
+  it.each([
+    'Відправимо завтра.',
+    'Уточніть, будь ласка, який саме товар або модель вас цікавить.',
+  ])('addresses an unverified next-day shipping request despite model text %s', async (modelText) => {
+    const seedData = await seed();
+    await prisma.aiReplyDraft.update({ where: { id: seedData.draftId },
+      data: { triggerSource: 'AUTOMATIC', createdByUserId: null } });
+    await prisma.message.update({ where: { id: seedData.anchorId },
+      data: { text: 'Чи гарантуєте, що відправите завтра вхідні двері Вигаданий Регіон 860×2050?' } });
+    await prisma.product.update({ where: { id: seedData.productId },
+      data: { name: 'Вигаданий Регіон 860×2050' } });
+    const generate = vi.fn().mockResolvedValue({
+      reply: { outcome: 'CLARIFY', text: modelText, productIds: [], claims: [] },
+      metadata: { model: 'fictional-model', latencyMs: 10, inputTokens: 20, outputTokens: 10 },
+    });
+
+    expect(await new ReplyDraftProcessor(prisma, { generate })
+      .process({ tenantId: seedData.tenantId, draftId: seedData.draftId })).toBe('READY');
+    const draft = await prisma.aiReplyDraft.findUniqueOrThrow({ where: { id: seedData.draftId } });
+    expect(draft.outcome).toBe('CLARIFY');
+    expect(draft.generatedText).toMatch(/термін відправлення|строк відправлення/iu);
+    expect(draft.generatedText).toMatch(/уточн|перевір/iu);
+    expect(draft.generatedText).not.toMatch(/який саме товар|яку модель|відправимо завтра/iu);
+    expect(draft.outboundMessageId).toBeNull();
+  });
+
   it('does not promise an English follow-up when stock is unconfirmed', async () => {
     const seedData = await seed();
     await prisma.aiReplyDraft.update({ where: { id: seedData.draftId },
