@@ -2,12 +2,12 @@ import type { DemoLeadNotificationClaim, DemoLeadFailureCode } from '@autosale/d
 import nodemailer from 'nodemailer';
 
 type SmtpSettings = {
-  SMTP_HOST?: string;
+  SMTP_HOST?: string | undefined;
   SMTP_PORT: number;
-  SMTP_USER?: string;
-  SMTP_PASSWORD?: string;
-  SMTP_FROM?: string;
-  DEMO_LEAD_EMAIL?: string;
+  SMTP_USER?: string | undefined;
+  SMTP_PASSWORD?: string | undefined;
+  SMTP_FROM?: string | undefined;
+  DEMO_LEAD_EMAIL?: string | undefined;
 };
 
 type Mail = { from: string; to: string; subject: string; text: string; messageId: string };

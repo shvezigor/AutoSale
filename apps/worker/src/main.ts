@@ -2,7 +2,7 @@ import { Buffer } from 'node:buffer';
 
 import { parseWorkerEnv } from '@autosale/config/worker-env';
 import { retentionDryRunJobSchema, shipmentCreateJobSchema, telegramDeliveryJobSchema, tenantLifecycleJobSchema, ukrposhtaTrackingBatchJobSchema } from '@autosale/contracts';
-import { createPrismaClient, PlatformChannelGate, ProcurementStore, withTenantTransaction } from '@autosale/database';
+import { createPrismaClient, DemoLeadNotificationStore, PlatformChannelGate, ProcurementStore, withTenantTransaction } from '@autosale/database';
 import {
   createGoogleSheetsAdapter,
   CredentialCipher,
@@ -17,8 +17,12 @@ import {
 } from '@autosale/integrations';
 import { Queue, Worker } from 'bullmq';
 import { metrics, StructuredLogger } from '@autosale/observability';
+import { z } from 'zod';
 
 import { createWorkerHealthServer } from './health-server.js';
+import { createDemoLeadEmailSender } from './demo-leads/demo-lead-email.js';
+import { DemoLeadNotificationProcessor } from './demo-leads/demo-lead-notification.processor.js';
+import { DemoLeadNotificationReconciler } from './demo-leads/demo-lead-notification.reconciler.js';
 import { FacebookProcessor } from './facebook/facebook.processor.js';
 import { InstagramProcessor } from './instagram/instagram.processor.js';
 import { InstagramAvatarCleanupReconciler } from './instagram/instagram-avatar-cleanup-reconciler.js';
@@ -169,6 +173,43 @@ async function bootstrap(): Promise<void> {
     password: redis.password || undefined,
     tls: redis.protocol === 'rediss:' ? {} : undefined,
   };
+  const demoLeadQueue = new Queue('demo-leads', { connection: redisConnection });
+  const demoLeadStore = new DemoLeadNotificationStore(prisma);
+  const demoLeadProcessor = new DemoLeadNotificationProcessor(
+    demoLeadStore, createDemoLeadEmailSender(env), demoLeadQueue,
+  );
+  const demoLeadReconciler = new DemoLeadNotificationReconciler(demoLeadStore, demoLeadQueue);
+  const demoLeadJobSchema = z.object({ leadId: z.uuid() }).strict();
+  const demoLeadWorker = new Worker('demo-leads', async (job) => {
+    if (job.name !== 'demo-lead.notify') return;
+    const parsed = demoLeadJobSchema.safeParse(job.data);
+    if (!parsed.success) throw new Error('DEMO_LEAD_JOB_INVALID');
+    const started = performance.now();
+    try {
+      const result = await demoLeadProcessor.process(parsed.data);
+      metrics.increment('autosale_operations_total', {
+        operation: 'demo_lead_notify', result: result === 'SENT' || result === 'SKIPPED' ? 'success' : 'failure',
+      });
+      logger.info('demo_lead_notify_completed', { correlationId: parsed.data.leadId, result });
+    } catch (error) {
+      metrics.increment('autosale_operations_total', { operation: 'demo_lead_notify', result: 'failure' });
+      logger.warn('demo_lead_notify_failed', {
+        correlationId: parsed.data.leadId, errorCode: error instanceof Error ? error.name : 'UNKNOWN',
+      });
+      throw error;
+    } finally {
+      metrics.observe('autosale_operation_duration_seconds', (performance.now() - started) / 1_000,
+        { operation: 'demo_lead_notify' });
+    }
+  }, { connection: redisConnection, concurrency: 2 });
+  demoLeadWorker.on('error', () => {
+    metrics.increment('autosale_operations_total', { operation: 'demo_lead_worker', result: 'failure' });
+    logger.warn('demo_lead_worker_error', { correlationId: 'system:demo-leads', errorCode: 'QUEUE_ERROR' });
+  });
+  demoLeadQueue.on('error', () => {
+    metrics.increment('autosale_operations_total', { operation: 'demo_lead_queue', result: 'failure' });
+    logger.warn('demo_lead_queue_error', { correlationId: 'system:demo-leads', errorCode: 'QUEUE_ERROR' });
+  });
   const replyDraftQueue = new Queue('ai-replies', { connection: redisConnection });
   const automaticReplyDraftScheduler = new AutomaticReplyDraftScheduler(prisma, replyDraftQueue);
   const mediaCopy = new MediaCopyService(storage);
@@ -751,6 +792,26 @@ async function bootstrap(): Promise<void> {
     }
   };
   const sheetsTimer = setInterval(() => void pollExports(), 5_000);
+  let reconcilingDemoLeads = false;
+  const reconcileDemoLeads = async (): Promise<void> => {
+    if (reconcilingDemoLeads) return;
+    reconcilingDemoLeads = true;
+    try {
+      const result = await demoLeadReconciler.reconcile();
+      metrics.set('autosale_queue_backlog', result.attempted, { queue: 'demo_leads' });
+      if (result.failed > 0) metrics.increment('autosale_operations_total', {
+        operation: 'demo_lead_reconcile', result: 'failure',
+      }, result.failed);
+    } catch (error) {
+      metrics.increment('autosale_operations_total', { operation: 'demo_lead_reconcile', result: 'failure' });
+      logger.warn('demo_lead_reconcile_failed', {
+        correlationId: 'system:demo-leads', errorCode: error instanceof Error ? error.name : 'UNKNOWN',
+      });
+    } finally {
+      reconcilingDemoLeads = false;
+    }
+  };
+  const demoLeadReconcileTimer = setInterval(() => void reconcileDemoLeads(), 5_000);
   let reconcilingCatalogueMappings = false;
   const reconcileCatalogueMappings = async (): Promise<void> => {
     if (reconcilingCatalogueMappings) return;
@@ -1047,6 +1108,7 @@ async function bootstrap(): Promise<void> {
   };
   const replyDraftReconcileTimer = setInterval(() => void reconcileReplyDrafts(), 5_000);
   void pollExports();
+  void reconcileDemoLeads();
   void reconcileCatalogueMappings();
   void reconcileInstagramEvents();
   void reconcileInstagramProfiles();
@@ -1067,6 +1129,7 @@ async function bootstrap(): Promise<void> {
 
   const shutdown = async (): Promise<void> => {
     clearInterval(sheetsTimer);
+    clearInterval(demoLeadReconcileTimer);
     clearInterval(catalogueReconcileTimer);
     clearInterval(instagramReconcileTimer);
     clearInterval(instagramProfileReconcileTimer);
@@ -1082,6 +1145,8 @@ async function bootstrap(): Promise<void> {
     clearInterval(tenantLifecycleCleanupTimer);
     clearInterval(replyDraftReconcileTimer);
     await replyDraftWorker.close();
+    await demoLeadWorker.close();
+    await demoLeadQueue.close();
     await replyDraftQueue.close();
     await tenantLifecycleWorker.close();
     await tenantLifecycleQueue.close();
