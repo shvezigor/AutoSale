@@ -1,6 +1,6 @@
 # Durable demo-lead notification retries
 
-Status: deployed to the current production host on 16 October 2026. Public submission and durable unconfigured-SMTP standby passed live acceptance; internal-mailbox and platform-admin browser acceptance remain pending. Isolated PostgreSQL/loopback-SMTP tests cover transient recovery, terminal rejection, replay, and simulated lost queue wake-up. A separate 18 October test restarts a real Redis container and recreates a BullMQ worker instance; full application-process restart acceptance remains open.
+Status: deployed to the current production host on 16 October 2026. Public submission and durable unconfigured-SMTP standby passed live acceptance; internal-mailbox and platform-admin browser acceptance remain pending. Isolated PostgreSQL/loopback-SMTP tests cover transient recovery, terminal rejection, replay, and simulated lost queue wake-up. A separate 18 October test restarts a real Redis container and recreates a BullMQ worker instance. The deployed worker container also restarted successfully in unconfigured SMTP standby without consuming an attempt; full-process recovery with configured SMTP and a controlled sink remains open.
 
 ## Problem and outcome
 
