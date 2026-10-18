@@ -6,8 +6,10 @@ import { resolve } from 'node:path';
 
 import { createPrismaClient, DemoLeadNotificationStore } from '@autosale/database';
 import { PostgreSqlContainer, type StartedPostgreSqlContainer } from '@testcontainers/postgresql';
+import { Queue, Worker } from 'bullmq';
 import pg from 'pg';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { GenericContainer, type StartedTestContainer } from 'testcontainers';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import { createDemoLeadEmailSender } from './demo-lead-email.js';
 import { DemoLeadNotificationProcessor } from './demo-lead-notification.processor.js';
@@ -157,4 +159,72 @@ describe('demo lead notification acceptance', () => {
       await once(server, 'close');
     }
   }, 30_000);
+
+  it('recovers a due lead after Redis and BullMQ worker restart without resending a completed lead', async () => {
+    let redis: StartedTestContainer | undefined;
+    let queue: Queue<{ leadId: string }> | undefined;
+    let worker: Worker<{ leadId: string }> | undefined;
+    const deliveredLeadIds: string[] = [];
+    const queueName = `demo-lead-acceptance-${randomUUID()}`;
+    const store = new DemoLeadNotificationStore(prisma);
+    const sender = { configured: true, async send(lead: { id: string }) {
+      deliveredLeadIds.push(lead.id);
+    } };
+    const createDueLead = async () => prisma.demoLead.create({ data: {
+      idempotencyKey: randomUUID(), name: 'Fictional Daria', company: 'Example Shop',
+      email: 'lead@example.test', orderVolume: 'LESS_THAN_50', locale: 'en',
+      notificationNextAttemptAt: new Date(Date.now() - 1_000),
+    } });
+
+    try {
+      redis = await new GenericContainer('redis:8.2.1-alpine').withExposedPorts(6379).start();
+      const startWorker = async () => {
+        const connection = { host: redis!.getHost(), port: redis!.getMappedPort(6379) };
+        queue = new Queue<{ leadId: string }>(queueName, { connection });
+        await queue.waitUntilReady();
+        const processor = new DemoLeadNotificationProcessor(store, sender, queue);
+        worker = new Worker<{ leadId: string }>(queueName, (job) => processor.process(job.data), {
+          connection, concurrency: 1,
+        });
+        await worker.waitUntilReady();
+      };
+      await startWorker();
+
+      const completed = await createDueLead();
+      expect(await new DemoLeadNotificationReconciler(store, queue!).reconcile()).toMatchObject({
+        attempted: 1, enqueued: 1,
+      });
+      await vi.waitFor(async () => {
+        expect((await prisma.demoLead.findUniqueOrThrow({ where: { id: completed.id } })).notificationStatus).toBe('SENT');
+      }, { timeout: 15_000 });
+      expect(deliveredLeadIds).toEqual([completed.id]);
+
+      await worker!.close();
+      await queue!.close();
+      worker = undefined;
+      queue = undefined;
+      const stranded = await createDueLead();
+      await redis.restart();
+      await startWorker();
+      expect(await new DemoLeadNotificationReconciler(store, queue!).reconcile()).toMatchObject({
+        attempted: 1, enqueued: 1,
+      });
+      await vi.waitFor(async () => {
+        expect((await prisma.demoLead.findUniqueOrThrow({ where: { id: stranded.id } })).notificationStatus).toBe('SENT');
+      }, { timeout: 15_000 });
+
+      const replay = await queue!.add('demo-lead.notify', { leadId: completed.id }, {
+        jobId: `replay-${completed.id}`, attempts: 1, removeOnComplete: 100, removeOnFail: 250,
+      });
+      await vi.waitFor(async () => expect(await replay.getState()).toBe('completed'), { timeout: 15_000 });
+      expect(deliveredLeadIds).toEqual([completed.id, stranded.id]);
+      expect(await prisma.demoLead.findUniqueOrThrow({ where: { id: completed.id } })).toMatchObject({
+        notificationStatus: 'SENT', notificationAttempts: 1,
+      });
+    } finally {
+      await worker?.close();
+      await queue?.close();
+      await redis?.stop();
+    }
+  }, 120_000);
 });

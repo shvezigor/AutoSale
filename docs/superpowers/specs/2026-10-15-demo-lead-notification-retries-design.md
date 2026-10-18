@@ -1,6 +1,6 @@
 # Durable demo-lead notification retries
 
-Status: deployed to the current production host on 16 October 2026. Public submission and durable unconfigured-SMTP standby passed live acceptance; internal-mailbox and platform-admin browser acceptance remain pending. A 18 October isolated PostgreSQL/loopback-SMTP test covers transient recovery, terminal rejection, replay, and simulated lost queue wake-up; an actual Redis/worker restart is still an open controlled acceptance step.
+Status: deployed to the current production host on 16 October 2026. Public submission and durable unconfigured-SMTP standby passed live acceptance; internal-mailbox and platform-admin browser acceptance remain pending. Isolated PostgreSQL/loopback-SMTP tests cover transient recovery, terminal rejection, replay, and simulated lost queue wake-up. A separate 18 October test restarts a real Redis container and recreates a BullMQ worker instance; full application-process restart acceptance remains open.
 
 ## Problem and outcome
 
@@ -53,3 +53,5 @@ Non-goals: a platform-admin lead-management page, customer-facing email, public 
 - Automated contract, API, worker, migration, typecheck and build checks pass. Browser checks cover accepted submission and reload-safe form behavior; the authenticated operations view shows only aggregate downstream status. Controlled SMTP-sink checks cover retry and failure. Production email delivery is reported separately from local acceptance.
 
 The isolated cross-component acceptance lives in `apps/worker/src/demo-leads/demo-lead-notification.acceptance.postgres.spec.ts`. It uses fictional data, a disposable PostgreSQL container, and SMTP bound to `127.0.0.1`; it cannot contact an external recipient. It verifies the stored state after each delivery outcome and reconciles a due row after a simulated queue-enqueue failure. Run this PostgreSQL-backed suite serially on a busy Docker Desktop host; parallel cold container starts may time out before a database becomes ready.
+
+The same acceptance file also uses a separate disposable Redis container and real BullMQ queue/worker. It closes and recreates the worker around a Redis container restart, then verifies that PostgreSQL reconciliation delivers a stranded lead and a replayed `SENT` job does not call the SMTP boundary again. Docker Desktop may remap the published Redis port on restart; each new worker must read the current mapped port. This checks the queue/worker lifecycle with a test SMTP double, not a complete application process restart or a real internal mailbox.
