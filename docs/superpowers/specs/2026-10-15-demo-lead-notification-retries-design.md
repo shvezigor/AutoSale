@@ -1,6 +1,6 @@
 # Durable demo-lead notification retries
 
-Status: design approved in chat on 15 October 2026; implementation in `codex/demo-lead-notification-retry`, isolated and live acceptance pending.
+Status: deployed to the current production host on 16 October 2026. Public submission and durable unconfigured-SMTP standby passed live acceptance; internal-mailbox and platform-admin browser acceptance remain pending. A 18 October isolated PostgreSQL/loopback-SMTP test covers transient recovery, terminal rejection, replay, and simulated lost queue wake-up; an actual Redis/worker restart is still an open controlled acceptance step.
 
 ## Problem and outcome
 
@@ -51,3 +51,5 @@ Non-goals: a platform-admin lead-management page, customer-facing email, public 
 - A permanent rejection stops automatically; missing configuration preserves due leads and their attempt budgets without spinning. Queue outage, worker restart and duplicate job are recovered or ignored without losing the lead.
 - No test fixture or log contains real contact data, SMTP credentials or email body. Queue jobs carry only a UUID.
 - Automated contract, API, worker, migration, typecheck and build checks pass. Browser checks cover accepted submission and reload-safe form behavior; the authenticated operations view shows only aggregate downstream status. Controlled SMTP-sink checks cover retry and failure. Production email delivery is reported separately from local acceptance.
+
+The isolated cross-component acceptance lives in `apps/worker/src/demo-leads/demo-lead-notification.acceptance.postgres.spec.ts`. It uses fictional data, a disposable PostgreSQL container, and SMTP bound to `127.0.0.1`; it cannot contact an external recipient. It verifies the stored state after each delivery outcome and reconciles a due row after a simulated queue-enqueue failure. Run this PostgreSQL-backed suite serially on a busy Docker Desktop host; parallel cold container starts may time out before a database becomes ready.

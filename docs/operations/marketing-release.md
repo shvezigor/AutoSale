@@ -42,6 +42,11 @@ Roll back application containers first. The demo lead table is additive and can 
 
 ## Deployment record
 
+### 2026-10-18 controlled acceptance follow-up
+
+- A disposable PostgreSQL container plus SMTP server bound to `127.0.0.1` verified one fictional notification after a transient 450 response, a terminal 550 rejection without retry, no second email on `SENT` replay, and reconciliation after a simulated queue-enqueue failure. The worker's 15 demo-lead tests and typecheck passed. PostgreSQL suites that timed out when two test containers started concurrently passed individually with one worker; run them serially on this busy Docker Desktop host.
+- Production still has no SMTP or internal recipient settings. The live pending lead therefore remains unclaimed with zero attempts; no production email or platform-admin browser acceptance is claimed. No application rebuild/deploy is required for this test-only follow-up.
+
 ### 2026-10-16 durable demo-notification rollout
 
 - Deployed and pushed `master` commit `ed43c046623fe28f897660f9b11da9db2b1dc497` to the current Windows Docker/Cloudflare host. Fresh application-consistent backup: `backups/20261015T201645Z`; its manifest was checksum-verified, and the PostgreSQL dump and MinIO archive were readable. A separate partial backup at `backups/.incomplete-20261015T201626Z` from the first attempt was retained for manual private cleanup; it must not be published.
