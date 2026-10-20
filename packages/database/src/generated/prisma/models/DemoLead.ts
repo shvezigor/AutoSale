@@ -27,10 +27,12 @@ export type AggregateDemoLead = {
 }
 
 export type DemoLeadAvgAggregateOutputType = {
+  version: number | null
   notificationAttempts: number | null
 }
 
 export type DemoLeadSumAggregateOutputType = {
+  version: number | null
   notificationAttempts: number | null
 }
 
@@ -47,6 +49,8 @@ export type DemoLeadMinAggregateOutputType = {
   consentVersion: string | null
   consentedAt: Date | null
   lifecycleStatus: $Enums.DemoLeadLifecycleStatus | null
+  version: number | null
+  lastOperatorActionAt: Date | null
   notificationStatus: $Enums.DemoLeadNotificationStatus | null
   notificationAttempts: number | null
   notificationNextAttemptAt: Date | null
@@ -71,6 +75,8 @@ export type DemoLeadMaxAggregateOutputType = {
   consentVersion: string | null
   consentedAt: Date | null
   lifecycleStatus: $Enums.DemoLeadLifecycleStatus | null
+  version: number | null
+  lastOperatorActionAt: Date | null
   notificationStatus: $Enums.DemoLeadNotificationStatus | null
   notificationAttempts: number | null
   notificationNextAttemptAt: Date | null
@@ -95,6 +101,8 @@ export type DemoLeadCountAggregateOutputType = {
   consentVersion: number
   consentedAt: number
   lifecycleStatus: number
+  version: number
+  lastOperatorActionAt: number
   notificationStatus: number
   notificationAttempts: number
   notificationNextAttemptAt: number
@@ -109,10 +117,12 @@ export type DemoLeadCountAggregateOutputType = {
 
 
 export type DemoLeadAvgAggregateInputType = {
+  version?: true
   notificationAttempts?: true
 }
 
 export type DemoLeadSumAggregateInputType = {
+  version?: true
   notificationAttempts?: true
 }
 
@@ -129,6 +139,8 @@ export type DemoLeadMinAggregateInputType = {
   consentVersion?: true
   consentedAt?: true
   lifecycleStatus?: true
+  version?: true
+  lastOperatorActionAt?: true
   notificationStatus?: true
   notificationAttempts?: true
   notificationNextAttemptAt?: true
@@ -153,6 +165,8 @@ export type DemoLeadMaxAggregateInputType = {
   consentVersion?: true
   consentedAt?: true
   lifecycleStatus?: true
+  version?: true
+  lastOperatorActionAt?: true
   notificationStatus?: true
   notificationAttempts?: true
   notificationNextAttemptAt?: true
@@ -177,6 +191,8 @@ export type DemoLeadCountAggregateInputType = {
   consentVersion?: true
   consentedAt?: true
   lifecycleStatus?: true
+  version?: true
+  lastOperatorActionAt?: true
   notificationStatus?: true
   notificationAttempts?: true
   notificationNextAttemptAt?: true
@@ -288,6 +304,8 @@ export type DemoLeadGroupByOutputType = {
   consentVersion: string
   consentedAt: Date
   lifecycleStatus: $Enums.DemoLeadLifecycleStatus
+  version: number
+  lastOperatorActionAt: Date | null
   notificationStatus: $Enums.DemoLeadNotificationStatus
   notificationAttempts: number
   notificationNextAttemptAt: Date | null
@@ -335,6 +353,8 @@ export type DemoLeadWhereInput = {
   consentVersion?: Prisma.StringFilter<"DemoLead"> | string
   consentedAt?: Prisma.DateTimeFilter<"DemoLead"> | Date | string
   lifecycleStatus?: Prisma.EnumDemoLeadLifecycleStatusFilter<"DemoLead"> | $Enums.DemoLeadLifecycleStatus
+  version?: Prisma.IntFilter<"DemoLead"> | number
+  lastOperatorActionAt?: Prisma.DateTimeNullableFilter<"DemoLead"> | Date | string | null
   notificationStatus?: Prisma.EnumDemoLeadNotificationStatusFilter<"DemoLead"> | $Enums.DemoLeadNotificationStatus
   notificationAttempts?: Prisma.IntFilter<"DemoLead"> | number
   notificationNextAttemptAt?: Prisma.DateTimeNullableFilter<"DemoLead"> | Date | string | null
@@ -359,6 +379,8 @@ export type DemoLeadOrderByWithRelationInput = {
   consentVersion?: Prisma.SortOrder
   consentedAt?: Prisma.SortOrder
   lifecycleStatus?: Prisma.SortOrder
+  version?: Prisma.SortOrder
+  lastOperatorActionAt?: Prisma.SortOrderInput | Prisma.SortOrder
   notificationStatus?: Prisma.SortOrder
   notificationAttempts?: Prisma.SortOrder
   notificationNextAttemptAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -386,6 +408,8 @@ export type DemoLeadWhereUniqueInput = Prisma.AtLeast<{
   consentVersion?: Prisma.StringFilter<"DemoLead"> | string
   consentedAt?: Prisma.DateTimeFilter<"DemoLead"> | Date | string
   lifecycleStatus?: Prisma.EnumDemoLeadLifecycleStatusFilter<"DemoLead"> | $Enums.DemoLeadLifecycleStatus
+  version?: Prisma.IntFilter<"DemoLead"> | number
+  lastOperatorActionAt?: Prisma.DateTimeNullableFilter<"DemoLead"> | Date | string | null
   notificationStatus?: Prisma.EnumDemoLeadNotificationStatusFilter<"DemoLead"> | $Enums.DemoLeadNotificationStatus
   notificationAttempts?: Prisma.IntFilter<"DemoLead"> | number
   notificationNextAttemptAt?: Prisma.DateTimeNullableFilter<"DemoLead"> | Date | string | null
@@ -410,6 +434,8 @@ export type DemoLeadOrderByWithAggregationInput = {
   consentVersion?: Prisma.SortOrder
   consentedAt?: Prisma.SortOrder
   lifecycleStatus?: Prisma.SortOrder
+  version?: Prisma.SortOrder
+  lastOperatorActionAt?: Prisma.SortOrderInput | Prisma.SortOrder
   notificationStatus?: Prisma.SortOrder
   notificationAttempts?: Prisma.SortOrder
   notificationNextAttemptAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -442,6 +468,8 @@ export type DemoLeadScalarWhereWithAggregatesInput = {
   consentVersion?: Prisma.StringWithAggregatesFilter<"DemoLead"> | string
   consentedAt?: Prisma.DateTimeWithAggregatesFilter<"DemoLead"> | Date | string
   lifecycleStatus?: Prisma.EnumDemoLeadLifecycleStatusWithAggregatesFilter<"DemoLead"> | $Enums.DemoLeadLifecycleStatus
+  version?: Prisma.IntWithAggregatesFilter<"DemoLead"> | number
+  lastOperatorActionAt?: Prisma.DateTimeNullableWithAggregatesFilter<"DemoLead"> | Date | string | null
   notificationStatus?: Prisma.EnumDemoLeadNotificationStatusWithAggregatesFilter<"DemoLead"> | $Enums.DemoLeadNotificationStatus
   notificationAttempts?: Prisma.IntWithAggregatesFilter<"DemoLead"> | number
   notificationNextAttemptAt?: Prisma.DateTimeNullableWithAggregatesFilter<"DemoLead"> | Date | string | null
@@ -466,6 +494,8 @@ export type DemoLeadCreateInput = {
   consentVersion?: string
   consentedAt?: Date | string
   lifecycleStatus?: $Enums.DemoLeadLifecycleStatus
+  version?: number
+  lastOperatorActionAt?: Date | string | null
   notificationStatus?: $Enums.DemoLeadNotificationStatus
   notificationAttempts?: number
   notificationNextAttemptAt?: Date | string | null
@@ -490,6 +520,8 @@ export type DemoLeadUncheckedCreateInput = {
   consentVersion?: string
   consentedAt?: Date | string
   lifecycleStatus?: $Enums.DemoLeadLifecycleStatus
+  version?: number
+  lastOperatorActionAt?: Date | string | null
   notificationStatus?: $Enums.DemoLeadNotificationStatus
   notificationAttempts?: number
   notificationNextAttemptAt?: Date | string | null
@@ -514,6 +546,8 @@ export type DemoLeadUpdateInput = {
   consentVersion?: Prisma.StringFieldUpdateOperationsInput | string
   consentedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lifecycleStatus?: Prisma.EnumDemoLeadLifecycleStatusFieldUpdateOperationsInput | $Enums.DemoLeadLifecycleStatus
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  lastOperatorActionAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notificationStatus?: Prisma.EnumDemoLeadNotificationStatusFieldUpdateOperationsInput | $Enums.DemoLeadNotificationStatus
   notificationAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   notificationNextAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -538,6 +572,8 @@ export type DemoLeadUncheckedUpdateInput = {
   consentVersion?: Prisma.StringFieldUpdateOperationsInput | string
   consentedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lifecycleStatus?: Prisma.EnumDemoLeadLifecycleStatusFieldUpdateOperationsInput | $Enums.DemoLeadLifecycleStatus
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  lastOperatorActionAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notificationStatus?: Prisma.EnumDemoLeadNotificationStatusFieldUpdateOperationsInput | $Enums.DemoLeadNotificationStatus
   notificationAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   notificationNextAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -562,6 +598,8 @@ export type DemoLeadCreateManyInput = {
   consentVersion?: string
   consentedAt?: Date | string
   lifecycleStatus?: $Enums.DemoLeadLifecycleStatus
+  version?: number
+  lastOperatorActionAt?: Date | string | null
   notificationStatus?: $Enums.DemoLeadNotificationStatus
   notificationAttempts?: number
   notificationNextAttemptAt?: Date | string | null
@@ -586,6 +624,8 @@ export type DemoLeadUpdateManyMutationInput = {
   consentVersion?: Prisma.StringFieldUpdateOperationsInput | string
   consentedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lifecycleStatus?: Prisma.EnumDemoLeadLifecycleStatusFieldUpdateOperationsInput | $Enums.DemoLeadLifecycleStatus
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  lastOperatorActionAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notificationStatus?: Prisma.EnumDemoLeadNotificationStatusFieldUpdateOperationsInput | $Enums.DemoLeadNotificationStatus
   notificationAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   notificationNextAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -610,6 +650,8 @@ export type DemoLeadUncheckedUpdateManyInput = {
   consentVersion?: Prisma.StringFieldUpdateOperationsInput | string
   consentedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lifecycleStatus?: Prisma.EnumDemoLeadLifecycleStatusFieldUpdateOperationsInput | $Enums.DemoLeadLifecycleStatus
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  lastOperatorActionAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   notificationStatus?: Prisma.EnumDemoLeadNotificationStatusFieldUpdateOperationsInput | $Enums.DemoLeadNotificationStatus
   notificationAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   notificationNextAttemptAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -634,6 +676,8 @@ export type DemoLeadCountOrderByAggregateInput = {
   consentVersion?: Prisma.SortOrder
   consentedAt?: Prisma.SortOrder
   lifecycleStatus?: Prisma.SortOrder
+  version?: Prisma.SortOrder
+  lastOperatorActionAt?: Prisma.SortOrder
   notificationStatus?: Prisma.SortOrder
   notificationAttempts?: Prisma.SortOrder
   notificationNextAttemptAt?: Prisma.SortOrder
@@ -646,6 +690,7 @@ export type DemoLeadCountOrderByAggregateInput = {
 }
 
 export type DemoLeadAvgOrderByAggregateInput = {
+  version?: Prisma.SortOrder
   notificationAttempts?: Prisma.SortOrder
 }
 
@@ -662,6 +707,8 @@ export type DemoLeadMaxOrderByAggregateInput = {
   consentVersion?: Prisma.SortOrder
   consentedAt?: Prisma.SortOrder
   lifecycleStatus?: Prisma.SortOrder
+  version?: Prisma.SortOrder
+  lastOperatorActionAt?: Prisma.SortOrder
   notificationStatus?: Prisma.SortOrder
   notificationAttempts?: Prisma.SortOrder
   notificationNextAttemptAt?: Prisma.SortOrder
@@ -686,6 +733,8 @@ export type DemoLeadMinOrderByAggregateInput = {
   consentVersion?: Prisma.SortOrder
   consentedAt?: Prisma.SortOrder
   lifecycleStatus?: Prisma.SortOrder
+  version?: Prisma.SortOrder
+  lastOperatorActionAt?: Prisma.SortOrder
   notificationStatus?: Prisma.SortOrder
   notificationAttempts?: Prisma.SortOrder
   notificationNextAttemptAt?: Prisma.SortOrder
@@ -698,6 +747,7 @@ export type DemoLeadMinOrderByAggregateInput = {
 }
 
 export type DemoLeadSumOrderByAggregateInput = {
+  version?: Prisma.SortOrder
   notificationAttempts?: Prisma.SortOrder
 }
 
@@ -724,6 +774,8 @@ export type DemoLeadSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   consentVersion?: boolean
   consentedAt?: boolean
   lifecycleStatus?: boolean
+  version?: boolean
+  lastOperatorActionAt?: boolean
   notificationStatus?: boolean
   notificationAttempts?: boolean
   notificationNextAttemptAt?: boolean
@@ -748,6 +800,8 @@ export type DemoLeadSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   consentVersion?: boolean
   consentedAt?: boolean
   lifecycleStatus?: boolean
+  version?: boolean
+  lastOperatorActionAt?: boolean
   notificationStatus?: boolean
   notificationAttempts?: boolean
   notificationNextAttemptAt?: boolean
@@ -772,6 +826,8 @@ export type DemoLeadSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   consentVersion?: boolean
   consentedAt?: boolean
   lifecycleStatus?: boolean
+  version?: boolean
+  lastOperatorActionAt?: boolean
   notificationStatus?: boolean
   notificationAttempts?: boolean
   notificationNextAttemptAt?: boolean
@@ -796,6 +852,8 @@ export type DemoLeadSelectScalar = {
   consentVersion?: boolean
   consentedAt?: boolean
   lifecycleStatus?: boolean
+  version?: boolean
+  lastOperatorActionAt?: boolean
   notificationStatus?: boolean
   notificationAttempts?: boolean
   notificationNextAttemptAt?: boolean
@@ -807,7 +865,7 @@ export type DemoLeadSelectScalar = {
   updatedAt?: boolean
 }
 
-export type DemoLeadOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "idempotencyKey" | "name" | "company" | "email" | "phone" | "orderVolume" | "note" | "locale" | "consentVersion" | "consentedAt" | "lifecycleStatus" | "notificationStatus" | "notificationAttempts" | "notificationNextAttemptAt" | "notificationLeaseId" | "notificationLeaseExpiresAt" | "notifiedAt" | "lastNotificationError" | "createdAt" | "updatedAt", ExtArgs["result"]["demoLead"]>
+export type DemoLeadOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "idempotencyKey" | "name" | "company" | "email" | "phone" | "orderVolume" | "note" | "locale" | "consentVersion" | "consentedAt" | "lifecycleStatus" | "version" | "lastOperatorActionAt" | "notificationStatus" | "notificationAttempts" | "notificationNextAttemptAt" | "notificationLeaseId" | "notificationLeaseExpiresAt" | "notifiedAt" | "lastNotificationError" | "createdAt" | "updatedAt", ExtArgs["result"]["demoLead"]>
 
 export type $DemoLeadPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "DemoLead"
@@ -825,6 +883,8 @@ export type $DemoLeadPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     consentVersion: string
     consentedAt: Date
     lifecycleStatus: $Enums.DemoLeadLifecycleStatus
+    version: number
+    lastOperatorActionAt: Date | null
     notificationStatus: $Enums.DemoLeadNotificationStatus
     notificationAttempts: number
     notificationNextAttemptAt: Date | null
@@ -1269,6 +1329,8 @@ export interface DemoLeadFieldRefs {
   readonly consentVersion: Prisma.FieldRef<"DemoLead", 'String'>
   readonly consentedAt: Prisma.FieldRef<"DemoLead", 'DateTime'>
   readonly lifecycleStatus: Prisma.FieldRef<"DemoLead", 'DemoLeadLifecycleStatus'>
+  readonly version: Prisma.FieldRef<"DemoLead", 'Int'>
+  readonly lastOperatorActionAt: Prisma.FieldRef<"DemoLead", 'DateTime'>
   readonly notificationStatus: Prisma.FieldRef<"DemoLead", 'DemoLeadNotificationStatus'>
   readonly notificationAttempts: Prisma.FieldRef<"DemoLead", 'Int'>
   readonly notificationNextAttemptAt: Prisma.FieldRef<"DemoLead", 'DateTime'>

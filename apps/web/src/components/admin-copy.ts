@@ -2,7 +2,7 @@ import type { AppLocale } from '../i18n/locales';
 
 const copy = {
   uk: {
-    navigation: { overview: 'Огляд', clients: 'Клієнти', integrations: 'Інтеграції', operations: 'Операції', label: 'Навігація адміністратора' },
+    navigation: { overview: 'Огляд', clients: 'Клієнти', leads: 'Демозаявки', integrations: 'Інтеграції', operations: 'Операції', label: 'Навігація адміністратора' },
     shell: { context: 'Адміністрування платформи', openMenu: 'Відкрити меню', closeMenu: 'Закрити меню', logout: 'Вийти', loggingOut: 'Виходимо…' },
     dashboard: {
       eyebrow: 'Стан системи', title: 'Огляд платформи', description: 'Ключові показники клієнтів і фонової обробки без доступу до бізнес-даних.',
@@ -14,6 +14,13 @@ const copy = {
     clients: {
       eyebrow: 'Клієнти Sales AITO', title: 'Організації', description: 'Загальна неконфіденційна інформація, доступ і агрегати використання.', searchPlaceholder: 'Назва або email власника', statusLabel: 'Статус', allStatuses: 'Усі статуси', active: 'Активна', blocked: 'Заблокована', empty: 'Нічого не знайдено',
       columns: { number: '№', organization: 'Організація', owner: 'Власник', users: 'Користувачі', orders: 'Замовлення', status: 'Статус', created: 'Створено', action: 'Дія' }, view: 'Переглянути', sortName: 'Сортувати за назвою', sortUsers: 'Сортувати за користувачами', sortOrders: 'Сортувати за замовленнями', sortDate: 'Сортувати за датою', total: 'Усього: {count}',
+    },
+    leads: {
+      eyebrow: 'Запити на демо', title: 'Демозаявки', description: 'Опрацьовуйте запити окремо від організацій клієнтів.', statusLabel: 'Статус', allStatuses: 'Усі статуси', empty: 'Заявок із цим статусом немає.', loadMore: 'Показати ще', loading: 'Завантажуємо…', loadFailed: 'Не вдалося завантажити ще заявки.', view: 'Переглянути',
+      statuses: { NEW: 'Нова', CONTACTED: 'Опрацьована', QUALIFIED: 'Кваліфікована', CLOSED: 'Закрита' },
+      notifications: { PENDING: 'Очікує сповіщення', SENT: 'Сповіщено', FAILED: 'Помилка сповіщення' },
+      columns: { company: 'Компанія', contact: 'Контакт', status: 'Статус', notification: 'Сповіщення', created: 'Створено', action: 'Дія' },
+      back: 'До демозаявок', detailEyebrow: 'Запит на демо', name: 'Ім’я', email: 'Email', phone: 'Телефон', volume: 'Замовлень на місяць', note: 'Запит', consent: 'Згода', updated: 'Оновлено', actionTitle: 'Опрацювання', actionDescription: 'Зміна статусу фіксується в журналі безпеки.', actionLabels: { CONTACTED: 'Позначити як опрацьовану', QUALIFIED: 'Кваліфікувати', CLOSED: 'Закрити', REOPEN: 'Відкрити повторно' }, saving: 'Зберігаємо…', changed: 'Статус заявки змінив інший адміністратор. Оновіть сторінку.', mutationFailed: 'Не вдалося змінити статус. Спробуйте ще раз.',
     },
     clientDetail: {
       back: 'До списку клієнтів', eyebrow: 'Клієнт Sales AITO', owner: 'Власник', users: 'Користувачі', orders: 'Замовлення', created: 'Створено', status: 'Статус', active: 'Активна', blocked: 'Заблокована', accessTitle: 'Доступ організації', accessDescription: 'Блокування завершує активні сесії команди. Дані організації залишаються збереженими.', block: 'Заблокувати організацію', blocking: 'Блокуємо…', unblock: 'Розблокувати організацію', unblocking: 'Розблоковуємо…', blockTitle: 'Заблокувати {name}?', blockDescription: 'Усі активні сесії цієї організації будуть завершені.', blockConfirm: 'Так, заблокувати', unblockTitle: 'Розблокувати {name}?', unblockDescription: 'Команда знову зможе входити до робочого простору.', unblockConfirm: 'Так, розблокувати', mutationFailed: 'Не вдалося змінити доступ. Спробуйте ще раз.', dataTitle: 'Керування даними', dataDescription: 'Експорт і підготовка до видалення із додатковим підтвердженням адміністратора.',
@@ -31,7 +38,7 @@ const copy = {
     },
   },
   en: {
-    navigation: { overview: 'Overview', clients: 'Clients', integrations: 'Integrations', operations: 'Operations', label: 'Administrator navigation' },
+    navigation: { overview: 'Overview', clients: 'Clients', leads: 'Demo requests', integrations: 'Integrations', operations: 'Operations', label: 'Administrator navigation' },
     shell: { context: 'Platform administration', openMenu: 'Open menu', closeMenu: 'Close menu', logout: 'Log out', loggingOut: 'Logging out…' },
     dashboard: {
       eyebrow: 'System state', title: 'Platform overview', description: 'Key client and background-processing indicators without access to business data.',
@@ -43,6 +50,13 @@ const copy = {
     clients: {
       eyebrow: 'Sales AITO clients', title: 'Organizations', description: 'General non-confidential information, access and usage aggregates.', searchPlaceholder: 'Name or owner email', statusLabel: 'Status', allStatuses: 'All statuses', active: 'Active', blocked: 'Blocked', empty: 'Nothing found',
       columns: { number: '#', organization: 'Organization', owner: 'Owner', users: 'Users', orders: 'Orders', status: 'Status', created: 'Created', action: 'Action' }, view: 'View', sortName: 'Sort by name', sortUsers: 'Sort by users', sortOrders: 'Sort by orders', sortDate: 'Sort by date', total: 'Total: {count}',
+    },
+    leads: {
+      eyebrow: 'Demo requests', title: 'Demo requests', description: 'Process inquiries separately from customer organizations.', statusLabel: 'Status', allStatuses: 'All statuses', empty: 'No requests with this status.', loadMore: 'Load more', loading: 'Loading…', loadFailed: 'Could not load more requests.', view: 'View',
+      statuses: { NEW: 'New', CONTACTED: 'Contacted', QUALIFIED: 'Qualified', CLOSED: 'Closed' },
+      notifications: { PENDING: 'Notification pending', SENT: 'Notified', FAILED: 'Notification failed' },
+      columns: { company: 'Company', contact: 'Contact', status: 'Status', notification: 'Notification', created: 'Created', action: 'Action' },
+      back: 'Back to demo requests', detailEyebrow: 'Demo request', name: 'Name', email: 'Email', phone: 'Phone', volume: 'Monthly orders', note: 'Inquiry', consent: 'Consent', updated: 'Updated', actionTitle: 'Processing', actionDescription: 'Status changes are recorded in the security audit.', actionLabels: { CONTACTED: 'Mark as contacted', QUALIFIED: 'Qualify', CLOSED: 'Close', REOPEN: 'Reopen' }, saving: 'Saving…', changed: 'Another administrator changed this request. Refresh the page.', mutationFailed: 'Could not change status. Try again.',
     },
     clientDetail: {
       back: 'Back to clients', eyebrow: 'Sales AITO client', owner: 'Owner', users: 'Users', orders: 'Orders', created: 'Created', status: 'Status', active: 'Active', blocked: 'Blocked', accessTitle: 'Organization access', accessDescription: 'Blocking ends the team’s active sessions. Organization data remains stored.', block: 'Block organization', blocking: 'Blocking…', unblock: 'Unblock organization', unblocking: 'Unblocking…', blockTitle: 'Block {name}?', blockDescription: 'All active sessions for this organization will be ended.', blockConfirm: 'Yes, block', unblockTitle: 'Unblock {name}?', unblockDescription: 'The team will be able to sign in to the workspace again.', unblockConfirm: 'Yes, unblock', mutationFailed: 'Could not change access. Try again.', dataTitle: 'Data management', dataDescription: 'Export and deletion preparation with additional administrator confirmation.',

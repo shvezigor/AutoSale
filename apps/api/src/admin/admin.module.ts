@@ -7,6 +7,8 @@ import { Queue } from 'bullmq';
 import { CryptoService } from '../auth/crypto.service.js';
 import { platformChannelDeployment } from '../integrations/platform-channel-deployment.js';
 import { AdminController } from './admin.controller.js';
+import { AdminDemoLeadsController } from './admin-demo-leads.controller.js';
+import { AdminDemoLeadsService } from './admin-demo-leads.service.js';
 import { AdminIntegrationService } from './admin-integration.service.js';
 import { BullAdminQueueMonitor } from './admin-queue-monitor.js';
 import { AdminService } from './admin.service.js';
@@ -34,9 +36,10 @@ export class AdminModule {
     });
     return {
       module: AdminModule,
-      controllers: [AdminController],
+      controllers: [AdminController, AdminDemoLeadsController],
       providers: [
         { provide: AdminService, useValue: new AdminService(prisma, undefined, monitoredQueues) },
+        { provide: AdminDemoLeadsService, useValue: new AdminDemoLeadsService(prisma) },
         { provide: AdminIntegrationService, useValue: new AdminIntegrationService(prisma, integrationDeployment) },
         { provide: AdminStepUpService, useValue: stepUp },
         { provide: TenantLifecycleService, useValue: new TenantLifecycleService(

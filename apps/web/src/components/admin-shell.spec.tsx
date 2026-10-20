@@ -17,6 +17,7 @@ describe('AdminShell', () => {
 
     expect(screen.getByRole('link', { name: 'Огляд' })).toHaveAttribute('href', '/admin');
     expect(screen.getByRole('link', { name: 'Клієнти' })).toHaveAttribute('href', '/admin/tenants');
+    expect(screen.getByRole('link', { name: 'Демозаявки' })).toHaveAttribute('href', '/admin/leads');
     expect(screen.getByRole('link', { name: 'Операції' })).toHaveAttribute('href', '/admin/operations');
     expect(screen.getByRole('link', { name: 'Інтеграції' })).toHaveAttribute('aria-current', 'page');
     expect(screen.queryByRole('link', { name: /діалоги|замовлення/i })).not.toBeInTheDocument();

@@ -1,6 +1,6 @@
 # Demo lead operations and privacy-minimal conversion measurement
 
-**Status:** design approved in chat on 2026-10-20; public abuse-protection increment implemented in the feature branch, not yet deployed or browser-accepted. Remaining increments pending.
+**Status:** design approved in chat on 2026-10-20; public abuse protection and the audited admin queue are implemented in the feature branch, not yet deployed or browser-accepted. Export, deletion, retention, analytics and form acceptance remain pending.
 
 ## Outcome and boundaries
 
@@ -29,6 +29,8 @@ Implementation increment (2026-10-20): the public route checks a 16 KiB raw JSON
 - Existing lifecycle values remain `NEW`, `CONTACTED`, `QUALIFIED`, `CLOSED`. Permitted operator transitions are explicit and validated; reopening a closed lead returns it to `CONTACTED`, not a new row. The API uses an expected version/updated timestamp to reject conflicting edits. There is no tenant conversion, assignment, outbound customer message, or arbitrary free-text operator note in this slice.
 - Record status changes, contact-detail access, export and deletion in the existing platform security-audit mechanism with actor ID, lead ID, action, old/new status where applicable and time. Never copy name, contact, note or CSV into audit metadata. Audited mutations and status change commit atomically; audit failure rolls the mutation back. Admin overview/operations stay aggregate-only.
 - Admin screens use the shared buttons and loading states, localized safe errors, keyboard focus and responsive table/detail layouts. A tenant member gets no route or API access, including by direct URL.
+
+Implementation increment (2026-10-20): `/api/admin/demo-leads` and `/admin/leads` provide a bounded 50-row page with stable `createdAt,id` ordering and cursor continuation. The list selects only company, masked contact, lifecycle/notification status, creation time and version; name, full contact and note are withheld. The detail route selects full contact only for a platform administrator, returns `Cache-Control: no-store` and appends `DEMO_LEAD_DETAIL_ACCESSED` with lead UUID only before disclosing the response. A status mutation follows `NEW→CONTACTED→QUALIFIED→CLOSED` or explicit `CLOSED→CONTACTED`, compares the expected version and appends `DEMO_LEAD_STATUS_CHANGED` with UUID and enum values in one database transaction. The additive migration adds a version counter and `last_operator_action_at`; an audit failure rolls the mutation back. The existing admin shell adds a separate Demo requests navigation item; status action uses `LoadingButton`, localized conflict/error text and the established responsive table/detail patterns. This is not yet a deployed/browser-accepted capability.
 
 ## 3. Demo contact lifecycle
 

@@ -1925,6 +1925,8 @@ model DemoLead {
   consentVersion        String                     @default("2026-09-17") @map("consent_version")
   consentedAt           DateTime                   @default(now()) @map("consented_at")
   lifecycleStatus       DemoLeadLifecycleStatus    @default(NEW) @map("lifecycle_status")
+  version               Int                        @default(0)
+  lastOperatorActionAt  DateTime?                  @map("last_operator_action_at")
   notificationStatus    DemoLeadNotificationStatus @default(PENDING) @map("notification_status")
   notificationAttempts  Int                        @default(0) @map("notification_attempts")
   notificationNextAttemptAt DateTime?               @map("notification_next_attempt_at")
@@ -1936,6 +1938,7 @@ model DemoLead {
   updatedAt             DateTime                   @updatedAt @map("updated_at")
 
   @@index([lifecycleStatus, createdAt])
+  @@index([createdAt, id])
   @@index([notificationStatus, createdAt])
   @@index([notificationStatus, notificationNextAttemptAt])
   @@map("demo_leads")

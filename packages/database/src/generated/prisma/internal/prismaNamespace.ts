@@ -6686,6 +6686,8 @@ export const DemoLeadScalarFieldEnum = {
   consentVersion: 'consentVersion',
   consentedAt: 'consentedAt',
   lifecycleStatus: 'lifecycleStatus',
+  version: 'version',
+  lastOperatorActionAt: 'lastOperatorActionAt',
   notificationStatus: 'notificationStatus',
   notificationAttempts: 'notificationAttempts',
   notificationNextAttemptAt: 'notificationNextAttemptAt',

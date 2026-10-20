@@ -45,8 +45,11 @@ In this capability, a **client** means a Sales AITO tenant organization. It neve
 | `/admin/tenants/:tenantId` | — | Privacy-safe organization detail and existing administrative actions |
 | `/admin/operations` | Operations | Service and background queue diagnostics |
 | `/admin/integrations` | Integrations | Global Facebook and TikTok availability and runtime controls |
+| `/admin/leads` | Demo requests | Separate, audited platform-operator queue; see the [demo lead operations design](2026-10-20-demo-lead-operations-and-private-conversion-design.md). This is not a tenant-client detail page. |
 
 The shell header identifies the platform-administrator context and offers logout. The admin navigation is separate from tenant navigation and does not expose workspace search or tenant notifications.
+
+The later demo-lead queue adds a deliberately separate navigation item. Its list has masked contacts; opening a lead is an audited, platform-admin-only access to that lead's full contact and note. This exception does not change the aggregate-only contract of the overview, clients and operations pages.
 
 ## Data contracts
 
