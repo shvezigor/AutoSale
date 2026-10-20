@@ -1,7 +1,7 @@
 import { createHmac } from 'node:crypto';
 
-import type { ConversionEvent } from '@autosale/contracts';
-import type { PrismaClient } from '@autosale/database';
+import type { ConversionEvent, ConversionPlanId } from '@autosale/contracts';
+import { withTenantTransaction, type PrismaClient } from '@autosale/database';
 import { HttpException, HttpStatus, ServiceUnavailableException } from '@nestjs/common';
 
 export interface ConversionQuotaClient {
@@ -36,5 +36,14 @@ export class ConversionService {
     await this.prisma.$queryRaw`
       SELECT public.api_increment_marketing_counter(${event.event}, ${event.locale}, ${event.event === 'plan_interest' ? event.planId : 'none'})
     `;
+  }
+
+  async recordPlanInterest(tenantId: string, planId: ConversionPlanId, now = new Date()): Promise<{ recorded: boolean }> {
+    if (!this.enabled) return { recorded: false };
+    const day = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+    const result = await withTenantTransaction(this.prisma, tenantId, (tx) => tx.tenantPlanInterest.createMany({
+      data: [{ tenantId, planId, day, createdAt: now }], skipDuplicates: true,
+    }));
+    return { recorded: result.count === 1 };
   }
 }

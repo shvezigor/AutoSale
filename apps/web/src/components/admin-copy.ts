@@ -2,7 +2,7 @@ import type { AppLocale } from '../i18n/locales';
 
 const copy = {
   uk: {
-    navigation: { overview: 'Огляд', clients: 'Клієнти', leads: 'Демозаявки', integrations: 'Інтеграції', operations: 'Операції', label: 'Навігація адміністратора' },
+    navigation: { overview: 'Огляд', clients: 'Клієнти', leads: 'Демозаявки', conversions: 'Конверсії', integrations: 'Інтеграції', operations: 'Операції', label: 'Навігація адміністратора' },
     shell: { context: 'Адміністрування платформи', openMenu: 'Відкрити меню', closeMenu: 'Закрити меню', logout: 'Вийти', loggingOut: 'Виходимо…' },
     dashboard: {
       eyebrow: 'Стан системи', title: 'Огляд платформи', description: 'Ключові показники клієнтів і фонової обробки без доступу до бізнес-даних.',
@@ -40,7 +40,7 @@ const copy = {
     },
   },
   en: {
-    navigation: { overview: 'Overview', clients: 'Clients', leads: 'Demo requests', integrations: 'Integrations', operations: 'Operations', label: 'Administrator navigation' },
+    navigation: { overview: 'Overview', clients: 'Clients', leads: 'Demo requests', conversions: 'Conversions', integrations: 'Integrations', operations: 'Operations', label: 'Administrator navigation' },
     shell: { context: 'Platform administration', openMenu: 'Open menu', closeMenu: 'Close menu', logout: 'Log out', loggingOut: 'Logging out…' },
     dashboard: {
       eyebrow: 'System state', title: 'Platform overview', description: 'Key client and background-processing indicators without access to business data.',

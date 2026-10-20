@@ -25,8 +25,8 @@ CREATE INDEX tenant_plan_interests_created_at_idx ON public.tenant_plan_interest
 ALTER TABLE public.tenant_plan_interests ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.tenant_plan_interests FORCE ROW LEVEL SECURITY;
 CREATE POLICY tenant_plan_interests_isolation ON public.tenant_plan_interests
-  USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid)
-  WITH CHECK (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
+  USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::uuid)
+  WITH CHECK (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::uuid);
 
 CREATE FUNCTION public.api_increment_marketing_counter(p_event text, p_locale text, p_plan_id text)
 RETURNS integer

@@ -31,7 +31,7 @@ describe('parseApiEnv', () => {
     expect(parseApiEnv({ ...validEnv, UKRPOSHTA_SANDBOX_SHIPMENTS_ENABLED: 'true' }).UKRPOSHTA_SANDBOX_SHIPMENTS_ENABLED).toBe(true);
   });
   it('coerces a valid API environment', () => {
-    expect(parseApiEnv(validEnv)).toEqual({ ...validEnv, PORT: 3001, SMTP_PORT: 587, GOOGLE_SIGN_IN_ENABLED: false, FACEBOOK_MESSENGER_ENABLED: false, TIKTOK_BUSINESS_MESSAGING_ENABLED: false, CATALOGUE_AI_STRUCTURE_ANALYSIS: true, NOVA_POSHTA_DELIVERY_ENABLED: false, UKRPOSHTA_SANDBOX_SHIPMENTS_ENABLED: false });
+    expect(parseApiEnv(validEnv)).toEqual({ ...validEnv, PORT: 3001, SMTP_PORT: 587, GOOGLE_SIGN_IN_ENABLED: false, FACEBOOK_MESSENGER_ENABLED: false, TIKTOK_BUSINESS_MESSAGING_ENABLED: false, CATALOGUE_AI_STRUCTURE_ANALYSIS: true, NOVA_POSHTA_DELIVERY_ENABLED: false, UKRPOSHTA_SANDBOX_SHIPMENTS_ENABLED: false, DEMO_LEAD_ERASURE_ENABLED: false, MARKETING_ANALYTICS_ENABLED: false });
   });
 
   it('accepts an explicit Nova Poshta delivery feature flag', () => {

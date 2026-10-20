@@ -8,3 +8,11 @@ export const conversionEventSchema = z.discriminatedUnion('event', [
 ]);
 export type ConversionEvent = z.infer<typeof conversionEventSchema>;
 export type ConversionPlanId = z.infer<typeof conversionPlanIdSchema>;
+
+export interface AdminConversionReport {
+  from: string;
+  to: string;
+  metrics: Array<{ metric: string; locale: string; planId: string; count: number | null }>;
+  rates: { registrationToFirstOrder: number | null; firstOrderToPlanInterest: number | null };
+  note: 'counts_not_unique_visitors';
+}

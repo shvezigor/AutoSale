@@ -19,6 +19,7 @@ const items = [
   { href: '/admin', key: 'overview' as const, Icon: OverviewIcon },
   { href: '/admin/tenants', key: 'clients' as const, Icon: ClientsIcon },
   { href: '/admin/leads', key: 'leads' as const, Icon: LeadsIcon },
+  { href: '/admin/conversions', key: 'conversions' as const, Icon: OperationsIcon },
   { href: '/admin/integrations', key: 'integrations' as const, Icon: IntegrationsIcon },
   { href: '/admin/operations', key: 'operations' as const, Icon: OperationsIcon },
 ];

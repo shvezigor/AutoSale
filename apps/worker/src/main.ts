@@ -2,7 +2,7 @@ import { Buffer } from 'node:buffer';
 
 import { parseWorkerEnv } from '@autosale/config/worker-env';
 import { retentionDryRunJobSchema, shipmentCreateJobSchema, telegramDeliveryJobSchema, tenantLifecycleJobSchema, ukrposhtaTrackingBatchJobSchema } from '@autosale/contracts';
-import { createPrismaClient, DemoLeadNotificationStore, DemoLeadRetentionStore, PlatformChannelGate, ProcurementStore, withTenantTransaction } from '@autosale/database';
+import { createPrismaClient, ConversionRetentionStore, DemoLeadNotificationStore, DemoLeadRetentionStore, PlatformChannelGate, ProcurementStore, withTenantTransaction } from '@autosale/database';
 import {
   createGoogleSheetsAdapter,
   CredentialCipher,
@@ -24,6 +24,7 @@ import { createDemoLeadEmailSender } from './demo-leads/demo-lead-email.js';
 import { DemoLeadNotificationProcessor } from './demo-leads/demo-lead-notification.processor.js';
 import { DemoLeadNotificationReconciler } from './demo-leads/demo-lead-notification.reconciler.js';
 import { DemoLeadRetentionReconciler } from './demo-leads/demo-lead-retention.reconciler.js';
+import { ConversionRetentionReconciler } from './conversion/conversion-retention.reconciler.js';
 import { FacebookProcessor } from './facebook/facebook.processor.js';
 import { InstagramProcessor } from './instagram/instagram.processor.js';
 import { InstagramAvatarCleanupReconciler } from './instagram/instagram-avatar-cleanup-reconciler.js';
@@ -182,6 +183,7 @@ async function bootstrap(): Promise<void> {
   );
   const demoLeadReconciler = new DemoLeadNotificationReconciler(demoLeadStore, demoLeadQueue, undefined, demoLeadSender.configured);
   const demoLeadRetention = new DemoLeadRetentionReconciler(new DemoLeadRetentionStore(prisma), env.DEMO_LEAD_ERASURE_ENABLED);
+  const conversionRetention = new ConversionRetentionReconciler(new ConversionRetentionStore(prisma));
   const demoLeadJobSchema = z.object({ leadId: z.uuid() }).strict();
   const demoLeadWorker = new Worker('demo-leads', async (job) => {
     if (job.name !== 'demo-lead.notify') return;
@@ -832,6 +834,23 @@ async function bootstrap(): Promise<void> {
     } finally { reconcilingDemoLeadRetention = false; }
   };
   const demoLeadRetentionTimer = setInterval(() => void reconcileDemoLeadRetention(), 24 * 60 * 60_000);
+  let reconcilingConversionRetention = false;
+  const reconcileConversionRetention = async (): Promise<void> => {
+    if (reconcilingConversionRetention) return;
+    reconcilingConversionRetention = true;
+    try {
+      const result = await conversionRetention.reconcile();
+      if (result.interestsDeleted > 0 || result.countersDeleted > 0) logger.info('conversion_retention_completed', {
+        correlationId: 'system:conversion-retention', ...result,
+      });
+    } catch (error) {
+      metrics.increment('autosale_operations_total', { operation: 'conversion_retention', result: 'failure' });
+      logger.warn('conversion_retention_failed', {
+        correlationId: 'system:conversion-retention', errorCode: error instanceof Error ? error.name : 'UNKNOWN',
+      });
+    } finally { reconcilingConversionRetention = false; }
+  };
+  const conversionRetentionTimer = setInterval(() => void reconcileConversionRetention(), 24 * 60 * 60_000);
   let reconcilingCatalogueMappings = false;
   const reconcileCatalogueMappings = async (): Promise<void> => {
     if (reconcilingCatalogueMappings) return;
@@ -1130,6 +1149,7 @@ async function bootstrap(): Promise<void> {
   void pollExports();
   void reconcileDemoLeads();
   void reconcileDemoLeadRetention();
+  void reconcileConversionRetention();
   void reconcileCatalogueMappings();
   void reconcileInstagramEvents();
   void reconcileInstagramProfiles();
@@ -1152,6 +1172,7 @@ async function bootstrap(): Promise<void> {
     clearInterval(sheetsTimer);
     clearInterval(demoLeadReconcileTimer);
     clearInterval(demoLeadRetentionTimer);
+    clearInterval(conversionRetentionTimer);
     clearInterval(catalogueReconcileTimer);
     clearInterval(instagramReconcileTimer);
     clearInterval(instagramProfileReconcileTimer);

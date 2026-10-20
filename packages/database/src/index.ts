@@ -11,3 +11,4 @@ export * from './tenant-transaction.js';
 export * from './tenant-lifecycle.js';
 export * from './demo-lead-notifications.js';
 export * from './demo-lead-retention.js';
+export * from './conversion-retention.js';

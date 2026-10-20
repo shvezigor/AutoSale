@@ -11,5 +11,9 @@ describe('PrivacyPage', () => {
     expect(screen.getByText(/повідомлення та вкладення з підключеного Instagram/)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Запит на видалення даних' })).toHaveAttribute('href', '/privacy/data-deletion');
     expect(screen.getByText('shvezigor@gmail.com')).toBeInTheDocument();
+    expect(screen.getByText(/без IP-адреси, контакту/)).toBeInTheDocument();
+    expect(screen.getByText(/13 місяців/)).toBeInTheDocument();
+    expect(screen.getByText(/90 днів/)).toBeInTheDocument();
+    expect(screen.getByText(/Публічний збір вимкнений за замовчуванням/)).toBeInTheDocument();
   });
 });

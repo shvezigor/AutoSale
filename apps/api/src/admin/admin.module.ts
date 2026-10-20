@@ -7,6 +7,8 @@ import { Queue } from 'bullmq';
 import { CryptoService } from '../auth/crypto.service.js';
 import { platformChannelDeployment } from '../integrations/platform-channel-deployment.js';
 import { AdminController } from './admin.controller.js';
+import { AdminConversionController } from './admin-conversion.controller.js';
+import { AdminConversionService } from './admin-conversion.service.js';
 import { AdminDemoLeadsController } from './admin-demo-leads.controller.js';
 import { AdminDemoLeadsService } from './admin-demo-leads.service.js';
 import { AdminIntegrationService } from './admin-integration.service.js';
@@ -36,9 +38,10 @@ export class AdminModule {
     });
     return {
       module: AdminModule,
-      controllers: [AdminController, AdminDemoLeadsController],
+      controllers: [AdminController, AdminDemoLeadsController, AdminConversionController],
       providers: [
         { provide: AdminService, useValue: new AdminService(prisma, undefined, monitoredQueues) },
+        { provide: AdminConversionService, useValue: new AdminConversionService(prisma) },
         { provide: AdminDemoLeadsService, useValue: new AdminDemoLeadsService(prisma, undefined, stepUp, env.DEMO_LEAD_ERASURE_ENABLED) },
         { provide: AdminIntegrationService, useValue: new AdminIntegrationService(prisma, integrationDeployment) },
         { provide: AdminStepUpService, useValue: stepUp },

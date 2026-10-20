@@ -30,7 +30,7 @@ describe('parseWorkerEnv', () => {
     expect(parseWorkerEnv({ ...validEnv, UKRPOSHTA_SANDBOX_SHIPMENTS_ENABLED: 'true' }).UKRPOSHTA_SANDBOX_SHIPMENTS_ENABLED).toBe(true);
   });
   it('accepts a complete worker environment', () => {
-    expect(parseWorkerEnv(validEnv)).toEqual({ ...validEnv, HEALTH_PORT: 3002, SMTP_PORT: 587, FACEBOOK_MESSENGER_ENABLED: false, TIKTOK_BUSINESS_MESSAGING_ENABLED: false, CATALOGUE_AI_STRUCTURE_ANALYSIS: true, NOVA_POSHTA_DELIVERY_ENABLED: false, UKRPOSHTA_SANDBOX_SHIPMENTS_ENABLED: false });
+    expect(parseWorkerEnv(validEnv)).toEqual({ ...validEnv, HEALTH_PORT: 3002, SMTP_PORT: 587, FACEBOOK_MESSENGER_ENABLED: false, TIKTOK_BUSINESS_MESSAGING_ENABLED: false, CATALOGUE_AI_STRUCTURE_ANALYSIS: true, NOVA_POSHTA_DELIVERY_ENABLED: false, UKRPOSHTA_SANDBOX_SHIPMENTS_ENABLED: false, DEMO_LEAD_ERASURE_ENABLED: false });
   });
 
   it('passes optional SMTP settings to the worker without requiring them at startup', () => {
