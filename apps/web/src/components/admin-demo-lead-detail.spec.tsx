@@ -58,4 +58,14 @@ describe('AdminDemoLeadDetail', () => {
     await waitFor(() => expect(mutatingFetch).toHaveBeenCalledWith(`/api/admin/demo-leads/${lead.id}/delete`, expect.objectContaining({ body: JSON.stringify({ confirmId: lead.id }) })));
     expect(replace).toHaveBeenCalledWith('/admin/leads');
   });
+
+  it('focuses the password after a valid deletion confirmation ID', () => {
+    render(<AdminDemoLeadDetail lead={lead} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Видалити заявку' }));
+    fireEvent.change(screen.getByLabelText('Повний ID заявки'), { target: { value: lead.id } });
+    fireEvent.click(screen.getByRole('button', { name: 'Підтвердити' }));
+    expect(screen.getByLabelText('Повний ID заявки')).not.toHaveAttribute('aria-invalid', 'true');
+    expect(screen.getByLabelText('Поточний пароль')).toHaveAttribute('aria-invalid', 'true');
+    expect(screen.getByLabelText('Поточний пароль')).toHaveFocus();
+  });
 });

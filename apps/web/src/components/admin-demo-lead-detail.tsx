@@ -53,7 +53,7 @@ export function AdminDemoLeadDetail({ lead }: { lead: AdminDemoLeadDetail }) {
     if (!password) errors.currentPassword = text.data.required;
     if (dataMode === 'delete' && confirmation !== lead.id) errors.confirmId = confirmation ? text.data.mismatch : text.data.required;
     setFieldErrors(errors);
-    if (Object.keys(errors).length) { focusFirstInvalid(event.currentTarget, ['confirmId', 'currentPassword']); return; }
+    if (Object.keys(errors).length) { focusFirstInvalid(event.currentTarget, ['confirmId', 'currentPassword'].filter((field) => field in errors)); return; }
     setDataPending(true);
     setDataError(null);
     try {

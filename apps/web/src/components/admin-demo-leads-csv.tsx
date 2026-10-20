@@ -33,7 +33,7 @@ export function AdminDemoLeadsCsv({ status }: { status: 'ALL' | AdminDemoLeadSta
     if (from && to && from > to) next.to = text.range;
     if (!currentPassword) next.currentPassword = text.required;
     setErrors(next);
-    if (Object.keys(next).length) { focusFirstInvalid(event.currentTarget, ['from', 'to', 'currentPassword']); return; }
+    if (Object.keys(next).length) { focusFirstInvalid(event.currentTarget, ['from', 'to', 'currentPassword'].filter((field) => field in next)); return; }
     setPending(true);
     setFormError(null);
     try {

@@ -39,4 +39,14 @@ describe('AdminDemoLeadsTable', () => {
     expect(screen.getByLabelText('Поточний пароль')).toHaveAttribute('aria-invalid', 'true');
     expect(screen.getByLabelText('Від дати')).toHaveFocus();
   });
+
+  it('focuses the password when it is the only invalid CSV export field', () => {
+    render(<AdminDemoLeadsTable initial={{ items: [lead], nextCursor: null }} status="ALL" />);
+    fireEvent.click(screen.getByRole('button', { name: 'Експорт CSV' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Завантажити CSV' }));
+    expect(screen.getByLabelText('Від дати')).not.toHaveAttribute('aria-invalid', 'true');
+    expect(screen.getByLabelText('До дати')).not.toHaveAttribute('aria-invalid', 'true');
+    expect(screen.getByLabelText('Поточний пароль')).toHaveAttribute('aria-invalid', 'true');
+    expect(screen.getByLabelText('Поточний пароль')).toHaveFocus();
+  });
 });
