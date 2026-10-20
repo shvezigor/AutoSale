@@ -27,4 +27,16 @@ describe('AdminDemoLeadsTable', () => {
     fireEvent.change(screen.getByLabelText('Статус'), { target: { value: 'CONTACTED' } });
     expect(push).toHaveBeenCalledWith('/admin/leads?status=CONTACTED');
   });
+
+  it('validates the scoped CSV export next to its fields before requesting step-up', () => {
+    render(<AdminDemoLeadsTable initial={{ items: [lead], nextCursor: null }} status="ALL" />);
+    fireEvent.click(screen.getByRole('button', { name: 'Експорт CSV' }));
+    fireEvent.change(screen.getByLabelText('Від дати'), { target: { value: '' } });
+    fireEvent.change(screen.getByLabelText('До дати'), { target: { value: '' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Завантажити CSV' }));
+    expect(screen.getByLabelText('Від дати')).toHaveAttribute('aria-invalid', 'true');
+    expect(screen.getByLabelText('До дати')).toHaveAttribute('aria-invalid', 'true');
+    expect(screen.getByLabelText('Поточний пароль')).toHaveAttribute('aria-invalid', 'true');
+    expect(screen.getByLabelText('Від дати')).toHaveFocus();
+  });
 });

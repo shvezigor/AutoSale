@@ -53,10 +53,13 @@ describe('AdminDemoLeadsController HTTP authorization', () => {
     const resolve = vi.fn(async (token: string) => token === 'admin' ? admin : token === 'tenant' ? tenant : null);
     const list = vi.fn().mockResolvedValue({ items: [{ id: leadId, company: 'Fictional Shop', maskedContact: 'o***@***', status: 'NEW', notificationStatus: 'PENDING', createdAt: '2026-10-20T10:00:00.000Z', version: 0 }], nextCursor: null });
     const changeStatus = vi.fn().mockResolvedValue({ id: leadId, status: 'CONTACTED', version: 1 });
+    const exportOne = vi.fn().mockResolvedValue({ id: leadId, company: 'Fictional Shop', email: 'olena@example.test' });
+    const exportCsv = vi.fn().mockResolvedValue('id,company\r\n"' + leadId + '","Fictional Shop"\r\n');
+    const deleteOne = vi.fn().mockResolvedValue({ deleted: true });
     const moduleRef = await Test.createTestingModule({
       controllers: [AdminDemoLeadsController],
       providers: [
-        { provide: AdminDemoLeadsService, useValue: { list, detail: vi.fn(), changeStatus } },
+        { provide: AdminDemoLeadsService, useValue: { list, detail: vi.fn(), changeStatus, exportOne, exportCsv, deleteOne } },
         { provide: SessionService, useValue: { resolve } },
         { provide: CsrfService, useValue: csrf },
         { provide: AUTH_HTTP_CONFIG, useValue: { cookieName: 'session', production: false } },
@@ -78,6 +81,23 @@ describe('AdminDemoLeadsController HTTP authorization', () => {
         .set('Cookie', 'session=admin').set('x-csrf-token', csrf.issue(admin.sessionId))
         .send({ status: 'CONTACTED', expectedVersion: 0 }).expect(200);
       expect(changeStatus).toHaveBeenCalledWith(leadId, 'CONTACTED', 0, admin.userId);
+      await request(app.getHttpServer()).get(`/api/admin/demo-leads/${leadId}/export`)
+        .set('Cookie', 'session=tenant').set('x-admin-step-up', 'fictional-token').expect(403);
+      const exported = await request(app.getHttpServer()).get(`/api/admin/demo-leads/${leadId}/export`)
+        .set('Cookie', 'session=admin').set('x-admin-step-up', 'fictional-token').expect(200);
+      expect(exported.headers['cache-control']).toBe('no-store');
+      expect(exported.headers['content-disposition']).toContain('attachment');
+      expect(exported.headers['content-type']).toContain('application/json');
+      expect(exportOne).toHaveBeenCalledWith(leadId, admin.userId, admin.sessionId, 'fictional-token');
+      const csv = await request(app.getHttpServer()).get('/api/admin/demo-leads/export.csv?from=2026-10-01&to=2026-10-20')
+        .set('Cookie', 'session=admin').set('x-admin-step-up', 'fictional-token').expect(200);
+      expect(csv.headers['content-disposition']).toContain('.csv');
+      await request(app.getHttpServer()).post(`/api/admin/demo-leads/${leadId}/delete`)
+        .set('Cookie', 'session=admin').set('x-admin-step-up', 'fictional-token').send({ confirmId: leadId }).expect(403);
+      await request(app.getHttpServer()).post(`/api/admin/demo-leads/${leadId}/delete`)
+        .set('Cookie', 'session=admin').set('x-csrf-token', csrf.issue(admin.sessionId))
+        .set('x-admin-step-up', 'fictional-token').send({ confirmId: leadId }).expect(201);
+      expect(deleteOne).toHaveBeenCalledWith(leadId, leadId, admin.userId, admin.sessionId, 'fictional-token');
     } finally { await app.close(); }
   });
 });

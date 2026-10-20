@@ -4,10 +4,11 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { AdminDemoLeadDetail } from './admin-demo-lead-detail';
 
 const refresh = vi.fn();
+const replace = vi.fn();
 const mutatingFetch = vi.fn();
-vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh }) }));
+vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh, replace }) }));
 vi.mock('../auth/csrf-fetch', () => ({ mutatingFetch: (...args: unknown[]) => mutatingFetch(...args) }));
-afterEach(() => { cleanup(); refresh.mockReset(); mutatingFetch.mockReset(); });
+afterEach(() => { cleanup(); refresh.mockReset(); replace.mockReset(); mutatingFetch.mockReset(); });
 
 const lead = {
   id: '22222222-2222-4222-8222-222222222222', name: 'Fictional Olena', company: 'Fictional Shop',
@@ -34,5 +35,21 @@ describe('AdminDemoLeadDetail', () => {
       method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ status: 'CONTACTED', expectedVersion: 0 }),
     }));
     expect(refresh).toHaveBeenCalledOnce();
+  });
+
+  it('shows field-level errors, preserves values, and deletes only after purpose-bound reauthentication', async () => {
+    mutatingFetch.mockResolvedValueOnce(new Response(JSON.stringify({ stepUpToken: 'fictional-token' }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ deleted: true }), { status: 200 }));
+    render(<AdminDemoLeadDetail lead={lead} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Видалити заявку' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Підтвердити' }));
+    expect(screen.getByLabelText('Повний ID заявки')).toHaveAttribute('aria-invalid', 'true');
+    expect(screen.getByLabelText('Поточний пароль')).toHaveAttribute('aria-invalid', 'true');
+    fireEvent.change(screen.getByLabelText('Повний ID заявки'), { target: { value: lead.id } });
+    fireEvent.change(screen.getByLabelText('Поточний пароль'), { target: { value: 'fictional password' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Підтвердити' }));
+    await waitFor(() => expect(mutatingFetch).toHaveBeenCalledWith('/api/admin/reauth', expect.objectContaining({ body: JSON.stringify({ currentPassword: 'fictional password', purpose: 'DEMO_LEAD_DELETE' }) })));
+    await waitFor(() => expect(mutatingFetch).toHaveBeenCalledWith(`/api/admin/demo-leads/${lead.id}/delete`, expect.objectContaining({ body: JSON.stringify({ confirmId: lead.id }) })));
+    expect(replace).toHaveBeenCalledWith('/admin/leads');
   });
 });

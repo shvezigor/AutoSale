@@ -86,4 +86,26 @@ describe('AdminDemoLeadsService PostgreSQL audit boundary', () => {
     expect(second.items).toHaveLength(1);
     expect(new Set([first.items[0]?.id, second.items[0]?.id])).toEqual(new Set(ids));
   });
+
+  it('refuses deletion during an active notification claim and commits deletion with minimal audit', async () => {
+    const lead = await owner.demoLead.create({ data: {
+      idempotencyKey: randomUUID(), name: 'Fictional Daria', company: 'Fictional Studio',
+      email: 'daria@example.test', orderVolume: 'UNDER_50', locale: 'uk',
+      notificationLeaseId: randomUUID(), notificationLeaseExpiresAt: new Date(Date.now() + 60_000),
+    } });
+    const stepUp = { verify: () => true };
+    const service = new AdminDemoLeadsService(api, undefined, stepUp as never);
+    await expect(service.deleteOne(lead.id, lead.id, adminId, 'fictional-session', 'fictional-token')).rejects.toMatchObject({ status: 409 });
+    expect(await owner.demoLead.findUnique({ where: { id: lead.id } })).not.toBeNull();
+    await owner.demoLead.update({ where: { id: lead.id }, data: { notificationLeaseExpiresAt: new Date(Date.now() - 1_000) } });
+    const failing = new AdminDemoLeadsService(api, async () => { throw new Error('fictional audit failure'); }, stepUp as never);
+    await expect(failing.deleteOne(lead.id, lead.id, adminId, 'fictional-session', 'fictional-token')).rejects.toThrow('fictional audit failure');
+    expect(await owner.demoLead.findUnique({ where: { id: lead.id } })).not.toBeNull();
+    await expect(service.deleteOne(lead.id, lead.id, adminId, 'fictional-session', 'fictional-token')).resolves.toEqual({ deleted: true });
+    expect(await owner.demoLead.findUnique({ where: { id: lead.id } })).toBeNull();
+    const audits = await owner.securityAuditLog.findMany({ where: { action: 'DEMO_LEAD_DELETED' } });
+    expect(audits).toHaveLength(1);
+    expect(audits[0]?.metadata).toEqual({ leadId: lead.id, reason: 'CONTROLLER_REQUEST' });
+    expect(JSON.stringify(audits)).not.toContain('daria@example.test');
+  });
 });

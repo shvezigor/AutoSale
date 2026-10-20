@@ -44,4 +44,18 @@ describe('AdminStepUpService', () => {
     clock = new Date(now.getTime() + 5 * 60_000 + 1);
     expect(service.verify(token, userId, sessionId, 'TENANT_DELETE_REQUEST')).toBe(false);
   });
+
+  it('keeps demo export and deletion authorizations purpose-bound', async () => {
+    const prisma = { user: { findUnique: vi.fn().mockResolvedValue({
+      passwordHash: 'fictional-hash', platformRole: 'PLATFORM_ADMIN', status: 'ACTIVE',
+    }) } };
+    let clock = now;
+    const service = new AdminStepUpService(prisma as never, { verifyPassword: vi.fn().mockResolvedValue(true) } as never, 'p'.repeat(32), () => clock);
+    const token = await service.issue(userId, sessionId, 'fictional secure password', 'DEMO_LEAD_EXPORT');
+    expect(service.verify(token, userId, sessionId, 'DEMO_LEAD_EXPORT')).toBe(true);
+    expect(service.verify(token, userId, sessionId, 'DEMO_LEAD_DELETE')).toBe(false);
+    expect(service.verify(token, userId, 'another-session', 'DEMO_LEAD_EXPORT')).toBe(false);
+    clock = new Date(now.getTime() + AdminStepUpService.TTL_MS + 1);
+    expect(service.verify(token, userId, sessionId, 'DEMO_LEAD_EXPORT')).toBe(false);
+  });
 });

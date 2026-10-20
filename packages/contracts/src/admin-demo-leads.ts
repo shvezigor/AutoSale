@@ -7,6 +7,9 @@ export const adminDemoLeadListQuerySchema = z.object({
   cursor: z.uuid().optional(),
   limit: z.coerce.number().int().positive().optional(),
 }).strict();
+export const adminDemoLeadCsvQuerySchema = z.object({
+  from: z.iso.date(), to: z.iso.date(), status: adminDemoLeadStatusSchema.optional(),
+}).strict().refine((value) => value.from <= value.to);
 export const adminDemoLeadStatusInputSchema = z.object({
   status: adminDemoLeadStatusSchema,
   expectedVersion: z.number().int().nonnegative(),

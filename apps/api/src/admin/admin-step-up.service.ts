@@ -86,5 +86,6 @@ export class AdminStepUpService {
 }
 
 function isPurpose(value: unknown): value is AdminReauthPurpose {
-  return value === 'TENANT_DELETE_REQUEST' || value === 'TENANT_EXPORT_DOWNLOAD';
+  return value === 'TENANT_DELETE_REQUEST' || value === 'TENANT_EXPORT_DOWNLOAD'
+    || value === 'DEMO_LEAD_EXPORT' || value === 'DEMO_LEAD_DELETE';
 }
