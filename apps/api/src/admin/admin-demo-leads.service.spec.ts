@@ -75,13 +75,18 @@ describe('AdminDemoLeadsService', () => {
     const prisma = { $transaction: vi.fn(async (operation: (client: typeof tx) => Promise<unknown>) => operation(tx)) };
     const audit = vi.fn().mockResolvedValue(undefined);
     const stepUp = { verify: vi.fn().mockReturnValue(true) };
-    const service = new AdminDemoLeadsService(prisma as never, audit, stepUp as never);
+    const service = new AdminDemoLeadsService(prisma as never, audit, stepUp as never, true);
     await expect(service.deleteOne(leadId, leadId, adminId, 'session-a', 'token')).resolves.toEqual({ deleted: true });
     expect(tx.demoLead.deleteMany).toHaveBeenCalledWith(expect.objectContaining({ where: expect.objectContaining({ id: leadId }) }));
     expect(audit).toHaveBeenCalledWith(tx, expect.objectContaining({ action: 'DEMO_LEAD_DELETED', metadata: { leadId, reason: 'CONTROLLER_REQUEST' } }));
     await expect(service.deleteOne(leadId, 'wrong-id', adminId, 'session-a', 'token')).rejects.toMatchObject({ status: 400 });
     tx.demoLead.findUnique.mockResolvedValue({ ...row, notificationLeaseId: '33333333-3333-4333-8333-333333333333', notificationLeaseExpiresAt: new Date(Date.now() + 60_000) });
     await expect(service.deleteOne(leadId, leadId, adminId, 'session-a', 'token')).rejects.toMatchObject({ status: 409 });
+  });
+
+  it('fails closed for deletion until the erasure recovery gate is enabled', async () => {
+    const service = new AdminDemoLeadsService({} as never, vi.fn(), { verify: () => true } as never);
+    await expect(service.deleteOne(leadId, leadId, adminId, 'session-a', 'token')).rejects.toMatchObject({ status: 503 });
   });
 
   it('escapes spreadsheet formulas and bounds the CSV export', async () => {

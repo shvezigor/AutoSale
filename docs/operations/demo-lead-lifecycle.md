@@ -1,6 +1,6 @@
 # Demo request contact lifecycle
 
-This capability is under implementation. The export/deletion API and UI are **not deployed or browser-accepted**. Do not enable scheduled erasure or rely on the privacy-period claim in production until the gates below pass.
+This capability is under implementation. The export/deletion API and UI are **not deployed or browser-accepted**. `DEMO_LEAD_ERASURE_ENABLED` defaults to `false` in both API and worker; when false, the delete action is hidden/refused and the scheduled purge does not run. Do not enable it or rely on the privacy-period claim in production until the gates below pass.
 
 ## Operator actions
 
@@ -13,7 +13,9 @@ This capability is under implementation. The export/deletion API and UI are **no
 
 The product default approved on 2026-10-20 is the earlier of 180 days after the last successful operator status change and 365 days after lead creation. Viewing a lead or notifying the internal mailbox does not extend the clock. This is a product rule pending legal review, not a statutory claim.
 
-The scheduled purge must remain disabled until an additive migration, database backup, independent restore test, count-only dry run and notification-fencing test pass. An off-host erasure/deletion ledger or equivalent recovery evidence is also required: restoring a backup must replay all erasures **before** any restored application or notification worker can read the database. A platform audit row in the same database alone is insufficient for a backup taken before deletion. Do not claim complete erasure or enable the automatic sweep without this recovery gate.
+The scheduled purge is implemented as a bounded PostgreSQL `FOR UPDATE SKIP LOCKED` function. It selects at most 100 due leads, refuses active notification leases, deletes eligible rows and appends a contact-free `SYSTEM` platform audit atomically. The worker invokes it on startup and daily **only** when `DEMO_LEAD_ERASURE_ENABLED=true`. The function is worker-only; API access is revoked. PostgreSQL tests cover 180/365-day boundaries, status-action extension, active/expired leases, row-lock contention, idempotency and notification replay after deletion.
+
+Keep the flag off until an additive migration, database backup, independent restore test, count-only dry run and notification-fencing test pass. An off-host erasure/deletion ledger or equivalent recovery evidence is also required: restoring a backup must replay all erasures **before** any restored application or notification worker can read the database. A platform audit row in the same database alone is insufficient for a backup taken before deletion. Do not claim complete erasure or enable the automatic sweep without this recovery gate.
 
 ## Recovery and verification
 

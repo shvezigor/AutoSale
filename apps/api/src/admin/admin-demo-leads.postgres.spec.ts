@@ -94,11 +94,11 @@ describe('AdminDemoLeadsService PostgreSQL audit boundary', () => {
       notificationLeaseId: randomUUID(), notificationLeaseExpiresAt: new Date(Date.now() + 60_000),
     } });
     const stepUp = { verify: () => true };
-    const service = new AdminDemoLeadsService(api, undefined, stepUp as never);
+    const service = new AdminDemoLeadsService(api, undefined, stepUp as never, true);
     await expect(service.deleteOne(lead.id, lead.id, adminId, 'fictional-session', 'fictional-token')).rejects.toMatchObject({ status: 409 });
     expect(await owner.demoLead.findUnique({ where: { id: lead.id } })).not.toBeNull();
     await owner.demoLead.update({ where: { id: lead.id }, data: { notificationLeaseExpiresAt: new Date(Date.now() - 1_000) } });
-    const failing = new AdminDemoLeadsService(api, async () => { throw new Error('fictional audit failure'); }, stepUp as never);
+    const failing = new AdminDemoLeadsService(api, async () => { throw new Error('fictional audit failure'); }, stepUp as never, true);
     await expect(failing.deleteOne(lead.id, lead.id, adminId, 'fictional-session', 'fictional-token')).rejects.toThrow('fictional audit failure');
     expect(await owner.demoLead.findUnique({ where: { id: lead.id } })).not.toBeNull();
     await expect(service.deleteOne(lead.id, lead.id, adminId, 'fictional-session', 'fictional-token')).resolves.toEqual({ deleted: true });

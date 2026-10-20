@@ -39,7 +39,7 @@ export class AdminModule {
       controllers: [AdminController, AdminDemoLeadsController],
       providers: [
         { provide: AdminService, useValue: new AdminService(prisma, undefined, monitoredQueues) },
-        { provide: AdminDemoLeadsService, useValue: new AdminDemoLeadsService(prisma, undefined, stepUp) },
+        { provide: AdminDemoLeadsService, useValue: new AdminDemoLeadsService(prisma, undefined, stepUp, env.DEMO_LEAD_ERASURE_ENABLED) },
         { provide: AdminIntegrationService, useValue: new AdminIntegrationService(prisma, integrationDeployment) },
         { provide: AdminStepUpService, useValue: stepUp },
         { provide: TenantLifecycleService, useValue: new TenantLifecycleService(

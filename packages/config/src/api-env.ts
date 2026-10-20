@@ -76,6 +76,7 @@ export const apiEnvSchema = z.object({
   SMTP_PASSWORD: z.preprocess((value) => value === '' ? undefined : value, z.string().min(1).optional()),
   SMTP_FROM: z.preprocess((value) => value === '' ? undefined : value, z.string().min(3).optional()),
   DEMO_LEAD_EMAIL: z.preprocess((value) => value === '' ? undefined : value, z.string().email().optional()),
+  DEMO_LEAD_ERASURE_ENABLED: optionalBoolean,
   TELEGRAM_BOT_TOKEN: z.preprocess(
     (value) => value === '' ? undefined : value,
     z.string().regex(/^\d{5,20}:[A-Za-z0-9_-]{30,}$/).optional(),

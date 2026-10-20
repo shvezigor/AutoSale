@@ -156,6 +156,10 @@ export async function configureRuntimeDatabaseRoles(
           REVOKE ALL ON FUNCTION public.worker_due_retention_dry_runs(timestamp with time zone, integer) FROM autosale_api;
           GRANT EXECUTE ON FUNCTION public.worker_due_retention_dry_runs(timestamp with time zone, integer) TO autosale_worker;
         END IF;
+        IF to_regprocedure('public.worker_purge_expired_demo_leads(timestamp with time zone,integer)') IS NOT NULL THEN
+          REVOKE ALL ON FUNCTION public.worker_purge_expired_demo_leads(timestamp with time zone, integer) FROM autosale_api;
+          GRANT EXECUTE ON FUNCTION public.worker_purge_expired_demo_leads(timestamp with time zone, integer) TO autosale_worker;
+        END IF;
         IF to_regprocedure('public.platform_order_counts()') IS NOT NULL THEN
           GRANT EXECUTE ON FUNCTION public.platform_order_counts() TO autosale_api;
           REVOKE ALL ON FUNCTION public.platform_order_counts() FROM autosale_worker;

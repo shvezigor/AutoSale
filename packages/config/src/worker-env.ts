@@ -31,6 +31,7 @@ export const workerEnvSchema = z.object({
   SMTP_PASSWORD: optionalNonEmptyString,
   SMTP_FROM: optionalNonEmptyString,
   DEMO_LEAD_EMAIL: optionalNonEmptyString,
+  DEMO_LEAD_ERASURE_ENABLED: optionalBoolean,
   CATALOGUE_AI_STRUCTURE_ANALYSIS: z.enum(['true', 'false']).default('true').transform((value) => value === 'true'),
   NOVA_POSHTA_DELIVERY_ENABLED: optionalBoolean,
   UKRPOSHTA_SANDBOX_SHIPMENTS_ENABLED: optionalBoolean,

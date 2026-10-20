@@ -2,7 +2,7 @@ import { Buffer } from 'node:buffer';
 
 import { parseWorkerEnv } from '@autosale/config/worker-env';
 import { retentionDryRunJobSchema, shipmentCreateJobSchema, telegramDeliveryJobSchema, tenantLifecycleJobSchema, ukrposhtaTrackingBatchJobSchema } from '@autosale/contracts';
-import { createPrismaClient, DemoLeadNotificationStore, PlatformChannelGate, ProcurementStore, withTenantTransaction } from '@autosale/database';
+import { createPrismaClient, DemoLeadNotificationStore, DemoLeadRetentionStore, PlatformChannelGate, ProcurementStore, withTenantTransaction } from '@autosale/database';
 import {
   createGoogleSheetsAdapter,
   CredentialCipher,
@@ -23,6 +23,7 @@ import { createWorkerHealthServer } from './health-server.js';
 import { createDemoLeadEmailSender } from './demo-leads/demo-lead-email.js';
 import { DemoLeadNotificationProcessor } from './demo-leads/demo-lead-notification.processor.js';
 import { DemoLeadNotificationReconciler } from './demo-leads/demo-lead-notification.reconciler.js';
+import { DemoLeadRetentionReconciler } from './demo-leads/demo-lead-retention.reconciler.js';
 import { FacebookProcessor } from './facebook/facebook.processor.js';
 import { InstagramProcessor } from './instagram/instagram.processor.js';
 import { InstagramAvatarCleanupReconciler } from './instagram/instagram-avatar-cleanup-reconciler.js';
@@ -180,6 +181,7 @@ async function bootstrap(): Promise<void> {
     demoLeadStore, demoLeadSender, demoLeadQueue,
   );
   const demoLeadReconciler = new DemoLeadNotificationReconciler(demoLeadStore, demoLeadQueue, undefined, demoLeadSender.configured);
+  const demoLeadRetention = new DemoLeadRetentionReconciler(new DemoLeadRetentionStore(prisma), env.DEMO_LEAD_ERASURE_ENABLED);
   const demoLeadJobSchema = z.object({ leadId: z.uuid() }).strict();
   const demoLeadWorker = new Worker('demo-leads', async (job) => {
     if (job.name !== 'demo-lead.notify') return;
@@ -813,6 +815,23 @@ async function bootstrap(): Promise<void> {
     }
   };
   const demoLeadReconcileTimer = setInterval(() => void reconcileDemoLeads(), 5_000);
+  let reconcilingDemoLeadRetention = false;
+  const reconcileDemoLeadRetention = async (): Promise<void> => {
+    if (reconcilingDemoLeadRetention || !env.DEMO_LEAD_ERASURE_ENABLED) return;
+    reconcilingDemoLeadRetention = true;
+    try {
+      const result = await demoLeadRetention.reconcile();
+      if (result.purged > 0 || result.busy > 0) logger.info('demo_lead_retention_completed', {
+        correlationId: 'system:demo-lead-retention', purged: result.purged, busy: result.busy,
+      });
+    } catch (error) {
+      metrics.increment('autosale_operations_total', { operation: 'demo_lead_retention', result: 'failure' });
+      logger.warn('demo_lead_retention_failed', {
+        correlationId: 'system:demo-lead-retention', errorCode: error instanceof Error ? error.name : 'UNKNOWN',
+      });
+    } finally { reconcilingDemoLeadRetention = false; }
+  };
+  const demoLeadRetentionTimer = setInterval(() => void reconcileDemoLeadRetention(), 24 * 60 * 60_000);
   let reconcilingCatalogueMappings = false;
   const reconcileCatalogueMappings = async (): Promise<void> => {
     if (reconcilingCatalogueMappings) return;
@@ -1110,6 +1129,7 @@ async function bootstrap(): Promise<void> {
   const replyDraftReconcileTimer = setInterval(() => void reconcileReplyDrafts(), 5_000);
   void pollExports();
   void reconcileDemoLeads();
+  void reconcileDemoLeadRetention();
   void reconcileCatalogueMappings();
   void reconcileInstagramEvents();
   void reconcileInstagramProfiles();
@@ -1131,6 +1151,7 @@ async function bootstrap(): Promise<void> {
   const shutdown = async (): Promise<void> => {
     clearInterval(sheetsTimer);
     clearInterval(demoLeadReconcileTimer);
+    clearInterval(demoLeadRetentionTimer);
     clearInterval(catalogueReconcileTimer);
     clearInterval(instagramReconcileTimer);
     clearInterval(instagramProfileReconcileTimer);

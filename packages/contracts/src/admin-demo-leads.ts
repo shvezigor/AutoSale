@@ -25,7 +25,7 @@ export const adminDemoLeadDetailSchema = z.object({
   id: z.uuid(), name: z.string(), company: z.string(), email: z.string().nullable(), phone: z.string().nullable(),
   orderVolume: z.string(), note: z.string().nullable(), locale: z.enum(['uk', 'en']), consentVersion: z.string(),
   consentedAt: z.iso.datetime(), status: adminDemoLeadStatusSchema, notificationStatus: adminDemoLeadNotificationStatusSchema,
-  createdAt: z.iso.datetime(), updatedAt: z.iso.datetime(), version: z.number().int(), lastOperatorActionAt: z.iso.datetime().nullable(),
+  createdAt: z.iso.datetime(), updatedAt: z.iso.datetime(), version: z.number().int(), lastOperatorActionAt: z.iso.datetime().nullable(), deletionAvailable: z.boolean(),
 }).strict();
 
 export type AdminDemoLeadStatus = z.infer<typeof adminDemoLeadStatusSchema>;

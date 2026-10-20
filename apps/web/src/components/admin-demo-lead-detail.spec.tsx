@@ -15,7 +15,7 @@ const lead = {
   email: 'olena@example.test', phone: null, orderVolume: 'UNDER_50', note: 'Fictional note', locale: 'en' as const,
   consentVersion: '2026-09-17', consentedAt: '2026-10-20T10:00:00.000Z', status: 'NEW' as const,
   notificationStatus: 'PENDING' as const, createdAt: '2026-10-20T10:00:00.000Z', updatedAt: '2026-10-20T10:00:00.000Z',
-  version: 0, lastOperatorActionAt: null,
+  version: 0, lastOperatorActionAt: null, deletionAvailable: true,
 };
 
 describe('AdminDemoLeadDetail', () => {
@@ -25,6 +25,12 @@ describe('AdminDemoLeadDetail', () => {
     expect(screen.getByText('olena@example.test')).toBeInTheDocument();
     expect(screen.getByText('Fictional note')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'До демозаявок' })).toHaveAttribute('href', '/admin/leads');
+  });
+
+  it('does not offer deletion while erasure recovery has not been enabled', () => {
+    render(<AdminDemoLeadDetail lead={{ ...lead, deletionAvailable: false }} />);
+    expect(screen.queryByRole('button', { name: 'Видалити заявку' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Завантажити JSON' })).toBeInTheDocument();
   });
 
   it('submits a versioned status change and refreshes persisted detail', async () => {

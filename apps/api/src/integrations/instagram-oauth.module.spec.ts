@@ -36,6 +36,7 @@ const env = {
   UKRPOSHTA_SANDBOX_SHIPMENTS_ENABLED: false,
   CATALOGUE_AI_STRUCTURE_ANALYSIS: true,
   SMTP_PORT: 587,
+  DEMO_LEAD_ERASURE_ENABLED: false,
 } satisfies ApiEnv;
 
 describe('InstagramOAuthModule', () => {

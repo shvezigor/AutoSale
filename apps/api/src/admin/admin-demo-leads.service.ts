@@ -1,5 +1,5 @@
 import { appendSecurityAudit, type PrismaClient } from '@autosale/database';
-import { BadRequestException, ConflictException, ForbiddenException, NotFoundException, PayloadTooLargeException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, NotFoundException, PayloadTooLargeException, ServiceUnavailableException } from '@nestjs/common';
 
 import type { AdminStepUpService } from './admin-step-up.service.js';
 
@@ -28,6 +28,7 @@ export class AdminDemoLeadsService {
     private readonly prisma: PrismaClient,
     private readonly audit = appendSecurityAudit,
     private readonly stepUp?: Pick<AdminStepUpService, 'verify'>,
+    private readonly erasureEnabled = false,
   ) {}
 
   private requireStepUp(token: string, adminId: string, sessionId: string, purpose: 'DEMO_LEAD_EXPORT' | 'DEMO_LEAD_DELETE') {
@@ -77,6 +78,7 @@ export class AdminDemoLeadsService {
   }
 
   async deleteOne(id: string, confirmId: string, adminId: string, sessionId: string, token: string): Promise<{ deleted: true }> {
+    if (!this.erasureEnabled) throw new ServiceUnavailableException('DEMO_LEAD_ERASURE_DISABLED');
     this.requireStepUp(token, adminId, sessionId, 'DEMO_LEAD_DELETE');
     if (confirmId !== id) throw new BadRequestException('DEMO_LEAD_CONFIRM_ID');
     return this.prisma.$transaction(async (tx) => {
@@ -132,6 +134,7 @@ export class AdminDemoLeadsService {
       consentedAt: row.consentedAt.toISOString(), status: row.lifecycleStatus, notificationStatus: row.notificationStatus,
       createdAt: row.createdAt.toISOString(), updatedAt: row.updatedAt.toISOString(), version: row.version,
       lastOperatorActionAt: row.lastOperatorActionAt?.toISOString() ?? null,
+      deletionAvailable: this.erasureEnabled,
     };
   }
 
