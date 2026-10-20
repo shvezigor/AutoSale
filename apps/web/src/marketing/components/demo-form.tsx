@@ -13,7 +13,7 @@ const issueAllowlist = { name: ['INVALID_NAME'], company: ['INVALID_COMPANY'], e
 
 export function DemoForm({ locale }: { locale: Locale }) {
   const uk = locale === 'uk';
-  const [status, setStatus] = useState<'idle' | 'pending' | 'success' | 'error'>('idle');
+  const [status, setStatus] = useState<'idle' | 'pending' | 'success' | 'rate-limited' | 'unavailable' | 'error'>('idle');
   const [fieldErrors, setFieldErrors] = useState<FieldErrors<DemoField>>({});
   const idempotencyKey = useRef(crypto.randomUUID());
   const copy = (ua: string, en: string) => uk ? ua : en;
@@ -55,6 +55,8 @@ export function DemoForm({ locale }: { locale: Locale }) {
     try {
       const response = await fetch('/api/demo-leads', { method: 'POST', headers: { 'content-type': 'application/json', 'idempotency-key': idempotencyKey.current }, body: JSON.stringify({ ...payload, locale, privacyConsent: true }) });
       if (response.ok) { setStatus('success'); return; }
+      if (response.status === 429) { setStatus('rate-limited'); return; }
+      if (response.status === 503) { setStatus('unavailable'); return; }
       const failure = await parseValidationFailure(response, issueAllowlist);
       if (failure) {
         const next: FieldErrors<DemoField> = {};
@@ -66,12 +68,13 @@ export function DemoForm({ locale }: { locale: Locale }) {
         focus(form, next);
         setStatus('idle');
       } else setStatus('error');
-    } catch { setStatus('error'); }
+    } catch { setStatus('unavailable'); }
   }
 
   if (status === 'success') return <div className="demo-form" role="status"><h2>{copy('Заявку отримано', 'Request received')}</h2><p>{copy('Команда Sales AITO зв’яжеться з вами, щоб узгодити демо.', 'The Sales AITO team will contact you to arrange the demo.')}</p></div>;
 
   return <form className="demo-form" onSubmit={(event) => void submit(event)} noValidate aria-describedby="demo-form-status">
+    <label aria-hidden="true" style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clipPath: 'inset(50%)' }}>Website<input name="companyWebsite" type="text" autoComplete="off" tabIndex={-1} /></label>
     <FormField id="demo-name" label={copy('Ім’я', 'Name')} error={fieldErrors.name} required><input name="name" minLength={2} maxLength={100} autoComplete="name" onChange={() => clear('name')} /></FormField>
     <FormField id="demo-company" label={copy('Компанія або магазин', 'Company or store')} error={fieldErrors.company} required><input name="company" minLength={2} maxLength={160} autoComplete="organization" onChange={() => clear('company')} /></FormField>
     <FormField id="demo-email" label="Email" error={fieldErrors.email}><input name="email" type="email" maxLength={254} autoComplete="email" onChange={() => clear('email')} /></FormField>
@@ -81,6 +84,10 @@ export function DemoForm({ locale }: { locale: Locale }) {
     <label className="demo-form__consent"><input name="privacyConsent" type="checkbox" aria-invalid={Boolean(fieldErrors.privacyConsent)} aria-describedby={fieldErrors.privacyConsent ? 'demo-privacyConsent-error' : undefined} onChange={() => clear('privacyConsent')} /><span>{copy('Погоджуюсь на обробку даних для організації демо.', 'I agree to data processing for arranging the demo.')}</span></label>
     <FieldError id="demo-privacyConsent-error" message={fieldErrors.privacyConsent} />
     <LoadingButton className="primary-button marketing-button" type="submit" pending={status === 'pending'} pendingLabel={copy('Надсилаємо…', 'Sending…')}>{copy('Замовити демо', 'Book a demo')}</LoadingButton>
-    <p className="demo-form__status" id="demo-form-status" role="status">{status === 'error' ? copy('Не вдалося надіслати. Перевірте контактні дані й спробуйте ще раз.', 'Could not submit. Check your contact details and try again.') : ''}</p>
+    <p className="demo-form__status" id="demo-form-status" role="status">{
+      status === 'rate-limited' ? copy('Забагато запитів. Спробуйте надіслати форму пізніше.', 'Too many requests. Please try again later.')
+        : status === 'unavailable' ? copy('Сервіс тимчасово недоступний. Спробуйте ще раз пізніше.', 'The service is temporarily unavailable. Please try again later.')
+          : status === 'error' ? copy('Не вдалося надіслати. Спробуйте ще раз.', 'Could not submit. Please try again.') : ''
+    }</p>
   </form>;
 }

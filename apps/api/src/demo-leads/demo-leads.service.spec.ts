@@ -7,6 +7,13 @@ const input = { name: 'Fictional Olena', company: 'Example Store', email: 'lead@
 const lead = { id: '00000000-0000-4000-8000-000000000001', idempotencyKey: 'fictional-key', notificationStatus: 'PENDING' };
 
 describe('DemoLeadsService', () => {
+  it('finds a prior accepted idempotency key without exposing lead contact', async () => {
+    const prisma = { demoLead: { findUnique: vi.fn().mockResolvedValue({ id: lead.id }) } };
+    const service = new DemoLeadsService(prisma as never, { add: vi.fn() } as never);
+    await expect(service.findAccepted('fictional-key')).resolves.toEqual({ id: lead.id, accepted: true });
+    expect(prisma.demoLead.findUnique).toHaveBeenCalledWith({ where: { idempotencyKey: 'fictional-key' }, select: { id: true } });
+  });
+
   it('persists before adding an ID-only job and leaves delivery to the worker', async () => {
     const events: string[] = [];
     const prisma = { demoLead: { create: vi.fn(async () => { events.push('persist'); return lead; }), update: vi.fn() } };

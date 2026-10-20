@@ -40,7 +40,7 @@
 
 **Interfaces:** Produce `DemoLeadAbuseService.check(input: { ipPrefix: string; contact: string; idempotencyKey: string }): Promise<void>`; it throws safe 429 or 503. `DemoLeadsService.create` remains the durable acceptance method.
 
-- [ ] **Step 1: Write red tests** for independent IP and contact quotas, simultaneous calls, expired windows, ignored spoofed `x-forwarded-for`, repeat accepted idempotency, honeypot no-write, and localized 429/503 with preserved form values. Example test assertions:
+- [x] **Step 1: Write red tests** for independent IP and contact quotas, simultaneous calls, expired windows, ignored spoofed `x-forwarded-for`, repeat accepted idempotency, honeypot no-write, and localized 429/503 with preserved form values. Example test assertions:
 
 ```ts
 await expect(abuse.check({ ipPrefix: '192.0.2.0/24', contact: 'a@example.test', idempotencyKey: 'same' })).resolves.toBeUndefined();
@@ -48,16 +48,16 @@ await expect(abuse.check({ ipPrefix: '192.0.2.0/24', contact: 'b@example.test', 
 expect(prisma.demoLead.create).not.toHaveBeenCalled(); // honeypot request
 ```
 
-- [ ] **Step 2: Run failing focused tests.** `pnpm --filter @autosale/api test -- demo-lead-abuse demo-leads.controller` and `pnpm --filter @autosale/web test -- demo-form`; verify failures point to the new contract, not missing Docker.
-- [ ] **Step 3: Implement** an atomic Redis Lua `INCR` plus first-key `EXPIRE` operation for two HMAC keys derived with `AUTH_TOKEN_PEPPER`; take the trusted request IP from Nest/Express `request.ip`, never a raw forwarded header. Check the existing idempotency key in PostgreSQL before consuming a new quota; enforce the 16 KiB JSON body limit at the application adapter. Use a visually hidden, `aria-hidden`/`tabIndex=-1` `companyWebsite` honeypot that is stripped before the strict `demoLeadInputSchema`. Return generic accepted-looking output with no new row on honeypot hits. Represent `429` with `Retry-After`; map Redis failure to safe `503`. Example key derivation:
+- [x] **Step 2: Run failing focused tests.** `pnpm --filter @autosale/api test -- demo-lead-abuse demo-leads.controller` and `pnpm --filter @autosale/web test -- demo-form`; verify failures point to the new contract, not missing Docker.
+- [x] **Step 3: Implement** an atomic Redis Lua `INCR` plus first-key `EXPIRE` operation for two HMAC keys derived with `AUTH_TOKEN_PEPPER`; take the trusted request IP from Nest/Express `request.ip`, never a raw forwarded header. Check the existing idempotency key in PostgreSQL before consuming a new quota; enforce the 16 KiB JSON body limit at the application adapter. Use a visually hidden, `aria-hidden`/`tabIndex=-1` `companyWebsite` honeypot that is stripped before the strict `demoLeadInputSchema`. Return generic accepted-looking output with no new row on honeypot hits. Represent `429` with `Retry-After`; map Redis failure to safe `503`. Example key derivation:
 
 ```ts
 const digest = createHmac('sha256', pepper).update(`${kind}\0${value}`).digest('hex');
 const redisKey = `demo-rate:${kind}:${digest}`;
 ```
 
-- [ ] **Step 4: Run focused tests and typecheck.** `pnpm --filter @autosale/api test -- demo-lead-abuse demo-leads.controller demo-leads.service`; `pnpm --filter @autosale/web test -- demo-form`; `pnpm --filter @autosale/api typecheck`; `pnpm --filter @autosale/web typecheck`. Record exact rate defaults and error copy in the canonical spec and marketing release runbook.
-- [ ] **Step 5: Commit only this increment.** Stage the named source, tests and docs; inspect `git diff --cached --check` and `git diff --cached --name-only`; commit `feat: protect public demo requests`.
+- [x] **Step 4: Run focused tests and typecheck.** `pnpm --filter @autosale/api test -- demo-lead-abuse demo-leads.controller demo-leads.service`; `pnpm --filter @autosale/web test -- demo-form`; `pnpm --filter @autosale/api typecheck`; `pnpm --filter @autosale/web typecheck`. Record exact rate defaults and error copy in the canonical spec and marketing release runbook.
+- [x] **Step 5: Commit only this increment.** Stage the named source, tests and docs; inspect `git diff --cached --check` and `git diff --cached --name-only`; commit `feat: protect public demo requests`.
 
 ## Task 2: Admin queue, contact detail and audited status changes
 

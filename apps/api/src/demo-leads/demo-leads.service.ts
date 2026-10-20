@@ -9,6 +9,11 @@ export class DemoLeadsService {
     private readonly enqueueTimeoutMs = 1_500,
   ) {}
 
+  async findAccepted(idempotencyKey: string): Promise<{ id: string; accepted: true } | null> {
+    const lead = await this.prisma.demoLead.findUnique({ where: { idempotencyKey }, select: { id: true } });
+    return lead ? { id: lead.id, accepted: true } : null;
+  }
+
   async create(input: DemoLeadInput, idempotencyKey: string): Promise<{ id: string; accepted: true }> {
     let lead;
     try {

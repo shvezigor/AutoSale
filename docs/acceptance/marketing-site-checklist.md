@@ -27,6 +27,8 @@ Original acceptance date: 2026-09-17. Release status reconciled on 2026-10-15 ag
 
 ## External launch prerequisites
 
+- [ ] 2026-10-20 public abuse-protection increment: focused API/web tests, API/web typecheck, disposable Redis concurrency/expiry and Caddyfile adaptation passed in the feature worktree. After manual deployment, verify a fictional valid lead, persisted accepted replay, 429 `Retry-After`, localized 429/503 states with retained values, and the trusted Cloudflare Tunnel client-IP boundary in a real browser. No deployed-browser acceptance is claimed yet.
+
 - [x] Deploy the integrated marketing release to the production host on 2026-09-18; the initial 2026-09-17 build was rolled back before the corrected release.
 - [x] Apply migration `20260917150000_demo_leads` in production, as recorded in the release runbook.
 - [ ] Configure `DEMO_LEAD_EMAIL` and SMTP, then verify a real internal notification.

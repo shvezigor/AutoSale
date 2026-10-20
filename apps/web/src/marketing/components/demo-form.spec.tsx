@@ -31,7 +31,37 @@ describe('DemoForm', () => {
     fireEvent.change(screen.getByLabelText('Monthly orders'), { target: { value: 'UNDER_50' } });
     fireEvent.click(screen.getByRole('checkbox'));
     fireEvent.click(screen.getByRole('button', { name: 'Book a demo' }));
-    expect(await screen.findByText(/Could not submit/)).toBeInTheDocument();
+    expect(await screen.findByText(/temporarily unavailable/)).toBeInTheDocument();
     expect(screen.getByLabelText('Name')).toHaveValue('Alice');
+  });
+
+  it('explains a rate limit in Ukrainian while preserving fields for a later retry', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 429 }));
+    render(<DemoForm locale="uk" />);
+    fireEvent.change(screen.getByLabelText('Ім’я'), { target: { value: 'Олена' } });
+    fireEvent.change(screen.getByLabelText('Компанія або магазин'), { target: { value: 'Вигаданий магазин' } });
+    fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'olena@example.test' } });
+    fireEvent.change(screen.getByLabelText('Замовлень на місяць'), { target: { value: 'UNDER_50' } });
+    fireEvent.click(screen.getByRole('checkbox'));
+    fireEvent.click(screen.getByRole('button', { name: 'Замовити демо' }));
+    expect(await screen.findByText(/Забагато запитів/)).toBeInTheDocument();
+    expect(screen.getByLabelText('Ім’я')).toHaveValue('Олена');
+    expect(screen.getByLabelText('Email')).toHaveValue('olena@example.test');
+  });
+
+  it('submits an empty screen-reader-hidden bot field without showing it to a user', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true });
+    vi.stubGlobal('fetch', fetchMock);
+    render(<DemoForm locale="en" />);
+    expect(screen.queryByRole('textbox', { name: /website/i })).not.toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Alice' } });
+    fireEvent.change(screen.getByLabelText('Company or store'), { target: { value: 'Fictional Shop' } });
+    fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'alice@example.test' } });
+    fireEvent.change(screen.getByLabelText('Monthly orders'), { target: { value: 'UNDER_50' } });
+    fireEvent.click(screen.getByRole('checkbox'));
+    fireEvent.click(screen.getByRole('button', { name: 'Book a demo' }));
+    await screen.findByText('Request received');
+    const payload = JSON.parse(fetchMock.mock.calls[0]![1].body);
+    expect(payload.companyWebsite).toBe('');
   });
 });

@@ -1,6 +1,6 @@
 # Demo lead operations and privacy-minimal conversion measurement
 
-**Status:** design approved in chat on 2026-10-20; implementation pending.
+**Status:** design approved in chat on 2026-10-20; public abuse-protection increment implemented in the feature branch, not yet deployed or browser-accepted. Remaining increments pending.
 
 ## Outcome and boundaries
 
@@ -20,6 +20,8 @@ The work is five independently testable increments: public abuse protection; adm
 - Use Redis atomic counters with expiring keys, separately for a trusted client IP (`10` new requests per 10 minutes) and a normalized contact HMAC (`3` new requests per 24 hours). Never trust an arbitrary browser-supplied forwarding header; use the configured proxy trust boundary. No raw IP, email or phone enters Redis keys, logs or metrics. A repeat of an already accepted idempotency key is returned as the same accepted lead and does not consume another quota.
 - Rate limits are a bounded configuration with conservative defaults and tests for multiple API instances, simultaneous requests, expiry, spoofed headers and legitimate retries. A limit returns HTTP 429 with `Retry-After`; Redis outage fails closed with a safe 503. The form localizes both states at form level, preserves entries, exposes an accessible live message and does not reset its idempotency key after a transient failure. Existing field-level validation remains intact.
 - Do not add a third-party CAPTCHA or analytics cookie. Count limiter outcomes without retaining contact values.
+
+Implementation increment (2026-10-20): the public route checks a 16 KiB raw JSON limit, suppresses a screen-reader-hidden `companyWebsite` honeypot without persistence, and returns an already accepted idempotency key before consuming quota. Atomic Redis Lua checks and increments an IP and a normalized contact counter together; defaults are 10 per IP/600 seconds and 3 per contact/86,400 seconds. Email is trimmed/lowercased; phone formatting is stripped to digits. Redis keys contain only HMAC-SHA256 digests using `AUTH_TOKEN_PEPPER`, never raw IP/contact. Caddy accepts `CF-Connecting-IP` only from trusted private-network peers (the tunnel), replaces the API-bound forwarding chain with one parsed client address, and Express trusts exactly Caddy's hop. A limit returns 429 with `Retry-After`; Redis outage returns 503. The form preserves entered values and its idempotency key, with localized rate-limit and outage text. Focused unit/type tests and an isolated disposable-Redis concurrency/expiry test passed; the deployed browser/proxy behavior remains an explicit acceptance gate.
 
 ## 2. Platform-admin lead queue
 
