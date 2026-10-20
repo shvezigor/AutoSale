@@ -27,7 +27,9 @@ Original acceptance date: 2026-09-17. Release status reconciled on 2026-10-15 ag
 
 ## External launch prerequisites
 
-- [ ] 2026-10-20 public abuse-protection increment: focused API/web tests, API/web typecheck, disposable Redis concurrency/expiry and Caddyfile adaptation passed in the feature worktree. After manual deployment, verify a fictional valid lead, persisted accepted replay, 429 `Retry-After`, localized 429/503 states with retained values, and the trusted Cloudflare Tunnel client-IP boundary in a real browser. No deployed-browser acceptance is claimed yet.
+- [x] 2026-10-20: the public abuse-protection code was manually deployed after a checksum-verified backup and isolated PostgreSQL restore. Production Playwright verified the real form's localized 429 and 503 states with retained fictional values using intercepted responses; a screenshot of the 429 state is stored in ignored Playwright output. Public pricing-signal payload, locale navigation, SEO, responsive layout, demo success and invalid-field tests also passed. The 429/503 browser checks verify UI handling, **not** that production Redis actually throttled or failed.
+- [ ] Repeat with one approved fictional lead and its idempotent replay, inspect actual `Retry-After` after a controlled quota test, and verify the Cloudflare Tunnel client-IP boundary without logging raw IPs. Do not induce a Redis outage on the live host merely for this checklist.
+- [ ] The platform-admin demo queue/detail/status/export and aggregate conversion report still require a platform-admin browser session. Automated E2E cases are present but skipped without `E2E_ADMIN_EMAIL` and `E2E_ADMIN_PASSWORD`; this is not accepted browser coverage.
 
 - [x] Deploy the integrated marketing release to the production host on 2026-09-18; the initial 2026-09-17 build was rolled back before the corrected release.
 - [x] Apply migration `20260917150000_demo_leads` in production, as recorded in the release runbook.
