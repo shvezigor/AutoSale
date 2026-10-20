@@ -371,3 +371,13 @@ export type Attachment = Prisma.AttachmentModel
  * 
  */
 export type DemoLead = Prisma.DemoLeadModel
+/**
+ * Model MarketingDailyCounter
+ *
+ */
+export type MarketingDailyCounter = Prisma.MarketingDailyCounterModel
+/**
+ * Model TenantPlanInterest
+ *
+ */
+export type TenantPlanInterest = Prisma.TenantPlanInterestModel

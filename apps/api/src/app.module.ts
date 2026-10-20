@@ -28,6 +28,7 @@ import { CommercialSettingsModule } from './commercial-settings/commercial-setti
 import { TenantLifecycleExceptionFilter } from './common/tenant-lifecycle-exception.filter.js';
 import { SearchModule } from './search/search.module.js';
 import { TikTokModule } from './tiktok/tiktok.module.js';
+import { ConversionModule } from './conversion/conversion.module.js';
 
 @Module({
   controllers: [HealthController],
@@ -61,6 +62,7 @@ export class AppModule {
         CommercialSettingsModule.register(env),
         SearchModule.register(env),
         TikTokModule.register(env),
+        ConversionModule.register(env),
       ],
       providers: [{ provide: APP_FILTER, useClass: TenantLifecycleExceptionFilter }],
     };

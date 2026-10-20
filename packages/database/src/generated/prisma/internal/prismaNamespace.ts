@@ -462,7 +462,9 @@ export const ModelName = {
   CatalogueMapping: 'CatalogueMapping',
   CatalogueImportRun: 'CatalogueImportRun',
   Attachment: 'Attachment',
-  DemoLead: 'DemoLead'
+  DemoLead: 'DemoLead',
+  MarketingDailyCounter: 'MarketingDailyCounter',
+  TenantPlanInterest: 'TenantPlanInterest'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -478,7 +480,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "tenant" | "tenantLifecycleRequest" | "tenantRetentionDryRun" | "googleConnection" | "googleOAuthAttempt" | "googleCredentialCleanup" | "instagramConnection" | "instagramOAuthState" | "instagramCredentialCleanup" | "facebookConnection" | "facebookOAuthAttempt" | "facebookCredentialCleanup" | "tikTokConnection" | "tikTokOAuthAttempt" | "tikTokCredentialCleanup" | "user" | "userAvatarCleanup" | "userNotification" | "telegramLinkAttempt" | "telegramUserBinding" | "telegramBusinessConnection" | "telegramChat" | "telegramSupplierSetting" | "telegramWebhookUpdate" | "telegramDelivery" | "googleIdentity" | "googleSignInAttempt" | "tenantMembership" | "session" | "emailVerificationToken" | "passwordResetToken" | "tenantInvitation" | "securityAuditLog" | "platformFeatureFlag" | "webhookEvent" | "conversation" | "instagramCustomerProfile" | "instagramAvatarCleanup" | "message" | "googleSheetsDestination" | "tenantSettings" | "tenantReplyStyle" | "aiReplyDraft" | "tenantLegalEntity" | "tenantBankAccount" | "order" | "orderCommercialTerms" | "orderPayment" | "orderIntentEvaluation" | "deliveryConnection" | "deliverySenderProfile" | "shipment" | "shipmentAttempt" | "shipmentStatusEvent" | "orderExport" | "auditLog" | "orderItem" | "product" | "inventoryReservation" | "telegramDeliveryItem" | "telegramNotificationPreference" | "catalogueSource" | "catalogueMapping" | "catalogueImportRun" | "attachment" | "demoLead"
+    modelProps: "tenant" | "tenantLifecycleRequest" | "tenantRetentionDryRun" | "googleConnection" | "googleOAuthAttempt" | "googleCredentialCleanup" | "instagramConnection" | "instagramOAuthState" | "instagramCredentialCleanup" | "facebookConnection" | "facebookOAuthAttempt" | "facebookCredentialCleanup" | "tikTokConnection" | "tikTokOAuthAttempt" | "tikTokCredentialCleanup" | "user" | "userAvatarCleanup" | "userNotification" | "telegramLinkAttempt" | "telegramUserBinding" | "telegramBusinessConnection" | "telegramChat" | "telegramSupplierSetting" | "telegramWebhookUpdate" | "telegramDelivery" | "googleIdentity" | "googleSignInAttempt" | "tenantMembership" | "session" | "emailVerificationToken" | "passwordResetToken" | "tenantInvitation" | "securityAuditLog" | "platformFeatureFlag" | "webhookEvent" | "conversation" | "instagramCustomerProfile" | "instagramAvatarCleanup" | "message" | "googleSheetsDestination" | "tenantSettings" | "tenantReplyStyle" | "aiReplyDraft" | "tenantLegalEntity" | "tenantBankAccount" | "order" | "orderCommercialTerms" | "orderPayment" | "orderIntentEvaluation" | "deliveryConnection" | "deliverySenderProfile" | "shipment" | "shipmentAttempt" | "shipmentStatusEvent" | "orderExport" | "auditLog" | "orderItem" | "product" | "inventoryReservation" | "telegramDeliveryItem" | "telegramNotificationPreference" | "catalogueSource" | "catalogueMapping" | "catalogueImportRun" | "attachment" | "demoLead" | "marketingDailyCounter" | "tenantPlanInterest"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -5366,6 +5368,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    MarketingDailyCounter: {
+      payload: Prisma.$MarketingDailyCounterPayload<ExtArgs>
+      fields: Prisma.MarketingDailyCounterFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MarketingDailyCounterFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MarketingDailyCounterPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MarketingDailyCounterFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MarketingDailyCounterPayload>
+        }
+        findFirst: {
+          args: Prisma.MarketingDailyCounterFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MarketingDailyCounterPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MarketingDailyCounterFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MarketingDailyCounterPayload>
+        }
+        findMany: {
+          args: Prisma.MarketingDailyCounterFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MarketingDailyCounterPayload>[]
+        }
+        create: {
+          args: Prisma.MarketingDailyCounterCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MarketingDailyCounterPayload>
+        }
+        createMany: {
+          args: Prisma.MarketingDailyCounterCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MarketingDailyCounterCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MarketingDailyCounterPayload>[]
+        }
+        delete: {
+          args: Prisma.MarketingDailyCounterDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MarketingDailyCounterPayload>
+        }
+        update: {
+          args: Prisma.MarketingDailyCounterUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MarketingDailyCounterPayload>
+        }
+        deleteMany: {
+          args: Prisma.MarketingDailyCounterDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MarketingDailyCounterUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MarketingDailyCounterUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MarketingDailyCounterPayload>[]
+        }
+        upsert: {
+          args: Prisma.MarketingDailyCounterUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MarketingDailyCounterPayload>
+        }
+        aggregate: {
+          args: Prisma.MarketingDailyCounterAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMarketingDailyCounter>
+        }
+        groupBy: {
+          args: Prisma.MarketingDailyCounterGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MarketingDailyCounterGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MarketingDailyCounterCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MarketingDailyCounterCountAggregateOutputType> | number
+        }
+      }
+    }
+    TenantPlanInterest: {
+      payload: Prisma.$TenantPlanInterestPayload<ExtArgs>
+      fields: Prisma.TenantPlanInterestFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TenantPlanInterestFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantPlanInterestPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TenantPlanInterestFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantPlanInterestPayload>
+        }
+        findFirst: {
+          args: Prisma.TenantPlanInterestFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantPlanInterestPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TenantPlanInterestFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantPlanInterestPayload>
+        }
+        findMany: {
+          args: Prisma.TenantPlanInterestFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantPlanInterestPayload>[]
+        }
+        create: {
+          args: Prisma.TenantPlanInterestCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantPlanInterestPayload>
+        }
+        createMany: {
+          args: Prisma.TenantPlanInterestCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TenantPlanInterestCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantPlanInterestPayload>[]
+        }
+        delete: {
+          args: Prisma.TenantPlanInterestDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantPlanInterestPayload>
+        }
+        update: {
+          args: Prisma.TenantPlanInterestUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantPlanInterestPayload>
+        }
+        deleteMany: {
+          args: Prisma.TenantPlanInterestDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TenantPlanInterestUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TenantPlanInterestUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantPlanInterestPayload>[]
+        }
+        upsert: {
+          args: Prisma.TenantPlanInterestUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantPlanInterestPayload>
+        }
+        aggregate: {
+          args: Prisma.TenantPlanInterestAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTenantPlanInterest>
+        }
+        groupBy: {
+          args: Prisma.TenantPlanInterestGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TenantPlanInterestGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TenantPlanInterestCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TenantPlanInterestCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -6702,6 +6852,28 @@ export const DemoLeadScalarFieldEnum = {
 export type DemoLeadScalarFieldEnum = (typeof DemoLeadScalarFieldEnum)[keyof typeof DemoLeadScalarFieldEnum]
 
 
+export const MarketingDailyCounterScalarFieldEnum = {
+  day: 'day',
+  event: 'event',
+  locale: 'locale',
+  planId: 'planId',
+  count: 'count'
+} as const
+
+export type MarketingDailyCounterScalarFieldEnum = (typeof MarketingDailyCounterScalarFieldEnum)[keyof typeof MarketingDailyCounterScalarFieldEnum]
+
+
+export const TenantPlanInterestScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  planId: 'planId',
+  day: 'day',
+  createdAt: 'createdAt'
+} as const
+
+export type TenantPlanInterestScalarFieldEnum = (typeof TenantPlanInterestScalarFieldEnum)[keyof typeof TenantPlanInterestScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -7679,6 +7851,8 @@ export type GlobalOmitConfig = {
   catalogueImportRun?: Prisma.CatalogueImportRunOmit
   attachment?: Prisma.AttachmentOmit
   demoLead?: Prisma.DemoLeadOmit
+  marketingDailyCounter?: Prisma.MarketingDailyCounterOmit
+  tenantPlanInterest?: Prisma.TenantPlanInterestOmit
 }
 
 /* Types for Logging */

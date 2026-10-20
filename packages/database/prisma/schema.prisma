@@ -373,6 +373,7 @@ model Tenant {
   orderPayments                   OrderPayment[]
   lifecycleRequests               TenantLifecycleRequest[]
   retentionDryRuns                TenantRetentionDryRun[]
+  planInterests                   TenantPlanInterest[]
 
   @@index([status])
   @@map("tenants")
@@ -1942,4 +1943,29 @@ model DemoLead {
   @@index([notificationStatus, createdAt])
   @@index([notificationStatus, notificationNextAttemptAt])
   @@map("demo_leads")
+}
+
+model MarketingDailyCounter {
+  day       DateTime @db.Date
+  event     String
+  locale    String
+  planId    String   @map("plan_id")
+  count     Int      @default(0)
+
+  @@id([day, event, locale, planId])
+  @@index([day, event])
+  @@map("marketing_daily_counters")
+}
+
+model TenantPlanInterest {
+  id        String   @id @default(uuid()) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  planId    String   @map("plan_id")
+  day       DateTime @db.Date
+  createdAt DateTime @default(now()) @map("created_at")
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, planId, day])
+  @@index([createdAt])
+  @@map("tenant_plan_interests")
 }

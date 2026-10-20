@@ -102,6 +102,9 @@ export async function configureRuntimeDatabaseRoles(
         REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC;
       DO $platform_flags$
       BEGIN
+        IF to_regclass('public.marketing_daily_counters') IS NOT NULL THEN
+          REVOKE ALL ON TABLE public.marketing_daily_counters FROM autosale_api, autosale_worker;
+        END IF;
         IF to_regclass('public.platform_feature_flags') IS NOT NULL THEN
           REVOKE INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER
             ON TABLE public.platform_feature_flags FROM autosale_worker, autosale_backup;
@@ -159,6 +162,10 @@ export async function configureRuntimeDatabaseRoles(
         IF to_regprocedure('public.worker_purge_expired_demo_leads(timestamp with time zone,integer)') IS NOT NULL THEN
           REVOKE ALL ON FUNCTION public.worker_purge_expired_demo_leads(timestamp with time zone, integer) FROM autosale_api;
           GRANT EXECUTE ON FUNCTION public.worker_purge_expired_demo_leads(timestamp with time zone, integer) TO autosale_worker;
+        END IF;
+        IF to_regprocedure('public.api_increment_marketing_counter(text,text,text)') IS NOT NULL THEN
+          GRANT EXECUTE ON FUNCTION public.api_increment_marketing_counter(text, text, text) TO autosale_api;
+          REVOKE ALL ON FUNCTION public.api_increment_marketing_counter(text, text, text) FROM autosale_worker;
         END IF;
         IF to_regprocedure('public.platform_order_counts()') IS NOT NULL THEN
           GRANT EXECUTE ON FUNCTION public.platform_order_counts() TO autosale_api;

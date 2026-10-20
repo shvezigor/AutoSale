@@ -116,7 +116,9 @@ export const ModelName = {
   CatalogueMapping: 'CatalogueMapping',
   CatalogueImportRun: 'CatalogueImportRun',
   Attachment: 'Attachment',
-  DemoLead: 'DemoLead'
+  DemoLead: 'DemoLead',
+  MarketingDailyCounter: 'MarketingDailyCounter',
+  TenantPlanInterest: 'TenantPlanInterest'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1430,6 +1432,28 @@ export const DemoLeadScalarFieldEnum = {
 } as const
 
 export type DemoLeadScalarFieldEnum = (typeof DemoLeadScalarFieldEnum)[keyof typeof DemoLeadScalarFieldEnum]
+
+
+export const MarketingDailyCounterScalarFieldEnum = {
+  day: 'day',
+  event: 'event',
+  locale: 'locale',
+  planId: 'planId',
+  count: 'count'
+} as const
+
+export type MarketingDailyCounterScalarFieldEnum = (typeof MarketingDailyCounterScalarFieldEnum)[keyof typeof MarketingDailyCounterScalarFieldEnum]
+
+
+export const TenantPlanInterestScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  planId: 'planId',
+  day: 'day',
+  createdAt: 'createdAt'
+} as const
+
+export type TenantPlanInterestScalarFieldEnum = (typeof TenantPlanInterestScalarFieldEnum)[keyof typeof TenantPlanInterestScalarFieldEnum]
 
 
 export const SortOrder = {

@@ -37,6 +37,7 @@ const env = {
   CATALOGUE_AI_STRUCTURE_ANALYSIS: true,
   SMTP_PORT: 587,
   DEMO_LEAD_ERASURE_ENABLED: false,
+  MARKETING_ANALYTICS_ENABLED: false,
 } satisfies ApiEnv;
 
 describe('InstagramOAuthModule', () => {
