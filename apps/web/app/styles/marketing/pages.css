@@ -109,7 +109,7 @@
 .demo-form textarea { min-height: 110px; resize: vertical; }
 .demo-form__consent { display: grid !important; grid-template-columns: auto 1fr; align-items: start; font-weight: 500 !important; line-height: 1.45; }
 .demo-form__consent input { width: 18px; min-height: 18px; margin-top: 2px; }
-.demo-form__status { margin: 0; color: #385f1e; }
+.demo-form__status { margin: 0; color: var(--danger); }
 .article-list { display: grid; gap: 1px; margin-top: 42px; border: 1px solid #cfd5e1; background: #cfd5e1; }
 .article-list article { padding: 30px; background: white; }
 .article-list h2 { margin: 0 0 12px; font-size: 26px; }

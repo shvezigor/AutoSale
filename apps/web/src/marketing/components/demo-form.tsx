@@ -84,7 +84,7 @@ export function DemoForm({ locale }: { locale: Locale }) {
     <label className="demo-form__consent"><input name="privacyConsent" type="checkbox" aria-invalid={Boolean(fieldErrors.privacyConsent)} aria-describedby={fieldErrors.privacyConsent ? 'demo-privacyConsent-error' : undefined} onChange={() => clear('privacyConsent')} /><span>{copy('Погоджуюсь на обробку даних для організації демо.', 'I agree to data processing for arranging the demo.')}</span></label>
     <FieldError id="demo-privacyConsent-error" message={fieldErrors.privacyConsent} />
     <LoadingButton className="primary-button marketing-button" type="submit" pending={status === 'pending'} pendingLabel={copy('Надсилаємо…', 'Sending…')}>{copy('Замовити демо', 'Book a demo')}</LoadingButton>
-    <p className="demo-form__status" id="demo-form-status" role="status">{
+    <p className="demo-form__status" id="demo-form-status" role="alert">{
       status === 'rate-limited' ? copy('Забагато запитів. Спробуйте надіслати форму пізніше.', 'Too many requests. Please try again later.')
         : status === 'unavailable' ? copy('Сервіс тимчасово недоступний. Спробуйте ще раз пізніше.', 'The service is temporarily unavailable. Please try again later.')
           : status === 'error' ? copy('Не вдалося надіслати. Спробуйте ще раз.', 'Could not submit. Please try again.') : ''

@@ -45,6 +45,7 @@ describe('DemoForm', () => {
     fireEvent.click(screen.getByRole('checkbox'));
     fireEvent.click(screen.getByRole('button', { name: 'Замовити демо' }));
     expect(await screen.findByText(/Забагато запитів/)).toBeInTheDocument();
+    expect(screen.getByRole('alert')).toContainElement(screen.getByText(/Забагато запитів/));
     expect(screen.getByLabelText('Ім’я')).toHaveValue('Олена');
     expect(screen.getByLabelText('Email')).toHaveValue('olena@example.test');
   });
