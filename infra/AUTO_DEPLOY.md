@@ -15,10 +15,12 @@ As observed on 21 October 2026, recent GitHub-hosted jobs did not start because
 GitHub reported an account billing lock. Local passing checks do not replace a
 successful GitHub run; resolve the account issue and rerun verification before
 relying on this gate.
-The same-date local `pnpm audit --prod --audit-level high` also fails on
-`proxy-addr`, `source-map-js`, `sharp`, and `next`. Dependency remediation,
-application regression tests, and browser acceptance are still required before
-this audit gate can pass; do not waive it as part of the CI ordering fix.
+The 21 October local production audit initially found advisories in
+`proxy-addr`, `source-map-js`, `sharp`, and `next`; patched package versions are
+now pinned in the workspace lockfile. The dev-only Vite advisory was also
+patched. Both local full and production audits report no known vulnerabilities.
+A successful GitHub-hosted audit still requires the billing lock to be cleared
+and the job rerun; the local result does not substitute for that gate.
 
 ## One-time server setup
 
