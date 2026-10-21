@@ -12,6 +12,7 @@ Never commit `.env`, credentials, OAuth tokens, database dumps, runtime PID/toke
 
 ## UI design rule
 
+- Before UI work, read `DESIGN.md`, then the relevant canonical design document. Follow the skill-selection and review workflow in `docs/frontend/design-system.md`; preserve the established surface identity when applying external design guidance.
 - Use the shared `primary-button`, `secondary-button`, `danger-button`, `text-button`, or `icon-button` variants. Never introduce browser-default action buttons or the legacy `button-primary`, `button-secondary`, or `secondary` tokens.
 - Use `LoadingButton` for async mutations; it defaults to the primary variant, so pass an explicit shared variant for secondary or destructive actions.
 - When adding a new variant or contextual exception, update `docs/frontend/design-system.md` and the button contract test in the same change.

@@ -1,6 +1,55 @@
 # Workspace UI design system
 
-This is the canonical rule for action controls in the Sales AITO workspace. New UI work must use the shared variants and must not fall back to browser-default buttons.
+This is the canonical workspace UI contract and UI development workflow. New UI work must use the shared variants and must not fall back to browser-default buttons. The root [DESIGN.md](../../DESIGN.md) routes agents here; it does not duplicate tokens.
+
+## Product context and visual ownership
+
+The workspace serves owners and managers repeatedly reviewing conversations, products and orders. Preserve the existing light surfaces, violet action accent, compact navigation and readable operational hierarchy. Exact colors, spacing, radii and typography rules live in [globals.css](../../apps/web/app/globals.css); font loading lives in [layout.tsx](../../apps/web/app/layout.tsx). Reuse the nearest existing component before adding a new abstraction or isolated style.
+
+The public site has its own approved [Autonomous Command design](../superpowers/specs/2026-09-17-sales-aito-marketing-site-design.md), scoped `--m-*` tokens and marketing components. Its expressive graphics do not define the workspace layout. Public capability claims must follow the feature index. Check Ukrainian text and glyph rendering as well as English wherever both locales are supported.
+
+Existing token values describe the current implementation; they are not proof that every combination meets accessibility requirements. Measure the actual foreground/background and interaction states affected by a change.
+
+## Selecting design assistance
+
+Start with the repository contract. Load one relevant design skill at a time, plus a focused implementation or browser-testing skill when needed; do not combine competing theme generators by default.
+
+| Work | Guidance | Boundary |
+|---|---|---|
+| Workspace forms, tables, inbox and responsive interactions | `ui-ux-pro-max`, when available, for targeted UX/accessibility guidance | Preserve existing tokens and business workflows; skip palette generation for routine fixes. |
+| Public landing page composition or an explicitly requested visual redesign | `design-taste-frontend`, when available | Apply the approved marketing direction; its landing-page guidance is not a dashboard specification. |
+| Existing UI quality review | Follow the audit and acceptance sequence below | Aesthetic suggestions require a concrete usability or visual-consistency reason. |
+| New motion or a third-party visual component | Evaluate against a named interaction and measured cost | Prefer existing CSS for simple feedback. Assess bundle cost, framework compatibility, licensing and reduced-motion behavior before adoption. |
+
+Skills installed in one developer's environment are optional aids, not repository dependencies. If absent, follow this document and the affected feature's acceptance record. Do not install a new design stack just to perform a review. Never remove a product color or component solely because a generic skill calls it an AI design pattern.
+
+## UI implementation and review sequence
+
+1. **Establish the task.** Name the surface, user, primary action and affected screens. Find its component, CSS, localization, contract and acceptance tests through the feature index. For a material visual change, inspect the current page and capture a baseline using fictional or authorized data.
+2. **Audit the affected scope.** Record concrete findings: location, user impact, severity and proposed correction. Review hierarchy, text readability, keyboard interaction, focus, mobile layout and real loading/empty/error/success states. An aesthetic score alone is not evidence.
+3. **Implement the smallest coherent correction.** Reuse tokens, shared controls and field validation. Preserve entered data, selection and scroll context where the interaction requires them. Keep essential content in semantic HTML; motion must not be required to read or operate the flow.
+4. **Verify behavior and visuals.** Run the relevant automated tests and the browser acceptance matrix below. Check the final result against the baseline and resolve regressions. A passing source contract or screenshot alone is insufficient for changed user behavior.
+5. **Record evidence.** Update the affected canonical feature and its acceptance record. State environment, commit, viewport/locale, scenario, result and screenshot location when visuals matter. Record blocked steps explicitly; do not mark a live gate complete from a local fixture.
+
+### Browser acceptance matrix for affected UI
+
+- Check 320, 768, 1024 and 1440 px widths, plus any breakpoint implicated by the change. Text and actions must remain reachable; long product names, amounts and localized errors must wrap or have an intentional accessible overflow treatment. Horizontal scrolling may be local to a data table, not accidental document overflow.
+- Operate the complete flow with a keyboard, including opening and closing overlays, visible focus and focus return. Inspect accessible names, labels and errors. Check 200% zoom and touch interactions without relying on hover.
+- Exercise applicable loading, empty, validation, permission/provider failure and success states. Verify saved state after reload and the result on downstream screens. Use fictional fixtures for failure injection; do not induce production outages or send customer messages without authorization.
+- Check supported locales on the changed surface. For motion changes, test `prefers-reduced-motion`, cleanup on navigation and layout stability. For new assets or dependencies, compare route payload and browser performance with the baseline and record the result.
+- Capture the final browser state for material visual changes. Follow the repository's post-deployment acceptance rule in the target environment; blocked credentials or accounts remain explicit gaps.
+
+### Existing verification entry points
+
+| Concern | Existing coverage |
+|---|---|
+| Shared actions | `apps/web/src/components/button-style-contract.spec.ts` |
+| Field validation inventory and behavior | `apps/web/src/components/form-validation-contract.spec.ts`, `tests/e2e/field-validation-accessibility.spec.ts` |
+| Inbox scroll ownership | `apps/web/src/components/conversation-viewport-contract.spec.ts`, `tests/e2e/conversation-inbox.spec.ts` |
+| Responsive header and orders | `tests/e2e/app-header-responsive.spec.ts`, `tests/e2e/orders-mobile-layout.spec.ts` |
+| Public site and demo form | `tests/e2e/marketing-site.spec.ts`, `apps/web/src/marketing/components/demo-form.spec.tsx` |
+
+These are entry points, not a claim that the entire matrix is already automated or verified. Extend the relevant existing test when behavior changes; do not create duplicate acceptance suites solely to mirror this checklist.
 
 ## Action variants
 

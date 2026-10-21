@@ -148,6 +148,8 @@ Before changing functionality:
 4. Read only its linked canonical spec, runbook, source entry points and tests.
 5. Search for existing services, contracts, adapters, queues and models before adding new ones.
 
+For UI work, also start from [`DESIGN.md`](DESIGN.md). It routes to the existing workspace and marketing design contracts, including skill selection and browser review criteria. The [UI tooling assessment](docs/research/2026-10-21-ui-design-tooling-assessment.md) explains which external design resources fit this project.
+
 This progressive-disclosure approach keeps work out of a single chat context and prevents parallel implementations of the same feature. When behavior changes, update the canonical feature document and feature index in the same commit.
 
 Git lifecycle:
