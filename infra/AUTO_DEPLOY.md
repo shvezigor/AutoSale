@@ -5,6 +5,20 @@ Complete the host provisioning, migration, and first-deploy gates in [`../docs/o
 The GitHub Actions workflow in `.github/workflows/ci-deploy.yml` verifies every
 pull request and every push to `master`. Production deployment remains disabled
 until a real server is prepared and the repository variable below is enabled.
+The verify job builds workspace packages, then type-checks and runs tests:
+type checks and API tests resolve generated `dist` exports, so running either
+before building can use stale local artifacts or fail in a clean checkout.
+The build is a quality gate, not a deploy.
+Workspace test packages run sequentially and PostgreSQL-backed test files use
+bounded Vitest workers, avoiding a burst of temporary database containers.
+As observed on 21 October 2026, recent GitHub-hosted jobs did not start because
+GitHub reported an account billing lock. Local passing checks do not replace a
+successful GitHub run; resolve the account issue and rerun verification before
+relying on this gate.
+The same-date local `pnpm audit --prod --audit-level high` also fails on
+`proxy-addr`, `source-map-js`, `sharp`, and `next`. Dependency remediation,
+application regression tests, and browser acceptance are still required before
+this audit gate can pass; do not waive it as part of the CI ordering fix.
 
 ## One-time server setup
 

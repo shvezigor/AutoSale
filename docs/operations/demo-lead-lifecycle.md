@@ -1,6 +1,6 @@
 # Demo request contact lifecycle
 
-The export/deletion API and UI were deployed on the current Docker host on 2026-10-20, but **platform-admin browser acceptance is still pending**. `DEMO_LEAD_ERASURE_ENABLED` defaults to `false` in both API and worker; when false, the delete action is hidden/refused and the scheduled purge does not run. Do not enable it or rely on the privacy-period claim in production until the gates below pass.
+The export/deletion API and UI were deployed on the current Docker host on 2026-10-20. A platform-admin browser session verified the masked queue, fictional-lead status persistence and password-step-up form validation; **actual JSON/CSV download and deletion acceptance remain pending**. `DEMO_LEAD_ERASURE_ENABLED` defaults to `false` in both API and worker; when false, the delete action is hidden/refused and the scheduled purge does not run. Do not enable it or rely on the privacy-period claim in production until the gates below pass.
 
 ## Operator actions
 

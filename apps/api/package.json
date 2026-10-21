@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "test": "vitest run",
+    "test": "vitest run --maxWorkers=2",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "auth:bootstrap-admin": "node dist/cli/bootstrap-auth.js admin",
     "auth:adopt-tenant": "node dist/cli/bootstrap-auth.js adopt",

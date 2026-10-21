@@ -33,6 +33,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # Workspace type checks and API tests resolve package dist files.
+      - name: Build production application
+        run: pnpm build
+
       - name: Type check
         run: pnpm typecheck
 
@@ -41,9 +45,6 @@ jobs:
 
       - name: Test backup and restore scripts
         run: sh infra/scripts/offsite-backup.spec.sh
-
-      - name: Build production application
-        run: pnpm build
 
       - name: Audit production dependencies
         run: pnpm audit --prod --audit-level high
