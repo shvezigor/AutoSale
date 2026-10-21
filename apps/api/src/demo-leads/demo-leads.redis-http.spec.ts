@@ -55,3 +55,36 @@ describe.runIf(Boolean(process.env.DEMO_TEST_REDIS_URL))('demo lead HTTP quota a
     }
   });
 });
+
+describe.runIf(Boolean(process.env.DEMO_TEST_REDIS_OUTAGE_URL))('demo lead HTTP quota after disposable Redis stops', () => {
+  it('returns a safe 503 and never creates a lead when the Redis server is unreachable', async () => {
+    const redis = new Redis(process.env.DEMO_TEST_REDIS_OUTAGE_URL!, {
+      lazyConnect: true, connectTimeout: 500, maxRetriesPerRequest: 1, retryStrategy: () => null,
+    });
+    redis.on('error', () => undefined);
+    const create = vi.fn();
+    const moduleRef = await Test.createTestingModule({
+      controllers: [DemoLeadsController],
+      providers: [
+        { provide: DemoLeadsService, useValue: { findAccepted: vi.fn().mockResolvedValue(null), create } },
+        { provide: DemoLeadAbuseService, useValue: new DemoLeadAbuseService(new RedisDemoLeadQuotaStore(redis), randomUUID()) },
+      ],
+    }).compile();
+    const app: INestApplication = moduleRef.createNestApplication();
+    await app.init();
+    try {
+      const contact = `fictional-${randomUUID()}@example.test`;
+      const response = await request(app.getHttpServer()).post('/api/demo-leads')
+        .set('Idempotency-Key', randomUUID())
+        .send({ name: 'Fictional Person', company: 'Fictional Store', email: contact, phone: '', orderVolume: '50_TO_300', note: '', locale: 'en', privacyConsent: true })
+        .expect(503);
+      expect(response.body.message).toBe('DEMO_RATE_LIMITER_UNAVAILABLE');
+      expect(JSON.stringify(response.body)).not.toContain(contact);
+      expect(response.headers['retry-after']).toBeUndefined();
+      expect(create).not.toHaveBeenCalled();
+    } finally {
+      await app.close();
+      redis.disconnect();
+    }
+  });
+});
