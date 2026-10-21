@@ -88,4 +88,17 @@ describe.runIf(Boolean(process.env.DEMO_TEST_REDIS_URL))('RedisDemoLeadQuotaStor
       await redis.quit();
     }
   });
+
+  it('fails closed when an established Redis connection is lost', async () => {
+    const redis = new Redis(process.env.DEMO_TEST_REDIS_URL!, { maxRetriesPerRequest: 1 });
+    const limiter = new DemoLeadAbuseService(new RedisDemoLeadQuotaStore(redis), 'p'.repeat(32));
+    try {
+      await redis.ping();
+      redis.disconnect();
+      await expect(limiter.check(request('192.0.2.0/24', 'fictional@example.test', randomUUID())))
+        .rejects.toMatchObject({ status: 503, message: 'DEMO_RATE_LIMITER_UNAVAILABLE' });
+    } finally {
+      redis.disconnect();
+    }
+  });
 });

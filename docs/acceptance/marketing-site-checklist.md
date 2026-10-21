@@ -12,6 +12,7 @@ Original acceptance date: 2026-09-17. Release status reconciled on 2026-10-15 ag
 - [x] Existing web tests and new marketing registry/locale tests pass.
 - [x] Contracts tests pass, including demo lead validation.
 - [x] API tests pass, including durable demo lead and notification failure behavior.
+- [x] 2026-10-21: `demo-lead-abuse.service.spec.ts` passed all eight checks against a disposable Redis 8.2.1 container bound to a random loopback port. The real Lua quota admitted exactly 10 of 20 concurrent requests, rejected the other 10, then admitted a request after expiry. A second integration check established a Redis connection, disconnected that client, and confirmed the limiter returned a safe 503. This is isolated adapter evidence, not a production HTTP `Retry-After`, proxy-IP, or server-outage acceptance.
 - [x] Marketing Playwright suite passes for SEO metadata, hero asset loading, equivalent locale switching, 375/768/1440 responsive widths, and demo submission state.
 - [x] Raw server HTML contains localized H1, canonical, alternate links, JSON-LD, and indexable robots metadata.
 - [x] Login inherits `noindex, nofollow`.

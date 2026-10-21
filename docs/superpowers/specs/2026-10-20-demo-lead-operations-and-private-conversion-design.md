@@ -1,6 +1,6 @@
 # Demo lead operations and privacy-minimal conversion measurement
 
-**Status:** implemented and manually deployed on the current Docker host on 2026-10-20. Public production-browser checks pass with controlled 429/503 response interception. A partial platform-admin browser acceptance now covers the masked queue, fictional-lead detail/status persistence, aggregate conversion report and count-only notification metrics; actual step-up exports and authenticated automated cases remain open. Authenticated owner acceptance is partial, while real quota/proxy checks, legal analytics activation and independent erasure-ledger gates remain open. The two collection/erasure switches remain off.
+**Status:** implemented and manually deployed on the current Docker host on 2026-10-20. Public production-browser checks pass with controlled 429/503 response interception. On 2026-10-21, isolated Redis-backed concurrency, expiry and established-client disconnection checks passed; production HTTP quota, `Retry-After` and trusted-proxy acceptance remain open. A partial platform-admin browser acceptance now covers the masked queue, fictional-lead detail/status persistence, aggregate conversion report and count-only notification metrics; actual step-up exports and authenticated automated cases remain open. Authenticated owner acceptance is partial, while legal analytics activation and independent erasure-ledger gates remain open. The two collection/erasure switches remain off.
 
 ## Outcome and boundaries
 
