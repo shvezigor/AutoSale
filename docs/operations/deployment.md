@@ -52,9 +52,13 @@ webhook callback — `<APP_PUBLIC_URL>/webhooks/meta`.
 і тримайте Docker, комп'ютер та ngrok active. Для власного домену можна
 використати named Cloudflare Tunnel: `cloudflared` створює вихідне з'єднання,
 тому origin не потребує публічної IP-адреси або відкритого inbound port
-forwarding. Поточний Compose публікує Caddy на host port 80; для тунелю
-спрямуйте його на `http://localhost:80` і заблокуйте зовнішній TCP 80/443
-firewall-ом (або змініть binding на loopback).
+forwarding. У поточному Compose тунель і Caddy спільно використовують мережу
+`edge`; маршрут hostname має вести на `http://proxy:80`, **не** на host port.
+Caddy публікує 80/443 тільки на `127.0.0.1` для локальних перевірок. Не
+відкривайте ці порти для LAN/Internet і не спрямовуйте інший контейнер на
+`host.docker.internal:80`: loopback-binding не гарантує доступ із контейнера.
+Перед зміною binding перевірте всі додаткові тунелі; застарілі Quick Tunnel
+зупиніть або переналаштуйте на `proxy:80` у тій самій Docker-мережі.
 
 Після зміни домену оновіть **і** Meta redirect URI, **і** Meta webhook
 callback, потім повторіть webhook verification та приймальний OAuth-тест.
