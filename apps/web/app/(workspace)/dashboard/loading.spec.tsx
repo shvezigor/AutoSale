@@ -8,8 +8,9 @@ describe('DashboardLoading', () => {
 
   it('preserves the dashboard structure without presenting fake values', () => {
     const { container } = render(<DashboardLoading />);
-    expect(screen.getByRole('status')).toHaveAttribute('aria-busy', 'true');
-    expect(screen.getByText('Завантаження…')).toHaveClass('sr-only');
+    expect(screen.getByRole('heading', { name: 'Операційний огляд' })).toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent('Завантажуємо показники…');
+    expect(container.querySelector('[aria-busy="true"]')).toBeInTheDocument();
     expect(container.querySelectorAll('[data-dashboard-skeleton="metric"]')).toHaveLength(4);
     expect(container).not.toHaveTextContent(/₴|%|замовлен/i);
   });

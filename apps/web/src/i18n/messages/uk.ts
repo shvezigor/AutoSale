@@ -6,6 +6,16 @@ export const ukMessages = {
     confirm: 'Підтвердити',
     loading: 'Завантаження…',
   },
+  routeLoading: {
+    orders: 'Завантажуємо список замовлень…',
+    orderDetail: 'Завантажуємо замовлення…',
+    catalogue: 'Завантажуємо каталог…',
+    team: 'Завантажуємо команду…',
+    settings: 'Завантажуємо налаштування…',
+    conversations: 'Завантажуємо діалоги…',
+    dashboard: 'Завантажуємо показники…',
+    slow: 'Це займає довше, ніж зазвичай. Зачекайте ще трохи.',
+  },
   errors: {
     generic: 'Сталася помилка. Спробуйте ще раз.', sectionLoadFailed: 'Не вдалося завантажити розділ', retryRequest: 'Спробуйте повторити запит.', retry: 'Повторити', currentPasswordInvalid: 'Поточний пароль неправильний', avatarInvalid: 'Не вдалося обробити зображення профілю', authenticationRequired: 'Потрібно увійти в систему', accessDenied: 'Недостатньо прав для цієї дії', rateLimit: 'Забагато запитів', catalogueImportFailed: 'Не вдалося імпортувати каталог', deliveryConnectionRequired: 'Підключіть службу доставки', telegramUnavailable: 'Telegram тимчасово недоступний', googleRequired: 'Підключіть Google', instagramRateLimited: 'Instagram тимчасово обмежив надсилання',
   },

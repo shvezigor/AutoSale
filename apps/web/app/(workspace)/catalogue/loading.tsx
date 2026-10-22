@@ -1,5 +1,5 @@
 import { RouteSkeleton } from '../../../src/components/route-skeleton';
 
 export default function CatalogueLoading() {
-  return <RouteSkeleton variant="table" />;
+  return <RouteSkeleton section="catalogue" variant="table" />;
 }

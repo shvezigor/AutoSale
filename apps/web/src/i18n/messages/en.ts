@@ -8,6 +8,16 @@ export const enMessages = {
     confirm: 'Confirm',
     loading: 'Loading…',
   },
+  routeLoading: {
+    orders: 'Loading orders…',
+    orderDetail: 'Loading order…',
+    catalogue: 'Loading catalogue…',
+    team: 'Loading team…',
+    settings: 'Loading settings…',
+    conversations: 'Loading conversations…',
+    dashboard: 'Loading dashboard metrics…',
+    slow: 'This is taking longer than usual. Please wait a little longer.',
+  },
   errors: {
     generic: 'Something went wrong. Please try again.', sectionLoadFailed: 'Could not load this section', retryRequest: 'Please try the request again.', retry: 'Retry', currentPasswordInvalid: 'The current password is incorrect', avatarInvalid: 'Could not process the profile image', authenticationRequired: 'Please sign in', accessDenied: 'You do not have permission for this action', rateLimit: 'Too many requests', catalogueImportFailed: 'Could not import the catalogue', deliveryConnectionRequired: 'Connect a delivery service', telegramUnavailable: 'Telegram is temporarily unavailable', googleRequired: 'Connect Google', instagramRateLimited: 'Instagram temporarily limited sending',
   },
