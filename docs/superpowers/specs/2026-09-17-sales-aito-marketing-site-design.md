@@ -250,6 +250,8 @@ The site should meet these implementation constraints:
 
 Performance acceptance should target green Core Web Vitals under realistic mobile conditions and no avoidable layout shift from fonts, images, or interactive sections.
 
+The homepage hero image is the observed mobile LCP element. It must be discoverable in initial HTML, eagerly loaded, and carry `fetchpriority="high"` on both its image preload and rendered image. This is an LCP resource-priority invariant, not evidence that field Core Web Vitals pass. Record mobile and desktop laboratory results separately from 28-day CrUX field data; do not close the production Core Web Vitals gate from Lighthouse alone.
+
 ## 13. Failure and Empty States
 
 - Missing translations fail during validation or build for core pages rather than silently shipping mixed-language content.

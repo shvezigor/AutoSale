@@ -11,6 +11,8 @@ test.describe('Sales AITO marketing site', () => {
     const heroImage = page.locator('.marketing-hero__visual img');
     await expect(heroImage).toHaveJSProperty('complete', true);
     await expect(heroImage).toHaveCSS('object-fit', 'cover');
+    await expect(heroImage).toHaveAttribute('fetchpriority', 'high');
+    await expect(page.locator('link[rel="preload"][as="image"][imagesrcset]')).toHaveAttribute('fetchpriority', 'high');
     await expect.poll(() => heroImage.evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0);
   });
 
