@@ -1,11 +1,16 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { AnchorHTMLAttributes, ReactNode } from 'react';
 
 import type { ManagerOrder } from '../../../../packages/contracts/src/orders';
 
 const push = vi.fn();
 const replace = vi.fn();
 vi.mock('next/navigation', () => ({ useRouter: () => ({ push, replace }) }));
+vi.mock('next/link', () => ({
+  default: ({ prefetch, children, ...props }: { prefetch?: boolean; children?: ReactNode } & AnchorHTMLAttributes<HTMLAnchorElement>) =>
+    <a {...props} data-prefetch={String(prefetch)}>{children}</a>,
+}));
 
 import { OrdersTable } from './orders-table';
 import { I18nProvider } from '../i18n/i18n-provider';
@@ -36,6 +41,14 @@ const order: ManagerOrder = {
 afterEach(() => { cleanup(); push.mockReset(); replace.mockReset(); });
 
 describe('OrdersTable', () => {
+  it('does not prefetch every order detail from the desktop and mobile list', () => {
+    render(<OrdersTable orders={[order]} page={1} pageSize={25} total={1} />);
+
+    const detailLinks = screen.getAllByRole('link', { name: /Переглянути замовлення/ });
+    expect(detailLinks).toHaveLength(2);
+    for (const link of detailLinks) expect(link).toHaveAttribute('data-prefetch', 'false');
+  });
+
   it('opens an order by clicking its row while keeping a clear link action', () => {
     render(<OrdersTable orders={[order]} page={1} pageSize={25} total={1} />);
 

@@ -286,6 +286,7 @@ Initial fields are `order_id`, timestamps, status, channel, conversation ID, cus
 
 - List and view conversations.
 - List and view orders/review tasks.
+- The paginated order list does not prefetch every row's detail route when links enter the viewport. Each authenticated route prefetch reads the session, so prefetching a full page of rows creates avoidable concurrent database work. Main workspace navigation remains prefetched; an order detail is requested when the manager opens it.
 - Correct an order draft.
 - Approve or cancel an order.
 - View and retry a recoverable export.
