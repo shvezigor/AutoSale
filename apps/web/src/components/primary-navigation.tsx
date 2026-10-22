@@ -2,8 +2,8 @@
 
 import type { PublicSession } from '../../../../packages/contracts/src/auth';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import type { ComponentType, SVGProps } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useRef, type ComponentType, type SVGProps } from 'react';
 import { useI18n } from '../i18n/i18n-provider';
 
 type NavigationSession = Pick<PublicSession, 'name' | 'email' | 'membershipRole'>;
@@ -49,8 +49,16 @@ export function PrimaryNavigation({
   onToggleCollapse?: () => void;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const prefetchedRoutes = useRef(new Set<string>());
+  useEffect(() => { prefetchedRoutes.current.clear(); }, [pathname]);
   const { t } = useI18n();
   const navigationHandler = onNavigate ? { onClick: onNavigate } : {};
+  const prefetchOnIntent = (href: string) => {
+    if (isNavigationItemActive(pathname, href) || prefetchedRoutes.current.has(href)) return;
+    prefetchedRoutes.current.add(href);
+    router.prefetch(href);
+  };
   const visibleItems = navigationItems.filter((item) => {
     if (item.ownerOnly) return session.membershipRole === 'OWNER';
     if (item.requiresMembership) return Boolean(session.membershipRole);
@@ -59,7 +67,7 @@ export function PrimaryNavigation({
 
   return <aside className={`primary-nav ${className}`.trim()}>
     <div className="primary-nav-brand-row">
-      <Link className="brand" href="/dashboard" aria-label="Sales AITO" {...navigationHandler}><span className="brand-mark" aria-hidden="true">A</span><span className="brand-label">Sales AITO</span></Link>
+      <Link className="brand" href="/dashboard" prefetch={false} aria-label="Sales AITO" onMouseEnter={() => prefetchOnIntent('/dashboard')} onFocus={() => prefetchOnIntent('/dashboard')} {...navigationHandler}><span className="brand-mark" aria-hidden="true">A</span><span className="brand-label">Sales AITO</span></Link>
       {onToggleCollapse && <button className="sidebar-toggle" type="button" aria-label={collapsed ? t('navigation.expand') : t('navigation.collapse')} aria-expanded={!collapsed} onClick={onToggleCollapse}><CollapseIcon data-collapsed={collapsed} /></button>}
     </div>
     <nav aria-label={ariaLabel ?? t('navigation.mainLabel')} id={navId}>
@@ -67,7 +75,7 @@ export function PrimaryNavigation({
         const Icon = item.icon;
         const active = isNavigationItemActive(pathname, item.href);
         const label = t(item.labelKey);
-        return <Link className={`nav-item${active ? ' active' : ''}`} href={item.href} aria-label={collapsed ? label : undefined} aria-current={active ? 'page' : undefined} {...navigationHandler} key={item.href}>
+        return <Link className={`nav-item${active ? ' active' : ''}`} href={item.href} prefetch={false} aria-label={collapsed ? label : undefined} aria-current={active ? 'page' : undefined} onMouseEnter={() => prefetchOnIntent(item.href)} onFocus={() => prefetchOnIntent(item.href)} {...navigationHandler} key={item.href}>
           <span className="nav-icon-frame" aria-hidden="true"><Icon className="nav-icon" /></span>
           <span className="nav-label">{label}</span>
           <span className="nav-tooltip" aria-hidden="true">{label}</span>

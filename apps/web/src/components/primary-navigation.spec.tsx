@@ -1,22 +1,48 @@
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import type { AnchorHTMLAttributes, ReactNode } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { I18nProvider } from '../i18n/i18n-provider';
 import { PrimaryNavigation } from './primary-navigation';
 
-const { usePathname } = vi.hoisted(() => ({ usePathname: vi.fn() }));
-vi.mock('next/navigation', () => ({ usePathname, useRouter: () => ({ refresh: vi.fn() }) }));
+const { usePathname, prefetch } = vi.hoisted(() => ({ usePathname: vi.fn(), prefetch: vi.fn() }));
+vi.mock('next/navigation', () => ({ usePathname, useRouter: () => ({ refresh: vi.fn(), prefetch }) }));
+vi.mock('next/link', () => ({
+  default: ({ prefetch: shouldPrefetch, children, ...props }: { prefetch?: boolean; children?: ReactNode } & AnchorHTMLAttributes<HTMLAnchorElement>) =>
+    <a {...props} data-prefetch={String(shouldPrefetch)}>{children}</a>,
+}));
 
 const managerSession = { name: 'Іван', email: 'manager@example.com', membershipRole: 'MANAGER' as const };
 const ownerSession = { name: 'Олена', email: 'owner@example.com', membershipRole: 'OWNER' as const };
 
-afterEach(() => { cleanup(); usePathname.mockReset(); });
+afterEach(() => { cleanup(); usePathname.mockReset(); prefetch.mockReset(); });
 
 function renderNavigation(session: Parameters<typeof PrimaryNavigation>[0]['session'] = ownerSession, locale: 'uk' | 'en' = 'uk', props: Partial<Parameters<typeof PrimaryNavigation>[0]> = {}) {
   return render(<I18nProvider locale={locale} authenticated><PrimaryNavigation session={session} {...props} /></I18nProvider>);
 }
 
 describe('PrimaryNavigation', () => {
+  it('prefetches workspace destinations only when the user shows intent', () => {
+    usePathname.mockReturnValue('/dashboard');
+    renderNavigation();
+
+    for (const link of screen.getAllByRole('link')) expect(link).toHaveAttribute('data-prefetch', 'false');
+    expect(prefetch).not.toHaveBeenCalled();
+
+    fireEvent.mouseEnter(screen.getByRole('link', { name: 'Дашборд' }));
+    fireEvent.focus(screen.getByRole('link', { name: 'Sales AITO' }));
+    expect(prefetch).not.toHaveBeenCalled();
+
+    fireEvent.mouseEnter(screen.getByRole('link', { name: 'Замовлення' }));
+    expect(prefetch).toHaveBeenCalledWith('/orders');
+
+    fireEvent.focus(screen.getByRole('link', { name: 'Налаштування' }));
+    expect(prefetch).toHaveBeenCalledWith('/settings');
+
+    fireEvent.mouseEnter(screen.getByRole('link', { name: 'Замовлення' }));
+    expect(prefetch).toHaveBeenCalledTimes(2);
+  });
+
   it('exposes the dashboard as the first workspace destination', () => {
     usePathname.mockReturnValue('/dashboard');
     renderNavigation();

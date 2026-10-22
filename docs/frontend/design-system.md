@@ -10,6 +10,10 @@ The public site has its own approved [Autonomous Command design](../superpowers/
 
 Existing token values describe the current implementation; they are not proof that every combination meets accessibility requirements. Measure the actual foreground/background and interaction states affected by a change.
 
+## Workspace navigation loading contract
+
+The persistent sidebar does not prefetch every destination when it enters the viewport. `PrimaryNavigation` disables automatic `Link` prefetch and asks Next.js to prefetch a destination once when the user hovers or keyboard-focuses that link. A click still navigates normally, including on touch devices without hover. The active destination is not prefetched again. Order-list detail links likewise avoid automatic prefetch for every visible row; their click behavior is unchanged. This prevents a full page load from multiplying authenticated server requests across unrelated pages while preserving intent-based preparation for pointer and keyboard navigation. Keep this contract in the component tests when adding sidebar destinations or dense lists.
+
 ## Selecting design assistance
 
 Start with the repository contract. Load one relevant design skill at a time, plus a focused implementation or browser-testing skill when needed; do not combine competing theme generators by default.
