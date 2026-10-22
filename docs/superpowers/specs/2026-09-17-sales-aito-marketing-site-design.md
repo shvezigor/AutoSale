@@ -214,6 +214,7 @@ Every indexable page requires:
 
 - one clear search intent and one primary H1;
 - unique localized title and meta description;
+- a concise, localized browser title where an editorial H1 is longer; the visible heading and article schema retain the full editorial wording;
 - self-referencing canonical URL;
 - reciprocal `hreflang` entries for available translations and `x-default` where appropriate;
 - server-rendered meaningful content;

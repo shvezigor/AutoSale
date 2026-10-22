@@ -22,6 +22,20 @@ test.describe('Sales AITO marketing site', () => {
     await expect(page.getByRole('heading', { level: 1 })).toContainText('30 days free');
   });
 
+  test('keeps article browser titles concise without shortening editorial headings', async ({ page }) => {
+    for (const [locale, heading] of [
+      ['uk', 'Як автоматизувати замовлення з Instagram без втрати контролю'],
+      ['en', 'How to automate Instagram orders without losing control'],
+    ] as const) {
+      await page.goto(`/${locale}/blog/how-to-automate-instagram-orders`);
+      const title = await page.title();
+      expect(title).toContain('Instagram');
+      expect(title).toContain('Sales AITO');
+      expect(title.length).toBeLessThanOrEqual(60);
+      await expect(page.getByRole('heading', { level: 1 })).toHaveText(heading);
+    }
+  });
+
   test('has no horizontal overflow across key viewports', async ({ page }) => {
     await page.goto('/uk');
     for (const viewport of [{ width: 375, height: 812 }, { width: 768, height: 1024 }, { width: 1440, height: 900 }]) {
