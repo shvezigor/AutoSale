@@ -48,6 +48,12 @@ Roll back application containers first. The demo lead table is additive and can 
 
 ## Deployment record
 
+### 2026-10-22 sitemap accuracy and search preflight
+
+- Pushed tested `master` commit `f132714` and manually rebuilt/recreated **web only** on the live Windows Docker/Cloudflare host. No API, worker, database migration, DNS, or external search-account setting changed. Pre-release backup `backups/20261022T110622Z` passed SHA-256 checks for the PostgreSQL dump, MinIO archive and config; `pg_restore -l` read 778 entries and the MinIO archive listed 407 entries. It remains local and was not restored or copied off-host.
+- The new web image was `sha256:d03f74a30c7a112824867f22edf0d136dc2ebd0de16ef68b1cb8b77e2edb51a3`. Web/API/worker/PostgreSQL/Redis/MinIO returned to healthy; public `/health/live` and `/uk` returned HTTP 200. Production `/sitemap.xml` returned 20 public localized URLs, 40 alternate-language entries, and no stale `<lastmod>` or ignored `<changefreq>` tags. A Chrome browser opened the resulting sitemap, and all five production Playwright marketing checks passed, including locale navigation, responsive layout, intercepted demo success and invalid-field states. No real demo lead was submitted.
+- Read-only launch preflight found `www.sales-aito.com` unresolved, the available Search Console account unverified for `https://sales-aito.com/`, Bing Webmaster Tools signed out, and CrUX Vis without field data for the origin or `/uk`. These remain separate launch gates; no DNS change, property claim, sitemap submission, or field-speed conclusion is claimed. Rollback for the sitemap-only code is to revert `f132714` on `master` and manually rebuild/recreate `web`; the database backup is not needed for that rollback.
+
 ### 2026-10-22 mobile LCP experiment and rollback
 
 - On the current live Windows Docker host, built and manually deployed web-only commit `f530807` after backup `20261022T103210Z`. The backup checksum manifest, MinIO archive listing and PostgreSQL dump listing passed read-only checks. API, worker and database were not redeployed or migrated.
