@@ -48,6 +48,11 @@ Roll back application containers first. The demo lead table is additive and can 
 
 ## Deployment record
 
+### 2026-10-22 Search Console domain verification
+
+- With owner approval, added a DNS-only verification TXT at the Cloudflare apex and confirmed ownership of the `sales-aito.com` Domain property in Google Search Console. The verification value is not stored in Git or this runbook. Existing tunnel/`www` DNS and redirect configuration was unchanged; no application image, container, or database was deployed or migrated.
+- Submitted the public sitemap. After a transient initial fetch error, Search Console reported `Успішно`, last read 2026-10-22, with 20 discovered pages. Public sitemap HTTP/XML checks passed and `/health/live` remained HTTP 200. This does not prove individual URL indexing. Bing verification/submission, URL inspection, and field Core Web Vitals remain open.
+
 ### 2026-10-22 canonical www host
 
 - With owner approval, published a Cloudflare Single Redirect limited to `www.sales-aito.com` (301 to the apex, preserving path and query) and added a proxied redirect-only `www` A record targeting `192.0.2.1`. The existing apex Cloudflare Tunnel DNS record and container deployment were not changed. Both HTTP and HTTPS `www` pricing URLs returned one 301 to the corresponding canonical URL; Chrome loaded the canonical page and apex health stayed HTTP 200.

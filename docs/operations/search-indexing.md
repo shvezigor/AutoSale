@@ -20,7 +20,7 @@ Core page content, headings, canonical links, alternates, JSON-LD, and navigatio
 3. Verify the following return HTTPS 200 responses: `/uk`, `/en`, `/uk/pricing`, `/en/pricing`, `/robots.txt`, `/sitemap.xml`, and `/images/sales-aito-ai-operator-hero.png`.
 4. Confirm `/` returns one redirect to `/uk` and does not loop.
 5. Inspect raw HTML for canonical, reciprocal alternates, one H1, indexable robots metadata, and visible localized body copy.
-6. Verify `https://sales-aito.com` in Google Search Console and Bing Webmaster Tools.
+6. Verify the `sales-aito.com` Domain property in Google Search Console and the site in Bing Webmaster Tools.
 7. Submit `https://sales-aito.com/sitemap.xml` to both services.
 8. Inspect `/uk`, `/en`, `/uk/integrations`, `/uk/pricing`, and the first article URL.
 
@@ -41,3 +41,9 @@ No ranking outcome is guaranteed. Search readiness means the site is crawlable, 
 - Public DNS resolved `www` to Cloudflare proxy addresses. Both `http://www.sales-aito.com/uk/pricing?from=qa` and `https://www.sales-aito.com/uk/pricing?from=qa` returned one 301 to `https://sales-aito.com/uk/pricing?from=qa`. The apex `/health/live` stayed HTTP 200. Chrome followed the redirect and rendered the pricing page at the canonical URL.
 - A fresh local backup `backups/20261022T111348Z` passed checksums for the PostgreSQL dump, MinIO archive and configuration; the PostgreSQL dump and MinIO archive listings were readable. The backup remains local and must not be committed or uploaded.
 - Rollback, if needed: remove or disable only this redirect rule and remove only the `www` A record after verifying their exact identities. Leave the apex tunnel record untouched. This would make `www` unavailable again; restore it only after deciding on a replacement route.
+
+## 2026-10-22 Google Search Console verification
+
+- With owner approval, verified the `sales-aito.com` Domain property through a manually added apex DNS TXT record in Cloudflare. The record is DNS-only and must remain in place to retain verification; its value is intentionally absent from this repository. Google was not given access to the Cloudflare account. The existing apex tunnel and `www` redirect records were unchanged.
+- Submitted `https://sales-aito.com/sitemap.xml` in that property. Search Console ultimately showed type `Sitemap`, status `Успішно`, last read 2026-10-22, and 20 discovered pages. An initial transient `Не вдалось отримати` status cleared after Google processed the file. Independently, the public endpoint returned HTTP 200 and a parseable XML `urlset` with 20 URLs.
+- Successful sitemap processing proves discovery, **not** that any page has been indexed or receives search traffic. URL inspection for the key pages in checklist step 8, Bing verification/submission, and field Core Web Vitals remain open. This was an external DNS/Search Console change only; no application containers were rebuilt or restarted. Do not delete the verification TXT except as an intentional owner-access revocation.
