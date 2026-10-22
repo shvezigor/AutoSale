@@ -48,10 +48,15 @@ Roll back application containers first. The demo lead table is additive and can 
 
 ## Deployment record
 
+### 2026-10-22 Bing Webmaster verification
+
+- With owner approval, added a dedicated DNS-only CNAME in Cloudflare and confirmed that public DNS resolves it to Bing's verification target. Bing Webmaster Tools then displayed verified administrator ownership by DNS. The verification value is not stored in Git or this runbook. Existing apex tunnel, `www` redirect and Google verification DNS records were unchanged; no Google Search Console permissions were imported.
+- Submitted the public sitemap once. Bing accepted it for processing; the sitemap list showed one known sitemap, zero errors or warnings, status `Processing`, and zero URLs discovered at that time. This does not establish crawling or indexing. Public `/sitemap.xml` and `/health/live` returned HTTP 200. No application image, container or database was deployed or migrated.
+
 ### 2026-10-22 Search Console domain verification
 
 - With owner approval, added a DNS-only verification TXT at the Cloudflare apex and confirmed ownership of the `sales-aito.com` Domain property in Google Search Console. The verification value is not stored in Git or this runbook. Existing tunnel/`www` DNS and redirect configuration was unchanged; no application image, container, or database was deployed or migrated.
-- Submitted the public sitemap. After a transient initial fetch error, Search Console reported `Успішно`, last read 2026-10-22, with 20 discovered pages. Public sitemap HTTP/XML checks passed and `/health/live` remained HTTP 200. This does not prove individual URL indexing. Bing verification/submission, URL inspection, and field Core Web Vitals remain open.
+- Submitted the public sitemap. After a transient initial fetch error, Search Console reported `Успішно`, last read 2026-10-22, with 20 discovered pages. Public sitemap HTTP/XML checks passed and `/health/live` remained HTTP 200. This does not prove individual URL indexing. Bing verification/submission was completed later on 22 October; Bing processing/URL discovery and field Core Web Vitals remain open.
 
 ### 2026-10-22 canonical www host
 
