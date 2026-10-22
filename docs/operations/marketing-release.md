@@ -48,6 +48,12 @@ Roll back application containers first. The demo lead table is additive and can 
 
 ## Deployment record
 
+### 2026-10-22 article SEO title and Bing crawl follow-up
+
+- Manually rebuilt and recreated **web only** from tested `master` commit `c48e3df` on the live Windows Docker/Cloudflare host; no API/worker restart, database migration, DNS change or new provider permission. The prior web image was retained under a rollback tag. The new running image is `sha256:f50116a1ed98471ebca053faad3f0c5345274bf9544f6da506d6acd530d03cc3`.
+- Pre-release local backup `backups/20261022T121115Z` passed SHA-256 verification for the PostgreSQL dump, MinIO archive and configuration. `pg_restore -l` read 778 lines and the MinIO archive listed 407 entries. A first attempt failed while Git Bash rewrote a container path; its separate `.incomplete-20261022T121104Z` directory was not used and remains for controlled cleanup. No backup was restored or copied off-host.
+- Web/API/worker/PostgreSQL/Redis/MinIO were healthy after release; public `/health/live` and both localized article routes returned HTTP 200. Their `<title>` values were 50/52 characters with the full H1 intact. Chrome verified the Ukrainian article and English language switch; six production Playwright marketing tests passed, including intercepted demo success and validation without a real lead submission. Bing's refreshed live test cleared the prior long-title issue and accepted one indexing request for the article. Actual Bing indexing remains pending. To roll back web-only code, restore the retained pre-release web image and recreate only `web`; leave the database and other services untouched.
+
 ### 2026-10-22 Bing Webmaster verification
 
 - With owner approval, added a dedicated DNS-only CNAME in Cloudflare and confirmed that public DNS resolves it to Bing's verification target. Bing Webmaster Tools then displayed verified administrator ownership by DNS. The verification value is not stored in Git or this runbook. Existing apex tunnel, `www` redirect and Google verification DNS records were unchanged; no Google Search Console permissions were imported.
