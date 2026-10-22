@@ -48,6 +48,12 @@ Roll back application containers first. The demo lead table is additive and can 
 
 ## Deployment record
 
+### 2026-10-22 mobile LCP experiment and rollback
+
+- On the current live Windows Docker host, built and manually deployed web-only commit `f530807` after backup `20261022T103210Z`. The backup checksum manifest, MinIO archive listing and PostgreSQL dump listing passed read-only checks. API, worker and database were not redeployed or migrated.
+- Three production Lighthouse 13.5 mobile runs before and after the hero-image fetch-priority change did not show an LCP improvement (medians 3.53 s before and 3.79 s after). The Lighthouse priority diagnostic cleared, but that is not a user-speed result. Reverted the change in `6ac317e`; final pushed `master` is `671df3d`, and its web image was manually rebuilt/recreated. Public `/uk`, `/en` and `/health/live` returned HTTP 200; all eight long-lived Compose services were running, with health checks passing where defined. Five production Playwright marketing tests passed, including bilingual pages, four viewport widths and intercepted demo-form success/validation. A separate 412 px browser check found the hero image loaded and zero console warnings/errors. No real demo lead was submitted.
+- The first backup attempt failed because Git Bash rewrote a Docker container path. It left an incomplete local archive at `backups/.incomplete-20261022T103152Z` containing a PostgreSQL dump; **do not use it for restore**. Automatic deletion was blocked by the execution policy, so an operator must remove that exact incomplete directory after confirming the valid backup above. No data was committed or uploaded. Unauthenticated PageSpeed Insights returned HTTP 429, so 28-day CrUX field Core Web Vitals remain unverified; see the [marketing acceptance checklist](../acceptance/marketing-site-checklist.md).
+
 ### 2026-10-20 demo operations and conversion-code rollout
 
 - Fast-forwarded and pushed `master` through `25006d1` (main implementation at `aaaa53a`). Before deployment, created `backups/20261020T115402Z`: SHA-256 manifest verified the PostgreSQL dump, MinIO archive and configuration; the dump listing was readable and a full PostgreSQL restore succeeded in an isolated temporary container with 67 public tables. The temporary restore container was removed; the backup remains local. This is **not** an off-host erasure ledger or independent-host disaster-recovery proof.
