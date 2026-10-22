@@ -17,6 +17,7 @@ API приймає безпечний `x-request-id` або генерує UUID 
 
 - API у внутрішній Docker-мережі: `GET http://api:3001/metrics`
 - Worker у внутрішній Docker-мережі: `GET http://worker:3002/metrics`
+- Web server records `web_upstream_slow` when an internal API call takes at least 1 second and `web_upstream_failed` for API 5xx or network failure. These JSON log events contain only a bounded route group (`orders`, `auth`, etc., otherwise `other`), status class, elapsed milliseconds and a generated request ID. The same ID is forwarded as `x-request-id` to the API and appears in its existing request-completion log. Never log the full URL, query string, cookies, response body or exception message. These events measure the **web → API hop**, not the full browser navigation, Next rendering or Cloudflare tunnel; compare them with API histograms before attributing a slow page to the database.
 - `autosale_http_requests_total` — rate/error за method, route template і status class.
 - `autosale_http_request_duration_seconds` — histogram тривалості HTTP.
 - `autosale_operations_total` — результат normalization та Sheets export.
