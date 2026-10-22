@@ -22,6 +22,12 @@ After a web-only production deployment, an authenticated Ukrainian workspace at 
 
 Not yet proven: a forced slow/failing production request, an authenticated mobile production viewport, and the underlying cause of intermittent API 5xx incidents. The loading redesign improves feedback but does not itself make requests faster or provide a retry action.
 
+## Mobile dashboard overflow correction
+
+An authenticated production Chrome pass at 390 px found the dashboard document `scrollWidth` at 641 px; a visually hidden, semantically exposed chart-data `<table>` retained a roughly 609 px intrinsic width and escaped its own `sr-only` clipping. The same read-only mobile pass loaded Conversations, Orders, Catalogue, Settings and Onboarding without document-width overflow. This is a dashboard-specific layout defect, not evidence that the intermittent route-loading delay is fixed; one Orders transition still displayed the long-wait placeholder before its content appeared.
+
+The chart now puts its semantic table inside a visually clipped wrapper. It remains available by table name to assistive technology, while the wrapper owns the one-pixel clipping box. A component regression first failed on the former table-level `sr-only` markup and then passed with the wrapper; all 500 web tests, web typecheck, production build and the existing dashboard Playwright fixture tests passed. The authenticated production mobile dashboard and broader width/keyboard acceptance must be repeated after web-only deployment before closing this correction.
+
 ## Intermittent-delay diagnostic baseline
 
 On 22 October, 12 additional authenticated Dashboard ↔ Orders browser transitions completed in 449–568 ms (median 535 ms); no long wait or 5xx was reproduced. The running API histogram at that point recorded 29 `GET /api/orders` requests, 28 within 250 ms and all 29 within one second. This is a process-lifetime snapshot, not a historical latency distribution. The web container's preceding two hours of logs contained no errors, but it did not record the duration of its internal API calls. Therefore the current evidence does not support a database/query optimization as the fix for the intermittent symptom.

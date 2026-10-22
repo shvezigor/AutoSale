@@ -20,6 +20,14 @@ describe('DashboardCharts', () => {
     expect(screen.getByRole('link', { name: 'Усі замовлення' })).toHaveAttribute('href', '/orders');
   });
 
+  it('clips the accessible chart table without allowing its intrinsic width to widen the page', () => {
+    render(<DashboardCharts dailyOrders={dailyOrders} funnel={configuredFunnel} locale="uk" t={createTranslator('uk')} />);
+
+    const table = screen.getByRole('table', { name: 'Дані динаміки замовлень' });
+    expect(table.parentElement).toHaveClass('sr-only');
+    expect(table).not.toHaveClass('sr-only');
+  });
+
   it('renders ordered funnel counts, conversion rates, and configured export', () => {
     render(<DashboardCharts dailyOrders={dailyOrders} funnel={configuredFunnel} locale="uk" t={createTranslator('uk')} />);
 

@@ -60,10 +60,12 @@ export function DashboardCharts({ dailyOrders, funnel, locale, t }: Props) {
                 );
               })}
             </div>
-            <table aria-label={t('dashboard.chart.tableLabel')} className="sr-only">
-              <thead><tr><th>{t('dashboard.chart.date')}</th>{statuses.map((status) => <th key={status}>{t(`dashboard.chart.status.${status}`)}</th>)}</tr></thead>
-              <tbody>{dailyOrders.map((day) => <tr key={day.date}><th>{date.format(parseDate(day.date))}</th>{statuses.map((status) => <td key={status}>{day[status]}</td>)}</tr>)}</tbody>
-            </table>
+            <div className="sr-only">
+              <table aria-label={t('dashboard.chart.tableLabel')}>
+                <thead><tr><th>{t('dashboard.chart.date')}</th>{statuses.map((status) => <th key={status}>{t(`dashboard.chart.status.${status}`)}</th>)}</tr></thead>
+                <tbody>{dailyOrders.map((day) => <tr key={day.date}><th>{date.format(parseDate(day.date))}</th>{statuses.map((status) => <td key={status}>{day[status]}</td>)}</tr>)}</tbody>
+              </table>
+            </div>
           </>
         )}
       </article>
