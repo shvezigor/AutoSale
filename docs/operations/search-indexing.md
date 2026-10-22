@@ -16,7 +16,7 @@ Core page content, headings, canonical links, alternates, JSON-LD, and navigatio
 ## Release checklist
 
 1. Set `APP_PUBLIC_URL=https://sales-aito.com` in production.
-2. Route `sales-aito.com` and `www.sales-aito.com` to the Cloudflare Tunnel service, with one hostname redirecting permanently to the chosen canonical host.
+2. Keep `sales-aito.com` on the Cloudflare Tunnel. Proxy `www.sales-aito.com` through Cloudflare with a redirect-only DNS record and a hostname-scoped 301 to the canonical apex; preserve path and query string. Do not add `www` to the tunnel origin route.
 3. Verify the following return HTTPS 200 responses: `/uk`, `/en`, `/uk/pricing`, `/en/pricing`, `/robots.txt`, `/sitemap.xml`, and `/images/sales-aito-ai-operator-hero.png`.
 4. Confirm `/` returns one redirect to `/uk` and does not loop.
 5. Inspect raw HTML for canonical, reciprocal alternates, one H1, indexable robots metadata, and visible localized body copy.
@@ -34,3 +34,10 @@ No ranking outcome is guaranteed. Search readiness means the site is crawlable, 
 - `www.sales-aito.com` did not resolve in DNS. The canonical apex host worked, but checklist step 2 remains open; adding a DNS record and permanent redirect is a separate live Cloudflare change requiring approval.
 - The available Google Search Console account reported no access to `https://sales-aito.com/`; Bing Webmaster Tools was not signed in. Property verification, sitemap submission, and URL inspection remain open. Do not infer search indexing from the public HTTP checks.
 - CrUX Vis returned `data not found` for the origin and `/uk` on mobile and desktop. There is no accessible field Core Web Vitals sample yet; retain the laboratory Lighthouse results separately and recheck field data when available.
+
+## 2026-10-22 canonical-host rollout
+
+- Cloudflare has one active Single Redirect named `www to canonical apex`: match `http.host eq "www.sales-aito.com"`, dynamic target `concat("https://sales-aito.com", http.request.uri.path)`, HTTP 301, preserve query string. A separate proxied `www` A record points at the documentation-only address `192.0.2.1`; Cloudflare handles the redirect before an origin request. The existing apex tunnel CNAME was not changed.
+- Public DNS resolved `www` to Cloudflare proxy addresses. Both `http://www.sales-aito.com/uk/pricing?from=qa` and `https://www.sales-aito.com/uk/pricing?from=qa` returned one 301 to `https://sales-aito.com/uk/pricing?from=qa`. The apex `/health/live` stayed HTTP 200. Chrome followed the redirect and rendered the pricing page at the canonical URL.
+- A fresh local backup `backups/20261022T111348Z` passed checksums for the PostgreSQL dump, MinIO archive and configuration; the PostgreSQL dump and MinIO archive listings were readable. The backup remains local and must not be committed or uploaded.
+- Rollback, if needed: remove or disable only this redirect rule and remove only the `www` A record after verifying their exact identities. Leave the apex tunnel record untouched. This would make `www` unavailable again; restore it only after deciding on a replacement route.

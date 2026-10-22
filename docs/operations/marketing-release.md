@@ -48,6 +48,11 @@ Roll back application containers first. The demo lead table is additive and can 
 
 ## Deployment record
 
+### 2026-10-22 canonical www host
+
+- With owner approval, published a Cloudflare Single Redirect limited to `www.sales-aito.com` (301 to the apex, preserving path and query) and added a proxied redirect-only `www` A record targeting `192.0.2.1`. The existing apex Cloudflare Tunnel DNS record and container deployment were not changed. Both HTTP and HTTPS `www` pricing URLs returned one 301 to the corresponding canonical URL; Chrome loaded the canonical page and apex health stayed HTTP 200.
+- Before the DNS change, created local backup `backups/20261022T111348Z`. Its manifest checks passed for PostgreSQL, MinIO and configuration; dump/archive listings were readable. It remains local and uncommitted. Rollback is scoped to disabling this rule and removing this `www` record after identity checks, without changing the apex tunnel record.
+
 ### 2026-10-22 sitemap accuracy and search preflight
 
 - Pushed tested `master` commit `f132714` and manually rebuilt/recreated **web only** on the live Windows Docker/Cloudflare host. No API, worker, database migration, DNS, or external search-account setting changed. Pre-release backup `backups/20261022T110622Z` passed SHA-256 checks for the PostgreSQL dump, MinIO archive and config; `pg_restore -l` read 778 entries and the MinIO archive listed 407 entries. It remains local and was not restored or copied off-host.
