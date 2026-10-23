@@ -62,7 +62,7 @@ describe('PrimaryNavigation', () => {
     expect(info).not.toHaveBeenCalled();
     paintFrame();
     paintFrame();
-    expect(info).toHaveBeenCalledExactlyOnceWith('workspace_navigation_ready {"route":"orders","durationMs":450}');
+    expect(info).toHaveBeenCalledExactlyOnceWith('workspace_navigation_ready {"route":"orders","durationMs":450,"routeResourceCount":0}');
   });
 
   it('exposes the dashboard as the first workspace destination', () => {

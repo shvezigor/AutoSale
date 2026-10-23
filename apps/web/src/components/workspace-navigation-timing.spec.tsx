@@ -45,8 +45,28 @@ describe('workspace navigation timing', () => {
     expect(info).not.toHaveBeenCalled();
     paintNextFrame();
 
-    expect(info).toHaveBeenCalledExactlyOnceWith('workspace_navigation_ready {"route":"orders","durationMs":665}');
+    expect(info).toHaveBeenCalledExactlyOnceWith('workspace_navigation_ready {"route":"orders","durationMs":665,"routeResourceCount":0}');
     expect(window.sessionStorage.getItem(storageKey)).toBe('1');
+  });
+
+  it('separates same-origin route response time from the remaining paint delay without logging resource URLs', () => {
+    window.history.replaceState({}, '', '/dashboard?navTiming=1');
+    const now = vi.spyOn(performance, 'now').mockReturnValue(100);
+    const info = vi.spyOn(console, 'info').mockImplementation(() => undefined);
+    vi.spyOn(performance, 'getEntriesByType').mockReturnValue([
+      { name: `${window.location.origin}/orders?_rsc=private-customer-id`, initiatorType: 'fetch', startTime: 150, responseEnd: 360 },
+      { name: `${window.location.origin}/orders?_rsc=prefetched`, initiatorType: 'fetch', startTime: 90, responseEnd: 110 },
+      { name: `${window.location.origin}/orders/secret-id`, initiatorType: 'fetch', startTime: 170, responseEnd: 300 },
+      { name: 'https://other.example.test/orders', initiatorType: 'fetch', startTime: 180, responseEnd: 280 },
+    ] as unknown as PerformanceEntry[]);
+
+    beginWorkspaceNavigationTiming('/orders', '/dashboard');
+    now.mockReturnValue(600);
+    render(<WorkspaceNavigationReady route="orders" />);
+    paintNextFrame();
+    paintNextFrame();
+
+    expect(info).toHaveBeenCalledExactlyOnceWith('workspace_navigation_ready {"route":"orders","durationMs":500,"routeResourceCount":1,"routeResponseEndMs":260,"afterResponseMs":240}');
   });
 
   it('stays silent for ordinary sessions and for unrelated destinations', () => {

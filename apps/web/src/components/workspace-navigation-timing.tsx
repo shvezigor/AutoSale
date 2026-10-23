@@ -7,6 +7,29 @@ type TimedRoute = 'dashboard' | 'orders';
 const storageKey = 'sales-aito.workspace-navigation-timing';
 let pending: { route: TimedRoute; startedAt: number } | null = null;
 
+function routeResourceTiming(route: TimedRoute, startedAt: number, paintedAt: number) {
+  const pathname = `/${route}`;
+  let latestResponseEnd = -1;
+  let routeResourceCount = 0;
+  try {
+    for (const entry of performance.getEntriesByType('resource') as PerformanceResourceTiming[]) {
+      if (entry.initiatorType !== 'fetch' || entry.startTime < startedAt || entry.responseEnd > paintedAt) continue;
+      const url = new URL(entry.name);
+      if (url.origin !== window.location.origin || url.pathname !== pathname) continue;
+      routeResourceCount += 1;
+      latestResponseEnd = Math.max(latestResponseEnd, entry.responseEnd);
+    }
+  } catch {
+    return { routeResourceCount: 0 };
+  }
+  if (routeResourceCount === 0) return { routeResourceCount };
+  return {
+    routeResourceCount,
+    routeResponseEndMs: Math.max(0, Math.round(latestResponseEnd - startedAt)),
+    afterResponseMs: Math.max(0, Math.round(paintedAt - latestResponseEnd)),
+  };
+}
+
 function isEnabledInThisTab(): boolean {
   try {
     const requested = new URLSearchParams(window.location.search).get('navTiming');
@@ -32,9 +55,10 @@ export function WorkspaceNavigationReady({ route }: { route: TimedRoute }) {
     let mounted = true;
     requestAnimationFrame(() => requestAnimationFrame(() => {
       if (!mounted || pending !== sample || !isEnabledInThisTab()) return;
-      const durationMs = Math.max(0, Math.round(performance.now() - sample.startedAt));
+      const paintedAt = performance.now();
+      const durationMs = Math.max(0, Math.round(paintedAt - sample.startedAt));
       pending = null;
-      console.info(`workspace_navigation_ready ${JSON.stringify({ route, durationMs })}`);
+      console.info(`workspace_navigation_ready ${JSON.stringify({ route, durationMs, ...routeResourceTiming(route, sample.startedAt, paintedAt) })}`);
     }));
     return () => { mounted = false; };
   }, [route]);
