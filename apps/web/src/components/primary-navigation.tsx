@@ -3,8 +3,9 @@
 import type { PublicSession } from '../../../../packages/contracts/src/auth';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useRef, type ComponentType, type SVGProps } from 'react';
+import { useEffect, useRef, type ComponentType, type MouseEvent, type SVGProps } from 'react';
 import { useI18n } from '../i18n/i18n-provider';
+import { beginWorkspaceNavigationTiming } from './workspace-navigation-timing';
 
 type NavigationSession = Pick<PublicSession, 'name' | 'email' | 'membershipRole'>;
 type NavigationIcon = ComponentType<SVGProps<SVGSVGElement>>;
@@ -53,7 +54,12 @@ export function PrimaryNavigation({
   const prefetchedRoutes = useRef(new Set<string>());
   useEffect(() => { prefetchedRoutes.current.clear(); }, [pathname]);
   const { t } = useI18n();
-  const navigationHandler = onNavigate ? { onClick: onNavigate } : {};
+  const navigate = (destination: string) => (event: MouseEvent<HTMLAnchorElement>) => {
+    if (!event.defaultPrevented && event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) {
+      beginWorkspaceNavigationTiming(destination, pathname);
+    }
+    onNavigate?.();
+  };
   const prefetchOnIntent = (href: string) => {
     if (isNavigationItemActive(pathname, href) || prefetchedRoutes.current.has(href)) return;
     prefetchedRoutes.current.add(href);
@@ -67,7 +73,7 @@ export function PrimaryNavigation({
 
   return <aside className={`primary-nav ${className}`.trim()}>
     <div className="primary-nav-brand-row">
-      <Link className="brand" href="/dashboard" prefetch={false} aria-label="Sales AITO" onMouseEnter={() => prefetchOnIntent('/dashboard')} onFocus={() => prefetchOnIntent('/dashboard')} {...navigationHandler}><span className="brand-mark" aria-hidden="true">A</span><span className="brand-label">Sales AITO</span></Link>
+      <Link className="brand" href="/dashboard" prefetch={false} aria-label="Sales AITO" onMouseEnter={() => prefetchOnIntent('/dashboard')} onFocus={() => prefetchOnIntent('/dashboard')} onClick={navigate('/dashboard')}><span className="brand-mark" aria-hidden="true">A</span><span className="brand-label">Sales AITO</span></Link>
       {onToggleCollapse && <button className="sidebar-toggle" type="button" aria-label={collapsed ? t('navigation.expand') : t('navigation.collapse')} aria-expanded={!collapsed} onClick={onToggleCollapse}><CollapseIcon data-collapsed={collapsed} /></button>}
     </div>
     <nav aria-label={ariaLabel ?? t('navigation.mainLabel')} id={navId}>
@@ -75,7 +81,7 @@ export function PrimaryNavigation({
         const Icon = item.icon;
         const active = isNavigationItemActive(pathname, item.href);
         const label = t(item.labelKey);
-        return <Link className={`nav-item${active ? ' active' : ''}`} href={item.href} prefetch={false} aria-label={collapsed ? label : undefined} aria-current={active ? 'page' : undefined} onMouseEnter={() => prefetchOnIntent(item.href)} onFocus={() => prefetchOnIntent(item.href)} {...navigationHandler} key={item.href}>
+        return <Link className={`nav-item${active ? ' active' : ''}`} href={item.href} prefetch={false} aria-label={collapsed ? label : undefined} aria-current={active ? 'page' : undefined} onMouseEnter={() => prefetchOnIntent(item.href)} onFocus={() => prefetchOnIntent(item.href)} onClick={navigate(item.href)} key={item.href}>
           <span className="nav-icon-frame" aria-hidden="true"><Icon className="nav-icon" /></span>
           <span className="nav-label">{label}</span>
           <span className="nav-tooltip" aria-hidden="true">{label}</span>

@@ -6,6 +6,7 @@ import type { ShipmentStatus } from '../../../../../packages/contracts/src/deliv
 import type { OrderPaymentStatus } from '../../../../../packages/contracts/src/payments';
 import { getServerSession } from '../../../src/auth/session';
 import { createTranslator } from '../../../src/i18n/translator';
+import { WorkspaceNavigationReady } from '../../../src/components/workspace-navigation-timing';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,7 +28,7 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
   const sort = sortParam(params.sort);
   const direction = directionParam(params.direction, sort);
   const orders = await getOrders({ page, pageSize, sort, direction, ...(search ? { search } : {}), ...(status ? { status } : {}), ...(procurementStatus ? { procurementStatus } : {}), ...(shipmentStatus ? { shipmentStatus } : {}), ...(paymentStatus ? { paymentStatus } : {}) });
-  return <main className="orders-layout orders-layout-content"><section className="orders-content"><header className="orders-header"><h1>{t('orders.title')}</h1><p>{t('orders.description')}</p></header><OrdersTable direction={direction} orders={orders.items} page={orders.page} pageSize={orders.pageSize} search={search} sort={sort} {...(status ? { status } : {})} {...(procurementStatus ? { procurementStatus } : {})} {...(shipmentStatus ? { shipmentStatus } : {})} {...(paymentStatus ? { paymentStatus } : {})} total={orders.total} /></section></main>;
+  return <main className="orders-layout orders-layout-content"><WorkspaceNavigationReady route="orders" /><section className="orders-content"><header className="orders-header"><h1>{t('orders.title')}</h1><p>{t('orders.description')}</p></header><OrdersTable direction={direction} orders={orders.items} page={orders.page} pageSize={orders.pageSize} search={search} sort={sort} {...(status ? { status } : {})} {...(procurementStatus ? { procurementStatus } : {})} {...(shipmentStatus ? { shipmentStatus } : {})} {...(paymentStatus ? { paymentStatus } : {})} total={orders.total} /></section></main>;
 }
 
 function positiveInteger(value: string | string[] | undefined) { const parsed = Number(Array.isArray(value) ? value[0] : value); return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : null; }

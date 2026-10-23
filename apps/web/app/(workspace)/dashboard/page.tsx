@@ -7,6 +7,7 @@ import { DashboardOverview } from '../../../src/components/dashboard/dashboard-o
 import { DashboardCharts } from '../../../src/components/dashboard/dashboard-charts';
 import { DashboardActions } from '../../../src/components/dashboard/dashboard-actions';
 import { PlanInterestCard } from '../../../src/components/dashboard/plan-interest-card';
+import { WorkspaceNavigationReady } from '../../../src/components/workspace-navigation-timing';
 import { createTranslator } from '../../../src/i18n/translator';
 
 export const dynamic = 'force-dynamic';
@@ -32,6 +33,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
 
   return (
     <main className="dashboard-page">
+      <WorkspaceNavigationReady route="dashboard" />
       <header className="dashboard-live-header">
         <div>
           <h1>{t('dashboard.title')}</h1>

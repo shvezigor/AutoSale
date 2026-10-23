@@ -16,6 +16,8 @@ The persistent sidebar does not prefetch every destination when it enters the vi
 
 Workspace route fallbacks use `RouteSkeleton` with a real section heading and a localized, visible description of what is loading. The Orders, Catalogue and Team placeholders resemble a toolbar and rows; Settings, Conversations, order detail and Dashboard use their own structural silhouettes. Placeholder shapes contain no invented values or interactive controls. A 320 ms visual reveal delay avoids flashing a skeleton on fast navigation; after three seconds, the status text honestly says that loading is taking longer, without a fake percentage or speculative cause. The status remains available to assistive technology, while decorative shapes are hidden from it. Respect reduced-motion preferences. A real failure exits the loading boundary to the existing localized error/retry screen; the fallback itself must not invent an error. Keep these contracts in `route-skeleton.spec.tsx` and the affected route-loading tests.
 
+The Dashboard/Orders navigation-timing probe is invisible to ordinary users and does not replace loading feedback. It is enabled only per test tab through `?navTiming=1`, reports a fixed route label and click-to-painted-content duration to that tab's console, and can be cleared with `?navTiming=0`. Its privacy and interpretation limits live in the [observability runbook](../operations/observability.md); performance conclusions require paired browser and proxy evidence, not the probe alone.
+
 ## Selecting design assistance
 
 Start with the repository contract. Load one relevant design skill at a time, plus a focused implementation or browser-testing skill when needed; do not combine competing theme generators by default.

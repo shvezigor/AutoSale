@@ -1,0 +1,42 @@
+'use client';
+
+import { useEffect } from 'react';
+
+type TimedRoute = 'dashboard' | 'orders';
+
+const storageKey = 'sales-aito.workspace-navigation-timing';
+let pending: { route: TimedRoute; startedAt: number } | null = null;
+
+function isEnabledInThisTab(): boolean {
+  try {
+    const requested = new URLSearchParams(window.location.search).get('navTiming');
+    if (requested === '1') window.sessionStorage.setItem(storageKey, '1');
+    if (requested === '0') window.sessionStorage.removeItem(storageKey);
+    return window.sessionStorage.getItem(storageKey) === '1';
+  } catch {
+    return false;
+  }
+}
+
+export function beginWorkspaceNavigationTiming(destination: string, currentPathname: string) {
+  pending = null;
+  if (!isEnabledInThisTab() || destination === currentPathname) return;
+  const route = destination === '/dashboard' ? 'dashboard' : destination === '/orders' ? 'orders' : null;
+  if (route) pending = { route, startedAt: performance.now() };
+}
+
+export function WorkspaceNavigationReady({ route }: { route: TimedRoute }) {
+  useEffect(() => {
+    if (!isEnabledInThisTab() || !pending || pending.route !== route) return;
+    const sample = pending;
+    let mounted = true;
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      if (!mounted || pending !== sample || !isEnabledInThisTab()) return;
+      const durationMs = Math.max(0, Math.round(performance.now() - sample.startedAt));
+      pending = null;
+      console.info('workspace_navigation_ready', { route, durationMs });
+    }));
+    return () => { mounted = false; };
+  }, [route]);
+  return null;
+}

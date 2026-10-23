@@ -4,18 +4,19 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { I18nProvider } from '../i18n/i18n-provider';
 import { PrimaryNavigation } from './primary-navigation';
+import { WorkspaceNavigationReady } from './workspace-navigation-timing';
 
 const { usePathname, prefetch } = vi.hoisted(() => ({ usePathname: vi.fn(), prefetch: vi.fn() }));
 vi.mock('next/navigation', () => ({ usePathname, useRouter: () => ({ refresh: vi.fn(), prefetch }) }));
 vi.mock('next/link', () => ({
   default: ({ prefetch: shouldPrefetch, children, ...props }: { prefetch?: boolean; children?: ReactNode } & AnchorHTMLAttributes<HTMLAnchorElement>) =>
-    <a {...props} data-prefetch={String(shouldPrefetch)}>{children}</a>,
+    <a {...props} data-prefetch={String(shouldPrefetch)} onClick={(event) => { props.onClick?.(event); event.preventDefault(); }}>{children}</a>,
 }));
 
 const managerSession = { name: 'Іван', email: 'manager@example.com', membershipRole: 'MANAGER' as const };
 const ownerSession = { name: 'Олена', email: 'owner@example.com', membershipRole: 'OWNER' as const };
 
-afterEach(() => { cleanup(); usePathname.mockReset(); prefetch.mockReset(); });
+afterEach(() => { cleanup(); usePathname.mockReset(); prefetch.mockReset(); vi.restoreAllMocks(); vi.unstubAllGlobals(); window.sessionStorage.clear(); window.history.replaceState({}, '', '/dashboard'); });
 
 function renderNavigation(session: Parameters<typeof PrimaryNavigation>[0]['session'] = ownerSession, locale: 'uk' | 'en' = 'uk', props: Partial<Parameters<typeof PrimaryNavigation>[0]> = {}) {
   return render(<I18nProvider locale={locale} authenticated><PrimaryNavigation session={session} {...props} /></I18nProvider>);
@@ -41,6 +42,27 @@ describe('PrimaryNavigation', () => {
 
     fireEvent.mouseEnter(screen.getByRole('link', { name: 'Замовлення' }));
     expect(prefetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('records an opted-in sidebar click until the destination is ready without skipping mobile close', () => {
+    window.history.replaceState({}, '', '/dashboard?navTiming=1');
+    usePathname.mockReturnValue('/dashboard');
+    const now = vi.spyOn(performance, 'now').mockReturnValue(300);
+    const info = vi.spyOn(console, 'info').mockImplementation(() => undefined);
+    let frames: FrameRequestCallback[] = [];
+    vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => { frames.push(callback); return frames.length; });
+    const paintFrame = () => { const callbacks = frames; frames = []; callbacks.forEach((callback) => callback(0)); };
+    const onNavigate = vi.fn();
+    renderNavigation(ownerSession, 'uk', { onNavigate });
+
+    fireEvent.click(screen.getByRole('link', { name: 'Замовлення' }));
+    expect(onNavigate).toHaveBeenCalledTimes(1);
+    now.mockReturnValue(750);
+    render(<WorkspaceNavigationReady route="orders" />);
+    expect(info).not.toHaveBeenCalled();
+    paintFrame();
+    paintFrame();
+    expect(info).toHaveBeenCalledExactlyOnceWith('workspace_navigation_ready', { route: 'orders', durationMs: 450 });
   });
 
   it('exposes the dashboard as the first workspace destination', () => {
