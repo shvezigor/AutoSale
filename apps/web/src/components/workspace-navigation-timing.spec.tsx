@@ -49,7 +49,7 @@ describe('workspace navigation timing', () => {
     expect(window.sessionStorage.getItem(storageKey)).toBe('1');
   });
 
-  it('separates same-origin route response time from the remaining paint delay without logging resource URLs', () => {
+  it('separates click-to-request delay, route fetch duration and paint delay without logging resource URLs', () => {
     window.history.replaceState({}, '', '/dashboard?navTiming=1');
     const now = vi.spyOn(performance, 'now').mockReturnValue(100);
     const info = vi.spyOn(console, 'info').mockImplementation(() => undefined);
@@ -66,7 +66,7 @@ describe('workspace navigation timing', () => {
     paintNextFrame();
     paintNextFrame();
 
-    expect(info).toHaveBeenCalledExactlyOnceWith('workspace_navigation_ready {"route":"orders","durationMs":500,"routeResourceCount":1,"routeResponseEndMs":260,"afterResponseMs":240}');
+    expect(info).toHaveBeenCalledExactlyOnceWith('workspace_navigation_ready {"route":"orders","durationMs":500,"routeResourceCount":1,"routeRequestStartMs":50,"routeFetchDurationMs":210,"routeResponseEndMs":260,"afterResponseMs":240}');
   });
 
   it('stays silent for ordinary sessions and for unrelated destinations', () => {

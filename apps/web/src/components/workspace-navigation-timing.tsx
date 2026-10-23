@@ -10,6 +10,7 @@ let pending: { route: TimedRoute; startedAt: number } | null = null;
 function routeResourceTiming(route: TimedRoute, startedAt: number, paintedAt: number) {
   const pathname = `/${route}`;
   let latestResponseEnd = -1;
+  let latestRequestStart = -1;
   let routeResourceCount = 0;
   try {
     for (const entry of performance.getEntriesByType('resource') as PerformanceResourceTiming[]) {
@@ -17,7 +18,10 @@ function routeResourceTiming(route: TimedRoute, startedAt: number, paintedAt: nu
       const url = new URL(entry.name);
       if (url.origin !== window.location.origin || url.pathname !== pathname) continue;
       routeResourceCount += 1;
-      latestResponseEnd = Math.max(latestResponseEnd, entry.responseEnd);
+      if (entry.responseEnd > latestResponseEnd) {
+        latestResponseEnd = entry.responseEnd;
+        latestRequestStart = entry.startTime;
+      }
     }
   } catch {
     return { routeResourceCount: 0 };
@@ -25,6 +29,8 @@ function routeResourceTiming(route: TimedRoute, startedAt: number, paintedAt: nu
   if (routeResourceCount === 0) return { routeResourceCount };
   return {
     routeResourceCount,
+    routeRequestStartMs: Math.max(0, Math.round(latestRequestStart - startedAt)),
+    routeFetchDurationMs: Math.max(0, Math.round(latestResponseEnd - latestRequestStart)),
     routeResponseEndMs: Math.max(0, Math.round(latestResponseEnd - startedAt)),
     afterResponseMs: Math.max(0, Math.round(paintedAt - latestResponseEnd)),
   };
