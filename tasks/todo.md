@@ -11,7 +11,7 @@
 - [x] Production deployment, demo-lead migration, public route checks, and container health verification completed on `sales-aito.com`.
 - [x] Distributed demo notification retries were deployed on 16 October. Isolated PostgreSQL/SMTP, Redis-restart and configured full-worker-container acceptance pass; production SMTP and a real internal mailbox remain unconfigured.
 - [x] Distributed demo quotas, a masked audited admin queue, purpose-bound export code and bounded retention/deletion code were deployed on 20 October. Actual step-up downloads remain unverified; deletion and scheduled purging stay disabled pending an independent erasure/restore ledger and legal review.
-- [x] Google Search Console and Bing Webmaster Tools ownership and sitemap processing were verified; both discovered 20 URLs. Some key URLs were still unindexed at the last check, and field Core Web Vitals had insufficient real-user data.
+- [x] Google Search Console and Bing Webmaster Tools ownership and sitemap processing were verified; both discovered 20 URLs. Both now report the first article indexed, while three inspected Bing pages remain non-indexed and field Core Web Vitals still lack real-user data.
 - [x] Privacy-minimal conversion counters and an aggregate admin report were deployed behind a disabled-by-default public analytics switch. Trial start/enforcement is a separate unimplemented billing capability.
 - [ ] Deferred live gates: production SMTP/internal recipient and real notification; authorized JSON/CSV download acceptance; independent erasure-ledger/restore rehearsal and legal activation; analytics privacy/legal release decision; remaining search indexing and field Core Web Vitals. See the canonical [marketing acceptance](../docs/acceptance/marketing-site-checklist.md) and [feature map](../docs/features/README.md).
 
@@ -1916,7 +1916,8 @@ Reference: [competitive analysis](../docs/research/2026-10-02-chatoryx-competiti
 
 - [x] Verify `sales-aito.com` in Google Search Console and Bing Webmaster Tools; both ownership methods are recorded in the [search runbook](../docs/operations/search-indexing.md).
 - [x] Submit the sitemap to both services and inspect representative Ukrainian and English URLs. Both processed 20 discovered URLs; discovery is not indexing.
-- [ ] Recheck stored Google indexing for the first article and Bing indexing for `/en`, `/uk/integrations`, `/uk/pricing` and the article without repeating unchanged submission requests.
+- [x] Recheck stored Google and Bing indexing for the first article: both now report it indexed; Bing's retained title warning predates the corrected live page.
+- [ ] Recheck stored Bing indexing for `/en`, `/uk/integrations`, and `/uk/pricing` without repeating unchanged submission requests.
 - [ ] Capture production Core Web Vitals and resolve any release-environment regressions.
 - [ ] Reconsider IndexNow after a deployment-owned key and publication hook are approved.
 
