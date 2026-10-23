@@ -115,7 +115,6 @@ services:
       start_period: 10s
     networks:
       - internal
-      - edge
 
   migrate:
     build:
@@ -205,7 +204,6 @@ services:
       start_period: 10s
     networks:
       - internal
-      - edge
 
   postgres:
     image: postgres:17.6-alpine
