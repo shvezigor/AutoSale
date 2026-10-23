@@ -41,12 +41,12 @@ try {
 
   foreach ($entry in $accessLogs) {
     $fields = @($entry.PSObject.Properties.Name)
-    if ($fields -contains 'request' -or $fields -contains 'resp_headers') { throw 'An access log retained request or response metadata.' }
+    if ($fields -contains 'request' -or $fields -contains 'resp_headers' -or $fields -contains 'user_id') { throw 'An access log retained request, response or user metadata.' }
     if ($null -eq $entry.duration -or $null -eq $entry.status) { throw 'An access log lacks duration or status.' }
     if (($entry | ConvertTo-Json -Depth 8 -Compress).Contains($marker)) { throw 'An access log retained a private URL, cookie or header marker.' }
   }
 
-  Write-Output 'Caddy route timing verified: two bounded entries, no private request or response metadata.'
+  Write-Output 'Caddy route timing verified: two bounded entries, no private request, response or user metadata.'
 } finally {
   if ($started) { & docker stop $container 2>$null | Out-Null }
 }

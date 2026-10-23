@@ -21,6 +21,7 @@
     format filter {
       request delete
       resp_headers delete
+      user_id delete
       wrap json {
         duration_format ms
       }
