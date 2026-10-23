@@ -8,6 +8,28 @@
 :80 {
   encode zstd gzip
 
+  # Scope navigation timing to two fixed routes and omit all request metadata.
+  @skipRouteTiming {
+    not path /dashboard /orders
+  }
+  log {
+    output file /data/workspace-navigation-timing.log {
+      roll_size 10MiB
+      roll_keep 3
+      roll_keep_for 168h
+    }
+    format filter {
+      request delete
+      resp_headers delete
+      wrap json {
+        duration_format ms
+      }
+    }
+  }
+  log_skip @skipRouteTiming
+  log_append /dashboard route dashboard
+  log_append /orders route orders
+
   @api path /api/* /health/* /webhooks/*
   handle @api {
     reverse_proxy api:3001 {

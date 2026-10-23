@@ -43,6 +43,10 @@ jobs:
       - name: Run tests
         run: pnpm test
 
+      - name: Verify privacy-safe Caddy route timing
+        shell: pwsh
+        run: ./infra/scripts/verify-caddy-route-timing.ps1
+
       - name: Test backup and restore scripts
         run: sh infra/scripts/offsite-backup.spec.sh
 
