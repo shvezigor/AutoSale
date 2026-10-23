@@ -1,21 +1,23 @@
 # Sales AITO — Shared Task Checklist
 
-## Marketing implementation status, 2026-09-17
+## Marketing implementation status, 2026-10-23
 
 - [x] Bilingual public marketing routes and Autonomous Command design foundation implemented.
 - [x] Ukrainian and English home, platform, AI operator, integrations, solutions, about, pricing, demo, blog, and article pages implemented.
 - [x] Canonical, reciprocal `hreflang`, sitemap, robots, JSON-LD, Open Graph, private-route noindex, and server-rendered core content implemented.
-- [x] Approved 30-day trial and Start 599 / Growth 1,999 / Scale 2,999 UAH pricing implemented with a 20% annual display calculation.
+- [x] Public pages display the proposed 30-day trial and Start 599 / Growth 1,999 / Scale 2,999 UAH pricing with a 20% annual calculation; actual trial/subscription enforcement is not implemented.
 - [x] Demo leads validate, persist before notification, use an idempotency key, and retain failed notification state.
 - [x] Production build, unit/API tests, raw-HTML checks, and responsive browser E2E pass locally.
 - [x] Production deployment, demo-lead migration, public route checks, and container health verification completed on `sales-aito.com`.
-- [ ] SMTP recipient configuration, a real internal demo notification, Search Console/Bing submission, and production Core Web Vitals remain launch operations.
-- [ ] Distributed demo notification retries: implementation is on `codex/demo-lead-notification-retry`; isolated SMTP/browser acceptance and production rollout remain. Operator lead-management UI is a separate follow-up.
-- [ ] First-party conversion analytics remain deferred until the event storage and privacy policy are approved.
+- [x] Distributed demo notification retries were deployed on 16 October. Isolated PostgreSQL/SMTP, Redis-restart and configured full-worker-container acceptance pass; production SMTP and a real internal mailbox remain unconfigured.
+- [x] Distributed demo quotas, a masked audited admin queue, purpose-bound export code and bounded retention/deletion code were deployed on 20 October. Actual step-up downloads remain unverified; deletion and scheduled purging stay disabled pending an independent erasure/restore ledger and legal review.
+- [x] Google Search Console and Bing Webmaster Tools ownership and sitemap processing were verified; both discovered 20 URLs. Some key URLs were still unindexed at the last check, and field Core Web Vitals had insufficient real-user data.
+- [x] Privacy-minimal conversion counters and an aggregate admin report were deployed behind a disabled-by-default public analytics switch. Trial start/enforcement is a separate unimplemented billing capability.
+- [ ] Deferred live gates: production SMTP/internal recipient and real notification; authorized JSON/CSV download acceptance; independent erasure-ledger/restore rehearsal and legal activation; analytics privacy/legal release decision; remaining search indexing and field Core Web Vitals. See the canonical [marketing acceptance](../docs/acceptance/marketing-site-checklist.md) and [feature map](../docs/features/README.md).
 
 ## Historical implementation breakdown: Public Marketing Website
 
-This M1–M18 checklist is the original implementation plan, not the current live-work queue. The bilingual site and demo-lead migration were deployed on 18 September 2026; see the [marketing release record](../docs/operations/marketing-release.md) and [feature index](../docs/features/README.md). Its unchecked template boxes have not been individually reconciled and must not be counted as outstanding product implementation by themselves. Current open marketing work is listed in the status summary above and the shared backlog below: SMTP/internal notification, search-engine submission, production Core Web Vitals, distributed demo-notification retry and operator lead management, and privacy-approved conversion analytics. In particular, M13's distributed retry and M16's event tracking remain follow-up work rather than completed parts of the released site.
+This M1–M18 checklist is the original implementation plan, not the current live-work queue. The bilingual site and demo-lead migration were deployed on 18 September 2026; see the [marketing release record](../docs/operations/marketing-release.md) and [feature index](../docs/features/README.md). Its unchecked template boxes have not been individually reconciled and must not be counted as outstanding product implementation by themselves. The current implementation and remaining acceptance gates are summarized above and in the shared backlog below. Distributed notification retry, operator lead management and aggregate conversion reporting were implemented later; SMTP delivery, protected download acceptance, erasure recovery, privacy/legal activation and field search-performance evidence remain separate gates.
 
 ### M1: Lock the existing route and metadata baseline
 
@@ -1896,21 +1898,25 @@ Reference: [competitive analysis](../docs/research/2026-10-02-chatoryx-competiti
 
 ### Backlog: Complete demo lead operations
 
-- [ ] Add bounded BullMQ retry with backoff for `FAILED` demo notifications. Approved design: [`durable demo-lead notification retries`](../docs/superpowers/specs/2026-10-15-demo-lead-notification-retries-design.md); implementation and acceptance pending.
-- [ ] Add distributed public rate limiting and abuse protection for demo submissions.
-- [ ] Add a privacy-safe platform-admin lead queue with lifecycle transitions and audit history.
-- [ ] Define retention, deletion, and export procedures for demo contact data.
+- [x] Bounded BullMQ retry with PostgreSQL-owned state and backoff is deployed; isolated configured-SMTP recovery passed. [Live internal-mailbox delivery](../docs/acceptance/marketing-site-checklist.md) remains open.
+- [x] Distributed Redis public rate limiting, request bounds, honeypot, idempotent replay and safe 429/503 responses are deployed; controlled public quota and browser checks passed. A live Redis outage was not induced.
+- [x] The privacy-safe platform-admin lead queue, detail, status transitions and audit are deployed; a fictional status transition persisted in the production browser.
+- [x] Retention policy and purpose-bound JSON/CSV export plus guarded deletion code are documented and deployed; the erasure switch remains off.
+- [ ] Complete actual password-step-up JSON/CSV browser downloads and audit/header verification in an authorized admin session. The owner chose to defer this check for now.
+- [ ] Provision the independent erasure/restore ledger, rehearse restore and obtain legal approval before enabling deletion or the 180/365-day purge. Configure production SMTP and a real internal recipient only when the owner resumes that deferred work.
 
 ### Backlog: Add first-party conversion analytics
 
-- [ ] Approve event names and privacy policy for pricing views, plan interest, registration arrival, trial activation, and demo intent.
-- [ ] Persist events without customer message content or cross-site identifiers.
-- [ ] Add reporting for registration-to-activation and activation-to-plan-intent conversion.
+- [x] A fixed privacy-minimal event contract for pricing views, plan interest and registration arrival is implemented. Accepted demo intent and first confirmed non-demo order are derived from server-side state; the latter is **not** trial activation.
+- [x] UTC daily aggregate counters exclude message content, free text, URLs and cross-site identifiers. Public collection remains disabled by default.
+- [x] The admin conversion report uses suppressed small cells and first-order funnels; it does not infer a trial start or uniquely stitch anonymous page views to registration.
+- [ ] Approve the public privacy disclosure, legal basis and market rollout before enabling event intake. Implementing the actual 30-day trial remains in the billing backlog, not this analytics slice.
 
 ### Backlog: Complete external search launch
 
-- [ ] Verify `sales-aito.com` in Google Search Console and Bing Webmaster Tools.
-- [ ] Submit the sitemap and inspect representative Ukrainian and English URLs.
+- [x] Verify `sales-aito.com` in Google Search Console and Bing Webmaster Tools; both ownership methods are recorded in the [search runbook](../docs/operations/search-indexing.md).
+- [x] Submit the sitemap to both services and inspect representative Ukrainian and English URLs. Both processed 20 discovered URLs; discovery is not indexing.
+- [ ] Recheck stored Google indexing for the first article and Bing indexing for `/en`, `/uk/integrations`, `/uk/pricing` and the article without repeating unchanged submission requests.
 - [ ] Capture production Core Web Vitals and resolve any release-environment regressions.
 - [ ] Reconsider IndexNow after a deployment-owned key and publication hook are approved.
 
