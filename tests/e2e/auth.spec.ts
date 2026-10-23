@@ -5,6 +5,15 @@ const ownerPassword = process.env.E2E_OWNER_PASSWORD;
 const adminEmail = process.env.E2E_ADMIN_EMAIL;
 const adminPassword = process.env.E2E_ADMIN_PASSWORD;
 
+test('anonymous visitors cannot render the admin shell or demo queue', async ({ page }) => {
+  for (const pathname of ['/admin', '/admin/leads']) {
+    await page.goto(pathname);
+    await expect(page).toHaveURL(new RegExp(`/login\\?next=${encodeURIComponent(pathname)}$`));
+    await expect(page.getByRole('heading', { name: 'Адміністрування платформи' })).toHaveCount(0);
+    await expect(page.getByRole('link', { name: 'Демозаявки' })).toHaveCount(0);
+  }
+});
+
 test('owner logs in and opens team management', async ({ page }) => {
   test.skip(!ownerEmail || !ownerPassword, 'E2E owner credentials are not configured');
   await login(page, ownerEmail!, ownerPassword!);

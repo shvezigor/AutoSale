@@ -160,6 +160,7 @@ Use shared `primary-button`, `secondary-button`, `danger-button`, `text-button` 
 - `pnpm audit --audit-level high`: no known vulnerabilities after updating Next.js to 16.3.6 and constraining the test-only gRPC dependency to 1.14.5.
 - Browser acceptance against the rebuilt Docker stack covered the desktop overview, client sorting and detail navigation, operations monitoring, the 390 × 844 client layout and mobile drawer. The browser console reported no errors.
 - Authorization acceptance temporarily promoted the designated test account, then restored its `USER` role; a final `/admin` request redirected it back to `/dashboard`.
+- 2026-10-23 route-boundary regression: web tests cover tenant-user redirects for direct admin, lead-queue and client-detail paths even with RSC prefetch headers; a failed session lookup redirects to login; the server admin layout returns no shell or children for anonymous or tenant sessions. The API's existing HTTP security tests independently return 401/403 for unauthenticated/tenant requests. In an isolated production Chromium context, `/admin` and `/admin/leads` redirected to login without rendering the admin shell. The signed-in tenant-owner browser path has not been repeated in this check because isolated owner E2E credentials are unavailable; the earlier one-time shell flash remains an open visual-acceptance observation, not a proven data disclosure.
 
 ## Boundaries
 
