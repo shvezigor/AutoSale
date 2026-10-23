@@ -45,10 +45,7 @@ describe('workspace navigation timing', () => {
     expect(info).not.toHaveBeenCalled();
     paintNextFrame();
 
-    expect(info).toHaveBeenCalledExactlyOnceWith('workspace_navigation_ready', {
-      route: 'orders',
-      durationMs: 665,
-    });
+    expect(info).toHaveBeenCalledExactlyOnceWith('workspace_navigation_ready {"route":"orders","durationMs":665}');
     expect(window.sessionStorage.getItem(storageKey)).toBe('1');
   });
 

@@ -34,7 +34,7 @@ export function WorkspaceNavigationReady({ route }: { route: TimedRoute }) {
       if (!mounted || pending !== sample || !isEnabledInThisTab()) return;
       const durationMs = Math.max(0, Math.round(performance.now() - sample.startedAt));
       pending = null;
-      console.info('workspace_navigation_ready', { route, durationMs });
+      console.info(`workspace_navigation_ready ${JSON.stringify({ route, durationMs })}`);
     }));
     return () => { mounted = false; };
   }, [route]);
