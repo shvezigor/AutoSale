@@ -79,6 +79,8 @@ Validate before implementing billing enforcement:
 - which features cause upgrade intent;
 - preferred payment methods and need for invoices or VAT documents.
 
+The approved [internal AI provider usage-ledger design](../superpowers/specs/2026-10-24-ai-provider-usage-ledger-design.md) specifies how to measure the AI component and reconcile it with provider and infrastructure invoices without charging tenants. It is not implemented yet. Existing token columns are incomplete and overlap across order/intent records, so they are not a measured cost-per-order baseline; the cost prerequisite above remains open.
+
 Defer until separately designed:
 
 - payment-provider integration;

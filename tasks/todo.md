@@ -1937,6 +1937,8 @@ Reference: [competitive analysis](../docs/research/2026-10-02-chatoryx-competiti
 **Prerequisites:**
 - [ ] Validate willingness to pay for Start 599 UAH, Growth 1,999 UAH, and Scale 2,999 UAH.
 - [ ] Measure direct AI and infrastructure cost per processed order.
+  - [x] Approve the narrow internal [AI provider usage-ledger design](../docs/superpowers/specs/2026-10-24-ai-provider-usage-ledger-design.md); the written specification awaits owner review.
+  - [ ] Implement and invoice-reconcile the tenant-scoped attempt ledger and private monthly report; historical token fields are not a complete cost baseline.
 - [ ] Select a payment provider and confirm support for Ukrainian businesses, recurring payments, refunds, invoices, taxes, and webhook verification.
 - [ ] Approve the legal and accounting treatment of displayed prices and billing documents.
 
