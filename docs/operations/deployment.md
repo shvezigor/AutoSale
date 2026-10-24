@@ -58,13 +58,18 @@ webhook callback — `<APP_PUBLIC_URL>/webhooks/meta`.
 forwarding. У поточному Compose тунель і Caddy спільно використовують мережу
 `edge`; маршрут hostname має вести на `http://proxy:80`, **не** на host port.
 Склад мереж навмисно вузький: `cloudflared` працює лише в `edge`, `proxy` — в
-`edge` і `internal`, а `api`, `worker` та `web` — лише в `internal`. Не
+`edge` і `internal`, `web` — лише в ізольованій `internal`, а `api` і `worker` —
+в `internal` та окремій неізольованій `provider_egress`. Остання потрібна для
+вихідних DNS/HTTPS-запитів до Meta, Google, OpenAI та інших провайдерів;
+`internal: true` сама по собі не має зовнішнього маршруту. `provider_egress`
+не підключена до тунелю, proxy, web, PostgreSQL, Redis або MinIO. Не
 підключайте API або worker до `edge`: це відкриває прямий обхід Caddy для
 контейнерів цієї мережі й суперечить межі довіри `trust proxy` в API.
 Перевіряйте конфігурацію скриптом
 `infra/scripts/verify-edge-network-boundary.ps1`; після ручного мережевого
 релізу запустіть його з `-Live`, щоб перевірити фактичні мережі контейнерів,
-недоступність API/worker напряму з `edge` та здоровий маршрут через proxy.
+недоступність API/worker напряму з `edge`, вихідний DNS із API/worker та
+здоровий маршрут через proxy.
 Caddy публікує 80/443 тільки на `127.0.0.1` для локальних перевірок. Не
 відкривайте ці порти для LAN/Internet і не спрямовуйте інший контейнер на
 `host.docker.internal:80`: loopback-binding не гарантує доступ із контейнера.

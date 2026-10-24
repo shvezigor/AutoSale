@@ -115,6 +115,7 @@ services:
       start_period: 10s
     networks:
       - internal
+      - provider_egress
 
   migrate:
     build:
@@ -204,6 +205,7 @@ services:
       start_period: 10s
     networks:
       - internal
+      - provider_egress
 
   postgres:
     image: postgres:17.6-alpine
@@ -277,6 +279,7 @@ networks:
   edge:
   internal:
     internal: true
+  provider_egress:
 
 volumes:
   postgres_data:

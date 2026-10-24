@@ -11,8 +11,8 @@ $config = ($rendered -join "`n") | ConvertFrom-Json
 $expectedNetworks = @{
   cloudflared = @('edge')
   proxy = @('edge', 'internal')
-  api = @('internal')
-  worker = @('internal')
+  api = @('internal', 'provider_egress')
+  worker = @('internal', 'provider_egress')
   web = @('internal')
 }
 foreach ($service in $expectedNetworks.Keys) {
@@ -21,6 +21,19 @@ foreach ($service in $expectedNetworks.Keys) {
   if (($actual -join ',') -ne ($expected -join ',')) {
     throw "Unexpected networks for $service. Expected $($expected -join ','), got $($actual -join ',')."
   }
+}
+
+if (-not $config.networks.internal.internal) {
+  throw 'The application data network must remain externally isolated.'
+}
+if (-not $config.networks.provider_egress -or $config.networks.provider_egress.internal) {
+  throw 'The provider egress network must allow outbound traffic.'
+}
+$egressMembers = @($config.services.PSObject.Properties | Where-Object {
+  $_.Value.networks.PSObject.Properties.Name -contains 'provider_egress'
+} | ForEach-Object Name | Sort-Object)
+if (($egressMembers -join ',') -ne 'api,worker') {
+  throw "Only API and worker may join provider egress, got $($egressMembers -join ',')."
 }
 
 $ports = @($config.services.proxy.ports)
@@ -41,7 +54,7 @@ if ($Live) {
     if ($LASTEXITCODE -ne 0 -or -not $containerId) { throw "Running $service container not found." }
     $inspection = (& docker inspect $containerId | ConvertFrom-Json)[0]
     $actual = @($inspection.NetworkSettings.Networks.PSObject.Properties.Name | ForEach-Object {
-      if ($_ -eq $edgeNetwork) { 'edge' } elseif ($_ -eq "${projectName}_internal") { 'internal' } else { $_ }
+      if ($_ -eq $edgeNetwork) { 'edge' } elseif ($_ -eq "${projectName}_internal") { 'internal' } elseif ($_ -eq "${projectName}_provider_egress") { 'provider_egress' } else { $_ }
     } | Sort-Object)
     $expected = @($expectedNetworks[$service] | Sort-Object)
     if (($actual -join ',') -ne ($expected -join ',')) {
@@ -65,5 +78,19 @@ if (response.status !== 200) throw new Error('Proxy health route is unavailable 
 '@
   & docker run --rm --network $edgeNetwork node:24-alpine node --input-type=module -e $probe
   if ($LASTEXITCODE -ne 0) { throw 'Live edge-network reachability probe failed.' }
+
+  $dnsProbe = @'
+require('node:dns').lookup('lookaside.fbsbx.com', (error) => {
+  if (error) {
+    console.error(`Provider DNS unavailable: ${error.code}`);
+    process.exitCode = 1;
+  }
+});
+'@
+  foreach ($service in @('api', 'worker')) {
+    $containerId = (& docker compose -f $composeFile ps -q $service).Trim()
+    & docker exec $containerId node -e $dnsProbe
+    if ($LASTEXITCODE -ne 0) { throw "Live provider DNS unavailable from $service." }
+  }
   Write-Output 'Live edge network boundary: PASS'
 }
