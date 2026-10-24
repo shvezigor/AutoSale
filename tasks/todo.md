@@ -1920,6 +1920,7 @@ Reference: [competitive analysis](../docs/research/2026-10-02-chatoryx-competiti
 - [x] Recheck stored Bing indexing for `/en`, `/uk/integrations`, and `/uk/pricing` on 24 October without repeating unchanged submission requests; all three remain non-indexed.
 - [ ] Recheck these three Bing stored-index results after a new crawl or a meaningful waiting interval; distinguish the stale `/uk/integrations` denial from the currently indexable live page.
 - [ ] Capture production Core Web Vitals and resolve any release-environment regressions.
+- [ ] Reproduce one genuinely slow Dashboard/Orders transition with the opt-in browser probe and correlate its bounded timings with Caddy/API before changing page loading; the 24 October spot-check was fast and Search Console still lacks field Core Web Vitals.
 - [ ] Reconsider IndexNow after a deployment-owned key and publication hook are approved.
 
 ### Backlog: Implement billing and subscription enforcement
