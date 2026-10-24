@@ -15,10 +15,12 @@ As observed on 21 October 2026, recent GitHub-hosted jobs did not start because
 GitHub reported an account billing lock. Local passing checks do not replace a
 successful GitHub run; resolve the account issue and rerun verification before
 relying on this gate.
-The 21 October local production audit initially found advisories in
-`proxy-addr`, `source-map-js`, `sharp`, and `next`; patched package versions are
-now pinned in the workspace lockfile. The dev-only Vite advisory was also
-patched. Both local full and production audits report no known vulnerabilities.
+The 24 October dependency refresh pins patched `next`, `zod`, `multer`,
+`nodemailer`, `body-parser`, and `fast-uri` in the workspace lockfile. The
+dev-only `vitest` and `undici` findings are patched as well. A fresh local
+full audit and production audit both report no known vulnerabilities. This is
+an advisory scan, not a guarantee that every dependency is safe; repeat it
+against the committed lockfile before each release.
 A successful GitHub-hosted audit still requires the billing lock to be cleared
 and the job rerun; the local result does not substitute for that gate.
 
