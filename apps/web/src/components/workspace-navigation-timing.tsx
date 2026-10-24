@@ -7,7 +7,7 @@ type TimedRoute = 'dashboard' | 'orders';
 const storageKey = 'sales-aito.workspace-navigation-timing';
 let pending: { route: TimedRoute; startedAt: number } | null = null;
 
-function routeResourceTiming(route: TimedRoute, startedAt: number, paintedAt: number) {
+function routeResourceTiming(route: TimedRoute, startedAt: number, readyEffectAt: number, paintedAt: number) {
   const pathname = `/${route}`;
   let latestResponseEnd = -1;
   let latestRequestStart = -1;
@@ -33,6 +33,7 @@ function routeResourceTiming(route: TimedRoute, startedAt: number, paintedAt: nu
     routeFetchDurationMs: Math.max(0, Math.round(latestResponseEnd - latestRequestStart)),
     routeResponseEndMs: Math.max(0, Math.round(latestResponseEnd - startedAt)),
     afterResponseMs: Math.max(0, Math.round(paintedAt - latestResponseEnd)),
+    ...(latestResponseEnd <= readyEffectAt ? { responseToReadyEffectMs: Math.max(0, Math.round(readyEffectAt - latestResponseEnd)) } : {}),
   };
 }
 
@@ -58,13 +59,20 @@ export function WorkspaceNavigationReady({ route }: { route: TimedRoute }) {
   useEffect(() => {
     if (!isEnabledInThisTab() || !pending || pending.route !== route) return;
     const sample = pending;
+    const readyEffectAt = performance.now();
     let mounted = true;
     requestAnimationFrame(() => requestAnimationFrame(() => {
       if (!mounted || pending !== sample || !isEnabledInThisTab()) return;
       const paintedAt = performance.now();
       const durationMs = Math.max(0, Math.round(paintedAt - sample.startedAt));
       pending = null;
-      console.info(`workspace_navigation_ready ${JSON.stringify({ route, durationMs, ...routeResourceTiming(route, sample.startedAt, paintedAt) })}`);
+      console.info(`workspace_navigation_ready ${JSON.stringify({
+        route,
+        durationMs,
+        readyEffectMs: Math.max(0, Math.round(readyEffectAt - sample.startedAt)),
+        ...routeResourceTiming(route, sample.startedAt, readyEffectAt, paintedAt),
+        effectToPaintMs: Math.max(0, Math.round(paintedAt - readyEffectAt)),
+      })}`);
     }));
     return () => { mounted = false; };
   }, [route]);

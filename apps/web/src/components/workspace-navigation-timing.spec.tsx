@@ -45,7 +45,7 @@ describe('workspace navigation timing', () => {
     expect(info).not.toHaveBeenCalled();
     paintNextFrame();
 
-    expect(info).toHaveBeenCalledExactlyOnceWith('workspace_navigation_ready {"route":"orders","durationMs":665,"routeResourceCount":0}');
+    expect(info).toHaveBeenCalledExactlyOnceWith('workspace_navigation_ready {"route":"orders","durationMs":665,"readyEffectMs":665,"routeResourceCount":0,"effectToPaintMs":0}');
     expect(window.sessionStorage.getItem(storageKey)).toBe('1');
   });
 
@@ -66,7 +66,36 @@ describe('workspace navigation timing', () => {
     paintNextFrame();
     paintNextFrame();
 
-    expect(info).toHaveBeenCalledExactlyOnceWith('workspace_navigation_ready {"route":"orders","durationMs":500,"routeResourceCount":1,"routeRequestStartMs":50,"routeFetchDurationMs":210,"routeResponseEndMs":260,"afterResponseMs":240}');
+    expect(info).toHaveBeenCalledExactlyOnceWith('workspace_navigation_ready {"route":"orders","durationMs":500,"readyEffectMs":500,"routeResourceCount":1,"routeRequestStartMs":50,"routeFetchDurationMs":210,"routeResponseEndMs":260,"afterResponseMs":240,"responseToReadyEffectMs":240,"effectToPaintMs":0}');
+  });
+
+  it('separates route response to ready effect from ready effect to paint', () => {
+    window.history.replaceState({}, '', '/dashboard?navTiming=1');
+    const info = vi.spyOn(console, 'info').mockImplementation(() => undefined);
+    const now = vi.spyOn(performance, 'now').mockReturnValue(100);
+    vi.spyOn(performance, 'getEntriesByType').mockReturnValue([
+      { name: `${window.location.origin}/orders?_rsc=private-customer-id`, initiatorType: 'fetch', startTime: 150, responseEnd: 300 },
+    ] as unknown as PerformanceEntry[]);
+
+    beginWorkspaceNavigationTiming('/orders', '/dashboard');
+    now.mockReturnValue(450);
+    render(<WorkspaceNavigationReady route="orders" />);
+    now.mockReturnValue(600);
+    paintNextFrame();
+    paintNextFrame();
+
+    expect(info).toHaveBeenCalledOnce();
+    const line = String(info.mock.calls[0]?.[0]);
+    expect(line.startsWith('workspace_navigation_ready ')).toBe(true);
+    expect(JSON.parse(line.slice('workspace_navigation_ready '.length))).toEqual(expect.objectContaining({
+      route: 'orders',
+      durationMs: 500,
+      routeResponseEndMs: 200,
+      readyEffectMs: 350,
+      responseToReadyEffectMs: 150,
+      effectToPaintMs: 150,
+    }));
+    expect(line).not.toContain('private-customer-id');
   });
 
   it('stays silent for ordinary sessions and for unrelated destinations', () => {
