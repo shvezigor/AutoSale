@@ -1882,6 +1882,14 @@ Status: commercial terms were implemented on 2026-09-19 and manual audited payme
 - [x] Production deployment verification is complete before claiming the live dashboard is ready.
 ## Shared Product Backlog
 
+### Deferred: Investigate intermittent Dashboard/Orders navigation delay
+
+Owner: workspace UI / operations. Status: deferred at the owner's request on 24 October 2026; do not run more timing probes or infer a performance fix while the issue is not recurring. Existing skeleton, bounded opt-in diagnostics and route logs remain available; [acceptance evidence](../docs/acceptance/workspace-navigation-performance-2026-10-22.md) distinguishes the probe's measured frame from actual first visual paint.
+
+- [ ] Resume if a user again sees a sustained skeleton or a clearly slow Dashboard/Orders transition. Record route, approximate local time, browser/profile and whether it occurs repeatedly, without customer content.
+- [ ] During a reproduced slow transition, compare a clean authenticated browser profile with the affected profile and capture a foreground main-thread/network trace; correlate it with the bounded Caddy/API timing before changing loading, caching or rendering.
+- [ ] Apply only an evidence-backed optimization, then verify the visible transition and failure states in a real browser. A fast spot-check or double-`requestAnimationFrame` number alone does not close this item.
+
 ### Backlog: Validate differentiation against Chatoryx
 
 Reference: [competitive analysis](../docs/research/2026-10-02-chatoryx-competitive-analysis.md). Owner: product; status: proposed validation, no new runtime functionality.
@@ -1920,7 +1928,6 @@ Reference: [competitive analysis](../docs/research/2026-10-02-chatoryx-competiti
 - [x] Recheck stored Bing indexing for `/en`, `/uk/integrations`, and `/uk/pricing` on 24 October without repeating unchanged submission requests; all three remain non-indexed.
 - [ ] Recheck these three Bing stored-index results after a new crawl or a meaningful waiting interval; distinguish the stale `/uk/integrations` denial from the currently indexable live page.
 - [ ] Capture production Core Web Vitals and resolve any release-environment regressions.
-- [ ] Reproduce one genuinely slow Dashboard/Orders transition with the opt-in browser probe and correlate its bounded timings with Caddy/API before changing page loading; the 24 October spot-check was fast and Search Console still lacks field Core Web Vitals.
 - [ ] Reconsider IndexNow after a deployment-owned key and publication hook are approved.
 
 ### Backlog: Implement billing and subscription enforcement
