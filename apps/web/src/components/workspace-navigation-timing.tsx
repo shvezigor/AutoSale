@@ -3,6 +3,10 @@
 import { useEffect } from 'react';
 
 type TimedRoute = 'dashboard' | 'orders';
+type LongFrameTiming = PerformanceEntry & {
+  renderStart?: number;
+  scripts?: ReadonlyArray<{ startTime: number; duration: number }>;
+};
 
 const storageKey = 'sales-aito.workspace-navigation-timing';
 let pending: { route: TimedRoute; startedAt: number } | null = null;
@@ -86,13 +90,26 @@ export function WorkspaceNavigationReady({ route }: { route: TimedRoute }) {
         let longFrameCount = 0;
         let longFrameOverlapMs = 0;
         let longFrameMaxOverlapMs = 0;
-        for (const frame of longFrames) {
+        let longFrameAttributedScriptCount = 0;
+        let longFrameAttributedScriptMs = 0;
+        let longFrameRenderMs = 0;
+        for (const frame of longFrames as LongFrameTiming[]) {
           if (!Number.isFinite(frame.startTime) || !Number.isFinite(frame.duration)) continue;
           const overlap = Math.max(0, Math.min(paintedAt, frame.startTime + frame.duration) - Math.max(readyEffectAt, frame.startTime));
           if (overlap <= 0) continue;
           longFrameCount += 1;
           longFrameOverlapMs += overlap;
           longFrameMaxOverlapMs = Math.max(longFrameMaxOverlapMs, overlap);
+          if (Number.isFinite(frame.renderStart) && (frame.renderStart ?? 0) > 0) {
+            longFrameRenderMs += Math.max(0, Math.min(paintedAt, frame.startTime + frame.duration) - Math.max(readyEffectAt, frame.renderStart ?? 0));
+          }
+          for (const script of frame.scripts ?? []) {
+            if (!Number.isFinite(script.startTime) || !Number.isFinite(script.duration)) continue;
+            const scriptOverlap = Math.max(0, Math.min(paintedAt, script.startTime + script.duration) - Math.max(readyEffectAt, script.startTime));
+            if (scriptOverlap <= 0) continue;
+            longFrameAttributedScriptCount += 1;
+            longFrameAttributedScriptMs += scriptOverlap;
+          }
         }
         const durationMs = Math.max(0, Math.round(paintedAt - sample.startedAt));
         pending = null;
@@ -106,6 +123,9 @@ export function WorkspaceNavigationReady({ route }: { route: TimedRoute }) {
           longFrameCount,
           longFrameOverlapMs: Math.round(longFrameOverlapMs),
           longFrameMaxOverlapMs: Math.round(longFrameMaxOverlapMs),
+          longFrameAttributedScriptCount,
+          longFrameAttributedScriptMs: Math.round(longFrameAttributedScriptMs),
+          longFrameRenderMs: Math.round(longFrameRenderMs),
         })}`);
       });
     }));

@@ -44,7 +44,9 @@ This is the routing index for product functionality. It is intentionally compact
 
 The cross-cutting workspace probe also splits post-route-response time at the destination's React ready effect and the following measured frame (`readyEffectMs`, `responseToReadyEffectMs` when applicable, `effectToPaintMs`). Its owner, tests, privacy limits and open latency diagnosis remain in the cross-cutting row and linked [navigation acceptance](../acceptance/workspace-navigation-performance-2026-10-22.md) and [observability runbook](../operations/observability.md).
 
-For opted-in Dashboard/Orders diagnostics, the same probe now adds support status, count and bounded millisecond overlap of Long Animation Frames during the ready-effect-to-measured-frame interval. It never includes script attribution or page data; zero captured frames do not resolve the intermittent delay. The cross-cutting row above remains its ownership and verification entry point.
+For opted-in Dashboard/Orders diagnostics, the same probe now adds support status, count and bounded millisecond overlap of Long Animation Frames during the ready-effect-to-measured-frame interval. It never includes script identity or page data; zero captured frames do not resolve the intermittent delay. The cross-cutting row above remains its ownership and verification entry point.
+
+The LoAF probe also reports bounded numeric time for browser-attributed scripts and rendering, without script names, URLs, source locations or customer data. Missing script attribution is inconclusive, especially for extension code; see the [observability runbook](../operations/observability.md). The open performance issue still requires a full browser trace before a causal optimization.
 
 The dashboard chart's semantic data table is now placed inside a visually clipped wrapper, preserving screen-reader access without letting its intrinsic width widen the mobile document. Source and regression test: `apps/web/src/components/dashboard/dashboard-charts{,.spec}.tsx`; browser acceptance remains in the [workspace navigation record](../acceptance/workspace-navigation-performance-2026-10-22.md).
 

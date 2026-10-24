@@ -31,6 +31,46 @@ afterEach(() => {
 });
 
 describe('workspace navigation timing', () => {
+  it('separates attributed script and rendering time in a long frame without exposing script sources', () => {
+    window.history.replaceState({}, '', '/dashboard?navTiming=1');
+    const info = vi.spyOn(console, 'info').mockImplementation(() => undefined);
+    const now = vi.spyOn(performance, 'now').mockReturnValue(100);
+    const records = [{
+      name: 'long-animation-frame', entryType: 'long-animation-frame', startTime: 480, duration: 240,
+      blockingDuration: 180, firstUIEventTimestamp: 0, renderStart: 650, styleAndLayoutStart: 660,
+      scripts: [
+        { startTime: 470, duration: 70, sourceURL: 'https://private.example.test/customer-id', sourceFunctionName: 'private-customer' },
+        { startTime: 610, duration: 80, sourceURL: 'https://private.example.test/order-id', sourceFunctionName: 'private-order' },
+        { startTime: 710, duration: 20, sourceURL: 'https://private.example.test/after-paint' },
+      ],
+    }] as unknown as PerformanceEntry[];
+    class LongFrameObserver {
+      static supportedEntryTypes = ['long-animation-frame'];
+      observe() {}
+      takeRecords() { return records; }
+      disconnect() {}
+    }
+    vi.stubGlobal('PerformanceObserver', LongFrameObserver);
+
+    beginWorkspaceNavigationTiming('/orders', '/dashboard');
+    now.mockReturnValue(500);
+    render(<WorkspaceNavigationReady route="orders" />);
+    now.mockReturnValue(700);
+    paintNextFrame();
+    paintNextFrame();
+    paintNextFrame();
+
+    const line = String(info.mock.calls[0]?.[0]);
+    expect(JSON.parse(line.slice('workspace_navigation_ready '.length))).toEqual(expect.objectContaining({
+      longFrameCount: 1,
+      longFrameOverlapMs: 200,
+      longFrameAttributedScriptCount: 2,
+      longFrameAttributedScriptMs: 120,
+      longFrameRenderMs: 50,
+    }));
+    expect(line).not.toContain('private-');
+  });
+
   it('reports only numeric long-frame overlap between ready effect and measured paint', () => {
     window.history.replaceState({}, '', '/dashboard?navTiming=1');
     const info = vi.spyOn(console, 'info').mockImplementation(() => undefined);
@@ -85,7 +125,7 @@ describe('workspace navigation timing', () => {
     expect(info).not.toHaveBeenCalled();
     paintNextFrame();
 
-    expect(info).toHaveBeenCalledExactlyOnceWith('workspace_navigation_ready {"route":"orders","durationMs":665,"readyEffectMs":665,"routeResourceCount":0,"effectToPaintMs":0,"longFrameSupported":false,"longFrameCount":0,"longFrameOverlapMs":0,"longFrameMaxOverlapMs":0}');
+    expect(info).toHaveBeenCalledExactlyOnceWith('workspace_navigation_ready {"route":"orders","durationMs":665,"readyEffectMs":665,"routeResourceCount":0,"effectToPaintMs":0,"longFrameSupported":false,"longFrameCount":0,"longFrameOverlapMs":0,"longFrameMaxOverlapMs":0,"longFrameAttributedScriptCount":0,"longFrameAttributedScriptMs":0,"longFrameRenderMs":0}');
     expect(window.sessionStorage.getItem(storageKey)).toBe('1');
   });
 
@@ -107,7 +147,7 @@ describe('workspace navigation timing', () => {
     paintNextFrame();
     paintNextFrame();
 
-    expect(info).toHaveBeenCalledExactlyOnceWith('workspace_navigation_ready {"route":"orders","durationMs":500,"readyEffectMs":500,"routeResourceCount":1,"routeRequestStartMs":50,"routeFetchDurationMs":210,"routeResponseEndMs":260,"afterResponseMs":240,"responseToReadyEffectMs":240,"effectToPaintMs":0,"longFrameSupported":false,"longFrameCount":0,"longFrameOverlapMs":0,"longFrameMaxOverlapMs":0}');
+    expect(info).toHaveBeenCalledExactlyOnceWith('workspace_navigation_ready {"route":"orders","durationMs":500,"readyEffectMs":500,"routeResourceCount":1,"routeRequestStartMs":50,"routeFetchDurationMs":210,"routeResponseEndMs":260,"afterResponseMs":240,"responseToReadyEffectMs":240,"effectToPaintMs":0,"longFrameSupported":false,"longFrameCount":0,"longFrameOverlapMs":0,"longFrameMaxOverlapMs":0,"longFrameAttributedScriptCount":0,"longFrameAttributedScriptMs":0,"longFrameRenderMs":0}');
   });
 
   it('separates route response to ready effect from ready effect to paint', () => {
