@@ -173,8 +173,10 @@ off the public tunnel's `edge` network. Compose attaches only these two services
 to a dedicated `provider_egress` bridge in addition to the isolated data network;
 the proxy, tunnel, web and stateful services never join it. A worker that has only
 the `internal: true` network cannot download otherwise-valid Meta media and
-will repeatedly leave those copies retryable. Verify the outbound path and
-the inbound edge boundary together with `verify-edge-network-boundary.ps1 -Live`.
+will repeatedly leave those copies retryable. Verify the outbound DNS/HTTPS
+path and the inbound edge boundary together with
+`verify-edge-network-boundary.ps1 -Live`; an HTTP response from the provider
+only proves transport, not that a specific media URL remains valid.
 
 Only official Meta APIs are supported. Browser scraping and personal-account automation are outside the design.
 

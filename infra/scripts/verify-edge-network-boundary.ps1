@@ -87,10 +87,21 @@ require('node:dns').lookup('lookaside.fbsbx.com', (error) => {
   }
 });
 '@
+  $httpsProbe = @'
+fetch('https://lookaside.fbsbx.com/', {
+  redirect: 'manual',
+  signal: AbortSignal.timeout(10000),
+}).catch((error) => {
+  console.error(`Provider HTTPS unavailable: ${error.cause?.code ?? error.name}`);
+  process.exitCode = 1;
+});
+'@
   foreach ($service in @('api', 'worker')) {
     $containerId = (& docker compose -f $composeFile ps -q $service).Trim()
     & docker exec $containerId node -e $dnsProbe
     if ($LASTEXITCODE -ne 0) { throw "Live provider DNS unavailable from $service." }
+    & docker exec $containerId node -e $httpsProbe
+    if ($LASTEXITCODE -ne 0) { throw "Live provider HTTPS unavailable from $service." }
   }
   Write-Output 'Live edge network boundary: PASS'
 }
