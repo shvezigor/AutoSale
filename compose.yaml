@@ -55,7 +55,7 @@ services:
       target: api
     restart: unless-stopped
     environment:
-      NODE_ENV: ${NODE_ENV:-production}
+      NODE_ENV: production
       PORT: 3001
       DATABASE_URL: postgresql://autosale_api:${POSTGRES_API_PASSWORD:?POSTGRES_API_PASSWORD is required}@postgres:5432/${POSTGRES_DB}
       REDIS_URL: ${REDIS_URL}

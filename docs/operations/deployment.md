@@ -8,6 +8,7 @@
 - DNS домену спрямований на сервер; відкриті лише TCP 80/443 і адміністративний SSH.
 - Репозиторій розгорнутий під окремим системним користувачем без root-login.
 - `.env` створений із `.env.example`. Для tenant Google Sheets використовується OAuth; service-account JSON дозволений лише як тимчасовий development fallback і не потрібен у production.
+- Основний Compose фіксує `NODE_ENV=production` для публічного API; значення `NODE_ENV` у кореневому `.env` не може його знизити. Ізольований lifecycle acceptance має окремий override для development. Якщо SMTP не налаштований, не обіцяйте роботу реєстрації, запрошень чи відновлення пароля; див. [`authentication.md`](authentication.md).
 - `POSTGRES_API_PASSWORD`, `POSTGRES_WORKER_PASSWORD` і `POSTGRES_BACKUP_PASSWORD` — три різні URL-safe секрети щонайменше з 32 символів. Вони не збігаються з owner-паролем у `DATABASE_URL`.
 
 Для поточного Windows-host секрети можна створити без їх виведення в консоль:

@@ -12,6 +12,8 @@ services:
 
   api:
     restart: "no"
+    environment:
+      NODE_ENV: development
 
   worker:
     restart: "no"
