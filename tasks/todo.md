@@ -1917,7 +1917,8 @@ Reference: [competitive analysis](../docs/research/2026-10-02-chatoryx-competiti
 - [x] Verify `sales-aito.com` in Google Search Console and Bing Webmaster Tools; both ownership methods are recorded in the [search runbook](../docs/operations/search-indexing.md).
 - [x] Submit the sitemap to both services and inspect representative Ukrainian and English URLs. Both processed 20 discovered URLs; discovery is not indexing.
 - [x] Recheck stored Google and Bing indexing for the first article: both now report it indexed; Bing's retained title warning predates the corrected live page.
-- [ ] Recheck stored Bing indexing for `/en`, `/uk/integrations`, and `/uk/pricing` without repeating unchanged submission requests.
+- [x] Recheck stored Bing indexing for `/en`, `/uk/integrations`, and `/uk/pricing` on 24 October without repeating unchanged submission requests; all three remain non-indexed.
+- [ ] Recheck these three Bing stored-index results after a new crawl or a meaningful waiting interval; distinguish the stale `/uk/integrations` denial from the currently indexable live page.
 - [ ] Capture production Core Web Vitals and resolve any release-environment regressions.
 - [ ] Reconsider IndexNow after a deployment-owned key and publication hook are approved.
 
