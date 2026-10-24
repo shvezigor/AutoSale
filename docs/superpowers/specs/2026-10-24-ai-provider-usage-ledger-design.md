@@ -1,7 +1,7 @@
 # Internal AI provider usage ledger and unit-cost measurement
 
 **Date:** 2026-10-24
-**Status:** design approved in chat; written specification awaiting owner review. Not implemented or deployed.
+**Status:** approved by the owner in chat on 2026-10-24. Not implemented or deployed.
 
 ## Outcome and boundary
 
