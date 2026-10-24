@@ -61,20 +61,55 @@ export function WorkspaceNavigationReady({ route }: { route: TimedRoute }) {
     const sample = pending;
     const readyEffectAt = performance.now();
     let mounted = true;
+    const longFrames: PerformanceEntry[] = [];
+    let longFrameObserver: PerformanceObserver | null = null;
+    try {
+      if (PerformanceObserver.supportedEntryTypes.includes('long-animation-frame')) {
+        longFrameObserver = new PerformanceObserver((list) => {
+          longFrames.push(...list.getEntries().slice(0, Math.max(0, 200 - longFrames.length)));
+        });
+        longFrameObserver.observe({ type: 'long-animation-frame', buffered: true });
+      }
+    } catch {
+      longFrameObserver?.disconnect();
+      longFrameObserver = null;
+    }
     requestAnimationFrame(() => requestAnimationFrame(() => {
       if (!mounted || pending !== sample || !isEnabledInThisTab()) return;
       const paintedAt = performance.now();
-      const durationMs = Math.max(0, Math.round(paintedAt - sample.startedAt));
-      pending = null;
-      console.info(`workspace_navigation_ready ${JSON.stringify({
-        route,
-        durationMs,
-        readyEffectMs: Math.max(0, Math.round(readyEffectAt - sample.startedAt)),
-        ...routeResourceTiming(route, sample.startedAt, readyEffectAt, paintedAt),
-        effectToPaintMs: Math.max(0, Math.round(paintedAt - readyEffectAt)),
-      })}`);
+      requestAnimationFrame(() => {
+        if (!mounted || pending !== sample || !isEnabledInThisTab()) return;
+        if (longFrameObserver) {
+          longFrames.push(...longFrameObserver.takeRecords().slice(0, Math.max(0, 200 - longFrames.length)));
+          longFrameObserver.disconnect();
+        }
+        let longFrameCount = 0;
+        let longFrameOverlapMs = 0;
+        let longFrameMaxOverlapMs = 0;
+        for (const frame of longFrames) {
+          if (!Number.isFinite(frame.startTime) || !Number.isFinite(frame.duration)) continue;
+          const overlap = Math.max(0, Math.min(paintedAt, frame.startTime + frame.duration) - Math.max(readyEffectAt, frame.startTime));
+          if (overlap <= 0) continue;
+          longFrameCount += 1;
+          longFrameOverlapMs += overlap;
+          longFrameMaxOverlapMs = Math.max(longFrameMaxOverlapMs, overlap);
+        }
+        const durationMs = Math.max(0, Math.round(paintedAt - sample.startedAt));
+        pending = null;
+        console.info(`workspace_navigation_ready ${JSON.stringify({
+          route,
+          durationMs,
+          readyEffectMs: Math.max(0, Math.round(readyEffectAt - sample.startedAt)),
+          ...routeResourceTiming(route, sample.startedAt, readyEffectAt, paintedAt),
+          effectToPaintMs: Math.max(0, Math.round(paintedAt - readyEffectAt)),
+          longFrameSupported: longFrameObserver !== null,
+          longFrameCount,
+          longFrameOverlapMs: Math.round(longFrameOverlapMs),
+          longFrameMaxOverlapMs: Math.round(longFrameMaxOverlapMs),
+        })}`);
+      });
     }));
-    return () => { mounted = false; };
+    return () => { mounted = false; longFrameObserver?.disconnect(); };
   }, [route]);
   return null;
 }

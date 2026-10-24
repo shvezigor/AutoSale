@@ -62,7 +62,8 @@ describe('PrimaryNavigation', () => {
     expect(info).not.toHaveBeenCalled();
     paintFrame();
     paintFrame();
-    expect(info).toHaveBeenCalledExactlyOnceWith('workspace_navigation_ready {"route":"orders","durationMs":450,"readyEffectMs":450,"routeResourceCount":0,"effectToPaintMs":0}');
+    paintFrame();
+    expect(info).toHaveBeenCalledExactlyOnceWith('workspace_navigation_ready {"route":"orders","durationMs":450,"readyEffectMs":450,"routeResourceCount":0,"effectToPaintMs":0,"longFrameSupported":false,"longFrameCount":0,"longFrameOverlapMs":0,"longFrameMaxOverlapMs":0}');
   });
 
   it('exposes the dashboard as the first workspace destination', () => {

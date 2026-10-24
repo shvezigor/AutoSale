@@ -31,6 +31,44 @@ afterEach(() => {
 });
 
 describe('workspace navigation timing', () => {
+  it('reports only numeric long-frame overlap between ready effect and measured paint', () => {
+    window.history.replaceState({}, '', '/dashboard?navTiming=1');
+    const info = vi.spyOn(console, 'info').mockImplementation(() => undefined);
+    const now = vi.spyOn(performance, 'now').mockReturnValue(100);
+    const records = [
+      { startTime: 400, duration: 50, name: 'private-before-effect' },
+      { startTime: 490, duration: 80, name: 'private-customer-url', scripts: [{ sourceURL: 'private-script-url' }] },
+      { startTime: 600, duration: 120, name: 'private-after-paint' },
+      { startTime: 750, duration: 60, name: 'private-after-paint' },
+    ] as unknown as PerformanceEntry[];
+    class LongFrameObserver {
+      static supportedEntryTypes = ['long-animation-frame'];
+      observe() {}
+      takeRecords() { return records; }
+      disconnect() {}
+    }
+    vi.stubGlobal('PerformanceObserver', LongFrameObserver);
+
+    beginWorkspaceNavigationTiming('/orders', '/dashboard');
+    now.mockReturnValue(500);
+    render(<WorkspaceNavigationReady route="orders" />);
+    now.mockReturnValue(700);
+    paintNextFrame();
+    paintNextFrame();
+    paintNextFrame();
+
+    const line = String(info.mock.calls[0]?.[0]);
+    expect(JSON.parse(line.slice('workspace_navigation_ready '.length))).toEqual(expect.objectContaining({
+      route: 'orders',
+      durationMs: 600,
+      longFrameSupported: true,
+      longFrameCount: 2,
+      longFrameOverlapMs: 170,
+      longFrameMaxOverlapMs: 100,
+    }));
+    expect(line).not.toContain('private-');
+  });
+
   it('logs only a fixed destination and click-to-ready duration after explicit opt-in', () => {
     window.history.replaceState({}, '', '/dashboard?navTiming=1');
     const now = vi.spyOn(performance, 'now').mockReturnValue(200);
@@ -44,8 +82,10 @@ describe('workspace navigation timing', () => {
     paintNextFrame();
     expect(info).not.toHaveBeenCalled();
     paintNextFrame();
+    expect(info).not.toHaveBeenCalled();
+    paintNextFrame();
 
-    expect(info).toHaveBeenCalledExactlyOnceWith('workspace_navigation_ready {"route":"orders","durationMs":665,"readyEffectMs":665,"routeResourceCount":0,"effectToPaintMs":0}');
+    expect(info).toHaveBeenCalledExactlyOnceWith('workspace_navigation_ready {"route":"orders","durationMs":665,"readyEffectMs":665,"routeResourceCount":0,"effectToPaintMs":0,"longFrameSupported":false,"longFrameCount":0,"longFrameOverlapMs":0,"longFrameMaxOverlapMs":0}');
     expect(window.sessionStorage.getItem(storageKey)).toBe('1');
   });
 
@@ -65,8 +105,9 @@ describe('workspace navigation timing', () => {
     render(<WorkspaceNavigationReady route="orders" />);
     paintNextFrame();
     paintNextFrame();
+    paintNextFrame();
 
-    expect(info).toHaveBeenCalledExactlyOnceWith('workspace_navigation_ready {"route":"orders","durationMs":500,"readyEffectMs":500,"routeResourceCount":1,"routeRequestStartMs":50,"routeFetchDurationMs":210,"routeResponseEndMs":260,"afterResponseMs":240,"responseToReadyEffectMs":240,"effectToPaintMs":0}');
+    expect(info).toHaveBeenCalledExactlyOnceWith('workspace_navigation_ready {"route":"orders","durationMs":500,"readyEffectMs":500,"routeResourceCount":1,"routeRequestStartMs":50,"routeFetchDurationMs":210,"routeResponseEndMs":260,"afterResponseMs":240,"responseToReadyEffectMs":240,"effectToPaintMs":0,"longFrameSupported":false,"longFrameCount":0,"longFrameOverlapMs":0,"longFrameMaxOverlapMs":0}');
   });
 
   it('separates route response to ready effect from ready effect to paint', () => {
@@ -81,6 +122,7 @@ describe('workspace navigation timing', () => {
     now.mockReturnValue(450);
     render(<WorkspaceNavigationReady route="orders" />);
     now.mockReturnValue(600);
+    paintNextFrame();
     paintNextFrame();
     paintNextFrame();
 
@@ -120,6 +162,7 @@ describe('workspace navigation timing', () => {
     render(<WorkspaceNavigationReady route="dashboard" />);
     expect(info).not.toHaveBeenCalled();
     render(<StrictMode><WorkspaceNavigationReady route="orders" /></StrictMode>);
+    paintNextFrame();
     paintNextFrame();
     paintNextFrame();
     expect(info).toHaveBeenCalledTimes(1);
