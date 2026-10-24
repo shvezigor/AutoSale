@@ -31,6 +31,14 @@ Close every reachable safety and browser gate in the [AI reply draft acceptance 
 - Acceptance: no full-pilot claim while a live provider gate remains open; scoped branch merged/pushed and removed; unrelated `artifacts/` untouched.
 - Verification: diff check, tests, deployment and browser evidence as applicable. Depends on P1–P3. Scope: medium.
 
+### P5 — Complete the consenting-store pilot (open)
+
+- [ ] Confirm which stores consent to the Instagram pilot, their catalogue/channel readiness and a comparable manual-reply baseline. Do not enable an unrelated tenant's switch by default.
+- [ ] Run the 14-day cohort, record only the aggregate denominators, manager-reviewed factual-correction decisions, active-time summaries and incidents defined in the [acceptance protocol](../docs/acceptance/ai-reply-drafts-checklist.md). An individual technical test tenant does not satisfy the five-store target.
+- [ ] Review the results against the proposed 70% factually unchanged acceptance, 30% median active-time reduction and zero critical-incident targets; stop the affected tenant's AI-draft switch immediately after a critical incident.
+- [ ] Keep Facebook/TikTok and Instagram `HUMAN_AGENT` live gates separate. No eligible Facebook/TikTok test channel is currently visible in the test workspace, and Meta approval is still required for successful late manual delivery. Do not call the multi-provider capability fully accepted because the Instagram cohort succeeds.
+- Acceptance: real consent and measured evidence for each participating store, or an explicit external blocker; no invented pilot outcome or automatic customer send. Scope: operational and provider-dependent.
+
 ### Checkpoints
 
 - [x] After P1: tests/typecheck/build pass with fictional fixtures.

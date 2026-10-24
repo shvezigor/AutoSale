@@ -109,6 +109,20 @@ The initial authenticated smoke check had no fresh inbound anchor; later authori
 
 ## Controlled live pilot
 
+### Cohort closeout protocol (pending consenting stores)
+
+The existing test tenant proves technical paths but is not a substitute for a multi-store product pilot. Before enrolling a store, record its owner's explicit consent, eligible channel, catalogue readiness, named manager, start/end dates and ability to return to ordinary manual replies. Keep the switch off for all other tenants. Do not add a Facebook or TikTok account merely to satisfy a checklist: their separate provider eligibility gates remain in force. On 24 October 2026, a read-only production-browser check showed the current test tenant's Instagram channel and AI-draft switch active, with no effective Facebook/TikTok channel in that workspace; it did not establish another store's eligibility or send a message.
+
+For each consenting store, establish a comparable manual-reply baseline from existing measurements or a clearly dated observation window, then run a 14-day AI-draft period with comparable conversation types and staffing. Record only aggregate counts and timing summaries in pilot evidence; keep customer text, recipient identities, prompts and catalogue details in the tenant's existing access-controlled records, not in the pilot report. A manager reviews sources before every send. Automatic preparation never authorizes automatic delivery.
+
+Use these predeclared measures, reporting sample size and exclusions alongside each result:
+
+- **Factually unchanged acceptance:** numerator = used drafts the reviewing manager marks as requiring no factual correction, even if they changed tone or formatting; denominator = all ready drafts the manager reviewed for an eligible reply. Record separately ready drafts that were not reviewed, clarified/handed off, failed, blocked or became stale. Do not infer factual correctness by comparing generated and final strings.
+- **Active manager time:** for each eligible conversation, time only the manager's active reading, source checking, editing and sending, excluding the ten-second quiet period, provider/model wait and unrelated interruptions. Compare the median of the pilot period with that store's comparable manual baseline; report store-level medians before any cross-store summary. A 30% reduction is a proposed target, not an observed result.
+- **Safety:** count critical factual, privacy and duplicate-send incidents separately, including near misses stopped by the manager. Target zero critical incidents. A critical incident immediately stops the affected store's pilot: owner disables its tenant AI-draft switch, managers continue manual replies, and an incident review precedes any re-enable.
+
+The Instagram cohort closes only with five consenting stores, fourteen pilot days per store, complete numerator/denominator and baseline evidence, and no critical incidents. The overall multi-provider capability retains **Validation pending** while Facebook/TikTok and Meta permission gates below remain open, even if the Instagram cohort succeeds. If stores are unavailable, do not manufacture a success rate or broaden the feature flag. Product owner decides whether the measured 70% unchanged-acceptance and 30% time-reduction hypotheses justify wider rollout.
+
 1. Deploy the migration and worker with the existing worker-only `OPENAI_API_KEY` and `OPENAI_MODEL`; confirm API, web, worker and `ai_replies` queue are healthy. Do not paste credentials into screenshots or tickets.
 2. In a fictional or consenting tenant with a small catalogue, set a company name and communication style under **Settings → Social / customers → AI reply style**, then enable drafts.
 3. For Instagram and an eligible TikTok conversation, send a short inbound block, wait for automatic preparation, review the source products and text, edit it, then explicitly send once. Confirm one outbound message, one `USED` draft and the exact final text in the audit record.
