@@ -906,3 +906,9 @@ button:disabled { opacity: .72; cursor: not-allowed; }
 @media (prefers-reduced-motion: reduce) { .dashboard-chart-bar button::after,.dashboard-attention-actions a { transition: none; } }
 @media (max-width: 760px) { .payment-card-heading { align-items: stretch; flex-direction: column; }.payment-card-heading .payment-status { align-self: flex-start; }.payment-summary { grid-template-columns: repeat(2,minmax(0,1fr)); }.payment-form-grid { grid-template-columns: 1fr; }.payment-note { grid-column: auto; }.payment-form-actions .loading-button { width: 100%; }.payment-history-row { grid-template-columns: 1fr; }.payment-history-row > .text-button { justify-self: start; }.payment-cancel-form > div { align-items: stretch; flex-direction: column-reverse; }.payment-cancel-form button { width: 100%; } }
 @media (max-width: 380px) { .payment-summary { grid-template-columns: 1fr; } }
+
+.inbox-status-tabs { display: flex; gap: 4px; margin-top: 14px; }
+.inbox-status-tabs .text-button { flex: 1; min-width: 0; padding: 8px 4px; min-height: 44px; font-size: 12px; }
+.inbox-status-tabs [aria-selected="true"] { background: var(--accent-soft); color: var(--accent); }
+.inbox-status-panel { display: grid; grid-template-rows: minmax(0, 1fr) auto; min-height: 0; overflow: hidden; }
+.inbox-status-panel .dialog-count { display: grid; gap: 8px; }

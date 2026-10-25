@@ -6,9 +6,10 @@ import { useI18n } from '../i18n/i18n-provider';
 
 interface ConversationListProps {
   conversations: ConversationListResponse['items'];
+  status?: string;
   selectedId?: string | undefined;
 }
-export function ConversationList({ conversations, selectedId }: ConversationListProps) {
+export function ConversationList({ conversations, selectedId, status }: ConversationListProps) {
   const { formatDate, t } = useI18n();
   if (conversations.length === 0) {
     return <p className="empty-list">{t('conversations.emptyList')}</p>;
@@ -34,7 +35,7 @@ export function ConversationList({ conversations, selectedId }: ConversationList
           <Link
             className="conversation-row"
             data-selected={conversation.id === selectedId}
-            href={`/conversations/${conversation.id}`}
+            href={`/conversations/${conversation.id}${status ? `?status=${status.toLowerCase()}` : ""}`}
             key={conversation.id}
           >
             {conversation.participantAvatarUrl

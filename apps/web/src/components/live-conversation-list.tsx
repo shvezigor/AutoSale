@@ -1,56 +1,22 @@
 'use client';
-
-import type { ConversationListResponse } from '../../../../packages/contracts/src/conversations';
+import { useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
-
-import { refreshConversationList } from '../api/conversation-replies';
 import { ConversationList } from './conversation-list';
+import { useConversationTriage } from './conversation-triage-context';
+import { LoadingButton } from './loading-button';
 import { useI18n } from '../i18n/i18n-provider';
-
-const POLL_INTERVAL_MS = 3_000;
-
-export function LiveConversationList({
-  conversations: initialConversations,
-}: {
-  conversations: ConversationListResponse['items'];
-}) {
-  const pathname = usePathname();
-  const { t } = useI18n();
-  const [conversations, setConversations] = useState(initialConversations);
-  const refreshInFlight = useRef(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    const refresh = async () => {
-      if (cancelled || document.visibilityState === 'hidden' || refreshInFlight.current) return;
-      refreshInFlight.current = true;
-      try {
-        const response = await refreshConversationList();
-        if (!cancelled) setConversations(response.items);
-      } catch {
-        // Keep the last usable list during a temporary background refresh failure.
-      } finally {
-        refreshInFlight.current = false;
-      }
-    };
-    const timer = window.setInterval(() => void refresh(), POLL_INTERVAL_MS);
-    return () => {
-      cancelled = true;
-      window.clearInterval(timer);
-    };
-  }, []);
-
-  return (
-    <>
-      <ConversationList conversations={conversations} selectedId={selectedConversationId(pathname)} />
-      <footer className="dialog-count">{t('conversations.total', { count: conversations.length })}</footer>
-    </>
-  );
-}
-
-function selectedConversationId(pathname: string | null): string | undefined {
-  if (!pathname) return undefined;
-  const match = pathname.match(/^\/conversations\/([^/]+)/);
-  return match?.[1] ? decodeURIComponent(match[1]) : undefined;
+export function LiveConversationList() {
+  const [retrying, setRetrying] = useState(false);
+  const pathname = usePathname(); const { t } = useI18n();
+  const { items, status, counts, loading, loadingMore, hasMore, loadMore, refresh, error, announcement } = useConversationTriage();
+  const selectedId = pathname?.match(/^\/conversations\/([^/]+)/)?.[1];
+  return <div className="inbox-status-panel" id="conversation-status-panel" role="tabpanel" tabIndex={0} aria-labelledby={`tab-${status}`}>
+    {loading ? <p role="status">{t('conversations.triage.loading', { status: t(`conversations.triage.${status}`) })}</p> : items.length ? <ConversationList conversations={items} status={status} selectedId={selectedId ? decodeURIComponent(selectedId) : undefined} /> : <p className="empty-list">{t('conversations.triage.empty', { status: t(`conversations.triage.${status}`) })}</p>}
+    <footer className="dialog-count">
+      {hasMore && <LoadingButton className="secondary-button" pending={loadingMore} onClick={() => void loadMore()}>{t('conversations.triage.loadMore')}</LoadingButton>}
+      <span>{t('conversations.total', { count: counts[status] })}</span>
+      {error && <div role="alert">{error} <LoadingButton className="text-button" pending={retrying} onClick={() => { setRetrying(true); void refresh().catch(() => {}).finally(() => setRetrying(false)); }}>{t('conversations.triage.retry')}</LoadingButton></div>}
+      <span role="status" className="sr-only">{announcement}</span>
+    </footer>
+  </div>;
 }
