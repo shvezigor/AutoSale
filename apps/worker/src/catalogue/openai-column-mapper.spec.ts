@@ -1,18 +1,22 @@
+import type { AiUsageContext } from '@autosale/database';
+
 import { describe, expect, it, vi } from 'vitest';
 
 import { CatalogueMappingProviderError, CatalogueMappingResponseError, OpenAiColumnMapper } from './openai-column-mapper.js';
 
+const usageContext: AiUsageContext = { tenantId: '11111111-1111-4111-8111-111111111111', operationId: '22222222-2222-4222-8222-222222222222', purpose: 'CATALOGUE_COLUMN_MAPPING' };
+
 describe('OpenAiColumnMapper', () => {
   it('normalizes an assortment column to the product name when the model calls it a description', async () => {
-    const mapper = new OpenAiColumnMapper({ responses: { create: vi.fn().mockResolvedValue({
+    const mapper = new OpenAiColumnMapper({ create: vi.fn().mockResolvedValue({
       id: 'resp_assortment', model: 'gpt-5.4-mini',
       output_text: JSON.stringify({ columns: [
         { source: 'ассортимент', target: 'description', confidence: 0.96 },
         { source: 'оптовая цена €', target: 'price', confidence: 0.99 },
       ] }),
-    }) } }, 'gpt-5.4-mini');
+    }) }, 'gpt-5.4-mini');
 
-    const result = await mapper.suggest({
+    const result = await mapper.suggest({ usageContext,
       headers: ['ассортимент', 'оптовая цена €'],
       primitiveTypes: { ассортимент: 'string', 'оптовая цена €': 'number' },
       sampleRows: [{ ассортимент: 'Двері Неаполь', 'оптовая цена €': 158 }],
@@ -37,9 +41,9 @@ describe('OpenAiColumnMapper', () => {
       }),
       usage: { input_tokens: 88, output_tokens: 42 },
     });
-    const mapper = new OpenAiColumnMapper({ responses: { create } }, 'gpt-5.4-mini');
+    const mapper = new OpenAiColumnMapper({ create }, 'gpt-5.4-mini');
 
-    const result = await mapper.suggest({
+    const result = await mapper.suggest({ usageContext,
       headers: ['Артикул', 'Назва позиції', 'Внутрішня примітка'],
       primitiveTypes: { Артикул: 'string', 'Назва позиції': 'string', 'Внутрішня примітка': 'string' },
       sampleRows: [{ Артикул: 'SKU-7', 'Назва позиції': 'Куртка', 'Внутрішня примітка': 'test' }],
@@ -54,38 +58,38 @@ describe('OpenAiColumnMapper', () => {
       responseId: 'resp_columns_1', model: 'gpt-5.4-mini', promptVersion: 'catalogue-column-mapping-v1',
       schemaVersion: 'catalogue-mapping-proposal-v1', latencyMs: expect.any(Number), inputTokens: 88, outputTokens: 42,
     });
-    expect(create).toHaveBeenCalledWith(expect.objectContaining({
+    expect(create).toHaveBeenCalledWith(usageContext, expect.objectContaining({
       model: 'gpt-5.4-mini', store: false, max_output_tokens: 32_000,
       text: { format: expect.objectContaining({ type: 'json_schema', strict: true }) },
     }));
   });
 
   it('rejects an invented mapping target returned by the model', async () => {
-    const mapper = new OpenAiColumnMapper({ responses: { create: vi.fn().mockResolvedValue({
+    const mapper = new OpenAiColumnMapper({ create: vi.fn().mockResolvedValue({
       id: 'resp_columns_invalid', model: 'gpt-5.4-mini',
       output_text: JSON.stringify({ columns: [{ source: 'Артикул', target: 'inventedTarget', confidence: 0.9 }] }),
-    }) } }, 'gpt-5.4-mini');
+    }) }, 'gpt-5.4-mini');
 
-    await expect(mapper.suggest({ headers: ['Артикул'], primitiveTypes: { Артикул: 'string' }, sampleRows: [] }))
+    await expect(mapper.suggest({ usageContext, headers: ['Артикул'], primitiveTypes: { Артикул: 'string' }, sampleRows: [] }))
       .rejects.toBeInstanceOf(CatalogueMappingResponseError);
   });
 
   it('rejects a proposal that omits a supplied source header instead of silently losing it', async () => {
-    const mapper = new OpenAiColumnMapper({ responses: { create: vi.fn().mockResolvedValue({
+    const mapper = new OpenAiColumnMapper({ create: vi.fn().mockResolvedValue({
       id: 'resp_columns_missing', model: 'gpt-5.4-mini',
       output_text: JSON.stringify({ columns: [{ source: 'Артикул', target: 'sku', confidence: 0.9 }] }),
-    }) } }, 'gpt-5.4-mini');
+    }) }, 'gpt-5.4-mini');
 
-    await expect(mapper.suggest({
+    await expect(mapper.suggest({ usageContext,
       headers: ['Артикул', 'Невідомо'], primitiveTypes: { Артикул: 'string', Невідомо: 'string' }, sampleRows: [],
     })).rejects.toBeInstanceOf(CatalogueMappingResponseError);
   });
 
   it('preserves a safe provider status for diagnostics', async () => {
     const providerError = Object.assign(new Error('secret provider detail'), { status: 400 });
-    const mapper = new OpenAiColumnMapper({ responses: { create: vi.fn().mockRejectedValue(providerError) } }, 'gpt-5.4-mini');
+    const mapper = new OpenAiColumnMapper({ create: vi.fn().mockRejectedValue(providerError) }, 'gpt-5.4-mini');
 
-    const error = await mapper.suggest({ headers: ['Артикул'], primitiveTypes: { Артикул: 'string' }, sampleRows: [] }).catch((caught: unknown) => caught);
+    const error = await mapper.suggest({ usageContext, headers: ['Артикул'], primitiveTypes: { Артикул: 'string' }, sampleRows: [] }).catch((caught: unknown) => caught);
 
     expect(error).toBeInstanceOf(CatalogueMappingProviderError);
     expect(error).toMatchObject({ status: 400, message: 'Catalogue mapping provider request failed' });
@@ -96,41 +100,41 @@ describe('OpenAiColumnMapper', () => {
       id: 'resp_columns_bounded', model: 'gpt-5.4-mini',
       output_text: JSON.stringify({ columns: [{ source: 'Колонка', target: 'ignore', confidence: 0.5 }] }),
     });
-    const mapper = new OpenAiColumnMapper({ responses: { create } }, 'gpt-5.4-mini');
+    const mapper = new OpenAiColumnMapper({ create }, 'gpt-5.4-mini');
 
-    await mapper.suggest({
+    await mapper.suggest({ usageContext,
       headers: ['Колонка'], primitiveTypes: { Колонка: 'string' },
       sampleRows: Array.from({ length: 6 }, (_, index) => ({ Колонка: `${index}`.repeat(600) })),
     });
 
-    const request = create.mock.calls[0]?.[0] as { input: string };
+    const request = create.mock.calls[0]?.[1] as { input: string };
     const input = JSON.parse(request.input) as { sampleRows: Array<Record<string, string>> };
     expect(input.sampleRows).toHaveLength(5);
     expect(input.sampleRows[0]?.['Колонка']).toHaveLength(500);
   });
 
   it('maps wide catalogues in complete batches and merges every source', async () => {
-    const create = vi.fn().mockImplementation(async (request: { input: string }) => {
+    const create = vi.fn().mockImplementation(async (_context: AiUsageContext, request: { input: string }) => {
       const batch = JSON.parse(request.input) as { headers: string[] };
       return { id: `resp-${create.mock.calls.length}`, model: 'gpt-5.4-mini', output_text: JSON.stringify({ columns: batch.headers.map((source) => ({ source, target: 'ignore', confidence: 0.7 })) }) };
     });
     const headers = Array.from({ length: 120 }, (_, index) => `Поле ${index}`);
-    const result = await new OpenAiColumnMapper({ responses: { create } }, 'gpt-5.4-mini').suggest({ headers, primitiveTypes: Object.fromEntries(headers.map((header) => [header, 'string'])), sampleRows: [] });
+    const result = await new OpenAiColumnMapper({ create }, 'gpt-5.4-mini').suggest({ usageContext, headers, primitiveTypes: Object.fromEntries(headers.map((header) => [header, 'string'])), sampleRows: [] });
     expect(create).toHaveBeenCalledTimes(3);
     expect(result.proposal.columns.map((column) => column.source)).toEqual(headers);
   });
 
   it('keeps only the strongest confident source for each catalogue field', async () => {
-    const mapper = new OpenAiColumnMapper({ responses: { create: vi.fn().mockResolvedValue({
+    const mapper = new OpenAiColumnMapper({ create: vi.fn().mockResolvedValue({
       id: 'resp_duplicates', model: 'gpt-5.4-mini', output_text: JSON.stringify({ columns: [
         { source: 'Заголовок', target: 'name', confidence: 0.7 },
         { source: 'Наименование', target: 'name', confidence: 0.98 },
         { source: 'Цена старая', target: 'price', confidence: 0.78 },
         { source: 'Цена', target: 'price', confidence: 0.99 },
       ] }),
-    }) } }, 'gpt-5.4-mini');
+    }) }, 'gpt-5.4-mini');
 
-    const result = await mapper.suggest({
+    const result = await mapper.suggest({ usageContext,
       headers: ['Заголовок', 'Наименование', 'Цена старая', 'Цена'],
       primitiveTypes: { Заголовок: 'string', Наименование: 'string', 'Цена старая': 'number', Цена: 'number' },
       sampleRows: [],

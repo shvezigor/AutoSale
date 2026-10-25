@@ -5,6 +5,20 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 describe('deployment environment contract', () => {
+  it.each(['false', 'true'])('passes explicit usage collection=%s only to the worker', (enabled) => {
+    const rendered = JSON.parse(execFileSync('docker', [
+      'compose', '--env-file', '.env.example', '-f', 'compose.yaml', 'config', '--format', 'json',
+    ], { cwd: resolve(process.cwd(), '../..'), encoding: 'utf8', env: {
+      ...process.env,
+      AI_USAGE_COLLECTION_ENABLED: enabled,
+      POSTGRES_API_PASSWORD: 'fictional-api-password',
+      POSTGRES_WORKER_PASSWORD: 'fictional-worker-password',
+      POSTGRES_BACKUP_PASSWORD: 'fictional-backup-password',
+    } })) as { services: { worker: { environment: Record<string, string> }; api: { environment: Record<string, string> } } };
+    expect(rendered.services.worker.environment.AI_USAGE_COLLECTION_ENABLED).toBe(enabled);
+    expect(rendered.services.api.environment.AI_USAGE_COLLECTION_ENABLED).toBeUndefined();
+  });
+
   it('renders the public API in production while keeping the isolated acceptance API in development', () => {
     const root = resolve(process.cwd(), '../..');
     const env = {

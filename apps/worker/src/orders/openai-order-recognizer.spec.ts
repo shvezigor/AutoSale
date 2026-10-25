@@ -1,6 +1,10 @@
+import type { AiUsageContext } from '@autosale/database';
+
 import { describe, expect, it, vi } from 'vitest';
 
 import { OpenAiOrderRecognizer } from './openai-order-recognizer.js';
+
+const usageContext: AiUsageContext = { tenantId: '11111111-1111-4111-8111-111111111111', operationId: '22222222-2222-4222-8222-222222222222', purpose: 'ORDER_RECOGNITION' };
 
 describe('OpenAiOrderRecognizer', () => {
   it('requests strict structured output and validates the result', async () => {
@@ -27,9 +31,9 @@ describe('OpenAiOrderRecognizer', () => {
       }),
       usage: { input_tokens: 120, output_tokens: 80, total_tokens: 200 },
     });
-    const recognizer = new OpenAiOrderRecognizer({ responses: { create } }, 'gpt-5.4-mini');
+    const recognizer = new OpenAiOrderRecognizer({ create }, 'gpt-5.4-mini');
 
-    const result = await recognizer.recognize({
+    const result = await recognizer.recognize({ usageContext,
       messages: [{ id: 'msg-1', direction: 'INBOUND', text: 'Хочу чорний костюм M' }],
       products: [{ id: 'SKU-1042', name: 'Костюм Classic', aliases: ['чорний костюм'] }],
       recognitionMode: 'CONVERSATIONAL_INTENT',
@@ -43,7 +47,7 @@ describe('OpenAiOrderRecognizer', () => {
       outputTokens: 80,
     });
     expect(create).toHaveBeenCalledWith(
-      expect.objectContaining({
+      usageContext, expect.objectContaining({
         model: 'gpt-5.4-mini',
         store: false,
         text: {
@@ -51,7 +55,7 @@ describe('OpenAiOrderRecognizer', () => {
         },
       }),
     );
-    const request = create.mock.calls[0]?.[0] as { instructions: string; input: string };
+    const request = create.mock.calls[0]?.[1] as { instructions: string; input: string };
     expect(request.instructions).toContain('anchor message itself explicitly commits');
     expect(JSON.parse(request.input)).toMatchObject({
       recognitionTarget: { mode: 'CONVERSATIONAL_INTENT', anchorMessageId: 'msg-1' },
@@ -64,9 +68,9 @@ describe('OpenAiOrderRecognizer', () => {
       model: 'gpt-5.4-mini',
       output_text: '{"isOrder":true,"items":[]}',
     });
-    const recognizer = new OpenAiOrderRecognizer({ responses: { create } }, 'gpt-5.4-mini');
+    const recognizer = new OpenAiOrderRecognizer({ create }, 'gpt-5.4-mini');
 
-    await expect(recognizer.recognize({ messages: [], products: [], recognitionMode: 'TRIGGERED_ORDER' })).rejects.toThrow(
+    await expect(recognizer.recognize({ usageContext, messages: [], products: [], recognitionMode: 'TRIGGERED_ORDER' })).rejects.toThrow(
       'OpenAI returned an invalid order extraction',
     );
   });
@@ -93,9 +97,9 @@ describe('OpenAiOrderRecognizer', () => {
       }),
       usage: { input_tokens: 200, output_tokens: 90 },
     });
-    const recognizer = new OpenAiOrderRecognizer({ responses: { create } }, 'gpt-5.4-mini');
+    const recognizer = new OpenAiOrderRecognizer({ create }, 'gpt-5.4-mini');
 
-    await recognizer.recognize({
+    await recognizer.recognize({ usageContext,
       messages: [
         { id: 'old-product', direction: 'INBOUND', text: 'Хочу замовити штани ройал кет' },
         { id: 'old-confirmation', direction: 'OUTBOUND', text: 'Дякую, беремо замовлення в роботу' },
@@ -106,7 +110,7 @@ describe('OpenAiOrderRecognizer', () => {
       recognitionMode: 'TRIGGERED_ORDER',
     });
 
-    const request = create.mock.calls[0]?.[0] as { input: string };
+    const request = create.mock.calls[0]?.[1] as { input: string };
     expect(JSON.parse(request.input)).toMatchObject({
       recognitionTarget: {
         mode: 'TRIGGERED_ORDER',
@@ -128,12 +132,12 @@ describe('OpenAiOrderRecognizer', () => {
         items: [], missingFields: [], overallConfidence: 0,
       }),
     });
-    const recognizer = new OpenAiOrderRecognizer({ responses: { create } }, 'gpt-5.4-mini');
-    await recognizer.recognize({
+    const recognizer = new OpenAiOrderRecognizer({ create }, 'gpt-5.4-mini');
+    await recognizer.recognize({ usageContext,
       messages: [{ id: 'tiktok-message', direction: 'INBOUND', text: 'Вітаю' }],
       products: [], recognitionMode: 'CONVERSATIONAL_INTENT', channel: 'TIKTOK',
     });
-    expect((create.mock.calls[0]?.[0] as { instructions: string }).instructions)
+    expect((create.mock.calls[0]?.[1] as { instructions: string }).instructions)
       .toContain('TikTok social-commerce conversation');
   });
 });

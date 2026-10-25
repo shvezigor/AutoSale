@@ -8,7 +8,8 @@ import pg from 'pg';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import { ReplyDraftProcessor } from './reply-draft.processor.js';
-import { ReplyModelInvalidResponseError } from './openai-reply-draft-generator.js';
+import { createWorkerResponses } from '../ai-usage/worker-responses.js';
+import { OpenAiReplyDraftGenerator, ReplyModelInvalidResponseError } from './openai-reply-draft-generator.js';
 import { CatalogueRetrievalError } from './catalogue-retrieval.js';
 
 describe('ReplyDraftProcessor', () => {
@@ -74,6 +75,9 @@ describe('ReplyDraftProcessor', () => {
     const processor = new ReplyDraftProcessor(prisma, { generate });
     expect(await processor.process({ tenantId: seedData.tenantId, draftId: seedData.draftId })).toBe('READY');
     expect(await processor.process({ tenantId: seedData.tenantId, draftId: seedData.draftId })).toBe('SKIPPED');
+    expect(generate).toHaveBeenCalledWith(expect.objectContaining({
+      usageContext: { tenantId: seedData.tenantId, operationId: seedData.draftId, purpose: 'REPLY_DRAFT' },
+    }));
     expect(generate).toHaveBeenCalledOnce();
     expect(await prisma.aiReplyDraft.findUniqueOrThrow({ where: { id: seedData.draftId } })).toMatchObject({
       status: 'READY', generatedText: 'DOOR-7', modelVersion: 'fictional-model', attempts: 1,
@@ -559,11 +563,17 @@ describe('ReplyDraftProcessor', () => {
     `;
     await prisma.aiReplyDraft.update({ where: { id: seedData.draftId },
       data: { triggerSource, ...(triggerSource === 'AUTOMATIC' ? { createdByUserId: null } : {}) } });
-    const generate = vi.fn();
-    expect(await new ReplyDraftProcessor(prisma, { generate }).process({
+    const create = vi.fn();
+    const store = { start: vi.fn(), finalize: vi.fn() };
+    const generator = new OpenAiReplyDraftGenerator(createWorkerResponses(
+      'fictional-key', true, store, vi.fn(), () => ({ responses: { create } }),
+    ), 'fictional-model');
+    expect(await new ReplyDraftProcessor(prisma, generator).process({
       tenantId: seedData.tenantId, draftId: seedData.draftId,
     })).toBe(triggerSource === 'AUTOMATIC' ? 'READY' : 'BLOCKED');
-    expect(generate).not.toHaveBeenCalled();
+    expect(create).not.toHaveBeenCalled();
+    expect(store.start).not.toHaveBeenCalled();
+    expect(store.finalize).not.toHaveBeenCalled();
     expect(await prisma.aiReplyDraft.findUniqueOrThrow({ where: { id: seedData.draftId } })).toMatchObject({
       status: triggerSource === 'AUTOMATIC' ? 'READY' : 'BLOCKED',
       outcome: triggerSource === 'AUTOMATIC' ? 'CLARIFY' : null,

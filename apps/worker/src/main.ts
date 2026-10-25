@@ -2,7 +2,7 @@ import { Buffer } from 'node:buffer';
 
 import { parseWorkerEnv } from '@autosale/config/worker-env';
 import { retentionDryRunJobSchema, shipmentCreateJobSchema, telegramDeliveryJobSchema, tenantLifecycleJobSchema, ukrposhtaTrackingBatchJobSchema } from '@autosale/contracts';
-import { createPrismaClient, ConversionRetentionStore, DemoLeadNotificationStore, DemoLeadRetentionStore, PlatformChannelGate, ProcurementStore, withTenantTransaction } from '@autosale/database';
+import { AiProviderUsageStore, createPrismaClient, ConversionRetentionStore, DemoLeadNotificationStore, DemoLeadRetentionStore, PlatformChannelGate, ProcurementStore, withTenantTransaction } from '@autosale/database';
 import {
   createGoogleSheetsAdapter,
   CredentialCipher,
@@ -19,6 +19,7 @@ import { Queue, Worker } from 'bullmq';
 import { metrics, StructuredLogger } from '@autosale/observability';
 import { z } from 'zod';
 
+import { createWorkerResponses } from './ai-usage/worker-responses.js';
 import { createWorkerHealthServer } from './health-server.js';
 import { createDemoLeadEmailSender } from './demo-leads/demo-lead-email.js';
 import { DemoLeadNotificationProcessor } from './demo-leads/demo-lead-notification.processor.js';
@@ -100,11 +101,14 @@ async function bootstrap(): Promise<void> {
     appSecret: env.META_APP_SECRET,
     graphVersion: env.META_GRAPH_API_VERSION,
   });
-  const orderRecognizer = createOpenAiOrderRecognizer(env.OPENAI_API_KEY, env.OPENAI_MODEL);
-  const catalogueMapper = createOpenAiColumnMapper(env.OPENAI_API_KEY, env.OPENAI_MODEL);
+  const responses = createWorkerResponses(env.OPENAI_API_KEY, env.AI_USAGE_COLLECTION_ENABLED,
+    new AiProviderUsageStore(prisma),
+    (label) => logger.warn('ai_usage_collection_failed', { correlationId: 'system:ai-usage', result: label }));
+  const orderRecognizer = createOpenAiOrderRecognizer(responses, env.OPENAI_MODEL);
+  const catalogueMapper = createOpenAiColumnMapper(responses, env.OPENAI_MODEL);
   const catalogueHybrid = {
-    structureAnalyzer: createOpenAiTableStructureAnalyzer(env.OPENAI_API_KEY, env.OPENAI_MODEL),
-    ambiguousRows: createOpenAiAmbiguousRowClassifier(env.OPENAI_API_KEY, env.OPENAI_MODEL),
+    structureAnalyzer: createOpenAiTableStructureAnalyzer(responses, env.OPENAI_MODEL),
+    ambiguousRows: createOpenAiAmbiguousRowClassifier(responses, env.OPENAI_MODEL),
   };
   const catalogueMappingProcessor = new CatalogueMappingProcessor(
     prisma,
@@ -258,7 +262,7 @@ async function bootstrap(): Promise<void> {
     orderProcessor,
   );
   const replyDraftProcessor = new ReplyDraftProcessor(prisma,
-    createOpenAiReplyDraftGenerator(env.OPENAI_API_KEY, env.OPENAI_MODEL));
+    createOpenAiReplyDraftGenerator(responses, env.OPENAI_MODEL));
   const replyDraftReconciler = new ReplyDraftReconciler(prisma, replyDraftQueue);
   const replyDraftWorker = new Worker('ai-replies', async (job) => {
     if (job.name !== 'ai-replies.generate') return;

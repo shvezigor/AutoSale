@@ -180,6 +180,7 @@ export class ReplyDraftProcessor {
     let generated;
     try {
       generated = await this.generator.generate({
+        usageContext: { tenantId, operationId: draftId, purpose: 'REPLY_DRAFT' },
         latestInbound: context.safe.latestInbound,
         recentContext: context.safe.recentContext,
         style: context.style,

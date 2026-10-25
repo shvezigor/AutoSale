@@ -1,3 +1,5 @@
+import type { AiUsageContext } from '@autosale/database';
+
 import { describe, expect, it, vi } from 'vitest';
 
 import type { CatalogueStructureProfile } from './catalogue-table-profiler.js';
@@ -29,16 +31,18 @@ const validProposal = {
   ],
 };
 
+const usageContext: AiUsageContext = { tenantId: '11111111-1111-4111-8111-111111111111', operationId: '22222222-2222-4222-8222-222222222222', purpose: 'CATALOGUE_STRUCTURE' };
+
 describe('OpenAiTableStructureAnalyzer', () => {
   it('returns a validated indexed structure and sends store false', async () => {
     const create = vi.fn().mockResolvedValue(response(validProposal));
-    const analyzer = new OpenAiTableStructureAnalyzer({ responses: { create } }, 'gpt-5.4-mini');
+    const analyzer = new OpenAiTableStructureAnalyzer({ create }, 'gpt-5.4-mini');
 
-    const result = await analyzer.analyze(profile);
+    const result = await analyzer.analyze({ ...profile, usageContext });
 
     expect(result.proposal.headerStartRow).toBe(21);
     expect(result.proposal.columns.map((column) => column.index)).toEqual([5, 7]);
-    expect(create).toHaveBeenCalledWith(expect.objectContaining({
+    expect(create).toHaveBeenCalledWith(usageContext, expect.objectContaining({
       model: 'gpt-5.4-mini', store: false,
       text: { format: expect.objectContaining({ type: 'json_schema', strict: true }) },
     }));
@@ -46,9 +50,9 @@ describe('OpenAiTableStructureAnalyzer', () => {
 
   it('rejects coordinates absent from the supplied profile', async () => {
     const create = vi.fn().mockResolvedValue(response({ ...validProposal, headerStartRow: 9_999, headerEndRow: 9_999 }));
-    const analyzer = new OpenAiTableStructureAnalyzer({ responses: { create } }, 'gpt-5.4-mini');
+    const analyzer = new OpenAiTableStructureAnalyzer({ create }, 'gpt-5.4-mini');
 
-    await expect(analyzer.analyze(profile)).rejects.toBeInstanceOf(TableStructureResponseError);
+    await expect(analyzer.analyze({ ...profile, usageContext })).rejects.toBeInstanceOf(TableStructureResponseError);
   });
 
   it('rejects duplicate semantic targets and unobserved columns', async () => {
@@ -59,8 +63,8 @@ describe('OpenAiTableStructureAnalyzer', () => {
         { index: 6, label: 'Інша назва', target: 'name', confidence: 0.8 },
       ],
     }));
-    const analyzer = new OpenAiTableStructureAnalyzer({ responses: { create } }, 'gpt-5.4-mini');
+    const analyzer = new OpenAiTableStructureAnalyzer({ create }, 'gpt-5.4-mini');
 
-    await expect(analyzer.analyze(profile)).rejects.toBeInstanceOf(TableStructureResponseError);
+    await expect(analyzer.analyze({ ...profile, usageContext })).rejects.toBeInstanceOf(TableStructureResponseError);
   });
 });

@@ -27,7 +27,7 @@ describe('OrderRecognitionService', () => {
     const service = new OrderRecognitionService({ recognize });
 
     const result = await service.recognize(
-      { messages: [], products: [{ id: 'SKU-1', name: 'Костюм', aliases: [] }], recognitionMode: 'TRIGGERED_ORDER' },
+      { usageContext: { tenantId: '11111111-1111-4111-8111-111111111111', operationId: '22222222-2222-4222-8222-222222222222', purpose: 'ORDER_RECOGNITION' }, messages: [], products: [{ id: 'SKU-1', name: 'Костюм', aliases: [] }], recognitionMode: 'TRIGGERED_ORDER' },
       { approvalMode: 'NEVER', autoApprovalThreshold: 0.9 },
     );
 
@@ -45,7 +45,7 @@ describe('OrderRecognitionService', () => {
     const service = new OrderRecognitionService({ recognize });
 
     const result = await service.recognize(
-      { messages: [], products: [{ id: 'SKU-1', name: 'Костюм', aliases: [] }], recognitionMode: 'TRIGGERED_ORDER' },
+      { usageContext: { tenantId: '11111111-1111-4111-8111-111111111111', operationId: '22222222-2222-4222-8222-222222222222', purpose: 'ORDER_RECOGNITION' }, messages: [], products: [{ id: 'SKU-1', name: 'Костюм', aliases: [] }], recognitionMode: 'TRIGGERED_ORDER' },
       { approvalMode: 'NEVER', autoApprovalThreshold: 0.9 },
     );
 
@@ -69,6 +69,7 @@ describe('OrderRecognitionService', () => {
 
     const result = await service.recognize(
       {
+        usageContext: { tenantId: '11111111-1111-4111-8111-111111111111', operationId: '22222222-2222-4222-8222-222222222222', purpose: 'ORDER_RECOGNITION' },
         messages: [],
         products: [
           { id: 'AUTO-3D4BAFDE3B26', name: '860х2050 Регіон (плівка мат)', aliases: [] },
@@ -95,7 +96,7 @@ describe('OrderRecognitionService', () => {
     const service = new OrderRecognitionService({ recognize });
 
     const result = await service.recognize(
-      { messages: [], products: [{ id: 'SKU-1', name: 'Костюм', aliases: [] }], recognitionMode: 'TRIGGERED_ORDER' },
+      { usageContext: { tenantId: '11111111-1111-4111-8111-111111111111', operationId: '22222222-2222-4222-8222-222222222222', purpose: 'ORDER_RECOGNITION' }, messages: [], products: [{ id: 'SKU-1', name: 'Костюм', aliases: [] }], recognitionMode: 'TRIGGERED_ORDER' },
       { approvalMode: 'NEVER', autoApprovalThreshold: 0.9 },
     );
 
@@ -121,6 +122,7 @@ describe('OrderRecognitionService', () => {
 
     const unique = await service.recognize(
       {
+        usageContext: { tenantId: '11111111-1111-4111-8111-111111111111', operationId: '22222222-2222-4222-8222-222222222222', purpose: 'ORDER_RECOGNITION' },
         messages: [],
         products: [
           { id: 'AUTO-5E44CA0A3C32', name: '860х2050      Колізей (VINARIT) Вологостійка МДФ', aliases: [] },
@@ -132,6 +134,7 @@ describe('OrderRecognitionService', () => {
     );
     const ambiguous = await service.recognize(
       {
+        usageContext: { tenantId: '11111111-1111-4111-8111-111111111111', operationId: '22222222-2222-4222-8222-222222222222', purpose: 'ORDER_RECOGNITION' },
         messages: [],
         products: [
           { id: 'DOOR-860', name: 'Колізей', aliases: [] },

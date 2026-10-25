@@ -1,5 +1,5 @@
 import type { CatalogueMappingProposal, RawCatalogueMatrix, TableStructureProposal } from '@autosale/contracts';
-import { assertTenantAcceptingMutations, type PrismaClient, TenantLifecycleFrozenError, withTenantTransaction } from '@autosale/database';
+import { assertTenantAcceptingMutations, type AiUsageContext, type PrismaClient, TenantLifecycleFrozenError, withTenantTransaction } from '@autosale/database';
 import { googleSheetsStructureFingerprint, matrixFromRows, type ObjectStorage } from '@autosale/integrations';
 import { parse as parseCsv } from 'csv-parse/sync';
 import { randomUUID } from 'node:crypto';
@@ -23,8 +23,8 @@ export type CatalogueMappingJob = { tenantId: string; runId: string };
 type Mapper = { suggest(input: CatalogueColumnMappingInput): Promise<CatalogueMappingSuggestion> };
 type AutoImporter = { process(input: CatalogueMappingJob): Promise<{ status: 'COMPLETED' }> };
 type HybridDependencies = {
-  structureAnalyzer: { analyze(profile: ReturnType<typeof buildCatalogueStructureProfile>): Promise<TableStructureSuggestion> };
-  ambiguousRows: { classify(rows: ClassifiedCatalogueRow[]): Promise<AmbiguousRowClassification[]> };
+  structureAnalyzer: { analyze(profile: ReturnType<typeof buildCatalogueStructureProfile> & { usageContext: AiUsageContext }): Promise<TableStructureSuggestion> };
+  ambiguousRows: { classify(rows: ClassifiedCatalogueRow[], usageContext: AiUsageContext): Promise<AmbiguousRowClassification[]> };
 };
 
 export class CatalogueMappingProcessor {
@@ -101,7 +101,7 @@ export class CatalogueMappingProcessor {
       const input = await this.loadSource(objectKey, run.source.type);
       if (!await heartbeat()) return { status: 'SKIPPED', proposal: null };
       failureCode = 'MAPPING_RESPONSE_INVALID';
-      const suggestion = await this.mapper.suggest(input);
+      const suggestion = await this.mapper.suggest({ ...input, usageContext: { tenantId: job.tenantId, operationId: job.runId, purpose: 'CATALOGUE_COLUMN_MAPPING' } });
       if (!await heartbeat()) return { status: 'SKIPPED', proposal: null };
       const decision = this.autoImporter ? decideCatalogueImport({ columns: suggestion.proposal.columns, sampleRows: input.sampleRows }) : { action: 'REVIEW_REQUIRED' as const, reasons: [] };
       const autoImport = decision.action === 'AUTO_IMPORT';
@@ -179,10 +179,10 @@ export class CatalogueMappingProcessor {
     const matrix = await rawMatrix(body, run.source.type, revision);
     if (!await heartbeat()) return { status: 'SKIPPED', proposal: null };
 
-    const structure = await this.hybrid!.structureAnalyzer.analyze(buildCatalogueStructureProfile(matrix));
+    const structure = await this.hybrid!.structureAnalyzer.analyze({ ...buildCatalogueStructureProfile(matrix), usageContext: { tenantId: job.tenantId, operationId: job.runId, purpose: 'CATALOGUE_STRUCTURE' } });
     if (!await heartbeat()) return { status: 'SKIPPED', proposal: null };
     const local = normalizeCatalogueRows({ matrix, proposal: structure.proposal });
-    const decisions = local.ambiguous.length > 0 ? await this.hybrid!.ambiguousRows.classify(local.ambiguous) : [];
+    const decisions = local.ambiguous.length > 0 ? await this.hybrid!.ambiguousRows.classify(local.ambiguous, { tenantId: job.tenantId, operationId: job.runId, purpose: 'CATALOGUE_ROW_CLASSIFICATION' }) : [];
     if (!await heartbeat()) return { status: 'SKIPPED', proposal: null };
     const normalized = applyAmbiguousDecisions(local, decisions);
     const columns = structure.proposal.columns.filter((column) => column.target !== 'ignore').map((column, index) => ({
@@ -252,7 +252,7 @@ export class CatalogueMappingProcessor {
     return { status: 'MAPPING_REVIEW', proposal };
   }
 
-  private async loadSource(objectKey: string, type: 'CSV_UPLOAD' | 'XLSX_UPLOAD' | 'GOOGLE_SHEETS'): Promise<CatalogueColumnMappingInput> {
+  private async loadSource(objectKey: string, type: 'CSV_UPLOAD' | 'XLSX_UPLOAD' | 'GOOGLE_SHEETS'): Promise<Omit<CatalogueColumnMappingInput, 'usageContext'>> {
     const object = await this.storage.get(objectKey);
     const body = Buffer.from(object.body);
     if (body.length === 0 || body.length > MAX_SOURCE_BYTES) throw new Error('source size is invalid');

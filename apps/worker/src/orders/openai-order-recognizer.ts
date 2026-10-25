@@ -1,4 +1,5 @@
-import OpenAI from 'openai';
+import type { AiUsageContext } from '@autosale/database';
+import type { MeteredResponses } from '../ai-usage/metered-responses.js';
 import { z } from 'zod';
 import { INSTAGRAM_ORDER_PROMPT_VERSION } from '@autosale/contracts';
 
@@ -36,21 +37,11 @@ export const recognizedOrderSchema = z.object({
 export type RecognizedOrder = z.infer<typeof recognizedOrderSchema>;
 
 export interface OrderRecognitionInput {
+  usageContext: AiUsageContext;
   messages: Array<{ id: string; direction: string; text: string | null }>;
   products: Array<{ id: string; name: string; aliases: string[] }>;
   recognitionMode: 'TRIGGERED_ORDER' | 'CONVERSATIONAL_INTENT';
   channel?: 'INSTAGRAM' | 'FACEBOOK' | 'TIKTOK';
-}
-
-interface ResponsesClient {
-  responses: {
-    create(input: Record<string, unknown>): Promise<{
-      id: string;
-      model: string;
-      output_text: string;
-      usage?: { input_tokens?: number; output_tokens?: number };
-    }>;
-  };
 }
 
 const orderJsonSchema = {
@@ -100,7 +91,7 @@ const orderJsonSchema = {
 
 export class OpenAiOrderRecognizer {
   constructor(
-    private readonly client: ResponsesClient,
+    private readonly client: MeteredResponses,
     private readonly model: string,
   ) {}
 
@@ -126,7 +117,7 @@ export class OpenAiOrderRecognizer {
           'The anchor is an explicit manager or manual trigger for extraction. It may close the current order even when the anchor itself is not customer purchase intent.',
           'Set anchorHasExplicitPurchaseIntent according to the anchor message itself; this field does not invalidate a manager-triggered extraction.',
         ];
-    const response = await this.client.responses.create({
+    const response = await this.client.create(input.usageContext, {
       model: this.model,
       store: false,
       instructions:
@@ -141,7 +132,9 @@ export class OpenAiOrderRecognizer {
           'catalogId must be one of the supplied product ids or null. Return missing field paths in missingFields.',
         ].join(' '),
       input: JSON.stringify({
-        ...input,
+        messages: input.messages,
+        products: input.products,
+        recognitionMode: input.recognitionMode,
         channel,
         recognitionTarget: {
           mode: input.recognitionMode,
@@ -185,33 +178,8 @@ function socialChannelLabel(channel: NonNullable<OrderRecognitionInput['channel'
   }
 }
 
-export function createOpenAiOrderRecognizer(
-  apiKey: string,
-  model: string,
-): OpenAiOrderRecognizer {
-  const openai = new OpenAI({ apiKey });
-
-  return new OpenAiOrderRecognizer(
-    {
-      responses: {
-        create: async (input) => {
-          const response = await openai.responses.create(input as never);
-          return {
-            id: response.id,
-            model: String(response.model),
-            output_text: response.output_text,
-            ...(response.usage
-              ? { usage: {
-                  input_tokens: response.usage.input_tokens,
-                  output_tokens: response.usage.output_tokens,
-                } }
-              : {}),
-          };
-        },
-      },
-    },
-    model,
-  );
+export function createOpenAiOrderRecognizer(client: MeteredResponses, model: string): OpenAiOrderRecognizer {
+  return new OpenAiOrderRecognizer(client, model);
 }
 
 function nullableFields(names: string[]): Record<string, unknown> {

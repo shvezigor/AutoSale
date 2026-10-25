@@ -1,4 +1,5 @@
-import OpenAI from 'openai';
+import type { AiUsageContext } from '@autosale/database';
+import type { MeteredResponses } from '../ai-usage/metered-responses.js';
 import type { ReplyDraftSource } from '@autosale/contracts/reply-drafts';
 
 import { generatedReplySchema, type GeneratedReply } from './claim-validator.js';
@@ -7,6 +8,7 @@ export const REPLY_DRAFT_PROMPT_VERSION = 'catalogue-reply-v1';
 export const REPLY_DRAFT_SCHEMA_VERSION = 'reply-claims-v1';
 
 export interface ReplyGeneratorInput {
+  usageContext: AiUsageContext;
   latestInbound: string;
   recentContext: string[];
   style: {
@@ -16,16 +18,6 @@ export interface ReplyGeneratorInput {
     guidance: string;
   };
   sources: readonly ReplyDraftSource[];
-}
-
-interface ResponsesClient {
-  responses: {
-    create(input: Record<string, unknown>): Promise<{
-      model: string;
-      output_text: string;
-      usage?: { input_tokens?: number; output_tokens?: number };
-    }>;
-  };
 }
 
 export class ReplyModelUnavailableError extends Error {
@@ -60,7 +52,7 @@ const responseSchema = {
 };
 
 export class OpenAiReplyDraftGenerator {
-  constructor(private readonly client: ResponsesClient, private readonly model: string) {}
+  constructor(private readonly client: MeteredResponses, private readonly model: string) {}
 
   async generate(input: ReplyGeneratorInput): Promise<{
     reply: GeneratedReply;
@@ -69,7 +61,7 @@ export class OpenAiReplyDraftGenerator {
     const started = Date.now();
     let response;
     try {
-      response = await this.client.responses.create({
+      response = await this.client.create(input.usageContext, {
         model: this.model,
         store: false,
         instructions: [
@@ -109,20 +101,6 @@ export class OpenAiReplyDraftGenerator {
   }
 }
 
-export function createOpenAiReplyDraftGenerator(apiKey: string, model: string): OpenAiReplyDraftGenerator {
-  const client = new OpenAI({ apiKey });
-  return new OpenAiReplyDraftGenerator({
-    responses: {
-      create: async (input) => {
-        const response = await client.responses.create(input as never);
-        return {
-          model: String(response.model), output_text: response.output_text,
-          ...(response.usage ? { usage: {
-            input_tokens: response.usage.input_tokens,
-            output_tokens: response.usage.output_tokens,
-          } } : {}),
-        };
-      },
-    },
-  }, model);
+export function createOpenAiReplyDraftGenerator(client: MeteredResponses, model: string): OpenAiReplyDraftGenerator {
+  return new OpenAiReplyDraftGenerator(client, model);
 }

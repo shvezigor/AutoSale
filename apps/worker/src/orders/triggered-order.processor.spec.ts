@@ -168,6 +168,9 @@ describe('TriggeredOrderProcessor', () => {
       Prisma.sql`SELECT "quantity" FROM "order_items" WHERE "order_id" = ${first!.id}::uuid`,
     );
     expect(persistedItems).toEqual([{ quantity: 1 }]);
+    expect(recognize).toHaveBeenCalledWith(expect.objectContaining({
+      usageContext: { tenantId: tenant.id, operationId: trigger.id, purpose: 'ORDER_RECOGNITION' },
+    }));
     expect(recognize).toHaveBeenCalledTimes(1);
     expect(procurement.assessApprovedOrder).toHaveBeenCalledWith(tenant.id, first!.id, 'SYSTEM');
     expect(alerts.persist).toHaveBeenCalledWith(expect.anything(), {
@@ -241,6 +244,9 @@ describe('TriggeredOrderProcessor', () => {
     const first = await processor.processIfTriggered(tenant.id, anchor.id);
     const replay = await processor.processIfTriggered(tenant.id, anchor.id);
 
+    expect(recognize).toHaveBeenCalledWith(expect.objectContaining({
+      usageContext: { tenantId: tenant.id, operationId: anchor.id, purpose: 'ORDER_INTENT' },
+    }));
     expect(first).toMatchObject({ status: 'NEEDS_REVIEW' });
     expect(replay?.id).toBe(first?.id);
     expect(recognize).toHaveBeenCalledTimes(1);

@@ -66,7 +66,7 @@ describe('AI provider failure across worker and conversation API', () => {
       createdByUserId: null, idempotencyKey: anchor.id, triggerSource: 'AUTOMATIC',
     } });
     const create = vi.fn().mockRejectedValue(new Error('fictional private provider details'));
-    const generator = new OpenAiReplyDraftGenerator({ responses: { create } }, 'fictional-model');
+    const generator = new OpenAiReplyDraftGenerator({ create }, 'fictional-model');
     const processor = new ReplyDraftProcessor(prisma, generator);
 
     expect(await processor.process({ tenantId: tenant.id, draftId: draft.id })).toBe('FAILED');

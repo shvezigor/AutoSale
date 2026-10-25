@@ -1,5 +1,6 @@
 import { catalogueMappingProposalSchema, type CatalogueMappingProposal } from '@autosale/contracts';
-import OpenAI from 'openai';
+import type { AiUsageContext } from '@autosale/database';
+import type { MeteredResponses } from '../ai-usage/metered-responses.js';
 
 export const CATALOGUE_MAPPING_PROMPT_VERSION = 'catalogue-column-mapping-v1';
 export const CATALOGUE_MAPPING_SCHEMA_VERSION = 'catalogue-mapping-proposal-v1';
@@ -7,20 +8,10 @@ export const CATALOGUE_MAPPING_SCHEMA_VERSION = 'catalogue-mapping-proposal-v1';
 type PrimitiveType = 'string' | 'number' | 'boolean' | 'null' | 'mixed' | 'empty';
 
 export interface CatalogueColumnMappingInput {
+  usageContext: AiUsageContext;
   headers: string[];
   primitiveTypes: Record<string, PrimitiveType>;
   sampleRows: Array<Record<string, unknown>>;
-}
-
-interface ResponsesClient {
-  responses: {
-    create(input: Record<string, unknown>): Promise<{
-      id: string;
-      model: string;
-      output_text: string;
-      usage?: { input_tokens?: number; output_tokens?: number };
-    }>;
-  };
 }
 
 export type CatalogueMappingSuggestion = {
@@ -73,12 +64,12 @@ const mappingJsonSchema = {
 };
 
 export class OpenAiColumnMapper {
-  constructor(private readonly client: ResponsesClient, private readonly model: string) {}
+  constructor(private readonly client: MeteredResponses, private readonly model: string) {}
 
   async suggest(input: CatalogueColumnMappingInput): Promise<CatalogueMappingSuggestion> {
     const safeInput = boundedInput(input);
     const started = performance.now();
-    const responses: Awaited<ReturnType<ResponsesClient['responses']['create']>>[] = [];
+    const responses: Awaited<ReturnType<MeteredResponses['create']>>[] = [];
     const columns: CatalogueMappingProposal['columns'] = [];
     try {
       for (let offset = 0; offset < safeInput.headers.length; offset += 50) {
@@ -88,9 +79,9 @@ export class OpenAiColumnMapper {
           primitiveTypes: Object.fromEntries(headers.map((header) => [header, safeInput.primitiveTypes[header]])),
           sampleRows: safeInput.sampleRows.map((row) => Object.fromEntries(headers.map((header) => [header, row[header] ?? null]))),
         };
-        let response: Awaited<ReturnType<ResponsesClient['responses']['create']>>;
+        let response: Awaited<ReturnType<MeteredResponses['create']>>;
         try {
-          response = await this.client.responses.create({
+          response = await this.client.create(input.usageContext, {
             model: this.model, store: false, max_output_tokens: 32_000,
             instructions: 'Classify catalogue column headers only. You may use the supplied primitive types and bounded samples solely to infer what each header represents. Do not transform, copy, infer, or invent product row values. Return exactly one mapping for every supplied header, with each source appearing once. target must be a supported catalogue target, and target must be ignore when evidence is insufficient.',
             input: JSON.stringify(batch),
@@ -182,25 +173,15 @@ function normalizeConfidentMappings(proposal: CatalogueMappingProposal): Catalog
   };
 }
 
-export function createOpenAiColumnMapper(apiKey: string, model: string): OpenAiColumnMapper {
-  const openai = new OpenAI({ apiKey });
-  return new OpenAiColumnMapper({
-    responses: {
-      create: async (input) => {
-        const response = await openai.responses.create(input as never);
-        return {
-          id: response.id, model: String(response.model), output_text: response.output_text,
-          ...(response.usage ? { usage: { input_tokens: response.usage.input_tokens, output_tokens: response.usage.output_tokens } } : {}),
-        };
-      },
-    },
-  }, model);
+export function createOpenAiColumnMapper(client: MeteredResponses, model: string): OpenAiColumnMapper {
+  return new OpenAiColumnMapper(client, model);
 }
 
 function boundedInput(input: CatalogueColumnMappingInput): CatalogueColumnMappingInput {
   const headers = input.headers.map((header) => header.trim()).filter((header, index, all) => header.length > 0 && all.indexOf(header) === index).slice(0, 500);
   const primitiveTypes = Object.fromEntries(headers.map((header) => [header, input.primitiveTypes[header] ?? 'empty']));
   return {
+    usageContext: input.usageContext,
     headers,
     primitiveTypes,
     sampleRows: input.sampleRows.slice(0, 5).map((row) => Object.fromEntries(headers.map((header) => [header, boundedValue(row[header])]))),

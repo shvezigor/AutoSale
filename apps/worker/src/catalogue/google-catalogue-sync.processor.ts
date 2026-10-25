@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
 import { catalogueStructurePlanSchema, type AmbiguousRowClassification, type CatalogueStructurePlan, type CatalogueTargetField, type RawCatalogueMatrix, type TableStructureProposal } from '@autosale/contracts';
-import { assertTenantAcceptingMutations, CatalogueImportLeaseLostError, CatalogueSkuOwnershipError, importCatalogueTable, type CatalogueImportCounts, type PrismaClient, TenantLifecycleFrozenError, withTenantTransaction } from '@autosale/database';
+import { assertTenantAcceptingMutations, type AiUsageContext, CatalogueImportLeaseLostError, CatalogueSkuOwnershipError, importCatalogueTable, type CatalogueImportCounts, type PrismaClient, TenantLifecycleFrozenError, withTenantTransaction } from '@autosale/database';
 import { GoogleOAuthAccessError, GoogleSheetsReadError, GoogleSheetsTableValidationError, googleSheetsStructureFingerprint, type GoogleSheetsAdapter, type GoogleSheetsCell, type ObjectStorage } from '@autosale/integrations';
 import { buildCatalogueStructureProfile } from './catalogue-table-profiler.js';
 import { applyAmbiguousDecisions, normalizeCatalogueRows, type ClassifiedCatalogueRow } from './catalogue-row-classifier.js';
@@ -33,8 +33,8 @@ export class GoogleCatalogueSyncProcessor {
     private readonly oauthSheets?: (tenantId: string, connectionId: string) => Promise<Pick<GoogleSheetsAdapter, 'readTable' | 'readMatrix'>>,
     private readonly notifications?: CatalogueSyncNotifications,
     private readonly hybrid?: {
-      structureAnalyzer: { analyze(profile: ReturnType<typeof buildCatalogueStructureProfile>): Promise<TableStructureSuggestion> };
-      ambiguousRows: { classify(rows: ClassifiedCatalogueRow[]): Promise<AmbiguousRowClassification[]> };
+      structureAnalyzer: { analyze(profile: ReturnType<typeof buildCatalogueStructureProfile> & { usageContext: AiUsageContext }): Promise<TableStructureSuggestion> };
+      ambiguousRows: { classify(rows: ClassifiedCatalogueRow[], usageContext: AiUsageContext): Promise<AmbiguousRowClassification[]> };
     },
   ) {
     this.importer = importer ?? { importTable: (input) => importCatalogueTable(prisma, input) };
@@ -81,7 +81,7 @@ export class GoogleCatalogueSyncProcessor {
       if (!sheets) throw new GoogleOAuthAccessError();
       if (this.hybrid) {
         const matrix = await sheets.readMatrix({ spreadsheetId: source.spreadsheetId, sheetName: source.sheetName, maxRows: 5_000 });
-        const prepared = await this.prepareHybridTable(input, matrix, source.createdByUserId);
+        const prepared = await this.prepareHybridTable(input, matrix, source.createdByUserId, leaseId);
         table = prepared.table;
         if (!prepared.confident) {
           const reviewKey = `catalogue/${input.tenantId}/${input.sourceId}/google/${matrix.revision}.json`;
@@ -247,6 +247,7 @@ export class GoogleCatalogueSyncProcessor {
     input: { tenantId: string; sourceId: string },
     matrix: RawCatalogueMatrix,
     userId: string | null,
+    operationId: string,
   ): Promise<{ table: { headers: string[]; rows: GoogleSheetsCell[][]; revision: string; sourceRowNumbers: number[] }; confident: boolean }> {
     const existing = await withTenantTransaction(this.prisma, input.tenantId, (transaction) => transaction.catalogueMapping.findFirst({
       where: {
@@ -266,12 +267,12 @@ export class GoogleCatalogueSyncProcessor {
       proposal = proposalFromPlan(storedPlan);
       reused = true;
     } else {
-      const suggestion = await this.hybrid!.structureAnalyzer.analyze(buildCatalogueStructureProfile(matrix));
+      const suggestion = await this.hybrid!.structureAnalyzer.analyze({ ...buildCatalogueStructureProfile(matrix), usageContext: { tenantId: input.tenantId, operationId, purpose: 'CATALOGUE_STRUCTURE' } });
       proposal = suggestion.proposal;
       metadata = suggestion.metadata;
     }
     const local = normalizeCatalogueRows({ matrix, proposal });
-    const decisions = local.ambiguous.length ? await this.hybrid!.ambiguousRows.classify(local.ambiguous) : [];
+    const decisions = local.ambiguous.length ? await this.hybrid!.ambiguousRows.classify(local.ambiguous, { tenantId: input.tenantId, operationId, purpose: 'CATALOGUE_ROW_CLASSIFICATION' }) : [];
     const normalized = applyAmbiguousDecisions(local, decisions);
     const sourceRowNumbers = normalized.products.map((row) => row.sourceRowNumber);
     const confident = proposal.structureConfidence >= 0.9

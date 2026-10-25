@@ -1,14 +1,9 @@
 import { ambiguousRowClassificationSchema, type AmbiguousRowClassification, type RawCatalogueCell } from '@autosale/contracts';
-import OpenAI from 'openai';
+import type { AiUsageContext } from '@autosale/database';
+import type { MeteredResponses } from '../ai-usage/metered-responses.js';
 import { z } from 'zod';
 
 import type { ClassifiedCatalogueRow } from './catalogue-row-classifier.js';
-
-interface ResponsesClient {
-  responses: {
-    create(input: Record<string, unknown>): Promise<{ id: string; model: string; output_text: string }>;
-  };
-}
 
 export class AmbiguousRowProviderError extends Error {
   constructor(readonly status: number | null) {
@@ -28,17 +23,17 @@ const resultSchema = z.object({ decisions: z.array(ambiguousRowClassificationSch
 const instructions = 'Classify each supplied row as PRODUCT or SKIP. Never return or modify cell values. Category labels, repeated headers, contacts, notes, and totals are SKIP. Return exactly one decision for every original rowNumber.';
 
 export class OpenAiAmbiguousRowClassifier {
-  constructor(private readonly client: ResponsesClient, private readonly model: string) {}
+  constructor(private readonly client: MeteredResponses, private readonly model: string) {}
 
-  async classify(rows: ClassifiedCatalogueRow[]): Promise<AmbiguousRowClassification[]> {
+  async classify(rows: ClassifiedCatalogueRow[], usageContext: AiUsageContext): Promise<AmbiguousRowClassification[]> {
     if (rows.length > 1_000) throw new AmbiguousRowResponseError();
     const decisions: AmbiguousRowClassification[] = [];
     for (let offset = 0; offset < rows.length; offset += 100) {
       const batch = rows.slice(offset, offset + 100);
       const rowNumbers = batch.map((row) => row.sourceRowNumber);
-      let response: Awaited<ReturnType<ResponsesClient['responses']['create']>>;
+      let response: Awaited<ReturnType<MeteredResponses['create']>>;
       try {
-        response = await this.client.responses.create({
+        response = await this.client.create(usageContext, {
           model: this.model,
           store: false,
           max_output_tokens: 8_000,
@@ -93,12 +88,6 @@ function providerStatus(error: unknown): number | null {
   return typeof status === 'number' && Number.isInteger(status) ? status : null;
 }
 
-export function createOpenAiAmbiguousRowClassifier(apiKey: string, model: string): OpenAiAmbiguousRowClassifier {
-  const openai = new OpenAI({ apiKey });
-  return new OpenAiAmbiguousRowClassifier({
-    responses: { create: async (input) => {
-      const response = await openai.responses.create(input as never);
-      return { id: response.id, model: String(response.model), output_text: response.output_text };
-    } },
-  }, model);
+export function createOpenAiAmbiguousRowClassifier(client: MeteredResponses, model: string): OpenAiAmbiguousRowClassifier {
+  return new OpenAiAmbiguousRowClassifier(client, model);
 }

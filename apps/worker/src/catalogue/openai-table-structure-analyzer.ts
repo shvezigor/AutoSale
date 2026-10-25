@@ -1,21 +1,11 @@
 import { tableStructureProposalSchema, type TableStructureProposal } from '@autosale/contracts';
-import OpenAI from 'openai';
+import type { AiUsageContext } from '@autosale/database';
+import type { MeteredResponses } from '../ai-usage/metered-responses.js';
 
 import type { CatalogueStructureProfile } from './catalogue-table-profiler.js';
 
 export const TABLE_STRUCTURE_PROMPT_VERSION = 'catalogue-table-structure-v1';
 export const TABLE_STRUCTURE_SCHEMA_VERSION = 'table-structure-proposal-v1';
-
-interface ResponsesClient {
-  responses: {
-    create(input: Record<string, unknown>): Promise<{
-      id: string;
-      model: string;
-      output_text: string;
-      usage?: { input_tokens?: number; output_tokens?: number };
-    }>;
-  };
-}
 
 export interface TableStructureSuggestion {
   proposal: TableStructureProposal;
@@ -77,13 +67,14 @@ const structureJsonSchema = {
 const instructions = 'Identify catalogue structure only. Return original one-based row numbers and zero-based column indexes. Combine at most three adjacent header rows. Map semantic columns without changing cell values. Treat titles, contacts, currency notes, category labels, and repeated headers as non-product structure. Use low confidence when evidence is insufficient.';
 
 export class OpenAiTableStructureAnalyzer {
-  constructor(private readonly client: ResponsesClient, private readonly model: string) {}
+  constructor(private readonly client: MeteredResponses, private readonly model: string) {}
 
-  async analyze(profile: CatalogueStructureProfile): Promise<TableStructureSuggestion> {
+  async analyze(input: CatalogueStructureProfile & { usageContext: AiUsageContext }): Promise<TableStructureSuggestion> {
+    const { usageContext: _usageContext, ...profile } = input;
     const started = performance.now();
-    let response: Awaited<ReturnType<ResponsesClient['responses']['create']>>;
+    let response: Awaited<ReturnType<MeteredResponses['create']>>;
     try {
-      response = await this.client.responses.create({
+      response = await this.client.create(input.usageContext, {
         model: this.model,
         store: false,
         max_output_tokens: 16_000,
@@ -141,19 +132,6 @@ function providerStatus(error: unknown): number | null {
   return typeof status === 'number' && Number.isInteger(status) ? status : null;
 }
 
-export function createOpenAiTableStructureAnalyzer(apiKey: string, model: string): OpenAiTableStructureAnalyzer {
-  const openai = new OpenAI({ apiKey });
-  return new OpenAiTableStructureAnalyzer({
-    responses: {
-      create: async (input) => {
-        const response = await openai.responses.create(input as never);
-        return {
-          id: response.id,
-          model: String(response.model),
-          output_text: response.output_text,
-          ...(response.usage ? { usage: { input_tokens: response.usage.input_tokens, output_tokens: response.usage.output_tokens } } : {}),
-        };
-      },
-    },
-  }, model);
+export function createOpenAiTableStructureAnalyzer(client: MeteredResponses, model: string): OpenAiTableStructureAnalyzer {
+  return new OpenAiTableStructureAnalyzer(client, model);
 }

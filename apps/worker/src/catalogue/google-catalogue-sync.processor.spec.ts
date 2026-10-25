@@ -103,13 +103,21 @@ describe('GoogleCatalogueSyncProcessor', () => {
       },
       metadata: { responseId: 'r', model: 'm', promptVersion: 'v', schemaVersion: 's', latencyMs: 1, inputTokens: 1, outputTokens: 1 },
     }) };
+    const ambiguousRows = { classify: vi.fn().mockResolvedValue([{ rowNumber: 25, kind: 'SKIP', confidence: 0.99 }]) };
+    matrix.rows.push({ rowNumber: 25, cells: [null, null, null, null, null, null, null, 99] });
     const hybridSheets = { readMatrix: vi.fn().mockResolvedValue(matrix) };
     const processor = new GoogleCatalogueSyncProcessor(
       prisma as never, hybridSheets as never, storage, importer, undefined, notifications,
-      { structureAnalyzer, ambiguousRows: { classify: vi.fn().mockResolvedValue([]) } },
+      { structureAnalyzer, ambiguousRows },
     );
 
     await expect(processor.process({ tenantId, sourceId })).resolves.toMatchObject({ status: 'COMPLETED' });
+    const claim = prisma.catalogueSource.updateMany.mock.calls.find(([args]) => args.data.syncLeaseId)?.[0];
+    expect(structureAnalyzer.analyze).toHaveBeenCalledWith(expect.objectContaining({
+      usageContext: { tenantId, operationId: claim!.data.syncLeaseId, purpose: 'CATALOGUE_STRUCTURE' },
+    }));
+    expect(ambiguousRows.classify).toHaveBeenCalledWith(expect.any(Array),
+      { tenantId, operationId: claim!.data.syncLeaseId, purpose: 'CATALOGUE_ROW_CLASSIFICATION' });
 
     expect(importer.importTable).toHaveBeenCalledWith(expect.objectContaining({
       headers: ['Асортимент', 'Ціна (грн) / Роздріб'], rows: [['860х2050 Регіон', 2420]], sourceRowNumbers: [24],

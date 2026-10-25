@@ -80,6 +80,7 @@ export class TriggeredOrderProcessor {
         {
           messages: recentMessages.reverse().map((message) => ({ id: message.id, direction: message.direction, text: message.text })),
           products: products.map((product) => ({ id: product.sku, name: product.name, aliases: stringArray(product.aliases) })),
+          usageContext: { tenantId: anchor.tenantId, operationId: anchor.id, purpose: 'ORDER_INTENT' },
           recognitionMode: 'CONVERSATIONAL_INTENT',
           channel: socialChannel(anchor.channel),
         },
@@ -295,6 +296,7 @@ export class TriggeredOrderProcessor {
             name: product.name,
             aliases: stringArray(product.aliases),
           })),
+          usageContext: { tenantId: trigger.tenantId, operationId: triggerMessageId, purpose: 'ORDER_RECOGNITION' },
           recognitionMode: 'TRIGGERED_ORDER',
           channel: socialChannel(trigger.channel),
         },

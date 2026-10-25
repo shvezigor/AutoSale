@@ -62,6 +62,9 @@ describe('CatalogueMappingProcessor', () => {
       prisma as never, storage as never, mapper, autoImporter, { structureAnalyzer, ambiguousRows },
     ).process({ tenantId, runId })).resolves.toMatchObject({ status: 'COMPLETED' });
 
+    expect(structureAnalyzer.analyze).toHaveBeenCalledWith(expect.objectContaining({
+      usageContext: { tenantId, operationId: runId, purpose: 'CATALOGUE_STRUCTURE' },
+    }));
     expect(mapper.suggest).not.toHaveBeenCalled();
     expect(storage.put).toHaveBeenCalledWith(expect.objectContaining({
       contentType: 'application/vnd.autosale.catalogue-table+json',
@@ -162,6 +165,7 @@ describe('CatalogueMappingProcessor', () => {
 
     expect(storage.get).toHaveBeenCalledWith('catalogue/google/snapshot.json');
     expect(mapper.suggest).toHaveBeenCalledWith({
+      usageContext: { tenantId, operationId: runId, purpose: 'CATALOGUE_COLUMN_MAPPING' },
       headers: ['ассортимент', 'оптовая цена €'],
       primitiveTypes: { ассортимент: 'string', 'оптовая цена €': 'number' },
       sampleRows: [{ ассортимент: 'Двері Неаполь', 'оптовая цена €': '158' }],
@@ -195,6 +199,7 @@ describe('CatalogueMappingProcessor', () => {
       data: expect.objectContaining({ status: 'MAPPING', mappingLeaseId: expect.any(String), mappingLeaseExpiresAt: expect.any(Date) }),
     }));
     expect(mapper.suggest).toHaveBeenCalledWith({
+      usageContext: { tenantId, operationId: runId, purpose: 'CATALOGUE_COLUMN_MAPPING' },
       headers: ['артикул', 'назва'],
       primitiveTypes: { артикул: 'string', назва: 'string' },
       sampleRows: [{ артикул: 'SKU-1', назва: 'Куртка' }],
