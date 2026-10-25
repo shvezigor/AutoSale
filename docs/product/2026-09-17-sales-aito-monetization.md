@@ -12,7 +12,7 @@ Affected actors are the tenant owner, managers invited by that owner, the platfo
 ## Confirmed product facts
 
 - The current repository has tenant, membership, conversation, message, order, catalogue, and integration models.
-- It does not yet have subscription, invoice, payment, entitlement, trial, or usage-ledger models.
+- It does not yet have subscription, invoice, payment, entitlement or trial models. A separate internal AI provider-call usage ledger was deployed on 2026-10-25 with collection OFF; it is not a billable order-usage model.
 - PostgreSQL is the source of truth; Google Sheets is a projection.
 - AI output remains untrusted until schema, catalogue, completeness, duplicate, and approval checks pass.
 - Instagram, AI order recognition, manager review, catalogue management, and Google Sheets form the current product baseline.
@@ -79,7 +79,7 @@ Validate before implementing billing enforcement:
 - which features cause upgrade intent;
 - preferred payment methods and need for invoices or VAT documents.
 
-The approved [internal AI provider usage-ledger design](../superpowers/specs/2026-10-24-ai-provider-usage-ledger-design.md) specifies how to measure the AI component and reconcile it with provider and infrastructure invoices without charging tenants. It is not implemented yet. Existing token columns are incomplete and overlap across order/intent records, so they are not a measured cost-per-order baseline; the cost prerequisite above remains open.
+The approved [internal AI provider usage-ledger design](../superpowers/specs/2026-10-24-ai-provider-usage-ledger-design.md) specifies how to measure the AI component and reconcile it with provider and infrastructure invoices without charging tenants. Its schema and code are deployed, but collection remains OFF pending separate privacy/accounting approval and acceptance. Existing token columns are incomplete and overlap across order/intent records, so neither they nor the empty disabled ledger are a measured cost-per-order baseline; the cost prerequisite above remains open.
 
 Defer until separately designed:
 
