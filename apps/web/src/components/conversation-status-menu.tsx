@@ -11,9 +11,11 @@ type Props = { id: string; name: string; workflowStatus: ConversationWorkflowSta
 
 export function ConversationStatusMenu({ id, name, workflowStatus, statusVersion, detail = false }: Props) {
   const { t } = useI18n();
-  const { confirmedStatus, pendingIds, moveConversation, error, announcement } = useConversationTriage();
+  const { confirmedStatus, pendingIds, recoveryIds, refresh, moveConversation, error, announcement } = useConversationTriage();
   const current = confirmedStatus(id, { workflowStatus, statusVersion });
   const pending = pendingIds.has(id);
+  const recoveryRequired = recoveryIds.has(id);
+  const [retrying, setRetrying] = useState(false);
   const targets = conversationStatuses.filter(status => status !== current.workflowStatus);
   const trigger = useRef<HTMLButtonElement>(null);
   const menu = useRef<HTMLDivElement>(null);
@@ -50,10 +52,13 @@ export function ConversationStatusMenu({ id, name, workflowStatus, statusVersion
   return <div className={`conversation-status-control${detail ? ' conversation-status-detail' : ''}`}>
     <div className="conversation-status-summary">
       {detail && <span className="conversation-status-label">{t(`conversations.triage.${current.workflowStatus}`)}</span>}
-      <button ref={trigger} id={detail ? `conversation-status-detail-${id}` : undefined} type="button" className="icon-button" disabled={pending} aria-label={t('conversations.triage.move', { name })} aria-haspopup="menu" aria-expanded={Boolean(position)} aria-controls={position ? menuId : undefined} onClick={() => position ? close(true) : open()} onKeyDown={event => {
+      <button ref={trigger} id={detail ? `conversation-status-detail-${id}` : undefined} type="button" className="icon-button" disabled={pending || recoveryRequired} aria-label={t('conversations.triage.move', { name })} aria-haspopup="menu" aria-expanded={Boolean(position)} aria-controls={position ? menuId : undefined} onClick={() => position ? close(true) : open()} onKeyDown={event => {
         if (event.key === 'ArrowDown' || event.key === 'ArrowUp') { event.preventDefault(); open(); }
       }}><svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><circle cx="5" cy="12" r="2" /><circle cx="12" cy="12" r="2" /><circle cx="19" cy="12" r="2" /></svg></button>
     </div>
+    {detail && recoveryRequired && <LoadingButton className="text-button" pending={retrying || pending} onClick={() => {
+      setRetrying(true); void refresh().catch(() => {}).finally(() => setRetrying(false));
+    }}>{t('conversations.triage.retry')}</LoadingButton>}
     {detail && error && <p className="conversation-status-feedback" role="alert">{error}</p>}
     {detail && !error && announcement && <p className="conversation-status-feedback" role="status">{announcement}</p>}
     {position && createPortal(<div ref={menu} id={menuId} role="menu" aria-label={t('conversations.triage.move', { name })} className="conversation-status-menu" style={position} onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) close(); }} onKeyDown={event => {
@@ -63,6 +68,6 @@ export function ConversationStatusMenu({ id, name, workflowStatus, statusVersion
       const index = items.indexOf(document.activeElement as HTMLButtonElement);
       const next = event.key === 'ArrowDown' ? (index + 1) % items.length : event.key === 'ArrowUp' ? (index + items.length - 1) % items.length : event.key === 'Home' ? 0 : event.key === 'End' ? items.length - 1 : -1;
       if (next >= 0) { event.preventDefault(); items[next]?.focus(); }
-    }}>{targets.map(status => <LoadingButton key={status} type="button" role="menuitem" tabIndex={-1} className="text-button" pending={pending && target === status} disabled={pending} onClick={() => void move(status)}>{t(`conversations.triage.to${status}`)}</LoadingButton>)}</div>, document.body)}
+    }}>{targets.map(status => <LoadingButton key={status} type="button" role="menuitem" tabIndex={-1} className="text-button" pending={pending && target === status} disabled={pending || recoveryRequired} onClick={() => void move(status)}>{t(`conversations.triage.to${status}`)}</LoadingButton>)}</div>, document.body)}
   </div>;
 }

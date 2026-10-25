@@ -16,6 +16,35 @@ beforeEach(() => { vi.resetAllMocks(); api.refreshConversationList.mockResolvedV
 afterEach(() => { cleanup(); vi.useRealTimers(); });
 const detail = () => within(screen.getByRole('region', { name: 'Selected detail' }));
 describe('conversation status actions', () => {
+  it.each(['detail', 'counts', 'list'])('requires full recovery before another move when conflict %s refresh fails', async failure => {
+    vi.useFakeTimers();
+    api.changeConversationStatus.mockRejectedValueOnce(new ConversationReplyApiError('safe', 409));
+    api.refreshConversationList.mockResolvedValue({ items: [row], nextCursor: null });
+    if (failure === 'detail') api.refreshConversation.mockRejectedValueOnce(new Error('detail unavailable'));
+    if (failure === 'counts') api.refreshConversationStatusCounts.mockRejectedValueOnce(new Error('counts unavailable'));
+    if (failure === 'list') api.refreshConversationList.mockRejectedValueOnce(new Error('list unavailable'));
+    render(fixture()); fireEvent.click(detail().getByRole('button'));
+    await act(async () => fireEvent.click(screen.getByRole('menuitem', { name: 'До неактивних' })));
+    const triggers = () => screen.getAllByRole('button', { name: 'Перемістити діалог Олена' });
+    expect(triggers().every(button => button.hasAttribute('disabled'))).toBe(true);
+    expect(detail().getByRole('button', { name: 'Повторити' })).toBeVisible();
+    await act(async () => vi.advanceTimersByTimeAsync(15000));
+    expect(triggers().every(button => button.hasAttribute('disabled'))).toBe(true);
+    expect(detail().getByRole('alert')).toBeVisible();
+    expect(api.changeConversationStatus).toHaveBeenCalledTimes(1);
+    let finish!: (value: unknown) => void;
+    api.refreshConversation.mockReturnValueOnce(new Promise(resolve => { finish = resolve; }));
+    await act(async () => fireEvent.click((failure === 'counts' ? within(screen.getByRole('tabpanel')) : detail()).getByRole('button', { name: 'Повторити' })));
+    expect(triggers().every(button => button.hasAttribute('disabled'))).toBe(true);
+    await act(async () => finish({ ...row, workflowStatus: 'CLOSED', statusVersion: 5 }));
+    expect(triggers().every(button => !button.hasAttribute('disabled'))).toBe(true);
+    expect(detail().queryByRole('button', { name: 'Повторити' })).toBeNull();
+    expect(detail().getByText('Закриті')).toBeVisible();
+    api.changeConversationStatus.mockResolvedValueOnce({ status: 'ACTIVE', statusVersion: 6 });
+    fireEvent.click(detail().getByRole('button'));
+    await act(async () => fireEvent.click(screen.getByRole('menuitem', { name: 'До активних' })));
+    expect(api.changeConversationStatus).toHaveBeenLastCalledWith('fixture', { status: 'ACTIVE', expectedVersion: 5 });
+  });
   it('keeps the visible row trigger beside the link and supports keyboard focus', () => {
     render(fixture());
     const trigger = screen.getAllByRole('button', { name: 'Перемістити діалог Олена' })[0]!;

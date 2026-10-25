@@ -12,7 +12,7 @@ type Page = ConversationListResponse & { firstIds: string[]; expanded: boolean }
 type Triage = {
   status: Status; counts: ConversationStatusCounts; items: ConversationListResponse['items']; hasMore: boolean;
   loading: boolean; loadingMore: boolean; error: string; announcement: string;
-  pendingIds: Set<string>;
+  pendingIds: Set<string>; recoveryIds: Set<string>;
   confirmedStatus(id: string, initial: ConfirmedStatus): ConfirmedStatus;
   selectStatus(status: Status): void; loadMore(): Promise<void>; refresh(): Promise<void>;
   moveConversation(input: { id: string; status: Status; expectedVersion: number }): Promise<void>;
@@ -37,6 +37,8 @@ export function ConversationTriageProvider({ initialPage, initialCounts, childre
   const [confirmed, setConfirmed] = useState<Record<string, ConfirmedStatus>>({});
   const pendingRef = useRef(new Set<string>());
   const [pendingIds, setPendingIds] = useState(new Set<string>());
+  const recoveryRef = useRef(new Set<string>());
+  const [recoveryIds, setRecoveryIds] = useState(new Set<string>());
   const [counts, setCounts] = useState(initialCounts);
   const [loadingMore, setLoadingMore] = useState(false);
   const [loadError, setLoadError] = useState('');
@@ -74,14 +76,19 @@ export function ConversationTriageProvider({ initialPage, initialCounts, childre
     if (request === countRequest.current) setCounts(next);
   }, []);
   const refresh = useCallback(async () => {
-    setMutationError('');
+    if (!recoveryRef.current.size) setMutationError('');
+    const recoveringIds = [...recoveryRef.current];
     // A mutation must not be overwritten by a first-page request already in flight.
     rebuilding.current = true;
     const refreshGeneration = ++generation.current;
     await Promise.allSettled([...pendingRequests.current]);
     try {
       const targets = conversationStatuses.filter(target => pagesRef.current[target] || target === status);
-      const results = await Promise.allSettled([refreshCounts(), ...targets.map(async target => {
+      const results = await Promise.allSettled([refreshCounts(), ...recoveringIds.map(async id => {
+        const detail = await refreshConversation(id);
+        if (refreshGeneration !== generation.current) return;
+        setConfirmed(previous => ({ ...previous, [id]: { workflowStatus: detail.workflowStatus, statusVersion: detail.statusVersion } }));
+      }), ...targets.map(async target => {
         const desiredSize = pagesRef.current[target]?.items.length ?? 0;
         const first = await refreshConversationList({ status: target });
         let items = first.items; let cursor = first.nextCursor;
@@ -97,6 +104,10 @@ export function ConversationTriageProvider({ initialPage, initialCounts, childre
       // A rejected sibling must not release the lock while category requests can still write.
       const failure = results.find(result => result.status === 'rejected');
       if (failure?.status === 'rejected') throw failure.reason;
+      if (refreshGeneration !== generation.current) return;
+      recoveringIds.forEach(id => recoveryRef.current.delete(id));
+      setRecoveryIds(new Set(recoveryRef.current));
+      setMutationError(recoveryRef.current.size ? t('conversations.triage.loadError') : '');
       setLoadError('');
       router.refresh();
     } catch (cause) { setLoadError(t('conversations.triage.loadError')); throw cause; }
@@ -123,7 +134,7 @@ export function ConversationTriageProvider({ initialPage, initialCounts, childre
     finally { inFlight.current.delete(status); setLoadingMore(false); }
   }
   async function moveConversation(input: { id: string; status: Status; expectedVersion: number }) {
-    if (pendingRef.current.has(input.id)) return;
+    if (pendingRef.current.has(input.id) || recoveryRef.current.has(input.id)) return;
     pendingRef.current.add(input.id); setPendingIds(new Set(pendingRef.current));
     setLoadError(''); setMutationError(''); setAnnouncement('');
     try {
@@ -135,11 +146,10 @@ export function ConversationTriageProvider({ initialPage, initialCounts, childre
       await refresh().catch(() => {});
     } catch (cause) {
       if (cause instanceof ConversationReplyApiError && cause.status === 409) {
+        recoveryRef.current.add(input.id); setRecoveryIds(new Set(recoveryRef.current));
         try {
-          const detail = await refreshConversation(input.id);
-          setConfirmed(previous => ({ ...previous, [input.id]: { workflowStatus: detail.workflowStatus, statusVersion: detail.statusVersion } }));
           await refresh();
-          setMutationError(t('conversations.triage.conflict'));
+          setMutationError(t(recoveryRef.current.has(input.id) ? 'conversations.triage.loadError' : 'conversations.triage.conflict'));
         } catch { setMutationError(t('conversations.triage.loadError')); }
       } else setMutationError(t('conversations.triage.moveError'));
       throw cause;
@@ -154,5 +164,5 @@ export function ConversationTriageProvider({ initialPage, initialCounts, childre
     const query = new URLSearchParams(params.toString()); query.set('status', next.toLowerCase());
     router.replace(`${pathname}?${query.toString()}`, { scroll: false });
   }
-  return <Context.Provider value={{ pendingIds, confirmedStatus, status, counts, items: pages[status]?.items ?? [], hasMore: Boolean(pages[status]?.nextCursor), loading: !pages[status], loadingMore, error, announcement, selectStatus, loadMore, refresh, moveConversation }}>{children}</Context.Provider>;
+  return <Context.Provider value={{ pendingIds, recoveryIds, confirmedStatus, status, counts, items: pages[status]?.items ?? [], hasMore: Boolean(pages[status]?.nextCursor), loading: !pages[status], loadingMore, error, announcement, selectStatus, loadMore, refresh, moveConversation }}>{children}</Context.Provider>;
 }
