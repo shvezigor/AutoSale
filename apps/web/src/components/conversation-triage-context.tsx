@@ -33,7 +33,10 @@ export function ConversationTriageProvider({ initialPage, initialCounts, childre
   const previousStatus = useRef(status);
   const [counts, setCounts] = useState(initialCounts);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [error, setError] = useState(''); const [announcement, setAnnouncement] = useState('');
+  const [loadError, setLoadError] = useState('');
+  const [mutationError, setMutationError] = useState('');
+  const [announcement, setAnnouncement] = useState('');
+  const error = mutationError || loadError;
   const inFlight = useRef(new Set<Status>());
   const generation = useRef(0);
   const countRequest = useRef(0);
@@ -55,8 +58,8 @@ export function ConversationTriageProvider({ initialPage, initialCounts, childre
         const tail = old.items.filter(item => !response.items.some(fresh => fresh.id === item.id) && (!old.firstIds.includes(item.id) || (response.nextCursor && boundary && (item.lastMessageAt < boundary.lastMessageAt || (item.lastMessageAt === boundary.lastMessageAt && item.id < boundary.id)))));
         return { ...previous, [target]: { ...old, items: [...response.items, ...tail], firstIds: response.items.map(item => item.id) } };
       });
-      setError('');
-    } catch { setError(t('conversations.triage.loadError')); }
+      setLoadError('');
+    } catch { setLoadError(t('conversations.triage.loadError')); }
     finally { inFlight.current.delete(target); }
   }, [t]);
   const refreshCounts = useCallback(async () => {
@@ -65,13 +68,14 @@ export function ConversationTriageProvider({ initialPage, initialCounts, childre
     if (request === countRequest.current) setCounts(next);
   }, []);
   const refresh = useCallback(async () => {
+    setMutationError('');
     // A mutation must not be overwritten by a first-page request already in flight.
     rebuilding.current = true;
     const refreshGeneration = ++generation.current;
     await Promise.allSettled([...pendingRequests.current]);
     try {
       const targets = conversationStatuses.filter(target => pagesRef.current[target] || target === status);
-      await Promise.all([refreshCounts(), ...targets.map(async target => {
+      const results = await Promise.allSettled([refreshCounts(), ...targets.map(async target => {
         const desiredSize = pagesRef.current[target]?.items.length ?? 0;
         const first = await refreshConversationList({ status: target });
         let items = first.items; let cursor = first.nextCursor;
@@ -84,8 +88,11 @@ export function ConversationTriageProvider({ initialPage, initialCounts, childre
         if (refreshGeneration !== generation.current) return;
         setPages(previous => ({ ...previous, [target]: { items, nextCursor: cursor, firstIds: first.items.map(item => item.id), expanded: seen.size > 0 } }));
       })]);
-      setError('');
-    } catch (cause) { setError(t('conversations.triage.loadError')); throw cause; }
+      // A rejected sibling must not release the lock while category requests can still write.
+      const failure = results.find(result => result.status === 'rejected');
+      if (failure?.status === 'rejected') throw failure.reason;
+      setLoadError('');
+    } catch (cause) { setLoadError(t('conversations.triage.loadError')); throw cause; }
     finally { if (refreshGeneration === generation.current) rebuilding.current = false; router.refresh(); }
   }, [refreshCounts, router, status, t]);
   useEffect(() => {
@@ -104,12 +111,12 @@ export function ConversationTriageProvider({ initialPage, initialCounts, childre
       pendingRequests.current.add(request);
       const response = await request.finally(() => pendingRequests.current.delete(request));
       if (started === generation.current) setPages(previous => ({ ...previous, [status]: { ...page, items: unique([...page.items, ...response.items]), nextCursor: response.nextCursor, expanded: true } }));
-      setError('');
-    } catch { setError(t('conversations.triage.loadError')); }
+      setLoadError('');
+    } catch { setLoadError(t('conversations.triage.loadError')); }
     finally { inFlight.current.delete(status); setLoadingMore(false); }
   }
   async function moveConversation(input: { id: string; status: Status; expectedVersion: number }) {
-    setError(''); setAnnouncement('');
+    setLoadError(''); setMutationError(''); setAnnouncement('');
     try {
       const confirmed = await changeConversationStatus(input.id, { status: input.status, expectedVersion: input.expectedVersion });
       generation.current += 1;
@@ -120,9 +127,9 @@ export function ConversationTriageProvider({ initialPage, initialCounts, childre
       if (cause instanceof ConversationReplyApiError && cause.status === 409) {
         try {
           await refresh();
-          setError(t('conversations.triage.conflict'));
+          setMutationError(t('conversations.triage.conflict'));
         } catch { /* Keep the refresh failure visible; never claim stale data was refreshed. */ }
-      } else setError(t('conversations.triage.moveError'));
+      } else setMutationError(t('conversations.triage.moveError'));
       throw cause;
     }
   }

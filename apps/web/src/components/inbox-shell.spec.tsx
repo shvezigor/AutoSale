@@ -87,3 +87,43 @@ describe('confirmed mutation recovery', () => {
     visibility.mockRestore();
   });
 });
+function RefreshProbe() {
+  const { refresh, loadMore } = useConversationTriage();
+  return <><button onClick={() => void refresh().catch(() => {})}>Refresh fixture</button><button onClick={() => void loadMore()}>Load fixture</button></>;
+}
+
+describe('review regressions', () => {
+  it('keeps the rebuild lock until delayed category requests settle after counts fail', async () => {
+    vi.useFakeTimers();
+    let finishPage!: (value: { items: typeof row[]; nextCursor: string | null }) => void;
+    const delayedPage = new Promise<{ items: typeof row[]; nextCursor: string | null }>(resolve => { finishPage = resolve; });
+    api.refreshConversationList.mockReturnValueOnce(delayedPage);
+    api.refreshConversationStatusCounts.mockRejectedValueOnce(new Error('counts unavailable'));
+    render(<InboxShell initialPage={{ items: [row], nextCursor: 'older-cursor' }} initialCounts={counts}><RefreshProbe /></InboxShell>);
+    await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Refresh fixture' })));
+    await act(async () => vi.advanceTimersByTimeAsync(3000));
+    await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Load fixture' })));
+    expect(api.refreshConversationList).toHaveBeenCalledTimes(1);
+    expect(navigation.refresh).not.toHaveBeenCalled();
+    await act(async () => finishPage({ items: [{ ...row, lastMessagePreview: 'Rebuilt' }], nextCursor: 'older-cursor' }));
+    expect(navigation.refresh).toHaveBeenCalledOnce();
+    expect(screen.getByRole('alert')).toBeVisible();
+    api.refreshConversationList.mockResolvedValueOnce({ items: [{ ...row, id: 'older-row', lastMessagePreview: 'Older row' }], nextCursor: null });
+    await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Load fixture' })));
+    expect(screen.getAllByRole('link')).toHaveLength(2);
+    expect(screen.getByText('Older row')).toBeVisible();
+  });
+
+  it.each([503, 409])('keeps mutation feedback after a successful background poll (%s)', async status => {
+    vi.useFakeTimers();
+    api.changeConversationStatus.mockRejectedValue(new ConversationReplyApiError('safe', status));
+    api.refreshConversationList.mockResolvedValue({ items: [row], nextCursor: null });
+    render(<InboxShell initialPage={{ items: [row], nextCursor: null }} initialCounts={counts}><MoveProbe /><RefreshProbe /></InboxShell>);
+    await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Move fixture' })));
+    const feedback = screen.getByRole('alert').textContent;
+    await act(async () => vi.advanceTimersByTimeAsync(3000));
+    expect(screen.getByRole('alert')).toHaveTextContent(feedback!);
+    await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Refresh fixture' })));
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+});
