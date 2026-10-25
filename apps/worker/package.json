@@ -6,7 +6,8 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "test": "vitest run --maxWorkers=2",
-    "typecheck": "tsc --noEmit -p tsconfig.json"
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "ai-usage:report": "node dist/ai-usage/report-cli.js"
   },
   "dependencies": {
     "@autosale/config": "workspace:*",
