@@ -191,6 +191,14 @@ export async function configureRuntimeDatabaseRoles(
           REVOKE ALL ON FUNCTION public.worker_due_ai_reply_drafts(timestamp with time zone, integer) FROM autosale_api;
           GRANT EXECUTE ON FUNCTION public.worker_due_ai_reply_drafts(timestamp with time zone, integer) TO autosale_worker;
         END IF;
+        IF to_regprocedure('public.worker_due_ai_provider_usage_attempts(timestamp with time zone,integer)') IS NOT NULL THEN
+          REVOKE ALL ON FUNCTION public.worker_due_ai_provider_usage_attempts(timestamp with time zone, integer) FROM autosale_api;
+          GRANT EXECUTE ON FUNCTION public.worker_due_ai_provider_usage_attempts(timestamp with time zone, integer) TO autosale_worker;
+        END IF;
+        IF to_regprocedure('public.worker_purge_ai_provider_usage_attempts(timestamp with time zone,integer)') IS NOT NULL THEN
+          REVOKE ALL ON FUNCTION public.worker_purge_ai_provider_usage_attempts(timestamp with time zone, integer) FROM autosale_api;
+          GRANT EXECUTE ON FUNCTION public.worker_purge_ai_provider_usage_attempts(timestamp with time zone, integer) TO autosale_worker;
+        END IF;
         IF to_regprocedure('public.worker_fail_expired_ai_reply_drafts(timestamp with time zone,integer)') IS NOT NULL THEN
           REVOKE ALL ON FUNCTION public.worker_fail_expired_ai_reply_drafts(timestamp with time zone, integer) FROM autosale_api;
           GRANT EXECUTE ON FUNCTION public.worker_fail_expired_ai_reply_drafts(timestamp with time zone, integer) TO autosale_worker;

@@ -1,4 +1,4 @@
-import { materializeCommercialTerms, Prisma, type CommercialLineInput, type PrismaClient, type ProcurementStore, withTenantTransaction } from '@autosale/database';
+import { assertTenantAcceptingMutations, materializeCommercialTerms, Prisma, type CommercialLineInput, type PrismaClient, type ProcurementStore, withTenantTransaction } from '@autosale/database';
 import { SOCIAL_ORDER_PROMPT_VERSION } from '@autosale/contracts';
 
 import type { ApprovalMode } from './approval-policy.js';
@@ -76,6 +76,8 @@ export class TriggeredOrderProcessor {
         })),
       ]);
       const { recentMessages, conversation } = conversationContext;
+      await withTenantTransaction(this.prisma, anchor.tenantId, (tx) =>
+        assertTenantAcceptingMutations(tx, anchor.tenantId, 'ORDER_RECOGNITION'));
       const result = await this.recognition.recognize(
         {
           messages: recentMessages.reverse().map((message) => ({ id: message.id, direction: message.direction, text: message.text })),
@@ -284,6 +286,8 @@ export class TriggeredOrderProcessor {
         })),
       ]);
       const { recentMessages, conversation } = conversationContext;
+      await withTenantTransaction(this.prisma, trigger.tenantId, (tx) =>
+        assertTenantAcceptingMutations(tx, trigger.tenantId, 'ORDER_RECOGNITION'));
       const result = await this.recognition.recognize(
         {
           messages: recentMessages.reverse().map((message) => ({
@@ -388,6 +392,7 @@ export class TriggeredOrderProcessor {
     promptVersion: string;
   }): Promise<{ id: string; status: string }> {
     return withTenantTransaction(this.prisma, input.tenantId, async (transaction) => {
+      await assertTenantAcceptingMutations(transaction, input.tenantId, 'ORDER_RECOGNITION');
       try {
         return await transaction.order.create({ data: input });
       } catch (error) {

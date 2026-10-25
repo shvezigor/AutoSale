@@ -1,4 +1,5 @@
 import { readdir, readFile } from 'node:fs/promises';
+import { randomUUID } from 'node:crypto';
 import { resolve } from 'node:path';
 
 import { createPrismaClient, Prisma, type PrismaClient } from '@autosale/database';
@@ -39,6 +40,72 @@ describe('TriggeredOrderProcessor', () => {
     );
 
     expect(result?.prefix).toBe('AS');
+  });
+
+  it('blocks a queued manual recognition after tenant freeze before creating work or calling the provider', async () => {
+    const tenant = await prisma.tenant.create({ data: { key: 'fictional-frozen-manual', name: 'Fictional Frozen' } });
+    await prisma.tenantSettings.create({ data: { tenantId: tenant.id, triggerPhrases: [] } });
+    const conversation = await prisma.conversation.create({ data: {
+      tenantId: tenant.id, channel: 'INSTAGRAM', externalConversationId: 'fictional-frozen', participantId: 'fictional-frozen', lastMessageAt: new Date(),
+    } });
+    const event = await prisma.webhookEvent.create({ data: {
+      tenantId: tenant.id, provider: 'META', externalEventId: 'fictional-frozen-event', payload: {},
+    } });
+    const anchor = await prisma.message.create({ data: {
+      tenantId: tenant.id, conversationId: conversation.id, rawEventId: event.id, channel: 'INSTAGRAM', externalMessageId: 'fictional-frozen-manual',
+      direction: 'INBOUND', senderId: 'fictional-frozen', text: 'Fictional order', sourceTimestamp: new Date(),
+    } });
+    await prisma.tenantLifecycleRequest.create({ data: {
+      tenantId: tenant.id, kind: 'DELETE', status: 'EXPORT_READY', reasonCode: 'ADMINISTRATIVE_TEST',
+      requestedByUserId: randomUUID(), idempotencyKey: randomUUID(), requestHash: 'f'.repeat(64), ingestionFrozenAt: new Date(),
+    } });
+    const recognize = vi.fn(() => { throw new Error('Provider dispatch forbidden'); });
+    const processor = new TriggeredOrderProcessor(prisma, new OrderRecognitionService({ recognize }), { assessApprovedOrder: vi.fn() } as never);
+    await expect(processor.process(tenant.id, anchor.id)).rejects.toMatchObject({ code: 'TENANT_LIFECYCLE_FROZEN' });
+    expect(recognize).not.toHaveBeenCalled();
+    expect(await prisma.order.count({ where: { triggerMessageId: anchor.id } })).toBe(0);
+    const existing = await prisma.order.create({ data: {
+      tenantId: tenant.id, conversationId: conversation.id, triggerMessageId: anchor.id,
+      promptVersion: 'fictional-existing', status: 'NEEDS_REVIEW',
+    } });
+    expect(await processor.process(tenant.id, anchor.id)).toMatchObject({ id: existing.id, status: 'NEEDS_REVIEW' });
+    expect(recognize).not.toHaveBeenCalled();
+  });
+
+  it.each(['manual', 'intent'])('rechecks freeze after %s preparation before the provider call', async (mode) => {
+    const tenant = await prisma.tenant.create({ data: { key: `fictional-freeze-during-${mode}`, name: 'Fictional Preparing' } });
+    await prisma.tenantSettings.create({ data: { tenantId: tenant.id, triggerPhrases: [], intentDetectionMode: 'AI_SUGGESTION' } });
+    const conversation = await prisma.conversation.create({ data: {
+      tenantId: tenant.id, channel: 'INSTAGRAM', externalConversationId: `fictional-preparing-${mode}`,
+      participantId: 'fictional-preparing', lastMessageAt: new Date(),
+    } });
+    const event = await prisma.webhookEvent.create({ data: {
+      tenantId: tenant.id, provider: 'META', externalEventId: `fictional-preparing-${mode}`, payload: {},
+    } });
+    const anchor = await prisma.message.create({ data: {
+      tenantId: tenant.id, conversationId: conversation.id, rawEventId: event.id, channel: 'INSTAGRAM',
+      externalMessageId: `fictional-preparing-${mode}`, direction: 'INBOUND', senderId: 'fictional-preparing',
+      text: 'Fictional order', sourceTimestamp: new Date(),
+    } });
+    // Freeze after claim but while the bounded model input is being loaded.
+    const freezePrisma = prisma.$extends({ query: { product: { async findMany({ args, query }) {
+      const products = await query(args);
+      await prisma.tenantLifecycleRequest.create({ data: {
+        tenantId: tenant.id, kind: 'DELETE', status: 'EXPORT_READY', reasonCode: 'ADMINISTRATIVE_TEST',
+        requestedByUserId: randomUUID(), idempotencyKey: randomUUID(), requestHash: 'f'.repeat(64), ingestionFrozenAt: new Date(),
+      } });
+      return products;
+    } } } });
+    const recognize = vi.fn(() => { throw new Error('Provider dispatch forbidden'); });
+    const processor = new TriggeredOrderProcessor(freezePrisma as unknown as PrismaClient, new OrderRecognitionService({ recognize }), { assessApprovedOrder: vi.fn() } as never);
+    const run = mode === 'manual' ? processor.process(tenant.id, anchor.id) : processor.processIfTriggered(tenant.id, anchor.id);
+    await expect(run).rejects.toMatchObject({ code: 'TENANT_LIFECYCLE_FROZEN' });
+    expect(recognize).not.toHaveBeenCalled();
+    if (mode === 'manual') {
+      expect(await prisma.order.findUnique({ where: { triggerMessageId: anchor.id } })).toMatchObject({ status: 'AI_FAILED' });
+    } else {
+      expect(await prisma.orderIntentEvaluation.findUnique({ where: { anchorMessageId: anchor.id } })).toMatchObject({ status: 'FAILED' });
+    }
   });
 
   it('persists one auto-approved order for a trigger message', async () => {

@@ -11,12 +11,15 @@ describe('deployment environment contract', () => {
     ], { cwd: resolve(process.cwd(), '../..'), encoding: 'utf8', env: {
       ...process.env,
       AI_USAGE_COLLECTION_ENABLED: enabled,
+      AI_USAGE_RETENTION_ENABLED: enabled,
       POSTGRES_API_PASSWORD: 'fictional-api-password',
       POSTGRES_WORKER_PASSWORD: 'fictional-worker-password',
       POSTGRES_BACKUP_PASSWORD: 'fictional-backup-password',
     } })) as { services: { worker: { environment: Record<string, string> }; api: { environment: Record<string, string> } } };
     expect(rendered.services.worker.environment.AI_USAGE_COLLECTION_ENABLED).toBe(enabled);
     expect(rendered.services.api.environment.AI_USAGE_COLLECTION_ENABLED).toBeUndefined();
+    expect(rendered.services.worker.environment.AI_USAGE_RETENTION_ENABLED).toBe(enabled);
+    expect(rendered.services.api.environment.AI_USAGE_RETENTION_ENABLED).toBeUndefined();
   });
 
   it('renders the public API in production while keeping the isolated acceptance API in development', () => {

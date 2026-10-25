@@ -35,6 +35,8 @@ The order review displays a localized, bounded explanation: manager-review mode,
 
 The evaluated context is bounded to the latest 50 messages at or before the anchor timestamp and active tenant products. Context may resolve references in an explicit purchase commitment, but it is not independent proof of intent. The structured model result therefore includes an anchor-specific purchase-intent gate that is checked again by deterministic policy. A later inbound message is a new revision with its own evaluation; older messages are never re-evaluated as anchors.
 
+The worker rechecks the tenant lifecycle freeze after preparing context and immediately before each new model request. A freeze during preparation leaves the claimed evaluation safely failed without provider dispatch. The same processor guards queued manual recognition before creating processing work and again before dispatch; bootstrap terminally skips a frozen manual job. Existing order replay remains available, and an already-dispatched AI usage attempt may finalize after freeze to preserve cost evidence. These guards and the freeze-during-preparation regression live in `triggered-order.processor.spec.ts`.
+
 ## Data, audit and observability
 
 Each evaluation stores the safe reason, mode, attempts, response/model identifiers, input/output token counts, latency, completion time and safe failure code. The existing order audit log records manager corrections, approval and cancellation; because the evaluation links to its order, corrections and rejected proposals can be used to calculate false-positive and correction rates without storing extra conversation content in telemetry.

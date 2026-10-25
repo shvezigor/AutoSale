@@ -25,6 +25,7 @@ export const workerEnvSchema = z.object({
   S3_SECRET_ACCESS_KEY: z.string().min(8),
   OPENAI_API_KEY: z.string().min(20),
   AI_USAGE_COLLECTION_ENABLED: optionalBoolean,
+  AI_USAGE_RETENTION_ENABLED: optionalBoolean,
   OPENAI_MODEL: z.string().min(1).default('gpt-5.4-mini'),
   SMTP_HOST: optionalNonEmptyString,
   SMTP_PORT: z.coerce.number().int().min(1).max(65535).default(587),

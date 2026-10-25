@@ -38,6 +38,10 @@ describe('AI provider usage ledger PostgreSQL contract', () => {
     admin = new pg.Pool({ connectionString: container.getConnectionUri() });
     const root = resolve(fileURLToPath(new URL('../prisma/migrations', import.meta.url)));
     for (const name of (await readdir(root)).sort()) {
+      // Exercise the upgrade path with runtime roles/default privileges already present.
+      if (name === '20261025_ai_provider_usage_maintenance') {
+        await configureRuntimeDatabaseRoles(container.getConnectionUri(), passwords);
+      }
       if (name !== 'migration_lock.toml') await admin.query(await readFile(resolve(root, name, 'migration.sql'), 'utf8'));
     }
     for (const [id, key] of [[tenantA, 'fictional-alpha'], [tenantB, 'fictional-beta']]) {
@@ -170,5 +174,70 @@ describe('AI provider usage ledger PostgreSQL contract', () => {
     await expect(withTenantTransaction(worker, tenantA, (tx) => tx.aiProviderUsageAttempt.update({
       where: { id: row.id }, data: { outcome: 'STARTED', finalizedAt: null, inputTokens: null, outputTokens: null },
     }))).rejects.toBeDefined();
+  });
+
+  it('allows in-flight finalization after freeze without changing immutable terminal evidence', async () => {
+    const { AiProviderUsageStore } = await import('./ai-provider-usage.js');
+    const store = new AiProviderUsageStore(worker);
+    const context = { tenantId: tenantB, operationId: randomUUID(), purpose: 'ORDER_RECOGNITION' as const };
+    const id = randomUUID();
+    await store.start(context, 'fictional-model', id, startedAt);
+    const lifecycleId = randomUUID();
+    await admin.query(`INSERT INTO tenant_lifecycle_requests
+      (id, tenant_id, kind, status, reason_code, requested_by_user_id, idempotency_key, request_hash, ingestion_frozen_at, updated_at)
+      VALUES ($1,$2,'DELETE','EXPORT_READY','ADMINISTRATIVE_TEST',$3,$4,$5,$6,$6)`,
+    [lifecycleId, tenantB, randomUUID(), randomUUID(), 'f'.repeat(64), finalizedAt]);
+    try {
+      expect(await store.finalize(context, id, 'REPORTED', { inputTokens: 7, outputTokens: 2, cachedInputTokens: null }, 'fictional-model', finalizedAt)).toBe(true);
+      expect(await store.finalize(context, id, 'CHARGE_UNKNOWN', emptyUsage, null, finalizedAt, 'ORPHANED')).toBe(false);
+      expect(await withTenantTransaction(worker, tenantB, (tx) => tx.aiProviderUsageAttempt.findUniqueOrThrow({ where: { id } })))
+        .toMatchObject({ outcome: 'REPORTED', inputTokens: 7, outputTokens: 2 });
+    } finally {
+      await admin.query('DELETE FROM tenant_lifecycle_requests WHERE id=$1', [lifecycleId]);
+    }
+  });
+
+  it('exposes bounded maintenance functions only to worker, including after repeated role bootstrap', async () => {
+    for (const name of ['worker_due_ai_provider_usage_attempts', 'worker_purge_ai_provider_usage_attempts']) {
+      await expect(api.$queryRawUnsafe(`SELECT * FROM public.${name}($1::timestamptz, $2::int)`, finalizedAt, 100)).rejects.toBeDefined();
+      const privileges = await admin.query(`SELECT
+        has_function_privilege('autosale_worker', $1, 'EXECUTE') AS worker,
+        has_function_privilege('autosale_api', $1, 'EXECUTE') AS api,
+        has_function_privilege('autosale_backup', $1, 'EXECUTE') AS backup`, [`public.${name}(timestamp with time zone,integer)`]);
+      expect(privileges.rows).toEqual([{ worker: true, api: false, backup: false }]);
+      const metadata = await admin.query(`SELECT p.prosecdef, p.proconfig,
+        EXISTS (SELECT 1 FROM aclexplode(p.proacl) acl WHERE acl.grantee=0 AND acl.privilege_type='EXECUTE') AS public_execute
+        FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='public' AND p.proname=$1`, [name]);
+      expect(metadata.rows).toEqual([{ prosecdef: true, proconfig: ['search_path=pg_catalog, public'], public_execute: false }]);
+    }
+  });
+
+  it('hard caps SQL discovery/deletion and never purges STARTED or recently finalized rows', async () => {
+    await admin.query('DELETE FROM ai_provider_usage_attempts');
+    const now = new Date('2026-10-25T12:00:00Z');
+    for (let i = 0; i < 105; i++) {
+      await admin.query(`INSERT INTO ai_provider_usage_attempts
+        (id,tenant_id,purpose,operation_id,requested_model,started_at,outcome,finalized_at)
+        VALUES ($1,$2,'ORDER_INTENT',$3,'fictional-model','2026-01-01','STARTED',NULL),
+          ($4,$5,'ORDER_INTENT',$6,'fictional-model','2026-01-01','NOT_SENT','2026-01-02')`,
+      [randomUUID(), i % 2 ? tenantA : tenantB, randomUUID(), randomUUID(), i % 2 ? tenantB : tenantA, randomUUID()]);
+    }
+    const due = (limit: number | null) => worker.$queryRawUnsafe<Array<{ tenant_id: string; attempt_id: string }>>(
+      'SELECT * FROM public.worker_due_ai_provider_usage_attempts($1::timestamptz,$2::int)', now, limit);
+    expect(await due(10_000)).toHaveLength(100);
+    expect(await due(0)).toHaveLength(1);
+    expect(await due(-1)).toHaveLength(1);
+    expect(await due(null)).toHaveLength(1);
+    expect(new Set((await due(100)).map((row) => row.tenant_id))).toEqual(new Set([tenantA, tenantB]));
+    expect(Object.keys((await due(1))[0]!).sort()).toEqual(['attempt_id', 'tenant_id']);
+    const purge = (limit: number | null) => worker.$queryRawUnsafe<Array<{ purged: number }>>(
+      'SELECT public.worker_purge_ai_provider_usage_attempts($1::timestamptz,$2::int) AS purged', now, limit);
+    expect(await purge(0)).toEqual([{ purged: 1 }]);
+    expect(await purge(-1)).toEqual([{ purged: 1 }]);
+    expect(await purge(null)).toEqual([{ purged: 1 }]);
+    expect(await purge(10_000)).toEqual([{ purged: 100 }]);
+    expect(await purge(100)).toEqual([{ purged: 2 }]);
+    expect(await purge(100)).toEqual([{ purged: 0 }]);
+    expect((await admin.query("SELECT count(*)::int AS count FROM ai_provider_usage_attempts WHERE outcome='STARTED'")).rows).toEqual([{ count: 105 }]);
   });
 });

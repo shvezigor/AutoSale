@@ -2,7 +2,7 @@ import { Buffer } from 'node:buffer';
 
 import { parseWorkerEnv } from '@autosale/config/worker-env';
 import { retentionDryRunJobSchema, shipmentCreateJobSchema, telegramDeliveryJobSchema, tenantLifecycleJobSchema, ukrposhtaTrackingBatchJobSchema } from '@autosale/contracts';
-import { AiProviderUsageStore, createPrismaClient, ConversionRetentionStore, DemoLeadNotificationStore, DemoLeadRetentionStore, PlatformChannelGate, ProcurementStore, withTenantTransaction } from '@autosale/database';
+import { AiProviderUsageStore, createPrismaClient, ConversionRetentionStore, DemoLeadNotificationStore, DemoLeadRetentionStore, PlatformChannelGate, ProcurementStore, TenantLifecycleFrozenError, withTenantTransaction } from '@autosale/database';
 import {
   createGoogleSheetsAdapter,
   CredentialCipher,
@@ -20,6 +20,7 @@ import { metrics, StructuredLogger } from '@autosale/observability';
 import { z } from 'zod';
 
 import { createWorkerResponses } from './ai-usage/worker-responses.js';
+import { AiUsageReconciler } from './ai-usage/ai-usage.reconciler.js';
 import { createWorkerHealthServer } from './health-server.js';
 import { createDemoLeadEmailSender } from './demo-leads/demo-lead-email.js';
 import { DemoLeadNotificationProcessor } from './demo-leads/demo-lead-notification.processor.js';
@@ -80,6 +81,7 @@ async function bootstrap(): Promise<void> {
   const logger = new StructuredLogger('worker');
   const server = createWorkerHealthServer();
   const prisma = createPrismaClient(env.DATABASE_URL);
+  const aiUsageReconciler = new AiUsageReconciler(prisma, env.AI_USAGE_RETENTION_ENABLED);
   const platformChannelDeployment = {
     FACEBOOK_MESSENGER: env.FACEBOOK_MESSENGER_ENABLED,
     TIKTOK_BUSINESS_MESSAGING: env.TIKTOK_BUSINESS_MESSAGING_ENABLED
@@ -499,7 +501,14 @@ async function bootstrap(): Promise<void> {
           select: { id: true },
         }));
         if (!trigger) throw new Error('Manual order trigger message not found');
-        await orderProcessor.process(job.data.tenantId, trigger.id);
+        try {
+          await orderProcessor.process(job.data.tenantId, trigger.id);
+        } catch (error) {
+          if (!(error instanceof TenantLifecycleFrozenError)) throw error;
+          metrics.increment('autosale_tenant_lifecycle_freeze_rejections_total', {
+            surface: 'ORDER_RECOGNITION', safe_reason: 'lifecycle_frozen',
+          });
+        }
         return;
       }
       if (
@@ -1150,6 +1159,22 @@ async function bootstrap(): Promise<void> {
     }
   };
   const replyDraftReconcileTimer = setInterval(() => void reconcileReplyDrafts(), 5_000);
+  let reconcilingAiUsage = false;
+  const reconcileAiUsage = async (): Promise<void> => {
+    if (reconcilingAiUsage) return;
+    reconcilingAiUsage = true;
+    try {
+      const result = await aiUsageReconciler.reconcile(new Date());
+      metrics.increment('autosale_operations_total', { operation: 'ai_usage_reconcile', result: 'success' });
+      if (result.unknown > 0 || result.purged > 0) logger.info('ai_usage_reconcile_completed', {
+        correlationId: 'system:ai-usage-reconcile', ...result,
+      });
+    } catch {
+      metrics.increment('autosale_operations_total', { operation: 'ai_usage_reconcile', result: 'failure' });
+      logger.warn('ai_usage_reconcile_failed', { correlationId: 'system:ai-usage-reconcile', result: 'failure' });
+    } finally { reconcilingAiUsage = false; }
+  };
+  const aiUsageTimer = setInterval(() => void reconcileAiUsage(), 60_000);
   void pollExports();
   void reconcileDemoLeads();
   void reconcileDemoLeadRetention();
@@ -1168,6 +1193,7 @@ async function bootstrap(): Promise<void> {
   void reconcileTenantLifecycle();
   void cleanupTenantLifecycleArtifacts();
   void reconcileReplyDrafts();
+  void reconcileAiUsage();
   logger.info('service_started', { correlationId: 'system:startup', healthPort: env.HEALTH_PORT });
 
   server.listen(env.HEALTH_PORT, '0.0.0.0');
@@ -1191,6 +1217,7 @@ async function bootstrap(): Promise<void> {
     clearInterval(tenantLifecycleReconcileTimer);
     clearInterval(tenantLifecycleCleanupTimer);
     clearInterval(replyDraftReconcileTimer);
+    clearInterval(aiUsageTimer);
     await replyDraftWorker.close();
     await demoLeadWorker.close();
     demoLeadSender.close();

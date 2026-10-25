@@ -25,6 +25,11 @@ const validEnv = {
 };
 
 describe('parseWorkerEnv', () => {
+  it('requires separate opt-in for terminal usage deletion', () => {
+    expect(parseWorkerEnv(validEnv).AI_USAGE_RETENTION_ENABLED).toBe(false);
+    expect(parseWorkerEnv({ ...validEnv, AI_USAGE_COLLECTION_ENABLED: 'true' }).AI_USAGE_RETENTION_ENABLED).toBe(false);
+    expect(parseWorkerEnv({ ...validEnv, AI_USAGE_RETENTION_ENABLED: 'true' }).AI_USAGE_RETENTION_ENABLED).toBe(true);
+  });
   it('collects usage only after explicit runtime opt-in', () => {
     expect(parseWorkerEnv(validEnv).AI_USAGE_COLLECTION_ENABLED).toBe(false);
     expect(parseWorkerEnv({ ...validEnv, AI_USAGE_COLLECTION_ENABLED: 'false' }).AI_USAGE_COLLECTION_ENABLED).toBe(false);
@@ -35,7 +40,7 @@ describe('parseWorkerEnv', () => {
     expect(parseWorkerEnv({ ...validEnv, UKRPOSHTA_SANDBOX_SHIPMENTS_ENABLED: 'true' }).UKRPOSHTA_SANDBOX_SHIPMENTS_ENABLED).toBe(true);
   });
   it('accepts a complete worker environment', () => {
-    expect(parseWorkerEnv(validEnv)).toEqual({ ...validEnv, AI_USAGE_COLLECTION_ENABLED: false, HEALTH_PORT: 3002, SMTP_PORT: 587, FACEBOOK_MESSENGER_ENABLED: false, TIKTOK_BUSINESS_MESSAGING_ENABLED: false, CATALOGUE_AI_STRUCTURE_ANALYSIS: true, NOVA_POSHTA_DELIVERY_ENABLED: false, UKRPOSHTA_SANDBOX_SHIPMENTS_ENABLED: false, DEMO_LEAD_ERASURE_ENABLED: false });
+    expect(parseWorkerEnv(validEnv)).toEqual({ ...validEnv, AI_USAGE_COLLECTION_ENABLED: false, AI_USAGE_RETENTION_ENABLED: false, HEALTH_PORT: 3002, SMTP_PORT: 587, FACEBOOK_MESSENGER_ENABLED: false, TIKTOK_BUSINESS_MESSAGING_ENABLED: false, CATALOGUE_AI_STRUCTURE_ANALYSIS: true, NOVA_POSHTA_DELIVERY_ENABLED: false, UKRPOSHTA_SANDBOX_SHIPMENTS_ENABLED: false, DEMO_LEAD_ERASURE_ENABLED: false });
   });
 
   it('passes optional SMTP settings to the worker without requiring them at startup', () => {
