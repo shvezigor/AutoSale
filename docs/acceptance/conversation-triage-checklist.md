@@ -1,6 +1,6 @@
 # Conversation triage acceptance
 
-Date: 2026-10-25. Status: local regression verification complete; deployment and browser acceptance pending. Canonical behavior: [approved design](../superpowers/specs/2026-10-25-conversation-triage-design.md).
+Date: 2026-10-25. Status: deployed and manually verified for status moves; isolated end-to-end inbound and conflict checks remain pending. Canonical behavior: [approved design](../superpowers/specs/2026-10-25-conversation-triage-design.md).
 
 ## Evidence boundaries
 
@@ -40,13 +40,13 @@ The new `conversation-inbox.spec.ts` scenario signs a unique fictional inbound, 
 - [ ] Execute the new Playwright scenario without skips against the isolated fixture.
 - [ ] Inspect browser traces/screenshots and fix any runtime-only issue before claiming local browser acceptance.
 
-## Controlled release — controller owned, pending
+## Controlled release — 25 October 2026
 
-- [ ] Review the whole branch, run merged-result checks, merge/push and verify remote SHA.
-- [ ] Record verified backup and rollback reference under the [backup runbook](../operations/backup-restore.md).
-- [ ] Apply the additive migration, deploy API/worker/web manually under the [deployment runbook](../operations/deployment.md), verify health, and record actual SHA/environment.
-- [ ] With an authorized test account, verify move/reverse move, reload persistence, tab/count/detail downstream effects and conflict/error recovery.
-- [ ] Verify 320/768/1024/1440 px, keyboard, touch, 200% zoom, Ukrainian/English and capture final screenshots in local `artifacts/`.
+- [x] Review the whole branch, run merged-result checks, merge/push and verify remote SHA. The full merged run passed 2,411 tests with six documented opt-in skips; the visual-fix web run passed 548 tests. The scoped fix received a separate review with no Critical or Important findings.
+- [x] Record verified backup and rollback reference under the [backup runbook](../operations/backup-restore.md). The pre-release backup is the local private directory `backups/20261025T141848Z` (PostgreSQL, MinIO and configuration checksums verified); it must not enter Git.
+- [x] Apply the additive migration, deploy API/worker/web manually under the [deployment runbook](../operations/deployment.md), verify health, and record actual SHA/environment. Migration `20261025160000_conversation_triage` applied successfully on the current Windows Docker host; all Compose services were healthy and `https://sales-aito.com/health/live` returned HTTP 200. Feature release `e9f28aad`; web styling correction `92d4a51`, both pushed to `origin/master`. Docker Desktop was updated in place to 4.96.3 after its older engine failed to restart; existing volumes and services recovered.
+- [x] With an authorized test account, verify move/reverse move, reload persistence and tab/count/detail downstream effects. A pre-existing test conversation moved Active → Inactive → Closed → Active through row and detail menus. Counts changed 18/0/0 → 17/1/0 → 17/0/1 → 18/0/0; detail status and the selected tab followed; reload preserved both the intermediate Inactive and final Active state. No customer response was sent. Browser conflict/error recovery remains unverified.
+- [ ] Verify the complete responsive and accessibility matrix. The tabs and controls were reachable at 320, 390, 768, 1024 and 1440 px; the menu closed with Escape and restored trigger focus; Ukrainian and English labels were checked. Touch input and 200% zoom were not tested. Final desktop/mobile/menu screenshots are private ignored files in `artifacts/conversation-triage-sdd/browser/` and must not be committed.
 - [ ] Verify authorized new inbound reopening without any outbound customer/provider send. Do not send real customer messages to produce evidence.
 
-Release SHA/environment: not deployed in this increment. No production browser acceptance or provider-side action has been performed here.
+The Playwright scenario remains skipped because the isolated Instagram fixture and owner credentials were not provisioned. API and worker tests cover conflict and inbound reopening, but they do not replace the missing live browser/provider checks. This feature therefore remains **Validation pending**.

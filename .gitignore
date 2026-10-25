@@ -1,6 +1,7 @@
 .worktrees/
 .superpowers/brainstorm/
 backups/
+/artifacts/
 node_modules/
 **/node_modules/
 **/dist/
