@@ -1990,8 +1990,10 @@ Acceptance criteria, dependencies, verification and stop conditions: `tasks/plan
 
 ---
 
-# Planned: Conversation triage in the workspace inbox
+# Current initiative: Conversation triage in the workspace inbox
 
 - [x] Agree on manual Active/Inactive/Closed categories and automatic return to Active for a genuinely new inbound customer message. The [canonical design](../docs/superpowers/specs/2026-10-25-conversation-triage-design.md) excludes per-chat deletion and Instagram inbox mutation.
-- [ ] Implement tenant-scoped status persistence, conditional inbound reopening, status-filtered pagination/counts and accessible row/detail actions with Ukrainian and English copy.
-- [ ] Run fictional cross-channel/database/UI regressions, then manually release and verify persisted transitions in a real browser with an authorized test account. Do not send provider messages for this acceptance without separate authorization.
+- [x] Implement tenant-scoped status persistence, conditional inbound reopening, status-filtered pagination/counts and accessible row/detail actions with Ukrainian and English copy.
+- [x] Run affected full contracts/database/API/worker/web suites, workspace build/typecheck and the pre-existing-row migration upgrade regression; repair stale migration/layout test fixtures. See the [acceptance checklist](../docs/acceptance/conversation-triage-checklist.md) for exact passes and opt-in skips.
+- [ ] Execute unskipped isolated Playwright acceptance; the authored scenarios currently skip because fictional owner credentials and the isolated Instagram fixture are unavailable.
+- [ ] Controller: review the whole branch, merge/push, take a verified backup, manually release and verify persisted transitions in a real browser with an authorized test account. Do not send provider messages for this acceptance without separate authorization.
