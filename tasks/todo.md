@@ -1882,6 +1882,18 @@ Status: commercial terms were implemented on 2026-09-19 and manual audited payme
 - [x] Production deployment verification is complete before claiming the live dashboard is ready.
 ## Shared Product Backlog
 
+### Planned: Workspace voice assistant, onboarding first
+
+**Status:** Architecture proposed for review on 2026-10-25; no implementation or deployment. The owner selected confirmation by voice or button.
+
+**Canonical design:** [Workspace voice assistant](../docs/superpowers/specs/2026-10-25-workspace-voice-assistant-design.md), with [proposed ADR 0003](../docs/adr/0003-workspace-assistant-actions.md).
+
+- [ ] Review the first-release scope: owner onboarding guidance/navigation and confirmed changes to the existing two order-processing mode fields.
+- [ ] After design review, write the scoped implementation plan covering shared readiness, session authority, atomic confirmed operations, privacy/lifecycle and Realtime integration.
+- [ ] Validate Ukrainian/English speech and voice-confirmation reliability using fictional data; evaluate actual cost under bounded pilot quotas.
+- [ ] Complete automated tests and deployed real-browser acceptance, including confirmation, errors, persisted settings after reload and downstream views.
+- [ ] Add orders, messaging and other workspace actions in later individually reviewed capability slices; preserve provider provenance, outbox and retry rules.
+
 ### Deferred: Investigate intermittent Dashboard/Orders navigation delay
 
 Owner: workspace UI / operations. Status: deferred at the owner's request on 24 October 2026; do not run more timing probes or infer a performance fix while the issue is not recurring. Existing skeleton, bounded opt-in diagnostics and route logs remain available; [acceptance evidence](../docs/acceptance/workspace-navigation-performance-2026-10-22.md) distinguishes the probe's measured frame from actual first visual paint.

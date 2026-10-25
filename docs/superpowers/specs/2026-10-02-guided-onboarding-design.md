@@ -9,7 +9,7 @@ The `Onboarding` workspace page is the single launch checklist for a newly creat
 ## User flow
 
 1. The owner opens `Onboarding` from the primary navigation.
-2. Sales AITO reads current catalogue, Instagram, order-rule, delivery, supplier, notification and commercial settings.
+2. Sales AITO reads current catalogue, Instagram/Facebook/TikTok, order-rule, delivery, supplier, notification and commercial settings.
 3. The page separates the three required launch steps from four optional integrations.
 4. The main action opens the first incomplete required step in the exact Settings tab.
 5. After the owner saves settings and returns, progress is recalculated from the canonical configuration.
@@ -20,7 +20,7 @@ The `Onboarding` workspace page is the single launch checklist for a newly creat
 ### Required
 
 - **Product catalogue:** at least one catalogue source has `ACTIVE` status.
-- **Customer channel:** the Instagram connection has `ACTIVE` status.
+- **Customer channel:** Instagram or Facebook has `ACTIVE` status, or TikTok has `ACTIVE` or `INBOUND_ONLY` status. An inbound-ready channel satisfies setup readiness; this is not a claim that outbound replies are available for that channel.
 - **Order rules:** the order settings API returns both intent detection and approval modes. Safe defaults therefore count as ready, while a missing or inaccessible configuration does not.
 
 ### Optional
@@ -51,5 +51,11 @@ Optional steps use `Optional` while incomplete and `Ready` when configured. They
 
 ## Verification
 
-- Unit tests cover status derivation, required progress, optional non-blocking behavior, Settings deep links and both locales.
+- Unit tests in `apps/web/app/(workspace)/onboarding/page.spec.tsx` cover status derivation, required progress, optional non-blocking behavior, Settings deep links, Facebook/TikTok channel readiness and both locales.
 - Browser verification covers desktop and mobile composition, keyboard focus order and the absence of horizontal overflow.
+
+## Planned voice extension
+
+The [workspace voice assistant architecture](2026-10-25-workspace-voice-assistant-design.md) proposes reusing this checklist's readiness rules for owner guidance and confirmed settings changes. It is a proposed design, not an available feature. During implementation, extract one shared readiness projection used by the page and assistant, preserve the current channel/optional-step rules, and expose source-unavailable states without claiming an integration is disconnected.
+
+Documentation reconciliation on 2026-10-25 updates the older Instagram-only description to match the existing page and its Facebook/TikTok regression tests. It introduces no runtime behavior change or new browser acceptance evidence.
