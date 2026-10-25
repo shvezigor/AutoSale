@@ -1,6 +1,6 @@
 # Conversation triage in the workspace inbox
 
-Date: 2026-10-25. Status: product direction approved; detailed specification awaiting owner review and implementation.
+Date: 2026-10-25. Status: approved by owner; implementation pending.
 
 ## Purpose and decision
 
