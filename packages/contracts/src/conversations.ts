@@ -4,7 +4,31 @@ import { replyDraftSummarySchema } from './reply-drafts.js';
 export const socialChannelSchema = z.enum(['INSTAGRAM', 'FACEBOOK', 'TIKTOK']);
 export type SocialChannel = z.infer<typeof socialChannelSchema>;
 
+export const conversationWorkflowStatusSchema = z.enum(['ACTIVE', 'INACTIVE', 'CLOSED']);
+export type ConversationWorkflowStatus = z.infer<typeof conversationWorkflowStatusSchema>;
+
+export const conversationStatusChangeInputSchema = z.object({
+  status: conversationWorkflowStatusSchema,
+  expectedVersion: z.number().int().min(0),
+});
+export type ConversationStatusChangeInput = z.infer<typeof conversationStatusChangeInputSchema>;
+
+export const conversationStatusChangeResponseSchema = z.object({
+  status: conversationWorkflowStatusSchema,
+  statusVersion: z.number().int().min(0),
+  statusChangedAt: z.string().datetime().nullable(),
+});
+export type ConversationStatusChangeResponse = z.infer<typeof conversationStatusChangeResponseSchema>;
+
+export const conversationStatusCountsSchema = z.object({
+  ACTIVE: z.number().int().min(0),
+  INACTIVE: z.number().int().min(0),
+  CLOSED: z.number().int().min(0),
+});
+export type ConversationStatusCounts = z.infer<typeof conversationStatusCountsSchema>;
+
 export const conversationQuerySchema = z.object({
+  status: conversationWorkflowStatusSchema.optional(),
   cursor: z.string().min(1).optional(),
   limit: z.coerce.number().int().min(1).max(50).default(20),
 });
@@ -12,6 +36,8 @@ export const conversationQuerySchema = z.object({
 export const conversationSummarySchema = z.object({
   id: z.string().uuid(),
   channel: socialChannelSchema,
+  workflowStatus: conversationWorkflowStatusSchema,
+  statusVersion: z.number().int().min(0),
   participantName: z.string().nullable(),
   participantUsername: z.string().nullable(),
   participantAvatarUrl: z.string().nullable(),
@@ -82,6 +108,8 @@ export const conversationMessageSchema = z.object({
 export const conversationDetailResponseSchema = z.object({
   id: z.string().uuid(),
   channel: socialChannelSchema,
+  workflowStatus: conversationWorkflowStatusSchema,
+  statusVersion: z.number().int().min(0),
   participantName: z.string().nullable(),
   participantUsername: z.string().nullable(),
   participantAvatarUrl: z.string().nullable(),

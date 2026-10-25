@@ -6247,6 +6247,10 @@ export type WebhookEventScalarFieldEnum = (typeof WebhookEventScalarFieldEnum)[k
 
 
 export const ConversationScalarFieldEnum = {
+  workflowStatus: 'workflowStatus',
+  statusVersion: 'statusVersion',
+  statusChangedAt: 'statusChangedAt',
+  statusChangedByUserId: 'statusChangedByUserId',
   id: 'id',
   tenantId: 'tenantId',
   channel: 'channel',
@@ -7364,6 +7368,20 @@ export type EnumMembershipRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$P
  */
 export type ListEnumMembershipRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MembershipRole[]'>
     
+
+
+/**
+ * Reference to a field of type 'ConversationWorkflowStatus'
+ */
+export type EnumConversationWorkflowStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ConversationWorkflowStatus'>
+
+
+
+/**
+ * Reference to a field of type 'ConversationWorkflowStatus[]'
+ */
+export type ListEnumConversationWorkflowStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ConversationWorkflowStatus[]'>
+
 
 
 /**

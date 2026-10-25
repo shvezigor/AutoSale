@@ -755,6 +755,10 @@ export type WebhookEventScalarFieldEnum = (typeof WebhookEventScalarFieldEnum)[k
 
 
 export const ConversationScalarFieldEnum = {
+  workflowStatus: 'workflowStatus',
+  statusVersion: 'statusVersion',
+  statusChangedAt: 'statusChangedAt',
+  statusChangedByUserId: 'statusChangedByUserId',
   id: 'id',
   tenantId: 'tenantId',
   channel: 'channel',
@@ -1523,4 +1527,3 @@ export const JsonNullValueFilter = {
 } as const
 
 export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
-

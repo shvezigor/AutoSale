@@ -55,6 +55,7 @@ export const TENANT_EXPORT_DATASETS: readonly TenantExportDataset[] = [
   dataset('conversations', 'conversation', {
     ...identityFields, channel: true, externalConversationId: true, participantId: true,
     profileId: true, displayName: true, lastMessageAt: true, updatedAt: true,
+    workflowStatus: true, statusVersion: true, statusChangedAt: true, statusChangedByUserId: true,
   }),
   dataset('instagram-customer-profiles', 'instagramCustomerProfile', {
     ...identityFields, participantId: true, displayName: true, username: true,

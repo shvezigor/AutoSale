@@ -65,6 +65,14 @@ describe('conversation and message row-level security', () => {
     ]);
   });
 
+  it('defaults legacy-shaped conversation inserts to active version zero within tenant RLS', async () => {
+    const rows = await withTenantTransaction(api, tenantA, (tx) => tx.$queryRaw<Array<{ workflow_status: string; status_version: number; status_changed_at: Date | null; status_changed_by_user_id: string | null }>>`
+      SELECT workflow_status, status_version, status_changed_at, status_changed_by_user_id FROM conversations WHERE id = ${conversationA}::uuid
+    `);
+    expect(rows).toEqual([{ workflow_status: 'ACTIVE', status_version: 0, status_changed_at: null, status_changed_by_user_id: null }]);
+    await expect(withTenantTransaction(api, tenantB, (tx) => tx.conversation.findUnique({ where: { id: conversationA } }))).resolves.toBeNull();
+  });
+
   it('rejects cross-tenant conversation and message updates', async () => {
     await expect(withTenantTransaction(api, tenantA, (tx) => tx.conversation.update({
       where: { id: conversationB },
