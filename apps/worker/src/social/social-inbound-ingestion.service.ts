@@ -155,6 +155,23 @@ export class SocialInboundIngestionService {
           });
         }
 
+        if (wasCreated && normalized.direction === 'INBOUND') {
+          await transaction.conversation.updateMany({
+            where: {
+              id: conversation.id,
+              tenantId: event.tenantId,
+              workflowStatus: { not: 'ACTIVE' },
+              statusChangedAt: { lt: normalized.sourceTimestamp },
+            },
+            data: {
+              workflowStatus: 'ACTIVE',
+              statusVersion: { increment: 1 },
+              statusChangedAt: new Date(),
+              statusChangedByUserId: null,
+            },
+          });
+        }
+
         if (normalized.attachments.length > 0) {
           const existingAttachments = await transaction.attachment.findMany({
             where: {

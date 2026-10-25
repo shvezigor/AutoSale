@@ -1,3 +1,4 @@
+import { conversationTriageTests } from '../social/conversation-triage.test-helper.js';
 import { randomUUID } from 'node:crypto';
 import { readdir, readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
@@ -80,6 +81,10 @@ describe('TikTokProcessor', () => {
     await expect(prisma.message.count({ where: { tenantId } })).resolves.toBe(0);
     expect(processIfTriggered).not.toHaveBeenCalled();
   });
+
+  conversationTriageTests('TIKTOK', () => ({
+    prisma, tenantId, processor: (media, schedule, orders) => new TikTokProcessor(prisma, media, { processIfTriggered: orders }, { schedule }),
+  }));
 
   async function createEvent(fixtureName: string, externalEventId: string) {
     return prisma.webhookEvent.create({ data: {

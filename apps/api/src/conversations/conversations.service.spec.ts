@@ -8,6 +8,7 @@ import { PostgreSqlContainer, type StartedPostgreSqlContainer } from '@testconta
 import pg from 'pg';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { SocialInboundIngestionService } from '../../../worker/src/social/social-inbound-ingestion.service.js';
 import { ConversationsService } from './conversations.service.js';
 
 describe('ConversationsService', () => {
@@ -167,6 +168,52 @@ describe('ConversationsService', () => {
     expect(outcomes.find((result) => result.status === 'rejected')).toMatchObject({ reason: expect.any(ConflictException) });
     await prisma.conversation.update({ where: { id: newestId }, data: { workflowStatus: 'ACTIVE' } });
     expect(queue.add).not.toHaveBeenCalled();
+  });
+
+  it('rejects a concurrent stale manager move after inbound commits and preserves a newer manager decision', async () => {
+    const tenant = await prisma.tenant.create({ data: { key: randomUUID(), name: 'Fictional triage race' } });
+    try {
+      const timestamp = new Date('2026-01-01T12:00:01Z');
+      const conversation = await prisma.conversation.create({ data: {
+        tenantId: tenant.id, channel: 'FACEBOOK', participantId: 'fictional-race', externalConversationId: 'fictional-race',
+        lastMessageAt: timestamp, workflowStatus: 'CLOSED', statusVersion: 4, statusChangedAt: new Date(timestamp.getTime() - 1000),
+      } });
+      const event = await prisma.webhookEvent.create({ data: {
+        tenantId: tenant.id, provider: 'META', externalEventId: randomUUID(), payload: {},
+      } });
+      let reachedLock!: () => void;
+      let releaseLock!: () => void;
+      const locked = new Promise<void>((resolve) => { reachedLock = resolve; });
+      const release = new Promise<void>((resolve) => { releaseLock = resolve; });
+      const coordinated = prisma.$extends({ query: { conversation: { async upsert({ args, query }) {
+        const result = await query(args);
+        reachedLock();
+        await release;
+        return result;
+      } } } });
+      const schedule = vi.fn();
+      const orders = vi.fn();
+      const normalize = () => [{ channel: 'FACEBOOK' as const, externalConversationId: 'fictional-race', participantId: 'fictional-race',
+        externalMessageId: randomUUID(), direction: 'INBOUND' as const, senderId: 'fictional-race', text: 'Fictional question',
+        sourceTimestamp: timestamp, attachments: [] }];
+      // The adapter's upsert holds the row lock while the real API move starts.
+      const inbound = new SocialInboundIngestionService(coordinated as PrismaClient, { copy: vi.fn() },
+        { processIfTriggered: orders }, { schedule }).process(tenant.id, event.id, normalize);
+      await locked;
+      const move = service.changeStatus(tenant.id, actorUserId, conversation.id, { status: 'INACTIVE', expectedVersion: 4 });
+      const conflict = expect(move).rejects.toMatchObject({ status: 409, message: 'CONVERSATION_STATUS_CHANGED' });
+      releaseLock();
+      await inbound;
+      await conflict;
+      expect(await prisma.conversation.findUniqueOrThrow({ where: { id: conversation.id } }))
+        .toMatchObject({ workflowStatus: 'ACTIVE', statusVersion: 5, statusChangedByUserId: null });
+      expect(schedule).toHaveBeenCalledTimes(1);
+      expect(orders).toHaveBeenCalledTimes(1);
+      await service.changeStatus(tenant.id, actorUserId, conversation.id, { status: 'CLOSED', expectedVersion: 5 });
+      await new SocialInboundIngestionService(prisma, { copy: vi.fn() }).process(tenant.id, event.id, normalize);
+      expect(await prisma.conversation.findUniqueOrThrow({ where: { id: conversation.id } }))
+        .toMatchObject({ workflowStatus: 'CLOSED', statusVersion: 6, statusChangedByUserId: actorUserId });
+    } finally { await prisma.tenant.delete({ where: { id: tenant.id } }); }
   });
 
   it('denies moves and no-ops while the tenant is frozen', async () => {

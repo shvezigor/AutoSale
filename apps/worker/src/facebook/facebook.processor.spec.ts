@@ -1,3 +1,4 @@
+import { conversationTriageTests } from '../social/conversation-triage.test-helper.js';
 import { readdir, readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
@@ -71,6 +72,10 @@ describe('FacebookProcessor', () => {
     await expect(prisma.attachment.findFirstOrThrow({ where: { message: { rawEventId: event.id } } }))
       .resolves.toMatchObject({ copyStatus: 'COPIED', checksum: 'checksum' });
   });
+
+  conversationTriageTests('FACEBOOK', () => ({
+    prisma, tenantId, processor: (media, schedule, orders) => new FacebookProcessor(prisma, media, { processIfTriggered: orders }, { schedule }),
+  }));
 
   async function createEvent(fixtureName: string, externalEventId: string) {
     const payload = JSON.parse(await readFile(
