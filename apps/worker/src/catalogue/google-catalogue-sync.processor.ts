@@ -33,8 +33,8 @@ export class GoogleCatalogueSyncProcessor {
     private readonly oauthSheets?: (tenantId: string, connectionId: string) => Promise<Pick<GoogleSheetsAdapter, 'readTable' | 'readMatrix'>>,
     private readonly notifications?: CatalogueSyncNotifications,
     private readonly hybrid?: {
-      structureAnalyzer: { analyze(profile: ReturnType<typeof buildCatalogueStructureProfile> & { usageContext: AiUsageContext }): Promise<TableStructureSuggestion> };
-      ambiguousRows: { classify(rows: ClassifiedCatalogueRow[], usageContext: AiUsageContext): Promise<AmbiguousRowClassification[]> };
+      structureAnalyzer: { analyze(profile: ReturnType<typeof buildCatalogueStructureProfile> & { usageContext: AiUsageContext; assertCanDispatch: () => Promise<void> }): Promise<TableStructureSuggestion> };
+      ambiguousRows: { classify(rows: ClassifiedCatalogueRow[], usageContext: AiUsageContext, assertCanDispatch: () => Promise<void>): Promise<AmbiguousRowClassification[]> };
     },
   ) {
     this.importer = importer ?? { importTable: (input) => importCatalogueTable(prisma, input) };
@@ -71,6 +71,18 @@ export class GoogleCatalogueSyncProcessor {
     const syncVersion = source.syncVersion + 1;
     const leaseWhere = { id: input.sourceId, tenantId: input.tenantId, type: 'GOOGLE_SHEETS' as const, syncLeaseId: leaseId, syncVersion };
     const heartbeat = this.startLeaseHeartbeat(leaseWhere);
+    const assertCanDispatch = async (): Promise<void> => {
+      await heartbeat.assertOwned();
+      await withTenantTransaction(this.prisma, input.tenantId, async (tx) => {
+        await assertTenantAcceptingMutations(tx, input.tenantId, 'CATALOGUE');
+        const now = new Date();
+        const owned = await tx.catalogueSource.updateMany({
+          where: { ...leaseWhere, syncLeaseExpiresAt: { gt: now } },
+          data: { syncLeaseExpiresAt: new Date(now.getTime() + SOURCE_LEASE_MS) },
+        });
+        if (owned.count !== 1) throw new CatalogueImportLeaseLostError();
+      });
+    };
 
     try {
     let table: { headers: string[]; rows: GoogleSheetsCell[][]; revision: string; sourceRowNumbers?: number[] };
@@ -81,7 +93,7 @@ export class GoogleCatalogueSyncProcessor {
       if (!sheets) throw new GoogleOAuthAccessError();
       if (this.hybrid) {
         const matrix = await sheets.readMatrix({ spreadsheetId: source.spreadsheetId, sheetName: source.sheetName, maxRows: 5_000 });
-        const prepared = await this.prepareHybridTable(input, matrix, source.createdByUserId, leaseId);
+        const prepared = await this.prepareHybridTable(input, matrix, source.createdByUserId, leaseId, assertCanDispatch);
         table = prepared.table;
         if (!prepared.confident) {
           const reviewKey = `catalogue/${input.tenantId}/${input.sourceId}/google/${matrix.revision}.json`;
@@ -92,6 +104,14 @@ export class GoogleCatalogueSyncProcessor {
         table = await sheets.readTable({ spreadsheetId: source.spreadsheetId, sheetName: source.sheetName, maxRows: 5_000 });
       }
     } catch (error) {
+      if (error instanceof TenantLifecycleFrozenError) {
+        await withTenantTransaction(this.prisma, input.tenantId, (tx) => tx.catalogueSource.updateMany({
+          where: { ...leaseWhere, syncLeaseExpiresAt: { gt: new Date() } },
+          data: { status: 'PAUSED', lastErrorSummary: error.code, syncLeaseId: null, syncLeaseExpiresAt: null },
+        }));
+        return { status: 'IGNORED_FROZEN' as const };
+      }
+      if (error instanceof CatalogueImportLeaseLostError) return { status: 'BUSY' as const };
       if (error instanceof GoogleSheetsTableValidationError) {
         await withTenantTransaction(this.prisma, input.tenantId, (transaction) => transaction.catalogueSource.updateMany({ where: leaseWhere, data: {
           status: 'PAUSED', lastErrorSummary: `TABLE_${error.code}`, syncLeaseId: null, syncLeaseExpiresAt: null,
@@ -248,6 +268,7 @@ export class GoogleCatalogueSyncProcessor {
     matrix: RawCatalogueMatrix,
     userId: string | null,
     operationId: string,
+    assertCanDispatch: () => Promise<void>,
   ): Promise<{ table: { headers: string[]; rows: GoogleSheetsCell[][]; revision: string; sourceRowNumbers: number[] }; confident: boolean }> {
     const existing = await withTenantTransaction(this.prisma, input.tenantId, (transaction) => transaction.catalogueMapping.findFirst({
       where: {
@@ -267,12 +288,12 @@ export class GoogleCatalogueSyncProcessor {
       proposal = proposalFromPlan(storedPlan);
       reused = true;
     } else {
-      const suggestion = await this.hybrid!.structureAnalyzer.analyze({ ...buildCatalogueStructureProfile(matrix), usageContext: { tenantId: input.tenantId, operationId, purpose: 'CATALOGUE_STRUCTURE' } });
+      const suggestion = await this.hybrid!.structureAnalyzer.analyze({ ...buildCatalogueStructureProfile(matrix), assertCanDispatch, usageContext: { tenantId: input.tenantId, operationId, purpose: 'CATALOGUE_STRUCTURE' } });
       proposal = suggestion.proposal;
       metadata = suggestion.metadata;
     }
     const local = normalizeCatalogueRows({ matrix, proposal });
-    const decisions = local.ambiguous.length ? await this.hybrid!.ambiguousRows.classify(local.ambiguous, { tenantId: input.tenantId, operationId, purpose: 'CATALOGUE_ROW_CLASSIFICATION' }) : [];
+    const decisions = local.ambiguous.length ? await this.hybrid!.ambiguousRows.classify(local.ambiguous, { tenantId: input.tenantId, operationId, purpose: 'CATALOGUE_ROW_CLASSIFICATION' }, assertCanDispatch) : [];
     const normalized = applyAmbiguousDecisions(local, decisions);
     const sourceRowNumbers = normalized.products.map((row) => row.sourceRowNumber);
     const confident = proposal.structureConfidence >= 0.9

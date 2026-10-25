@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { CatalogueMappingProviderError, CatalogueMappingResponseError, OpenAiColumnMapper } from './openai-column-mapper.js';
 
+const assertCanDispatch = async () => {};
 const usageContext: AiUsageContext = { tenantId: '11111111-1111-4111-8111-111111111111', operationId: '22222222-2222-4222-8222-222222222222', purpose: 'CATALOGUE_COLUMN_MAPPING' };
 
 describe('OpenAiColumnMapper', () => {
@@ -16,7 +17,7 @@ describe('OpenAiColumnMapper', () => {
       ] }),
     }) }, 'gpt-5.4-mini');
 
-    const result = await mapper.suggest({ usageContext,
+    const result = await mapper.suggest({ assertCanDispatch, usageContext,
       headers: ['ассортимент', 'оптовая цена €'],
       primitiveTypes: { ассортимент: 'string', 'оптовая цена €': 'number' },
       sampleRows: [{ ассортимент: 'Двері Неаполь', 'оптовая цена €': 158 }],
@@ -43,7 +44,7 @@ describe('OpenAiColumnMapper', () => {
     });
     const mapper = new OpenAiColumnMapper({ create }, 'gpt-5.4-mini');
 
-    const result = await mapper.suggest({ usageContext,
+    const result = await mapper.suggest({ assertCanDispatch, usageContext,
       headers: ['Артикул', 'Назва позиції', 'Внутрішня примітка'],
       primitiveTypes: { Артикул: 'string', 'Назва позиції': 'string', 'Внутрішня примітка': 'string' },
       sampleRows: [{ Артикул: 'SKU-7', 'Назва позиції': 'Куртка', 'Внутрішня примітка': 'test' }],
@@ -70,7 +71,7 @@ describe('OpenAiColumnMapper', () => {
       output_text: JSON.stringify({ columns: [{ source: 'Артикул', target: 'inventedTarget', confidence: 0.9 }] }),
     }) }, 'gpt-5.4-mini');
 
-    await expect(mapper.suggest({ usageContext, headers: ['Артикул'], primitiveTypes: { Артикул: 'string' }, sampleRows: [] }))
+    await expect(mapper.suggest({ assertCanDispatch, usageContext, headers: ['Артикул'], primitiveTypes: { Артикул: 'string' }, sampleRows: [] }))
       .rejects.toBeInstanceOf(CatalogueMappingResponseError);
   });
 
@@ -80,7 +81,7 @@ describe('OpenAiColumnMapper', () => {
       output_text: JSON.stringify({ columns: [{ source: 'Артикул', target: 'sku', confidence: 0.9 }] }),
     }) }, 'gpt-5.4-mini');
 
-    await expect(mapper.suggest({ usageContext,
+    await expect(mapper.suggest({ assertCanDispatch, usageContext,
       headers: ['Артикул', 'Невідомо'], primitiveTypes: { Артикул: 'string', Невідомо: 'string' }, sampleRows: [],
     })).rejects.toBeInstanceOf(CatalogueMappingResponseError);
   });
@@ -89,7 +90,7 @@ describe('OpenAiColumnMapper', () => {
     const providerError = Object.assign(new Error('secret provider detail'), { status: 400 });
     const mapper = new OpenAiColumnMapper({ create: vi.fn().mockRejectedValue(providerError) }, 'gpt-5.4-mini');
 
-    const error = await mapper.suggest({ usageContext, headers: ['Артикул'], primitiveTypes: { Артикул: 'string' }, sampleRows: [] }).catch((caught: unknown) => caught);
+    const error = await mapper.suggest({ assertCanDispatch, usageContext, headers: ['Артикул'], primitiveTypes: { Артикул: 'string' }, sampleRows: [] }).catch((caught: unknown) => caught);
 
     expect(error).toBeInstanceOf(CatalogueMappingProviderError);
     expect(error).toMatchObject({ status: 400, message: 'Catalogue mapping provider request failed' });
@@ -102,7 +103,7 @@ describe('OpenAiColumnMapper', () => {
     });
     const mapper = new OpenAiColumnMapper({ create }, 'gpt-5.4-mini');
 
-    await mapper.suggest({ usageContext,
+    await mapper.suggest({ assertCanDispatch, usageContext,
       headers: ['Колонка'], primitiveTypes: { Колонка: 'string' },
       sampleRows: Array.from({ length: 6 }, (_, index) => ({ Колонка: `${index}`.repeat(600) })),
     });
@@ -119,7 +120,7 @@ describe('OpenAiColumnMapper', () => {
       return { id: `resp-${create.mock.calls.length}`, model: 'gpt-5.4-mini', output_text: JSON.stringify({ columns: batch.headers.map((source) => ({ source, target: 'ignore', confidence: 0.7 })) }) };
     });
     const headers = Array.from({ length: 120 }, (_, index) => `Поле ${index}`);
-    const result = await new OpenAiColumnMapper({ create }, 'gpt-5.4-mini').suggest({ usageContext, headers, primitiveTypes: Object.fromEntries(headers.map((header) => [header, 'string'])), sampleRows: [] });
+    const result = await new OpenAiColumnMapper({ create }, 'gpt-5.4-mini').suggest({ assertCanDispatch, usageContext, headers, primitiveTypes: Object.fromEntries(headers.map((header) => [header, 'string'])), sampleRows: [] });
     expect(create).toHaveBeenCalledTimes(3);
     expect(result.proposal.columns.map((column) => column.source)).toEqual(headers);
   });
@@ -134,7 +135,7 @@ describe('OpenAiColumnMapper', () => {
       ] }),
     }) }, 'gpt-5.4-mini');
 
-    const result = await mapper.suggest({ usageContext,
+    const result = await mapper.suggest({ assertCanDispatch, usageContext,
       headers: ['Заголовок', 'Наименование', 'Цена старая', 'Цена'],
       primitiveTypes: { Заголовок: 'string', Наименование: 'string', 'Цена старая': 'number', Цена: 'number' },
       sampleRows: [],

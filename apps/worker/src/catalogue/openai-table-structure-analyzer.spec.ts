@@ -31,6 +31,7 @@ const validProposal = {
   ],
 };
 
+const assertCanDispatch = async () => {};
 const usageContext: AiUsageContext = { tenantId: '11111111-1111-4111-8111-111111111111', operationId: '22222222-2222-4222-8222-222222222222', purpose: 'CATALOGUE_STRUCTURE' };
 
 describe('OpenAiTableStructureAnalyzer', () => {
@@ -38,7 +39,7 @@ describe('OpenAiTableStructureAnalyzer', () => {
     const create = vi.fn().mockResolvedValue(response(validProposal));
     const analyzer = new OpenAiTableStructureAnalyzer({ create }, 'gpt-5.4-mini');
 
-    const result = await analyzer.analyze({ ...profile, usageContext });
+    const result = await analyzer.analyze({ ...profile, usageContext, assertCanDispatch });
 
     expect(result.proposal.headerStartRow).toBe(21);
     expect(result.proposal.columns.map((column) => column.index)).toEqual([5, 7]);
@@ -52,7 +53,7 @@ describe('OpenAiTableStructureAnalyzer', () => {
     const create = vi.fn().mockResolvedValue(response({ ...validProposal, headerStartRow: 9_999, headerEndRow: 9_999 }));
     const analyzer = new OpenAiTableStructureAnalyzer({ create }, 'gpt-5.4-mini');
 
-    await expect(analyzer.analyze({ ...profile, usageContext })).rejects.toBeInstanceOf(TableStructureResponseError);
+    await expect(analyzer.analyze({ ...profile, usageContext, assertCanDispatch })).rejects.toBeInstanceOf(TableStructureResponseError);
   });
 
   it('rejects duplicate semantic targets and unobserved columns', async () => {
@@ -65,6 +66,6 @@ describe('OpenAiTableStructureAnalyzer', () => {
     }));
     const analyzer = new OpenAiTableStructureAnalyzer({ create }, 'gpt-5.4-mini');
 
-    await expect(analyzer.analyze({ ...profile, usageContext })).rejects.toBeInstanceOf(TableStructureResponseError);
+    await expect(analyzer.analyze({ ...profile, usageContext, assertCanDispatch })).rejects.toBeInstanceOf(TableStructureResponseError);
   });
 });

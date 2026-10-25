@@ -69,10 +69,11 @@ const instructions = 'Identify catalogue structure only. Return original one-bas
 export class OpenAiTableStructureAnalyzer {
   constructor(private readonly client: MeteredResponses, private readonly model: string) {}
 
-  async analyze(input: CatalogueStructureProfile & { usageContext: AiUsageContext }): Promise<TableStructureSuggestion> {
-    const { usageContext: _usageContext, ...profile } = input;
+  async analyze(input: CatalogueStructureProfile & { usageContext: AiUsageContext; assertCanDispatch: () => Promise<void> }): Promise<TableStructureSuggestion> {
+    const { usageContext: _usageContext, assertCanDispatch, ...profile } = input;
     const started = performance.now();
     let response: Awaited<ReturnType<MeteredResponses['create']>>;
+    await assertCanDispatch();
     try {
       response = await this.client.create(input.usageContext, {
         model: this.model,

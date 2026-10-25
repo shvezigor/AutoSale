@@ -1,5 +1,5 @@
 import type { CatalogueMappingProposal, RawCatalogueMatrix, TableStructureProposal } from '@autosale/contracts';
-import { assertTenantAcceptingMutations, type AiUsageContext, type PrismaClient, TenantLifecycleFrozenError, withTenantTransaction } from '@autosale/database';
+import { assertTenantAcceptingMutations, CatalogueImportLeaseLostError, type AiUsageContext, type PrismaClient, TenantLifecycleFrozenError, withTenantTransaction } from '@autosale/database';
 import { googleSheetsStructureFingerprint, matrixFromRows, type ObjectStorage } from '@autosale/integrations';
 import { parse as parseCsv } from 'csv-parse/sync';
 import { randomUUID } from 'node:crypto';
@@ -23,8 +23,8 @@ export type CatalogueMappingJob = { tenantId: string; runId: string };
 type Mapper = { suggest(input: CatalogueColumnMappingInput): Promise<CatalogueMappingSuggestion> };
 type AutoImporter = { process(input: CatalogueMappingJob): Promise<{ status: 'COMPLETED' }> };
 type HybridDependencies = {
-  structureAnalyzer: { analyze(profile: ReturnType<typeof buildCatalogueStructureProfile> & { usageContext: AiUsageContext }): Promise<TableStructureSuggestion> };
-  ambiguousRows: { classify(rows: ClassifiedCatalogueRow[], usageContext: AiUsageContext): Promise<AmbiguousRowClassification[]> };
+  structureAnalyzer: { analyze(profile: ReturnType<typeof buildCatalogueStructureProfile> & { usageContext: AiUsageContext; assertCanDispatch: () => Promise<void> }): Promise<TableStructureSuggestion> };
+  ambiguousRows: { classify(rows: ClassifiedCatalogueRow[], usageContext: AiUsageContext, assertCanDispatch: () => Promise<void>): Promise<AmbiguousRowClassification[]> };
 };
 
 export class CatalogueMappingProcessor {
@@ -82,6 +82,21 @@ export class CatalogueMappingProcessor {
       return ownsLease;
     };
     const heartbeatTimer = setInterval(() => { void heartbeat().catch(() => { ownsLease = false; }); }, CATALOGUE_MAPPING_HEARTBEAT_MS);
+    const assertCanDispatch = async (): Promise<void> => {
+      if (!ownsLease) throw new CatalogueImportLeaseLostError();
+      await withTenantTransaction(this.prisma, job.tenantId, async (tx) => {
+        await assertTenantAcceptingMutations(tx, job.tenantId, 'CATALOGUE');
+        const now = new Date();
+        const owned = await tx.catalogueImportRun.updateMany({
+          where: { id: job.runId, tenantId: job.tenantId, status: 'MAPPING', mappingLeaseId: leaseId, mappingLeaseExpiresAt: { gt: now } },
+          data: { mappingLeaseExpiresAt: leaseExpiry(now) },
+        });
+        if (owned.count !== 1) {
+          ownsLease = false;
+          throw new CatalogueImportLeaseLostError();
+        }
+      });
+    };
 
     try {
       const run = await withTenantTransaction(this.prisma, job.tenantId, (transaction) => transaction.catalogueImportRun.findFirst({
@@ -91,7 +106,7 @@ export class CatalogueMappingProcessor {
       const objectKey = run?.source.type === 'GOOGLE_SHEETS' ? run.snapshotObjectKey : run?.source.objectKey;
       if (!run || !objectKey) throw new Error('source unavailable');
       if (this.hybrid) {
-        return await this.processHybrid(job, run, objectKey, leaseId, heartbeat);
+        return await this.processHybrid(job, run, objectKey, leaseId, heartbeat, assertCanDispatch);
       }
       const sourceFingerprint = run?.source.type === 'GOOGLE_SHEETS'
         ? fingerprintFromHeaders(run.sourceHeaders)
@@ -101,7 +116,7 @@ export class CatalogueMappingProcessor {
       const input = await this.loadSource(objectKey, run.source.type);
       if (!await heartbeat()) return { status: 'SKIPPED', proposal: null };
       failureCode = 'MAPPING_RESPONSE_INVALID';
-      const suggestion = await this.mapper.suggest({ ...input, usageContext: { tenantId: job.tenantId, operationId: job.runId, purpose: 'CATALOGUE_COLUMN_MAPPING' } });
+      const suggestion = await this.mapper.suggest({ ...input, assertCanDispatch, usageContext: { tenantId: job.tenantId, operationId: job.runId, purpose: 'CATALOGUE_COLUMN_MAPPING' } });
       if (!await heartbeat()) return { status: 'SKIPPED', proposal: null };
       const decision = this.autoImporter ? decideCatalogueImport({ columns: suggestion.proposal.columns, sampleRows: input.sampleRows }) : { action: 'REVIEW_REQUIRED' as const, reasons: [] };
       const autoImport = decision.action === 'AUTO_IMPORT';
@@ -143,6 +158,14 @@ export class CatalogueMappingProcessor {
       return { status: 'MAPPING_REVIEW', proposal: suggestion.proposal };
     } catch (error) {
       if (autoImportStarted) throw error;
+      if (error instanceof TenantLifecycleFrozenError) {
+        await withTenantTransaction(this.prisma, job.tenantId, (tx) => tx.catalogueImportRun.updateMany({
+          where: { id: job.runId, tenantId: job.tenantId, status: 'MAPPING', mappingLeaseId: leaseId, mappingLeaseExpiresAt: { gt: new Date() } },
+          data: { status: 'CANCELLED', mappingLeaseId: null, mappingLeaseExpiresAt: null },
+        }));
+        return { status: 'IGNORED_FROZEN', proposal: null };
+      }
+      if (error instanceof CatalogueImportLeaseLostError) return { status: 'SKIPPED', proposal: null };
       if (!ownsLease) return { status: 'SKIPPED', proposal: null };
       const fallback = await withTenantTransaction(this.prisma, job.tenantId, (transaction) => transaction.catalogueImportRun.updateMany({
         where: {
@@ -171,6 +194,7 @@ export class CatalogueMappingProcessor {
     objectKey: string,
     leaseId: string,
     heartbeat: () => Promise<boolean>,
+    assertCanDispatch: () => Promise<void>,
   ): Promise<{ status: 'COMPLETED' | 'MAPPING_REVIEW' | 'SKIPPED'; proposal: CatalogueMappingProposal | null }> {
     const object = await this.storage.get(objectKey);
     const body = Buffer.from(object.body);
@@ -179,10 +203,10 @@ export class CatalogueMappingProcessor {
     const matrix = await rawMatrix(body, run.source.type, revision);
     if (!await heartbeat()) return { status: 'SKIPPED', proposal: null };
 
-    const structure = await this.hybrid!.structureAnalyzer.analyze({ ...buildCatalogueStructureProfile(matrix), usageContext: { tenantId: job.tenantId, operationId: job.runId, purpose: 'CATALOGUE_STRUCTURE' } });
+    const structure = await this.hybrid!.structureAnalyzer.analyze({ ...buildCatalogueStructureProfile(matrix), assertCanDispatch, usageContext: { tenantId: job.tenantId, operationId: job.runId, purpose: 'CATALOGUE_STRUCTURE' } });
     if (!await heartbeat()) return { status: 'SKIPPED', proposal: null };
     const local = normalizeCatalogueRows({ matrix, proposal: structure.proposal });
-    const decisions = local.ambiguous.length > 0 ? await this.hybrid!.ambiguousRows.classify(local.ambiguous, { tenantId: job.tenantId, operationId: job.runId, purpose: 'CATALOGUE_ROW_CLASSIFICATION' }) : [];
+    const decisions = local.ambiguous.length > 0 ? await this.hybrid!.ambiguousRows.classify(local.ambiguous, { tenantId: job.tenantId, operationId: job.runId, purpose: 'CATALOGUE_ROW_CLASSIFICATION' }, assertCanDispatch) : [];
     if (!await heartbeat()) return { status: 'SKIPPED', proposal: null };
     const normalized = applyAmbiguousDecisions(local, decisions);
     const columns = structure.proposal.columns.filter((column) => column.target !== 'ignore').map((column, index) => ({
@@ -252,7 +276,7 @@ export class CatalogueMappingProcessor {
     return { status: 'MAPPING_REVIEW', proposal };
   }
 
-  private async loadSource(objectKey: string, type: 'CSV_UPLOAD' | 'XLSX_UPLOAD' | 'GOOGLE_SHEETS'): Promise<Omit<CatalogueColumnMappingInput, 'usageContext'>> {
+  private async loadSource(objectKey: string, type: 'CSV_UPLOAD' | 'XLSX_UPLOAD' | 'GOOGLE_SHEETS'): Promise<Omit<CatalogueColumnMappingInput, 'usageContext' | 'assertCanDispatch'>> {
     const object = await this.storage.get(objectKey);
     const body = Buffer.from(object.body);
     if (body.length === 0 || body.length > MAX_SOURCE_BYTES) throw new Error('source size is invalid');

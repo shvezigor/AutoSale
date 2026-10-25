@@ -165,6 +165,7 @@ describe('CatalogueMappingProcessor', () => {
 
     expect(storage.get).toHaveBeenCalledWith('catalogue/google/snapshot.json');
     expect(mapper.suggest).toHaveBeenCalledWith({
+      assertCanDispatch: expect.any(Function),
       usageContext: { tenantId, operationId: runId, purpose: 'CATALOGUE_COLUMN_MAPPING' },
       headers: ['ассортимент', 'оптовая цена €'],
       primitiveTypes: { ассортимент: 'string', 'оптовая цена €': 'number' },
@@ -199,6 +200,7 @@ describe('CatalogueMappingProcessor', () => {
       data: expect.objectContaining({ status: 'MAPPING', mappingLeaseId: expect.any(String), mappingLeaseExpiresAt: expect.any(Date) }),
     }));
     expect(mapper.suggest).toHaveBeenCalledWith({
+      assertCanDispatch: expect.any(Function),
       usageContext: { tenantId, operationId: runId, purpose: 'CATALOGUE_COLUMN_MAPPING' },
       headers: ['артикул', 'назва'],
       primitiveTypes: { артикул: 'string', назва: 'string' },

@@ -9,6 +9,7 @@ import { OpenAiReplyDraftGenerator } from '../reply-drafts/openai-reply-draft-ge
 import { createWorkerResponses } from './worker-responses.js';
 import type { MeteredResponses, ResponsesRequest } from './metered-responses.js';
 
+const assertCanDispatch = async () => {};
 const base = {
   tenantId: '11111111-1111-4111-8111-111111111111',
   operationId: '22222222-2222-4222-8222-222222222222',
@@ -38,11 +39,11 @@ const calls: Array<[AiUsageContext['purpose'], (boundary: MeteredResponses, cont
   ['REPLY_DRAFT', (boundary, usageContext) => new OpenAiReplyDraftGenerator(boundary, 'fictional-model')
     .generate({ usageContext, latestInbound: 'Fictional question', recentContext: [], style, sources: [] })],
   ['CATALOGUE_STRUCTURE', (boundary, usageContext) => new OpenAiTableStructureAnalyzer(boundary, 'fictional-model')
-    .analyze({ usageContext, totalRows: 2, maxColumns: 1, columnTypes: { 0: 'string' }, rows: [] })],
+    .analyze({ assertCanDispatch, usageContext, totalRows: 2, maxColumns: 1, columnTypes: { 0: 'string' }, rows: [] })],
   ['CATALOGUE_COLUMN_MAPPING', (boundary, usageContext) => new OpenAiColumnMapper(boundary, 'fictional-model')
-    .suggest({ usageContext, headers: ['Fictional name'], primitiveTypes: {}, sampleRows: [] })],
+    .suggest({ assertCanDispatch, usageContext, headers: ['Fictional name'], primitiveTypes: {}, sampleRows: [] })],
   ['CATALOGUE_ROW_CLASSIFICATION', (boundary, usageContext) => new OpenAiAmbiguousRowClassifier(boundary, 'fictional-model')
-    .classify([{ sourceRowNumber: 1, cells: ['Fictional row'] }], usageContext)],
+    .classify([{ sourceRowNumber: 1, cells: ['Fictional row'] }], usageContext, assertCanDispatch)],
 ];
 
 describe('adapter metering integration', () => {
@@ -73,7 +74,7 @@ describe('adapter metering integration', () => {
       return JSON.stringify({ columns: headers.map((source) => ({ source, target: 'ignore', confidence: 0.5 })) });
     });
     const mapper = new OpenAiColumnMapper(f.boundary, 'fictional-model');
-    const input = { usageContext: { ...base, purpose: 'CATALOGUE_COLUMN_MAPPING' as const },
+    const input = { assertCanDispatch, usageContext: { ...base, purpose: 'CATALOGUE_COLUMN_MAPPING' as const },
       headers: Array.from({ length: 51 }, (_, index) => 'Fictional column ' + index), primitiveTypes: {}, sampleRows: [] };
     expect((await mapper.suggest(input)).proposal.columns).toHaveLength(51);
     expect(f.store.start).toHaveBeenCalledTimes(2);
@@ -91,7 +92,7 @@ describe('adapter metering integration', () => {
     });
     const rows = Array.from({ length: 101 }, (_, index) => ({ sourceRowNumber: index + 1, cells: ['Fictional row'] }));
     expect(await new OpenAiAmbiguousRowClassifier(f.boundary, 'fictional-model')
-      .classify(rows, { ...base, purpose: 'CATALOGUE_ROW_CLASSIFICATION' })).toHaveLength(101);
+      .classify(rows, { ...base, purpose: 'CATALOGUE_ROW_CLASSIFICATION' }, assertCanDispatch)).toHaveLength(101);
     expect(f.store.start).toHaveBeenCalledTimes(2);
     expect(new Set(f.store.start.mock.calls.map(([, , id]) => id)).size).toBe(2);
     expect(f.store.finalize).toHaveBeenCalledTimes(2);

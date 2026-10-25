@@ -117,7 +117,7 @@ describe('GoogleCatalogueSyncProcessor', () => {
       usageContext: { tenantId, operationId: claim!.data.syncLeaseId, purpose: 'CATALOGUE_STRUCTURE' },
     }));
     expect(ambiguousRows.classify).toHaveBeenCalledWith(expect.any(Array),
-      { tenantId, operationId: claim!.data.syncLeaseId, purpose: 'CATALOGUE_ROW_CLASSIFICATION' });
+      { tenantId, operationId: claim!.data.syncLeaseId, purpose: 'CATALOGUE_ROW_CLASSIFICATION' }, expect.any(Function));
 
     expect(importer.importTable).toHaveBeenCalledWith(expect.objectContaining({
       headers: ['Асортимент', 'Ціна (грн) / Роздріб'], rows: [['860х2050 Регіон', 2420]], sourceRowNumbers: [24],

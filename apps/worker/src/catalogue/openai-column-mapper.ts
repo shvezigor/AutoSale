@@ -1,5 +1,5 @@
 import { catalogueMappingProposalSchema, type CatalogueMappingProposal } from '@autosale/contracts';
-import type { AiUsageContext } from '@autosale/database';
+import { CatalogueImportLeaseLostError, TenantLifecycleFrozenError, type AiUsageContext } from '@autosale/database';
 import type { MeteredResponses } from '../ai-usage/metered-responses.js';
 
 export const CATALOGUE_MAPPING_PROMPT_VERSION = 'catalogue-column-mapping-v1';
@@ -9,6 +9,7 @@ type PrimitiveType = 'string' | 'number' | 'boolean' | 'null' | 'mixed' | 'empty
 
 export interface CatalogueColumnMappingInput {
   usageContext: AiUsageContext;
+  assertCanDispatch: () => Promise<void>;
   headers: string[];
   primitiveTypes: Record<string, PrimitiveType>;
   sampleRows: Array<Record<string, unknown>>;
@@ -80,6 +81,7 @@ export class OpenAiColumnMapper {
           sampleRows: safeInput.sampleRows.map((row) => Object.fromEntries(headers.map((header) => [header, row[header] ?? null]))),
         };
         let response: Awaited<ReturnType<MeteredResponses['create']>>;
+        await input.assertCanDispatch();
         try {
           response = await this.client.create(input.usageContext, {
             model: this.model, store: false, max_output_tokens: 32_000,
@@ -118,6 +120,7 @@ export class OpenAiColumnMapper {
         },
       };
     } catch (error) {
+      if (error instanceof TenantLifecycleFrozenError || error instanceof CatalogueImportLeaseLostError) throw error;
       if (error instanceof CatalogueMappingProviderError || error instanceof CatalogueMappingResponseError) throw error;
       throw new CatalogueMappingResponseError();
     }
@@ -182,6 +185,7 @@ function boundedInput(input: CatalogueColumnMappingInput): CatalogueColumnMappin
   const primitiveTypes = Object.fromEntries(headers.map((header) => [header, input.primitiveTypes[header] ?? 'empty']));
   return {
     usageContext: input.usageContext,
+    assertCanDispatch: input.assertCanDispatch,
     headers,
     primitiveTypes,
     sampleRows: input.sampleRows.slice(0, 5).map((row) => Object.fromEntries(headers.map((header) => [header, boundedValue(row[header])]))),

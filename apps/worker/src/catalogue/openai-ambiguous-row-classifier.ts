@@ -25,13 +25,14 @@ const instructions = 'Classify each supplied row as PRODUCT or SKIP. Never retur
 export class OpenAiAmbiguousRowClassifier {
   constructor(private readonly client: MeteredResponses, private readonly model: string) {}
 
-  async classify(rows: ClassifiedCatalogueRow[], usageContext: AiUsageContext): Promise<AmbiguousRowClassification[]> {
+  async classify(rows: ClassifiedCatalogueRow[], usageContext: AiUsageContext, assertCanDispatch: () => Promise<void>): Promise<AmbiguousRowClassification[]> {
     if (rows.length > 1_000) throw new AmbiguousRowResponseError();
     const decisions: AmbiguousRowClassification[] = [];
     for (let offset = 0; offset < rows.length; offset += 100) {
       const batch = rows.slice(offset, offset + 100);
       const rowNumbers = batch.map((row) => row.sourceRowNumber);
       let response: Awaited<ReturnType<MeteredResponses['create']>>;
+      await assertCanDispatch();
       try {
         response = await this.client.create(usageContext, {
           model: this.model,

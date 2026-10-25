@@ -118,6 +118,8 @@ Each component receives plain typed data and has no access to unrelated tenant r
 
 ## Failure handling
 
+- Every catalogue AI dispatch, including each later mapping/classification batch and the stage after a source read, requires a fresh tenant-lifecycle and current lease-token/expiry check. The guard renews only a still-owned, unexpired lease and applies with usage collection disabled as well as enabled.
+- A freeze cancels the still-owned mapping run or pauses the still-owned Google source; loss/expiry of its lease stops stale processing. These stop signals are not OpenAI failures or retryable Google read failures. They cannot open a usage attempt; already-dispatched usage can still finalize. The provider call is not atomic with a concurrently committed lifecycle change.
 - Invalid or out-of-range AI coordinates: review required; no import.
 - Missing name mapping or no valid products: review required.
 - OpenAI timeout, malformed response, or quota failure: review required with a retry action.
@@ -148,6 +150,7 @@ On high confidence, the final toast reports imported, updated, skipped, and fail
 
 Unit and integration tests must cover:
 
+- freezes, revoked leases and expired leases during source reads, between structure/classification stages and between provider batches; `apps/worker/src/catalogue/catalogue-dispatch-guards.spec.ts` uses real adapters and the shared Responses boundary with fictional provider/database doubles to prove no new dispatch or STARTED row after a rejected guard, with collection OFF/ON;
 - headers after row 20 and multi-row headers;
 - sparse columns and duplicate header labels;
 - title/contact blocks before data;
