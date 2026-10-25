@@ -1,6 +1,6 @@
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-const api = vi.hoisted(() => ({ refreshConversationList: vi.fn(), refreshConversationStatusCounts: vi.fn(), changeConversationStatus: vi.fn() }));
+const api = vi.hoisted(() => ({ refreshConversation: vi.fn(), refreshConversationList: vi.fn(), refreshConversationStatusCounts: vi.fn(), changeConversationStatus: vi.fn() }));
 const navigation = vi.hoisted(() => ({ query: '', replace: vi.fn(), refresh: vi.fn() }));
 vi.mock('../api/conversation-replies', async importOriginal => ({ ...await importOriginal<object>(), ...api }));
 vi.mock('next/navigation', () => ({ usePathname: () => '/conversations/test', useSearchParams: () => new URLSearchParams(navigation.query), useRouter: () => navigation }));
@@ -9,7 +9,7 @@ import { ConversationReplyApiError } from '../api/conversation-replies';
 import { InboxShell } from './inbox-shell';
 export const row = { id: '11111111-1111-4111-8111-111111111111', channel: 'INSTAGRAM' as const, workflowStatus: 'ACTIVE' as const, statusVersion: 0, participantName: 'Клієнт один', participantUsername: null, participantAvatarUrl: null, lastMessagePreview: 'Старе', lastMessageAt: '2026-10-25T10:00:00.000Z' };
 const counts = { ACTIVE: 80, INACTIVE: 12, CLOSED: 7 };
-beforeEach(() => { navigation.query = ''; vi.clearAllMocks(); api.refreshConversationList.mockResolvedValue({ items: [], nextCursor: null }); api.refreshConversationStatusCounts.mockResolvedValue(counts); });
+beforeEach(() => { navigation.query = ''; vi.clearAllMocks(); api.refreshConversation.mockResolvedValue({ ...row, statusVersion: 2 }); api.refreshConversationList.mockResolvedValue({ items: [], nextCursor: null }); api.refreshConversationStatusCounts.mockResolvedValue(counts); });
 afterEach(() => { cleanup(); vi.useRealTimers(); });
 describe('InboxShell triage', () => {
   it.each([['active', 'Активні', 80], ['inactive', 'Неактивні', 12], ['closed', 'Закриті', 7]])('selects URL %s and shows full count', async (status, label, count) => {
@@ -24,7 +24,7 @@ describe('InboxShell triage', () => {
     fireEvent.click(screen.getByRole('tab', { name: 'Закриті 7' }));
     expect(navigation.replace).toHaveBeenCalledWith('/conversations/test?status=closed', { scroll: false });
     navigation.query = 'status=closed';
-    view.rerender(<InboxShell initialPage={{ items: [row], nextCursor: 'active-cursor' }} initialCounts={counts}>�����</InboxShell>);
+    view.rerender(<InboxShell initialPage={{ items: [row], nextCursor: 'active-cursor' }} initialCounts={counts}>Деталі</InboxShell>);
     await act(async () => {});
     expect(api.refreshConversationList).toHaveBeenCalledWith({ status: 'CLOSED' });
   });
@@ -54,7 +54,7 @@ describe('confirmed mutation recovery', () => {
     const first = Array.from({ length: 50 }, (_, index) => ({ ...row, id: `fixture-${index}`, participantName: `Fixture ${index}` }));
     api.refreshConversationList.mockResolvedValue({ items: [first[49], { ...row, id: 'fixture-50' }], nextCursor: null });
     render(<InboxShell initialPage={{ items: first, nextCursor: 'page-2' }} initialCounts={counts}>Details</InboxShell>);
-    await act(async () => fireEvent.click(screen.getByRole('button', { name: /.+/ })));
+    await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Завантажити ще' })));
     expect(screen.getAllByRole('link')).toHaveLength(51);
   });
 
@@ -106,7 +106,7 @@ describe('review regressions', () => {
     expect(api.refreshConversationList).toHaveBeenCalledTimes(1);
     expect(navigation.refresh).not.toHaveBeenCalled();
     await act(async () => finishPage({ items: [{ ...row, lastMessagePreview: 'Rebuilt' }], nextCursor: 'older-cursor' }));
-    expect(navigation.refresh).toHaveBeenCalledOnce();
+    expect(navigation.refresh).not.toHaveBeenCalled();
     expect(screen.getByRole('alert')).toBeVisible();
     api.refreshConversationList.mockResolvedValueOnce({ items: [{ ...row, id: 'older-row', lastMessagePreview: 'Older row' }], nextCursor: null });
     await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Load fixture' })));

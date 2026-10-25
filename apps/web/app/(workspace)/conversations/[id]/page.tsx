@@ -1,5 +1,6 @@
 import { getConversation, getConversationOrder } from '../../../../src/api/conversations';
 import { getServerSession } from '../../../../src/auth/session';
+import { ConversationStatusMenu } from '../../../../src/components/conversation-status-menu';
 import { SocialReplyComposer } from '../../../../src/components/social-reply-composer';
 import { ConversationOrderPanel } from '../../../../src/components/conversation-order-panel';
 import { createTranslator } from '../../../../src/i18n/translator';
@@ -39,7 +40,8 @@ export default async function ConversationDetailPage({ params }: { params: Promi
           {conversation.participantAvatarUrl
             ? <img className="avatar large" src={conversation.participantAvatarUrl} alt={t('conversations.profilePhoto', { name })} />
             : <span className="avatar large" aria-hidden="true">{name[0]}</span>}
-          <span><h2>{name}</h2><small>{accountLabel}</small></span>
+          <span className="conversation-header-identity"><h2>{name}</h2><small>{accountLabel}</small></span>
+          <ConversationStatusMenu id={id} name={name} workflowStatus={conversation.workflowStatus} statusVersion={conversation.statusVersion} detail />
         </header>
         <SocialReplyComposer
           canManageSettings={session?.membershipRole === 'OWNER'}

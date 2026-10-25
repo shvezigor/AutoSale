@@ -2,6 +2,7 @@ import type { ConversationListResponse } from '../../../../packages/contracts/sr
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+vi.mock('./conversation-triage-context', () => ({ conversationStatuses: ['ACTIVE', 'INACTIVE', 'CLOSED'], useConversationTriage: () => ({ confirmedStatus: (_id: string, initial: unknown) => initial, pendingIds: new Set(), moveConversation: vi.fn(), error: '', announcement: '' }) }));
 vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
 import { I18nProvider } from '../i18n/i18n-provider';
 import { ConversationList } from './conversation-list';

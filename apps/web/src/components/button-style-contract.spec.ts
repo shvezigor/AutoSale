@@ -16,6 +16,11 @@ function collectProductionTsx(root: string): string[] {
 }
 
 describe('button style contract', () => {
+  it('keeps triage menu mutations and triggers on shared variants', () => {
+    const source = readFileSync(resolve(__dirname, 'conversation-status-menu.tsx'), 'utf8');
+    expect(source).toContain('className="icon-button"');
+    expect(source).toMatch(/<LoadingButton[^>]*className="text-button"/);
+  });
   it('does not allow legacy or browser-default action variants in production components', () => {
     const roots = [resolve(__dirname, '../../app'), resolve(__dirname, '.')];
     const legacyVariant = /className\s*=\s*["'](?:button-primary|button-secondary|secondary)["']/;

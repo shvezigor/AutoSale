@@ -3,14 +3,17 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import type { ConversationListResponse, ConversationStatusCounts, ConversationWorkflowStatus } from '../../../../packages/contracts/src/conversations';
-import { changeConversationStatus, ConversationReplyApiError, refreshConversationList, refreshConversationStatusCounts } from '../api/conversation-replies';
+import { changeConversationStatus, ConversationReplyApiError, refreshConversation, refreshConversationList, refreshConversationStatusCounts } from '../api/conversation-replies';
 import { useI18n } from '../i18n/i18n-provider';
 
 type Status = ConversationWorkflowStatus;
+type ConfirmedStatus = { workflowStatus: Status; statusVersion: number };
 type Page = ConversationListResponse & { firstIds: string[]; expanded: boolean };
 type Triage = {
   status: Status; counts: ConversationStatusCounts; items: ConversationListResponse['items']; hasMore: boolean;
   loading: boolean; loadingMore: boolean; error: string; announcement: string;
+  pendingIds: Set<string>;
+  confirmedStatus(id: string, initial: ConfirmedStatus): ConfirmedStatus;
   selectStatus(status: Status): void; loadMore(): Promise<void>; refresh(): Promise<void>;
   moveConversation(input: { id: string; status: Status; expectedVersion: number }): Promise<void>;
 };
@@ -31,6 +34,9 @@ export function ConversationTriageProvider({ initialPage, initialCounts, childre
   const [pages, setPages] = useState<Partial<Record<Status, Page>>>({ ACTIVE: pageState(initialPage) });
   const pagesRef = useRef(pages); pagesRef.current = pages;
   const previousStatus = useRef(status);
+  const [confirmed, setConfirmed] = useState<Record<string, ConfirmedStatus>>({});
+  const pendingRef = useRef(new Set<string>());
+  const [pendingIds, setPendingIds] = useState(new Set<string>());
   const [counts, setCounts] = useState(initialCounts);
   const [loadingMore, setLoadingMore] = useState(false);
   const [loadError, setLoadError] = useState('');
@@ -92,8 +98,9 @@ export function ConversationTriageProvider({ initialPage, initialCounts, childre
       const failure = results.find(result => result.status === 'rejected');
       if (failure?.status === 'rejected') throw failure.reason;
       setLoadError('');
+      router.refresh();
     } catch (cause) { setLoadError(t('conversations.triage.loadError')); throw cause; }
-    finally { if (refreshGeneration === generation.current) rebuilding.current = false; router.refresh(); }
+    finally { if (refreshGeneration === generation.current) rebuilding.current = false; }
   }, [refreshCounts, router, status, t]);
   useEffect(() => {
     if (!pagesRef.current[status] || previousStatus.current !== status) void refreshPage(status);
@@ -116,9 +123,12 @@ export function ConversationTriageProvider({ initialPage, initialCounts, childre
     finally { inFlight.current.delete(status); setLoadingMore(false); }
   }
   async function moveConversation(input: { id: string; status: Status; expectedVersion: number }) {
+    if (pendingRef.current.has(input.id)) return;
+    pendingRef.current.add(input.id); setPendingIds(new Set(pendingRef.current));
     setLoadError(''); setMutationError(''); setAnnouncement('');
     try {
       const confirmed = await changeConversationStatus(input.id, { status: input.status, expectedVersion: input.expectedVersion });
+      setConfirmed(previous => ({ ...previous, [input.id]: { workflowStatus: confirmed.status, statusVersion: confirmed.statusVersion } }));
       generation.current += 1;
       setPages(previous => Object.fromEntries(Object.entries(previous).map(([key, page]) => [key, { ...page, items: page.items.filter(item => item.id !== input.id || key === confirmed.status).map(item => item.id === input.id ? { ...item, workflowStatus: confirmed.status, statusVersion: confirmed.statusVersion } : item) }])));
       setAnnouncement(t('conversations.triage.moved'));
@@ -126,16 +136,23 @@ export function ConversationTriageProvider({ initialPage, initialCounts, childre
     } catch (cause) {
       if (cause instanceof ConversationReplyApiError && cause.status === 409) {
         try {
+          const detail = await refreshConversation(input.id);
+          setConfirmed(previous => ({ ...previous, [input.id]: { workflowStatus: detail.workflowStatus, statusVersion: detail.statusVersion } }));
           await refresh();
           setMutationError(t('conversations.triage.conflict'));
-        } catch { /* Keep the refresh failure visible; never claim stale data was refreshed. */ }
+        } catch { setMutationError(t('conversations.triage.loadError')); }
       } else setMutationError(t('conversations.triage.moveError'));
       throw cause;
-    }
+    } finally { pendingRef.current.delete(input.id); setPendingIds(new Set(pendingRef.current)); }
+  }
+  function confirmedStatus(id: string, initial: ConfirmedStatus): ConfirmedStatus {
+    // Server detail props and cached pages can advance independently. Never regress a version.
+    const candidates = [initial, confirmed[id], ...Object.values(pages).flatMap(page => page.items.filter(item => item.id === id))];
+    return candidates.reduce<ConfirmedStatus>((latest, item) => item && item.statusVersion > latest.statusVersion ? item : latest, initial);
   }
   function selectStatus(next: Status) {
     const query = new URLSearchParams(params.toString()); query.set('status', next.toLowerCase());
     router.replace(`${pathname}?${query.toString()}`, { scroll: false });
   }
-  return <Context.Provider value={{ status, counts, items: pages[status]?.items ?? [], hasMore: Boolean(pages[status]?.nextCursor), loading: !pages[status], loadingMore, error, announcement, selectStatus, loadMore, refresh, moveConversation }}>{children}</Context.Provider>;
+  return <Context.Provider value={{ pendingIds, confirmedStatus, status, counts, items: pages[status]?.items ?? [], hasMore: Boolean(pages[status]?.nextCursor), loading: !pages[status], loadingMore, error, announcement, selectStatus, loadMore, refresh, moveConversation }}>{children}</Context.Provider>;
 }

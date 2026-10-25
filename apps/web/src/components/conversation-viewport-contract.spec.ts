@@ -3,6 +3,14 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 describe('conversation viewport contract', () => {
+  it('keeps triage targets visible on touch and its menu outside clipped scroll surfaces', () => {
+    const css = readFileSync(resolve(__dirname, '../../app/globals.css'), 'utf8');
+    expect(css).toMatch(/\.conversation-status-control \.icon-button\s*\{[^}]*min-width:\s*44px;[^}]*min-height:\s*44px/);
+    expect(css).toMatch(/\.conversation-status-menu\s*\{[^}]*position:\s*fixed/);
+    const source = readFileSync(resolve(__dirname, 'conversation-status-menu.tsx'), 'utf8');
+    expect(source).toContain('createPortal(');
+    expect(source).toContain('document.body)');
+  });
   it('keeps the workspace fixed to the viewport and scrolls only the internal lists', () => {
     const css = readFileSync(resolve(__dirname, '../../app/globals.css'), 'utf8');
 

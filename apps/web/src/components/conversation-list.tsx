@@ -2,6 +2,7 @@
 
 import type { ConversationListResponse } from '../../../../packages/contracts/src/conversations';
 import Link from 'next/link';
+import { ConversationStatusMenu } from './conversation-status-menu';
 import { useI18n } from '../i18n/i18n-provider';
 
 interface ConversationListProps {
@@ -32,25 +33,27 @@ export function ConversationList({ conversations, selectedId, status }: Conversa
                 ? t('conversations.tiktokCustomer')
                 : t('conversations.instagramCustomer'));
         return (
-          <Link
-            className="conversation-row"
-            data-selected={conversation.id === selectedId}
-            href={`/conversations/${conversation.id}${status ? `?status=${status.toLowerCase()}` : ""}`}
-            key={conversation.id}
-          >
-            {conversation.participantAvatarUrl
-              ? <img className="avatar" src={conversation.participantAvatarUrl} alt={t('conversations.profilePhoto', { name })} />
-              : <span className="avatar" aria-hidden="true">{initials(name)}</span>}
-            <span className="conversation-copy">
-              <span className="conversation-line">
-                <strong>{name} <span className="conversation-channel-badge">{channelLabel}</span></strong>
-                <time dateTime={conversation.lastMessageAt}>{formatDate(conversation.lastMessageAt, { hour: '2-digit', minute: '2-digit' })}</time>
+          <div className="conversation-row-actions" key={conversation.id}>
+            <Link
+              className="conversation-row"
+              data-selected={conversation.id === selectedId}
+              href={`/conversations/${conversation.id}${status ? `?status=${status.toLowerCase()}` : ""}`}
+            >
+              {conversation.participantAvatarUrl
+                ? <img className="avatar" src={conversation.participantAvatarUrl} alt={t('conversations.profilePhoto', { name })} />
+                : <span className="avatar" aria-hidden="true">{initials(name)}</span>}
+              <span className="conversation-copy">
+                <span className="conversation-line">
+                  <strong>{name} <span className="conversation-channel-badge">{channelLabel}</span></strong>
+                  <time dateTime={conversation.lastMessageAt}>{formatDate(conversation.lastMessageAt, { hour: '2-digit', minute: '2-digit' })}</time>
+                </span>
+                <span className="conversation-preview">
+                  {conversation.lastMessagePreview ?? t('conversations.instagramAttachment')}
+                </span>
               </span>
-              <span className="conversation-preview">
-                {conversation.lastMessagePreview ?? t('conversations.instagramAttachment')}
-              </span>
-            </span>
-          </Link>
+            </Link>
+            <ConversationStatusMenu id={conversation.id} name={name} workflowStatus={conversation.workflowStatus} statusVersion={conversation.statusVersion} />
+          </div>
         );
       })}
     </nav>
