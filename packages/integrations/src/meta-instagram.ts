@@ -38,6 +38,7 @@ export interface MetaInstagramSendResult {
 }
 
 export type MetaInstagramReplyMode = 'STANDARD' | 'HUMAN_AGENT' | 'EXPIRED';
+export type MetaInstagramProviderReason = 'CLIENT_SECRET' | 'REDIRECT_URI' | 'ACCESS_RESTRICTED' | 'AUTHORIZATION_CODE' | 'ACCESS_TOKEN';
 
 const STANDARD_REPLY_WINDOW_MS = 24 * 60 * 60 * 1_000;
 const HUMAN_AGENT_REPLY_WINDOW_MS = 7 * 24 * 60 * 60 * 1_000;
@@ -59,8 +60,9 @@ export class MetaInstagramError extends Error {
     readonly providerCode: number | string | null,
     readonly isTransient: boolean | null = null,
     readonly errorSubcode: number | null = null,
-    readonly responseStage: 'SHORT_LIVED_TOKEN' | 'LONG_LIVED_TOKEN' | 'IDENTITY' | 'PROFILE' | 'SEND' | null = null,
+    readonly responseStage: 'SHORT_LIVED_TOKEN_REQUEST' | 'LONG_LIVED_TOKEN_REQUEST' | 'SHORT_LIVED_TOKEN' | 'LONG_LIVED_TOKEN' | 'IDENTITY' | 'PROFILE' | 'SEND' | null = null,
     readonly responseShape: string | null = null,
+    readonly providerReason: MetaInstagramProviderReason | null = null,
   ) {
     super('Meta Instagram API request failed');
     this.name = 'MetaInstagramError';
@@ -98,11 +100,11 @@ export class MetaInstagramClient {
       redirect_uri: input.redirectUri,
       code: input.code,
     });
-    const payload = await this.requestJson('https://api.instagram.com/oauth/access_token', {
+    const payload = await this.tokenRequestJson('https://api.instagram.com/oauth/access_token', {
       method: 'POST',
       headers: { 'content-type': 'application/x-www-form-urlencoded' },
       body,
-    });
+    }, 'SHORT_LIVED_TOKEN_REQUEST');
 
     const shortLived = parseShortLivedToken(payload);
     const longLivedUrl = new URL('https://graph.instagram.com/access_token');
@@ -111,7 +113,7 @@ export class MetaInstagramClient {
       client_secret: this.config.appSecret,
       access_token: shortLived.accessToken,
     }).toString();
-    const longLivedPayload = await this.requestJson(longLivedUrl, { method: 'GET' });
+    const longLivedPayload = await this.tokenRequestJson(longLivedUrl, { method: 'GET' }, 'LONG_LIVED_TOKEN_REQUEST');
 
     if (!isRecord(longLivedPayload) || typeof longLivedPayload.access_token !== 'string' || typeof longLivedPayload.expires_in !== 'number' || !Number.isFinite(longLivedPayload.expires_in) || longLivedPayload.expires_in <= 0) throw new MetaInstagramError(200, null, null, null, 'LONG_LIVED_TOKEN');
     return {
@@ -259,6 +261,27 @@ export class MetaInstagramClient {
     }
   }
 
+  private async tokenRequestJson(
+    url: URL | string,
+    init: RequestInit,
+    stage: 'SHORT_LIVED_TOKEN_REQUEST' | 'LONG_LIVED_TOKEN_REQUEST',
+  ): Promise<unknown> {
+    try {
+      return await this.requestJson(url, init);
+    } catch (error) {
+      if (!(error instanceof MetaInstagramError)) throw error;
+      throw new MetaInstagramError(
+        error.status,
+        error.providerCode,
+        error.isTransient,
+        error.errorSubcode,
+        stage,
+        error.responseShape,
+        error.providerReason,
+      );
+    }
+  }
+
   private async requestVoid(url: URL | string, init: RequestInit): Promise<void> {
     const response = await this.request(url, init);
     let payload: unknown;
@@ -296,6 +319,9 @@ export class MetaInstagramClient {
       providerCode(payload),
       providerIsTransient(payload),
       providerErrorSubcode(payload),
+      null,
+      null,
+      providerReason(payload),
     );
   }
 }
@@ -309,9 +335,25 @@ function isOptionalNullableString(value: unknown): boolean {
 }
 
 function providerCode(payload: unknown): number | string | null {
-  if (!isRecord(payload) || !isRecord(payload.error)) return null;
-  const { code } = payload.error;
+  if (!isRecord(payload)) return null;
+  const { code } = isRecord(payload.error) ? payload.error : payload;
   return typeof code === 'number' || typeof code === 'string' ? code : null;
+}
+
+function providerReason(payload: unknown): MetaInstagramProviderReason | null {
+  if (!isRecord(payload)) return null;
+  const error = isRecord(payload.error) ? payload.error : payload;
+  const message = typeof error.message === 'string'
+    ? error.message.toLowerCase()
+    : typeof error.error_message === 'string'
+      ? error.error_message.toLowerCase()
+      : '';
+  if (/client[_ ]secret|app[_ ]secret|secret key/.test(message)) return 'CLIENT_SECRET';
+  if (/redirect[_ ]uri|redirect url/.test(message)) return 'REDIRECT_URI';
+  if (/advanced access|not approved|not authorized|not permitted|permission/.test(message)) return 'ACCESS_RESTRICTED';
+  if (/authorization code|verification code/.test(message)) return 'AUTHORIZATION_CODE';
+  if (/access token/.test(message)) return 'ACCESS_TOKEN';
+  return null;
 }
 
 function providerIsTransient(payload: unknown): boolean | null {

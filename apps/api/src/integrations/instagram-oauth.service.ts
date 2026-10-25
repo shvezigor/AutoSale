@@ -1324,6 +1324,7 @@ function safeProviderDiagnostics(
   if (error.isTransient !== null) diagnostics.providerTransient = String(error.isTransient);
   if (error.responseStage !== null) diagnostics.providerResponseStage = error.responseStage;
   if (error.responseShape !== null) diagnostics.providerResponseShape = error.responseShape;
+  if (error.providerReason !== null) diagnostics.providerReason = error.providerReason;
   return diagnostics;
 }
 

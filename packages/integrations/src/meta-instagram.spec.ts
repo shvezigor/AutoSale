@@ -100,6 +100,48 @@ describe('MetaInstagramClient', () => {
     expect(url.searchParams.get('access_token')).toBe('short-lived-token');
   });
 
+  it('classifies a top-level authorization-code rejection without keeping provider text', async () => {
+    const client = new MetaInstagramClient({
+      ...config,
+      fetch: vi.fn<typeof fetch>().mockResolvedValue(response({
+        error_type: 'OAuthException',
+        code: 400,
+        error_message: 'Invalid authorization code authorization-code-that-must-not-leak',
+      }, 400)),
+    });
+
+    const failure = client.exchangeCode({ code: 'authorization-code-that-must-not-leak', redirectUri: 'https://example.test/callback' });
+    await expect(failure).rejects.toEqual(expect.objectContaining({
+      name: 'MetaInstagramError',
+      status: 400,
+      providerCode: 400,
+      responseStage: 'SHORT_LIVED_TOKEN_REQUEST',
+      providerReason: 'AUTHORIZATION_CODE',
+    }));
+    await expect(failure).rejects.not.toThrow('authorization-code-that-must-not-leak');
+  });
+
+  it('classifies a long-lived-token client-secret rejection without keeping provider text', async () => {
+    const client = new MetaInstagramClient({
+      ...config,
+      fetch: vi.fn<typeof fetch>()
+        .mockResolvedValueOnce(response(documentedShortLivedTokenEnvelope))
+        .mockResolvedValueOnce(response({
+          error: { code: 100, message: 'Invalid client_secret app-secret-that-must-not-leak' },
+        }, 400)),
+    });
+
+    const failure = client.exchangeCode({ code: 'authorization-code', redirectUri: 'https://example.test/callback' });
+    await expect(failure).rejects.toEqual(expect.objectContaining({
+      name: 'MetaInstagramError',
+      status: 400,
+      providerCode: 100,
+      responseStage: 'LONG_LIVED_TOKEN_REQUEST',
+      providerReason: 'CLIENT_SECRET',
+    }));
+    await expect(failure).rejects.not.toThrow('app-secret-that-must-not-leak');
+  });
+
   it('rejects a long-lived token response without a positive expiry', async () => {
     const client = new MetaInstagramClient({
       ...config,

@@ -636,6 +636,28 @@ describe('InstagramOAuthService', () => {
     });
   });
 
+  it('audits only the allow-listed token-exchange stage and reason', async () => {
+    const { service, meta, auditCreate } = setup();
+    meta.exchangeCode.mockRejectedValue(new MetaInstagramError(
+      400, 100, false, null, 'LONG_LIVED_TOKEN_REQUEST', null, 'ACCESS_RESTRICTED',
+    ));
+
+    await expect(service.completeCallback('authorization-code', 'raw-state')).rejects.toThrow('Instagram connection failed');
+    expect(auditCreate).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        action: 'INSTAGRAM_CALLBACK_FAILED',
+        metadata: expect.objectContaining({
+          providerPhase: 'TOKEN_EXCHANGE',
+          providerStatus: '400',
+          providerCode: '100',
+          providerResponseStage: 'LONG_LIVED_TOKEN_REQUEST',
+          providerReason: 'ACCESS_RESTRICTED',
+        }),
+      }),
+    });
+    expect(JSON.stringify(auditCreate.mock.calls)).not.toContain('authorization-code');
+  });
+
   it('returns a safe summary without credential fields', async () => {
     const { service, findUnique } = setup();
     findUnique.mockResolvedValue(connection());

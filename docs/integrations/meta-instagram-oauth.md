@@ -1,5 +1,33 @@
 # Підключення Meta Instagram OAuth через ngrok
 
+## Діагностика підключення нового клієнта — 2026-10-25
+
+Три спроби підключення зовнішнього акаунта дійшли до callback, але Meta
+повернула HTTP 400 / code 100 під час обміну токена. Екран з кнопкою
+«Дозволити» сам по собі не є підтвердженням підключення. У запущеному API
+`APP_PUBLIC_URL`, Instagram App ID та callback збігалися з Instagram Login
+settings у Meta. Застосунок був у Live mode, але обидва потрібні permissions
+(`instagram_business_basic`, `instagram_business_manage_messages`) мали лише
+`Ready for testing`/Standard Access. Це **можливий** блокер для стороннього
+клієнта; одного коду 100 недостатньо, щоб виключити помилку Instagram App
+Secret чи іншого параметра обміну. Live mode сам по собі не надає Advanced
+Access. Не просіть клієнта нескінченно повторювати OAuth.
+
+Після наступної погодженої спроби перегляньте лише
+`INSTAGRAM_CALLBACK_FAILED` у `security_audit_logs`: `providerPhase`,
+`providerResponseStage`, `providerStatus`, `providerCode` і
+`providerReason`. `SHORT_LIVED_TOKEN_REQUEST` означає відмову на
+`api.instagram.com`, `LONG_LIVED_TOKEN_REQUEST` — на `graph.instagram.com`.
+`providerReason` є тільки allow-listed категорією (`CLIENT_SECRET`,
+`REDIRECT_URI`, `ACCESS_RESTRICTED`, `AUTHORIZATION_CODE`, `ACCESS_TOKEN`)
+або відсутній; сирий текст Meta, код OAuth, секрети й токени не зберігаються.
+Відсутність категорії не доводить, що доступи правильні. Звіряйте Instagram
+App Secret у Meta та deployment-середовищі без копіювання його в чат чи логи;
+для цього Meta може вимагати від власника повторно ввести пароль. Для
+сторонніх клієнтів перевіряйте професійний тип Instagram-акаунта та статус
+Advanced Access/App Review для обох permissions. Тимчасове тестування через
+роль/тестера не замінює схвалення Meta для загального підключення.
+
 Цей посібник призначений для локального Docker-розгортання AutoSale. Він
 налаштовує **Instagram API with Instagram Login** для професійних акаунтів
 Instagram типу Business або Creator. Особисті Instagram-акаунти не підтримані.
