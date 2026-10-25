@@ -1,7 +1,7 @@
 # Internal AI provider usage ledger and unit-cost measurement
 
 **Date:** 2026-10-24
-**Status:** In progress. Approved by the owner in chat on 2026-10-24. The tenant-scoped ledger, store and lifecycle-export dataset are implemented in the feature branch; provider collection, reporting, reconciliation/retention and deployment remain pending.
+**Status:** In progress. Approved by the owner in chat on 2026-10-24. The tenant-scoped ledger, store, lifecycle-export dataset and shared Responses transport boundary are implemented in the feature branch; production adapter wiring, reporting, reconciliation/retention and deployment remain pending.
 
 ## Outcome and boundary
 
@@ -36,6 +36,10 @@ The table contains no prompt, conversation content, catalogue row, customer iden
 This is tenant-owned operational data: include it in the canonical lifecycle export while held, prevent new provider calls for a frozen tenant under the existing freeze gates, and permit finalizing an already-dispatched attempt so a freeze does not erase cost evidence. The proposed engineering retention for raw attempts is 90 days, subject to the privacy/accounting review before production activation. A bounded, idempotent sweep and its lifecycle/restore acceptance must ship with production collection, so records are not silently retained forever; retain longer tenant-linked summaries only after a separate legal/accounting decision. The normal backup expiry and later deletion-ledger replay still apply.
 
 The canonical lifecycle export now includes `ai-provider-usage-attempts`, selecting only the ledger's fourteen scalar fields. Exact allowlist, real JSONL archive count/checksum and PostgreSQL tenant-isolation tests cover the schema slice. No provider adapter calls the store yet, and the bounded orphan reconciler and retention function will arrive in a follow-on migration before production collection. No deployment or live browser/provider acceptance is claimed for this stage.
+
+The worker's `ai-usage/metered-responses.ts` now owns a shared, independently tested non-streaming Responses boundary and an injectable OpenAI client factory with `maxRetries: 0`. Each call generates a new attempt UUID, awaits start before one SDK invocation, enforces `store: false`, and awaits finalization before returning the original response without parsing generated text. Counts must be integers from zero through PostgreSQL INTEGER's maximum; invalid or missing values stay NULL. Valid partial totals survive. Cached counts require a known input total; a cached count above that total makes both input and cached evidence unknown while preserving valid output, yielding `USAGE_MISSING`. Missing or otherwise invalid cached breakdowns stay NULL independently of known totals.
+
+Transport exceptions finalize as `CHARGE_UNKNOWN` with all counts NULL and a fixed `TIMEOUT` or `TRANSPORT_ERROR` category, then rethrow the original exception. Start-storage failure still permits the single provider invocation; finalization failure or a false conditional-update result preserves the original product result. The only failure-signal arguments are `start_failed` and `finalize_failed`, and a failing signal sink cannot replace the response or exception. Adapter integration, worker bootstrap changes and the existing tenant-freeze gates remain the next collection step; the tested boundary and factory are not active in production call paths yet.
 
 ## Internal monthly report
 
