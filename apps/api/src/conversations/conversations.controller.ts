@@ -1,5 +1,7 @@
 import {
   conversationQuerySchema,
+  conversationStatusCountsSchema,
+  type ConversationStatusCounts,
   conversationOrderStartResponseSchema,
   conversationOrderStateSchema,
   outboundMessageInputSchema,
@@ -47,6 +49,7 @@ export class ConversationsController {
 
   @Get()
   @ApiOperation({ summary: 'List manager conversations' })
+  @ApiQuery({ name: 'status', required: false, enum: ['ACTIVE', 'INACTIVE', 'CLOSED'] })
   @ApiQuery({ name: 'cursor', required: false, type: String })
   @ApiQuery({ name: 'limit', required: false, type: Number, example: 20 })
   @ApiOkResponse({ schema: conversationListOpenApiSchema() })
@@ -59,6 +62,19 @@ export class ConversationsController {
       }
       throw error;
     }
+  }
+
+  @Get('status-counts')
+  @ApiOperation({ summary: 'Count manager conversations by workflow status' })
+  @ApiOkResponse({ schema: {
+    type: 'object', required: ['ACTIVE', 'INACTIVE', 'CLOSED'], properties: {
+      ACTIVE: { type: 'integer', minimum: 0 },
+      INACTIVE: { type: 'integer', minimum: 0 },
+      CLOSED: { type: 'integer', minimum: 0 },
+    },
+  } })
+  async statusCounts(@CurrentPrincipal() principal: AuthPrincipal): Promise<ConversationStatusCounts> {
+    return conversationStatusCountsSchema.parse(await this.conversations.statusCounts(principal.tenantId!));
   }
 
   @Get(':id')
@@ -133,9 +149,11 @@ function conversationListOpenApiSchema(): OpenApiSchema {
       type: 'array',
       items: {
         type: 'object',
-        required: ['id', 'channel', 'participantName', 'participantUsername', 'participantAvatarUrl', 'lastMessagePreview', 'lastMessageAt'],
+        required: ['id', 'workflowStatus', 'statusVersion', 'channel', 'participantName', 'participantUsername', 'participantAvatarUrl', 'lastMessagePreview', 'lastMessageAt'],
         properties: {
           id: { type: 'string', format: 'uuid' },
+          workflowStatus: { type: 'string', enum: ['ACTIVE', 'INACTIVE', 'CLOSED'] },
+          statusVersion: { type: 'integer' },
           channel: { type: 'string', enum: ['INSTAGRAM', 'FACEBOOK', 'TIKTOK'] },
           participantName: { type: 'string', nullable: true },
           participantUsername: { type: 'string', nullable: true },
@@ -153,9 +171,11 @@ function conversationListOpenApiSchema(): OpenApiSchema {
 function conversationDetailOpenApiSchema(): OpenApiSchema {
   return {
   type: 'object',
-  required: ['id', 'channel', 'participantName', 'participantUsername', 'participantAvatarUrl', 'replyCapability', 'messages'],
+  required: ['id', 'workflowStatus', 'statusVersion', 'channel', 'participantName', 'participantUsername', 'participantAvatarUrl', 'replyCapability', 'messages'],
   properties: {
     id: { type: 'string', format: 'uuid' },
+    workflowStatus: { type: 'string', enum: ['ACTIVE', 'INACTIVE', 'CLOSED'] },
+    statusVersion: { type: 'integer' },
     channel: { type: 'string', enum: ['INSTAGRAM', 'FACEBOOK', 'TIKTOK'] },
     participantName: { type: 'string', nullable: true },
     participantUsername: { type: 'string', nullable: true },

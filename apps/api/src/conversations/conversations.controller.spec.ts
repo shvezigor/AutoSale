@@ -36,6 +36,7 @@ describe('ConversationsController', () => {
   let app: INestApplication | undefined;
   const list = vi.fn();
   const detail = vi.fn();
+  const statusCounts = vi.fn();
   const send = vi.fn();
   const retry = vi.fn();
   const createOrder = vi.fn();
@@ -57,6 +58,7 @@ describe('ConversationsController', () => {
       items: [
         {
           id: conversationId,
+          workflowStatus: 'ACTIVE', statusVersion: 0,
           channel: 'INSTAGRAM',
           participantName: 'Олена',
           participantUsername: 'olena',
@@ -69,6 +71,7 @@ describe('ConversationsController', () => {
     });
     detail.mockReset().mockResolvedValue({
       id: conversationId,
+      workflowStatus: 'INACTIVE', statusVersion: 3,
       channel: 'INSTAGRAM',
       participantName: 'Олена',
       participantUsername: 'olena',
@@ -76,6 +79,7 @@ describe('ConversationsController', () => {
       replyCapability: { enabled: true, aiDraftSendAllowed: true, reason: null },
       messages: [],
     });
+    statusCounts.mockReset().mockResolvedValue({ ACTIVE: 2, INACTIVE: 1, CLOSED: 1 });
     send.mockReset().mockResolvedValue(outboundMessage);
     retry.mockReset().mockResolvedValue(outboundMessage);
     createOrder.mockReset().mockResolvedValue({ orderId: null, queued: true });
@@ -88,7 +92,7 @@ describe('ConversationsController', () => {
     const moduleRef = await Test.createTestingModule({
       controllers: [ConversationsController],
       providers: [
-        { provide: ConversationsService, useValue: { list, detail, send, retry, createOrder, orderState } },
+        { provide: ConversationsService, useValue: { list, detail, statusCounts, send, retry, createOrder, orderState } },
         { provide: SessionService, useValue: { resolve: resolveSession } },
         { provide: CsrfService, useValue: csrf },
         { provide: AUTH_HTTP_CONFIG, useValue: { cookieName: 'autosale_session', production: false } },
@@ -116,6 +120,28 @@ describe('ConversationsController', () => {
 
     expect(() => conversationListResponseSchema.parse(response.body)).not.toThrow();
     expect(list).toHaveBeenCalledWith(tenantId, { limit: 20 });
+  });
+
+  it('filters valid statuses and rejects unknown status values', async () => {
+    await request(app!.getHttpServer()).get('/api/conversations?status=INACTIVE&limit=1')
+      .set('Cookie', 'autosale_session=manager-token').expect(200);
+    expect(list).toHaveBeenCalledWith(tenantId, { status: 'INACTIVE', limit: 1 });
+    list.mockClear();
+    await request(app!.getHttpServer()).get('/api/conversations?status=ARCHIVED')
+      .set('Cookie', 'autosale_session=manager-token').expect(400);
+    expect(list).not.toHaveBeenCalled();
+  });
+
+  it('returns tenant counts through the fixed route and requires membership', async () => {
+    const response = await request(app!.getHttpServer()).get('/api/conversations/status-counts')
+      .set('Cookie', 'autosale_session=manager-token').expect(200);
+    expect(response.body).toEqual({ ACTIVE: 2, INACTIVE: 1, CLOSED: 1 });
+    expect(statusCounts).toHaveBeenCalledWith(tenantId);
+    expect(detail).not.toHaveBeenCalled();
+    resolveSession.mockResolvedValueOnce({ ...manager, membershipRole: null, tenantId: null });
+    await request(app!.getHttpServer()).get('/api/conversations/status-counts')
+      .set('Cookie', 'autosale_session=manager-token').expect(403);
+    expect(statusCounts).toHaveBeenCalledTimes(1);
   });
 
   it('returns detail conforming to the shared response contract', async () => {
@@ -226,9 +252,15 @@ describe('ConversationsController', () => {
     expect(document.paths['/api/conversations/{id}/order']?.get?.responses?.['200']).toBeDefined();
     expect(document.paths['/api/conversations/{id}/order']?.post?.responses?.['201']).toBeDefined();
     const response = document.paths['/api/conversations']?.get?.responses?.['200'];
+    expect(JSON.stringify(response)).toContain('workflowStatus');
+    expect(JSON.stringify(response)).toContain('statusVersion');
+    expect(document.paths['/api/conversations/status-counts']?.get?.responses?.['200']).toBeDefined();
+    expect(JSON.stringify(document.paths['/api/conversations']?.get?.parameters)).toContain('status');
     expect(JSON.stringify(response)).toContain('participantAvatarUrl');
     expect(JSON.stringify(response)).toContain('participantUsername');
     const detailResponse = document.paths['/api/conversations/{id}']?.get?.responses?.['200'];
+    expect(JSON.stringify(detailResponse)).toContain('workflowStatus');
+    expect(JSON.stringify(detailResponse)).toContain('statusVersion');
     expect(JSON.stringify(detailResponse)).toContain('TIKTOK_CAPABILITY_UNAVAILABLE');
     expect(JSON.stringify(detailResponse)).toContain('TIKTOK_REPLY_NOT_PERMITTED');
   });

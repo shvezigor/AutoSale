@@ -1,6 +1,6 @@
 # Conversation triage in the workspace inbox
 
-Date: 2026-10-25. Status: approved by owner; implementation pending.
+Date: 2026-10-25. Status: approved by owner; implementation in progress. Schema/contracts and status-filtered list, aggregate counts and detail reads are implemented; remaining transitions, ingestion, UI, deployment and browser acceptance are pending.
 
 ## Purpose and decision
 
@@ -41,6 +41,10 @@ Include the new status metadata in the explicit tenant lifecycle export dataset.
 A failed status update leaves the row in its last confirmed category and shows a recoverable error. On `409`, refresh list, counts and detail before allowing a new choice. A polling failure retains the last usable list with a visible retry path for the status mutation; it must not display a false success. A new inbound message during a manual move is resolved by the conditional/versioned transaction and reflected on the next list refresh. Opening an old link can still display a conversation regardless of the selected tab.
 
 Ship the additive migration before API/worker/web changes, with the existing backup and manual deployment process. No feature flag is required because default `ACTIVE` preserves existing data and no provider action occurs. Keep the repository's existing channel feature gates unchanged. Rollback of the app may ignore the new columns; rollback must not delete status data without a separate migration/backup decision.
+
+## Implementation evidence
+
+The existing manager API now accepts the optional validated `status` filter while preserving unfiltered callers and cursor pagination. `GET /api/conversations/status-counts` returns zero-filled tenant-only aggregates; list/detail expose persisted `workflowStatus` and `statusVersion`. Fictional PostgreSQL service and HTTP controller tests cover filtering, pagination, counts, foreign-detail denial, invalid status and manager authorization. Representative local `EXPLAIN` queries use `conversations_tenant_status_last_message_id_idx` for both the ordered page (index-only scan) and tenant count aggregate (bitmap index scan); no additional index is justified by that fixture. This does not establish production-scale count performance or close browser acceptance.
 
 ## Verification
 

@@ -7,6 +7,7 @@ import type {
   ConversationOrderStartResponse,
   ConversationOrderState,
   ConversationQuery,
+  ConversationStatusCounts,
   OutboundMessageInput,
   SocialChannel,
 } from '@autosale/contracts/conversations';
@@ -85,6 +86,7 @@ export class ConversationsService {
     const rows = await withTenantTransaction(this.prisma, tenantId, (transaction) => transaction.conversation.findMany({
       where: {
         tenantId,
+        ...(query.status ? { workflowStatus: query.status } : {}),
         ...(cursor
           ? {
               OR: [
@@ -125,6 +127,8 @@ export class ConversationsService {
     return {
       items: page.map((conversation) => ({
         id: conversation.id,
+        workflowStatus: conversation.workflowStatus,
+        statusVersion: conversation.statusVersion,
         channel: socialChannel(conversation.channel),
         participantName: participantName(conversation.profile, conversation.displayName),
         participantUsername: conversation.profile?.username ?? null,
@@ -138,6 +142,16 @@ export class ConversationsService {
           ? encodeCursor({ lastMessageAt: last.lastMessageAt.toISOString(), id: last.id })
           : null,
     };
+  }
+
+  async statusCounts(tenantId: string): Promise<ConversationStatusCounts> {
+    const groups = await withTenantTransaction(this.prisma, tenantId, (transaction) =>
+      transaction.conversation.groupBy({
+        by: ['workflowStatus'], where: { tenantId }, _count: { _all: true },
+      }));
+    const counts: ConversationStatusCounts = { ACTIVE: 0, INACTIVE: 0, CLOSED: 0 };
+    for (const group of groups) counts[group.workflowStatus] = group._count._all;
+    return counts;
   }
 
   async detail(tenantId: string, id: string): Promise<ConversationDetailResponse> {
@@ -181,6 +195,8 @@ export class ConversationsService {
       : channel === 'TIKTOK' && tikTokReplyCapability(tikTokConnection, now, lastInboundAt).enabled;
     return {
       id: conversation.id,
+      workflowStatus: conversation.workflowStatus,
+      statusVersion: conversation.statusVersion,
       channel,
       participantName: participantName(conversation.profile, conversation.displayName),
       participantUsername: conversation.profile?.username ?? null,

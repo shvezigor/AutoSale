@@ -163,6 +163,35 @@ describe('ConversationsService', () => {
     expect(second.nextCursor).toBeNull();
   });
 
+  it('filters pages by persisted status, counts only tenant rows and returns detail versions', async () => {
+    const tenant = await prisma.tenant.create({ data: { key: `fictional-triage-${randomUUID()}`, name: 'Fictional triage' } });
+    const rows = await Promise.all((['ACTIVE', 'ACTIVE', 'INACTIVE', 'CLOSED'] as const).map((workflowStatus, index) =>
+      prisma.conversation.create({ data: {
+        tenantId: tenant.id, channel: 'INSTAGRAM', externalConversationId: `fictional-${index}`,
+        participantId: `fictional-${index}`, workflowStatus, statusVersion: index,
+        lastMessageAt: new Date(1_800_000_000_000 + index * 1000),
+      } })));
+    try {
+      const page = await service.list(tenant.id, { status: 'INACTIVE', limit: 1 });
+      expect(page.items).toHaveLength(1);
+      expect(page.items[0]).toMatchObject({ id: rows[2]!.id, workflowStatus: 'INACTIVE', statusVersion: 2 });
+      expect(page.nextCursor).toBeNull();
+      expect((await service.list(tenant.id, { limit: 50 })).items).toHaveLength(4);
+      expect(await service.statusCounts(tenant.id)).toEqual({ ACTIVE: 2, INACTIVE: 1, CLOSED: 1 });
+      expect(await service.statusCounts(otherTenantId)).toEqual({ ACTIVE: 1, INACTIVE: 0, CLOSED: 0 });
+      expect(await service.detail(tenant.id, rows[2]!.id)).toMatchObject({ workflowStatus: 'INACTIVE', statusVersion: 2 });
+      const first = await service.list(tenant.id, { status: 'ACTIVE', limit: 1 });
+      const second = await service.list(tenant.id, { status: 'ACTIVE', limit: 1, cursor: first.nextCursor! });
+      expect(first.items[0]!.id).toBe(rows[1]!.id);
+      expect(second.items[0]!.id).toBe(rows[0]!.id);
+      expect(second.nextCursor).toBeNull();
+      await expect(service.detail(otherTenantId, rows[2]!.id)).rejects.toBeInstanceOf(NotFoundException);
+    } finally {
+      await prisma.conversation.deleteMany({ where: { tenantId: tenant.id } });
+      await prisma.tenant.delete({ where: { id: tenant.id } });
+    }
+  });
+
   it('returns an ordered conversation detail without source object URLs', async () => {
     const detail = await service.detail(tenantId, newestId);
 
