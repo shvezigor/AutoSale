@@ -1,5 +1,7 @@
 import {
   conversationQuerySchema,
+  conversationStatusChangeInputSchema,
+  type ConversationStatusChangeResponse,
   conversationStatusCountsSchema,
   type ConversationStatusCounts,
   conversationOrderStartResponseSchema,
@@ -19,6 +21,7 @@ import {
   Get,
   Inject,
   Param,
+  Patch,
   ParseUUIDPipe,
   Post,
   Query,
@@ -75,6 +78,25 @@ export class ConversationsController {
   } })
   async statusCounts(@CurrentPrincipal() principal: AuthPrincipal): Promise<ConversationStatusCounts> {
     return conversationStatusCountsSchema.parse(await this.conversations.statusCounts(principal.tenantId!));
+  }
+
+  @Patch(':id/status')
+  @ApiOperation({ summary: 'Move a manager conversation to a workflow status' })
+  @ApiOkResponse({ schema: {
+    type: 'object', required: ['status', 'statusVersion', 'statusChangedAt'], properties: {
+      status: { type: 'string', enum: ['ACTIVE', 'INACTIVE', 'CLOSED'] },
+      statusVersion: { type: 'integer', minimum: 0 },
+      statusChangedAt: { type: 'string', format: 'date-time', nullable: true },
+    },
+  } })
+  changeStatus(
+    @CurrentPrincipal() principal: AuthPrincipal,
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Body() raw: unknown,
+  ): Promise<ConversationStatusChangeResponse> {
+    const parsed = conversationStatusChangeInputSchema.safeParse(raw);
+    if (!parsed.success) throw new BadRequestException('CONVERSATION_STATUS_INVALID');
+    return this.conversations.changeStatus(principal.tenantId!, principal.userId, id, parsed.data);
   }
 
   @Get(':id')

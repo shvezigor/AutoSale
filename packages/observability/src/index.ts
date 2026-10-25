@@ -2,7 +2,7 @@ const redactedKeys = /token|secret|password|authorization|cookie|phone|email|add
 const allowedMetricLabels = new Set(['operation', 'result', 'method', 'route', 'status_class', 'provider', 'queue', 'state', 'surface', 'safe_reason']);
 const allowedMetricResults = new Set(['success', 'failure', 'skipped', 'conflict']);
 const allowedMutationSurfaces = new Set([
-  'META_INBOUND', 'TELEGRAM_INBOUND', 'ORDER_RECOGNITION', 'CONVERSATION_REPLY',
+  'META_INBOUND', 'TELEGRAM_INBOUND', 'ORDER_RECOGNITION', 'CONVERSATION_REPLY', 'CONVERSATION_TRIAGE',
   'ORDER_MUTATION', 'COMMERCIAL_TERMS', 'PAYMENT', 'PROCUREMENT', 'CATALOGUE',
   'DELIVERY', 'SUPPLIER_SEND', 'SHEETS_EXPORT', 'NOTIFICATION_SEND', 'ACCOUNT_ADMINISTRATION',
 ]);

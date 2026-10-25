@@ -8,12 +8,15 @@ import type {
   ConversationOrderState,
   ConversationQuery,
   ConversationStatusCounts,
+  ConversationStatusChangeInput,
+  ConversationStatusChangeResponse,
   OutboundMessageInput,
   SocialChannel,
 } from '@autosale/contracts/conversations';
 import { replyDraftSourceSchema } from '@autosale/contracts/reply-drafts';
 import {
   assertTenantAcceptingMutations,
+  Prisma,
   PlatformChannelDisabledError,
   type PlatformChannelGate,
   type PrismaClient,
@@ -142,6 +145,55 @@ export class ConversationsService {
           ? encodeCursor({ lastMessageAt: last.lastMessageAt.toISOString(), id: last.id })
           : null,
     };
+  }
+
+  async changeStatus(
+    tenantId: string,
+    userId: string,
+    id: string,
+    input: ConversationStatusChangeInput,
+  ): Promise<ConversationStatusChangeResponse> {
+    return withTenantTransaction(this.prisma, tenantId, async (transaction) => {
+      await assertTenantAcceptingMutations(transaction, tenantId, 'CONVERSATION_TRIAGE');
+      // Hold the same row lock acquired by inbound updates through commit, including
+      // no-ops, so the expected version cannot be checked against a stale snapshot.
+      const [current] = await transaction.$queryRaw<Array<{
+        workflow_status: ConversationStatusChangeResponse['status'];
+        status_version: number;
+        status_changed_at: Date | null;
+      }>>(Prisma.sql`
+        SELECT workflow_status, status_version, status_changed_at
+        FROM conversations
+        WHERE tenant_id = ${tenantId}::uuid AND id = ${id}::uuid
+        FOR UPDATE
+      `);
+      if (!current) throw new NotFoundException('Conversation not found');
+      if (current.status_version !== input.expectedVersion) {
+        throw new ConflictException('CONVERSATION_STATUS_CHANGED');
+      }
+      if (current.workflow_status === input.status) {
+        return {
+          status: current.workflow_status,
+          statusVersion: current.status_version,
+          statusChangedAt: current.status_changed_at?.toISOString() ?? null,
+        };
+      }
+      const updated = await transaction.conversation.update({
+        where: { id, tenantId },
+        data: {
+          workflowStatus: input.status,
+          statusVersion: { increment: 1 },
+          statusChangedAt: new Date(),
+          statusChangedByUserId: userId,
+        },
+        select: { workflowStatus: true, statusVersion: true, statusChangedAt: true },
+      });
+      return {
+        status: updated.workflowStatus,
+        statusVersion: updated.statusVersion,
+        statusChangedAt: updated.statusChangedAt?.toISOString() ?? null,
+      };
+    });
   }
 
   async statusCounts(tenantId: string): Promise<ConversationStatusCounts> {

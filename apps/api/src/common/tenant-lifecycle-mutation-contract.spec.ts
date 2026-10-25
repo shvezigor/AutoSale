@@ -4,7 +4,7 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 const guardedSources = [
-  ['src/conversations/conversations.service.ts', ['ORDER_RECOGNITION', 'CONVERSATION_REPLY']],
+  ['src/conversations/conversations.service.ts', ['ORDER_RECOGNITION', 'CONVERSATION_REPLY', 'CONVERSATION_TRIAGE']],
   ['src/orders/orders.service.ts', ['ORDER_MUTATION', 'SHEETS_EXPORT']],
   ['src/orders/commercial-terms.service.ts', ['COMMERCIAL_TERMS']],
   ['src/orders/payments.service.ts', ['PAYMENT']],

@@ -1,6 +1,6 @@
 # Conversation triage in the workspace inbox
 
-Date: 2026-10-25. Status: approved by owner; implementation in progress. Schema/contracts and status-filtered list, aggregate counts and detail reads are implemented; remaining transitions, ingestion, UI, deployment and browser acceptance are pending.
+Date: 2026-10-25. Status: approved by owner; implementation in progress. Schema/contracts, status-filtered list, aggregate counts, detail reads and manager status moves are implemented; ingestion, UI, deployment and browser acceptance are pending.
 
 ## Purpose and decision
 
@@ -45,6 +45,8 @@ Ship the additive migration before API/worker/web changes, with the existing bac
 ## Implementation evidence
 
 The existing manager API now accepts the optional validated `status` filter while preserving unfiltered callers and cursor pagination. `GET /api/conversations/status-counts` returns zero-filled tenant-only aggregates; list/detail expose persisted `workflowStatus` and `statusVersion`. Fictional PostgreSQL service and HTTP controller tests cover filtering, pagination, counts, foreign-detail denial, invalid status and manager authorization. Representative local `EXPLAIN` queries use `conversations_tenant_status_last_message_id_idx` for both the ordered page (index-only scan) and tenant count aggregate (bitmap index scan); no additional index is justified by that fixture. This does not establish production-scale count performance or close browser acceptance.
+
+Manager status changes now use the existing authenticated, manager/owner-authorized and CSRF-protected `PATCH /api/conversations/:id/status` route. Within one tenant transaction, the `CONVERSATION_TRIAGE` lifecycle gate runs before a parameterized tenant-scoped `SELECT ... FOR UPDATE`; the lock remains held through version comparison, same-state no-op or update and commit. Updates increment the version and save the actor and time. Stale versions return `CONVERSATION_STATUS_CHANGED` (409), invalid bodies return `CONVERSATION_STATUS_INVALID` (400), and missing/foreign rows share the existing not-found response. Fictional PostgreSQL tests cover reversible moves, no-ops, stale versions, competing manager writes and freeze denial; HTTP tests cover authorization, CSRF, bounded errors and OpenAPI. No queue/provider dispatch is added. Inbound-versus-manager integration races remain part of the worker implementation and acceptance work.
 
 ## Verification
 

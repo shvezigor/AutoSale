@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { readFile, readdir } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
-import { createPrismaClient, PlatformChannelDisabledError, type PrismaClient } from '@autosale/database';
+import { createPrismaClient, TenantLifecycleFrozenError, PlatformChannelDisabledError, type PrismaClient } from '@autosale/database';
 import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 import { PostgreSqlContainer, type StartedPostgreSqlContainer } from '@testcontainers/postgresql';
 import pg from 'pg';
@@ -133,6 +133,56 @@ describe('ConversationsService', () => {
   beforeEach(() => {
     queue.add.mockReset().mockResolvedValue(undefined);
     channelGate.assertEnabled.mockReset().mockResolvedValue(undefined);
+  });
+
+  it('moves reversibly, preserves current-state no-ops and rejects stale versions without dispatch', async () => {
+    const initial = await service.changeStatus(tenantId, actorUserId, newestId, { status: 'ACTIVE', expectedVersion: 0 });
+    expect(initial).toEqual({ status: 'ACTIVE', statusVersion: 0, statusChangedAt: null });
+    let version = 0;
+    for (const status of ['INACTIVE', 'CLOSED', 'ACTIVE'] as const) {
+      const moved = await service.changeStatus(tenantId, actorUserId, newestId, { status, expectedVersion: version });
+      expect(moved).toEqual({ status, statusVersion: ++version, statusChangedAt: expect.any(String) });
+      expect(await service.changeStatus(tenantId, actorUserId, newestId, { status, expectedVersion: version })).toEqual(moved);
+      await expect(service.changeStatus(tenantId, actorUserId, newestId, { status, expectedVersion: version - 1 }))
+        .rejects.toThrow('CONVERSATION_STATUS_CHANGED');
+    }
+    expect(await prisma.conversation.findUniqueOrThrow({ where: { id: newestId } }))
+      .toMatchObject({ workflowStatus: 'ACTIVE', statusVersion: 3, statusChangedByUserId: actorUserId });
+    expect(queue.add).not.toHaveBeenCalled();
+  });
+
+  it('gives the same not-found result for missing and foreign conversation IDs', async () => {
+    for (const [tenant, id] of [[tenantId, randomUUID()], [otherTenantId, newestId]]) {
+      await expect(service.changeStatus(tenant!, actorUserId, id!, { status: 'CLOSED', expectedVersion: 0 }))
+        .rejects.toThrow(new NotFoundException('Conversation not found'));
+    }
+    expect(queue.add).not.toHaveBeenCalled();
+  });
+
+  it('allows only one of two concurrent moves with the same expected version', async () => {
+    const row = await prisma.conversation.findUniqueOrThrow({ where: { id: newestId } });
+    const outcomes = await Promise.allSettled(['INACTIVE', 'CLOSED'].map((status) =>
+      service.changeStatus(tenantId, actorUserId, newestId, { status: status as 'INACTIVE' | 'CLOSED', expectedVersion: row.statusVersion })));
+    expect(outcomes.filter((result) => result.status === 'fulfilled')).toHaveLength(1);
+    expect(outcomes.find((result) => result.status === 'rejected')).toMatchObject({ reason: expect.any(ConflictException) });
+    await prisma.conversation.update({ where: { id: newestId }, data: { workflowStatus: 'ACTIVE' } });
+    expect(queue.add).not.toHaveBeenCalled();
+  });
+
+  it('denies moves and no-ops while the tenant is frozen', async () => {
+    const freeze = await prisma.tenantLifecycleRequest.create({ data: {
+      tenantId, kind: 'DELETE', reasonCode: 'ADMINISTRATIVE_TEST', requestedByUserId: actorUserId,
+      idempotencyKey: randomUUID(), requestHash: 'fictional-triage-freeze', ingestionFrozenAt: new Date(),
+    } });
+    try {
+      const before = await prisma.conversation.findUniqueOrThrow({ where: { id: newestId } });
+      for (const status of ['CLOSED', 'ACTIVE'] as const) {
+        await expect(service.changeStatus(tenantId, actorUserId, newestId, { status, expectedVersion: before.statusVersion }))
+          .rejects.toBeInstanceOf(TenantLifecycleFrozenError);
+      }
+      expect(await prisma.conversation.findUniqueOrThrow({ where: { id: newestId } })).toEqual(before);
+      expect(queue.add).not.toHaveBeenCalled();
+    } finally { await prisma.tenantLifecycleRequest.delete({ where: { id: freeze.id } }); }
   });
 
   it('orders newest first, isolates the tenant, and paginates by cursor', async () => {
