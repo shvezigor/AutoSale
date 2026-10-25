@@ -2003,3 +2003,13 @@ Checkpoint details and acceptance criteria: `tasks/plan.md`. Canonical behavior:
 - [x] P4 — publish evidence in the canonical spec, feature index and acceptance checklist; manually deploy the tested releases, verify health/queue and clean merged branches. P2 is closed; external provider-browser gates remain open without a full-pilot claim.
 
 Acceptance criteria, dependencies, verification and stop conditions: `tasks/plan.md`. The feature remains **Validation pending** until every live provider gate in `docs/acceptance/ai-reply-drafts-checklist.md` is evidenced.
+
+---
+
+# Current initiative: Conversation triage in the workspace inbox
+
+- [x] Agree on manual Active/Inactive/Closed categories and automatic return to Active for a genuinely new inbound customer message. The [canonical design](../docs/superpowers/specs/2026-10-25-conversation-triage-design.md) excludes per-chat deletion and Instagram inbox mutation.
+- [x] Implement tenant-scoped status persistence, conditional inbound reopening, status-filtered pagination/counts and accessible row/detail actions with Ukrainian and English copy.
+- [x] Run affected full contracts/database/API/worker/web suites, workspace build/typecheck and the pre-existing-row migration upgrade regression; repair stale migration/layout test fixtures. See the [acceptance checklist](../docs/acceptance/conversation-triage-checklist.md) for exact passes and opt-in skips.
+- [ ] Execute unskipped isolated Playwright acceptance; the authored scenarios currently skip because fictional owner credentials and the isolated Instagram fixture are unavailable.
+- [ ] Controller: review the whole branch, merge/push, take a verified backup, manually release and verify persisted transitions in a real browser with an authorized test account. Do not send provider messages for this acceptance without separate authorization.

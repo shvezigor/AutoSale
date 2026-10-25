@@ -1,5 +1,9 @@
 import {
   conversationDetailResponseSchema,
+  conversationStatusCountsSchema,
+  conversationStatusChangeResponseSchema,
+  type ConversationWorkflowStatus,
+  type ConversationStatusChangeInput,
   conversationListResponseSchema,
   conversationMessageSchema,
   conversationOrderStartResponseSchema,
@@ -32,9 +36,12 @@ export async function refreshConversation(id: string): Promise<ConversationDetai
   );
 }
 
-export async function refreshConversationList(): Promise<ConversationListResponse> {
+export async function refreshConversationList(input?: { status: ConversationWorkflowStatus; cursor?: string }): Promise<ConversationListResponse> {
+  const query = new URLSearchParams({ limit: "50" });
+  if (input) query.set("status", input.status);
+  if (input?.cursor) query.set("cursor", input.cursor);
   return parseResponse(
-    await fetch('/api/conversations?limit=50', { cache: 'no-store' }),
+    await fetch(`/api/conversations?${query.toString()}`, { cache: 'no-store' }),
     conversationListResponseSchema.parse,
   );
 }
@@ -100,4 +107,13 @@ async function parseResponse<T>(response: Response, parse: (value: unknown) => T
   } catch (error) {
     throw new ConversationReplyApiError('Сервер повернув некоректні дані', response.status, { cause: error });
   }
+}
+
+export async function refreshConversationStatusCounts() {
+  return parseResponse(await fetch('/api/conversations/status-counts', { cache: 'no-store' }), conversationStatusCountsSchema.parse);
+}
+export async function changeConversationStatus(id: string, input: ConversationStatusChangeInput) {
+  return parseResponse(await mutatingFetch(`/api/conversations/${encodeURIComponent(id)}/status`, {
+    method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify(input),
+  }), conversationStatusChangeResponseSchema.parse);
 }

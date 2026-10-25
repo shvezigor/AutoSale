@@ -708,6 +708,23 @@ export type EnumMembershipRoleWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumMembershipRoleFilter<$PrismaModel>
 }
 
+export type EnumConversationWorkflowStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.ConversationWorkflowStatus | Prisma.EnumConversationWorkflowStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.ConversationWorkflowStatus[] | Prisma.ListEnumConversationWorkflowStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ConversationWorkflowStatus[] | Prisma.ListEnumConversationWorkflowStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumConversationWorkflowStatusFilter<$PrismaModel> | $Enums.ConversationWorkflowStatus
+}
+
+export type EnumConversationWorkflowStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ConversationWorkflowStatus | Prisma.EnumConversationWorkflowStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.ConversationWorkflowStatus[] | Prisma.ListEnumConversationWorkflowStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ConversationWorkflowStatus[] | Prisma.ListEnumConversationWorkflowStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumConversationWorkflowStatusWithAggregatesFilter<$PrismaModel> | $Enums.ConversationWorkflowStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumConversationWorkflowStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumConversationWorkflowStatusFilter<$PrismaModel>
+}
+
 export type EnumOutboundDeliveryStatusNullableFilter<$PrismaModel = never> = {
   equals?: $Enums.OutboundDeliveryStatus | Prisma.EnumOutboundDeliveryStatusFieldRefInput<$PrismaModel> | null
   in?: $Enums.OutboundDeliveryStatus[] | Prisma.ListEnumOutboundDeliveryStatusFieldRefInput<$PrismaModel> | null
@@ -1958,6 +1975,23 @@ export type NestedEnumMembershipRoleWithAggregatesFilter<$PrismaModel = never> =
   _max?: Prisma.NestedEnumMembershipRoleFilter<$PrismaModel>
 }
 
+export type NestedEnumConversationWorkflowStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.ConversationWorkflowStatus | Prisma.EnumConversationWorkflowStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.ConversationWorkflowStatus[] | Prisma.ListEnumConversationWorkflowStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ConversationWorkflowStatus[] | Prisma.ListEnumConversationWorkflowStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumConversationWorkflowStatusFilter<$PrismaModel> | $Enums.ConversationWorkflowStatus
+}
+
+export type NestedEnumConversationWorkflowStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ConversationWorkflowStatus | Prisma.EnumConversationWorkflowStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.ConversationWorkflowStatus[] | Prisma.ListEnumConversationWorkflowStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ConversationWorkflowStatus[] | Prisma.ListEnumConversationWorkflowStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumConversationWorkflowStatusWithAggregatesFilter<$PrismaModel> | $Enums.ConversationWorkflowStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumConversationWorkflowStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumConversationWorkflowStatusFilter<$PrismaModel>
+}
+
 export type NestedEnumOutboundDeliveryStatusNullableFilter<$PrismaModel = never> = {
   equals?: $Enums.OutboundDeliveryStatus | Prisma.EnumOutboundDeliveryStatusFieldRefInput<$PrismaModel> | null
   in?: $Enums.OutboundDeliveryStatus[] | Prisma.ListEnumOutboundDeliveryStatusFieldRefInput<$PrismaModel> | null
@@ -2536,5 +2570,3 @@ export type NestedEnumDemoLeadNotificationStatusWithAggregatesFilter<$PrismaMode
   _min?: Prisma.NestedEnumDemoLeadNotificationStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumDemoLeadNotificationStatusFilter<$PrismaModel>
 }
-
-

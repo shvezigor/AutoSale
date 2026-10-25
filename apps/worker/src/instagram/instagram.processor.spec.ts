@@ -1,3 +1,4 @@
+import { conversationTriageTests } from '../social/conversation-triage.test-helper.js';
 import { randomUUID } from 'node:crypto';
 import { readdir, readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
@@ -483,6 +484,10 @@ describe('InstagramProcessor', () => {
       where: { conversationId: conversation.id, externalMessageId: 'mid.ambiguous.123' },
     })).resolves.toMatchObject({ rawEventId: event.id, providerMessageId: null });
   });
+
+  conversationTriageTests('INSTAGRAM', () => ({
+    prisma, tenantId, processor: (media, schedule, orders) => new InstagramProcessor(prisma, media, { processIfTriggered: orders }, { schedule }),
+  }));
 
   it('marks a queued event processed without business writes when the tenant is frozen', async () => {
     const payload = await loadFixture('text-message.json');

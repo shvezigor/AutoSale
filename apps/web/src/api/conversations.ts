@@ -1,5 +1,7 @@
 import {
   conversationDetailResponseSchema,
+  conversationStatusCountsSchema,
+  type ConversationWorkflowStatus,
   conversationListResponseSchema,
   conversationOrderStateSchema,
   type ConversationDetailResponse,
@@ -19,8 +21,10 @@ export class ConversationApiError extends Error {
   }
 }
 
-export async function getConversations(): Promise<ConversationListResponse> {
-  return request('/api/conversations?limit=50', conversationListResponseSchema.parse);
+export async function getConversations(input?: { status: ConversationWorkflowStatus }): Promise<ConversationListResponse> {
+  const query = new URLSearchParams({ limit: "50" });
+  if (input) query.set("status", input.status);
+  return request(`/api/conversations?${query.toString()}`, conversationListResponseSchema.parse);
 }
 
 export async function getConversation(id: string): Promise<ConversationDetailResponse> {
@@ -50,4 +54,8 @@ async function request<T>(path: string, parse: (value: unknown) => T): Promise<T
       cause: error,
     });
   }
+}
+
+export async function getConversationStatusCounts() {
+  return request("/api/conversations/status-counts", conversationStatusCountsSchema.parse);
 }

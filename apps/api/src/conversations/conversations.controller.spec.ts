@@ -1,12 +1,15 @@
 import {
+  conversationStatusChangeResponseSchema,
   conversationDetailResponseSchema,
   conversationListResponseSchema,
   conversationMessageSchema,
   conversationOrderStartResponseSchema,
   conversationOrderStateSchema,
 } from '@autosale/contracts/conversations';
+import { TenantLifecycleFrozenError } from '@autosale/database';
+import { TenantLifecycleExceptionFilter } from '../common/tenant-lifecycle-exception.filter.js';
 import type { AuthPrincipal } from '@autosale/contracts/auth';
-import { BadRequestException, type INestApplication, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, type INestApplication, NotFoundException } from '@nestjs/common';
 import { APP_GUARD, Reflector } from '@nestjs/core';
 import { Test } from '@nestjs/testing';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -36,6 +39,8 @@ describe('ConversationsController', () => {
   let app: INestApplication | undefined;
   const list = vi.fn();
   const detail = vi.fn();
+  const statusCounts = vi.fn();
+  const changeStatus = vi.fn();
   const send = vi.fn();
   const retry = vi.fn();
   const createOrder = vi.fn();
@@ -57,6 +62,7 @@ describe('ConversationsController', () => {
       items: [
         {
           id: conversationId,
+          workflowStatus: 'ACTIVE', statusVersion: 0,
           channel: 'INSTAGRAM',
           participantName: 'Олена',
           participantUsername: 'olena',
@@ -69,6 +75,7 @@ describe('ConversationsController', () => {
     });
     detail.mockReset().mockResolvedValue({
       id: conversationId,
+      workflowStatus: 'INACTIVE', statusVersion: 3,
       channel: 'INSTAGRAM',
       participantName: 'Олена',
       participantUsername: 'olena',
@@ -76,6 +83,8 @@ describe('ConversationsController', () => {
       replyCapability: { enabled: true, aiDraftSendAllowed: true, reason: null },
       messages: [],
     });
+    changeStatus.mockReset().mockResolvedValue({ status: 'INACTIVE', statusVersion: 1, statusChangedAt: '2026-10-25T12:00:00.000Z' });
+    statusCounts.mockReset().mockResolvedValue({ ACTIVE: 2, INACTIVE: 1, CLOSED: 1 });
     send.mockReset().mockResolvedValue(outboundMessage);
     retry.mockReset().mockResolvedValue(outboundMessage);
     createOrder.mockReset().mockResolvedValue({ orderId: null, queued: true });
@@ -88,7 +97,7 @@ describe('ConversationsController', () => {
     const moduleRef = await Test.createTestingModule({
       controllers: [ConversationsController],
       providers: [
-        { provide: ConversationsService, useValue: { list, detail, send, retry, createOrder, orderState } },
+        { provide: ConversationsService, useValue: { list, detail, statusCounts, changeStatus, send, retry, createOrder, orderState } },
         { provide: SessionService, useValue: { resolve: resolveSession } },
         { provide: CsrfService, useValue: csrf },
         { provide: AUTH_HTTP_CONFIG, useValue: { cookieName: 'autosale_session', production: false } },
@@ -105,10 +114,58 @@ describe('ConversationsController', () => {
       ],
     }).compile();
     app = moduleRef.createNestApplication();
+    app.useGlobalFilters(new TenantLifecycleExceptionFilter());
     await app.init();
   });
 
   afterEach(async () => app?.close());
+
+  it.each([['manager-token', manager], ['owner-token', owner]])('moves status for %s with CSRF', async (token, principal) => {
+    const body = { status: 'INACTIVE', expectedVersion: 0 };
+    const response = await request(app!.getHttpServer()).patch(`/api/conversations/${conversationId}/status`)
+      .set('Cookie', `autosale_session=${token}`).set('x-csrf-token', csrf.issue(principal.sessionId)).send(body).expect(200);
+    expect(() => conversationStatusChangeResponseSchema.parse(response.body)).not.toThrow();
+    expect(changeStatus).toHaveBeenCalledWith(tenantId, principal.userId, conversationId, body);
+    expect(send).not.toHaveBeenCalled();
+  });
+
+  it('rejects unauthenticated, non-member and missing CSRF status mutations', async () => {
+    const url = `/api/conversations/${conversationId}/status`;
+    await request(app!.getHttpServer()).patch(url).send({}).expect(401);
+    await request(app!.getHttpServer()).patch(url).set('Cookie', 'autosale_session=manager-token').send({}).expect(403);
+    resolveSession.mockResolvedValueOnce({ ...manager, membershipRole: null, tenantId: null });
+    await request(app!.getHttpServer()).patch(url).set('Cookie', 'autosale_session=manager-token')
+      .set('x-csrf-token', csrf.issue(manager.sessionId)).send({}).expect(403);
+    expect(changeStatus).not.toHaveBeenCalled();
+  });
+
+  it.each([{ status: 'ARCHIVED', expectedVersion: 0 }, { status: 'CLOSED', expectedVersion: -1 },
+    { status: 'CLOSED', expectedVersion: 0.5 }, { status: 'CLOSED', expectedVersion: '0' }, { status: 'CLOSED' }])
+  ('returns a safe validation error for %j', async (body) => {
+    const response = await request(app!.getHttpServer()).patch(`/api/conversations/${conversationId}/status`)
+      .set('Cookie', 'autosale_session=manager-token').set('x-csrf-token', csrf.issue(manager.sessionId)).send(body).expect(400);
+    expect(response.body.message).toBe('CONVERSATION_STATUS_INVALID');
+    expect(changeStatus).not.toHaveBeenCalled();
+  });
+
+  it('returns safe conflict and not-found JSON errors', async () => {
+    for (const [error, status] of [[new ConflictException('CONVERSATION_STATUS_CHANGED'), 409], [new NotFoundException('Conversation not found'), 404]] as const) {
+      changeStatus.mockRejectedValueOnce(error);
+      const response = await request(app!.getHttpServer()).patch(`/api/conversations/${conversationId}/status`)
+        .set('Cookie', 'autosale_session=manager-token').set('x-csrf-token', csrf.issue(manager.sessionId))
+        .send({ status: 'CLOSED', expectedVersion: 0 }).expect(status);
+      expect(response.body.message).toBe(error.message);
+      expect(response.body).not.toHaveProperty('stack');
+    }
+  });
+
+  it('returns the shared safe tenant freeze error', async () => {
+    changeStatus.mockRejectedValueOnce(new TenantLifecycleFrozenError('CONVERSATION_TRIAGE'));
+    const response = await request(app!.getHttpServer()).patch(`/api/conversations/${conversationId}/status`)
+      .set('Cookie', 'autosale_session=manager-token').set('x-csrf-token', csrf.issue(manager.sessionId))
+      .send({ status: 'CLOSED', expectedVersion: 0 }).expect(409);
+    expect(response.body).toEqual({ statusCode: 409, code: 'TENANT_LIFECYCLE_FROZEN', message: 'TENANT_LIFECYCLE_FROZEN' });
+  });
 
   it('returns a list conforming to the shared response contract', async () => {
     const response = await request(app!.getHttpServer()).get('/api/conversations?limit=20')
@@ -116,6 +173,28 @@ describe('ConversationsController', () => {
 
     expect(() => conversationListResponseSchema.parse(response.body)).not.toThrow();
     expect(list).toHaveBeenCalledWith(tenantId, { limit: 20 });
+  });
+
+  it('filters valid statuses and rejects unknown status values', async () => {
+    await request(app!.getHttpServer()).get('/api/conversations?status=INACTIVE&limit=1')
+      .set('Cookie', 'autosale_session=manager-token').expect(200);
+    expect(list).toHaveBeenCalledWith(tenantId, { status: 'INACTIVE', limit: 1 });
+    list.mockClear();
+    await request(app!.getHttpServer()).get('/api/conversations?status=ARCHIVED')
+      .set('Cookie', 'autosale_session=manager-token').expect(400);
+    expect(list).not.toHaveBeenCalled();
+  });
+
+  it('returns tenant counts through the fixed route and requires membership', async () => {
+    const response = await request(app!.getHttpServer()).get('/api/conversations/status-counts')
+      .set('Cookie', 'autosale_session=manager-token').expect(200);
+    expect(response.body).toEqual({ ACTIVE: 2, INACTIVE: 1, CLOSED: 1 });
+    expect(statusCounts).toHaveBeenCalledWith(tenantId);
+    expect(detail).not.toHaveBeenCalled();
+    resolveSession.mockResolvedValueOnce({ ...manager, membershipRole: null, tenantId: null });
+    await request(app!.getHttpServer()).get('/api/conversations/status-counts')
+      .set('Cookie', 'autosale_session=manager-token').expect(403);
+    expect(statusCounts).toHaveBeenCalledTimes(1);
   });
 
   it('returns detail conforming to the shared response contract', async () => {
@@ -225,10 +304,19 @@ describe('ConversationsController', () => {
     expect(document.paths['/api/conversations/{id}/messages/{messageId}/retry']?.post?.responses?.['201']).toBeDefined();
     expect(document.paths['/api/conversations/{id}/order']?.get?.responses?.['200']).toBeDefined();
     expect(document.paths['/api/conversations/{id}/order']?.post?.responses?.['201']).toBeDefined();
+    const statusResponse = document.paths['/api/conversations/{id}/status']?.patch?.responses?.['200'];
+    expect(JSON.stringify(statusResponse)).toContain('statusChangedAt');
+    expect(JSON.stringify(statusResponse)).toContain('statusVersion');
     const response = document.paths['/api/conversations']?.get?.responses?.['200'];
+    expect(JSON.stringify(response)).toContain('workflowStatus');
+    expect(JSON.stringify(response)).toContain('statusVersion');
+    expect(document.paths['/api/conversations/status-counts']?.get?.responses?.['200']).toBeDefined();
+    expect(JSON.stringify(document.paths['/api/conversations']?.get?.parameters)).toContain('status');
     expect(JSON.stringify(response)).toContain('participantAvatarUrl');
     expect(JSON.stringify(response)).toContain('participantUsername');
     const detailResponse = document.paths['/api/conversations/{id}']?.get?.responses?.['200'];
+    expect(JSON.stringify(detailResponse)).toContain('workflowStatus');
+    expect(JSON.stringify(detailResponse)).toContain('statusVersion');
     expect(JSON.stringify(detailResponse)).toContain('TIKTOK_CAPABILITY_UNAVAILABLE');
     expect(JSON.stringify(detailResponse)).toContain('TIKTOK_REPLY_NOT_PERMITTED');
   });

@@ -1131,6 +1131,12 @@ model WebhookEvent {
   @@map("webhook_events")
 }
 
+enum ConversationWorkflowStatus {
+  ACTIVE
+  INACTIVE
+  CLOSED
+}
+
 model Conversation {
   id                     String                    @id @default(uuid()) @db.Uuid
   tenantId               String                    @map("tenant_id") @db.Uuid
@@ -1140,6 +1146,10 @@ model Conversation {
   profileId              String?                   @map("profile_id") @db.Uuid
   displayName            String?                   @map("display_name")
   lastMessageAt          DateTime                  @map("last_message_at")
+  workflowStatus       ConversationWorkflowStatus @default(ACTIVE) @map("workflow_status")
+  statusVersion        Int                        @default(0) @map("status_version")
+  statusChangedAt      DateTime?                  @map("status_changed_at")
+  statusChangedByUserId String?                   @map("status_changed_by_user_id") @db.Uuid
   createdAt              DateTime                  @default(now()) @map("created_at")
   updatedAt              DateTime                  @updatedAt @map("updated_at")
   tenant                 Tenant                    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
@@ -1152,6 +1162,7 @@ model Conversation {
   @@unique([tenantId, channel, externalConversationId])
   @@unique([tenantId, id])
   @@index([tenantId, lastMessageAt])
+  @@index([tenantId, workflowStatus, lastMessageAt(sort: Desc), id(sort: Desc)], map: "conversations_tenant_status_last_message_id_idx")
   @@map("conversations")
 }
 

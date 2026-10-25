@@ -23,6 +23,7 @@ const message = {
 };
 const conversation: ConversationDetailResponse = {
   id: '11111111-1111-4111-8111-111111111111',
+  workflowStatus: 'ACTIVE', statusVersion: 0,
   channel: 'INSTAGRAM',
   participantName: 'Олена',
   participantUsername: 'olena',

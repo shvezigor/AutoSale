@@ -20,11 +20,25 @@ export type ConversationModel = runtime.Types.Result.DefaultSelection<Prisma.$Co
 
 export type AggregateConversation = {
   _count: ConversationCountAggregateOutputType | null
+  _avg: ConversationAvgAggregateOutputType | null
+  _sum: ConversationSumAggregateOutputType | null
   _min: ConversationMinAggregateOutputType | null
   _max: ConversationMaxAggregateOutputType | null
 }
 
+export type ConversationAvgAggregateOutputType = {
+  statusVersion: number | null
+}
+
+export type ConversationSumAggregateOutputType = {
+  statusVersion: number | null
+}
+
 export type ConversationMinAggregateOutputType = {
+  workflowStatus: $Enums.ConversationWorkflowStatus | null
+  statusVersion: number | null
+  statusChangedAt: Date | null
+  statusChangedByUserId: string | null
   id: string | null
   tenantId: string | null
   channel: string | null
@@ -38,6 +52,10 @@ export type ConversationMinAggregateOutputType = {
 }
 
 export type ConversationMaxAggregateOutputType = {
+  workflowStatus: $Enums.ConversationWorkflowStatus | null
+  statusVersion: number | null
+  statusChangedAt: Date | null
+  statusChangedByUserId: string | null
   id: string | null
   tenantId: string | null
   channel: string | null
@@ -51,6 +69,10 @@ export type ConversationMaxAggregateOutputType = {
 }
 
 export type ConversationCountAggregateOutputType = {
+  workflowStatus: number
+  statusVersion: number
+  statusChangedAt: number
+  statusChangedByUserId: number
   id: number
   tenantId: number
   channel: number
@@ -65,7 +87,19 @@ export type ConversationCountAggregateOutputType = {
 }
 
 
+export type ConversationAvgAggregateInputType = {
+  statusVersion?: true
+}
+
+export type ConversationSumAggregateInputType = {
+  statusVersion?: true
+}
+
 export type ConversationMinAggregateInputType = {
+  workflowStatus?: true
+  statusVersion?: true
+  statusChangedAt?: true
+  statusChangedByUserId?: true
   id?: true
   tenantId?: true
   channel?: true
@@ -79,6 +113,10 @@ export type ConversationMinAggregateInputType = {
 }
 
 export type ConversationMaxAggregateInputType = {
+  workflowStatus?: true
+  statusVersion?: true
+  statusChangedAt?: true
+  statusChangedByUserId?: true
   id?: true
   tenantId?: true
   channel?: true
@@ -92,6 +130,10 @@ export type ConversationMaxAggregateInputType = {
 }
 
 export type ConversationCountAggregateInputType = {
+  workflowStatus?: true
+  statusVersion?: true
+  statusChangedAt?: true
+  statusChangedByUserId?: true
   id?: true
   tenantId?: true
   channel?: true
@@ -142,6 +184,18 @@ export type ConversationAggregateArgs<ExtArgs extends runtime.Types.Extensions.I
   _count?: true | ConversationCountAggregateInputType
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   *
+   * Select which fields to average
+  **/
+  _avg?: ConversationAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   *
+   * Select which fields to sum
+  **/
+  _sum?: ConversationSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
    * Select which fields to find the minimum value
   **/
@@ -173,11 +227,17 @@ export type ConversationGroupByArgs<ExtArgs extends runtime.Types.Extensions.Int
   take?: number
   skip?: number
   _count?: ConversationCountAggregateInputType | true
+  _avg?: ConversationAvgAggregateInputType
+  _sum?: ConversationSumAggregateInputType
   _min?: ConversationMinAggregateInputType
   _max?: ConversationMaxAggregateInputType
 }
 
 export type ConversationGroupByOutputType = {
+  workflowStatus: $Enums.ConversationWorkflowStatus
+  statusVersion: number
+  statusChangedAt: Date | null
+  statusChangedByUserId: string | null
   id: string
   tenantId: string
   channel: string
@@ -189,6 +249,8 @@ export type ConversationGroupByOutputType = {
   createdAt: Date
   updatedAt: Date
   _count: ConversationCountAggregateOutputType | null
+  _avg: ConversationAvgAggregateOutputType | null
+  _sum: ConversationSumAggregateOutputType | null
   _min: ConversationMinAggregateOutputType | null
   _max: ConversationMaxAggregateOutputType | null
 }
@@ -212,6 +274,10 @@ export type ConversationWhereInput = {
   AND?: Prisma.ConversationWhereInput | Prisma.ConversationWhereInput[]
   OR?: Prisma.ConversationWhereInput[]
   NOT?: Prisma.ConversationWhereInput | Prisma.ConversationWhereInput[]
+  workflowStatus?: Prisma.EnumConversationWorkflowStatusFilter<"Conversation"> | $Enums.ConversationWorkflowStatus
+  statusVersion?: Prisma.IntFilter<"Conversation"> | number
+  statusChangedAt?: Prisma.DateTimeNullableFilter<"Conversation"> | Date | string | null
+  statusChangedByUserId?: Prisma.UuidNullableFilter<"Conversation"> | string | null
   id?: Prisma.UuidFilter<"Conversation"> | string
   tenantId?: Prisma.UuidFilter<"Conversation"> | string
   channel?: Prisma.StringFilter<"Conversation"> | string
@@ -231,6 +297,10 @@ export type ConversationWhereInput = {
 }
 
 export type ConversationOrderByWithRelationInput = {
+  workflowStatus?: Prisma.SortOrder
+  statusVersion?: Prisma.SortOrder
+  statusChangedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  statusChangedByUserId?: Prisma.SortOrderInput | Prisma.SortOrder
   id?: Prisma.SortOrder
   tenantId?: Prisma.SortOrder
   channel?: Prisma.SortOrder
@@ -256,6 +326,10 @@ export type ConversationWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.ConversationWhereInput | Prisma.ConversationWhereInput[]
   OR?: Prisma.ConversationWhereInput[]
   NOT?: Prisma.ConversationWhereInput | Prisma.ConversationWhereInput[]
+  workflowStatus?: Prisma.EnumConversationWorkflowStatusFilter<"Conversation"> | $Enums.ConversationWorkflowStatus
+  statusVersion?: Prisma.IntFilter<"Conversation"> | number
+  statusChangedAt?: Prisma.DateTimeNullableFilter<"Conversation"> | Date | string | null
+  statusChangedByUserId?: Prisma.UuidNullableFilter<"Conversation"> | string | null
   tenantId?: Prisma.UuidFilter<"Conversation"> | string
   channel?: Prisma.StringFilter<"Conversation"> | string
   externalConversationId?: Prisma.StringFilter<"Conversation"> | string
@@ -274,6 +348,10 @@ export type ConversationWhereUniqueInput = Prisma.AtLeast<{
 }, "id" | "tenantId_channel_externalConversationId" | "tenantId_id">
 
 export type ConversationOrderByWithAggregationInput = {
+  workflowStatus?: Prisma.SortOrder
+  statusVersion?: Prisma.SortOrder
+  statusChangedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  statusChangedByUserId?: Prisma.SortOrderInput | Prisma.SortOrder
   id?: Prisma.SortOrder
   tenantId?: Prisma.SortOrder
   channel?: Prisma.SortOrder
@@ -285,14 +363,20 @@ export type ConversationOrderByWithAggregationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.ConversationCountOrderByAggregateInput
+  _avg?: Prisma.ConversationAvgOrderByAggregateInput
   _max?: Prisma.ConversationMaxOrderByAggregateInput
   _min?: Prisma.ConversationMinOrderByAggregateInput
+  _sum?: Prisma.ConversationSumOrderByAggregateInput
 }
 
 export type ConversationScalarWhereWithAggregatesInput = {
   AND?: Prisma.ConversationScalarWhereWithAggregatesInput | Prisma.ConversationScalarWhereWithAggregatesInput[]
   OR?: Prisma.ConversationScalarWhereWithAggregatesInput[]
   NOT?: Prisma.ConversationScalarWhereWithAggregatesInput | Prisma.ConversationScalarWhereWithAggregatesInput[]
+  workflowStatus?: Prisma.EnumConversationWorkflowStatusWithAggregatesFilter<"Conversation"> | $Enums.ConversationWorkflowStatus
+  statusVersion?: Prisma.IntWithAggregatesFilter<"Conversation"> | number
+  statusChangedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Conversation"> | Date | string | null
+  statusChangedByUserId?: Prisma.UuidNullableWithAggregatesFilter<"Conversation"> | string | null
   id?: Prisma.UuidWithAggregatesFilter<"Conversation"> | string
   tenantId?: Prisma.UuidWithAggregatesFilter<"Conversation"> | string
   channel?: Prisma.StringWithAggregatesFilter<"Conversation"> | string
@@ -306,6 +390,10 @@ export type ConversationScalarWhereWithAggregatesInput = {
 }
 
 export type ConversationCreateInput = {
+  workflowStatus?: $Enums.ConversationWorkflowStatus
+  statusVersion?: number
+  statusChangedAt?: Date | string | null
+  statusChangedByUserId?: string | null
   id?: string
   channel: string
   externalConversationId: string
@@ -323,6 +411,10 @@ export type ConversationCreateInput = {
 }
 
 export type ConversationUncheckedCreateInput = {
+  workflowStatus?: $Enums.ConversationWorkflowStatus
+  statusVersion?: number
+  statusChangedAt?: Date | string | null
+  statusChangedByUserId?: string | null
   id?: string
   tenantId: string
   channel: string
@@ -340,6 +432,10 @@ export type ConversationUncheckedCreateInput = {
 }
 
 export type ConversationUpdateInput = {
+  workflowStatus?: Prisma.EnumConversationWorkflowStatusFieldUpdateOperationsInput | $Enums.ConversationWorkflowStatus
+  statusVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  statusChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  statusChangedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   channel?: Prisma.StringFieldUpdateOperationsInput | string
   externalConversationId?: Prisma.StringFieldUpdateOperationsInput | string
@@ -357,6 +453,10 @@ export type ConversationUpdateInput = {
 }
 
 export type ConversationUncheckedUpdateInput = {
+  workflowStatus?: Prisma.EnumConversationWorkflowStatusFieldUpdateOperationsInput | $Enums.ConversationWorkflowStatus
+  statusVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  statusChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  statusChangedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   channel?: Prisma.StringFieldUpdateOperationsInput | string
@@ -374,6 +474,10 @@ export type ConversationUncheckedUpdateInput = {
 }
 
 export type ConversationCreateManyInput = {
+  workflowStatus?: $Enums.ConversationWorkflowStatus
+  statusVersion?: number
+  statusChangedAt?: Date | string | null
+  statusChangedByUserId?: string | null
   id?: string
   tenantId: string
   channel: string
@@ -387,6 +491,10 @@ export type ConversationCreateManyInput = {
 }
 
 export type ConversationUpdateManyMutationInput = {
+  workflowStatus?: Prisma.EnumConversationWorkflowStatusFieldUpdateOperationsInput | $Enums.ConversationWorkflowStatus
+  statusVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  statusChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  statusChangedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   channel?: Prisma.StringFieldUpdateOperationsInput | string
   externalConversationId?: Prisma.StringFieldUpdateOperationsInput | string
@@ -398,6 +506,10 @@ export type ConversationUpdateManyMutationInput = {
 }
 
 export type ConversationUncheckedUpdateManyInput = {
+  workflowStatus?: Prisma.EnumConversationWorkflowStatusFieldUpdateOperationsInput | $Enums.ConversationWorkflowStatus
+  statusVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  statusChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  statusChangedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   channel?: Prisma.StringFieldUpdateOperationsInput | string
@@ -432,6 +544,10 @@ export type ConversationTenantIdIdCompoundUniqueInput = {
 }
 
 export type ConversationCountOrderByAggregateInput = {
+  workflowStatus?: Prisma.SortOrder
+  statusVersion?: Prisma.SortOrder
+  statusChangedAt?: Prisma.SortOrder
+  statusChangedByUserId?: Prisma.SortOrder
   id?: Prisma.SortOrder
   tenantId?: Prisma.SortOrder
   channel?: Prisma.SortOrder
@@ -444,7 +560,15 @@ export type ConversationCountOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
 }
 
+export type ConversationAvgOrderByAggregateInput = {
+  statusVersion?: Prisma.SortOrder
+}
+
 export type ConversationMaxOrderByAggregateInput = {
+  workflowStatus?: Prisma.SortOrder
+  statusVersion?: Prisma.SortOrder
+  statusChangedAt?: Prisma.SortOrder
+  statusChangedByUserId?: Prisma.SortOrder
   id?: Prisma.SortOrder
   tenantId?: Prisma.SortOrder
   channel?: Prisma.SortOrder
@@ -458,6 +582,10 @@ export type ConversationMaxOrderByAggregateInput = {
 }
 
 export type ConversationMinOrderByAggregateInput = {
+  workflowStatus?: Prisma.SortOrder
+  statusVersion?: Prisma.SortOrder
+  statusChangedAt?: Prisma.SortOrder
+  statusChangedByUserId?: Prisma.SortOrder
   id?: Prisma.SortOrder
   tenantId?: Prisma.SortOrder
   channel?: Prisma.SortOrder
@@ -468,6 +596,10 @@ export type ConversationMinOrderByAggregateInput = {
   lastMessageAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type ConversationSumOrderByAggregateInput = {
+  statusVersion?: Prisma.SortOrder
 }
 
 export type ConversationScalarRelationFilter = {
@@ -515,6 +647,10 @@ export type ConversationUncheckedUpdateManyWithoutTenantNestedInput = {
   update?: Prisma.ConversationUpdateWithWhereUniqueWithoutTenantInput | Prisma.ConversationUpdateWithWhereUniqueWithoutTenantInput[]
   updateMany?: Prisma.ConversationUpdateManyWithWhereWithoutTenantInput | Prisma.ConversationUpdateManyWithWhereWithoutTenantInput[]
   deleteMany?: Prisma.ConversationScalarWhereInput | Prisma.ConversationScalarWhereInput[]
+}
+
+export type EnumConversationWorkflowStatusFieldUpdateOperationsInput = {
+  set?: $Enums.ConversationWorkflowStatus
 }
 
 export type ConversationCreateNestedManyWithoutProfileInput = {
@@ -616,6 +752,10 @@ export type ConversationUpdateOneRequiredWithoutOrderIntentEvaluationsNestedInpu
 }
 
 export type ConversationCreateWithoutTenantInput = {
+  workflowStatus?: $Enums.ConversationWorkflowStatus
+  statusVersion?: number
+  statusChangedAt?: Date | string | null
+  statusChangedByUserId?: string | null
   id?: string
   channel: string
   externalConversationId: string
@@ -632,6 +772,10 @@ export type ConversationCreateWithoutTenantInput = {
 }
 
 export type ConversationUncheckedCreateWithoutTenantInput = {
+  workflowStatus?: $Enums.ConversationWorkflowStatus
+  statusVersion?: number
+  statusChangedAt?: Date | string | null
+  statusChangedByUserId?: string | null
   id?: string
   channel: string
   externalConversationId: string
@@ -677,6 +821,10 @@ export type ConversationScalarWhereInput = {
   AND?: Prisma.ConversationScalarWhereInput | Prisma.ConversationScalarWhereInput[]
   OR?: Prisma.ConversationScalarWhereInput[]
   NOT?: Prisma.ConversationScalarWhereInput | Prisma.ConversationScalarWhereInput[]
+  workflowStatus?: Prisma.EnumConversationWorkflowStatusFilter<"Conversation"> | $Enums.ConversationWorkflowStatus
+  statusVersion?: Prisma.IntFilter<"Conversation"> | number
+  statusChangedAt?: Prisma.DateTimeNullableFilter<"Conversation"> | Date | string | null
+  statusChangedByUserId?: Prisma.UuidNullableFilter<"Conversation"> | string | null
   id?: Prisma.UuidFilter<"Conversation"> | string
   tenantId?: Prisma.UuidFilter<"Conversation"> | string
   channel?: Prisma.StringFilter<"Conversation"> | string
@@ -690,6 +838,10 @@ export type ConversationScalarWhereInput = {
 }
 
 export type ConversationCreateWithoutProfileInput = {
+  workflowStatus?: $Enums.ConversationWorkflowStatus
+  statusVersion?: number
+  statusChangedAt?: Date | string | null
+  statusChangedByUserId?: string | null
   id?: string
   channel: string
   externalConversationId: string
@@ -706,6 +858,10 @@ export type ConversationCreateWithoutProfileInput = {
 }
 
 export type ConversationUncheckedCreateWithoutProfileInput = {
+  workflowStatus?: $Enums.ConversationWorkflowStatus
+  statusVersion?: number
+  statusChangedAt?: Date | string | null
+  statusChangedByUserId?: string | null
   id?: string
   channel: string
   externalConversationId: string
@@ -747,6 +903,10 @@ export type ConversationUpdateManyWithWhereWithoutProfileInput = {
 }
 
 export type ConversationCreateWithoutMessagesInput = {
+  workflowStatus?: $Enums.ConversationWorkflowStatus
+  statusVersion?: number
+  statusChangedAt?: Date | string | null
+  statusChangedByUserId?: string | null
   id?: string
   channel: string
   externalConversationId: string
@@ -763,6 +923,10 @@ export type ConversationCreateWithoutMessagesInput = {
 }
 
 export type ConversationUncheckedCreateWithoutMessagesInput = {
+  workflowStatus?: $Enums.ConversationWorkflowStatus
+  statusVersion?: number
+  statusChangedAt?: Date | string | null
+  statusChangedByUserId?: string | null
   id?: string
   tenantId: string
   channel: string
@@ -795,6 +959,10 @@ export type ConversationUpdateToOneWithWhereWithoutMessagesInput = {
 }
 
 export type ConversationUpdateWithoutMessagesInput = {
+  workflowStatus?: Prisma.EnumConversationWorkflowStatusFieldUpdateOperationsInput | $Enums.ConversationWorkflowStatus
+  statusVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  statusChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  statusChangedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   channel?: Prisma.StringFieldUpdateOperationsInput | string
   externalConversationId?: Prisma.StringFieldUpdateOperationsInput | string
@@ -811,6 +979,10 @@ export type ConversationUpdateWithoutMessagesInput = {
 }
 
 export type ConversationUncheckedUpdateWithoutMessagesInput = {
+  workflowStatus?: Prisma.EnumConversationWorkflowStatusFieldUpdateOperationsInput | $Enums.ConversationWorkflowStatus
+  statusVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  statusChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  statusChangedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   channel?: Prisma.StringFieldUpdateOperationsInput | string
@@ -827,6 +999,10 @@ export type ConversationUncheckedUpdateWithoutMessagesInput = {
 }
 
 export type ConversationCreateWithoutReplyDraftsInput = {
+  workflowStatus?: $Enums.ConversationWorkflowStatus
+  statusVersion?: number
+  statusChangedAt?: Date | string | null
+  statusChangedByUserId?: string | null
   id?: string
   channel: string
   externalConversationId: string
@@ -843,6 +1019,10 @@ export type ConversationCreateWithoutReplyDraftsInput = {
 }
 
 export type ConversationUncheckedCreateWithoutReplyDraftsInput = {
+  workflowStatus?: $Enums.ConversationWorkflowStatus
+  statusVersion?: number
+  statusChangedAt?: Date | string | null
+  statusChangedByUserId?: string | null
   id?: string
   tenantId: string
   channel: string
@@ -875,6 +1055,10 @@ export type ConversationUpdateToOneWithWhereWithoutReplyDraftsInput = {
 }
 
 export type ConversationUpdateWithoutReplyDraftsInput = {
+  workflowStatus?: Prisma.EnumConversationWorkflowStatusFieldUpdateOperationsInput | $Enums.ConversationWorkflowStatus
+  statusVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  statusChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  statusChangedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   channel?: Prisma.StringFieldUpdateOperationsInput | string
   externalConversationId?: Prisma.StringFieldUpdateOperationsInput | string
@@ -891,6 +1075,10 @@ export type ConversationUpdateWithoutReplyDraftsInput = {
 }
 
 export type ConversationUncheckedUpdateWithoutReplyDraftsInput = {
+  workflowStatus?: Prisma.EnumConversationWorkflowStatusFieldUpdateOperationsInput | $Enums.ConversationWorkflowStatus
+  statusVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  statusChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  statusChangedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   channel?: Prisma.StringFieldUpdateOperationsInput | string
@@ -907,6 +1095,10 @@ export type ConversationUncheckedUpdateWithoutReplyDraftsInput = {
 }
 
 export type ConversationCreateWithoutOrdersInput = {
+  workflowStatus?: $Enums.ConversationWorkflowStatus
+  statusVersion?: number
+  statusChangedAt?: Date | string | null
+  statusChangedByUserId?: string | null
   id?: string
   channel: string
   externalConversationId: string
@@ -923,6 +1115,10 @@ export type ConversationCreateWithoutOrdersInput = {
 }
 
 export type ConversationUncheckedCreateWithoutOrdersInput = {
+  workflowStatus?: $Enums.ConversationWorkflowStatus
+  statusVersion?: number
+  statusChangedAt?: Date | string | null
+  statusChangedByUserId?: string | null
   id?: string
   tenantId: string
   channel: string
@@ -955,6 +1151,10 @@ export type ConversationUpdateToOneWithWhereWithoutOrdersInput = {
 }
 
 export type ConversationUpdateWithoutOrdersInput = {
+  workflowStatus?: Prisma.EnumConversationWorkflowStatusFieldUpdateOperationsInput | $Enums.ConversationWorkflowStatus
+  statusVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  statusChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  statusChangedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   channel?: Prisma.StringFieldUpdateOperationsInput | string
   externalConversationId?: Prisma.StringFieldUpdateOperationsInput | string
@@ -971,6 +1171,10 @@ export type ConversationUpdateWithoutOrdersInput = {
 }
 
 export type ConversationUncheckedUpdateWithoutOrdersInput = {
+  workflowStatus?: Prisma.EnumConversationWorkflowStatusFieldUpdateOperationsInput | $Enums.ConversationWorkflowStatus
+  statusVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  statusChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  statusChangedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   channel?: Prisma.StringFieldUpdateOperationsInput | string
@@ -987,6 +1191,10 @@ export type ConversationUncheckedUpdateWithoutOrdersInput = {
 }
 
 export type ConversationCreateWithoutOrderIntentEvaluationsInput = {
+  workflowStatus?: $Enums.ConversationWorkflowStatus
+  statusVersion?: number
+  statusChangedAt?: Date | string | null
+  statusChangedByUserId?: string | null
   id?: string
   channel: string
   externalConversationId: string
@@ -1003,6 +1211,10 @@ export type ConversationCreateWithoutOrderIntentEvaluationsInput = {
 }
 
 export type ConversationUncheckedCreateWithoutOrderIntentEvaluationsInput = {
+  workflowStatus?: $Enums.ConversationWorkflowStatus
+  statusVersion?: number
+  statusChangedAt?: Date | string | null
+  statusChangedByUserId?: string | null
   id?: string
   tenantId: string
   channel: string
@@ -1035,6 +1247,10 @@ export type ConversationUpdateToOneWithWhereWithoutOrderIntentEvaluationsInput =
 }
 
 export type ConversationUpdateWithoutOrderIntentEvaluationsInput = {
+  workflowStatus?: Prisma.EnumConversationWorkflowStatusFieldUpdateOperationsInput | $Enums.ConversationWorkflowStatus
+  statusVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  statusChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  statusChangedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   channel?: Prisma.StringFieldUpdateOperationsInput | string
   externalConversationId?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1051,6 +1267,10 @@ export type ConversationUpdateWithoutOrderIntentEvaluationsInput = {
 }
 
 export type ConversationUncheckedUpdateWithoutOrderIntentEvaluationsInput = {
+  workflowStatus?: Prisma.EnumConversationWorkflowStatusFieldUpdateOperationsInput | $Enums.ConversationWorkflowStatus
+  statusVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  statusChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  statusChangedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   channel?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1067,6 +1287,10 @@ export type ConversationUncheckedUpdateWithoutOrderIntentEvaluationsInput = {
 }
 
 export type ConversationCreateManyTenantInput = {
+  workflowStatus?: $Enums.ConversationWorkflowStatus
+  statusVersion?: number
+  statusChangedAt?: Date | string | null
+  statusChangedByUserId?: string | null
   id?: string
   channel: string
   externalConversationId: string
@@ -1079,6 +1303,10 @@ export type ConversationCreateManyTenantInput = {
 }
 
 export type ConversationUpdateWithoutTenantInput = {
+  workflowStatus?: Prisma.EnumConversationWorkflowStatusFieldUpdateOperationsInput | $Enums.ConversationWorkflowStatus
+  statusVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  statusChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  statusChangedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   channel?: Prisma.StringFieldUpdateOperationsInput | string
   externalConversationId?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1095,6 +1323,10 @@ export type ConversationUpdateWithoutTenantInput = {
 }
 
 export type ConversationUncheckedUpdateWithoutTenantInput = {
+  workflowStatus?: Prisma.EnumConversationWorkflowStatusFieldUpdateOperationsInput | $Enums.ConversationWorkflowStatus
+  statusVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  statusChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  statusChangedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   channel?: Prisma.StringFieldUpdateOperationsInput | string
   externalConversationId?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1111,6 +1343,10 @@ export type ConversationUncheckedUpdateWithoutTenantInput = {
 }
 
 export type ConversationUncheckedUpdateManyWithoutTenantInput = {
+  workflowStatus?: Prisma.EnumConversationWorkflowStatusFieldUpdateOperationsInput | $Enums.ConversationWorkflowStatus
+  statusVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  statusChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  statusChangedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   channel?: Prisma.StringFieldUpdateOperationsInput | string
   externalConversationId?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1123,6 +1359,10 @@ export type ConversationUncheckedUpdateManyWithoutTenantInput = {
 }
 
 export type ConversationCreateManyProfileInput = {
+  workflowStatus?: $Enums.ConversationWorkflowStatus
+  statusVersion?: number
+  statusChangedAt?: Date | string | null
+  statusChangedByUserId?: string | null
   id?: string
   channel: string
   externalConversationId: string
@@ -1134,6 +1374,10 @@ export type ConversationCreateManyProfileInput = {
 }
 
 export type ConversationUpdateWithoutProfileInput = {
+  workflowStatus?: Prisma.EnumConversationWorkflowStatusFieldUpdateOperationsInput | $Enums.ConversationWorkflowStatus
+  statusVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  statusChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  statusChangedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   channel?: Prisma.StringFieldUpdateOperationsInput | string
   externalConversationId?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1150,6 +1394,10 @@ export type ConversationUpdateWithoutProfileInput = {
 }
 
 export type ConversationUncheckedUpdateWithoutProfileInput = {
+  workflowStatus?: Prisma.EnumConversationWorkflowStatusFieldUpdateOperationsInput | $Enums.ConversationWorkflowStatus
+  statusVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  statusChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  statusChangedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   channel?: Prisma.StringFieldUpdateOperationsInput | string
   externalConversationId?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1165,6 +1413,10 @@ export type ConversationUncheckedUpdateWithoutProfileInput = {
 }
 
 export type ConversationUncheckedUpdateManyWithoutProfileInput = {
+  workflowStatus?: Prisma.EnumConversationWorkflowStatusFieldUpdateOperationsInput | $Enums.ConversationWorkflowStatus
+  statusVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  statusChangedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  statusChangedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   id?: Prisma.StringFieldUpdateOperationsInput | string
   channel?: Prisma.StringFieldUpdateOperationsInput | string
   externalConversationId?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1234,6 +1486,10 @@ export type ConversationCountOutputTypeCountReplyDraftsArgs<ExtArgs extends runt
 
 
 export type ConversationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  workflowStatus?: boolean
+  statusVersion?: boolean
+  statusChangedAt?: boolean
+  statusChangedByUserId?: boolean
   id?: boolean
   tenantId?: boolean
   channel?: boolean
@@ -1254,6 +1510,10 @@ export type ConversationSelect<ExtArgs extends runtime.Types.Extensions.Internal
 }, ExtArgs["result"]["conversation"]>
 
 export type ConversationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  workflowStatus?: boolean
+  statusVersion?: boolean
+  statusChangedAt?: boolean
+  statusChangedByUserId?: boolean
   id?: boolean
   tenantId?: boolean
   channel?: boolean
@@ -1269,6 +1529,10 @@ export type ConversationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
 }, ExtArgs["result"]["conversation"]>
 
 export type ConversationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  workflowStatus?: boolean
+  statusVersion?: boolean
+  statusChangedAt?: boolean
+  statusChangedByUserId?: boolean
   id?: boolean
   tenantId?: boolean
   channel?: boolean
@@ -1284,6 +1548,10 @@ export type ConversationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
 }, ExtArgs["result"]["conversation"]>
 
 export type ConversationSelectScalar = {
+  workflowStatus?: boolean
+  statusVersion?: boolean
+  statusChangedAt?: boolean
+  statusChangedByUserId?: boolean
   id?: boolean
   tenantId?: boolean
   channel?: boolean
@@ -1296,7 +1564,7 @@ export type ConversationSelectScalar = {
   updatedAt?: boolean
 }
 
-export type ConversationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "channel" | "externalConversationId" | "participantId" | "profileId" | "displayName" | "lastMessageAt" | "createdAt" | "updatedAt", ExtArgs["result"]["conversation"]>
+export type ConversationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"workflowStatus" | "statusVersion" | "statusChangedAt" | "statusChangedByUserId" | "id" | "tenantId" | "channel" | "externalConversationId" | "participantId" | "profileId" | "displayName" | "lastMessageAt" | "createdAt" | "updatedAt", ExtArgs["result"]["conversation"]>
 export type ConversationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   profile?: boolean | Prisma.Conversation$profileArgs<ExtArgs>
@@ -1326,6 +1594,10 @@ export type $ConversationPayload<ExtArgs extends runtime.Types.Extensions.Intern
     replyDrafts: Prisma.$AiReplyDraftPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
+    workflowStatus: $Enums.ConversationWorkflowStatus
+    statusVersion: number
+    statusChangedAt: Date | null
+    statusChangedByUserId: string | null
     id: string
     tenantId: string
     channel: string
@@ -1419,8 +1691,8 @@ export interface ConversationDelegate<ExtArgs extends runtime.Types.Extensions.I
    * // Get first 10 Conversations
    * const conversations = await prisma.conversation.findMany({ take: 10 })
    * 
-   * // Only select the `id`
-   * const conversationWithIdOnly = await prisma.conversation.findMany({ select: { id: true } })
+   * // Only select the `statusVersion`
+   * const conversationWithStatusVersionOnly = await prisma.conversation.findMany({ select: { statusVersion: true } })
    * 
    */
   findMany<T extends ConversationFindManyArgs>(args?: Prisma.SelectSubset<T, ConversationFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConversationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
@@ -1464,9 +1736,9 @@ export interface ConversationDelegate<ExtArgs extends runtime.Types.Extensions.I
    *   ]
    * })
    * 
-   * // Create many Conversations and only return the `id`
-   * const conversationWithIdOnly = await prisma.conversation.createManyAndReturn({
-   *   select: { id: true },
+   * // Create many Conversations and only return the `statusVersion`
+   * const conversationWithStatusVersionOnly = await prisma.conversation.createManyAndReturn({
+   *   select: { statusVersion: true },
    *   data: [
    *     // ... provide data here
    *   ]
@@ -1555,9 +1827,9 @@ export interface ConversationDelegate<ExtArgs extends runtime.Types.Extensions.I
    *   ]
    * })
    * 
-   * // Update zero or more Conversations and only return the `id`
-   * const conversationWithIdOnly = await prisma.conversation.updateManyAndReturn({
-   *   select: { id: true },
+   * // Update zero or more Conversations and only return the `statusVersion`
+   * const conversationWithStatusVersionOnly = await prisma.conversation.updateManyAndReturn({
+   *   select: { statusVersion: true },
    *   where: {
    *     // ... provide filter here
    *   },
@@ -1765,6 +2037,10 @@ export interface Prisma__ConversationClient<T, Null = never, ExtArgs extends run
  * Fields of the Conversation model
  */
 export interface ConversationFieldRefs {
+  readonly workflowStatus: Prisma.FieldRef<"Conversation", 'ConversationWorkflowStatus'>
+  readonly statusVersion: Prisma.FieldRef<"Conversation", 'Int'>
+  readonly statusChangedAt: Prisma.FieldRef<"Conversation", 'DateTime'>
+  readonly statusChangedByUserId: Prisma.FieldRef<"Conversation", 'String'>
   readonly id: Prisma.FieldRef<"Conversation", 'String'>
   readonly tenantId: Prisma.FieldRef<"Conversation", 'String'>
   readonly channel: Prisma.FieldRef<"Conversation", 'String'>

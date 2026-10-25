@@ -2,12 +2,13 @@ import { randomUUID } from 'node:crypto';
 import { readFile, readdir } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
-import { createPrismaClient, PlatformChannelDisabledError, type PrismaClient } from '@autosale/database';
+import { createPrismaClient, TenantLifecycleFrozenError, PlatformChannelDisabledError, type PrismaClient } from '@autosale/database';
 import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 import { PostgreSqlContainer, type StartedPostgreSqlContainer } from '@testcontainers/postgresql';
 import pg from 'pg';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { SocialInboundIngestionService } from '../../../worker/src/social/social-inbound-ingestion.service.js';
 import { ConversationsService } from './conversations.service.js';
 
 describe('ConversationsService', () => {
@@ -135,6 +136,102 @@ describe('ConversationsService', () => {
     channelGate.assertEnabled.mockReset().mockResolvedValue(undefined);
   });
 
+  it('moves reversibly, preserves current-state no-ops and rejects stale versions without dispatch', async () => {
+    const initial = await service.changeStatus(tenantId, actorUserId, newestId, { status: 'ACTIVE', expectedVersion: 0 });
+    expect(initial).toEqual({ status: 'ACTIVE', statusVersion: 0, statusChangedAt: null });
+    let version = 0;
+    for (const status of ['INACTIVE', 'CLOSED', 'ACTIVE'] as const) {
+      const moved = await service.changeStatus(tenantId, actorUserId, newestId, { status, expectedVersion: version });
+      expect(moved).toEqual({ status, statusVersion: ++version, statusChangedAt: expect.any(String) });
+      expect(await service.changeStatus(tenantId, actorUserId, newestId, { status, expectedVersion: version })).toEqual(moved);
+      await expect(service.changeStatus(tenantId, actorUserId, newestId, { status, expectedVersion: version - 1 }))
+        .rejects.toThrow('CONVERSATION_STATUS_CHANGED');
+    }
+    expect(await prisma.conversation.findUniqueOrThrow({ where: { id: newestId } }))
+      .toMatchObject({ workflowStatus: 'ACTIVE', statusVersion: 3, statusChangedByUserId: actorUserId });
+    expect(queue.add).not.toHaveBeenCalled();
+  });
+
+  it('gives the same not-found result for missing and foreign conversation IDs', async () => {
+    for (const [tenant, id] of [[tenantId, randomUUID()], [otherTenantId, newestId]]) {
+      await expect(service.changeStatus(tenant!, actorUserId, id!, { status: 'CLOSED', expectedVersion: 0 }))
+        .rejects.toThrow(new NotFoundException('Conversation not found'));
+    }
+    expect(queue.add).not.toHaveBeenCalled();
+  });
+
+  it('allows only one of two concurrent moves with the same expected version', async () => {
+    const row = await prisma.conversation.findUniqueOrThrow({ where: { id: newestId } });
+    const outcomes = await Promise.allSettled(['INACTIVE', 'CLOSED'].map((status) =>
+      service.changeStatus(tenantId, actorUserId, newestId, { status: status as 'INACTIVE' | 'CLOSED', expectedVersion: row.statusVersion })));
+    expect(outcomes.filter((result) => result.status === 'fulfilled')).toHaveLength(1);
+    expect(outcomes.find((result) => result.status === 'rejected')).toMatchObject({ reason: expect.any(ConflictException) });
+    await prisma.conversation.update({ where: { id: newestId }, data: { workflowStatus: 'ACTIVE' } });
+    expect(queue.add).not.toHaveBeenCalled();
+  });
+
+  it('rejects a concurrent stale manager move after inbound commits and preserves a newer manager decision', async () => {
+    const tenant = await prisma.tenant.create({ data: { key: randomUUID(), name: 'Fictional triage race' } });
+    try {
+      const timestamp = new Date('2026-01-01T12:00:01Z');
+      const conversation = await prisma.conversation.create({ data: {
+        tenantId: tenant.id, channel: 'FACEBOOK', participantId: 'fictional-race', externalConversationId: 'fictional-race',
+        lastMessageAt: timestamp, workflowStatus: 'CLOSED', statusVersion: 4, statusChangedAt: new Date(timestamp.getTime() - 1000),
+      } });
+      const event = await prisma.webhookEvent.create({ data: {
+        tenantId: tenant.id, provider: 'META', externalEventId: randomUUID(), payload: {},
+      } });
+      let reachedLock!: () => void;
+      let releaseLock!: () => void;
+      const locked = new Promise<void>((resolve) => { reachedLock = resolve; });
+      const release = new Promise<void>((resolve) => { releaseLock = resolve; });
+      const coordinated = prisma.$extends({ query: { conversation: { async upsert({ args, query }) {
+        const result = await query(args);
+        reachedLock();
+        await release;
+        return result;
+      } } } });
+      const schedule = vi.fn();
+      const orders = vi.fn();
+      const normalize = () => [{ channel: 'FACEBOOK' as const, externalConversationId: 'fictional-race', participantId: 'fictional-race',
+        externalMessageId: randomUUID(), direction: 'INBOUND' as const, senderId: 'fictional-race', text: 'Fictional question',
+        sourceTimestamp: timestamp, attachments: [] }];
+      // The adapter's upsert holds the row lock while the real API move starts.
+      const inbound = new SocialInboundIngestionService(coordinated as PrismaClient, { copy: vi.fn() },
+        { processIfTriggered: orders }, { schedule }).process(tenant.id, event.id, normalize);
+      await locked;
+      const move = service.changeStatus(tenant.id, actorUserId, conversation.id, { status: 'INACTIVE', expectedVersion: 4 });
+      const conflict = expect(move).rejects.toMatchObject({ status: 409, message: 'CONVERSATION_STATUS_CHANGED' });
+      releaseLock();
+      await inbound;
+      await conflict;
+      expect(await prisma.conversation.findUniqueOrThrow({ where: { id: conversation.id } }))
+        .toMatchObject({ workflowStatus: 'ACTIVE', statusVersion: 5, statusChangedByUserId: null });
+      expect(schedule).toHaveBeenCalledTimes(1);
+      expect(orders).toHaveBeenCalledTimes(1);
+      await service.changeStatus(tenant.id, actorUserId, conversation.id, { status: 'CLOSED', expectedVersion: 5 });
+      await new SocialInboundIngestionService(prisma, { copy: vi.fn() }).process(tenant.id, event.id, normalize);
+      expect(await prisma.conversation.findUniqueOrThrow({ where: { id: conversation.id } }))
+        .toMatchObject({ workflowStatus: 'CLOSED', statusVersion: 6, statusChangedByUserId: actorUserId });
+    } finally { await prisma.tenant.delete({ where: { id: tenant.id } }); }
+  });
+
+  it('denies moves and no-ops while the tenant is frozen', async () => {
+    const freeze = await prisma.tenantLifecycleRequest.create({ data: {
+      tenantId, kind: 'DELETE', reasonCode: 'ADMINISTRATIVE_TEST', requestedByUserId: actorUserId,
+      idempotencyKey: randomUUID(), requestHash: 'fictional-triage-freeze', ingestionFrozenAt: new Date(),
+    } });
+    try {
+      const before = await prisma.conversation.findUniqueOrThrow({ where: { id: newestId } });
+      for (const status of ['CLOSED', 'ACTIVE'] as const) {
+        await expect(service.changeStatus(tenantId, actorUserId, newestId, { status, expectedVersion: before.statusVersion }))
+          .rejects.toBeInstanceOf(TenantLifecycleFrozenError);
+      }
+      expect(await prisma.conversation.findUniqueOrThrow({ where: { id: newestId } })).toEqual(before);
+      expect(queue.add).not.toHaveBeenCalled();
+    } finally { await prisma.tenantLifecycleRequest.delete({ where: { id: freeze.id } }); }
+  });
+
   it('orders newest first, isolates the tenant, and paginates by cursor', async () => {
     const first = await service.list(tenantId, { limit: 2 });
     const second = await service.list(tenantId, { limit: 2, cursor: first.nextCursor! });
@@ -161,6 +258,35 @@ describe('ConversationsService', () => {
       participantAvatarUrl: null,
     });
     expect(second.nextCursor).toBeNull();
+  });
+
+  it('filters pages by persisted status, counts only tenant rows and returns detail versions', async () => {
+    const tenant = await prisma.tenant.create({ data: { key: `fictional-triage-${randomUUID()}`, name: 'Fictional triage' } });
+    const rows = await Promise.all((['ACTIVE', 'ACTIVE', 'INACTIVE', 'CLOSED'] as const).map((workflowStatus, index) =>
+      prisma.conversation.create({ data: {
+        tenantId: tenant.id, channel: 'INSTAGRAM', externalConversationId: `fictional-${index}`,
+        participantId: `fictional-${index}`, workflowStatus, statusVersion: index,
+        lastMessageAt: new Date(1_800_000_000_000 + index * 1000),
+      } })));
+    try {
+      const page = await service.list(tenant.id, { status: 'INACTIVE', limit: 1 });
+      expect(page.items).toHaveLength(1);
+      expect(page.items[0]).toMatchObject({ id: rows[2]!.id, workflowStatus: 'INACTIVE', statusVersion: 2 });
+      expect(page.nextCursor).toBeNull();
+      expect((await service.list(tenant.id, { limit: 50 })).items).toHaveLength(4);
+      expect(await service.statusCounts(tenant.id)).toEqual({ ACTIVE: 2, INACTIVE: 1, CLOSED: 1 });
+      expect(await service.statusCounts(otherTenantId)).toEqual({ ACTIVE: 1, INACTIVE: 0, CLOSED: 0 });
+      expect(await service.detail(tenant.id, rows[2]!.id)).toMatchObject({ workflowStatus: 'INACTIVE', statusVersion: 2 });
+      const first = await service.list(tenant.id, { status: 'ACTIVE', limit: 1 });
+      const second = await service.list(tenant.id, { status: 'ACTIVE', limit: 1, cursor: first.nextCursor! });
+      expect(first.items[0]!.id).toBe(rows[1]!.id);
+      expect(second.items[0]!.id).toBe(rows[0]!.id);
+      expect(second.nextCursor).toBeNull();
+      await expect(service.detail(otherTenantId, rows[2]!.id)).rejects.toBeInstanceOf(NotFoundException);
+    } finally {
+      await prisma.conversation.deleteMany({ where: { tenantId: tenant.id } });
+      await prisma.tenant.delete({ where: { id: tenant.id } });
+    }
   });
 
   it('returns an ordered conversation detail without source object URLs', async () => {

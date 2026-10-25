@@ -4,6 +4,10 @@ import { Prisma } from '@autosale/database';
 import { TENANT_EXPORT_DATASETS } from './tenant-export-datasets.js';
 
 describe('tenant export dataset allowlist', () => {
+  it('includes conversation workflow metadata in lifecycle exports', () => {
+    expect(TENANT_EXPORT_DATASETS.find((entry) => entry.name === 'conversations')?.fields).toEqual(expect.arrayContaining(['workflowStatus', 'statusVersion', 'statusChangedAt', 'statusChangedByUserId']));
+  });
+
   it('exports only the usage ledger scalar allowlist without content, customer identifiers or secrets', () => {
     const dataset = TENANT_EXPORT_DATASETS.find((candidate) => candidate.name === 'ai-provider-usage-attempts')!;
     expect(dataset?.fields).toEqual([

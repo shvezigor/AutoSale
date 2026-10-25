@@ -1,0 +1,135 @@
+import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+const api = vi.hoisted(() => ({ refreshConversationList: vi.fn(), refreshConversationStatusCounts: vi.fn(), refreshConversation: vi.fn(), changeConversationStatus: vi.fn() }));
+const navigation = vi.hoisted(() => ({ query: '', refresh: vi.fn(), replace: vi.fn() }));
+vi.mock('../api/conversation-replies', async original => ({ ...await original<object>(), ...api }));
+vi.mock('next/navigation', () => ({ usePathname: () => '/conversations/fixture', useSearchParams: () => new URLSearchParams(navigation.query), useRouter: () => navigation }));
+import { ConversationStatusMenu } from './conversation-status-menu';
+import { SocialReplyComposer } from './social-reply-composer';
+import { ToastProvider } from './toast-provider';
+import { InboxShell } from './inbox-shell';
+import { I18nProvider } from '../i18n/i18n-provider';
+import { ConversationReplyApiError } from '../api/conversation-replies';
+const row = { id: 'fixture', workflowStatus: 'ACTIVE' as const, statusVersion: 0, channel: 'INSTAGRAM' as const, participantName: 'Олена', participantUsername: null, participantAvatarUrl: null, lastMessageAt: '2026-10-25T10:00:00Z', lastMessagePreview: 'Fictional test' };
+function fixture(locale: 'uk' | 'en' = 'uk', version = 0, status: 'ACTIVE' | 'CLOSED' = 'ACTIVE') {
+  return <I18nProvider locale={locale} authenticated><InboxShell initialPage={{ items: [row], nextCursor: null }} initialCounts={{ ACTIVE: 1, INACTIVE: 0, CLOSED: 0 }}><section aria-label="Selected detail"><ConversationStatusMenu id={row.id} name="Олена" workflowStatus={status} statusVersion={version} detail /><textarea aria-label="Reply" defaultValue="Preserved draft" /></section></InboxShell></I18nProvider>;
+}
+beforeEach(() => { navigation.query = ''; vi.resetAllMocks(); api.refreshConversationList.mockResolvedValue({ items: [], nextCursor: null }); api.refreshConversationStatusCounts.mockResolvedValue({ ACTIVE: 0, INACTIVE: 0, CLOSED: 1 }); api.refreshConversation.mockResolvedValue({ ...row, workflowStatus: 'CLOSED', statusVersion: 2 }); });
+afterEach(() => { cleanup(); vi.useRealTimers(); });
+const detail = () => within(screen.getByRole('region', { name: 'Selected detail' }));
+describe('conversation status actions', () => {
+  it('updates selected header and menu from detail polling after its row disappears, ignoring older responses', async () => {
+    vi.useFakeTimers();
+    navigation.query = 'status=closed';
+    api.refreshConversationList.mockResolvedValueOnce({ items: [{ ...row, workflowStatus: 'CLOSED', statusVersion: 1 }], nextCursor: null });
+    const selected = { ...row, workflowStatus: 'CLOSED' as const, statusVersion: 1, messages: [], replyCapability: { enabled: true, aiDraftSendAllowed: true, reason: null } };
+    api.refreshConversation.mockResolvedValue({ ...selected, workflowStatus: 'ACTIVE', statusVersion: 2 });
+    render(<I18nProvider locale="en" authenticated><ToastProvider><InboxShell initialPage={{ items: [], nextCursor: null }} initialCounts={{ ACTIVE: 0, INACTIVE: 0, CLOSED: 1 }}><section aria-label="Selected detail"><ConversationStatusMenu id={row.id} name="Fictional" workflowStatus="CLOSED" statusVersion={1} detail /><SocialReplyComposer initialConversation={selected} canManageSettings={false} /></section></InboxShell></ToastProvider></I18nProvider>);
+    await act(async () => {});
+    expect(screen.getByRole('link')).toBeVisible();
+    expect(detail().getByText('Closed')).toBeVisible();
+    const editor = detail().getByRole('textbox'); fireEvent.change(editor, { target: { value: 'Fictional preserved reply' } });
+    await act(async () => vi.advanceTimersByTimeAsync(3000));
+    expect(detail().getByText('Active')).toBeVisible();
+    expect(screen.queryByRole('link')).toBeNull();
+    api.refreshConversation.mockResolvedValue(selected);
+    await act(async () => vi.advanceTimersByTimeAsync(2000));
+    expect(detail().getByText('Active')).toBeVisible();
+    fireEvent.click(detail().getByRole('button', { name: 'Move conversation Fictional' }));
+    expect(screen.queryByRole('menuitem', { name: 'Move to Active' })).toBeNull();
+    expect(screen.getByRole('menuitem', { name: 'Move to Closed' })).toBeVisible();
+    expect(detail().getByRole('textbox')).toBe(editor); expect(editor).toHaveValue('Fictional preserved reply');
+    expect(navigation.refresh).not.toHaveBeenCalled(); expect(navigation.replace).not.toHaveBeenCalled(); expect(api.changeConversationStatus).not.toHaveBeenCalled();
+  });
+  it.each(['detail', 'counts', 'list'])('requires full recovery before another move when conflict %s refresh fails', async failure => {
+    vi.useFakeTimers();
+    api.changeConversationStatus.mockRejectedValueOnce(new ConversationReplyApiError('safe', 409));
+    api.refreshConversationList.mockResolvedValue({ items: [row], nextCursor: null });
+    if (failure === 'detail') api.refreshConversation.mockRejectedValueOnce(new Error('detail unavailable'));
+    if (failure === 'counts') api.refreshConversationStatusCounts.mockRejectedValueOnce(new Error('counts unavailable'));
+    if (failure === 'list') api.refreshConversationList.mockRejectedValueOnce(new Error('list unavailable'));
+    render(fixture()); fireEvent.click(detail().getByRole('button'));
+    await act(async () => fireEvent.click(screen.getByRole('menuitem', { name: 'До неактивних' })));
+    const triggers = () => screen.getAllByRole('button', { name: 'Перемістити діалог Олена' });
+    expect(triggers().every(button => button.hasAttribute('disabled'))).toBe(true);
+    expect(detail().getByRole('button', { name: 'Повторити' })).toBeVisible();
+    await act(async () => vi.advanceTimersByTimeAsync(15000));
+    expect(triggers().every(button => button.hasAttribute('disabled'))).toBe(true);
+    expect(detail().getByRole('alert')).toBeVisible();
+    expect(api.changeConversationStatus).toHaveBeenCalledTimes(1);
+    let finish!: (value: unknown) => void;
+    api.refreshConversation.mockReturnValueOnce(new Promise(resolve => { finish = resolve; }));
+    await act(async () => fireEvent.click((failure === 'counts' ? within(screen.getByRole('tabpanel')) : detail()).getByRole('button', { name: 'Повторити' })));
+    expect(triggers().every(button => button.hasAttribute('disabled'))).toBe(true);
+    await act(async () => finish({ ...row, workflowStatus: 'CLOSED', statusVersion: 5 }));
+    expect(triggers().every(button => !button.hasAttribute('disabled'))).toBe(true);
+    expect(detail().queryByRole('button', { name: 'Повторити' })).toBeNull();
+    expect(detail().getByText('Закриті')).toBeVisible();
+    api.changeConversationStatus.mockResolvedValueOnce({ status: 'ACTIVE', statusVersion: 6 });
+    fireEvent.click(detail().getByRole('button'));
+    await act(async () => fireEvent.click(screen.getByRole('menuitem', { name: 'До активних' })));
+    expect(api.changeConversationStatus).toHaveBeenLastCalledWith('fixture', { status: 'ACTIVE', expectedVersion: 5 });
+  });
+  it('keeps the visible row trigger beside the link and supports keyboard focus', () => {
+    render(fixture());
+    const trigger = screen.getAllByRole('button', { name: 'Перемістити діалог Олена' })[0]!;
+    expect(trigger).toBeVisible(); expect(screen.getByRole('link').contains(trigger)).toBe(false);
+    expect(screen.getByRole('link').parentElement).toBe(trigger.closest('.conversation-status-control')?.parentElement);
+    fireEvent.click(trigger);
+    const items = screen.getAllByRole('menuitem'); expect(items).toHaveLength(2);
+    expect(items[0]).toHaveTextContent('До неактивних'); expect(items[0]).toHaveFocus();
+    fireEvent.keyDown(items[0]!, { key: 'ArrowDown' }); expect(items[1]).toHaveFocus();
+    fireEvent.keyDown(items[1]!, { key: 'ArrowUp' }); expect(items[0]).toHaveFocus();
+    fireEvent.keyDown(items[0]!, { key: 'Escape' }); expect(trigger).toHaveFocus(); expect(screen.queryByRole('menu')).toBeNull();
+  });
+  it('localizes English names and offers only other states', () => {
+    render(fixture('en', 3, 'CLOSED')); fireEvent.click(detail().getByRole('button', { name: 'Move conversation Олена' }));
+    expect(screen.getByRole('menuitem', { name: 'Move to Active' })).toHaveFocus();
+    expect(screen.getByRole('menuitem', { name: 'Move to Inactive' })).toBeVisible();
+    expect(screen.queryByRole('menuitem', { name: 'Move to Closed' })).toBeNull();
+  });
+  it('disables both surfaces while pending and preserves detail/editor when the row leaves', async () => {
+    let finish!: (value: unknown) => void;
+    api.changeConversationStatus.mockReturnValueOnce(new Promise(resolve => { finish = resolve; }));
+    render(fixture()); const editor = screen.getByRole('textbox', { name: 'Reply' });
+    fireEvent.click(detail().getByRole('button')); fireEvent.click(screen.getByRole('menuitem', { name: 'До закритих' }));
+    expect(screen.getAllByRole('button', { name: 'Перемістити діалог Олена' }).every(button => button.hasAttribute('disabled'))).toBe(true);
+    expect(screen.getAllByRole('menuitem').every(button => button.hasAttribute('disabled'))).toBe(true);
+    await act(async () => finish({ status: 'CLOSED', statusVersion: 1 }));
+    expect(screen.queryByRole('link')).toBeNull(); expect(detail().getByText('Закриті')).toBeVisible();
+    expect(detail().getByRole('status')).toHaveTextContent('Статус діалогу змінено.');
+    expect(screen.getByRole('textbox')).toBe(editor); expect(editor).toHaveValue('Preserved draft');
+    api.changeConversationStatus.mockResolvedValueOnce({ status: 'ACTIVE', statusVersion: 2 });
+    fireEvent.click(detail().getByRole('button'));
+    await act(async () => fireEvent.click(screen.getByRole('menuitem', { name: 'До активних' })));
+    expect(api.changeConversationStatus).toHaveBeenLastCalledWith('fixture', { status: 'ACTIVE', expectedVersion: 1 });
+  });
+  it('uses refreshed server props immediately', () => {
+    const view = render(fixture()); view.rerender(fixture('uk', 4, 'CLOSED'));
+    expect(detail().getByText('Закриті')).toBeVisible(); fireEvent.click(detail().getByRole('button'));
+    expect(screen.queryByRole('menuitem', { name: 'До закритих' })).toBeNull();
+  });
+  it('dismisses a row menu on scroll and returns keyboard focus', () => {
+    render(fixture());
+    const trigger = screen.getAllByRole('button', { name: 'Перемістити діалог Олена' })[0]!;
+    fireEvent.click(trigger);
+    fireEvent.scroll(screen.getByRole('navigation'));
+    expect(screen.queryByRole('menu')).toBeNull(); expect(trigger).toHaveFocus();
+  });
+  it('refreshes conflicted detail/counts and preserves feedback through polling', async () => {
+    vi.useFakeTimers(); api.changeConversationStatus.mockRejectedValue(new ConversationReplyApiError('safe', 409));
+    render(fixture()); fireEvent.click(detail().getByRole('button'));
+    await act(async () => fireEvent.click(screen.getByRole('menuitem', { name: 'До неактивних' })));
+    expect(api.refreshConversation).toHaveBeenCalledWith('fixture'); expect(api.refreshConversationStatusCounts).toHaveBeenCalled();
+    expect(detail().getByText('Закриті')).toBeVisible(); expect(detail().getByRole('alert')).toHaveTextContent('Статус уже змінився');
+    expect(detail().queryByRole('status')).toBeNull();
+    await act(async () => vi.advanceTimersByTimeAsync(3000)); expect(detail().getByRole('alert')).toBeVisible();
+  });
+  it('retains confirmed state and detail retry guidance on failure', async () => {
+    api.changeConversationStatus.mockRejectedValue(new ConversationReplyApiError('safe', 503));
+    render(fixture()); fireEvent.click(detail().getByRole('button'));
+    await act(async () => fireEvent.click(screen.getByRole('menuitem', { name: 'До закритих' })));
+    expect(screen.getByRole('link')).toBeVisible(); expect(detail().getByText('Активні')).toBeVisible();
+    expect(detail().getByRole('alert')).toHaveTextContent('Спробуйте ще раз'); expect(navigation.refresh).not.toHaveBeenCalled();
+  });
+});

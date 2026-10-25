@@ -478,3 +478,12 @@ export const PaymentMethod = {
 } as const
 
 export type PaymentMethod = (typeof PaymentMethod)[keyof typeof PaymentMethod]
+
+
+export const ConversationWorkflowStatus = {
+  ACTIVE: 'ACTIVE',
+  INACTIVE: 'INACTIVE',
+  CLOSED: 'CLOSED'
+} as const
+
+export type ConversationWorkflowStatus = (typeof ConversationWorkflowStatus)[keyof typeof ConversationWorkflowStatus]

@@ -35,8 +35,6 @@ describe('conversation and message row-level security', () => {
     container = await new PostgreSqlContainer('postgres:17.6-alpine').start();
     admin = new pg.Pool({ connectionString: container.getConnectionUri() });
     await applyMigrations(admin);
-    await seedConversation(admin, tenantA, conversationA, messageA, 'conversation-a');
-    await seedConversation(admin, tenantB, conversationB, messageB, 'conversation-b');
     await configureRuntimeDatabaseRoles(container.getConnectionUri(), { apiPassword, workerPassword, backupPassword });
     api = createPrismaClient(runtimeUrl(container.getConnectionUri(), 'autosale_api', apiPassword));
     worker = createPrismaClient(runtimeUrl(container.getConnectionUri(), 'autosale_worker', workerPassword));
@@ -63,6 +61,18 @@ describe('conversation and message row-level security', () => {
       { id: messageA, tenantId: tenantA },
       { id: backfillMessageA, tenantId: tenantA },
     ]);
+  });
+
+  it('upgrades pre-existing conversations to active version zero without losing history or tenant RLS', async () => {
+    const rows = await withTenantTransaction(api, tenantA, (tx) => tx.$queryRaw<Array<{ workflow_status: string; status_version: number; status_changed_at: Date | null; status_changed_by_user_id: string | null }>>`
+      SELECT workflow_status, status_version, status_changed_at, status_changed_by_user_id FROM conversations WHERE id = ${conversationA}::uuid
+    `);
+    expect(rows).toEqual([{ workflow_status: 'ACTIVE', status_version: 0, status_changed_at: null, status_changed_by_user_id: null }]);
+    const history = await withTenantTransaction(api, tenantA, (tx) => tx.message.findUnique({ where: { id: messageA } }));
+    expect(history).toMatchObject({ conversationId: conversationA, text: 'Fictional message' });
+    const security = await admin.query("SELECT relrowsecurity, relforcerowsecurity FROM pg_class WHERE relname = 'conversations'");
+    expect(security.rows).toEqual([{ relrowsecurity: true, relforcerowsecurity: true }]);
+    await expect(withTenantTransaction(api, tenantB, (tx) => tx.conversation.findUnique({ where: { id: conversationA } }))).resolves.toBeNull();
   });
 
   it('rejects cross-tenant conversation and message updates', async () => {
@@ -149,6 +159,16 @@ async function applyMigrations(pool: pg.Pool): Promise<void> {
   const root = resolve(fileURLToPath(new URL('../prisma/migrations', import.meta.url)));
   for (const name of (await readdir(root)).sort()) {
     if (name === 'migration_lock.toml') continue;
+    if (name === '20261025160000_conversation_triage') {
+      // Seed against the actual previous schema, before the additive migration.
+      await seedConversation(pool, tenantA, conversationA, messageA, 'conversation-a');
+      await seedConversation(pool, tenantB, conversationB, messageB, 'conversation-b');
+      const columns = await pool.query("SELECT column_name FROM information_schema.columns WHERE table_name = 'conversations' AND column_name = 'workflow_status'");
+      expect(columns.rows).toEqual([]);
+      expect((await pool.query('SELECT id FROM conversations WHERE id = $1', [conversationA])).rows).toEqual([{ id: conversationA }]);
+      await expect(pool.query('SELECT workflow_status FROM conversations WHERE id = $1', [conversationA]))
+        .rejects.toMatchObject({ code: '42703' });
+    }
     await pool.query(await readFile(resolve(root, name, 'migration.sql'), 'utf8'));
   }
 }

@@ -3,6 +3,11 @@ import * as conversationContracts from './conversations.js';
 
 import {
   conversationDetailResponseSchema,
+  conversationStatusChangeInputSchema,
+  conversationStatusChangeResponseSchema,
+  conversationStatusCountsSchema,
+  conversationQuerySchema,
+  conversationSummarySchema,
   conversationListResponseSchema,
   outboundDeliverySchema,
   replyCapabilitySchema,
@@ -15,11 +20,33 @@ const profile = {
 };
 
 describe('conversation profile contracts', () => {
+  it('validates workflow input, response, counts and optional filtering', () => {
+    expect(() => conversationStatusChangeInputSchema.parse({ status: 'ARCHIVED', expectedVersion: 0 })).toThrow();
+    for (const expectedVersion of [-1, 0.5]) {
+      expect(() => conversationStatusChangeInputSchema.parse({ status: 'CLOSED', expectedVersion })).toThrow();
+    }
+    expect(conversationStatusChangeInputSchema.parse({ status: 'CLOSED', expectedVersion: 0 })).toEqual({ status: 'CLOSED', expectedVersion: 0 });
+    expect(conversationStatusChangeResponseSchema.parse({ status: 'ACTIVE', statusVersion: 0, statusChangedAt: null })).toEqual({ status: 'ACTIVE', statusVersion: 0, statusChangedAt: null });
+    expect(conversationStatusCountsSchema.parse({ ACTIVE: 2, INACTIVE: 1, CLOSED: 0 })).toEqual({ ACTIVE: 2, INACTIVE: 1, CLOSED: 0 });
+    expect(() => conversationStatusCountsSchema.parse({ ACTIVE: -1, INACTIVE: 0, CLOSED: 0 })).toThrow();
+    expect(conversationQuerySchema.parse({ status: 'INACTIVE' }).status).toBe('INACTIVE');
+    expect(conversationQuerySchema.parse({}).status).toBeUndefined();
+    expect(() => conversationQuerySchema.parse({ status: 'ARCHIVED' })).toThrow();
+  });
+
+  it('requires workflow status and version on summaries and details', () => {
+    const summary = { id: '11111111-1111-4111-8111-111111111111', channel: 'INSTAGRAM', ...profile, lastMessagePreview: null, lastMessageAt: '2026-10-25T10:00:00.000Z' };
+    expect(() => conversationSummarySchema.parse(summary)).toThrow();
+    expect(() => conversationSummarySchema.parse({ ...summary, workflowStatus: 'ACTIVE' })).toThrow();
+    expect(() => conversationSummarySchema.parse({ ...summary, statusVersion: 0 })).toThrow();
+    expect(() => conversationDetailResponseSchema.parse({ id: summary.id, channel: summary.channel, ...profile, replyCapability: { enabled: false, aiDraftSendAllowed: false, reason: 'NOT_CONNECTED' }, messages: [] })).toThrow();
+  });
+
   it('accepts TikTok as a bounded social channel', () => {
     const tiktok = conversationListResponseSchema.parse({
       items: [{
         id: '11111111-1111-4111-8111-111111111111',
-        channel: 'TIKTOK',
+        channel: 'TIKTOK', workflowStatus: 'ACTIVE', statusVersion: 0,
         ...profile,
         lastMessagePreview: 'Вітаю з TikTok',
         lastMessageAt: '2026-10-04T10:00:00.000Z',
@@ -34,7 +61,7 @@ describe('conversation profile contracts', () => {
     const facebook = conversationListResponseSchema.parse({
       items: [{
         id: '11111111-1111-4111-8111-111111111111',
-        channel: 'FACEBOOK',
+        channel: 'FACEBOOK', workflowStatus: 'ACTIVE', statusVersion: 0,
         ...profile,
         lastMessagePreview: 'Вітаю',
         lastMessageAt: '2026-10-02T10:00:00.000Z',
@@ -52,7 +79,7 @@ describe('conversation profile contracts', () => {
   it('represents the inbound-only Facebook reply capability explicitly', () => {
     const parsed = conversationDetailResponseSchema.parse({
       id: '11111111-1111-4111-8111-111111111111',
-      channel: 'FACEBOOK',
+      channel: 'FACEBOOK', workflowStatus: 'ACTIVE', statusVersion: 0,
       participantName: 'Олена',
       participantUsername: null,
       participantAvatarUrl: null,
@@ -67,7 +94,7 @@ describe('conversation profile contracts', () => {
     const parsed = conversationListResponseSchema.parse({
       items: [{
         id: '11111111-1111-4111-8111-111111111111',
-        channel: 'INSTAGRAM',
+        channel: 'INSTAGRAM', workflowStatus: 'ACTIVE', statusVersion: 0,
         ...profile,
         lastMessagePreview: 'Вітаю',
         lastMessageAt: '2026-09-02T10:00:00.000Z',
@@ -81,7 +108,7 @@ describe('conversation profile contracts', () => {
   it('retains nullable profile fields in conversation detail responses', () => {
     const parsed = conversationDetailResponseSchema.parse({
       id: '11111111-1111-4111-8111-111111111111',
-      channel: 'INSTAGRAM',
+      channel: 'INSTAGRAM', workflowStatus: 'ACTIVE', statusVersion: 0,
       participantName: null,
       participantUsername: null,
       participantAvatarUrl: null,
@@ -99,7 +126,7 @@ describe('conversation profile contracts', () => {
   it('retains outbound delivery state and reply capability', () => {
     const parsed = conversationDetailResponseSchema.parse({
       id: '11111111-1111-4111-8111-111111111111',
-      channel: 'INSTAGRAM',
+      channel: 'INSTAGRAM', workflowStatus: 'ACTIVE', statusVersion: 0,
       participantName: 'Олена',
       participantUsername: 'olena',
       participantAvatarUrl: null,
@@ -148,7 +175,7 @@ describe('conversation profile contracts', () => {
   it('retains expired reply-window capability and delivery errors', () => {
     const parsed = conversationDetailResponseSchema.parse({
       id: '11111111-1111-4111-8111-111111111111',
-      channel: 'INSTAGRAM',
+      channel: 'INSTAGRAM', workflowStatus: 'ACTIVE', statusVersion: 0,
       participantName: 'Олена',
       participantUsername: 'olena',
       participantAvatarUrl: null,
@@ -174,7 +201,7 @@ describe('conversation profile contracts', () => {
   it('distinguishes manual reply eligibility from AI-draft sending', () => {
     const parsed = conversationDetailResponseSchema.parse({
       id: '11111111-1111-4111-8111-111111111111',
-      channel: 'INSTAGRAM',
+      channel: 'INSTAGRAM', workflowStatus: 'ACTIVE', statusVersion: 0,
       participantName: 'Fictional customer',
       participantUsername: null,
       participantAvatarUrl: null,
@@ -188,7 +215,7 @@ describe('conversation profile contracts', () => {
   it('retains image, video, link, and unsupported Instagram attachments', () => {
     const parsed = conversationDetailResponseSchema.parse({
       id: '11111111-1111-4111-8111-111111111111',
-      channel: 'INSTAGRAM',
+      channel: 'INSTAGRAM', workflowStatus: 'ACTIVE', statusVersion: 0,
       participantName: 'Олена',
       participantUsername: 'olena',
       participantAvatarUrl: null,
