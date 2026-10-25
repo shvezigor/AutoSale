@@ -6,6 +6,8 @@
 
 **Confirmed direction:** OpenAI-based voice interaction; onboarding first, then orders, customer messages and other workspace actions. The owner selected confirmation by voice or button and requires each user to be able to enable or disable the assistant. Numeric pilot limits below remain engineering defaults to validate during implementation.
 
+**Execution hold (2026-10-25):** The owner requested preparation only and will explicitly authorize when implementation may start. The [implementation plan](../plans/2026-10-25-workspace-voice-assistant.md) and [acceptance/readiness checklist](../../acceptance/workspace-voice-assistant-checklist.md) are prepared; no runtime code, dependency, migration, provider session or deployment is authorized by those documents.
+
 ## Outcome and scope
 
 Help a tenant owner complete workspace setup by speaking naturally, understanding the current configuration, opening the right screen and confirming concrete changes. Later, let owners and managers operate their existing permitted workflows through the same assistant. Success is completion of real product tasks, not conversation length.
@@ -104,6 +106,8 @@ Actors: tenant owners only. Language: Ukrainian and English, selected from the e
 
 The model can propose an update, but has no `confirm`/`execute` tool. Confirmation is a separate application-controlled input path. Keep other fields unchanged, reject unknown fields and reuse shared settings validation. The preview explains operational consequences, especially when selecting AI automation or reducing human order approval.
 
+A trusted final user request to disable assistance may reduce personal availability through the same profile preference boundary; it never grants domain mutation authority or enables the assistant. Keep the direct Disable control available when speech is unavailable or ambiguous.
+
 Readiness becomes a single shared, side-effect-aware projection used by the checklist and assistant; extract the current predicates rather than rewriting them twice. Separate source loading from pure readiness rules. Existing settings reads can create defaults, so document that behavior and do not make the assistant's preview create hidden configuration. Use the existing safe defaults for display or a read-only projection. Missing/failed provider data must be labeled unknown/unavailable to the assistant, never confidently described as disconnected. Preserve optional non-blocking rules and existing core completion semantics.
 
 Google/Meta OAuth, Google Picker, file uploads, API keys, bank details and provider-specific sender forms continue through existing screens. The assistant opens the correct section, explains it, pauses microphone/context capture for secret entry, and re-reads readiness when the user returns. It never asks the user to dictate a token/password. Completing OAuth in a new window cannot be inferred from opening it; verify stored connection state after return.
@@ -141,7 +145,10 @@ Proposed application endpoints (names are design contracts, not implemented rout
 
 - Extend `GET /api/profile` with `assistantEnabled` and `assistantPreferenceVersion`; add a narrowly scoped `PATCH /api/profile/assistant-preference` in the existing profile controller/service accepting only the boolean and expected version. Derive the user from the authenticated principal, require CSRF, and preserve name/phone/locale. This avoids submitting unrelated profile fields or introducing a parallel preference service.
 - `POST /api/assistant/sessions`: authorize/start one bound session and negotiate audio.
+- `GET /api/assistant/availability`: return effective availability and the personal preference without starting a provider session.
+- `POST /api/assistant/sessions/:id/heartbeat`: refresh current authority for an active session; never extend its maximum lifetime.
 - `POST /api/assistant/sessions/:id/context`: accept bounded UI context with a monotonic revision; resolve resources and permissions server-side.
+- `POST /api/assistant/sessions/:id/preview-ready` and `POST /api/assistant/sessions/:id/voice-confirmation-ready`: acknowledge the current visible preview and completed prompt playback with operation/hash/context revision. Backend-observed prompt/input state remains required; these requests cannot supply a transcript or authorize execution.
 - `POST /api/assistant/operations/:id/confirm`: button confirmation only; voice confirmation enters internally from the verified provider event path.
 - `POST /api/assistant/operations/:id/cancel` and `POST /api/assistant/sessions/:id/end`: invalidate pending work and close the session as appropriate.
 - `GET /api/assistant/operations/:id`: authorized durable status/result reference. Use bounded polling initially; a new application WebSocket is unnecessary.
@@ -152,7 +159,7 @@ Operation states: `AWAITING_CONFIRMATION -> EXECUTING -> SUCCEEDED | FAILED | NE
 
 For settings, confirmation claim, compare-and-set precondition, domain update, audit and success result must commit in the **same tenant transaction**. Extract a transaction-aware method from the existing service; use it from both button and assistant paths. Add a settings version/precondition that every writer increments atomically. A stale preview receives a conflict and a new preview; it cannot overwrite a concurrent button change. Do not implement a read-before-write check outside the transaction and call it concurrency protection.
 
-Unique `(tenantId, sessionId, providerCallId)` identifies one tool proposal; operation ID/hash identifies one confirmed intent. A repeated confirmation reads the previous result. A genuinely new utterance creates a new proposal, but no new write occurs without new confirmation. After a crash, inspect durable state/domain references before deciding whether execution is safe. Expired transport leases do not authorize repeating external effects.
+Unique `(tenantId, sessionId, providerToolCallId)` identifies one tool proposal; operation ID/hash identifies one confirmed intent. The transport-level `providerCallId` identifies the bound voice session and must not be confused with the tool-call ID. A repeated confirmation reads the previous result. A genuinely new utterance creates a new proposal, but no new write occurs without new confirmation. After a crash, inspect durable state/domain references before deciding whether execution is safe. Expired transport leases do not authorize repeating external effects.
 
 Future asynchronous actions reuse the domain outbox. Tie assistant acceptance to domain creation transactionally where possible; otherwise reuse a stable domain idempotency key derived from the operation and reconcile its existing result after a crash. Never use “exactly once” to describe delivery to a provider without provider-side idempotency.
 
@@ -187,7 +194,7 @@ For messaging, preserve origin such as user-dictated versus AI-generated. The cu
 
 ## Validation and rollout
 
-Architecture-only change: no runtime flag, migration, SDK dependency, provider request or deployment is added by this document. Feature status remains Planned. Detailed implementation planning follows review of this specification.
+Documentation-only preparation: no runtime flag, migration, SDK dependency, provider request or deployment is added by this document. Feature status remains Planned. The scoped implementation plan is prepared; execution remains on hold until the owner's explicit instruction.
 
 Required implementation gates:
 
@@ -200,6 +207,8 @@ Required implementation gates:
 7. Preference contract/controller/real-transaction tests: own-user-only changes, CSRF, default false, other users unaffected, no privilege escalation, stale preference version, repeated disable, simultaneous disable/confirmation, late tool events, cross-device heartbeat expiry and preference-read/write failures. Verify disabling leaves committed domain work and ordinary controls intact.
 
 Roll out behind a proposed default-OFF assistant flag and an explicit test-tenant allowlist, with separate read/navigation and mutation switches. Use an owner-only pilot; measure baseline normal onboarding first, then task completion without human support, time to complete, field correction/conflict rate and actual spend. Proposed initial acceptance is zero unauthorized/duplicate/unconfirmed writes across the acceptance suite and successful required onboarding through both confirmation modes; latency and completion improvements are pilot hypotheses, not proven benefits. Any unintended write or cross-tenant exposure stops the pilot. Disable flags, close active sessions and invalidate pending proposals on rollback; keep completed domain effects and their audit intact.
+
+The plan names the proposed server-side settings `ASSISTANT_ENABLED=false`, `ASSISTANT_MUTATIONS_ENABLED=false`, `ASSISTANT_TEST_TENANT_IDS` (empty by default), `OPENAI_REALTIME_API_KEY`, `OPENAI_REALTIME_MODEL`, `OPENAI_REALTIME_TRANSCRIPTION_MODEL` and `OPENAI_REALTIME_VOICE`. They are not current runtime configuration. Paid tests require an owner-approved budget and selected API project; do not infer model access or a hard spend cap from public documentation or billing alerts.
 
 No current live acceptance gap is closed by this design. OAuth/provider approval and unavailable test accounts must be listed as exact blocked steps; no production customer messages or external shipments may be used merely to test the assistant.
 
