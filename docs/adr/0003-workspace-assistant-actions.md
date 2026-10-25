@@ -2,17 +2,19 @@
 
 **Date:** 2026-10-25
 
-**Status:** Proposed; awaiting architecture review.
+**Status:** Accepted by the owner on 2026-10-25; implementation remains planned.
 
 ## Context
 
 Sales AITO needs voice-guided onboarding first and later access to order, message and other workspace operations. The product already has authenticated tenant APIs, domain services, RLS, lifecycle freeze, audit and durable provider outboxes. A voice-only implementation must not become a second source of business rules or stronger authority than the signed-in user.
 
-## Proposed decision
+## Decision
 
 Use OpenAI Realtime as the initial speech/conversation adapter and an explicit typed action registry in the existing NestJS API. The server owns authorization, prepared operations, confirmation and domain execution. The authenticated workspace uses WebRTC audio and presents application-owned previews/results. Voice and button confirmations bind to one immutable operation; model output cannot grant confirmation. Invoke existing domain services through shared validation/permission boundaries and transaction-aware methods where needed.
 
 Buttons and assistant actions share domain behavior, not browser selectors. Migrate common action boundaries only as a capability is exposed. Preserve existing workers/outboxes and provider-specific delivery restrictions. Begin with onboarding reads/navigation and the two order-processing mode fields; do not build a generic workflow engine or expose every endpoint.
+
+Each user can persistently enable or disable the assistant through their existing profile boundary. The preference defaults off and is checked at session start and action execution independently of tenant rollout/role gates. Enabling never starts the microphone automatically; disabling stops sessions and invalidates unclaimed proposals without undoing committed domain effects.
 
 ## Alternatives
 

@@ -56,6 +56,6 @@ Optional steps use `Optional` while incomplete and `Ready` when configured. They
 
 ## Planned voice extension
 
-The [workspace voice assistant architecture](2026-10-25-workspace-voice-assistant-design.md) proposes reusing this checklist's readiness rules for owner guidance and confirmed settings changes. It is a proposed design, not an available feature. During implementation, extract one shared readiness projection used by the page and assistant, preserve the current channel/optional-step rules, and expose source-unavailable states without claiming an integration is disconnected.
+The [approved workspace voice assistant architecture](2026-10-25-workspace-voice-assistant-design.md) reuses this checklist's readiness rules for owner guidance and confirmed settings changes. It remains planned, not an available feature. Each user can enable or disable assistance through a persisted personal preference; normal onboarding remains available when it is off. During implementation, extract one shared readiness projection used by the page and assistant, preserve the current channel/optional-step rules, and expose source-unavailable states without claiming an integration is disconnected.
 
 Documentation reconciliation on 2026-10-25 updates the older Instagram-only description to match the existing page and its Facebook/TikTok regression tests. It introduces no runtime behavior change or new browser acceptance evidence.

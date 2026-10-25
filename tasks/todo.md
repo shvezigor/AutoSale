@@ -1884,11 +1884,12 @@ Status: commercial terms were implemented on 2026-09-19 and manual audited payme
 
 ### Planned: Workspace voice assistant, onboarding first
 
-**Status:** Architecture proposed for review on 2026-10-25; no implementation or deployment. The owner selected confirmation by voice or button.
+**Status:** Architecture approved on 2026-10-25; no implementation or deployment. The owner selected confirmation by voice or button and required personal enable/disable control.
 
-**Canonical design:** [Workspace voice assistant](../docs/superpowers/specs/2026-10-25-workspace-voice-assistant-design.md), with [proposed ADR 0003](../docs/adr/0003-workspace-assistant-actions.md).
+**Canonical design:** [Workspace voice assistant](../docs/superpowers/specs/2026-10-25-workspace-voice-assistant-design.md), with [accepted ADR 0003](../docs/adr/0003-workspace-assistant-actions.md).
 
-- [ ] Review the first-release scope: owner onboarding guidance/navigation and confirmed changes to the existing two order-processing mode fields.
+- [x] Review the first-release scope: owner onboarding guidance/navigation and confirmed changes to the existing two order-processing mode fields.
+- [ ] Implement the persisted personal assistant switch through the existing profile boundary; default off, explicit microphone startup, safe disable during pending work and cross-device consistency.
 - [ ] After design review, write the scoped implementation plan covering shared readiness, session authority, atomic confirmed operations, privacy/lifecycle and Realtime integration.
 - [ ] Validate Ukrainian/English speech and voice-confirmation reliability using fictional data; evaluate actual cost under bounded pilot quotas.
 - [ ] Complete automated tests and deployed real-browser acceptance, including confirmation, errors, persisted settings after reload and downstream views.
