@@ -139,6 +139,34 @@ enum CatalogueImportStatus {
   CANCELLED
 }
 
+enum AiProviderUsagePurpose {
+  ORDER_RECOGNITION
+  ORDER_INTENT
+  REPLY_DRAFT
+  CATALOGUE_STRUCTURE
+  CATALOGUE_COLUMN_MAPPING
+  CATALOGUE_ROW_CLASSIFICATION
+}
+
+enum AiProviderUsageProvider {
+  OPENAI
+}
+
+enum AiProviderUsageOutcome {
+  STARTED
+  REPORTED
+  USAGE_MISSING
+  CHARGE_UNKNOWN
+  NOT_SENT
+}
+
+enum AiProviderUsageErrorCategory {
+  TRANSPORT_ERROR
+  TIMEOUT
+  PRE_DISPATCH_FAILURE
+  ORPHANED
+}
+
 enum AiReplyDraftStatus {
   QUEUED
   PROCESSING
@@ -324,6 +352,7 @@ model Tenant {
   settings                        TenantSettings?
   replyStyle                      TenantReplyStyle?
   replyDrafts                     AiReplyDraft[]
+  aiProviderUsageAttempts         AiProviderUsageAttempt[]
   orders                          Order[]
   products                        Product[]
   catalogueSources                CatalogueSource[]
@@ -1263,6 +1292,28 @@ model TenantReplyStyle {
   tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@map("tenant_reply_styles")
+}
+
+model AiProviderUsageAttempt {
+  id                String                        @id @default(uuid()) @db.Uuid
+  tenantId          String                        @map("tenant_id") @db.Uuid
+  purpose           AiProviderUsagePurpose
+  operationId       String                        @map("operation_id") @db.Uuid
+  provider          AiProviderUsageProvider        @default(OPENAI)
+  requestedModel    String                        @map("requested_model")
+  returnedModel     String?                       @map("returned_model")
+  startedAt         DateTime                      @map("started_at") @db.Timestamptz
+  finalizedAt       DateTime?                     @map("finalized_at") @db.Timestamptz
+  outcome           AiProviderUsageOutcome         @default(STARTED)
+  inputTokens       Int?                          @map("input_tokens")
+  outputTokens      Int?                          @map("output_tokens")
+  cachedInputTokens Int?                          @map("cached_input_tokens")
+  errorCategory     AiProviderUsageErrorCategory? @map("error_category")
+  tenant            Tenant                        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, startedAt, id])
+  @@index([outcome, startedAt, id])
+  @@map("ai_provider_usage_attempts")
 }
 
 model AiReplyDraft {

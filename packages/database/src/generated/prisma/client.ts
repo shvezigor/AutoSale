@@ -252,6 +252,11 @@ export type TenantSettings = Prisma.TenantSettingsModel
  */
 export type TenantReplyStyle = Prisma.TenantReplyStyleModel
 /**
+ * Model AiProviderUsageAttempt
+ *
+ */
+export type AiProviderUsageAttempt = Prisma.AiProviderUsageAttemptModel
+/**
  * Model AiReplyDraft
  * 
  */

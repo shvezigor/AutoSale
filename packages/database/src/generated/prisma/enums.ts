@@ -192,6 +192,46 @@ export const CatalogueImportStatus = {
 export type CatalogueImportStatus = (typeof CatalogueImportStatus)[keyof typeof CatalogueImportStatus]
 
 
+export const AiProviderUsagePurpose = {
+  ORDER_RECOGNITION: 'ORDER_RECOGNITION',
+  ORDER_INTENT: 'ORDER_INTENT',
+  REPLY_DRAFT: 'REPLY_DRAFT',
+  CATALOGUE_STRUCTURE: 'CATALOGUE_STRUCTURE',
+  CATALOGUE_COLUMN_MAPPING: 'CATALOGUE_COLUMN_MAPPING',
+  CATALOGUE_ROW_CLASSIFICATION: 'CATALOGUE_ROW_CLASSIFICATION'
+} as const
+
+export type AiProviderUsagePurpose = (typeof AiProviderUsagePurpose)[keyof typeof AiProviderUsagePurpose]
+
+
+export const AiProviderUsageProvider = {
+  OPENAI: 'OPENAI'
+} as const
+
+export type AiProviderUsageProvider = (typeof AiProviderUsageProvider)[keyof typeof AiProviderUsageProvider]
+
+
+export const AiProviderUsageOutcome = {
+  STARTED: 'STARTED',
+  REPORTED: 'REPORTED',
+  USAGE_MISSING: 'USAGE_MISSING',
+  CHARGE_UNKNOWN: 'CHARGE_UNKNOWN',
+  NOT_SENT: 'NOT_SENT'
+} as const
+
+export type AiProviderUsageOutcome = (typeof AiProviderUsageOutcome)[keyof typeof AiProviderUsageOutcome]
+
+
+export const AiProviderUsageErrorCategory = {
+  TRANSPORT_ERROR: 'TRANSPORT_ERROR',
+  TIMEOUT: 'TIMEOUT',
+  PRE_DISPATCH_FAILURE: 'PRE_DISPATCH_FAILURE',
+  ORPHANED: 'ORPHANED'
+} as const
+
+export type AiProviderUsageErrorCategory = (typeof AiProviderUsageErrorCategory)[keyof typeof AiProviderUsageErrorCategory]
+
+
 export const AiReplyDraftStatus = {
   QUEUED: 'QUEUED',
   PROCESSING: 'PROCESSING',

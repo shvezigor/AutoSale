@@ -1,7 +1,7 @@
 # Internal AI provider usage ledger and unit-cost measurement
 
 **Date:** 2026-10-24
-**Status:** approved by the owner in chat on 2026-10-24. Not implemented or deployed.
+**Status:** In progress. Approved by the owner in chat on 2026-10-24. The tenant-scoped ledger, store and lifecycle-export dataset are implemented in the feature branch; provider collection, reporting, reconciliation/retention and deployment remain pending.
 
 ## Outcome and boundary
 
@@ -25,11 +25,17 @@ PostgreSQL remains the source of truth. Existing `orders`, `order_intent_evaluat
 
 ## Ledger contract
 
-An additive `ai_provider_usage_attempts` table has a tenant ID and attempt UUID, purpose, operation UUID, provider (`OPENAI` for this slice), requested and returned model identifiers, start/finalized timestamps, outcome, nullable non-negative input/output token counts and nullable priced sub-counts when the provider returns them (for example cached input). It stores a bounded error category, not an exception message or provider payload. Terminal rows are immutable except for an explicitly audited correction procedure; a `STARTED` row can be finalized once. Database constraints reject negative or contradictory usage; `NULL` means unavailable and numeric `0` means the provider explicitly reported zero.
+An additive `ai_provider_usage_attempts` table has a tenant ID and attempt UUID, purpose, operation UUID, provider (`OPENAI` for this slice), requested and returned model identifiers, start/finalized timestamps, outcome, nullable non-negative input/output token counts and nullable priced sub-counts when the provider returns them (for example cached input). It stores a bounded error category, not an exception message or provider payload. A `BEFORE UPDATE` trigger rejects all changes to terminal rows; this slice provides no correction procedure. A `STARTED` row can be finalized once. Database constraints reject negative or contradictory usage; `NULL` means unavailable and numeric `0` means the provider explicitly reported zero.
+
+`REPORTED` requires explicitly known input and output totals; the cached-input breakdown may be absent. `USAGE_MISSING` requires at least one missing total and retains any known total or subcount. Cached input requires a known input total and cannot exceed it. `STARTED`, `CHARGE_UNKNOWN` and `NOT_SENT` require all token counts to be `NULL`. Started rows have no finalized timestamp, returned model or error category; terminal rows require a finalized timestamp no earlier than their start. Error categories are limited to `TRANSPORT_ERROR`, `TIMEOUT`, `PRE_DISPATCH_FAILURE` and `ORPHANED`.
+
+The database package exports `AiProviderUsageStore`, constructed with a Prisma client, and `AiUsageContext = { tenantId, operationId, purpose }`. `start(context, requestedModel, attemptId, now)` persists `STARTED` with constant provider `OPENAI`. `finalize(context, attemptId, outcome, usage, returnedModel, now, errorCategory?)` conditionally updates only the matching tenant/operation/purpose attempt still in `STARTED` and returns whether one row changed. Each usage field is individually nullable; callers supply an all-null usage object when no counts are available. Both operations use `withTenantTransaction`. Duplicate or competing finalizations cannot add usage twice. API has tenant-scoped read permission but no insert/update/delete permission; worker has tenant-scoped read/insert/update permission and no direct deletion permission. Runtime-role bootstrap preserves these restrictions.
 
 The table contains no prompt, conversation content, catalogue row, customer identifier, email, phone, address, URL, access token, raw provider response or API key. Internal operation UUIDs are tenant-confidential and never become log/metric labels or public API fields. Forced fail-closed RLS and the existing `withTenantTransaction` pattern protect reads/writes; runtime roles get the minimum required rights. A PostgreSQL isolation test must prove empty context and cross-tenant reads/writes fail. Platform-admin APIs do not gain row-level access in this slice.
 
 This is tenant-owned operational data: include it in the canonical lifecycle export while held, prevent new provider calls for a frozen tenant under the existing freeze gates, and permit finalizing an already-dispatched attempt so a freeze does not erase cost evidence. The proposed engineering retention for raw attempts is 90 days, subject to the privacy/accounting review before production activation. A bounded, idempotent sweep and its lifecycle/restore acceptance must ship with production collection, so records are not silently retained forever; retain longer tenant-linked summaries only after a separate legal/accounting decision. The normal backup expiry and later deletion-ledger replay still apply.
+
+The canonical lifecycle export now includes `ai-provider-usage-attempts`, selecting only the ledger's fourteen scalar fields. Exact allowlist, real JSONL archive count/checksum and PostgreSQL tenant-isolation tests cover the schema slice. No provider adapter calls the store yet, and the bounded orphan reconciler and retention function will arrive in a follow-on migration before production collection. No deployment or live browser/provider acceptance is claimed for this stage.
 
 ## Internal monthly report
 

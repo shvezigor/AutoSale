@@ -7,7 +7,7 @@ import { inflateRawSync } from 'node:zlib';
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import type { TenantExportDataset } from './tenant-export-datasets.js';
+import { TENANT_EXPORT_DATASETS, type TenantExportDataset } from './tenant-export-datasets.js';
 import { writeTenantExport } from './tenant-export-writer.js';
 
 const tenantId = '11111111-1111-4111-8111-111111111111';
@@ -18,6 +18,42 @@ const roots: string[] = [];
 afterEach(async () => Promise.all(roots.splice(0).map((root) => rm(root, { recursive: true, force: true }))));
 
 describe('writeTenantExport', () => {
+  it('writes the real usage dataset with deterministic JSONL count and checksum', async () => {
+    const dataset = TENANT_EXPORT_DATASETS.find((candidate) => candidate.name === 'ai-provider-usage-attempts')!;
+    expect(dataset).toBeDefined();
+    const fixture = {
+      id: '33333333-3333-4333-8333-333333333333', tenantId,
+      purpose: 'REPLY_DRAFT', operationId: '44444444-4444-4444-8444-444444444444',
+      provider: 'OPENAI', requestedModel: 'fictional-model', returnedModel: null,
+      startedAt: new Date('2026-10-02T08:00:00Z'), finalizedAt: new Date('2026-10-02T08:00:01Z'),
+      outcome: 'USAGE_MISSING', inputTokens: 7, outputTokens: null, cachedInputTokens: null, errorCategory: null,
+    };
+    const prisma = {
+      $transaction: vi.fn(async (operation: (tx: unknown) => Promise<unknown>) => operation({
+        $queryRaw: vi.fn(),
+        aiProviderUsageAttempt: { findMany: vi.fn(async ({ select, where }) => {
+          expect(where).toEqual({ tenantId });
+          return [Object.fromEntries(Object.keys(select).map((field) => [field, fixture[field as keyof typeof fixture]]))];
+        }) },
+      })),
+    };
+    const input = {
+      prisma: prisma as never, storage: { getStream: vi.fn() } as never,
+      tenantId, requestId, snapshotAt, datasets: [dataset], objectReferences: [],
+    };
+    const first = await writeTenantExport({ ...input, directory: await temporaryRoot() });
+    const second = await writeTenantExport({ ...input, directory: await temporaryRoot() });
+    expect(second.sha256Hex).toBe(first.sha256Hex);
+    expect(first.datasetCounts).toEqual({ 'ai-provider-usage-attempts': 1 });
+    const archive = await readFile(first.archivePath);
+    const jsonl = readZipText(archive, 'data/ai-provider-usage-attempts.jsonl');
+    expect(JSON.parse(jsonl)).toEqual({ ...fixture, startedAt: '2026-10-02T08:00:00.000Z', finalizedAt: '2026-10-02T08:00:01.000Z' });
+    const manifest = JSON.parse(readZipText(archive, 'manifest.json'));
+    expect(manifest.datasets).toEqual([{
+      name: 'data/ai-provider-usage-attempts.jsonl', count: 1,
+      sha256: createHash('sha256').update(jsonl).digest('hex'), sizeBytes: Buffer.byteLength(jsonl),
+    }]);
+  });
   it('writes a deterministic redacted archive and checksums referenced objects', async () => {
     const dataset: TenantExportDataset = {
       name: 'instagram-connections',

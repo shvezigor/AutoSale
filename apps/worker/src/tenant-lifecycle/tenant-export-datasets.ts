@@ -115,6 +115,11 @@ export const TENANT_EXPORT_DATASETS: readonly TenantExportDataset[] = [
     providerLatencyMs: true, inputTokens: true, outputTokens: true,
     errorCode: true, outboundMessageId: true, usedAt: true, updatedAt: true,
   }),
+  dataset('ai-provider-usage-attempts', 'aiProviderUsageAttempt', {
+    id: true, tenantId: true, purpose: true, operationId: true, provider: true,
+    requestedModel: true, returnedModel: true, startedAt: true, finalizedAt: true,
+    outcome: true, inputTokens: true, outputTokens: true, cachedInputTokens: true, errorCategory: true,
+  }),
   dataset('memberships', 'tenantMembership', {
     ...identityFields, userId: true, role: true, status: true, updatedAt: true,
     user: { select: { id: true, email: true, name: true, phone: true, locale: true, status: true, createdAt: true } },

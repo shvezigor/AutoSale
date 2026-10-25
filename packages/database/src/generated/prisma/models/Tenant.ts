@@ -196,6 +196,7 @@ export type TenantWhereInput = {
   settings?: Prisma.XOR<Prisma.TenantSettingsNullableScalarRelationFilter, Prisma.TenantSettingsWhereInput> | null
   replyStyle?: Prisma.XOR<Prisma.TenantReplyStyleNullableScalarRelationFilter, Prisma.TenantReplyStyleWhereInput> | null
   replyDrafts?: Prisma.AiReplyDraftListRelationFilter
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptListRelationFilter
   orders?: Prisma.OrderListRelationFilter
   products?: Prisma.ProductListRelationFilter
   catalogueSources?: Prisma.CatalogueSourceListRelationFilter
@@ -260,6 +261,7 @@ export type TenantOrderByWithRelationInput = {
   settings?: Prisma.TenantSettingsOrderByWithRelationInput
   replyStyle?: Prisma.TenantReplyStyleOrderByWithRelationInput
   replyDrafts?: Prisma.AiReplyDraftOrderByRelationAggregateInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptOrderByRelationAggregateInput
   orders?: Prisma.OrderOrderByRelationAggregateInput
   products?: Prisma.ProductOrderByRelationAggregateInput
   catalogueSources?: Prisma.CatalogueSourceOrderByRelationAggregateInput
@@ -327,6 +329,7 @@ export type TenantWhereUniqueInput = Prisma.AtLeast<{
   settings?: Prisma.XOR<Prisma.TenantSettingsNullableScalarRelationFilter, Prisma.TenantSettingsWhereInput> | null
   replyStyle?: Prisma.XOR<Prisma.TenantReplyStyleNullableScalarRelationFilter, Prisma.TenantReplyStyleWhereInput> | null
   replyDrafts?: Prisma.AiReplyDraftListRelationFilter
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptListRelationFilter
   orders?: Prisma.OrderListRelationFilter
   products?: Prisma.ProductListRelationFilter
   catalogueSources?: Prisma.CatalogueSourceListRelationFilter
@@ -415,6 +418,7 @@ export type TenantCreateInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -479,6 +483,7 @@ export type TenantUncheckedCreateInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -543,6 +548,7 @@ export type TenantUpdateInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -607,6 +613,7 @@ export type TenantUncheckedUpdateInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -1190,6 +1197,20 @@ export type TenantUpdateOneRequiredWithoutReplyStyleNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.TenantUpdateToOneWithWhereWithoutReplyStyleInput, Prisma.TenantUpdateWithoutReplyStyleInput>, Prisma.TenantUncheckedUpdateWithoutReplyStyleInput>
 }
 
+export type TenantCreateNestedOneWithoutAiProviderUsageAttemptsInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutAiProviderUsageAttemptsInput, Prisma.TenantUncheckedCreateWithoutAiProviderUsageAttemptsInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutAiProviderUsageAttemptsInput
+  connect?: Prisma.TenantWhereUniqueInput
+}
+
+export type TenantUpdateOneRequiredWithoutAiProviderUsageAttemptsNestedInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutAiProviderUsageAttemptsInput, Prisma.TenantUncheckedCreateWithoutAiProviderUsageAttemptsInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutAiProviderUsageAttemptsInput
+  upsert?: Prisma.TenantUpsertWithoutAiProviderUsageAttemptsInput
+  connect?: Prisma.TenantWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TenantUpdateToOneWithWhereWithoutAiProviderUsageAttemptsInput, Prisma.TenantUpdateWithoutAiProviderUsageAttemptsInput>, Prisma.TenantUncheckedUpdateWithoutAiProviderUsageAttemptsInput>
+}
+
 export type TenantCreateNestedOneWithoutReplyDraftsInput = {
   create?: Prisma.XOR<Prisma.TenantCreateWithoutReplyDraftsInput, Prisma.TenantUncheckedCreateWithoutReplyDraftsInput>
   connectOrCreate?: Prisma.TenantCreateOrConnectWithoutReplyDraftsInput
@@ -1525,6 +1546,7 @@ export type TenantCreateWithoutLifecycleRequestsInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -1588,6 +1610,7 @@ export type TenantUncheckedCreateWithoutLifecycleRequestsInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -1667,6 +1690,7 @@ export type TenantUpdateWithoutLifecycleRequestsInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -1730,6 +1754,7 @@ export type TenantUncheckedUpdateWithoutLifecycleRequestsInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -1793,6 +1818,7 @@ export type TenantCreateWithoutRetentionDryRunsInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -1856,6 +1882,7 @@ export type TenantUncheckedCreateWithoutRetentionDryRunsInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -1935,6 +1962,7 @@ export type TenantUpdateWithoutRetentionDryRunsInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -1998,6 +2026,7 @@ export type TenantUncheckedUpdateWithoutRetentionDryRunsInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -2061,6 +2090,7 @@ export type TenantCreateWithoutGoogleConnectionInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -2124,6 +2154,7 @@ export type TenantUncheckedCreateWithoutGoogleConnectionInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -2203,6 +2234,7 @@ export type TenantUpdateWithoutGoogleConnectionInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -2266,6 +2298,7 @@ export type TenantUncheckedUpdateWithoutGoogleConnectionInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -2329,6 +2362,7 @@ export type TenantCreateWithoutGoogleOAuthAttemptsInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -2392,6 +2426,7 @@ export type TenantUncheckedCreateWithoutGoogleOAuthAttemptsInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -2471,6 +2506,7 @@ export type TenantUpdateWithoutGoogleOAuthAttemptsInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -2534,6 +2570,7 @@ export type TenantUncheckedUpdateWithoutGoogleOAuthAttemptsInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -2597,6 +2634,7 @@ export type TenantCreateWithoutGoogleCredentialCleanupsInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -2660,6 +2698,7 @@ export type TenantUncheckedCreateWithoutGoogleCredentialCleanupsInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -2739,6 +2778,7 @@ export type TenantUpdateWithoutGoogleCredentialCleanupsInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -2802,6 +2842,7 @@ export type TenantUncheckedUpdateWithoutGoogleCredentialCleanupsInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -2865,6 +2906,7 @@ export type TenantCreateWithoutInstagramConnectionInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -2928,6 +2970,7 @@ export type TenantUncheckedCreateWithoutInstagramConnectionInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -3007,6 +3050,7 @@ export type TenantUpdateWithoutInstagramConnectionInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -3070,6 +3114,7 @@ export type TenantUncheckedUpdateWithoutInstagramConnectionInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -3133,6 +3178,7 @@ export type TenantCreateWithoutInstagramOAuthStatesInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -3196,6 +3242,7 @@ export type TenantUncheckedCreateWithoutInstagramOAuthStatesInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -3275,6 +3322,7 @@ export type TenantUpdateWithoutInstagramOAuthStatesInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -3338,6 +3386,7 @@ export type TenantUncheckedUpdateWithoutInstagramOAuthStatesInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -3401,6 +3450,7 @@ export type TenantCreateWithoutInstagramCredentialCleanupsInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -3464,6 +3514,7 @@ export type TenantUncheckedCreateWithoutInstagramCredentialCleanupsInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -3543,6 +3594,7 @@ export type TenantUpdateWithoutInstagramCredentialCleanupsInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -3606,6 +3658,7 @@ export type TenantUncheckedUpdateWithoutInstagramCredentialCleanupsInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -3669,6 +3722,7 @@ export type TenantCreateWithoutFacebookConnectionInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -3732,6 +3786,7 @@ export type TenantUncheckedCreateWithoutFacebookConnectionInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -3811,6 +3866,7 @@ export type TenantUpdateWithoutFacebookConnectionInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -3874,6 +3930,7 @@ export type TenantUncheckedUpdateWithoutFacebookConnectionInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -3937,6 +3994,7 @@ export type TenantCreateWithoutFacebookOAuthAttemptsInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -4000,6 +4058,7 @@ export type TenantUncheckedCreateWithoutFacebookOAuthAttemptsInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -4079,6 +4138,7 @@ export type TenantUpdateWithoutFacebookOAuthAttemptsInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -4142,6 +4202,7 @@ export type TenantUncheckedUpdateWithoutFacebookOAuthAttemptsInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -4205,6 +4266,7 @@ export type TenantCreateWithoutFacebookCredentialCleanupsInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -4268,6 +4330,7 @@ export type TenantUncheckedCreateWithoutFacebookCredentialCleanupsInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -4347,6 +4410,7 @@ export type TenantUpdateWithoutFacebookCredentialCleanupsInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -4410,6 +4474,7 @@ export type TenantUncheckedUpdateWithoutFacebookCredentialCleanupsInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -4473,6 +4538,7 @@ export type TenantCreateWithoutTikTokConnectionInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -4536,6 +4602,7 @@ export type TenantUncheckedCreateWithoutTikTokConnectionInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -4615,6 +4682,7 @@ export type TenantUpdateWithoutTikTokConnectionInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -4678,6 +4746,7 @@ export type TenantUncheckedUpdateWithoutTikTokConnectionInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -4741,6 +4810,7 @@ export type TenantCreateWithoutTikTokOAuthAttemptsInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -4804,6 +4874,7 @@ export type TenantUncheckedCreateWithoutTikTokOAuthAttemptsInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -4883,6 +4954,7 @@ export type TenantUpdateWithoutTikTokOAuthAttemptsInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -4946,6 +5018,7 @@ export type TenantUncheckedUpdateWithoutTikTokOAuthAttemptsInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -5009,6 +5082,7 @@ export type TenantCreateWithoutTikTokCredentialCleanupsInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -5072,6 +5146,7 @@ export type TenantUncheckedCreateWithoutTikTokCredentialCleanupsInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -5151,6 +5226,7 @@ export type TenantUpdateWithoutTikTokCredentialCleanupsInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -5214,6 +5290,7 @@ export type TenantUncheckedUpdateWithoutTikTokCredentialCleanupsInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -5277,6 +5354,7 @@ export type TenantCreateWithoutNotificationsInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -5340,6 +5418,7 @@ export type TenantUncheckedCreateWithoutNotificationsInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -5419,6 +5498,7 @@ export type TenantUpdateWithoutNotificationsInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -5482,6 +5562,7 @@ export type TenantUncheckedUpdateWithoutNotificationsInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -5545,6 +5626,7 @@ export type TenantCreateWithoutTelegramLinkAttemptsInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -5608,6 +5690,7 @@ export type TenantUncheckedCreateWithoutTelegramLinkAttemptsInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -5687,6 +5770,7 @@ export type TenantUpdateWithoutTelegramLinkAttemptsInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -5750,6 +5834,7 @@ export type TenantUncheckedUpdateWithoutTelegramLinkAttemptsInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -5813,6 +5898,7 @@ export type TenantCreateWithoutTelegramUserBindingsInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -5876,6 +5962,7 @@ export type TenantUncheckedCreateWithoutTelegramUserBindingsInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -5955,6 +6042,7 @@ export type TenantUpdateWithoutTelegramUserBindingsInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -6018,6 +6106,7 @@ export type TenantUncheckedUpdateWithoutTelegramUserBindingsInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -6081,6 +6170,7 @@ export type TenantCreateWithoutTelegramBusinessConnectionsInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -6144,6 +6234,7 @@ export type TenantUncheckedCreateWithoutTelegramBusinessConnectionsInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -6223,6 +6314,7 @@ export type TenantUpdateWithoutTelegramBusinessConnectionsInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -6286,6 +6378,7 @@ export type TenantUncheckedUpdateWithoutTelegramBusinessConnectionsInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -6349,6 +6442,7 @@ export type TenantCreateWithoutTelegramChatsInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -6412,6 +6506,7 @@ export type TenantUncheckedCreateWithoutTelegramChatsInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -6491,6 +6586,7 @@ export type TenantUpdateWithoutTelegramChatsInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -6554,6 +6650,7 @@ export type TenantUncheckedUpdateWithoutTelegramChatsInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -6617,6 +6714,7 @@ export type TenantCreateWithoutTelegramSupplierSettingInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -6680,6 +6778,7 @@ export type TenantUncheckedCreateWithoutTelegramSupplierSettingInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -6759,6 +6858,7 @@ export type TenantUpdateWithoutTelegramSupplierSettingInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -6822,6 +6922,7 @@ export type TenantUncheckedUpdateWithoutTelegramSupplierSettingInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -6885,6 +6986,7 @@ export type TenantCreateWithoutTelegramDeliveriesInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -6948,6 +7050,7 @@ export type TenantUncheckedCreateWithoutTelegramDeliveriesInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -7027,6 +7130,7 @@ export type TenantUpdateWithoutTelegramDeliveriesInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -7090,6 +7194,7 @@ export type TenantUncheckedUpdateWithoutTelegramDeliveriesInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -7153,6 +7258,7 @@ export type TenantCreateWithoutMembershipsInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -7216,6 +7322,7 @@ export type TenantUncheckedCreateWithoutMembershipsInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -7295,6 +7402,7 @@ export type TenantUpdateWithoutMembershipsInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -7358,6 +7466,7 @@ export type TenantUncheckedUpdateWithoutMembershipsInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -7421,6 +7530,7 @@ export type TenantCreateWithoutSessionsInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -7484,6 +7594,7 @@ export type TenantUncheckedCreateWithoutSessionsInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -7563,6 +7674,7 @@ export type TenantUpdateWithoutSessionsInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -7626,6 +7738,7 @@ export type TenantUncheckedUpdateWithoutSessionsInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -7689,6 +7802,7 @@ export type TenantCreateWithoutInvitationsInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -7752,6 +7866,7 @@ export type TenantUncheckedCreateWithoutInvitationsInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -7831,6 +7946,7 @@ export type TenantUpdateWithoutInvitationsInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -7894,6 +8010,7 @@ export type TenantUncheckedUpdateWithoutInvitationsInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -7957,6 +8074,7 @@ export type TenantCreateWithoutSecurityAuditLogsInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -8020,6 +8138,7 @@ export type TenantUncheckedCreateWithoutSecurityAuditLogsInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -8099,6 +8218,7 @@ export type TenantUpdateWithoutSecurityAuditLogsInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -8162,6 +8282,7 @@ export type TenantUncheckedUpdateWithoutSecurityAuditLogsInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -8224,6 +8345,7 @@ export type TenantCreateWithoutEventsInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -8287,6 +8409,7 @@ export type TenantUncheckedCreateWithoutEventsInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -8366,6 +8489,7 @@ export type TenantUpdateWithoutEventsInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -8429,6 +8553,7 @@ export type TenantUncheckedUpdateWithoutEventsInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -8492,6 +8617,7 @@ export type TenantCreateWithoutConversationsInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -8555,6 +8681,7 @@ export type TenantUncheckedCreateWithoutConversationsInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -8634,6 +8761,7 @@ export type TenantUpdateWithoutConversationsInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -8697,6 +8825,7 @@ export type TenantUncheckedUpdateWithoutConversationsInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -8761,6 +8890,7 @@ export type TenantCreateWithoutInstagramCustomerProfilesInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -8824,6 +8954,7 @@ export type TenantUncheckedCreateWithoutInstagramCustomerProfilesInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -8903,6 +9034,7 @@ export type TenantUpdateWithoutInstagramCustomerProfilesInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -8966,6 +9098,7 @@ export type TenantUncheckedUpdateWithoutInstagramCustomerProfilesInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -9028,6 +9161,7 @@ export type TenantCreateWithoutMessagesInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -9091,6 +9225,7 @@ export type TenantUncheckedCreateWithoutMessagesInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -9170,6 +9305,7 @@ export type TenantUpdateWithoutMessagesInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -9233,6 +9369,7 @@ export type TenantUncheckedUpdateWithoutMessagesInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -9297,6 +9434,7 @@ export type TenantCreateWithoutSheetsDestinationInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -9360,6 +9498,7 @@ export type TenantUncheckedCreateWithoutSheetsDestinationInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -9439,6 +9578,7 @@ export type TenantUpdateWithoutSheetsDestinationInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -9502,6 +9642,7 @@ export type TenantUncheckedUpdateWithoutSheetsDestinationInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -9564,6 +9705,7 @@ export type TenantCreateWithoutSettingsInput = {
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -9627,6 +9769,7 @@ export type TenantUncheckedCreateWithoutSettingsInput = {
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -9706,6 +9849,7 @@ export type TenantUpdateWithoutSettingsInput = {
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -9769,6 +9913,7 @@ export type TenantUncheckedUpdateWithoutSettingsInput = {
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -9832,6 +9977,7 @@ export type TenantCreateWithoutReplyStyleInput = {
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -9895,6 +10041,7 @@ export type TenantUncheckedCreateWithoutReplyStyleInput = {
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -9974,6 +10121,7 @@ export type TenantUpdateWithoutReplyStyleInput = {
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -10036,6 +10184,279 @@ export type TenantUncheckedUpdateWithoutReplyStyleInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
+  products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
+  catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
+  catalogueMappings?: Prisma.CatalogueMappingUncheckedUpdateManyWithoutTenantNestedInput
+  catalogueImportRuns?: Prisma.CatalogueImportRunUncheckedUpdateManyWithoutTenantNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedUpdateOneWithoutTenantNestedInput
+  orderExports?: Prisma.OrderExportUncheckedUpdateManyWithoutTenantNestedInput
+  memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutTenantNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutTenantNestedInput
+  invitations?: Prisma.TenantInvitationUncheckedUpdateManyWithoutTenantNestedInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUncheckedUpdateManyWithoutTenantNestedInput
+  instagramConnection?: Prisma.InstagramConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutTenantNestedInput
+  instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  tikTokConnection?: Prisma.TikTokConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  tikTokOAuthAttempts?: Prisma.TikTokOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  tikTokCredentialCleanups?: Prisma.TikTokCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedUpdateManyWithoutTenantNestedInput
+  googleConnection?: Prisma.GoogleConnectionUncheckedUpdateOneWithoutTenantNestedInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutTenantNestedInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUncheckedUpdateManyWithoutTenantNestedInput
+  telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedUpdateManyWithoutTenantNestedInput
+  telegramChats?: Prisma.TelegramChatUncheckedUpdateManyWithoutTenantNestedInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUncheckedUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedUpdateOneWithoutTenantNestedInput
+  orderItems?: Prisma.OrderItemUncheckedUpdateManyWithoutTenantNestedInput
+  inventoryReservations?: Prisma.InventoryReservationUncheckedUpdateManyWithoutTenantNestedInput
+  telegramDeliveryItems?: Prisma.TelegramDeliveryItemUncheckedUpdateManyWithoutTenantNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutTenantNestedInput
+  deliveryConnections?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutTenantNestedInput
+  deliverySenderProfiles?: Prisma.DeliverySenderProfileUncheckedUpdateManyWithoutTenantNestedInput
+  shipments?: Prisma.ShipmentUncheckedUpdateManyWithoutTenantNestedInput
+  shipmentAttempts?: Prisma.ShipmentAttemptUncheckedUpdateManyWithoutTenantNestedInput
+  shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedUpdateManyWithoutTenantNestedInput
+  legalEntities?: Prisma.TenantLegalEntityUncheckedUpdateManyWithoutTenantNestedInput
+  bankAccounts?: Prisma.TenantBankAccountUncheckedUpdateManyWithoutTenantNestedInput
+  orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedUpdateManyWithoutTenantNestedInput
+  orderPayments?: Prisma.OrderPaymentUncheckedUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedUpdateManyWithoutTenantNestedInput
+  planInterests?: Prisma.TenantPlanInterestUncheckedUpdateManyWithoutTenantNestedInput
+}
+
+export type TenantCreateWithoutAiProviderUsageAttemptsInput = {
+  id?: string
+  key: string
+  name: string
+  status?: $Enums.AccessStatus
+  createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
+  events?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
+  conversations?: Prisma.ConversationCreateNestedManyWithoutTenantInput
+  messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
+  settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
+  products?: Prisma.ProductCreateNestedManyWithoutTenantInput
+  catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
+  catalogueMappings?: Prisma.CatalogueMappingCreateNestedManyWithoutTenantInput
+  catalogueImportRuns?: Prisma.CatalogueImportRunCreateNestedManyWithoutTenantInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationCreateNestedOneWithoutTenantInput
+  orderExports?: Prisma.OrderExportCreateNestedManyWithoutTenantInput
+  memberships?: Prisma.TenantMembershipCreateNestedManyWithoutTenantInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutTenantInput
+  invitations?: Prisma.TenantInvitationCreateNestedManyWithoutTenantInput
+  securityAuditLogs?: Prisma.SecurityAuditLogCreateNestedManyWithoutTenantInput
+  instagramConnection?: Prisma.InstagramConnectionCreateNestedOneWithoutTenantInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutTenantInput
+  instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutTenantInput
+  tikTokConnection?: Prisma.TikTokConnectionCreateNestedOneWithoutTenantInput
+  tikTokOAuthAttempts?: Prisma.TikTokOAuthAttemptCreateNestedManyWithoutTenantInput
+  tikTokCredentialCleanups?: Prisma.TikTokCredentialCleanupCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileCreateNestedManyWithoutTenantInput
+  googleConnection?: Prisma.GoogleConnectionCreateNestedOneWithoutTenantInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutTenantInput
+  googleCredentialCleanups?: Prisma.GoogleCredentialCleanupCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationCreateNestedManyWithoutTenantInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptCreateNestedManyWithoutTenantInput
+  telegramUserBindings?: Prisma.TelegramUserBindingCreateNestedManyWithoutTenantInput
+  telegramBusinessConnections?: Prisma.TelegramBusinessConnectionCreateNestedManyWithoutTenantInput
+  telegramChats?: Prisma.TelegramChatCreateNestedManyWithoutTenantInput
+  telegramDeliveries?: Prisma.TelegramDeliveryCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingCreateNestedOneWithoutTenantInput
+  orderItems?: Prisma.OrderItemCreateNestedManyWithoutTenantInput
+  inventoryReservations?: Prisma.InventoryReservationCreateNestedManyWithoutTenantInput
+  telegramDeliveryItems?: Prisma.TelegramDeliveryItemCreateNestedManyWithoutTenantInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutTenantInput
+  deliveryConnections?: Prisma.DeliveryConnectionCreateNestedManyWithoutTenantInput
+  deliverySenderProfiles?: Prisma.DeliverySenderProfileCreateNestedManyWithoutTenantInput
+  shipments?: Prisma.ShipmentCreateNestedManyWithoutTenantInput
+  shipmentAttempts?: Prisma.ShipmentAttemptCreateNestedManyWithoutTenantInput
+  shipmentStatusEvents?: Prisma.ShipmentStatusEventCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationCreateNestedManyWithoutTenantInput
+  legalEntities?: Prisma.TenantLegalEntityCreateNestedManyWithoutTenantInput
+  bankAccounts?: Prisma.TenantBankAccountCreateNestedManyWithoutTenantInput
+  orderCommercialTerms?: Prisma.OrderCommercialTermsCreateNestedManyWithoutTenantInput
+  orderPayments?: Prisma.OrderPaymentCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunCreateNestedManyWithoutTenantInput
+  planInterests?: Prisma.TenantPlanInterestCreateNestedManyWithoutTenantInput
+}
+
+export type TenantUncheckedCreateWithoutAiProviderUsageAttemptsInput = {
+  id?: string
+  key: string
+  name: string
+  status?: $Enums.AccessStatus
+  createdAt?: Date | string
+  instagramOAuthCurrentAttemptId?: string | null
+  events?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
+  conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutTenantInput
+  messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
+  settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
+  catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
+  catalogueMappings?: Prisma.CatalogueMappingUncheckedCreateNestedManyWithoutTenantInput
+  catalogueImportRuns?: Prisma.CatalogueImportRunUncheckedCreateNestedManyWithoutTenantInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutTenantInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUncheckedCreateNestedOneWithoutTenantInput
+  orderExports?: Prisma.OrderExportUncheckedCreateNestedManyWithoutTenantInput
+  memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutTenantInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutTenantInput
+  invitations?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutTenantInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUncheckedCreateNestedManyWithoutTenantInput
+  instagramConnection?: Prisma.InstagramConnectionUncheckedCreateNestedOneWithoutTenantInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutTenantInput
+  instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  facebookConnection?: Prisma.FacebookConnectionUncheckedCreateNestedOneWithoutTenantInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  tikTokConnection?: Prisma.TikTokConnectionUncheckedCreateNestedOneWithoutTenantInput
+  tikTokOAuthAttempts?: Prisma.TikTokOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  tikTokCredentialCleanups?: Prisma.TikTokCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUncheckedCreateNestedManyWithoutTenantInput
+  googleConnection?: Prisma.GoogleConnectionUncheckedCreateNestedOneWithoutTenantInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutTenantInput
+  googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUncheckedCreateNestedManyWithoutTenantInput
+  notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutTenantInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedCreateNestedManyWithoutTenantInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUncheckedCreateNestedManyWithoutTenantInput
+  telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUncheckedCreateNestedManyWithoutTenantInput
+  telegramChats?: Prisma.TelegramChatUncheckedCreateNestedManyWithoutTenantInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUncheckedCreateNestedManyWithoutTenantInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUncheckedCreateNestedOneWithoutTenantInput
+  orderItems?: Prisma.OrderItemUncheckedCreateNestedManyWithoutTenantInput
+  inventoryReservations?: Prisma.InventoryReservationUncheckedCreateNestedManyWithoutTenantInput
+  telegramDeliveryItems?: Prisma.TelegramDeliveryItemUncheckedCreateNestedManyWithoutTenantInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutTenantInput
+  deliveryConnections?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutTenantInput
+  deliverySenderProfiles?: Prisma.DeliverySenderProfileUncheckedCreateNestedManyWithoutTenantInput
+  shipments?: Prisma.ShipmentUncheckedCreateNestedManyWithoutTenantInput
+  shipmentAttempts?: Prisma.ShipmentAttemptUncheckedCreateNestedManyWithoutTenantInput
+  shipmentStatusEvents?: Prisma.ShipmentStatusEventUncheckedCreateNestedManyWithoutTenantInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUncheckedCreateNestedManyWithoutTenantInput
+  legalEntities?: Prisma.TenantLegalEntityUncheckedCreateNestedManyWithoutTenantInput
+  bankAccounts?: Prisma.TenantBankAccountUncheckedCreateNestedManyWithoutTenantInput
+  orderCommercialTerms?: Prisma.OrderCommercialTermsUncheckedCreateNestedManyWithoutTenantInput
+  orderPayments?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutTenantInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUncheckedCreateNestedManyWithoutTenantInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUncheckedCreateNestedManyWithoutTenantInput
+  planInterests?: Prisma.TenantPlanInterestUncheckedCreateNestedManyWithoutTenantInput
+}
+
+export type TenantCreateOrConnectWithoutAiProviderUsageAttemptsInput = {
+  where: Prisma.TenantWhereUniqueInput
+  create: Prisma.XOR<Prisma.TenantCreateWithoutAiProviderUsageAttemptsInput, Prisma.TenantUncheckedCreateWithoutAiProviderUsageAttemptsInput>
+}
+
+export type TenantUpsertWithoutAiProviderUsageAttemptsInput = {
+  update: Prisma.XOR<Prisma.TenantUpdateWithoutAiProviderUsageAttemptsInput, Prisma.TenantUncheckedUpdateWithoutAiProviderUsageAttemptsInput>
+  create: Prisma.XOR<Prisma.TenantCreateWithoutAiProviderUsageAttemptsInput, Prisma.TenantUncheckedCreateWithoutAiProviderUsageAttemptsInput>
+  where?: Prisma.TenantWhereInput
+}
+
+export type TenantUpdateToOneWithWhereWithoutAiProviderUsageAttemptsInput = {
+  where?: Prisma.TenantWhereInput
+  data: Prisma.XOR<Prisma.TenantUpdateWithoutAiProviderUsageAttemptsInput, Prisma.TenantUncheckedUpdateWithoutAiProviderUsageAttemptsInput>
+}
+
+export type TenantUpdateWithoutAiProviderUsageAttemptsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  events?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
+  conversations?: Prisma.ConversationUpdateManyWithoutTenantNestedInput
+  messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
+  settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
+  products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
+  catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
+  catalogueMappings?: Prisma.CatalogueMappingUpdateManyWithoutTenantNestedInput
+  catalogueImportRuns?: Prisma.CatalogueImportRunUpdateManyWithoutTenantNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutTenantNestedInput
+  sheetsDestination?: Prisma.GoogleSheetsDestinationUpdateOneWithoutTenantNestedInput
+  orderExports?: Prisma.OrderExportUpdateManyWithoutTenantNestedInput
+  memberships?: Prisma.TenantMembershipUpdateManyWithoutTenantNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutTenantNestedInput
+  invitations?: Prisma.TenantInvitationUpdateManyWithoutTenantNestedInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUpdateManyWithoutTenantNestedInput
+  instagramConnection?: Prisma.InstagramConnectionUpdateOneWithoutTenantNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutTenantNestedInput
+  instagramCredentialCleanups?: Prisma.InstagramCredentialCleanupUpdateManyWithoutTenantNestedInput
+  facebookConnection?: Prisma.FacebookConnectionUpdateOneWithoutTenantNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutTenantNestedInput
+  facebookCredentialCleanups?: Prisma.FacebookCredentialCleanupUpdateManyWithoutTenantNestedInput
+  tikTokConnection?: Prisma.TikTokConnectionUpdateOneWithoutTenantNestedInput
+  tikTokOAuthAttempts?: Prisma.TikTokOAuthAttemptUpdateManyWithoutTenantNestedInput
+  tikTokCredentialCleanups?: Prisma.TikTokCredentialCleanupUpdateManyWithoutTenantNestedInput
+  instagramCustomerProfiles?: Prisma.InstagramCustomerProfileUpdateManyWithoutTenantNestedInput
+  googleConnection?: Prisma.GoogleConnectionUpdateOneWithoutTenantNestedInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutTenantNestedInput
+  googleCredentialCleanups?: Prisma.GoogleCredentialCleanupUpdateManyWithoutTenantNestedInput
+  notifications?: Prisma.UserNotificationUpdateManyWithoutTenantNestedInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUpdateManyWithoutTenantNestedInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUpdateManyWithoutTenantNestedInput
+  telegramBusinessConnections?: Prisma.TelegramBusinessConnectionUpdateManyWithoutTenantNestedInput
+  telegramChats?: Prisma.TelegramChatUpdateManyWithoutTenantNestedInput
+  telegramDeliveries?: Prisma.TelegramDeliveryUpdateManyWithoutTenantNestedInput
+  telegramSupplierSetting?: Prisma.TelegramSupplierSettingUpdateOneWithoutTenantNestedInput
+  orderItems?: Prisma.OrderItemUpdateManyWithoutTenantNestedInput
+  inventoryReservations?: Prisma.InventoryReservationUpdateManyWithoutTenantNestedInput
+  telegramDeliveryItems?: Prisma.TelegramDeliveryItemUpdateManyWithoutTenantNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutTenantNestedInput
+  deliveryConnections?: Prisma.DeliveryConnectionUpdateManyWithoutTenantNestedInput
+  deliverySenderProfiles?: Prisma.DeliverySenderProfileUpdateManyWithoutTenantNestedInput
+  shipments?: Prisma.ShipmentUpdateManyWithoutTenantNestedInput
+  shipmentAttempts?: Prisma.ShipmentAttemptUpdateManyWithoutTenantNestedInput
+  shipmentStatusEvents?: Prisma.ShipmentStatusEventUpdateManyWithoutTenantNestedInput
+  orderIntentEvaluations?: Prisma.OrderIntentEvaluationUpdateManyWithoutTenantNestedInput
+  legalEntities?: Prisma.TenantLegalEntityUpdateManyWithoutTenantNestedInput
+  bankAccounts?: Prisma.TenantBankAccountUpdateManyWithoutTenantNestedInput
+  orderCommercialTerms?: Prisma.OrderCommercialTermsUpdateManyWithoutTenantNestedInput
+  orderPayments?: Prisma.OrderPaymentUpdateManyWithoutTenantNestedInput
+  lifecycleRequests?: Prisma.TenantLifecycleRequestUpdateManyWithoutTenantNestedInput
+  retentionDryRuns?: Prisma.TenantRetentionDryRunUpdateManyWithoutTenantNestedInput
+  planInterests?: Prisma.TenantPlanInterestUpdateManyWithoutTenantNestedInput
+}
+
+export type TenantUncheckedUpdateWithoutAiProviderUsageAttemptsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instagramOAuthCurrentAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  events?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
+  conversations?: Prisma.ConversationUncheckedUpdateManyWithoutTenantNestedInput
+  messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
+  settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
+  replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
@@ -10100,6 +10521,7 @@ export type TenantCreateWithoutReplyDraftsInput = {
   messages?: Prisma.MessageCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -10163,6 +10585,7 @@ export type TenantUncheckedCreateWithoutReplyDraftsInput = {
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutTenantInput
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -10242,6 +10665,7 @@ export type TenantUpdateWithoutReplyDraftsInput = {
   messages?: Prisma.MessageUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -10305,6 +10729,7 @@ export type TenantUncheckedUpdateWithoutReplyDraftsInput = {
   messages?: Prisma.MessageUncheckedUpdateManyWithoutTenantNestedInput
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -10369,6 +10794,7 @@ export type TenantCreateWithoutLegalEntitiesInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -10432,6 +10858,7 @@ export type TenantUncheckedCreateWithoutLegalEntitiesInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -10511,6 +10938,7 @@ export type TenantUpdateWithoutLegalEntitiesInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -10574,6 +11002,7 @@ export type TenantUncheckedUpdateWithoutLegalEntitiesInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -10637,6 +11066,7 @@ export type TenantCreateWithoutBankAccountsInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -10700,6 +11130,7 @@ export type TenantUncheckedCreateWithoutBankAccountsInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -10779,6 +11210,7 @@ export type TenantUpdateWithoutBankAccountsInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -10842,6 +11274,7 @@ export type TenantUncheckedUpdateWithoutBankAccountsInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -10905,6 +11338,7 @@ export type TenantCreateWithoutOrdersInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
   catalogueMappings?: Prisma.CatalogueMappingCreateNestedManyWithoutTenantInput
@@ -10968,6 +11402,7 @@ export type TenantUncheckedCreateWithoutOrdersInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
   catalogueMappings?: Prisma.CatalogueMappingUncheckedCreateNestedManyWithoutTenantInput
@@ -11047,6 +11482,7 @@ export type TenantUpdateWithoutOrdersInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
   catalogueMappings?: Prisma.CatalogueMappingUpdateManyWithoutTenantNestedInput
@@ -11110,6 +11546,7 @@ export type TenantUncheckedUpdateWithoutOrdersInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
   catalogueMappings?: Prisma.CatalogueMappingUncheckedUpdateManyWithoutTenantNestedInput
@@ -11173,6 +11610,7 @@ export type TenantCreateWithoutOrderCommercialTermsInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -11236,6 +11674,7 @@ export type TenantUncheckedCreateWithoutOrderCommercialTermsInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -11315,6 +11754,7 @@ export type TenantUpdateWithoutOrderCommercialTermsInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -11378,6 +11818,7 @@ export type TenantUncheckedUpdateWithoutOrderCommercialTermsInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -11441,6 +11882,7 @@ export type TenantCreateWithoutOrderPaymentsInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -11504,6 +11946,7 @@ export type TenantUncheckedCreateWithoutOrderPaymentsInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -11583,6 +12026,7 @@ export type TenantUpdateWithoutOrderPaymentsInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -11646,6 +12090,7 @@ export type TenantUncheckedUpdateWithoutOrderPaymentsInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -11709,6 +12154,7 @@ export type TenantCreateWithoutOrderIntentEvaluationsInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -11772,6 +12218,7 @@ export type TenantUncheckedCreateWithoutOrderIntentEvaluationsInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -11851,6 +12298,7 @@ export type TenantUpdateWithoutOrderIntentEvaluationsInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -11914,6 +12362,7 @@ export type TenantUncheckedUpdateWithoutOrderIntentEvaluationsInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -11977,6 +12426,7 @@ export type TenantCreateWithoutDeliveryConnectionsInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -12040,6 +12490,7 @@ export type TenantUncheckedCreateWithoutDeliveryConnectionsInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -12119,6 +12570,7 @@ export type TenantUpdateWithoutDeliveryConnectionsInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -12182,6 +12634,7 @@ export type TenantUncheckedUpdateWithoutDeliveryConnectionsInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -12245,6 +12698,7 @@ export type TenantCreateWithoutDeliverySenderProfilesInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -12308,6 +12762,7 @@ export type TenantUncheckedCreateWithoutDeliverySenderProfilesInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -12387,6 +12842,7 @@ export type TenantUpdateWithoutDeliverySenderProfilesInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -12450,6 +12906,7 @@ export type TenantUncheckedUpdateWithoutDeliverySenderProfilesInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -12513,6 +12970,7 @@ export type TenantCreateWithoutShipmentsInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -12576,6 +13034,7 @@ export type TenantUncheckedCreateWithoutShipmentsInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -12655,6 +13114,7 @@ export type TenantUpdateWithoutShipmentsInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -12718,6 +13178,7 @@ export type TenantUncheckedUpdateWithoutShipmentsInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -12781,6 +13242,7 @@ export type TenantCreateWithoutShipmentAttemptsInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -12844,6 +13306,7 @@ export type TenantUncheckedCreateWithoutShipmentAttemptsInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -12923,6 +13386,7 @@ export type TenantUpdateWithoutShipmentAttemptsInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -12986,6 +13450,7 @@ export type TenantUncheckedUpdateWithoutShipmentAttemptsInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -13049,6 +13514,7 @@ export type TenantCreateWithoutShipmentStatusEventsInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -13112,6 +13578,7 @@ export type TenantUncheckedCreateWithoutShipmentStatusEventsInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -13191,6 +13658,7 @@ export type TenantUpdateWithoutShipmentStatusEventsInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -13254,6 +13722,7 @@ export type TenantUncheckedUpdateWithoutShipmentStatusEventsInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -13317,6 +13786,7 @@ export type TenantCreateWithoutOrderExportsInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -13380,6 +13850,7 @@ export type TenantUncheckedCreateWithoutOrderExportsInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -13459,6 +13930,7 @@ export type TenantUpdateWithoutOrderExportsInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -13522,6 +13994,7 @@ export type TenantUncheckedUpdateWithoutOrderExportsInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -13585,6 +14058,7 @@ export type TenantCreateWithoutAuditLogsInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -13648,6 +14122,7 @@ export type TenantUncheckedCreateWithoutAuditLogsInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -13727,6 +14202,7 @@ export type TenantUpdateWithoutAuditLogsInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -13790,6 +14266,7 @@ export type TenantUncheckedUpdateWithoutAuditLogsInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -13853,6 +14330,7 @@ export type TenantCreateWithoutOrderItemsInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -13916,6 +14394,7 @@ export type TenantUncheckedCreateWithoutOrderItemsInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -13995,6 +14474,7 @@ export type TenantUpdateWithoutOrderItemsInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -14058,6 +14538,7 @@ export type TenantUncheckedUpdateWithoutOrderItemsInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -14121,6 +14602,7 @@ export type TenantCreateWithoutProductsInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
   catalogueMappings?: Prisma.CatalogueMappingCreateNestedManyWithoutTenantInput
@@ -14184,6 +14666,7 @@ export type TenantUncheckedCreateWithoutProductsInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
   catalogueMappings?: Prisma.CatalogueMappingUncheckedCreateNestedManyWithoutTenantInput
@@ -14263,6 +14746,7 @@ export type TenantUpdateWithoutProductsInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
   catalogueMappings?: Prisma.CatalogueMappingUpdateManyWithoutTenantNestedInput
@@ -14326,6 +14810,7 @@ export type TenantUncheckedUpdateWithoutProductsInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
   catalogueMappings?: Prisma.CatalogueMappingUncheckedUpdateManyWithoutTenantNestedInput
@@ -14389,6 +14874,7 @@ export type TenantCreateWithoutInventoryReservationsInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -14452,6 +14938,7 @@ export type TenantUncheckedCreateWithoutInventoryReservationsInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -14531,6 +15018,7 @@ export type TenantUpdateWithoutInventoryReservationsInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -14594,6 +15082,7 @@ export type TenantUncheckedUpdateWithoutInventoryReservationsInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -14657,6 +15146,7 @@ export type TenantCreateWithoutTelegramDeliveryItemsInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -14720,6 +15210,7 @@ export type TenantUncheckedCreateWithoutTelegramDeliveryItemsInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -14799,6 +15290,7 @@ export type TenantUpdateWithoutTelegramDeliveryItemsInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -14862,6 +15354,7 @@ export type TenantUncheckedUpdateWithoutTelegramDeliveryItemsInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -14925,6 +15418,7 @@ export type TenantCreateWithoutTelegramNotificationPreferencesInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -14988,6 +15482,7 @@ export type TenantUncheckedCreateWithoutTelegramNotificationPreferencesInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -15067,6 +15562,7 @@ export type TenantUpdateWithoutTelegramNotificationPreferencesInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -15130,6 +15626,7 @@ export type TenantUncheckedUpdateWithoutTelegramNotificationPreferencesInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -15193,6 +15690,7 @@ export type TenantCreateWithoutCatalogueSourcesInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueMappings?: Prisma.CatalogueMappingCreateNestedManyWithoutTenantInput
@@ -15256,6 +15754,7 @@ export type TenantUncheckedCreateWithoutCatalogueSourcesInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueMappings?: Prisma.CatalogueMappingUncheckedCreateNestedManyWithoutTenantInput
@@ -15335,6 +15834,7 @@ export type TenantUpdateWithoutCatalogueSourcesInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueMappings?: Prisma.CatalogueMappingUpdateManyWithoutTenantNestedInput
@@ -15398,6 +15898,7 @@ export type TenantUncheckedUpdateWithoutCatalogueSourcesInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueMappings?: Prisma.CatalogueMappingUncheckedUpdateManyWithoutTenantNestedInput
@@ -15461,6 +15962,7 @@ export type TenantCreateWithoutCatalogueMappingsInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -15524,6 +16026,7 @@ export type TenantUncheckedCreateWithoutCatalogueMappingsInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -15603,6 +16106,7 @@ export type TenantUpdateWithoutCatalogueMappingsInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -15666,6 +16170,7 @@ export type TenantUncheckedUpdateWithoutCatalogueMappingsInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -15729,6 +16234,7 @@ export type TenantCreateWithoutCatalogueImportRunsInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -15792,6 +16298,7 @@ export type TenantUncheckedCreateWithoutCatalogueImportRunsInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -15871,6 +16378,7 @@ export type TenantUpdateWithoutCatalogueImportRunsInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -15934,6 +16442,7 @@ export type TenantUncheckedUpdateWithoutCatalogueImportRunsInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -15997,6 +16506,7 @@ export type TenantCreateWithoutPlanInterestsInput = {
   settings?: Prisma.TenantSettingsCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceCreateNestedManyWithoutTenantInput
@@ -16060,6 +16570,7 @@ export type TenantUncheckedCreateWithoutPlanInterestsInput = {
   settings?: Prisma.TenantSettingsUncheckedCreateNestedOneWithoutTenantInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedCreateNestedOneWithoutTenantInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutTenantInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedCreateNestedManyWithoutTenantInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTenantInput
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutTenantInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedCreateNestedManyWithoutTenantInput
@@ -16139,6 +16650,7 @@ export type TenantUpdateWithoutPlanInterestsInput = {
   settings?: Prisma.TenantSettingsUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUpdateManyWithoutTenantNestedInput
@@ -16202,6 +16714,7 @@ export type TenantUncheckedUpdateWithoutPlanInterestsInput = {
   settings?: Prisma.TenantSettingsUncheckedUpdateOneWithoutTenantNestedInput
   replyStyle?: Prisma.TenantReplyStyleUncheckedUpdateOneWithoutTenantNestedInput
   replyDrafts?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutTenantNestedInput
+  aiProviderUsageAttempts?: Prisma.AiProviderUsageAttemptUncheckedUpdateManyWithoutTenantNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTenantNestedInput
   products?: Prisma.ProductUncheckedUpdateManyWithoutTenantNestedInput
   catalogueSources?: Prisma.CatalogueSourceUncheckedUpdateManyWithoutTenantNestedInput
@@ -16262,6 +16775,7 @@ export type TenantCountOutputType = {
   conversations: number
   messages: number
   replyDrafts: number
+  aiProviderUsageAttempts: number
   orders: number
   products: number
   catalogueSources: number
@@ -16312,6 +16826,7 @@ export type TenantCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions
   conversations?: boolean | TenantCountOutputTypeCountConversationsArgs
   messages?: boolean | TenantCountOutputTypeCountMessagesArgs
   replyDrafts?: boolean | TenantCountOutputTypeCountReplyDraftsArgs
+  aiProviderUsageAttempts?: boolean | TenantCountOutputTypeCountAiProviderUsageAttemptsArgs
   orders?: boolean | TenantCountOutputTypeCountOrdersArgs
   products?: boolean | TenantCountOutputTypeCountProductsArgs
   catalogueSources?: boolean | TenantCountOutputTypeCountCatalogueSourcesArgs
@@ -16393,6 +16908,13 @@ export type TenantCountOutputTypeCountMessagesArgs<ExtArgs extends runtime.Types
  */
 export type TenantCountOutputTypeCountReplyDraftsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.AiReplyDraftWhereInput
+}
+
+/**
+ * TenantCountOutputType without action
+ */
+export type TenantCountOutputTypeCountAiProviderUsageAttemptsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AiProviderUsageAttemptWhereInput
 }
 
 /**
@@ -16710,6 +17232,7 @@ export type TenantSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   settings?: boolean | Prisma.Tenant$settingsArgs<ExtArgs>
   replyStyle?: boolean | Prisma.Tenant$replyStyleArgs<ExtArgs>
   replyDrafts?: boolean | Prisma.Tenant$replyDraftsArgs<ExtArgs>
+  aiProviderUsageAttempts?: boolean | Prisma.Tenant$aiProviderUsageAttemptsArgs<ExtArgs>
   orders?: boolean | Prisma.Tenant$ordersArgs<ExtArgs>
   products?: boolean | Prisma.Tenant$productsArgs<ExtArgs>
   catalogueSources?: boolean | Prisma.Tenant$catalogueSourcesArgs<ExtArgs>
@@ -16797,6 +17320,7 @@ export type TenantInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   settings?: boolean | Prisma.Tenant$settingsArgs<ExtArgs>
   replyStyle?: boolean | Prisma.Tenant$replyStyleArgs<ExtArgs>
   replyDrafts?: boolean | Prisma.Tenant$replyDraftsArgs<ExtArgs>
+  aiProviderUsageAttempts?: boolean | Prisma.Tenant$aiProviderUsageAttemptsArgs<ExtArgs>
   orders?: boolean | Prisma.Tenant$ordersArgs<ExtArgs>
   products?: boolean | Prisma.Tenant$productsArgs<ExtArgs>
   catalogueSources?: boolean | Prisma.Tenant$catalogueSourcesArgs<ExtArgs>
@@ -16860,6 +17384,7 @@ export type $TenantPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     settings: Prisma.$TenantSettingsPayload<ExtArgs> | null
     replyStyle: Prisma.$TenantReplyStylePayload<ExtArgs> | null
     replyDrafts: Prisma.$AiReplyDraftPayload<ExtArgs>[]
+    aiProviderUsageAttempts: Prisma.$AiProviderUsageAttemptPayload<ExtArgs>[]
     orders: Prisma.$OrderPayload<ExtArgs>[]
     products: Prisma.$ProductPayload<ExtArgs>[]
     catalogueSources: Prisma.$CatalogueSourcePayload<ExtArgs>[]
@@ -17317,6 +17842,7 @@ export interface Prisma__TenantClient<T, Null = never, ExtArgs extends runtime.T
   settings<T extends Prisma.Tenant$settingsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$settingsArgs<ExtArgs>>): Prisma.Prisma__TenantSettingsClient<runtime.Types.Result.GetResult<Prisma.$TenantSettingsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   replyStyle<T extends Prisma.Tenant$replyStyleArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$replyStyleArgs<ExtArgs>>): Prisma.Prisma__TenantReplyStyleClient<runtime.Types.Result.GetResult<Prisma.$TenantReplyStylePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   replyDrafts<T extends Prisma.Tenant$replyDraftsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$replyDraftsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AiReplyDraftPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  aiProviderUsageAttempts<T extends Prisma.Tenant$aiProviderUsageAttemptsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$aiProviderUsageAttemptsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AiProviderUsageAttemptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   orders<T extends Prisma.Tenant$ordersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$ordersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   products<T extends Prisma.Tenant$productsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$productsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   catalogueSources<T extends Prisma.Tenant$catalogueSourcesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$catalogueSourcesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CatalogueSourcePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -17925,6 +18451,30 @@ export type Tenant$replyDraftsArgs<ExtArgs extends runtime.Types.Extensions.Inte
   take?: number
   skip?: number
   distinct?: Prisma.AiReplyDraftScalarFieldEnum | Prisma.AiReplyDraftScalarFieldEnum[]
+}
+
+/**
+ * Tenant.aiProviderUsageAttempts
+ */
+export type Tenant$aiProviderUsageAttemptsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AiProviderUsageAttempt
+   */
+  select?: Prisma.AiProviderUsageAttemptSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AiProviderUsageAttempt
+   */
+  omit?: Prisma.AiProviderUsageAttemptOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AiProviderUsageAttemptInclude<ExtArgs> | null
+  where?: Prisma.AiProviderUsageAttemptWhereInput
+  orderBy?: Prisma.AiProviderUsageAttemptOrderByWithRelationInput | Prisma.AiProviderUsageAttemptOrderByWithRelationInput[]
+  cursor?: Prisma.AiProviderUsageAttemptWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AiProviderUsageAttemptScalarFieldEnum | Prisma.AiProviderUsageAttemptScalarFieldEnum[]
 }
 
 /**

@@ -93,6 +93,7 @@ export const ModelName = {
   GoogleSheetsDestination: 'GoogleSheetsDestination',
   TenantSettings: 'TenantSettings',
   TenantReplyStyle: 'TenantReplyStyle',
+  AiProviderUsageAttempt: 'AiProviderUsageAttempt',
   AiReplyDraft: 'AiReplyDraft',
   TenantLegalEntity: 'TenantLegalEntity',
   TenantBankAccount: 'TenantBankAccount',
@@ -885,6 +886,26 @@ export const TenantReplyStyleScalarFieldEnum = {
 } as const
 
 export type TenantReplyStyleScalarFieldEnum = (typeof TenantReplyStyleScalarFieldEnum)[keyof typeof TenantReplyStyleScalarFieldEnum]
+
+
+export const AiProviderUsageAttemptScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  purpose: 'purpose',
+  operationId: 'operationId',
+  provider: 'provider',
+  requestedModel: 'requestedModel',
+  returnedModel: 'returnedModel',
+  startedAt: 'startedAt',
+  finalizedAt: 'finalizedAt',
+  outcome: 'outcome',
+  inputTokens: 'inputTokens',
+  outputTokens: 'outputTokens',
+  cachedInputTokens: 'cachedInputTokens',
+  errorCategory: 'errorCategory'
+} as const
+
+export type AiProviderUsageAttemptScalarFieldEnum = (typeof AiProviderUsageAttemptScalarFieldEnum)[keyof typeof AiProviderUsageAttemptScalarFieldEnum]
 
 
 export const AiReplyDraftScalarFieldEnum = {

@@ -752,6 +752,74 @@ export type FloatWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedFloatFilter<$PrismaModel>
 }
 
+export type EnumAiProviderUsagePurposeFilter<$PrismaModel = never> = {
+  equals?: $Enums.AiProviderUsagePurpose | Prisma.EnumAiProviderUsagePurposeFieldRefInput<$PrismaModel>
+  in?: $Enums.AiProviderUsagePurpose[] | Prisma.ListEnumAiProviderUsagePurposeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AiProviderUsagePurpose[] | Prisma.ListEnumAiProviderUsagePurposeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAiProviderUsagePurposeFilter<$PrismaModel> | $Enums.AiProviderUsagePurpose
+}
+
+export type EnumAiProviderUsageProviderFilter<$PrismaModel = never> = {
+  equals?: $Enums.AiProviderUsageProvider | Prisma.EnumAiProviderUsageProviderFieldRefInput<$PrismaModel>
+  in?: $Enums.AiProviderUsageProvider[] | Prisma.ListEnumAiProviderUsageProviderFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AiProviderUsageProvider[] | Prisma.ListEnumAiProviderUsageProviderFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAiProviderUsageProviderFilter<$PrismaModel> | $Enums.AiProviderUsageProvider
+}
+
+export type EnumAiProviderUsageOutcomeFilter<$PrismaModel = never> = {
+  equals?: $Enums.AiProviderUsageOutcome | Prisma.EnumAiProviderUsageOutcomeFieldRefInput<$PrismaModel>
+  in?: $Enums.AiProviderUsageOutcome[] | Prisma.ListEnumAiProviderUsageOutcomeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AiProviderUsageOutcome[] | Prisma.ListEnumAiProviderUsageOutcomeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAiProviderUsageOutcomeFilter<$PrismaModel> | $Enums.AiProviderUsageOutcome
+}
+
+export type EnumAiProviderUsageErrorCategoryNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.AiProviderUsageErrorCategory | Prisma.EnumAiProviderUsageErrorCategoryFieldRefInput<$PrismaModel> | null
+  in?: $Enums.AiProviderUsageErrorCategory[] | Prisma.ListEnumAiProviderUsageErrorCategoryFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.AiProviderUsageErrorCategory[] | Prisma.ListEnumAiProviderUsageErrorCategoryFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumAiProviderUsageErrorCategoryNullableFilter<$PrismaModel> | $Enums.AiProviderUsageErrorCategory | null
+}
+
+export type EnumAiProviderUsagePurposeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.AiProviderUsagePurpose | Prisma.EnumAiProviderUsagePurposeFieldRefInput<$PrismaModel>
+  in?: $Enums.AiProviderUsagePurpose[] | Prisma.ListEnumAiProviderUsagePurposeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AiProviderUsagePurpose[] | Prisma.ListEnumAiProviderUsagePurposeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAiProviderUsagePurposeWithAggregatesFilter<$PrismaModel> | $Enums.AiProviderUsagePurpose
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumAiProviderUsagePurposeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumAiProviderUsagePurposeFilter<$PrismaModel>
+}
+
+export type EnumAiProviderUsageProviderWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.AiProviderUsageProvider | Prisma.EnumAiProviderUsageProviderFieldRefInput<$PrismaModel>
+  in?: $Enums.AiProviderUsageProvider[] | Prisma.ListEnumAiProviderUsageProviderFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AiProviderUsageProvider[] | Prisma.ListEnumAiProviderUsageProviderFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAiProviderUsageProviderWithAggregatesFilter<$PrismaModel> | $Enums.AiProviderUsageProvider
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumAiProviderUsageProviderFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumAiProviderUsageProviderFilter<$PrismaModel>
+}
+
+export type EnumAiProviderUsageOutcomeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.AiProviderUsageOutcome | Prisma.EnumAiProviderUsageOutcomeFieldRefInput<$PrismaModel>
+  in?: $Enums.AiProviderUsageOutcome[] | Prisma.ListEnumAiProviderUsageOutcomeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AiProviderUsageOutcome[] | Prisma.ListEnumAiProviderUsageOutcomeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAiProviderUsageOutcomeWithAggregatesFilter<$PrismaModel> | $Enums.AiProviderUsageOutcome
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumAiProviderUsageOutcomeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumAiProviderUsageOutcomeFilter<$PrismaModel>
+}
+
+export type EnumAiProviderUsageErrorCategoryNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.AiProviderUsageErrorCategory | Prisma.EnumAiProviderUsageErrorCategoryFieldRefInput<$PrismaModel> | null
+  in?: $Enums.AiProviderUsageErrorCategory[] | Prisma.ListEnumAiProviderUsageErrorCategoryFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.AiProviderUsageErrorCategory[] | Prisma.ListEnumAiProviderUsageErrorCategoryFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumAiProviderUsageErrorCategoryNullableWithAggregatesFilter<$PrismaModel> | $Enums.AiProviderUsageErrorCategory | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumAiProviderUsageErrorCategoryNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumAiProviderUsageErrorCategoryNullableFilter<$PrismaModel>
+}
+
 export type EnumAiReplyDraftTriggerSourceFilter<$PrismaModel = never> = {
   equals?: $Enums.AiReplyDraftTriggerSource | Prisma.EnumAiReplyDraftTriggerSourceFieldRefInput<$PrismaModel>
   in?: $Enums.AiReplyDraftTriggerSource[] | Prisma.ListEnumAiReplyDraftTriggerSourceFieldRefInput<$PrismaModel>
@@ -1921,6 +1989,74 @@ export type NestedFloatWithAggregatesFilter<$PrismaModel = never> = {
   _sum?: Prisma.NestedFloatFilter<$PrismaModel>
   _min?: Prisma.NestedFloatFilter<$PrismaModel>
   _max?: Prisma.NestedFloatFilter<$PrismaModel>
+}
+
+export type NestedEnumAiProviderUsagePurposeFilter<$PrismaModel = never> = {
+  equals?: $Enums.AiProviderUsagePurpose | Prisma.EnumAiProviderUsagePurposeFieldRefInput<$PrismaModel>
+  in?: $Enums.AiProviderUsagePurpose[] | Prisma.ListEnumAiProviderUsagePurposeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AiProviderUsagePurpose[] | Prisma.ListEnumAiProviderUsagePurposeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAiProviderUsagePurposeFilter<$PrismaModel> | $Enums.AiProviderUsagePurpose
+}
+
+export type NestedEnumAiProviderUsageProviderFilter<$PrismaModel = never> = {
+  equals?: $Enums.AiProviderUsageProvider | Prisma.EnumAiProviderUsageProviderFieldRefInput<$PrismaModel>
+  in?: $Enums.AiProviderUsageProvider[] | Prisma.ListEnumAiProviderUsageProviderFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AiProviderUsageProvider[] | Prisma.ListEnumAiProviderUsageProviderFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAiProviderUsageProviderFilter<$PrismaModel> | $Enums.AiProviderUsageProvider
+}
+
+export type NestedEnumAiProviderUsageOutcomeFilter<$PrismaModel = never> = {
+  equals?: $Enums.AiProviderUsageOutcome | Prisma.EnumAiProviderUsageOutcomeFieldRefInput<$PrismaModel>
+  in?: $Enums.AiProviderUsageOutcome[] | Prisma.ListEnumAiProviderUsageOutcomeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AiProviderUsageOutcome[] | Prisma.ListEnumAiProviderUsageOutcomeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAiProviderUsageOutcomeFilter<$PrismaModel> | $Enums.AiProviderUsageOutcome
+}
+
+export type NestedEnumAiProviderUsageErrorCategoryNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.AiProviderUsageErrorCategory | Prisma.EnumAiProviderUsageErrorCategoryFieldRefInput<$PrismaModel> | null
+  in?: $Enums.AiProviderUsageErrorCategory[] | Prisma.ListEnumAiProviderUsageErrorCategoryFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.AiProviderUsageErrorCategory[] | Prisma.ListEnumAiProviderUsageErrorCategoryFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumAiProviderUsageErrorCategoryNullableFilter<$PrismaModel> | $Enums.AiProviderUsageErrorCategory | null
+}
+
+export type NestedEnumAiProviderUsagePurposeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.AiProviderUsagePurpose | Prisma.EnumAiProviderUsagePurposeFieldRefInput<$PrismaModel>
+  in?: $Enums.AiProviderUsagePurpose[] | Prisma.ListEnumAiProviderUsagePurposeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AiProviderUsagePurpose[] | Prisma.ListEnumAiProviderUsagePurposeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAiProviderUsagePurposeWithAggregatesFilter<$PrismaModel> | $Enums.AiProviderUsagePurpose
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumAiProviderUsagePurposeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumAiProviderUsagePurposeFilter<$PrismaModel>
+}
+
+export type NestedEnumAiProviderUsageProviderWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.AiProviderUsageProvider | Prisma.EnumAiProviderUsageProviderFieldRefInput<$PrismaModel>
+  in?: $Enums.AiProviderUsageProvider[] | Prisma.ListEnumAiProviderUsageProviderFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AiProviderUsageProvider[] | Prisma.ListEnumAiProviderUsageProviderFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAiProviderUsageProviderWithAggregatesFilter<$PrismaModel> | $Enums.AiProviderUsageProvider
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumAiProviderUsageProviderFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumAiProviderUsageProviderFilter<$PrismaModel>
+}
+
+export type NestedEnumAiProviderUsageOutcomeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.AiProviderUsageOutcome | Prisma.EnumAiProviderUsageOutcomeFieldRefInput<$PrismaModel>
+  in?: $Enums.AiProviderUsageOutcome[] | Prisma.ListEnumAiProviderUsageOutcomeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AiProviderUsageOutcome[] | Prisma.ListEnumAiProviderUsageOutcomeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAiProviderUsageOutcomeWithAggregatesFilter<$PrismaModel> | $Enums.AiProviderUsageOutcome
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumAiProviderUsageOutcomeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumAiProviderUsageOutcomeFilter<$PrismaModel>
+}
+
+export type NestedEnumAiProviderUsageErrorCategoryNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.AiProviderUsageErrorCategory | Prisma.EnumAiProviderUsageErrorCategoryFieldRefInput<$PrismaModel> | null
+  in?: $Enums.AiProviderUsageErrorCategory[] | Prisma.ListEnumAiProviderUsageErrorCategoryFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.AiProviderUsageErrorCategory[] | Prisma.ListEnumAiProviderUsageErrorCategoryFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumAiProviderUsageErrorCategoryNullableWithAggregatesFilter<$PrismaModel> | $Enums.AiProviderUsageErrorCategory | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumAiProviderUsageErrorCategoryNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumAiProviderUsageErrorCategoryNullableFilter<$PrismaModel>
 }
 
 export type NestedEnumAiReplyDraftTriggerSourceFilter<$PrismaModel = never> = {

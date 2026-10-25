@@ -4,6 +4,18 @@ import { Prisma } from '@autosale/database';
 import { TENANT_EXPORT_DATASETS } from './tenant-export-datasets.js';
 
 describe('tenant export dataset allowlist', () => {
+  it('exports only the usage ledger scalar allowlist without content, customer identifiers or secrets', () => {
+    const dataset = TENANT_EXPORT_DATASETS.find((candidate) => candidate.name === 'ai-provider-usage-attempts')!;
+    expect(dataset?.fields).toEqual([
+      'id', 'tenantId', 'purpose', 'operationId', 'provider', 'requestedModel', 'returnedModel',
+      'startedAt', 'finalizedAt', 'outcome', 'inputTokens', 'outputTokens', 'cachedInputTokens', 'errorCategory',
+    ]);
+    const scalarFields = new Set(Object.values(Prisma.AiProviderUsageAttemptScalarFieldEnum));
+    expect(dataset.fields.filter((field) => !scalarFields.has(field as never))).toEqual([]);
+    for (const prohibited of ['prompt', 'response', 'customerId', 'email', 'phone', 'apiKey', 'accessToken']) {
+      expect(dataset.fields).not.toContain(prohibited);
+    }
+  });
   it('selects only scalar fields that exist on the tenant model', () => {
     const dataset = TENANT_EXPORT_DATASETS.find((candidate) => candidate.name === 'tenants')!;
     const tenantFields = new Set(Object.values(Prisma.TenantScalarFieldEnum));

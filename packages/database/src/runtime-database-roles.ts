@@ -102,6 +102,10 @@ export async function configureRuntimeDatabaseRoles(
         REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC;
       DO $platform_flags$
       BEGIN
+        IF to_regclass('public.ai_provider_usage_attempts') IS NOT NULL THEN
+          REVOKE INSERT, UPDATE, DELETE ON TABLE public.ai_provider_usage_attempts FROM autosale_api;
+          REVOKE DELETE ON TABLE public.ai_provider_usage_attempts FROM autosale_worker;
+        END IF;
         IF to_regclass('public.marketing_daily_counters') IS NOT NULL THEN
           REVOKE ALL ON TABLE public.marketing_daily_counters FROM autosale_api, autosale_worker;
         END IF;

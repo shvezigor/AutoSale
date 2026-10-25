@@ -439,6 +439,7 @@ export const ModelName = {
   GoogleSheetsDestination: 'GoogleSheetsDestination',
   TenantSettings: 'TenantSettings',
   TenantReplyStyle: 'TenantReplyStyle',
+  AiProviderUsageAttempt: 'AiProviderUsageAttempt',
   AiReplyDraft: 'AiReplyDraft',
   TenantLegalEntity: 'TenantLegalEntity',
   TenantBankAccount: 'TenantBankAccount',
@@ -480,7 +481,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "tenant" | "tenantLifecycleRequest" | "tenantRetentionDryRun" | "googleConnection" | "googleOAuthAttempt" | "googleCredentialCleanup" | "instagramConnection" | "instagramOAuthState" | "instagramCredentialCleanup" | "facebookConnection" | "facebookOAuthAttempt" | "facebookCredentialCleanup" | "tikTokConnection" | "tikTokOAuthAttempt" | "tikTokCredentialCleanup" | "user" | "userAvatarCleanup" | "userNotification" | "telegramLinkAttempt" | "telegramUserBinding" | "telegramBusinessConnection" | "telegramChat" | "telegramSupplierSetting" | "telegramWebhookUpdate" | "telegramDelivery" | "googleIdentity" | "googleSignInAttempt" | "tenantMembership" | "session" | "emailVerificationToken" | "passwordResetToken" | "tenantInvitation" | "securityAuditLog" | "platformFeatureFlag" | "webhookEvent" | "conversation" | "instagramCustomerProfile" | "instagramAvatarCleanup" | "message" | "googleSheetsDestination" | "tenantSettings" | "tenantReplyStyle" | "aiReplyDraft" | "tenantLegalEntity" | "tenantBankAccount" | "order" | "orderCommercialTerms" | "orderPayment" | "orderIntentEvaluation" | "deliveryConnection" | "deliverySenderProfile" | "shipment" | "shipmentAttempt" | "shipmentStatusEvent" | "orderExport" | "auditLog" | "orderItem" | "product" | "inventoryReservation" | "telegramDeliveryItem" | "telegramNotificationPreference" | "catalogueSource" | "catalogueMapping" | "catalogueImportRun" | "attachment" | "demoLead" | "marketingDailyCounter" | "tenantPlanInterest"
+    modelProps: "tenant" | "tenantLifecycleRequest" | "tenantRetentionDryRun" | "googleConnection" | "googleOAuthAttempt" | "googleCredentialCleanup" | "instagramConnection" | "instagramOAuthState" | "instagramCredentialCleanup" | "facebookConnection" | "facebookOAuthAttempt" | "facebookCredentialCleanup" | "tikTokConnection" | "tikTokOAuthAttempt" | "tikTokCredentialCleanup" | "user" | "userAvatarCleanup" | "userNotification" | "telegramLinkAttempt" | "telegramUserBinding" | "telegramBusinessConnection" | "telegramChat" | "telegramSupplierSetting" | "telegramWebhookUpdate" | "telegramDelivery" | "googleIdentity" | "googleSignInAttempt" | "tenantMembership" | "session" | "emailVerificationToken" | "passwordResetToken" | "tenantInvitation" | "securityAuditLog" | "platformFeatureFlag" | "webhookEvent" | "conversation" | "instagramCustomerProfile" | "instagramAvatarCleanup" | "message" | "googleSheetsDestination" | "tenantSettings" | "tenantReplyStyle" | "aiProviderUsageAttempt" | "aiReplyDraft" | "tenantLegalEntity" | "tenantBankAccount" | "order" | "orderCommercialTerms" | "orderPayment" | "orderIntentEvaluation" | "deliveryConnection" | "deliverySenderProfile" | "shipment" | "shipmentAttempt" | "shipmentStatusEvent" | "orderExport" | "auditLog" | "orderItem" | "product" | "inventoryReservation" | "telegramDeliveryItem" | "telegramNotificationPreference" | "catalogueSource" | "catalogueMapping" | "catalogueImportRun" | "attachment" | "demoLead" | "marketingDailyCounter" | "tenantPlanInterest"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -3592,6 +3593,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    AiProviderUsageAttempt: {
+      payload: Prisma.$AiProviderUsageAttemptPayload<ExtArgs>
+      fields: Prisma.AiProviderUsageAttemptFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AiProviderUsageAttemptFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiProviderUsageAttemptPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AiProviderUsageAttemptFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiProviderUsageAttemptPayload>
+        }
+        findFirst: {
+          args: Prisma.AiProviderUsageAttemptFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiProviderUsageAttemptPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AiProviderUsageAttemptFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiProviderUsageAttemptPayload>
+        }
+        findMany: {
+          args: Prisma.AiProviderUsageAttemptFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiProviderUsageAttemptPayload>[]
+        }
+        create: {
+          args: Prisma.AiProviderUsageAttemptCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiProviderUsageAttemptPayload>
+        }
+        createMany: {
+          args: Prisma.AiProviderUsageAttemptCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AiProviderUsageAttemptCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiProviderUsageAttemptPayload>[]
+        }
+        delete: {
+          args: Prisma.AiProviderUsageAttemptDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiProviderUsageAttemptPayload>
+        }
+        update: {
+          args: Prisma.AiProviderUsageAttemptUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiProviderUsageAttemptPayload>
+        }
+        deleteMany: {
+          args: Prisma.AiProviderUsageAttemptDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AiProviderUsageAttemptUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AiProviderUsageAttemptUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiProviderUsageAttemptPayload>[]
+        }
+        upsert: {
+          args: Prisma.AiProviderUsageAttemptUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiProviderUsageAttemptPayload>
+        }
+        aggregate: {
+          args: Prisma.AiProviderUsageAttemptAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAiProviderUsageAttempt>
+        }
+        groupBy: {
+          args: Prisma.AiProviderUsageAttemptGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AiProviderUsageAttemptGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AiProviderUsageAttemptCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AiProviderUsageAttemptCountAggregateOutputType> | number
+        }
+      }
+    }
     AiReplyDraft: {
       payload: Prisma.$AiReplyDraftPayload<ExtArgs>
       fields: Prisma.AiReplyDraftFieldRefs
@@ -6305,6 +6380,26 @@ export const TenantReplyStyleScalarFieldEnum = {
 export type TenantReplyStyleScalarFieldEnum = (typeof TenantReplyStyleScalarFieldEnum)[keyof typeof TenantReplyStyleScalarFieldEnum]
 
 
+export const AiProviderUsageAttemptScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  purpose: 'purpose',
+  operationId: 'operationId',
+  provider: 'provider',
+  requestedModel: 'requestedModel',
+  returnedModel: 'returnedModel',
+  startedAt: 'startedAt',
+  finalizedAt: 'finalizedAt',
+  outcome: 'outcome',
+  inputTokens: 'inputTokens',
+  outputTokens: 'outputTokens',
+  cachedInputTokens: 'cachedInputTokens',
+  errorCategory: 'errorCategory'
+} as const
+
+export type AiProviderUsageAttemptScalarFieldEnum = (typeof AiProviderUsageAttemptScalarFieldEnum)[keyof typeof AiProviderUsageAttemptScalarFieldEnum]
+
+
 export const AiReplyDraftScalarFieldEnum = {
   id: 'id',
   tenantId: 'tenantId',
@@ -7300,6 +7395,62 @@ export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaMode
 
 
 /**
+ * Reference to a field of type 'AiProviderUsagePurpose'
+ */
+export type EnumAiProviderUsagePurposeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AiProviderUsagePurpose'>
+
+
+
+/**
+ * Reference to a field of type 'AiProviderUsagePurpose[]'
+ */
+export type ListEnumAiProviderUsagePurposeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AiProviderUsagePurpose[]'>
+
+
+
+/**
+ * Reference to a field of type 'AiProviderUsageProvider'
+ */
+export type EnumAiProviderUsageProviderFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AiProviderUsageProvider'>
+
+
+
+/**
+ * Reference to a field of type 'AiProviderUsageProvider[]'
+ */
+export type ListEnumAiProviderUsageProviderFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AiProviderUsageProvider[]'>
+
+
+
+/**
+ * Reference to a field of type 'AiProviderUsageOutcome'
+ */
+export type EnumAiProviderUsageOutcomeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AiProviderUsageOutcome'>
+
+
+
+/**
+ * Reference to a field of type 'AiProviderUsageOutcome[]'
+ */
+export type ListEnumAiProviderUsageOutcomeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AiProviderUsageOutcome[]'>
+
+
+
+/**
+ * Reference to a field of type 'AiProviderUsageErrorCategory'
+ */
+export type EnumAiProviderUsageErrorCategoryFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AiProviderUsageErrorCategory'>
+
+
+
+/**
+ * Reference to a field of type 'AiProviderUsageErrorCategory[]'
+ */
+export type ListEnumAiProviderUsageErrorCategoryFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AiProviderUsageErrorCategory[]'>
+
+
+
+/**
  * Reference to a field of type 'AiReplyDraftTriggerSource'
  */
 export type EnumAiReplyDraftTriggerSourceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AiReplyDraftTriggerSource'>
@@ -7827,6 +7978,7 @@ export type GlobalOmitConfig = {
   googleSheetsDestination?: Prisma.GoogleSheetsDestinationOmit
   tenantSettings?: Prisma.TenantSettingsOmit
   tenantReplyStyle?: Prisma.TenantReplyStyleOmit
+  aiProviderUsageAttempt?: Prisma.AiProviderUsageAttemptOmit
   aiReplyDraft?: Prisma.AiReplyDraftOmit
   tenantLegalEntity?: Prisma.TenantLegalEntityOmit
   tenantBankAccount?: Prisma.TenantBankAccountOmit
