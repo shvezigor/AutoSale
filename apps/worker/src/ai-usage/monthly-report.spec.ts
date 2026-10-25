@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildMonthlyAiUsageReport, utcMonth, type MonthlyReportInput, type UsageAttempt } from './monthly-report.js';
+import { buildMonthlyAiUsageReport, sumTokenCounts, utcMonth, type MonthlyReportInput, type UsageAttempt } from './monthly-report.js';
 
 const tenant = '11111111-1111-4111-8111-111111111111';
 const testTenant = '22222222-2222-4222-8222-222222222222';
@@ -29,6 +29,31 @@ export function fixture(): MonthlyReportInput {
 }
 
 describe('private monthly AI report', () => {
+  it('adds the maximum accepted tenant token aggregates exactly beyond MAX_SAFE_INTEGER', () => {
+    let tokens = '0';
+    // Each literal is 99,999 PostgreSQL INTEGER-max counts: safely exact per tenant.
+    for (let tenantIndex = 0; tenantIndex < 100; tenantIndex++) tokens = sumTokenCounts(tokens, '214746217216353');
+    expect(tokens).toBe('21474621721635300');
+    expect(sumTokenCounts('9007199254740991', 1)).toBe('9007199254740992');
+  });
+
+  it('serializes every token total as an exact decimal integer string across buckets, tenants and cohorts', () => {
+    const input = fixture();
+    input.attempts = [attempt('included-1', { inputTokens: 2_147_483_647, outputTokens: 2_147_483_647, cachedInputTokens: 2_147_483_647 }),
+      attempt('included-2', { tenantId: zeroTenant, inputTokens: 2_147_483_647, outputTokens: 2_147_483_647, cachedInputTokens: 2_147_483_647 }),
+      attempt('test-1', { tenantId: testTenant, inputTokens: 2_147_483_647, outputTokens: 2_147_483_647, cachedInputTokens: 2_147_483_647 })];
+    const report = JSON.parse(JSON.stringify(buildMonthlyAiUsageReport(input)));
+    for (const field of ['inputTokens', 'outputTokens', 'cachedInputTokens']) {
+      expect(report.included[field]).toBe('4294967294');
+      expect(report.testCohort[field]).toBe('2147483647');
+      expect(report.tenants.map((row: Record<string, unknown>) => row[field])).toEqual(['2147483647', '2147483647', '2147483647']);
+      expect(report.buckets.map((row: Record<string, unknown>) => row[field])).toEqual(['2147483647', '2147483647', '2147483647']);
+    }
+    const empty = fixture();
+    empty.attempts = [];
+    expect(buildMonthlyAiUsageReport(empty).included).toMatchObject({ inputTokens: '0', outputTokens: '0', cachedInputTokens: '0' });
+  });
+
   it('counts ledger attempts once, includes unused drafts/setup, separates explicit test cohort and distinct canonical orders', () => {
     const report = buildMonthlyAiUsageReport(fixture());
     expect(report.status).toBe('COMPLETE');

@@ -12,7 +12,8 @@ const uuid = z.string().regex(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][
 const identity = z.string().regex(/^[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}$/);
 const decimal = z.string().regex(/^(0|[1-9]\d{0,11})(\.\d{1,12})?$/);
 const currency = z.string().regex(/^[A-Z]{3}$/);
-const instant = z.iso.datetime({ offset: false }).transform((value) => new Date(value));
+// Date cannot retain sub-millisecond precision. Reject it before construction.
+const instant = z.iso.datetime({ offset: false }).regex(/T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?Z$/).transform((value) => new Date(value));
 const month = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/);
 const ids = z.array(uuid).max(100).refine((value) => new Set(value).size === value.length);
 const range = { from: instant, until: instant };

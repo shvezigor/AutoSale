@@ -49,6 +49,35 @@ describe('private operator report CLI', () => {
     expect(() => parseOperatorInput({ ...config(), authorizedTenantIds: [tenant, tenant] })).toThrow('Invalid operator input');
   });
 
+  it.each(['effectiveFrom', 'effectiveUntil'] as const)('rejects sub-millisecond %s tariff boundaries instead of silently rounding', (field) => {
+    const rate = { version: 'fictional-v1', source: 'fictional tariff', model: 'fictional-model', currency: 'USD',
+      effectiveFrom: '2026-09-01T00:00:00.000Z', effectiveUntil: '2026-10-01T00:00:00.000Z', inputPerMillion: '0.1', outputPerMillion: '0.2', cachedInputPerMillion: '0.01' };
+    for (const instant of ['2026-09-16T00:00:00.0009Z', '2026-09-16T00:00:00.000000Z']) {
+      expect(() => parseOperatorInput({ ...config(), rates: [{ ...rate, [field]: instant }] })).toThrow('Invalid operator input');
+    }
+    for (const [instant, expected] of [['2026-09-16T00:00:00Z', '2026-09-16T00:00:00.000Z'],
+      ['2026-09-16T00:00:00.1Z', '2026-09-16T00:00:00.100Z'], ['2026-09-16T00:00:00.12Z', '2026-09-16T00:00:00.120Z'],
+      ['2026-09-16T00:00:00.123Z', '2026-09-16T00:00:00.123Z']]) {
+      expect(parseOperatorInput({ ...config(), rates: [{ ...rate, [field]: instant }] }).rates[0]![field].toISOString()).toBe(expected);
+    }
+  });
+
+  it('rejects a sub-millisecond tariff before querying or writing a report', async () => {
+    const dir = await directory();
+    const repo = await directory();
+    const rate = { version: 'fictional-v1', source: 'fictional tariff', model: 'fictional-model', currency: 'USD',
+      effectiveFrom: '2026-09-16T00:00:00.0009Z', effectiveUntil: '2026-10-01T00:00:00.000Z', inputPerMillion: '0.1', outputPerMillion: '0.2', cachedInputPerMillion: '0.01' };
+    await writeFile(join(dir, 'input.json'), JSON.stringify({ ...config(), rates: [rate] }));
+    let reads = 0;
+    const errors: string[] = [];
+    expect(await runReportCli(['--input', join(dir, 'input.json'), '--month', '2026-09', '--output', join(dir, 'report.json')], {
+      repositoryRoot: repo, readData: async () => { reads++; return { attempts: [], orderIds: [] }; }, stderr: (message) => errors.push(message),
+    })).toBe(1);
+    expect(reads).toBe(0);
+    await expect(readFile(join(dir, 'report.json'))).rejects.toMatchObject({ code: 'ENOENT' });
+    expect(errors).toEqual(['Invalid operator input; check the versioned private JSON contract.\n']);
+  });
+
   it('reads only selected scalar evidence and canonical order IDs inside each explicit tenant RLS transaction', async () => {
     const calls: unknown[] = [];
     const tx = {
@@ -199,7 +228,7 @@ describe('private report reader with PostgreSQL runtime RLS', () => {
     expect(await runReportCli(['--input', join(dir, 'input.json'), '--month', '2026-09', '--output', join(dir, 'report.json')],
       { repositoryRoot: repo, readData: (input) => loadMonthlyReportData(worker, input), stderr: (message) => errors.push(message) })).toBe(0);
     const artifact = await readFile(join(dir, 'report.json'), 'utf8');
-    expect(JSON.parse(artifact)).toMatchObject({ status: 'PROVISIONAL', included: { orders: 1, attempts: 1, inputTokens: 1, outputTokens: 2 }, testCohort: { orders: 1, attempts: 1 } });
+    expect(JSON.parse(artifact)).toMatchObject({ status: 'PROVISIONAL', included: { orders: 1, attempts: 1, inputTokens: '1', outputTokens: '2', cachedInputTokens: '0' }, testCohort: { orders: 1, attempts: 1, inputTokens: '1', outputTokens: '2', cachedInputTokens: '0' } });
     expect(artifact).not.toMatch(/Fictional private text|999999|operationId|fictional-account/);
     expect(errors).toEqual([]);
   });

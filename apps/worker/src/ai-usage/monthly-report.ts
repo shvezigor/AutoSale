@@ -18,7 +18,8 @@ export type MonthlyReportInput = { period: ReportPeriod; tenantIds: string[]; te
   orderIds: { id: string; tenantId: string; createdAt: Date }[] };
 export type CostStatus = 'COMPLETE' | 'PROVISIONAL';
 type Coverage = { tenantId: string | null; reason: string; count: number };
-type Totals = { attempts: number; orders: number; inputTokens: number; outputTokens: number; cachedInputTokens: number;
+// Token aggregates can exceed MAX_SAFE_INTEGER within the authorized reader bounds.
+type Totals = { attempts: number; orders: number; inputTokens: string; outputTokens: string; cachedInputTokens: string;
   knownAiCost: string; setupKnownAiCost: string; unpricedAttempts: number; aiCostPerOrder: string | null };
 
 export function utcMonth(month: string): ReportPeriod {
@@ -31,8 +32,16 @@ export function utcMonth(month: string): ReportPeriod {
 const sameIds = (a: string[], b: string[]) => a.length === b.length && a.every((id) => b.includes(id));
 const inPeriod = (date: Date, period: ReportPeriod) => date >= period.from && date < period.until;
 const ratio = (amount: string, orders: number) => orders === 0 ? null : new Money(amount).div(orders).toDecimalPlaces(12).toString();
-const emptyTotals = (): Totals => ({ attempts: 0, orders: 0, inputTokens: 0, outputTokens: 0, cachedInputTokens: 0, knownAiCost: '0', setupKnownAiCost: '0', unpricedAttempts: 0, aiCostPerOrder: null });
+const emptyTotals = (): Totals => ({ attempts: 0, orders: 0, inputTokens: '0', outputTokens: '0', cachedInputTokens: '0', knownAiCost: '0', setupKnownAiCost: '0', unpricedAttempts: 0, aiCostPerOrder: null });
 const addCost = (a: string, b: string) => new Money(a).plus(b).toString();
+
+/** Exact integer addition with JSON-safe serialization at every aggregate layer. */
+export function sumTokenCounts(left: string, right: string | number): string {
+  if (!/^(0|[1-9]\d*)$/.test(left) || (typeof right === 'number'
+    ? !Number.isSafeInteger(right) || right < 0
+    : !/^(0|[1-9]\d*)$/.test(right))) throw new Error('Invalid integer token total');
+  return (BigInt(left) + BigInt(right)).toString();
+}
 
 /** Pure private aggregate. Unknown cost is never substituted with a measured zero. */
 export function buildMonthlyAiUsageReport(input: MonthlyReportInput) {
@@ -100,9 +109,9 @@ export function buildMonthlyAiUsageReport(input: MonthlyReportInput) {
     }
     for (const target of [tenant, bucket]) {
       target.attempts++;
-      target.inputTokens += attempt.inputTokens ?? 0;
-      target.outputTokens += attempt.outputTokens ?? 0;
-      target.cachedInputTokens += attempt.cachedInputTokens ?? 0;
+      target.inputTokens = sumTokenCounts(target.inputTokens, attempt.inputTokens ?? 0);
+      target.outputTokens = sumTokenCounts(target.outputTokens, attempt.outputTokens ?? 0);
+      target.cachedInputTokens = sumTokenCounts(target.cachedInputTokens, attempt.cachedInputTokens ?? 0);
       target.knownAiCost = addCost(target.knownAiCost, cost.toString());
       if (attempt.purpose.startsWith('CATALOGUE_')) target.setupKnownAiCost = addCost(target.setupKnownAiCost, cost.toString());
       if (unpriced) target.unpricedAttempts++;
@@ -115,7 +124,8 @@ export function buildMonthlyAiUsageReport(input: MonthlyReportInput) {
   function cohort(kind: 'TEST' | 'INCLUDED') {
     const totals = emptyTotals();
     for (const row of tenants.filter((tenant) => tenant.cohort === kind)) {
-      for (const key of ['attempts', 'orders', 'inputTokens', 'outputTokens', 'cachedInputTokens', 'unpricedAttempts'] as const) totals[key] += row[key];
+      for (const key of ['attempts', 'orders', 'unpricedAttempts'] as const) totals[key] += row[key];
+      for (const key of ['inputTokens', 'outputTokens', 'cachedInputTokens'] as const) totals[key] = sumTokenCounts(totals[key], row[key]);
       totals.knownAiCost = addCost(totals.knownAiCost, row.knownAiCost);
       totals.setupKnownAiCost = addCost(totals.setupKnownAiCost, row.setupKnownAiCost);
     }
@@ -154,7 +164,7 @@ export function buildMonthlyAiUsageReport(input: MonthlyReportInput) {
     providerReconciliation: { computedPreCredit, invoiceSubtotal: invoice?.subtotal ?? null, credits: invoice?.credits ?? null, taxes: invoice?.taxes ?? null, invoiceAfterCreditsAndTaxes, variance },
     infrastructure: { amount: infrastructure?.attributableAmount ?? null, currency: infrastructure?.currency ?? null, globalBlendedCostPerOrder: blended },
     rateVersions: [...new Set(input.rates.map((row) => row.version))],
-    interpretation: 'Known AI costs are lower bounds when PROVISIONAL; ratios use those known costs and are rounded to 12 decimal places. Test AI is excluded from included ratios. Infrastructure is global only.',
+    interpretation: 'Known AI costs are lower bounds when PROVISIONAL; ratios use those known costs and are rounded to 12 decimal places. Token totals are exact decimal integer strings. Test AI is excluded from included ratios. Infrastructure is global only.',
     excludedCosts: ['LABOUR', 'TAXES', 'PAYMENT_PROVIDER_FEES', 'CUSTOMER_CARRIER_AND_MESSAGE_FEES'],
   };
 }
