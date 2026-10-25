@@ -68,6 +68,7 @@ These are entry points, not a claim that the entire matrix is already automated 
 - A contextual variant is allowed only when its selector and purpose are documented next to the component.
 
 All variants use the shared height, radius, typography, focus ring, hover and disabled states from `apps/web/app/globals.css`. Do not use `button-primary`, `button-secondary`, `secondary`, or an unstyled native `<button>` for an action.
+The global `.icon-button` rule supplies the visual base, hover, focus and disabled states. Conversation triage keeps its menu trigger at least 44 × 44 px through `.conversation-status-control .icon-button` so the row action remains usable on touch screens; existing dialog-specific dimensions remain scoped to those dialogs.
 
 ## Async actions
 

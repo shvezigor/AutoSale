@@ -16,6 +16,18 @@ function collectProductionTsx(root: string): string[] {
 }
 
 describe('button style contract', () => {
+  it('styles the shared icon variant instead of leaving triage actions to browser defaults', () => {
+    const css = readFileSync(resolve(__dirname, '../../app/globals.css'), 'utf8');
+    const iconBase = css.match(/(?:^|\n)\.icon-button\s*\{([^}]+)\}/)?.[1];
+    expect(iconBase).toMatch(/display:\s*inline-grid/);
+    expect(iconBase).toMatch(/border:\s*1px solid var\(--border\)/);
+    expect(iconBase).toMatch(/border-radius:\s*10px/);
+    expect(iconBase).toMatch(/background:\s*#fff/);
+    expect(css).toMatch(/\.icon-button:focus-visible\s*\{[^}]*outline:/);
+    expect(css).toMatch(/\.icon-button:disabled\s*\{[^}]*cursor:\s*not-allowed/);
+    expect(css).toMatch(/\.conversation-status-control \.icon-button\s*\{[^}]*min-width:\s*44px;[^}]*min-height:\s*44px/);
+    expect(css).toMatch(/\.conversation-status-menu \.text-button\s*\{[^}]*display:\s*flex/);
+  });
   it('keeps triage menu mutations and triggers on shared variants', () => {
     const source = readFileSync(resolve(__dirname, 'conversation-status-menu.tsx'), 'utf8');
     expect(source).toContain('className="icon-button"');
