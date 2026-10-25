@@ -1,10 +1,12 @@
 import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 const api = vi.hoisted(() => ({ refreshConversationList: vi.fn(), refreshConversationStatusCounts: vi.fn(), refreshConversation: vi.fn(), changeConversationStatus: vi.fn() }));
-const navigation = vi.hoisted(() => ({ refresh: vi.fn(), replace: vi.fn() }));
+const navigation = vi.hoisted(() => ({ query: '', refresh: vi.fn(), replace: vi.fn() }));
 vi.mock('../api/conversation-replies', async original => ({ ...await original<object>(), ...api }));
-vi.mock('next/navigation', () => ({ usePathname: () => '/conversations/fixture', useSearchParams: () => new URLSearchParams(), useRouter: () => navigation }));
+vi.mock('next/navigation', () => ({ usePathname: () => '/conversations/fixture', useSearchParams: () => new URLSearchParams(navigation.query), useRouter: () => navigation }));
 import { ConversationStatusMenu } from './conversation-status-menu';
+import { SocialReplyComposer } from './social-reply-composer';
+import { ToastProvider } from './toast-provider';
 import { InboxShell } from './inbox-shell';
 import { I18nProvider } from '../i18n/i18n-provider';
 import { ConversationReplyApiError } from '../api/conversation-replies';
@@ -12,10 +14,33 @@ const row = { id: 'fixture', workflowStatus: 'ACTIVE' as const, statusVersion: 0
 function fixture(locale: 'uk' | 'en' = 'uk', version = 0, status: 'ACTIVE' | 'CLOSED' = 'ACTIVE') {
   return <I18nProvider locale={locale} authenticated><InboxShell initialPage={{ items: [row], nextCursor: null }} initialCounts={{ ACTIVE: 1, INACTIVE: 0, CLOSED: 0 }}><section aria-label="Selected detail"><ConversationStatusMenu id={row.id} name="Олена" workflowStatus={status} statusVersion={version} detail /><textarea aria-label="Reply" defaultValue="Preserved draft" /></section></InboxShell></I18nProvider>;
 }
-beforeEach(() => { vi.resetAllMocks(); api.refreshConversationList.mockResolvedValue({ items: [], nextCursor: null }); api.refreshConversationStatusCounts.mockResolvedValue({ ACTIVE: 0, INACTIVE: 0, CLOSED: 1 }); api.refreshConversation.mockResolvedValue({ ...row, workflowStatus: 'CLOSED', statusVersion: 2 }); });
+beforeEach(() => { navigation.query = ''; vi.resetAllMocks(); api.refreshConversationList.mockResolvedValue({ items: [], nextCursor: null }); api.refreshConversationStatusCounts.mockResolvedValue({ ACTIVE: 0, INACTIVE: 0, CLOSED: 1 }); api.refreshConversation.mockResolvedValue({ ...row, workflowStatus: 'CLOSED', statusVersion: 2 }); });
 afterEach(() => { cleanup(); vi.useRealTimers(); });
 const detail = () => within(screen.getByRole('region', { name: 'Selected detail' }));
 describe('conversation status actions', () => {
+  it('updates selected header and menu from detail polling after its row disappears, ignoring older responses', async () => {
+    vi.useFakeTimers();
+    navigation.query = 'status=closed';
+    api.refreshConversationList.mockResolvedValueOnce({ items: [{ ...row, workflowStatus: 'CLOSED', statusVersion: 1 }], nextCursor: null });
+    const selected = { ...row, workflowStatus: 'CLOSED' as const, statusVersion: 1, messages: [], replyCapability: { enabled: true, aiDraftSendAllowed: true, reason: null } };
+    api.refreshConversation.mockResolvedValue({ ...selected, workflowStatus: 'ACTIVE', statusVersion: 2 });
+    render(<I18nProvider locale="en" authenticated><ToastProvider><InboxShell initialPage={{ items: [], nextCursor: null }} initialCounts={{ ACTIVE: 0, INACTIVE: 0, CLOSED: 1 }}><section aria-label="Selected detail"><ConversationStatusMenu id={row.id} name="Fictional" workflowStatus="CLOSED" statusVersion={1} detail /><SocialReplyComposer initialConversation={selected} canManageSettings={false} /></section></InboxShell></ToastProvider></I18nProvider>);
+    await act(async () => {});
+    expect(screen.getByRole('link')).toBeVisible();
+    expect(detail().getByText('Closed')).toBeVisible();
+    const editor = detail().getByRole('textbox'); fireEvent.change(editor, { target: { value: 'Fictional preserved reply' } });
+    await act(async () => vi.advanceTimersByTimeAsync(3000));
+    expect(detail().getByText('Active')).toBeVisible();
+    expect(screen.queryByRole('link')).toBeNull();
+    api.refreshConversation.mockResolvedValue(selected);
+    await act(async () => vi.advanceTimersByTimeAsync(2000));
+    expect(detail().getByText('Active')).toBeVisible();
+    fireEvent.click(detail().getByRole('button', { name: 'Move conversation Fictional' }));
+    expect(screen.queryByRole('menuitem', { name: 'Move to Active' })).toBeNull();
+    expect(screen.getByRole('menuitem', { name: 'Move to Closed' })).toBeVisible();
+    expect(detail().getByRole('textbox')).toBe(editor); expect(editor).toHaveValue('Fictional preserved reply');
+    expect(navigation.refresh).not.toHaveBeenCalled(); expect(navigation.replace).not.toHaveBeenCalled(); expect(api.changeConversationStatus).not.toHaveBeenCalled();
+  });
   it.each(['detail', 'counts', 'list'])('requires full recovery before another move when conflict %s refresh fails', async failure => {
     vi.useFakeTimers();
     api.changeConversationStatus.mockRejectedValueOnce(new ConversationReplyApiError('safe', 409));

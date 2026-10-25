@@ -168,7 +168,7 @@ test('triage persists reversible moves, preserves detail, recovers conflicts and
   expect(after.messages.filter(message => message.text === reopened)).toHaveLength(1);
   expect(after.messages.filter(message => message.direction === 'OUTBOUND')).toEqual([]);
   expect(outboundRequests).toEqual([]);
-  await page.reload();
+  // Automatic detail polling must update the selected header before any reload.
   await expect(status).toHaveText('Активні');
   await expect(row()).toHaveCount(0);
   await page.getByRole('tab', { name: /^Активні/ }).click();

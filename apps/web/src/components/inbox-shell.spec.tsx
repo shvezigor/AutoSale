@@ -6,6 +6,7 @@ vi.mock('../api/conversation-replies', async importOriginal => ({ ...await impor
 vi.mock('next/navigation', () => ({ usePathname: () => '/conversations/test', useSearchParams: () => new URLSearchParams(navigation.query), useRouter: () => navigation }));
 import { useConversationTriage } from './conversation-triage-context';
 import { ConversationReplyApiError } from '../api/conversation-replies';
+import { I18nProvider } from '../i18n/i18n-provider';
 import { InboxShell } from './inbox-shell';
 export const row = { id: '11111111-1111-4111-8111-111111111111', channel: 'INSTAGRAM' as const, workflowStatus: 'ACTIVE' as const, statusVersion: 0, participantName: 'Клієнт один', participantUsername: null, participantAvatarUrl: null, lastMessagePreview: 'Старе', lastMessageAt: '2026-10-25T10:00:00.000Z' };
 const counts = { ACTIVE: 80, INACTIVE: 12, CLOSED: 7 };
@@ -18,6 +19,28 @@ describe('InboxShell triage', () => {
     expect(screen.getByRole('tab', { name: `${label} ${count}` })).toHaveAttribute('aria-selected', 'true');
     if (status !== 'active') expect(screen.queryByText('Старе')).not.toBeInTheDocument();
     await act(async () => {});
+  });
+  it.each([51, 120])('reconciles an expanded Closed window after an external reopen (%i rows)', async total => {
+    vi.useFakeTimers(); navigation.query = 'status=closed';
+    let rows = Array.from({ length: total }, (_, index) => ({ ...row, workflowStatus: 'CLOSED' as const, id: `closed-${index}`, participantName: `Fictional ${index}` }));
+    api.refreshConversationList.mockImplementation(async ({ cursor }) => {
+      const start = Number(cursor ?? 0);
+      return { items: rows.slice(start, start + 50), nextCursor: start + 50 < rows.length ? String(start + 50) : null };
+    });
+    api.refreshConversationStatusCounts.mockImplementation(async () => ({ ACTIVE: 1, INACTIVE: 0, CLOSED: rows.length }));
+    render(<I18nProvider locale="en" authenticated><InboxShell initialPage={{ items: [], nextCursor: null }} initialCounts={{ ACTIVE: 0, INACTIVE: 0, CLOSED: total }}>Details</InboxShell></I18nProvider>);
+    await act(async () => {});
+    await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Load more' })));
+    expect(screen.getAllByRole('link')).toHaveLength(Math.min(total, 100));
+    const retained = screen.getByRole('link', { name: /Fictional 10 / }); retained.focus();
+    rows = rows.filter(item => item.id !== 'closed-50');
+    await act(async () => vi.advanceTimersByTimeAsync(15000));
+    expect(screen.queryByRole('link', { name: /Fictional 50 / })).toBeNull();
+    expect(screen.getAllByRole('link')).toHaveLength(Math.min(total - 1, 100));
+    expect(screen.getByRole('tab', { name: `Closed ${total - 1}` })).toBeVisible();
+    expect(screen.getByRole('link', { name: /Fictional 10 / })).toBe(retained);
+    expect(retained).toHaveFocus();
+    if (total === 51) expect(screen.queryByRole('button', { name: 'Load more' })).toBeNull();
   });
   it('switches URL preserving detail and requests filtered data', async () => {
     const view = render(<InboxShell initialPage={{ items: [row], nextCursor: 'active-cursor' }} initialCounts={counts}>Деталі</InboxShell>);
@@ -36,7 +59,9 @@ describe('InboxShell triage', () => {
     expect(api.refreshConversationList).toHaveBeenCalledWith({ status: 'ACTIVE', cursor: 'next/+' });
     expect(screen.getAllByRole('link')).toHaveLength(2);
     const older = screen.getByRole('link', { name: /Клієнт два/ }); older.focus();
-    api.refreshConversationList.mockResolvedValue({ items: [{ ...row, lastMessagePreview: 'Нове' }], nextCursor: 'next/+' });
+    api.refreshConversationList.mockImplementation(async ({ cursor }) => cursor
+      ? { items: [{ ...row, id: 'older', participantName: 'Клієнт два' }], nextCursor: null }
+      : { items: [{ ...row, lastMessagePreview: 'Нове' }], nextCursor: 'next/+' });
     await act(async () => vi.advanceTimersByTimeAsync(15000));
     expect(screen.getByText('Нове')).toBeVisible(); expect(older).toHaveFocus();
     expect(screen.getAllByRole('link')).toHaveLength(2);

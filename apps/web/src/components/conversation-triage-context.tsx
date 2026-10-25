@@ -8,33 +8,50 @@ import { useI18n } from '../i18n/i18n-provider';
 
 type Status = ConversationWorkflowStatus;
 type ConfirmedStatus = { workflowStatus: Status; statusVersion: number };
-type Page = ConversationListResponse & { firstIds: string[]; expanded: boolean };
+type Page = ConversationListResponse;
 type Triage = {
   status: Status; counts: ConversationStatusCounts; items: ConversationListResponse['items']; hasMore: boolean;
   loading: boolean; loadingMore: boolean; error: string; announcement: string;
   pendingIds: Set<string>; recoveryIds: Set<string>;
+  confirmStatus(id: string, status: ConfirmedStatus): void;
   confirmedStatus(id: string, initial: ConfirmedStatus): ConfirmedStatus;
   selectStatus(status: Status): void; loadMore(): Promise<void>; refresh(): Promise<void>;
   moveConversation(input: { id: string; status: Status; expectedVersion: number }): Promise<void>;
 };
 const Context = createContext<Triage | null>(null);
 export const conversationStatuses: Status[] = ['ACTIVE', 'INACTIVE', 'CLOSED'];
+export function useOptionalConversationTriage() { return useContext(Context); }
 export function useConversationTriage(): Triage {
   const value = useContext(Context);
   if (!value) throw new Error('ConversationTriageProvider is required');
   return value;
 }
-const pageState = (page: ConversationListResponse): Page => ({ ...page, firstIds: page.items.map(item => item.id), expanded: false });
 const unique = (items: ConversationListResponse['items']) => [...new Map(items.map(item => [item.id, item])).values()];
+
+async function fetchWindow(status: Status, desiredSize: number): Promise<Page> {
+  const first = await refreshConversationList({ status });
+  let items = first.items; let cursor = first.nextCursor;
+  const seen = new Set<string>();
+  while (cursor && items.length < desiredSize && !seen.has(cursor)) {
+    seen.add(cursor);
+    const next = await refreshConversationList({ status, cursor });
+    items = unique([...items, ...next.items]); cursor = next.nextCursor;
+  }
+  return { items, nextCursor: cursor };
+}
 
 export function ConversationTriageProvider({ initialPage, initialCounts, children }: { initialPage: ConversationListResponse; initialCounts: ConversationStatusCounts; children: ReactNode }) {
   const router = useRouter(); const pathname = usePathname(); const params = useSearchParams(); const { t } = useI18n();
   const queryStatus = params.get('status')?.toUpperCase();
   const status: Status = conversationStatuses.includes(queryStatus as Status) ? queryStatus as Status : 'ACTIVE';
-  const [pages, setPages] = useState<Partial<Record<Status, Page>>>({ ACTIVE: pageState(initialPage) });
+  const [pages, setPages] = useState<Partial<Record<Status, Page>>>({ ACTIVE: initialPage });
   const pagesRef = useRef(pages); pagesRef.current = pages;
   const previousStatus = useRef(status);
   const [confirmed, setConfirmed] = useState<Record<string, ConfirmedStatus>>({});
+  const confirmStatus = useCallback((id: string, status: ConfirmedStatus) => {
+    setConfirmed(previous => previous[id] && previous[id].statusVersion >= status.statusVersion
+      ? previous : { ...previous, [id]: status });
+  }, []);
   const pendingRef = useRef(new Set<string>());
   const [pendingIds, setPendingIds] = useState(new Set<string>());
   const recoveryRef = useRef(new Set<string>());
@@ -54,18 +71,13 @@ export function ConversationTriageProvider({ initialPage, initialCounts, childre
     if (rebuilding.current || inFlight.current.has(target)) return;
     inFlight.current.add(target); const started = generation.current;
     try {
-      const request = refreshConversationList({ status: target });
+      // Revalidate the entire loaded window: cached tail membership can change externally.
+      const desiredSize = pagesRef.current[target]?.items.length ?? 0;
+      const request = fetchWindow(target, desiredSize);
       pendingRequests.current.add(request);
-      const response = await request.finally(() => pendingRequests.current.delete(request));
+      const page = await request.finally(() => pendingRequests.current.delete(request));
       if (started !== generation.current) return;
-      setPages(previous => {
-        const old = previous[target];
-        if (!old?.expanded) return { ...previous, [target]: pageState(response) };
-        // Replace the newest page while retaining older pages and keyed DOM rows.
-        const boundary = response.items.at(-1);
-        const tail = old.items.filter(item => !response.items.some(fresh => fresh.id === item.id) && (!old.firstIds.includes(item.id) || (response.nextCursor && boundary && (item.lastMessageAt < boundary.lastMessageAt || (item.lastMessageAt === boundary.lastMessageAt && item.id < boundary.id)))));
-        return { ...previous, [target]: { ...old, items: [...response.items, ...tail], firstIds: response.items.map(item => item.id) } };
-      });
+      setPages(previous => ({ ...previous, [target]: page }));
       setLoadError('');
     } catch { setLoadError(t('conversations.triage.loadError')); }
     finally { inFlight.current.delete(target); }
@@ -87,19 +99,11 @@ export function ConversationTriageProvider({ initialPage, initialCounts, childre
       const results = await Promise.allSettled([refreshCounts(), ...recoveringIds.map(async id => {
         const detail = await refreshConversation(id);
         if (refreshGeneration !== generation.current) return;
-        setConfirmed(previous => ({ ...previous, [id]: { workflowStatus: detail.workflowStatus, statusVersion: detail.statusVersion } }));
+        confirmStatus(id, detail);
       }), ...targets.map(async target => {
-        const desiredSize = pagesRef.current[target]?.items.length ?? 0;
-        const first = await refreshConversationList({ status: target });
-        let items = first.items; let cursor = first.nextCursor;
-        const seen = new Set<string>();
-        while (cursor && items.length < desiredSize && !seen.has(cursor)) {
-          seen.add(cursor);
-          const next = await refreshConversationList({ status: target, cursor });
-          items = unique([...items, ...next.items]); cursor = next.nextCursor;
-        }
+        const page = await fetchWindow(target, pagesRef.current[target]?.items.length ?? 0);
         if (refreshGeneration !== generation.current) return;
-        setPages(previous => ({ ...previous, [target]: { items, nextCursor: cursor, firstIds: first.items.map(item => item.id), expanded: seen.size > 0 } }));
+        setPages(previous => ({ ...previous, [target]: page }));
       })]);
       // A rejected sibling must not release the lock while category requests can still write.
       const failure = results.find(result => result.status === 'rejected');
@@ -112,7 +116,7 @@ export function ConversationTriageProvider({ initialPage, initialCounts, childre
       router.refresh();
     } catch (cause) { setLoadError(t('conversations.triage.loadError')); throw cause; }
     finally { if (refreshGeneration === generation.current) rebuilding.current = false; }
-  }, [refreshCounts, router, status, t]);
+  }, [confirmStatus, refreshCounts, router, status, t]);
   useEffect(() => {
     if (!pagesRef.current[status] || previousStatus.current !== status) void refreshPage(status);
     previousStatus.current = status;
@@ -128,7 +132,7 @@ export function ConversationTriageProvider({ initialPage, initialCounts, childre
       const request = refreshConversationList({ status, cursor: page.nextCursor });
       pendingRequests.current.add(request);
       const response = await request.finally(() => pendingRequests.current.delete(request));
-      if (started === generation.current) setPages(previous => ({ ...previous, [status]: { ...page, items: unique([...page.items, ...response.items]), nextCursor: response.nextCursor, expanded: true } }));
+      if (started === generation.current) setPages(previous => ({ ...previous, [status]: { ...page, items: unique([...page.items, ...response.items]), nextCursor: response.nextCursor } }));
       setLoadError('');
     } catch { setLoadError(t('conversations.triage.loadError')); }
     finally { inFlight.current.delete(status); setLoadingMore(false); }
@@ -139,7 +143,7 @@ export function ConversationTriageProvider({ initialPage, initialCounts, childre
     setLoadError(''); setMutationError(''); setAnnouncement('');
     try {
       const confirmed = await changeConversationStatus(input.id, { status: input.status, expectedVersion: input.expectedVersion });
-      setConfirmed(previous => ({ ...previous, [input.id]: { workflowStatus: confirmed.status, statusVersion: confirmed.statusVersion } }));
+      confirmStatus(input.id, { workflowStatus: confirmed.status, statusVersion: confirmed.statusVersion });
       generation.current += 1;
       setPages(previous => Object.fromEntries(Object.entries(previous).map(([key, page]) => [key, { ...page, items: page.items.filter(item => item.id !== input.id || key === confirmed.status).map(item => item.id === input.id ? { ...item, workflowStatus: confirmed.status, statusVersion: confirmed.statusVersion } : item) }])));
       setAnnouncement(t('conversations.triage.moved'));
@@ -164,5 +168,5 @@ export function ConversationTriageProvider({ initialPage, initialCounts, childre
     const query = new URLSearchParams(params.toString()); query.set('status', next.toLowerCase());
     router.replace(`${pathname}?${query.toString()}`, { scroll: false });
   }
-  return <Context.Provider value={{ pendingIds, recoveryIds, confirmedStatus, status, counts, items: pages[status]?.items ?? [], hasMore: Boolean(pages[status]?.nextCursor), loading: !pages[status], loadingMore, error, announcement, selectStatus, loadMore, refresh, moveConversation }}>{children}</Context.Provider>;
+  return <Context.Provider value={{ pendingIds, recoveryIds, confirmStatus, confirmedStatus, status, counts, items: pages[status]?.items ?? [], hasMore: Boolean(pages[status]?.nextCursor), loading: !pages[status], loadingMore, error, announcement, selectStatus, loadMore, refresh, moveConversation }}>{children}</Context.Provider>;
 }

@@ -6,6 +6,7 @@ import { type FormEvent, type KeyboardEvent, useEffect, useRef, useState } from 
 
 import { ConversationReplyApiError, createConversationReplyDraft, refreshConversation, retryConversationMessage, sendConversationMessage } from '../api/conversation-replies';
 import { useI18n } from '../i18n/i18n-provider';
+import { useOptionalConversationTriage } from './conversation-triage-context';
 import { FieldError } from './form-field';
 import { LoadingButton } from './loading-button';
 import { MessageThread } from './message-thread';
@@ -34,6 +35,10 @@ export function SocialReplyComposer({
     )) ?? null
     : null;
   const [conversation, setConversation] = useState(initialConversation);
+  const confirmStatus = useOptionalConversationTriage()?.confirmStatus;
+  useEffect(() => {
+    confirmStatus?.(conversation.id, { workflowStatus: conversation.workflowStatus, statusVersion: conversation.statusVersion });
+  }, [confirmStatus, conversation.id, conversation.workflowStatus, conversation.statusVersion]);
   const [text, setText] = useState(() => initialReadyDraft?.generatedText ?? '');
   const [textError, setTextError] = useState<string | null>(null);
   const [draftReviewRequired, setDraftReviewRequired] = useState(false);
