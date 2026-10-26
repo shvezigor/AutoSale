@@ -1,6 +1,6 @@
 # Additional Agensi skill listings
 
-Prepared and submitted 2026-10-26 with the owner's approval at **USD 9 one-time each**. All three 1.0.0 packages and their icons are uploaded; Creator Studio reports Pending Review / In review. The [submission record](agensi-submissions.md) owns listing URLs, verification evidence and remaining moderation gates. Submission is not public availability.
+Prepared and submitted 2026-10-26 with the owner's approval at **USD 9 one-time each**. All three 1.0.0 packages and their icons are uploaded and now **Live**, verified in Creator Studio and the public creator profile. The [submission record](agensi-submissions.md) owns listing URLs, verification evidence and remaining gates for the fifth skill.
 
 ## Repository Feature Map
 

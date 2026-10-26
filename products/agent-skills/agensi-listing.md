@@ -1,6 +1,6 @@
 # Agensi listing: Privacy-Aware Session Analysis
 
-Status: **Pending Review / In review**, verified in Agensi Creator Studio on 2026-10-26 after the owner uploaded and submitted the package. After submitting the additional three products, the dashboard reports 4 total, 0 live and 4 pending skills; see the [submission record](agensi-submissions.md). Submission is not public availability.
+Status: **Live**, verified in Creator Studio and the public creator profile on 2026-10-26. [Public listing](https://www.agensi.io/skills/privacy-aware-session-analysis). After the fifth skill submission, the dashboard reports 5 total, 4 live and 1 pending; see the [submission record](agensi-submissions.md).
 Version: 1.0.0.
 Price: owner-selected USD 9 one-time.
 Logo: [privacy-aware-session-analysis.png](marketplace-assets/icons/privacy-aware-session-analysis.png), uploaded and saved as a separate listing asset on 2026-10-26. The package was not replaced. A stored remote preview was verified by reopening the edit form.
@@ -13,7 +13,7 @@ Archive content is verified locally: five Markdown files under one top-level ski
 
 Creator mode is enabled. The prepared listing includes title, summary, full description, a fictional input/output demo, compatibility limitations, read-file permission, Research & Analysis as primary category, Business & Operations as secondary category, and the USD 9 one-time price. The original draft survived reload. The later Creator Studio check confirms completed profile, connected payouts and submitted skill, with the same title, summary and USD 9 price. Zoneless connection was observed before submission; actual payout delivery has not been tested.
 
-Remaining: verify the moderation result and public listing when available. Do not mark the skill published based on submission or local validation. Never commit payment details, identity documents, auth redirects or session tokens. The owner completed financial-account setup directly; it is not a guarantee of successful future payouts.
+Moderation approval and public availability are verified. Actual purchase and payout delivery remain untested. Never commit payment details, identity documents, auth redirects or session tokens. The owner completed financial-account setup directly; it is not a guarantee of successful future payouts.
 
 ## Title
 

@@ -22,6 +22,8 @@ One independent Codex evaluator read only the target skill and linked resources,
 
 No material flaw observed in this small forward test. The first scenario resembles the worked example and mostly tests application; the other two test different evidence and lifecycle boundaries. These 13 manually graded checks are not an independent benchmark, comprehensive reliability result or proof of user benefit. No baseline comparison, token/time comparison, actual browser/screen-reader validation or other-agent-product testing was performed. All proposed acceptance scenarios in the reports remain proposed.
 
-## Release state
+## Release state at package validation
 
 Ready as a locally prepared reviewable package with listing copy and icon. No new price selection, marketplace upload or submission occurred. The four existing Agensi submissions are unchanged. The package README and listing disclose host-tool requirements and lack of formal accessibility/security certification.
+
+Later on 2026-10-26, the owner-authorized package and icon were submitted at USD 9 one-time. The [submission record](../../agensi-submissions.md) owns current marketplace status and browser evidence; this does not expand the package evaluation above.

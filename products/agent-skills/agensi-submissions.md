@@ -2,7 +2,22 @@
 
 The owner approved submission of all prepared skills at USD 9 per skill, one-time. The three new packages were uploaded with their matching generated PNG icons, complete fictional input/output demonstrations, compatibility limits and read-file permissions, then submitted through Agensi's final-review dialog. The existing session-analysis listing received its icon through Save without replacing its package.
 
-## Verified state
+## Current verified state
+
+Later on 2026-10-26, Creator Studio was refreshed and the public [creator profile](https://www.agensi.io/creators/igor-shvez) was checked. The original four listings are **Live**, with public cards, matching icons and USD 9 one-time prices:
+
+- [Privacy-Aware Session Analysis](https://www.agensi.io/skills/privacy-aware-session-analysis)
+- [Repository Feature Map](https://www.agensi.io/skills/repository-feature-map)
+- [Evidence-Led Product Planning](https://www.agensi.io/skills/evidence-led-product-planning)
+- [Docker Compose Release Planner](https://www.agensi.io/skills/docker-compose-release-planner)
+
+Form Validation Audit 1.0.0 was then uploaded with its coral icon and submitted through the final-review dialog at **USD 9 one-time**. Its [edit form](https://www.agensi.io/dashboard/submit/237226b3-61bd-45e0-8646-f9b8051ce442) was reopened to verify the saved price of 9 and remote HTTPS icon preview. The package SHA256 is `34846821f6c8589e67449657c2af202cfd93e6e086c3b5d13eb069bfaa4e2ad6`.
+
+The resulting dashboard showed **5 total, 4 live, 1 pending**. Form Validation Audit is **Pending Review / In review**. Its fictional demo came from the maintained evaluation output; auto-filled FAQs and limitations were reviewed and corrected to avoid universal compatibility or compliance claims. Read Files was the sole checked tool permission. No sale or payout delivery was tested.
+
+Current browser evidence is `agensi-four-live-one-pending.png` in the owner's Downloads folder, outside Git. Earlier evidence below records the initial submission state, superseded by this verification.
+
+## Initial submission evidence
 
 | Skill | Listing edit URL | Price | Status | Icon |
 |---|---|---|---|---|
@@ -25,4 +40,4 @@ All new listings retained USD 9 one-time pricing. Read Files was the only checke
 
 The native file-input button did not deliver a file chooser through browser control. Clicking the visible ZIP drop area or visible logo upload area did return a chooser, and the documented chooser `setFiles` flow successfully uploaded the local files. No programmatic website API bypass or browser-security-setting change was performed by the agent.
 
-ZIP hashes remain those in the existing package manifests; icons are separate listing assets. Remaining: Agensi moderation and subsequent verification of the public listings. Do not mark any skill live from this record alone.
+ZIP hashes remain those in the existing package manifests; icons are separate listing assets. Remaining: Agensi moderation and public-listing verification for Form Validation Audit. The original four are verified Live as recorded above. Actual purchase and payout delivery remain untested.

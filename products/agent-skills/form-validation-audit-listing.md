@@ -1,6 +1,6 @@
-# Form Validation Audit: listing preparation
+# Form Validation Audit: Agensi listing
 
-Version 1.0.0. Local preparation only; not uploaded or submitted. No price has been set for this additional skill. The existing four submitted listings are unchanged.
+Version 1.0.0. Uploaded with its icon and submitted on 2026-10-26 at **USD 9 one-time**. Status: **Pending Review / In review**. [Edit listing](https://www.agensi.io/dashboard/submit/237226b3-61bd-45e0-8646-f9b8051ce442). The [submission record](agensi-submissions.md) owns browser verification and current marketplace status.
 
 Package: [SKILL.md](form-validation-audit/SKILL.md). Logo: [PNG](marketplace-assets/icons/form-validation-audit.png). Validation: [results](validation/form-validation-audit/results.md). The generated icon is a separate listing asset; it is not included in the six-Markdown-file skill ZIP.
 
