@@ -63,10 +63,16 @@ test.describe('Sales AITO marketing site', () => {
     await page.locator('.marketing-menu summary').tap();
     await page.locator('.faq-list summary').first().tap();
     await expect(page.locator('.faq-list details').first()).toHaveAttribute('open', '');
-    await page.setViewportSize({ width: 1440, height: 1000 });
-    await page.evaluate(() => { document.body.style.zoom = '2'; });
-    expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
     await touchContext.close();
+
+    // A 1440 px desktop at 200% browser zoom has a 720 CSS-pixel layout.
+    // CSS `zoom` on body does not update media queries and is not browser zoom.
+    const zoomContext = await browser.newContext({ viewport: { width: 720, height: 500 }, deviceScaleFactor: 2 });
+    const zoomPage = await zoomContext.newPage();
+    await zoomPage.goto(`${process.env.E2E_BASE_URL ?? 'http://localhost'}/en`);
+    expect(await zoomPage.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+    await expect(zoomPage.locator('.marketing-hero').getByRole('link', { name: 'Start 30-day trial' })).toBeVisible();
+    await zoomContext.close();
   });
 
   test('explains the illustrated order with manager control in both languages', async ({ page }) => {
