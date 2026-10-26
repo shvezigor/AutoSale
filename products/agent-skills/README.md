@@ -14,11 +14,11 @@ This directory owns distributable agent-skill products. It is separate from `.co
 
 | Package | Origin | Deliverable | Distribution state |
 |---|---|---|---|
-| [Repository Feature Map](repository-feature-map/SKILL.md) | `.codex/skills/feature-knowledge/` | Existing owner/contract/test map and reuse decision | Local package; not uploaded |
-| [Evidence-Led Product Planning](evidence-led-product-planning/SKILL.md) | `.codex/skills/product-management/` | Decision brief, narrow PRD or validation plan | Local package; not uploaded |
-| [Docker Compose Release Planner](docker-compose-release-planner/SKILL.md) | `.codex/skills/production-deployment/` | Readiness and recovery handoff; no live execution | Local package; not uploaded |
+| [Repository Feature Map](repository-feature-map/SKILL.md) | `.codex/skills/feature-knowledge/` | Existing owner/contract/test map and reuse decision | Submitted; USD 9; pending review |
+| [Evidence-Led Product Planning](evidence-led-product-planning/SKILL.md) | `.codex/skills/product-management/` | Decision brief, narrow PRD or validation plan | Submitted; USD 9; pending review |
+| [Docker Compose Release Planner](docker-compose-release-planner/SKILL.md) | `.codex/skills/production-deployment/` | Readiness and recovery handoff; no live execution | Submitted; USD 9; pending review |
 
-The internal skills remain the project-specific entry points. [Prepared listing copy](prepared-listings.md) owns prices/submission state for the additional packages; [fictional validation](validation/prepared-skills/results.md) owns observed checks and limits. These products do not add application behavior or enable recording, experiments or deployment.
+The internal skills remain the project-specific entry points. [Listing copy](prepared-listings.md) owns content and prices; the [submission record](agensi-submissions.md) owns observed listing state and browser verification; [fictional validation](validation/prepared-skills/results.md) owns package checks and limits. These products do not add application behavior or enable recording, experiments or deployment.
 
 ## Marketplace images
 

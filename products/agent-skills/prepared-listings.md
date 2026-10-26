@@ -1,6 +1,6 @@
-# Additional skill listing drafts
+# Additional Agensi skill listings
 
-Prepared 2026-10-26. These three 1.0.0 packages are local release candidates, not uploaded, submitted or published. Prices remain unset pending the owner's decision. Do not reuse the USD 9 price of Privacy-Aware Session Analysis without a pricing decision.
+Prepared and submitted 2026-10-26 with the owner's approval at **USD 9 one-time each**. All three 1.0.0 packages and their icons are uploaded; Creator Studio reports Pending Review / In review. The [submission record](agensi-submissions.md) owns listing URLs, verification evidence and remaining moderation gates. Submission is not public availability.
 
 ## Repository Feature Map
 

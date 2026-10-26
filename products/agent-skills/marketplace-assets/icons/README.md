@@ -13,4 +13,4 @@ Full prompts and generator mode are recorded in [prompts.json](prompts.json); di
 
 PNG decoding, square dimensions, minimum 512px resolution, under-5-MiB sizes and a four-file ZIP round-trip were checked. The delivery archive is `sales-aito-skill-icons-v1.zip` in the owner's Downloads folder, outside Git. It contains only these four PNGs.
 
-Upload the matching PNG through the marketplace's Skill logo field when updating each listing. These assets have not been uploaded or submitted in this change. Keep them outside the Markdown-only skill distribution ZIPs; those packages and their hashes are unchanged. Preserve the existing pending-review listing until an authorized marketplace update is made.
+The matching PNGs were uploaded through each listing's Skill logo field on 2026-10-26 after owner approval; stored remote previews were verified by reopening all four edit forms. See the [submission record](../../agensi-submissions.md). They remain outside the Markdown-only skill distribution ZIPs; those packages and their hashes are unchanged. All four listings are pending review rather than live.
