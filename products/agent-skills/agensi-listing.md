@@ -1,6 +1,6 @@
 # Agensi listing: Privacy-Aware Session Analysis
 
-Status: **Live**, verified in Creator Studio and the public creator profile on 2026-10-26. [Public listing](https://www.agensi.io/skills/privacy-aware-session-analysis). After the fifth skill submission, the dashboard reports 5 total, 4 live and 1 pending; see the [submission record](agensi-submissions.md).
+Status: **Live**, verified in Creator Studio and the public creator profile on 2026-10-26. [Public listing](https://www.agensi.io/skills/privacy-aware-session-analysis). After the commerce/SaaS expansion, the dashboard reports 10 total, 5 live and 5 pending; see the [submission record](agensi-submissions.md).
 Version: 1.0.0.
 Price: owner-selected USD 9 one-time.
 Logo: [privacy-aware-session-analysis.png](marketplace-assets/icons/privacy-aware-session-analysis.png), uploaded and saved as a separate listing asset on 2026-10-26. The package was not replaced. A stored remote preview was verified by reopening the edit form.

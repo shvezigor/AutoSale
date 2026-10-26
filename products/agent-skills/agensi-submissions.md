@@ -2,7 +2,27 @@
 
 The owner approved submission of all prepared skills at USD 9 per skill, one-time. The three new packages were uploaded with their matching generated PNG icons, complete fictional input/output demonstrations, compatibility limits and read-file permissions, then submitted through Agensi's final-review dialog. The existing session-analysis listing received its icon through Save without replacing its package.
 
-## Current verified state
+## Current verified state after expansion
+
+All five new commerce/SaaS skills were uploaded with their matching icons, reviewed buyer-facing copy, complete independent fictional demonstrations and USD 9 one-time prices, then submitted through the final-review dialog on 2026-10-26.
+
+| New skill | Listing | Price | Status |
+|---|---|---|---|
+| E-commerce AI Reply Fact Checker | [Edit listing](https://www.agensi.io/dashboard/submit/184177c3-2935-4d0e-82bb-2f56de3b8990) | USD 9 one-time | Pending Review / In review |
+| Meta Instagram Integration Readiness Audit | [Edit listing](https://www.agensi.io/dashboard/submit/6fdc40a2-b3b3-48d6-a860-e17b9e45877d) | USD 9 one-time | Pending Review / In review |
+| PostgreSQL Tenant Isolation Audit | [Edit listing](https://www.agensi.io/dashboard/submit/46e0cc9b-473d-45ee-b2f8-4914f758b041) | USD 9 one-time | Pending Review / In review |
+| Duplicate Order & Webhook Retry Audit | [Edit listing](https://www.agensi.io/dashboard/submit/de6dcf8f-64fa-4e70-8fc6-015bdcdcbb81) | USD 9 one-time | Pending Review / In review |
+| AI Cost per Successful Task | [Edit listing](https://www.agensi.io/dashboard/submit/1450f3f9-d53d-4008-a3d9-0272f0959b21) | USD 9 one-time | Pending Review / In review |
+
+Creator Studio now reports **10 total, 5 Live, 5 Pending**, with all ten named skills at USD 9. The public [creator profile](https://www.agensi.io/creators/igor-shvez) shows the original five Live products, including the newly approved [Form Validation Audit](https://www.agensi.io/skills/form-validation-audit), with matching icons and prices.
+
+Each of the five new edit forms was reopened after submission. Saved title, summary, full description, compatibility note, complete demo input/output, price 9 and remote HTTPS icon preview matched the maintained drafts. The non-sensitive [browser verification record](validation/commerce-expansion/browser-listing-verification.json) records these comparisons and edit URLs. All auto-filled FAQs/limitations were replaced with bounded factual copy; categories/use cases were reviewed and unsupported claims adjusted. Read Files was the sole checked tool permission at submission. The five ZIP hashes are in their [manifest](validation/commerce-expansion/package-manifest.json).
+
+The **SaaS Planning & Release Toolkit** bundle is **Live** at [its public page](https://www.agensi.io/bundles/saas-planning-release-toolkit), verified with exactly Repository Feature Map, Evidence-Led Product Planning and Docker Compose Release Planner. Price: USD 19 one-time versus USD 27 separately, saving USD 8 (displayed as 30%). Existing component prices/packages were not changed. The bundle page displays the three expected skills and price.
+
+Current evidence is saved outside Git in Downloads as `agensi-ten-skills-five-pending.png` and `agensi-saas-toolkit-live.png`. Account screenshots and profile photos are not committed. No customer purchase, checkout, sale or payout delivery was performed or tested. Remaining: moderation and subsequent public-listing verification for the five new products. Earlier records below are historical, superseded by this section.
+
+## Earlier same-day verification
 
 Later on 2026-10-26, Creator Studio was refreshed and the public [creator profile](https://www.agensi.io/creators/igor-shvez) was checked. The original four listings are **Live**, with public cards, matching icons and USD 9 one-time prices:
 
@@ -40,4 +60,4 @@ All new listings retained USD 9 one-time pricing. Read Files was the only checke
 
 The native file-input button did not deliver a file chooser through browser control. Clicking the visible ZIP drop area or visible logo upload area did return a chooser, and the documented chooser `setFiles` flow successfully uploaded the local files. No programmatic website API bypass or browser-security-setting change was performed by the agent.
 
-ZIP hashes remain those in the existing package manifests; icons are separate listing assets. Remaining: Agensi moderation and public-listing verification for Form Validation Audit. The original four are verified Live as recorded above. Actual purchase and payout delivery remain untested.
+ZIP hashes remain those in the existing package manifests; icons are separate listing assets. Remaining: moderation/public-listing verification for the five commerce/SaaS products. The original five are now verified Live as recorded above. Actual purchase and payout delivery remain untested.

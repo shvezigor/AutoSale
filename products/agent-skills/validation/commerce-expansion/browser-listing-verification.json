@@ -1,0 +1,61 @@
+{
+  "date": "2026-10-26",
+  "scope": "Reopened edit forms after submission; public non-sensitive listing content only",
+  "listings": [
+    {
+      "compatibilityMatches": true,
+      "descriptionMatches": true,
+      "icon": "https://geeduzbsatvodnlijqfs.supabase.co/storage/v1/object/public/product-media/f83b2730-bc14-46a3-911d-6a0e7dfc258d/1793023518637.png",
+      "inputMatches": true,
+      "outputMatches": true,
+      "price": "9",
+      "summaryMatches": true,
+      "title": "E-commerce AI Reply Fact Checker",
+      "url": "https://www.agensi.io/dashboard/submit/184177c3-2935-4d0e-82bb-2f56de3b8990"
+    },
+    {
+      "compatibilityMatches": true,
+      "descriptionMatches": true,
+      "icon": "https://geeduzbsatvodnlijqfs.supabase.co/storage/v1/object/public/product-media/f83b2730-bc14-46a3-911d-6a0e7dfc258d/1793023664644.png",
+      "inputMatches": true,
+      "outputMatches": true,
+      "price": "9",
+      "summaryMatches": true,
+      "title": "Meta Instagram Integration Readiness Audit",
+      "url": "https://www.agensi.io/dashboard/submit/6fdc40a2-b3b3-48d6-a860-e17b9e45877d"
+    },
+    {
+      "compatibilityMatches": true,
+      "descriptionMatches": true,
+      "icon": "https://geeduzbsatvodnlijqfs.supabase.co/storage/v1/object/public/product-media/f83b2730-bc14-46a3-911d-6a0e7dfc258d/1793023763895.png",
+      "inputMatches": true,
+      "outputMatches": true,
+      "price": "9",
+      "summaryMatches": true,
+      "title": "PostgreSQL Tenant Isolation Audit",
+      "url": "https://www.agensi.io/dashboard/submit/46e0cc9b-473d-45ee-b2f8-4914f758b041"
+    },
+    {
+      "compatibilityMatches": true,
+      "descriptionMatches": true,
+      "icon": "https://geeduzbsatvodnlijqfs.supabase.co/storage/v1/object/public/product-media/f83b2730-bc14-46a3-911d-6a0e7dfc258d/1793023859150.png",
+      "inputMatches": true,
+      "outputMatches": true,
+      "price": "9",
+      "summaryMatches": true,
+      "title": "Duplicate Order & Webhook Retry Audit",
+      "url": "https://www.agensi.io/dashboard/submit/de6dcf8f-64fa-4e70-8fc6-015bdcdcbb81"
+    },
+    {
+      "compatibilityMatches": true,
+      "descriptionMatches": true,
+      "icon": "https://geeduzbsatvodnlijqfs.supabase.co/storage/v1/object/public/product-media/f83b2730-bc14-46a3-911d-6a0e7dfc258d/1793023975722.png",
+      "inputMatches": true,
+      "outputMatches": true,
+      "price": "9",
+      "summaryMatches": true,
+      "title": "AI Cost per Successful Task",
+      "url": "https://www.agensi.io/dashboard/submit/1450f3f9-d53d-4008-a3d9-0272f0959b21"
+    }
+  ]
+}

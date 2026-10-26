@@ -4,7 +4,7 @@
     "title": "E-commerce AI Reply Fact Checker",
     "version": "1.0.0",
     "price": 9,
-    "status": "Prepared locally",
+    "status": "Pending Review / In review",
     "summary": "Check AI customer replies against product and policy evidence. Catch unsupported prices, stock, discounts and delivery promises before human approval.",
     "description": "Review draft sales and support replies against the exact store, SKU, variant, currency, source timestamp and latest customer intent. Receive an atomic claim ledger, corrected customer draft and the smallest unresolved evidence request. Includes a claim-rules reference, report template and fictional worked example. It does not send messages, reserve stock, connect a store or verify live facts without supplied evidence and authorized host tools. Fictional supplied-evidence exercises are documented separately; no live provider, database, browser or cross-agent compatibility acceptance is claimed.",
     "category": "E-commerce",
@@ -35,14 +35,20 @@
         "question": "What are the main limits?",
         "answer": "Cannot establish current stock, price or policy from missing/stale evidence; no automatic message sending or accuracy guarantee."
       }
-    ]
+    ],
+    "listingEditUrl": "https://www.agensi.io/dashboard/submit/184177c3-2935-4d0e-82bb-2f56de3b8990",
+    "verifiedOn": "2026-10-26",
+    "additionalFaqWhenAutofillHasExtraRow": {
+      "question": "What evidence should I provide?",
+      "answer": "Provide the task scope and the smallest authorized redacted source, configuration, usage or policy evidence relevant to the requested analysis. Missing evidence remains explicitly unknown; credentials and production customer exports are not required."
+    }
   },
   {
     "slug": "meta-instagram-integration-readiness-audit",
     "title": "Meta Instagram Integration Readiness Audit",
     "version": "1.0.0",
     "price": 9,
-    "status": "Prepared locally",
+    "status": "Pending Review / In review",
     "summary": "Find OAuth, webhook and App Review preparation gaps. Get a dated blocker map, reviewer walkthrough plan and separate technical and provider gates.",
     "description": "Map the actual Instagram Login/API path and version to product actions, minimal access and reviewer evidence. Review callback stages, role-versus-external actor access, webhook proof and data-handling gaps. Includes a readiness method, report template and fictional worked example. Independent preparation workflow; no affiliation with Meta and no approval guarantee. It does not add permissions, change provider settings, handle credentials or submit App Review. Current path-specific official requirements must be verified when tools are available; unavailable documentation remains an explicit gap. Fictional supplied-evidence exercises are documented separately; no live provider, database, browser or cross-agent compatibility acceptance is claimed.",
     "category": "APIs & Backend",
@@ -73,14 +79,20 @@
         "question": "What are the main limits?",
         "answer": "Cannot guarantee Meta approval or diagnose an exact permission from a generic error; official requirements and live acceptance need current verification."
       }
-    ]
+    ],
+    "listingEditUrl": "https://www.agensi.io/dashboard/submit/6fdc40a2-b3b3-48d6-a860-e17b9e45877d",
+    "verifiedOn": "2026-10-26",
+    "additionalFaqWhenAutofillHasExtraRow": {
+      "question": "What evidence should I provide?",
+      "answer": "Provide the task scope and the smallest authorized redacted source, configuration, usage or policy evidence relevant to the requested analysis. Missing evidence remains explicitly unknown; credentials and production customer exports are not required."
+    }
   },
   {
     "slug": "postgresql-tenant-isolation-audit",
     "title": "PostgreSQL Tenant Isolation Audit",
     "version": "1.0.0",
     "price": 9,
-    "status": "Prepared locally",
+    "status": "Pending Review / In review",
     "summary": "Trace cross-workspace access risks through API authorization, SQL, RLS roles, pooled connections, caches and jobs. Get evidence-linked findings and tests.",
     "description": "Audit selected PostgreSQL SaaS tenant boundaries using redacted source/schema and the actual runtime identity. Distinguish reachable access violations from defense-in-depth observations, privileged maintenance paths and unverified risks. Covers role ownership/BYPASSRLS, policy composition, transaction context, cached responses, jobs and negative acceptance scenarios. Includes a boundary-method reference, report template and fictional worked example. Read-only by default; no database connection, exploit, schema change, production query or security certification is included. Fictional supplied-evidence exercises are documented separately; no live provider, database, browser or cross-agent compatibility acceptance is claimed.",
     "category": "Security",
@@ -111,14 +123,20 @@
         "question": "What are the main limits?",
         "answer": "Source analysis cannot prove whole-system security; isolated runtime-role tests and separately authorized browser acceptance remain necessary."
       }
-    ]
+    ],
+    "listingEditUrl": "https://www.agensi.io/dashboard/submit/46e0cc9b-473d-45ee-b2f8-4914f758b041",
+    "verifiedOn": "2026-10-26",
+    "additionalFaqWhenAutofillHasExtraRow": {
+      "question": "What evidence should I provide?",
+      "answer": "Provide the task scope and the smallest authorized redacted source, configuration, usage or policy evidence relevant to the requested analysis. Missing evidence remains explicitly unknown; credentials and production customer exports are not required."
+    }
   },
   {
     "slug": "duplicate-order-webhook-retry-audit",
     "title": "Duplicate Order & Webhook Retry Audit",
     "version": "1.0.0",
     "price": 9,
-    "status": "Prepared locally",
+    "status": "Pending Review / In review",
     "summary": "Trace duplicate orders and external effects through webhook, queue and retry failure windows. Get a scoped identity map, recovery plan and crash tests.",
     "description": "Trace receipt, durable acceptance, queue claim, business mutation, outbound effect and result persistence. Check tenant/provider-scoped identity, racing guards, premature processed markers, lease expiry, queue retention and uncertain remote success. Includes a failure-window worksheet, audit template and fictional worked example. Proposes bounded fake-provider tests and narrow remedies that reuse existing owners. It does not run a webhook server, replay production events, cancel shipments or promise exactly-once delivery across a remote API. Fictional supplied-evidence exercises are documented separately; no live provider, database, browser or cross-agent compatibility acceptance is claimed.",
     "category": "Testing & Debugging",
@@ -149,14 +167,20 @@
         "question": "What are the main limits?",
         "answer": "Provider idempotency and lookup contracts must be verified; a timeout can leave an uncertain effect and cannot safely justify blind replay."
       }
-    ]
+    ],
+    "listingEditUrl": "https://www.agensi.io/dashboard/submit/de6dcf8f-64fa-4e70-8fc6-015bdcdcbb81",
+    "verifiedOn": "2026-10-26",
+    "additionalFaqWhenAutofillHasExtraRow": {
+      "question": "What evidence should I provide?",
+      "answer": "Provide the task scope and the smallest authorized redacted source, configuration, usage or policy evidence relevant to the requested analysis. Missing evidence remains explicitly unknown; credentials and production customer exports are not required."
+    }
   },
   {
     "slug": "ai-cost-per-successful-task",
     "title": "AI Cost per Successful Task",
     "version": "1.0.0",
     "price": 9,
-    "status": "Prepared locally",
+    "status": "Pending Review / In review",
     "summary": "Calculate AI cost per completed business outcome, including retries, failed attempts and supplied review costs. Keep missing prices and invoice gaps visible.",
     "description": "Define a business-success cohort and reconcile canonical tasks with every included attempt. Calculate inference and included cost per success with explicit cache-token semantics, decimal arithmetic, dated rates, coverage and invoice differences. Includes a cost-method reference, worksheet and fictional worked example. Compare quality-adjusted experiments without inventing savings. This is an analysis workflow, not a live meter or billing connector. No API keys, provider account, current prices or executable calculator are bundled. Fictional supplied-evidence exercises are documented separately; no live provider, database, browser or cross-agent compatibility acceptance is claimed.",
     "category": "LLM Ops",
@@ -187,6 +211,12 @@
         "question": "What are the main limits?",
         "answer": "Results depend on complete usage/outcome evidence and applicable rates; zero successes make the ratio undefined. No guaranteed savings or complete all-in cost without all costs."
       }
-    ]
+    ],
+    "listingEditUrl": "https://www.agensi.io/dashboard/submit/1450f3f9-d53d-4008-a3d9-0272f0959b21",
+    "verifiedOn": "2026-10-26",
+    "additionalFaqWhenAutofillHasExtraRow": {
+      "question": "What evidence should I provide?",
+      "answer": "Provide the task scope and the smallest authorized redacted source, configuration, usage or policy evidence relevant to the requested analysis. Missing evidence remains explicitly unknown; credentials and production customer exports are not required."
+    }
   }
 ]

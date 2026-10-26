@@ -16,6 +16,8 @@ Each ZIP contains four Markdown files: the entry point, one method reference, on
 
 ## Marketplace state
 
+All five new products were submitted on 2026-10-26 at USD 9 one-time each and are Pending Review / In review. Reopened edit forms verified stored prices, icons and complete listing/demo content. Creator Studio reports 10 total skills: the original five Live, these five Pending. The bundle below is Live.
+
 The [submission record](agensi-submissions.md) owns persisted prices, listing URLs, moderation status, public verification and browser evidence. Local preparation, fictional exercises and successful upload are not moderation approval or purchase/payout proof.
 
 The [SaaS Planning & Release Toolkit](https://www.agensi.io/bundles/saas-planning-release-toolkit) was created and verified publicly on 2026-10-26 at USD 19 one-time, comprising exactly the three authorized existing USD 9 listings (USD 27 separately; USD 8 saving). It uses the existing skill packages, with their own limitations; it is not a deployment service. No buyer checkout or payout was tested.

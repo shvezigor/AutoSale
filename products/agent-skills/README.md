@@ -26,11 +26,11 @@ Five additional original workflows cover catalogue reply fact-checking, Meta int
 
 ## Marketplace images
 
-All five submitted skills have matching square PNG card icons in [marketplace-assets/icons](marketplace-assets/icons/README.md), with prompts, file hashes and verification notes. These listing assets stay outside the Markdown distribution ZIPs. Image preparation does not change the recorded submission/publication status.
+All ten submitted skills have matching square PNG card icons in [marketplace-assets/icons](marketplace-assets/icons/README.md), with prompts, file hashes and verification notes. These listing assets stay outside the Markdown distribution ZIPs. Image preparation does not change the recorded submission/publication status.
 
 ## Form Validation Audit 1.0.0
 
-Source: [form-validation-audit](form-validation-audit/SKILL.md). Generalizes the project's field-validation UX contract into a focused source/evidence/browser audit workflow, while preserving valid native-validation patterns and distinguishing guidelines from project-specific conventions. Includes an audit report, acceptance matrix, method reference and fictional before/after example. The original application helpers and behavior are unchanged. [Listing preparation](form-validation-audit-listing.md) owns distribution/price status; [validation](validation/form-validation-audit/results.md) owns observed checks and limits. This additional package was submitted at USD 9 one-time on 2026-10-26 and is Pending Review; the original four are Live.
+Source: [form-validation-audit](form-validation-audit/SKILL.md). Generalizes the project's field-validation UX contract into a focused source/evidence/browser audit workflow, while preserving valid native-validation patterns and distinguishing guidelines from project-specific conventions. Includes an audit report, acceptance matrix, method reference and fictional before/after example. The original application helpers and behavior are unchanged. [Listing preparation](form-validation-audit-listing.md) owns distribution/price status; [validation](validation/form-validation-audit/results.md) owns observed checks and limits. This package is now Live at USD 9 one-time, verified in Creator Studio and the public creator profile on 2026-10-26.
 
 Packaging (Python standard library, run from repository root; output outside Git). Set `source` to the desired skill folder and match its output filename; include only that folder's Markdown files:
 
