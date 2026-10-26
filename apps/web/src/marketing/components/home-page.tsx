@@ -6,11 +6,16 @@ import { pricingPlans } from '../content/pricing';
 import { siteCopy } from '../content/site';
 import { localizedPath, type Locale } from '../routing/locales';
 import { StatusBadge } from './status-badge';
+import { OrderStory } from './order-story';
 
 const homeCopy = {
   uk: {
     eyebrow: 'AI-оператор для social commerce',
-    title: 'Продажі з діалогів. Без ручної рутини.',
+    titleLead: 'Продажі з діалогів.',
+    titleAccent: 'Без ручної рутини.',
+    trial: '30 днів безкоштовно · Без картки',
+    proof: ['Instagram', 'AI-розпізнавання', 'Контроль менеджера', 'Google Sheets'],
+    workflowEyebrow: 'Менше копіювання. Більше продажів.',
     lead: 'Sales AITO розпізнає замовлення, перевіряє дані й веде покупця до оформлення.',
     proofTitle: 'Від повідомлення до готового замовлення',
     proofText: 'Система вже поєднує Instagram, AI-розпізнавання, каталог товарів і Google Sheets у контрольований процес.',
@@ -44,7 +49,11 @@ const homeCopy = {
   },
   en: {
     eyebrow: 'AI operator for social commerce',
-    title: 'Turn conversations into orders. Skip the manual work.',
+    titleLead: 'Turn conversations into orders.',
+    titleAccent: 'Skip the manual work.',
+    trial: '30 days free · No card required',
+    proof: ['Instagram', 'AI recognition', 'Manager control', 'Google Sheets'],
+    workflowEyebrow: 'Less copying. More selling.',
     lead: 'Sales AITO recognises orders, validates details and guides each buyer towards completion.',
     proofTitle: 'From first message to a ready order',
     proofText: 'The system already connects Instagram, AI recognition, your catalogue and Google Sheets in one controlled process.',
@@ -84,17 +93,18 @@ export function HomePage({ locale }: { locale: Locale }) {
   const highlightedIntegrations = integrations.slice(0, 6);
 
   return (
-    <main id="main-content">
+    <main id="main-content" className="marketing-home">
       <section className="marketing-hero">
         <div className="marketing-shell marketing-hero__grid">
           <div className="marketing-hero__copy">
             <p className="marketing-eyebrow">{copy.eyebrow}</p>
-            <h1>{copy.title}</h1>
+            <h1>{copy.titleLead} <span>{copy.titleAccent}</span></h1>
             <p className="marketing-hero__lead">{copy.lead}</p>
             <div className="marketing-actions">
-              <Link className="marketing-button" href="/register">{site.startFree}</Link>
-              <Link className="marketing-button marketing-button--secondary" href={localizedPath(locale, '/demo')}>{site.bookDemo}</Link>
+              <Link className="primary-button marketing-button" href="/register">{site.startFree}<span aria-hidden="true">↗</span></Link>
+              <Link className="secondary-button marketing-button marketing-button--secondary" href={localizedPath(locale, '/demo')}>{site.bookDemo}</Link>
             </div>
+            <p className="marketing-hero__trial">{copy.trial}</p>
           </div>
           <div className="marketing-hero__visual" aria-hidden="true">
             <Image src="/images/sales-aito-ai-operator-hero.png" fill priority sizes="(max-width: 1000px) 100vw, 1200px" alt="" />
@@ -102,12 +112,18 @@ export function HomePage({ locale }: { locale: Locale }) {
         </div>
       </section>
 
+      <div className="marketing-proof-strip">
+        <ul className="marketing-shell">{copy.proof.map((item) => <li key={item}><span aria-hidden="true">✓</span>{item}</li>)}</ul>
+      </div>
+
       <section className="marketing-section marketing-section--light">
         <div className="marketing-shell">
           <div className="section-heading section-heading--narrow">
+            <p className="marketing-section-label">{copy.workflowEyebrow}</p>
             <h2>{copy.proofTitle}</h2>
             <p>{copy.proofText}</p>
           </div>
+          <OrderStory locale={locale} />
           <ol className="workflow-steps">
             {copy.steps.map(([number, title, description]) => (
               <li key={number}>
@@ -173,7 +189,7 @@ export function HomePage({ locale }: { locale: Locale }) {
                 <h3>{plan.name}</h3>
                 <p>{plan.summary[locale]}</p>
                 <strong>{plan.monthlyUah.toLocaleString(locale === 'uk' ? 'uk-UA' : 'en-US')} <small>{copy.perMonth}</small></strong>
-                <Link className={plan.featured ? 'marketing-button' : 'marketing-button marketing-button--secondary'} href={`/register?plan=${plan.id}`}>{copy.planCta}</Link>
+                <Link className={plan.featured ? 'primary-button marketing-button' : 'secondary-button marketing-button marketing-button--secondary'} href={`/register?plan=${plan.id}`}>{copy.planCta}</Link>
               </article>
             ))}
           </div>
@@ -196,8 +212,8 @@ export function HomePage({ locale }: { locale: Locale }) {
         <div className="marketing-shell marketing-final-cta__inner">
           <div><h2>{copy.finalTitle}</h2><p>{copy.finalText}</p></div>
           <div className="marketing-actions">
-            <Link className="marketing-button" href="/register">{site.startFree}</Link>
-            <Link className="marketing-button marketing-button--secondary" href={localizedPath(locale, '/demo')}>{site.bookDemo}</Link>
+            <Link className="primary-button marketing-button" href="/register">{site.startFree}</Link>
+            <Link className="secondary-button marketing-button marketing-button--secondary" href={localizedPath(locale, '/demo')}>{site.bookDemo}</Link>
           </div>
         </div>
       </section>

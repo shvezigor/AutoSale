@@ -1,5 +1,11 @@
 # Marketing site acceptance record
 
+## 2026-10-26 home visual refresh
+
+Local browser acceptance passed on the updated Ukrainian and English home pages: no document overflow at 320/768/1024/1440 px; hero registration/demo links, keyboard skip link and FAQ; explicitly fictional order illustration and manager-review state; off-screen animation pause, reduced-motion final view, and readable server HTML with JavaScript disabled. Touch navigation/FAQ, enlarged layout and post-reload content are included in the browser suite. Demo success uses an intercepted response; invalid-field checks preserve entered values and focus the first error. No real lead or customer message is submitted.
+
+Twenty scoped web tests passed (marketing components, pricing/locales, button and field-validation contracts), plus web typecheck, production build, full moderate/production high dependency audits and quiet Compose validation. A broader web-suite attempt stalled without results and was cancelled; no full-suite pass is claimed. The scoped suites passed independently. Before/after screenshots are private ignored artifacts: `artifacts/landing-before-{desktop,mobile}.png` and `artifacts/landing-local-{desktop,hero,mobile}.png`. Deployment and final public-browser evidence will be recorded below after rollout. These checks do not close the existing SMTP, provider, admin, indexing or field Core Web Vitals gates.
+
 Original acceptance date: 2026-09-17. Release status reconciled on 2026-10-15 against the [production marketing release record](../operations/marketing-release.md).
 
 ## Automated evidence

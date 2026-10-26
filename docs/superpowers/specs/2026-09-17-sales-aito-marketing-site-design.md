@@ -57,6 +57,14 @@ The visual system must remain legible for long-form SEO content and pricing comp
 
 ## 5. Homepage Narrative
 
+### 26 October 2026 visual refresh
+
+The approved refresh preserves Autonomous Command and the proportional hero artwork. The hero emphasizes the routine-free benefit in lime, adds the existing 30-day/no-card terms, and leads into a compact strip naming Instagram, recognition, manager control and Sheets. A localized, explicitly fictional travel-mug example illustrates message → catalogue match → order awaiting manager review. This is illustrative HTML, not a live customer conversation or an autonomous approval claim.
+
+`OrderStory` is the small client boundary; the page and essential copy remain server-rendered. A short, one-time border/transform sequence follows reading order, pauses off screen through `IntersectionObserver`, disconnects on navigation and is completely disabled by `prefers-reduced-motion`. All steps stay readable with JavaScript unavailable. There are no new animation dependencies, generated video, or third-party calls. The approach adapts composition and motion principles from [Elaya's design skills](https://github.com/elayadesign/ai-design-skills), without adopting their conflicting palette/font/mandatory-reveal rules or copying their implementation.
+
+Pricing now uses off-white surfaces with a pale lime Growth card. The final CTA uses a lime field with graphite actions. These home-only styles live in `apps/web/app/styles/marketing/home.css`; other marketing pages and the workspace retain their surfaces. Shared action variants receive the documented marketing skin. Prices, trial rules, integration availability and form behavior are unchanged by this visual refresh.
+
 The approved home-page sequence is:
 
 1. **Header** — brand, platform, capabilities, integrations, pricing, locale switcher, sign-in, and start-free CTA.

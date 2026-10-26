@@ -37,13 +37,76 @@ test.describe('Sales AITO marketing site', () => {
   });
 
   test('has no horizontal overflow across key viewports', async ({ page }) => {
-    await page.goto('/uk');
-    for (const viewport of [{ width: 375, height: 812 }, { width: 768, height: 1024 }, { width: 1440, height: 900 }]) {
-      await page.setViewportSize(viewport);
-      const dimensions = await page.evaluate(() => ({ scrollWidth: document.documentElement.scrollWidth, clientWidth: document.documentElement.clientWidth }));
-      expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.clientWidth);
-      await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    for (const locale of ['uk', 'en']) {
+      await page.goto(`/${locale}`);
+      for (const viewport of [{ width: 320, height: 812 }, { width: 768, height: 1024 }, { width: 1024, height: 900 }, { width: 1440, height: 900 }]) {
+        await page.setViewportSize(viewport);
+        const dimensions = await page.evaluate(() => ({ scrollWidth: document.documentElement.scrollWidth, clientWidth: document.documentElement.clientWidth }));
+        expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.clientWidth);
+        await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+      }
     }
+  });
+
+  test('keeps the example readable without JavaScript and supports touch and enlarged text', async ({ browser }) => {
+    const staticContext = await browser.newContext({ javaScriptEnabled: false });
+    const staticPage = await staticContext.newPage();
+    await staticPage.goto(`${process.env.E2E_BASE_URL ?? 'http://localhost'}/uk`);
+    await expect(staticPage.getByRole('figure').getByText('Очікує перевірки менеджером')).toBeVisible();
+    await staticContext.close();
+
+    const touchContext = await browser.newContext({ hasTouch: true, isMobile: true, viewport: { width: 375, height: 812 } });
+    const page = await touchContext.newPage();
+    await page.goto(`${process.env.E2E_BASE_URL ?? 'http://localhost'}/en`);
+    await page.locator('.marketing-menu summary').tap();
+    await expect(page.locator('.marketing-menu__panel')).toBeVisible();
+    await page.locator('.marketing-menu summary').tap();
+    await page.locator('.faq-list summary').first().tap();
+    await expect(page.locator('.faq-list details').first()).toHaveAttribute('open', '');
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    await page.evaluate(() => { document.body.style.zoom = '2'; });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+    await touchContext.close();
+  });
+
+  test('explains the illustrated order with manager control in both languages', async ({ page }) => {
+    for (const [locale, caption, review] of [
+      ['uk', 'Ілюстрація процесу · вигадані дані', 'Очікує перевірки менеджером'],
+      ['en', 'Workflow illustration · fictional data', 'Waiting for manager review'],
+    ] as const) {
+      await page.goto(`/${locale}`);
+      const story = page.getByRole('figure');
+      await story.scrollIntoViewIfNeeded();
+      await expect(story.getByText(caption)).toBeVisible();
+      await expect(story.getByText(review)).toBeVisible();
+      await expect(story).toHaveAttribute('data-playing', 'true');
+      await page.getByRole('heading', { level: 1 }).scrollIntoViewIfNeeded();
+      await expect(story).toHaveAttribute('data-playing', 'false');
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+      await story.scrollIntoViewIfNeeded();
+      expect(await story.locator('li').first().evaluate((element) => getComputedStyle(element, '::before').animationName)).toBe('none');
+      await page.reload();
+      await expect(story.getByText(review)).toBeVisible();
+    }
+  });
+
+  test('keeps hero navigation and FAQ usable by keyboard', async ({ page }) => {
+    await page.goto('/uk');
+    await page.keyboard.press('Tab');
+    await expect(page.getByRole('link', { name: 'Перейти до вмісту' })).toBeFocused();
+    await page.keyboard.press('Enter');
+    const trial = page.locator('.marketing-hero').getByRole('link', { name: /Спробувати/ });
+    await trial.focus();
+    await page.keyboard.press('Enter');
+    await expect(page).toHaveURL(/\/register$/);
+    await page.goto('/uk');
+    await page.locator('.marketing-hero').getByRole('link', { name: 'Замовити демо' }).click();
+    await expect(page).toHaveURL(/\/uk\/demo$/);
+    await page.goto('/uk');
+    const question = page.locator('.faq-list summary').first();
+    await question.focus();
+    await page.keyboard.press('Enter');
+    await expect(page.locator('.faq-list details').first()).toHaveAttribute('open', '');
   });
 
   test('submits the demo form with an idempotency key and shows success', async ({ page }) => {

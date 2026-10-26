@@ -1,6 +1,7 @@
 @import "./styles/marketing/tokens.css";
 @import "./styles/marketing/foundation.css";
 @import "./styles/marketing/pages.css";
+@import "./styles/marketing/home.css";
 
 :root {
   --canvas: #f6f7fb;

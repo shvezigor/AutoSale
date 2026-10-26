@@ -16,6 +16,16 @@ function collectProductionTsx(root: string): string[] {
 }
 
 describe('button style contract', () => {
+  it('keeps home marketing actions on shared variants with a scoped marketing skin', () => {
+    const home = readFileSync(resolve(__dirname, '../marketing/components/home-page.tsx'), 'utf8');
+    const css = readFileSync(resolve(__dirname, '../../app/styles/marketing/home.css'), 'utf8');
+    expect(home).toContain('primary-button marketing-button');
+    expect(home).toContain('secondary-button marketing-button marketing-button--secondary');
+    expect(home).not.toContain('className="marketing-button"');
+    expect(css).toContain('.marketing-home .marketing-button.primary-button');
+    expect(css).toContain('.marketing-home .marketing-button.secondary-button');
+    expect(css).toContain('.marketing-home .marketing-final-cta a:focus-visible');
+  });
   it('styles the shared icon variant instead of leaving triage actions to browser defaults', () => {
     const css = readFileSync(resolve(__dirname, '../../app/globals.css'), 'utf8');
     const iconBase = css.match(/(?:^|\n)\.icon-button\s*\{([^}]+)\}/)?.[1];

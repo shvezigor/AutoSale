@@ -61,6 +61,8 @@ These are entry points, not a claim that the entire matrix is already automated 
 
 ## Action variants
 
+The public home page uses the shared `primary-button` / `secondary-button` classes with the existing `marketing-button` skin, scoped by `.marketing-home` in `home.css`. Dark hero actions keep lime/graphite contrast; light pricing actions use dark text; the lime final CTA reverses the primary action to graphite and uses a dark focus outline. Both hero actions retain a 48 px minimum height. These surface-specific colors do not change workspace variants. Keep the home skin checks in `button-style-contract.spec.ts`.
+
 - `primary-button` — the main action in a section (create, save, calculate, confirm).
 - `secondary-button` — a reversible or supporting action (edit, cancel, retry).
 - `danger-button` — destructive actions that need an explicit warning.
