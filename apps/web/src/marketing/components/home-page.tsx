@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import Link from 'next/link';
 
 import { integrations } from '../content/integrations';
@@ -7,6 +6,7 @@ import { siteCopy } from '../content/site';
 import { localizedPath, type Locale } from '../routing/locales';
 import { StatusBadge } from './status-badge';
 import { OrderStory } from './order-story';
+import { HeroArtwork } from './hero-artwork';
 
 const homeCopy = {
   uk: {
@@ -106,9 +106,7 @@ export function HomePage({ locale }: { locale: Locale }) {
             </div>
             <p className="marketing-hero__trial">{copy.trial}</p>
           </div>
-          <div className="marketing-hero__visual" aria-hidden="true">
-            <Image src="/images/sales-aito-ai-operator-hero.png" fill priority sizes="(max-width: 1000px) 100vw, 1200px" alt="" />
-          </div>
+          <HeroArtwork locale={locale} />
         </div>
       </section>
 

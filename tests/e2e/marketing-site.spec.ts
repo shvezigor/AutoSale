@@ -10,7 +10,8 @@ test.describe('Sales AITO marketing site', () => {
     await expect(page.getByRole('heading', { level: 1 })).toContainText('Продажі з діалогів');
     const heroImage = page.locator('.marketing-hero__visual img');
     await expect(heroImage).toHaveJSProperty('complete', true);
-    await expect(heroImage).toHaveCSS('object-fit', 'cover');
+    await expect(heroImage).toHaveAttribute('src', /sales-aito-conversation-sculpture/);
+    await expect(heroImage).toHaveCSS('object-fit', 'contain');
     await expect.poll(() => heroImage.evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0);
   });
 
@@ -20,6 +21,29 @@ test.describe('Sales AITO marketing site', () => {
     await expect(page).toHaveURL(/\/en\/pricing$/);
     await expect(page.locator('html')).toHaveAttribute('lang', 'en');
     await expect(page.getByRole('heading', { level: 1 })).toContainText('30 days free');
+  });
+
+  test('animates the new hero artwork with persistent pause and a static reduced-motion view', async ({ page }) => {
+    await page.goto('/uk');
+    const art = page.locator('.hero-art');
+    const packet = page.locator('.hero-art__packet').first();
+    await expect(art).toHaveAttribute('data-playing', 'true');
+    await expect(packet).toHaveCSS('animation-play-state', 'running');
+    const first = await packet.evaluate(element => getComputedStyle(element).transform);
+    await expect.poll(() => packet.evaluate(element => getComputedStyle(element).transform)).not.toBe(first);
+    await page.getByRole('button', { name: 'Зупинити анімацію' }).click();
+    await expect(packet).toHaveCSS('animation-play-state', 'paused');
+    await page.getByRole('figure').scrollIntoViewIfNeeded();
+    await expect(art).toHaveAttribute('data-playing', 'false');
+    await art.scrollIntoViewIfNeeded();
+    await expect(art).toHaveAttribute('data-playing', 'false');
+    await page.getByRole('button', { name: 'Відтворити анімацію' }).focus();
+    await page.keyboard.press('Enter');
+    await expect(art).toHaveAttribute('data-playing', 'true');
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await expect(packet).toHaveCSS('animation-name', 'none');
+    await expect(page.locator('.hero-art__control')).toBeHidden();
+    await expect(page.locator('.hero-art__order')).toHaveCSS('opacity', '1');
   });
 
   test('keeps article browser titles concise without shortening editorial headings', async ({ page }) => {
