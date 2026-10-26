@@ -1,5 +1,9 @@
 # Marketing site acceptance record
 
+## 2026-10-26 sculptural animated hero
+
+The neon-sphere hero is replaced by a built-in-imagegen sculptural plate and independent CSS message/typing/order animation layers. On the local UK/EN home, ten Playwright cases passed: the new complete contained image, actual packet-transform changes, explicit pause and keyboard resume, pause persistence on scroll away/back, off-screen pausing, reduced-motion static result, existing no-JavaScript content, four viewport widths (320/768/1024/1440), zoom-layout emulation, touch menu/FAQ, locale routes, registration/demo navigation and intercepted demo success/field validation. Twenty-two scoped marketing/button/form tests and web typecheck passed. No live lead is submitted. Local private screenshots: `artifacts/landing-sculpture-local-{hero,desktop,mobile}.png` in the primary workspace. Public deployment evidence follows after rollout; the previous section's unrelated external acceptance gates remain unchanged.
+
 ## 2026-10-26 home visual refresh
 
 Local browser acceptance passed on the updated Ukrainian and English home pages: no document overflow at 320/768/1024/1440 px; hero registration/demo links, keyboard skip link and FAQ; explicitly fictional order illustration and manager-review state; off-screen animation pause, reduced-motion final view, and readable server HTML with JavaScript disabled. Touch navigation/FAQ and post-reload content are included in the browser suite. The suite also emulates a 1440 px desktop at 200% zoom with a 720 CSS-pixel layout and device scale 2; this is layout emulation, not a manual browser-toolbar zoom check. Demo success uses an intercepted response; invalid-field checks preserve entered values and focus the first error. No real lead or customer message is submitted.

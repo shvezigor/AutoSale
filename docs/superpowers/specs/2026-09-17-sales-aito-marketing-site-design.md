@@ -50,12 +50,25 @@ The chosen visual direction is **Autonomous Command**:
 - restrained violet illumination for AI and orchestration visuals;
 - dense but calm information hierarchy, avoiding generic neon cyberpunk styling;
 - interface fragments, workflow diagrams, and abstract system graphics instead of stock photography;
-- the home hero uses its landscape artwork as one proportional compositional stage behind the copy; responsive crops preserve the source aspect ratio and never stretch the image;
+- the home hero pairs its copy with a separate proportional sculptural illustration; the complete artwork stays contained at every width and is never stretched or placed beneath the heading;
 - motion intensity of approximately 3/10, using opacity and transforms and respecting `prefers-reduced-motion`.
 
 The visual system must remain legible for long-form SEO content and pricing comparisons. The marketing identity may be more expressive than the authenticated workspace, but both must share brand name, typography principles, semantic colors, and core controls.
 
 ## 5. Homepage Narrative
+
+### 26 October 2026 sculptural hero artwork
+
+Following owner feedback that the former neon sphere felt generic, `HeroArtwork` replaces it with a purpose-generated 1536 × 1024 editorial 3D still: ceramic conversation forms, a translucent lime ribbon, graphite order tiles and a folded parcel. The image is `apps/web/public/images/sales-aito-conversation-sculpture.png`, generated with the built-in `imagegen` tool. It is a static sculptural plate with separate animated foreground layers, not an AI-generated video. No other asset or animation library is loaded.
+
+The live hero moves three independent message packets through the composition and choreographs a typing label and an order-recognised label on a 6.6-second cycle. The result explicitly names manager review. Only transforms and opacity animate. `IntersectionObserver` pauses work off screen and disconnects on navigation; a localized 44 px shared icon button lets visitors pause/resume with keyboard support and keeps an explicit pause when scrolling away/back. Reduced motion removes all animations and the redundant pause control. Without JavaScript or the observer API, the static artwork and labels remain visible. Decorative layers are hidden from accessibility APIs, while the existing page copy and fictional workflow retain the semantic explanation. The prior hero asset is retained for rollback but is no longer requested by the home page. This supersedes the artwork portion of the earlier refresh below.
+
+<details>
+<summary>Built-in imagegen generation prompt</summary>
+
+Use case: stylized-concept. Create a premium original 3D editorial hero illustration for Sales AITO, a Ukrainian social-commerce sales automation product. Landscape 3:2 composition, no typography at all. The image will be the RIGHT HALF of a dark website hero, with separate live animated HTML UI cards overlaid later. The visual metaphor is 'from scattered conversations to an orderly sale': one broad sculptural ribbon of translucent electric lime acrylic sweeps diagonally from upper left towards lower right, twists through one beautiful architectural folded loop, then straightens into three precise slim graphite order tiles. Around the entrance float three small chunky off-white ceramic speech-bubble shapes, no writing, and one pale violet translucent glass rectangle; at the exit sits a single beautifully crafted off-white and lime folded package. Tangible high-end industrial design, softly rounded machined edges, physically plausible glass refraction, delicate shadows, tactile ceramic and brushed dark metal. Beautiful asymmetric sculptural object composition with cinematic studio lighting, substantial negative space, confident minimal art direction, like an expensive design-studio campaign for a real software brand. Backdrop perfectly flat near-black graphite #0b0d17, fading edges to that exact dark color so it integrates seamlessly into the webpage. Main sculpture centered in the right two-thirds of image, avoid cropping. Bright white ceramic and vivid lime accents provide clear contrast. Camera three-quarter perspective, medium telephoto, editorial still life, crisp refined render. Avoid: glowing AI orbs, spheres, robots, brains, neural networks, circuit boards, cyberpunk, space imagery, neon purple light trails, stock SaaS isometric factories, trucks, random tiny icons, screenshots, UI text, logos, watermarks, mountains. This must look authored and sculptural, not like a generic AI technology illustration.
+
+</details>
 
 ### 26 October 2026 visual refresh
 

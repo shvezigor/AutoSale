@@ -25,6 +25,9 @@ describe('button style contract', () => {
     expect(css).toContain('.marketing-home .marketing-button.primary-button');
     expect(css).toContain('.marketing-home .marketing-button.secondary-button');
     expect(css).toContain('.marketing-home .marketing-final-cta a:focus-visible');
+    const art = readFileSync(resolve(__dirname, '../marketing/components/hero-artwork.tsx'), 'utf8');
+    expect(art).toContain('className="icon-button hero-art__control"');
+    expect(css).toContain('.marketing-home .hero-art__control.icon-button');
   });
   it('styles the shared icon variant instead of leaving triage actions to browser defaults', () => {
     const css = readFileSync(resolve(__dirname, '../../app/globals.css'), 'utf8');
