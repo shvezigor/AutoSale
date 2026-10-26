@@ -48,6 +48,13 @@ Roll back application containers first. The demo lead table is additive and can 
 
 ## Deployment record
 
+### 2026-10-26 home visual refresh
+
+- Manually rebuilt web from tested application commit `df614a74633055555d7124fba43963d105e3bb64`, already merged and pushed to `master`. The follow-up `14889d9` changes only acceptance tests/documentation. Deployed image `sha256:bf3aaf5476c176ab194ec8107b5112aaa1e3683942103551bd3d8bbc360af011` by recreating only `web` on the live Windows Docker/Cloudflare host. API, worker, database, storage, proxy and tunnel were not recreated; no migration or external provider action was performed.
+- Fresh local backup `backups/20261026T122048Z` passed SHA-256 checks for PostgreSQL, MinIO, Compose and Caddyfile. `pg_restore --list` read 797 listing lines; the MinIO archive listed 336 entries. No restore or off-host copy was performed. The pre-release web image remains tagged `autosale-web:rollback-landing-20261026`; to roll back, retag it as `autosale-web:latest` and recreate only `web` with `--no-deps --no-build`.
+- All existing application/storage services remained healthy, and public `/health/live` returned 200. The standalone production image passed nine marketing browser cases in a disposable loopback preview, then the public site passed the same nine cases. Final UK/EN desktop/mobile screenshots and console/payload evidence are linked from the [marketing acceptance record](../acceptance/marketing-site-checklist.md#2026-10-26-home-visual-refresh). No real demo lead, customer message or provider side effect was generated.
+- Full moderate and production high dependency audits returned no known vulnerabilities. Twenty scoped web tests, typecheck, production web build and the Docker dependency-safe workspace build passed. The broader local web-suite attempt stalled and was cancelled; no full-suite pass is claimed. GitHub Verify run `40321828921` never started because of the account billing lock; Deploy was skipped, and the auto-deploy variable was absent. This was a manual release, not successful GitHub deployment. Existing provider/SMTP/indexing/CWV acceptance gaps remain open, as does manual toolbar-zoom verification (automated 200% layout emulation passed).
+
 ### 2026-10-22 article SEO title and Bing crawl follow-up
 
 - Manually rebuilt and recreated **web only** from tested `master` commit `c48e3df` on the live Windows Docker/Cloudflare host; no API/worker restart, database migration, DNS change or new provider permission. The prior web image was retained under a rollback tag. The new running image is `sha256:f50116a1ed98471ebca053faad3f0c5345274bf9544f6da506d6acd530d03cc3`.
