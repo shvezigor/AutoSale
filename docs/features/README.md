@@ -102,6 +102,10 @@ An isolated test also connects the actual provider adapter, worker and conversat
 
 [Chatoryx analysis and prioritized validation, 2026-10-02](../research/2026-10-02-chatoryx-competitive-analysis.md) records public competitor claims, our capability gaps and proposed pilot criteria. Catalogue-grounded AI reply drafts are implemented behind a disabled-by-default tenant switch, but require live provider validation and a controlled pilot. Bounded autonomous customer dialogue has not been designed. Product owns validation; execution priorities remain in `tasks/todo.md` and pricing in the monetization hypothesis.
 
+## Distributable agent skills
+
+Marketplace skill source is owned by [`products/agent-skills/README.md`](../../products/agent-skills/README.md), separately from repository-specific `.codex/skills/` guidance. Privacy-Aware Session Analysis 1.0.0 generalizes the internal session-analysis workflow with a report template, counting reference and fictional example. Its [Agensi listing record](../../products/agent-skills/agensi-listing.md) owns submission status, price and remaining payout/upload/moderation gates; draft creation is not publication. It adds no application runtime behavior or telemetry collection.
+
 ## Documentation ownership
 
 - `docs/features/README.md` — routing and current status only.
