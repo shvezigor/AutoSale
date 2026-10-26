@@ -1,4 +1,4 @@
-# Meta App Review для AutoSale
+# Meta App Review для Sales AITO
 
 Цей документ фіксує стан заявки Meta та відтворюваний сценарій перевірки.
 Секрети Meta, Instagram-токени й облікові дані реальних клієнтів сюди не
@@ -7,8 +7,12 @@
 ## Поточний стан
 
 - Meta app `AutoSale` опублікований.
-- У заявці залишено лише `instagram_business_basic` і
-  `instagram_business_manage_messages`.
+- У неподаній заявці залишено лише `instagram_business_basic` і
+  `instagram_business_manage_messages`. 2026-10-26 зайві Facebook,
+  comments, `public_profile` і `Human Agent` вилучено саме з цієї чернетки,
+  щоб не затримувати доступ до основних Instagram DM. Це не змінює вже
+  надані дозволи застосунку; семиденна ручна відповідь потребуватиме
+  окремої заявки на `Human Agent`.
 - Звичайні відповіді Send API доступні у 24-годинному вікні. Окремий live-тест
   2026-10-02 довів, що `HUMAN_AGENT` для ручної відповіді до 7 днів ще не
   надано: Meta повернув HTTP 403 / code 10 при справному token та recipient
@@ -21,8 +25,13 @@
   `Human Agent` лишається зовнішньою передумовою.
 - 2026-10-02 застосунок незворотно позначено в Meta як **Tech Provider**, що
   відповідає моделі Sales AITO: сервіс обробляє Instagram-дані компаній-клієнтів.
-- `Human Agent` додано до чернетки App Review разом із поточними запитами.
-  Чернетка ще не подана.
+- 2026-10-26 Meta прийняла іконку 1024×1024 з
+  [`assets/sales-aito-meta-icon-1024.png`](assets/sales-aito-meta-icon-1024.png)
+  без редизайну; App settings у заявці показує 100%.
+- Текстове обґрунтування `instagram_business_manage_messages` збережено в
+  чернетці. Allowed usage ще показує 0%: потрібні screencast, підтвердження
+  дозволеного використання й додаткові питання для
+  `instagram_business_basic`.
 - Business verification для портфоліо `AutoSale` була розпочата 2026-08-30 і
   зараз має статус **«Заявка на розгляді»**. Поки Meta її не завершить, кнопка
   Access verification залишається заблокованою. Meta вказує, що після подання
@@ -40,27 +49,24 @@
 
 1. Дочекатися завершення Business verification у Meta Business Suite.
 2. Після схвалення пройти Access verification для Tech Provider.
-3. Завантажити в Meta App settings файл
-   `apps/web/public/autosale-icon.png` як app icon 1024×1024.
-4. Підготувати окремий публічний Instagram Professional test account. Він має
+3. Підготувати окремий публічний Instagram Professional test account. Він має
    пройти OAuth без помилки ролі й бути доступним під час review.
-5. Записати screencast для кожного дозволу. Meta вимагає показати повний
+4. Записати screencast для кожного дозволу. Meta вимагає показати повний
    end-to-end сценарій, тому текстовий опис не замінює відео.
-6. Завершити Allowed usage, Data handling, Reviewer instructions та решту
-   обов'язкових питань у submission draft.
-7. Перевірити, чи справді продукт використовує кожен елемент поточної чернетки.
-   Окрім `instagram_business_basic`, `instagram_business_manage_messages` і
-   `Human Agent`, Meta зараз показує `instagram_manage_comments` та
-   `public_profile`; не подавати зайві дозволи без підтвердженого сценарію.
-8. Перевірити заявку ще раз і лише після цього натиснути Submit for review.
+5. Завершити Allowed usage та Data handling. Reviewer instructions уже 100%,
+   але перевірити актуальність тестового доступу перед поданням. Анкета Data
+   handling зараз 0% і містить попередні відповіді про обробників даних,
+   відповідальну юридичну особу та запити органів влади; власник має звірити
+   їх із чинними договорами й процесами, не підтверджувати автоматично.
+6. Перевірити заявку ще раз і лише після цього натиснути Submit for review.
    Після подання чернетку вже не можна редагувати.
-9. Для `Human Agent` у screencast показати саме ручну дію менеджера у діалозі
-   віком 24 години–7 днів; автоматичні або AI-відповіді не можна
-   обґрунтовувати цим feature.
+7. Якщо пізніше подавати `Human Agent` окремо, у screencast показати саме
+   ручну дію менеджера у діалозі віком 24 години–7 днів; автоматичні або
+   AI-відповіді не можна обґрунтовувати цим feature.
 
-Тимчасовий `trycloudflare.com` URL придатний для розробки, але може змінитися
-після перезапуску quick tunnel. Перед поданням краще перейти на named
-Cloudflare Tunnel і власний стабільний домен, щоб reviewer URL не зник.
+Для reviewer використовуйте чинний стабільний домен `sales-aito.com` і
+перевірте його доступність перед поданням. Тимчасові `trycloudflare.com` URL
+не підходять як постійні reviewer-посилання.
 
 ## Сценарій screencast
 
@@ -104,9 +110,9 @@ DM бізнесу, дозволяє менеджеру відповідати н
 
 ## Фінальна перевірка
 
-- [ ] App icon прийнято Meta, попередження `Currently ineligible` відсутнє.
+- [x] App icon прийнято Meta; App settings показує 100%.
 - [x] AutoSale позначено як Tech Provider.
-- [x] `Human Agent` додано до чернетки App Review.
+- [x] Чернетку скорочено до двох Instagram permissions.
 - [ ] Business verification схвалено Meta (зараз заявка на розгляді).
 - [ ] Access verification для Tech Provider завершено.
 - [ ] Reviewer credentials працюють у приватному вікні браузера.
@@ -116,7 +122,7 @@ DM бізнесу, дозволяє менеджеру відповідати н
 - [ ] Обидва screencast завантажені й не містять секретів.
 - [ ] Privacy, Terms і Data deletion URL повертають HTTP 200.
 - [ ] У заявці немає permissions, які продукт не використовує.
-- [ ] Human Agent access схвалено й одна ручна відповідь у діалозі віком
+- [ ] Окремий Human Agent access схвалено й одна ручна відповідь у діалозі віком
   24 години–7 днів отримала `SENT` без повторного повідомлення.
 - [ ] Публічний домен залишатиметься активним протягом усього review.
 - [ ] Перед Submit виконано ручний перегляд усіх відповідей.
