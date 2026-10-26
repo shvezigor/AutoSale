@@ -104,6 +104,8 @@ An isolated test also connects the actual provider adapter, worker and conversat
 
 ## Distributable agent skills
 
+[Commerce and SaaS expansion 1.0.0](../../products/agent-skills/commerce-expansion.md) adds five original evidence-led workflows for reply fact-checking, Meta integration readiness, PostgreSQL tenant isolation, duplicate/retry audits and cost per successful task. The owner authorized USD 9 one-time each, icons and submission, plus the publicly verified USD 19 SaaS Planning & Release Toolkit bundle of three existing live skills. [Forward validation](../../products/agent-skills/validation/commerce-expansion/results.md) owns ten fictional supplied-evidence exercises and package checks; the [submission record](../../products/agent-skills/agensi-submissions.md) owns actual moderation/publication state. No application or production behavior changes.
+
 [Form Validation Audit 1.0.0](../../products/agent-skills/form-validation-audit-listing.md) is an additional skill with an audit method, report/acceptance templates, fictional before/after example and a separate icon. Its [validation record](../../products/agent-skills/validation/form-validation-audit/results.md) owns package/evidence-only checks; no browser/assistive or formal compliance certification is implied. It was submitted at USD 9 one-time on 2026-10-26 and is Pending Review. It changes no application form behavior.
 
 Shared card icons for all five skill products are owned by the [marketplace asset catalogue](../../products/agent-skills/marketplace-assets/icons/README.md). They are separate from the Markdown-only skill ZIPs and are uploaded as listing images; the [submission record](../../products/agent-skills/agensi-submissions.md) owns persisted-image and browser verification.

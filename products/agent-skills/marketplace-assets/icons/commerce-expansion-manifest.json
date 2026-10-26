@@ -1,0 +1,37 @@
+[
+  {
+    "name": "ecommerce-ai-reply-fact-checker",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 1366014,
+    "sha256": "3e301cd976eab8a3000dec8a0e3639d0b98e85b780f11ab79da9cf2a0d62d3b6"
+  },
+  {
+    "name": "meta-instagram-integration-readiness-audit",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 1402051,
+    "sha256": "98598f88553bd3ff51be24ad5b3bb5c66ae908b3d425c9583304695794b28212"
+  },
+  {
+    "name": "postgresql-tenant-isolation-audit",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 1397102,
+    "sha256": "ecd2306b96c85e88e79c66c3418034260c138f2c7d0f3eeeb67fb9b80f523d9f"
+  },
+  {
+    "name": "duplicate-order-webhook-retry-audit",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 1483396,
+    "sha256": "3d5492e8006600964cdef667d845770ff58d2418b40d5491915d32d913774e04"
+  },
+  {
+    "name": "ai-cost-per-successful-task",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 1429657,
+    "sha256": "81bef8de6159ab2b2c1920677957226c713aa5e47e882b19266425d129f0bb05"
+  }
+]

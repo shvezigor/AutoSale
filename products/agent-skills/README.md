@@ -20,6 +20,10 @@ This directory owns distributable agent-skill products. It is separate from `.co
 
 The internal skills remain the project-specific entry points. [Listing copy](prepared-listings.md) owns content and prices; the [submission record](agensi-submissions.md) owns observed listing state and browser verification; [fictional validation](validation/prepared-skills/results.md) owns package checks and limits. These products do not add application behavior or enable recording, experiments or deployment.
 
+## Commerce and SaaS expansion 1.0.0
+
+Five additional original workflows cover catalogue reply fact-checking, Meta integration readiness, PostgreSQL tenant isolation, duplicate/retry audits and AI cost per successful task. [Expansion catalogue](commerce-expansion.md) links source, listing copy, ten fictional forward exercises, package manifests and five matching icons. The owner authorized USD 9 one-time per skill and a USD 19 bundle of three existing live listings. The [submission record](agensi-submissions.md) owns actual marketplace status.
+
 ## Marketplace images
 
 All five submitted skills have matching square PNG card icons in [marketplace-assets/icons](marketplace-assets/icons/README.md), with prompts, file hashes and verification notes. These listing assets stay outside the Markdown distribution ZIPs. Image preparation does not change the recorded submission/publication status.

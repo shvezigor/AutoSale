@@ -1,0 +1,122 @@
+[
+  {
+    "slug": "ecommerce-ai-reply-fact-checker",
+    "version": "1.0.0",
+    "archive": "ecommerce-ai-reply-fact-checker-1.0.0.zip",
+    "sha256": "78c10d20c99110cc1a52346602174c1c3179b7b8e8ed645d111c3da2cefae47c",
+    "files": [
+      {
+        "path": "ecommerce-ai-reply-fact-checker/assets/review-report.md",
+        "sha256": "12c1d6205baa8a55e00a2e07d8ac06a27bd31e2639d991b415c174c137bd33dc"
+      },
+      {
+        "path": "ecommerce-ai-reply-fact-checker/references/claim-rules.md",
+        "sha256": "ab7c2ad99f22c6f7a7ec0152c6c9ef5057ecd18f004c98cf03baf21f7b95a552"
+      },
+      {
+        "path": "ecommerce-ai-reply-fact-checker/references/worked-example.md",
+        "sha256": "f9d6488b3e033da593081021c1b8741e09cde163c3fe2081de5281533efe4ce6"
+      },
+      {
+        "path": "ecommerce-ai-reply-fact-checker/SKILL.md",
+        "sha256": "11dd36b972ab71b34ec192ba8c66e12290b73d1eacefc1a5895422a06d7b1927"
+      }
+    ]
+  },
+  {
+    "slug": "meta-instagram-integration-readiness-audit",
+    "version": "1.0.0",
+    "archive": "meta-instagram-integration-readiness-audit-1.0.0.zip",
+    "sha256": "fb164a37511de9022e34597091e28787a8030d1de0b8ef6a130fe82bba5f635e",
+    "files": [
+      {
+        "path": "meta-instagram-integration-readiness-audit/assets/readiness-report.md",
+        "sha256": "bb1f7c92d15b745e1f7b0bdc82ef2e6ee7371baaf35edf364941f2f85a6a0f00"
+      },
+      {
+        "path": "meta-instagram-integration-readiness-audit/references/readiness-method.md",
+        "sha256": "0f79345cef6e80a2fd07208f95335a006905fb1dccc2620aa042e67f9c1efe12"
+      },
+      {
+        "path": "meta-instagram-integration-readiness-audit/references/worked-example.md",
+        "sha256": "1cd06b3d03464a87861155bc7b6a8409917db026a2954477207ecd580c01bafd"
+      },
+      {
+        "path": "meta-instagram-integration-readiness-audit/SKILL.md",
+        "sha256": "832c2ccb00400177a247b0c0e12dc2d750584b3355d7e24cb93bf171d132e744"
+      }
+    ]
+  },
+  {
+    "slug": "postgresql-tenant-isolation-audit",
+    "version": "1.0.0",
+    "archive": "postgresql-tenant-isolation-audit-1.0.0.zip",
+    "sha256": "e78cb5395c655b015309e818d1fb141a603f9e5a0ff6ff739754f6cc576575b9",
+    "files": [
+      {
+        "path": "postgresql-tenant-isolation-audit/assets/isolation-report.md",
+        "sha256": "071d11e9db6c2875aa4ab482f94668f33402b8f1848ffac54b8ad7fd2f523eaa"
+      },
+      {
+        "path": "postgresql-tenant-isolation-audit/references/boundary-method.md",
+        "sha256": "fe70068b4e0ec6f7f96de0907c83a4516a523986861a4a8260ee578df7ff90bc"
+      },
+      {
+        "path": "postgresql-tenant-isolation-audit/references/worked-example.md",
+        "sha256": "003bfda480765b08fef1b88ec27fe369b4beaa934c6f3ff14e6b1539bfddf676"
+      },
+      {
+        "path": "postgresql-tenant-isolation-audit/SKILL.md",
+        "sha256": "fbcbe7bbb4dc65ba49f13d2919e6e13418deec711c177c4b7749dcada87ab3ce"
+      }
+    ]
+  },
+  {
+    "slug": "duplicate-order-webhook-retry-audit",
+    "version": "1.0.0",
+    "archive": "duplicate-order-webhook-retry-audit-1.0.0.zip",
+    "sha256": "b62b7fe0067ed67f6242bd9e2bd51dbeba944c740872f9352f25f4d4afdd21ad",
+    "files": [
+      {
+        "path": "duplicate-order-webhook-retry-audit/assets/retry-audit.md",
+        "sha256": "1566a8485bdad2332d54e3089c251ca40be6328f8dfbcdf6a5f1ffe9c63ead33"
+      },
+      {
+        "path": "duplicate-order-webhook-retry-audit/references/failure-windows.md",
+        "sha256": "98ba0ea194bfc08cadc222d1dca89618a3a0bb6c2acdff1db85a29b9af4d6327"
+      },
+      {
+        "path": "duplicate-order-webhook-retry-audit/references/worked-example.md",
+        "sha256": "e4b89b7d40ef30db35722875bd53f972d6b19e6f70be400c7c734707a197292f"
+      },
+      {
+        "path": "duplicate-order-webhook-retry-audit/SKILL.md",
+        "sha256": "f9ca1c17b373b97aa19378ea2349540f662d6d04ed3cbc2180a6d2aa56552972"
+      }
+    ]
+  },
+  {
+    "slug": "ai-cost-per-successful-task",
+    "version": "1.0.0",
+    "archive": "ai-cost-per-successful-task-1.0.0.zip",
+    "sha256": "1ef2f05f6c67434bd3805170b835a50dcc4693c8caca9755f84a7063928c8c40",
+    "files": [
+      {
+        "path": "ai-cost-per-successful-task/assets/cost-worksheet.md",
+        "sha256": "941dc052f9a6a48b5665f9311502dd59c79f4a4b0033f11f0b9c465550a06dd1"
+      },
+      {
+        "path": "ai-cost-per-successful-task/references/cost-method.md",
+        "sha256": "6ea880175d47299348aa511aea43628b7bf88b0d4391422cf8ace74e2198a874"
+      },
+      {
+        "path": "ai-cost-per-successful-task/references/worked-example.md",
+        "sha256": "161ae470edda0daacf738a2cfa941ce56434edcdbe840ae3f607f54c04630649"
+      },
+      {
+        "path": "ai-cost-per-successful-task/SKILL.md",
+        "sha256": "6063f72acccdb1b585474b02d06e783378166df53c0047995f2bb5228c493b40"
+      }
+    ]
+  }
+]

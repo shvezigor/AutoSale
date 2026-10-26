@@ -1,5 +1,7 @@
 # Marketplace skill icons v1
 
+The five commerce/SaaS expansion products have additional matching PNGs recorded in [commerce-expansion-manifest.json](commerce-expansion-manifest.json), generated with the built-in image tool from [these prompts](commerce-expansion-prompts.json). All were visually inspected and verified as 1254px squares below 5 MiB. They are separate from the original four-icon archive and all Markdown-only skill ZIPs. [Expansion catalogue](../../commerce-expansion.md) and [submission record](../../agensi-submissions.md) own product and upload status.
+
 Form Validation Audit has an additional matching [coral icon](form-validation-audit.png), prepared locally with its [own prompt](form-validation-audit-prompt.json). It is included in the current file manifest but not in the original four-icon ZIP below. The separate `form-validation-audit-icon.png` delivery is in Downloads; it has been uploaded and its stored remote preview verified. The listing is Pending Review. PNG decoding, square dimensions, minimum 512px size, under-5-MiB size and SHA256 were verified. Original pixels are preserved.
 
 Four marketplace card/logo assets generated with the built-in `image_gen` tool on 2026-10-26. Each is an original square PNG, 1254 × 1254 pixels, opaque navy background, under 5 MiB. They are visually reviewed for a shared ceramic/ivory style, distinct accent colors, clear symbols and absence of text or watermarks. These are listing images, not diagrams or certifications of safety.
