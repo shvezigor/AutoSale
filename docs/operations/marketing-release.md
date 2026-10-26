@@ -48,6 +48,13 @@ Roll back application containers first. The demo lead table is additive and can 
 
 ## Deployment record
 
+### 2026-10-26 generated sculptural hero and motion
+
+- Released application commit `2439e123e962e42736f64911587f711005f68dc5`, merged and pushed to `master`, by replacing only `web` at 12:41 UTC on the existing live Windows/Docker host. Running image: `sha256:a616faf8e8e597104a64b996adae29d579df216d393df6651d95e66c777f267b`. API, worker, proxy, tunnel, database and object storage were not restarted or migrated. Subsequent marketplace-icon work on `master` is unrelated to this runtime image.
+- Verified fresh local backup `backups/20261026T123939Z`: all four manifest checksums passed; PostgreSQL listing had 797 lines and the MinIO archive listed 324 entries. No restore or off-host copy was performed. The previous web image is retained as `autosale-web:rollback-before-sculpture-20261026`; rollback retags it as `autosale-web:latest` and recreates only `web` with `--no-deps --no-build`.
+- The exact image passed ten marketing browser cases in a disposable loopback preview before replacement, then all ten passed against `https://sales-aito.com`. The preview was stopped/removed. Public health returned 200 and services were healthy; final clean-browser capture had no page exceptions or console errors. UK/EN/mobile screenshots, the live animation recording and payload sample are recorded in the [hero acceptance](../acceptance/marketing-site-checklist.md#2026-10-26-sculptural-animated-hero). No real lead, customer message or external-provider action was created.
+- Twenty-two scoped web tests, typecheck, production builds and moderate/full plus high/production audits passed. GitHub Verify run `40324239007` did not start due to the account billing lock, and Deploy was skipped with automatic deployment still disabled. This manual web-only release does not close unrelated SMTP/provider/admin/indexing/CWV gates or the manual toolbar-zoom gap.
+
 ### 2026-10-26 home visual refresh
 
 - Manually rebuilt web from tested application commit `df614a74633055555d7124fba43963d105e3bb64`, already merged and pushed to `master`. The follow-up `14889d9` changes only acceptance tests/documentation. Deployed image `sha256:bf3aaf5476c176ab194ec8107b5112aaa1e3683942103551bd3d8bbc360af011` by recreating only `web` on the live Windows Docker/Cloudflare host. API, worker, database, storage, proxy and tunnel were not recreated; no migration or external provider action was performed.
