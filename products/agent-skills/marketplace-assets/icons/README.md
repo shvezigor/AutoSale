@@ -1,5 +1,7 @@
 # Marketplace skill icons v1
 
+Form Validation Audit has an additional matching [coral icon](form-validation-audit.png), prepared locally with its [own prompt](form-validation-audit-prompt.json). It is included in the current file manifest but not in the original four-icon ZIP below. The separate `form-validation-audit-icon.png` delivery is in Downloads; it has not been uploaded. PNG decoding, square dimensions, minimum 512px size, under-5-MiB size and SHA256 were verified. Original pixels are preserved.
+
 Four marketplace card/logo assets generated with the built-in `image_gen` tool on 2026-10-26. Each is an original square PNG, 1254 × 1254 pixels, opaque navy background, under 5 MiB. They are visually reviewed for a shared ceramic/ivory style, distinct accent colors, clear symbols and absence of text or watermarks. These are listing images, not diagrams or certifications of safety.
 
 | Skill | Icon | Accent / symbol |

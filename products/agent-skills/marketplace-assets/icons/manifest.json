@@ -38,5 +38,15 @@
     ],
     "bytes": 1364434,
     "sha256": "9a7dd977ec0b54d941af78f74d9f0ee4bdf08e04bc6355af364f42a36388489d"
+  },
+  {
+    "name": "form-validation-audit",
+    "file": "form-validation-audit.png",
+    "pixels": [
+      1254,
+      1254
+    ],
+    "bytes": 1304549,
+    "sha256": "a2df49d89b9c60f01e9fda32775444d74a2b74aa967d03f804b80a3d530bcfde"
   }
 ]
