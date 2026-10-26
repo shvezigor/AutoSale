@@ -3,6 +3,7 @@
 Status: **Pending Review / In review**, verified in Agensi Creator Studio on 2026-10-26 after the owner uploaded and submitted the package. The dashboard reports 1 total, 0 live and 1 pending skill. Submission is not public availability.
 Version: 1.0.0.
 Price: owner-selected USD 9 one-time.
+Prepared logo: [privacy-aware-session-analysis.png](marketplace-assets/icons/privacy-aware-session-analysis.png), separate listing asset; not uploaded in the icon-preparation change.
 Draft: https://www.agensi.io/dashboard/submit?draft=138177e1-15d6-4cee-82b0-16d88a862cf3
 Payout setup: https://www.agensi.io/dashboard#my-skills/payouts
 Archive SHA256: `60b31610e6b01ca636dfaf10b5e58a86a1323279ee88d08a1c0f8f2ef6e368f7`.

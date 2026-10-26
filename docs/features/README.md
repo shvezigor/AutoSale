@@ -104,6 +104,8 @@ An isolated test also connects the actual provider adapter, worker and conversat
 
 ## Distributable agent skills
 
+Shared card icons for all four skill products are owned by the [marketplace asset catalogue](../../products/agent-skills/marketplace-assets/icons/README.md). They are separate from the Markdown-only skill ZIPs and have not been uploaded by icon preparation.
+
 Marketplace skill source is owned by [`products/agent-skills/README.md`](../../products/agent-skills/README.md), separately from repository-specific `.codex/skills/` guidance. Privacy-Aware Session Analysis 1.0.0 is submitted and pending Agensi moderation; its [listing record](../../products/agent-skills/agensi-listing.md) owns price, evidence and remaining publication gates. Repository Feature Map, Evidence-Led Product Planning and Docker Compose Release Planner 1.0.0 generalize the other three internal workflows into standalone packages with templates and fictional examples. Their [listing drafts](../../products/agent-skills/prepared-listings.md) and [validation record](../../products/agent-skills/validation/prepared-skills/results.md) own preparation status and checks; they are not uploaded or priced. These packages add no application runtime behavior, telemetry collection or production execution.
 
 ## Documentation ownership

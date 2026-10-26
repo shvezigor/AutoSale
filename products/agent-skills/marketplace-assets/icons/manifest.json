@@ -1,0 +1,42 @@
+[
+  {
+    "name": "privacy-aware-session-analysis",
+    "file": "privacy-aware-session-analysis.png",
+    "pixels": [
+      1254,
+      1254
+    ],
+    "bytes": 1422724,
+    "sha256": "7553ce6b2384ed8ea358901a4e59f2375f0125eb76d023e2a92a67bcad197192"
+  },
+  {
+    "name": "repository-feature-map",
+    "file": "repository-feature-map.png",
+    "pixels": [
+      1254,
+      1254
+    ],
+    "bytes": 1321693,
+    "sha256": "7d3954603c14ff406e211b321f3d1ade012bd0278ab6de6487130fb7fc6c4722"
+  },
+  {
+    "name": "evidence-led-product-planning",
+    "file": "evidence-led-product-planning.png",
+    "pixels": [
+      1254,
+      1254
+    ],
+    "bytes": 1414895,
+    "sha256": "b887196fce6533ae4116fb06bf513bbe6ae552a3af9f2b080da71fc808b07daf"
+  },
+  {
+    "name": "docker-compose-release-planner",
+    "file": "docker-compose-release-planner.png",
+    "pixels": [
+      1254,
+      1254
+    ],
+    "bytes": 1364434,
+    "sha256": "9a7dd977ec0b54d941af78f74d9f0ee4bdf08e04bc6355af364f42a36388489d"
+  }
+]

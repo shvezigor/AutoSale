@@ -20,6 +20,10 @@ This directory owns distributable agent-skill products. It is separate from `.co
 
 The internal skills remain the project-specific entry points. [Prepared listing copy](prepared-listings.md) owns prices/submission state for the additional packages; [fictional validation](validation/prepared-skills/results.md) owns observed checks and limits. These products do not add application behavior or enable recording, experiments or deployment.
 
+## Marketplace images
+
+All four skills have matching square PNG card icons in [marketplace-assets/icons](marketplace-assets/icons/README.md), with prompts, file hashes and verification notes. These listing assets stay outside the Markdown distribution ZIPs. Image preparation does not change the recorded submission/publication status.
+
 Packaging (Python standard library, run from repository root; output outside Git). Set `source` to the desired skill folder and match its output filename; include only that folder's Markdown files:
 
 ```python

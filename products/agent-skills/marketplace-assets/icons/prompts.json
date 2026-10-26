@@ -1,0 +1,22 @@
+{
+  "generator": "built-in image_gen",
+  "transparent_background": false,
+  "prompts": [
+    {
+      "name": "privacy-aware-session-analysis",
+      "prompt": "Create ONE polished square 1024x1024 marketplace skill icon. A cohesive family identity: flat deep midnight navy background (#101B2A), single centered sculptural emblem in ivory with ONE vivid accent color, softly beveled matte ceramic forms, restrained studio highlights and soft ambient shadow. Premium editorial software identity, bold simple silhouette, clear at 48 pixels. Emblem occupies central 62% with generous equal padding. Full-bleed square background, NO rounded-square outer tile, NO frame, NO lettering, NO numbers, NO text, NO watermark, NO tiny details. Not a collage or icon sheet. Subject: a simplified ivory eye shaped from two curved bands, with a small solid emerald shield as its central pupil, an elegant symbol of private observation. Accent emerald green #42D6AF."
+    },
+    {
+      "name": "repository-feature-map",
+      "prompt": "Create ONE polished square 1024x1024 marketplace skill icon. A cohesive family identity: flat deep midnight navy background (#101B2A), single centered sculptural emblem in ivory with ONE vivid accent color, softly beveled matte ceramic forms, restrained studio highlights and soft ambient shadow. Premium editorial software identity, bold simple silhouette, clear at 48 pixels. Emblem occupies central 62% with generous equal padding. Full-bleed square background, NO rounded-square outer tile, NO frame, NO lettering, NO numbers, NO text, NO watermark, NO tiny details. Not a collage or icon sheet. Subject: a compact ivory branching feature map: one central solid rounded cube connected by three thick clean paths to three small rounded cubes, orderly and readily legible. Accent electric sky blue #51BBF4 applied to central cube."
+    },
+    {
+      "name": "evidence-led-product-planning",
+      "prompt": "Create ONE polished square 1024x1024 marketplace skill icon. A cohesive family identity: flat deep midnight navy background (#101B2A), single centered sculptural emblem in ivory with ONE vivid accent color, softly beveled matte ceramic forms, restrained studio highlights and soft ambient shadow. Premium editorial software identity, bold simple silhouette, clear at 48 pixels. Emblem occupies central 62% with generous equal padding. Full-bleed square background, NO rounded-square outer tile, NO frame, NO lettering, NO numbers, NO text, NO watermark, NO tiny details. Not a collage or icon sheet. Subject: three offset ivory planning cards with a single oversized amber check mark spanning the front card; minimal confident symbol of evidence leading to a clear product decision. Accent warm amber #F7B84B."
+    },
+    {
+      "name": "docker-compose-release-planner",
+      "prompt": "Create ONE polished square 1024x1024 marketplace skill icon. A cohesive family identity: flat deep midnight navy background (#101B2A), single centered sculptural emblem in ivory with ONE vivid accent color, softly beveled matte ceramic forms, restrained studio highlights and soft ambient shadow. Premium editorial software identity, bold simple silhouette, clear at 48 pixels. Emblem occupies central 62% with generous equal padding. Full-bleed square background, NO rounded-square outer tile, NO frame, NO lettering, NO numbers, NO text, NO watermark, NO tiny details. Not a collage or icon sheet. Subject: three solid ivory server blocks stacked vertically and a compact violet shield with an ivory check mark in front of their lower right corner, a simple controlled-release emblem. Accent periwinkle violet #A99AFF."
+    }
+  ]
+}

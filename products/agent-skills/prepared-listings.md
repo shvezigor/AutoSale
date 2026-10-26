@@ -5,6 +5,7 @@ Prepared 2026-10-26. These three 1.0.0 packages are local release candidates, no
 ## Repository Feature Map
 
 Source: [repository-feature-map](repository-feature-map/SKILL.md).
+Logo: [repository-feature-map.png](marketplace-assets/icons/repository-feature-map.png).
 
 Summary: Trace existing feature ownership, contracts and tests before adding code. Get a scoped reuse decision and an evidence-linked documentation plan.
 
@@ -17,6 +18,7 @@ Compatibility: Markdown-reading agent. Repository discovery requires the host's 
 ## Evidence-Led Product Planning
 
 Source: [evidence-led-product-planning](evidence-led-product-planning/SKILL.md).
+Logo: [evidence-led-product-planning.png](marketplace-assets/icons/evidence-led-product-planning.png).
 
 Summary: Turn feature requests into focused decisions, small PRDs and measurable validation plans while keeping evidence, assumptions and unknowns separate.
 
@@ -29,6 +31,7 @@ Compatibility: Markdown-reading agent with supplied product evidence. Optional f
 ## Docker Compose Release Planner
 
 Source: [docker-compose-release-planner](docker-compose-release-planner/SKILL.md).
+Logo: [docker-compose-release-planner.png](marketplace-assets/icons/docker-compose-release-planner.png).
 
 Summary: Assess Compose release readiness with explicit backup, schema-compatibility, acceptance and recovery gates before an operator touches production.
 
