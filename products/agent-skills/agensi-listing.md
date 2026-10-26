@@ -1,6 +1,6 @@
 # Agensi listing: Privacy-Aware Session Analysis
 
-Status: Agensi draft saved on 2026-10-26; not submitted or published. Paid submission is disabled until the owner connects a payout method. Browser ZIP upload also remains unverified because the file chooser did not become available.
+Status: **Pending Review / In review**, verified in Agensi Creator Studio on 2026-10-26 after the owner uploaded and submitted the package. The dashboard reports 1 total, 0 live and 1 pending skill. Submission is not public availability.
 Version: 1.0.0.
 Price: owner-selected USD 9 one-time.
 Draft: https://www.agensi.io/dashboard/submit?draft=138177e1-15d6-4cee-82b0-16d88a862cf3
@@ -10,9 +10,9 @@ Archive content is verified locally: five Markdown files under one top-level ski
 
 ## Browser acceptance and remaining steps
 
-Creator mode is enabled. The draft includes title, summary, full description, a fictional input/output demo, compatibility limitations, read-file permission, Research & Analysis as primary category, Business & Operations as secondary category, and the USD 9 one-time price. The form reports saved changes. Draft persistence is verified separately by reload before final handoff.
+Creator mode is enabled. The prepared listing includes title, summary, full description, a fictional input/output demo, compatibility limitations, read-file permission, Research & Analysis as primary category, Business & Operations as secondary category, and the USD 9 one-time price. The original draft survived reload. The later Creator Studio check confirms completed profile, connected payouts and submitted skill, with the same title, summary and USD 9 price. Zoneless connection was observed before submission; actual payout delivery has not been tested.
 
-Remaining: upload the ZIP, connect payouts through the owner's chosen provider, inspect any submission terms, submit for review, and verify the moderation result and public listing. Do not mark the skill published based on draft creation or local validation. Never commit payment details, identity documents, auth redirects or session tokens. The owner completes financial-account setup directly.
+Remaining: verify the moderation result and public listing when available. Do not mark the skill published based on submission or local validation. Never commit payment details, identity documents, auth redirects or session tokens. The owner completed financial-account setup directly; it is not a guarantee of successful future payouts.
 
 ## Title
 

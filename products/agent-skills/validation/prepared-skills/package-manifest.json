@@ -1,0 +1,20 @@
+[
+  {
+    "name": "repository-feature-map",
+    "version": "1.0.0",
+    "files": 6,
+    "sha256": "b9221e538ead3fc1e30683ad0127afda14afa10a6ca5234a42b1900936799564"
+  },
+  {
+    "name": "evidence-led-product-planning",
+    "version": "1.0.0",
+    "files": 6,
+    "sha256": "01afd2ef484ad81c4c0e8bd9180c2ed8b783c29d0f935c4c60757eff0fd7b024"
+  },
+  {
+    "name": "docker-compose-release-planner",
+    "version": "1.0.0",
+    "files": 6,
+    "sha256": "0f18f66eabab29ff29f9a18a111a6a11ed254747a810d64d9110a5073afeaf7c"
+  }
+]

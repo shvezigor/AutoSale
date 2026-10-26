@@ -10,7 +10,17 @@ This directory owns distributable agent-skill products. It is separate from `.co
 - Validation: frontmatter/resource/archive checks plus independent fictional behavioral scenarios. See `validation/` for prompts and results.
 - Marketplace: Agensi; submission status and listing copy are maintained in `agensi-listing.md`.
 
-Packaging (Python standard library, run from repository root; output outside Git):
+## Additional prepared packages 1.0.0
+
+| Package | Origin | Deliverable | Distribution state |
+|---|---|---|---|
+| [Repository Feature Map](repository-feature-map/SKILL.md) | `.codex/skills/feature-knowledge/` | Existing owner/contract/test map and reuse decision | Local package; not uploaded |
+| [Evidence-Led Product Planning](evidence-led-product-planning/SKILL.md) | `.codex/skills/product-management/` | Decision brief, narrow PRD or validation plan | Local package; not uploaded |
+| [Docker Compose Release Planner](docker-compose-release-planner/SKILL.md) | `.codex/skills/production-deployment/` | Readiness and recovery handoff; no live execution | Local package; not uploaded |
+
+The internal skills remain the project-specific entry points. [Prepared listing copy](prepared-listings.md) owns prices/submission state for the additional packages; [fictional validation](validation/prepared-skills/results.md) owns observed checks and limits. These products do not add application behavior or enable recording, experiments or deployment.
+
+Packaging (Python standard library, run from repository root; output outside Git). Set `source` to the desired skill folder and match its output filename; include only that folder's Markdown files:
 
 ```python
 from pathlib import Path

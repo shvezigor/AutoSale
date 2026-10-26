@@ -104,7 +104,7 @@ An isolated test also connects the actual provider adapter, worker and conversat
 
 ## Distributable agent skills
 
-Marketplace skill source is owned by [`products/agent-skills/README.md`](../../products/agent-skills/README.md), separately from repository-specific `.codex/skills/` guidance. Privacy-Aware Session Analysis 1.0.0 generalizes the internal session-analysis workflow with a report template, counting reference and fictional example. Its [Agensi listing record](../../products/agent-skills/agensi-listing.md) owns submission status, price and remaining payout/upload/moderation gates; draft creation is not publication. It adds no application runtime behavior or telemetry collection.
+Marketplace skill source is owned by [`products/agent-skills/README.md`](../../products/agent-skills/README.md), separately from repository-specific `.codex/skills/` guidance. Privacy-Aware Session Analysis 1.0.0 is submitted and pending Agensi moderation; its [listing record](../../products/agent-skills/agensi-listing.md) owns price, evidence and remaining publication gates. Repository Feature Map, Evidence-Led Product Planning and Docker Compose Release Planner 1.0.0 generalize the other three internal workflows into standalone packages with templates and fictional examples. Their [listing drafts](../../products/agent-skills/prepared-listings.md) and [validation record](../../products/agent-skills/validation/prepared-skills/results.md) own preparation status and checks; they are not uploaded or priced. These packages add no application runtime behavior, telemetry collection or production execution.
 
 ## Documentation ownership
 
