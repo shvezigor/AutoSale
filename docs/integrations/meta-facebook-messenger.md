@@ -2,8 +2,8 @@
 
 ## Current status
 
-Facebook Page Messenger inbound is implemented behind
-`FACEBOOK_MESSENGER_ENABLED=false` and remains **Validation pending**. The
+Facebook Page Messenger inbound is implemented behind a deployment flag that
+defaults to `FACEBOOK_MESSENGER_ENABLED=false` and remains **Validation pending**. The
 current slice receives new Page messages, stores them in the shared inbox and
 may invoke the existing order-recognition flow. It does not send Facebook
 replies, import history, process comments/Marketplace, or connect personal
@@ -17,14 +17,29 @@ portfolio does not replace verification and review of the Sales AITO app owner.
 As checked in Meta on 2026-10-27, the app-owner business verification is
 **Verified**; the separate Tech Provider Access verification is **In review**.
 The existing App Review submission covers Instagram permissions only and is
-also **In review**. The Messenger use case is present, but `pages_messaging`,
-`pages_show_list` and `pages_manage_metadata` show **Ready for testing**, not
-Advanced Access approval. Messenger API Setup has no saved webhook callback or
-verify token, and the listed `Sales AITO Test` Page has no subscribed fields.
+also **In review**. On 2026-10-27, the three Messenger permissions
+`pages_messaging`, `pages_show_list` and `pages_manage_metadata` were requested
+for testing, but still show **Ready for testing**: they are not in the submitted
+Instagram review and do not have Advanced Access. In the current Meta UI,
+**Add to App Review** for `pages_messaging` is disabled while the Instagram
+submission is **Review in progress**; recheck this control after Meta completes
+that review rather than claiming the Facebook request has been submitted.
+Messenger API Setup now has
+the saved production webhook callback and the Page `messages` field subscribed
+at v26.0. The listed `Sales AITO Test` Page (1373072285888208) also has its
+`messages` field subscribed. Meta verified the callback using a newly random
+shared verify token; the deployed endpoint accepts that token and rejects a
+wrong one, and the existing Instagram `messages` subscription remains active.
+The production Facebook Login setting already lists the exact redirect URI
+`https://sales-aito.com/api/integrations/facebook/callback`.
+
 Production API and worker have the Facebook deployment flag and dedicated app
 credentials configured, while the platform runtime gate remains off: the
-tenant settings show only Instagram. Keep the gate off until the controlled
-Page flow and App Review acceptance below pass.
+tenant settings show only Instagram. This Page belongs to a different business
+portfolio from the app owner and is not proof of OAuth Page eligibility. Keep
+the gate off until a same-portfolio controlled Page passes the owner flow and
+live acceptance below, and Meta approves the required Messenger Advanced
+Access for external clients. No live Facebook inbound message has been verified.
 
 ## Meta application configuration
 
