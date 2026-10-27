@@ -9,11 +9,22 @@ may invoke the existing order-recognition flow. It does not send Facebook
 replies, import history, process comments/Marketplace, or connect personal
 Messenger accounts.
 
-Production onboarding of Pages owned by customer business portfolios is
-blocked until the business portfolio that owns the Sales AITO Meta app passes
-Meta Business Verification and the app receives the applicable App Review /
-Advanced Access approvals. Verification of a customer's business portfolio
-does not replace verification and review of the Sales AITO app owner.
+Production onboarding of Pages owned by customer business portfolios requires
+the Sales AITO app owner's Meta Business Verification and the applicable App
+Review / Advanced Access approvals. Verification of a customer's business
+portfolio does not replace verification and review of the Sales AITO app owner.
+
+As checked in Meta on 2026-10-27, the app-owner business verification is
+**Verified**; the separate Tech Provider Access verification is **In review**.
+The existing App Review submission covers Instagram permissions only and is
+also **In review**. The Messenger use case is present, but `pages_messaging`,
+`pages_show_list` and `pages_manage_metadata` show **Ready for testing**, not
+Advanced Access approval. Messenger API Setup has no saved webhook callback or
+verify token, and the listed `Sales AITO Test` Page has no subscribed fields.
+Production API and worker have the Facebook deployment flag and dedicated app
+credentials configured, while the platform runtime gate remains off: the
+tenant settings show only Instagram. Keep the gate off until the controlled
+Page flow and App Review acceptance below pass.
 
 ## Meta application configuration
 
