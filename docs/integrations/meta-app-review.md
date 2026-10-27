@@ -31,10 +31,12 @@
 - Обидва описи дозволів і підтвердження дозволеного використання збережені в
   чернетці. Два підготовлені screencast завантажено до відповідних дозволів;
   **Allowed usage показує 100%**. Meta ще не оцінювала достатність цих відео.
-- Business verification для портфоліо `AutoSale` була розпочата 2026-08-30 і
-  зараз має статус **«Заявка на розгляді»**. Поки Meta її не завершить, кнопка
-  Access verification залишається заблокованою. Meta вказує, що після подання
-  Access verification зазвичай відповідає протягом п'яти днів.
+- 2026-10-27 Meta підтвердила Business verification для ФОП Швець Ігор
+  Олександрович у портфоліо `AutoSale`. У Meta Developers вона відображається
+  як **Verified**. Це ще не надає Instagram Advanced Access клієнтам.
+- 2026-10-27 окрему **Access verification** для Tech Provider подано з описом
+  Sales AITO як SaaS-платформи. Її стан — **In review**; Meta вказує, що
+  звернеться протягом п'яти днів, якщо потрібні додаткові відомості.
 - Налаштовано HTTPS OAuth callback, webhook, deauthorization callback і data
   deletion callback.
 - Webhook успішно пройшов verification і тест поля `messages`.
@@ -64,20 +66,19 @@
 
 ## Що блокує подання
 
-1. Дочекатися завершення Business verification у Meta Business Suite.
-2. Після схвалення пройти Access verification для Tech Provider.
-3. Підготувати окремий публічний Instagram Professional test account. Він має
+1. Дочекатися рішення Meta щодо поданої Access verification для Tech Provider.
+2. Підготувати окремий публічний Instagram Professional test account. Він має
    пройти OAuth без помилки ролі й бути доступним під час review.
-4. Перевірити, чи обидва завантажені screencast достатньо чітко показують
+3. Перевірити, чи обидва завантажені screencast достатньо чітко показують
    повний сценарій для reviewer; факт завантаження не означає схвалення Meta.
-5. Завершити Data handling на підставі перевірених назв юридичних осіб,
+4. Завершити Data handling на підставі перевірених назв юридичних осіб,
    категорій послуг і країн обробки кожного постачальника. Reviewer
    instructions і Allowed usage уже 100%, але тестовий вхід ще потребує
    незалежної браузерної перевірки. Відповіді Data handling про контролера,
    держзапити й процеси слід звірити перед підтвердженням.
-6. Перевірити заявку ще раз і лише після цього натиснути Submit for review.
+5. Перевірити заявку ще раз і лише після цього натиснути Submit for review.
    Після подання чернетку вже не можна редагувати.
-7. Якщо пізніше подавати `Human Agent` окремо, у screencast показати саме
+6. Якщо пізніше подавати `Human Agent` окремо, у screencast показати саме
    ручну дію менеджера у діалозі віком 24 години–7 днів; автоматичні або
    AI-відповіді не можна обґрунтовувати цим feature.
 
@@ -130,8 +131,9 @@ DM бізнесу, дозволяє менеджеру відповідати н
 - [x] App icon прийнято Meta; App settings показує 100%.
 - [x] AutoSale позначено як Tech Provider.
 - [x] Чернетку скорочено до двох Instagram permissions.
-- [ ] Business verification схвалено Meta (зараз заявка на розгляді).
-- [ ] Access verification для Tech Provider завершено.
+- [x] Business verification схвалено Meta (2026-10-27).
+- [ ] Access verification для Tech Provider схвалено (подана 2026-10-27,
+  зараз **In review**).
 - [ ] Reviewer credentials працюють у приватному вікні браузера.
 - [ ] OAuth завершується для окремого Professional test account.
 - [ ] Картка інтеграції показує правильний username.
