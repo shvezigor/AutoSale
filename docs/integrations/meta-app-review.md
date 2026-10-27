@@ -7,9 +7,11 @@
 ## Поточний стан
 
 - Meta app `AutoSale` опублікований.
-- У неподаній заявці залишено лише `instagram_business_basic` і
-  `instagram_business_manage_messages`. 2026-10-26 зайві Facebook,
-  comments, `public_profile` і `Human Agent` вилучено саме з цієї чернетки,
+- **App Review подано 2026-10-27**: Meta показує **Review in progress** для
+  `instagram_business_basic` і `instagram_business_manage_messages` у
+  [заявці AutoSale](https://developers.facebook.com/apps/1361315439512963/app-review/submissions/feedback/?submission_id=1361506322827208).
+  2026-10-26 зайві Facebook, comments, `public_profile` і `Human Agent`
+  вилучено з цієї заявки,
   щоб не затримувати доступ до основних Instagram DM. Це не змінює вже
   надані дозволи застосунку; семиденна ручна відповідь потребуватиме
   окремої заявки на `Human Agent`.
@@ -28,9 +30,9 @@
 - 2026-10-26 Meta прийняла іконку 1024×1024 з
   [`assets/sales-aito-meta-icon-1024.png`](assets/sales-aito-meta-icon-1024.png)
   без редизайну; App settings у заявці показує 100%.
-- Обидва описи дозволів і підтвердження дозволеного використання збережені в
-  чернетці. Два підготовлені screencast завантажено до відповідних дозволів;
-  **Allowed usage показує 100%**. Meta ще не оцінювала достатність цих відео.
+- Обидва описи дозволів, підтвердження дозволеного використання й два
+  screencast подано; **Allowed usage показувало 100%** перед поданням.
+  Meta ще не повідомила рішення щодо достатності цих відео.
 - 2026-10-27 Meta підтвердила Business verification для ФОП Швець Ігор
   Олександрович у портфоліо `AutoSale`. У Meta Developers вона відображається
   як **Verified**. Це ще не надає Instagram Advanced Access клієнтам.
@@ -47,8 +49,8 @@
   навігації й тесту виправлено. Самі reviewer credentials після цього ще не
   перевірено в окремій браузерній сесії.
 - Створено окремий активний AutoSale workspace для Meta reviewer. Його
-  credentials зберігаються лише в чернетці Meta App Review, не в Git.
--  **Data handling завершено в чернетці 2026-10-27.** До Meta внесено
+  credentials передано лише в заявці Meta App Review, не в Git.
+- **Data handling завершено й подано 2026-10-27.** До Meta внесено
   `OpenAI, OpCo, LLC`, `Google LLC` і `Cloudflare, Inc.` як постачальників
   IT-послуг. Географію обробки взято з чинних публічних переліків для OpenAI
   API, Google Workspace та глобальної мережі Cloudflare; для Cloudflare
@@ -62,24 +64,24 @@
   [Cloudflare](https://www.cloudflare.com/gdpr/subprocessors/cloudflare-services/).
   Публічні переліки охоплюють можливі місця обробки й підтримки, тому
   географія в декларації ширша за місця фактично підтверджених запитів.
-  Після перезавантаження заявки кнопка **Submit for review** активна. Meta
-  вимагає окремої фінальної позначки згоди з Platform Terms / Developer
-  Policies; ця згода й подання ще очікують підтвердження власника.
+  Після фінального підтвердження власником Meta Platform Terms / Developer
+  Policies заявка перейшла у **Review in progress**. Це не означає, що
+  Advanced Access уже схвалено.
 - `https://sales-aito.com/login`, `/privacy`, `/privacy/data-deletion` і
   `/terms` повернули HTTP 200 під час перевірки 2026-10-26.
 
-## Що блокує подання
+## Що перевірити під час review
 
 1. Відстежити окрему Access verification для Tech Provider: вона **In review**.
-2. Підготувати окремий публічний Instagram Professional test account. Він має
-   пройти OAuth без помилки ролі й бути доступним під час review.
+2. Meta може попросити окремий публічний Instagram Professional test account,
+   який проходить OAuth без помилки ролі й доступний reviewer.
 3. Перевірити, чи обидва завантажені screencast достатньо чітко показують
    повний сценарій для reviewer; факт завантаження не означає схвалення Meta.
-4. Reviewer instructions і Allowed usage уже 100%, але тестовий вхід ще
-   потребує незалежної браузерної перевірки. Перед фінальним поданням
-   переглянути зафіксовану Data handling декларацію.
-5. Після підтвердження власником умов Meta поставити фінальну позначку й
-   натиснути Submit. Після подання чернетку вже не можна редагувати.
+4. Reviewer instructions і Allowed usage показували 100% перед поданням,
+   але тестовий вхід ще не перевірено незалежно в браузері. На запит Meta
+   надати відтворювані кроки без передавання клієнтських паролів.
+5. Стежити за статусом **Review in progress** і відповідати на конкретні
+   запити Meta. Подану заявку не можна редагувати чи скасувати під час review.
 6. Якщо пізніше подавати `Human Agent` окремо, у screencast показати саме
    ручну дію менеджера у діалозі віком 24 години–7 днів; автоматичні або
    AI-відповіді не можна обґрунтовувати цим feature.
@@ -132,7 +134,7 @@ DM бізнесу, дозволяє менеджеру відповідати н
 
 - [x] App icon прийнято Meta; App settings показує 100%.
 - [x] AutoSale позначено як Tech Provider.
-- [x] Чернетку скорочено до двох Instagram permissions.
+- [x] Подану заявку скорочено до двох Instagram permissions.
 - [x] Business verification схвалено Meta (2026-10-27).
 - [ ] Access verification для Tech Provider схвалено (подана 2026-10-27,
   зараз **In review**).
@@ -143,8 +145,9 @@ DM бізнесу, дозволяє менеджеру відповідати н
 - [x] Обидва screencast завантажені й перевірені на видимі секрети; достатність
   демонстрації ще оцінить Meta.
 - [x] Privacy, Terms і Data deletion URL повертають HTTP 200 (2026-10-26).
-- [ ] У заявці немає permissions, які продукт не використовує.
+- [x] У заявці немає permissions, які продукт не використовує.
 - [ ] Окремий Human Agent access схвалено й одна ручна відповідь у діалозі віком
   24 години–7 днів отримала `SENT` без повторного повідомлення.
 - [ ] Публічний домен залишатиметься активним протягом усього review.
-- [ ] Перед Submit виконано ручний перегляд усіх відповідей.
+- [x] Data handling заповнено, згоду з умовами Meta підтверджено й заявку
+  подано; статус **Review in progress** перевірено 2026-10-27.
