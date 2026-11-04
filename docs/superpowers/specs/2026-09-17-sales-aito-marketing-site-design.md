@@ -144,6 +144,8 @@ The root route `/` selects a locale using a stored preference and then the reque
 
 Authentication routes remain stable at `/login` and `/register`. The chosen locale is passed through a safe preference mechanism so the auth experience can render in the visitor's language. Successful sign-in enters the protected workspace; it never returns the user to a marketing page unless explicitly requested.
 
+The sign-in screen bridges the public home and the workspace: it reuses the home's graphite backdrop, lime action accent, sculptural conversation image and localized headline on a dedicated brand panel. A light, high-contrast form panel keeps the existing Google and email/password methods, recovery and registration links, field validation and safe sign-in error. The image is decorative; mobile layouts prioritize visible form controls. Registration, recovery, invitation and other authentication frames retain their existing layout. No authentication route or API contract changes with this visual treatment.
+
 ## 8. Marketing Component Architecture
 
 Recommended organization:

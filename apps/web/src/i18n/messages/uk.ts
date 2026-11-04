@@ -76,6 +76,10 @@ export const ukMessages = {
     },
   },
   authentication: {
+    loginBrandEyebrow: 'AI-оператор для social commerce',
+    loginBrandLead: 'Продажі з діалогів.',
+    loginBrandAccent: 'Без ручної рутини.',
+    loginBrandDescription: 'Sales AITO розпізнає замовлення, перевіряє дані й веде покупця до оформлення.',
     brandTitle: 'Замовлення з чатів — у зрозумілому робочому процесі.',
     brandDescription: 'AI розпізнає дані, менеджер контролює результат, а команда працює в одному просторі.',
     email: 'Email', password: 'Пароль', name: 'Ім’я', organization: 'Назва організації',

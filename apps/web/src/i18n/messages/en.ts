@@ -78,6 +78,10 @@ export const enMessages = {
     },
   },
   authentication: {
+    loginBrandEyebrow: 'AI operator for social commerce',
+    loginBrandLead: 'Sales from conversations.',
+    loginBrandAccent: 'Without manual busywork.',
+    loginBrandDescription: 'Sales AITO recognizes orders, checks details and guides customers through checkout.',
     brandTitle: 'Turn chat orders into a clear workflow.', brandDescription: 'AI recognizes the details, managers verify the result, and the whole team works in one place.',
     email: 'Email', password: 'Password', name: 'Name', organization: 'Organization name',
     loginTitle: 'Sign in to Sales AITO', loginDescription: 'Continue working with orders and conversations.', login: 'Sign in', loggingIn: 'Signing in…', loginError: 'Could not sign in. Check your email and password.',

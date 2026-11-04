@@ -711,6 +711,35 @@ button:disabled { opacity: .72; cursor: not-allowed; }
 .google-identity-summary { display: grid; gap: 4px; margin-bottom: 20px; padding: 14px; border: 1px solid var(--border); border-radius: 9px; background: var(--surface); }.google-identity-summary span,.google-identity-summary small { color: var(--muted); font-size: 12px; }.google-identity-summary strong { font-size: 14px; }
 @media (max-width: 780px) { .auth-layout { display: block; }.auth-brand-panel { min-height: 210px; padding: 24px 22px 32px; }.auth-brand-panel h1 { margin-top: 58px; font-size: 30px; letter-spacing: -1px; }.auth-brand-panel p { display: none; }.auth-content { padding: 26px 14px 44px; }.auth-card { padding: 27px 22px; }.auth-card h2 { font-size: 26px; } }
 
+/* Sign-in shares the public home's graphite, lime and sculptural artwork. Other auth flows keep their existing frame. */
+.auth-layout--marketing-login { --m-canvas: #0b0d17; --m-text: #f7f8fc; --m-muted: #aeb7cc; --m-action: #b7ff5a; --m-action-ink: #101410; grid-template-columns: minmax(0, 1.05fr) minmax(420px, .95fr); background: #f5f7fb; }
+.auth-layout--marketing-login .auth-brand-panel { min-height: 100dvh; padding: 32px clamp(28px, 5vw, 76px) 36px; background: var(--m-canvas); color: var(--m-text); }
+.auth-layout--marketing-login .brand { width: fit-content; color: var(--m-text); font-family: var(--font-display), sans-serif; font-size: 20px; letter-spacing: -.04em; }
+.auth-layout--marketing-login .brand::before { width: 32px; height: 32px; border-radius: 8px; background: var(--m-action); color: var(--m-action-ink); font-size: 16px; }
+.auth-brand-story { display: flex; min-height: min(780px, calc(100dvh - 110px)); flex-direction: column; justify-content: center; }
+.auth-layout--marketing-login .auth-brand-story__eyebrow { display: flex; align-items: center; gap: 10px; margin: 22px 0 20px; color: var(--m-action); font-size: 12px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+.auth-brand-story__eyebrow::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.auth-layout--marketing-login .auth-brand-story h1 { max-width: 660px; margin: 0 0 18px; font-family: var(--font-display), sans-serif; font-size: clamp(42px, 4.4vw, 68px); line-height: 1.04; letter-spacing: -.055em; }
+.auth-brand-story h1 span { display: block; color: var(--m-action); }
+.auth-layout--marketing-login .auth-brand-story > p:not(.auth-brand-story__eyebrow) { max-width: 520px; color: var(--m-muted); font-size: clamp(15px, 1.25vw, 18px); line-height: 1.55; }
+.auth-brand-story__art { width: min(100%, 660px); min-height: 200px; aspect-ratio: 3 / 1.45; margin: 4px auto -24px; background: url('/images/sales-aito-conversation-sculpture.png') center / contain no-repeat; }
+.auth-layout--marketing-login .auth-content { padding: 48px clamp(24px, 5vw, 82px); }
+.auth-layout--marketing-login .auth-card { width: min(100%, 480px); padding: clamp(28px, 3vw, 46px); border: 1px solid #dfe4ed; border-radius: 20px; box-shadow: 0 24px 70px rgba(23, 26, 43, .07); }
+.auth-layout--marketing-login .auth-card h2 { color: #171a2b; font-family: var(--font-display), sans-serif; font-size: clamp(28px, 2.4vw, 36px); letter-spacing: -.04em; }
+.auth-layout--marketing-login .auth-form .primary-button { min-height: 48px; background: var(--m-action); color: var(--m-action-ink); font-size: 15px; }
+.auth-layout--marketing-login .auth-form .primary-button:hover:not(:disabled) { background: #c6ff7d; }
+.auth-layout--marketing-login .auth-form .primary-button:focus-visible { outline: 3px solid #577d20; outline-offset: 3px; }
+.auth-layout--marketing-login .auth-link, .auth-layout--marketing-login .auth-switch a { color: #365e18; }
+.auth-layout--marketing-login .auth-link:focus-visible, .auth-layout--marketing-login .auth-switch a:focus-visible, .auth-layout--marketing-login .brand:focus-visible { outline: 3px solid var(--m-action); outline-offset: 3px; }
+@media (max-width: 780px) {
+  .auth-layout--marketing-login .auth-brand-panel { min-height: 0; padding: 20px 22px 24px; }
+  .auth-layout--marketing-login .auth-brand-story { min-height: 0; }
+  .auth-layout--marketing-login .auth-brand-story__eyebrow { margin: 26px 0 12px; }
+  .auth-layout--marketing-login .auth-brand-story h1 { margin: 0; font-size: clamp(30px, 7vw, 44px); }
+  .auth-layout--marketing-login .auth-brand-story > p:not(.auth-brand-story__eyebrow), .auth-brand-story__art { display: none; }
+  .auth-layout--marketing-login .auth-content { padding: 20px 14px 40px; }
+}
+
 .management-content { padding: 18px clamp(18px, 3vw, 40px) 34px; }.management-header { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }.team-grid { display: grid; grid-template-columns: minmax(320px, .9fr) minmax(390px, 1.1fr); gap: 18px; max-width: 1000px; }.team-invite-card, .management-card { overflow: hidden; border: 1px solid #eceef4; border-radius: 18px; background: white; box-shadow: var(--shadow-card); }.team-invite-card { align-self: start; padding: 25px 22px 22px; }.team-invite-card h2 { margin: 0 0 20px; font-size: 18px; }.invite-form { display: grid; gap: 14px; margin: 0; }.invite-form label { display: grid; gap: 8px; color: #8d92a9; font-size: 11px; font-weight: 650; }.invite-form input { min-height: 46px; border: 0; border-radius: 11px; padding: 10px 13px; outline: 0; background: #f6f6fa; }.invite-form input:focus { box-shadow: 0 0 0 3px rgba(91,82,224,.13); }.invite-form .primary-button { width: 100%; min-height: 46px; }.management-card { margin: 0; }.management-card h2, .management-card h3 { margin: 0; padding: 22px 22px 13px; border: 0; font-size: 18px; }.management-card h3 { padding-top: 18px; color: var(--muted); font-size: 12px; }.management-row { display: flex; align-items: center; gap: 12px; padding: 13px 22px; }.management-row > span:nth-child(2) { min-width: 0; flex: 1; }.management-row strong, .management-row small { display: block; }.management-row strong { font-size: 12px; }.management-row small { margin-top: 4px; overflow: hidden; color: #8d92a9; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }.team-avatar { display: grid; width: 40px; height: 40px; flex: 0 0 40px; place-items: center; border-radius: 11px; background: var(--accent-soft); color: var(--accent); font-size: 11px; font-weight: 800; }.access-badge, .health-badge { padding: 6px 9px; border-radius: 8px; background: #dcfce7; color: #15803d; font-size: 10px; font-weight: 750; }.status-blocked { background: #f9e8e8; color: #a33434; }.danger-button { border: 1px solid #edc7c7; border-radius: 8px; padding: 9px 12px; background: white; color: #a33434; cursor: pointer; }.team-empty { margin: 0; padding: 15px 22px 24px; color: var(--muted); font-size: 11px; }
 .admin-lifecycle { min-width: 0; }
 .admin-lifecycle-toggle { width: 100%; }

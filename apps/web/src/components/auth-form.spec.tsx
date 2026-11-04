@@ -91,10 +91,17 @@ describe('authentication forms', () => {
 
   it('renders the login journey in English', () => {
     renderAuth(<LoginForm submit={vi.fn()} />, 'en');
+    expect(screen.getByRole('main')).toHaveClass('auth-layout--marketing-login');
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Sales from conversations. Without manual busywork.');
     expect(screen.getByRole('link', { name: 'Sales AITO' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Sign in to Sales AITO' })).toBeInTheDocument();
     expect(screen.getByLabelText('Password')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Continue with Google' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Sign in' })).toBeInTheDocument();
+  });
+
+  it('keeps the existing frame for registration', () => {
+    renderAuth(<RegisterForm submit={vi.fn()} />);
+    expect(screen.getByRole('main')).not.toHaveClass('auth-layout--marketing-login');
   });
 });

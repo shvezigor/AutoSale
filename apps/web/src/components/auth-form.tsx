@@ -7,6 +7,7 @@ import type { Translator } from '../i18n/translator';
 import { FormField } from './form-field';
 import { clearFieldError, focusFirstInvalid, nativeConstraintMessage, type FieldErrors } from './form-validation';
 import { GoogleSignInButton } from './google-sign-in-button';
+import { LoadingButton } from './loading-button';
 
 type SubmitResult = { ok: boolean; previewUrl?: string };
 
@@ -30,13 +31,13 @@ export function LoginForm({ submit, googleReturnPath }: { submit: (input: { emai
     const result = await submit({ email: String(data.get('email')), password: String(data.get('password')) });
     setState(result.ok ? 'idle' : 'error');
   }
-  return <AuthFrame title={t('authentication.loginTitle')} description={t('authentication.loginDescription')}>
+  return <AuthFrame title={t('authentication.loginTitle')} description={t('authentication.loginDescription')} marketingLogin>
     <GoogleSignInButton returnPath={googleReturnPath} />
     <form className="auth-form" noValidate onSubmit={(event) => void onSubmit(event)}>
       <Field label={t('authentication.email')} name="email" type="email" autoComplete="email" error={fieldErrors.email} onClear={() => setFieldErrors((current) => clearFieldError(current, 'email'))} />
       <Field label={t('authentication.password')} name="password" type="password" autoComplete="current-password" minLength={12} error={fieldErrors.password} onClear={() => setFieldErrors((current) => clearFieldError(current, 'password'))} />
       {state === 'error' && <p className="auth-error" role="alert">{t('authentication.loginError')}</p>}
-      <button className="primary-button" disabled={state === 'submitting'} type="submit">{state === 'submitting' ? t('authentication.loggingIn') : t('authentication.login')}</button>
+      <LoadingButton className="primary-button" pending={state === 'submitting'} pendingLabel={t('authentication.loggingIn')} type="submit">{t('authentication.login')}</LoadingButton>
       <Link className="auth-link" href="/forgot-password">{t('authentication.forgotPassword')}</Link>
     </form>
     <p className="auth-switch">{t('authentication.noAccount')} <Link href="/register">{t('authentication.register')}</Link></p>
@@ -101,9 +102,9 @@ export function InviteAcceptForm({ token, submit }: { token: string; submit: (in
   return <AuthFrame title={t('authentication.joinTitle')} description={t('authentication.joinDescription')}><form className="auth-form" noValidate onSubmit={(event) => void onSubmit(event)}><Field label={t('authentication.name')} name="name" autoComplete="name" maxLength={120} error={fieldErrors.name} onClear={() => setFieldErrors((current) => clearFieldError(current, 'name'))} /><Field label={t('authentication.password')} name="password" type="password" autoComplete="new-password" minLength={12} error={fieldErrors.password} onClear={() => setFieldErrors((current) => clearFieldError(current, 'password'))} />{state === 'error' && <p className="auth-error" role="alert">{t('authentication.inviteInvalid')}</p>}<button className="primary-button" type="submit">{t('authentication.join')}</button></form></AuthFrame>;
 }
 
-export function AuthFrame({ title, description, children }: { title: string; description: string; children: ReactNode }) {
+export function AuthFrame({ title, description, children, marketingLogin = false }: { title: string; description: string; children: ReactNode; marketingLogin?: boolean }) {
   const { t } = useI18n();
-  return <main className="auth-layout"><section className="auth-brand-panel"><Link className="brand" href="/">Sales AITO</Link><div><h1>{t('authentication.brandTitle')}</h1><p>{t('authentication.brandDescription')}</p></div></section><section className="auth-content"><div className="auth-card"><header><h2>{title}</h2><p>{description}</p></header>{children}</div></section></main>;
+  return <main className={`auth-layout${marketingLogin ? ' auth-layout--marketing-login' : ''}`}><section className="auth-brand-panel"><Link className="brand" href="/">Sales AITO</Link>{marketingLogin ? <div className="auth-brand-story"><p className="auth-brand-story__eyebrow">{t('authentication.loginBrandEyebrow')}</p><h1>{t('authentication.loginBrandLead')} <span>{t('authentication.loginBrandAccent')}</span></h1><p>{t('authentication.loginBrandDescription')}</p><div className="auth-brand-story__art" aria-hidden="true" /></div> : <div><h1>{t('authentication.brandTitle')}</h1><p>{t('authentication.brandDescription')}</p></div>}</section><section className="auth-content"><div className="auth-card"><header><h2>{title}</h2><p>{description}</p></header>{children}</div></section></main>;
 }
 
 function Field({ label, hint, error, onClear, ...input }: InputHTMLAttributes<HTMLInputElement> & { label: string; hint?: string | undefined; name: string; error?: string | undefined; onClear: () => void }) {
