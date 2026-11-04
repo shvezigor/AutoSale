@@ -92,3 +92,9 @@ Follow-up on 23 October: a fresh [redirected-root mobile run](https://pagespeed.
 - Bing Index inspection still reports `/en` and `/uk/pricing` as `Discovered but not crawled` (both discovered on 18 September 2026). Neither has a recorded crawl or is indexed.
 - `/uk/integrations` still reports `URL cannot appear on Bing` from its stored, successful 17 October 2026 crawl (`Crawl allowed? Yes`, `Indexing allowed? No`). This is not a new crawl: the 23 October Live URL test found the current page indexable, and the production response on 24 October was HTTP 200 with `robots: index, follow`, a self-canonical URL and no `X-Robots-Tag` denial. Do not treat the stale stored denial as evidence that the current HTML blocks Bing.
 - Bing's URL Submission list retains the four URLs submitted on 23 October, including these three. No duplicate indexing request or sitemap submission was made. Recheck after Bing recrawls; all three stored-index gates remain open.
+
+## 2026-11-04 Bing stored-index recheck
+
+- Bing Webmaster Tools URL Inspection now reports `/en` as `Indexed successfully` and eligible to appear on Bing. Its stored crawl says fetch succeeded and indexing was allowed on 23 October at 02:01. Bing also reports one image missing an alt attribute; a 4 November check of current server HTML found one `<img>` and it has `alt`. Treat the Bing notice as stale unless a future crawl reproduces it.
+- `/uk/pricing` is also `Indexed successfully`, with no SEO/GEO issues shown. Its stored crawl succeeded on 1 November at 16:46 and allowed indexing.
+- `/uk/integrations` still shows `URL cannot appear on Bing` with `Indexing allowed? No`, but the last recorded crawl remains **17 October at 17:52**. The 23 October live URL test and 24 October production HTML check found the current page indexable; the stale stored denial does not prove a present-day block. Recheck only after a new Bing crawl. No indexing request or sitemap resubmission was made on 4 November.

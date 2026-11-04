@@ -1942,7 +1942,9 @@ Reference: [competitive analysis](../docs/research/2026-10-02-chatoryx-competiti
 - [x] Submit the sitemap to both services and inspect representative Ukrainian and English URLs. Both processed 20 discovered URLs; discovery is not indexing.
 - [x] Recheck stored Google and Bing indexing for the first article: both now report it indexed; Bing's retained title warning predates the corrected live page.
 - [x] Recheck stored Bing indexing for `/en`, `/uk/integrations`, and `/uk/pricing` on 24 October without repeating unchanged submission requests; all three remain non-indexed.
-- [ ] Recheck these three Bing stored-index results after a new crawl or a meaningful waiting interval; distinguish the stale `/uk/integrations` denial from the currently indexable live page.
+- [x] Recheck these three Bing stored-index results after a meaningful waiting interval on 4 November: `/en` and `/uk/pricing` are indexed; `/uk/integrations` still has only its 17 October stored denial. See the [search runbook](../docs/operations/search-indexing.md).
+- [ ] Recheck `/uk/integrations` after Bing records a new crawl; compare any denial with the current live page before changing the site.
+- [x] Compare Bing's stored missing-alt notice on `/en` with the current server HTML: its one image has `alt`; re-evaluate only if Bing reproduces the notice after a fresh crawl.
 - [ ] Capture production Core Web Vitals and resolve any release-environment regressions.
 - [ ] Reconsider IndexNow after a deployment-owned key and publication hook are approved.
 
