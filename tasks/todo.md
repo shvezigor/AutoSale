@@ -1945,7 +1945,7 @@ Reference: [competitive analysis](../docs/research/2026-10-02-chatoryx-competiti
 - [x] Recheck these three Bing stored-index results after a meaningful waiting interval on 4 November: `/en` and `/uk/pricing` are indexed; `/uk/integrations` still has only its 17 October stored denial. See the [search runbook](../docs/operations/search-indexing.md).
 - [ ] Recheck `/uk/integrations` after Bing records a new crawl; compare any denial with the current live page before changing the site.
 - [x] Compare Bing's stored missing-alt notice on `/en` with the current server HTML: its one image has `alt`; re-evaluate only if Bing reproduces the notice after a fresh crawl.
-- [ ] Capture production Core Web Vitals and resolve any release-environment regressions.
+- [ ] Capture production Core Web Vitals and resolve any release-environment regressions. Search Console's 2 November report, checked on 4 November, still has insufficient 90-day mobile and desktop data; do not substitute laboratory PageSpeed scores.
 - [ ] Reconsider IndexNow after a deployment-owned key and publication hook are approved.
 
 ### Backlog: Implement billing and subscription enforcement

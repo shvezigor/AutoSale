@@ -98,3 +98,7 @@ Follow-up on 23 October: a fresh [redirected-root mobile run](https://pagespeed.
 - Bing Webmaster Tools URL Inspection now reports `/en` as `Indexed successfully` and eligible to appear on Bing. Its stored crawl says fetch succeeded and indexing was allowed on 23 October at 02:01. Bing also reports one image missing an alt attribute; a 4 November check of current server HTML found one `<img>` and it has `alt`. Treat the Bing notice as stale unless a future crawl reproduces it.
 - `/uk/pricing` is also `Indexed successfully`, with no SEO/GEO issues shown. Its stored crawl succeeded on 1 November at 16:46 and allowed indexing.
 - `/uk/integrations` still shows `URL cannot appear on Bing` with `Indexing allowed? No`, but the last recorded crawl remains **17 October at 17:52**. The 23 October live URL test and 24 October production HTML check found the current page indexable; the stale stored denial does not prove a present-day block. Recheck only after a new Bing crawl. No indexing request or sitemap resubmission was made on 4 November.
+
+## 2026-11-04 field Core Web Vitals recheck
+
+Google Search Console's Core Web Vitals report, last updated 2 November, still says there is insufficient Chrome user-experience data over the preceding 90 days for both mobile and desktop. Neither device report can be opened, and no field LCP, INP or CLS distribution is available. The earlier PageSpeed laboratory results remain separate; the field-performance gate stays open.
