@@ -2,7 +2,7 @@
 
 ## 2026-11-04 sign-in visual bridge
 
-The sign-in screen now has a scoped graphite/lime brand panel and reuses the contained sculptural image from the public home. Email/password and Google actions, localized field errors, recovery/registration links and redirect behavior retain their existing contracts. The registration frame remains unchanged. Scoped auth component tests (8) and web typecheck passed locally. Real-browser viewport, validation and deployment checks are still required before claiming production acceptance.
+The sign-in screen now has a scoped graphite/lime brand panel and reuses the contained sculptural image from the public home. Email/password and Google actions, localized field errors, recovery/registration links and redirect behavior retain their existing contracts. The registration frame remains unchanged. Scoped auth component tests (8), web typecheck and build passed locally. A local real browser showed the Ukrainian desktop frame, empty-submit errors with first-invalid Email focus and a 375 px layout without horizontal overflow. Commit `10968cb` was pushed to `master` and manually deployed as a web-only image after the verified `20261104T201118Z` backup; public anonymous HTTP returned 200 and the new headline/class, and the web container reached healthy. The available live in-app browser session redirected `/login` to `/dashboard` because it was signed in, and a second browser attempt stopped at the computer-use URL safety check. Therefore anonymous production visual/validation, English/mobile production and successful credential sign-in remain unverified browser gates; do not claim complete production acceptance.
 
 ## 2026-10-26 sculptural animated hero
 

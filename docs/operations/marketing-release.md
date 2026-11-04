@@ -1,5 +1,11 @@
 # Sales AITO marketing release
 
+## 2026-11-04 scoped sign-in visual release
+
+`master` commit `10968cb4e5892fdf837a05bf30877196c479695d` was built and manually deployed on the current Windows Docker/Cloudflare host as **web only**. The previous web image remains tagged `autosale-web:rollback-before-login-20261104`; rollback retags it as `autosale-web:latest` and recreates only `web` with `--no-deps --no-build`. The new image is `sha256:3fdf8be4faf013644bbfededa9544baaec2d2eb818c2d4ac66859b44e9d424ec`. API, worker, proxy, PostgreSQL, Redis and MinIO were not recreated or migrated.
+
+Fresh backup `backups/20261104T201118Z` passed all four SHA-256 checks; `pg_restore --list` opened the 786-entry PostgreSQL archive and the MinIO archive listed 467 entries. This was a local backup, not an off-host restore rehearsal. The focused auth tests (8), web typecheck and local production build passed; the Docker web image build passed. Public `/health/live` and anonymous `/login` returned HTTP 200, with the new login headline/class in server HTML, and the web container became healthy. Local real-browser desktop/375 px validation passed; signed-in production browser redirected to the dashboard, so anonymous production visual/field checks and credential sign-in remain open in the [marketing acceptance record](../acceptance/marketing-site-checklist.md). No customer message or OAuth connection was changed.
+
 ## Required production configuration
 
 ```dotenv

@@ -1,5 +1,9 @@
 # Sales AITO — Shared Task Checklist
 
+## Account erasure, 2026-11-04
+
+- [ ] Implement self-service account erasure after the owner-scope decision and legal retention review. A [design and two-agent security review](../docs/superpowers/specs/2026-11-04-account-erasure-design.md) now identify the required one-time reauthentication, multi-tenant/last-owner guards, durable cleanup and independent deletion-ledger replay. The [acceptance checklist](../docs/acceptance/account-erasure-checklist.md) remains entirely open; the existing tenant `DELETE` lifecycle action only freezes data and prepares export.
+
 ## Marketing implementation status, 2026-10-23
 
 - [x] Bilingual public marketing routes and Autonomous Command design foundation implemented.
