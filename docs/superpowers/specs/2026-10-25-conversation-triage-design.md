@@ -61,6 +61,8 @@ The [acceptance checklist](../../acceptance/conversation-triage-checklist.md) re
 - Web component and end-to-end tests: tab navigation/counts, move and reverse move, selected detail persistence after row disappears, loading/error/conflict states, older-page access, URL/reload persistence, Ukrainian/English copy and no provider outbound call.
 - Real-browser acceptance after deployment: authorized fictional/test-account conversations at 320, 768, 1024 and 1440 px, keyboard, touch and 200% zoom; verify saved status after reload and its visible downstream list/detail result. Capture final screenshots. Do not send Instagram messages or alter real customer conversations solely for this test without explicit authorization.
 
+At high browser zoom or a short viewport, the conversation keeps document scrolling disabled and reserves visible height for message history. The reply area may scroll independently to keep guidance, draft details and the send action reachable; its content must not squeeze the message viewport to an unusable strip.
+
 ## Explicit non-goals
 
 No permanent delete or Meta inbox deletion; no automatic status change on delivery, elapsed time, manager reply or outbound echo; no bulk actions, assignment/SLA system, new message-search service, customer-facing notification, or change to order/delivery state.
