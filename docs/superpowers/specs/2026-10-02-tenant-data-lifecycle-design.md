@@ -93,7 +93,7 @@ Tenant-owned таблиця з forced RLS:
 - `REQUESTED -> CANCELLED`;
 - `EXPORTING -> FAILED`, після чого дозволений контрольований retry;
 - `FAILED -> EXPORTING` через повторний claim;
-- для `DELETE`: після створення одразу фіксується `ingestionFrozenAt`, але експорт проходить тим самим pipeline.
+- для `DELETE`: після створення одразу фіксується `ingestionFrozenAt`, але експорт проходить тим самим pipeline. Worker повинен claim-ити обидва `kind` (`EXPORT` і `DELETE`); ізольований браузерний сценарій перевіряє `EXPORT_READY` для обох.
 
 Зарезервовані цільові стани наступної фази:
 
@@ -101,11 +101,11 @@ Tenant-owned таблиця з forced RLS:
 
 Стани фізичного видалення не можна встановити через API, доки rollout flag наступної фази вимкнений.
 
-### `TenantDeletionLedger` — наступна фаза
+### Незалежний `TenantDeletionLedger` — наступна фаза
 
-Ledger не має foreign key до `Tenant`, бо повинен пережити видалення tenant. Мінімальний запис міститиме tenant UUID, lifecycle request UUID, код підстави, actor UUID без FK, час завершення, checksum експорту, результат очищення object storage/provider credentials і дату завершення backup-expiry window.
+Видалення організації та всіх її Sales AITO бізнес-даних дозволено власником продукту **лише після окремого фінального підтвердження**. Фізичний workflow досі вимкнено. Незворотний намір видалення має бути durable й перевірений **перед першою руйнівною дією**; відтоді скасування заборонене. Ledger не може існувати тільки як таблиця PostgreSQL або об'єкт MinIO, бо обидва відновлюються зі старого backup. Він зберігається окремо, з захищеною актуальною копією і монотонним номером запису. Мінімальний запис: tenant UUID, lifecycle request UUID, покоління/послідовність, стан і час, checksum експортного manifest; без customer content або credentials.
 
-Runtime-ролі не отримають прямий доступ до ledger. Запис і replay виконуватимуться лише через вузькі security-definer functions із фіксованим `search_path`, перевіркою platform admin/restore authority та без повернення customer content.
+Restore мусить зупинити runtime, перевірити повноту/актуальність незалежного ledger, повторити всі наміри стирання проти відновлених PostgreSQL і MinIO та перевірити відсутність tenant-owned об'єктів **до** запуску API, worker і proxy. Відсутній, пошкоджений або застарілий ledger блокує запуск. Після freeze звичайні disconnect-методи заблоковані, тому окремий вузький cleanup виконує відкликання провайдерів до стирання credentials; невдача зберігає pending стан. Права звичайних API/worker ролей на прямий `DELETE` кореневого `Tenant` мають бути відкликані; фізичне стирання виконує лише окремий maintenance authority із повторною перевіркою збереженого підтвердженого запиту, не довільного actor UUID.
 
 ## Експорт
 

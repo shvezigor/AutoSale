@@ -2,7 +2,7 @@
 
 ## Account erasure, 2026-11-04
 
-- [ ] Implement self-service account erasure after the owner-scope decision and legal retention review. A [design and two-agent security review](../docs/superpowers/specs/2026-11-04-account-erasure-design.md) now identify the required one-time reauthentication, multi-tenant/last-owner guards, durable cleanup and independent deletion-ledger replay. The [acceptance checklist](../docs/acceptance/account-erasure-checklist.md) remains entirely open; the existing tenant `DELETE` lifecycle action only freezes data and prepares export.
+- [ ] Implement self-service account erasure. Owner scope is decided: each organization owned by the departing user requires separate confirmation to erase the entire organization and its Sales AITO business data. The [design and two-agent security review](../docs/superpowers/specs/2026-11-04-account-erasure-design.md) require legal retention review, one-time local/Google reauthentication, multi-tenant and co-owner guards, provider revocation, exhaustive tenant-only object cleanup, a dedicated purge authority, an independent deletion ledger and mandatory restore replay. The [acceptance checklist](../docs/acceptance/account-erasure-checklist.md) tracks these gates. The current tenant `DELETE` lifecycle action freezes data and prepares export only; physical erasure stays disabled.
 
 ## Marketing implementation status, 2026-10-23
 

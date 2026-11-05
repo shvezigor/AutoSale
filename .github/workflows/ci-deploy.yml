@@ -48,7 +48,9 @@ jobs:
         run: ./infra/scripts/verify-caddy-route-timing.ps1
 
       - name: Test backup and restore scripts
-        run: sh infra/scripts/offsite-backup.spec.sh
+        run: |
+          sh infra/scripts/offsite-backup.spec.sh
+          sh infra/scripts/restore-stop.spec.sh
 
       - name: Audit production dependencies
         run: pnpm audit --prod --audit-level high

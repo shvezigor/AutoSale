@@ -42,12 +42,13 @@ For a self-contained local run with fresh fictional identities, isolated Docker 
 
 The runner generates credentials only in its process environment, binds the temporary stack to loopback, uses a unique Compose project, and removes its containers and volumes in `finally`. It never reads production tenant data or writes credentials to disk.
 
-The scenario creates one export and one temporary `DELETE` preparation for fictional tenant A, confirms tenant B remains mutable, and cancels tenant A's request in `finally`. Keep the generated export private and allow its normal seven-day cleanup. Never store credentials, download responses, tenant IDs, archive contents or screenshots containing personal data in Git or CI artifacts.
+The scenario creates one export and one temporary `DELETE` preparation for fictional tenant A, confirms the deletion preparation also reaches `EXPORT_READY`, verifies tenant B remains mutable, and cancels tenant A's request in `finally`. This assertion guards against a worker that claims only `EXPORT` jobs and leaves a frozen `DELETE` request stuck. Keep the generated export private and allow its normal seven-day cleanup. Never store credentials, download responses, tenant IDs, archive contents or screenshots containing personal data in Git or CI artifacts.
 
 ## Current result
 
 - [x] The opt-in scenario is discovered by Playwright and safely skips when its explicit fictional fixture is absent.
 - [x] On 2026-10-02 the self-contained runner passed against two fresh fictional tenants: export integrity and exclusions, tenant A lifecycle freeze, tenant B continuity and cancellation cleanup were all green.
+- [x] On 2026-11-05 the isolated browser runner passed against two fresh fictional tenants, including the new `DELETE` preparation assertion: it reached `EXPORT_READY` with SHA-256 and nonzero archive size, tenant A was frozen, tenant B remained mutable, and the request was cancelled. The runner now waits for proxy readiness, invokes installed Playwright directly and can explicitly reuse previously built acceptance images while recreating empty test volumes. This is not a production-browser test.
 - [x] Phase-one tenant lifecycle is **Available**. The destructive phase and EU launch gates listed below remain out of scope.
 
 ## Deliberate phase-one limits
@@ -55,5 +56,5 @@ The scenario creates one export and one temporary `DELETE` preparation for ficti
 - Physical tenant deletion is unavailable.
 - Provider credential revocation, object/database erasure, deletion-ledger creation and mandatory post-restore ledger replay are later destructive-phase gates.
 - Retention is preview-only; merchant-specific conversation/order/payment/delivery periods remain unconfigured.
-- The current restore procedure is unchanged because phase one never deletes tenant data. A destructive phase must add and prove ledger replay before runtime startup.
+- Restore now aborts before replacing data if application shutdown or the subsequent running-container check fails; a mocked four-case shell test guards that preflight. This does not serialize a concurrent deploy or prove the absence of out-of-project writers. A destructive phase must add and prove independent ledger replay before runtime startup.
 - Encrypted off-host backup enforcement and recurring production-like restore exercises remain EU launch gates.

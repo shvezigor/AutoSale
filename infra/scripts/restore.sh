@@ -23,7 +23,17 @@ fi
 
 (cd "$BACKUP_DIR" && sha256sum -c SHA256SUMS)
 
-docker compose stop proxy web api worker redis 2>/dev/null || true
+# A failed stop must abort before replacing either database or object storage.
+# Continuing with a live API/worker could re-create writes during restore.
+docker compose stop proxy web api worker redis
+if ! RUNNING_APPLICATION_CONTAINERS=$(docker compose ps -q --status running proxy web api worker redis); then
+  echo "Cannot verify application containers are stopped; restore aborted before data replacement" >&2
+  exit 1
+fi
+if [ -n "$RUNNING_APPLICATION_CONTAINERS" ]; then
+  echo "Application services are still running; restore aborted before data replacement" >&2
+  exit 1
+fi
 docker compose up -d --wait postgres minio
 
 docker compose exec -T postgres sh -c \

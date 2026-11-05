@@ -54,6 +54,12 @@ describe('runtime database role provisioning', () => {
       await api.query('INSERT INTO tenants (id, key, name) VALUES ($1, $2, $3)', [tenantId, 'role-test', 'Fictional Role Test']);
       await expect(worker.query('SELECT name FROM tenants WHERE id = $1', [tenantId]))
         .resolves.toMatchObject({ rows: [{ name: 'Fictional Role Test' }] });
+      await expect(api.query('DELETE FROM tenants WHERE id = $1', [tenantId]))
+        .rejects.toMatchObject({ code: '42501' });
+      await expect(worker.query('DELETE FROM tenants WHERE id = $1', [tenantId]))
+        .rejects.toMatchObject({ code: '42501' });
+      await expect(adminPool.query('SELECT id FROM tenants WHERE id = $1', [tenantId]))
+        .resolves.toMatchObject({ rows: [{ id: tenantId }] });
       await expect(api.query("SELECT public.autosale_order_prefix('Fictional Shop') AS prefix"))
         .resolves.toMatchObject({ rows: [{ prefix: 'FS' }] });
       await expect(worker.query("SELECT public.autosale_order_prefix('Fictional Shop') AS prefix"))
@@ -63,6 +69,14 @@ describe('runtime database role provisioning', () => {
 
       await expect(api.query('CREATE TABLE forbidden_api_ddl (id integer)')).rejects.toMatchObject({ code: '42501' });
       await expect(worker.query('ALTER TABLE tenants ADD COLUMN forbidden_worker_ddl text')).rejects.toMatchObject({ code: '42501' });
+
+      // Deploy reapplies broad grants after every migration. The root-table
+      // revocation must survive a second provisioning run as well.
+      await configureRuntimeDatabaseRoles(container.getConnectionUri(), { apiPassword, workerPassword, backupPassword });
+      const rootDelete = await adminPool.query<{ api_delete: boolean; worker_delete: boolean }>(`
+        SELECT has_table_privilege('autosale_api', 'tenants', 'DELETE') AS api_delete,
+               has_table_privilege('autosale_worker', 'tenants', 'DELETE') AS worker_delete`);
+      expect(rootDelete.rows).toEqual([{ api_delete: false, worker_delete: false }]);
 
       await adminPool.query(`
         CREATE TABLE backup_rls_fixture (
