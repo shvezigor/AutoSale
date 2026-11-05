@@ -44,9 +44,12 @@ test('admin exports and freezes only the selected fictional tenant', async ({ br
     expect(tenantSummaryA, 'tenant A must be visible in the platform directory').toBeTruthy();
 
     await admin.goto('/admin');
-    await expect(admin.getByRole('heading', { name: 'Адміністрування платформи' })).toBeVisible();
-    const tenantCard = admin.locator('.tenant-card').filter({ hasText: tenantSummaryA!.tenantName });
-    await expect(tenantCard.getByRole('button', { name: 'Керувати даними' })).toBeVisible();
+    await expect(admin.getByRole('heading', { name: 'Огляд платформи' })).toBeVisible();
+    await admin.getByRole('link', { name: 'Клієнти' }).click();
+    const tenantRow = admin.getByRole('row').filter({ hasText: tenantSummaryA!.tenantName });
+    await tenantRow.getByRole('link', { name: 'Переглянути' }).click();
+    await expect(admin.getByRole('heading', { name: tenantSummaryA!.tenantName })).toBeVisible();
+    await expect(admin.getByRole('button', { name: 'Керувати даними' })).toBeVisible();
 
     const exportRequest = await apiMutate<LifecycleRequest>(
       admin,
@@ -84,6 +87,10 @@ test('admin exports and freezes only the selected fictional tenant', async ({ br
     const settingsB = mutableOrderSettings(await apiGet<Record<string, unknown>>(tenantB, '/api/settings/orders'));
     const unaffectedResponse = await rawMutate(tenantB, '/api/settings/orders', settingsB, {}, 'PATCH');
     expect(unaffectedResponse.status).toBe(200);
+
+    const preparedDeletion = await waitForLifecycle(admin, deletion.id, 'EXPORT_READY');
+    expect(preparedDeletion.exportSha256).toMatch(/^[a-f0-9]{64}$/);
+    expect(preparedDeletion.exportSizeBytes).toBeGreaterThan(0);
   } finally {
     if (deletionRequestId) {
       await rawMutate(admin, `/api/admin/tenant-lifecycle/${deletionRequestId}/cancel`, undefined);

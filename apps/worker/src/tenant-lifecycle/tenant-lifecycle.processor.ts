@@ -97,7 +97,7 @@ export class TenantLifecycleProcessor {
         where: {
           id: job.requestId,
           tenantId: job.tenantId,
-          kind: 'EXPORT',
+          kind: { in: ['EXPORT', 'DELETE'] },
           OR: [
             { status: { in: ['REQUESTED', 'FAILED'] }, nextAttemptAt: { lte: now } },
             { status: 'EXPORTING', leaseExpiresAt: { lte: now } },

@@ -42,6 +42,9 @@ describe('TenantLifecycleProcessor', () => {
     );
 
     await expect(processor.process({ tenantId, requestId })).resolves.toBe('EXPORT_READY');
+    expect(updateMany).toHaveBeenNthCalledWith(1, expect.objectContaining({
+      where: expect.objectContaining({ kind: { in: ['EXPORT', 'DELETE'] } }),
+    }));
     expect(updateMany).toHaveBeenLastCalledWith(expect.objectContaining({
       where: expect.objectContaining({ id: requestId, tenantId, leaseId, status: 'EXPORTING' }),
       data: expect.objectContaining({ status: 'EXPORT_READY', exportSha256: 'a'.repeat(64) }),

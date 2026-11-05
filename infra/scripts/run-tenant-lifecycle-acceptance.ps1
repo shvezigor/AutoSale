@@ -1,7 +1,9 @@
 [CmdletBinding()]
 param(
   [ValidateRange(1024, 65535)]
-  [int]$Port = 18080
+  [int]$Port = 18080,
+  [ValidatePattern('^salesaito_lifecycle_acceptance_[0-9]+$')]
+  [string]$ReuseImageProject = ''
 )
 
 $ErrorActionPreference = 'Stop'
@@ -10,7 +12,7 @@ $ProgressPreference = 'SilentlyContinue'
 $repositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
 $composeFile = Join-Path $repositoryRoot 'compose.yaml'
 $acceptanceComposeFile = Join-Path $repositoryRoot 'infra\compose.lifecycle-acceptance.yaml'
-$projectName = "salesaito_lifecycle_acceptance_$PID"
+$projectName = if ($ReuseImageProject) { $ReuseImageProject } else { "salesaito_lifecycle_acceptance_$PID" }
 $baseUrl = "http://127.0.0.1:$Port"
 $started = $false
 
@@ -47,6 +49,18 @@ function Register-FictionalOwner([string]$Email, [string]$Password, [string]$Ten
   if ($verification.StatusCode -ne 200) {
     throw "Fictional owner verification failed with HTTP $($verification.StatusCode)"
   }
+}
+
+function Wait-ForAcceptanceProxy {
+  for ($attempt = 1; $attempt -le 20; $attempt++) {
+    try {
+      $health = Invoke-WebRequest -UseBasicParsing -Uri "$baseUrl/health/live" -TimeoutSec 5
+      if ($health.StatusCode -eq 200) { return }
+    } catch {
+      Start-Sleep -Seconds 2
+    }
+  }
+  throw 'Acceptance proxy did not serve the API health endpoint after Compose became healthy'
 }
 
 if (Get-NetTCPConnection -State Listen -LocalPort $Port -ErrorAction SilentlyContinue) {
@@ -125,8 +139,17 @@ foreach ($entry in $acceptanceEnvironment.GetEnumerator()) {
 }
 
 try {
+  if ($ReuseImageProject) {
+    $existingContainers = & docker compose -p $projectName -f $composeFile -f $acceptanceComposeFile ps -a -q
+    if ($LASTEXITCODE -ne 0 -or $existingContainers) {
+      throw 'Cannot reuse acceptance images while that isolated Compose project has containers or is unavailable'
+    }
+  }
   $started = $true
-  Invoke-AcceptanceCompose @('up', '-d', '--build', '--wait', '--wait-timeout', '240')
+  $upArguments = @('up', '-d', '--wait', '--wait-timeout', '240')
+  if ($ReuseImageProject) { $upArguments += '--no-build' } else { $upArguments += '--build' }
+  Invoke-AcceptanceCompose $upArguments
+  Wait-ForAcceptanceProxy
 
   $bootstrapPayload = @{
     email = $adminEmail
@@ -152,7 +175,14 @@ try {
 
   Push-Location $repositoryRoot
   try {
-    & pnpm exec playwright test tests/e2e/tenant-data-lifecycle.spec.ts
+    $playwrightCommand = Join-Path $repositoryRoot 'node_modules/.bin/playwright.cmd'
+    if (-not (Test-Path $playwrightCommand)) {
+      $playwrightCommand = Join-Path $repositoryRoot 'node_modules/.bin/playwright'
+    }
+    if (-not (Test-Path $playwrightCommand)) {
+      throw 'Playwright is not installed; run pnpm install before the isolated acceptance'
+    }
+    & $playwrightCommand test tests/e2e/tenant-data-lifecycle.spec.ts
     if ($LASTEXITCODE -ne 0) {
       throw "Tenant lifecycle acceptance failed with exit code $LASTEXITCODE"
     }
