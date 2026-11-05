@@ -426,6 +426,7 @@ export const ModelName = {
   GoogleSignInAttempt: 'GoogleSignInAttempt',
   TenantMembership: 'TenantMembership',
   Session: 'Session',
+  AccountReauthProof: 'AccountReauthProof',
   EmailVerificationToken: 'EmailVerificationToken',
   PasswordResetToken: 'PasswordResetToken',
   TenantInvitation: 'TenantInvitation',
@@ -481,7 +482,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "tenant" | "tenantLifecycleRequest" | "tenantRetentionDryRun" | "googleConnection" | "googleOAuthAttempt" | "googleCredentialCleanup" | "instagramConnection" | "instagramOAuthState" | "instagramCredentialCleanup" | "facebookConnection" | "facebookOAuthAttempt" | "facebookCredentialCleanup" | "tikTokConnection" | "tikTokOAuthAttempt" | "tikTokCredentialCleanup" | "user" | "userAvatarCleanup" | "userNotification" | "telegramLinkAttempt" | "telegramUserBinding" | "telegramBusinessConnection" | "telegramChat" | "telegramSupplierSetting" | "telegramWebhookUpdate" | "telegramDelivery" | "googleIdentity" | "googleSignInAttempt" | "tenantMembership" | "session" | "emailVerificationToken" | "passwordResetToken" | "tenantInvitation" | "securityAuditLog" | "platformFeatureFlag" | "webhookEvent" | "conversation" | "instagramCustomerProfile" | "instagramAvatarCleanup" | "message" | "googleSheetsDestination" | "tenantSettings" | "tenantReplyStyle" | "aiProviderUsageAttempt" | "aiReplyDraft" | "tenantLegalEntity" | "tenantBankAccount" | "order" | "orderCommercialTerms" | "orderPayment" | "orderIntentEvaluation" | "deliveryConnection" | "deliverySenderProfile" | "shipment" | "shipmentAttempt" | "shipmentStatusEvent" | "orderExport" | "auditLog" | "orderItem" | "product" | "inventoryReservation" | "telegramDeliveryItem" | "telegramNotificationPreference" | "catalogueSource" | "catalogueMapping" | "catalogueImportRun" | "attachment" | "demoLead" | "marketingDailyCounter" | "tenantPlanInterest"
+    modelProps: "tenant" | "tenantLifecycleRequest" | "tenantRetentionDryRun" | "googleConnection" | "googleOAuthAttempt" | "googleCredentialCleanup" | "instagramConnection" | "instagramOAuthState" | "instagramCredentialCleanup" | "facebookConnection" | "facebookOAuthAttempt" | "facebookCredentialCleanup" | "tikTokConnection" | "tikTokOAuthAttempt" | "tikTokCredentialCleanup" | "user" | "userAvatarCleanup" | "userNotification" | "telegramLinkAttempt" | "telegramUserBinding" | "telegramBusinessConnection" | "telegramChat" | "telegramSupplierSetting" | "telegramWebhookUpdate" | "telegramDelivery" | "googleIdentity" | "googleSignInAttempt" | "tenantMembership" | "session" | "accountReauthProof" | "emailVerificationToken" | "passwordResetToken" | "tenantInvitation" | "securityAuditLog" | "platformFeatureFlag" | "webhookEvent" | "conversation" | "instagramCustomerProfile" | "instagramAvatarCleanup" | "message" | "googleSheetsDestination" | "tenantSettings" | "tenantReplyStyle" | "aiProviderUsageAttempt" | "aiReplyDraft" | "tenantLegalEntity" | "tenantBankAccount" | "order" | "orderCommercialTerms" | "orderPayment" | "orderIntentEvaluation" | "deliveryConnection" | "deliverySenderProfile" | "shipment" | "shipmentAttempt" | "shipmentStatusEvent" | "orderExport" | "auditLog" | "orderItem" | "product" | "inventoryReservation" | "telegramDeliveryItem" | "telegramNotificationPreference" | "catalogueSource" | "catalogueMapping" | "catalogueImportRun" | "attachment" | "demoLead" | "marketingDailyCounter" | "tenantPlanInterest"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2628,6 +2629,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.SessionCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.SessionCountAggregateOutputType> | number
+        }
+      }
+    }
+    AccountReauthProof: {
+      payload: Prisma.$AccountReauthProofPayload<ExtArgs>
+      fields: Prisma.AccountReauthProofFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AccountReauthProofFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountReauthProofPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AccountReauthProofFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountReauthProofPayload>
+        }
+        findFirst: {
+          args: Prisma.AccountReauthProofFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountReauthProofPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AccountReauthProofFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountReauthProofPayload>
+        }
+        findMany: {
+          args: Prisma.AccountReauthProofFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountReauthProofPayload>[]
+        }
+        create: {
+          args: Prisma.AccountReauthProofCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountReauthProofPayload>
+        }
+        createMany: {
+          args: Prisma.AccountReauthProofCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AccountReauthProofCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountReauthProofPayload>[]
+        }
+        delete: {
+          args: Prisma.AccountReauthProofDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountReauthProofPayload>
+        }
+        update: {
+          args: Prisma.AccountReauthProofUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountReauthProofPayload>
+        }
+        deleteMany: {
+          args: Prisma.AccountReauthProofDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AccountReauthProofUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AccountReauthProofUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountReauthProofPayload>[]
+        }
+        upsert: {
+          args: Prisma.AccountReauthProofUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AccountReauthProofPayload>
+        }
+        aggregate: {
+          args: Prisma.AccountReauthProofAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAccountReauthProof>
+        }
+        groupBy: {
+          args: Prisma.AccountReauthProofGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AccountReauthProofGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AccountReauthProofCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AccountReauthProofCountAggregateOutputType> | number
         }
       }
     }
@@ -6168,6 +6243,23 @@ export const SessionScalarFieldEnum = {
 export type SessionScalarFieldEnum = (typeof SessionScalarFieldEnum)[keyof typeof SessionScalarFieldEnum]
 
 
+export const AccountReauthProofScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  tenantId: 'tenantId',
+  sessionId: 'sessionId',
+  purpose: 'purpose',
+  method: 'method',
+  tokenHash: 'tokenHash',
+  credentialFingerprint: 'credentialFingerprint',
+  expiresAt: 'expiresAt',
+  usedAt: 'usedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type AccountReauthProofScalarFieldEnum = (typeof AccountReauthProofScalarFieldEnum)[keyof typeof AccountReauthProofScalarFieldEnum]
+
+
 export const EmailVerificationTokenScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -7984,6 +8076,7 @@ export type GlobalOmitConfig = {
   googleSignInAttempt?: Prisma.GoogleSignInAttemptOmit
   tenantMembership?: Prisma.TenantMembershipOmit
   session?: Prisma.SessionOmit
+  accountReauthProof?: Prisma.AccountReauthProofOmit
   emailVerificationToken?: Prisma.EmailVerificationTokenOmit
   passwordResetToken?: Prisma.PasswordResetTokenOmit
   tenantInvitation?: Prisma.TenantInvitationOmit

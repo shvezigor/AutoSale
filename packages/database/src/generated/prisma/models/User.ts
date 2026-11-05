@@ -265,6 +265,7 @@ export type UserWhereInput = {
   createdTenants?: Prisma.TenantListRelationFilter
   memberships?: Prisma.TenantMembershipListRelationFilter
   sessions?: Prisma.SessionListRelationFilter
+  accountReauthProofs?: Prisma.AccountReauthProofListRelationFilter
   emailVerificationTokens?: Prisma.EmailVerificationTokenListRelationFilter
   passwordResetTokens?: Prisma.PasswordResetTokenListRelationFilter
   invitationsCreated?: Prisma.TenantInvitationListRelationFilter
@@ -315,6 +316,7 @@ export type UserOrderByWithRelationInput = {
   createdTenants?: Prisma.TenantOrderByRelationAggregateInput
   memberships?: Prisma.TenantMembershipOrderByRelationAggregateInput
   sessions?: Prisma.SessionOrderByRelationAggregateInput
+  accountReauthProofs?: Prisma.AccountReauthProofOrderByRelationAggregateInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenOrderByRelationAggregateInput
   passwordResetTokens?: Prisma.PasswordResetTokenOrderByRelationAggregateInput
   invitationsCreated?: Prisma.TenantInvitationOrderByRelationAggregateInput
@@ -368,6 +370,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   createdTenants?: Prisma.TenantListRelationFilter
   memberships?: Prisma.TenantMembershipListRelationFilter
   sessions?: Prisma.SessionListRelationFilter
+  accountReauthProofs?: Prisma.AccountReauthProofListRelationFilter
   emailVerificationTokens?: Prisma.EmailVerificationTokenListRelationFilter
   passwordResetTokens?: Prisma.PasswordResetTokenListRelationFilter
   invitationsCreated?: Prisma.TenantInvitationListRelationFilter
@@ -460,6 +463,7 @@ export type UserCreateInput = {
   createdTenants?: Prisma.TenantCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationCreateNestedManyWithoutInvitedByInput
@@ -510,6 +514,7 @@ export type UserUncheckedCreateInput = {
   createdTenants?: Prisma.TenantUncheckedCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutInvitedByInput
@@ -560,6 +565,7 @@ export type UserUpdateInput = {
   createdTenants?: Prisma.TenantUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUpdateManyWithoutInvitedByNestedInput
@@ -610,6 +616,7 @@ export type UserUncheckedUpdateInput = {
   createdTenants?: Prisma.TenantUncheckedUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
@@ -1045,6 +1052,20 @@ export type UserUpdateOneRequiredWithoutSessionsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSessionsInput, Prisma.UserUpdateWithoutSessionsInput>, Prisma.UserUncheckedUpdateWithoutSessionsInput>
 }
 
+export type UserCreateNestedOneWithoutAccountReauthProofsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAccountReauthProofsInput, Prisma.UserUncheckedCreateWithoutAccountReauthProofsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAccountReauthProofsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutAccountReauthProofsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAccountReauthProofsInput, Prisma.UserUncheckedCreateWithoutAccountReauthProofsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAccountReauthProofsInput
+  upsert?: Prisma.UserUpsertWithoutAccountReauthProofsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAccountReauthProofsInput, Prisma.UserUpdateWithoutAccountReauthProofsInput>, Prisma.UserUncheckedUpdateWithoutAccountReauthProofsInput>
+}
+
 export type UserCreateNestedOneWithoutEmailVerificationTokensInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutEmailVerificationTokensInput, Prisma.UserUncheckedCreateWithoutEmailVerificationTokensInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutEmailVerificationTokensInput
@@ -1261,6 +1282,7 @@ export type UserCreateWithoutCreatedTenantsInput = {
   updatedAt?: Date | string
   memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationCreateNestedManyWithoutInvitedByInput
@@ -1310,6 +1332,7 @@ export type UserUncheckedCreateWithoutCreatedTenantsInput = {
   updatedAt?: Date | string
   memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutInvitedByInput
@@ -1375,6 +1398,7 @@ export type UserUpdateWithoutCreatedTenantsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUpdateManyWithoutInvitedByNestedInput
@@ -1424,6 +1448,7 @@ export type UserUncheckedUpdateWithoutCreatedTenantsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
@@ -1474,6 +1499,7 @@ export type UserCreateWithoutGoogleConnectionsInput = {
   createdTenants?: Prisma.TenantCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationCreateNestedManyWithoutInvitedByInput
@@ -1523,6 +1549,7 @@ export type UserUncheckedCreateWithoutGoogleConnectionsInput = {
   createdTenants?: Prisma.TenantUncheckedCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutInvitedByInput
@@ -1588,6 +1615,7 @@ export type UserUpdateWithoutGoogleConnectionsInput = {
   createdTenants?: Prisma.TenantUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUpdateManyWithoutInvitedByNestedInput
@@ -1637,6 +1665,7 @@ export type UserUncheckedUpdateWithoutGoogleConnectionsInput = {
   createdTenants?: Prisma.TenantUncheckedUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
@@ -1686,6 +1715,7 @@ export type UserCreateWithoutGoogleOAuthAttemptsInput = {
   createdTenants?: Prisma.TenantCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationCreateNestedManyWithoutInvitedByInput
@@ -1735,6 +1765,7 @@ export type UserUncheckedCreateWithoutGoogleOAuthAttemptsInput = {
   createdTenants?: Prisma.TenantUncheckedCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutInvitedByInput
@@ -1800,6 +1831,7 @@ export type UserUpdateWithoutGoogleOAuthAttemptsInput = {
   createdTenants?: Prisma.TenantUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUpdateManyWithoutInvitedByNestedInput
@@ -1849,6 +1881,7 @@ export type UserUncheckedUpdateWithoutGoogleOAuthAttemptsInput = {
   createdTenants?: Prisma.TenantUncheckedUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
@@ -1898,6 +1931,7 @@ export type UserCreateWithoutInstagramConnectionsInput = {
   createdTenants?: Prisma.TenantCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationCreateNestedManyWithoutInvitedByInput
@@ -1947,6 +1981,7 @@ export type UserUncheckedCreateWithoutInstagramConnectionsInput = {
   createdTenants?: Prisma.TenantUncheckedCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutInvitedByInput
@@ -2012,6 +2047,7 @@ export type UserUpdateWithoutInstagramConnectionsInput = {
   createdTenants?: Prisma.TenantUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUpdateManyWithoutInvitedByNestedInput
@@ -2061,6 +2097,7 @@ export type UserUncheckedUpdateWithoutInstagramConnectionsInput = {
   createdTenants?: Prisma.TenantUncheckedUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
@@ -2110,6 +2147,7 @@ export type UserCreateWithoutInstagramOAuthStatesInput = {
   createdTenants?: Prisma.TenantCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationCreateNestedManyWithoutInvitedByInput
@@ -2159,6 +2197,7 @@ export type UserUncheckedCreateWithoutInstagramOAuthStatesInput = {
   createdTenants?: Prisma.TenantUncheckedCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutInvitedByInput
@@ -2224,6 +2263,7 @@ export type UserUpdateWithoutInstagramOAuthStatesInput = {
   createdTenants?: Prisma.TenantUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUpdateManyWithoutInvitedByNestedInput
@@ -2273,6 +2313,7 @@ export type UserUncheckedUpdateWithoutInstagramOAuthStatesInput = {
   createdTenants?: Prisma.TenantUncheckedUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
@@ -2322,6 +2363,7 @@ export type UserCreateWithoutInstagramCleanupsDeadLetteredInput = {
   createdTenants?: Prisma.TenantCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationCreateNestedManyWithoutInvitedByInput
@@ -2371,6 +2413,7 @@ export type UserUncheckedCreateWithoutInstagramCleanupsDeadLetteredInput = {
   createdTenants?: Prisma.TenantUncheckedCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutInvitedByInput
@@ -2436,6 +2479,7 @@ export type UserUpdateWithoutInstagramCleanupsDeadLetteredInput = {
   createdTenants?: Prisma.TenantUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUpdateManyWithoutInvitedByNestedInput
@@ -2485,6 +2529,7 @@ export type UserUncheckedUpdateWithoutInstagramCleanupsDeadLetteredInput = {
   createdTenants?: Prisma.TenantUncheckedUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
@@ -2534,6 +2579,7 @@ export type UserCreateWithoutFacebookConnectionsInput = {
   createdTenants?: Prisma.TenantCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationCreateNestedManyWithoutInvitedByInput
@@ -2583,6 +2629,7 @@ export type UserUncheckedCreateWithoutFacebookConnectionsInput = {
   createdTenants?: Prisma.TenantUncheckedCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutInvitedByInput
@@ -2648,6 +2695,7 @@ export type UserUpdateWithoutFacebookConnectionsInput = {
   createdTenants?: Prisma.TenantUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUpdateManyWithoutInvitedByNestedInput
@@ -2697,6 +2745,7 @@ export type UserUncheckedUpdateWithoutFacebookConnectionsInput = {
   createdTenants?: Prisma.TenantUncheckedUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
@@ -2746,6 +2795,7 @@ export type UserCreateWithoutFacebookOAuthAttemptsInput = {
   createdTenants?: Prisma.TenantCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationCreateNestedManyWithoutInvitedByInput
@@ -2795,6 +2845,7 @@ export type UserUncheckedCreateWithoutFacebookOAuthAttemptsInput = {
   createdTenants?: Prisma.TenantUncheckedCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutInvitedByInput
@@ -2860,6 +2911,7 @@ export type UserUpdateWithoutFacebookOAuthAttemptsInput = {
   createdTenants?: Prisma.TenantUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUpdateManyWithoutInvitedByNestedInput
@@ -2909,6 +2961,7 @@ export type UserUncheckedUpdateWithoutFacebookOAuthAttemptsInput = {
   createdTenants?: Prisma.TenantUncheckedUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
@@ -2958,6 +3011,7 @@ export type UserCreateWithoutFacebookCleanupsDeadLetteredInput = {
   createdTenants?: Prisma.TenantCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationCreateNestedManyWithoutInvitedByInput
@@ -3007,6 +3061,7 @@ export type UserUncheckedCreateWithoutFacebookCleanupsDeadLetteredInput = {
   createdTenants?: Prisma.TenantUncheckedCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutInvitedByInput
@@ -3072,6 +3127,7 @@ export type UserUpdateWithoutFacebookCleanupsDeadLetteredInput = {
   createdTenants?: Prisma.TenantUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUpdateManyWithoutInvitedByNestedInput
@@ -3121,6 +3177,7 @@ export type UserUncheckedUpdateWithoutFacebookCleanupsDeadLetteredInput = {
   createdTenants?: Prisma.TenantUncheckedUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
@@ -3170,6 +3227,7 @@ export type UserCreateWithoutTikTokConnectionsInput = {
   createdTenants?: Prisma.TenantCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationCreateNestedManyWithoutInvitedByInput
@@ -3219,6 +3277,7 @@ export type UserUncheckedCreateWithoutTikTokConnectionsInput = {
   createdTenants?: Prisma.TenantUncheckedCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutInvitedByInput
@@ -3284,6 +3343,7 @@ export type UserUpdateWithoutTikTokConnectionsInput = {
   createdTenants?: Prisma.TenantUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUpdateManyWithoutInvitedByNestedInput
@@ -3333,6 +3393,7 @@ export type UserUncheckedUpdateWithoutTikTokConnectionsInput = {
   createdTenants?: Prisma.TenantUncheckedUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
@@ -3382,6 +3443,7 @@ export type UserCreateWithoutTikTokOAuthAttemptsInput = {
   createdTenants?: Prisma.TenantCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationCreateNestedManyWithoutInvitedByInput
@@ -3431,6 +3493,7 @@ export type UserUncheckedCreateWithoutTikTokOAuthAttemptsInput = {
   createdTenants?: Prisma.TenantUncheckedCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutInvitedByInput
@@ -3496,6 +3559,7 @@ export type UserUpdateWithoutTikTokOAuthAttemptsInput = {
   createdTenants?: Prisma.TenantUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUpdateManyWithoutInvitedByNestedInput
@@ -3545,6 +3609,7 @@ export type UserUncheckedUpdateWithoutTikTokOAuthAttemptsInput = {
   createdTenants?: Prisma.TenantUncheckedUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
@@ -3594,6 +3659,7 @@ export type UserCreateWithoutTikTokCleanupsDeadLetteredInput = {
   createdTenants?: Prisma.TenantCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationCreateNestedManyWithoutInvitedByInput
@@ -3643,6 +3709,7 @@ export type UserUncheckedCreateWithoutTikTokCleanupsDeadLetteredInput = {
   createdTenants?: Prisma.TenantUncheckedCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutInvitedByInput
@@ -3708,6 +3775,7 @@ export type UserUpdateWithoutTikTokCleanupsDeadLetteredInput = {
   createdTenants?: Prisma.TenantUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUpdateManyWithoutInvitedByNestedInput
@@ -3757,6 +3825,7 @@ export type UserUncheckedUpdateWithoutTikTokCleanupsDeadLetteredInput = {
   createdTenants?: Prisma.TenantUncheckedUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
@@ -3806,6 +3875,7 @@ export type UserCreateWithoutAvatarCleanupsInput = {
   createdTenants?: Prisma.TenantCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationCreateNestedManyWithoutInvitedByInput
@@ -3855,6 +3925,7 @@ export type UserUncheckedCreateWithoutAvatarCleanupsInput = {
   createdTenants?: Prisma.TenantUncheckedCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutInvitedByInput
@@ -3920,6 +3991,7 @@ export type UserUpdateWithoutAvatarCleanupsInput = {
   createdTenants?: Prisma.TenantUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUpdateManyWithoutInvitedByNestedInput
@@ -3969,6 +4041,7 @@ export type UserUncheckedUpdateWithoutAvatarCleanupsInput = {
   createdTenants?: Prisma.TenantUncheckedUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
@@ -4018,6 +4091,7 @@ export type UserCreateWithoutNotificationsInput = {
   createdTenants?: Prisma.TenantCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationCreateNestedManyWithoutInvitedByInput
@@ -4067,6 +4141,7 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   createdTenants?: Prisma.TenantUncheckedCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutInvitedByInput
@@ -4132,6 +4207,7 @@ export type UserUpdateWithoutNotificationsInput = {
   createdTenants?: Prisma.TenantUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUpdateManyWithoutInvitedByNestedInput
@@ -4181,6 +4257,7 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   createdTenants?: Prisma.TenantUncheckedUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
@@ -4230,6 +4307,7 @@ export type UserCreateWithoutTelegramLinkAttemptsInput = {
   createdTenants?: Prisma.TenantCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationCreateNestedManyWithoutInvitedByInput
@@ -4279,6 +4357,7 @@ export type UserUncheckedCreateWithoutTelegramLinkAttemptsInput = {
   createdTenants?: Prisma.TenantUncheckedCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutInvitedByInput
@@ -4344,6 +4423,7 @@ export type UserUpdateWithoutTelegramLinkAttemptsInput = {
   createdTenants?: Prisma.TenantUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUpdateManyWithoutInvitedByNestedInput
@@ -4393,6 +4473,7 @@ export type UserUncheckedUpdateWithoutTelegramLinkAttemptsInput = {
   createdTenants?: Prisma.TenantUncheckedUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
@@ -4442,6 +4523,7 @@ export type UserCreateWithoutTelegramUserBindingsInput = {
   createdTenants?: Prisma.TenantCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationCreateNestedManyWithoutInvitedByInput
@@ -4491,6 +4573,7 @@ export type UserUncheckedCreateWithoutTelegramUserBindingsInput = {
   createdTenants?: Prisma.TenantUncheckedCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutInvitedByInput
@@ -4556,6 +4639,7 @@ export type UserUpdateWithoutTelegramUserBindingsInput = {
   createdTenants?: Prisma.TenantUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUpdateManyWithoutInvitedByNestedInput
@@ -4605,6 +4689,7 @@ export type UserUncheckedUpdateWithoutTelegramUserBindingsInput = {
   createdTenants?: Prisma.TenantUncheckedUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
@@ -4654,6 +4739,7 @@ export type UserCreateWithoutGoogleIdentityInput = {
   createdTenants?: Prisma.TenantCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationCreateNestedManyWithoutInvitedByInput
@@ -4703,6 +4789,7 @@ export type UserUncheckedCreateWithoutGoogleIdentityInput = {
   createdTenants?: Prisma.TenantUncheckedCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutInvitedByInput
@@ -4768,6 +4855,7 @@ export type UserUpdateWithoutGoogleIdentityInput = {
   createdTenants?: Prisma.TenantUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUpdateManyWithoutInvitedByNestedInput
@@ -4817,6 +4905,7 @@ export type UserUncheckedUpdateWithoutGoogleIdentityInput = {
   createdTenants?: Prisma.TenantUncheckedUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
@@ -4865,6 +4954,7 @@ export type UserCreateWithoutMembershipsInput = {
   updatedAt?: Date | string
   createdTenants?: Prisma.TenantCreateNestedManyWithoutCreatedByUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationCreateNestedManyWithoutInvitedByInput
@@ -4914,6 +5004,7 @@ export type UserUncheckedCreateWithoutMembershipsInput = {
   updatedAt?: Date | string
   createdTenants?: Prisma.TenantUncheckedCreateNestedManyWithoutCreatedByUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutInvitedByInput
@@ -4979,6 +5070,7 @@ export type UserUpdateWithoutMembershipsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdTenants?: Prisma.TenantUpdateManyWithoutCreatedByUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUpdateManyWithoutInvitedByNestedInput
@@ -5028,6 +5120,7 @@ export type UserUncheckedUpdateWithoutMembershipsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdTenants?: Prisma.TenantUncheckedUpdateManyWithoutCreatedByUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
@@ -5077,6 +5170,7 @@ export type UserCreateWithoutSessionsInput = {
   updatedAt?: Date | string
   createdTenants?: Prisma.TenantCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationCreateNestedManyWithoutInvitedByInput
@@ -5126,6 +5220,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   updatedAt?: Date | string
   createdTenants?: Prisma.TenantUncheckedCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutInvitedByInput
@@ -5191,6 +5286,7 @@ export type UserUpdateWithoutSessionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdTenants?: Prisma.TenantUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUpdateManyWithoutInvitedByNestedInput
@@ -5240,6 +5336,223 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdTenants?: Prisma.TenantUncheckedUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
+  invitationsCreated?: Prisma.TenantInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUncheckedUpdateManyWithoutUserNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedUpdateManyWithoutUserNestedInput
+  instagramConnections?: Prisma.InstagramConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  instagramMessagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSentByNestedInput
+  instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
+  tikTokOAuthAttempts?: Prisma.TikTokOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
+  tikTokConnections?: Prisma.TikTokConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  tikTokCleanupsDeadLettered?: Prisma.TikTokCredentialCleanupUncheckedUpdateManyWithoutDeadLetteredByNestedInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedUpdateManyWithoutUserNestedInput
+  googleConnections?: Prisma.GoogleConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  googleIdentity?: Prisma.GoogleIdentityUncheckedUpdateOneWithoutUserNestedInput
+  notifications?: Prisma.UserNotificationUncheckedUpdateManyWithoutUserNestedInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedUpdateManyWithoutUserNestedInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUncheckedUpdateManyWithoutUserNestedInput
+  procurementHandOffs?: Prisma.OrderUncheckedUpdateManyWithoutProcurementHandedOffByUserNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedUpdateManyWithoutUserNestedInput
+  deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedUpdateManyWithoutConnectedByNestedInput
+  shipmentsCreated?: Prisma.ShipmentUncheckedUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedUpdateManyWithoutCancellerNestedInput
+  platformFeatureFlagsUpdated?: Prisma.PlatformFeatureFlagUncheckedUpdateManyWithoutUpdatedByNestedInput
+  replyDraftsCreated?: Prisma.AiReplyDraftUncheckedUpdateManyWithoutCreatedByNestedInput
+}
+
+export type UserCreateWithoutAccountReauthProofsInput = {
+  id?: string
+  email: string
+  name: string
+  phone?: string | null
+  locale?: string
+  passwordHash?: string | null
+  emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
+  platformRole?: $Enums.PlatformRole
+  status?: $Enums.AccessStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  createdTenants?: Prisma.TenantCreateNestedManyWithoutCreatedByUserInput
+  memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
+  invitationsCreated?: Prisma.TenantInvitationCreateNestedManyWithoutInvitedByInput
+  securityAuditLogs?: Prisma.SecurityAuditLogCreateNestedManyWithoutUserInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateCreateNestedManyWithoutUserInput
+  instagramConnections?: Prisma.InstagramConnectionCreateNestedManyWithoutConnectedByInput
+  instagramMessagesSent?: Prisma.MessageCreateNestedManyWithoutSentByInput
+  instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
+  tikTokOAuthAttempts?: Prisma.TikTokOAuthAttemptCreateNestedManyWithoutUserInput
+  tikTokConnections?: Prisma.TikTokConnectionCreateNestedManyWithoutConnectedByInput
+  tikTokCleanupsDeadLettered?: Prisma.TikTokCredentialCleanupCreateNestedManyWithoutDeadLetteredByInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptCreateNestedManyWithoutUserInput
+  googleConnections?: Prisma.GoogleConnectionCreateNestedManyWithoutConnectedByInput
+  googleIdentity?: Prisma.GoogleIdentityCreateNestedOneWithoutUserInput
+  notifications?: Prisma.UserNotificationCreateNestedManyWithoutUserInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptCreateNestedManyWithoutUserInput
+  telegramUserBindings?: Prisma.TelegramUserBindingCreateNestedManyWithoutUserInput
+  procurementHandOffs?: Prisma.OrderCreateNestedManyWithoutProcurementHandedOffByUserInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceCreateNestedManyWithoutUserInput
+  deliveryConnectionsConnected?: Prisma.DeliveryConnectionCreateNestedManyWithoutConnectedByInput
+  shipmentsCreated?: Prisma.ShipmentCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentCreateNestedManyWithoutCancellerInput
+  platformFeatureFlagsUpdated?: Prisma.PlatformFeatureFlagCreateNestedManyWithoutUpdatedByInput
+  replyDraftsCreated?: Prisma.AiReplyDraftCreateNestedManyWithoutCreatedByInput
+}
+
+export type UserUncheckedCreateWithoutAccountReauthProofsInput = {
+  id?: string
+  email: string
+  name: string
+  phone?: string | null
+  locale?: string
+  passwordHash?: string | null
+  emailVerifiedAt?: Date | string | null
+  avatarStorageKey?: string | null
+  avatarChecksum?: string | null
+  avatarContentType?: string | null
+  lastLoginAt?: Date | string | null
+  platformRole?: $Enums.PlatformRole
+  status?: $Enums.AccessStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  createdTenants?: Prisma.TenantUncheckedCreateNestedManyWithoutCreatedByUserInput
+  memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+  invitationsCreated?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUncheckedCreateNestedManyWithoutUserInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUncheckedCreateNestedManyWithoutUserInput
+  instagramConnections?: Prisma.InstagramConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  instagramMessagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSentByInput
+  instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
+  facebookConnections?: Prisma.FacebookConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
+  tikTokOAuthAttempts?: Prisma.TikTokOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
+  tikTokConnections?: Prisma.TikTokConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  tikTokCleanupsDeadLettered?: Prisma.TikTokCredentialCleanupUncheckedCreateNestedManyWithoutDeadLetteredByInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUncheckedCreateNestedManyWithoutUserInput
+  googleConnections?: Prisma.GoogleConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  googleIdentity?: Prisma.GoogleIdentityUncheckedCreateNestedOneWithoutUserInput
+  notifications?: Prisma.UserNotificationUncheckedCreateNestedManyWithoutUserInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUncheckedCreateNestedManyWithoutUserInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUncheckedCreateNestedManyWithoutUserInput
+  procurementHandOffs?: Prisma.OrderUncheckedCreateNestedManyWithoutProcurementHandedOffByUserInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUncheckedCreateNestedManyWithoutUserInput
+  deliveryConnectionsConnected?: Prisma.DeliveryConnectionUncheckedCreateNestedManyWithoutConnectedByInput
+  shipmentsCreated?: Prisma.ShipmentUncheckedCreateNestedManyWithoutCreatedByInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUncheckedCreateNestedManyWithoutUserInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCreatorInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUncheckedCreateNestedManyWithoutCancellerInput
+  platformFeatureFlagsUpdated?: Prisma.PlatformFeatureFlagUncheckedCreateNestedManyWithoutUpdatedByInput
+  replyDraftsCreated?: Prisma.AiReplyDraftUncheckedCreateNestedManyWithoutCreatedByInput
+}
+
+export type UserCreateOrConnectWithoutAccountReauthProofsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutAccountReauthProofsInput, Prisma.UserUncheckedCreateWithoutAccountReauthProofsInput>
+}
+
+export type UserUpsertWithoutAccountReauthProofsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutAccountReauthProofsInput, Prisma.UserUncheckedUpdateWithoutAccountReauthProofsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutAccountReauthProofsInput, Prisma.UserUncheckedCreateWithoutAccountReauthProofsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutAccountReauthProofsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutAccountReauthProofsInput, Prisma.UserUncheckedUpdateWithoutAccountReauthProofsInput>
+}
+
+export type UserUpdateWithoutAccountReauthProofsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdTenants?: Prisma.TenantUpdateManyWithoutCreatedByUserNestedInput
+  memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+  invitationsCreated?: Prisma.TenantInvitationUpdateManyWithoutInvitedByNestedInput
+  securityAuditLogs?: Prisma.SecurityAuditLogUpdateManyWithoutUserNestedInput
+  instagramOAuthStates?: Prisma.InstagramOAuthStateUpdateManyWithoutUserNestedInput
+  instagramConnections?: Prisma.InstagramConnectionUpdateManyWithoutConnectedByNestedInput
+  instagramMessagesSent?: Prisma.MessageUpdateManyWithoutSentByNestedInput
+  instagramCleanupsDeadLettered?: Prisma.InstagramCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
+  facebookOAuthAttempts?: Prisma.FacebookOAuthAttemptUpdateManyWithoutUserNestedInput
+  facebookConnections?: Prisma.FacebookConnectionUpdateManyWithoutConnectedByNestedInput
+  facebookCleanupsDeadLettered?: Prisma.FacebookCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
+  tikTokOAuthAttempts?: Prisma.TikTokOAuthAttemptUpdateManyWithoutUserNestedInput
+  tikTokConnections?: Prisma.TikTokConnectionUpdateManyWithoutConnectedByNestedInput
+  tikTokCleanupsDeadLettered?: Prisma.TikTokCredentialCleanupUpdateManyWithoutDeadLetteredByNestedInput
+  googleOAuthAttempts?: Prisma.GoogleOAuthAttemptUpdateManyWithoutUserNestedInput
+  googleConnections?: Prisma.GoogleConnectionUpdateManyWithoutConnectedByNestedInput
+  googleIdentity?: Prisma.GoogleIdentityUpdateOneWithoutUserNestedInput
+  notifications?: Prisma.UserNotificationUpdateManyWithoutUserNestedInput
+  telegramLinkAttempts?: Prisma.TelegramLinkAttemptUpdateManyWithoutUserNestedInput
+  telegramUserBindings?: Prisma.TelegramUserBindingUpdateManyWithoutUserNestedInput
+  procurementHandOffs?: Prisma.OrderUpdateManyWithoutProcurementHandedOffByUserNestedInput
+  telegramNotificationPreferences?: Prisma.TelegramNotificationPreferenceUpdateManyWithoutUserNestedInput
+  deliveryConnectionsConnected?: Prisma.DeliveryConnectionUpdateManyWithoutConnectedByNestedInput
+  shipmentsCreated?: Prisma.ShipmentUpdateManyWithoutCreatedByNestedInput
+  avatarCleanups?: Prisma.UserAvatarCleanupUpdateManyWithoutUserNestedInput
+  orderPaymentsCreated?: Prisma.OrderPaymentUpdateManyWithoutCreatorNestedInput
+  orderPaymentsCancelled?: Prisma.OrderPaymentUpdateManyWithoutCancellerNestedInput
+  platformFeatureFlagsUpdated?: Prisma.PlatformFeatureFlagUpdateManyWithoutUpdatedByNestedInput
+  replyDraftsCreated?: Prisma.AiReplyDraftUpdateManyWithoutCreatedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutAccountReauthProofsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locale?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  avatarStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarContentType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  status?: Prisma.EnumAccessStatusFieldUpdateOperationsInput | $Enums.AccessStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdTenants?: Prisma.TenantUncheckedUpdateManyWithoutCreatedByUserNestedInput
+  memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
@@ -5290,6 +5603,7 @@ export type UserCreateWithoutEmailVerificationTokensInput = {
   createdTenants?: Prisma.TenantCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationCreateNestedManyWithoutInvitedByInput
   securityAuditLogs?: Prisma.SecurityAuditLogCreateNestedManyWithoutUserInput
@@ -5339,6 +5653,7 @@ export type UserUncheckedCreateWithoutEmailVerificationTokensInput = {
   createdTenants?: Prisma.TenantUncheckedCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutInvitedByInput
   securityAuditLogs?: Prisma.SecurityAuditLogUncheckedCreateNestedManyWithoutUserInput
@@ -5404,6 +5719,7 @@ export type UserUpdateWithoutEmailVerificationTokensInput = {
   createdTenants?: Prisma.TenantUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUpdateManyWithoutInvitedByNestedInput
   securityAuditLogs?: Prisma.SecurityAuditLogUpdateManyWithoutUserNestedInput
@@ -5453,6 +5769,7 @@ export type UserUncheckedUpdateWithoutEmailVerificationTokensInput = {
   createdTenants?: Prisma.TenantUncheckedUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   securityAuditLogs?: Prisma.SecurityAuditLogUncheckedUpdateManyWithoutUserNestedInput
@@ -5502,6 +5819,7 @@ export type UserCreateWithoutPasswordResetTokensInput = {
   createdTenants?: Prisma.TenantCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationCreateNestedManyWithoutInvitedByInput
   securityAuditLogs?: Prisma.SecurityAuditLogCreateNestedManyWithoutUserInput
@@ -5551,6 +5869,7 @@ export type UserUncheckedCreateWithoutPasswordResetTokensInput = {
   createdTenants?: Prisma.TenantUncheckedCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutInvitedByInput
   securityAuditLogs?: Prisma.SecurityAuditLogUncheckedCreateNestedManyWithoutUserInput
@@ -5616,6 +5935,7 @@ export type UserUpdateWithoutPasswordResetTokensInput = {
   createdTenants?: Prisma.TenantUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUpdateManyWithoutInvitedByNestedInput
   securityAuditLogs?: Prisma.SecurityAuditLogUpdateManyWithoutUserNestedInput
@@ -5665,6 +5985,7 @@ export type UserUncheckedUpdateWithoutPasswordResetTokensInput = {
   createdTenants?: Prisma.TenantUncheckedUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   securityAuditLogs?: Prisma.SecurityAuditLogUncheckedUpdateManyWithoutUserNestedInput
@@ -5714,6 +6035,7 @@ export type UserCreateWithoutInvitationsCreatedInput = {
   createdTenants?: Prisma.TenantCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   securityAuditLogs?: Prisma.SecurityAuditLogCreateNestedManyWithoutUserInput
@@ -5763,6 +6085,7 @@ export type UserUncheckedCreateWithoutInvitationsCreatedInput = {
   createdTenants?: Prisma.TenantUncheckedCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   securityAuditLogs?: Prisma.SecurityAuditLogUncheckedCreateNestedManyWithoutUserInput
@@ -5828,6 +6151,7 @@ export type UserUpdateWithoutInvitationsCreatedInput = {
   createdTenants?: Prisma.TenantUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   securityAuditLogs?: Prisma.SecurityAuditLogUpdateManyWithoutUserNestedInput
@@ -5877,6 +6201,7 @@ export type UserUncheckedUpdateWithoutInvitationsCreatedInput = {
   createdTenants?: Prisma.TenantUncheckedUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   securityAuditLogs?: Prisma.SecurityAuditLogUncheckedUpdateManyWithoutUserNestedInput
@@ -5926,6 +6251,7 @@ export type UserCreateWithoutSecurityAuditLogsInput = {
   createdTenants?: Prisma.TenantCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationCreateNestedManyWithoutInvitedByInput
@@ -5975,6 +6301,7 @@ export type UserUncheckedCreateWithoutSecurityAuditLogsInput = {
   createdTenants?: Prisma.TenantUncheckedCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutInvitedByInput
@@ -6040,6 +6367,7 @@ export type UserUpdateWithoutSecurityAuditLogsInput = {
   createdTenants?: Prisma.TenantUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUpdateManyWithoutInvitedByNestedInput
@@ -6089,6 +6417,7 @@ export type UserUncheckedUpdateWithoutSecurityAuditLogsInput = {
   createdTenants?: Prisma.TenantUncheckedUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
@@ -6138,6 +6467,7 @@ export type UserCreateWithoutPlatformFeatureFlagsUpdatedInput = {
   createdTenants?: Prisma.TenantCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationCreateNestedManyWithoutInvitedByInput
@@ -6187,6 +6517,7 @@ export type UserUncheckedCreateWithoutPlatformFeatureFlagsUpdatedInput = {
   createdTenants?: Prisma.TenantUncheckedCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutInvitedByInput
@@ -6252,6 +6583,7 @@ export type UserUpdateWithoutPlatformFeatureFlagsUpdatedInput = {
   createdTenants?: Prisma.TenantUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUpdateManyWithoutInvitedByNestedInput
@@ -6301,6 +6633,7 @@ export type UserUncheckedUpdateWithoutPlatformFeatureFlagsUpdatedInput = {
   createdTenants?: Prisma.TenantUncheckedUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
@@ -6350,6 +6683,7 @@ export type UserCreateWithoutInstagramMessagesSentInput = {
   createdTenants?: Prisma.TenantCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationCreateNestedManyWithoutInvitedByInput
@@ -6399,6 +6733,7 @@ export type UserUncheckedCreateWithoutInstagramMessagesSentInput = {
   createdTenants?: Prisma.TenantUncheckedCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutInvitedByInput
@@ -6464,6 +6799,7 @@ export type UserUpdateWithoutInstagramMessagesSentInput = {
   createdTenants?: Prisma.TenantUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUpdateManyWithoutInvitedByNestedInput
@@ -6513,6 +6849,7 @@ export type UserUncheckedUpdateWithoutInstagramMessagesSentInput = {
   createdTenants?: Prisma.TenantUncheckedUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
@@ -6562,6 +6899,7 @@ export type UserCreateWithoutReplyDraftsCreatedInput = {
   createdTenants?: Prisma.TenantCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationCreateNestedManyWithoutInvitedByInput
@@ -6611,6 +6949,7 @@ export type UserUncheckedCreateWithoutReplyDraftsCreatedInput = {
   createdTenants?: Prisma.TenantUncheckedCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutInvitedByInput
@@ -6676,6 +7015,7 @@ export type UserUpdateWithoutReplyDraftsCreatedInput = {
   createdTenants?: Prisma.TenantUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUpdateManyWithoutInvitedByNestedInput
@@ -6725,6 +7065,7 @@ export type UserUncheckedUpdateWithoutReplyDraftsCreatedInput = {
   createdTenants?: Prisma.TenantUncheckedUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
@@ -6774,6 +7115,7 @@ export type UserCreateWithoutProcurementHandOffsInput = {
   createdTenants?: Prisma.TenantCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationCreateNestedManyWithoutInvitedByInput
@@ -6823,6 +7165,7 @@ export type UserUncheckedCreateWithoutProcurementHandOffsInput = {
   createdTenants?: Prisma.TenantUncheckedCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutInvitedByInput
@@ -6888,6 +7231,7 @@ export type UserUpdateWithoutProcurementHandOffsInput = {
   createdTenants?: Prisma.TenantUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUpdateManyWithoutInvitedByNestedInput
@@ -6937,6 +7281,7 @@ export type UserUncheckedUpdateWithoutProcurementHandOffsInput = {
   createdTenants?: Prisma.TenantUncheckedUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
@@ -6986,6 +7331,7 @@ export type UserCreateWithoutOrderPaymentsCreatedInput = {
   createdTenants?: Prisma.TenantCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationCreateNestedManyWithoutInvitedByInput
@@ -7035,6 +7381,7 @@ export type UserUncheckedCreateWithoutOrderPaymentsCreatedInput = {
   createdTenants?: Prisma.TenantUncheckedCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutInvitedByInput
@@ -7089,6 +7436,7 @@ export type UserCreateWithoutOrderPaymentsCancelledInput = {
   createdTenants?: Prisma.TenantCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationCreateNestedManyWithoutInvitedByInput
@@ -7138,6 +7486,7 @@ export type UserUncheckedCreateWithoutOrderPaymentsCancelledInput = {
   createdTenants?: Prisma.TenantUncheckedCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutInvitedByInput
@@ -7203,6 +7552,7 @@ export type UserUpdateWithoutOrderPaymentsCreatedInput = {
   createdTenants?: Prisma.TenantUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUpdateManyWithoutInvitedByNestedInput
@@ -7252,6 +7602,7 @@ export type UserUncheckedUpdateWithoutOrderPaymentsCreatedInput = {
   createdTenants?: Prisma.TenantUncheckedUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
@@ -7312,6 +7663,7 @@ export type UserUpdateWithoutOrderPaymentsCancelledInput = {
   createdTenants?: Prisma.TenantUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUpdateManyWithoutInvitedByNestedInput
@@ -7361,6 +7713,7 @@ export type UserUncheckedUpdateWithoutOrderPaymentsCancelledInput = {
   createdTenants?: Prisma.TenantUncheckedUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
@@ -7410,6 +7763,7 @@ export type UserCreateWithoutDeliveryConnectionsConnectedInput = {
   createdTenants?: Prisma.TenantCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationCreateNestedManyWithoutInvitedByInput
@@ -7459,6 +7813,7 @@ export type UserUncheckedCreateWithoutDeliveryConnectionsConnectedInput = {
   createdTenants?: Prisma.TenantUncheckedCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutInvitedByInput
@@ -7524,6 +7879,7 @@ export type UserUpdateWithoutDeliveryConnectionsConnectedInput = {
   createdTenants?: Prisma.TenantUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUpdateManyWithoutInvitedByNestedInput
@@ -7573,6 +7929,7 @@ export type UserUncheckedUpdateWithoutDeliveryConnectionsConnectedInput = {
   createdTenants?: Prisma.TenantUncheckedUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
@@ -7622,6 +7979,7 @@ export type UserCreateWithoutShipmentsCreatedInput = {
   createdTenants?: Prisma.TenantCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationCreateNestedManyWithoutInvitedByInput
@@ -7671,6 +8029,7 @@ export type UserUncheckedCreateWithoutShipmentsCreatedInput = {
   createdTenants?: Prisma.TenantUncheckedCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutInvitedByInput
@@ -7736,6 +8095,7 @@ export type UserUpdateWithoutShipmentsCreatedInput = {
   createdTenants?: Prisma.TenantUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUpdateManyWithoutInvitedByNestedInput
@@ -7785,6 +8145,7 @@ export type UserUncheckedUpdateWithoutShipmentsCreatedInput = {
   createdTenants?: Prisma.TenantUncheckedUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
@@ -7834,6 +8195,7 @@ export type UserCreateWithoutTelegramNotificationPreferencesInput = {
   createdTenants?: Prisma.TenantCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationCreateNestedManyWithoutInvitedByInput
@@ -7883,6 +8245,7 @@ export type UserUncheckedCreateWithoutTelegramNotificationPreferencesInput = {
   createdTenants?: Prisma.TenantUncheckedCreateNestedManyWithoutCreatedByUserInput
   memberships?: Prisma.TenantMembershipUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedCreateNestedManyWithoutUserInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedCreateNestedManyWithoutUserInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedCreateNestedManyWithoutInvitedByInput
@@ -7948,6 +8311,7 @@ export type UserUpdateWithoutTelegramNotificationPreferencesInput = {
   createdTenants?: Prisma.TenantUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUpdateManyWithoutInvitedByNestedInput
@@ -7997,6 +8361,7 @@ export type UserUncheckedUpdateWithoutTelegramNotificationPreferencesInput = {
   createdTenants?: Prisma.TenantUncheckedUpdateManyWithoutCreatedByUserNestedInput
   memberships?: Prisma.TenantMembershipUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accountReauthProofs?: Prisma.AccountReauthProofUncheckedUpdateManyWithoutUserNestedInput
   emailVerificationTokens?: Prisma.EmailVerificationTokenUncheckedUpdateManyWithoutUserNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   invitationsCreated?: Prisma.TenantInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
@@ -8036,6 +8401,7 @@ export type UserCountOutputType = {
   createdTenants: number
   memberships: number
   sessions: number
+  accountReauthProofs: number
   emailVerificationTokens: number
   passwordResetTokens: number
   invitationsCreated: number
@@ -8070,6 +8436,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   createdTenants?: boolean | UserCountOutputTypeCountCreatedTenantsArgs
   memberships?: boolean | UserCountOutputTypeCountMembershipsArgs
   sessions?: boolean | UserCountOutputTypeCountSessionsArgs
+  accountReauthProofs?: boolean | UserCountOutputTypeCountAccountReauthProofsArgs
   emailVerificationTokens?: boolean | UserCountOutputTypeCountEmailVerificationTokensArgs
   passwordResetTokens?: boolean | UserCountOutputTypeCountPasswordResetTokensArgs
   invitationsCreated?: boolean | UserCountOutputTypeCountInvitationsCreatedArgs
@@ -8129,6 +8496,13 @@ export type UserCountOutputTypeCountMembershipsArgs<ExtArgs extends runtime.Type
  */
 export type UserCountOutputTypeCountSessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.SessionWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountAccountReauthProofsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AccountReauthProofWhereInput
 }
 
 /**
@@ -8347,6 +8721,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   createdTenants?: boolean | Prisma.User$createdTenantsArgs<ExtArgs>
   memberships?: boolean | Prisma.User$membershipsArgs<ExtArgs>
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
+  accountReauthProofs?: boolean | Prisma.User$accountReauthProofsArgs<ExtArgs>
   emailVerificationTokens?: boolean | Prisma.User$emailVerificationTokensArgs<ExtArgs>
   passwordResetTokens?: boolean | Prisma.User$passwordResetTokensArgs<ExtArgs>
   invitationsCreated?: boolean | Prisma.User$invitationsCreatedArgs<ExtArgs>
@@ -8438,6 +8813,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   createdTenants?: boolean | Prisma.User$createdTenantsArgs<ExtArgs>
   memberships?: boolean | Prisma.User$membershipsArgs<ExtArgs>
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
+  accountReauthProofs?: boolean | Prisma.User$accountReauthProofsArgs<ExtArgs>
   emailVerificationTokens?: boolean | Prisma.User$emailVerificationTokensArgs<ExtArgs>
   passwordResetTokens?: boolean | Prisma.User$passwordResetTokensArgs<ExtArgs>
   invitationsCreated?: boolean | Prisma.User$invitationsCreatedArgs<ExtArgs>
@@ -8478,6 +8854,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     createdTenants: Prisma.$TenantPayload<ExtArgs>[]
     memberships: Prisma.$TenantMembershipPayload<ExtArgs>[]
     sessions: Prisma.$SessionPayload<ExtArgs>[]
+    accountReauthProofs: Prisma.$AccountReauthProofPayload<ExtArgs>[]
     emailVerificationTokens: Prisma.$EmailVerificationTokenPayload<ExtArgs>[]
     passwordResetTokens: Prisma.$PasswordResetTokenPayload<ExtArgs>[]
     invitationsCreated: Prisma.$TenantInvitationPayload<ExtArgs>[]
@@ -8921,6 +9298,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   createdTenants<T extends Prisma.User$createdTenantsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$createdTenantsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   memberships<T extends Prisma.User$membershipsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$membershipsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TenantMembershipPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   sessions<T extends Prisma.User$sessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  accountReauthProofs<T extends Prisma.User$accountReauthProofsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$accountReauthProofsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AccountReauthProofPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   emailVerificationTokens<T extends Prisma.User$emailVerificationTokensArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$emailVerificationTokensArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EmailVerificationTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   passwordResetTokens<T extends Prisma.User$passwordResetTokensArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$passwordResetTokensArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PasswordResetTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   invitationsCreated<T extends Prisma.User$invitationsCreatedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$invitationsCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TenantInvitationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -9456,6 +9834,30 @@ export type User$sessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   take?: number
   skip?: number
   distinct?: Prisma.SessionScalarFieldEnum | Prisma.SessionScalarFieldEnum[]
+}
+
+/**
+ * User.accountReauthProofs
+ */
+export type User$accountReauthProofsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AccountReauthProof
+   */
+  select?: Prisma.AccountReauthProofSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AccountReauthProof
+   */
+  omit?: Prisma.AccountReauthProofOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AccountReauthProofInclude<ExtArgs> | null
+  where?: Prisma.AccountReauthProofWhereInput
+  orderBy?: Prisma.AccountReauthProofOrderByWithRelationInput | Prisma.AccountReauthProofOrderByWithRelationInput[]
+  cursor?: Prisma.AccountReauthProofWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AccountReauthProofScalarFieldEnum | Prisma.AccountReauthProofScalarFieldEnum[]
 }
 
 /**

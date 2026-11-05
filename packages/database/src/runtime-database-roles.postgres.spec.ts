@@ -62,6 +62,12 @@ describe('runtime database role provisioning', () => {
         .rejects.toMatchObject({ code: '42501' });
       await expect(worker.query('DELETE FROM users WHERE id = $1', [tenantId]))
         .rejects.toMatchObject({ code: '42501' });
+      await expect(worker.query('SELECT id FROM account_reauth_proofs'))
+        .rejects.toMatchObject({ code: '42501' });
+      await expect(api.query('DELETE FROM account_reauth_proofs WHERE id = $1', [tenantId]))
+        .rejects.toMatchObject({ code: '42501' });
+      await expect(api.query('UPDATE account_reauth_proofs SET expires_at = now() WHERE id = $1', [tenantId]))
+        .rejects.toMatchObject({ code: '42501' });
       await expect(adminPool.query('SELECT id FROM tenants WHERE id = $1', [tenantId]))
         .resolves.toMatchObject({ rows: [{ id: tenantId }] });
       await expect(api.query("SELECT public.autosale_order_prefix('Fictional Shop') AS prefix"))
@@ -77,6 +83,18 @@ describe('runtime database role provisioning', () => {
       // Deploy reapplies broad grants after every migration. The root-table
       // revocation must survive a second provisioning run as well.
       await configureRuntimeDatabaseRoles(container.getConnectionUri(), { apiPassword, workerPassword, backupPassword });
+      const proofAccess = await adminPool.query<{
+        api_insert: boolean; api_delete: boolean; worker_select: boolean;
+        api_update_used: boolean; api_update_expiry: boolean;
+      }>(`SELECT has_table_privilege('autosale_api', 'account_reauth_proofs', 'INSERT') AS api_insert,
+                 has_table_privilege('autosale_api', 'account_reauth_proofs', 'DELETE') AS api_delete,
+                 has_table_privilege('autosale_worker', 'account_reauth_proofs', 'SELECT') AS worker_select,
+                 has_column_privilege('autosale_api', 'account_reauth_proofs', 'used_at', 'UPDATE') AS api_update_used,
+                 has_column_privilege('autosale_api', 'account_reauth_proofs', 'expires_at', 'UPDATE') AS api_update_expiry`);
+      expect(proofAccess.rows).toEqual([{
+        api_insert: true, api_delete: false, worker_select: false,
+        api_update_used: true, api_update_expiry: false,
+      }]);
       const rootDelete = await adminPool.query<{
         api_tenant_delete: boolean;
         worker_tenant_delete: boolean;

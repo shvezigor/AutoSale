@@ -6,6 +6,7 @@ import { APP_GUARD } from '@nestjs/core';
 import Redis from 'ioredis';
 
 import { AuthController, AUTH_HTTP_CONFIG } from './auth.controller.js';
+import { AccountDeleteReauthService } from './account-delete-reauth.service.js';
 import { AuthGuard } from './auth.guard.js';
 import { AuthService } from './auth.service.js';
 import { CryptoService } from './crypto.service.js';
@@ -30,6 +31,7 @@ export class AuthModule {
     const rateLimit = new RateLimitService(new RedisRateLimitStore(redis), env.AUTH_TOKEN_PEPPER);
     const email = createEmailDelivery(env);
     const auth = new AuthService(prisma, crypto, sessions, email, env.AUTH_TOKEN_PEPPER, env.APP_PUBLIC_URL);
+    const accountDeleteReauth = new AccountDeleteReauthService(prisma, crypto, rateLimit, env.AUTH_TOKEN_PEPPER);
     const googleSignInState = new GoogleSignInStateService(prisma);
     const googleSignInClient = new GoogleSignInClient({
       clientId: env.GOOGLE_OAUTH_CLIENT_ID ?? '',
@@ -53,6 +55,7 @@ export class AuthModule {
       controllers: [AuthController, GoogleSignInController, ProfileController],
       providers: [
         { provide: AuthService, useValue: auth },
+        { provide: AccountDeleteReauthService, useValue: accountDeleteReauth },
         { provide: GoogleSignInService, useValue: googleSignIn },
         { provide: SessionService, useValue: sessions },
         { provide: CsrfService, useValue: csrf },
@@ -66,7 +69,7 @@ export class AuthModule {
           production: env.NODE_ENV === 'production',
         } },
       ],
-      exports: [SessionService, CsrfService, AuthGuard, AUTH_HTTP_CONFIG],
+      exports: [SessionService, CsrfService, AuthGuard, AUTH_HTTP_CONFIG, AccountDeleteReauthService],
     };
   }
 }

@@ -87,6 +87,18 @@ export async function configureRuntimeDatabaseRoles(
       -- memberships or business data; a future erasure executor needs its own
       -- narrowly scoped maintenance identity.
       REVOKE DELETE ON TABLE public.tenants, public.users FROM autosale_api, autosale_worker;
+      -- Reauthentication proof hashes are API-only and cannot be removed by a
+      -- general runtime role before the future deletion transaction consumes one.
+      DO $account_reauth$
+      BEGIN
+        IF to_regclass('public.account_reauth_proofs') IS NOT NULL THEN
+          REVOKE ALL ON TABLE public.account_reauth_proofs FROM autosale_worker;
+          REVOKE DELETE ON TABLE public.account_reauth_proofs FROM autosale_api;
+          REVOKE UPDATE ON TABLE public.account_reauth_proofs FROM autosale_api;
+          GRANT UPDATE (used_at) ON TABLE public.account_reauth_proofs TO autosale_api;
+        END IF;
+      END
+      $account_reauth$;
       GRANT SELECT ON ALL TABLES IN SCHEMA public TO autosale_backup;
       GRANT USAGE, SELECT, UPDATE ON ALL SEQUENCES IN SCHEMA public TO autosale_api, autosale_worker;
       GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO autosale_backup;

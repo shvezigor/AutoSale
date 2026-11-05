@@ -80,6 +80,7 @@ export const ModelName = {
   GoogleSignInAttempt: 'GoogleSignInAttempt',
   TenantMembership: 'TenantMembership',
   Session: 'Session',
+  AccountReauthProof: 'AccountReauthProof',
   EmailVerificationToken: 'EmailVerificationToken',
   PasswordResetToken: 'PasswordResetToken',
   TenantInvitation: 'TenantInvitation',
@@ -674,6 +675,23 @@ export const SessionScalarFieldEnum = {
 } as const
 
 export type SessionScalarFieldEnum = (typeof SessionScalarFieldEnum)[keyof typeof SessionScalarFieldEnum]
+
+
+export const AccountReauthProofScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  tenantId: 'tenantId',
+  sessionId: 'sessionId',
+  purpose: 'purpose',
+  method: 'method',
+  tokenHash: 'tokenHash',
+  credentialFingerprint: 'credentialFingerprint',
+  expiresAt: 'expiresAt',
+  usedAt: 'usedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type AccountReauthProofScalarFieldEnum = (typeof AccountReauthProofScalarFieldEnum)[keyof typeof AccountReauthProofScalarFieldEnum]
 
 
 export const EmailVerificationTokenScalarFieldEnum = {
