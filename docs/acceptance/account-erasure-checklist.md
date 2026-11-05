@@ -6,6 +6,8 @@ Verified preparatory controls on 2026-11-05: the worker unit test covers `DELETE
 
 Release `9f71aa2` was merged and pushed to `master`, backed up under local archive `20261105T092459Z` with verified PostgreSQL/MinIO/config checksums, and manually deployed on 2026-11-05. Production API, web and worker were healthy, `/health/live` returned 200, and PostgreSQL reported `DELETE` on `public.tenants` denied to both runtime roles. The signed-in production dashboard loaded in Chrome. The production admin lifecycle action was not repeated after deployment, so that browser acceptance remains open; the isolated two-tenant browser acceptance is the evidence for its behavior.
 
+The next role hardening also denies API/worker direct `DELETE` on global `users`; its PostgreSQL role test passed 3/3, including denial after a second provisioning run. Production privilege verification for `users` remains open until that follow-up release is deployed.
+
 - [x] Owner policy approved: closing an owner's account requires separate confirmation for erasure of each organization and its Sales AITO business data; other owners must approve or receive ownership before closure.
 - [ ] Legal retention schedule approved; UI states exact scope, effect on other members, backup/provider limits and global identities that survive another tenant.
 - [ ] Current-password and Google-only reauthentication use purpose-bound, single-use confirmation; wrong Google `sub`, stale `auth_time`, cross-session state and nonce replay are rejected; CSRF, rate limit and session revocation pass.

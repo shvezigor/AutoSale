@@ -83,10 +83,10 @@ export async function configureRuntimeDatabaseRoles(
       REVOKE CREATE ON SCHEMA public FROM PUBLIC, autosale_api, autosale_worker, autosale_backup;
       GRANT USAGE ON SCHEMA public TO autosale_api, autosale_worker, autosale_backup;
       GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO autosale_api, autosale_worker;
-      -- A tenant root has no RLS policy. Its removal cascades across business data,
-      -- so ordinary runtime identities must never have this privilege. A future
-      -- erasure executor needs a separate, narrowly scoped maintenance identity.
-      REVOKE DELETE ON TABLE public.tenants FROM autosale_api, autosale_worker;
+      -- These global roots have no RLS policy. Removing either can cascade across
+      -- memberships or business data; a future erasure executor needs its own
+      -- narrowly scoped maintenance identity.
+      REVOKE DELETE ON TABLE public.tenants, public.users FROM autosale_api, autosale_worker;
       GRANT SELECT ON ALL TABLES IN SCHEMA public TO autosale_backup;
       GRANT USAGE, SELECT, UPDATE ON ALL SEQUENCES IN SCHEMA public TO autosale_api, autosale_worker;
       GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO autosale_backup;

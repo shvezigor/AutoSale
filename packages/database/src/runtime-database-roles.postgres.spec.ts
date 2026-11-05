@@ -58,6 +58,10 @@ describe('runtime database role provisioning', () => {
         .rejects.toMatchObject({ code: '42501' });
       await expect(worker.query('DELETE FROM tenants WHERE id = $1', [tenantId]))
         .rejects.toMatchObject({ code: '42501' });
+      await expect(api.query('DELETE FROM users WHERE id = $1', [tenantId]))
+        .rejects.toMatchObject({ code: '42501' });
+      await expect(worker.query('DELETE FROM users WHERE id = $1', [tenantId]))
+        .rejects.toMatchObject({ code: '42501' });
       await expect(adminPool.query('SELECT id FROM tenants WHERE id = $1', [tenantId]))
         .resolves.toMatchObject({ rows: [{ id: tenantId }] });
       await expect(api.query("SELECT public.autosale_order_prefix('Fictional Shop') AS prefix"))
@@ -73,10 +77,22 @@ describe('runtime database role provisioning', () => {
       // Deploy reapplies broad grants after every migration. The root-table
       // revocation must survive a second provisioning run as well.
       await configureRuntimeDatabaseRoles(container.getConnectionUri(), { apiPassword, workerPassword, backupPassword });
-      const rootDelete = await adminPool.query<{ api_delete: boolean; worker_delete: boolean }>(`
-        SELECT has_table_privilege('autosale_api', 'tenants', 'DELETE') AS api_delete,
-               has_table_privilege('autosale_worker', 'tenants', 'DELETE') AS worker_delete`);
-      expect(rootDelete.rows).toEqual([{ api_delete: false, worker_delete: false }]);
+      const rootDelete = await adminPool.query<{
+        api_tenant_delete: boolean;
+        worker_tenant_delete: boolean;
+        api_user_delete: boolean;
+        worker_user_delete: boolean;
+      }>(`
+        SELECT has_table_privilege('autosale_api', 'tenants', 'DELETE') AS api_tenant_delete,
+               has_table_privilege('autosale_worker', 'tenants', 'DELETE') AS worker_tenant_delete,
+               has_table_privilege('autosale_api', 'users', 'DELETE') AS api_user_delete,
+               has_table_privilege('autosale_worker', 'users', 'DELETE') AS worker_user_delete`);
+      expect(rootDelete.rows).toEqual([{
+        api_tenant_delete: false,
+        worker_tenant_delete: false,
+        api_user_delete: false,
+        worker_user_delete: false,
+      }]);
 
       await adminPool.query(`
         CREATE TABLE backup_rls_fixture (
