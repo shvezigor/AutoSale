@@ -4,6 +4,8 @@ export type {
   StoredObjectHead,
   StoredObjectStream,
   StreamingObjectStorage,
+  TenantErasureObjectStorage,
+  TenantOwnedObjectVersion,
 } from './object-storage.js';
 export { matrixFromRows } from './catalogue-matrix.js';
 export { CredentialCipher } from './credential-cipher.js';
