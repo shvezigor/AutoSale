@@ -100,7 +100,7 @@ export class TeamService {
       const user = existing ?? await tx.user.create({
         data: { email: invitation.email, name: input.name.trim(), passwordHash, status: 'ACTIVE', emailVerifiedAt: now },
       });
-      if (existing?.status === 'BLOCKED') throw new BadRequestException('Invitation cannot be accepted');
+      if (existing && existing.status !== 'ACTIVE') throw new BadRequestException('Invitation cannot be accepted');
       await tx.tenantMembership.upsert({
         where: { userId_tenantId: { userId: user.id, tenantId: invitation.tenantId } },
         create: { userId: user.id, tenantId: invitation.tenantId, role: 'MANAGER', status: 'ACTIVE' },

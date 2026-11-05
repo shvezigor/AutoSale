@@ -36,6 +36,7 @@ export class AuthService {
         const user = await tx.user.create({
           data: { email: normalizedEmail, name: input.name.trim(), passwordHash, status: 'PENDING' },
         });
+        await tx.tenant.update({ where: { id: tenant.id }, data: { createdByUserId: user.id } });
         await tx.tenantMembership.create({
           data: { userId: user.id, tenantId: tenant.id, role: 'OWNER', status: 'PENDING' },
         });
@@ -59,7 +60,11 @@ export class AuthService {
     await this.prisma.$transaction(async (tx) => {
       const token = await tx.emailVerificationToken.findUnique({ where: { tokenHash } });
       if (!token || token.usedAt || token.expiresAt <= now) throw new BadRequestException('Invalid or expired token');
-      await tx.user.update({ where: { id: token.userId }, data: { status: 'ACTIVE', emailVerifiedAt: now } });
+      const activated = await tx.user.updateMany({
+        where: { id: token.userId, status: 'PENDING' },
+        data: { status: 'ACTIVE', emailVerifiedAt: now },
+      });
+      if (activated.count !== 1) throw new BadRequestException('Invalid or expired token');
       await activateOwnerMemberships(tx, token.userId);
       await tx.emailVerificationToken.update({ where: { id: token.id }, data: { usedAt: now } });
     });
@@ -111,7 +116,11 @@ export class AuthService {
     const userId = await this.prisma.$transaction(async (tx) => {
       const token = await tx.passwordResetToken.findUnique({ where: { tokenHash } });
       if (!token || token.usedAt || token.expiresAt <= now) throw new BadRequestException('Invalid or expired token');
-      await tx.user.update({ where: { id: token.userId }, data: { passwordHash } });
+      const changed = await tx.user.updateMany({
+        where: { id: token.userId, status: 'ACTIVE' },
+        data: { passwordHash },
+      });
+      if (changed.count !== 1) throw new BadRequestException('Invalid or expired token');
       await tx.passwordResetToken.update({ where: { id: token.id }, data: { usedAt: now } });
       return token.userId;
     });

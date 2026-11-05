@@ -21,7 +21,7 @@ function setup(overrides: Record<string, unknown> = {}) {
       findUnique: vi.fn(async () => null), create: vi.fn(async () => ({})), update: vi.fn(async () => ({})),
     },
     user: { findUnique: vi.fn(async () => null), create: vi.fn(async () => user), update: vi.fn(async () => user) },
-    tenant: { create: vi.fn(async () => ({ id: user.memberships[0]!.tenantId })) },
+    tenant: { create: vi.fn(async () => ({ id: user.memberships[0]!.tenantId })), update: vi.fn(async () => ({})) },
     tenantMembership: { create: vi.fn(async () => user.memberships[0]) },
     securityAuditLog: { create: vi.fn(async () => ({})) },
     $queryRaw: vi.fn(async () => [{ tenant_id: user.memberships[0]!.tenantId, membership_role: 'OWNER' }]),
@@ -91,6 +91,7 @@ describe('GoogleSignInService', () => {
     expect(fixture.prisma.user.create).toHaveBeenCalledWith({ data: expect.objectContaining({
       email: identity.email, passwordHash: null, status: 'ACTIVE', emailVerifiedAt: now,
     }) });
+    expect(fixture.prisma.tenant.update).toHaveBeenCalledWith({ where: { id: user.memberships[0]!.tenantId }, data: { createdByUserId: user.id } });
     expect(fixture.prisma.tenantMembership.create).toHaveBeenCalledWith({ data: expect.objectContaining({ role: 'OWNER', status: 'ACTIVE' }) });
     expect(fixture.prisma.googleIdentity.create).toHaveBeenCalledWith({ data: expect.objectContaining({ googleSubject: identity.subject }) });
     expect(result).toMatchObject({ returnPath: '/catalogue', sessionResult: { rawToken: 'session-token' } });

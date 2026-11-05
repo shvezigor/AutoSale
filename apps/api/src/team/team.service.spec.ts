@@ -81,6 +81,24 @@ describe('TeamService', () => {
     expect(invitationUpdate).toHaveBeenCalledWith(expect.objectContaining({ data: { usedAt: new Date('2026-08-27T00:00:00Z') } }));
   });
 
+  it.each(['BLOCKED', 'PENDING', 'DELETING'])('does not rejoin an inactive account through an invitation (%s)', async (status) => {
+    const invitation = { id: 'invite-1', tenantId: 'tenant-1', email: 'manager@example.com', role: 'MANAGER', usedAt: null, revokedAt: null, expiresAt: new Date('2026-08-28T00:00:00Z') };
+    const upsert = vi.fn();
+    const prisma = {
+      tenantInvitation: { findFirst: vi.fn().mockResolvedValue(invitation), updateMany: vi.fn().mockResolvedValue({ count: 1 }) },
+      user: { findUnique: vi.fn().mockResolvedValue({ id: 'user-1', status }), create: vi.fn() },
+      tenantMembership: { upsert },
+      $queryRaw: vi.fn().mockResolvedValue([{ tenant_id: 'tenant-1', invitation_id: 'invite-1' }]),
+    };
+    const service = new TeamService(prisma as never, {
+      hashOpaqueToken: vi.fn().mockReturnValue('hash'), hashPassword: vi.fn().mockResolvedValue('fictional-hash'),
+    } as never, {} as never, 'pepper', 'https://app.example.com', () => new Date('2026-08-27T00:00:00Z'));
+
+    await expect(service.accept('fictional-token', { name: 'Manager', password: 'fictional-long-password' }))
+      .rejects.toThrow('Invitation cannot be accepted');
+    expect(upsert).not.toHaveBeenCalled();
+  });
+
   it('revokes only an unused invitation from the supplied tenant', async () => {
     const updateMany = vi.fn().mockResolvedValue({ count: 1 });
     const service = new TeamService({ tenantInvitation: { updateMany } } as never, {} as never, {} as never, 'pepper', 'https://app.example.com');

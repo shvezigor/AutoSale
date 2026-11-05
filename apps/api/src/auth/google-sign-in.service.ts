@@ -119,6 +119,7 @@ export class GoogleSignInService {
           email: pending.email.trim().toLowerCase(), name: pending.name, passwordHash: null,
           emailVerifiedAt: this.now(), status: 'ACTIVE',
         } });
+        await transaction.tenant.update({ where: { id: tenant.id }, data: { createdByUserId: user.id } });
         const membership = await transaction.tenantMembership.create({ data: {
           userId: user.id, tenantId: tenant.id, role: 'OWNER', status: 'ACTIVE',
         } });

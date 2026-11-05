@@ -6,10 +6,53 @@ import { CryptoService } from './crypto.service.js';
 import type { EmailDelivery } from './email-delivery.js';
 
 describe('AuthService', () => {
+  it('does not reactivate a user with a stale verification token', async () => {
+    const activateMemberships = vi.fn();
+    const markUsed = vi.fn();
+    const tx = {
+      emailVerificationToken: {
+        findUnique: vi.fn().mockResolvedValue({ id: 'token-1', userId: 'user-1', usedAt: null, expiresAt: new Date('2026-08-28T00:00:00Z') }),
+        update: markUsed,
+      },
+      user: { updateMany: vi.fn().mockResolvedValue({ count: 0 }) },
+      $queryRaw: activateMemberships,
+    };
+    const prisma = { $transaction: vi.fn(async (work: (value: typeof tx) => unknown) => work(tx)) } as unknown as PrismaClient;
+    const auth = new AuthService(prisma, { hashOpaqueToken: vi.fn().mockReturnValue('hash') } as never, {} as never,
+      {} as never, 't'.repeat(32), 'http://localhost', () => new Date('2026-08-27T00:00:00Z'));
+
+    await expect(auth.verifyEmail('fictional-token')).rejects.toThrow('Invalid or expired token');
+    expect(tx.user.updateMany).toHaveBeenCalledWith({ where: { id: 'user-1', status: 'PENDING' }, data: { status: 'ACTIVE', emailVerifiedAt: new Date('2026-08-27T00:00:00Z') } });
+    expect(activateMemberships).not.toHaveBeenCalled();
+    expect(markUsed).not.toHaveBeenCalled();
+  });
+
+  it('does not reset a password for a user who is no longer active', async () => {
+    const markUsed = vi.fn();
+    const tx = {
+      passwordResetToken: {
+        findUnique: vi.fn().mockResolvedValue({ id: 'reset-1', userId: 'user-1', usedAt: null, expiresAt: new Date('2026-08-28T00:00:00Z') }),
+        update: markUsed,
+      },
+      user: { updateMany: vi.fn().mockResolvedValue({ count: 0 }) },
+    };
+    const prisma = { $transaction: vi.fn(async (work: (value: typeof tx) => unknown) => work(tx)) } as unknown as PrismaClient;
+    const revokeAllForUser = vi.fn();
+    const auth = new AuthService(prisma, {
+      hashOpaqueToken: vi.fn().mockReturnValue('hash'), hashPassword: vi.fn().mockResolvedValue('fictional-hash'),
+    } as never, { revokeAllForUser } as never, {} as never,
+    't'.repeat(32), 'http://localhost', () => new Date('2026-08-27T00:00:00Z'));
+
+    await expect(auth.resetPassword('fictional-token', 'fictional-long-password')).rejects.toThrow('Invalid or expired token');
+    expect(tx.user.updateMany).toHaveBeenCalledWith({ where: { id: 'user-1', status: 'ACTIVE' }, data: { passwordHash: 'fictional-hash' } });
+    expect(markUsed).not.toHaveBeenCalled();
+    expect(revokeAllForUser).not.toHaveBeenCalled();
+  });
+
   it('registers a pending owner and sends a verification URL without persisting its raw token', async () => {
     const createdToken: { tokenHash?: string } = {};
     const tx = {
-      tenant: { create: vi.fn(async () => ({ id: '10000000-0000-4000-8000-000000000001' })) },
+      tenant: { create: vi.fn(async () => ({ id: '10000000-0000-4000-8000-000000000001' })), update: vi.fn(async () => ({})) },
       user: { create: vi.fn(async () => ({ id: '10000000-0000-4000-8000-000000000002', email: 'owner@example.com' })) },
       tenantMembership: { create: vi.fn(async () => ({})) },
       emailVerificationToken: { create: vi.fn(async ({ data }: { data: { tokenHash: string } }) => { createdToken.tokenHash = data.tokenHash; return {}; }) },
@@ -22,6 +65,7 @@ describe('AuthService', () => {
     const result = await auth.register({ email: ' Owner@Example.com ', password: 'correct horse battery', name: 'Owner', tenantName: 'Store' }, {});
 
     expect(tx.user.create).toHaveBeenCalledWith({ data: expect.objectContaining({ email: 'owner@example.com', status: 'PENDING' }) });
+    expect(tx.tenant.update).toHaveBeenCalledWith({ where: { id: '10000000-0000-4000-8000-000000000001' }, data: { createdByUserId: '10000000-0000-4000-8000-000000000002' } });
     expect(tx.tenantMembership.create).toHaveBeenCalledWith({ data: expect.objectContaining({ role: 'OWNER', status: 'PENDING' }) });
     const sentUrl = vi.mocked(email.sendVerification).mock.calls[0]![1];
     expect(sentUrl).toContain('/verify-email?token=');
