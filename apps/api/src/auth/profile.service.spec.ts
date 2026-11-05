@@ -44,6 +44,11 @@ function createFixture() {
     securityAuditLog: { create: vi.fn(async () => ({})) },
     userAvatarCleanup: { create: vi.fn(async () => ({})) },
     session: { updateMany: vi.fn(async () => ({ count: 0 })) },
+    tenant: { findUnique: vi.fn(async (): Promise<{ name: string; status: string; createdByUserId: string | null }> => ({ name: 'Вигадана крамниця', status: 'ACTIVE', createdByUserId: principal.userId })) },
+    tenantMembership: {
+      findUnique: vi.fn(async () => ({ role: 'OWNER', status: 'ACTIVE' })),
+      count: vi.fn(async (query?: { where?: { role?: string } }): Promise<number> => query?.where?.role === 'OWNER' ? 0 : 1),
+    },
     $queryRaw: vi.fn(async () => [{ audit_id: '30000000-0000-4000-8000-000000000003' }]),
     $transaction: vi.fn(async (work: (tx: unknown) => unknown) => work(prisma)),
   };
@@ -59,6 +64,67 @@ function createFixture() {
 }
 
 describe('ProfileService', () => {
+  it('previews company closure only for its active registrant and sole owner', async () => {
+    const fixture = createFixture();
+
+    const result = await fixture.service.companyClosurePreview(principal);
+
+    expect(result).toEqual({
+      companyName: 'Вигадана крамниця', activeMemberCount: 1,
+      eligibility: 'AUTHORITY_VERIFIED', deletionAvailable: false,
+    });
+    expect(fixture.prisma.tenant.findUnique).toHaveBeenCalledWith({
+      where: { id: principal.tenantId },
+      select: { name: true, status: true, createdByUserId: true },
+    });
+    expect(fixture.prisma.tenantMembership.findUnique).toHaveBeenCalledWith({
+      where: { userId_tenantId: { userId: principal.userId, tenantId: principal.tenantId } },
+      select: { role: true, status: true },
+    });
+  });
+
+  it('does not infer the founder of a legacy company from its owner', async () => {
+    const fixture = createFixture();
+    fixture.prisma.tenant.findUnique.mockResolvedValue({ name: 'Вигадана крамниця', status: 'ACTIVE', createdByUserId: null });
+
+    expect((await fixture.service.companyClosurePreview(principal)).eligibility).toBe('FOUNDER_UNVERIFIED');
+  });
+
+  it('rejects a stale owner claim when the persisted membership is a manager', async () => {
+    const fixture = createFixture();
+    fixture.prisma.tenantMembership.findUnique.mockResolvedValue({ role: 'MANAGER', status: 'ACTIVE' });
+
+    expect((await fixture.service.companyClosurePreview(principal)).eligibility).toBe('NOT_OWNER');
+  });
+
+  it('keeps another registrant and inactive company ineligible', async () => {
+    const fixture = createFixture();
+    fixture.prisma.tenant.findUnique.mockResolvedValueOnce({
+      name: 'Вигадана крамниця', status: 'ACTIVE', createdByUserId: '30000000-0000-4000-8000-000000000003',
+    }).mockResolvedValueOnce({
+      name: 'Вигадана крамниця', status: 'BLOCKED', createdByUserId: principal.userId,
+    });
+
+    expect((await fixture.service.companyClosurePreview(principal)).eligibility).toBe('NOT_FOUNDER');
+    expect((await fixture.service.companyClosurePreview(principal)).eligibility).toBe('COMPANY_INACTIVE');
+  });
+
+  it('does not read tenant data without a tenant-bound session', async () => {
+    const fixture = createFixture();
+
+    expect(await fixture.service.companyClosurePreview({ ...principal, tenantId: null })).toEqual({
+      companyName: null, activeMemberCount: 0, eligibility: 'NO_COMPANY', deletionAvailable: false,
+    });
+    expect(fixture.prisma.tenant.findUnique).not.toHaveBeenCalled();
+  });
+
+  it('does not present sole-owner closure when another owner is active', async () => {
+    const fixture = createFixture();
+    fixture.prisma.tenantMembership.count.mockResolvedValueOnce(2).mockResolvedValueOnce(1);
+
+    expect((await fixture.service.companyClosurePreview(principal)).eligibility).toBe('OTHER_OWNERS');
+  });
+
   it('reads only the current user and returns a safe public profile', async () => {
     const fixture = createFixture();
 

@@ -1,4 +1,5 @@
 import { readdir, readFile } from 'node:fs/promises';
+import { randomUUID } from 'node:crypto';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -139,7 +140,92 @@ describe('membership, invitation and session row-level security', () => {
       )
     `).resolves.toEqual([{ session_id: '88888888-8888-4888-8888-888888888888' }]);
   });
+
+  it('refuses a concurrent session issued after the account starts deleting', async () => {
+    const userId = await seedErasureUser(admin);
+    const sessionId = randomUUID();
+    const blocker = await adminPool.connect();
+    const issuer = new pg.Client({ connectionString: runtimeUrl(container.getConnectionUri(), 'autosale_api', apiPassword) });
+    try {
+      await issuer.connect();
+      const issuerPid = (await issuer.query<{ pid: number }>('SELECT pg_backend_pid() AS pid')).rows[0]!.pid;
+      await blocker.query('BEGIN');
+      await blocker.query(`UPDATE users SET status = 'DELETING' WHERE id = $1`, [userId]);
+
+      const issued = issuer.query<{ session_id: string }>(
+        `SELECT session_id FROM public.api_issue_session($1::uuid, $2::uuid, $3::uuid, $4, $5, NULL, NULL)`,
+        [sessionId, userId, tenantA, `erasure-late-${sessionId}`, new Date('2099-01-01T00:00:00Z')],
+      );
+      await waitForDatabaseLock(adminPool, issuerPid);
+      await blocker.query('COMMIT');
+
+      expect((await issued).rows).toEqual([]);
+      expect(await admin.session.count({ where: { id: sessionId } })).toBe(0);
+    } finally {
+      await blocker.query('ROLLBACK').catch(() => undefined);
+      blocker.release();
+      await issuer.end();
+    }
+  });
+
+  it('revokes a session that wins the race before the account starts deleting', async () => {
+    const userId = await seedErasureUser(admin);
+    const sessionId = randomUUID();
+    const issuer = new pg.Client({ connectionString: runtimeUrl(container.getConnectionUri(), 'autosale_api', apiPassword) });
+    const eraser = await adminPool.connect();
+    try {
+      await issuer.connect();
+      await issuer.query('BEGIN');
+      const issued = await issuer.query<{ session_id: string }>(
+        `SELECT session_id FROM public.api_issue_session($1::uuid, $2::uuid, $3::uuid, $4, $5, NULL, NULL)`,
+        [sessionId, userId, tenantA, `erasure-early-${sessionId}`, new Date('2099-01-01T00:00:00Z')],
+      );
+      expect(issued.rows).toEqual([{ session_id: sessionId }]);
+
+      const eraserPid = (await eraser.query<{ pid: number }>('SELECT pg_backend_pid() AS pid')).rows[0]!.pid;
+      await eraser.query('BEGIN');
+      const transitioned = eraser.query(`UPDATE users SET status = 'DELETING' WHERE id = $1`, [userId]);
+      await waitForDatabaseLock(adminPool, eraserPid);
+      await issuer.query('COMMIT');
+      await transitioned;
+      await eraser.query('UPDATE sessions SET revoked_at = now() WHERE user_id = $1 AND revoked_at IS NULL', [userId]);
+      await eraser.query('COMMIT');
+
+      const session = await admin.session.findUniqueOrThrow({ where: { id: sessionId } });
+      expect(session.revokedAt).not.toBeNull();
+      await expect(api.$queryRaw`
+        SELECT * FROM public.api_resolve_session(${`erasure-early-${sessionId}`}, ${new Date()})
+      `).resolves.toEqual([]);
+    } finally {
+      await issuer.query('ROLLBACK').catch(() => undefined);
+      await eraser.query('ROLLBACK').catch(() => undefined);
+      await issuer.end();
+      eraser.release();
+    }
+  });
 });
+
+async function seedErasureUser(prisma: PrismaClient): Promise<string> {
+  const userId = randomUUID();
+  await prisma.user.create({ data: {
+    id: userId, email: `${userId}@example.invalid`, name: 'Fictional Erasure Test',
+    status: 'ACTIVE', emailVerifiedAt: new Date('2026-01-01T00:00:00Z'),
+  } });
+  await prisma.tenantMembership.create({ data: { tenantId: tenantA, userId, role: 'OWNER', status: 'ACTIVE' } });
+  return userId;
+}
+
+async function waitForDatabaseLock(pool: pg.Pool, pid: number): Promise<void> {
+  const deadline = Date.now() + 5_000;
+  while (Date.now() < deadline) {
+    const result = await pool.query<{ wait_event_type: string | null }>(
+      'SELECT wait_event_type FROM pg_stat_activity WHERE pid = $1', [pid],
+    );
+    if (result.rows[0]?.wait_event_type === 'Lock') return;
+    await new Promise((resolve) => setTimeout(resolve, 25));
+  }
+  throw new Error('Expected concurrent transaction to wait on the user row lock');
+}
 
 async function seed(prisma: PrismaClient): Promise<void> {
   for (const [tenantId, userId, suffix] of [[tenantA, userA, 'a'], [tenantB, userB, 'b']] as const) {

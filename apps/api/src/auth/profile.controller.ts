@@ -20,6 +20,11 @@ export class ProfileController {
     return this.profiles.get(principal);
   }
 
+  @Get('company-closure-preview')
+  companyClosurePreview(@CurrentPrincipal() principal: AuthPrincipal) {
+    return this.profiles.companyClosurePreview(principal);
+  }
+
   @Patch()
   update(@CurrentPrincipal() principal: AuthPrincipal, @Body() body: unknown) {
     const parsed = updateProfileRequestSchema.safeParse(body);

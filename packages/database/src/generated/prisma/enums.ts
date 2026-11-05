@@ -28,7 +28,8 @@ export type MembershipRole = (typeof MembershipRole)[keyof typeof MembershipRole
 export const AccessStatus = {
   PENDING: 'PENDING',
   ACTIVE: 'ACTIVE',
-  BLOCKED: 'BLOCKED'
+  BLOCKED: 'BLOCKED',
+  DELETING: 'DELETING'
 } as const
 
 export type AccessStatus = (typeof AccessStatus)[keyof typeof AccessStatus]

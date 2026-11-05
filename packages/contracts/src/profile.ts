@@ -40,3 +40,20 @@ export type ProfileResponse = z.infer<typeof profileResponseSchema>;
 export type UpdateProfileRequest = z.infer<typeof updateProfileRequestSchema>;
 export type ChangePasswordRequest = z.infer<typeof changePasswordRequestSchema>;
 export type UserLocale = z.infer<typeof userLocaleSchema>;
+
+export const companyClosurePreviewSchema = z.object({
+  companyName: z.string().nullable(),
+  activeMemberCount: z.number().int().nonnegative(),
+  eligibility: z.enum([
+    'NO_COMPANY',
+    'COMPANY_INACTIVE',
+    'NOT_OWNER',
+    'FOUNDER_UNVERIFIED',
+    'NOT_FOUNDER',
+    'OTHER_OWNERS',
+    'AUTHORITY_VERIFIED',
+  ]),
+  deletionAvailable: z.boolean(),
+}).strict();
+
+export type CompanyClosurePreview = z.infer<typeof companyClosurePreviewSchema>;

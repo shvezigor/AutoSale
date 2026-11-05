@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { changePasswordRequestSchema, profileResponseSchema, updateProfileRequestSchema } from './profile.js';
+import { changePasswordRequestSchema, companyClosurePreviewSchema, profileResponseSchema, updateProfileRequestSchema } from './profile.js';
 
 const base = {
   userId: '10000000-0000-4000-8000-000000000001',
@@ -17,6 +17,11 @@ const base = {
 } as const;
 
 describe('profile contracts', () => {
+  it('accepts a minimal closure preview without teammate identities', () => {
+    const preview = { companyName: 'Вигадана крамниця', activeMemberCount: 2, eligibility: 'OTHER_OWNERS', deletionAvailable: false };
+    expect(companyClosurePreviewSchema.parse(preview)).toEqual(preview);
+    expect(companyClosurePreviewSchema.safeParse({ ...preview, teammateEmail: 'fictional@example.com' }).success).toBe(false);
+  });
   it('accepts a safe public profile and rejects password internals', () => {
     expect(profileResponseSchema.parse(base)).toEqual(base);
     expect(profileResponseSchema.safeParse({ ...base, passwordHash: 'secret' }).success).toBe(false);

@@ -24,6 +24,7 @@ enum AccessStatus {
   PENDING
   ACTIVE
   BLOCKED
+  DELETING
 }
 
 enum InstagramConnectionStatus {

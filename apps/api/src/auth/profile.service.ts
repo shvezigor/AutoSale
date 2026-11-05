@@ -1,7 +1,7 @@
 import { createHash, randomUUID } from 'node:crypto';
 
 import type { AuthPrincipal } from '@autosale/contracts/auth';
-import type { ChangePasswordRequest, ProfileResponse, UpdateProfileRequest } from '@autosale/contracts/profile';
+import type { ChangePasswordRequest, CompanyClosurePreview, ProfileResponse, UpdateProfileRequest } from '@autosale/contracts/profile';
 import { appendSecurityAudit, setTenantContext, type PrismaClient, withTenantTransaction } from '@autosale/database';
 import type { ObjectStorage } from '@autosale/integrations';
 import { BadRequestException, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
@@ -74,6 +74,43 @@ export class ProfileService {
     });
     if (!user) throw new NotFoundException('PROFILE_NOT_FOUND');
     return this.response(user, principal.tenantId);
+  }
+
+  async companyClosurePreview(principal: AuthPrincipal): Promise<CompanyClosurePreview> {
+    if (!principal.tenantId) {
+      return { companyName: null, activeMemberCount: 0, eligibility: 'NO_COMPANY', deletionAvailable: false };
+    }
+
+    return withTenantTransaction(this.prisma, principal.tenantId, async (transaction) => {
+      const tenant = await transaction.tenant.findUnique({
+        where: { id: principal.tenantId! },
+        select: { name: true, status: true, createdByUserId: true },
+      });
+      if (!tenant) {
+        return { companyName: null, activeMemberCount: 0, eligibility: 'NO_COMPANY', deletionAvailable: false };
+      }
+
+      const [membership, activeMemberCount, otherOwnerCount] = await Promise.all([
+        transaction.tenantMembership.findUnique({
+          where: { userId_tenantId: { userId: principal.userId, tenantId: principal.tenantId! } },
+          select: { role: true, status: true },
+        }),
+        transaction.tenantMembership.count({ where: { tenantId: principal.tenantId!, status: 'ACTIVE' } }),
+        transaction.tenantMembership.count({
+          where: { tenantId: principal.tenantId!, status: 'ACTIVE', role: 'OWNER', userId: { not: principal.userId } },
+        }),
+      ]);
+
+      let eligibility: CompanyClosurePreview['eligibility'];
+      if (tenant.status !== 'ACTIVE') eligibility = 'COMPANY_INACTIVE';
+      else if (membership?.status !== 'ACTIVE' || membership.role !== 'OWNER') eligibility = 'NOT_OWNER';
+      else if (!tenant.createdByUserId) eligibility = 'FOUNDER_UNVERIFIED';
+      else if (tenant.createdByUserId !== principal.userId) eligibility = 'NOT_FOUNDER';
+      else if (otherOwnerCount > 0) eligibility = 'OTHER_OWNERS';
+      else eligibility = 'AUTHORITY_VERIFIED';
+
+      return { companyName: tenant.name, activeMemberCount, eligibility, deletionAvailable: false };
+    });
   }
 
   async update(principal: AuthPrincipal, input: UpdateProfileRequest): Promise<ProfileResponse> {

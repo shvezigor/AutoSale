@@ -26,6 +26,16 @@ describe('ProfileController', () => {
     expect(get).toHaveBeenCalledWith(principal);
   });
 
+  it('passes only the authenticated principal to the closure preview', async () => {
+    const companyClosurePreview = vi.fn(async () => ({ eligibility: 'NOT_OWNER', deletionAvailable: false }));
+    const controller = new ProfileController({ companyClosurePreview } as never, {} as never);
+
+    await controller.companyClosurePreview(principal);
+
+    expect(companyClosurePreview).toHaveBeenCalledOnce();
+    expect(companyClosurePreview).toHaveBeenCalledWith(principal);
+  });
+
   it('parses editable fields and delegates with the current principal', async () => {
     const update = vi.fn(async () => ({ userId: principal.userId }));
     const controller = new ProfileController({ update } as never, {} as never);
