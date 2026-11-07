@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { RateLimitExceededError, RateLimitService, RedisRateLimitStore, type RateLimitStore } from './rate-limit.service.js';
 
@@ -31,15 +31,21 @@ describe('RateLimitService', () => {
       .rejects.toBeInstanceOf(RateLimitExceededError);
   });
 
-  it('creates an expiring Redis counter on the first attempt', async () => {
-    const commands: Array<[string, ...unknown[]]> = [];
-    const redis = {
-      incr: async (key: string) => { commands.push(['incr', key]); return 1; },
-      expire: async (key: string, seconds: number) => { commands.push(['expire', key, seconds]); return 1; },
-    };
-
+  it('increments and sets expiry in one Redis operation', async () => {
+    const redis = { eval: vi.fn().mockResolvedValue(1) };
     await expect(new RedisRateLimitStore(redis).increment('bounded-key', 60)).resolves.toBe(1);
-    expect(commands).toEqual([['incr', 'bounded-key'], ['expire', 'bounded-key', 60]]);
+    expect(redis.eval).toHaveBeenCalledOnce();
+    const [script, keys, key, seconds] = redis.eval.mock.calls[0]!;
+    expect(script).toContain("redis.call('INCR', KEYS[1])");
+    expect(script).toContain("redis.call('TTL', KEYS[1]) < 0");
+    expect(script).toContain("redis.call('EXPIRE', KEYS[1], ARGV[1])");
+    expect([keys, key, seconds]).toEqual([1, 'bounded-key', 60]);
+  });
+
+  it('rejects an invalid Redis counter response', async () => {
+    const redis = { eval: vi.fn().mockResolvedValue('unexpected') };
+    await expect(new RedisRateLimitStore(redis).increment('bounded-key', 60))
+      .rejects.toThrow('Invalid Redis rate-limit counter');
   });
 
   it('fails closed with 503 when the rate-limit store is unavailable', async () => {
