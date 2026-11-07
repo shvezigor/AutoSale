@@ -12,3 +12,19 @@ export class ConversionRetentionStore {
     return { interestsDeleted: rows[0].interests_deleted, countersDeleted: rows[0].counters_deleted };
   }
 }
+
+/** Worker-only, database-clock cleanup; it cannot remove unexpired proofs. */
+export class AccountReauthProofRetentionStore {
+  constructor(private readonly prisma: PrismaClient) {}
+
+  async purgeDue(limit = 100): Promise<number> {
+    const bounded = Math.min(Math.max(Math.trunc(limit), 1), 100);
+    const rows = await this.prisma.$queryRaw<Array<{ purged: number }>>`
+      SELECT public.worker_purge_expired_account_reauth_proofs(${bounded}) AS purged
+    `;
+    if (!rows[0] || !Number.isInteger(rows[0].purged)) {
+      throw new Error('Account reauthentication proof retention returned no count');
+    }
+    return rows[0].purged;
+  }
+}

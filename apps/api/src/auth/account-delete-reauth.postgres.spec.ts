@@ -3,7 +3,7 @@ import { readdir, readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
 import type { AuthPrincipal } from '@autosale/contracts/auth';
-import { configureRuntimeDatabaseRoles, createPrismaClient, withTenantTransaction, type PrismaClient } from '@autosale/database';
+import { AccountReauthProofRetentionStore, createPrismaClient, withTenantTransaction, type PrismaClient } from '@autosale/database';
 import { PostgreSqlContainer, type StartedPostgreSqlContainer } from '@testcontainers/postgresql';
 import pg from 'pg';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
@@ -11,6 +11,7 @@ import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { AccountDeleteReauthService } from './account-delete-reauth.service.js';
 import { CryptoService } from './crypto.service.js';
 import type { RateLimitService } from './rate-limit.service.js';
+import { configureRuntimeDatabaseRoles } from '../../../../packages/database/src/runtime-database-roles.js';
 
 const password = 'Fictional current passphrase 123!';
 const apiPassword = 'fictional-api-password-32-characters';
@@ -24,9 +25,11 @@ describe('account deletion local-password reauthentication', () => {
   let pool: pg.Pool;
   let admin: PrismaClient;
   let api: PrismaClient;
+  let worker: PrismaClient;
   let crypto: CryptoService;
   let now: Date;
   const consumeRateLimit = vi.fn(async () => undefined);
+  const consumeUserRateLimit = vi.fn(async () => undefined);
   let service: AccountDeleteReauthService;
 
   beforeAll(async () => {
@@ -36,14 +39,16 @@ describe('account deletion local-password reauthentication', () => {
     await configureRuntimeDatabaseRoles(container.getConnectionUri(), { apiPassword, workerPassword, backupPassword });
     admin = createPrismaClient(container.getConnectionUri());
     api = createPrismaClient(runtimeUrl(container.getConnectionUri(), 'autosale_api', apiPassword));
+    worker = createPrismaClient(runtimeUrl(container.getConnectionUri(), 'autosale_worker', workerPassword));
     crypto = new CryptoService();
     now = start;
     service = new AccountDeleteReauthService(
-      api, crypto, { consume: consumeRateLimit } as unknown as RateLimitService, pepper, () => now,
+      api, crypto, { consume: consumeRateLimit, consumeUser: consumeUserRateLimit } as unknown as RateLimitService, pepper, () => now,
     );
   }, 60_000);
 
   afterAll(async () => {
+    await worker?.$disconnect();
     await api?.$disconnect();
     await admin?.$disconnect();
     await pool?.end();
@@ -75,6 +80,7 @@ describe('account deletion local-password reauthentication', () => {
     expect(issued.proof).toMatch(/^[A-Za-z0-9_-]{43}$/);
     expect(issued.expiresAt).toEqual(new Date(start.getTime() + 5 * 60_000));
     expect(consumeRateLimit).toHaveBeenCalledWith('account-delete-reauth', '192.0.2.1', principal.email, 5, 900);
+    expect(consumeUserRateLimit).toHaveBeenCalledWith('account-delete-reauth-user', principal.userId, 5, 900);
 
     const stored = await withTenantTransaction(api, principal.tenantId!, (tx) => tx.accountReauthProof.findFirst());
     expect(stored).toMatchObject({ userId: principal.userId, sessionId: principal.sessionId,
@@ -102,6 +108,29 @@ describe('account deletion local-password reauthentication', () => {
       where: { tokenHash, usedAt: null }, data: { usedAt: now },
     }))).rejects.toThrow('ACCOUNT_REAUTH_PROOF_IMMUTABLE');
     now = start;
+  });
+
+  it('purges only expired proofs in bounded worker batches without table access', async () => {
+    await admin.accountReauthProof.deleteMany({ where: { expiresAt: { lte: new Date() } } });
+    const principal = await fixture();
+    await admin.accountReauthProof.createMany({ data: [
+      ...Array.from({ length: 3 }, (_, index) => ({
+        userId: principal.userId, tenantId: principal.tenantId!, sessionId: principal.sessionId,
+        purpose: 'ACCOUNT_DELETE', method: 'LOCAL_PASSWORD',
+        tokenHash: `fictional-expired-batch-${index}-${randomUUID()}`,
+        credentialFingerprint: 'fictional-fingerprint', expiresAt: new Date(Date.now() - 1_000),
+      })),
+      { userId: principal.userId, tenantId: principal.tenantId!, sessionId: principal.sessionId,
+        purpose: 'ACCOUNT_DELETE', method: 'LOCAL_PASSWORD',
+        tokenHash: `fictional-active-${randomUUID()}`,
+        credentialFingerprint: 'fictional-fingerprint', expiresAt: new Date(Date.now() + 60_000) },
+    ] });
+    const retention = new AccountReauthProofRetentionStore(worker);
+    expect(await retention.purgeDue(2)).toBe(2);
+    expect(await retention.purgeDue(2)).toBe(1);
+    expect(await admin.accountReauthProof.count({ where: { userId: principal.userId } })).toBe(1);
+    await expect(new AccountReauthProofRetentionStore(api).purgeDue()).rejects.toThrow();
+    await expect(worker.accountReauthProof.findFirst()).rejects.toThrow();
   });
 
   it('allows only one of two concurrent consumers to use a proof', async () => {
@@ -136,7 +165,7 @@ describe('account deletion local-password reauthentication', () => {
       hashOpaqueToken: crypto.hashOpaqueToken.bind(crypto),
     } as CryptoService;
     const racingService = new AccountDeleteReauthService(
-      api, raceCrypto, { consume: consumeRateLimit } as unknown as RateLimitService, pepper, () => now,
+      api, raceCrypto, { consume: consumeRateLimit, consumeUser: consumeUserRateLimit } as unknown as RateLimitService, pepper, () => now,
     );
     await expect(racingService.issueLocalPasswordProof(changed, password, '192.0.2.1'))
       .rejects.toThrow('ACCOUNT_DELETE_REAUTH_INVALID');
@@ -153,7 +182,7 @@ describe('account deletion local-password reauthentication', () => {
       hashOpaqueToken: crypto.hashOpaqueToken.bind(crypto),
     } as CryptoService;
     const loggedOutService = new AccountDeleteReauthService(
-      api, logoutCrypto, { consume: consumeRateLimit } as unknown as RateLimitService, pepper, () => now,
+      api, logoutCrypto, { consume: consumeRateLimit, consumeUser: consumeUserRateLimit } as unknown as RateLimitService, pepper, () => now,
     );
     await expect(loggedOutService.issueLocalPasswordProof(loggedOut, password, '192.0.2.1'))
       .rejects.toThrow('ACCOUNT_DELETE_REAUTH_INVALID');

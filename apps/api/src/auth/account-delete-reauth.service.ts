@@ -28,6 +28,7 @@ export class AccountDeleteReauthService {
     currentPassword: string,
     ipPrefix: string,
   ): Promise<{ proof: string; expiresAt: Date }> {
+    await this.rateLimit.consumeUser('account-delete-reauth-user', principal.userId, 5, 15 * 60);
     await this.rateLimit.consume('account-delete-reauth', ipPrefix, principal.email, 5, 15 * 60);
     if (!principal.tenantId || !currentPassword) throw new UnauthorizedException(INVALID);
 

@@ -2,7 +2,7 @@ import { Buffer } from 'node:buffer';
 
 import { parseWorkerEnv } from '@autosale/config/worker-env';
 import { retentionDryRunJobSchema, shipmentCreateJobSchema, telegramDeliveryJobSchema, tenantLifecycleJobSchema, ukrposhtaTrackingBatchJobSchema } from '@autosale/contracts';
-import { AiProviderUsageStore, createPrismaClient, ConversionRetentionStore, DemoLeadNotificationStore, DemoLeadRetentionStore, PlatformChannelGate, ProcurementStore, TenantLifecycleFrozenError, withTenantTransaction } from '@autosale/database';
+import { AccountReauthProofRetentionStore, AiProviderUsageStore, createPrismaClient, ConversionRetentionStore, DemoLeadNotificationStore, DemoLeadRetentionStore, PlatformChannelGate, ProcurementStore, TenantLifecycleFrozenError, withTenantTransaction } from '@autosale/database';
 import {
   createGoogleSheetsAdapter,
   CredentialCipher,
@@ -190,6 +190,7 @@ async function bootstrap(): Promise<void> {
   const demoLeadReconciler = new DemoLeadNotificationReconciler(demoLeadStore, demoLeadQueue, undefined, demoLeadSender.configured);
   const demoLeadRetention = new DemoLeadRetentionReconciler(new DemoLeadRetentionStore(prisma), env.DEMO_LEAD_ERASURE_ENABLED);
   const conversionRetention = new ConversionRetentionReconciler(new ConversionRetentionStore(prisma));
+  const accountReauthProofRetention = new AccountReauthProofRetentionStore(prisma);
   const demoLeadJobSchema = z.object({ leadId: z.uuid() }).strict();
   const demoLeadWorker = new Worker('demo-leads', async (job) => {
     if (job.name !== 'demo-lead.notify') return;
@@ -864,6 +865,33 @@ async function bootstrap(): Promise<void> {
     } finally { reconcilingConversionRetention = false; }
   };
   const conversionRetentionTimer = setInterval(() => void reconcileConversionRetention(), 24 * 60 * 60_000);
+  let reconcilingAccountReauthProofRetention = false;
+  const reconcileAccountReauthProofRetention = async (): Promise<void> => {
+    if (reconcilingAccountReauthProofRetention) return;
+    reconcilingAccountReauthProofRetention = true;
+    try {
+      let purged = 0;
+      let saturated = false;
+      for (let batch = 0; batch < 10; batch += 1) {
+        const count = await accountReauthProofRetention.purgeDue();
+        purged += count;
+        if (count < 100) break;
+        saturated = batch === 9;
+      }
+      if (purged > 0) logger.info('account_reauth_proof_retention_completed', {
+        correlationId: 'system:account-reauth-proof-retention', purged,
+      });
+      if (saturated) logger.warn('account_reauth_proof_retention_saturated', {
+        correlationId: 'system:account-reauth-proof-retention', batchLimit: 10,
+      });
+    } catch (error) {
+      metrics.increment('autosale_operations_total', { operation: 'account_reauth_proof_retention', result: 'failure' });
+      logger.warn('account_reauth_proof_retention_failed', {
+        correlationId: 'system:account-reauth-proof-retention', errorCode: error instanceof Error ? error.name : 'UNKNOWN',
+      });
+    } finally { reconcilingAccountReauthProofRetention = false; }
+  };
+  const accountReauthProofRetentionTimer = setInterval(() => void reconcileAccountReauthProofRetention(), 60 * 60_000);
   let reconcilingCatalogueMappings = false;
   const reconcileCatalogueMappings = async (): Promise<void> => {
     if (reconcilingCatalogueMappings) return;
@@ -1179,6 +1207,7 @@ async function bootstrap(): Promise<void> {
   void reconcileDemoLeads();
   void reconcileDemoLeadRetention();
   void reconcileConversionRetention();
+  void reconcileAccountReauthProofRetention();
   void reconcileCatalogueMappings();
   void reconcileInstagramEvents();
   void reconcileInstagramProfiles();
@@ -1203,6 +1232,7 @@ async function bootstrap(): Promise<void> {
     clearInterval(demoLeadReconcileTimer);
     clearInterval(demoLeadRetentionTimer);
     clearInterval(conversionRetentionTimer);
+    clearInterval(accountReauthProofRetentionTimer);
     clearInterval(catalogueReconcileTimer);
     clearInterval(instagramReconcileTimer);
     clearInterval(instagramProfileReconcileTimer);

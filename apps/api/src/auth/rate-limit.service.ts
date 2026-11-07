@@ -28,7 +28,16 @@ export class RateLimitService {
   constructor(private readonly store: RateLimitStore, private readonly pepper: string) {}
 
   async consume(route: string, ipPrefix: string, email: string, limit: number, windowSeconds: number): Promise<void> {
-    const identity = createHmac('sha256', this.pepper).update(`${ipPrefix}\0${email.trim().toLowerCase()}`).digest('hex');
+    await this.consumeKey(route, `${ipPrefix}\0${email.trim().toLowerCase()}`, limit, windowSeconds);
+  }
+
+  /** A second, IP-independent budget for sensitive actions by an authenticated user. */
+  async consumeUser(route: string, userId: string, limit: number, windowSeconds: number): Promise<void> {
+    await this.consumeKey(route, `user\0${userId}`, limit, windowSeconds);
+  }
+
+  private async consumeKey(route: string, material: string, limit: number, windowSeconds: number): Promise<void> {
+    const identity = createHmac('sha256', this.pepper).update(material).digest('hex');
     let count: number;
     try {
       count = await this.store.increment(`auth-rate:${route}:${identity}`, windowSeconds);

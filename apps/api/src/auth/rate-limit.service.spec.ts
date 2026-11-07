@@ -20,6 +20,17 @@ describe('RateLimitService', () => {
     await expect(limiter.consume('login', '127.0.0.0/24', 'owner@example.com', 5, 60)).rejects.toBeInstanceOf(RateLimitExceededError);
   });
 
+  it('keeps an authenticated user budget when the IP address changes', async () => {
+    const limiter = new RateLimitService(new MemoryStore(), 'r'.repeat(32));
+    const userId = '00000000-0000-4000-8000-000000000001';
+    for (let attempt = 1; attempt <= 5; attempt += 1) {
+      await limiter.consumeUser('account-delete-reauth-user', userId, 5, 900);
+      await limiter.consume('account-delete-reauth', `192.0.2.${attempt}`, 'owner@example.invalid', 5, 900);
+    }
+    await expect(limiter.consumeUser('account-delete-reauth-user', userId, 5, 900))
+      .rejects.toBeInstanceOf(RateLimitExceededError);
+  });
+
   it('creates an expiring Redis counter on the first attempt', async () => {
     const commands: Array<[string, ...unknown[]]> = [];
     const redis = {
