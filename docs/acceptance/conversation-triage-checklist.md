@@ -2,7 +2,9 @@
 
 ## Mobile viewport regression — 2026-11-12
 
-An authenticated production-browser reproduction at 390×844 showed the inbox card extending below the viewport and an invisible empty detail wrapper adding roughly another screen of document height. The mobile fix removes that wrapper on the list route and gives the inbox card the available height below the 72 px workspace header. Recheck the list footer, internal row scrolling, detail opening and back navigation after deployment; the screenshot from the owner shows the blank area in iOS Safari, so an actual iOS Safari pass remains a separate acceptance step.
+An authenticated production-browser reproduction at 390×844 showed the inbox card extending below the viewport and an invisible empty detail wrapper adding roughly another screen of document height. The mobile fix removes that wrapper on the list route and gives the inbox card the available height below the 72 px workspace header.
+
+After web-only deployment of `9db571f`, an authenticated Chromium browser at 390×844 measured document height 844 px, list footer bottom 827 px and no rendered empty detail wrapper. Pressing End in the list moved its internal scroll position to its maximum while document scroll stayed at zero; opening a conversation displayed the fixed message panel, and browser Back restored the list. At 320×568, document height was 568 px and the footer remained at 551 px. Web tests (554), TypeScript and optimized Next.js build passed before deployment; web, API and worker were healthy and the public liveness endpoint returned HTTP 200 afterward. The owner screenshot was taken in iOS Safari, so an actual iOS Safari pass remains a separate acceptance step.
 
 Date: 2026-10-25. Status: deployed and manually verified for status moves; isolated end-to-end inbound and conflict checks remain pending. Canonical behavior: [approved design](../superpowers/specs/2026-10-25-conversation-triage-design.md).
 
