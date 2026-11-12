@@ -63,6 +63,8 @@ The [acceptance checklist](../../acceptance/conversation-triage-checklist.md) re
 
 At high browser zoom or a short viewport, the conversation keeps document scrolling disabled and reserves visible height for message history. The reply area may scroll independently to keep guidance, draft details and the send action reachable; its content must not squeeze the message viewport to an unusable strip.
 
+On a phone, the inbox list occupies only the viewport area below the workspace header. Its rows scroll inside the list and its status footer remains visible. The desktop-only empty detail placeholder must not reserve another screen of height under the mobile list; opening a conversation still presents the fixed detail panel.
+
 ## Explicit non-goals
 
 No permanent delete or Meta inbox deletion; no automatic status change on delivery, elapsed time, manager reply or outbound echo; no bulk actions, assignment/SLA system, new message-search service, customer-facing notification, or change to order/delivery state.

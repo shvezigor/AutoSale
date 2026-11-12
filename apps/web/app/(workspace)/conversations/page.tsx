@@ -5,7 +5,7 @@ import { useI18n } from '../../../src/i18n/i18n-provider';
 export default function ConversationsPage() {
   const { t } = useI18n();
   return (
-    <div className="conversation-detail-transition">
+    <div className="conversation-detail-transition conversation-detail-empty">
       <section className="conversation-empty">
         <div className="empty-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 17 17 7M10 7h7v7" /></svg></div>
         <h2>{t('conversations.selectTitle')}</h2>

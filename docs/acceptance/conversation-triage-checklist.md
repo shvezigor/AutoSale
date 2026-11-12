@@ -1,5 +1,9 @@
 # Conversation triage acceptance
 
+## Mobile viewport regression — 2026-11-12
+
+An authenticated production-browser reproduction at 390×844 showed the inbox card extending below the viewport and an invisible empty detail wrapper adding roughly another screen of document height. The mobile fix removes that wrapper on the list route and gives the inbox card the available height below the 72 px workspace header. Recheck the list footer, internal row scrolling, detail opening and back navigation after deployment; the screenshot from the owner shows the blank area in iOS Safari, so an actual iOS Safari pass remains a separate acceptance step.
+
 Date: 2026-10-25. Status: deployed and manually verified for status moves; isolated end-to-end inbound and conflict checks remain pending. Canonical behavior: [approved design](../superpowers/specs/2026-10-25-conversation-triage-design.md).
 
 ## Evidence boundaries
