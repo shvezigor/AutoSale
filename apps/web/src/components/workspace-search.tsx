@@ -22,6 +22,7 @@ export function WorkspaceSearch() {
   const { t, formatNumber } = useI18n();
   const router = useRouter();
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLDialogElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -32,6 +33,7 @@ export function WorkspaceSearch() {
   const items = useMemo(() => flattenResults(result, t, formatNumber), [formatNumber, result, t]);
 
   const close = useCallback(() => {
+    if (dialogRef.current?.open) dialogRef.current.close();
     setOpen(false);
     setQuery('');
     setResult(null);
@@ -47,17 +49,17 @@ export function WorkspaceSearch() {
       if ((event.ctrlKey || event.metaKey) && event.key.toLocaleLowerCase() === 'k') {
         event.preventDefault();
         show();
-      } else if (event.key === 'Escape' && open) {
-        event.preventDefault();
-        close();
       }
     };
     document.addEventListener('keydown', shortcut);
     return () => document.removeEventListener('keydown', shortcut);
-  }, [close, open, show]);
+  }, [show]);
 
   useEffect(() => {
-    if (open) inputRef.current?.focus();
+    if (!open) return;
+    const dialog = dialogRef.current;
+    if (dialog && !dialog.open) dialog.showModal();
+    inputRef.current?.focus();
   }, [open]);
 
   useEffect(() => {
@@ -112,11 +114,12 @@ export function WorkspaceSearch() {
   }
 
   return <div className="workspace-search-root">
-    <button ref={triggerRef} className="app-header-search" type="button" aria-label={t('search.label')} aria-haspopup="dialog" aria-expanded={open} onClick={show}>
+    <button ref={triggerRef} className="app-header-search" type="button" aria-label={t('search.label')} aria-haspopup="dialog" aria-expanded={open} aria-controls={open ? 'workspace-search-modal' : undefined} onClick={show}>
       <SearchIcon /><span>{t('header.searchPlaceholder')}</span><kbd>⌘ K</kbd>
     </button>
-    {open && <div className="workspace-search-layer" onMouseDown={(event) => { if (event.target === event.currentTarget) close(); }}>
-      <section className="workspace-search-dialog" role="dialog" aria-modal="true" aria-labelledby="workspace-search-title">
+    {open && <dialog ref={dialogRef} id="workspace-search-modal" className="workspace-search-modal" aria-labelledby="workspace-search-title" onClose={close} onMouseDown={(event) => { if (event.target === event.currentTarget) close(); }}>
+      <div className="workspace-search-layer" onMouseDown={(event) => { if (event.target === event.currentTarget) close(); }}>
+      <section className="workspace-search-dialog">
         <header className="workspace-search-heading">
           <div><strong id="workspace-search-title">{t('search.label')}</strong><span>{t('search.description')}</span></div>
           <button className="icon-button" type="button" aria-label={t('search.close')} onClick={close}>×</button>
@@ -134,7 +137,8 @@ export function WorkspaceSearch() {
           {status === 'ready' && items.length > 0 && <ResultGroups result={result!} items={items} activeIndex={activeIndex} onActive={setActiveIndex} onSelect={select} />}
         </div>
       </section>
-    </div>}
+      </div>
+    </dialog>}
   </div>;
 }
 

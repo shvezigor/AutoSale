@@ -39,6 +39,8 @@ The CLI can be run without adding a runtime dependency. In PowerShell, use `DISA
 
 The 2026-11-12 baseline scan of `apps/web` reported two password-autofill findings in platform-admin demo export forms. Both fields now use `autoComplete="current-password"`; this is a browser hint for the existing reauthentication flow, with no change to step-up authorization or export permissions. Other guides are adopted only for scoped work after checking compatibility and the affected acceptance matrix.
 
+The [site audit](../acceptance/modern-web-guidance-audit-2026-11-12.md) records the next scoped adoption: native modality for global search, ordinary link/button semantics for the profile disclosure, and deferred off-screen conversation avatars. It also records browser evidence and remaining release gates. Do not replace existing accessible overlays or navigation solely to use a newer API.
+
 ## UI implementation and review sequence
 
 1. **Establish the task.** Name the surface, user, primary action and affected screens. Find its component, CSS, localization, contract and acceptance tests through the feature index. For a material visual change, inspect the current page and capture a baseline using fictional or authorized data.

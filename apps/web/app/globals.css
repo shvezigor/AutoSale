@@ -72,6 +72,9 @@ html[data-sidebar-state="collapsed"] .authenticated-shell { --sidebar-width: 72p
 .app-header-search { display: grid; width: min(360px, 32vw); min-height: 44px; grid-template-columns: 18px minmax(0,1fr) auto; align-items: center; gap: 10px; padding: 0 13px; border: 1px solid #eceef4; border-radius: 14px; background: #fff; box-shadow: 0 3px 10px rgba(20,20,43,.035); color: #777b98; cursor: pointer; font-size: 12px; text-align: left; transition: border-color 150ms ease, box-shadow 150ms ease, color 150ms ease; }
 .app-header-search:hover, .app-header-search:focus-visible { border-color: #d6d3f7; box-shadow: 0 5px 16px rgba(20,20,43,.08); color: #4e4b66; outline: none; }
 .app-header-search svg { width: 17px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-width: 1.8; }.app-header-search kbd { border: 0; background: transparent; color: #888eaa; font: inherit; font-weight: 700; }
+.workspace-search-modal { position: fixed; inset: 0; width: 100vw; height: 100dvh; max-width: none; max-height: none; margin: 0; padding: 0; overflow: hidden; border: 0; background: transparent; color: inherit; }
+.workspace-search-modal:modal { overscroll-behavior: contain; }
+.workspace-search-modal::backdrop { overflow: hidden; overscroll-behavior: contain; background: transparent; }
 .workspace-search-layer { position: fixed; inset: 72px 0 0; z-index: 40; display: grid; place-items: start center; padding: 18px; background: rgba(20,20,43,.28); backdrop-filter: blur(3px); }
 .workspace-search-dialog { display: grid; width: min(640px, calc(100vw - 36px)); max-height: calc(100dvh - 108px); grid-template-rows: auto auto minmax(0,1fr); overflow: hidden; border: 1px solid var(--border); border-radius: 16px; background: #fff; box-shadow: 0 24px 70px rgba(20,20,43,.2); }
 .workspace-search-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; padding: 18px 18px 13px; }

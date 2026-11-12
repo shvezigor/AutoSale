@@ -42,7 +42,7 @@ The query is trimmed, limited to 100 characters and must contain at least two ch
 - The existing header position and visual language remain unchanged.
 - Desktop uses an anchored command dialog; mobile uses a viewport-safe full-width sheet.
 - The trigger is a real button, uses the localized placeholder and advertises its keyboard shortcut.
-- The dialog follows accessible dialog/combobox/listbox semantics, has a visible label, traps neither the browser nor screen-reader cursor unnecessarily, and restores focus on close.
+- The blocking search overlay is a native modal `<dialog>` opened with `showModal()`. The browser keeps background controls inert, contains keyboard focus and handles `Escape`; closing restores focus to the trigger. The combobox and grouped results retain their existing accessible labels and arrow-key behavior.
 - Results have textual group labels and type labels; colour is never the only identifier.
 - Search is localized in Ukrainian and English.
 - The empty query shows a short instruction, not stale results.
@@ -62,4 +62,4 @@ The query is trimmed, limited to 100 characters and must contain at least two ch
 - Component tests cover click and shortcut opening, debounce, rendering, keyboard selection, navigation, retry, empty state, close/focus restoration and both locales.
 - Browser acceptance covers desktop and mobile composition, keyboard operation, exact navigation destinations and absence of horizontal overflow.
 
-The shipped implementation is owned by `packages/contracts/src/search.ts`, `apps/api/src/search`, `apps/web/src/api/workspace-search.ts` and `apps/web/src/components/workspace-search.tsx`. Automated contract, API and component tests protect the public response shape, tenant-scoped aggregation and keyboard-accessible interface.
+The shipped implementation is owned by `packages/contracts/src/search.ts`, `apps/api/src/search`, `apps/web/src/api/workspace-search.ts` and `apps/web/src/components/workspace-search.tsx`. Automated contract, API and component tests protect the public response shape, tenant-scoped aggregation and keyboard-accessible interface. The 2026-11-12 Modern Web Guidance audit found that the old overlay's focus could move to the background language switcher while open; the native dialog removes that mismatch. Post-deployment browser verification remains required.

@@ -12,7 +12,7 @@ Open <http://127.0.0.1:4188/>. The launcher installs the separately locked proto
 
 Dependencies are confined to this folder and its npm lock. The SDK version is `0.15.0`; the protocol version is `1.0`. npm currently reports an upstream peer mismatch: `@a2ui/markdown-it@0.2.2` expects web_core `^0.14.0`, while the renderer requires `^0.15.0`. This prototype uses no Markdown components; verify upstream resolution before production adoption.
 
-Checks from this folder:
+The main web app excludes this independent prototype from its TypeScript and Vitest projects. Checks from this folder:
 
 ```sh
 npm run typecheck

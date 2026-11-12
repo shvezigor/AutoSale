@@ -6,6 +6,8 @@ import { WorkspaceSearch } from './workspace-search';
 
 const push = vi.fn();
 vi.mock('next/navigation', () => ({ useRouter: () => ({ push, refresh: vi.fn() }) }));
+const originalShowModal = Object.getOwnPropertyDescriptor(HTMLDialogElement.prototype, 'showModal');
+const originalClose = Object.getOwnPropertyDescriptor(HTMLDialogElement.prototype, 'close');
 
 const result = {
   query: 'Ол',
@@ -17,6 +19,8 @@ const result = {
 beforeEach(() => {
   vi.useFakeTimers();
   push.mockReset();
+  Object.defineProperty(HTMLDialogElement.prototype, 'showModal', { configurable: true, value: function (this: HTMLDialogElement) { this.setAttribute('open', ''); } });
+  Object.defineProperty(HTMLDialogElement.prototype, 'close', { configurable: true, value: function (this: HTMLDialogElement) { this.removeAttribute('open'); this.dispatchEvent(new Event('close')); } });
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => result }));
 });
 
@@ -24,12 +28,17 @@ afterEach(() => {
   cleanup();
   vi.useRealTimers();
   vi.unstubAllGlobals();
+  if (originalShowModal) Object.defineProperty(HTMLDialogElement.prototype, 'showModal', originalShowModal);
+  else delete (HTMLDialogElement.prototype as Partial<HTMLDialogElement>).showModal;
+  if (originalClose) Object.defineProperty(HTMLDialogElement.prototype, 'close', originalClose);
+  else delete (HTMLDialogElement.prototype as Partial<HTMLDialogElement>).close;
 });
 
 describe('WorkspaceSearch', () => {
   it('opens from its trigger and searches only after two characters', async () => {
     renderSearch();
     fireEvent.click(screen.getByRole('button', { name: 'Глобальний пошук' }));
+    expect(screen.getByRole('dialog', { name: 'Глобальний пошук' })).toHaveAttribute('open');
     const input = screen.getByRole('combobox', { name: 'Глобальний пошук' });
     expect(input).toHaveFocus();
 
@@ -46,7 +55,7 @@ describe('WorkspaceSearch', () => {
     expect(screen.getByRole('heading', { name: 'Товари' })).toBeInTheDocument();
   });
 
-  it('opens with Ctrl+K and supports ArrowDown, Enter and Escape', async () => {
+  it('opens with Ctrl+K, supports ArrowDown and Enter, and restores focus on close', async () => {
     vi.mocked(fetch).mockResolvedValue({
       ok: true, status: 200, json: async () => ({ ...result, customers: [], products: [] }),
     } as Response);
@@ -62,7 +71,7 @@ describe('WorkspaceSearch', () => {
     expect(push).toHaveBeenCalledWith('/orders/b46c9029-ecdd-4fa5-8c0a-e3146ffe3168');
 
     fireEvent.click(trigger);
-    fireEvent.keyDown(document, { key: 'Escape' });
+    fireEvent.click(screen.getByRole('button', { name: 'Закрити пошук' }));
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     expect(trigger).toHaveFocus();
   });

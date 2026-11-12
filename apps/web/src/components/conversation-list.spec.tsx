@@ -33,6 +33,7 @@ describe('ConversationList', () => {
       'src',
       fixtureSummary.participantAvatarUrl,
     );
+    expect(screen.getByRole('img', { name: 'Фото профілю Олена' })).toHaveAttribute('loading', 'lazy');
   });
 
   it('renders the current username when the API suppresses a stale legacy name', () => {

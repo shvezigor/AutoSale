@@ -100,11 +100,11 @@ function ProfileMenu({ session, open, onToggle, onClose }: { session: HeaderSess
         : <span className="manager-avatar" aria-label={t('header.initial', { initial: session.name.slice(0, 1).toUpperCase() })}>{session.name.slice(0, 1).toUpperCase()}</span>}
       <span className="profile-trigger-copy"><strong>{session.name}</strong><small>{session.email}</small></span>
     </button>
-    {open && <div id="profile-popover" className="header-popover profile-popover" role="menu">
+    {open && <div id="profile-popover" className="header-popover profile-popover">
       <div className="profile-summary"><strong>{session.name}</strong><small>{session.email}</small></div>
-      <Link role="menuitem" href="/profile" onClick={onClose}>{t('navigation.profile')}</Link>
-      {session.membershipRole === 'OWNER' && <Link role="menuitem" href="/team" onClick={onClose}>{t('header.team')}</Link>}
-      <button role="menuitem" type="button" disabled={loggingOut} onClick={() => void logout()}>{loggingOut ? t('header.signingOut') : t('header.signOut')}</button>
+      <Link href="/profile" onClick={onClose}>{t('navigation.profile')}</Link>
+      {session.membershipRole === 'OWNER' && <Link href="/team" onClick={onClose}>{t('header.team')}</Link>}
+      <button type="button" disabled={loggingOut} onClick={() => void logout()}>{loggingOut ? t('header.signingOut') : t('header.signOut')}</button>
     </div>}
   </div>;
 }

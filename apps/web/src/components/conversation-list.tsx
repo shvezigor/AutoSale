@@ -40,7 +40,7 @@ export function ConversationList({ conversations, selectedId, status }: Conversa
               href={`/conversations/${conversation.id}${status ? `?status=${status.toLowerCase()}` : ""}`}
             >
               {conversation.participantAvatarUrl
-                ? <img className="avatar" src={conversation.participantAvatarUrl} alt={t('conversations.profilePhoto', { name })} />
+                ? <img className="avatar" src={conversation.participantAvatarUrl} alt={t('conversations.profilePhoto', { name })} width={40} height={40} loading="lazy" decoding="async" />
                 : <span className="avatar" aria-hidden="true">{initials(name)}</span>}
               <span className="conversation-copy">
                 <span className="conversation-line">

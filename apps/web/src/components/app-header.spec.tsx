@@ -28,9 +28,9 @@ describe('AppHeader', () => {
     fireEvent.click(bell);
     expect(screen.getByText('Каталог готовий')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Меню профілю' }));
-    expect(screen.getByRole('menuitem', { name: 'Мій профіль' })).toHaveAttribute('href', '/profile');
-    expect(screen.queryByRole('menuitem', { name: 'Налаштування' })).not.toBeInTheDocument();
-    expect(screen.getByRole('menuitem', { name: 'Команда' })).toHaveAttribute('href', '/team');
+    expect(screen.getByRole('link', { name: 'Мій профіль' })).toHaveAttribute('href', '/profile');
+    expect(screen.queryByRole('link', { name: 'Налаштування' })).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Команда' })).toHaveAttribute('href', '/team');
     expect(screen.getByRole('img', { name: 'Фото профілю Ігор Швець' })).toHaveAttribute('src', '/api/media/profile/avatar?v=abc');
   });
 
@@ -49,10 +49,10 @@ describe('AppHeader', () => {
     await waitFor(() => expect(screen.getByRole('button', { name: /Сповіщення/ })).toBeInTheDocument());
     const profile = screen.getByRole('button', { name: 'Меню профілю' });
     fireEvent.click(profile);
-    expect(screen.queryByRole('menuitem', { name: 'Команда' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Команда' })).not.toBeInTheDocument();
     expect(screen.getByLabelText('Ініціал О')).toHaveTextContent('О');
     fireEvent.keyDown(document, { key: 'Escape' });
-    expect(screen.queryByRole('menu')).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Мій профіль' })).not.toBeInTheDocument();
     expect(profile).toHaveFocus();
   });
 
@@ -60,8 +60,8 @@ describe('AppHeader', () => {
     renderHeader({ name: 'Ihor', email: 'owner@example.com', membershipRole: 'OWNER', avatarUrl: null }, 'en');
     expect(screen.getByText('Workspace')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Profile menu' }));
-    expect(screen.getByRole('menuitem', { name: 'My profile' })).toBeInTheDocument();
-    expect(screen.getByRole('menuitem', { name: 'Sign out' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'My profile' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Sign out' })).toBeInTheDocument();
   });
 
   it('renders an operable global search instead of an unavailable shell', () => {
