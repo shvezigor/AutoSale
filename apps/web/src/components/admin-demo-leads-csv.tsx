@@ -68,7 +68,7 @@ export function AdminDemoLeadsCsv({ status }: { status: 'ALL' | AdminDemoLeadSta
         <FormField id="from" label={text.from} error={errors.from} required><input name="from" type="date" value={from} onChange={(event) => { setFrom(event.target.value); setErrors((current) => clearFieldError(current, 'from')); }} /></FormField>
         <FormField id="to" label={text.to} error={errors.to} required><input name="to" type="date" value={to} onChange={(event) => { setTo(event.target.value); setErrors((current) => clearFieldError(current, 'to')); }} /></FormField>
       </div>
-      <FormField id="currentPassword" label={text.password} error={errors.currentPassword} required><input name="currentPassword" type="password" value={currentPassword} onChange={(event) => { setCurrentPassword(event.target.value); setErrors((current) => clearFieldError(current, 'currentPassword')); }} /></FormField>
+      <FormField id="currentPassword" label={text.password} error={errors.currentPassword} required><input name="currentPassword" type="password" autoComplete="current-password" value={currentPassword} onChange={(event) => { setCurrentPassword(event.target.value); setErrors((current) => clearFieldError(current, 'currentPassword')); }} /></FormField>
       {formError && <p className="admin-form-error" role="alert">{formError}</p>}
       <div className="admin-reauth-actions"><button className="secondary-button" type="button" disabled={pending} onClick={() => setOpen(false)}>{text.cancel}</button><LoadingButton className="primary-button" type="submit" pending={pending} pendingLabel={text.working}>{text.submit}</LoadingButton></div>
     </form>}

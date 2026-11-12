@@ -31,6 +31,14 @@ Start with the repository contract. Load one relevant design skill at a time, pl
 
 Skills installed in one developer's environment are optional aids, not repository dependencies. If absent, follow this document and the affected feature's acceptance record. Do not install a new design stack just to perform a review. Never remove a product color or component solely because a generic skill calls it an AI design pattern.
 
+## Modern web platform guidance
+
+For a web UI change, use [GoogleChrome Modern Web Guidance](https://github.com/GoogleChrome/modern-web-guidance) as a focused reference for browser-native layout, forms, accessibility and performance. Search for the affected interaction, retrieve the relevant guide, and check its browser support and fallback advice before coding. The repository's design, validation, privacy and browser acceptance contracts still determine the final implementation. Do not enable Origin Trial or volatile feature guidance for production work without a specific compatibility review.
+
+The CLI can be run without adding a runtime dependency. In PowerShell, use `DISABLE_TELEMETRY=1` for repository-related queries so search terms and guide IDs are not reported externally. For example: `$env:DISABLE_TELEMETRY='1'; npx --yes modern-web-guidance@latest search 'accessible form validation'`, then `retrieve <guide-id>`. Run `legacy-scan apps/web --json` when auditing a relevant surface; its deterministic rules cover only part of the catalog, so a clean scan is not proof of full accessibility or performance. Review findings against the actual flow and existing tests before changing code. Do not pass customer data, credentials or private URLs to CLI search terms.
+
+The 2026-11-12 baseline scan of `apps/web` reported two password-autofill findings in platform-admin demo export forms. Both fields now use `autoComplete="current-password"`; this is a browser hint for the existing reauthentication flow, with no change to step-up authorization or export permissions. Other guides are adopted only for scoped work after checking compatibility and the affected acceptance matrix.
+
 ## UI implementation and review sequence
 
 1. **Establish the task.** Name the surface, user, primary action and affected screens. Find its component, CSS, localization, contract and acceptance tests through the feature index. For a material visual change, inspect the current page and capture a baseline using fictional or authorized data.

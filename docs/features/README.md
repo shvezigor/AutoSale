@@ -92,6 +92,8 @@ A fictional-data API conversation-detail regression now verifies that a persiste
 
 An isolated test also connects the actual provider adapter, worker and conversation-detail API through temporary PostgreSQL with a fictional rejecting provider. It confirms that already retrieved tenant catalogue sources may remain on the failed audit/API record, while no reply text or outbound message is produced; the local browser fixture mirrors this shape. The production-provider gate remains open.
 
+The [workspace UI design system](../frontend/design-system.md#modern-web-platform-guidance) now routes web work through scoped Modern Web Guidance lookup and browser compatibility review. The 2026-11-12 baseline scan's two admin demo export password-autofill findings were addressed in the existing [demo lead operations design](../superpowers/specs/2026-10-20-demo-lead-operations-and-private-conversion-design.md); the step-up export browser gate remains open.
+
 ## How to add or change a feature
 
 1. Search this index and the repository for equivalent behavior.

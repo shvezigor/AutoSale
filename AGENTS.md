@@ -2,6 +2,8 @@
 
 Before planning, implementing, debugging, or documenting product behavior, use the project skill at `.codex/skills/feature-knowledge/SKILL.md`.
 
+For web UI work, consult the [Modern Web Guidance workflow](docs/frontend/design-system.md#modern-web-platform-guidance) for relevant browser features and compatibility before choosing an implementation. Apply guidance to the affected flow rather than adopting new APIs project-wide.
+
 Start from `docs/features/README.md`. Load only the documentation and source entry points for the capability being changed. Search for an existing contract, service, adapter, queue, database model, UI flow, and tests before introducing another implementation.
 
 Update the canonical feature documentation and feature index in the same change whenever behavior, status, setup, invariants, or ownership changes. Do not rely on chat history as project documentation.
