@@ -8,6 +8,8 @@
 
 **Execution hold (2026-10-25):** The owner requested preparation only and will explicitly authorize when implementation may start. The [implementation plan](../plans/2026-10-25-workspace-voice-assistant.md) and [acceptance/readiness checklist](../../acceptance/workspace-voice-assistant-checklist.md) are prepared; no runtime code, dependency, migration, provider session or deployment is authorized by those documents.
 
+**Isolated prototype authorization (2026-11-12):** The owner requested an A2UI settings-assistant prototype compared with a React card. The [comparison and runnable fixture](../../research/2026-11-12-settings-assistant-a2ui-comparison.md) use scripted responses and fictional local state only. This authorizes the isolated UI experiment; the production/voice implementation hold and acceptance gates remain in force.
+
 ## Outcome and scope
 
 Help a tenant owner complete workspace setup by speaking naturally, understanding the current configuration, opening the right screen and confirming concrete changes. Later, let owners and managers operate their existing permitted workflows through the same assistant. Success is completion of real product tasks, not conversation length.

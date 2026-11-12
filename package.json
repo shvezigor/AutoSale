@@ -8,7 +8,8 @@
     "test": "pnpm -r --workspace-concurrency=1 test",
     "test:e2e": "playwright test",
     "typecheck": "pnpm -r typecheck",
-    "dev": "docker compose up --build"
+    "dev": "docker compose up --build",
+    "prototype:settings": "node apps/web/dev-fixtures/settings-assistant-prototype/start.mjs"
   },
   "devDependencies": {
     "@playwright/test": "1.62.1",
